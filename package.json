@@ -2,9 +2,20 @@
   "name": "skybridge",
   "version": "0.0.1",
   "description": "Skybridge is a framework for building ChatGPT apps",
-  "main": "index.js",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/skybridge.umd.cjs",
+  "module": "./dist/skybridge.js",
+  "exports": {
+    ".": {
+      "import": "./dist/skybridge.js",
+      "require": "./dist/skybridge.umd.cjs"
+    }
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "vite build"
   },
   "keywords": [
     "chatgpt",
@@ -15,7 +26,9 @@
   "author": "Frédéric Barthelet",
   "license": "ISC",
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "@total-typescript/tsconfig": "^1.0.4",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.9"
   },
   "packageManager": "pnpm@10.17.1"
 }
