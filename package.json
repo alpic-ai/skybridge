@@ -15,7 +15,8 @@
     }
   },
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "test": "vitest"
   },
   "keywords": [
     "chatgpt",
@@ -28,7 +29,8 @@
   "devDependencies": {
     "@total-typescript/tsconfig": "^1.0.4",
     "typescript": "^5.9.3",
-    "vite": "^7.1.9"
+    "vite": "^7.1.9",
+    "vitest": "^3.2.4"
   },
   "packageManager": "pnpm@10.17.1"
 }
