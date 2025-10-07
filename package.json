@@ -1,0 +1,21 @@
+{
+  "name": "skybridge",
+  "version": "0.0.1",
+  "description": "Skybridge is a framework for building ChatGPT apps",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "chatgpt",
+    "app",
+    "ai",
+    "skybridge"
+  ],
+  "author": "Frédéric Barthelet",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@10.17.1"
+}
