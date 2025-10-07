@@ -28,9 +28,14 @@
   "license": "ISC",
   "devDependencies": {
     "@total-typescript/tsconfig": "^1.0.4",
+    "@types/react": "^19.2.2",
+    "react": "^19.2.0",
     "typescript": "^5.9.3",
     "vite": "^7.1.9",
     "vitest": "^3.2.4"
   },
-  "packageManager": "pnpm@10.17.1"
+  "packageManager": "pnpm@10.17.1",
+  "peerDependencies": {
+    "react": "^19.2.0"
+  }
 }
