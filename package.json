@@ -1,22 +1,24 @@
 {
   "name": "skybridge",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Skybridge is a framework for building ChatGPT apps",
   "type": "module",
   "files": [
     "dist"
   ],
-  "main": "./dist/skybridge.umd.cjs",
   "module": "./dist/skybridge.js",
   "exports": {
-    ".": {
-      "import": "./dist/skybridge.js",
-      "require": "./dist/skybridge.umd.cjs"
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "default": "./dist/server/index.js"
+    },
+    "./web": {
+      "types": "./dist/web/index.d.ts",
+      "default": "./dist/web/index.js"
     }
   },
   "scripts": {
-    "build": "vite build",
-    "test": "vitest"
+    "build": "tsc"
   },
   "keywords": [
     "chatgpt",
@@ -26,16 +28,25 @@
   ],
   "author": "Frédéric Barthelet",
   "license": "ISC",
+  "peerDependencies": {
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "zod": "^3.25.51",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "vite": "^7.1.9"
+  },
   "devDependencies": {
     "@total-typescript/tsconfig": "^1.0.4",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.15.30",
+    "@types/react-dom": "^19.2.2",
     "@types/react": "^19.2.2",
-    "react": "^19.2.0",
-    "typescript": "^5.9.3",
-    "vite": "^7.1.9",
-    "vitest": "^3.2.4"
+    "typescript": "^5.9.3"
   },
-  "packageManager": "pnpm@10.17.1",
-  "peerDependencies": {
-    "react": "^19.2.0"
-  }
+  "packageManager": "pnpm@10.17.1"
 }
