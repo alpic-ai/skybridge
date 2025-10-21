@@ -6,7 +6,6 @@
   "files": [
     "dist"
   ],
-  "module": "./dist/skybridge.js",
   "exports": {
     "./server": {
       "types": "./dist/server/index.d.ts",

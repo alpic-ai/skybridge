@@ -1,1 +1,6 @@
-{ "extends": "@total-typescript/tsconfig/tsc/dom/library" }
+{
+  "extends": "@total-typescript/tsconfig/tsc/dom/library",
+  "compilerOptions": {
+    "outDir": "dist"
+  }
+}

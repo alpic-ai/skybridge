@@ -14,7 +14,7 @@ export const TOOL_RESPONSE_EVENT_TYPE = "openai:tool_response";
 export class ToolResponseEvent extends CustomEvent<{
   tool: { name: string; args: UnknownObject };
 }> {
-  readonly type = TOOL_RESPONSE_EVENT_TYPE;
+  override readonly type = TOOL_RESPONSE_EVENT_TYPE;
 }
 
 declare global {
@@ -31,7 +31,7 @@ export type OpenAiGlobals<
   ToolInput extends UnknownObject = UnknownObject,
   ToolOutput extends UnknownObject = UnknownObject,
   ToolResponseMetadata extends UnknownObject = UnknownObject,
-  WidgetState extends UnknownObject = UnknownObject,
+  WidgetState extends UnknownObject = UnknownObject
 > = {
   theme: Theme;
   userAgent: UserAgent;
@@ -55,7 +55,10 @@ export type CallToolResponse = {
 
 type API<WidgetState extends UnknownObject> = {
   /** Calls a tool on your MCP. Returns the full response. */
-  callTool: (name: string, args: Record<string, unknown>) => Promise<CallToolResponse>;
+  callTool: (
+    name: string,
+    args: Record<string, unknown>
+  ) => Promise<CallToolResponse>;
 
   /** Triggers a followup turn in the ChatGPT conversation */
   sendFollowUpMessage: (args: { prompt: string }) => Promise<void>;
@@ -80,10 +83,13 @@ export const SET_GLOBALS_EVENT_TYPE = "openai:set_globals";
 export class SetGlobalsEvent extends CustomEvent<{
   globals: Partial<OpenAiGlobals>;
 }> {
-  readonly type = SET_GLOBALS_EVENT_TYPE;
+  override readonly type = SET_GLOBALS_EVENT_TYPE;
 }
 
-export type CallTool = (name: string, args: Record<string, unknown>) => Promise<CallToolResponse>;
+export type CallTool = (
+  name: string,
+  args: Record<string, unknown>
+) => Promise<CallToolResponse>;
 
 export type DisplayMode = "pip" | "inline" | "fullscreen";
 
