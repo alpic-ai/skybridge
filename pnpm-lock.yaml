@@ -24,7 +24,7 @@ importers:
         specifier: '>=19.0.0'
         version: 19.2.0(react@19.2.0)
       vite:
-        specifier: ^7.1.9
+        specifier: ^7.1.11
         version: 7.1.11(@types/node@22.18.12)
       zod:
         specifier: ^3.25.51
