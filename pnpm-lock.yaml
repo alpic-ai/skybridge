@@ -21,10 +21,10 @@ importers:
         specifier: ^4.7.8
         version: 4.7.8
       react:
-        specifier: '>=19.0.0'
+        specifier: '>=18.0.0'
         version: 19.2.0
       react-dom:
-        specifier: '>=19.0.0'
+        specifier: '>=18.0.0'
         version: 19.2.0(react@19.2.0)
       vite:
         specifier: ^7.1.11

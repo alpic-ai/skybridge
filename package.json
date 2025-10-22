@@ -8,16 +8,16 @@
   ],
   "exports": {
     "./server": {
-      "types": "./dist/server/index.d.ts",
-      "default": "./dist/server/index.js"
+      "types": "./dist/src/server/index.d.ts",
+      "default": "./dist/src/server/index.js"
     },
     "./web": {
-      "types": "./dist/web/index.d.ts",
-      "default": "./dist/web/index.js"
+      "types": "./dist/src/web/index.d.ts",
+      "default": "./dist/src/web/index.js"
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run"
@@ -31,8 +31,8 @@
   "author": "Frédéric Barthelet",
   "license": "ISC",
   "peerDependencies": {
-    "react": ">=19.0.0",
-    "react-dom": ">=19.0.0"
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.0",
