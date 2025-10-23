@@ -79,10 +79,7 @@ export class McpServer extends McpServerBase {
             {
               uri,
               mimeType: "text/html+skybridge",
-              text:
-                process.env.NODE_ENV === "production"
-                  ? html
-                  : templateHelper.injectViteClient(html, templateData),
+              text: html,
             },
           ],
         };

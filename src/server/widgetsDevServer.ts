@@ -3,11 +3,14 @@ import cors from "cors";
 import path from "node:path";
 
 /**
- * Install Vite dev server when env is not production
+ * Install Vite dev server
  * This router MUST be installed at the application root, like so:
  *
  *  const app = express();
- *  app.use(await widgetsRouter());
+ *
+ * if (env.NODE_ENV !== "production") {
+ *   app.use(await widgetsRouter());
+ * }
  */
 export const widgetsDevServer = async (): Promise<RequestHandler> => {
   const router = express.Router();

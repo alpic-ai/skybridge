@@ -21,10 +21,7 @@ describe("McpServer.widget", () => {
   let mockRegisterTool: MockInstance<McpServer["registerTool"]>;
 
   beforeEach(() => {
-    const mock = createMockMcpServer();
-    server = mock.server;
-    mockResource = mock.mockResource;
-    mockRegisterTool = mock.mockRegisterTool;
+    ({ server, mockResource, mockRegisterTool } = createMockMcpServer());
   });
 
   afterEach(() => {
