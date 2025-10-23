@@ -1,5 +1,6 @@
 import { globSync } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
 
 export function skybridge(): Plugin {
@@ -7,11 +8,12 @@ export function skybridge(): Plugin {
     name: "skybridge",
 
     config() {
+      const __dirname = dirname(fileURLToPath(import.meta.url));
       const input = Object.fromEntries(
         globSync("src/widgets/*.{js,ts,jsx,tsx,html}").map((file) => [
           file.match(/^src\/widgets\/(.+)\.tsx$/)?.[1] ?? file.slice(10, -3),
           resolve(__dirname, file),
-        ]),
+        ])
       );
 
       return {
