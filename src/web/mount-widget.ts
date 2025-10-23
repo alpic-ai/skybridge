@@ -1,10 +1,17 @@
 import { createElement, StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, type Root } from "react-dom/client";
+
+let rootInstance: Root | null = null;
 
 export const mountWidget = (component: React.ReactNode) => {
-  const root = document.getElementById("root");
-  if (!root) {
+  const rootElement = document.getElementById("root");
+  if (!rootElement) {
     throw new Error("Root element not found");
   }
-  createRoot(root).render(createElement(StrictMode, null, component));
+
+  if (!rootInstance) {
+    rootInstance = createRoot(rootElement);
+  }
+
+  rootInstance.render(createElement(StrictMode, null, component));
 };
