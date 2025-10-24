@@ -57,12 +57,10 @@ export class McpServer extends McpServerBase {
       },
       async (_uri, extra) => {
         const serverUrl =
-          process.env.NODE_ENV === "production"
-            ? `https://${
-                extra?.requestInfo?.headers?.["x-forwarded-host"] ??
-                extra?.requestInfo?.headers?.host
-              }`
-            : `http://localhost:3000`;
+          `https://${
+            extra?.requestInfo?.headers?.["x-forwarded-host"] ??
+            extra?.requestInfo?.headers?.host
+          }`;
 
         const templateData = {
           serverUrl,
