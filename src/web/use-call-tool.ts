@@ -103,8 +103,15 @@ export const useCallTool = <
     }
   };
 
-  const callTool = (toolArgs: ToolArgs) => {
-    void callToolAsync(toolArgs);
+  const callTool = (
+    toolArgs: ToolArgs,
+    {
+      onSuccess,
+    }: { onSuccess: (data: ToolResponse, toolArgs: ToolArgs) => void }
+  ) => {
+    callToolAsync(toolArgs).then((data) => {
+      onSuccess(data, toolArgs);
+    });
   };
 
   return {
