@@ -105,13 +105,22 @@ export const useCallTool = <
 
   const callTool = (
     toolArgs: ToolArgs,
-    {
-      onSuccess,
-    }: { onSuccess: (data: ToolResponse, toolArgs: ToolArgs) => void }
+    sideEffects?: {
+      onSuccess?: (data: ToolResponse, toolArgs: ToolArgs) => void;
+      onError?: (error: unknown, toolArgs: ToolArgs) => void;
+    }
   ) => {
-    callToolAsync(toolArgs).then((data) => {
-      onSuccess(data, toolArgs);
-    });
+    callToolAsync(toolArgs)
+      .then((data) => {
+        if (sideEffects?.onSuccess) {
+          sideEffects.onSuccess(data, toolArgs);
+        }
+      })
+      .catch((error) => {
+        if (sideEffects?.onError) {
+          sideEffects.onError(error, toolArgs);
+        }
+      });
   };
 
   return {
