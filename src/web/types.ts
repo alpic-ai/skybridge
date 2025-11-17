@@ -49,16 +49,28 @@ export type OpenAiGlobals<
   widgetState: WidgetState | null;
 };
 
+export type CallToolArgs = Record<string, unknown> | null;
+
 export type CallToolResponse = {
+  content: {
+    type: "text";
+    text: string;
+  }[];
+  structuredContent: Record<string, unknown>;
+  isError: boolean;
   result: string;
+  meta: Record<string, unknown>;
 };
 
 type API<WidgetState extends UnknownObject> = {
   /** Calls a tool on your MCP. Returns the full response. */
-  callTool: (
+  callTool: <
+    ToolArgs extends CallToolArgs = null,
+    ToolResponse extends CallToolResponse = CallToolResponse
+  >(
     name: string,
-    args: Record<string, unknown>
-  ) => Promise<CallToolResponse>;
+    args: ToolArgs
+  ) => Promise<ToolResponse>;
 
   /** Triggers a followup turn in the ChatGPT conversation */
   sendFollowUpMessage: (args: { prompt: string }) => Promise<void>;
