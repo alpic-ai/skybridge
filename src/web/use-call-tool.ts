@@ -13,6 +13,7 @@ type BaseCallToolState<
   data: TStatus extends "success" ? TData : undefined;
   error: TStatus extends "error" ? unknown : undefined;
 };
+
 type IdleCallToolState = BaseCallToolState<"idle">;
 type PendingCallToolState = BaseCallToolState<"pending">;
 type SuccessCallToolState<TData extends CallToolResponse = CallToolResponse> =
@@ -31,54 +32,25 @@ export const useCallTool = <
 >(
   name: string
 ) => {
-  const [callToolState, setCallToolState] = useState<
-    CallToolState<ToolResponse>
-  >({
-    status: "idle",
-    data: undefined,
-    error: undefined,
-    isIdle: true,
-    isPending: false,
-    isSuccess: false,
-    isError: false,
-  });
+  const [{ status, data, error }, setCallToolState] = useState<
+    Omit<
+      CallToolState<ToolResponse>,
+      "isIdle" | "isPending" | "isSuccess" | "isError"
+    >
+  >({ status: "idle", data: undefined, error: undefined });
 
   const callToolAsync = async (toolArgs: ToolArgs) => {
-    setCallToolState({
-      status: "pending",
-      data: undefined,
-      error: undefined,
-      isIdle: false,
-      isPending: true,
-      isSuccess: false,
-      isError: false,
-    });
+    setCallToolState({ status: "pending", data: undefined, error: undefined });
     try {
       const data = await window.openai.callTool<ToolArgs, ToolResponse>(
         name,
         toolArgs
       );
-      setCallToolState({
-        status: "success",
-        data,
-        error: undefined,
-        isIdle: false,
-        isPending: false,
-        isSuccess: true,
-        isError: false,
-      });
+      setCallToolState({ status: "success", data, error: undefined });
 
       return data;
     } catch (error) {
-      setCallToolState({
-        status: "error",
-        data: undefined,
-        error,
-        isIdle: false,
-        isPending: false,
-        isSuccess: false,
-        isError: true,
-      });
+      setCallToolState({ status: "error", data: undefined, error });
       throw error;
     }
   };
@@ -102,6 +74,16 @@ export const useCallTool = <
         }
       });
   };
+
+  const callToolState = {
+    status,
+    data,
+    error,
+    isIdle: status === "idle",
+    isPending: status === "pending",
+    isSuccess: status === "success",
+    isError: status === "error",
+  } as CallToolState<ToolResponse>;
 
   return {
     ...callToolState,
