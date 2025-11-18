@@ -1,48 +1,28 @@
 import { useState } from "react";
 import type { CallToolArgs, CallToolResponse } from "./types.js";
 
-type IdleCallToolState = {
-  status: "idle";
-  data: undefined;
-  error: undefined;
-  isIdle: true;
-  isPending: false;
-  isSuccess: false;
-  isError: false;
+type BaseCallToolState<
+  TStatus extends "idle" | "pending" | "success" | "error",
+  TData extends CallToolResponse = CallToolResponse
+> = {
+  status: TStatus;
+  isIdle: TStatus extends "idle" ? true : false;
+  isPending: TStatus extends "pending" ? true : false;
+  isSuccess: TStatus extends "success" ? true : false;
+  isError: TStatus extends "error" ? true : false;
+  data: TStatus extends "success" ? TData : undefined;
+  error: TStatus extends "error" ? unknown : undefined;
 };
-type PendingCallToolState = {
-  status: "pending";
-  data: undefined;
-  error: undefined;
-  isIdle: false;
-  isPending: true;
-  isSuccess: false;
-  isError: false;
-};
-type SuccessCallToolState<TOutput extends CallToolResponse = CallToolResponse> =
-  {
-    status: "success";
-    data: TOutput;
-    error: undefined;
-    isIdle: false;
-    isPending: false;
-    isSuccess: true;
-    isError: false;
-  };
-type ErrorCallToolState = {
-  status: "error";
-  data: undefined;
-  error: unknown;
-  isIdle: false;
-  isPending: false;
-  isSuccess: false;
-  isError: true;
-};
+type IdleCallToolState = BaseCallToolState<"idle">;
+type PendingCallToolState = BaseCallToolState<"pending">;
+type SuccessCallToolState<TData extends CallToolResponse = CallToolResponse> =
+  BaseCallToolState<"success", TData>;
+type ErrorCallToolState = BaseCallToolState<"error">;
 
-type CallToolState<TOutput extends CallToolResponse = CallToolResponse> =
+type CallToolState<TData extends CallToolResponse = CallToolResponse> =
   | IdleCallToolState
   | PendingCallToolState
-  | SuccessCallToolState<TOutput>
+  | SuccessCallToolState<TData>
   | ErrorCallToolState;
 
 export const useCallTool = <
