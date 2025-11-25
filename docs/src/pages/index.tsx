@@ -17,6 +17,13 @@ function HomepageHeader() {
           {siteConfig.title}
         </Heading>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
+        <div className={styles.buttons}>
+          <Link
+            className="button button--secondary button--lg"
+            to="/docs/introduction">
+            Get Started →
+          </Link>
+        </div>
       </div>
     </header>
   );
@@ -26,8 +33,8 @@ export default function Home(): ReactNode {
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
+      title={`${siteConfig.title} - TypeScript Framework for ChatGPT & MCP Apps`}
+      description="Build powerful ChatGPT plugins and MCP servers with TypeScript.">
       <HomepageHeader />
       <main>
         <HomepageFeatures />
