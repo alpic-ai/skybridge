@@ -55,13 +55,7 @@ const config: Config = {
         src: 'img/logo.png',
       },
       items: [
-        {
-          type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
-          position: 'left',
-          label: 'Tutorial',
-        },
-        {to: '/blog', label: 'Blog', position: 'left'},
+        { type: 'docSidebar', sidebarId: 'docSidebar', label: 'Docs', position: 'left' },
         {
           href: 'https://github.com/alpic-ai/skybridge',
           label: 'GitHub',
@@ -76,8 +70,8 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Tutorial',
-              to: '/docs/intro',
+              label: 'Introduction',
+              to: '/docs/introduction',
             },
           ],
         },
@@ -93,10 +87,6 @@ const config: Config = {
         {
           title: 'More',
           items: [
-            {
-              label: 'Blog',
-              to: '/blog',
-            },
             {
               label: 'GitHub',
               href: 'https://github.com/alpic-ai/skybridge',
