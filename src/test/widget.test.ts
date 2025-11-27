@@ -1,24 +1,48 @@
+import * as fs from "node:fs";
 import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
   afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
   type MockInstance,
 } from "vitest";
 import { McpServer } from "../server/server.js";
 import {
-  createMockMcpServer,
   createMockExtra,
-  setTestEnv,
+  createMockMcpServer,
   resetTestEnv,
+  setTestEnv,
 } from "./utils.js";
+
+const mockManifest = {
+  "src/widgets/my-widget.tsx": { file: "my-widget.js" },
+  "style.css": { file: "style.css" },
+};
+
+vi.mock("node:fs", async () => {
+  const actual = await vi.importActual<typeof import("node:fs")>("node:fs");
+  const readFileSync = vi.fn((path: string, ...args: any[]) => {
+    if (typeof path === "string" && path.includes("manifest.json")) {
+      return JSON.stringify(mockManifest);
+    }
+    return actual.readFileSync(path, ...args);
+  });
+
+  return {
+    readFileSync,
+    default: {
+      readFileSync,
+    },
+  };
+});
 
 describe("McpServer.widget", () => {
   let server: McpServer;
   let mockResource: MockInstance<McpServer["resource"]>;
   let mockRegisterTool: MockInstance<McpServer["registerTool"]>;
+  let readFileSyncSpy: any = null;
 
   beforeEach(() => {
     ({ server, mockResource, mockRegisterTool } = createMockMcpServer());

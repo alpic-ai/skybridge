@@ -27,24 +27,18 @@ class TemplateHelper {
     return template;
   }
 
-  renderProduction(data: TemplateData): string {
+  renderProduction(data: {
+    serverUrl: string;
+    widgetFile: string;
+    styleFile: string;
+  }): string {
     const template = this.loadTemplate("production");
     return template(data);
   }
 
-  renderDevelopment(data: TemplateData): string {
+  renderDevelopment(data: { serverUrl: string; widgetName: string }): string {
     const template = this.loadTemplate("development");
     return template(data);
-  }
-
-  renderViteClient(data: TemplateData): string {
-    const template = this.loadTemplate("vite-client");
-    return template(data);
-  }
-
-  injectViteClient(html: string, data: TemplateData): string {
-    const viteClientScript = this.renderViteClient(data);
-    return viteClientScript + html;
   }
 }
 

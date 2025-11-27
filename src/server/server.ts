@@ -5,6 +5,8 @@ import {
 import type { Resource } from "@modelcontextprotocol/sdk/types.js";
 import type { ZodRawShape } from "zod";
 import { templateHelper } from "./templateHelper.js";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 
 /** @see https://developers.openai.com/apps-sdk/reference#tool-descriptor-parameters */
 type ToolMeta = {
@@ -64,15 +66,17 @@ export class McpServer extends McpServerBase {
               }`
             : `http://localhost:3000`;
 
-        const templateData = {
-          serverUrl,
-          widgetName: name,
-        };
-
         const html =
           process.env.NODE_ENV === "production"
-            ? templateHelper.renderProduction(templateData)
-            : templateHelper.renderDevelopment(templateData);
+            ? templateHelper.renderProduction({
+                serverUrl,
+                widgetFile: this.lookupDistFile(`src/widgets/${name}.tsx`),
+                styleFile: this.lookupDistFile("style.css"),
+              })
+            : templateHelper.renderDevelopment({
+                serverUrl,
+                widgetName: name,
+              });
 
         return {
           contents: [
@@ -99,5 +103,16 @@ export class McpServer extends McpServerBase {
       },
       toolCallback
     );
+  }
+
+  private lookupDistFile(key: string): string {
+    const manifest = JSON.parse(
+      readFileSync(
+        path.join(process.cwd(), "dist", "assets", ".vite", "manifest.json"),
+        "utf-8"
+      )
+    );
+
+    return manifest[key]?.file;
   }
 }
