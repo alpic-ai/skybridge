@@ -7,6 +7,7 @@ import {
   afterEach,
   type MockInstance,
 } from "vitest";
+import * as fs from "node:fs";
 import { McpServer } from "../server/server.js";
 import {
   createMockMcpServer,
@@ -77,6 +78,13 @@ describe("McpServer.widget", () => {
 
   it("should generate correct HTML for production mode", async () => {
     setTestEnv({ NODE_ENV: "production" });
+
+    // Mock the manifest.json file that's read in production mode
+    const mockManifest = {
+      "src/widgets/my-widget.tsx": { file: "my-widget.js" },
+      "style.css": { file: "style.css" },
+    };
+    vi.spyOn(fs, "readFileSync").mockReturnValue(JSON.stringify(mockManifest));
 
     const mockToolCallback = vi.fn();
     const mockResourceConfig = { description: "Test widget" };

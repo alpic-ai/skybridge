@@ -66,22 +66,17 @@ export class McpServer extends McpServerBase {
               }`
             : `http://localhost:3000`;
 
-        const templateData = {
-          serverUrl,
-          widgetName:
-            process.env.NODE_ENV === "production"
-              ? this.lookupWidgetName(`src/widgets/${name}.tsx`)
-              : name,
-          styleName:
-            process.env.NODE_ENV === "production"
-              ? this.lookupWidgetName("style.css")
-              : undefined,
-        };
-
         const html =
           process.env.NODE_ENV === "production"
-            ? templateHelper.renderProduction(templateData)
-            : templateHelper.renderDevelopment(templateData);
+            ? templateHelper.renderProduction({
+                serverUrl,
+                widgetFile: this.lookupDistFile(`src/widgets/${name}.tsx`),
+                styleFile: this.lookupDistFile("style.css"),
+              })
+            : templateHelper.renderDevelopment({
+                serverUrl,
+                widgetName: name,
+              });
 
         return {
           contents: [
@@ -110,7 +105,7 @@ export class McpServer extends McpServerBase {
     );
   }
 
-  private lookupWidgetName(key: string): string {
+  private lookupDistFile(key: string): string {
     const manifest = JSON.parse(
       readFileSync(
         path.join(process.cwd(), "dist", "assets", ".vite", "manifest.json"),
