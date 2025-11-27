@@ -23,6 +23,7 @@ export function skybridge(): Plugin {
       );
 
       return {
+        base: "/assets",
         build: {
           minify: true,
           cssCodeSplit: false,
