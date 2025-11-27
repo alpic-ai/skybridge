@@ -25,14 +25,11 @@ export function skybridge(): Plugin {
       return {
         base: "/assets",
         build: {
+          manifest: true,
           minify: true,
           cssCodeSplit: false,
           rollupOptions: {
             input,
-            output: {
-              entryFileNames: "[name].js",
-              assetFileNames: "[name][extname]",
-            },
           },
         },
       };
