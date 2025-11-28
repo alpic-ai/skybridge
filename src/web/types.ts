@@ -10,6 +10,12 @@ export type RequestDisplayMode = (args: { mode: DisplayMode }) => Promise<{
   mode: DisplayMode;
 }>;
 
+export type RequestModal = (options: RequestModalOptions) => Promise<void>;
+
+export type RequestModalOptions = {
+  title: string;
+};
+
 export const TOOL_RESPONSE_EVENT_TYPE = "openai:tool_response";
 export class ToolResponseEvent extends CustomEvent<{
   tool: { name: string; args: UnknownObject };
@@ -48,6 +54,7 @@ export type OpenAiGlobals<
   toolResponseMetadata: ToolResponseMetadata | null;
   widgetState: WidgetState | null;
   requestDisplayMode: RequestDisplayMode;
+  requestModal: RequestModal;
 };
 
 export type CallToolArgs = Record<string, unknown> | null;
