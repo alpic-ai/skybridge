@@ -1,8 +1,8 @@
-import { useOpenAiGlobal } from "skybridge/web";
+import { useOpenAiGlobal } from "./use-openai-global.js";
 
 export function useDisplayMode() {
-  const displayMode = useOpenAiGlobal("displayMode");
-  const setDisplayMode = useOpenAiGlobal("requestDisplayMode");
+  const displayMode = useOpenAiGlobal("displayMode")!;
+  const setDisplayMode = window.openai.requestDisplayMode;
 
-  return { displayMode, setDisplayMode };
+  return [displayMode, setDisplayMode] as const;
 }
