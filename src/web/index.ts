@@ -5,3 +5,4 @@ export { useCallTool } from "./use-call-tool.js";
 export * from "./types.js";
 export { mountWidget } from "./mount-widget.js";
 export { skybridge } from "./plugin.js";
+export { useWidgetState } from "./use-widget-state.js";
