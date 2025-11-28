@@ -34,7 +34,7 @@ declare global {
 }
 
 export type OpenAiGlobals<
-  ToolInput extends UnknownObject = UnknownObject,
+  ToolInput extends UnknownObject = {},
   ToolOutput extends UnknownObject = UnknownObject,
   ToolResponseMetadata extends UnknownObject = UnknownObject,
   WidgetState extends UnknownObject = UnknownObject
@@ -50,7 +50,7 @@ export type OpenAiGlobals<
 
   // state
   toolInput: ToolInput;
-  toolOutput: ToolOutput | null;
+  toolOutput: ToolOutput | { text: string } | null;
   toolResponseMetadata: ToolResponseMetadata | null;
   widgetState: WidgetState | null;
   requestDisplayMode: RequestDisplayMode;
