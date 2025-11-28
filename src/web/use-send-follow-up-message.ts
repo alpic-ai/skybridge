@@ -11,5 +11,5 @@ export function useSendFollowUpMessage() {
     []
   );
 
-  return { sendFollowUpMessage };
+  return sendFollowUpMessage;
 }
