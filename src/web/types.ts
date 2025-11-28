@@ -1,4 +1,4 @@
-type UnknownObject = Record<string, unknown>;
+export type UnknownObject = Record<string, unknown>;
 
 export type WidgetState = UnknownObject;
 

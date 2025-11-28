@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type SetStateAction } from "react";
 import { useOpenAiGlobal } from "./use-openai-global.js";
+import type { UnknownObject } from "./types.js";
 
-type UnknownObject = Record<string, unknown>;
 export function useWidgetState<T extends UnknownObject>(
   defaultState: T | (() => T)
 ): readonly [T, (state: SetStateAction<T>) => void];
@@ -14,7 +14,7 @@ export function useWidgetState<T extends UnknownObject>(
   const widgetStateFromWindow = useOpenAiGlobal("widgetState") as T;
 
   const [widgetState, _setWidgetState] = useState<T | null>(() => {
-    if (widgetStateFromWindow != null) {
+    if (widgetStateFromWindow !== null) {
       return widgetStateFromWindow;
     }
 
@@ -25,7 +25,7 @@ export function useWidgetState<T extends UnknownObject>(
 
   useEffect(() => {
     // Fixes openai implementation bug
-    if (widgetStateFromWindow != null) {
+    if (widgetStateFromWindow !== null) {
       _setWidgetState(widgetStateFromWindow);
     }
   }, [widgetStateFromWindow]);
@@ -35,7 +35,7 @@ export function useWidgetState<T extends UnknownObject>(
       _setWidgetState((prevState) => {
         const newState = typeof state === "function" ? state(prevState) : state;
 
-        if (newState != null) {
+        if (newState !== null) {
           window.openai.setWidgetState(newState);
         }
 
