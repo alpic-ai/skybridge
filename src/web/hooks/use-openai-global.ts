@@ -16,7 +16,6 @@ export function useOpenAiGlobal<K extends keyof OpenAiGlobals>(
           return;
         }
 
-        console.dir(event.detail.globals, { depth: Infinity });
         onChange();
       };
 
