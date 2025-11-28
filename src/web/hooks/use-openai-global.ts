@@ -8,6 +8,12 @@ import {
 export function useOpenAiGlobal<K extends keyof OpenAiGlobals>(
   key: K
 ): OpenAiGlobals[K] | undefined {
+  if (!window.openai) {
+    console.warn(
+      "openai is not defined on window. Please make sure to only call this hook inside the OpenAI iFrame skybridge runtime."
+    );
+  }
+
   return useSyncExternalStore(
     (onChange) => {
       const handleSetGlobal = (event: SetGlobalsEvent) => {
