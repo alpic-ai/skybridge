@@ -47,6 +47,7 @@ export type OpenAiGlobals<
   toolOutput: ToolOutput | null;
   toolResponseMetadata: ToolResponseMetadata | null;
   widgetState: WidgetState | null;
+  requestDisplayMode: RequestDisplayMode;
 };
 
 export type CallToolArgs = Record<string, unknown> | null;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { CallToolArgs, CallToolResponse } from "./types.js";
+import type { CallToolArgs, CallToolResponse } from "../types.js";
 
 type BaseCallToolState<
   TStatus extends "idle" | "pending" | "success" | "error",
