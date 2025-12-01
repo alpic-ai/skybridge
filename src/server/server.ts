@@ -9,20 +9,39 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 
 /** @see https://developers.openai.com/apps-sdk/reference#tool-descriptor-parameters */
-type ToolMeta = {
+type OpenaiToolMeta = {
   "openai/outputTemplate": string;
   "openai/widgetAccessible"?: boolean;
   "openai/toolInvocation/invoking"?: string;
   "openai/toolInvocation/invoked"?: string;
 };
 
+/** @see https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx#resource-discovery */
+type McpAppsToolMeta = {
+  "ui/resourceUri": string;
+};
+
+type ToolMeta = OpenaiToolMeta & McpAppsToolMeta;
+
 /** @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields */
-type ResourceMeta = {
+type OpenaiResourceMeta = {
   "openai/widgetDescription"?: string;
   "openai/widgetPrefersBorder"?: boolean;
   "openai/widgetCSP"?: Record<"connect_domains" | "resource_domains", string[]>;
   "openai/widgetDomain"?: string;
 };
+
+/** @see https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx#ui-resource-format */
+type McpAppsResourceMeta = {
+  csp?: {
+    connectDomains?: string[];
+    resourceDomains?: string[];
+  };
+  domain?: string;
+  prefersBorder?: boolean;
+};
+
+type ResourceMeta = OpenaiResourceMeta & McpAppsResourceMeta;
 
 type McpServerOriginalResourceConfig = Omit<
   Resource,
@@ -45,7 +64,9 @@ export class McpServer extends McpServerBase {
     toolCallback: ToolCallback<InputArgs>
   ) {
     const uri = `ui://widgets/${name}.html`;
-    const resourceMetadata: ResourceMeta = { ...(resourceConfig._meta ?? {}) };
+    const resourceMetadata: ResourceMeta = {
+      ...(resourceConfig._meta ?? {}),
+    };
     if (toolConfig.description !== undefined) {
       resourceMetadata["openai/widgetDescription"] = toolConfig.description;
     }
@@ -93,6 +114,7 @@ export class McpServer extends McpServerBase {
     const toolMeta: ToolMeta = {
       ...toolConfig._meta,
       "openai/outputTemplate": uri,
+      "ui/resourceUri": uri,
     };
 
     this.registerTool(
