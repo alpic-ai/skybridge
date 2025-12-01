@@ -43,7 +43,22 @@ export const useCallTool = <
     >
   >({ status: "idle", data: undefined, error: undefined });
 
-  const callToolAsync = async (toolArgs: ToolArgs) => {
+  type ResolvedToolArgs = ToolArgs extends null ? null : ToolArgs;
+
+  type CallToolAsyncFn<TA, TR> = TA extends null
+    ? (toolArgs?: TA) => Promise<TR>
+    : (toolArgs: TA) => Promise<TR>;
+
+  const callToolAsync = (async (toolArgs?: ResolvedToolArgs) => {
+    if (toolArgs === undefined) {
+      return doCallToolAsync(null as ToolArgs);
+    }
+    return doCallToolAsync(toolArgs as ToolArgs);
+  }) as CallToolAsyncFn<ResolvedToolArgs, CallToolResponse & ToolResponse>;
+
+  const doCallToolAsync = async (
+    toolArgs: ToolArgs
+  ): Promise<CallToolResponse & ToolResponse> => {
     setCallToolState({ status: "pending", data: undefined, error: undefined });
     try {
       const data = await window.openai.callTool<
@@ -59,19 +74,38 @@ export const useCallTool = <
     }
   };
 
-  const callTool = (
+  type SideEffects<ToolArgs, ToolResponse> = {
+    onSuccess?: (data: ToolResponse, toolArgs: ToolArgs) => void;
+    onError?: (error: unknown, toolArgs: ToolArgs) => void;
+    onSettled?: (
+      data: ToolResponse | undefined,
+      error: unknown | undefined,
+      toolArgs: ToolArgs
+    ) => void;
+  };
+
+  function callTool(sideEffects?: SideEffects<ToolArgs, ToolResponse>): void;
+  function callTool(
     toolArgs: ToolArgs,
-    sideEffects?: {
-      onSuccess?: (data: ToolResponse, toolArgs: ToolArgs) => void;
-      onError?: (error: unknown, toolArgs: ToolArgs) => void;
-      onSettled?: (
-        data: ToolResponse | undefined,
-        error: unknown | undefined,
-        toolArgs: ToolArgs
-      ) => void;
+    sideEffects?: SideEffects<ToolArgs, ToolResponse>
+  ): void;
+  function callTool(
+    arg1?: ToolArgs | SideEffects<ToolArgs, ToolResponse>,
+    sideEffects?: SideEffects<ToolArgs, ToolResponse>
+  ) {
+    let toolArgs: ToolArgs;
+    if (
+      arg1 &&
+      typeof arg1 === "object" &&
+      ("onSuccess" in arg1 || "onError" in arg1 || "onSettled" in arg1)
+    ) {
+      toolArgs = null as ToolArgs; // no toolArgs provided
+      sideEffects = arg1;
+    } else {
+      toolArgs = arg1 as ToolArgs;
     }
-  ) => {
-    callToolAsync(toolArgs)
+
+    doCallToolAsync(toolArgs)
       .then((data) => {
         if (sideEffects?.onSuccess) {
           sideEffects.onSuccess(data, toolArgs);
@@ -88,7 +122,7 @@ export const useCallTool = <
           sideEffects.onSettled(undefined, error, toolArgs);
         }
       });
-  };
+  }
 
   const callToolState = {
     status,
