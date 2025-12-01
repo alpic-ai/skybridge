@@ -1,9 +1,13 @@
 import { useState } from "react";
-import type { CallToolArgs, CallToolResponse } from "../types.js";
+import type {
+  CallToolArgs,
+  CallToolResponse,
+  CallToolResponseConstraint,
+} from "../types.js";
 
 type BaseCallToolState<
   TStatus extends "idle" | "pending" | "success" | "error",
-  TData extends CallToolResponse = CallToolResponse
+  TData extends CallToolResponseConstraint = CallToolResponse
 > = {
   status: TStatus;
   isIdle: TStatus extends "idle" ? true : false;
@@ -16,11 +20,14 @@ type BaseCallToolState<
 
 type IdleCallToolState = BaseCallToolState<"idle">;
 type PendingCallToolState = BaseCallToolState<"pending">;
-type SuccessCallToolState<TData extends CallToolResponse = CallToolResponse> =
-  BaseCallToolState<"success", TData>;
+type SuccessCallToolState<
+  TData extends CallToolResponseConstraint = CallToolResponse
+> = BaseCallToolState<"success", TData>;
 type ErrorCallToolState = BaseCallToolState<"error">;
 
-type CallToolState<TData extends CallToolResponse = CallToolResponse> =
+type CallToolState<
+  TData extends CallToolResponseConstraint = CallToolResponse
+> =
   | IdleCallToolState
   | PendingCallToolState
   | SuccessCallToolState<TData>
@@ -28,7 +35,7 @@ type CallToolState<TData extends CallToolResponse = CallToolResponse> =
 
 export const useCallTool = <
   ToolArgs extends CallToolArgs = null,
-  ToolResponse extends CallToolResponse = CallToolResponse
+  ToolResponse extends CallToolResponseConstraint = CallToolResponse
 >(
   name: string
 ) => {
