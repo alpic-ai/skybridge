@@ -19,7 +19,9 @@
   "scripts": {
     "build": "tsc && pnpm run build:templates",
     "build:templates": "cp -r src/server/templates dist/src/server/",
-    "test": "vitest run --silent",
+    "test": "pnpm run test:unit && pnpm run test:type",
+    "test:unit": "vitest run --silent",
+    "test:type": "tsc --noEmit",
     "docs:dev": "pnpm --filter @skybridge/docs start",
     "docs:build": "pnpm --filter @skybridge/docs build",
     "docs:serve": "pnpm --filter @skybridge/docs serve"

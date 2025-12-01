@@ -1,24 +1,23 @@
-import { renderHook } from "@testing-library/react";
+import { fireEvent, renderHook, waitFor, act } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useToolInfo } from "./use-tool-info.js";
+import {
+  SET_GLOBALS_EVENT_TYPE,
+  SetGlobalsEvent,
+  type OpenAiGlobals,
+} from "../types.js";
 
 describe("useToolInfo", () => {
-  let OpenaiMock: {
-    toolInput: Record<string, unknown>;
-    toolOutput: Record<string, unknown> | null;
-    toolResponseMetadata: Record<string, unknown> | null;
-  };
+  let OpenaiMock: Pick<
+    OpenAiGlobals,
+    "toolInput" | "toolOutput" | "toolResponseMetadata"
+  >;
 
   beforeEach(() => {
     OpenaiMock = {
-      toolInput: { name: "pikachu", args: { param: "value" } },
-      toolOutput: {
-        name: "pikachu",
-        color: "yellow",
-        description:
-          "When several of these POKéMON gather, their\felectricity could build and cause lightning storms.",
-      },
-      toolResponseMetadata: { id: 12 },
+      toolInput: { name: "pokemon", args: { name: "pikachu" } },
+      toolOutput: null,
+      toolResponseMetadata: null,
     };
     vi.stubGlobal("openai", OpenaiMock);
   });
@@ -28,21 +27,51 @@ describe("useToolInfo", () => {
     vi.resetAllMocks();
   });
 
-  it("should return toolInput, toolOutput, and toolResponseMetadata from window.openai", () => {
+  it("should return toolInput on initial mount window.openai", () => {
     const { result } = renderHook(() => useToolInfo());
 
-    expect(result.current.input).toEqual({
-      name: "pikachu",
-      args: { param: "value" },
+    expect(result.current).toMatchObject({
+      input: { name: "pokemon", args: { name: "pikachu" } },
+      status: "pending",
+      isPending: true,
+      isSuccess: false,
     });
-    expect(result.current.output).toEqual({
+  });
+
+  it("should eventually return tool output and response metadata once tool call completes", async () => {
+    const toolOutput = {
       name: "pikachu",
       color: "yellow",
       description:
         "When several of these POKéMON gather, their\felectricity could build and cause lightning storms.",
+    };
+    const toolResponseMetadata = { id: 12 };
+    const { result } = renderHook(() => useToolInfo());
+
+    act(() => {
+      OpenaiMock.toolOutput = toolOutput;
+      OpenaiMock.toolResponseMetadata = toolResponseMetadata;
+      fireEvent(
+        window,
+        new SetGlobalsEvent(SET_GLOBALS_EVENT_TYPE, {
+          detail: {
+            globals: {
+              toolOutput,
+              toolResponseMetadata,
+            },
+          },
+        })
+      );
     });
-    expect(result.current.responseMetadata).toEqual({
-      id: 12,
+
+    await waitFor(() => {
+      expect(result.current).toMatchObject({
+        status: "success",
+        isPending: false,
+        isSuccess: true,
+        output: toolOutput,
+        responseMetadata: toolResponseMetadata,
+      });
     });
   });
 });
