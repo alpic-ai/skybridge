@@ -44,6 +44,7 @@ export function useToolInfo<
   }>
 >() {
   const [status, setStatus] = useState<"pending" | "success">("pending");
+  const input = useOpenAiGlobal("toolInput")!;
   const output = useOpenAiGlobal("toolOutput") ?? undefined;
   const responseMetadata = useOpenAiGlobal("toolResponseMetadata") ?? undefined;
 
@@ -56,7 +57,7 @@ export function useToolInfo<
   }, [output, responseMetadata]);
 
   return {
-    input: useOpenAiGlobal("toolInput")!,
+    input,
     status,
     isPending: status === "pending",
     isSuccess: status === "success",
