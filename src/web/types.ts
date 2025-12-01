@@ -70,11 +70,9 @@ export type CallToolResponse = {
   meta: Record<string, unknown>;
 };
 
-export type CallToolResponseConstraint = Pick<
-  CallToolResponse,
-  "content" | "isError" | "result"
-> &
-  Partial<Pick<CallToolResponse, "structuredContent" | "meta">>;
+export type CallToolResponseConstraint = Partial<
+  Pick<CallToolResponse, "structuredContent" | "meta">
+>;
 
 type API<WidgetState extends UnknownObject> = {
   /** Calls a tool on your MCP. Returns the full response. */

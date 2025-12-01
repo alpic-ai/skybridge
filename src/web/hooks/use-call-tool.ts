@@ -7,7 +7,7 @@ import type {
 
 type BaseCallToolState<
   TStatus extends "idle" | "pending" | "success" | "error",
-  TData extends CallToolResponseConstraint = CallToolResponse
+  TData extends CallToolResponse = CallToolResponse
 > = {
   status: TStatus;
   isIdle: TStatus extends "idle" ? true : false;
@@ -20,14 +20,11 @@ type BaseCallToolState<
 
 type IdleCallToolState = BaseCallToolState<"idle">;
 type PendingCallToolState = BaseCallToolState<"pending">;
-type SuccessCallToolState<
-  TData extends CallToolResponseConstraint = CallToolResponse
-> = BaseCallToolState<"success", TData>;
+type SuccessCallToolState<TData extends CallToolResponse = CallToolResponse> =
+  BaseCallToolState<"success", TData>;
 type ErrorCallToolState = BaseCallToolState<"error">;
 
-type CallToolState<
-  TData extends CallToolResponseConstraint = CallToolResponse
-> =
+type CallToolState<TData extends CallToolResponse = CallToolResponse> =
   | IdleCallToolState
   | PendingCallToolState
   | SuccessCallToolState<TData>
@@ -35,13 +32,13 @@ type CallToolState<
 
 export const useCallTool = <
   ToolArgs extends CallToolArgs = null,
-  ToolResponse extends CallToolResponseConstraint = CallToolResponse
+  ToolResponse extends CallToolResponseConstraint = CallToolResponseConstraint
 >(
   name: string
 ) => {
   const [{ status, data, error }, setCallToolState] = useState<
     Omit<
-      CallToolState<ToolResponse>,
+      CallToolState<CallToolResponse & ToolResponse>,
       "isIdle" | "isPending" | "isSuccess" | "isError"
     >
   >({ status: "idle", data: undefined, error: undefined });
@@ -49,10 +46,10 @@ export const useCallTool = <
   const callToolAsync = async (toolArgs: ToolArgs) => {
     setCallToolState({ status: "pending", data: undefined, error: undefined });
     try {
-      const data = await window.openai.callTool<ToolArgs, ToolResponse>(
-        name,
-        toolArgs
-      );
+      const data = await window.openai.callTool<
+        ToolArgs,
+        CallToolResponse & ToolResponse
+      >(name, toolArgs);
       setCallToolState({ status: "success", data, error: undefined });
 
       return data;
@@ -101,7 +98,7 @@ export const useCallTool = <
     isPending: status === "pending",
     isSuccess: status === "success",
     isError: status === "error",
-  } as CallToolState<ToolResponse>;
+  } as CallToolState<CallToolResponse & ToolResponse>;
 
   return {
     ...callToolState,
