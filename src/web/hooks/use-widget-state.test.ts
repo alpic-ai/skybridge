@@ -66,7 +66,6 @@ describe("useWidgetState", () => {
       count: 1,
       name: "test",
     });
-    console.log("widgetState", result.current[0]);
     expect(result.current[0]).toEqual({ count: 1, name: "test" });
   });
 
