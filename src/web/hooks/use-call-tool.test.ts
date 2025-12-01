@@ -87,4 +87,52 @@ describe("useCallTool - onSuccess callback", () => {
       expect(onError).toHaveBeenCalledWith(error, args);
     });
   });
+
+  it("should call onSettled callback with data and undefined error on successful execution", async () => {
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+    const onSettled = vi.fn();
+    OpenaiMock.callTool.mockResolvedValueOnce(data);
+    const { result } = renderHook(() =>
+      useCallTool<typeof args, typeof data>(toolName)
+    );
+
+    act(() => {
+      result.current.callTool(args, {
+        onSuccess,
+        onError,
+        onSettled,
+      });
+    });
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalledWith(data, args);
+      expect(onSettled).toHaveBeenCalledWith(data, undefined, args);
+      expect(onError).not.toHaveBeenCalled();
+    });
+  });
+
+  it("should call onSettled callback with undefined data and error on failed execution", async () => {
+    const onSuccess = vi.fn();
+    const onError = vi.fn();
+    const onSettled = vi.fn();
+    OpenaiMock.callTool.mockRejectedValueOnce(error);
+    const { result } = renderHook(() =>
+      useCallTool<typeof args, typeof data>(toolName)
+    );
+
+    act(() => {
+      result.current.callTool(args, {
+        onSuccess,
+        onError,
+        onSettled,
+      });
+    });
+
+    await waitFor(() => {
+      expect(onError).toHaveBeenCalledWith(error, args);
+      expect(onSettled).toHaveBeenCalledWith(undefined, error, args);
+      expect(onSuccess).not.toHaveBeenCalled();
+    });
+  });
 });

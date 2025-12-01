@@ -60,6 +60,11 @@ export const useCallTool = <
     sideEffects?: {
       onSuccess?: (data: ToolResponse, toolArgs: ToolArgs) => void;
       onError?: (error: unknown, toolArgs: ToolArgs) => void;
+      onSettled?: (
+        data: ToolResponse | undefined,
+        error: unknown | undefined,
+        toolArgs: ToolArgs
+      ) => void;
     }
   ) => {
     callToolAsync(toolArgs)
@@ -67,10 +72,16 @@ export const useCallTool = <
         if (sideEffects?.onSuccess) {
           sideEffects.onSuccess(data, toolArgs);
         }
+        if (sideEffects?.onSettled) {
+          sideEffects.onSettled(data, undefined, toolArgs);
+        }
       })
       .catch((error) => {
         if (sideEffects?.onError) {
           sideEffects.onError(error, toolArgs);
+        }
+        if (sideEffects?.onSettled) {
+          sideEffects.onSettled(undefined, error, toolArgs);
         }
       });
   };
