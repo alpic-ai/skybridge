@@ -1,4 +1,4 @@
-import { useOpenAiGlobal } from "skybridge/web";
+import { useOpenAiGlobal } from "./use-openai-global.js";
 
 export function useToolInfo() {
   return {
