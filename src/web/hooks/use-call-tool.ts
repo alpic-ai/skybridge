@@ -30,6 +30,24 @@ type CallToolState<TData extends CallToolResponse = CallToolResponse> =
   | SuccessCallToolState<TData>
   | ErrorCallToolState;
 
+type ResolvedToolArgs<TArgs extends CallToolArgs> = TArgs extends null
+  ? null
+  : TArgs;
+
+type SideEffects<ToolArgs, ToolResponse> = {
+  onSuccess?: (data: ToolResponse, toolArgs: ToolArgs) => void;
+  onError?: (error: unknown, toolArgs: ToolArgs) => void;
+  onSettled?: (
+    data: ToolResponse | undefined,
+    error: unknown | undefined,
+    toolArgs: ToolArgs
+  ) => void;
+};
+
+type CallToolAsyncFn<TA, TR> = TA extends null
+  ? (toolArgs?: TA) => Promise<TR>
+  : (toolArgs: TA) => Promise<TR>;
+
 export const useCallTool = <
   ToolArgs extends CallToolArgs = null,
   ToolResponse extends CallToolResponseConstraint = CallToolResponseConstraint
@@ -42,19 +60,6 @@ export const useCallTool = <
       "isIdle" | "isPending" | "isSuccess" | "isError"
     >
   >({ status: "idle", data: undefined, error: undefined });
-
-  type ResolvedToolArgs = ToolArgs extends null ? null : ToolArgs;
-
-  type CallToolAsyncFn<TA, TR> = TA extends null
-    ? (toolArgs?: TA) => Promise<TR>
-    : (toolArgs: TA) => Promise<TR>;
-
-  const callToolAsync = (async (toolArgs?: ResolvedToolArgs) => {
-    if (toolArgs === undefined) {
-      return doCallToolAsync(null as ToolArgs);
-    }
-    return doCallToolAsync(toolArgs as ToolArgs);
-  }) as CallToolAsyncFn<ResolvedToolArgs, CallToolResponse & ToolResponse>;
 
   const doCallToolAsync = async (
     toolArgs: ToolArgs
@@ -74,23 +79,23 @@ export const useCallTool = <
     }
   };
 
-  type SideEffects<ToolArgs, ToolResponse> = {
-    onSuccess?: (data: ToolResponse, toolArgs: ToolArgs) => void;
-    onError?: (error: unknown, toolArgs: ToolArgs) => void;
-    onSettled?: (
-      data: ToolResponse | undefined,
-      error: unknown | undefined,
-      toolArgs: ToolArgs
-    ) => void;
-  };
+  const callToolAsync = (async (toolArgs?: ResolvedToolArgs<ToolArgs>) => {
+    if (toolArgs === undefined) {
+      return doCallToolAsync(null as ToolArgs);
+    }
+    return doCallToolAsync(toolArgs as ToolArgs);
+  }) as CallToolAsyncFn<
+    ResolvedToolArgs<ToolArgs>,
+    CallToolResponse & ToolResponse
+  >;
 
   function callTool(sideEffects?: SideEffects<ToolArgs, ToolResponse>): void;
   function callTool(
-    toolArgs: ToolArgs,
+    toolArgs: ResolvedToolArgs<ToolArgs>,
     sideEffects?: SideEffects<ToolArgs, ToolResponse>
   ): void;
   function callTool(
-    arg1?: ToolArgs | SideEffects<ToolArgs, ToolResponse>,
+    arg1?: ResolvedToolArgs<ToolArgs> | SideEffects<ToolArgs, ToolResponse>,
     sideEffects?: SideEffects<ToolArgs, ToolResponse>
   ) {
     let toolArgs: ToolArgs;
