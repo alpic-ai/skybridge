@@ -39,10 +39,6 @@ type CallToolState<TData extends CallToolResponse = CallToolResponse> =
       error: unknown;
     };
 
-type CallToolResponseConstraint = Partial<
-  Pick<CallToolResponse, "structuredContent" | "meta">
->;
-
 type SideEffects<ToolArgs, ToolResponse> = {
   onSuccess?: (data: ToolResponse, toolArgs: ToolArgs) => void;
   onError?: (error: unknown, toolArgs: ToolArgs) => void;
@@ -57,27 +53,33 @@ type CallToolAsyncFn<TA, TR> = TA extends null
   ? () => Promise<TR>
   : (toolArgs: TA) => Promise<TR>;
 
+type CallToolResponseConstraint = Partial<
+  Pick<CallToolResponse, "structuredContent" | "meta">
+>;
+
 export const useCallTool = <
   ToolArgs extends CallToolArgs = null,
   ToolResponse extends CallToolResponseConstraint = CallToolResponseConstraint
 >(
   name: string
 ) => {
+  type CombinedCallToolResponse = CallToolResponse & ToolResponse;
+
   const [{ status, data, error }, setCallToolState] = useState<
     Omit<
-      CallToolState<CallToolResponse & ToolResponse>,
+      CallToolState<CombinedCallToolResponse>,
       "isIdle" | "isPending" | "isSuccess" | "isError"
     >
   >({ status: "idle", data: undefined, error: undefined });
 
   const execute = async (
     toolArgs: ToolArgs
-  ): Promise<CallToolResponse & ToolResponse> => {
+  ): Promise<CombinedCallToolResponse> => {
     setCallToolState({ status: "pending", data: undefined, error: undefined });
     try {
       const data = await window.openai.callTool<
         ToolArgs,
-        CallToolResponse & ToolResponse
+        CombinedCallToolResponse
       >(name, toolArgs);
       setCallToolState({ status: "success", data, error: undefined });
 
@@ -93,16 +95,18 @@ export const useCallTool = <
       return execute(null as ToolArgs);
     }
     return execute(toolArgs as ToolArgs);
-  }) as CallToolAsyncFn<ToolArgs, CallToolResponse & ToolResponse>;
+  }) as CallToolAsyncFn<ToolArgs, CombinedCallToolResponse>;
 
-  function callTool(sideEffects?: SideEffects<ToolArgs, ToolResponse>): void;
   function callTool(
-    toolArgs: ToolArgs,
-    sideEffects?: SideEffects<ToolArgs, ToolResponse>
+    sideEffects?: SideEffects<ToolArgs, CombinedCallToolResponse>
   ): void;
   function callTool(
-    arg1?: ToolArgs | SideEffects<ToolArgs, ToolResponse>,
-    sideEffects?: SideEffects<ToolArgs, ToolResponse>
+    toolArgs: ToolArgs,
+    sideEffects?: SideEffects<ToolArgs, CombinedCallToolResponse>
+  ): void;
+  function callTool(
+    arg1?: ToolArgs | SideEffects<ToolArgs, CombinedCallToolResponse>,
+    sideEffects?: SideEffects<ToolArgs, CombinedCallToolResponse>
   ) {
     let toolArgs: ToolArgs;
     if (
@@ -143,7 +147,7 @@ export const useCallTool = <
     isPending: status === "pending",
     isSuccess: status === "success",
     isError: status === "error",
-  } as CallToolState<CallToolResponse & ToolResponse>;
+  } as CallToolState<CombinedCallToolResponse>;
 
   return {
     ...callToolState,
