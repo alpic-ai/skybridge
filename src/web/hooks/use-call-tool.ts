@@ -43,10 +43,6 @@ type CallToolState<TData extends CallToolResponse = CallToolResponse> =
       error: unknown;
     };
 
-type ResolvedToolArgs<TArgs extends CallToolArgs> = TArgs extends null
-  ? null
-  : TArgs;
-
 type SideEffects<ToolArgs, ToolResponse> = {
   onSuccess?: (data: ToolResponse, toolArgs: ToolArgs) => void;
   onError?: (error: unknown, toolArgs: ToolArgs) => void;
@@ -92,23 +88,20 @@ export const useCallTool = <
     }
   };
 
-  const callToolAsync = (async (toolArgs?: ResolvedToolArgs<ToolArgs>) => {
+  const callToolAsync = (async (toolArgs?: ToolArgs) => {
     if (toolArgs === undefined) {
       return execute(null as ToolArgs);
     }
     return execute(toolArgs as ToolArgs);
-  }) as CallToolAsyncFn<
-    ResolvedToolArgs<ToolArgs>,
-    CallToolResponse & ToolResponse
-  >;
+  }) as CallToolAsyncFn<ToolArgs, CallToolResponse & ToolResponse>;
 
   function callTool(sideEffects?: SideEffects<ToolArgs, ToolResponse>): void;
   function callTool(
-    toolArgs: ResolvedToolArgs<ToolArgs>,
+    toolArgs: ToolArgs,
     sideEffects?: SideEffects<ToolArgs, ToolResponse>
   ): void;
   function callTool(
-    arg1?: ResolvedToolArgs<ToolArgs> | SideEffects<ToolArgs, ToolResponse>,
+    arg1?: ToolArgs | SideEffects<ToolArgs, ToolResponse>,
     sideEffects?: SideEffects<ToolArgs, ToolResponse>
   ) {
     let toolArgs: ToolArgs;
