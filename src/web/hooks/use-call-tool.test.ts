@@ -1,14 +1,15 @@
-import { useCallTool } from "./use-call-tool.js";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { expectType } from "tsd";
 import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
   afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
   type Mock,
 } from "vitest";
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { useCallTool } from "./use-call-tool.js";
 
 describe("useCallTool - onSuccess callback", () => {
   let OpenaiMock: { callTool: Mock };
@@ -134,5 +135,105 @@ describe("useCallTool - onSuccess callback", () => {
       expect(onSettled).toHaveBeenCalledWith(undefined, error, args);
       expect(onSuccess).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe("useCallTool - TypeScript typing", () => {
+  let OpenaiMock: { callTool: Mock };
+
+  beforeEach(() => {
+    OpenaiMock = {
+      callTool: vi.fn(),
+    };
+    vi.stubGlobal("openai", OpenaiMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.resetAllMocks();
+  });
+
+  it("should have correct return types when ToolArgs is null and ToolResponse is specified", () => {
+    type TestResponse = {
+      structuredContent: { result: string };
+      meta: { id: number };
+    };
+
+    const { result } = renderHook(() =>
+      useCallTool<null, TestResponse>("test-tool")
+    );
+    const data = {
+      content: [{ type: "text" as const, text: "test" }],
+      structuredContent: { result: "test" },
+      isError: false,
+      result: "test",
+      meta: { id: 123 },
+    };
+
+    OpenaiMock.callTool.mockResolvedValueOnce(data);
+
+    act(() => {
+      result.current.callTool();
+    });
+
+    expect(OpenaiMock.callTool).toHaveBeenCalledWith("test-tool", null);
+    expectType<typeof data | undefined>(result.current.data);
+  });
+
+  it("should correctly type callToolAsync return value", async () => {
+    type TestArgs = { query: string };
+    type TestResponse = {
+      structuredContent: { answer: string };
+    };
+
+    const { result } = renderHook(() =>
+      useCallTool<TestArgs, TestResponse>("test-tool")
+    );
+
+    const testArgs: TestArgs = { query: "test" };
+    const mockResponse = {
+      content: [{ type: "text" as const, text: "answer" }],
+      structuredContent: { answer: "test answer" },
+      isError: false,
+      result: "answer",
+      meta: {},
+    };
+
+    OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);
+
+    const promise = result.current.callToolAsync(testArgs);
+    expectType<Promise<typeof mockResponse>>(promise);
+
+    const resolvedValue = await promise;
+    expect(resolvedValue).toEqual(mockResponse);
+  });
+
+  it("should correctly type callToolAsync when ToolArgs is null", async () => {
+    type TestResponse = {
+      structuredContent: { data: string };
+    };
+
+    const { result } = renderHook(() =>
+      useCallTool<null, TestResponse>("test-tool")
+    );
+
+    const mockResponse: TestResponse & {
+      content: Array<{ type: "text"; text: string }>;
+      isError: boolean;
+      result: string;
+    } = {
+      content: [{ type: "text" as const, text: "data" }],
+      structuredContent: { data: "test data" },
+      isError: false,
+      result: "data",
+    };
+
+    OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);
+
+    const promise = result.current.callToolAsync();
+    expectType<Promise<typeof mockResponse>>(promise);
+
+    const resolvedValue = await promise;
+    expect(resolvedValue).toEqual(mockResponse);
   });
 });

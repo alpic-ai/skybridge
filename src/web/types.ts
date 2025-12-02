@@ -72,7 +72,7 @@ export type CallToolResponse = {
 
 export type DefaultCallToolResponse = {
   structuredContent: Record<string, unknown>;
-  meta: undefined;
+  meta: Record<string, unknown>;
 };
 
 export type CallToolResponseConstraint = Partial<

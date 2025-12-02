@@ -107,7 +107,7 @@ export const useCallTool = <
       toolArgs = null as ToolArgs; // no toolArgs provided
       sideEffects = arg1;
     } else {
-      toolArgs = arg1 as ToolArgs;
+      toolArgs = (arg1 === undefined ? null : arg1) as ToolArgs;
     }
 
     execute(toolArgs)
