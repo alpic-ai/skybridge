@@ -70,6 +70,11 @@ export type CallToolResponse = {
   meta: Record<string, unknown>;
 };
 
+export type DefaultCallToolResponse = {
+  structuredContent: Record<string, unknown>;
+  meta: undefined;
+};
+
 export type CallToolResponseConstraint = Partial<
   Pick<CallToolResponse, "structuredContent" | "meta">
 >;
@@ -78,11 +83,11 @@ type API<WidgetState extends UnknownObject> = {
   /** Calls a tool on your MCP. Returns the full response. */
   callTool: <
     ToolArgs extends CallToolArgs = null,
-    ToolResponse extends CallToolResponseConstraint = CallToolResponse
+    ToolResponse extends CallToolResponseConstraint = DefaultCallToolResponse
   >(
     name: string,
     args: ToolArgs
-  ) => Promise<ToolResponse>;
+  ) => Promise<CallToolResponse & ToolResponse>;
 
   /** Triggers a followup turn in the ChatGPT conversation */
   sendFollowUpMessage: (args: { prompt: string }) => Promise<void>;

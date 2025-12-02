@@ -61,7 +61,7 @@ export const useCallTool = <
     >
   >({ status: "idle", data: undefined, error: undefined });
 
-  const doCallToolAsync = async (
+  const execute = async (
     toolArgs: ToolArgs
   ): Promise<CallToolResponse & ToolResponse> => {
     setCallToolState({ status: "pending", data: undefined, error: undefined });
@@ -81,9 +81,9 @@ export const useCallTool = <
 
   const callToolAsync = (async (toolArgs?: ResolvedToolArgs<ToolArgs>) => {
     if (toolArgs === undefined) {
-      return doCallToolAsync(null as ToolArgs);
+      return execute(null as ToolArgs);
     }
-    return doCallToolAsync(toolArgs as ToolArgs);
+    return execute(toolArgs as ToolArgs);
   }) as CallToolAsyncFn<
     ResolvedToolArgs<ToolArgs>,
     CallToolResponse & ToolResponse
@@ -110,7 +110,7 @@ export const useCallTool = <
       toolArgs = arg1 as ToolArgs;
     }
 
-    doCallToolAsync(toolArgs)
+    execute(toolArgs)
       .then((data) => {
         if (sideEffects?.onSuccess) {
           sideEffects.onSuccess(data, toolArgs);
