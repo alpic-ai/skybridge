@@ -5,30 +5,43 @@ import type {
   CallToolResponseConstraint,
 } from "../types.js";
 
-type BaseCallToolState<
-  TStatus extends "idle" | "pending" | "success" | "error",
-  TData extends CallToolResponse = CallToolResponse
-> = {
-  status: TStatus;
-  isIdle: TStatus extends "idle" ? true : false;
-  isPending: TStatus extends "pending" ? true : false;
-  isSuccess: TStatus extends "success" ? true : false;
-  isError: TStatus extends "error" ? true : false;
-  data: TStatus extends "success" ? TData : undefined;
-  error: TStatus extends "error" ? unknown : undefined;
-};
-
-type IdleCallToolState = BaseCallToolState<"idle">;
-type PendingCallToolState = BaseCallToolState<"pending">;
-type SuccessCallToolState<TData extends CallToolResponse = CallToolResponse> =
-  BaseCallToolState<"success", TData>;
-type ErrorCallToolState = BaseCallToolState<"error">;
-
 type CallToolState<TData extends CallToolResponse = CallToolResponse> =
-  | IdleCallToolState
-  | PendingCallToolState
-  | SuccessCallToolState<TData>
-  | ErrorCallToolState;
+  | {
+      status: "idle";
+      isIdle: true;
+      isPending: false;
+      isSuccess: false;
+      isError: false;
+      data: undefined;
+      error: undefined;
+    }
+  | {
+      status: "pending";
+      isIdle: false;
+      isPending: true;
+      isSuccess: false;
+      isError: false;
+      data: undefined;
+      error: undefined;
+    }
+  | {
+      status: "success";
+      isIdle: false;
+      isPending: false;
+      isSuccess: true;
+      isError: false;
+      data: TData;
+      error: undefined;
+    }
+  | {
+      status: "error";
+      isIdle: false;
+      isPending: false;
+      isSuccess: false;
+      isError: true;
+      data: undefined;
+      error: unknown;
+    };
 
 type ResolvedToolArgs<TArgs extends CallToolArgs> = TArgs extends null
   ? null
@@ -45,7 +58,7 @@ type SideEffects<ToolArgs, ToolResponse> = {
 };
 
 type CallToolAsyncFn<TA, TR> = TA extends null
-  ? (toolArgs?: TA) => Promise<TR>
+  ? () => Promise<TR>
   : (toolArgs: TA) => Promise<TR>;
 
 export const useCallTool = <
