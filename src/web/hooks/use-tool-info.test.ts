@@ -1,6 +1,13 @@
 import { fireEvent, renderHook, waitFor, act } from "@testing-library/react";
-import { expectType } from "tsd";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  expectTypeOf,
+} from "vitest";
 import { useToolInfo } from "./use-tool-info.js";
 import {
   SET_GLOBALS_EVENT_TYPE,
@@ -81,10 +88,10 @@ describe("useToolInfo - TypeScript typing", () => {
   it("should have correct types when no generic parameter is provided", () => {
     const { result } = renderHook(() => useToolInfo());
 
-    expectType<"pending" | "success">(result.current.status);
-    expectType<boolean>(result.current.isPending);
-    expectType<boolean>(result.current.isSuccess);
-    expectType<Record<string, unknown>>(result.current.input);
+    expectTypeOf<"pending" | "success">(result.current.status);
+    expectTypeOf<boolean>(result.current.isPending);
+    expectTypeOf<boolean>(result.current.isSuccess);
+    expectTypeOf<Record<string, unknown>>(result.current.input);
   });
 
   it("should correctly type input, output, and responseMetadata with explicit ToolSignature", () => {
@@ -100,22 +107,22 @@ describe("useToolInfo - TypeScript typing", () => {
       }>()
     );
 
-    expectType<TestInput>(result.current.input);
+    expectTypeOf<TestInput>(result.current.input);
 
     // When pending, output and responseMetadata should be undefined
     if (result.current.status === "pending") {
-      expectType<undefined>(result.current.output);
-      expectType<undefined>(result.current.responseMetadata);
-      expectType<true>(result.current.isPending);
-      expectType<false>(result.current.isSuccess);
+      expectTypeOf<undefined>(result.current.output);
+      expectTypeOf<undefined>(result.current.responseMetadata);
+      expectTypeOf<true>(result.current.isPending);
+      expectTypeOf<false>(result.current.isSuccess);
     }
 
     // When success, output and responseMetadata should be defined
     if (result.current.status === "success") {
-      expectType<TestOutput>(result.current.output);
-      expectType<TestMetadata>(result.current.responseMetadata);
-      expectType<false>(result.current.isPending);
-      expectType<true>(result.current.isSuccess);
+      expectTypeOf<TestOutput>(result.current.output);
+      expectTypeOf<TestMetadata>(result.current.responseMetadata);
+      expectTypeOf<false>(result.current.isPending);
+      expectTypeOf<true>(result.current.isSuccess);
     }
   });
 
@@ -134,35 +141,35 @@ describe("useToolInfo - TypeScript typing", () => {
 
     // Test type narrowing
     if (result.current.isPending) {
-      expectType<"pending">(result.current.status);
-      expectType<true>(result.current.isPending);
-      expectType<false>(result.current.isSuccess);
-      expectType<undefined>(result.current.output);
-      expectType<undefined>(result.current.responseMetadata);
+      expectTypeOf<"pending">(result.current.status);
+      expectTypeOf<true>(result.current.isPending);
+      expectTypeOf<false>(result.current.isSuccess);
+      expectTypeOf<undefined>(result.current.output);
+      expectTypeOf<undefined>(result.current.responseMetadata);
     }
 
     if (result.current.isSuccess) {
-      expectType<"success">(result.current.status);
-      expectType<false>(result.current.isPending);
-      expectType<true>(result.current.isSuccess);
-      expectType<TestOutput>(result.current.output);
-      expectType<TestMetadata>(result.current.responseMetadata);
+      expectTypeOf<"success">(result.current.status);
+      expectTypeOf<false>(result.current.isPending);
+      expectTypeOf<true>(result.current.isSuccess);
+      expectTypeOf<TestOutput>(result.current.output);
+      expectTypeOf<TestMetadata>(result.current.responseMetadata);
     }
 
     if (result.current.status === "pending") {
-      expectType<TestInput>(result.current.input);
-      expectType<true>(result.current.isPending);
-      expectType<false>(result.current.isSuccess);
-      expectType<undefined>(result.current.output);
-      expectType<undefined>(result.current.responseMetadata);
+      expectTypeOf<TestInput>(result.current.input);
+      expectTypeOf<true>(result.current.isPending);
+      expectTypeOf<false>(result.current.isSuccess);
+      expectTypeOf<undefined>(result.current.output);
+      expectTypeOf<undefined>(result.current.responseMetadata);
     }
 
     if (result.current.status === "success") {
-      expectType<TestInput>(result.current.input);
-      expectType<false>(result.current.isPending);
-      expectType<true>(result.current.isSuccess);
-      expectType<TestOutput>(result.current.output);
-      expectType<TestMetadata>(result.current.responseMetadata);
+      expectTypeOf<TestInput>(result.current.input);
+      expectTypeOf<false>(result.current.isPending);
+      expectTypeOf<true>(result.current.isSuccess);
+      expectTypeOf<TestOutput>(result.current.output);
+      expectTypeOf<TestMetadata>(result.current.responseMetadata);
     }
   });
 
@@ -175,11 +182,11 @@ describe("useToolInfo - TypeScript typing", () => {
       }>()
     );
 
-    expectType<TestInput>(result.current.input);
+    expectTypeOf<TestInput>(result.current.input);
 
     if (result.current.status === "success") {
-      expectType<Record<string, unknown>>(result.current.output);
-      expectType<Record<string, unknown>>(result.current.responseMetadata);
+      expectTypeOf<Record<string, unknown>>(result.current.output);
+      expectTypeOf<Record<string, unknown>>(result.current.responseMetadata);
     }
   });
 
@@ -192,10 +199,10 @@ describe("useToolInfo - TypeScript typing", () => {
       }>()
     );
 
-    expectType<Record<string, unknown>>(result.current.input);
+    expectTypeOf<Record<string, unknown>>(result.current.input);
 
     if (result.current.status === "success") {
-      expectType<TestOutput>(result.current.output);
+      expectTypeOf<TestOutput>(result.current.output);
     }
   });
 });

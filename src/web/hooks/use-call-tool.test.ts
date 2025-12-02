@@ -1,5 +1,4 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { expectType } from "tsd";
 import {
   afterEach,
   beforeEach,
@@ -8,6 +7,7 @@ import {
   it,
   vi,
   type Mock,
+  expectTypeOf,
 } from "vitest";
 import { useCallTool } from "./use-call-tool.js";
 
@@ -177,7 +177,7 @@ describe("useCallTool - TypeScript typing", () => {
     });
 
     expect(OpenaiMock.callTool).toHaveBeenCalledWith("test-tool", null);
-    expectType<typeof data | undefined>(result.current.data);
+    expectTypeOf<typeof data | undefined>(result.current.data);
   });
 
   it("should correctly type callToolAsync return value", async () => {
@@ -202,7 +202,7 @@ describe("useCallTool - TypeScript typing", () => {
     OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);
 
     const promise = result.current.callToolAsync(testArgs);
-    expectType<Promise<typeof mockResponse>>(promise);
+    expectTypeOf<Promise<typeof mockResponse>>(promise);
 
     const resolvedValue = await promise;
     expect(resolvedValue).toEqual(mockResponse);
@@ -231,7 +231,7 @@ describe("useCallTool - TypeScript typing", () => {
     OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);
 
     const promise = result.current.callToolAsync();
-    expectType<Promise<typeof mockResponse>>(promise);
+    expectTypeOf<Promise<typeof mockResponse>>(promise);
 
     const resolvedValue = await promise;
     expect(resolvedValue).toEqual(mockResponse);
