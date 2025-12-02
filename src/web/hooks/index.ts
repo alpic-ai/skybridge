@@ -1,8 +1,9 @@
 export { useCallTool } from "./use-call-tool.js";
 export { useDisplayMode } from "./use-display-mode.js";
+export { useFiles } from "./use-files.js";
 export { useLocale } from "./use-locale.js";
-export { useOpenExternal } from "./use-open-external.js";
 export { useOpenAiGlobal } from "./use-openai-global.js";
+export { useOpenExternal } from "./use-open-external.js";
 export { useRequestModal } from "./use-request-modal.js";
 export { useSendFollowUpMessage } from "./use-send-follow-up-message.js";
 export { useTheme } from "./use-theme.js";

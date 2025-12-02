@@ -2,6 +2,8 @@ export type UnknownObject = Record<string, unknown>;
 
 type WidgetState = UnknownObject;
 
+type FileMetadata = { fileId: string };
+
 export const TOOL_RESPONSE_EVENT_TYPE = "openai:tool_response";
 export class ToolResponseEvent extends CustomEvent<{
   tool: { name: string; args: UnknownObject };
@@ -90,6 +92,15 @@ type API<WidgetState extends UnknownObject> = {
    * This ensures the modal is correctly displayed and not limited to the widget's area.
    */
   requestModal: (args: { title: string }) => Promise<void>;
+
+  /** Uploads a new file to the host */
+  uploadFile: (file: File) => Promise<FileMetadata>;
+
+  /**
+   * Downloads a file from the host that was previously uploaded.
+   * Only files uploaded by the same connector instance can be downloaded.
+   */
+  downloadFile: (file: FileMetadata) => Promise<{ downloadUrl: string }>;
 };
 
 // Dispatched when any global changes in the host page
