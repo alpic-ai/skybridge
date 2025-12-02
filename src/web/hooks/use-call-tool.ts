@@ -1,9 +1,5 @@
 import { useState } from "react";
-import type {
-  CallToolArgs,
-  CallToolResponse,
-  CallToolResponseConstraint,
-} from "../types.js";
+import type { CallToolArgs, CallToolResponse } from "../types.js";
 
 type CallToolState<TData extends CallToolResponse = CallToolResponse> =
   | {
@@ -42,6 +38,10 @@ type CallToolState<TData extends CallToolResponse = CallToolResponse> =
       data: undefined;
       error: unknown;
     };
+
+type CallToolResponseConstraint = Partial<
+  Pick<CallToolResponse, "structuredContent" | "meta">
+>;
 
 type SideEffects<ToolArgs, ToolResponse> = {
   onSuccess?: (data: ToolResponse, toolArgs: ToolArgs) => void;

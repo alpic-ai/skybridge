@@ -34,7 +34,7 @@ declare global {
 }
 
 export type OpenAiGlobals<
-  ToolInput extends UnknownObject = {},
+  ToolInput extends UnknownObject = UnknownObject,
   ToolOutput extends UnknownObject = UnknownObject,
   ToolResponseMetadata extends UnknownObject = UnknownObject,
   WidgetState extends UnknownObject = UnknownObject
@@ -50,7 +50,7 @@ export type OpenAiGlobals<
 
   // state
   toolInput: ToolInput;
-  toolOutput: ToolOutput | { text: string } | null;
+  toolOutput: ToolOutput | null;
   toolResponseMetadata: ToolResponseMetadata | null;
   widgetState: WidgetState | null;
   requestDisplayMode: RequestDisplayMode;
@@ -70,20 +70,11 @@ export type CallToolResponse = {
   meta: Record<string, unknown>;
 };
 
-export type DefaultCallToolResponse = {
-  structuredContent: Record<string, unknown>;
-  meta: Record<string, unknown>;
-};
-
-export type CallToolResponseConstraint = Partial<
-  Pick<CallToolResponse, "structuredContent" | "meta">
->;
-
 type API<WidgetState extends UnknownObject> = {
   /** Calls a tool on your MCP. Returns the full response. */
   callTool: <
     ToolArgs extends CallToolArgs = null,
-    ToolResponse extends CallToolResponseConstraint = DefaultCallToolResponse
+    ToolResponse extends CallToolResponse = CallToolResponse
   >(
     name: string,
     args: ToolArgs
