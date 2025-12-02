@@ -2,47 +2,43 @@ import { useOpenAiGlobal } from "./use-openai-global.js";
 import { useEffect, useState } from "react";
 import type { UnknownObject } from "../types.js";
 
-type BaseToolState<
-  TStatus extends "pending" | "success",
-  ToolInput extends UnknownObject,
-  ToolOutput extends UnknownObject = UnknownObject,
-  ToolResponseMetadata extends UnknownObject = UnknownObject
-> = {
-  status: TStatus;
-  isPending: TStatus extends "pending" ? true : false;
-  isSuccess: TStatus extends "success" ? true : false;
+type ToolPendingState<ToolInput extends UnknownObject> = {
+  status: "pending";
+  isPending: true;
+  isSuccess: false;
   input: ToolInput;
-  output: TStatus extends "success" ? ToolOutput : undefined;
-  responseMetadata: TStatus extends "success"
-    ? ToolResponseMetadata
-    : undefined;
+  output: undefined;
+  responseMetadata: undefined;
 };
 
-type PendingToolState<ToolInput extends UnknownObject> = BaseToolState<
-  "pending",
-  ToolInput
->;
-type SuccessToolState<
+type ToolSuccessState<
   ToolInput extends UnknownObject,
   ToolOutput extends UnknownObject,
   ToolResponseMetadata extends UnknownObject
-> = BaseToolState<"success", ToolInput, ToolOutput, ToolResponseMetadata>;
+> = {
+  status: "success";
+  isPending: false;
+  isSuccess: true;
+  input: ToolInput;
+  output: ToolOutput;
+  responseMetadata: ToolResponseMetadata;
+};
 
 type ToolState<
   ToolInput extends UnknownObject,
   ToolOutput extends UnknownObject,
   ToolResponseMetadata extends UnknownObject
 > =
-  | PendingToolState<ToolInput>
-  | SuccessToolState<ToolInput, ToolOutput, ToolResponseMetadata>;
+  | ToolPendingState<ToolInput>
+  | ToolSuccessState<ToolInput, ToolOutput, ToolResponseMetadata>;
 
-export function useToolInfo<
-  ToolSignature extends Partial<{
-    input: UnknownObject;
-    output: UnknownObject;
-    responseMetadata: UnknownObject;
-  }>
->() {
+type ToolSignature = {
+  input: UnknownObject;
+  output: UnknownObject;
+  responseMetadata: UnknownObject;
+};
+
+export function useToolInfo<TS extends Partial<ToolSignature> = {}>() {
   const [status, setStatus] = useState<"pending" | "success">("pending");
   const input = useOpenAiGlobal("toolInput")!;
   const output = useOpenAiGlobal("toolOutput") ?? undefined;
@@ -56,6 +52,10 @@ export function useToolInfo<
     );
   }, [output, responseMetadata]);
 
+  type Input = UnknownObject & TS["input"];
+  type Output = UnknownObject & TS["output"];
+  type Metadata = UnknownObject & TS["responseMetadata"];
+
   return {
     input,
     status,
@@ -63,13 +63,5 @@ export function useToolInfo<
     isSuccess: status === "success",
     output,
     responseMetadata,
-  } as ToolState<
-    ToolSignature["input"] extends UnknownObject ? ToolSignature["input"] : {},
-    ToolSignature["output"] extends UnknownObject
-      ? ToolSignature["output"]
-      : UnknownObject,
-    ToolSignature["responseMetadata"] extends UnknownObject
-      ? ToolSignature["responseMetadata"]
-      : UnknownObject
-  >;
+  } as ToolState<Input, Output, Metadata>;
 }
