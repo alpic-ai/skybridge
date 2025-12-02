@@ -34,7 +34,7 @@ declare global {
 }
 
 export type OpenAiGlobals<
-  ToolInput extends UnknownObject = UnknownObject,
+  ToolInput extends UnknownObject = {},
   ToolOutput extends UnknownObject = UnknownObject,
   ToolResponseMetadata extends UnknownObject = UnknownObject,
   WidgetState extends UnknownObject = UnknownObject
