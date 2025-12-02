@@ -1,43 +1,51 @@
 import { useState } from "react";
 import type { CallToolArgs, CallToolResponse } from "../types.js";
 
+type CallToolIdleState = {
+  status: "idle";
+  isIdle: true;
+  isPending: false;
+  isSuccess: false;
+  isError: false;
+  data: undefined;
+  error: undefined;
+};
+
+type CallToolPendingState = {
+  status: "pending";
+  isIdle: false;
+  isPending: true;
+  isSuccess: false;
+  isError: false;
+  data: undefined;
+  error: undefined;
+};
+
+type CallToolSuccessState<TData extends CallToolResponse = CallToolResponse> = {
+  status: "success";
+  isIdle: false;
+  isPending: false;
+  isSuccess: true;
+  isError: false;
+  data: TData;
+  error: undefined;
+};
+
+type CallToolErrorState = {
+  status: "error";
+  isIdle: false;
+  isPending: false;
+  isSuccess: false;
+  isError: true;
+  data: undefined;
+  error: unknown;
+};
+
 type CallToolState<TData extends CallToolResponse = CallToolResponse> =
-  | {
-      status: "idle";
-      isIdle: true;
-      isPending: false;
-      isSuccess: false;
-      isError: false;
-      data: undefined;
-      error: undefined;
-    }
-  | {
-      status: "pending";
-      isIdle: false;
-      isPending: true;
-      isSuccess: false;
-      isError: false;
-      data: undefined;
-      error: undefined;
-    }
-  | {
-      status: "success";
-      isIdle: false;
-      isPending: false;
-      isSuccess: true;
-      isError: false;
-      data: TData;
-      error: undefined;
-    }
-  | {
-      status: "error";
-      isIdle: false;
-      isPending: false;
-      isSuccess: false;
-      isError: true;
-      data: undefined;
-      error: unknown;
-    };
+  | CallToolIdleState
+  | CallToolPendingState
+  | CallToolSuccessState<TData>
+  | CallToolErrorState;
 
 type SideEffects<ToolArgs, ToolResponse> = {
   onSuccess?: (data: ToolResponse, toolArgs: ToolArgs) => void;
@@ -49,17 +57,18 @@ type SideEffects<ToolArgs, ToolResponse> = {
   ) => void;
 };
 
-type CallToolAsyncFn<TA, TR> = TA extends null
-  ? () => Promise<TR>
-  : (toolArgs: TA) => Promise<TR>;
+type CallToolAsyncFn<ToolArgs, ToolResponse> = ToolArgs extends null
+  ? () => Promise<ToolResponse>
+  : (toolArgs: ToolArgs) => Promise<ToolResponse>;
 
-type CallToolResponseConstraint = Partial<
-  Pick<CallToolResponse, "structuredContent" | "meta">
+type ToolResponseSignature = Pick<
+  CallToolResponse,
+  "structuredContent" | "meta"
 >;
 
 export const useCallTool = <
   ToolArgs extends CallToolArgs = null,
-  ToolResponse extends CallToolResponseConstraint = CallToolResponseConstraint
+  ToolResponse extends Partial<ToolResponseSignature> = {}
 >(
   name: string
 ) => {
@@ -105,19 +114,21 @@ export const useCallTool = <
     sideEffects?: SideEffects<ToolArgs, CombinedCallToolResponse>
   ): void;
   function callTool(
-    arg1?: ToolArgs | SideEffects<ToolArgs, CombinedCallToolResponse>,
+    firstArg?: ToolArgs | SideEffects<ToolArgs, CombinedCallToolResponse>,
     sideEffects?: SideEffects<ToolArgs, CombinedCallToolResponse>
   ) {
     let toolArgs: ToolArgs;
     if (
-      arg1 &&
-      typeof arg1 === "object" &&
-      ("onSuccess" in arg1 || "onError" in arg1 || "onSettled" in arg1)
+      firstArg &&
+      typeof firstArg === "object" &&
+      ("onSuccess" in firstArg ||
+        "onError" in firstArg ||
+        "onSettled" in firstArg)
     ) {
       toolArgs = null as ToolArgs; // no toolArgs provided
-      sideEffects = arg1;
+      sideEffects = firstArg;
     } else {
-      toolArgs = (arg1 === undefined ? null : arg1) as ToolArgs;
+      toolArgs = (firstArg === undefined ? null : firstArg) as ToolArgs;
     }
 
     execute(toolArgs)

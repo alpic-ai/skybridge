@@ -50,7 +50,7 @@ export type OpenAiGlobals<
 
   // state
   toolInput: ToolInput;
-  toolOutput: ToolOutput | null;
+  toolOutput: ToolOutput | { text: string } | null;
   toolResponseMetadata: ToolResponseMetadata | null;
   widgetState: WidgetState | null;
   requestDisplayMode: RequestDisplayMode;
@@ -78,7 +78,7 @@ type API<WidgetState extends UnknownObject> = {
   >(
     name: string,
     args: ToolArgs
-  ) => Promise<CallToolResponse & ToolResponse>;
+  ) => Promise<ToolResponse>;
 
   /** Triggers a followup turn in the ChatGPT conversation */
   sendFollowUpMessage: (args: { prompt: string }) => Promise<void>;
