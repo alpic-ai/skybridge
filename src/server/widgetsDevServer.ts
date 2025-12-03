@@ -2,6 +2,8 @@ import express, { type RequestHandler } from "express";
 import cors from "cors";
 import path from "node:path";
 
+import describePlugin from "./describe-plugin.js";
+
 /**
  * Install Vite dev server
  * This router MUST be installed at the application root, like so:
@@ -41,6 +43,7 @@ export const widgetsDevServer = async (): Promise<RequestHandler> => {
     optimizeDeps: {
       include: ["react", "react-dom/client"],
     },
+    plugins: [describePlugin(), ...(devConfig.plugins ?? [])],
   });
 
   router.use(cors());

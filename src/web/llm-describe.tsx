@@ -1,4 +1,3 @@
-// react-llm-describe.tsx
 import {
   createContext,
   useContext,
@@ -6,10 +5,6 @@ import {
   useId,
   type ReactNode,
 } from "react";
-
-/* ------------------------------------------------------------------ */
-/*  Types                                                              */
-/* ------------------------------------------------------------------ */
 
 export type LLMDescribeContent = string;
 
