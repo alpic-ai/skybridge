@@ -1,10 +1,8 @@
-import type { RequestModalOptions } from "../types.js";
-
 /**
  * Triggers a modal containing the widget rendered in display mode "modal"
  */
 export function useRequestModal() {
-  return (options: RequestModalOptions) => {
+  return (options: { title: string }) => {
     window.openai.requestModal(options);
   };
 }

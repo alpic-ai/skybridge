@@ -1,20 +1,8 @@
 export type UnknownObject = Record<string, unknown>;
 
-export type WidgetState = UnknownObject;
+type WidgetState = UnknownObject;
 
-export type SetWidgetState = (state: WidgetState) => Promise<void>;
-
-export type SendFollowUpMessage = (args: { prompt: string }) => Promise<void>;
-
-export type RequestDisplayMode = (args: { mode: DisplayMode }) => Promise<{
-  mode: DisplayMode;
-}>;
-
-export type RequestModal = (options: RequestModalOptions) => Promise<void>;
-
-export type RequestModalOptions = {
-  title: string;
-};
+type FileMetadata = { fileId: string };
 
 export const TOOL_RESPONSE_EVENT_TYPE = "openai:tool_response";
 export class ToolResponseEvent extends CustomEvent<{
@@ -53,8 +41,6 @@ export type OpenAiGlobals<
   toolOutput: ToolOutput | { text: string } | null;
   toolResponseMetadata: ToolResponseMetadata | null;
   widgetState: WidgetState | null;
-  requestDisplayMode: RequestDisplayMode;
-  requestModal: RequestModal;
 };
 
 export type CallToolArgs = Record<string, unknown> | null;
@@ -84,7 +70,7 @@ type API<WidgetState extends UnknownObject> = {
   sendFollowUpMessage: (args: { prompt: string }) => Promise<void>;
 
   /** Opens an external link, redirects web page or mobile app */
-  openExternal(payload: { href: string }): void;
+  openExternal(args: { href: string }): void;
 
   /** For transitioning an app from inline to fullscreen or pip */
   requestDisplayMode: (args: { mode: DisplayMode }) => Promise<{
@@ -95,7 +81,26 @@ type API<WidgetState extends UnknownObject> = {
     mode: DisplayMode;
   }>;
 
+  /**
+   * Sets the widget state.
+   * This state is persisted across widget renders.
+   */
   setWidgetState: (state: WidgetState) => Promise<void>;
+
+  /**
+   * Opens a modal portaled outside of the widget iFrame.
+   * This ensures the modal is correctly displayed and not limited to the widget's area.
+   */
+  requestModal: (args: { title: string }) => Promise<void>;
+
+  /** Uploads a new file to the host */
+  uploadFile: (file: File) => Promise<FileMetadata>;
+
+  /**
+   * Downloads a file from the host that was previously uploaded.
+   * Only files uploaded by the same connector instance can be downloaded.
+   */
+  downloadFile: (file: FileMetadata) => Promise<{ downloadUrl: string }>;
 };
 
 // Dispatched when any global changes in the host page
