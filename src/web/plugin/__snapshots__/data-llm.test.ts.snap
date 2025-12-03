@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`data-llm plugin > should handle complex JSX with multiple data-llm attributes 1`] = `
+{
+  "code": "import { LLMDescribe } from "skybridge/web";
+function Component() {
+  return <div>
+            <LLMDescribe content="Section 1"><section>
+              <p>Content 1</p>
+            </section></LLMDescribe>
+            <LLMDescribe content="Section 2"><section>
+              <p>Content 2</p>
+            </section></LLMDescribe>
+          </div>;
+}",
+  "map": null,
+}
+`;
