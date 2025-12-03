@@ -6,17 +6,17 @@ import {
   type ReactNode,
 } from "react";
 
-export type LLMDescribeContent = string;
+export type DataLLMContent = string;
 
-export interface LLMDescribeNode {
+export interface DataLLMNode {
   id: string;
   parentId: string | null;
   content: string | null;
 }
 
-const nodes = new Map<string, LLMDescribeNode>();
+const nodes = new Map<string, DataLLMNode>();
 
-function setNode(node: LLMDescribeNode) {
+function setNode(node: DataLLMNode) {
   nodes.set(node.id, node);
   onChange();
 }
@@ -36,23 +36,30 @@ function onChange() {
 
 const ParentIdContext = createContext<string | null>(null);
 
-interface LLMDescribeProps {
-  content: LLMDescribeContent | null | undefined;
+interface DataLLMProps {
+  content: DataLLMContent | null | undefined;
   children?: ReactNode;
 }
 
-export function LLMDescribe({ content, children }: LLMDescribeProps) {
+export function DataLLM({ content, children }: DataLLMProps) {
   const parentId = useContext(ParentIdContext);
   const id = useId();
 
   useEffect(() => {
-    setNode({
-      id,
-      parentId,
-      content: content ?? null,
-    });
+    if (content) {
+      setNode({
+        id,
+        parentId,
+        content,
+      });
+      return;
+    }
+
+    console.log("removing node on unmount", id);
+    removeNode(id);
 
     return () => {
+      console.log("removing node", id);
       removeNode(id);
     };
   }, [id, parentId, content]);
@@ -63,7 +70,7 @@ export function LLMDescribe({ content, children }: LLMDescribeProps) {
 }
 
 function getLLMDescriptionString(): string {
-  const byParent = new Map<string | null, LLMDescribeNode[]>();
+  const byParent = new Map<string | null, DataLLMNode[]>();
   for (const node of Array.from(nodes.values())) {
     const key = node.parentId ?? null;
     if (!byParent.has(key)) byParent.set(key, []);

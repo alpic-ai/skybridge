@@ -1,5 +1,5 @@
 import type { Plugin } from "vite";
-import { transform as dataLlmTransform } from "./data-llm.js";
+import { transform as dataLlmTransform } from "./transform-data-llm.js";
 
 export function skybridge(): Plugin {
   return {

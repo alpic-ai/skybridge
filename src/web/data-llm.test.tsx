@@ -8,9 +8,9 @@ import {
   vi,
   type Mock,
 } from "vitest";
-import { LLMDescribe } from "./llm-describe.js";
+import { DataLLM } from "./data-llm.js";
 
-describe("LLMDescribe", () => {
+describe("DataLLM", () => {
   let OpenaiMock: { widgetState: unknown; setWidgetState: Mock };
 
   beforeEach(() => {
@@ -46,9 +46,9 @@ describe("LLMDescribe", () => {
 
   it("should register a node with content and call setWidgetState", () => {
     render(
-      <LLMDescribe content="Test content">
+      <DataLLM content="Test content">
         <div>Child</div>
-      </LLMDescribe>
+      </DataLLM>
     );
 
     expect(OpenaiMock.setWidgetState).toHaveBeenCalled();
@@ -60,9 +60,9 @@ describe("LLMDescribe", () => {
     OpenaiMock.widgetState = { existingKey: "existingValue" };
 
     render(
-      <LLMDescribe content="Test content">
+      <DataLLM content="Test content">
         <div>Child</div>
-      </LLMDescribe>
+      </DataLLM>
     );
 
     const callArgs = OpenaiMock.setWidgetState.mock.calls[0]?.[0];
@@ -70,16 +70,16 @@ describe("LLMDescribe", () => {
     expect(callArgs).toHaveProperty("__widget_context");
   });
 
-  it("should handle deeply nested LLMDescribe components", () => {
+  it("should handle deeply nested DataLLM components", () => {
     render(
-      <LLMDescribe content="Level 1">
-        <LLMDescribe content="Level 2A" />
-        <LLMDescribe content="Level 2B">
-          <LLMDescribe content="Level 3">
+      <DataLLM content="Level 1">
+        <DataLLM content="Level 2A" />
+        <DataLLM content="Level 2B">
+          <DataLLM content="Level 3">
             <div>Content</div>
-          </LLMDescribe>
-        </LLMDescribe>
-      </LLMDescribe>
+          </DataLLM>
+        </DataLLM>
+      </DataLLM>
     );
 
     const callArgs =
@@ -92,20 +92,20 @@ describe("LLMDescribe", () => {
     expect(context).toContain("  - Level 2B");
     expect(context).toContain("    - Level 3");
   });
-  
+
   it("should update context when content changes", () => {
     const { rerender } = render(
-      <LLMDescribe content="Initial content">
+      <DataLLM content="Initial content">
         <div>Child</div>
-      </LLMDescribe>
+      </DataLLM>
     );
 
     const initialCalls = OpenaiMock.setWidgetState.mock.calls.length;
 
     rerender(
-      <LLMDescribe content="Updated content">
+      <DataLLM content="Updated content">
         <div>Child</div>
-      </LLMDescribe>
+      </DataLLM>
     );
 
     expect(OpenaiMock.setWidgetState.mock.calls.length).toBeGreaterThan(
@@ -120,9 +120,9 @@ describe("LLMDescribe", () => {
 
   it("should remove node and update context when component unmounts", () => {
     const { unmount } = render(
-      <LLMDescribe content="Content to remove">
+      <DataLLM content="Content to remove">
         <div>Child</div>
-      </LLMDescribe>
+      </DataLLM>
     );
 
     const callsBeforeUnmount = OpenaiMock.setWidgetState.mock.calls.length;

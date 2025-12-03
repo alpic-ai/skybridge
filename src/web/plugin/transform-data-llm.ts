@@ -3,8 +3,8 @@ import type { PluginObj, TransformOptions, types } from "@babel/core";
 const LLM_IMPORT_SOURCE = "skybridge/web";
 
 interface State {
-  hasLLMDescribeImport?: boolean;
-  needsLLMDescribeImport?: boolean;
+  hasDataLLMImport?: boolean;
+  needsDataLLMImport?: boolean;
 }
 
 function createBabelPlugin(t: typeof types): PluginObj<State> {
@@ -14,8 +14,8 @@ function createBabelPlugin(t: typeof types): PluginObj<State> {
     visitor: {
       Program: {
         enter(path, state) {
-          state.hasLLMDescribeImport = false;
-          state.needsLLMDescribeImport = false;
+          state.hasDataLLMImport = false;
+          state.needsDataLLMImport = false;
 
           for (const node of path.node.body) {
             if (!t.isImportDeclaration(node)) continue;
@@ -24,23 +24,23 @@ function createBabelPlugin(t: typeof types): PluginObj<State> {
             const hasSpecifier = node.specifiers.some(
               (s) =>
                 t.isImportSpecifier(s) &&
-                t.isIdentifier(s.imported, { name: "LLMDescribe" })
+                t.isIdentifier(s.imported, { name: "DataLLM" })
             );
 
             if (hasSpecifier) {
-              state.hasLLMDescribeImport = true;
+              state.hasDataLLMImport = true;
               break;
             }
           }
         },
 
         exit(path, state) {
-          if (state.needsLLMDescribeImport && !state.hasLLMDescribeImport) {
+          if (state.needsDataLLMImport && !state.hasDataLLMImport) {
             const importDecl = t.importDeclaration(
               [
                 t.importSpecifier(
-                  t.identifier("LLMDescribe"),
-                  t.identifier("LLMDescribe")
+                  t.identifier("DataLLM"),
+                  t.identifier("DataLLM")
                 ),
               ],
               t.stringLiteral(LLM_IMPORT_SOURCE)
@@ -88,10 +88,10 @@ function createBabelPlugin(t: typeof types): PluginObj<State> {
             : t.jsxExpressionContainer(contentExpression)
         );
 
-        const llmOpening = t.jsxOpeningElement(t.jsxIdentifier("LLMDescribe"), [
+        const llmOpening = t.jsxOpeningElement(t.jsxIdentifier("DataLLM"), [
           contentAttr,
         ]);
-        const llmClosing = t.jsxClosingElement(t.jsxIdentifier("LLMDescribe"));
+        const llmClosing = t.jsxClosingElement(t.jsxIdentifier("DataLLM"));
 
         const wrapped = t.jsxElement(
           llmOpening,
@@ -100,7 +100,7 @@ function createBabelPlugin(t: typeof types): PluginObj<State> {
           false
         );
 
-        state.needsLLMDescribeImport = true;
+        state.needsDataLLMImport = true;
         path.replaceWith(wrapped);
       },
     },
