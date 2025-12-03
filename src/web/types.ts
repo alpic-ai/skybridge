@@ -2,7 +2,7 @@ import "react";
 
 declare module "react" {
   interface HTMLAttributes<T extends Element = HTMLElement> {
-    "llm-describe"?: string;
+    "data-llm"?: string;
   }
 }
 

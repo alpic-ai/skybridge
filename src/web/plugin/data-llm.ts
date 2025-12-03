@@ -1,7 +1,4 @@
-// tools/llm-describe-babel-plugin.ts
-import type { PluginObj, TransformOptions } from "@babel/core";
-import { transformSync, types as t } from "@babel/core";
-import type { Plugin } from "vite";
+import type { PluginObj, TransformOptions, types } from "@babel/core";
 
 const LLM_IMPORT_SOURCE = "skybridge/web";
 
@@ -10,9 +7,9 @@ interface State {
   needsLLMDescribeImport?: boolean;
 }
 
-function createBabelPlugin(): PluginObj<State> {
+function createBabelPlugin(t: typeof types): PluginObj<State> {
   return {
-    name: "llm-describe-babel",
+    name: "data-llm-babel",
 
     visitor: {
       Program: {
@@ -61,25 +58,25 @@ function createBabelPlugin(): PluginObj<State> {
         const llmAttrIndex = attrs.findIndex(
           (attr) =>
             t.isJSXAttribute(attr) &&
-            t.isJSXIdentifier(attr.name, { name: "llm-describe" })
+            t.isJSXIdentifier(attr.name, { name: "data-llm" })
         );
 
         if (llmAttrIndex === -1) return;
 
-        const llmAttr = attrs[llmAttrIndex] as t.JSXAttribute;
+        const llmAttr = attrs[llmAttrIndex] as types.JSXAttribute;
 
         const newAttrs = [...attrs];
         newAttrs.splice(llmAttrIndex, 1);
         opening.attributes = newAttrs;
 
-        let contentExpression: t.Expression;
+        let contentExpression: types.Expression;
 
         if (!llmAttr.value) {
           contentExpression = t.stringLiteral("");
         } else if (t.isStringLiteral(llmAttr.value)) {
           contentExpression = llmAttr.value;
         } else if (t.isJSXExpressionContainer(llmAttr.value)) {
-          contentExpression = llmAttr.value.expression as t.Expression;
+          contentExpression = llmAttr.value.expression as types.Expression;
         } else {
           return;
         }
@@ -110,39 +107,35 @@ function createBabelPlugin(): PluginObj<State> {
   };
 }
 
-export default function describePlugin(): Plugin {
-  return {
-    name: "llm-describe-vite",
-    enforce: "pre",
+export const transform = async (code: string, id: string) => {
+  if (!/\.(jsx|tsx)$/.test(id)) {
+    return null;
+  }
 
-    transform(code, id) {
-      if (!/\.(jsx|tsx)$/.test(id)) {
-        return null;
-      }
+  if (id.includes("node_modules")) {
+    return null;
+  }
 
-      if (id.includes("node_modules")) {
-        return null;
-      }
+  // Dynamic import to ensure @babel/core is only loaded in Node.js context
+  const { types: t, transformSync } = await import("@babel/core");
 
-      const babelOptions: TransformOptions = {
-        plugins: [createBabelPlugin()],
-        parserOpts: {
-          plugins: ["jsx", "typescript"],
-        },
-        filename: id,
-        sourceFileName: id,
-      };
-
-      const result = transformSync(code, babelOptions);
-
-      if (!result || !result.code) {
-        return null;
-      }
-
-      return {
-        code: result.code,
-        map: result.map || null,
-      };
+  const babelOptions: TransformOptions = {
+    plugins: [createBabelPlugin(t)],
+    parserOpts: {
+      plugins: ["jsx", "typescript"],
     },
+    filename: id,
+    sourceFileName: id,
   };
-}
+
+  const result = transformSync(code, babelOptions);
+
+  if (!result || !result.code) {
+    return null;
+  }
+
+  return {
+    code: result.code,
+    map: result.map || null,
+  };
+};
