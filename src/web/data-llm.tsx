@@ -52,14 +52,11 @@ export function DataLLM({ content, children }: DataLLMProps) {
         parentId,
         content,
       });
-      return;
+    } else {
+      removeNode(id);
     }
 
-    console.log("removing node on unmount", id);
-    removeNode(id);
-
     return () => {
-      console.log("removing node", id);
       removeNode(id);
     };
   }, [id, parentId, content]);
