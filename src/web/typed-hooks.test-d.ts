@@ -137,5 +137,42 @@ test("widgets with no outputSchema have empty object output type", () => {
   expectTypeOf<NoInputOutput>().toEqualTypeOf<{}>();
 });
 
+test("createTypedHooks provides autocomplete for widget names in useToolInfo", () => {
+  const { useToolInfo } = createTypedHooks<TestServer>();
 
+  useToolInfo<"search-voyage">();
+  useToolInfo<"get-trip-details">();
+  useToolInfo<"no-input-widget">();
+
+  // @ts-expect-error - "invalid-name" is not a valid widget name
+  useToolInfo<"invalid-name">();
+});
+
+test("useToolInfo infers input types from WidgetInput utility", () => {
+  const { useToolInfo } = createTypedHooks<TestServer>();
+  const toolInfo = useToolInfo<"search-voyage">();
+
+  type ExpectedInput = WidgetInput<TestServer, "search-voyage">;
+  expectTypeOf(toolInfo.input).toExtend<ExpectedInput>();
+
+  const detailsInfo = useToolInfo<"get-trip-details">();
+  type ExpectedDetailsInput = WidgetInput<TestServer, "get-trip-details">;
+  expectTypeOf(detailsInfo.input).toExtend<ExpectedDetailsInput>();
+});
+
+test("useToolInfo infers output types from WidgetOutput utility", () => {
+  const { useToolInfo } = createTypedHooks<TestServer>();
+  const toolInfo = useToolInfo<"search-voyage">();
+
+  type ExpectedOutput = WidgetOutput<TestServer, "search-voyage">;
+  if (toolInfo.status === "success") {
+    expectTypeOf(toolInfo.output).toExtend<ExpectedOutput>();
+  }
+
+  const detailsInfo = useToolInfo<"get-trip-details">();
+  type ExpectedDetailsOutput = WidgetOutput<TestServer, "get-trip-details">;
+  if (detailsInfo.status === "success") {
+    expectTypeOf(detailsInfo.output).toExtend<ExpectedDetailsOutput>();
+  }
+});
 

@@ -142,17 +142,19 @@ Create typed hooks once and export them for use across your app. This file acts 
 import type { AppType } from "../server"; // type-only import
 import { createTypedHooks } from "skybridge/web";
 
-export const { useCallTool } = createTypedHooks<AppType>();
+export const { useCallTool, useToolInfo } = createTypedHooks<AppType>();
 ```
 
 _Usage in widgets (web/src/widgets/search.tsx)_
 
 ```tsx
-import { useCallTool } from "../skybridge"; // import typed hooks
+import { useCallTool, useToolInfo } from "../skybridge"; // import typed hooks
 
 export function SearchWidget() {
   const { callTool, data, isPending } = useCallTool("search-voyage");
   //                                                 ^ autocomplete for tool names
+  const toolInfo = useToolInfo<"search-voyage">();
+  //                              ^ autocomplete for widget names
 
   const handleSearch = () => {
     callTool({ destination: "Spain" });
@@ -160,9 +162,15 @@ export function SearchWidget() {
   };
 
   return (
-    <button onClick={handleSearch} disabled={isPending}>
-      Search
-    </button>
+    <div>
+      <button onClick={handleSearch} disabled={isPending}>
+        Search
+      </button>
+      {toolInfo.isSuccess && (
+        <div>Found {toolInfo.output.totalCount} results</div>
+        //                      ^ typed output
+      )}
+    </div>
   );
 }
 ```
@@ -174,8 +182,9 @@ The `skybridge/web` package comes with a set of hooks to help you build your wid
 - `useOpenAiGlobal`: A generic hook to get any global data from the OpenAI iFrame skybridge runtime (in `window.openai`).
 - `useToolOutput`: A hook to get the initial tool `structuredContent` returned when rendering the widget for the first time. The data inside this hook is not updated when the tool is called again.
 - `useToolResponseMetadata`: A hook to get the initial tool `meta` returned when rendering the widget for the first time. The data inside this hook is not updated when the tool is called again.
+- `useToolInfo`: A hook to get the tool input, output, and response metadata with type inference. Provides a discriminated union based on status (pending/success).
 - `useCallTool`: A @tanstack/react-query inspired hook to send make additional tool calls inside a widget.
-- `createTypedHooks`: A factory that creates typed versions of `useCallTool` with full type inference from your server type.
+- `createTypedHooks`: A factory that creates typed versions of `useCallTool` and `useToolInfo` with full type inference from your server type.
 
 _useOpenAiGlobal_
 
@@ -199,6 +208,51 @@ _useToolResponseMetadata_
 import { useToolResponseMetadata } from "skybridge/web";
 
 const toolResponseMetadata = useToolResponseMetadata();
+```
+
+_useToolInfo_
+
+```ts
+import { useToolInfo } from "skybridge/web";
+
+const toolInfo = useToolInfo<{
+  input: { query: string };
+  output: { results: string[] };
+  responseMetadata: { id: number };
+}>();
+
+// toolInfo.input is typed based on the input type
+// toolInfo.output is typed based on the output type (undefined when pending)
+// toolInfo.status narrows correctly: "pending" | "success"
+
+if (toolInfo.isPending) {
+  // toolInfo.output is undefined here
+  console.log(toolInfo.input.query);
+}
+
+if (toolInfo.isSuccess) {
+  // toolInfo.output is typed here
+  console.log(toolInfo.output.results);
+}
+```
+
+_useToolInfo_ with typed hooks (recommended)
+
+```tsx
+import { useToolInfo } from "../skybridge"; // import typed hooks
+
+export function SearchWidget() {
+  const toolInfo = useToolInfo<"search-voyage">();
+  //                              ^ autocomplete for widget names
+  // toolInfo.input is typed as { destination: string; departureDate?: string; ... }
+  // toolInfo.output is typed as { results: Array<...>; totalCount: number; } | undefined
+
+  if (toolInfo.isSuccess) {
+    return <div>Found {toolInfo.output.totalCount} results</div>;
+  }
+
+  return <div>Searching for {toolInfo.input.destination}...</div>;
+}
 ```
 
 _useCallTool_ in synchronous mode
