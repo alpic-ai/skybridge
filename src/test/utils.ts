@@ -1,5 +1,5 @@
 import { vi, type MockInstance } from "vitest";
-import { McpServer, McpServer as McpServerBase } from "../server/server.js";
+import { McpServer } from "../server/server.js";
 
 /**
  * Creates a real McpServer instance for testing

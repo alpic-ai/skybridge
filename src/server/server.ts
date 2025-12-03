@@ -3,10 +3,18 @@ import {
   type ToolCallback,
 } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Resource } from "@modelcontextprotocol/sdk/types.js";
-import type { ZodRawShape } from "zod";
+import type { ZodRawShape, ZodObject, infer as Infer } from "zod";
 import { templateHelper } from "./templateHelper.js";
 import { readFileSync } from "node:fs";
 import path from "node:path";
+
+export type WidgetDef<
+  TInput = unknown,
+  TOutput = unknown
+> = {
+  input: TInput;
+  output: TOutput;
+};
 
 /** @see https://developers.openai.com/apps-sdk/reference#tool-descriptor-parameters */
 type OpenaiToolMeta = {
@@ -49,20 +57,33 @@ type McpServerOriginalResourceConfig = Omit<
 >;
 
 type McpServerOriginalToolConfig = Omit<
-  Parameters<McpServer["registerTool"]>[1],
+  Parameters<McpServerBase["registerTool"]>[1],
   "inputSchema" | "outputSchema"
 >;
 
-export class McpServer extends McpServerBase {
-  widget<InputArgs extends ZodRawShape, OutputArgs extends ZodRawShape>(
-    name: string,
+export class McpServer<
+  TWidgets extends Record<string, WidgetDef> = {}
+> extends McpServerBase {
+  widget<
+    TName extends string,
+    TInput extends ZodRawShape,
+    TOutput extends ZodRawShape = {}
+  >(
+    name: TName,
     resourceConfig: McpServerOriginalResourceConfig,
     toolConfig: McpServerOriginalToolConfig & {
-      inputSchema?: InputArgs;
-      outputSchema?: OutputArgs;
+      inputSchema?: TInput;
+      outputSchema?: TOutput;
     },
-    toolCallback: ToolCallback<InputArgs>
-  ) {
+    toolCallback: ToolCallback<TInput>
+  ): McpServer<
+    TWidgets & {
+      [K in TName]: WidgetDef<
+        Infer<ZodObject<TInput>>,
+        Infer<ZodObject<TOutput>>
+      >;
+    }
+  > {
     const uri = `ui://widgets/${name}.html`;
     const resourceMetadata: ResourceMeta = {
       ...(resourceConfig._meta ?? {}),
@@ -125,6 +146,8 @@ export class McpServer extends McpServerBase {
       },
       toolCallback
     );
+
+    return this;
   }
 
   private lookupDistFile(key: string): string {
