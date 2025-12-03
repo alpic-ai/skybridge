@@ -41,7 +41,7 @@ describe("useCallTool - onSuccess callback", () => {
     const { result } = renderHook(() =>
       useCallTool<typeof args, typeof data>(toolName)
     );
-    act(() => {
+    await act(async () => {
       result.current.callTool(args);
     });
     expect(OpenaiMock.callTool).toHaveBeenCalledWith(toolName, args);
@@ -153,7 +153,7 @@ describe("useCallTool - TypeScript typing", () => {
     vi.resetAllMocks();
   });
 
-  it("should have correct return types when ToolArgs is null and ToolResponse is specified", () => {
+  it("should have correct return types when ToolArgs is null and ToolResponse is specified", async () => {
     type TestResponse = {
       structuredContent: { result: string };
       meta: { id: number };
@@ -172,7 +172,7 @@ describe("useCallTool - TypeScript typing", () => {
 
     OpenaiMock.callTool.mockResolvedValueOnce(data);
 
-    act(() => {
+    await act(async () => {
       result.current.callTool();
     });
 
@@ -201,11 +201,15 @@ describe("useCallTool - TypeScript typing", () => {
 
     OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);
 
-    const promise = result.current.callToolAsync(testArgs);
-    expectTypeOf<Promise<typeof mockResponse>>(promise);
+    let promise: Promise<typeof mockResponse>;
+    let resolvedValue: typeof mockResponse;
+    await act(async () => {
+      promise = result.current.callToolAsync(testArgs);
+      expectTypeOf<Promise<typeof mockResponse>>(promise);
+      resolvedValue = await promise;
+    });
 
-    const resolvedValue = await promise;
-    expect(resolvedValue).toEqual(mockResponse);
+    expect(resolvedValue!).toEqual(mockResponse);
   });
 
   it("should correctly type callToolAsync when ToolArgs is null", async () => {
@@ -230,10 +234,14 @@ describe("useCallTool - TypeScript typing", () => {
 
     OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);
 
-    const promise = result.current.callToolAsync();
-    expectTypeOf<Promise<typeof mockResponse>>(promise);
+    let promise: Promise<typeof mockResponse>;
+    let resolvedValue: typeof mockResponse;
+    await act(async () => {
+      promise = result.current.callToolAsync();
+      expectTypeOf<Promise<typeof mockResponse>>(promise);
+      resolvedValue = await promise;
+    });
 
-    const resolvedValue = await promise;
-    expect(resolvedValue).toEqual(mockResponse);
+    expect(resolvedValue!).toEqual(mockResponse);
   });
 });
