@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-#  Introduction
+# Introduction
 
 **Skybridge is the TypeScript framework for building ChatGPT apps**
 Skybridge comes with 2 packages:
@@ -92,86 +92,7 @@ export default defineConfig({
 
 **Hooks**
 
-The `skybridge/web` package comes with a set of hooks to help you build your widgets :
-
-- `useOpenAiGlobal`: A generic hook to get any global data from the OpenAI iFrame skybridge runtime (in `window.openai`).
-- `useToolOutput`: A hook to get the initial tool `structuredContent` returned when rendering the widget for the first time. The data inside this hook is not updated when the tool is called again.
-- `useToolResponseMetadata`: A hook to get the initial tool `meta` returned when rendering the widget for the first time. The data inside this hook is not updated when the tool is called again.
-- `useCallTool`: A @tanstack/react-query inspired hook to send make additional tool calls inside a widget.
-
-_useOpenAiGlobal_
-
-```ts
-import { useOpenAiGlobal } from "skybridge/web";
-
-const theme = useOpenAiGlobal("theme");
-```
-
-_useToolOutput_
-
-```ts
-import { useToolOutput } from "skybridge/web";
-
-const toolOutput = useToolOutput();
-```
-
-_useToolResponseMetadata_
-
-```ts
-import { useToolResponseMetadata } from "skybridge/web";
-
-const toolResponseMetadata = useToolResponseMetadata();
-```
-
-_useCallTool_ in synchronous mode
-
-```ts
-import { useCallTool } from "skybridge/web";
-
-export const TestTool: React.FunctionComponent = () => {
-  const { callTool, isPending } = useCallTool("myToolName");
-
-  return (
-    <div>
-      <button
-        disabled={isPending}
-        onClick={() => {
-          callTool({ input: "test input" }, {
-            onSuccess: (data) => {
-              alert("Tool returned: " + data);
-            },
-          });
-      >
-        Call Tool inside a widget
-      </button>
-    </div>
-  );
-};
-```
-
-_useCallTool_ in asynchronous mode
-
-```ts
-import { useCallTool } from "skybridge/web";
-
-export const TestTool: React.FunctionComponent = () => {
-  const { callToolAsync, isPending } = useCallTool("myToolName");
-
-  return (
-    <div>
-      <button
-        disabled={isPending}
-        onClick={async () => {
-          const data = await callToolAsync({ input: "test input" });
-          alert("Tool returned: " + data);
-        }}
-      >
-        Call Tool inside a widget
-      </button>
-    </div>
-  );
-};
-```
+Check out the [API reference](/docs/api-reference) for the full list of hooks and components.
 
 ## Migrate your existing MCP server to a ChatGPT app
 
