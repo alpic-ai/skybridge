@@ -1,61 +1,30 @@
 import { expectTypeOf, test } from "vitest";
 import { createTypedHooks } from "./typed-hooks.js";
-import type {
-  McpServer,
-  InferWidgets,
-  WidgetNames,
-  WidgetInput,
-  WidgetOutput,
-  WidgetDef,
-} from "../server/index.js";
+import type { InferTools, ToolNames, ToolInput, ToolOutput } from "../server/index.js";
+import { createTestServer } from "../test/utils.js";
 
-type TestWidgetRegistry = {
-  "search-voyage": WidgetDef<
-    {
-      destination: string;
-      departureDate?: string | undefined;
-      maxPrice?: number | undefined;
-    },
-    {
-      results: Array<{
-        id: string;
-        name: string;
-        price: number;
-      }>;
-      totalCount: number;
-    }
-  >;
-  "get-trip-details": WidgetDef<
-    { tripId: string },
-    {
-      name: string;
-      description: string;
-      images: string[];
-    }
-  >;
-  "no-input-widget": WidgetDef<{}, {}>;
-};
+const server = createTestServer();
+type TestServer = typeof server;
 
-type TestServer = McpServer<TestWidgetRegistry>;
+test("InferTools extracts the tool registry type (widgets + registerTool)", () => {
+  type Tools = InferTools<TestServer>;
 
-test("InferWidgets extracts the widget registry type", () => {
-  type Widgets = InferWidgets<TestServer>;
-
-  expectTypeOf<Widgets>().toHaveProperty("search-voyage");
-  expectTypeOf<Widgets>().toHaveProperty("get-trip-details");
-  expectTypeOf<Widgets>().toHaveProperty("no-input-widget");
+  expectTypeOf<Tools>().toHaveProperty("search-voyage");
+  expectTypeOf<Tools>().toHaveProperty("get-trip-details");
+  expectTypeOf<Tools>().toHaveProperty("no-input-widget");
+  expectTypeOf<Tools>().toHaveProperty("calculate-price");
 });
 
-test("WidgetNames returns a union of widget name literals", () => {
-  type Names = WidgetNames<TestServer>;
+test("ToolNames returns a union of tool name literals (widgets + registerTool)", () => {
+  type Names = ToolNames<TestServer>;
 
   expectTypeOf<Names>().toEqualTypeOf<
-    "search-voyage" | "get-trip-details" | "no-input-widget"
+    "search-voyage" | "get-trip-details" | "no-input-widget" | "calculate-price"
   >();
 });
 
-test("WidgetInput extracts the correct input type from Zod schema", () => {
-  type SearchInput = WidgetInput<TestServer, "search-voyage">;
+test("ToolInput extracts the correct input type from Zod schema", () => {
+  type SearchInput = ToolInput<TestServer, "search-voyage">;
 
   expectTypeOf<SearchInput>().toEqualTypeOf<{
     destination: string;
@@ -63,15 +32,22 @@ test("WidgetInput extracts the correct input type from Zod schema", () => {
     maxPrice?: number | undefined;
   }>();
 
-  type DetailsInput = WidgetInput<TestServer, "get-trip-details">;
+  type DetailsInput = ToolInput<TestServer, "get-trip-details">;
 
   expectTypeOf<DetailsInput>().toEqualTypeOf<{
     tripId: string;
   }>();
+
+  type CalculateInput = ToolInput<TestServer, "calculate-price">;
+
+  expectTypeOf<CalculateInput>().toEqualTypeOf<{
+    tripId: string;
+    passengers: number;
+  }>();
 });
 
-test("WidgetOutput extracts the correct output type from Zod schema", () => {
-  type SearchOutput = WidgetOutput<TestServer, "search-voyage">;
+test("ToolOutput extracts the correct output type from Zod schema", () => {
+  type SearchOutput = ToolOutput<TestServer, "search-voyage">;
 
   expectTypeOf<SearchOutput>().toEqualTypeOf<{
     results: Array<{
@@ -82,23 +58,31 @@ test("WidgetOutput extracts the correct output type from Zod schema", () => {
     totalCount: number;
   }>();
 
-  type DetailsOutput = WidgetOutput<TestServer, "get-trip-details">;
+  type DetailsOutput = ToolOutput<TestServer, "get-trip-details">;
 
   expectTypeOf<DetailsOutput>().toEqualTypeOf<{
     name: string;
     description: string;
     images: string[];
   }>();
+
+  type CalculateOutput = ToolOutput<TestServer, "calculate-price">;
+
+  expectTypeOf<CalculateOutput>().toEqualTypeOf<{
+    totalPrice: number;
+    currency: string;
+  }>();
 });
 
-test("createTypedHooks provides autocomplete for widget names", () => {
+test("createTypedHooks provides autocomplete for tool names (widgets + registerTool)", () => {
   const { useCallTool } = createTypedHooks<TestServer>();
 
   useCallTool("search-voyage");
   useCallTool("get-trip-details");
   useCallTool("no-input-widget");
+  useCallTool("calculate-price");
 
-  // @ts-expect-error - "invalid-name" is not a valid widget name
+  // @ts-expect-error - "invalid-name" is not a valid tool name
   useCallTool("invalid-name");
 });
 
@@ -109,6 +93,9 @@ test("useCallTool returns correctly typed callTool function", () => {
   callTool({ destination: "Spain" });
   callTool({ destination: "France", departureDate: "2024-06-01" });
   callTool({ destination: "Italy", maxPrice: 1000 });
+
+  const { callTool: calculateTool } = useCallTool("calculate-price");
+  calculateTool({ tripId: "123", passengers: 2 });
 });
 
 test("useCallTool returns correctly typed data", () => {
@@ -131,48 +118,59 @@ test("useCallTool returns correctly typed data", () => {
 });
 
 
-test("widgets with no outputSchema have empty object output type", () => {
-  type NoInputOutput = WidgetOutput<TestServer, "no-input-widget">;
+test("tools with no outputSchema have empty object output type", () => {
+  type NoInputOutput = ToolOutput<TestServer, "no-input-widget">;
 
   expectTypeOf<NoInputOutput>().toEqualTypeOf<{}>();
 });
 
-test("createTypedHooks provides autocomplete for widget names in useToolInfo", () => {
+test("createTypedHooks provides autocomplete for tool names in useToolInfo (widgets + registerTool)", () => {
   const { useToolInfo } = createTypedHooks<TestServer>();
 
   useToolInfo<"search-voyage">();
   useToolInfo<"get-trip-details">();
   useToolInfo<"no-input-widget">();
+  useToolInfo<"calculate-price">();
 
-  // @ts-expect-error - "invalid-name" is not a valid widget name
+  // @ts-expect-error - "invalid-name" is not a valid tool name
   useToolInfo<"invalid-name">();
 });
 
-test("useToolInfo infers input types from WidgetInput utility", () => {
+test("useToolInfo infers input types from ToolInput utility", () => {
   const { useToolInfo } = createTypedHooks<TestServer>();
   const toolInfo = useToolInfo<"search-voyage">();
 
-  type ExpectedInput = WidgetInput<TestServer, "search-voyage">;
+  type ExpectedInput = ToolInput<TestServer, "search-voyage">;
   expectTypeOf(toolInfo.input).toExtend<ExpectedInput>();
 
   const detailsInfo = useToolInfo<"get-trip-details">();
-  type ExpectedDetailsInput = WidgetInput<TestServer, "get-trip-details">;
+  type ExpectedDetailsInput = ToolInput<TestServer, "get-trip-details">;
   expectTypeOf(detailsInfo.input).toExtend<ExpectedDetailsInput>();
+
+  const calculateInfo = useToolInfo<"calculate-price">();
+  type ExpectedCalculateInput = ToolInput<TestServer, "calculate-price">;
+  expectTypeOf(calculateInfo.input).toExtend<ExpectedCalculateInput>();
 });
 
-test("useToolInfo infers output types from WidgetOutput utility", () => {
+test("useToolInfo infers output types from ToolOutput utility", () => {
   const { useToolInfo } = createTypedHooks<TestServer>();
   const toolInfo = useToolInfo<"search-voyage">();
 
-  type ExpectedOutput = WidgetOutput<TestServer, "search-voyage">;
+  type ExpectedOutput = ToolOutput<TestServer, "search-voyage">;
   if (toolInfo.status === "success") {
     expectTypeOf(toolInfo.output).toExtend<ExpectedOutput>();
   }
 
   const detailsInfo = useToolInfo<"get-trip-details">();
-  type ExpectedDetailsOutput = WidgetOutput<TestServer, "get-trip-details">;
+  type ExpectedDetailsOutput = ToolOutput<TestServer, "get-trip-details">;
   if (detailsInfo.status === "success") {
     expectTypeOf(detailsInfo.output).toExtend<ExpectedDetailsOutput>();
+  }
+
+  const calculateInfo = useToolInfo<"calculate-price">();
+  type ExpectedCalculateOutput = ToolOutput<TestServer, "calculate-price">;
+  if (calculateInfo.status === "success") {
+    expectTypeOf(calculateInfo.output).toExtend<ExpectedCalculateOutput>();
   }
 });
 

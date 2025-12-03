@@ -1,58 +1,60 @@
-import type { McpServer, WidgetDef } from "./server.js";
+import type { McpServer, ToolDef } from "./server.js";
 
 /**
- * Any widget registry shape.
- * Used as a constraint for type parameters that accept widget registries.
+ * Any tool registry shape (includes both widgets and regular tools).
+ * Used as a constraint for type parameters that accept tool registries.
  */
-export type AnyWidgetRegistry = Record<string, WidgetDef>;
+export type AnyToolRegistry = Record<string, ToolDef>;
 
 /**
- * Extract the widget registry type from an McpServer instance.
+ * Extract the tool registry type from an McpServer instance.
+ * This includes both widgets (registered via widget()) and regular tools (registered via registerTool()).
  *
  * @example
  * ```ts
- * type MyWidgets = InferWidgets<MyServer>;
- * // { "search": WidgetDef<...>, "details": WidgetDef<...> }
+ * type MyTools = InferTools<MyServer>;
+ * // { "search": ToolDef<...>, "calculate": ToolDef<...> }
  * ```
  */
-export type InferWidgets<T> =
-  T extends McpServer<infer W extends AnyWidgetRegistry>
+export type InferTools<T> =
+  T extends McpServer<infer W extends AnyToolRegistry>
     ? W
     : T extends McpServer<any>
       ? never // T is McpServer but registry couldn't be inferred
       : never;
 
 /**
- * Get a union of all widget names from an McpServer instance.
+ * Get a union of all tool names from an McpServer instance.
+ * This includes both widgets and regular tools.
  *
  * @example
  * ```ts
- * type Names = WidgetNames<MyServer>;
- * // "search" | "details" | "profile"
+ * type Names = ToolNames<MyServer>;
+ * // "search" | "calculate" | "details"
  * ```
  */
-export type WidgetNames<T> = keyof InferWidgets<T> & string;
+export type ToolNames<T> = keyof InferTools<T> & string;
 
 /**
- * Get the input type for a specific widget.
+ * Get the input type for a specific tool (widget or regular tool).
  *
  * @example
  * ```ts
- * type SearchInput = WidgetInput<MyServer, "search">;
+ * type SearchInput = ToolInput<MyServer, "search">;
  * ```
  */
-export type WidgetInput<T, K extends WidgetNames<T>> =
-  InferWidgets<T>[K]["input"];
+export type ToolInput<T, K extends ToolNames<T>> =
+  InferTools<T>[K]["input"];
 
 /**
- * Get the output type for a specific widget.
+ * Get the output type for a specific tool (widget or regular tool).
  *
  * @example
  * ```ts
- * type SearchOutput = WidgetOutput<MyServer, "search">;
+ * type SearchOutput = ToolOutput<MyServer, "search">;
  * ```
  */
-export type WidgetOutput<T, K extends WidgetNames<T>> =
-  InferWidgets<T>[K]["output"];
+export type ToolOutput<T, K extends ToolNames<T>> =
+  InferTools<T>[K]["output"];
 
 

@@ -6,10 +6,10 @@ import type {
 } from "./hooks/use-tool-info.js";
 import type {
   McpServer,
-  InferWidgets,
-  AnyWidgetRegistry,
-  WidgetInput,
-  WidgetOutput,
+  InferTools,
+  AnyToolRegistry, 
+  ToolInput,
+  ToolOutput
 } from "../server/index.js";
 import type { CallToolArgs, UnknownObject } from "./types.js";
 
@@ -81,9 +81,9 @@ type TypedToolInfoReturn<
  * }
  * ```
  */
-export function createTypedHooks<T extends McpServer<AnyWidgetRegistry>>() {
-  type Widgets = InferWidgets<T>;
-  type Names = keyof Widgets & string;
+export function createTypedHooks<T extends McpServer<AnyToolRegistry>>() {
+  type Tools = InferTools<T>;
+  type Names = keyof Tools & string;
 
   return {
     /**
@@ -108,17 +108,17 @@ export function createTypedHooks<T extends McpServer<AnyWidgetRegistry>>() {
     useCallTool: <K extends Names>(
       name: K
     ): TypedCallToolReturn<
-      Widgets[K]["input"],
-      Widgets[K]["output"]
+      Tools[K]["input"],
+      Tools[K]["output"]
     > => {
       // Type assertion is safe here because the runtime types are compatible.
       // The underlying hook accepts broader types, but we expose narrower, more specific types.
       return useCallTool<
-        Widgets[K]["input"] & CallToolArgs,
-        { structuredContent: Widgets[K]["output"] & UnknownObject }
+        Tools[K]["input"] & CallToolArgs,
+        { structuredContent: Tools[K]["output"] & UnknownObject }
       >(name) as unknown as TypedCallToolReturn<
-        Widgets[K]["input"],
-        Widgets[K]["output"]
+        Tools[K]["input"],
+        Tools[K]["output"]
       >;
     },
     /**
@@ -147,19 +147,19 @@ export function createTypedHooks<T extends McpServer<AnyWidgetRegistry>>() {
      * ```
      */
     useToolInfo: <K extends Names>(): TypedToolInfoReturn<
-      WidgetInput<T, K> & UnknownObject,
-      WidgetOutput<T, K> & UnknownObject,
+      ToolInput<T, K> & UnknownObject,
+      ToolOutput<T, K> & UnknownObject,
       UnknownObject
     > => {
       // Type assertion is safe here because the runtime types are compatible.
       // The underlying hook accepts broader types, but we expose narrower, more specific types.
       return useToolInfo<{
-        input: WidgetInput<T, K> & UnknownObject;
-        output: WidgetOutput<T, K> & UnknownObject;
+        input: ToolInput<T, K> & UnknownObject;
+        output: ToolOutput<T, K> & UnknownObject;
         responseMetadata: UnknownObject;
       }>() as TypedToolInfoReturn<
-        WidgetInput<T, K> & UnknownObject,
-        WidgetOutput<T, K> & UnknownObject,
+        ToolInput<T, K> & UnknownObject,
+        ToolOutput<T, K> & UnknownObject,
         UnknownObject
       >;
     },
