@@ -8,6 +8,7 @@
   text-align: center;
   position: relative;
   overflow: hidden;
+  background-color: var(--ifm-color-primary-darkest);
 }
 
 @media screen and (max-width: 996px) {
@@ -16,9 +17,33 @@
   }
 }
 
+.heroTitle {
+  font-weight: 700;
+  color: var(--color-white);
+}
+
+.heroSubtitle {
+  color: var(--color-white);
+  opacity: 0.9;
+  font-weight: 500;
+}
+
 .buttons {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: 2rem;
+}
+
+.buttons :global(.button--secondary) {
+  background-color: var(--ifm-color-secondary-lightest);
+  color: var(--ifm-color-primary-darkest);
+  border-color: var(--ifm-color-secondary-lightest);
+  font-weight: 600;
+}
+
+.buttons :global(.button--secondary:hover) {
+  background-color: var(--ifm-color-secondary-lighter);
+  color: var(--ifm-color-primary-darkest);
+  border-color: var(--ifm-color-secondary-lighter);
 }
