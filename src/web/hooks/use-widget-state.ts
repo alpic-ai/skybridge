@@ -18,7 +18,7 @@ function filterWidgetContext<T extends UnknownObject>(
   return filteredState as T;
 }
 
-function persistWidgetContext<T extends UnknownObject>(
+function preserveWidgetContext<T extends UnknownObject>(
   newState: T | null
 ): T | null {
   if (newState === null) {
@@ -75,7 +75,7 @@ export function useWidgetState<T extends UnknownObject>(
   const setWidgetState = useCallback((state: SetStateAction<T | null>) => {
     _setWidgetState((prevState) => {
       const newState = typeof state === "function" ? state(prevState) : state;
-      const stateToSet = persistWidgetContext(newState);
+      const stateToSet = preserveWidgetContext(newState);
 
       if (stateToSet !== null) {
         window.openai.setWidgetState(stateToSet);
