@@ -225,14 +225,19 @@ You can pass side effect options as the first argument to the `callTool` functio
 import { useCallTool } from "skybridge/web";
 
 function RefreshButton() {
-  const { callTool, isPending } = useCallTool("refresh", {
-    onSuccess: () => {
-      console.log("Refreshed");
-    },
-  });
+  const { callTool, isPending } = useCallTool("refresh");
 
   return (
-    <button disabled={isPending} onClick={() => callTool()}>
+    <button
+      disabled={isPending}
+      onClick={() =>
+        callTool({
+          onSuccess: () => {
+            console.log("Refreshed");
+          },
+        })
+      }
+    >
       {isPending ? "Refreshing..." : "Refresh"}
     </button>
   );
