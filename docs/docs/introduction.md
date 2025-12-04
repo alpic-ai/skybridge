@@ -1,5 +1,6 @@
 ---
 sidebar_position: 1
+slug: /
 ---
 
 # Introduction
@@ -92,7 +93,7 @@ export default defineConfig({
 
 **Hooks**
 
-Check out the [API reference](/docs/api-reference) for the full list of hooks and components.
+Check out the [API reference](/api-reference) for the full list of hooks and components.
 
 ## Migrate your existing MCP server to a ChatGPT app
 

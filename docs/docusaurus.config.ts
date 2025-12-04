@@ -1,95 +1,78 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config} from '@docusaurus/types';
-import type * as Preset from '@docusaurus/preset-classic';
+import { themes as prismThemes } from "prism-react-renderer";
+import type { Config } from "@docusaurus/types";
+import type * as Preset from "@docusaurus/preset-classic";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'Skybridge',
-  tagline: 'Skybridge is the TypeScript framework for building ChatGPT & MCP apps',
-  favicon: 'img/favicon.ico',
+  title: "Skybridge",
+  tagline:
+    "Skybridge is the TypeScript framework for building ChatGPT & MCP apps",
+  favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
 
-  url: 'https://skybridge.tech',
-  baseUrl: '/',
+  url: "https://skybridge.tech",
+  baseUrl: "/",
 
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: "en",
+    locales: ["en"],
   },
 
   presets: [
     [
-      'classic',
+      "classic",
       {
         docs: {
-          sidebarPath: './sidebars.ts',
+          sidebarPath: "./sidebars.ts",
+          routeBasePath: "/", // Serve docs at the root
         },
         blog: {
           showReadingTime: true,
           feedOptions: {
-            type: ['rss', 'atom'],
+            type: ["rss", "atom"],
             xslt: true,
           },
         },
         theme: {
-          customCss: './src/css/custom.css',
+          customCss: "./src/css/custom.css",
         },
       } satisfies Preset.Options,
     ],
   ],
 
   themeConfig: {
-    image: 'img/logo.png',
+    image: "img/logo.png",
     colorMode: {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'Skybridge',
+      title: "Skybridge",
       logo: {
-        alt: 'Skybridge Logo',
-        src: 'img/logo.png',
+        alt: "Skybridge Logo",
+        src: "img/logo.png",
       },
       items: [
-        { type: 'docSidebar', sidebarId: 'docSidebar', label: 'Docs', position: 'left' },
         {
-          href: 'https://github.com/alpic-ai/skybridge',
-          label: 'GitHub',
-          position: 'right',
+          href: "https://github.com/alpic-ai/skybridge",
+          label: "GitHub",
+          position: "right",
         },
       ],
     },
     footer: {
-      style: 'dark',
+      style: "dark",
       links: [
         {
-          title: 'Docs',
+          title: "More",
           items: [
             {
-              label: 'Introduction',
-              to: '/docs/introduction',
-            },
-          ],
-        },
-        {
-          title: 'Community',
-          items: [
-            {
-              label: 'Discord',
-              href: 'https://discord.gg/gFYTXbv8tv',
-            },
-          ],
-        },
-        {
-          title: 'More',
-          items: [
-            {
-              label: 'GitHub',
-              href: 'https://github.com/alpic-ai/skybridge',
+              label: "GitHub",
+              href: "https://github.com/alpic-ai/skybridge",
             },
           ],
         },
