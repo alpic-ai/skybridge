@@ -100,6 +100,9 @@ const config: Config = {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
     },
+    codeBlock: {
+      showCopyButton: true,
+    },
   } satisfies Preset.ThemeConfig,
 };
 
