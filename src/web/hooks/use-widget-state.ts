@@ -5,7 +5,7 @@ import { useOpenAiGlobal } from "./use-openai-global.js";
 const WIDGET_CONTEXT_KEY = "__widget_context" as const;
 
 function filterWidgetContext<T extends UnknownObject>(
-  state: T | null
+  state?: T | null
 ): T | null {
   if (state === null) {
     return null;
@@ -53,7 +53,7 @@ export function useWidgetState<T extends UnknownObject>(
 export function useWidgetState<T extends UnknownObject>(
   defaultState?: T | (() => T | null) | null
 ): readonly [T | null, (state: SetStateAction<T | null>) => void] {
-  const widgetStateFromWindow = useOpenAiGlobal("widgetState") as T;
+  const widgetStateFromWindow = useOpenAiGlobal("widgetState") as T | null;
 
   const [widgetState, _setWidgetState] = useState<T | null>(() => {
     if (widgetStateFromWindow !== null) {

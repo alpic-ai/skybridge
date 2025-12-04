@@ -53,30 +53,26 @@ function createBabelPlugin(t: typeof types): PluginObj<State> {
 
       JSXElement(path, state) {
         const opening = path.node.openingElement;
-        const attrs = opening.attributes;
+        const attributes = opening.attributes;
 
-        const llmAttrIndex = attrs.findIndex(
-          (attr) =>
-            t.isJSXAttribute(attr) &&
-            t.isJSXIdentifier(attr.name, { name: "data-llm" })
+        const llmAttributeIndex = attributes.findIndex(
+          (attribute) =>
+            t.isJSXAttribute(attribute) &&
+            t.isJSXIdentifier(attribute.name, { name: "data-llm" })
         );
 
-        if (llmAttrIndex === -1) return;
+        if (llmAttributeIndex === -1) return;
 
-        const llmAttr = attrs[llmAttrIndex] as types.JSXAttribute;
-
-        const newAttrs = [...attrs];
-        newAttrs.splice(llmAttrIndex, 1);
-        opening.attributes = newAttrs;
+        const llmAttribute = attributes[
+          llmAttributeIndex
+        ] as types.JSXAttribute;
 
         let contentExpression: types.Expression;
 
-        if (!llmAttr.value) {
-          contentExpression = t.stringLiteral("");
-        } else if (t.isStringLiteral(llmAttr.value)) {
-          contentExpression = llmAttr.value;
-        } else if (t.isJSXExpressionContainer(llmAttr.value)) {
-          contentExpression = llmAttr.value.expression as types.Expression;
+        if (t.isStringLiteral(llmAttribute.value)) {
+          contentExpression = llmAttribute.value;
+        } else if (t.isJSXExpressionContainer(llmAttribute.value)) {
+          contentExpression = llmAttribute.value.expression as types.Expression;
         } else {
           return;
         }
@@ -88,6 +84,22 @@ function createBabelPlugin(t: typeof types): PluginObj<State> {
             : t.jsxExpressionContainer(contentExpression)
         );
 
+        const filteredAttributes = attributes.filter(
+          (_, index) => index !== llmAttributeIndex
+        );
+        const newOpening = t.jsxOpeningElement(
+          opening.name,
+          filteredAttributes,
+          opening.selfClosing
+        );
+
+        const elementWithoutLlm = t.jsxElement(
+          newOpening,
+          path.node.closingElement,
+          path.node.children,
+          path.node.selfClosing
+        );
+
         const llmOpening = t.jsxOpeningElement(t.jsxIdentifier("DataLLM"), [
           contentAttr,
         ]);
@@ -96,7 +108,7 @@ function createBabelPlugin(t: typeof types): PluginObj<State> {
         const wrapped = t.jsxElement(
           llmOpening,
           llmClosing,
-          [path.node],
+          [elementWithoutLlm],
           false
         );
 
