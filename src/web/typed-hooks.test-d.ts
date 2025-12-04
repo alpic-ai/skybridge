@@ -13,13 +13,20 @@ test("InferTools extracts the tool registry type (widgets + registerTool)", () =
   expectTypeOf<Tools>().toHaveProperty("get-trip-details");
   expectTypeOf<Tools>().toHaveProperty("no-input-widget");
   expectTypeOf<Tools>().toHaveProperty("calculate-price");
+  expectTypeOf<Tools>().toHaveProperty("inferred-output-widget");
+  expectTypeOf<Tools>().toHaveProperty("inferred-tool");
 });
 
 test("ToolNames returns a union of tool name literals (widgets + registerTool)", () => {
   type Names = ToolNames<TestServer>;
 
   expectTypeOf<Names>().toEqualTypeOf<
-    "search-voyage" | "get-trip-details" | "no-input-widget" | "calculate-price"
+    | "search-voyage"
+    | "get-trip-details"
+    | "no-input-widget"
+    | "calculate-price"
+    | "inferred-output-widget"
+    | "inferred-tool"
   >();
 });
 
@@ -46,7 +53,7 @@ test("ToolInput extracts the correct input type from Zod schema", () => {
   }>();
 });
 
-test("ToolOutput extracts the correct output type from Zod schema", () => {
+test("ToolOutput extracts the correct output type from callback's structuredContent", () => {
   type SearchOutput = ToolOutput<TestServer, "search-voyage">;
 
   expectTypeOf<SearchOutput>().toEqualTypeOf<{
@@ -66,6 +73,8 @@ test("ToolOutput extracts the correct output type from Zod schema", () => {
     images: string[];
   }>();
 
+  // Note: outputSchema has totalPrice: z.string(), but callback returns number
+  // Type is inferred from callback, so totalPrice is number
   type CalculateOutput = ToolOutput<TestServer, "calculate-price">;
 
   expectTypeOf<CalculateOutput>().toEqualTypeOf<{
@@ -73,9 +82,24 @@ test("ToolOutput extracts the correct output type from Zod schema", () => {
     currency: string;
   }>();
 
-  // tools with no outputSchema have empty object output type
   type NoInputOutput = ToolOutput<TestServer, "no-input-widget">;
   expectTypeOf<NoInputOutput>().toEqualTypeOf<{}>();
+});
+
+test("ToolOutput extracts the correct output type from callback (inferred)", () => {
+  type InferredWidgetOutput = ToolOutput<TestServer, "inferred-output-widget">;
+
+  expectTypeOf<InferredWidgetOutput>().toEqualTypeOf<{
+    inferredResults: { id: string; score: number }[];
+    inferredCount: number;
+  }>();
+
+  type InferredToolOutput = ToolOutput<TestServer, "inferred-tool">;
+
+  expectTypeOf<InferredToolOutput>().toEqualTypeOf<{
+    itemDetails: { name: string; available: boolean };
+    fetchedAt: string;
+  }>();
 });
 
 test("createTypedHooks provides autocomplete for tool names (widgets + registerTool)", () => {
@@ -85,6 +109,8 @@ test("createTypedHooks provides autocomplete for tool names (widgets + registerT
   useCallTool("get-trip-details");
   useCallTool("no-input-widget");
   useCallTool("calculate-price");
+  useCallTool("inferred-output-widget");
+  useCallTool("inferred-tool");
 
   // @ts-expect-error - "invalid-name" is not a valid tool name
   useCallTool("invalid-name");
@@ -121,6 +147,26 @@ test("useCallTool returns correctly typed data", () => {
   }
 });
 
+test("useCallTool returns correctly typed data for callback-inferred outputs", () => {
+  const { useCallTool } = createTypedHooks<TestServer>();
+
+  const { data: widgetData } = useCallTool("inferred-output-widget");
+  if (widgetData) {
+    expectTypeOf(widgetData.structuredContent).toExtend<{
+      inferredResults: { id: string; score: number }[];
+      inferredCount: number;
+    }>();
+  }
+
+  const { data: toolData } = useCallTool("inferred-tool");
+  if (toolData) {
+    expectTypeOf(toolData.structuredContent).toExtend<{
+      itemDetails: { name: string; available: boolean };
+      fetchedAt: string;
+    }>();
+  }
+});
+
 test("createTypedHooks provides autocomplete for tool names in useToolInfo (widgets + registerTool)", () => {
   const { useToolInfo } = createTypedHooks<TestServer>();
 
@@ -128,6 +174,8 @@ test("createTypedHooks provides autocomplete for tool names in useToolInfo (widg
   useToolInfo<"get-trip-details">();
   useToolInfo<"no-input-widget">();
   useToolInfo<"calculate-price">();
+  useToolInfo<"inferred-output-widget">();
+  useToolInfo<"inferred-tool">();
 
   // @ts-expect-error - "invalid-name" is not a valid tool name
   useToolInfo<"invalid-name">();

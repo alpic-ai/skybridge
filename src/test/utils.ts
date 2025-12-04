@@ -106,6 +106,25 @@ export function createTestServer() {
         };
       }
     )
+    .widget(
+      "inferred-output-widget",
+      {},
+      {
+        description: "Widget with output inferred from callback",
+        inputSchema: {
+          query: z.string(),
+        },
+      },
+      async ({ query }) => {
+        return {
+          content: [{ type: "text", text: `Query: ${query}` }],
+          structuredContent: {
+            inferredResults: [{ id: "inferred-1", score: 0.95 }],
+            inferredCount: 1,
+          },
+        };
+      }
+    )
     .registerTool(
       "calculate-price",
       {
@@ -125,6 +144,24 @@ export function createTestServer() {
           structuredContent: {
             totalPrice: 1000 * passengers,
             currency: "USD",
+          },
+        };
+      }
+    )
+    .registerTool(
+      "inferred-tool",
+      {
+        description: "Tool with output inferred from callback",
+        inputSchema: {
+          itemId: z.string(),
+        },
+      },
+      async ({ itemId }) => {
+        return {
+          content: [{ type: "text", text: `Item: ${itemId}` }],
+          structuredContent: {
+            itemDetails: { name: "Inferred Item", available: true },
+            fetchedAt: "2024-01-01",
           },
         };
       }
