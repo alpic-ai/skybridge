@@ -6,6 +6,7 @@ import {
 import type {
   Resource,
   ToolAnnotations,
+  
 } from "@modelcontextprotocol/sdk/types.js";
 import type { ZodRawShape, ZodObject, infer as Infer } from "zod";
 import { templateHelper } from "./templateHelper.js";
@@ -65,6 +66,27 @@ type McpServerOriginalToolConfig = Omit<
   "inputSchema" | "outputSchema"
 >;
 
+type AddTool<
+  TTools,
+  TName extends string,
+  TInput extends ZodRawShape,
+  TOutput extends ZodRawShape
+> = McpServer<TTools & {
+  [K in TName]: ToolDef<Infer<ZodObject<TInput>>, Infer<ZodObject<TOutput>>>;
+}>;
+
+type ToolConfig<
+  TInput extends ZodRawShape,
+  TOutput extends ZodRawShape = {}
+> = {
+  title?: string;
+  description?: string;
+  inputSchema?: TInput;
+  outputSchema?: TOutput;
+  annotations?: ToolAnnotations;
+  _meta?: Record<string, unknown>;
+};
+
 export class McpServer<
   TTools extends Record<string, ToolDef> = {}
 > extends McpServerBase {
@@ -80,14 +102,7 @@ export class McpServer<
       outputSchema?: TOutput;
     },
     toolCallback: ToolCallback<TInput>
-  ): McpServer<
-    TTools & {
-      [K in TName]: ToolDef<
-        Infer<ZodObject<TInput>>,
-        Infer<ZodObject<TOutput>>
-      >;
-    }
-  > {
+  ): AddTool<TTools, TName, TInput, TOutput> {
     const uri = `ui://widgets/${name}.html`;
     const resourceMetadata: ResourceMeta = {
       ...(resourceConfig._meta ?? {}),
@@ -160,57 +175,25 @@ export class McpServer<
     OutputArgs extends ZodRawShape = {}
   >(
     name: TName,
-    config: {
-      title?: string;
-      description?: string;
-      inputSchema?: InputArgs;
-      outputSchema?: OutputArgs;
-      annotations?: ToolAnnotations;
-      _meta?: Record<string, unknown>;
-    },
+    config: ToolConfig<InputArgs, OutputArgs>,
     cb: ToolCallback<InputArgs>
-  ): McpServer<
-    TTools & {
-      [K in TName]: ToolDef<
-        InputArgs extends ZodRawShape
-          ? Infer<ZodObject<InputArgs>>
-          : unknown,
-        OutputArgs extends ZodRawShape
-          ? Infer<ZodObject<OutputArgs>>
-          : unknown
-      >;
-    }
-  >;
-  
+  ): AddTool<TTools, TName, InputArgs, OutputArgs>;
+
   override registerTool<
     InputArgs extends ZodRawShape,
     OutputArgs extends ZodRawShape = {}
   >(
     name: string,
-    config: {
-      title?: string;
-      description?: string;
-      inputSchema?: InputArgs;
-      outputSchema?: OutputArgs;
-      annotations?: ToolAnnotations;
-      _meta?: Record<string, unknown>;
-    },
+    config: ToolConfig<InputArgs, OutputArgs>,
     cb: ToolCallback<InputArgs>
   ): RegisteredTool;
-  
+
   override registerTool<
     InputArgs extends ZodRawShape,
     OutputArgs extends ZodRawShape = {}
   >(
     name: string,
-    config: {
-      title?: string;
-      description?: string;
-      inputSchema?: InputArgs;
-      outputSchema?: OutputArgs;
-      annotations?: ToolAnnotations;
-      _meta?: Record<string, unknown>;
-    },
+    config: ToolConfig<InputArgs, OutputArgs>,
     cb: ToolCallback<InputArgs>
   ): RegisteredTool | McpServer<any> {
     super.registerTool(name, config, cb);

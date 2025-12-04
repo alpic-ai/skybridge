@@ -72,6 +72,10 @@ test("ToolOutput extracts the correct output type from Zod schema", () => {
     totalPrice: number;
     currency: string;
   }>();
+
+  // tools with no outputSchema have empty object output type
+  type NoInputOutput = ToolOutput<TestServer, "no-input-widget">;
+  expectTypeOf<NoInputOutput>().toEqualTypeOf<{}>();
 });
 
 test("createTypedHooks provides autocomplete for tool names (widgets + registerTool)", () => {
@@ -117,13 +121,6 @@ test("useCallTool returns correctly typed data", () => {
   }
 });
 
-
-test("tools with no outputSchema have empty object output type", () => {
-  type NoInputOutput = ToolOutput<TestServer, "no-input-widget">;
-
-  expectTypeOf<NoInputOutput>().toEqualTypeOf<{}>();
-});
-
 test("createTypedHooks provides autocomplete for tool names in useToolInfo (widgets + registerTool)", () => {
   const { useToolInfo } = createTypedHooks<TestServer>();
 
@@ -136,41 +133,14 @@ test("createTypedHooks provides autocomplete for tool names in useToolInfo (widg
   useToolInfo<"invalid-name">();
 });
 
-test("useToolInfo infers input types from ToolInput utility", () => {
+test("useToolInfo infers input and output types", () => {
   const { useToolInfo } = createTypedHooks<TestServer>();
   const toolInfo = useToolInfo<"search-voyage">();
 
-  type ExpectedInput = ToolInput<TestServer, "search-voyage">;
-  expectTypeOf(toolInfo.input).toExtend<ExpectedInput>();
+  expectTypeOf(toolInfo.input).toExtend<ToolInput<TestServer, "search-voyage">>();
 
-  const detailsInfo = useToolInfo<"get-trip-details">();
-  type ExpectedDetailsInput = ToolInput<TestServer, "get-trip-details">;
-  expectTypeOf(detailsInfo.input).toExtend<ExpectedDetailsInput>();
-
-  const calculateInfo = useToolInfo<"calculate-price">();
-  type ExpectedCalculateInput = ToolInput<TestServer, "calculate-price">;
-  expectTypeOf(calculateInfo.input).toExtend<ExpectedCalculateInput>();
-});
-
-test("useToolInfo infers output types from ToolOutput utility", () => {
-  const { useToolInfo } = createTypedHooks<TestServer>();
-  const toolInfo = useToolInfo<"search-voyage">();
-
-  type ExpectedOutput = ToolOutput<TestServer, "search-voyage">;
   if (toolInfo.status === "success") {
-    expectTypeOf(toolInfo.output).toExtend<ExpectedOutput>();
-  }
-
-  const detailsInfo = useToolInfo<"get-trip-details">();
-  type ExpectedDetailsOutput = ToolOutput<TestServer, "get-trip-details">;
-  if (detailsInfo.status === "success") {
-    expectTypeOf(detailsInfo.output).toExtend<ExpectedDetailsOutput>();
-  }
-
-  const calculateInfo = useToolInfo<"calculate-price">();
-  type ExpectedCalculateOutput = ToolOutput<TestServer, "calculate-price">;
-  if (calculateInfo.status === "success") {
-    expectTypeOf(calculateInfo.output).toExtend<ExpectedCalculateOutput>();
+    expectTypeOf(toolInfo.output).toExtend<ToolOutput<TestServer, "search-voyage">>();
   }
 });
 

@@ -1,35 +1,26 @@
-import { useCallTool } from "./hooks/use-call-tool.js";
-import { useToolInfo } from "./hooks/use-tool-info.js";
-import type {
-  ToolPendingState,
-  ToolSuccessState,
-} from "./hooks/use-tool-info.js";
+import { useCallTool, type CallToolState } from "./hooks/use-call-tool.js";
+import { useToolInfo, type ToolState } from "./hooks/use-tool-info.js";
 import type {
   McpServer,
   InferTools,
-  AnyToolRegistry, 
+  AnyToolRegistry,
   ToolInput,
-  ToolOutput
+  ToolOutput,
 } from "../server/index.js";
-import type { CallToolArgs, UnknownObject } from "./types.js";
+import type { CallToolResponse, Prettify, Objectify } from "./types.js";
 
-type TypedCallToolReturn<
-  TInput,
-  TOutput
-> = ReturnType<
-  typeof useCallTool<
-    TInput & CallToolArgs,
-    { structuredContent: TOutput & UnknownObject }
-  >
+type TypedCallToolReturn<TInput, TOutput> = Prettify<
+  CallToolState<CallToolResponse & { structuredContent: TOutput }> & {
+    callTool: (args: TInput) => void;
+    callToolAsync: (args: TInput) => Promise<CallToolResponse & { structuredContent: TOutput }>;
+  }
 >;
 
-type TypedToolInfoReturn<
-  TInput extends UnknownObject,
-  TOutput extends UnknownObject,
-  TResponseMetadata extends UnknownObject
-> =
-  | ToolPendingState<TInput>
-  | ToolSuccessState<TInput, TOutput, TResponseMetadata>;
+type TypedToolInfoReturn<TInput, TOutput> = ToolState<
+  Objectify<TInput>,
+  Objectify<TOutput>,
+  Objectify<{}>
+>;
 
 /**
  * Creates typed versions of skybridge hooks with full type inference
@@ -107,20 +98,13 @@ export function createTypedHooks<T extends McpServer<AnyToolRegistry>>() {
      */
     useCallTool: <K extends Names>(
       name: K
-    ): TypedCallToolReturn<
-      Tools[K]["input"],
-      Tools[K]["output"]
-    > => {
-      // Type assertion is safe here because the runtime types are compatible.
-      // The underlying hook accepts broader types, but we expose narrower, more specific types.
-      return useCallTool<
-        Tools[K]["input"] & CallToolArgs,
-        { structuredContent: Tools[K]["output"] & UnknownObject }
-      >(name) as unknown as TypedCallToolReturn<
+    ): TypedCallToolReturn<Tools[K]["input"], Tools[K]["output"]> => {
+      return useCallTool(name) as TypedCallToolReturn<
         Tools[K]["input"],
         Tools[K]["output"]
       >;
     },
+
     /**
      * Typed version of `useToolInfo` that provides autocomplete for widget names
      * and type inference for inputs, outputs, and responseMetadata.
@@ -147,20 +131,12 @@ export function createTypedHooks<T extends McpServer<AnyToolRegistry>>() {
      * ```
      */
     useToolInfo: <K extends Names>(): TypedToolInfoReturn<
-      ToolInput<T, K> & UnknownObject,
-      ToolOutput<T, K> & UnknownObject,
-      UnknownObject
+      ToolInput<T, K>,
+      ToolOutput<T, K>
     > => {
-      // Type assertion is safe here because the runtime types are compatible.
-      // The underlying hook accepts broader types, but we expose narrower, more specific types.
-      return useToolInfo<{
-        input: ToolInput<T, K> & UnknownObject;
-        output: ToolOutput<T, K> & UnknownObject;
-        responseMetadata: UnknownObject;
-      }>() as TypedToolInfoReturn<
-        ToolInput<T, K> & UnknownObject,
-        ToolOutput<T, K> & UnknownObject,
-        UnknownObject
+      return useToolInfo() as TypedToolInfoReturn<
+        ToolInput<T, K>,
+        ToolOutput<T, K>
       >;
     },
   };

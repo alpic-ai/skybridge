@@ -24,7 +24,7 @@ export type ToolSuccessState<
   responseMetadata: ToolResponseMetadata;
 };
 
-type ToolState<
+export type ToolState<
   ToolInput extends UnknownObject,
   ToolOutput extends UnknownObject,
   ToolResponseMetadata extends UnknownObject
