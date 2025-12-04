@@ -4,7 +4,37 @@ sidebar_position: 1
 
 # useCallTool
 
-A hook to call tools from within a widget.
+The `useCallTool` function allows you to call additional MCP tools from your widget. It wraps the [`window.openai.callTool`](https://developers.openai.com/apps-sdk/build/chatgpt-ui#trigger-server-actions) function while providing a more convenient state management and typed API.
+
+Make sure your tool `_meta["openai/widgetAccessible"]` property is set to `true` to make it accessible from widgets - more info on [component-initiated tool calls](https://developers.openai.com/apps-sdk/build/mcp-server#component-initiated-tool-calls).
+
+## Basic usage
+
+```tsx
+import { useCallTool } from "skybridge/web";
+import { useState } from "react";
+
+function BookTableWidget() {
+  const { callTool, isPending, isSuccess, data } = useCallTool<
+    { time: string; people: number },
+    { structuredContent: { tableNumber: string } }
+  >("bookTable");
+
+  return (
+    <div>
+      <button
+        disabled={isPending}
+        onClick={() => callTool({ time: "12:00", people: 2 })}
+      >
+        Book Table
+      </button>
+      {isSuccess && <p>Table booked: {data.structuredContent.tableNumber}</p>}
+    </div>
+  );
+}
+```
+
+## Parameters
 
 ```tsx
 const {
@@ -27,8 +57,6 @@ callTool(toolArgs, {
 
 await callToolAsync(toolArgs);
 ```
-
-## Parameters
 
 ### `name`
 
@@ -151,49 +179,6 @@ error: unknown | undefined;
 
 ## Examples
 
-### Basic Usage (No Arguments)
-
-For tools that don't require any arguments:
-
-```tsx
-import { useCallTool } from "skybridge/web";
-
-function RefreshButton() {
-  const { callTool, isPending } = useCallTool("refresh");
-
-  return (
-    <button disabled={isPending} onClick={() => callTool()}>
-      {isPending ? "Refreshing..." : "Refresh"}
-    </button>
-  );
-}
-```
-
-### With Arguments
-
-For tools that require arguments, pass them as the first parameter:
-
-```tsx
-import { useCallTool } from "skybridge/web";
-
-function SearchWidget() {
-  const { callTool, isPending, data } = useCallTool<{ query: string }>(
-    "search"
-  );
-  const [query, setQuery] = useState("");
-
-  return (
-    <div>
-      <input value={query} onChange={(e) => setQuery(e.target.value)} />
-      <button disabled={isPending} onClick={() => callTool({ query })}>
-        Search
-      </button>
-      {data && <pre>{JSON.stringify(data.structuredContent, null, 2)}</pre>}
-    </div>
-  );
-}
-```
-
 ### With Side Effects
 
 Handle success, error, and settled states with callbacks:
@@ -227,6 +212,28 @@ function SubmitForm() {
       onClick={() => handleSubmit("user@example.com")}
     >
       Subscribe
+    </button>
+  );
+}
+```
+
+### Tools without arguments
+
+You can pass side effect options as the first argument to the `callTool` function if it doesn't require any arguments.
+
+```tsx
+import { useCallTool } from "skybridge/web";
+
+function RefreshButton() {
+  const { callTool, isPending } = useCallTool("refresh", {
+    onSuccess: () => {
+      console.log("Refreshed");
+    },
+  });
+
+  return (
+    <button disabled={isPending} onClick={() => callTool()}>
+      {isPending ? "Refreshing..." : "Refresh"}
     </button>
   );
 }
