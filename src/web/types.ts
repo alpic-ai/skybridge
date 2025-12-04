@@ -1,3 +1,11 @@
+import "react";
+
+declare module "react" {
+  interface HTMLAttributes<T extends Element = HTMLElement> {
+    "data-llm"?: string;
+  }
+}
+
 export type UnknownObject = Record<string, unknown>;
 
 type WidgetState = UnknownObject;

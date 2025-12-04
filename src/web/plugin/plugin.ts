@@ -1,4 +1,5 @@
 import type { Plugin } from "vite";
+import { transform as dataLlmTransform } from "./transform-data-llm.js";
 
 export function skybridge(): Plugin {
   return {
@@ -33,6 +34,10 @@ export function skybridge(): Plugin {
           },
         },
       };
+    },
+    enforce: "pre",
+    async transform(code, id) {
+      return await dataLlmTransform(code, id);
     },
   };
 }
