@@ -49,9 +49,9 @@ type TypedToolInfoReturn<TInput, TOutput> = ToolState<
  * ```typescript
  * // web/src/skybridge.ts (one-time setup)
  * import type { AppType } from "../server";
- * import { createTypedHooks } from "skybridge/web";
+ * import { generateHelpers } from "skybridge/web";
  *
- * export const { useCallTool, useToolInfo } = createTypedHooks<AppType>();
+ * export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
  * ```
  *
  * @example
@@ -72,7 +72,7 @@ type TypedToolInfoReturn<TInput, TOutput> = ToolState<
  * }
  * ```
  */
-export function createTypedHooks<T extends McpServer<AnyToolRegistry>>() {
+export function generateHelpers<T extends McpServer<AnyToolRegistry>>() {
   type Tools = InferTools<T>;
   type Names = keyof Tools & string;
 

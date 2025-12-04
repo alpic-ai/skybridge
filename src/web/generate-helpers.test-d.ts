@@ -1,5 +1,5 @@
 import { expectTypeOf, test } from "vitest";
-import { createTypedHooks } from "./typed-hooks.js";
+import { generateHelpers } from "./generate-helpers.js";
 import type { InferTools, ToolNames, ToolInput, ToolOutput } from "../server/index.js";
 import { createTestServer } from "../test/utils.js";
 
@@ -102,8 +102,8 @@ test("ToolOutput extracts the correct output type from callback (inferred)", () 
   }>();
 });
 
-test("createTypedHooks provides autocomplete for tool names (widgets + registerTool)", () => {
-  const { useCallTool } = createTypedHooks<TestServer>();
+test("generateHelpers provides autocomplete for tool names (widgets + registerTool)", () => {
+  const { useCallTool } = generateHelpers<TestServer>();
 
   useCallTool("search-voyage");
   useCallTool("get-trip-details");
@@ -117,7 +117,7 @@ test("createTypedHooks provides autocomplete for tool names (widgets + registerT
 });
 
 test("useCallTool returns correctly typed callTool function", () => {
-  const { useCallTool } = createTypedHooks<TestServer>();
+  const { useCallTool } = generateHelpers<TestServer>();
   const { callTool } = useCallTool("search-voyage");
 
   callTool({ destination: "Spain" });
@@ -129,7 +129,7 @@ test("useCallTool returns correctly typed callTool function", () => {
 });
 
 test("useCallTool returns correctly typed data", () => {
-  const { useCallTool } = createTypedHooks<TestServer>();
+  const { useCallTool } = generateHelpers<TestServer>();
   const { data } = useCallTool("search-voyage");
 
   if (data) {
@@ -148,7 +148,7 @@ test("useCallTool returns correctly typed data", () => {
 });
 
 test("useCallTool returns correctly typed data for callback-inferred outputs", () => {
-  const { useCallTool } = createTypedHooks<TestServer>();
+  const { useCallTool } = generateHelpers<TestServer>();
 
   const { data: widgetData } = useCallTool("inferred-output-widget");
   if (widgetData) {
@@ -167,8 +167,8 @@ test("useCallTool returns correctly typed data for callback-inferred outputs", (
   }
 });
 
-test("createTypedHooks provides autocomplete for tool names in useToolInfo (widgets + registerTool)", () => {
-  const { useToolInfo } = createTypedHooks<TestServer>();
+test("generateHelpers provides autocomplete for tool names in useToolInfo (widgets + registerTool)", () => {
+  const { useToolInfo } = generateHelpers<TestServer>();
 
   useToolInfo<"search-voyage">();
   useToolInfo<"get-trip-details">();
@@ -182,7 +182,7 @@ test("createTypedHooks provides autocomplete for tool names in useToolInfo (widg
 });
 
 test("useToolInfo infers input and output types", () => {
-  const { useToolInfo } = createTypedHooks<TestServer>();
+  const { useToolInfo } = generateHelpers<TestServer>();
   const toolInfo = useToolInfo<"search-voyage">();
 
   expectTypeOf(toolInfo.input).toExtend<ToolInput<TestServer, "search-voyage">>();

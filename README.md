@@ -103,6 +103,54 @@ Skybridge provides fully typed hooks that give you autocomplete for tool names a
 
 > **Tip:** For the best TypeScript experience, use typed hooks throughout your application. They provide autocomplete, type safety, and better IDE support.
 
+> **Important:** For `generateHelpers` to work correctly, your MCP server must be defined using method chaining (e.g., `server.widget(...).widget(...).registerTool(...)`). This ensures TypeScript can properly infer the tool registry type from the chained calls.
+
+**Examples:**
+
+✅ **Works** - Using method chaining:
+
+```ts
+import { McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({ name: "my-app", version: "1.0" }, {})
+  .widget("search-voyage", {}, {
+    inputSchema: { destination: z.string() },
+  }, async ({ destination }) => {
+    return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
+  })
+  .registerTool("calculate-price", {
+    inputSchema: { tripId: z.string() },
+  }, async ({ tripId }) => {
+    return { content: [{ type: "text", text: `Price for ${tripId}` }] };
+  });
+
+export type AppType = typeof server; // ✅ Type inference works correctly
+```
+
+❌ **Doesn't work** - Without method chaining:
+
+```ts
+import { McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({ name: "my-app", version: "1.0" }, {});
+
+server.widget("search-voyage", {}, {
+  inputSchema: { destination: z.string() },
+}, async ({ destination }) => {
+  return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
+});
+
+server.registerTool("calculate-price", {
+  inputSchema: { tripId: z.string() },
+}, async ({ tripId }) => {
+  return { content: [{ type: "text", text: `Price for ${tripId}` }] };
+});
+
+export type AppType = typeof server; // ❌ Type inference fails - tool registry is empty
+```
+
 _Server setup (server/src/index.ts)_
 
 ```ts
@@ -140,9 +188,9 @@ Create typed hooks once and export them for use across your app. This file acts 
 
 ```ts
 import type { AppType } from "../server"; // type-only import
-import { createTypedHooks } from "skybridge/web";
+import { generateHelpers } from "skybridge/web";
 
-export const { useCallTool, useToolInfo } = createTypedHooks<AppType>();
+export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
 ```
 
 _Usage in widgets (web/src/widgets/search.tsx)_
@@ -184,7 +232,7 @@ The `skybridge/web` package comes with a set of hooks to help you build your wid
 - `useToolResponseMetadata`: A hook to get the initial tool `meta` returned when rendering the widget for the first time. The data inside this hook is not updated when the tool is called again.
 - `useToolInfo`: A hook to get the tool input, output, and response metadata with type inference. Provides a discriminated union based on status (pending/success).
 - `useCallTool`: A @tanstack/react-query inspired hook to send make additional tool calls inside a widget.
-- `createTypedHooks`: A factory that creates typed versions of `useCallTool` and `useToolInfo` with full type inference from your server type.
+- `generateHelpers`: A factory that creates typed versions of `useCallTool` and `useToolInfo` with full type inference from your server type.
 
 _useOpenAiGlobal_
 
