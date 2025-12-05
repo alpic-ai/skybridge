@@ -14,6 +14,8 @@ export interface DataLLMNode {
   content: string | null;
 }
 
+export const WIDGET_CONTEXT_KEY = "__widget_context" as const;
+
 const nodes = new Map<string, DataLLMNode>();
 
 function setNode(node: DataLLMNode) {
@@ -30,7 +32,7 @@ function onChange() {
   const description = getLLMDescriptionString();
   window.openai.setWidgetState({
     ...window.openai.widgetState,
-    __widget_context: description,
+    [WIDGET_CONTEXT_KEY]: description,
   });
 }
 

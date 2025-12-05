@@ -29,6 +29,9 @@ importers:
       react-dom:
         specifier: '>=18.0.0'
         version: 19.2.0(react@19.2.0)
+      superjson:
+        specifier: ^2.2.6
+        version: 2.2.6
       vite:
         specifier: ^7.1.11
         version: 7.1.11(@types/node@22.18.12)(jiti@1.21.7)(terser@5.44.1)
@@ -2690,6 +2693,10 @@ packages:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
 
+  copy-anything@4.0.5:
+    resolution: {integrity: sha512-7Vv6asjS4gMOuILabD3l739tsaxFQmC+a7pLZm02zyvs8p977bL3zEgq3yDk5rn9B0PbYgIv++jmHcuUab4RhA==}
+    engines: {node: '>=18'}
+
   copy-webpack-plugin@11.0.0:
     resolution: {integrity: sha512-fX2MWpamkW0hZxMEg0+mYnA40LTosOSa5TqZ9GYIBzyJa9C3QUaMPSE2xAi/buNr8u89SfD9wHSQVBzrRa/SOQ==}
     engines: {node: '>= 14.15.0'}
@@ -3766,6 +3773,10 @@ packages:
 
   is-typedarray@1.0.0:
     resolution: {integrity: sha512-cyA56iCMHAh5CdzjJIa4aohJyeO1YbwLi3Jc35MmRU6poroFjIGZzUzupGiRPOjgHg9TLu43xbpwXk523fMxKA==}
+
+  is-what@5.5.0:
+    resolution: {integrity: sha512-oG7cgbmg5kLYae2N5IVd3jm2s+vldjxJzK1pcu9LfpGuQ93MQSzo0okvRna+7y5ifrD+20FE8FvjusyGaz14fw==}
+    engines: {node: '>=18'}
 
   is-wsl@2.2.0:
     resolution: {integrity: sha512-fKzAra0rGJUUBwGBgNkHZuToZcn+TtXHpeCgmkMJMMYx1sQDYaCSyjJBSCa2nH1DGm7s3n1oBnohoVTBaN7Lww==}
@@ -5442,6 +5453,10 @@ packages:
     engines: {node: ^14 || ^16 || >=18.0}
     peerDependencies:
       postcss: ^8.4.31
+
+  superjson@2.2.6:
+    resolution: {integrity: sha512-H+ue8Zo4vJmV2nRjpx86P35lzwDT3nItnIsocgumgr0hHMQ+ZGq5vrERg9kJBo5AWGmxZDhzDo+WVIJqkB0cGA==}
+    engines: {node: '>=16'}
 
   supports-color@7.2.0:
     resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
@@ -9411,6 +9426,10 @@ snapshots:
 
   cookie@0.7.2: {}
 
+  copy-anything@4.0.5:
+    dependencies:
+      is-what: 5.5.0
+
   copy-webpack-plugin@11.0.0(webpack@5.103.0):
     dependencies:
       fast-glob: 3.3.3
@@ -10643,6 +10662,8 @@ snapshots:
   is-stream@2.0.1: {}
 
   is-typedarray@1.0.0: {}
+
+  is-what@5.5.0: {}
 
   is-wsl@2.2.0:
     dependencies:
@@ -12786,6 +12807,10 @@ snapshots:
       browserslist: 4.28.0
       postcss: 8.5.6
       postcss-selector-parser: 6.1.2
+
+  superjson@2.2.6:
+    dependencies:
+      copy-anything: 4.0.5
 
   supports-color@7.2.0:
     dependencies:
