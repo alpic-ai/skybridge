@@ -353,6 +353,50 @@ export const TestTool: React.FunctionComponent = () => {
 };
 ```
 
+**State Management**
+
+The `skybridge/web` package provides `createStore` for creating Zustand stores with automatic persistence to `window.openai.widgetState`. This is useful when you need more advanced state management than what `useWidgetState` provides.
+
+_createStore_
+
+```ts
+import { createStore } from "skybridge/web";
+
+type CounterState = {
+  count: number;
+  increment: () => void;
+  decrement: () => void;
+};
+
+const useCounterStore = createStore<CounterState>(
+  (set) => ({
+    count: 0,
+    increment: () => set((state) => ({ count: state.count + 1 })),
+    decrement: () => set((state) => ({ count: state.count - 1 })),
+  }),
+  { count: 0 } // Optional default state
+);
+
+// Use in your component
+function CounterWidget() {
+  const { count, increment, decrement } = useCounterStore();
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={increment}>Increment</button>
+      <button onClick={decrement}>Decrement</button>
+    </div>
+  );
+}
+```
+
+The `createStore` function:
+
+- Automatically persists state to `window.openai.widgetState`
+- Syncs with external state changes from the host
+- Only serializes state data, not methods
+
 ## Migrate your existing MCP server to a ChatGPT app
 
 If you're already using the `@modelcontextprotocol/sdk` to build a MCP server, you can migrate to a ChatGPT app by following these steps:
