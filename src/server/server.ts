@@ -73,6 +73,19 @@ type ExtractStructuredContent<T> = T extends { structuredContent: infer SC }
   ? SC
   : never;
 
+/**
+ * Type-level marker interface for cross-package type inference.
+ * This enables TypeScript to infer tool types across package boundaries
+ * using structural typing on the $types property, rather than relying on
+ * class generic inference which fails when McpServer comes from different
+ * package installations.
+ *
+ * Inspired by tRPC's _def pattern and Hono's type markers.
+ */
+export interface McpServerTypes<TTools extends Record<string, ToolDef> = {}> {
+  readonly tools: TTools;
+}
+
 type AddTool<
   TTools,
   TName extends string,
@@ -102,6 +115,8 @@ type ToolHandler<
 export class McpServer<
   TTools extends Record<string, ToolDef> = {}
 > extends McpServerBase {
+  declare readonly $types: McpServerTypes<TTools>;
+
   widget<
     TName extends string,
     TInput extends ZodRawShape,
@@ -178,7 +193,7 @@ export class McpServer<
       toolCallback
     );
 
-    return this;
+    return this as AddTool<TTools, TName, TInput, ExtractStructuredContent<TReturn>>;
   }
 
   override registerTool<
@@ -201,7 +216,7 @@ export class McpServer<
     name: string,
     config: ToolConfig<InputArgs>,
     cb: ToolCallback<InputArgs>
-  ): RegisteredTool | McpServer<any> {
+  ): RegisteredTool | McpServer<Record<string, ToolDef>> {
     super.registerTool(name, config, cb);
     return this;
   }

@@ -1,4 +1,4 @@
-import type { McpServer, ToolDef } from "./server.js";
+import type { McpServerTypes, ToolDef } from "./server.js";
 
 /**
  * Any tool registry shape (includes both widgets and regular tools).
@@ -10,13 +10,17 @@ export type AnyToolRegistry = Record<string, ToolDef>;
  * Extract the tool registry type from an McpServer instance.
  * This includes both widgets (registered via widget()) and regular tools (registered via registerTool()).
  *
+ * Uses the `$types` property pattern for cross-package type inference.
+ * This works across package boundaries because TypeScript uses structural typing
+ * on the shape of `$types`, rather than nominal typing on the McpServer class itself.
+ *
  * @example
  * ```ts
  * type MyTools = InferTools<MyServer>;
  * // { "search": ToolDef<...>, "calculate": ToolDef<...> }
  * ```
  */
-export type InferTools<ServerType> = ServerType extends McpServer<infer W> ? W : never;
+export type InferTools<ServerType> = ServerType extends { $types: McpServerTypes<infer W> } ? W : never;
 type ExtractTool<ServerType, K extends ToolNames<ServerType>> = InferTools<ServerType>[K];
 
 
