@@ -18,7 +18,10 @@ Instead of manually typing each hook call:
 
 ```tsx
 // ❌ Without generateHelpers - manual type annotations required
-const { callTool } = useCallTool<{ destination: string }, { structuredContent: { results: string[] } }>("search-voyage");
+const { callTool } = useCallTool<
+  { destination: string },
+  { structuredContent: { results: string[] } }
+>("search-voyage");
 ```
 
 You get automatic type inference:
@@ -42,16 +45,27 @@ import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
 const server = new McpServer({ name: "my-app", version: "1.0" }, {})
-  .widget("search-voyage", {}, {
-    inputSchema: { destination: z.string() },
-  }, async ({ destination }) => {
-    return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
-  })
-  .registerTool("calculate-price", {
-    inputSchema: { tripId: z.string() },
-  }, async ({ tripId }) => {
-    return { content: [{ type: "text", text: `Price for ${tripId}` }] };
-  });
+  .widget(
+    "search-voyage",
+    {},
+    {
+      inputSchema: { destination: z.string() },
+    },
+    async ({ destination }) => {
+      return {
+        content: [{ type: "text", text: `Found trips to ${destination}` }],
+      };
+    }
+  )
+  .registerTool(
+    "calculate-price",
+    {
+      inputSchema: { tripId: z.string() },
+    },
+    async ({ tripId }) => {
+      return { content: [{ type: "text", text: `Price for ${tripId}` }] };
+    }
+  );
 
 export type AppType = typeof server; // ✅ Type inference works correctly
 ```
@@ -64,17 +78,28 @@ import { z } from "zod";
 
 const server = new McpServer({ name: "my-app", version: "1.0" }, {});
 
-server.widget("search-voyage", {}, {
-  inputSchema: { destination: z.string() },
-}, async ({ destination }) => {
-  return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
-});
+server.widget(
+  "search-voyage",
+  {},
+  {
+    inputSchema: { destination: z.string() },
+  },
+  async ({ destination }) => {
+    return {
+      content: [{ type: "text", text: `Found trips to ${destination}` }],
+    };
+  }
+);
 
-server.registerTool("calculate-price", {
-  inputSchema: { tripId: z.string() },
-}, async ({ tripId }) => {
-  return { content: [{ type: "text", text: `Price for ${tripId}` }] };
-});
+server.registerTool(
+  "calculate-price",
+  {
+    inputSchema: { tripId: z.string() },
+  },
+  async ({ tripId }) => {
+    return { content: [{ type: "text", text: `Price for ${tripId}` }] };
+  }
+);
 
 export type AppType = typeof server; // ❌ Type inference fails - tool registry is empty
 ```
@@ -113,7 +138,7 @@ import { useCallTool, useToolInfo } from "../skybridge";
 export function SearchWidget() {
   const { callTool, data, isPending } = useCallTool("search-voyage");
   //                                      ^ autocomplete for tool names
-  
+
   const toolInfo = useToolInfo<"search-voyage">();
   //                              ^ autocomplete for widget names
 
@@ -162,7 +187,7 @@ An object containing typed versions of `useCallTool` and `useToolInfo` hooks:
 
 ### `useCallTool`
 
-A typed version of the [`useCallTool`](./useCallTool.md) hook that provides autocomplete for tool names and full type inference for inputs and outputs.
+A typed version of the [`useCallTool`](./use-call-tool) hook that provides autocomplete for tool names and full type inference for inputs and outputs.
 
 ```tsx
 const {
@@ -190,7 +215,7 @@ The name of the tool to call. This must match a tool name from your server's reg
 
 #### Return Value
 
-The typed `useCallTool` returns the same structure as the untyped version, but with automatically inferred types. See the [`useCallTool` API reference](./useCallTool.md) for detailed documentation on all return properties.
+The typed `useCallTool` returns the same structure as the untyped version, but with automatically inferred types. See the [`useCallTool` API reference](./use-call-tool) for detailed documentation on all return properties.
 
 ### `useToolInfo`
 
