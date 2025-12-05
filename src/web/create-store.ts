@@ -1,14 +1,10 @@
 import { create, type StateCreator } from "zustand";
 import {
-  deserializeState,
-  filterWidgetContext,
   getInitialState,
   injectWidgetContext,
-  serializeState,
+  serializeState
 } from "./helpers/state.js";
 import type { UnknownObject } from "./types.js";
-import { SET_GLOBALS_EVENT_TYPE, type SetGlobalsEvent } from "./types.js";
-import type { SuperJSONResult } from "superjson";
 
 export function createStore<State extends UnknownObject>(
   storeCreator: StateCreator<State, [], [], State>,
@@ -28,10 +24,8 @@ export function createStore<State extends UnknownObject>(
     }
   );
 
-  let isInternalUpdate = false;
-
   store.subscribe((state: State) => {
-    if (!isInternalUpdate && window.openai) {
+    if (window.openai) {
       const serializedState = serializeState(state);
       if (serializedState !== null && serializedState !== undefined) {
         const stateToPersist = injectWidgetContext(serializedState as State);
@@ -40,26 +34,6 @@ export function createStore<State extends UnknownObject>(
         }
       }
     }
-  });
-
-  const handleSetGlobals = (event: SetGlobalsEvent) => {
-    const widgetState = event.detail.globals.widgetState as
-      | SuperJSONResult
-      | null
-      | undefined;
-    if (!widgetState) return;
-
-    const deserialized = deserializeState(widgetState) as State | null;
-    const filteredState = filterWidgetContext<State>(deserialized);
-    if (filteredState !== null) {
-      isInternalUpdate = true;
-      store.setState(filteredState);
-      isInternalUpdate = false;
-    }
-  };
-
-  window.addEventListener(SET_GLOBALS_EVENT_TYPE, handleSetGlobals, {
-    passive: true,
   });
 
   return store;
