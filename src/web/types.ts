@@ -11,6 +11,12 @@ export type UnknownObject = Record<string, unknown>;
 export type Prettify<T> = { [K in keyof T]: T[K] } & {};
 export type Objectify<T> = T & UnknownObject;
 
+
+type RequiredKeys<T> = {
+  [K in keyof T]-?: {} extends Pick<T, K> ? never : K;
+}[keyof T];
+export type HasRequiredKeys<T> = RequiredKeys<T> extends never ? false : true;
+
 type WidgetState = UnknownObject;
 
 type FileMetadata = { fileId: string };

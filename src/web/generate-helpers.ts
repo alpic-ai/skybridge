@@ -1,24 +1,25 @@
-import { useCallTool, type CallToolState } from "./hooks/use-call-tool.js";
+import {
+  useCallTool,
+  type CallToolState,
+  type CallToolFn,
+  type CallToolAsyncFn,
+} from "./hooks/use-call-tool.js";
 import { useToolInfo, type ToolState } from "./hooks/use-tool-info.js";
-import type {
-  McpServer,
-  InferTools,
-  AnyToolRegistry,
-  ToolInput,
-  ToolOutput,
-} from "../server/index.js";
+import type { InferTools, ToolInput, ToolOutput } from "../server/index.js";
 import type { CallToolResponse, Prettify, Objectify } from "./types.js";
 
+type TypedCallToolResponse<TOutput> = CallToolResponse & { structuredContent: TOutput };
+
 type TypedCallToolReturn<TInput, TOutput> = Prettify<
-  CallToolState<CallToolResponse & { structuredContent: TOutput }> & {
-    callTool: (args: TInput) => void;
-    callToolAsync: (args: TInput) => Promise<CallToolResponse & { structuredContent: TOutput }>;
+  CallToolState<TypedCallToolResponse<TOutput>> & {
+    callTool: CallToolFn<TInput, TypedCallToolResponse<TOutput>>;
+    callToolAsync: CallToolAsyncFn<TInput, TypedCallToolResponse<TOutput>>;
   }
 >;
 
 type TypedToolInfoReturn<TInput, TOutput> = ToolState<
   Objectify<TInput>,
-  Objectify<TOutput>,
+  { structuredContent: TOutput },
   Objectify<{}>
 >;
 
@@ -29,7 +30,9 @@ type TypedToolInfoReturn<TInput, TOutput> = ToolState<
  * This is the recommended way to use skybridge hooks in your widgets.
  * Set this up once in a dedicated file and export the typed hooks for use across your app.
  *
- * @typeParam ServerType - The type of your McpServer instance. Use `typeof server`.
+ * @typeParam ServerType - The type of your McpServer instance (use `typeof server`).
+ *                         Must be a server instance created with method chaining.
+ *                         TypeScript will validate that tools can be inferred from this type.
  *
  * @example
  * ```typescript
@@ -68,11 +71,11 @@ type TypedToolInfoReturn<TInput, TOutput> = ToolState<
  *   const toolInfo = useToolInfo<"search-voyage">();
  *   //                              ^ autocomplete for widget names
  *   // toolInfo.input is typed based on widget input schema
- *   // toolInfo.output is typed based on widget output schema
+ *   // toolInfo.output.structuredContent is typed based on widget output schema
  * }
  * ```
  */
-export function generateHelpers<ServerType extends McpServer<AnyToolRegistry>>() {
+export function generateHelpers<ServerType = never>() {
   type Tools = InferTools<ServerType>;
   type ToolNames = keyof Tools & string;
 
@@ -116,7 +119,7 @@ export function generateHelpers<ServerType extends McpServer<AnyToolRegistry>>()
      * ```typescript
      * const toolInfo = useToolInfo<"search-voyage">();
      * // toolInfo.input is typed as { destination: string; ... }
-     * // toolInfo.output is typed as { results: Array<...>; ... } | undefined
+     * // toolInfo.output.structuredContent is typed as { results: Array<...>; ... }
      * // toolInfo.status narrows correctly: "pending" | "success"
      *
      * if (toolInfo.isPending) {
@@ -126,7 +129,7 @@ export function generateHelpers<ServerType extends McpServer<AnyToolRegistry>>()
      *
      * if (toolInfo.isSuccess) {
      *   // TypeScript knows output is defined here
-     *   console.log(toolInfo.output.results);
+     *   console.log(toolInfo.output.structuredContent.results);
      * }
      * ```
      */

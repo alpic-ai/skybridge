@@ -71,7 +71,7 @@ type McpServerOriginalToolConfig = Omit<
 
 type ExtractStructuredContent<T> = T extends { structuredContent: infer SC }
   ? SC
-  : {};
+  : never;
 
 type AddTool<
   TTools,

@@ -128,6 +128,83 @@ test("useCallTool returns correctly typed callTool function", () => {
   calculateTool({ tripId: "123", passengers: 2 });
 });
 
+test("callTool can be called without args for tools with no required inputs", () => {
+  const { useCallTool } = generateHelpers<TestServer>();
+  const { callTool, callToolAsync } = useCallTool("no-input-widget");
+
+  callTool();
+
+  callTool({});
+
+  callToolAsync();
+  callToolAsync({});
+});
+
+test("callTool requires args for tools with required inputs", () => {
+  const { useCallTool } = generateHelpers<TestServer>();
+  const { callTool } = useCallTool("search-voyage");
+
+  // @ts-expect-error - "destination" is required
+  callTool();
+
+  // @ts-expect-error - "destination" is required
+  callTool({});
+
+  // This should work
+  callTool({ destination: "Spain" });
+});
+
+test("callTool supports sideEffects for tools with required inputs", () => {
+  const { useCallTool } = generateHelpers<TestServer>();
+  const { callTool, data } = useCallTool("search-voyage");
+
+  callTool({ destination: "Spain" }, {
+    onSuccess: (response, args) => {
+      expectTypeOf(response.structuredContent.results).toBeArray();
+      expectTypeOf(args.destination).toBeString();
+    },
+    onError: (error, args) => {
+      expectTypeOf(error).toBeUnknown();
+      expectTypeOf(args.destination).toBeString();
+    },
+    onSettled: (response, error, args) => {
+      if (response) {
+        expectTypeOf(response.structuredContent.totalCount).toBeNumber();
+      }
+      expectTypeOf(args.destination).toBeString();
+    },
+  });
+});
+
+test("callTool supports sideEffects for tools with no required inputs", () => {
+  const { useCallTool } = generateHelpers<TestServer>();
+  const { callTool } = useCallTool("no-input-widget");
+
+  callTool({
+    onSuccess: (response) => {
+      expectTypeOf(response).toHaveProperty("structuredContent");
+    },
+  });
+
+  callTool({}, {
+    onSuccess: (response) => {
+      expectTypeOf(response).toHaveProperty("structuredContent");
+    },
+  });
+});
+
+test("callToolAsync returns correctly typed promise", () => {
+  const { useCallTool } = generateHelpers<TestServer>();
+
+  const { callToolAsync: searchAsync } = useCallTool("search-voyage");
+  const searchPromise = searchAsync({ destination: "Spain" });
+  expectTypeOf(searchPromise).resolves.toHaveProperty("structuredContent");
+
+  const { callToolAsync: noInputAsync } = useCallTool("no-input-widget");
+  const noInputPromise = noInputAsync();
+  expectTypeOf(noInputPromise).resolves.toHaveProperty("structuredContent");
+});
+
 test("useCallTool returns correctly typed data", () => {
   const { useCallTool } = generateHelpers<TestServer>();
   const { data } = useCallTool("search-voyage");
@@ -188,7 +265,7 @@ test("useToolInfo infers input and output types", () => {
   expectTypeOf(toolInfo.input).toExtend<ToolInput<TestServer, "search-voyage">>();
 
   if (toolInfo.status === "success") {
-    expectTypeOf(toolInfo.output).toExtend<ToolOutput<TestServer, "search-voyage">>();
+    expectTypeOf(toolInfo.output.structuredContent).toExtend<ToolOutput<TestServer, "search-voyage">>();
   }
 });
 
