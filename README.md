@@ -437,8 +437,6 @@ The `createStore` function:
 
 - Automatically persists state to `window.openai.widgetState`
 - Syncs with external state changes from the host
-- Filters out widget context keys from persisted state
-- Supports optional default state (value or function)
 - Only serializes state data, not methods
 
 ## Migrate your existing MCP server to a ChatGPT app
