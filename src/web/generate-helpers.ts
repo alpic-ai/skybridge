@@ -29,7 +29,7 @@ type TypedToolInfoReturn<TInput, TOutput> = ToolState<
  * This is the recommended way to use skybridge hooks in your widgets.
  * Set this up once in a dedicated file and export the typed hooks for use across your app.
  *
- * @typeParam T - The type of your McpServer instance. Use `typeof server`.
+ * @typeParam ServerType - The type of your McpServer instance. Use `typeof server`.
  *
  * @example
  * ```typescript
@@ -72,9 +72,9 @@ type TypedToolInfoReturn<TInput, TOutput> = ToolState<
  * }
  * ```
  */
-export function generateHelpers<T extends McpServer<AnyToolRegistry>>() {
-  type Tools = InferTools<T>;
-  type Names = keyof Tools & string;
+export function generateHelpers<ServerType extends McpServer<AnyToolRegistry>>() {
+  type Tools = InferTools<ServerType>;
+  type ToolNames = keyof Tools & string;
 
   return {
     /**
@@ -96,12 +96,12 @@ export function generateHelpers<T extends McpServer<AnyToolRegistry>>() {
      * }
      * ```
      */
-    useCallTool: <K extends Names>(
-      name: K
-    ): TypedCallToolReturn<Tools[K]["input"], Tools[K]["output"]> => {
+    useCallTool: <ToolName extends ToolNames>(
+      name: ToolName
+    ): TypedCallToolReturn<ToolInput<ServerType, ToolName>, ToolOutput<ServerType, ToolName>> => {
       return useCallTool(name) as TypedCallToolReturn<
-        Tools[K]["input"],
-        Tools[K]["output"]
+        ToolInput<ServerType, ToolName>,
+        ToolOutput<ServerType, ToolName>
       >;
     },
 
@@ -130,13 +130,13 @@ export function generateHelpers<T extends McpServer<AnyToolRegistry>>() {
      * }
      * ```
      */
-    useToolInfo: <K extends Names>(): TypedToolInfoReturn<
-      ToolInput<T, K>,
-      ToolOutput<T, K>
+    useToolInfo: <ToolName extends ToolNames>(): TypedToolInfoReturn<
+      ToolInput<ServerType, ToolName>,
+      ToolOutput<ServerType, ToolName>
     > => {
       return useToolInfo() as TypedToolInfoReturn<
-        ToolInput<T, K>,
-        ToolOutput<T, K>
+        ToolInput<ServerType, ToolName>,
+        ToolOutput<ServerType, ToolName>
       >;
     },
   };

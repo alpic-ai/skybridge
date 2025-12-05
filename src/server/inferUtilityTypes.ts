@@ -16,8 +16,8 @@ export type AnyToolRegistry = Record<string, ToolDef>;
  * // { "search": ToolDef<...>, "calculate": ToolDef<...> }
  * ```
  */
-export type InferTools<T> = T extends McpServer<infer W> ? W : never;
-type ExtractTool<T, K extends ToolNames<T>> = InferTools<T>[K];
+export type InferTools<ServerType> = ServerType extends McpServer<infer W> ? W : never;
+type ExtractTool<ServerType, K extends ToolNames<ServerType>> = InferTools<ServerType>[K];
 
 
 /**
@@ -30,7 +30,7 @@ type ExtractTool<T, K extends ToolNames<T>> = InferTools<T>[K];
  * // "search" | "calculate" | "details"
  * ```
  */
-export type ToolNames<T> = keyof InferTools<T> & string;
+export type ToolNames<ServerType> = keyof InferTools<ServerType> & string;
 
 
 /**
@@ -41,7 +41,7 @@ export type ToolNames<T> = keyof InferTools<T> & string;
  * type SearchInput = ToolInput<MyServer, "search">;
  * ```
  */
-export type ToolInput<T, K extends ToolNames<T>> = ExtractTool<T, K>["input"];
+export type ToolInput<ServerType, ToolName extends ToolNames<ServerType>> = ExtractTool<ServerType, ToolName>["input"];
 
 /**
  * Get the output type for a specific tool (widget or regular tool).
@@ -51,6 +51,6 @@ export type ToolInput<T, K extends ToolNames<T>> = ExtractTool<T, K>["input"];
  * type SearchOutput = ToolOutput<MyServer, "search">;
  * ```
  */
-export type ToolOutput<T, K extends ToolNames<T>> = ExtractTool<T, K>["output"];
+export type ToolOutput<ServerType, ToolName extends ToolNames<ServerType>> = ExtractTool<ServerType, ToolName>["output"];
 
 
