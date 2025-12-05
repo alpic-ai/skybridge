@@ -14,7 +14,5 @@ export { useRequestModal } from "./use-request-modal.js";
 export { useSendFollowUpMessage } from "./use-send-follow-up-message.js";
 export { useTheme } from "./use-theme.js";
 export { useToolInfo } from "./use-tool-info.js";
-export { useToolOutput } from "./use-tool-output.js";
-export { useToolResponseMetadata } from "./use-tool-response-metadata.js";
 export { useUserAgent } from "./use-user-agent.js";
 export { useWidgetState } from "./use-widget-state.js";
