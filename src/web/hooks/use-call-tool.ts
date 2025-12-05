@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { CallToolArgs, CallToolResponse } from "../types.js";
+import type { CallToolArgs, CallToolResponse, HasRequiredKeys } from "../types.js";
 
 type CallToolIdleState = {
   status: "idle";
@@ -47,7 +47,7 @@ export type CallToolState<TData extends CallToolResponse = CallToolResponse> =
   | CallToolSuccessState<TData>
   | CallToolErrorState;
 
-type SideEffects<ToolArgs, ToolResponse> = {
+export type SideEffects<ToolArgs, ToolResponse> = {
   onSuccess?: (data: ToolResponse, toolArgs: ToolArgs) => void;
   onError?: (error: unknown, toolArgs: ToolArgs) => void;
   onSettled?: (
@@ -57,9 +57,31 @@ type SideEffects<ToolArgs, ToolResponse> = {
   ) => void;
 };
 
-type CallToolAsyncFn<ToolArgs, ToolResponse> = ToolArgs extends null
-  ? () => Promise<ToolResponse>
-  : (toolArgs: ToolArgs) => Promise<ToolResponse>;
+
+type IsArgsOptional<T> = [T] extends [null]
+  ? true
+  : HasRequiredKeys<T> extends false
+    ? true
+    : false;
+
+export type CallToolFn<TArgs, TResponse> = IsArgsOptional<TArgs> extends true
+  ? {
+      (): void;
+      (sideEffects: SideEffects<TArgs, TResponse>): void;
+      (args: TArgs): void;
+      (args: TArgs, sideEffects: SideEffects<TArgs, TResponse>): void;
+    }
+  : {
+      (args: TArgs): void;
+      (args: TArgs, sideEffects: SideEffects<TArgs, TResponse>): void;
+    };
+
+export type CallToolAsyncFn<TArgs, TResponse> = IsArgsOptional<TArgs> extends true
+  ? {
+      (): Promise<TResponse>;
+      (args: TArgs): Promise<TResponse>;
+    }
+  : (args: TArgs) => Promise<TResponse>;
 
 type ToolResponseSignature = Pick<
   CallToolResponse,
@@ -99,24 +121,17 @@ export const useCallTool = <
     }
   };
 
-  const callToolAsync = (async (toolArgs?: ToolArgs) => {
+  const callToolAsync = ((toolArgs?: ToolArgs) => {
     if (toolArgs === undefined) {
       return execute(null as ToolArgs);
     }
-    return execute(toolArgs as ToolArgs);
+    return execute(toolArgs);
   }) as CallToolAsyncFn<ToolArgs, CombinedCallToolResponse>;
 
-  function callTool(
-    sideEffects?: SideEffects<ToolArgs, CombinedCallToolResponse>
-  ): void;
-  function callTool(
-    toolArgs: ToolArgs,
-    sideEffects?: SideEffects<ToolArgs, CombinedCallToolResponse>
-  ): void;
-  function callTool(
+  const callTool = ((
     firstArg?: ToolArgs | SideEffects<ToolArgs, CombinedCallToolResponse>,
     sideEffects?: SideEffects<ToolArgs, CombinedCallToolResponse>
-  ) {
+  ) => {
     let toolArgs: ToolArgs;
     if (
       firstArg &&
@@ -133,22 +148,14 @@ export const useCallTool = <
 
     execute(toolArgs)
       .then((data) => {
-        if (sideEffects?.onSuccess) {
-          sideEffects.onSuccess(data, toolArgs);
-        }
-        if (sideEffects?.onSettled) {
-          sideEffects.onSettled(data, undefined, toolArgs);
-        }
+        sideEffects?.onSuccess?.(data, toolArgs);
+        sideEffects?.onSettled?.(data, undefined, toolArgs);
       })
       .catch((error) => {
-        if (sideEffects?.onError) {
-          sideEffects.onError(error, toolArgs);
-        }
-        if (sideEffects?.onSettled) {
-          sideEffects.onSettled(undefined, error, toolArgs);
-        }
+        sideEffects?.onError?.(error, toolArgs);
+        sideEffects?.onSettled?.(undefined, error, toolArgs);
       });
-  }
+  }) as CallToolFn<ToolArgs, CombinedCallToolResponse>;
 
   const callToolState = {
     status,

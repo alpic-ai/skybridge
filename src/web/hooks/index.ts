@@ -1,4 +1,10 @@
-export { useCallTool } from "./use-call-tool.js";
+export {
+  useCallTool,
+  type CallToolState,
+  type SideEffects,
+  type CallToolFn,
+  type CallToolAsyncFn,
+} from "./use-call-tool.js";
 export { useDisplayMode } from "./use-display-mode.js";
 export { useFiles } from "./use-files.js";
 export { useLocale } from "./use-locale.js";

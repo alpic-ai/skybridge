@@ -215,7 +215,7 @@ export function SearchWidget() {
         Search
       </button>
       {toolInfo.isSuccess && (
-        <div>Found {toolInfo.output.totalCount} results</div>
+        <div>Found {toolInfo.output.structuredContent.totalCount} results</div>
         //                      ^ typed output
       )}
     </div>
@@ -270,17 +270,17 @@ const toolInfo = useToolInfo<{
 }>();
 
 // toolInfo.input is typed based on the input type
-// toolInfo.output is typed based on the output type (undefined when pending)
+// toolInfo.output.structuredContent is typed based on the output type (undefined when pending)
 // toolInfo.status narrows correctly: "pending" | "success"
 
 if (toolInfo.isPending) {
-  // toolInfo.output is undefined here
+  // toolInfo.output is undefined here (pending state)
   console.log(toolInfo.input.query);
 }
 
 if (toolInfo.isSuccess) {
-  // toolInfo.output is typed here
-  console.log(toolInfo.output.results);
+  // toolInfo.output.structuredContent is typed here
+  console.log(toolInfo.output.structuredContent.results);
 }
 ```
 
@@ -293,10 +293,10 @@ export function SearchWidget() {
   const toolInfo = useToolInfo<"search-voyage">();
   //                              ^ autocomplete for widget names
   // toolInfo.input is typed as { destination: string; departureDate?: string; ... }
-  // toolInfo.output is typed as { results: Array<...>; totalCount: number; } | undefined
+  // toolInfo.output.structuredContent is typed as { results: Array<...>; totalCount: number; }
 
   if (toolInfo.isSuccess) {
-    return <div>Found {toolInfo.output.totalCount} results</div>;
+    return <div>Found {toolInfo.output.structuredContent.totalCount} results</div>;
   }
 
   return <div>Searching for {toolInfo.input.destination}...</div>;

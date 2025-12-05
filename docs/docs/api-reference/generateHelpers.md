@@ -128,7 +128,7 @@ export function SearchWidget() {
         Search
       </button>
       {toolInfo.isSuccess && (
-        <div>Found {toolInfo.output.totalCount} results</div>
+        <div>Found {toolInfo.output.structuredContent.totalCount} results</div>
         //                      ^ typed output
       )}
     </div>
