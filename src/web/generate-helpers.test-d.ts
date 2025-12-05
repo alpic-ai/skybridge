@@ -265,7 +265,9 @@ test("useToolInfo infers input and output types", () => {
   expectTypeOf(toolInfo.input).toExtend<ToolInput<TestServer, "search-voyage">>();
 
   if (toolInfo.status === "success") {
-    expectTypeOf(toolInfo.output.structuredContent).toExtend<ToolOutput<TestServer, "search-voyage">>();
+    expectTypeOf(toolInfo.output).toExtend<ToolOutput<TestServer, "search-voyage">>();
+    expectTypeOf(toolInfo.output.results).toBeArray();
+    expectTypeOf(toolInfo.output.totalCount).toBeNumber();
   }
 });
 

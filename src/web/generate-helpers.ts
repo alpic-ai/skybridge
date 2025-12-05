@@ -19,7 +19,7 @@ type TypedCallToolReturn<TInput, TOutput> = Prettify<
 
 type TypedToolInfoReturn<TInput, TOutput> = ToolState<
   Objectify<TInput>,
-  { structuredContent: TOutput },
+  Objectify<TOutput>,
   Objectify<{}>
 >;
 
@@ -119,7 +119,7 @@ export function generateHelpers<ServerType = never>() {
      * ```typescript
      * const toolInfo = useToolInfo<"search-voyage">();
      * // toolInfo.input is typed as { destination: string; ... }
-     * // toolInfo.output.structuredContent is typed as { results: Array<...>; ... }
+     * // toolInfo.output is typed as { results: Array<...>; ... }
      * // toolInfo.status narrows correctly: "pending" | "success"
      *
      * if (toolInfo.isPending) {
@@ -129,7 +129,7 @@ export function generateHelpers<ServerType = never>() {
      *
      * if (toolInfo.isSuccess) {
      *   // TypeScript knows output is defined here
-     *   console.log(toolInfo.output.structuredContent.results);
+     *   console.log(toolInfo.output.results);
      * }
      * ```
      */
