@@ -29,7 +29,7 @@ describe("useToolInfo", () => {
 
   it("should return toolInput on initial mount window.openai", () => {
     const { result } = renderHook(() => useToolInfo());
-
+    
     expect(result.current).toMatchObject({
       input: { name: "pokemon", args: { name: "pikachu" } },
       status: "pending",
