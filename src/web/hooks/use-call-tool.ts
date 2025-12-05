@@ -41,7 +41,7 @@ type CallToolErrorState = {
   error: unknown;
 };
 
-type CallToolState<TData extends CallToolResponse = CallToolResponse> =
+export type CallToolState<TData extends CallToolResponse = CallToolResponse> =
   | CallToolIdleState
   | CallToolPendingState
   | CallToolSuccessState<TData>

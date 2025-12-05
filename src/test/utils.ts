@@ -1,5 +1,6 @@
 import { vi, type MockInstance } from "vitest";
-import { McpServer, McpServer as McpServerBase } from "../server/server.js";
+import { McpServer } from "../server/server.js";
+import { z } from "zod";
 
 /**
  * Creates a real McpServer instance for testing
@@ -27,6 +28,169 @@ export function createMockMcpServer(): {
     mockResource,
     mockRegisterTool,
   };
+}
+
+export function createTestServer() {
+  return new McpServer(
+    { name: "test-app", version: "1.0.0" },
+    {}
+  )
+    .widget(
+      "search-voyage",
+      {},
+      {
+        description: "Search for voyages",
+        inputSchema: {
+          destination: z.string(),
+          departureDate: z.string().optional(),
+          maxPrice: z.number().optional(),
+        },
+        outputSchema: {
+          results: z.array(
+            z.object({
+              id: z.string(),
+              name: z.string(),
+              price: z.number(),
+            })
+          ),
+          totalCount: z.number(),
+        },
+      },
+      async ({ destination }) => {
+        return {
+          content: [{ type: "text", text: `Found trips to ${destination}` }],
+          structuredContent: {
+            results: [{ id: "1", name: "Trip", price: 1000 }],
+            totalCount: 1,
+          },
+        };
+      }
+    )
+    .widget(
+      "get-trip-details",
+      {},
+      {
+        description: "Get trip details",
+        inputSchema: {
+          tripId: z.string(),
+        },
+        outputSchema: {
+          name: z.string(),
+          description: z.string(),
+          images: z.array(z.string()),
+        },
+      },
+      async ({ tripId }) => {
+        return {
+          content: [{ type: "text", text: `Details for ${tripId}` }],
+          structuredContent: {
+            name: "Trip",
+            description: "A great trip",
+            images: ["image1.jpg"],
+          },
+        };
+      }
+    )
+    .widget(
+      "no-input-widget",
+      {},
+      {
+        description: "Widget with no input",
+        inputSchema: {},
+        outputSchema: {},
+      },
+      async () => {
+        return {
+          content: [{ type: "text", text: "No input needed" }],
+          structuredContent: {},
+        };
+      }
+    )
+    .widget(
+      "inferred-output-widget",
+      {},
+      {
+        description: "Widget with output inferred from callback",
+        inputSchema: {
+          query: z.string(),
+        },
+      },
+      async ({ query }) => {
+        return {
+          content: [{ type: "text", text: `Query: ${query}` }],
+          structuredContent: {
+            inferredResults: [{ id: "inferred-1", score: 0.95 }],
+            inferredCount: 1,
+          },
+        };
+      }
+    )
+    .registerTool(
+      "calculate-price",
+      {
+        description: "Calculate trip price",
+        inputSchema: {
+          tripId: z.string(),
+          passengers: z.number(),
+        },
+        outputSchema: {
+          totalPrice: z.number(),
+          currency: z.string(),
+        },
+      },
+      async ({ tripId, passengers }) => {
+        return {
+          content: [{ type: "text", text: `Price for ${tripId}` }],
+          structuredContent: {
+            totalPrice: 1000 * passengers,
+            currency: "USD",
+          },
+        };
+      }
+    )
+    .registerTool(
+      "inferred-tool",
+      {
+        description: "Tool with output inferred from callback",
+        inputSchema: {
+          itemId: z.string(),
+        },
+      },
+      async ({ itemId }) => {
+        return {
+          content: [{ type: "text", text: `Item: ${itemId}` }],
+          structuredContent: {
+            itemDetails: { name: "Inferred Item", available: true },
+            fetchedAt: "2024-01-01",
+          },
+        };
+      }
+    );
+}
+
+export function createMinimalTestServer() {
+  return new McpServer(
+    { name: "test-app", version: "1.0.0" },
+    {}
+  ).widget(
+    "search-voyage",
+    {},
+    {
+      description: "Search for voyages",
+      inputSchema: {
+        destination: z.string(),
+      },
+      outputSchema: {
+        results: z.array(z.object({ id: z.string() })),
+      },
+    },
+    async ({ destination }) => {
+      return {
+        content: [{ type: "text", text: `Found trips to ${destination}` }],
+        structuredContent: { results: [{ id: "1" }] },
+      };
+    }
+  );
 }
 
 /**

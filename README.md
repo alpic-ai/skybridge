@@ -97,6 +97,132 @@ export default defineConfig({
 });
 ```
 
+**Typed Hooks**
+
+Skybridge provides fully typed hooks that give you autocomplete for tool names and type inference for inputs/outputs - similar to tRPC. This is opt-in and requires exporting your server type.
+
+> **Tip:** For the best TypeScript experience, use typed hooks throughout your application. They provide autocomplete, type safety, and better IDE support.
+
+> **Important:** For `generateHelpers` to work correctly, your MCP server must be defined using method chaining (e.g., `server.widget(...).widget(...).registerTool(...)`). This ensures TypeScript can properly infer the tool registry type from the chained calls.
+
+**Examples:**
+
+✅ **Works** - Using method chaining:
+
+```ts
+import { McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({ name: "my-app", version: "1.0" }, {})
+  .widget("search-voyage", {}, {
+    inputSchema: { destination: z.string() },
+  }, async ({ destination }) => {
+    return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
+  })
+  .registerTool("calculate-price", {
+    inputSchema: { tripId: z.string() },
+  }, async ({ tripId }) => {
+    return { content: [{ type: "text", text: `Price for ${tripId}` }] };
+  });
+
+export type AppType = typeof server; // ✅ Type inference works correctly
+```
+
+❌ **Doesn't work** - Without method chaining:
+
+```ts
+import { McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({ name: "my-app", version: "1.0" }, {});
+
+server.widget("search-voyage", {}, {
+  inputSchema: { destination: z.string() },
+}, async ({ destination }) => {
+  return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
+});
+
+server.registerTool("calculate-price", {
+  inputSchema: { tripId: z.string() },
+}, async ({ tripId }) => {
+  return { content: [{ type: "text", text: `Price for ${tripId}` }] };
+});
+
+export type AppType = typeof server; // ❌ Type inference fails - tool registry is empty
+```
+
+_Server setup (server/src/index.ts)_
+
+```ts
+import { McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({ name: "my-app", version: "1.0" }, {})
+  .widget("search-voyage", {}, {
+    description: "Search for trips",
+    inputSchema: {
+      destination: z.string(),
+      departureDate: z.string().optional(),
+    },
+    outputSchema: {
+      results: z.array(z.object({ id: z.string(), name: z.string() })),
+      totalCount: z.number(),
+    },
+  }, async ({ destination }) => {
+    // Your tool logic here...
+    return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
+  })
+  .widget("get-details", {}, {
+    inputSchema: { tripId: z.string() },
+  }, async ({ tripId }) => {
+    return { content: [{ type: "text", text: `Details for ${tripId}` }] };
+  });
+
+// Export the server type for the client
+export type AppType = typeof server;
+```
+
+_One-time setup (web/src/skybridge.ts)_
+
+Create typed hooks once and export them for use across your app. This file acts as a bridge between your server types and your widgets:
+
+```ts
+import type { AppType } from "../server"; // type-only import
+import { generateHelpers } from "skybridge/web";
+
+export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
+```
+
+_Usage in widgets (web/src/widgets/search.tsx)_
+
+```tsx
+import { useCallTool, useToolInfo } from "../skybridge"; // import typed hooks
+
+export function SearchWidget() {
+  const { callTool, data, isPending } = useCallTool("search-voyage");
+  //                                                 ^ autocomplete for tool names
+  const toolInfo = useToolInfo<"search-voyage">();
+  //                              ^ autocomplete for widget names
+
+  const handleSearch = () => {
+    callTool({ destination: "Spain" });
+    //         ^ autocomplete for input fields
+  };
+
+  return (
+    <div>
+      <button onClick={handleSearch} disabled={isPending}>
+        Search
+      </button>
+      {toolInfo.isSuccess && (
+        <div>Found {toolInfo.output.totalCount} results</div>
+        //                      ^ typed output
+      )}
+    </div>
+  );
+}
+```
+
 **Hooks**
 
 The `skybridge/web` package comes with a set of hooks to help you build your widgets :
@@ -104,7 +230,9 @@ The `skybridge/web` package comes with a set of hooks to help you build your wid
 - `useOpenAiGlobal`: A generic hook to get any global data from the OpenAI iFrame skybridge runtime (in `window.openai`).
 - `useToolOutput`: A hook to get the initial tool `structuredContent` returned when rendering the widget for the first time. The data inside this hook is not updated when the tool is called again.
 - `useToolResponseMetadata`: A hook to get the initial tool `meta` returned when rendering the widget for the first time. The data inside this hook is not updated when the tool is called again.
+- `useToolInfo`: A hook to get the tool input, output, and response metadata with type inference. Provides a discriminated union based on status (pending/success).
 - `useCallTool`: A @tanstack/react-query inspired hook to send make additional tool calls inside a widget.
+- `generateHelpers`: A factory that creates typed versions of `useCallTool` and `useToolInfo` with full type inference from your server type.
 
 _useOpenAiGlobal_
 
@@ -128,6 +256,51 @@ _useToolResponseMetadata_
 import { useToolResponseMetadata } from "skybridge/web";
 
 const toolResponseMetadata = useToolResponseMetadata();
+```
+
+_useToolInfo_
+
+```ts
+import { useToolInfo } from "skybridge/web";
+
+const toolInfo = useToolInfo<{
+  input: { query: string };
+  output: { results: string[] };
+  responseMetadata: { id: number };
+}>();
+
+// toolInfo.input is typed based on the input type
+// toolInfo.output is typed based on the output type (undefined when pending)
+// toolInfo.status narrows correctly: "pending" | "success"
+
+if (toolInfo.isPending) {
+  // toolInfo.output is undefined here
+  console.log(toolInfo.input.query);
+}
+
+if (toolInfo.isSuccess) {
+  // toolInfo.output is typed here
+  console.log(toolInfo.output.results);
+}
+```
+
+_useToolInfo_ with typed hooks (recommended)
+
+```tsx
+import { useToolInfo } from "../skybridge"; // import typed hooks
+
+export function SearchWidget() {
+  const toolInfo = useToolInfo<"search-voyage">();
+  //                              ^ autocomplete for widget names
+  // toolInfo.input is typed as { destination: string; departureDate?: string; ... }
+  // toolInfo.output is typed as { results: Array<...>; totalCount: number; } | undefined
+
+  if (toolInfo.isSuccess) {
+    return <div>Found {toolInfo.output.totalCount} results</div>;
+  }
+
+  return <div>Searching for {toolInfo.input.destination}...</div>;
+}
 ```
 
 _useCallTool_ in synchronous mode

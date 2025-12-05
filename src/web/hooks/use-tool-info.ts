@@ -2,7 +2,7 @@ import { useOpenAiGlobal } from "./use-openai-global.js";
 import { useEffect, useState } from "react";
 import type { UnknownObject } from "../types.js";
 
-type ToolPendingState<ToolInput extends UnknownObject> = {
+export type ToolPendingState<ToolInput extends UnknownObject> = {
   status: "pending";
   isPending: true;
   isSuccess: false;
@@ -11,7 +11,7 @@ type ToolPendingState<ToolInput extends UnknownObject> = {
   responseMetadata: undefined;
 };
 
-type ToolSuccessState<
+export type ToolSuccessState<
   ToolInput extends UnknownObject,
   ToolOutput extends UnknownObject,
   ToolResponseMetadata extends UnknownObject
@@ -24,7 +24,7 @@ type ToolSuccessState<
   responseMetadata: ToolResponseMetadata;
 };
 
-type ToolState<
+export type ToolState<
   ToolInput extends UnknownObject,
   ToolOutput extends UnknownObject,
   ToolResponseMetadata extends UnknownObject

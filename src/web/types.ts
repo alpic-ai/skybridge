@@ -8,6 +8,9 @@ declare module "react" {
 
 export type UnknownObject = Record<string, unknown>;
 
+export type Prettify<T> = { [K in keyof T]: T[K] } & {};
+export type Objectify<T> = T & UnknownObject;
+
 type WidgetState = UnknownObject;
 
 type FileMetadata = { fileId: string };
