@@ -44,6 +44,7 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "handlebars": "^4.7.8",
+    "superjson": "^2.2.6",
     "vite": "^7.1.11",
     "zod": "^3.25.51",
     "zustand": "^5.0.9"
