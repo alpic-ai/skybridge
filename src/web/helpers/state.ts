@@ -1,11 +1,11 @@
+import superjson, { type SuperJSONResult } from "superjson";
 import { WIDGET_CONTEXT_KEY } from "../data-llm.js";
 import type { UnknownObject } from "../types.js";
-import superjson from "superjson";
 
 export function filterWidgetContext<T extends UnknownObject>(
   state?: T | null
 ): T | null {
-  if (state === null) {
+  if (state === null || state === undefined) {
     return null;
   }
 
@@ -42,8 +42,12 @@ export function injectWidgetContext<T extends UnknownObject>(
   return newState;
 }
 
-export function serializeState(value: unknown): unknown {
-  return superjson.serialize(value).json;
+export function serializeState(value: UnknownObject) {
+  return superjson.parse(superjson.stringify(value)); // Strips functions
+}
+
+export function deserializeState(value: SuperJSONResult): unknown {
+  return superjson.deserialize(value);
 }
 
 export function getInitialState<State extends UnknownObject>(
