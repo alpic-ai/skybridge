@@ -58,8 +58,12 @@ const config: Config = {
       },
       items: [
         {
-          href: "https://github.com/alpic-ai/skybridge",
-          label: "GitHub",
+          type: "custom-github-stars",
+          position: "right",
+        },
+        {
+          href: "https://discord.gg/awV4gu74wK",
+          label: "Discord",
           position: "right",
         },
       ],
