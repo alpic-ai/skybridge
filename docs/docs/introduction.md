@@ -1,113 +1,74 @@
 ---
 sidebar_position: 1
+title: Introduction
 slug: /
 ---
 
 # Introduction
 
-**Skybridge is the TypeScript framework for building ChatGPT apps**
-Skybridge comes with 2 packages:
+**Skybridge is a modular framework for quickly building ChatGPT apps, the _modern TypeScript way_.**
 
-- `skybridge/server`: A drop-in replacement of the `@modelcontextprotocol/sdk` official `McpServer` class with extra features for widget development.
-- `skybridge/web`: A react library with hooks and components to build widgets on the underlying _OpenAI iFrame skybridge_ runtime.
+## Why does Skybridge exist?
 
-## Quick start
+OpenAI announced the [ChatGPT Apps SDK](https://developers.openai.com/apps-sdk) in October 2025, giving developers a new way of interacting with ChatGPT. While it provides powerful primitives with UI rendering, state persistence, tool calls, follow-up messages and layout management, it is very low-level and lacks modern frontend DX standards like React hooks, error handling or data state management.
 
-To get started in less than a minute, you can [create a new repository](https://github.com/new?template_name=apps-sdk-template&template_owner=alpic-ai) using our [ChatGPT SDK template](https://github.com/alpic-ai/apps-sdk-template). This template includes a basic setup for both the server and the widgets.
+In addition, ChatGPT Apps introduce a new challenge: building apps for **dual interaction surfaces**. With Apps interacting with both the user and the model, you need to make sure everything the user sees and does in the UI is also shared with the model, and vice-versa.
 
-## Installation
+Finally, there are no developer tools or environment. Developers can test their apps only inside ChatGPT Developer mode, which has infinite caching policies, no hot module reload, and requires you to refresh or re-install your app to test any change - losing minutes at each small iteration.
 
-```bash
-pnpm add skybridge
-```
+After building dozens of ChatGPT Apps, we quickly saw repeating patterns and frustrations, and realized developers were spending too much time stitching together SDKs and managing low-level wiring instead of focusing on their product.
 
-## Concepts
+We built Skybridge to avoid these frustrations to other developers, adding back the frontend development standards into ChatGPT Apps, while accelerating their time-to-production-app.
 
-### Widgets
 
-> A widget is a UI component that turns structured tool results into a human-friendly UI. Those are built using React components. They are rendered inside an iframe inline with the conversation on ChatGPT.
+## What is Skybridge?
 
-Each widget in your app must have a unique name. The name is used to bridge the tool invocation result with the widget React component.
+Skybridge is a _modular_ framework aiming to **maximize Developer Experience while minimizing boilerplate code** while building your ChatGPT Apps.
 
-For example, in order to register a new widget named `pokemon` on your ChatGPT app. You should have the following file structure and file contents:
+It includes 3 main components:
+- **`skybridge/server`**: A drop-in replacement for the official MCP SDK that adds widget registration and type inference capabilities.
+- **`skybridge/web`**: A React library providing hooks, components, and the runtime glue to render your widgets inside ChatGPT's iframe environment. 
+- a **local Dev Environment**: our Vite plugin adds Hot Module Reload to your ChatGPT Apps, with optimized assets building for both local and production environments.
 
-_Project structure_
 
-```
-server/
-└── src/
-    └── index.ts // Register the widget with McpServer.widget()
-web/
-└── src/
-    └── widgets/
-        └── pokemon.tsx // Use the same widget name as the file name
-```
+**Skybridge** bridges the gap between standard **MCP servers** and **OpenAI APIs**, allowing you to build rich, React-based UI experiences directly within ChatGPT conversations—all with full type safety and a developer experience you'll love.
 
-_server/src/index.ts_
+## What Skybridge is NOT
 
-```ts
-import { McpServer } from "skybridge/server";
+- **It is NOT another MCP SDK.** `skybridge/server` simply extends the official [TypeScript MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk), and `skybridge/web` focuses on improving the ChatGPT Apps API, making it compatible with any MCP Server and runtime.
+- **It is NOT a full-stack framework.** Skybridge provides React extensions and tooling, but you can use it alongside your favorite frameworks and libraries.
+- **It is NOT a hosting platform.** You deploy your app wherever you want—Vercel, Cloudflare, Alpic, or your own infrastructure.
 
-const server = new McpServer();
+## Get Started
 
-server.widget(
-  "pokemon"
-  // Remaining arguments...
-);
-```
+Ready to build your first ChatGPT App with Skybridge? Choose your path:
 
-_web/src/widgets/pokemon.tsx_
+<div className="card-grid">
+  <div className="card">
+    <h3>🚀 Create New App</h3>
+    <p>Start from scratch with our starter kit. Get up and running in 5 minutes with our dev server and HMR.</p>
+    <a href="/quickstart/create-new-app" className="card-link">Get Started →</a>
+  </div>
+  
+  <div className="card">
+    <h3>➕ Add to Existing App</h3>
+    <p>Already have an MCP server? Add Skybridge to enable our React helpers and widgets abstractions.</p>
+    <a href="/quickstart/add-to-existing-app" className="card-link">Migrate Now →</a>
+  </div>
+</div>
 
-```ts
-import { mountWidget } from "skybridge/web";
+## Want to dig deeper?
 
-const Pokemon: React.FunctionComponent = () => {
-  // Your React component code goes here...
-};
-
-mountWidget(<Pokemon />);
-```
-
-## Packages
-
-### skybridge/server
-
-The `skybridge/server` package is a drop-in replacement of the `@modelcontextprotocol/sdk` official `McpServer` class with extra features for widget development. If you're already using the `@modelcontextprotocol/sdk`, you can simply replace your `McpServer` import with `skybridge/server` and you're good to go.
-
-### skybridge/web
-
-The `skybridge/web` package is a react library with hooks and components to build widgets on the underlying _OpenAI iFrame skybridge_ runtime.
-
-**Vite plugin**
-
-The `skybridge/web` package comes with a Vite plugin that allows you to build your widgets as regular Vite apps.
-
-```ts
-import { defineConfig } from "vite";
-import { skybridge } from "skybridge/web";
-
-export default defineConfig({
-  plugins: [skybridge()],
-});
-```
-
-**Hooks**
-
-Check out the [API reference](/api-reference) for the full list of hooks and components.
-
-## Migrate your existing MCP server to a ChatGPT app
-
-If you're already using the `@modelcontextprotocol/sdk` to build a MCP server, you can migrate to a ChatGPT app by following these steps:
-
-1. Replace your `McpServer` import from `@modelcontextprotocol/sdk` with the same import from `skybridge/server`
-2. Create a new vite project in a folder named `web` and install the `skybridge` package
-3. Replace the `vite.config.ts` file with the following:
-
-```ts
-import { defineConfig } from "vite";
-import { skybridge } from "skybridge/web";
-
-export default defineConfig({
-  plugins: [skybridge()],
-});
-```
+<div className="card-grid">
+  <div className="card">
+    <h3>💡 Core Concepts</h3>
+    <p>Understand how MCP, ChatGPT Apps, and Skybridge work together</p>
+    <a href="/concepts" className="card-link">Learn More →</a>
+  </div>
+  
+  <div className="card">
+    <h3>🔄 Skybridge Abstractions</h3>
+    <p>Learn how Skybridge extends the raw OpenAI APIs with React hooks and utilities</p>
+    <a href="/skybridge-abstractions" className="card-link">Explore →</a>
+  </div>
+</div>
