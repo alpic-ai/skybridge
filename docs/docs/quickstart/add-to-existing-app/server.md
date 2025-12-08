@@ -30,7 +30,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { McpServer } from "skybridge/server";
 ```
 
-Your existing tools, resources, and prompts will continue to work as before. But now, you will also be able to create widgets.
+Your existing tools, resources, and prompts will continue to work as before. With `skybridge/server`, you will also be able to register **widgets**, a new class encompassing a Tool and a corresponding UI Resource. 
 
 ## Widget structure
 
@@ -50,7 +50,9 @@ your-project/
 
 ### Widget naming convention
 
-**Important:** The widget file name must match the widget name you register on the server.
+:::warning Widget naming convention
+The widget file name must match the widget name you register on the server.
+:::
 
 For example:
 - If you create `web/src/widgets/search-results.tsx`
@@ -163,9 +165,11 @@ app.listen(3000, () => {
 
 For full type inference and autocomplete in your widgets, follow these additional steps.
 
-### Use method chaining
+### Use method chaining for your MCP server.
 
-**Important:** Use method chaining when registering widgets to enable TypeScript type inference:
+:::warning Method chaining required
+Use method chaining when registering widgets to enable TypeScript type inference.
+:::
 
 ```typescript
 import { McpServer } from "skybridge/server";

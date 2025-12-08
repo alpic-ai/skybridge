@@ -13,29 +13,37 @@ You should already have:
 - A `web` folder or widgets directory in your project
 - Node.js 22+ and pnpm installed
 
+## Install
+
+Add Skybridge to your project:
+
+```bash
+pnpm add skybridge
+```
+
 ## Package overview
 
-Skybridge provides React hooks for building advanced ChatGPT Apps.
+`skybridge/web` provides React hooks and utilities for building advanced ChatGPT Apps:
 
-### Core hooks
-- **[`useToolInfo`](/api-reference/use-tool-info)**: Access the initial tool input and output data
-- **[`useCallTool`](/api-reference/use-call-tool)**: Make additional tool calls from within your widget
-- **[`useWidgetState`](/api-reference/use-widget-state)**: Manage widget state that persists across re-renders
+### State Management
+- **[`useToolInfo`](/api-reference/use-tool-info)**: Get initial tool input, output and metadata
+- **[`useWidgetState`](/api-reference/use-widget-state)**: Persist state across widget renders
 
-### ChatGPT integration hooks
-- **[`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message)**: Send follow-up messages to the conversation
-- **[`useRequestModal`](/api-reference/use-request-modal)**: Request a modal to display content
-- **[`useOpenExternal`](/api-reference/use-open-external)**: Open external URLs
+### User Interface
+- **[`useTheme`](/api-reference/use-theme)**: Get the current user theme
+- **[`useDisplayMode`](/api-reference/use-display-mode)**: Get and request widget display mode changes
+- **[`useRequestModal`](/api-reference/use-request-modal)**: Open a modal portaled outside of the widget iframe
+- **[`useLocale`](/api-reference/use-locale)**: Get the user's locale
+- **[`useUserAgent`](/api-reference/use-user-agent)**: Get device type and capabilities
 
-### ChatGPT environment hooks
-- **[`useTheme`](/api-reference/use-theme)**: Access the current ChatGPT theme (light/dark)
-- **[`useLocale`](/api-reference/use-locale)**: Access the user's locale
-- **[`useDisplayMode`](/api-reference/use-display-mode)**: Access the current display mode
-- **[`useUserAgent`](/api-reference/use-user-agent)**: Access the user agent string
-- **[`useFiles`](/api-reference/use-files)**: Access uploaded files
+### Actions
+- **[`useCallTool`](/api-reference/use-call-tool)**: Call tools from within a widget
+- **[`useOpenExternal`](/api-reference/use-open-external)**: Open external links
+- **[`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message)**: Send a follow-up message in the conversation
+- **[`useFiles`](/api-reference/use-files)**: Upload and download files
 
-### Advanced
-- **[`useOpenAiGlobal`](/api-reference/use-openai-global)**: Access any global data from the OpenAI runtime
+### Others
+- **[`useOpenAiGlobal`](/api-reference/use-openai-global)**: Low-level hook to subscribe to `window.openai` state values
 - **[`generateHelpers`](/api-reference/generateHelpers)**: Generate typed helpers for your widgets (requires `skybridge/server`)
 
 For complete documentation of all hooks with examples and options, see the [API Reference](/api-reference).

@@ -22,11 +22,9 @@ Skybridge contains 2 main packages that can be used together or independently.
 
 ## Option 2: use `skybridge/web` only
 
-**Best if**: you already have an MCP server in a non-TypeScript runtime and only want React hooks for widgets.
-
 <div className="card-grid">
   <div className="card">
     <h3><a href="web">Use skybridge/web only</a></h3>
-    <p>**Best if**: you already have an MCP server in a non-TypeScript runtime and only want React hooks for widgets.</p>
+    <p>**Best if**: you already have an MCP server in a non-TypeScript runtime and only want React hooks for UI components.</p>
   </div>
 </div>

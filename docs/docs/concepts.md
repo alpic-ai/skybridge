@@ -4,9 +4,13 @@ sidebar_position: 3
 
 # Core Concepts
 
-To build effectively with Skybridge, you will first need to be familiar with:
+Skybridge provides helpers and utilities to build ChatGPT Apps, which extend MCP Servers with UI resources. To build effectively with Skybridge, you will first need to be familiar with:
 - [Model Context Protocol](https://modelcontextprotocol.io) and MCP Servers
 - the [OpenAI Apps SDK](https://developers.openai.com/apps-sdk/) to build ChatGPT Apps
+
+:::note
+Read our <a href="https://alpic.ai/blog/inside-openai-s-apps-sdk-how-to-build-interactive-chatgpt-apps-with-mcp?ref=makerswave.com" target="_blank" rel="noopener noreferrer">in-depth blog article</a> to understand how ChatGPT Apps work
+:::
 
 ## MCP (Model Context Protocol)
 
@@ -14,21 +18,20 @@ To build effectively with Skybridge, you will first need to be familiar with:
 
 An MCP server exposes:
 - **Tools**: Functions the model can call (e.g., `search_flights`, `get_weather`)
-- **Resources**: Data the model can access (e.g., files, databases)
-- **Prompts**: Pre-defined instructions for the model
+- **Resources**: Data the model can access (e.g., files, UI components)
 
 When you ask ChatGPT a question, it can invoke tools on your MCP server to fetch data or perform actions on your behalf.
 
 ## ChatGPT Apps
 
-ChatGPT Apps, announced by OpenAI in October 2025, extend MCP with a powerful new capability: **interactive UI widgets** that render directly inside the conversation.
+ChatGPT Apps, [announced by OpenAI in October 2025](https://alpic.ai/blog/inside-openai-s-apps-sdk-how-to-build-interactive-chatgpt-apps-with-mcp?ref=makerswave.com), extend MCP with a powerful new capability: **interactive UI widgets** that render directly inside the conversation.
 
 ### How ChatGPT Apps Work
 
 A ChatGPT App consists of two components:
 
 1. **MCP Server**: Handles your business logic and exposes tools
-2. **Web Widgets**: React components that render in ChatGPT's interface
+2. **Web Widgets**: UI components that render in ChatGPT's interface
 
 When a tool is called, it can return both:
 - **Text content**: What the model sees and responds with
@@ -72,23 +75,21 @@ Skybridge bridges the gap between raw MCP servers and ChatGPT Apps by providing:
 ### 1. Server Extensions
 
 `skybridge/server` extends the official MCP SDK with:
-- **Widget registration**: Simple API to register widgets alongside tools
+- **Widget registration**: Simple API to register widgets, which are MCP tools with associated declared resources, saying you a lot of boilerplate code.
 - **Type inference**: Export your server type for end-to-end TypeScript safety
 - **Drop-in replacement**: Works with your existing MCP server code
 
 ### 2. React Abstractions
 
 `skybridge/web` wraps the raw `window.openai` API with:
-- **React hooks**: Modern, declarative alternatives to imperative API calls
+- **React hooks and utilities**: Modern, declarative alternatives to imperative API calls
 - **Automatic state management**: No manual loading/error state tracking
 - **Type safety**: Full autocomplete and type checking with `generateHelpers`
-- **Developer experience**: Hot Module Reload, better error messages
 
 ### 3. Development Tools
 
 - **Vite plugin**: Optimized builds with HMR for instant feedback
 - **Local dev server**: Test your widgets without constantly redeploying
-- **Type generation**: End-to-end type safety from server to client
 
 In short: Skybridge takes the low-level primitives of MCP and ChatGPT Apps and wraps them in a modern, type-safe, React-friendly framework.
 

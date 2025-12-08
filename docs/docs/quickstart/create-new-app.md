@@ -4,11 +4,11 @@ sidebar_position: 1
 
 # Create your ChatGPT App
 
-The fastest way to start building is using our starter template. It comes pre-configured with the MCP server, UI widgets, and a full dev server with Hot Module Reload.
+The fastest way to start building is using our starter template. It comes pre-configured with an MCP server, UI widgets, and a full dev server with Hot Module Reload.
 
 ## Clone the Starter kit
 
-You can [create a new repository](https://github.com/new?template_name=apps-sdk-template&template_owner=alpic-ai) using our [ChatGPT Apps SDK template](https://github.com/alpic-ai/apps-sdk-template), or clone it manually:
+You can [create a new repository](https://github.com/new?template_name=apps-sdk-template&template_owner=alpic-ai) using our [ChatGPT Apps starter template](https://github.com/alpic-ai/apps-sdk-template), or clone it manually:
 
 ```bash
 git clone https://github.com/alpic-ai/apps-sdk-template my-chatgpt-app
@@ -20,7 +20,7 @@ pnpm install
 Make sure you have:
 - **Node.js 22+** (see `.nvmrc` in the template for exact version)
 - **pnpm** (install with `npm install -g pnpm`)
-- **Ngrok** for exposing your local server
+- **[Ngrok](https://ngrok.com/download)** for exposing your local server
 :::
 
 ## Start the development server
@@ -66,7 +66,7 @@ Now you can edit React components in `web/src/widgets` and see changes instantly
 - The widget will automatically update in ChatGPT without refreshing or reconnecting
 - The Express server and MCP server continue running without interruption
 
-**Note:** When you modify widget components, changes will be reflected immediately. If you modify MCP server code (in `server/`), you may need to reload your connector in **Settings → Connectors → [Your connector] → Reload**.
+**Note:** When you modify widget components, changes will be reflected immediately. If you modify MCP server code (in `server/`), you may need to reload your connector in **Settings → Connectors → [Your connector] → Refresh**.
 
 ## Widget naming convention
 

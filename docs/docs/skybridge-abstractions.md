@@ -19,10 +19,11 @@ The raw `window.openai` API is powerful but imperative. Skybridge wraps these pr
 | `window.openai.callTool()` | [`useCallTool()`](/api-reference/use-call-tool) | Make additional tool calls |
 | `window.openai.sendFollowUpMessage()` | [`useSendFollowUpMessage()`](/api-reference/use-send-follow-up-message) | Send follow-up messages |
 | `window.openai.openExternal()` | [`useOpenExternal()`](/api-reference/use-open-external) | Open external URLs |
-| `window.openai.requestDisplayMode()` | [`useRequestModal()`](/api-reference/use-request-modal) | Request modal display |
+| `window.openai.requestModal()` | [`useRequestModal()`](/api-reference/use-request-modal) | Request modal display |
 | `window.openai.theme` | [`useTheme()`](/api-reference/use-theme) | Access ChatGPT theme |
 | `window.openai.locale` | [`useLocale()`](/api-reference/use-locale) | Access user locale |
 | `window.openai.displayMode` | [`useDisplayMode()`](/api-reference/use-display-mode) | Access display mode |
+| `window.openai.requestDisplayMode()` | [`useDisplayMode()`](/api-reference/use-display-mode) | Request display mode change |
 | `window.openai.userAgent` | [`useUserAgent()`](/api-reference/use-user-agent) | Access user agent info |
 | `window.openai.*` | [`useOpenAiGlobal()`](/api-reference/use-openai-global) | Access any global value |
 
@@ -31,27 +32,63 @@ The raw `window.openai` API is powerful but imperative. Skybridge wraps these pr
 ### Without Skybridge (Raw API)
 
 ```tsx
-const [loading, setLoading] = useState(false);
-const [data, setData] = useState(null);
-const [theme, setTheme] = useState(window.openai.theme);
+import { useEffect, useState } from "react";
 
-useEffect(() => {
-  const handleThemeChange = () => setTheme(window.openai.theme);
-  window.addEventListener('openai:set_globals', handleThemeChange);
-  return () => window.removeEventListener('openai:set_globals', handleThemeChange);
-}, []);
+function WeatherWidget() {
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [theme, setTheme] = useState("light");
 
-const handleClick = async () => {
-  setLoading(true);
-  try {
-    const result = await window.openai.callTool("search", { query: "hotels" });
-    setData(result);
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setLoading(false);
-  }
-};
+  // Subscribe to theme changes
+  useEffect(() => {
+    const updateTheme = () => {
+      setTheme(window.openai?.theme || "light");
+    };
+    updateTheme();
+    
+    window.addEventListener("message", (event) => {
+      if (event.data.type === "openai:set_globals") {
+        updateTheme();
+      }
+    });
+  }, []);
+
+  const handleGetWeather = async (city: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await window.openai.callTool("getWeather", { 
+        city, 
+        units: "metric" 
+      });
+      setData(result);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const isDark = theme === "dark";
+
+  return (
+    <div style={{ 
+      backgroundColor: isDark ? "#1a1a1a" : "#ffffff",
+      color: isDark ? "#ffffff" : "#000000" 
+    }}>
+      <button 
+        disabled={loading} 
+        onClick={() => handleGetWeather("Paris")}
+      >
+        {loading ? "Loading..." : "Get Weather"}
+      </button>
+      
+      {error && <p>Error: {String(error)}</p>}
+      {data && <p>Temperature: {data.structuredContent.temperature}°C</p>}
+    </div>
+  );
+}
 ```
 
 ### With Skybridge (React Hooks)
@@ -59,12 +96,31 @@ const handleClick = async () => {
 ```tsx
 import { useCallTool, useTheme } from "skybridge/web";
 
-const { callTool, isPending, data } = useCallTool("search");
-const theme = useTheme();
+function WeatherWidget() {
+  const { callTool, isPending, data, isError, error } = useCallTool<
+    { city: string; units: string },
+    { structuredContent: { temperature: number } }
+  >("getWeather");
+  const theme = useTheme();
+  const isDark = theme === "dark";
 
-const handleClick = () => {
-  callTool({ query: "hotels" });
-};
+  return (
+    <div style={{ 
+      backgroundColor: isDark ? "#1a1a1a" : "#ffffff",
+      color: isDark ? "#ffffff" : "#000000" 
+    }}>
+      <button 
+        disabled={isPending} 
+        onClick={() => callTool({ city: "Paris", units: "metric" })}
+      >
+        {isPending ? "Loading..." : "Get Weather"}
+      </button>
+      
+      {isError && <p>Error: {String(error)}</p>}
+      {data && <p>Temperature: {data.structuredContent.temperature}°C</p>}
+    </div>
+  );
+}
 ```
 
 Much cleaner! Skybridge handles state management, event listeners, and loading states automatically.
@@ -118,7 +174,7 @@ export function FlightWidget() {
 }
 ```
 
-**Use `useToolInfo` for the initial data** that renders your widget. This data doesn't change—it's the props your widget receives when it first loads.
+**Use [`useToolInfo`](/api-reference/use-tool-info) for the initial data** that renders your widget. This data doesn't change—it's the props your widget receives when it first loads.
 
 ### 2. Widget → Model (Context Sync)
 
@@ -143,7 +199,7 @@ The `data-llm` value is automatically injected into the model's context. This al
 - User clicks a flight → `data-llm` updates → Model knows which flight they're viewing
 - User asks "What's the baggage policy?" → Model has context to answer accurately
 
-**Why declarative?** Only what's currently rendered (and visible to the user) is shared with the model. No need to manually track state transitions.
+Only what's currently rendered (and visible to the user) is shared with the model. No need to manually track state transitions.
 
 ### 3. Widget → Server (Tool Calls)
 
@@ -167,9 +223,9 @@ export function FlightWidget() {
 }
 ```
 
-**Use `useCallTool` when the user performs an action** that requires fetching more data. This hook:
+**Use [`useCallTool`](/api-reference/use-call-tool) when the user performs an action** that requires fetching more data. This hook:
 - Manages loading/error/data states automatically
-- Provides full TypeScript inference with `generateHelpers`
+- Provides full TypeScript inference with [`generateHelpers`](/api-reference/generateHelpers)
 - Wraps `window.openai.callTool` with a React Query-like API
 
 ### 4. Widget → Chat (Follow-up Messages)
@@ -199,7 +255,7 @@ This creates a continuous loop: the widget can ask the model for help, and the m
 
 Widgets are rendered inside an iframe inline with the conversation on ChatGPT. They are hydrated with the initial tool call result that triggered the widget rendering. Once your component is mounted, it can send additional requests in accordance with the iframe CSP.
 
-One way your widget can request additional data is by calling tools on your MCP server. The `useCallTool` hook exported by `skybridge/web` is a wrapper of the underlying `window.openai.callTool` function. This way of requesting data is the preferred way and is guaranteed to be allowed by the iframe CSP.
+One way your widget can request additional data is by calling tools on your MCP server. The [`useCallTool`](/api-reference/use-call-tool) hook exported by `skybridge/web` is a wrapper of the underlying `window.openai.callTool` function. This way of requesting data is the preferred way and is guaranteed to be allowed by the iframe CSP.
 
 ### When to use
 
@@ -240,7 +296,7 @@ export const PokemonWidget: React.FunctionComponent = () => {
 
 ## Type Safety with generateHelpers
 
-When using `skybridge/server`, you can generate fully typed hooks:
+When using `skybridge/server`, you can generate fully typed hooks with [`generateHelpers`](/api-reference/generateHelpers):
 
 ```typescript
 // server/src/index.ts
@@ -333,19 +389,19 @@ const handleCheck = async (date: string) => {
 ## Summary: The Communication Loop
 
 1. **ChatGPT calls your tool** → Server responds with `structuredContent`
-2. **Widget hydrates** with `useToolInfo`
+2. **Widget hydrates** with [`useToolInfo`](/api-reference/use-tool-info)
 3. **User interacts** → Widget updates `data-llm` → Model sees the context
-4. **User triggers action** → Widget calls `useCallTool` → Server responds
-5. **Widget sends follow-up** → `useSendFollowUpMessage` → ChatGPT replies
+4. **User triggers action** → Widget calls [`useCallTool`](/api-reference/use-call-tool) → Server responds
+5. **Widget sends follow-up** → [`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message) → ChatGPT replies
 
 This loop creates a seamless experience where the conversation, the UI, and your backend work together as one cohesive app.
 
 ## Key Takeaways
 
-- Use **`useToolInfo`** for initial data (hydration)
-- Use **`useCallTool`** for user-triggered data fetching
+- Use **[`useToolInfo`](/api-reference/use-tool-info)** for initial data (hydration)
+- Use **[`useCallTool`](/api-reference/use-call-tool)** for user-triggered data fetching
 - Use **`data-llm`** to sync UI state with the model
-- Generate **typed hooks** with `generateHelpers` for autocomplete and type safety
+- Generate **typed hooks** with [`generateHelpers`](/api-reference/generateHelpers) for autocomplete and type safety
 - **Don't call tools on mount**—pass initial data through `structuredContent`
 
 ## What's Next?
