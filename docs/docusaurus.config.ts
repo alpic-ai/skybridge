@@ -58,7 +58,8 @@ const config: Config = {
       },
       items: [
         {
-          type: "custom-github-stars",
+          href: "https://github.com/alpic-ai/skybridge",
+          html: '<img src="https://img.shields.io/github/stars/alpic-ai/skybridge?label=Star us" alt="GitHub stars" class="github-stars-badge" />',
           position: "right",
         },
         {
