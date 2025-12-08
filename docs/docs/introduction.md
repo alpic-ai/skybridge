@@ -18,7 +18,7 @@ Finally, there are no developer tools or environment. Developers can test their 
 
 After building dozens of ChatGPT Apps, we quickly saw repeating patterns and frustrations, and realized developers were spending too much time stitching together SDKs and managing low-level wiring instead of focusing on their product.
 
-We built Skybridge to avoid these frustrations to other developers, adding back the frontend development standards into ChatGPT Apps, while accelerating their time-to-production-app.
+We built Skybridge to avoid these frustrations to other developers, adding back the full-stack development standards into ChatGPT Apps, while accelerating their time-to-production-app.
 
 
 ## What is Skybridge?
