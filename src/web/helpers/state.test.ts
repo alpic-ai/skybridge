@@ -26,39 +26,46 @@ describe("state helpers", () => {
     });
 
     it("should correctly filter WIDGET_CONTEXT_KEY and preserve other properties", () => {
-      const stateWithCtxAndOthers = {
+      const stateWithContextAndOthers = {
         a: 1,
         b: "two",
         c: { nested: true },
         [WIDGET_CONTEXT_KEY]: "context",
       };
-      const filteredWithCtxAndOthers = filterWidgetContext(
-        stateWithCtxAndOthers
+      const filteredWithContextAndOthers = filterWidgetContext(
+        stateWithContextAndOthers
       );
-      expect(filteredWithCtxAndOthers).toEqual({
+      expect(filteredWithContextAndOthers).toEqual({
         a: 1,
         b: "two",
         c: { nested: true },
       });
 
-      const stateNoCtx = { count: 5, name: "test" };
-      const filteredNoCtx = filterWidgetContext(stateNoCtx);
-      expect(filteredNoCtx).toEqual(stateNoCtx);
+      const stateNoContext = { count: 5, name: "test" };
+      const filteredNoContext = filterWidgetContext(stateNoContext);
+      expect(filteredNoContext).toEqual(stateNoContext);
     });
   });
 
   describe("serializeState", () => {
     it("should serialize plain objects", () => {
-      const arr = [1, "two", { three: 3 }];
+      const array = [1, "two", { three: 3 }];
       const date = new Date("2023-01-01T00:00:00Z");
-      const obj = { a: 1, b: "test", c: true, arr, date, fn: () => "test" };
-      const result = serializeState(obj);
+      const object = {
+        a: 1,
+        b: "test",
+        c: true,
+        array,
+        date,
+        function: () => "test",
+      };
+      const result = serializeState(object);
 
       expect(result).toEqual({
         a: 1,
         b: "test",
         c: true,
-        arr: [1, "two", { three: 3 }],
+        array: [1, "two", { three: 3 }],
         date: new Date("2023-01-01T00:00:00.000Z"),
       });
     });
