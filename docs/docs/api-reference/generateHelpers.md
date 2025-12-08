@@ -45,7 +45,7 @@ import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
 const server = new McpServer({ name: "my-app", version: "1.0" }, {})
-  .widget(
+  .registerWidget(
     "search-voyage",
     {},
     {
@@ -78,7 +78,7 @@ import { z } from "zod";
 
 const server = new McpServer({ name: "my-app", version: "1.0" }, {});
 
-server.widget(
+server.registerWidget(
   "search-voyage",
   {},
   {
