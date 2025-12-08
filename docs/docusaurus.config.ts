@@ -59,7 +59,12 @@ const config: Config = {
       items: [
         {
           href: "https://github.com/alpic-ai/skybridge",
-          label: "GitHub",
+          html: '<img src="https://img.shields.io/github/stars/alpic-ai/skybridge?label=Star us" alt="GitHub stars" class="github-stars-badge" />',
+          position: "right",
+        },
+        {
+          href: "https://discord.gg/awV4gu74wK",
+          label: "Discord",
           position: "right",
         },
       ],

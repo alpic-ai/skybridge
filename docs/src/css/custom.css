@@ -48,3 +48,11 @@
   
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+/* GitHub Stars Badge */
+.github-stars-badge {
+  transform: scale(1.2);
+  margin: 0 8px;
+  vertical-align: middle;
+  display: inline-block;
+}
