@@ -38,7 +38,7 @@ vi.mock("node:fs", async () => {
   };
 });
 
-describe("McpServer.widget", () => {
+describe("McpServer.registerWidget", () => {
   let server: McpServer;
   let mockResource: MockInstance<McpServer["resource"]>;
   let mockRegisterTool: MockInstance<McpServer["registerTool"]>;
@@ -60,7 +60,7 @@ describe("McpServer.widget", () => {
     const mockResourceConfig = { description: "Test widget" };
     const mockToolConfig = { description: "Test tool" };
 
-    server.widget(
+    server.registerWidget(
       "my-widget",
       mockResourceConfig,
       mockToolConfig,
@@ -106,7 +106,7 @@ describe("McpServer.widget", () => {
     const mockResourceConfig = { description: "Test widget" };
     const mockToolConfig = { description: "Test tool" };
 
-    server.widget(
+    server.registerWidget(
       "my-widget",
       mockResourceConfig,
       mockToolConfig,

@@ -42,7 +42,7 @@ _Project structure_
 ```
 server/
 └── src/
-    └── index.ts // Register the widget with McpServer.widget()
+    └── index.ts // Register the widget with McpServer.registerWidget()
 web/
 └── src/
     └── widgets/
@@ -56,7 +56,7 @@ import { McpServer } from "skybridge/server";
 
 const server = new McpServer();
 
-server.widget(
+server.registerWidget(
   "pokemon"
   // Remaining arguments...
 );
@@ -103,7 +103,7 @@ Skybridge provides fully typed hooks that give you autocomplete for tool names a
 
 > **Tip:** For the best TypeScript experience, use typed hooks throughout your application. They provide autocomplete, type safety, and better IDE support.
 
-> **Important:** For `generateHelpers` to work correctly, your MCP server must be defined using method chaining (e.g., `server.widget(...).widget(...).registerTool(...)`). This ensures TypeScript can properly infer the tool registry type from the chained calls.
+> **Important:** For `generateHelpers` to work correctly, your MCP server must be defined using method chaining (e.g., `server.registerWidget(...).registerWidget(...).registerTool(...)`). This ensures TypeScript can properly infer the tool registry type from the chained calls.
 
 **Examples:**
 
@@ -114,7 +114,7 @@ import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
 const server = new McpServer({ name: "my-app", version: "1.0" }, {})
-  .widget("search-voyage", {}, {
+  .registerWidget("search-voyage", {}, {
     inputSchema: { destination: z.string() },
   }, async ({ destination }) => {
     return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
@@ -136,7 +136,7 @@ import { z } from "zod";
 
 const server = new McpServer({ name: "my-app", version: "1.0" }, {});
 
-server.widget("search-voyage", {}, {
+server.registerWidget("search-voyage", {}, {
   inputSchema: { destination: z.string() },
 }, async ({ destination }) => {
   return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
@@ -158,7 +158,7 @@ import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
 const server = new McpServer({ name: "my-app", version: "1.0" }, {})
-  .widget("search-voyage", {}, {
+  .registerWidget("search-voyage", {}, {
     description: "Search for trips",
     inputSchema: {
       destination: z.string(),
@@ -172,7 +172,7 @@ const server = new McpServer({ name: "my-app", version: "1.0" }, {})
     // Your tool logic here...
     return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
   })
-  .widget("get-details", {}, {
+  .registerWidget("get-details", {}, {
     inputSchema: { tripId: z.string() },
   }, async ({ tripId }) => {
     return { content: [{ type: "text", text: `Details for ${tripId}` }] };

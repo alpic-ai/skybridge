@@ -36,7 +36,7 @@ _Project structure_
 ```
 server/
 └── src/
-    └── index.ts // Register the widget with McpServer.widget()
+    └── index.ts // Register the widget with McpServer.registerWidget()
 web/
 └── src/
     └── widgets/
@@ -50,7 +50,7 @@ import { McpServer } from "skybridge/server";
 
 const server = new McpServer();
 
-server.widget(
+server.registerWidget(
   "pokemon"
   // Remaining arguments...
 );

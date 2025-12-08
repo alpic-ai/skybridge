@@ -35,7 +35,7 @@ export function createTestServer() {
     { name: "test-app", version: "1.0.0" },
     {}
   )
-    .widget(
+    .registerWidget(
       "search-voyage",
       {},
       {
@@ -66,7 +66,7 @@ export function createTestServer() {
         };
       }
     )
-    .widget(
+    .registerWidget(
       "get-trip-details",
       {},
       {
@@ -91,7 +91,7 @@ export function createTestServer() {
         };
       }
     )
-    .widget(
+    .registerWidget(
       "no-input-widget",
       {},
       {
@@ -106,7 +106,7 @@ export function createTestServer() {
         };
       }
     )
-    .widget(
+    .registerWidget(
       "inferred-output-widget",
       {},
       {
@@ -172,7 +172,7 @@ export function createMinimalTestServer() {
   return new McpServer(
     { name: "test-app", version: "1.0.0" },
     {}
-  ).widget(
+  ).registerWidget(
     "search-voyage",
     {},
     {
