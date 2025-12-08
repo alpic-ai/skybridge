@@ -10,7 +10,7 @@ slug: /
 
 ## Why does Skybridge exist?
 
-OpenAI announced the [ChatGPT Apps SDK](https://developers.openai.com/apps-sdk) in October 2025, giving developers a new way of interacting with ChatGPT. While it provides powerful primitives with UI rendering, state persistence, tool calls, follow-up messages and layout management, it is very low-level and lacks modern frontend DX standards like React hooks, error handling or data state management.
+OpenAI announced the [ChatGPT Apps SDK](https://developers.openai.com/apps-sdk) in October 2025, giving developers a new way of interacting with ChatGPT. While it provides powerful primitives with UI rendering, state persistence, tool calls, follow-up messages and layout management, it is very low-level and lacks modern fullstack DX standards like end-to-end typesafe APIs, hooks, error handling or data state management.
 
 In addition, ChatGPT Apps introduce a new challenge: building apps for **dual interaction surfaces**. With Apps interacting with both the user and the model, you need to make sure everything the user sees and does in the UI is also shared with the model, and vice-versa.
 
