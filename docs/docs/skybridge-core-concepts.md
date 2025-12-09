@@ -2,9 +2,9 @@
 sidebar_position: 4
 ---
 
-# Skybridge Abstractions
+# Skybridge Core Concepts
 
-Now that you understand [Core Concepts](/concepts), let's see how Skybridge extends the low-level `window.openai` API with modern React abstractions.
+Now that you understand the basics of [MCP and ChatGPT Apps](/mcp-and-chatgpt-fundamentals), let's see how Skybridge extends the low-level `window.openai` API with modern React abstractions.
 
 ## From Imperative to Declarative
 
@@ -125,9 +125,11 @@ function WeatherWidget() {
 
 Much cleaner! Skybridge handles state management, event listeners, and loading states automatically.
 
-## The Three Actors
+## User, ChatGPT Host and your apps: a new interaction model
 
 ChatGPT Apps introduce a unique challenge: building for **dual interaction surfaces**. Understanding how the three actors communicate is essential:
+
+<img src="/img/chatgpt-apps-interaction.png" alt="ChatGPT Apps architecture" style={{maxWidth: '500px', width: '100%', display: 'block', margin: '0 auto'}} />
 
 1. **ChatGPT (Host)**: The conversational interface where users type messages and the model responds
 2. **Your MCP Server**: The backend that exposes tools and business logic
@@ -141,7 +143,7 @@ When ChatGPT calls one of your tools, the tool can return `structuredContent` to
 
 **Server:**
 ```ts
-server.widget("show_flights", {}, {
+server.registerWidget("show_flights", {}, {
   inputSchema: { destination: z.string() },
 }, async ({ destination }) => {
   const flights = await searchFlights(destination);
@@ -175,6 +177,16 @@ export function FlightWidget() {
 ```
 
 **Use [`useToolInfo`](/api-reference/use-tool-info) for the initial data** that renders your widget. This data doesn't change—it's the props your widget receives when it first loads.
+
+## Widget Naming Convention
+
+**Important:** For a widget to work properly, the name of the endpoint in your MCP server must match the file name of the corresponding React component in `web/src/widgets/`.
+
+For example:
+- If you create a widget endpoint named `pokemon-card`, you must create a corresponding React component file at `web/src/widgets/pokemon-card.tsx`
+- The endpoint name and the widget file name (without the `.tsx` extension) must be identical
+
+This naming convention allows the system to automatically map widget requests to their corresponding React components.
 
 ### 2. Widget → Model (Context Sync)
 
@@ -304,7 +316,7 @@ import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
 const server = new McpServer({ name: "my-app", version: "1.0" }, {})
-  .widget("search-hotels", {}, {
+  .registerWidget("search-hotels", {}, {
     inputSchema: {
       city: z.string(),
       checkIn: z.string(),

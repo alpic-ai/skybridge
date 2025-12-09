@@ -10,8 +10,7 @@ This guide shows you how to use `skybridge/web` without `skybridge/server` to ad
 
 You should already have:
 - A working ChatGPT app MCP server backend (in any technology)
-- A `web` folder or widgets directory in your project
-- Node.js 22+ and pnpm installed
+- Node.js 22+
 
 ## Install
 
@@ -79,7 +78,7 @@ mountWidget(<MyWidget />);
 
 ## Type safety without server
 
-Since you're not using `skybridge/server`, you won't get automatic type inference. You can still add types manually:
+If you're not using `skybridge/server`, you won't get automatic type inference. You can still add types manually:
 
 ```tsx
 import { useToolInfo } from "skybridge/web";
@@ -105,15 +104,15 @@ To learn more about how to build a ChatGPT App, please read the Core Concepts an
 
 <div className="card-grid">
   <div className="card">
-    <h3>Core Concepts</h3>
-    <p>Understand how ChatGPT Apps and widgets work</p>
-    <a href="/concepts" className="card-link">Learn More →</a>
+    <h3>MCP and ChatGPT Apps Fundamentals</h3>
+    <p>Learn the fundamentals of MCP servers and ChatGPT Apps</p>
+    <a href="/mcp-and-chatgpt-fundamentals" className="card-link">Learn More →</a>
   </div>
   
   <div className="card">
-    <h3>Skybridge Abstractions</h3>
+    <h3>Skybridge Core Concepts</h3>
     <p>Learn how Skybridge extends the raw APIs with React hooks</p>
-    <a href="/skybridge-abstractions" className="card-link">Explore →</a>
+    <a href="/skybridge-core-concepts" className="card-link">Explore →</a>
   </div>
 
   <div className="card">

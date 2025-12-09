@@ -10,7 +10,7 @@ This guide shows you how to add `skybridge/server` to an existing MCP server to 
 
 You should already have:
 - A working MCP server using the official [TypeScript MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk)
-- Node.js 22+ and pnpm installed
+- Node.js 22+ 
 
 ## Install Skybridge
 
@@ -104,14 +104,14 @@ mountWidget(<MyWidget />);
 
 ## Register the widget
 
-In your server code, register the widget using `server.widget()`:
+In your server code, register the widget using `server.registerWidget()`:
 
 ```typescript
 import { McpServer } from "skybridge/server";
 
 const server = new McpServer({ name: "my-app", version: "1.0" }, {});
 
-server.widget(
+server.registerWidget(
   "my-widget",  // Must match the filename: my-widget.tsx
   {},
   {
@@ -144,7 +144,7 @@ const app = express();
 const server = new McpServer({ name: "my-app", version: "1.0" }, {});
 
 // Register your widgets
-server.widget("my-widget", {}, {
+server.registerWidget("my-widget", {}, {
   inputSchema: { message: { type: "string" } },
 }, async ({ message }) => {
   return { 
@@ -177,7 +177,7 @@ import { z } from "zod";
 
 // ✅ Good - Using method chaining
 const server = new McpServer({ name: "my-app", version: "1.0" }, {})
-  .widget("search-results", {}, {
+  .registerWidget("search-results", {}, {
     inputSchema: {
       query: z.string(),
     },
@@ -188,7 +188,7 @@ const server = new McpServer({ name: "my-app", version: "1.0" }, {})
   }, async ({ query }) => {
     return { content: [{ type: "text", text: `Found results for ${query}` }] };
   })
-  .widget("get-details", {}, {
+  .registerWidget("get-details", {}, {
     inputSchema: { itemId: z.string() },
   }, async ({ itemId }) => {
     return { content: [{ type: "text", text: `Details for ${itemId}` }] };
@@ -202,8 +202,8 @@ export type AppType = typeof server;
 // ❌ Bad - Without method chaining
 const server = new McpServer({ name: "my-app", version: "1.0" }, {});
 
-server.widget("search-results", {}, { /* ... */ }, async () => { /* ... */ });
-server.widget("get-details", {}, { /* ... */ }, async () => { /* ... */ });
+server.registerWidget("search-results", {}, { /* ... */ }, async () => { /* ... */ });
+server.registerWidget("get-details", {}, { /* ... */ }, async () => { /* ... */ });
 
 export type AppType = typeof server; // Type inference fails
 ```

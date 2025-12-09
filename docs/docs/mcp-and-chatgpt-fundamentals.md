@@ -2,9 +2,9 @@
 sidebar_position: 3
 ---
 
-# Core Concepts
+# MCP and ChatGPT Apps Fundamentals
 
-Skybridge provides helpers and utilities to build ChatGPT Apps, which extend MCP Servers with UI resources. To build effectively with Skybridge, you will first need to be familiar with:
+To build effectively with Skybridge, you first need to understand the underlying technologies it builds upon:
 - [Model Context Protocol](https://modelcontextprotocol.io) and MCP Servers
 - the [OpenAI Apps SDK](https://developers.openai.com/apps-sdk/) to build ChatGPT Apps
 
@@ -31,7 +31,7 @@ ChatGPT Apps, [announced by OpenAI in October 2025](https://alpic.ai/blog/inside
 A ChatGPT App consists of two components:
 
 1. **MCP Server**: Handles your business logic and exposes tools
-2. **Web Widgets**: UI components that render in ChatGPT's interface
+2. **UI Widgets**: UI components that render in ChatGPT's interface
 
 When a tool is called, it can return both:
 - **Text content**: What the model sees and responds with
@@ -45,15 +45,7 @@ Here's what happens when ChatGPT renders a widget:
 
 1. User asks ChatGPT to perform an action (e.g., "Show me flight options to Paris")
 2. ChatGPT calls your MCP tool (e.g., `search_flights`)
-3. Your tool returns data with a reference to a widget resource:
-   ```ts
-   {
-     content: [{ type: "text", text: "Found 12 flights to Paris" }],
-     _meta: { "openai/outputTemplate": "ui://widget/flight-results.html" }
-   }
-   ```
-4. ChatGPT fetches the widget resource (your compiled React component)
-5. The widget renders in an iframe, hydrated with your tool's `structuredContent`
+3. Your tool returns a result with data, and if the tool contains a reference to a UI resource, ChatGPT fetches the resource (your compiled React component) and renders it in an iframe, hydrated with your tool's `structuredContent` and `_meta` properties.
 
 ### The `window.openai` API
 
@@ -70,30 +62,15 @@ This API is powerful but low-level and imperative—which is where Skybridge com
 
 ## What Skybridge Adds
 
-Skybridge bridges the gap between raw MCP servers and ChatGPT Apps by providing:
+Skybridge is a modular ChatGPT Apps framework that bridges the gap between standard MCP servers and [OpenAI APIs](https://developers.openai.com/apps-sdk/reference/). It includes:
 
-### 1. Server Extensions
+- **`skybridge/server`**: A drop-in replacement for the official MCP SDK that adds widget registration and type inference capabilities.
+- **`skybridge/web`**: A React library providing hooks, components, and the runtime glue to render your widgets inside ChatGPT's iframe environment. 
+- **Local Dev Environment**: A Vite plugin adds Hot Module Reload to your ChatGPT Apps, with optimized assets building for both local and production environments.
 
-`skybridge/server` extends the official MCP SDK with:
-- **Widget registration**: Simple API to register widgets, which are MCP tools with associated declared resources, saying you a lot of boilerplate code.
-- **Type inference**: Export your server type for end-to-end TypeScript safety
-- **Drop-in replacement**: Works with your existing MCP server code
+This lets you build rich, React-based UI experiences directly within ChatGPT conversations—all with full type safety and a developer experience you'll love.
 
-### 2. React Abstractions
-
-`skybridge/web` wraps the raw `window.openai` API with:
-- **React hooks and utilities**: Modern, declarative alternatives to imperative API calls
-- **Automatic state management**: No manual loading/error state tracking
-- **Type safety**: Full autocomplete and type checking with `generateHelpers`
-
-### 3. Development Tools
-
-- **Vite plugin**: Optimized builds with HMR for instant feedback
-- **Local dev server**: Test your widgets without constantly redeploying
-
-In short: Skybridge takes the low-level primitives of MCP and ChatGPT Apps and wraps them in a modern, type-safe, React-friendly framework.
-
-**Next:** Learn how Skybridge extends these primitives in [Skybridge Abstractions](/skybridge-abstractions).
+**Next:** Learn how Skybridge extends these primitives in [Skybridge Core Concepts](/skybridge-core-concepts).
 
 
 
