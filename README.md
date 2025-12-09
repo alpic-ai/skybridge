@@ -22,7 +22,7 @@ Skybridge is a fullstack library. It comes with modular packages aiming at simpl
 
 ## Get Involved
 
-We welcome issues and pull requests!
-Participate in [GitHub discussions](https://github.com/alpic-ai/skybridge/discussions)
-Chat with the community on [Discord](https://discord.com/invite/gNAazGueab)
+We welcome issues and pull requests!</br>
+Participate in [GitHub discussions](https://github.com/alpic-ai/skybridge/discussions)</br>
+Chat with the community on [Discord](https://discord.com/invite/gNAazGueab)</br>
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions
