@@ -92,6 +92,8 @@
 
 .card-link:hover {
   text-decoration: underline;
+}
+
 /* GitHub Stars Badge */
 .github-stars-badge {
   transform: scale(1.2);
