@@ -8,7 +8,7 @@ The best way today to test your App is to connect it to ChatGPT in developer mod
 
 ## Expose your local server
 
-Once your local server is running with `pnpm dev`, expose your it with a public URL using ngrok in another terminal:
+Once your local server is running with `pnpm dev`, expose it with a public URL using ngrok in another terminal:
 
 ```bash
 ngrok http 3000

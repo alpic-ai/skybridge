@@ -34,7 +34,8 @@ We built Skybridge so other developers wouldn’t have to deal with these same f
 
 ## What is Skybridge?
 
-Skybridge is a _modular_ ChatGPT Apps framework aiming to **maximize Developer Experience while minimizing boilerplate code** 
+Skybridge is a _modular_ ChatGPT Apps framework aiming to **maximize Developer Experience while minimizing boilerplate code**.
+
 It includes 3 main parts:
 - **`skybridge/server`**: A drop-in replacement for the official MCP SDK that adds widget registration and type inference capabilities.
 - **`skybridge/web`**: A React library providing hooks, components, and the runtime glue to render your widgets inside ChatGPT's iframe environment. 
