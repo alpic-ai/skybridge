@@ -117,7 +117,7 @@ export class McpServer<
 > extends McpServerBase {
   declare readonly $types: McpServerTypes<TTools>;
 
-  widget<
+  registerWidget<
     TName extends string,
     TInput extends ZodRawShape,
     TReturn extends CallToolResult
