@@ -27,7 +27,7 @@ function ThemeDisplay() {
 ### `key`
 
 ```tsx
-key: keyof OpenAiGlobals
+key: keyof OpenAiProperties
 ```
 
 **Required**
@@ -50,7 +50,7 @@ The key of the global value to subscribe to. Available keys include:
 ## Returns
 
 ```tsx
-value: OpenAiGlobals[K] | undefined
+value: OpenAiProperties[K] | undefined
 ```
 
 The current value of the specified global, or `undefined` if not available.
@@ -151,10 +151,10 @@ function EnvironmentInfo() {
 
 ## Type Reference
 
-### `OpenAiGlobals`
+### `OpenAiProperties`
 
 ```tsx
-type OpenAiGlobals = {
+type OpenAiProperties = {
   theme: "light" | "dark";
   userAgent: UserAgent;
   locale: string;

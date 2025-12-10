@@ -2,12 +2,12 @@ import { useSyncExternalStore } from "react";
 import {
   SET_GLOBALS_EVENT_TYPE,
   SetGlobalsEvent,
-  type OpenAiGlobals,
+  type OpenAiProperties,
 } from "../types.js";
 
-export function useOpenAiGlobal<K extends keyof OpenAiGlobals>(
+export function useOpenAiGlobal<K extends keyof OpenAiProperties>(
   key: K
-): OpenAiGlobals[K] | undefined {
+): OpenAiProperties[K] | undefined {
   if (!window.openai) {
     console.warn(
       "openai is not defined on window. Please make sure to only call this hook inside the OpenAI iFrame skybridge runtime."
