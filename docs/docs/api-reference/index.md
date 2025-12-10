@@ -16,6 +16,12 @@ This section contains detailed documentation for all hooks and utilities provide
 | [`useToolInfo`](./use-tool-info)       | Get initial tool input, output and metadata |
 | [`useWidgetState`](./use-widget-state) | Persist state across widget renders         |
 
+### Utilities
+
+| Utility                         | Description                                                       |
+| ------------------------------- | ----------------------------------------------------------------- |
+| [`createStore`](./create-store) | Create a Zustand store that automatically syncs with widget state |
+
 ### User Interface
 
 | Hook                                     | Description                                        |
@@ -43,10 +49,11 @@ This section contains detailed documentation for all hooks and utilities provide
 
 ## Import
 
-All hooks are exported from `skybridge/web`:
+All hooks and utilities are exported from `skybridge/web`:
 
 ```tsx
 import {
+  createStore,
   useCallTool,
   useDisplayMode,
   useFiles,
