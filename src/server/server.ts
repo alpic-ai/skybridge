@@ -108,7 +108,7 @@ type AddTool<
   TTools,
   TName extends string,
   TInput extends ZodRawShapeCompat,
-  TOutput
+  TOutput,
 > = McpServer<
   TTools & {
     [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput>;
@@ -126,21 +126,21 @@ type ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> = {
 
 type ToolHandler<
   TInput extends ZodRawShapeCompat,
-  TReturn extends CallToolResult = CallToolResult
+  TReturn extends CallToolResult = CallToolResult,
 > = (
   args: ShapeOutput<TInput>,
-  extra: RequestHandlerExtra<ServerRequest, ServerNotification>
+  extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
 ) => TReturn | Promise<TReturn>;
 
 export class McpServer<
-  TTools extends Record<string, ToolDef> = {}
+  TTools extends Record<string, ToolDef> = {},
 > extends McpServerBase {
   declare readonly $types: McpServerTypes<TTools>;
 
   registerWidget<
     TName extends string,
     TInput extends ZodRawShapeCompat,
-    TReturn extends CallToolResult
+    TReturn extends CallToolResult,
   >(
     name: TName,
     resourceConfig: McpServerOriginalResourceConfig,
@@ -148,7 +148,7 @@ export class McpServer<
       inputSchema?: TInput;
       outputSchema?: ZodRawShapeCompat | AnySchema;
     },
-    toolCallback: ToolHandler<TInput, TReturn>
+    toolCallback: ToolHandler<TInput, TReturn>,
   ): AddTool<TTools, TName, TInput, ExtractStructuredContent<TReturn>> {
     const uri = `ui://widgets/${name}.html`;
     const resourceMetadata: ResourceMeta = {
@@ -195,7 +195,7 @@ export class McpServer<
             },
           ],
         };
-      }
+      },
     );
 
     const toolMeta: ToolMeta = {
@@ -210,7 +210,7 @@ export class McpServer<
         ...toolConfig,
         _meta: toolMeta,
       },
-      toolCallback
+      toolCallback,
     );
 
     return this as AddTool<
@@ -224,23 +224,23 @@ export class McpServer<
   override registerTool<
     TName extends string,
     InputArgs extends ZodRawShapeCompat,
-    TReturn extends CallToolResult
+    TReturn extends CallToolResult,
   >(
     name: TName,
     config: ToolConfig<InputArgs>,
-    cb: ToolHandler<InputArgs, TReturn>
+    cb: ToolHandler<InputArgs, TReturn>,
   ): AddTool<TTools, TName, InputArgs, ExtractStructuredContent<TReturn>>;
 
   override registerTool<InputArgs extends ZodRawShapeCompat>(
     name: string,
     config: ToolConfig<InputArgs>,
-    cb: ToolHandler<InputArgs>
+    cb: ToolHandler<InputArgs>,
   ): RegisteredTool;
 
   override registerTool<InputArgs extends ZodRawShapeCompat>(
     name: string,
     config: ToolConfig<InputArgs>,
-    cb: ToolCallback<InputArgs>
+    cb: ToolCallback<InputArgs>,
   ): RegisteredTool | McpServer<Record<string, ToolDef>> {
     super.registerTool(name, config, cb);
     return this;
@@ -250,8 +250,8 @@ export class McpServer<
     const manifest = JSON.parse(
       readFileSync(
         path.join(process.cwd(), "dist", "assets", ".vite", "manifest.json"),
-        "utf-8"
-      )
+        "utf-8",
+      ),
     );
 
     return manifest[key]?.file;
