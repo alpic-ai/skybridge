@@ -30,7 +30,9 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { McpServer } from "skybridge/server";
 ```
 
-Your existing tools, resources, and prompts will continue to work as before. With `skybridge/server`, you will also be able to register **widgets**, a new class encompassing a Tool and a corresponding UI Resource. 
+Keep your existing dependency to @modelcontextprotocol/sdk in your project, skybridge does not replaces it, but depends on it.
+
+Your existing tools, resources, and prompts will continue to work as before. With `skybridge/server`, you will also be able to register **widgets**, a new class encompassing a Tool and a corresponding UI Resource.
 
 ## Widget structure
 
