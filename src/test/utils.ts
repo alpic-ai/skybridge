@@ -1,5 +1,5 @@
 import { type MockInstance, vi } from "vitest";
-import { z } from "zod";
+import * as z from "zod";
 import { McpServer } from "../server/server.js";
 
 /**

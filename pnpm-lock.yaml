@@ -32,6 +32,9 @@ importers:
       vite:
         specifier: ^7.1.11
         version: 7.1.11(@types/node@22.18.12)(jiti@1.21.7)(terser@5.44.1)
+      zustand:
+        specifier: ^5.0.9
+        version: 5.0.9(@types/react@19.2.2)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
     devDependencies:
       '@biomejs/biome':
         specifier: 2.3.8
