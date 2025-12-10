@@ -30,7 +30,7 @@ export class ToolResponseEvent extends CustomEvent<{
 
 declare global {
   interface Window {
-    openai: API<WidgetState> & OpenAiProperties;
+    openai: OpenAiMethods<WidgetState> & OpenAiProperties;
   }
 
   interface WindowEventMap {
@@ -73,7 +73,7 @@ export type CallToolResponse = {
   meta: Record<string, unknown>;
 };
 
-type API<WidgetState extends UnknownObject = UnknownObject> = {
+export type OpenAiMethods<WidgetState extends UnknownObject = UnknownObject> = {
   /** Calls a tool on your MCP. Returns the full response. */
   callTool: <
     ToolArgs extends CallToolArgs = null,
