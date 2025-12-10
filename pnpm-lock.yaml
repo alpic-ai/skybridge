@@ -32,19 +32,13 @@ importers:
       vite:
         specifier: ^7.1.11
         version: 7.1.11(@types/node@22.18.12)(jiti@1.21.7)(terser@5.44.1)
-      zod:
-        specifier: ^3.25.51
-        version: 3.25.76
-      zustand:
-        specifier: ^5.0.9
-        version: 5.0.9(@types/react@19.2.2)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
     devDependencies:
       '@biomejs/biome':
         specifier: 2.3.8
         version: 2.3.8
       '@modelcontextprotocol/sdk':
         specifier: ^1.24.3
-        version: 1.24.3(zod@3.25.76)
+        version: 1.24.3(zod@4.1.13)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -87,6 +81,9 @@ importers:
       vitest:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.18.12)(@vitest/ui@2.1.9)(jsdom@25.0.1)(terser@5.44.1)
+      zod:
+        specifier: ^4.1.13
+        version: 4.1.13
 
   docs:
     dependencies:
@@ -6106,9 +6103,6 @@ packages:
     peerDependencies:
       zod: ^3.25 || ^4
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
-
   zod@4.1.13:
     resolution: {integrity: sha512-AvvthqfqrAhNH9dnfmrfKzX5upOdjUVJYFqNSlkmGf64gRaTzlPwz99IHYnVs28qYAybvAlBV+H7pn0saFY4Ig==}
 
@@ -8401,7 +8395,7 @@ snapshots:
       '@types/react': 19.2.2
       react: 19.2.0
 
-  '@modelcontextprotocol/sdk@1.24.3(zod@3.25.76)':
+  '@modelcontextprotocol/sdk@1.24.3(zod@4.1.13)':
     dependencies:
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
@@ -8415,8 +8409,8 @@ snapshots:
       jose: 6.1.3
       pkce-challenge: 5.0.1
       raw-body: 3.0.1
-      zod: 3.25.76
-      zod-to-json-schema: 3.25.0(zod@3.25.76)
+      zod: 4.1.13
+      zod-to-json-schema: 3.25.0(zod@4.1.13)
     transitivePeerDependencies:
       - supports-color
 
@@ -13492,11 +13486,9 @@ snapshots:
 
   yocto-queue@1.2.2: {}
 
-  zod-to-json-schema@3.25.0(zod@3.25.76):
+  zod-to-json-schema@3.25.0(zod@4.1.13):
     dependencies:
-      zod: 3.25.76
-
-  zod@3.25.76: {}
+      zod: 4.1.13
 
   zod@4.1.13: {}
 
