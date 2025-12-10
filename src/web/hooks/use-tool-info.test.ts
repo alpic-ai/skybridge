@@ -4,12 +4,12 @@ import { useToolInfo } from "./use-tool-info.js";
 import {
   SET_GLOBALS_EVENT_TYPE,
   SetGlobalsEvent,
-  type OpenAiGlobals,
+  type OpenAiProperties,
 } from "../types.js";
 
 describe("useToolInfo", () => {
   let OpenaiMock: Pick<
-    OpenAiGlobals,
+    OpenAiProperties,
     "toolInput" | "toolOutput" | "toolResponseMetadata"
   >;
 

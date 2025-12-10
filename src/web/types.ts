@@ -30,7 +30,7 @@ export class ToolResponseEvent extends CustomEvent<{
 
 declare global {
   interface Window {
-    openai: API<WidgetState> & OpenAiGlobals;
+    openai: API<WidgetState> & OpenAiProperties;
   }
 
   interface WindowEventMap {
@@ -38,7 +38,7 @@ declare global {
   }
 }
 
-export type OpenAiGlobals<
+export type OpenAiProperties<
   ToolInput extends UnknownObject = {},
   ToolOutput extends UnknownObject = UnknownObject,
   ToolResponseMetadata extends UnknownObject = UnknownObject,
@@ -73,7 +73,7 @@ export type CallToolResponse = {
   meta: Record<string, unknown>;
 };
 
-type API<WidgetState extends UnknownObject> = {
+type API<WidgetState extends UnknownObject = UnknownObject> = {
   /** Calls a tool on your MCP. Returns the full response. */
   callTool: <
     ToolArgs extends CallToolArgs = null,
@@ -123,7 +123,7 @@ type API<WidgetState extends UnknownObject> = {
 // Dispatched when any global changes in the host page
 export const SET_GLOBALS_EVENT_TYPE = "openai:set_globals";
 export class SetGlobalsEvent extends CustomEvent<{
-  globals: Partial<OpenAiGlobals>;
+  globals: Partial<OpenAiProperties>;
 }> {
   override readonly type = SET_GLOBALS_EVENT_TYPE;
 }
