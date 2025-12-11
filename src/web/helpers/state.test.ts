@@ -1,19 +1,6 @@
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  type Mock,
-  vi,
-} from "vitest";
+import { describe, expect, it } from "vitest";
 import { WIDGET_CONTEXT_KEY } from "../data-llm.js";
-import {
-  filterWidgetContext,
-  getInitialState,
-  injectWidgetContext,
-  serializeState,
-} from "./state.js";
+import { filterWidgetContext, serializeState } from "./state.js";
 
 describe("state helpers", () => {
   describe("filterWidgetContext", () => {

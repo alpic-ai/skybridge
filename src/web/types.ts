@@ -1,7 +1,8 @@
 import "react";
 
 declare module "react" {
-  interface HTMLAttributes<T extends Element = HTMLElement> {
+  // biome-ignore lint/correctness/noUnusedVariables: HTMLAttributes must have the same signature and requires a type parameter
+  interface HTMLAttributes<T> {
     "data-llm"?: string;
   }
 }

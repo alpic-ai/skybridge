@@ -1,13 +1,5 @@
 import { renderHook } from "@testing-library/react";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  type Mock,
-  vi,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { UserAgent } from "../types.js";
 import { useUserAgent } from "./use-user-agent.js";
 
