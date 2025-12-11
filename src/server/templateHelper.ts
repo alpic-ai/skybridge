@@ -6,11 +6,6 @@ import Handlebars from "handlebars";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-type TemplateData = {
-  serverUrl: string;
-  widgetName: string;
-};
-
 class TemplateHelper {
   private templateCache = new Map<string, HandlebarsTemplateDelegate>();
 
