@@ -1,4 +1,3 @@
-import { renderHook } from "@testing-library/react";
 import { expectTypeOf, test } from "vitest";
 import { useToolInfo } from "./use-tool-info.js";
 

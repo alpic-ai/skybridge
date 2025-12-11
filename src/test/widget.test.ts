@@ -1,4 +1,3 @@
-import * as fs from "node:fs";
 import {
   afterEach,
   beforeEach,
@@ -40,12 +39,12 @@ vi.mock("node:fs", async () => {
 
 describe("McpServer.registerWidget", () => {
   let server: McpServer;
-  let mockResource: MockInstance<McpServer["registerResource"]>;
+  let mockRegisterResource: MockInstance<McpServer["registerResource"]>;
   let mockRegisterTool: MockInstance<McpServer["registerTool"]>;
-  const readFileSyncSpy: any = null;
 
   beforeEach(() => {
-    ({ server, mockResource, mockRegisterTool } = createMockMcpServer());
+    ({ server, mockRegisterResource, mockRegisterTool } =
+      createMockMcpServer());
   });
 
   afterEach(() => {
@@ -57,18 +56,18 @@ describe("McpServer.registerWidget", () => {
     setTestEnv({ NODE_ENV: "development" });
 
     const mockToolCallback = vi.fn();
-    const mockResourceConfig = { description: "Test widget" };
+    const mockRegisterResourceConfig = { description: "Test widget" };
     const mockToolConfig = { description: "Test tool" };
 
     server.registerWidget(
       "my-widget",
-      mockResourceConfig,
+      mockRegisterResourceConfig,
       mockToolConfig,
       mockToolCallback,
     );
 
     // Get the resource callback function
-    const resourceCallback = mockResource.mock.calls[0]?.[3] as (
+    const resourceCallback = mockRegisterResource.mock.calls[0]?.[3] as (
       uri: URL,
       extra: any,
     ) => any;
@@ -81,6 +80,7 @@ describe("McpServer.registerWidget", () => {
       mockExtra,
     );
 
+    expect(mockRegisterTool).toHaveBeenCalled();
     expect(result).toEqual({
       contents: [
         {
@@ -92,10 +92,10 @@ describe("McpServer.registerWidget", () => {
     });
 
     // Check development-specific content
-    expect(result.contents[0]?.text).toContain(serverUrl + "/@react-refresh");
-    expect(result.contents[0]?.text).toContain(serverUrl + "/@vite/client");
+    expect(result.contents[0]?.text).toContain(`${serverUrl}/@react-refresh`);
+    expect(result.contents[0]?.text).toContain(`${serverUrl}/@vite/client`);
     expect(result.contents[0]?.text).toContain(
-      serverUrl + "/src/widgets/my-widget.tsx",
+      `${serverUrl}/src/widgets/my-widget.tsx`,
     );
   });
 
@@ -103,18 +103,18 @@ describe("McpServer.registerWidget", () => {
     setTestEnv({ NODE_ENV: "production" });
 
     const mockToolCallback = vi.fn();
-    const mockResourceConfig = { description: "Test widget" };
+    const mockRegisterResourceConfig = { description: "Test widget" };
     const mockToolConfig = { description: "Test tool" };
 
     server.registerWidget(
       "my-widget",
-      mockResourceConfig,
+      mockRegisterResourceConfig,
       mockToolConfig,
       mockToolCallback,
     );
 
     // Get the resource callback function
-    const resourceCallback = mockResource.mock.calls[0]?.[3] as (
+    const resourceCallback = mockRegisterResource.mock.calls[0]?.[3] as (
       uri: URL,
       extra: any,
     ) => any;
@@ -122,7 +122,7 @@ describe("McpServer.registerWidget", () => {
 
     const serverUrl = "https://myapp.com";
     const mockExtra = createMockExtra(serverUrl);
-    const result = await resourceCallback!(
+    const result = await resourceCallback?.(
       new URL("ui://widgets/my-widget.html"),
       mockExtra,
     );
@@ -139,12 +139,12 @@ describe("McpServer.registerWidget", () => {
 
     // Check production-specific content
     expect(result.contents[0]?.text).not.toContain(
-      serverUrl + "@react-refresh",
+      `${serverUrl}@react-refresh`,
     );
-    expect(result.contents[0]?.text).not.toContain(serverUrl + "@vite/client");
+    expect(result.contents[0]?.text).not.toContain(`${serverUrl}@vite/client`);
     expect(result.contents[0]?.text).toContain(
-      serverUrl + "/assets/my-widget.js",
+      `${serverUrl}/assets/my-widget.js`,
     );
-    expect(result.contents[0]?.text).toContain(serverUrl + "/assets/style.css");
+    expect(result.contents[0]?.text).toContain(`${serverUrl}/assets/style.css`);
   });
 });

@@ -73,7 +73,7 @@ function getLLMDescriptionString(): string {
   for (const node of Array.from(nodes.values())) {
     const key = node.parentId ?? null;
     if (!byParent.has(key)) byParent.set(key, []);
-    byParent.get(key)!.push(node);
+    byParent.get(key)?.push(node);
   }
 
   for (const list of byParent.values()) {
@@ -87,7 +87,7 @@ function getLLMDescriptionString(): string {
     if (!children) return;
 
     for (const child of children) {
-      if (child.content && child.content.trim()) {
+      if (child.content?.trim()) {
         const indent = "  ".repeat(depth);
         lines.push(`${indent}- ${child.content.trim()}`);
       }

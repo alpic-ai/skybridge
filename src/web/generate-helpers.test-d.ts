@@ -161,7 +161,7 @@ test("callTool requires args for tools with required inputs", () => {
 
 test("callTool supports sideEffects for tools with required inputs", () => {
   const { useCallTool } = generateHelpers<TestServer>();
-  const { callTool, data } = useCallTool("search-voyage");
+  const { callTool } = useCallTool("search-voyage");
 
   callTool(
     { destination: "Spain" },
@@ -178,6 +178,7 @@ test("callTool supports sideEffects for tools with required inputs", () => {
         if (response) {
           expectTypeOf(response.structuredContent.totalCount).toBeNumber();
         }
+        expectTypeOf(error).toBeUnknown();
         expectTypeOf(args.destination).toBeString();
       },
     },
