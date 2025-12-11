@@ -7,7 +7,7 @@ import { McpServer } from "../server/server.js";
  */
 export function createMockMcpServer(): {
   server: McpServer;
-  mockResource: MockInstance<McpServer["resource"]>;
+  mockResource: MockInstance<McpServer["registerResource"]>;
   mockRegisterTool: MockInstance<McpServer["registerTool"]>;
 } {
   // Create a real McpServer instance
@@ -20,7 +20,7 @@ export function createMockMcpServer(): {
   );
 
   // Mock the underlying methods to track calls
-  const mockResource = vi.spyOn(server, "resource");
+  const mockResource = vi.spyOn(server, "registerResource");
   const mockRegisterTool = vi.spyOn(server, "registerTool");
 
   return {

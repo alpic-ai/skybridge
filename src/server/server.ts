@@ -158,7 +158,7 @@ export class McpServer<
       resourceMetadata["openai/widgetDescription"] = toolConfig.description;
     }
 
-    this.resource(
+    this.registerResource(
       name,
       uri,
       {
