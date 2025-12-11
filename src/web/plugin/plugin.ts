@@ -13,14 +13,14 @@ export function skybridge(): Plugin {
       const projectRoot = config.root || process.cwd();
       const widgetsPattern = resolve(
         projectRoot,
-        "src/widgets/*.{js,ts,jsx,tsx,html}"
+        "src/widgets/*.{js,ts,jsx,tsx,html}",
       );
 
       const input = Object.fromEntries(
         globSync(widgetsPattern).map((file) => [
           file.match(/src\/widgets\/(.+)\.tsx$/)?.[1],
           file,
-        ])
+        ]),
       );
 
       return {

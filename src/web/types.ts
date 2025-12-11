@@ -11,7 +11,6 @@ export type UnknownObject = Record<string, unknown>;
 export type Prettify<T> = { [K in keyof T]: T[K] } & {};
 export type Objectify<T> = T & UnknownObject;
 
-
 type RequiredKeys<T> = {
   [K in keyof T]-?: {} extends Pick<T, K> ? never : K;
 }[keyof T];
@@ -42,7 +41,7 @@ export type OpenAiProperties<
   ToolInput extends UnknownObject = {},
   ToolOutput extends UnknownObject = UnknownObject,
   ToolResponseMetadata extends UnknownObject = UnknownObject,
-  WidgetState extends UnknownObject = UnknownObject
+  WidgetState extends UnknownObject = UnknownObject,
 > = {
   theme: Theme;
   userAgent: UserAgent;
@@ -77,10 +76,10 @@ export type OpenAiMethods<WidgetState extends UnknownObject = UnknownObject> = {
   /** Calls a tool on your MCP. Returns the full response. */
   callTool: <
     ToolArgs extends CallToolArgs = null,
-    ToolResponse extends CallToolResponse = CallToolResponse
+    ToolResponse extends CallToolResponse = CallToolResponse,
   >(
     name: string,
-    args: ToolArgs
+    args: ToolArgs,
   ) => Promise<ToolResponse>;
 
   /** Triggers a followup turn in the ChatGPT conversation */
@@ -130,7 +129,7 @@ export class SetGlobalsEvent extends CustomEvent<{
 
 export type CallTool = (
   name: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
 ) => Promise<CallToolResponse>;
 
 export type DisplayMode = "pip" | "inline" | "fullscreen";

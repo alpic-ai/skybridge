@@ -1,25 +1,22 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import {
   McpServer as McpServerBase,
   type RegisteredTool,
   type ToolCallback,
 } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type {
-  Resource,
-  ToolAnnotations,
-  CallToolResult,
-  ServerRequest,
-  ServerNotification,
-} from "@modelcontextprotocol/sdk/types.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
-import type { ZodRawShape, ZodObject, infer as Infer } from "zod";
+import type {
+  CallToolResult,
+  Resource,
+  ServerNotification,
+  ServerRequest,
+  ToolAnnotations,
+} from "@modelcontextprotocol/sdk/types.js";
+import type { infer as Infer, ZodObject, ZodRawShape } from "zod";
 import { templateHelper } from "./templateHelper.js";
-import { readFileSync } from "node:fs";
-import path from "node:path";
 
-export type ToolDef<
-  TInput = unknown,
-  TOutput = unknown
-> = {
+export type ToolDef<TInput = unknown, TOutput = unknown> = {
   input: TInput;
   output: TOutput;
 };
@@ -90,10 +87,12 @@ type AddTool<
   TTools,
   TName extends string,
   TInput extends ZodRawShape,
-  TOutput
-> = McpServer<TTools & {
-  [K in TName]: ToolDef<Infer<ZodObject<TInput>>, TOutput>;
-}>;
+  TOutput,
+> = McpServer<
+  TTools & {
+    [K in TName]: ToolDef<Infer<ZodObject<TInput>>, TOutput>;
+  }
+>;
 
 type ToolConfig<TInput extends ZodRawShape> = {
   title?: string;
@@ -106,21 +105,21 @@ type ToolConfig<TInput extends ZodRawShape> = {
 
 type ToolHandler<
   TInput extends ZodRawShape,
-  TReturn extends CallToolResult = CallToolResult
+  TReturn extends CallToolResult = CallToolResult,
 > = (
   args: Infer<ZodObject<TInput>>,
-  extra: RequestHandlerExtra<ServerRequest, ServerNotification>
+  extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
 ) => TReturn | Promise<TReturn>;
 
 export class McpServer<
-  TTools extends Record<string, ToolDef> = {}
+  TTools extends Record<string, ToolDef> = {},
 > extends McpServerBase {
   declare readonly $types: McpServerTypes<TTools>;
 
   registerWidget<
     TName extends string,
     TInput extends ZodRawShape,
-    TReturn extends CallToolResult
+    TReturn extends CallToolResult,
   >(
     name: TName,
     resourceConfig: McpServerOriginalResourceConfig,
@@ -128,7 +127,7 @@ export class McpServer<
       inputSchema?: TInput;
       outputSchema?: ZodRawShape;
     },
-    toolCallback: ToolHandler<TInput, TReturn>
+    toolCallback: ToolHandler<TInput, TReturn>,
   ): AddTool<TTools, TName, TInput, ExtractStructuredContent<TReturn>> {
     const uri = `ui://widgets/${name}.html`;
     const resourceMetadata: ResourceMeta = {
@@ -175,7 +174,7 @@ export class McpServer<
             },
           ],
         };
-      }
+      },
     );
 
     const toolMeta: ToolMeta = {
@@ -190,32 +189,37 @@ export class McpServer<
         ...toolConfig,
         _meta: toolMeta,
       },
-      toolCallback
+      toolCallback,
     );
 
-    return this as AddTool<TTools, TName, TInput, ExtractStructuredContent<TReturn>>;
+    return this as AddTool<
+      TTools,
+      TName,
+      TInput,
+      ExtractStructuredContent<TReturn>
+    >;
   }
 
   override registerTool<
     TName extends string,
     InputArgs extends ZodRawShape,
-    TReturn extends CallToolResult
+    TReturn extends CallToolResult,
   >(
     name: TName,
     config: ToolConfig<InputArgs>,
-    cb: ToolHandler<InputArgs, TReturn>
+    cb: ToolHandler<InputArgs, TReturn>,
   ): AddTool<TTools, TName, InputArgs, ExtractStructuredContent<TReturn>>;
 
   override registerTool<InputArgs extends ZodRawShape>(
     name: string,
     config: ToolConfig<InputArgs>,
-    cb: ToolHandler<InputArgs>
+    cb: ToolHandler<InputArgs>,
   ): RegisteredTool;
 
   override registerTool<InputArgs extends ZodRawShape>(
     name: string,
     config: ToolConfig<InputArgs>,
-    cb: ToolCallback<InputArgs>
+    cb: ToolCallback<InputArgs>,
   ): RegisteredTool | McpServer<Record<string, ToolDef>> {
     super.registerTool(name, config, cb);
     return this;
@@ -225,8 +229,8 @@ export class McpServer<
     const manifest = JSON.parse(
       readFileSync(
         path.join(process.cwd(), "dist", "assets", ".vite", "manifest.json"),
-        "utf-8"
-      )
+        "utf-8",
+      ),
     );
 
     return manifest[key]?.file;

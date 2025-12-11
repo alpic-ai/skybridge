@@ -2,13 +2,13 @@ import { create, type StateCreator } from "zustand";
 import {
   getInitialState,
   injectWidgetContext,
-  serializeState
+  serializeState,
 } from "./helpers/state.js";
 import type { UnknownObject } from "./types.js";
 
 export function createStore<State extends UnknownObject>(
   storeCreator: StateCreator<State, [], [], State>,
-  defaultState?: State | (() => State)
+  defaultState?: State | (() => State),
 ) {
   const initialState = getInitialState(defaultState);
 
@@ -21,7 +21,7 @@ export function createStore<State extends UnknownObject>(
       }
 
       return baseStore;
-    }
+    },
   );
 
   store.subscribe((state: State) => {

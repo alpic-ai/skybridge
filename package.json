@@ -19,9 +19,11 @@
   "scripts": {
     "build": "tsc && pnpm run build:templates",
     "build:templates": "cp -r src/server/templates dist/src/server/",
-    "test": "pnpm run test:unit && pnpm run test:type",
+    "format": "biome check --write",
+    "test": "pnpm run test:unit && pnpm run test:type && pnpm run test:format",
     "test:unit": "vitest run",
     "test:type": "tsc --noEmit",
+    "test:format": "biome check",
     "docs:dev": "pnpm --filter @skybridge/docs start",
     "docs:build": "pnpm --filter @skybridge/docs build",
     "docs:serve": "pnpm --filter @skybridge/docs serve"
@@ -50,6 +52,7 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.3.8",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.0",
     "@total-typescript/tsconfig": "^1.0.4",

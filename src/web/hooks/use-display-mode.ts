@@ -1,5 +1,5 @@
-import { useOpenAiGlobal } from "./use-openai-global.js";
 import type { DisplayMode } from "../types.js";
+import { useOpenAiGlobal } from "./use-openai-global.js";
 
 export function useDisplayMode() {
   const displayMode = useOpenAiGlobal("displayMode")!;

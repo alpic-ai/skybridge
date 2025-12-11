@@ -5,8 +5,8 @@ import {
   describe,
   expect,
   it,
-  vi,
   type Mock,
+  vi,
 } from "vitest";
 import { DataLLM } from "./data-llm.js";
 
@@ -48,7 +48,7 @@ describe("DataLLM", () => {
     render(
       <DataLLM content="Test content">
         <div>Child</div>
-      </DataLLM>
+      </DataLLM>,
     );
 
     expect(OpenaiMock.setWidgetState).toHaveBeenCalled();
@@ -62,7 +62,7 @@ describe("DataLLM", () => {
     render(
       <DataLLM content="Test content">
         <div>Child</div>
-      </DataLLM>
+      </DataLLM>,
     );
 
     const callArgs = OpenaiMock.setWidgetState.mock.calls[0]?.[0];
@@ -79,7 +79,7 @@ describe("DataLLM", () => {
             <div>Content</div>
           </DataLLM>
         </DataLLM>
-      </DataLLM>
+      </DataLLM>,
     );
 
     const callArgs =
@@ -97,7 +97,7 @@ describe("DataLLM", () => {
     const { rerender } = render(
       <DataLLM content="Initial content">
         <div>Child</div>
-      </DataLLM>
+      </DataLLM>,
     );
 
     const initialCalls = OpenaiMock.setWidgetState.mock.calls.length;
@@ -105,11 +105,11 @@ describe("DataLLM", () => {
     rerender(
       <DataLLM content="Updated content">
         <div>Child</div>
-      </DataLLM>
+      </DataLLM>,
     );
 
     expect(OpenaiMock.setWidgetState.mock.calls.length).toBeGreaterThan(
-      initialCalls
+      initialCalls,
     );
     const lastCallArgs =
       OpenaiMock.setWidgetState.mock.calls[
@@ -122,7 +122,7 @@ describe("DataLLM", () => {
     const { unmount } = render(
       <DataLLM content="Content to remove">
         <div>Child</div>
-      </DataLLM>
+      </DataLLM>,
     );
 
     const callsBeforeUnmount = OpenaiMock.setWidgetState.mock.calls.length;
@@ -130,7 +130,7 @@ describe("DataLLM", () => {
     unmount();
 
     expect(OpenaiMock.setWidgetState.mock.calls.length).toBeGreaterThan(
-      callsBeforeUnmount
+      callsBeforeUnmount,
     );
     const lastCallArgs =
       OpenaiMock.setWidgetState.mock.calls[

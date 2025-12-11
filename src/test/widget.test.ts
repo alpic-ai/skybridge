@@ -5,10 +5,10 @@ import {
   describe,
   expect,
   it,
-  vi,
   type MockInstance,
+  vi,
 } from "vitest";
-import { McpServer } from "../server/server.js";
+import type { McpServer } from "../server/server.js";
 import {
   createMockExtra,
   createMockMcpServer,
@@ -42,7 +42,7 @@ describe("McpServer.registerWidget", () => {
   let server: McpServer;
   let mockResource: MockInstance<McpServer["resource"]>;
   let mockRegisterTool: MockInstance<McpServer["registerTool"]>;
-  let readFileSyncSpy: any = null;
+  const readFileSyncSpy: any = null;
 
   beforeEach(() => {
     ({ server, mockResource, mockRegisterTool } = createMockMcpServer());
@@ -64,13 +64,13 @@ describe("McpServer.registerWidget", () => {
       "my-widget",
       mockResourceConfig,
       mockToolConfig,
-      mockToolCallback
+      mockToolCallback,
     );
 
     // Get the resource callback function
     const resourceCallback = mockResource.mock.calls[0]?.[3] as (
       uri: URL,
-      extra: any
+      extra: any,
     ) => any;
     expect(resourceCallback).toBeDefined();
 
@@ -78,7 +78,7 @@ describe("McpServer.registerWidget", () => {
     const mockExtra = createMockExtra("__not_used__");
     const result = await resourceCallback(
       new URL("ui://widgets/my-widget.html"),
-      mockExtra
+      mockExtra,
     );
 
     expect(result).toEqual({
@@ -95,7 +95,7 @@ describe("McpServer.registerWidget", () => {
     expect(result.contents[0]?.text).toContain(serverUrl + "/@react-refresh");
     expect(result.contents[0]?.text).toContain(serverUrl + "/@vite/client");
     expect(result.contents[0]?.text).toContain(
-      serverUrl + "/src/widgets/my-widget.tsx"
+      serverUrl + "/src/widgets/my-widget.tsx",
     );
   });
 
@@ -110,13 +110,13 @@ describe("McpServer.registerWidget", () => {
       "my-widget",
       mockResourceConfig,
       mockToolConfig,
-      mockToolCallback
+      mockToolCallback,
     );
 
     // Get the resource callback function
     const resourceCallback = mockResource.mock.calls[0]?.[3] as (
       uri: URL,
-      extra: any
+      extra: any,
     ) => any;
     expect(resourceCallback).toBeDefined();
 
@@ -124,7 +124,7 @@ describe("McpServer.registerWidget", () => {
     const mockExtra = createMockExtra(serverUrl);
     const result = await resourceCallback!(
       new URL("ui://widgets/my-widget.html"),
-      mockExtra
+      mockExtra,
     );
 
     expect(result).toEqual({
@@ -139,11 +139,11 @@ describe("McpServer.registerWidget", () => {
 
     // Check production-specific content
     expect(result.contents[0]?.text).not.toContain(
-      serverUrl + "@react-refresh"
+      serverUrl + "@react-refresh",
     );
     expect(result.contents[0]?.text).not.toContain(serverUrl + "@vite/client");
     expect(result.contents[0]?.text).toContain(
-      serverUrl + "/assets/my-widget.js"
+      serverUrl + "/assets/my-widget.js",
     );
     expect(result.contents[0]?.text).toContain(serverUrl + "/assets/style.css");
   });

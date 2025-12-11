@@ -8,7 +8,7 @@ const colors = {
 export function installOpenAILoggingProxy() {
   if (typeof window === "undefined" || !window.openai) {
     console.warn(
-      "[openai-proxy] window.openai not found, skipping proxy installation"
+      "[openai-proxy] window.openai not found, skipping proxy installation",
     );
     return;
   }
@@ -23,14 +23,14 @@ export function installOpenAILoggingProxy() {
         return value;
       }
 
-      return function (...args: unknown[]) {
+      return (...args: unknown[]) => {
         const methodName = String(prop);
 
         console.group(
           `%c[openai] %cmethod %c${methodName}`,
           `color: ${colors.brand}; font-weight: normal`,
           `color: ${colors.info}; font-weight: normal`,
-          `color: ${colors.success}`
+          `color: ${colors.success}`,
         );
         console.log("%c← args:", `color: ${colors.info}`, args);
 
@@ -42,7 +42,7 @@ export function installOpenAILoggingProxy() {
               console.log(
                 "%c→ resolved:",
                 `color: ${colors.success}`,
-                resolved
+                resolved,
               );
               console.groupEnd();
               return resolved;
@@ -51,7 +51,7 @@ export function installOpenAILoggingProxy() {
               console.error("%c→ rejected:", `color: ${colors.error}`, error);
               console.groupEnd();
               throw error;
-            }
+            },
           );
         }
 
@@ -69,7 +69,7 @@ export function installOpenAILoggingProxy() {
         `color: ${colors.info}`,
         `color: ${colors.success}; font-weight: bold`,
         "←",
-        value
+        value,
       );
 
       return Reflect.set(target, prop, value, receiver);
@@ -81,6 +81,6 @@ export function installOpenAILoggingProxy() {
   console.log(
     "%c[openai-proxy] %cInstalled logging proxy for window.openai",
     `color: ${colors.brand}`,
-    `color: ${colors.info}`
+    `color: ${colors.info}`,
   );
 }

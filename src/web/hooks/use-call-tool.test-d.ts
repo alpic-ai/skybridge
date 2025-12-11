@@ -1,6 +1,10 @@
 import { expectTypeOf, test } from "vitest";
-import { useCallTool, type CallToolState, type SideEffects } from "./use-call-tool.js";
 import type { CallToolResponse } from "../types.js";
+import {
+  type CallToolState,
+  type SideEffects,
+  useCallTool,
+} from "./use-call-tool.js";
 
 test("callTool can be called without args when ToolArgs is null", () => {
   const { callTool, callToolAsync } = useCallTool<null>("test-tool");
@@ -30,23 +34,26 @@ test("callTool supports sideEffects with correct types", () => {
 
   const { callTool } = useCallTool<Args, Response>("test-tool");
 
-  callTool({ id: 1 }, {
-    onSuccess: (data, args) => {
-      expectTypeOf(data.structuredContent.result).toBeString();
-      expectTypeOf(args.id).toBeNumber();
-    },
-    onError: (error, args) => {
-      expectTypeOf(error).toBeUnknown();
-      expectTypeOf(args.id).toBeNumber();
-    },
-    onSettled: (data, error, args) => {
-      if (data) {
+  callTool(
+    { id: 1 },
+    {
+      onSuccess: (data, args) => {
         expectTypeOf(data.structuredContent.result).toBeString();
-      }
-      expectTypeOf(error).toEqualTypeOf<unknown | undefined>();
-      expectTypeOf(args.id).toBeNumber();
+        expectTypeOf(args.id).toBeNumber();
+      },
+      onError: (error, args) => {
+        expectTypeOf(error).toBeUnknown();
+        expectTypeOf(args.id).toBeNumber();
+      },
+      onSettled: (data, error, args) => {
+        if (data) {
+          expectTypeOf(data.structuredContent.result).toBeString();
+        }
+        expectTypeOf(error).toEqualTypeOf<unknown | undefined>();
+        expectTypeOf(args.id).toBeNumber();
+      },
     },
-  });
+  );
 });
 
 test("callTool allows sideEffects as first arg when ToolArgs is null", () => {
@@ -62,7 +69,10 @@ test("callTool allows sideEffects as first arg when ToolArgs is null", () => {
 
 test("callToolAsync returns correctly typed promise", () => {
   type Args = { name: string };
-  type Response = { structuredContent: { greeting: string }; meta: { id: number } };
+  type Response = {
+    structuredContent: { greeting: string };
+    meta: { id: number };
+  };
 
   const { callToolAsync } = useCallTool<Args, Response>("test-tool");
 
@@ -144,4 +154,3 @@ test("SideEffects type is correctly exported and usable", () => {
 
   expectTypeOf(sideEffects).toHaveProperty("onSuccess");
 });
-

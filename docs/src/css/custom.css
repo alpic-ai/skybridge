@@ -13,7 +13,7 @@
   --ifm-color-primary-light: #2d7a9a;
   --ifm-color-primary-lighter: #4da6c2;
   --ifm-color-primary-lightest: #6bc4d9;
-  
+
   --ifm-color-secondary: #4da6c2;
   --ifm-color-secondary-dark: #3d8fa8;
   --ifm-color-secondary-darker: #2d7a9a;
@@ -21,15 +21,15 @@
   --ifm-color-secondary-light: #6bc4d9;
   --ifm-color-secondary-lighter: #7dd1e5;
   --ifm-color-secondary-lightest: #8ee0f1;
-  
+
   --color-white: #ffffff;
-  
+
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme='dark'] {
+[data-theme="dark"] {
   --ifm-color-primary: #4da6c2;
   --ifm-color-primary-dark: #3d8fa8;
   --ifm-color-primary-darker: #2d7a9a;
@@ -37,7 +37,7 @@
   --ifm-color-primary-light: #6bc4d9;
   --ifm-color-primary-lighter: #7dd1e5;
   --ifm-color-primary-lightest: #8ee0f1;
-  
+
   --ifm-color-secondary: #6bc4d9;
   --ifm-color-secondary-dark: #4da6c2;
   --ifm-color-secondary-darker: #3d8fa8;
@@ -45,7 +45,7 @@
   --ifm-color-secondary-light: #7dd1e5;
   --ifm-color-secondary-lighter: #8ee0f1;
   --ifm-color-secondary-lightest: #a0e8f5;
-  
+
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 

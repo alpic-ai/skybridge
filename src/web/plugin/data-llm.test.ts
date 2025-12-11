@@ -56,7 +56,7 @@ describe("data-llm plugin", () => {
     `;
     const result1 = await transform(codeWithImport, "test.tsx");
     expect(
-      result1?.code.match(/import.*DataLLM.*from.*skybridge\/web/g)
+      result1?.code.match(/import.*DataLLM.*from.*skybridge\/web/g),
     ).toHaveLength(1);
 
     // Preserve other imports and add missing DataLLM

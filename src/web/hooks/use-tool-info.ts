@@ -1,6 +1,6 @@
-import { useOpenAiGlobal } from "./use-openai-global.js";
 import { useEffect, useState } from "react";
 import type { UnknownObject } from "../types.js";
+import { useOpenAiGlobal } from "./use-openai-global.js";
 
 export type ToolPendingState<ToolInput extends UnknownObject> = {
   status: "pending";
@@ -14,7 +14,7 @@ export type ToolPendingState<ToolInput extends UnknownObject> = {
 export type ToolSuccessState<
   ToolInput extends UnknownObject,
   ToolOutput extends UnknownObject,
-  ToolResponseMetadata extends UnknownObject
+  ToolResponseMetadata extends UnknownObject,
 > = {
   status: "success";
   isPending: false;
@@ -27,7 +27,7 @@ export type ToolSuccessState<
 export type ToolState<
   ToolInput extends UnknownObject,
   ToolOutput extends UnknownObject,
-  ToolResponseMetadata extends UnknownObject
+  ToolResponseMetadata extends UnknownObject,
 > =
   | ToolPendingState<ToolInput>
   | ToolSuccessState<ToolInput, ToolOutput, ToolResponseMetadata>;
@@ -48,7 +48,7 @@ export function useToolInfo<TS extends Partial<ToolSignature> = {}>() {
     setStatus(
       output === undefined && responseMetadata === undefined
         ? "pending"
-        : "success"
+        : "success",
     );
   }, [output, responseMetadata]);
 

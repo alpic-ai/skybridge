@@ -3,7 +3,7 @@ import { WIDGET_CONTEXT_KEY } from "../data-llm.js";
 import type { UnknownObject } from "../types.js";
 
 export function filterWidgetContext<T extends UnknownObject>(
-  state?: T | null
+  state?: T | null,
 ): T | null {
   if (state === null || state === undefined) {
     return null;
@@ -17,7 +17,7 @@ export function filterWidgetContext<T extends UnknownObject>(
 }
 
 export function injectWidgetContext<T extends UnknownObject>(
-  newState: T | null
+  newState: T | null,
 ): T | null {
   if (newState === null) {
     return null;
@@ -51,7 +51,7 @@ export function deserializeState(value: SuperJSONResult): unknown {
 }
 
 export function getInitialState<State extends UnknownObject>(
-  defaultState?: State | (() => State)
+  defaultState?: State | (() => State),
 ): State | null {
   const widgetStateFromWindow = window.openai?.widgetState as
     | State
@@ -64,5 +64,5 @@ export function getInitialState<State extends UnknownObject>(
 
   return typeof defaultState === "function"
     ? defaultState()
-    : defaultState ?? null;
+    : (defaultState ?? null);
 }
