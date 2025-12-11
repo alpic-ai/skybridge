@@ -1,14 +1,14 @@
-import { useWidgetState } from "./use-widget-state.js";
+import { act, renderHook } from "@testing-library/react";
 import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
   afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
   type Mock,
+  vi,
 } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { useWidgetState } from "./use-widget-state.js";
 
 describe("useWidgetState", () => {
   let OpenaiMock: { widgetState: unknown; setWidgetState: Mock };

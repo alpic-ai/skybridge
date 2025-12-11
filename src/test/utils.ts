@@ -1,6 +1,6 @@
-import { vi, type MockInstance } from "vitest";
-import { McpServer } from "../server/server.js";
+import { type MockInstance, vi } from "vitest";
 import { z } from "zod";
+import { McpServer } from "../server/server.js";
 
 /**
  * Creates a real McpServer instance for testing
@@ -16,7 +16,7 @@ export function createMockMcpServer(): {
       name: "alpic-openai-app",
       version: "0.0.1",
     },
-    { capabilities: {} }
+    { capabilities: {} },
   );
 
   // Mock the underlying methods to track calls
@@ -31,10 +31,7 @@ export function createMockMcpServer(): {
 }
 
 export function createTestServer() {
-  return new McpServer(
-    { name: "test-app", version: "1.0.0" },
-    {}
-  )
+  return new McpServer({ name: "test-app", version: "1.0.0" }, {})
     .registerWidget(
       "search-voyage",
       {},
@@ -51,7 +48,7 @@ export function createTestServer() {
               id: z.string(),
               name: z.string(),
               price: z.number(),
-            })
+            }),
           ),
           totalCount: z.number(),
         },
@@ -64,7 +61,7 @@ export function createTestServer() {
             totalCount: 1,
           },
         };
-      }
+      },
     )
     .registerWidget(
       "get-trip-details",
@@ -89,7 +86,7 @@ export function createTestServer() {
             images: ["image1.jpg"],
           },
         };
-      }
+      },
     )
     .registerWidget(
       "no-input-widget",
@@ -104,7 +101,7 @@ export function createTestServer() {
           content: [{ type: "text", text: "No input needed" }],
           structuredContent: {},
         };
-      }
+      },
     )
     .registerWidget(
       "inferred-output-widget",
@@ -123,7 +120,7 @@ export function createTestServer() {
             inferredCount: 1,
           },
         };
-      }
+      },
     )
     .registerTool(
       "calculate-price",
@@ -146,7 +143,7 @@ export function createTestServer() {
             currency: "USD",
           },
         };
-      }
+      },
     )
     .registerTool(
       "inferred-tool",
@@ -164,14 +161,14 @@ export function createTestServer() {
             fetchedAt: "2024-01-01",
           },
         };
-      }
+      },
     );
 }
 
 export function createMinimalTestServer() {
   return new McpServer(
     { name: "test-app", version: "1.0.0" },
-    {}
+    {},
   ).registerWidget(
     "search-voyage",
     {},
@@ -189,7 +186,7 @@ export function createMinimalTestServer() {
         content: [{ type: "text", text: `Found trips to ${destination}` }],
         structuredContent: { results: [{ id: "1" }] },
       };
-    }
+    },
   );
 }
 

@@ -1,6 +1,6 @@
-import express, { type RequestHandler } from "express";
-import cors from "cors";
 import path from "node:path";
+import cors from "cors";
+import express, { type RequestHandler } from "express";
 
 /**
  * Install Vite dev server
@@ -23,7 +23,7 @@ export const widgetsDevServer = async (): Promise<RequestHandler> => {
   const configResult = await loadConfigFromFile(
     { command: "serve", mode: "development" },
     path.join(webAppRoot, "vite.config.ts"),
-    webAppRoot
+    webAppRoot,
   );
 
   // Remove build-specific options that don't apply to dev server

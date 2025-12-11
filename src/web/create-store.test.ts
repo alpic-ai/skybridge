@@ -1,14 +1,14 @@
 import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
   afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
   type Mock,
+  vi,
 } from "vitest";
-import { createStore } from "./create-store.js";
 import type { StateCreator } from "zustand";
+import { createStore } from "./create-store.js";
 import { WIDGET_CONTEXT_KEY } from "./data-llm.js";
 
 describe("createStore", () => {
@@ -101,7 +101,7 @@ describe("createStore", () => {
 
     expect(store.getState()).toEqual({ count: 5 });
     expect(
-      (store.getState() as Record<string, unknown>)[WIDGET_CONTEXT_KEY]
+      (store.getState() as Record<string, unknown>)[WIDGET_CONTEXT_KEY],
     ).toBeUndefined();
   });
 });

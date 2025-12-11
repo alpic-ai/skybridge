@@ -1,11 +1,11 @@
-import { fireEvent, renderHook, waitFor, act } from "@testing-library/react";
+import { act, fireEvent, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useToolInfo } from "./use-tool-info.js";
 import {
+  type OpenAiProperties,
   SET_GLOBALS_EVENT_TYPE,
   SetGlobalsEvent,
-  type OpenAiProperties,
 } from "../types.js";
+import { useToolInfo } from "./use-tool-info.js";
 
 describe("useToolInfo", () => {
   let OpenaiMock: Pick<
@@ -29,7 +29,7 @@ describe("useToolInfo", () => {
 
   it("should return toolInput on initial mount window.openai", () => {
     const { result } = renderHook(() => useToolInfo());
-    
+
     expect(result.current).toMatchObject({
       input: { name: "pokemon", args: { name: "pikachu" } },
       status: "pending",
@@ -60,7 +60,7 @@ describe("useToolInfo", () => {
               toolResponseMetadata,
             },
           },
-        })
+        }),
       );
     });
 

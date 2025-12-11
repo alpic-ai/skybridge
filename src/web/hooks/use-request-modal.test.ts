@@ -1,6 +1,6 @@
-import { useRequestModal } from "./use-request-modal.js";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useRequestModal } from "./use-request-modal.js";
 
 describe("useRequestModal", () => {
   let requestModalMock: ReturnType<typeof vi.fn>;

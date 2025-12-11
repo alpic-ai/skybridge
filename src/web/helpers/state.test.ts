@@ -1,19 +1,19 @@
 import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
   afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
   type Mock,
+  vi,
 } from "vitest";
+import { WIDGET_CONTEXT_KEY } from "../data-llm.js";
 import {
   filterWidgetContext,
+  getInitialState,
   injectWidgetContext,
   serializeState,
-  getInitialState,
 } from "./state.js";
-import { WIDGET_CONTEXT_KEY } from "../data-llm.js";
 
 describe("state helpers", () => {
   describe("filterWidgetContext", () => {
@@ -33,7 +33,7 @@ describe("state helpers", () => {
         [WIDGET_CONTEXT_KEY]: "context",
       };
       const filteredWithContextAndOthers = filterWidgetContext(
-        stateWithContextAndOthers
+        stateWithContextAndOthers,
       );
       expect(filteredWithContextAndOthers).toEqual({
         a: 1,

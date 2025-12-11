@@ -4,10 +4,10 @@ import {
   beforeEach,
   describe,
   expect,
-  it,
-  vi,
-  type Mock,
   expectTypeOf,
+  it,
+  type Mock,
+  vi,
 } from "vitest";
 import { useCallTool } from "./use-call-tool.js";
 
@@ -39,7 +39,7 @@ describe("useCallTool - onSuccess callback", () => {
 
   it("should call window.openai.callTool with correct arguments", async () => {
     const { result } = renderHook(() =>
-      useCallTool<typeof args, typeof data>(toolName)
+      useCallTool<typeof args, typeof data>(toolName),
     );
     await act(async () => {
       result.current.callTool(args);
@@ -52,7 +52,7 @@ describe("useCallTool - onSuccess callback", () => {
     const onError = vi.fn();
     OpenaiMock.callTool.mockResolvedValueOnce(data);
     const { result } = renderHook(() =>
-      useCallTool<typeof args, typeof data>(toolName)
+      useCallTool<typeof args, typeof data>(toolName),
     );
 
     act(() => {
@@ -73,7 +73,7 @@ describe("useCallTool - onSuccess callback", () => {
     const onError = vi.fn();
     OpenaiMock.callTool.mockRejectedValueOnce(error);
     const { result } = renderHook(() =>
-      useCallTool<typeof args, typeof data>(toolName)
+      useCallTool<typeof args, typeof data>(toolName),
     );
 
     act(() => {
@@ -95,7 +95,7 @@ describe("useCallTool - onSuccess callback", () => {
     const onSettled = vi.fn();
     OpenaiMock.callTool.mockResolvedValueOnce(data);
     const { result } = renderHook(() =>
-      useCallTool<typeof args, typeof data>(toolName)
+      useCallTool<typeof args, typeof data>(toolName),
     );
 
     act(() => {
@@ -119,7 +119,7 @@ describe("useCallTool - onSuccess callback", () => {
     const onSettled = vi.fn();
     OpenaiMock.callTool.mockRejectedValueOnce(error);
     const { result } = renderHook(() =>
-      useCallTool<typeof args, typeof data>(toolName)
+      useCallTool<typeof args, typeof data>(toolName),
     );
 
     act(() => {
@@ -160,7 +160,7 @@ describe("useCallTool - TypeScript typing", () => {
     };
 
     const { result } = renderHook(() =>
-      useCallTool<null, TestResponse>("test-tool")
+      useCallTool<null, TestResponse>("test-tool"),
     );
     const data = {
       content: [{ type: "text" as const, text: "test" }],
@@ -187,7 +187,7 @@ describe("useCallTool - TypeScript typing", () => {
     };
 
     const { result } = renderHook(() =>
-      useCallTool<TestArgs, TestResponse>("test-tool")
+      useCallTool<TestArgs, TestResponse>("test-tool"),
     );
 
     const testArgs: TestArgs = { query: "test" };
@@ -218,7 +218,7 @@ describe("useCallTool - TypeScript typing", () => {
     };
 
     const { result } = renderHook(() =>
-      useCallTool<null, TestResponse>("test-tool")
+      useCallTool<null, TestResponse>("test-tool"),
     );
 
     const mockResponse: TestResponse & {

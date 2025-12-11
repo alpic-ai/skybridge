@@ -24,7 +24,7 @@ function createBabelPlugin(t: typeof types): PluginObj<State> {
             const hasSpecifier = node.specifiers.some(
               (s) =>
                 t.isImportSpecifier(s) &&
-                t.isIdentifier(s.imported, { name: "DataLLM" })
+                t.isIdentifier(s.imported, { name: "DataLLM" }),
             );
 
             if (hasSpecifier) {
@@ -40,10 +40,10 @@ function createBabelPlugin(t: typeof types): PluginObj<State> {
               [
                 t.importSpecifier(
                   t.identifier("DataLLM"),
-                  t.identifier("DataLLM")
+                  t.identifier("DataLLM"),
                 ),
               ],
-              t.stringLiteral(LLM_IMPORT_SOURCE)
+              t.stringLiteral(LLM_IMPORT_SOURCE),
             );
 
             path.node.body.unshift(importDecl);
@@ -58,7 +58,7 @@ function createBabelPlugin(t: typeof types): PluginObj<State> {
         const llmAttributeIndex = attributes.findIndex(
           (attribute) =>
             t.isJSXAttribute(attribute) &&
-            t.isJSXIdentifier(attribute.name, { name: "data-llm" })
+            t.isJSXIdentifier(attribute.name, { name: "data-llm" }),
         );
 
         if (llmAttributeIndex === -1) return;
@@ -81,23 +81,23 @@ function createBabelPlugin(t: typeof types): PluginObj<State> {
           t.jsxIdentifier("content"),
           t.isStringLiteral(contentExpression)
             ? contentExpression
-            : t.jsxExpressionContainer(contentExpression)
+            : t.jsxExpressionContainer(contentExpression),
         );
 
         const filteredAttributes = attributes.filter(
-          (_, index) => index !== llmAttributeIndex
+          (_, index) => index !== llmAttributeIndex,
         );
         const newOpening = t.jsxOpeningElement(
           opening.name,
           filteredAttributes,
-          opening.selfClosing
+          opening.selfClosing,
         );
 
         const elementWithoutLlm = t.jsxElement(
           newOpening,
           path.node.closingElement,
           path.node.children,
-          path.node.selfClosing
+          path.node.selfClosing,
         );
 
         const llmOpening = t.jsxOpeningElement(t.jsxIdentifier("DataLLM"), [
@@ -109,7 +109,7 @@ function createBabelPlugin(t: typeof types): PluginObj<State> {
           llmOpening,
           llmClosing,
           [elementWithoutLlm],
-          false
+          false,
         );
 
         state.needsDataLLMImport = true;

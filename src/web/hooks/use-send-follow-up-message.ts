@@ -8,7 +8,7 @@ export function useSendFollowUpMessage() {
       }
       return window.openai.sendFollowUpMessage({ prompt });
     },
-    []
+    [],
   );
 
   return sendFollowUpMessage;

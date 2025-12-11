@@ -1,7 +1,12 @@
 import { expectTypeOf, test } from "vitest";
-import { generateHelpers } from "./generate-helpers.js";
-import type { InferTools, ToolNames, ToolInput, ToolOutput } from "../server/index.js";
+import type {
+  InferTools,
+  ToolInput,
+  ToolNames,
+  ToolOutput,
+} from "../server/index.js";
 import { createTestServer } from "../test/utils.js";
+import { generateHelpers } from "./generate-helpers.js";
 
 const server = createTestServer();
 type TestServer = typeof server;
@@ -158,22 +163,25 @@ test("callTool supports sideEffects for tools with required inputs", () => {
   const { useCallTool } = generateHelpers<TestServer>();
   const { callTool, data } = useCallTool("search-voyage");
 
-  callTool({ destination: "Spain" }, {
-    onSuccess: (response, args) => {
-      expectTypeOf(response.structuredContent.results).toBeArray();
-      expectTypeOf(args.destination).toBeString();
+  callTool(
+    { destination: "Spain" },
+    {
+      onSuccess: (response, args) => {
+        expectTypeOf(response.structuredContent.results).toBeArray();
+        expectTypeOf(args.destination).toBeString();
+      },
+      onError: (error, args) => {
+        expectTypeOf(error).toBeUnknown();
+        expectTypeOf(args.destination).toBeString();
+      },
+      onSettled: (response, error, args) => {
+        if (response) {
+          expectTypeOf(response.structuredContent.totalCount).toBeNumber();
+        }
+        expectTypeOf(args.destination).toBeString();
+      },
     },
-    onError: (error, args) => {
-      expectTypeOf(error).toBeUnknown();
-      expectTypeOf(args.destination).toBeString();
-    },
-    onSettled: (response, error, args) => {
-      if (response) {
-        expectTypeOf(response.structuredContent.totalCount).toBeNumber();
-      }
-      expectTypeOf(args.destination).toBeString();
-    },
-  });
+  );
 });
 
 test("callTool supports sideEffects for tools with no required inputs", () => {
@@ -186,11 +194,14 @@ test("callTool supports sideEffects for tools with no required inputs", () => {
     },
   });
 
-  callTool({}, {
-    onSuccess: (response) => {
-      expectTypeOf(response).toHaveProperty("structuredContent");
+  callTool(
+    {},
+    {
+      onSuccess: (response) => {
+        expectTypeOf(response).toHaveProperty("structuredContent");
+      },
     },
-  });
+  );
 });
 
 test("callToolAsync returns correctly typed promise", () => {
@@ -262,12 +273,15 @@ test("useToolInfo infers input and output types", () => {
   const { useToolInfo } = generateHelpers<TestServer>();
   const toolInfo = useToolInfo<"search-voyage">();
 
-  expectTypeOf(toolInfo.input).toExtend<ToolInput<TestServer, "search-voyage">>();
+  expectTypeOf(toolInfo.input).toExtend<
+    ToolInput<TestServer, "search-voyage">
+  >();
 
   if (toolInfo.status === "success") {
-    expectTypeOf(toolInfo.output).toExtend<ToolOutput<TestServer, "search-voyage">>();
+    expectTypeOf(toolInfo.output).toExtend<
+      ToolOutput<TestServer, "search-voyage">
+    >();
     expectTypeOf(toolInfo.output.results).toBeArray();
     expectTypeOf(toolInfo.output.totalCount).toBeNumber();
   }
 });
-

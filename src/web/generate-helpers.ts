@@ -1,14 +1,16 @@
-import {
-  useCallTool,
-  type CallToolState,
-  type CallToolFn,
-  type CallToolAsyncFn,
-} from "./hooks/use-call-tool.js";
-import { useToolInfo, type ToolState } from "./hooks/use-tool-info.js";
 import type { InferTools, ToolInput, ToolOutput } from "../server/index.js";
-import type { CallToolResponse, Prettify, Objectify } from "./types.js";
+import {
+  type CallToolAsyncFn,
+  type CallToolFn,
+  type CallToolState,
+  useCallTool,
+} from "./hooks/use-call-tool.js";
+import { type ToolState, useToolInfo } from "./hooks/use-tool-info.js";
+import type { CallToolResponse, Objectify, Prettify } from "./types.js";
 
-type TypedCallToolResponse<TOutput> = CallToolResponse & { structuredContent: TOutput };
+type TypedCallToolResponse<TOutput> = CallToolResponse & {
+  structuredContent: TOutput;
+};
 
 type TypedCallToolReturn<TInput, TOutput> = Prettify<
   CallToolState<TypedCallToolResponse<TOutput>> & {
@@ -100,8 +102,11 @@ export function generateHelpers<ServerType = never>() {
      * ```
      */
     useCallTool: <ToolName extends ToolNames>(
-      name: ToolName
-    ): TypedCallToolReturn<ToolInput<ServerType, ToolName>, ToolOutput<ServerType, ToolName>> => {
+      name: ToolName,
+    ): TypedCallToolReturn<
+      ToolInput<ServerType, ToolName>,
+      ToolOutput<ServerType, ToolName>
+    > => {
       return useCallTool(name) as TypedCallToolReturn<
         ToolInput<ServerType, ToolName>,
         ToolOutput<ServerType, ToolName>
@@ -144,4 +149,3 @@ export function generateHelpers<ServerType = never>() {
     },
   };
 }
-
