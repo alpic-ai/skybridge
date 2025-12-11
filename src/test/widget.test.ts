@@ -40,7 +40,7 @@ vi.mock("node:fs", async () => {
 
 describe("McpServer.registerWidget", () => {
   let server: McpServer;
-  let mockResource: MockInstance<McpServer["resource"]>;
+  let mockResource: MockInstance<McpServer["registerResource"]>;
   let mockRegisterTool: MockInstance<McpServer["registerTool"]>;
   const readFileSyncSpy: any = null;
 
