@@ -15,7 +15,7 @@ Skybridge contains 2 main packages that can be used together or independently.
 
 <div className="card-grid">
   <div className="card">
-    <h3><a href="server">Use skybridge/server</a></h3>
+    <h3><a href="/quickstart/add-to-existing-app/server">Use skybridge/server</a></h3>
     <p>**Best if**: you're using the official TypeScript MCP SDK and want to add rich UI widgets with full type safety.</p>
   </div>
 </div>
@@ -24,7 +24,7 @@ Skybridge contains 2 main packages that can be used together or independently.
 
 <div className="card-grid">
   <div className="card">
-    <h3><a href="web">Use skybridge/web only</a></h3>
+    <h3><a href="/quickstart/add-to-existing-app/web">Use skybridge/web only</a></h3>
     <p>**Best if**: you already have an MCP server in a non-TypeScript runtime and only want React hooks for UI components.</p>
   </div>
 </div>
