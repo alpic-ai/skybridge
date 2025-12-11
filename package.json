@@ -37,22 +37,22 @@
   "author": "Frédéric Barthelet",
   "license": "ISC",
   "peerDependencies": {
+    "@modelcontextprotocol/sdk": ">=1.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
   "dependencies": {
     "@babel/core": "^7.28.5",
-    "@modelcontextprotocol/sdk": "^1.20.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "handlebars": "^4.7.8",
     "superjson": "^2.2.6",
     "vite": "^7.1.11",
-    "zod": "^3.25.51",
     "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.8",
+    "@modelcontextprotocol/sdk": "^1.24.3",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.0",
     "@total-typescript/tsconfig": "^1.0.4",
@@ -66,7 +66,8 @@
     "@vitest/ui": "^2.1.8",
     "jsdom": "^25.0.1",
     "typescript": "^5.9.3",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "zod": "^4.1.13"
   },
   "packageManager": "pnpm@10.17.1"
 }

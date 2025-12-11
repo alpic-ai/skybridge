@@ -1,10 +1,15 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import {
-  McpServer as McpServerBase,
-  type RegisteredTool,
-  type ToolCallback,
+import type {
+  RegisteredTool,
+  ToolCallback,
 } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer as McpServerBase } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type {
+  AnySchema,
+  SchemaOutput,
+  ZodRawShapeCompat,
+} from "@modelcontextprotocol/sdk/server/zod-compat.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
   CallToolResult,
@@ -13,7 +18,6 @@ import type {
   ServerRequest,
   ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
-import type { infer as Infer, ZodObject, ZodRawShape } from "zod";
 import { templateHelper } from "./templateHelper.js";
 
 export type ToolDef<TInput = unknown, TOutput = unknown> = {
@@ -62,7 +66,12 @@ type McpServerOriginalResourceConfig = Omit<
 >;
 
 type McpServerOriginalToolConfig = Omit<
-  Parameters<McpServerBase["registerTool"]>[1],
+  Parameters<
+    typeof McpServerBase.prototype.registerTool<
+      ZodRawShapeCompat,
+      ZodRawShapeCompat
+    >
+  >[1],
   "inputSchema" | "outputSchema"
 >;
 
@@ -83,31 +92,43 @@ export interface McpServerTypes<TTools extends Record<string, ToolDef> = {}> {
   readonly tools: TTools;
 }
 
+type Simplify<T> = { [K in keyof T]: T[K] };
+type ShapeOutput<Shape extends ZodRawShapeCompat> = Simplify<
+  {
+    [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
+      ? never
+      : K]: SchemaOutput<Shape[K]>;
+  } & {
+    [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
+      ? K
+      : never]?: SchemaOutput<Shape[K]>;
+  }
+>;
 type AddTool<
   TTools,
   TName extends string,
-  TInput extends ZodRawShape,
+  TInput extends ZodRawShapeCompat,
   TOutput,
 > = McpServer<
   TTools & {
-    [K in TName]: ToolDef<Infer<ZodObject<TInput>>, TOutput>;
+    [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput>;
   }
 >;
 
-type ToolConfig<TInput extends ZodRawShape> = {
+type ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> = {
   title?: string;
   description?: string;
   inputSchema?: TInput;
-  outputSchema?: ZodRawShape;
+  outputSchema?: ZodRawShapeCompat | AnySchema;
   annotations?: ToolAnnotations;
   _meta?: Record<string, unknown>;
 };
 
 type ToolHandler<
-  TInput extends ZodRawShape,
+  TInput extends ZodRawShapeCompat,
   TReturn extends CallToolResult = CallToolResult,
 > = (
-  args: Infer<ZodObject<TInput>>,
+  args: ShapeOutput<TInput>,
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
 ) => TReturn | Promise<TReturn>;
 
@@ -118,14 +139,14 @@ export class McpServer<
 
   registerWidget<
     TName extends string,
-    TInput extends ZodRawShape,
+    TInput extends ZodRawShapeCompat,
     TReturn extends CallToolResult,
   >(
     name: TName,
     resourceConfig: McpServerOriginalResourceConfig,
     toolConfig: McpServerOriginalToolConfig & {
       inputSchema?: TInput;
-      outputSchema?: ZodRawShape;
+      outputSchema?: ZodRawShapeCompat | AnySchema;
     },
     toolCallback: ToolHandler<TInput, TReturn>,
   ): AddTool<TTools, TName, TInput, ExtractStructuredContent<TReturn>> {
@@ -202,7 +223,7 @@ export class McpServer<
 
   override registerTool<
     TName extends string,
-    InputArgs extends ZodRawShape,
+    InputArgs extends ZodRawShapeCompat,
     TReturn extends CallToolResult,
   >(
     name: TName,
@@ -210,13 +231,13 @@ export class McpServer<
     cb: ToolHandler<InputArgs, TReturn>,
   ): AddTool<TTools, TName, InputArgs, ExtractStructuredContent<TReturn>>;
 
-  override registerTool<InputArgs extends ZodRawShape>(
+  override registerTool<InputArgs extends ZodRawShapeCompat>(
     name: string,
     config: ToolConfig<InputArgs>,
     cb: ToolHandler<InputArgs>,
   ): RegisteredTool;
 
-  override registerTool<InputArgs extends ZodRawShape>(
+  override registerTool<InputArgs extends ZodRawShapeCompat>(
     name: string,
     config: ToolConfig<InputArgs>,
     cb: ToolCallback<InputArgs>,
