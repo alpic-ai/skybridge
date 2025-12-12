@@ -1,5 +1,8 @@
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
-import { readFileSync } from "node:fs";
+import type {
+  ServerNotification,
+  ServerRequest,
+} from "@modelcontextprotocol/sdk/types.js";
 import {
   afterEach,
   beforeEach,
@@ -24,11 +27,11 @@ const mockManifest = {
 
 vi.mock("node:fs", async () => {
   const actual = await vi.importActual<typeof import("node:fs")>("node:fs");
-  const readFileSync = vi.fn((path: string, ...args: unknown[]) => {
+  const readFileSync = vi.fn((path: string, encoding?: BufferEncoding) => {
     if (typeof path === "string" && path.includes("manifest.json")) {
       return JSON.stringify(mockManifest);
     }
-    return actual.readFileSync(path, ...args);
+    return actual.readFileSync(path, encoding);
   });
 
   return {
@@ -69,14 +72,19 @@ describe("McpServer.registerWidget", () => {
     );
 
     // Get the resource callback function
-    const resourceCallback = mockRegisterResource.mock.calls[0]?.[3] as (
+    const resourceCallback = mockRegisterResource.mock
+      .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: RequestHandlerExtra,
-    ) => Promise<{ contents: Array<{ uri: URL | string; mimeType: string; text?: string }> }>;
+      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+    ) => Promise<{
+      contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
+    }>;
     expect(resourceCallback).toBeDefined();
 
     const serverUrl = "http://localhost:3000";
-    const mockExtra = createMockExtra("__not_used__");
+    const mockExtra = createMockExtra(
+      "__not_used__",
+    ) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>;
     const result = await resourceCallback(
       new URL("ui://widgets/my-widget.html"),
       mockExtra,
@@ -116,15 +124,20 @@ describe("McpServer.registerWidget", () => {
     );
 
     // Get the resource callback function
-    const resourceCallback = mockRegisterResource.mock.calls[0]?.[3] as (
+    const resourceCallback = mockRegisterResource.mock
+      .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: RequestHandlerExtra,
-    ) => Promise<{ contents: Array<{ uri: URL | string; mimeType: string; text?: string }> }>;
+      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+    ) => Promise<{
+      contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
+    }>;
     expect(resourceCallback).toBeDefined();
 
     const serverUrl = "https://myapp.com";
-    const mockExtra = createMockExtra(serverUrl);
-    const result = await resourceCallback?.(
+    const mockExtra = createMockExtra(
+      serverUrl,
+    ) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>;
+    const result = await resourceCallback(
       new URL("ui://widgets/my-widget.html"),
       mockExtra,
     );
