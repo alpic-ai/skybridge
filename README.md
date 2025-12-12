@@ -1,28 +1,123 @@
 <div align="center">
 
+<img alt="Skybridge" src="docs/static/img/logo.png" width="220">
+
 # Skybridge
 
-**Skybridge is the TypeScript framework for building ChatGPT apps**
+**Build ChatGPT Apps. The Modern TypeScript Way.**
 
-[![By Alpic](https://img.shields.io/badge/Made%20by%20Alpic-f6ffed?logo=alpic)](https://alpic.ai)
+The fullstack TypeScript framework for ChatGPT Apps.<br />
+**Type-safe. React-powered. Zero config.**
 
-![NPM Downloads](https://img.shields.io/npm/dm/skybridge?color=e90060)
-![NPM Version](https://img.shields.io/npm/v/skybridge?color=e90060)
-![GitHub License](https://img.shields.io/github/license/alpic-ai/skybridge?color=e90060)
+<br />
+
+[![NPM Version](https://img.shields.io/npm/v/skybridge?color=e90060&style=for-the-badge)](https://www.npmjs.com/package/skybridge)
+[![NPM Downloads](https://img.shields.io/npm/dm/skybridge?color=e90060&style=for-the-badge)](https://www.npmjs.com/package/skybridge)
+[![GitHub License](https://img.shields.io/github/license/alpic-ai/skybridge?color=e90060&style=for-the-badge)](https://github.com/alpic-ai/skybridge/blob/main/LICENSE)
+
+<br />
+
+[Documentation](https://skybridge.tech) · [Quick Start](https://github.com/new?template_name=apps-sdk-template&template_owner=alpic-ai) · [Examples](https://github.com/alpic-ai/apps-sdk-template)
 
 </div>
 
-Skybridge is a fullstack library. It comes with modular packages aiming at simplifying the development of ChatGPT apps:
+<br />
 
-- HMR server for development and build pipeline for production including end-to-end (tools-to-widget) type safety
-- collection of React hooks for state management, async data fetching
-- attribute for widget-to-context synchronization
+## ✨ Why Skybridge?
 
-### <a href="https://skybridge.tech">Read the docs →</b></a>
+ChatGPT Apps let you embed **rich, interactive UIs** directly in conversations. But the raw SDK is low-level—no hooks, no type safety, no dev tools, and no HMR.
 
-## Get Involved
+**Skybridge fixes that.**
 
-We welcome issues and pull requests!</br>
-Participate in [GitHub discussions](https://github.com/alpic-ai/skybridge/discussions)</br>
-Chat with the community on [Discord](https://discord.com/invite/gNAazGueab)</br>
+| | |
+|:--|:--|
+| 👨‍💻 **Full Dev Environment** — HMR, debug traces, and local emulator. No more refresh loops. | ✅ **End-to-End Type Safety** — tRPC-style inference from server to widget. Autocomplete everywhere. |
+| 🔄 **Widget-to-Model Sync** — Keep the model aware of UI state with `data-llm`. Dual surfaces, one source of truth. | ⚒️ **React Query-style Hooks** — `isPending`, `isError`, callbacks. State management you already know. |
+
+<br />
+
+## 🚀 Get Started
+
+**Create a new ChatGPT app:**
+
+```bash
+gh repo create my-app --template alpic-ai/apps-sdk-template --clone
+cd my-app && pnpm install
+```
+
+**Or add to an existing project:**
+
+```bash
+npm i skybridge
+yarn add skybridge
+pnpm add skybridge
+bun add skybridge
+deno add skybridge
+```
+
+<div align="center">
+
+**👉 [Read the Docs](https://skybridge.tech) 👈**
+
+</div>
+
+<br />
+
+## 📦 The Stack
+
+- **`skybridge/server`** — Drop-in MCP SDK replacement with widget registration and type inference.
+- **`skybridge/web`** — React hooks and components for ChatGPT's runtime.
+
+### Server
+
+```ts
+import { McpServer } from "skybridge/server";
+
+server.registerWidget("flights", {}, {
+  inputSchema: { destination: z.string() },
+}, async ({ destination }) => {
+  const flights = await searchFlights(destination);
+  return { structuredContent: { flights } };
+});
+```
+
+### Widget
+
+```tsx
+import { useToolInfo } from "skybridge/web";
+
+function FlightsWidget() {
+  const { output } = useToolInfo();
+
+  return output.structuredContent.flights.map(f =>
+    <FlightCard key={f.id} flight={f} />
+  );
+}
+```
+
+<br />
+
+## 🎯 Features at a Glance
+
+- **Live Reload** — Vite HMR. See changes instantly without reinstalling.
+- **Typed Hooks** — Full autocomplete for tools, inputs, outputs.
+- **Widget → Tool Calls** — Trigger server actions from UI.
+- **Dual Surface Sync** — Keep model aware of what users see with `data-llm`.
+- **React Query-style API** — `isPending`, `isError`, callbacks.
+- **MCP Compatible** — Extends the official SDK. Works with any MCP client.
+
+<br />
+
+<div align="center">
+
+[![GitHub Discussions](https://img.shields.io/badge/Discussions-Ask%20Questions-blue?style=flat-square&logo=github)](https://github.com/alpic-ai/skybridge/discussions)
+[![GitHub Issues](https://img.shields.io/badge/Issues-Report%20Bugs-red?style=flat-square&logo=github)](https://github.com/alpic-ai/skybridge/issues)
+[![Discord](https://img.shields.io/badge/Discord-Chat-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.com/invite/gNAazGueab)
+
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions
+
+<br />
+
+**[GPL-3.0 License](LICENSE)** · Made with ❤️ by **[Alpic](https://alpic.ai)**
+
+</div>
