@@ -23,13 +23,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Check formatting
-        run: pnpm biome format
+        run: pnpm run test:format
 
       - name: Type check
-        run: pnpm test:type
+        run: pnpm run test:type
 
       - name: Run lint
-        run: pnpm lint
+        run: pnpm run lint
 
   test:
     name: Test
