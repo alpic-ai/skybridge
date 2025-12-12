@@ -40,7 +40,12 @@ type ToolSignature = {
 
 export function useToolInfo<TS extends Partial<ToolSignature> = {}>() {
   const [status, setStatus] = useState<"pending" | "success">("pending");
-  const input = useOpenAiGlobal("toolInput")!;
+  const input = useOpenAiGlobal("toolInput");
+  if (input === undefined) {
+    throw new Error(
+      "toolInput is not available. Make sure you're calling this hook within the OpenAI iFrame skybridge runtime and a tool is being executed.",
+    );
+  }
   const output = useOpenAiGlobal("toolOutput") ?? undefined;
   const responseMetadata = useOpenAiGlobal("toolResponseMetadata") ?? undefined;
 
