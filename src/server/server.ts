@@ -88,7 +88,7 @@ type ExtractStructuredContent<T> = T extends { structuredContent: infer SC }
  *
  * Inspired by tRPC's _def pattern and Hono's type markers.
  */
-export interface McpServerTypes<TTools extends Record<string, ToolDef> = {}> {
+export interface McpServerTypes<TTools extends Record<string, ToolDef> = Record<string, never>> {
   readonly tools: TTools;
 }
 
@@ -133,7 +133,7 @@ type ToolHandler<
 ) => TReturn | Promise<TReturn>;
 
 export class McpServer<
-  TTools extends Record<string, ToolDef> = {},
+  TTools extends Record<string, ToolDef> = Record<string, never>,
 > extends McpServerBase {
   declare readonly $types: McpServerTypes<TTools>;
 

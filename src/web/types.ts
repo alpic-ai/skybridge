@@ -13,7 +13,7 @@ export type Prettify<T> = { [K in keyof T]: T[K] } & {};
 export type Objectify<T> = T & UnknownObject;
 
 type RequiredKeys<T> = {
-  [K in keyof T]-?: {} extends Pick<T, K> ? never : K;
+  [K in keyof T]-?: Record<string, never> extends Pick<T, K> ? never : K;
 }[keyof T];
 export type HasRequiredKeys<T> = RequiredKeys<T> extends never ? false : true;
 
@@ -39,7 +39,7 @@ declare global {
 }
 
 export type OpenAiProperties<
-  ToolInput extends UnknownObject = {},
+  ToolInput extends UnknownObject = Record<string, never>,
   ToolOutput extends UnknownObject = UnknownObject,
   ToolResponseMetadata extends UnknownObject = UnknownObject,
   WidgetState extends UnknownObject = UnknownObject,
