@@ -20,6 +20,7 @@
     "build": "tsc && pnpm run build:templates",
     "build:templates": "cp -r src/server/templates dist/src/server/",
     "format": "biome check --write",
+    "lint": "biome lint",
     "test": "pnpm run test:unit && pnpm run test:type && pnpm run test:format",
     "test:unit": "vitest run",
     "test:type": "tsc --noEmit",
