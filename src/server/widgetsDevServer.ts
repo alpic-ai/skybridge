@@ -1,6 +1,6 @@
-import path from "node:path";
 import cors from "cors";
 import express, { type RequestHandler } from "express";
+import path from "node:path";
 
 /**
  * Install Vite dev server

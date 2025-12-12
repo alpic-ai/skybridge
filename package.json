@@ -17,8 +17,9 @@
     }
   },
   "scripts": {
-    "build": "tsc && pnpm run build:templates",
+    "build": "tsc && pnpm run build:templates && pnpm run build:emulator",
     "build:templates": "cp -r src/server/templates dist/src/server/",
+    "build:emulator": "pnpm --filter emulator build && cp -r src/emulator/dist dist/src/emulator/",
     "format": "biome check --write",
     "test": "pnpm run test:unit && pnpm run test:type && pnpm run test:format",
     "test:unit": "vitest run",
