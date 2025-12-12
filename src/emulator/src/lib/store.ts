@@ -52,8 +52,6 @@ export const useStore = create<Store>()((set) => ({
     set((state) => {
       const updatedOpenaiObject = state.tools[tool]?.openaiObject;
 
-      console.log("updatedOpenaiObject", updatedOpenaiObject);
-
       if (!updatedOpenaiObject) {
         return state;
       }

@@ -16,7 +16,6 @@ export const CallToolButton = ({
   const handleClick = async () => {
     if (validateForm) {
       const isValid = await validateForm();
-      console.log("isValid", isValid);
       if (!isValid) return;
     }
     if (!formData) return;

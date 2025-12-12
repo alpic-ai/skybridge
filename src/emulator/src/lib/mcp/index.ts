@@ -7,7 +7,7 @@ import { McpClient } from "./client.js";
 const client = new McpClient();
 
 client.connect(import.meta.env.VITE_MCP_SERVER_URL).then(() => {
-  console.log("Connected to MCP server");
+  console.info("Connected to MCP server");
 });
 
 const defaultOpenaiObject: OpenAiProperties = {

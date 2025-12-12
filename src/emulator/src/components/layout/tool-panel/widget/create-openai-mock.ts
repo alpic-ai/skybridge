@@ -22,7 +22,6 @@ function createOpenaiMethods(
       name: string,
       args: ToolArgs,
     ): Promise<ToolResponse> => {
-      console.log("callTool", { name, args });
       log("callTool", { name, args });
       return {} as unknown as ToolResponse;
     },
