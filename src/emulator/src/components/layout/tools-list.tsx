@@ -1,6 +1,6 @@
 import { useSelectedTool, useTools } from "@/lib/mcp";
-import { cn } from "@/lib/utils";
 import { useStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
 
 function ToolsList() {
   const tools = useTools();

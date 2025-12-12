@@ -39,7 +39,10 @@ export class McpClient {
     return response.tools;
   }
 
-  async callTool(toolName: string, args: CallToolArgs): Promise<CallToolResponse> {
+  async callTool(
+    toolName: string,
+    args: CallToolArgs,
+  ): Promise<CallToolResponse> {
     if (!this.client) {
       throw new Error("Client not connected. Call connect() first.");
     }
@@ -95,7 +98,9 @@ export class McpClient {
       throw new Error("Client not connected. Call connect() first.");
     }
 
-    return (this.client as any)._serverVersion as { name: string; version: string } | undefined;
+    return (this.client as any)._serverVersion as
+      | { name: string; version: string }
+      | undefined;
   }
 
   async close(): Promise<void> {

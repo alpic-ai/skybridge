@@ -1,5 +1,5 @@
-import { type RefObject, useCallback, useEffect, useState } from "react";
 import { useLocalStorageState } from "ahooks";
+import { type RefObject, useCallback, useEffect, useState } from "react";
 
 export const useResize = ({
   key,
@@ -70,7 +70,14 @@ export const useResize = ({
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
     };
-  }, [isResizing, handleSetSize, containerRef, isVertical, startPos, startSize]);
+  }, [
+    isResizing,
+    handleSetSize,
+    containerRef,
+    isVertical,
+    startPos,
+    startSize,
+  ]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();

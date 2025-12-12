@@ -1,8 +1,8 @@
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { useCallToolResult } from "@/lib/store";
-import { useSelectedTool } from "@/lib/mcp";
 import ReactJsonView from "@microlink/react-json-view";
 import { CircleAlertIcon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useSelectedTool } from "@/lib/mcp";
+import { useCallToolResult } from "@/lib/store";
 
 export const Output = () => {
   const tool = useSelectedTool()!;
@@ -18,7 +18,9 @@ export const Output = () => {
             <Alert variant="error">
               <CircleAlertIcon />
               <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{result.response.content.map((c) => c.text).join("\n")}</AlertDescription>
+              <AlertDescription>
+                {result.response.content.map((c) => c.text).join("\n")}
+              </AlertDescription>
             </Alert>
           ) : (
             <div className="text-xs">

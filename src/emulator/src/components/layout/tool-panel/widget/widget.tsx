@@ -1,7 +1,6 @@
-import { useResource } from "@/lib/mcp";
-import { useStore, useCallToolResult } from "@/lib/store";
-import { useSelectedTool } from "@/lib/mcp";
 import { useCallback, useEffect, useRef } from "react";
+import { useResource, useSelectedTool } from "@/lib/mcp";
+import { useCallToolResult, useStore } from "@/lib/store";
 import { createAndInjectOpenAi } from "./create-openai-mock";
 
 export const Widget = () => {
@@ -42,8 +41,7 @@ export const Widget = () => {
     const doc = iframe.contentDocument!;
 
     const resizeObserver = new ResizeObserver(() => {
-      const height = doc.documentElement.scrollHeight;
-      iframe.style.height = height + "px";
+      iframe.style.height = `${doc.documentElement.scrollHeight}px`;
     });
 
     resizeObserver.observe(doc.body);

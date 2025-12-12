@@ -35,7 +35,10 @@ export function useResizablePanelSize({
   );
 
   return {
-    size: Math.max(minSizePercent, Math.min(maxSizePercent, size ?? defaultSizePercent)),
+    size: Math.max(
+      minSizePercent,
+      Math.min(maxSizePercent, size ?? defaultSizePercent),
+    ),
     onResize: handleResize,
   };
 }

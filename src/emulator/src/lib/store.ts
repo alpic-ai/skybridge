@@ -1,10 +1,10 @@
-import { create } from "zustand";
+import { set as lodashSet, merge } from "lodash-es";
 import type {
   CallToolResponse,
   OpenAiProperties,
   UnknownObject,
 } from "skybridge/web";
-import { merge, set as lodashSet } from "lodash-es";
+import { create } from "zustand";
 
 export type OpenAiLog = {
   id: string;

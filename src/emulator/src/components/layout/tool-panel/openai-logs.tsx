@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { useSelectedTool } from "@/lib/mcp";
-import { useStore, type OpenAiLog, useCallToolResult } from "@/lib/store";
 import { TrashIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useSelectedTool } from "@/lib/mcp";
+import { type OpenAiLog, useCallToolResult, useStore } from "@/lib/store";
 
 function formatTimestamp(timestamp: number): string {
   const date = new Date(timestamp);
@@ -29,7 +29,7 @@ function LogEntry({ log }: { log: OpenAiLog }) {
   const argsPreview = hasArgs ? getArgsPreview(log.args) : null;
 
   return (
-    <div>
+    <>
       <div
         onClick={() => setExpanded(!expanded)}
         className={`flex items-center gap-2 py-1.5 px-2 text-xs font-mono border-b border-gray-200 dark:border-gray-800/50 ${
@@ -62,7 +62,7 @@ function LogEntry({ log }: { log: OpenAiLog }) {
           </pre>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -83,7 +83,7 @@ export function OpenAiLogs() {
     if (container) {
       container.scrollTop = container.scrollHeight;
     }
-  }, [openaiLogs]);
+  }, []);
 
   return (
     <div className="flex flex-col h-full overflow-hidden min-h-0">

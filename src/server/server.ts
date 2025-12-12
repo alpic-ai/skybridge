@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import {
   McpServer as McpServerBase,
   type RegisteredTool,
@@ -16,8 +18,6 @@ import type {
   ServerRequest,
   ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
-import { readFileSync } from "node:fs";
-import path from "node:path";
 import { templateHelper } from "./templateHelper.js";
 
 export type ToolDef<TInput = unknown, TOutput = unknown> = {

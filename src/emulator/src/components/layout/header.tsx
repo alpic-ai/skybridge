@@ -1,7 +1,7 @@
+import { ExternalLink } from "lucide-react";
 import { useServerInfo } from "@/lib/mcp";
 import { useStore } from "@/lib/store";
 import { Button } from "../ui/button";
-import { ExternalLink } from "lucide-react";
 
 export const Header = () => {
   const serverInfo = useServerInfo();
