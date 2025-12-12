@@ -133,7 +133,7 @@ export type CallTool = (
   args: Record<string, unknown>,
 ) => Promise<CallToolResponse>;
 
-export type DisplayMode = "pip" | "inline" | "fullscreen";
+export type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
 
 export type Theme = "light" | "dark";
 
