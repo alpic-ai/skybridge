@@ -1,3 +1,5 @@
+import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
+import { readFileSync } from "node:fs";
 import {
   afterEach,
   beforeEach,
@@ -22,7 +24,7 @@ const mockManifest = {
 
 vi.mock("node:fs", async () => {
   const actual = await vi.importActual<typeof import("node:fs")>("node:fs");
-  const readFileSync = vi.fn((path: string, ...args: any[]) => {
+  const readFileSync = vi.fn((path: string, ...args: unknown[]) => {
     if (typeof path === "string" && path.includes("manifest.json")) {
       return JSON.stringify(mockManifest);
     }
@@ -69,8 +71,8 @@ describe("McpServer.registerWidget", () => {
     // Get the resource callback function
     const resourceCallback = mockRegisterResource.mock.calls[0]?.[3] as (
       uri: URL,
-      extra: any,
-    ) => any;
+      extra: RequestHandlerExtra,
+    ) => Promise<{ contents: Array<{ uri: URL | string; mimeType: string; text?: string }> }>;
     expect(resourceCallback).toBeDefined();
 
     const serverUrl = "http://localhost:3000";
@@ -116,8 +118,8 @@ describe("McpServer.registerWidget", () => {
     // Get the resource callback function
     const resourceCallback = mockRegisterResource.mock.calls[0]?.[3] as (
       uri: URL,
-      extra: any,
-    ) => any;
+      extra: RequestHandlerExtra,
+    ) => Promise<{ contents: Array<{ uri: URL | string; mimeType: string; text?: string }> }>;
     expect(resourceCallback).toBeDefined();
 
     const serverUrl = "https://myapp.com";
