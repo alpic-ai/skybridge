@@ -10,8 +10,9 @@ class TemplateHelper {
   private templateCache = new Map<string, HandlebarsTemplateDelegate>();
 
   private loadTemplate(templateName: string): HandlebarsTemplateDelegate {
-    if (this.templateCache.has(templateName)) {
-      return this.templateCache.get(templateName)!;
+    const cached = this.templateCache.get(templateName);
+    if (cached) {
+      return cached;
     }
 
     const templatePath = join(__dirname, "templates", `${templateName}.hbs`);
