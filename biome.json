@@ -18,13 +18,26 @@
     "rules": {
       "recommended": true,
       "correctness": {
-        "noUnusedVariables": "error"
-      }
+        "noUnusedVariables": "error",
+        "useExhaustiveDependencies": "warn"
+      },
+      "style": {
+        "noNonNullAssertion": "warn"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "warn"
+      },
+      "a11y": "warn"
     }
   },
   "javascript": {
     "formatter": {
       "quoteStyle": "double"
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
     }
   },
   "assist": {

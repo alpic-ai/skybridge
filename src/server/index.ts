@@ -1,3 +1,4 @@
+export { emulatorStaticServer } from "./emulatorStaticServer.js";
 export type {
   AnyToolRegistry,
   InferTools,
