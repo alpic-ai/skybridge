@@ -27,12 +27,21 @@ const mockManifest = {
 
 vi.mock("node:fs", async () => {
   const actual = await vi.importActual<typeof import("node:fs")>("node:fs");
-  const readFileSync = vi.fn((path: string, encoding?: BufferEncoding) => {
+  const readFileSyncImpl = (
+    path: Parameters<typeof actual.readFileSync>[0],
+    ...args: unknown[]
+  ): ReturnType<typeof actual.readFileSync> => {
     if (typeof path === "string" && path.includes("manifest.json")) {
-      return JSON.stringify(mockManifest);
+      return JSON.stringify(mockManifest) as ReturnType<
+        typeof actual.readFileSync
+      >;
     }
-    return actual.readFileSync(path, encoding);
-  });
+    // Type assertion needed because readFileSync has overloads with different parameter types
+    // Using @ts-expect-error because the overloads are complex and we're forwarding args
+    // @ts-expect-error - readFileSync overloads require complex type handling
+    return actual.readFileSync(path, ...args);
+  };
+  const readFileSync = vi.fn(readFileSyncImpl) as typeof actual.readFileSync;
 
   return {
     readFileSync,
