@@ -6,6 +6,31 @@ on:
     branches: [main]
 
 jobs:
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm biome format
+
+      - name: Type check
+        run: pnpm test:type
+
+      - name: Run lint
+        run: pnpm lint
+
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -15,8 +40,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          registry-url: "https://registry.npmjs.org"
+          node-version-file: ".nvmrc"
 
       - uses: pnpm/action-setup@v4
 
