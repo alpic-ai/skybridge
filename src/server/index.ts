@@ -4,6 +4,7 @@ export type {
   ToolInput,
   ToolNames,
   ToolOutput,
+  ToolResponseMetadata,
 } from "./inferUtilityTypes.js";
 export type { McpServerTypes, ToolDef } from "./server.js";
 export { McpServer } from "./server.js";
