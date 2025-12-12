@@ -26,7 +26,7 @@ export const widgetsDevServer = async (): Promise<RequestHandler> => {
     webAppRoot,
   );
 
-  // Remove build-specific options that don't apply to dev server
+  // biome-ignore lint/correctness/noUnusedVariables: Remove build-specific options that don't apply to dev server
   const { build, preview, ...devConfig } = configResult?.config || {};
 
   const vite = await createServer({
