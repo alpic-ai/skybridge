@@ -118,6 +118,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions
 
 <br />
 
-**[GPL-3.0 License](LICENSE)** · Made with ❤️ by **[Alpic](https://alpic.ai)**
+**[MIT License](LICENSE)** · Made with ❤️ by **[Alpic](https://alpic.ai)**
 
 </div>
