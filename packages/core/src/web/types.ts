@@ -114,7 +114,11 @@ export type OpenAiMethods<WidgetState extends UnknownObject = UnknownObject> = {
    * Opens a modal portaled outside of the widget iFrame.
    * This ensures the modal is correctly displayed and not limited to the widget's area.
    */
-  requestModal: (args: { title?: string, params?: Record<string, unknown>, anchor?: { top?: number, left?: number, width?: number, height?: number } }) => Promise<void>;
+  requestModal: (args: {
+    title?: string;
+    params?: Record<string, unknown>;
+    anchor?: { top?: number; left?: number; width?: number; height?: number };
+  }) => Promise<void>;
 
   /** Uploads a new file to the host */
   uploadFile: (file: File) => Promise<FileMetadata>;
