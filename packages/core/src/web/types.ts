@@ -58,6 +58,7 @@ export type OpenAiProperties<
   maxHeight: number;
   displayMode: DisplayMode;
   safeArea: SafeArea;
+  view: View;
 
   // state
   toolInput: ToolInput;
@@ -146,6 +147,11 @@ export type CallTool = (
 ) => Promise<CallToolResponse>;
 
 export type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
+
+export type View = {
+  mode: DisplayMode;
+  params?: Record<string, unknown>;
+};
 
 export type Theme = "light" | "dark";
 
