@@ -93,9 +93,10 @@ type ToolResponseSignature = Pick<
   "structuredContent" | "meta"
 >;
 
+// biome-ignore lint/complexity/noBannedTypes: Required for proper type inference and literal type preservation
 export const useCallTool = <
   ToolArgs extends CallToolArgs = null,
-  ToolResponse extends Partial<ToolResponseSignature> = object,
+  ToolResponse extends Partial<ToolResponseSignature> = {},
 >(
   name: string,
 ) => {

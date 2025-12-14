@@ -38,7 +38,8 @@ type ToolSignature = {
   responseMetadata: UnknownObject;
 };
 
-export function useToolInfo<TS extends Partial<ToolSignature> = object>() {
+// biome-ignore lint/complexity/noBannedTypes: Required for proper type inference and literal type preservation
+export function useToolInfo<TS extends Partial<ToolSignature> = {}>() {
   const [status, setStatus] = useState<"pending" | "success">("pending");
   const input = useOpenAiGlobal("toolInput")!;
   const output = useOpenAiGlobal("toolOutput") ?? undefined;

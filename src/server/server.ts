@@ -96,7 +96,8 @@ type ExtractMeta<T> =
  *
  * Inspired by tRPC's _def pattern and Hono's type markers.
  */
-export interface McpServerTypes<TTools extends Record<string, ToolDef> = Record<string, never>> {
+// biome-ignore lint/complexity/noBannedTypes: Required for proper type inference and literal type preservation
+export interface McpServerTypes<TTools extends Record<string, ToolDef> = {}> {
   readonly tools: TTools;
 }
 
@@ -141,8 +142,9 @@ type ToolHandler<
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
 ) => TReturn | Promise<TReturn>;
 
+// biome-ignore lint/complexity/noBannedTypes: Required for proper type inference and literal type preservation
 export class McpServer<
-  TTools extends Record<string, ToolDef> = Record<string, never>,
+  TTools extends Record<string, ToolDef> = {},
 > extends McpServerBase {
   declare readonly $types: McpServerTypes<TTools>;
 

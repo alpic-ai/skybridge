@@ -39,9 +39,11 @@ declare global {
 }
 
 export type OpenAiProperties<
-  ToolInput extends UnknownObject = object,
+  // biome-ignore lint/complexity/noBannedTypes: Required for proper type inference and literal type preservation
+  ToolInput extends UnknownObject = {},
   ToolOutput extends UnknownObject = UnknownObject,
-  ToolResponseMetadata extends UnknownObject = object,
+  // biome-ignore lint/complexity/noBannedTypes: Required for proper type inference and literal type preservation
+  ToolResponseMetadata extends UnknownObject = {},
   WidgetState extends UnknownObject = UnknownObject,
 > = {
   theme: Theme;
