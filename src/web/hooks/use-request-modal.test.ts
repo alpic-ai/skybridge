@@ -9,7 +9,7 @@ describe("useRequestModal", () => {
     requestModalMock = vi.fn();
     vi.stubGlobal("openai", {
       requestModal: requestModalMock,
-      displayMode: "inline",
+      view: { mode: "inline" },
     });
   });
 
@@ -18,32 +18,48 @@ describe("useRequestModal", () => {
     vi.resetAllMocks();
   });
 
-  it("should return an array with [open, isOpen] where isOpen is false when displayMode is not modal", () => {
+  it("should return an object with open, isOpen, and params properties where isOpen is false when mode is not modal", () => {
     const { result } = renderHook(() => useRequestModal());
 
-    expect(Array.isArray(result.current)).toBe(true);
-    expect(result.current).toHaveLength(2);
+    expect(typeof result.current).toBe("object");
+    expect(result.current).toHaveProperty("open");
+    expect(result.current).toHaveProperty("isOpen");
+    expect(result.current).toHaveProperty("params");
 
-    const [open, isOpen] = result.current;
+    const { open, isOpen, params } = result.current;
     expect(typeof open).toBe("function");
     expect(isOpen).toBe(false);
+    expect(params).toBeUndefined();
   });
 
-  it("should return isOpen as true when displayMode is modal", () => {
+  it("should return isOpen as true when mode is modal", () => {
     vi.stubGlobal("openai", {
       requestModal: requestModalMock,
-      displayMode: "modal",
+      view: { mode: "modal" },
     });
 
     const { result } = renderHook(() => useRequestModal());
-    const [, isOpen] = result.current;
+    const { isOpen } = result.current;
 
     expect(isOpen).toBe(true);
   });
 
+  it("should return params from view when available", () => {
+    const testParams = { foo: "bar", baz: 42 };
+    vi.stubGlobal("openai", {
+      requestModal: requestModalMock,
+      view: { mode: "modal", params: testParams },
+    });
+
+    const { result } = renderHook(() => useRequestModal());
+    const { params } = result.current;
+
+    expect(params).toEqual(testParams);
+  });
+
   it("should call window.openai.requestModal with the options when open is called", () => {
     const { result } = renderHook(() => useRequestModal());
-    const [open] = result.current;
+    const { open } = result.current;
 
     const options = { title: "Test Modal" };
     open(options);
