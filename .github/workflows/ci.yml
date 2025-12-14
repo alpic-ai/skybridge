@@ -9,6 +9,8 @@ jobs:
   code-quality:
     name: Code Quality
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -22,14 +24,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check formatting
-        run: pnpm run test:format
+      - name: Run Biome
+        run: biome ci .
 
       - name: Type check
-        run: pnpm run test:type
-
-      - name: Run lint
-        run: pnpm run lint
+        run: pnpm run typecheck
 
   test:
     name: Test
