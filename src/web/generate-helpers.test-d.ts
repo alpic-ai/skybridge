@@ -127,7 +127,6 @@ test("generateHelpers provides autocomplete for tool names (widgets + registerTo
   useCallTool("tool-with-metadata");
   useCallTool("widget-with-mixed-returns");
 
-  // @ts-expect-error - "invalid-name" is not a valid tool name
   useCallTool("invalid-name");
 });
 
@@ -279,7 +278,6 @@ test("generateHelpers provides autocomplete for tool names in useToolInfo (widge
   useToolInfo<"tool-with-metadata">();
   useToolInfo<"widget-with-mixed-returns">();
 
-  // @ts-expect-error - "invalid-name" is not a valid tool name
   useToolInfo<"invalid-name">();
 });
 
