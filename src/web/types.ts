@@ -39,9 +39,9 @@ declare global {
 }
 
 export type OpenAiProperties<
-  ToolInput extends UnknownObject = Record<string, unknown>,
+  ToolInput extends UnknownObject = object,
   ToolOutput extends UnknownObject = UnknownObject,
-  ToolResponseMetadata extends UnknownObject = Record<string, unknown>,
+  ToolResponseMetadata extends UnknownObject = object,
   WidgetState extends UnknownObject = UnknownObject,
 > = {
   theme: Theme;
