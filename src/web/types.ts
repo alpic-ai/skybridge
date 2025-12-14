@@ -73,6 +73,12 @@ export type CallToolResponse = {
   meta: Record<string, unknown>;
 };
 
+export type RequestModalOptions = {
+  title?: string;
+  params?: Record<string, unknown>;
+  anchor?: { top?: number; left?: number; width?: number; height?: number };
+};
+
 export type OpenAiMethods<WidgetState extends UnknownObject = UnknownObject> = {
   /** Calls a tool on your MCP. Returns the full response. */
   callTool: <
@@ -108,11 +114,7 @@ export type OpenAiMethods<WidgetState extends UnknownObject = UnknownObject> = {
    * Opens a modal portaled outside of the widget iFrame.
    * This ensures the modal is correctly displayed and not limited to the widget's area.
    */
-  requestModal: (args: {
-    title?: string;
-    params?: Record<string, unknown>;
-    anchor?: { top?: number; left?: number; width?: number; height?: number };
-  }) => Promise<void>;
+  requestModal: (args: RequestModalOptions) => Promise<void>;
 
   /** Uploads a new file to the host */
   uploadFile: (file: File) => Promise<FileMetadata>;
