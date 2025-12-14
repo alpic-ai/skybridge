@@ -21,7 +21,7 @@
     "build:templates": "cp -r src/server/templates dist/src/server/",
     "format": "biome check --write",
     "typecheck": "tsc --noEmit",
-    "format:check": "biome check",
+    "check": "biome check",
     "test": "vitest run",
     "docs:dev": "pnpm --filter @skybridge/docs start",
     "docs:build": "pnpm --filter @skybridge/docs build",

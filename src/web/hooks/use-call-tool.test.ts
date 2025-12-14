@@ -201,17 +201,11 @@ describe("useCallTool - TypeScript typing", () => {
 
     OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);
 
-    let promise: Promise<typeof mockResponse>;
-    let resolvedValue: typeof mockResponse | undefined;
-    await act(async () => {
-      promise = result.current.callToolAsync(testArgs);
-      expectTypeOf<Promise<typeof mockResponse>>(promise);
-      resolvedValue = await promise;
+    const promise = act(async () => {
+      return result.current.callToolAsync(testArgs);
     });
-
-    if (resolvedValue === undefined) {
-      throw new Error("Expected resolvedValue to be defined");
-    }
+    expectTypeOf<Promise<typeof mockResponse>>(promise);
+    const resolvedValue = await promise;
     expect(resolvedValue).toEqual(mockResponse);
   });
 
@@ -237,17 +231,10 @@ describe("useCallTool - TypeScript typing", () => {
 
     OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);
 
-    let promise: Promise<typeof mockResponse>;
-    let resolvedValue: typeof mockResponse | undefined;
-    await act(async () => {
-      promise = result.current.callToolAsync();
-      expectTypeOf<Promise<typeof mockResponse>>(promise);
-      resolvedValue = await promise;
+    const returnedValue = await act(async () => {
+      return result.current.callToolAsync();
     });
-
-    if (resolvedValue === undefined) {
-      throw new Error("Expected resolvedValue to be defined");
-    }
-    expect(resolvedValue).toEqual(mockResponse);
+    expectTypeOf<typeof mockResponse>(returnedValue);
+    expect(returnedValue).toEqual(mockResponse);
   });
 });
