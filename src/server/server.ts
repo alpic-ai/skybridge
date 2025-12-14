@@ -25,6 +25,16 @@ export type ToolDef<TInput = unknown, TOutput = unknown> = {
   output: TOutput;
 };
 
+export interface McpServerOptions {
+  /**
+   * Tunnel hostname for remote development (e.g., ngrok, cloudflare tunnel).
+   * When set, widget HTML will use this host for asset URLs.
+   *
+   * @example "your-subdomain.trycloudflare.com"
+   */
+  tunnelHost?: string;
+}
+
 /** @see https://developers.openai.com/apps-sdk/reference#tool-descriptor-parameters */
 type OpenaiToolMeta = {
   "openai/outputTemplate": string;
@@ -136,6 +146,15 @@ export class McpServer<
   TTools extends Record<string, ToolDef> = {},
 > extends McpServerBase {
   declare readonly $types: McpServerTypes<TTools>;
+  private readonly tunnelHost?: string;
+
+  constructor(
+    ...args: [...ConstructorParameters<typeof McpServerBase>, McpServerOptions?]
+  ) {
+    const [serverInfo, serverOptions, mcpOptions] = args;
+    super(serverInfo, serverOptions);
+    this.tunnelHost = mcpOptions?.tunnelHost;
+  }
 
   registerWidget<
     TName extends string,
@@ -172,7 +191,9 @@ export class McpServer<
                 extra?.requestInfo?.headers?.["x-forwarded-host"] ??
                 extra?.requestInfo?.headers?.host
               }`
-            : `http://localhost:3000`;
+            : this.tunnelHost
+              ? `https://${this.tunnelHost}`
+              : `http://localhost:3000`;
 
         const html =
           process.env.NODE_ENV === "production"
