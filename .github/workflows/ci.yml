@@ -6,48 +6,65 @@ on:
     branches: [main]
 
 jobs:
-  code-quality:
-    name: Code Quality
+  install:
+    name: Install
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-
-      - uses: pnpm/action-setup@v4
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Biome
-        run: biome ci .
-
-      - name: Type check
-        run: pnpm run typecheck
+      - uses: actions/cache/save@v4
+        with:
+          path: |
+            node_modules
+          key: build-${{ github.sha }}
 
   test:
-    name: Test
+    name: ${{ matrix.name }}
+    needs: install
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Unit Tests
+            command: pnpm run test:unit
+          - name: Type Check
+            command: pnpm run test:type
+          - name: Lint & Format
+            command: pnpm run test:format
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
+          cache: "pnpm"
 
-      - uses: pnpm/action-setup@v4
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+          key: build-${{ github.sha }}
 
       - name: Build project
+        if: matrix.name == 'Unit Tests'
         run: pnpm run build
 
-      - name: Run tests
-        run: pnpm run test
+      - name: Run ${{ matrix.name }}
+        run: ${{ matrix.command }}
