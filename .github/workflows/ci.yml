@@ -62,9 +62,5 @@ jobs:
             node_modules
           key: build-${{ github.sha }}
 
-      - name: Build project
-        if: matrix.name == 'Unit Tests'
-        run: pnpm run build
-
       - name: Run ${{ matrix.name }}
         run: ${{ matrix.command }}
