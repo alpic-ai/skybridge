@@ -123,7 +123,13 @@ export type OpenAiMethods<WidgetState extends UnknownObject = UnknownObject> = {
 // Dispatched when any global changes in the host page
 export const SET_GLOBALS_EVENT_TYPE = "openai:set_globals";
 export class SetGlobalsEvent extends CustomEvent<{
-  globals: Partial<OpenAiProperties>;
+  globals: Partial<
+    OpenAiProperties<
+      Record<string, unknown>,
+      Record<string, unknown>,
+      Record<string, unknown>
+    >
+  >;
 }> {
   override readonly type = SET_GLOBALS_EVENT_TYPE;
 }
