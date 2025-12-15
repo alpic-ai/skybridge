@@ -8,12 +8,6 @@ import {
 export function useOpenAiGlobal<K extends keyof OpenAiProperties>(
   key: K,
 ): OpenAiProperties[K] | undefined {
-  if (!window.openai) {
-    console.warn(
-      "openai is not defined on window. Please make sure to only call this hook inside the OpenAI iFrame skybridge runtime.",
-    );
-  }
-
   return useSyncExternalStore(
     (onChange) => {
       const handleSetGlobal = (event: SetGlobalsEvent) => {
@@ -33,6 +27,13 @@ export function useOpenAiGlobal<K extends keyof OpenAiProperties>(
         window.removeEventListener(SET_GLOBALS_EVENT_TYPE, handleSetGlobal);
       };
     },
-    () => window.openai?.[key],
+    () => {
+      if (!window.openai) {
+        throw new Error(
+          "openai is not defined on window. Please make sure to only call this hook inside the OpenAI iFrame skybridge runtime.",
+        );
+      }
+      return window.openai[key];
+    },
   );
 }
