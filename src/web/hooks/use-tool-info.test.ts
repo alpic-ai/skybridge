@@ -9,11 +9,7 @@ import { useToolInfo } from "./use-tool-info.js";
 
 describe("useToolInfo", () => {
   let OpenaiMock: Pick<
-    OpenAiProperties<
-      Record<string, unknown>,
-      Record<string, unknown>,
-      Record<string, unknown>
-    >,
+    OpenAiProperties,
     "toolInput" | "toolOutput" | "toolResponseMetadata"
   >;
 
