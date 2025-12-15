@@ -38,7 +38,9 @@ type ToolSignature = {
   responseMetadata: UnknownObject;
 };
 
-export function useToolInfo<TS extends Partial<ToolSignature> = {}>() {
+export function useToolInfo<
+  TS extends Partial<ToolSignature> = Record<string, never>,
+>() {
   const [status, setStatus] = useState<"pending" | "success">("pending");
   const input = useOpenAiGlobal("toolInput")!;
   const output = useOpenAiGlobal("toolOutput") ?? undefined;
