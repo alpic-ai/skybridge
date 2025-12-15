@@ -20,9 +20,14 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 import { templateHelper } from "./templateHelper.js";
 
-export type ToolDef<TInput = unknown, TOutput = unknown> = {
+export type ToolDef<
+  TInput = unknown,
+  TOutput = unknown,
+  TResponseMetadata = unknown,
+> = {
   input: TInput;
   output: TOutput;
+  responseMetadata: TResponseMetadata;
 };
 
 /** @see https://developers.openai.com/apps-sdk/reference#tool-descriptor-parameters */
@@ -79,6 +84,9 @@ type ExtractStructuredContent<T> = T extends { structuredContent: infer SC }
   ? SC
   : never;
 
+type ExtractMeta<T> =
+  Extract<T, { _meta: unknown }> extends { _meta: infer M } ? M : unknown;
+
 /**
  * Type-level marker interface for cross-package type inference.
  * This enables TypeScript to infer tool types across package boundaries
@@ -109,9 +117,10 @@ type AddTool<
   TName extends string,
   TInput extends ZodRawShapeCompat,
   TOutput,
+  TResponseMetadata = unknown,
 > = McpServer<
   TTools & {
-    [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput>;
+    [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput, TResponseMetadata>;
   }
 >;
 
@@ -149,7 +158,13 @@ export class McpServer<
       outputSchema?: ZodRawShapeCompat | AnySchema;
     },
     toolCallback: ToolHandler<TInput, TReturn>,
-  ): AddTool<TTools, TName, TInput, ExtractStructuredContent<TReturn>> {
+  ): AddTool<
+    TTools,
+    TName,
+    TInput,
+    ExtractStructuredContent<TReturn>,
+    ExtractMeta<TReturn>
+  > {
     const uri = `ui://widgets/${name}.html`;
     const resourceMetadata: ResourceMeta = {
       ...(resourceConfig._meta ?? {}),
@@ -217,7 +232,8 @@ export class McpServer<
       TTools,
       TName,
       TInput,
-      ExtractStructuredContent<TReturn>
+      ExtractStructuredContent<TReturn>,
+      ExtractMeta<TReturn>
     >;
   }
 
@@ -229,7 +245,13 @@ export class McpServer<
     name: TName,
     config: ToolConfig<InputArgs>,
     cb: ToolHandler<InputArgs, TReturn>,
-  ): AddTool<TTools, TName, InputArgs, ExtractStructuredContent<TReturn>>;
+  ): AddTool<
+    TTools,
+    TName,
+    InputArgs,
+    ExtractStructuredContent<TReturn>,
+    ExtractMeta<TReturn>
+  >;
 
   override registerTool<InputArgs extends ZodRawShapeCompat>(
     name: string,

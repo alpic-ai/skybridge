@@ -162,6 +162,79 @@ export function createTestServer() {
           },
         };
       },
+    )
+    .registerWidget(
+      "widget-with-metadata",
+      {},
+      {
+        description: "Widget that returns response metadata",
+        inputSchema: {
+          resourceId: z.string(),
+        },
+      },
+      async ({ resourceId }) => {
+        return {
+          content: [{ type: "text", text: `Resource: ${resourceId}` }],
+          structuredContent: {
+            data: { id: resourceId, loaded: true },
+          },
+          _meta: {
+            requestId: "req-123",
+            timestamp: 1704067200000,
+            cached: false,
+          },
+        };
+      },
+    )
+    .registerTool(
+      "tool-with-metadata",
+      {
+        description: "Tool that returns response metadata",
+        inputSchema: {
+          query: z.string(),
+        },
+      },
+      async ({ query }) => {
+        return {
+          content: [{ type: "text", text: `Query: ${query}` }],
+          structuredContent: {
+            results: [query],
+          },
+          _meta: {
+            executionTime: 150,
+            source: "cache",
+          },
+        };
+      },
+    )
+    .registerWidget(
+      "widget-with-mixed-returns",
+      {},
+      {
+        description:
+          "Widget with mixed return paths (some with _meta, some without)",
+        inputSchema: {
+          shouldSucceed: z.boolean(),
+        },
+      },
+      async ({ shouldSucceed }) => {
+        if (!shouldSucceed) {
+          // Error path - no _meta
+          return {
+            content: [{ type: "text", text: "Error occurred" }],
+            structuredContent: { error: "Something went wrong" },
+          };
+        }
+        // Success path - has _meta
+        return {
+          content: [{ type: "text", text: "Success" }],
+          structuredContent: { data: "result" },
+          _meta: {
+            processedAt: 1704067200000,
+            region: "eu-west-1",
+          },
+        };
+      },
     );
 }
 
