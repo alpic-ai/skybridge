@@ -19,6 +19,9 @@
       "recommended": true,
       "correctness": {
         "noUnusedVariables": "error"
+      },
+      "complexity": {
+        "noBannedTypes": "error"
       }
     }
   },

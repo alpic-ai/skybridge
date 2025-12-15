@@ -95,7 +95,7 @@ test("ToolOutput extracts the correct output type from callback's structuredCont
   }>();
 
   type NoInputOutput = ToolOutput<TestServer, "no-input-widget">;
-  expectTypeOf<NoInputOutput>().toEqualTypeOf<{}>();
+  expectTypeOf<NoInputOutput>().toEqualTypeOf<Record<never, unknown>>();
 });
 
 test("ToolOutput extracts the correct output type from callback (inferred)", () => {
