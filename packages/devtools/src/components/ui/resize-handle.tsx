@@ -18,6 +18,7 @@ export function ResizeHandle({
   const isVertical = direction === "vertical";
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: Suppress accessibility lint error for auto-generated file from shadcn/ui
     <div
       className={cn(
         "absolute transition-colors",

@@ -98,6 +98,7 @@ export class McpClient {
       throw new Error("Client not connected. Call connect() first.");
     }
 
+    // biome-ignore lint/suspicious/noExplicitAny: We choose to rely on _serverVersion private property for now.
     return (this.client as any)._serverVersion as
       | { name: string; version: string }
       | undefined;

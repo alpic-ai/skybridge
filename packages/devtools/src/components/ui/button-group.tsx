@@ -26,6 +26,7 @@ function ButtonGroup({
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof buttonGroupVariants>) {
   return (
+    // biome-ignore lint/a11y/useSemanticElements: Suppress accessibility lint error for auto-generated file from shadcn/ui
     <div
       role="group"
       data-slot="button-group"

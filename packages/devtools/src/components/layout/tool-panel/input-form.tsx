@@ -1,5 +1,3 @@
-import { useCallToolResult, useStore } from "@/lib/store";
-import { cn } from "@/lib/utils";
 import type Form from "@rjsf/core";
 import { Form as FormComponent } from "@rjsf/shadcn";
 import type {
@@ -10,9 +8,11 @@ import type {
 } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useRef } from "react";
+import { useSelectedTool } from "@/lib/mcp";
+import { useCallToolResult, useStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
 import { Card, CardContent } from "../../ui/card";
 import { CallToolButton } from "../call-tool-button";
-import { useSelectedTool } from "@/lib/mcp";
 
 const uiSchema: UiSchema = {
   "ui:submitButtonOptions": {
