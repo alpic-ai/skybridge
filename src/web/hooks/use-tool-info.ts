@@ -43,19 +43,14 @@ export function useToolInfo<
 >() {
   const [status, setStatus] = useState<"pending" | "success">("pending");
   const input = useOpenAiGlobal("toolInput");
-  if (input === undefined) {
-    throw new Error(
-      "toolInput is not available. Make sure you're calling this hook within the OpenAI iFrame skybridge runtime and a tool is being executed.",
-    );
-  }
-  const output = useOpenAiGlobal("toolOutput") ?? undefined;
-  const responseMetadata = useOpenAiGlobal("toolResponseMetadata") ?? undefined;
+  const output = useOpenAiGlobal("toolOutput", { required: false });
+  const responseMetadata = useOpenAiGlobal("toolResponseMetadata", {
+    required: false,
+  });
 
   useEffect(() => {
     setStatus(
-      output === undefined && responseMetadata === undefined
-        ? "pending"
-        : "success",
+      output == null && responseMetadata == null ? "pending" : "success",
     );
   }, [output, responseMetadata]);
 
