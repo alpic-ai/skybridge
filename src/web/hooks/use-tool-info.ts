@@ -43,14 +43,12 @@ export function useToolInfo<
 >() {
   const [status, setStatus] = useState<"pending" | "success">("pending");
   const input = useOpenAiGlobal("toolInput");
-  const output = useOpenAiGlobal("toolOutput", { required: false });
-  const responseMetadata = useOpenAiGlobal("toolResponseMetadata", {
-    required: false,
-  });
+  const output = useOpenAiGlobal("toolOutput");
+  const responseMetadata = useOpenAiGlobal("toolResponseMetadata");
 
   useEffect(() => {
     setStatus(
-      output == null && responseMetadata == null ? "pending" : "success",
+      output === null && responseMetadata === null ? "pending" : "success",
     );
   }, [output, responseMetadata]);
 
