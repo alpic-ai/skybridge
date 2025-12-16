@@ -19,11 +19,11 @@
   "scripts": {
     "build": "tsc && pnpm run build:templates",
     "build:templates": "cp -r src/server/templates dist/src/server/",
-    "format": "biome check --write",
+    "format": "biome check --write --error-on-warnings",
     "test": "pnpm run test:unit && pnpm run test:type && pnpm run test:format",
     "test:unit": "vitest run",
     "test:type": "tsc --noEmit",
-    "test:format": "biome check",
+    "test:format": "biome ci",
     "docs:dev": "pnpm --filter @skybridge/docs start",
     "docs:build": "pnpm --filter @skybridge/docs build",
     "docs:serve": "pnpm --filter @skybridge/docs serve"

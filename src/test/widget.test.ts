@@ -1,3 +1,8 @@
+import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
+import type {
+  ServerNotification,
+  ServerRequest,
+} from "@modelcontextprotocol/sdk/types.js";
 import {
   afterEach,
   beforeEach,
@@ -22,12 +27,21 @@ const mockManifest = {
 
 vi.mock("node:fs", async () => {
   const actual = await vi.importActual<typeof import("node:fs")>("node:fs");
-  const readFileSync = vi.fn((path: string, ...args: any[]) => {
+  const readFileSyncImpl = (
+    path: Parameters<typeof actual.readFileSync>[0],
+    ...args: unknown[]
+  ): ReturnType<typeof actual.readFileSync> => {
     if (typeof path === "string" && path.includes("manifest.json")) {
-      return JSON.stringify(mockManifest);
+      return JSON.stringify(mockManifest) as ReturnType<
+        typeof actual.readFileSync
+      >;
     }
+    // Type assertion needed because readFileSync has overloads with different parameter types
+    // Using @ts-expect-error because the overloads are complex and we're forwarding args
+    // @ts-expect-error - readFileSync overloads require complex type handling
     return actual.readFileSync(path, ...args);
-  });
+  };
+  const readFileSync = vi.fn(readFileSyncImpl) as typeof actual.readFileSync;
 
   return {
     readFileSync,
@@ -67,14 +81,19 @@ describe("McpServer.registerWidget", () => {
     );
 
     // Get the resource callback function
-    const resourceCallback = mockRegisterResource.mock.calls[0]?.[3] as (
+    const resourceCallback = mockRegisterResource.mock
+      .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: any,
-    ) => any;
+      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+    ) => Promise<{
+      contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
+    }>;
     expect(resourceCallback).toBeDefined();
 
     const serverUrl = "http://localhost:3000";
-    const mockExtra = createMockExtra("__not_used__");
+    const mockExtra = createMockExtra(
+      "__not_used__",
+    ) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>;
     const result = await resourceCallback(
       new URL("ui://widgets/my-widget.html"),
       mockExtra,
@@ -114,15 +133,20 @@ describe("McpServer.registerWidget", () => {
     );
 
     // Get the resource callback function
-    const resourceCallback = mockRegisterResource.mock.calls[0]?.[3] as (
+    const resourceCallback = mockRegisterResource.mock
+      .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: any,
-    ) => any;
+      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+    ) => Promise<{
+      contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
+    }>;
     expect(resourceCallback).toBeDefined();
 
     const serverUrl = "https://myapp.com";
-    const mockExtra = createMockExtra(serverUrl);
-    const result = await resourceCallback?.(
+    const mockExtra = createMockExtra(
+      serverUrl,
+    ) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>;
+    const result = await resourceCallback(
       new URL("ui://widgets/my-widget.html"),
       mockExtra,
     );

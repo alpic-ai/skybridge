@@ -38,9 +38,9 @@ describe("DataLLM", () => {
   afterEach(() => {
     vi.resetAllMocks();
     // Keep the mock available for React cleanup, but reset it
-    if (typeof window !== "undefined" && (window as any).openai) {
-      (window as any).openai.setWidgetState = vi.fn();
-      (window as any).openai.widgetState = {};
+    if (typeof window !== "undefined" && window.openai) {
+      window.openai.setWidgetState = vi.fn();
+      window.openai.widgetState = {};
     }
   });
 

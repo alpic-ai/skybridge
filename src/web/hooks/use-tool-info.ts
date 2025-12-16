@@ -42,15 +42,13 @@ export function useToolInfo<
   TS extends Partial<ToolSignature> = Record<string, never>,
 >() {
   const [status, setStatus] = useState<"pending" | "success">("pending");
-  const input = useOpenAiGlobal("toolInput")!;
-  const output = useOpenAiGlobal("toolOutput") ?? undefined;
-  const responseMetadata = useOpenAiGlobal("toolResponseMetadata") ?? undefined;
+  const input = useOpenAiGlobal("toolInput");
+  const output = useOpenAiGlobal("toolOutput");
+  const responseMetadata = useOpenAiGlobal("toolResponseMetadata");
 
   useEffect(() => {
     setStatus(
-      output === undefined && responseMetadata === undefined
-        ? "pending"
-        : "success",
+      output === null && responseMetadata === null ? "pending" : "success",
     );
   }, [output, responseMetadata]);
 
