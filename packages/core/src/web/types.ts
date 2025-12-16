@@ -129,7 +129,174 @@ export type OpenAiMethods<WidgetState extends UnknownObject = UnknownObject> = {
    * Only files uploaded by the same connector instance can be downloaded.
    */
   downloadFile: (file: FileMetadata) => Promise<{ downloadUrl: string }>;
+
+  /**
+   * Opens the Instant Checkout UI for payment processing.
+   * This is part of the ChatGPT Apps Monetization (private beta).
+   *
+   * The promise resolves with the order result after successful payment,
+   * or rejects on error/cancellation.
+   *
+   * @see https://developers.openai.com/commerce/specs/checkout
+   */
+  requestCheckout?: <
+    TSession extends CheckoutSessionRequest = CheckoutSessionRequest,
+    TResponse extends CheckoutResponse = CheckoutResponse,
+  >(
+    session: TSession,
+  ) => Promise<TResponse>;
 };
+
+/**
+ * Supported payment methods for instant checkout.
+ */
+export type SupportedPaymentMethod = "card" | "apple_pay" | "google_pay";
+
+/**
+ * Payment provider configuration for instant checkout.
+ */
+export type CheckoutPaymentProvider = {
+  provider: string;
+  merchant_id: string;
+  supported_payment_methods?: SupportedPaymentMethod[];
+};
+
+/**
+ * Line item in the checkout session.
+ */
+export type CheckoutLineItem = {
+  id?: string;
+  name: string;
+  description?: string;
+  quantity: number;
+  unit_amount: number;
+  image_url?: string;
+};
+
+/**
+ * Type of total line in the checkout summary.
+ */
+export type CheckoutTotalType =
+  | "subtotal"
+  | "tax"
+  | "discount"
+  | "fee"
+  | "shipping"
+  | "total";
+
+/**
+ * Total line in the checkout summary.
+ */
+export type CheckoutTotal = {
+  type: CheckoutTotalType;
+  display_text: string;
+  amount: number;
+};
+
+/**
+ * Type of legal/policy link for checkout.
+ */
+export type CheckoutLinkType =
+  | "terms_of_use"
+  | "privacy_policy"
+  | "refund_policy"
+  | "shipping_policy"
+  | "merchant_terms";
+
+/**
+ * Legal/policy link for checkout.
+ */
+export type CheckoutLink = {
+  type: CheckoutLinkType;
+  url: string;
+};
+
+/**
+ * Checkout session status.
+ */
+export type CheckoutSessionStatus =
+  | "pending"
+  | "ready_for_payment"
+  | "processing"
+  | "completed"
+  | "cancelled"
+  | "failed";
+
+/**
+ * Payment mode for the checkout session.
+ */
+export type CheckoutPaymentMode = "live" | "test";
+
+/**
+ * Checkout session request payload following the ACP specification.
+ */
+export type CheckoutSessionRequest = {
+  id: string;
+  payment_provider: CheckoutPaymentProvider;
+  status: CheckoutSessionStatus;
+  currency: string;
+  totals: CheckoutTotal[];
+  links?: CheckoutLink[];
+  payment_mode?: CheckoutPaymentMode;
+  line_items?: CheckoutLineItem[];
+  merchant_name?: string;
+  order_reference?: string;
+};
+
+/**
+ * Order status after checkout completion.
+ */
+export type CheckoutOrderStatus =
+  | "pending"
+  | "confirmed"
+  | "shipped"
+  | "delivered"
+  | "cancelled";
+
+/**
+ * Order details returned after successful checkout.
+ */
+export type CheckoutOrder = {
+  id: string;
+  checkout_session_id: string;
+  permalink_url?: string;
+  created_at?: string;
+  status?: CheckoutOrderStatus;
+};
+
+/**
+ * Successful checkout response.
+ */
+export type CheckoutSuccessResponse = {
+  id: string;
+  status: "completed";
+  currency: string;
+  order: CheckoutOrder;
+};
+
+/**
+ * Error code returned from checkout.
+ */
+export type CheckoutErrorCode =
+  | "payment_declined"
+  | "requires_3ds"
+  | "invalid_session"
+  | "expired_session"
+  | "cancelled"
+  | "unknown_error";
+
+/**
+ * Error response from checkout.
+ */
+export type CheckoutErrorResponse = {
+  code: CheckoutErrorCode;
+  message: string;
+};
+
+/**
+ * Checkout response - either success or error.
+ */
+export type CheckoutResponse = CheckoutSuccessResponse | CheckoutErrorResponse;
 
 // Dispatched when any global changes in the host page
 export const SET_GLOBALS_EVENT_TYPE = "openai:set_globals";
