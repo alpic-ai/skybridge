@@ -112,7 +112,7 @@ describe("useCheckout", () => {
       expect(result.current.isIdle).toBe(false);
 
       await act(async () => {
-        resolveCheckout!(mockSuccessResponse);
+        resolveCheckout?.(mockSuccessResponse);
       });
     });
 
@@ -242,12 +242,11 @@ describe("useCheckout", () => {
       requestCheckoutMock.mockResolvedValueOnce(mockSuccessResponse);
       const { result } = renderHook(() => useCheckout());
 
-      let response: CheckoutSuccessResponse;
-      await act(async () => {
-        response = await result.current.requestCheckoutAsync(mockSession);
+      const response = await act(async () => {
+        return result.current.requestCheckoutAsync(mockSession);
       });
 
-      expect(response!).toEqual(mockSuccessResponse);
+      expect(response).toEqual(mockSuccessResponse);
     });
 
     it("should throw on checkout error response", async () => {
