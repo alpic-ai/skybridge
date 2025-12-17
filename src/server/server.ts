@@ -1,10 +1,10 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import type {
-  RegisteredTool,
-  ToolCallback,
+import {
+  McpServer as McpServerBase,
+  type RegisteredTool,
+  type ToolCallback,
 } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { McpServer as McpServerBase } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type {
   AnySchema,
   SchemaOutput,
@@ -123,7 +123,6 @@ type AddTool<
     [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput, TResponseMetadata>;
   }
 >;
-
 type ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> = {
   title?: string;
   description?: string;

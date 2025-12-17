@@ -31,7 +31,7 @@ ChatGPT Apps let you embed **rich, interactive UIs** directly in conversations. 
 
 | | |
 |:--|:--|
-| 👨‍💻 **Full Dev Environment** — HMR, debug traces, and local emulator. No more refresh loops. | ✅ **End-to-End Type Safety** — tRPC-style inference from server to widget. Autocomplete everywhere. |
+| 👨‍💻 **Full Dev Environment** — HMR, debug traces, and local devtools. No more refresh loops. | ✅ **End-to-End Type Safety** — tRPC-style inference from server to widget. Autocomplete everywhere. |
 | 🔄 **Widget-to-Model Sync** — Keep the model aware of UI state with `data-llm`. Dual surfaces, one source of truth. | ⚒️ **React Query-style Hooks** — `isPending`, `isError`, callbacks. State management you already know. |
 
 <br />

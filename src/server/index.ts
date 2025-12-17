@@ -1,3 +1,4 @@
+export { devtoolsStaticServer } from "./devtoolsStaticServer.js";
 export type {
   AnyToolRegistry,
   InferTools,
