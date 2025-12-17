@@ -1,4 +1,4 @@
-import { set as lodashSet, merge } from "lodash-es";
+import { set, cloneDeep } from "lodash-es";
 import type {
   CallToolResponse,
   OpenAiProperties,
@@ -34,51 +34,51 @@ export type Store = {
   ) => void;
 };
 
-export const useStore = create<Store>()((set) => ({
+export const useStore = create<Store>()((setState) => ({
   tools: {},
   setToolData: (tool: string, data: Partial<ToolData>) =>
-    set((state) => ({
-      tools: { ...state.tools, [tool]: { ...state.tools[tool], ...data } },
-    })),
+    setState((state) =>
+      updateNestedState(state, `tools.${tool}`, {
+        ...state.tools[tool],
+        ...data,
+      }),
+    ),
   updateOpenaiObject: (
     tool: string,
     key: keyof OpenAiProperties,
     value: unknown,
   ) =>
-    set((state) => {
-      const updatedOpenaiObject = state.tools[tool]?.openaiObject;
-
-      if (!updatedOpenaiObject) {
+    setState((state) => {
+      if (!state.tools[tool]?.openaiObject) {
         return state;
       }
-
-      lodashSet(updatedOpenaiObject, key, value);
-
-      return {
-        tools: {
-          ...state.tools,
-          [tool]: {
-            ...state.tools[tool],
-            openaiObject: updatedOpenaiObject,
-          },
-        },
-      };
+      return updateNestedState(
+        state,
+        `tools.${tool}.openaiObject.${key}`,
+        value,
+      );
     }),
   pushOpenAiLog: (tool: string, log: Omit<OpenAiLog, "id">) =>
-    set((state) => ({
-      tools: {
-        ...state.tools,
-        [tool]: merge({}, state.tools[tool], {
-          openaiLogs: [
-            ...(state.tools[tool]?.openaiLogs || []),
-            { ...log, id: crypto.randomUUID() },
-          ],
-        }),
-      },
-    })),
+    setState((state) => {
+      const currentLogs = state.tools[tool]?.openaiLogs || [];
+      return updateNestedState(state, `tools.${tool}.openaiLogs`, [
+        ...currentLogs,
+        { ...log, id: crypto.randomUUID() },
+      ]);
+    }),
 }));
 
 export const useCallToolResult = (toolName: string) => {
   const { tools } = useStore();
   return tools[toolName];
+};
+
+const updateNestedState = <T extends Record<string, unknown>>(
+  state: T,
+  path: string | string[],
+  value: unknown,
+): T => {
+  const cloned = cloneDeep(state) as T;
+  set(cloned, path, value);
+  return cloned;
 };
