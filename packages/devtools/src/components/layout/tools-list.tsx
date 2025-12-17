@@ -1,10 +1,10 @@
 import { useSelectedToolOrNull, useSuspenseTools } from "@/lib/mcp";
-import { useStore } from "@/lib/store";
+import { useSelectedToolName } from "@/lib/nuqs";
 import { cn } from "@/lib/utils";
 
 function ToolsList() {
   const tools = useSuspenseTools();
-  const { setSelectedTool } = useStore();
+  const [, setSelectedTool] = useSelectedToolName();
   const selectedTool = useSelectedToolOrNull();
 
   return (

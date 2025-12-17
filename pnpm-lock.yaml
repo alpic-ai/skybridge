@@ -193,6 +193,9 @@ importers:
       motion:
         specifier: ^12.23.25
         version: 12.23.25(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      nuqs:
+        specifier: ^2.8.5
+        version: 2.8.5(react-router-dom@5.3.4(react@19.2.0))(react-router@5.3.4(react@19.2.0))(react@19.2.0)
       react:
         specifier: ^19.2.0
         version: 19.2.0
@@ -5614,6 +5617,27 @@ packages:
     engines: {node: '>= 10.13.0'}
     peerDependencies:
       webpack: ^4.0.0 || ^5.0.0
+
+  nuqs@2.8.5:
+    resolution: {integrity: sha512-ndhnNB9eLX/bsiGFkBNsrfOWf3BCbzBMD+b5GkD5o2Q96Q+llHnoUlZsrO3tgJKZZV7LLlVCvFKdj+sjBITRzg==}
+    peerDependencies:
+      '@remix-run/react': '>=2'
+      '@tanstack/react-router': ^1
+      next: '>=14.2.0'
+      react: '>=18.2.0 || ^19.0.0-0'
+      react-router: ^5 || ^6 || ^7
+      react-router-dom: ^5 || ^6 || ^7
+    peerDependenciesMeta:
+      '@remix-run/react':
+        optional: true
+      '@tanstack/react-router':
+        optional: true
+      next:
+        optional: true
+      react-router:
+        optional: true
+      react-router-dom:
+        optional: true
 
   nwsapi@2.2.22:
     resolution: {integrity: sha512-ujSMe1OWVn55euT1ihwCI1ZcAaAU3nxUiDwfDQldc51ZXaB9m2AyOn6/jh1BLe2t/G8xd6uKG1UBF2aZJeg2SQ==}
@@ -14187,6 +14211,14 @@ snapshots:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
       webpack: 5.103.0
+
+  nuqs@2.8.5(react-router-dom@5.3.4(react@19.2.0))(react-router@5.3.4(react@19.2.0))(react@19.2.0):
+    dependencies:
+      '@standard-schema/spec': 1.0.0
+      react: 19.2.0
+    optionalDependencies:
+      react-router: 5.3.4(react@19.2.0)
+      react-router-dom: 5.3.4(react@19.2.0)
 
   nwsapi@2.2.22: {}
 

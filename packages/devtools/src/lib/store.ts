@@ -22,8 +22,6 @@ type ToolData = {
 };
 
 export type Store = {
-  selectedTool: string | null;
-  setSelectedTool: (tool: string | null) => void;
   tools: {
     [name: string]: ToolData;
   };
@@ -37,8 +35,6 @@ export type Store = {
 };
 
 export const useStore = create<Store>()((set) => ({
-  selectedTool: null,
-  setSelectedTool: (tool: string | null) => set({ selectedTool: tool }),
   tools: {},
   setToolData: (tool: string, data: Partial<ToolData>) =>
     set((state) => ({

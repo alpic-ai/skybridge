@@ -3,6 +3,7 @@ import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import type { CallToolArgs, OpenAiProperties } from "skybridge/web";
 import { McpClient } from "./client.js";
+import { useSelectedToolName } from "../nuqs.js";
 
 const client = new McpClient();
 
@@ -83,7 +84,7 @@ export const useCallTool = () => {
 };
 
 export const useSelectedToolOrNull = () => {
-  const { selectedTool } = useStore();
+  const [selectedTool] = useSelectedToolName();
   const tools = useSuspenseTools();
 
   return tools.find((t) => t.name === selectedTool) ?? null;
