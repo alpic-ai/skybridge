@@ -1,13 +1,13 @@
-import { ExternalLink } from "lucide-react";
 import { useServerInfo } from "@/lib/mcp";
-import { useStore } from "@/lib/store";
+import { useSelectedToolName } from "@/lib/nuqs";
+import { ExternalLink } from "lucide-react";
 import { Button } from "../ui/button";
 
 export const Header = () => {
   const serverInfo = useServerInfo();
   const name = serverInfo?.name;
   const version = serverInfo?.version;
-  const { setSelectedTool } = useStore();
+  const [, setSelectedTool] = useSelectedToolName();
 
   return (
     <div className="flex flex-col border-b border-border bg-background">
@@ -36,11 +36,12 @@ export const Header = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="h-8 gap-2" asChild>
+          <Button variant="ghost" size="sm" className="h-8 gap-2">
             <a
               href="https://www.skybridge.tech/"
               target="_blank"
               rel="noopener noreferrer"
+              className="flex items-center gap-2"
             >
               Learn more about Skybridge
               <ExternalLink className="h-3.5 w-3.5" />

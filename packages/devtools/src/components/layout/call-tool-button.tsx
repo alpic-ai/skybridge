@@ -27,12 +27,7 @@ export const CallToolButton = ({
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <Button
-        size="sm"
-        onClick={handleClick}
-        variant="default"
-        disabled={isPending}
-      >
+      <Button onClick={handleClick} variant="default" disabled={isPending}>
         {isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (

@@ -1,20 +1,20 @@
-import ReactJsonView from "@microlink/react-json-view";
-import { MoonIcon, SunIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Fieldset } from "@/components/ui/fieldset";
+import { Field, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectItem,
-  SelectPopup,
+  SelectGroup,
   SelectTrigger,
   SelectValue,
+  SelectContent,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSelectedTool } from "@/lib/mcp";
 import { useCallToolResult, useStore } from "@/lib/store";
+import ReactJsonView from "@microlink/react-json-view";
+import { MoonIcon, SunIcon } from "lucide-react";
 
 export const OpenAiInspector = () => {
   const tool = useSelectedTool();
@@ -44,7 +44,7 @@ export const OpenAiInspector = () => {
           <TabsTrigger value="widget-state">Widget State</TabsTrigger>
         </TabsList>
         <TabsContent value="properties" className="p-4">
-          <Fieldset>
+          <FieldSet>
             <Field>
               <FieldLabel>Display Mode</FieldLabel>
               <Select
@@ -65,12 +65,14 @@ export const OpenAiInspector = () => {
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectPopup>
-                  <SelectItem value="inline">Inline</SelectItem>
-                  <SelectItem value="fullscreen">Fullscreen</SelectItem>
-                  <SelectItem value="pip">Pip</SelectItem>
-                  <SelectItem value="modal">Modal</SelectItem>
-                </SelectPopup>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="inline">Inline</SelectItem>
+                    <SelectItem value="fullscreen">Fullscreen</SelectItem>
+                    <SelectItem value="pip">Pip</SelectItem>
+                    <SelectItem value="modal">Modal</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
               </Select>
             </Field>
             <Field>
@@ -101,7 +103,7 @@ export const OpenAiInspector = () => {
                 onChange={(e) => handleValueChange("locale", e.target.value)}
               />
             </Field>
-          </Fieldset>
+          </FieldSet>
         </TabsContent>
         <TabsContent value="widget-state" className="p-4">
           <ReactJsonView
