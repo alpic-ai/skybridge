@@ -1,20 +1,20 @@
+import ReactJsonView from "@microlink/react-json-view";
+import { MoonIcon, SunIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Field, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Select,
-  SelectItem,
+  SelectContent,
   SelectGroup,
+  SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectContent,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSelectedTool } from "@/lib/mcp";
 import { useCallToolResult, useStore } from "@/lib/store";
-import ReactJsonView from "@microlink/react-json-view";
-import { MoonIcon, SunIcon } from "lucide-react";
 
 export const OpenAiInspector = () => {
   const tool = useSelectedTool();

@@ -1,9 +1,9 @@
-import { useStore } from "@/lib/store.js";
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import type { CallToolArgs, OpenAiProperties } from "skybridge/web";
-import { McpClient } from "./client.js";
+import { useStore } from "@/lib/store.js";
 import { useSelectedToolName } from "../nuqs.js";
+import { McpClient } from "./client.js";
 
 const client = new McpClient();
 

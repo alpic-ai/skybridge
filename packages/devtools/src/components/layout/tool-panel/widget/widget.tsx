@@ -1,6 +1,6 @@
+import { useCallback, useRef } from "react";
 import { useSelectedTool, useSuspenseResource } from "@/lib/mcp";
 import { useCallToolResult, useStore } from "@/lib/store";
-import { useCallback, useRef } from "react";
 import { createAndInjectOpenAi } from "./create-openai-mock";
 import { injectWaitForOpenai } from "./utils";
 

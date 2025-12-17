@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -6,7 +7,6 @@ import {
 import { useResizablePanelSize } from "@/hooks/use-resizable-panel-size";
 import { useSelectedTool } from "@/lib/mcp/index.js";
 import { useCallToolResult } from "@/lib/store.js";
-import { Suspense } from "react";
 import { InputForm } from "./input-form.js";
 import { OpenAiInspector } from "./openai-inspector.js";
 import { OpenAiLogs } from "./openai-logs.js";

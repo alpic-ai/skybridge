@@ -1,6 +1,6 @@
+import { ExternalLink } from "lucide-react";
 import { useServerInfo } from "@/lib/mcp";
 import { useSelectedToolName } from "@/lib/nuqs";
-import { ExternalLink } from "lucide-react";
 import { Button } from "../ui/button";
 
 export const Header = () => {
