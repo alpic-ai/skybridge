@@ -36,7 +36,7 @@ const defaultOpenaiObject: OpenAiProperties = {
 export const useSuspenseTools = () => {
   const { data } = useSuspenseQuery<Tool[]>({
     queryKey: ["list-tools"],
-    queryFn: async () => await client.listTools(),
+    queryFn: () => client.listTools(),
   });
   return data;
 };
