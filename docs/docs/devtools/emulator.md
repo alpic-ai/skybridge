@@ -21,7 +21,6 @@ pnpm install
 pnpm dev
 ```
 
-- Make sure your mcp server is running and accessible at the URL specified in the `VITE_MCP_SERVER_URL` environment variable (default is `http://localhost:3000/mcp`)
 - Open your browser to the URL printed in the terminal (usually http://localhost:5173/).
 
 **To build for production:**

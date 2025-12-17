@@ -6,7 +6,7 @@ import { McpClient } from "./client.js";
 
 const client = new McpClient();
 
-client.connect(import.meta.env.VITE_MCP_SERVER_URL).then(() => {
+client.connect("http://localhost:3000/mcp").then(() => {
   console.info("Connected to MCP server");
 });
 
