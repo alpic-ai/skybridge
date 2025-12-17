@@ -99,12 +99,17 @@ function createOpenaiObject(
   });
 }
 
-export function createAndInjectOpenAi(
-  iframeWindow: Window & { openai?: unknown },
-  initialValues: OpenAiProperties | null,
-  log: (command: string, args: UnknownObject) => void,
-  setValue: (key: keyof OpenAiProperties, value: unknown) => void,
-): void {
+export function createAndInjectOpenAi({
+  iframeWindow,
+  initialValues,
+  log,
+  setValue,
+}: {
+  iframeWindow: Window & { openai?: unknown };
+  initialValues: OpenAiProperties | null;
+  log: (command: string, args: UnknownObject) => void;
+  setValue: (key: keyof OpenAiProperties, value: unknown) => void;
+}): void {
   const openaiObject = cloneDeep(initialValues);
   const openai = createOpenaiObject(openaiObject, iframeWindow);
   const functions = createOpenaiMethods(

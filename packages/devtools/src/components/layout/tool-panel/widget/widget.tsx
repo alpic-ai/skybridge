@@ -25,16 +25,16 @@ export const Widget = () => {
 
     hasLoadedRef.current = true;
 
-    createAndInjectOpenAi(
-      iframe.contentWindow,
-      openaiObject,
-      (command, args) => {
+    createAndInjectOpenAi({
+      iframeWindow: iframe.contentWindow,
+      initialValues: openaiObject,
+      log: (command, args) => {
         pushOpenAiLog(tool.name, { timestamp: Date.now(), command, args });
       },
-      (key, value) => {
+      setValue: (key, value) => {
         updateOpenaiObject(tool.name, key, value);
       },
-    );
+    });
 
     const doc = iframe.contentDocument;
 
