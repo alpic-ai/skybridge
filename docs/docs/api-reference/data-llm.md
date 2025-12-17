@@ -383,32 +383,6 @@ Avoid `data-llm` when:
 - The information is already in the conversation history
 - The state is purely cosmetic (theme, collapsed panels)
 
-## Performance considerations
-
-- `data-llm` updates trigger `window.openai.setWidgetState` calls
-- Frequent updates (e.g., on every keystroke) may impact performance
-- Consider debouncing rapidly changing values:
-
-```tsx
-import { useMemo } from "react";
-import { debounce } from "lodash";
-
-export function SearchWidget() {
-  const [query, setQuery] = useState("");
-
-  const debouncedContext = useMemo(
-    () => debounce((q: string) => q, 300),
-    []
-  );
-
-  return (
-    <div data-llm={`User searching for: ${debouncedContext(query)}`}>
-      <input value={query} onChange={(e) => setQuery(e.target.value)} />
-    </div>
-  );
-}
-```
-
 ## Technical details
 
 ### How context is synced
