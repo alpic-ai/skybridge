@@ -7,7 +7,7 @@ export const Intro = () => {
       <div className="relative z-10 flex-1 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-semibold text-foreground mb-2">
-            Welcome to Skybridge Emulator
+            Welcome to Skybridge
           </h1>
           <p className="text-sm text-muted-foreground">
             Choose a tool from the sidebar to begin

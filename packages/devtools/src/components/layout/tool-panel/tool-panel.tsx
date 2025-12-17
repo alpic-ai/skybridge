@@ -17,7 +17,7 @@ export const ToolPanel = () => {
   const tool = useSelectedTool();
   const toolResult = useCallToolResult(tool.name);
   const inputColumnSize = useResizablePanelSize({
-    key: "skybridge-emulator-input-column-width",
+    key: "skybridge-devtools-input-column-width",
     defaultSizePercent: 35,
     minSizePercent: 20,
     maxSizePercent: 60,

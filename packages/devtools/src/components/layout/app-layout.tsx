@@ -13,7 +13,7 @@ import ToolsList from "./tools-list.js";
 function AppLayout() {
   const selectedTool = useSelectedToolOrNull();
   const toolsListSize = useResizablePanelSize({
-    key: "skybridge-emulator-tools-list-width",
+    key: "skybridge-devtools-tools-list-width",
     defaultSizePercent: 20, // ~256px out of ~1280px viewport
     minSizePercent: 15,
     maxSizePercent: 40,

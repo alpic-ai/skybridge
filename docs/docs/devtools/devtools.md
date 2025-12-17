@@ -2,9 +2,9 @@
 sidebar_position: 1
 ---
 
-# Skybridge MCP Emulator
+# Skybridge MCP Devtools
 
-This is the standalone frontend emulator for the Skybridge MCP application.  
+This is the standalone frontend devtools for the Skybridge MCP application.  
 It is a React-based web app, designed for both local development and deployment.
 
 ## Getting Started
@@ -39,13 +39,13 @@ pnpm build
 
 ## Usage
 
-To use the emulator in a Skybridge app during development, add the following to your server setup:
+To use the devtools in a Skybridge app during development, add the following to your server setup:
 
 ```js
 if (env.NODE_ENV !== "production") {
-  app.use(await emulatorStaticServer());
+  app.use(await devtoolsStaticServer());
   app.use(await widgetsDevServer());
 }
 ```
 
-This will serve the emulator and widget development server in non-production environments.
+This will serve the devtools and widget development server in non-production environments.
