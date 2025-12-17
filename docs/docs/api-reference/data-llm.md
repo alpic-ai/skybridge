@@ -6,6 +6,42 @@ sidebar_position: 2
 
 The `data-llm` attribute allows your widget to communicate its current UI state back to the ChatGPT model. This creates a feedback loop where the model can understand what the user is seeing and respond contextually to their questions.
 
+## Basic usage
+
+### Static string
+
+```tsx
+export function StatusWidget() {
+  return (
+    <div data-llm="User is on the home page">
+      <h1>Welcome Home</h1>
+    </div>
+  );
+}
+```
+
+### Dynamic expression
+
+```tsx
+export function FlightWidget() {
+  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+
+  return (
+    <div data-llm={
+      selectedFlight
+        ? `User is viewing ${selectedFlight.name} (${selectedFlight.id})`
+        : "User is browsing the flight list"
+    }>
+      {selectedFlight ? (
+        <FlightDetails flight={selectedFlight} />
+      ) : (
+        <FlightList onSelect={setSelectedFlight} />
+      )}
+    </div>
+  );
+}
+```
+
 ## Why it exists
 
 ChatGPT Apps introduce a unique challenge: the model needs to understand both the conversation history **and** what the user is currently viewing in your widget. Without `data-llm`, the model only knows about the initial tool call that rendered your widget. As users interact with your UI, the model remains unaware of state changes unless you explicitly sync them.
@@ -45,42 +81,6 @@ The `DataLLM` component:
 2. Automatically syncs with `window.openai.setWidgetState`
 3. Only shares currently rendered content (removed components are cleaned up)
 4. Supports nested hierarchies for complex UIs
-
-## Basic usage
-
-### Static string
-
-```tsx
-export function StatusWidget() {
-  return (
-    <div data-llm="User is on the home page">
-      <h1>Welcome Home</h1>
-    </div>
-  );
-}
-```
-
-### Dynamic expression
-
-```tsx
-export function FlightWidget() {
-  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
-
-  return (
-    <div data-llm={
-      selectedFlight
-        ? `User is viewing ${selectedFlight.name} (${selectedFlight.id})`
-        : "User is browsing the flight list"
-    }>
-      {selectedFlight ? (
-        <FlightDetails flight={selectedFlight} />
-      ) : (
-        <FlightList onSelect={setSelectedFlight} />
-      )}
-    </div>
-  );
-}
-```
 
 ## Use cases and examples
 
@@ -421,10 +421,3 @@ Nested `data-llm` attributes create an indented list:
     - Hovering over Q4 data
   - 5 notifications pending
 ```
-
-## See also
-
-- [useWidgetState](/api-reference/use-widget-state) - Persist state across widget renders
-- [useToolInfo](/api-reference/use-tool-info) - Access initial tool data
-- [useSendFollowUpMessage](/api-reference/use-send-follow-up-message) - Send messages to the conversation
-- [Core Concepts: Widget → Model Sync](/skybridge-core-concepts#2-widget--model-context-sync)
