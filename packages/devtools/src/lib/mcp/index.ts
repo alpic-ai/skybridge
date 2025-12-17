@@ -98,8 +98,8 @@ export const useSelectedTool = () => {
   return tool;
 };
 
-export const useResource = (uri?: string) => {
-  return useQuery({
+export const useSuspenseResource = (uri?: string) => {
+  return useSuspenseQuery({
     queryKey: ["resource", uri],
     queryFn: async () => {
       if (!uri) {
@@ -108,7 +108,6 @@ export const useResource = (uri?: string) => {
       const resource = await client.readResource(uri);
       return resource;
     },
-    enabled: !!uri,
   });
 };
 

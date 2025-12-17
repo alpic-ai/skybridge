@@ -11,6 +11,8 @@ import { OpenAiInspector } from "./openai-inspector.js";
 import { OpenAiLogs } from "./openai-logs.js";
 import { Output } from "./output.js";
 import { Widget } from "./widget/widget.js";
+import { Spinner } from "@/components/ui/spinner";
+import { Suspense } from "react";
 
 export const ToolPanel = () => {
   const tool = useSelectedTool();
@@ -59,7 +61,9 @@ export const ToolPanel = () => {
         <div className="flex overflow-hidden bg-card relative h-[60%]">
           <div className="flex flex-col flex-1 h-full overflow-hidden bg-card border-r border-border">
             <div className="border-b border-border">
-              <Widget />
+              <Suspense>
+                <Widget />
+              </Suspense>
             </div>
             <div className="p-4 flex flex-col h-full min-h-0">
               <OpenAiLogs />

@@ -1,13 +1,13 @@
-import { useCallback, useRef } from "react";
-import { useResource, useSelectedTool } from "@/lib/mcp";
+import { useSelectedTool, useSuspenseResource } from "@/lib/mcp";
 import { useCallToolResult, useStore } from "@/lib/store";
+import { useCallback, useRef } from "react";
 import { createAndInjectOpenAi } from "./create-openai-mock";
 import { injectWaitForOpenai } from "./utils";
 
 export const Widget = () => {
   const tool = useSelectedTool();
   const { openaiObject } = useCallToolResult(tool.name);
-  const { data: resource } = useResource(
+  const { data: resource } = useSuspenseResource(
     tool._meta?.["ui/resourceUri"] as string | undefined,
   );
   const { setToolData, pushOpenAiLog, updateOpenaiObject } = useStore();
@@ -15,8 +15,7 @@ export const Widget = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const hasLoadedRef = useRef(false);
 
-  const content = resource?.contents[0];
-  const text = content && "text" in content ? content.text : undefined;
+  const html = (resource.contents[0] as { text: string }).text;
 
   const handleLoad = useCallback(() => {
     if (hasLoadedRef.current) return;
@@ -60,7 +59,7 @@ export const Widget = () => {
     >
       <iframe
         ref={iframeRef}
-        srcDoc={injectWaitForOpenai(text as string)}
+        srcDoc={injectWaitForOpenai(html)}
         onLoad={handleLoad}
         style={{
           width: "100%",
