@@ -68,7 +68,6 @@ export const useStore = create<Store>()((set) => ({
         },
       };
     }),
-  getToolData: (tool: string) => (state: Store) => state.tools[tool],
   pushOpenAiLog: (tool: string, log: Omit<OpenAiLog, "id">) =>
     set((state) => ({
       tools: {

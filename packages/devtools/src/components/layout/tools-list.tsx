@@ -1,9 +1,9 @@
-import { useSelectedToolOrNull, useTools } from "@/lib/mcp";
+import { useSelectedToolOrNull, useSuspenseTools } from "@/lib/mcp";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 function ToolsList() {
-  const tools = useTools();
+  const tools = useSuspenseTools();
   const { setSelectedTool } = useStore();
   const selectedTool = useSelectedToolOrNull();
 

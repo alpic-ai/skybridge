@@ -1,7 +1,7 @@
+import { useStore } from "@/lib/store.js";
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import type { CallToolArgs, OpenAiProperties } from "skybridge/web";
-import { useStore } from "@/lib/store.js";
 import { McpClient } from "./client.js";
 
 const client = new McpClient();
@@ -33,7 +33,7 @@ const defaultOpenaiObject: OpenAiProperties = {
   widgetState: null,
 };
 
-export const useTools = () => {
+export const useSuspenseTools = () => {
   const { data } = useSuspenseQuery<Tool[]>({
     queryKey: ["list-tools"],
     queryFn: async () => await client.listTools(),
@@ -84,7 +84,7 @@ export const useCallTool = () => {
 
 export const useSelectedToolOrNull = () => {
   const { selectedTool } = useStore();
-  const tools = useTools();
+  const tools = useSuspenseTools();
 
   return tools.find((t) => t.name === selectedTool) ?? null;
 };
