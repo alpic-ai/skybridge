@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-pnpm --filter skybridge exec npm publish --tag dev --access public --ignore-scripts
+pnpm --filter skybridge publish --tag dev --access public --ignore-scripts  --no-git-checks
 
 echo "Packages published successfully"
