@@ -9,7 +9,8 @@
     "test": "pnpm -r test",
     "docs:dev": "pnpm --filter @skybridge/docs start",
     "docs:build": "pnpm --filter @skybridge/docs build",
-    "docs:serve": "pnpm --filter @skybridge/docs serve"
+    "docs:serve": "pnpm --filter @skybridge/docs serve",
+    "publish:test": "./scripts/publish-test.sh"
   },
   "keywords": [
     "chatgpt",

@@ -24,12 +24,9 @@ jobs:
       - run: pnpm build
 
       - name: Create test version
-        run: |
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          TEST_VERSION="0.0.0-dev.${SHORT_SHA}"
-          npm version $TEST_VERSION --no-git-tag-version
+        run: pnpm version:test
 
       - name: Publish to npm
-        run: npm publish --tag dev --access public
+        run: pnpm publish:test
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
