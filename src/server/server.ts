@@ -192,7 +192,7 @@ export class McpServer<
           process.env.NODE_ENV === "production"
             ? templateHelper.renderProduction({
                 serverUrl,
-                widgetFile: this.lookupDistFile(`src/widgets/${name}.tsx`),
+                widgetFile: this.lookupDistBarrelFile(`src/widgets/${name}`),
                 styleFile: this.lookupDistFile("style.css"),
               })
             : templateHelper.renderDevelopment({
@@ -268,13 +268,24 @@ export class McpServer<
   }
 
   private lookupDistFile(key: string): string {
-    const manifest = JSON.parse(
+    const manifest = this.readManifest();
+    return manifest[key]?.file;
+  }
+
+  private lookupDistBarrelFile(basePath: string): string {
+    const manifest = this.readManifest();
+
+    const flatFileKey = `${basePath}.tsx`;
+    const barrelFileKey = `${basePath}/index.tsx`;
+    return manifest[flatFileKey]?.file ?? manifest[barrelFileKey]?.file;
+  }
+
+  private readManifest() {
+    return JSON.parse(
       readFileSync(
         path.join(process.cwd(), "dist", "assets", ".vite", "manifest.json"),
         "utf-8",
       ),
     );
-
-    return manifest[key]?.file;
   }
 }
