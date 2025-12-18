@@ -48,12 +48,17 @@ jobs:
 
       - name: Update package.json version
         run: |
-          npm version ${{ steps.extract_version.outputs.version }} --no-git-tag-version
+          pnpm run version ${{ steps.extract_version.outputs.version }}
 
-      - name: Publish to npm
-        run: npm publish --access public
+      - name: Publish to npm (Skybridge)
+        run: pnpm publish:skybridge latest
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm (Packages)
+        run: pnpm publish:packages latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.ORG_NPM_TOKEN }}
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest

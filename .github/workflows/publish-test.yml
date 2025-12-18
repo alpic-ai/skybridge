@@ -5,6 +5,10 @@ on:
     branches-ignore:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   publish-test:
     runs-on: ubuntu-latest
@@ -23,13 +27,15 @@ jobs:
 
       - run: pnpm build
 
-      - name: Create test version
-        run: |
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          TEST_VERSION="0.0.0-dev.${SHORT_SHA}"
-          npm version $TEST_VERSION --no-git-tag-version
+      - name: Bump version
+        run: pnpm run version
 
-      - name: Publish to npm
-        run: npm publish --tag dev --access public
+      - name: Publish to npm (Skybridge)
+        run: pnpm publish:skybridge
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm (Packages)
+        run: pnpm publish:packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.ORG_NPM_TOKEN }}

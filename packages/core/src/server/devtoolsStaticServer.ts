@@ -1,8 +1,10 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express, { type RequestHandler } from "express";
+
+const require = createRequire(import.meta.url);
 
 /**
  * Serve the built devtools React app
@@ -19,8 +21,17 @@ import express, { type RequestHandler } from "express";
  */
 export const devtoolsStaticServer = async (): Promise<RequestHandler> => {
   const router = express.Router();
-  const currentDir = path.dirname(fileURLToPath(import.meta.url));
-  const devtoolsPath = path.join(currentDir, "..", "devtools");
+  let devtoolsPath: string;
+  const devtoolsPackagePath = require.resolve(
+    "@skybridge/devtools/package.json",
+  );
+  devtoolsPath = path.join(path.dirname(devtoolsPackagePath), "dist");
+
+  if (!existsSync(devtoolsPath)) {
+    throw new Error(
+      "@skybridge/devtools dist folder not found. The package is installed but not built. Please build it first.",
+    );
+  }
 
   router.use(cors());
 
