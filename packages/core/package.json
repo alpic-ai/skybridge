@@ -1,0 +1,70 @@
+{
+  "name": "skybridge",
+  "version": "0.0.0",
+  "description": "Skybridge is a framework for building ChatGPT apps",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "./server": {
+      "types": "./dist/src/server/index.d.ts",
+      "default": "./dist/src/server/index.js"
+    },
+    "./web": {
+      "types": "./dist/src/web/index.d.ts",
+      "default": "./dist/src/web/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc && pnpm run build:templates",
+    "build:templates": "cp -r src/server/templates dist/src/server/",
+    "format": "biome check --write --error-on-warnings",
+    "test": "pnpm run test:unit && pnpm run test:type && pnpm run test:format",
+    "test:unit": "vitest run",
+    "test:type": "tsc --noEmit",
+    "test:format": "biome ci"
+  },
+  "keywords": [
+    "chatgpt",
+    "app",
+    "ai",
+    "skybridge"
+  ],
+  "author": "Frédéric Barthelet",
+  "license": "ISC",
+  "peerDependencies": {
+    "@modelcontextprotocol/sdk": ">=1.0.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "dependencies": {
+    "@babel/core": "^7.28.5",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "handlebars": "^4.7.8",
+    "superjson": "^2.2.6",
+    "vite": "^7.1.11",
+    "zustand": "^5.0.9"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.8",
+    "@modelcontextprotocol/sdk": "^1.24.3",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.0",
+    "@total-typescript/tsconfig": "^1.0.4",
+    "@types/babel__core": "^7.20.5",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsdom": "^21.1.6",
+    "@types/node": "^22.15.30",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitest/ui": "^2.1.8",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.8",
+    "zod": "^4.1.13"
+  },
+  "packageManager": "pnpm@10.17.1"
+}
