@@ -8,14 +8,17 @@
     "create-skybridge": "dist/index.mjs"
   },
   "files": [
+    "index.js",
     "dist"
   ],
   "scripts": {
     "build": "tsc",
-    "typecheck": "tsc"
+    "test:type": "tsc --noEmit",
+    "test:format": "biome ci"
   },
   "devDependencies": {
     "@clack/prompts": "^0.11.0",
+    "@types/node": "^25.0.3",
     "mri": "^1.2.0",
     "picocolors": "^1.1.1",
     "typescript": "^5.9.3"
