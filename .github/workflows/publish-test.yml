@@ -5,6 +5,10 @@ on:
     branches-ignore:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   publish-test:
     runs-on: ubuntu-latest
