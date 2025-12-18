@@ -191,8 +191,8 @@ importers:
         specifier: ^3.19.0
         version: 3.20.0
       skybridge:
-        specifier: ^0.12.0
-        version: 0.12.0(@modelcontextprotocol/sdk@1.25.1(hono@4.11.1)(zod@4.2.1))(@types/node@24.10.4)(@types/react@19.2.7)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(use-sync-external-store@1.6.0(react@19.2.3))
+        specifier: workspace:*
+        version: link:../core
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
@@ -7126,13 +7126,6 @@ packages:
   skin-tone@2.0.0:
     resolution: {integrity: sha512-kUMbT1oBJCpgrnKoSr0o6wPtvRWT9W9UKvGLwfJYO2WuahZRHOpEyL1ckyMGgMWh0UdpmaoFqKKD29WTomNEGA==}
     engines: {node: '>=8'}
-
-  skybridge@0.12.0:
-    resolution: {integrity: sha512-Za1uRlSKAC/+qvF/8Es56NCWQl4tgPQQELjewG43NIPFuS7HZi0CeGvVs1hlYr5b1Sk9dRyRcr4PSVnd0I3ODg==}
-    peerDependencies:
-      '@modelcontextprotocol/sdk': '>=1.0.0'
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
 
   slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
@@ -16417,35 +16410,6 @@ snapshots:
   skin-tone@2.0.0:
     dependencies:
       unicode-emoji-modifier-base: 1.0.0
-
-  skybridge@0.12.0(@modelcontextprotocol/sdk@1.25.1(hono@4.11.1)(zod@4.2.1))(@types/node@24.10.4)(@types/react@19.2.7)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(use-sync-external-store@1.6.0(react@19.2.3)):
-    dependencies:
-      '@babel/core': 7.28.5
-      '@modelcontextprotocol/sdk': 1.25.1(hono@4.11.1)(zod@4.2.1)
-      cors: 2.8.5
-      express: 5.2.1
-      handlebars: 4.7.8
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
-      superjson: 2.2.6
-      vite: 7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)
-      zustand: 5.0.9(@types/react@19.2.7)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))
-    transitivePeerDependencies:
-      - '@types/node'
-      - '@types/react'
-      - immer
-      - jiti
-      - less
-      - lightningcss
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-      - tsx
-      - use-sync-external-store
-      - yaml
 
   slash@3.0.0: {}
 
