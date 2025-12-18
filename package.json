@@ -11,8 +11,8 @@
     "docs:build": "pnpm --filter @skybridge/docs build",
     "docs:serve": "pnpm --filter @skybridge/docs serve",
     "version": "./scripts/version.sh",
-    "publish:test:packages": "./scripts/publish-test-packages.sh",
-    "publish:test:skybridge": "./scripts/publish-test-skybridge.sh"
+    "publish:packages": "./scripts/publish-packages.sh",
+    "publish:skybridge": "./scripts/publish-skybridge.sh"
   },
   "keywords": [
     "chatgpt",
