@@ -40,6 +40,43 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  docs:
+    dependencies:
+      '@docusaurus/core':
+        specifier: 3.9.2
+        version: 3.9.2(@mdx-js/react@3.1.1(@types/react@19.2.7)(react@19.2.3))(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.6.3)
+      '@docusaurus/preset-classic':
+        specifier: 3.9.2
+        version: 3.9.2(@algolia/client-search@5.46.1)(@mdx-js/react@3.1.1(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(search-insights@2.17.3)(typescript@5.6.3)
+      '@mdx-js/react':
+        specifier: ^3.0.0
+        version: 3.1.1(@types/react@19.2.7)(react@19.2.3)
+      clsx:
+        specifier: ^2.0.0
+        version: 2.1.1
+      prism-react-renderer:
+        specifier: ^2.3.0
+        version: 2.4.1(react@19.2.3)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.3
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.3(react@19.2.3)
+    devDependencies:
+      '@docusaurus/module-type-aliases':
+        specifier: 3.9.2
+        version: 3.9.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@docusaurus/tsconfig':
+        specifier: 3.9.2
+        version: 3.9.2
+      '@docusaurus/types':
+        specifier: 3.9.2
+        version: 3.9.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      typescript:
+        specifier: ~5.6.2
+        version: 5.6.3
+
   packages/core:
     dependencies:
       '@babel/core':
@@ -257,43 +294,6 @@ importers:
       vite:
         specifier: ^7.2.4
         version: 7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)
-
-  packages/docs:
-    dependencies:
-      '@docusaurus/core':
-        specifier: 3.9.2
-        version: 3.9.2(@mdx-js/react@3.1.1(@types/react@19.2.7)(react@19.2.3))(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.6.3)
-      '@docusaurus/preset-classic':
-        specifier: 3.9.2
-        version: 3.9.2(@algolia/client-search@5.46.1)(@mdx-js/react@3.1.1(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(search-insights@2.17.3)(typescript@5.6.3)
-      '@mdx-js/react':
-        specifier: ^3.0.0
-        version: 3.1.1(@types/react@19.2.7)(react@19.2.3)
-      clsx:
-        specifier: ^2.0.0
-        version: 2.1.1
-      prism-react-renderer:
-        specifier: ^2.3.0
-        version: 2.4.1(react@19.2.3)
-      react:
-        specifier: ^19.0.0
-        version: 19.2.3
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.2.3(react@19.2.3)
-    devDependencies:
-      '@docusaurus/module-type-aliases':
-        specifier: 3.9.2
-        version: 3.9.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@docusaurus/tsconfig':
-        specifier: 3.9.2
-        version: 3.9.2
-      '@docusaurus/types':
-        specifier: 3.9.2
-        version: 3.9.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      typescript:
-        specifier: ~5.6.2
-        version: 5.6.3
 
 packages:
 
