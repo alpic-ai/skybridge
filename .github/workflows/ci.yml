@@ -28,24 +28,16 @@ jobs:
         with:
           path: |
             node_modules
+            packages/core/node_modules
+            packages/devtools/node_modules
           key: build-${{ github.sha }}
 
   test:
-    name: ${{ matrix.name }}
+    name: Run tests
     needs: install
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: Unit Tests
-            command: pnpm run test:unit
-          - name: Type Check
-            command: pnpm run test:type
-          - name: Lint & Format
-            command: pnpm run test:format
     steps:
       - uses: actions/checkout@v4
 
@@ -60,7 +52,9 @@ jobs:
         with:
           path: |
             node_modules
+            packages/core/node_modules
+            packages/devtools/node_modules
           key: build-${{ github.sha }}
 
-      - name: Run ${{ matrix.name }}
-        run: ${{ matrix.command }}
+      - name: Run tests
+        run: pnpm test
