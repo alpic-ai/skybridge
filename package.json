@@ -5,8 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm -r build",
-    "test": "pnpm -r test",
+    "build": "pnpm --filter './packages/*' build",
+    "test": "pnpm --filter './packages/*' test",
     "docs:dev": "pnpm --filter @skybridge/docs start",
     "docs:build": "pnpm --filter @skybridge/docs build",
     "docs:serve": "pnpm --filter @skybridge/docs serve",
