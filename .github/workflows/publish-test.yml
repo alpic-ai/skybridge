@@ -29,7 +29,13 @@ jobs:
 
       - name: Bump version
         run: pnpm run version
-      - name: Publish to npm
+
+      - name: Publish to npm (Skybridge)
         run: pnpm publish:test:skybridge
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm (Packages)
+        run: pnpm publish:test:packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.ORG_NPM_TOKEN }}
