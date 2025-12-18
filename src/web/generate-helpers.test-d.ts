@@ -6,11 +6,14 @@ import type {
   ToolOutput,
   ToolResponseMetadata,
 } from "../server/index.js";
-import { createTestServer } from "../test/utils.js";
+import { createInterfaceTestServer, createTestServer } from "../test/utils.js";
 import { generateHelpers } from "./generate-helpers.js";
 
 const server = createTestServer();
 type TestServer = typeof server;
+
+const interfaceServer = createInterfaceTestServer();
+type InterfaceTestServer = typeof interfaceServer;
 
 test("InferTools extracts the tool registry type (widgets + registerTool)", () => {
   type Tools = InferTools<TestServer>;
@@ -340,4 +343,44 @@ test("ToolResponseMetadata extracts _meta from mixed return paths", () => {
     processedAt: number;
     region: string;
   }>();
+});
+
+test("ToolOutput extracts correct type when using interface declaration", () => {
+  type InterfaceWidgetOutput = ToolOutput<
+    InterfaceTestServer,
+    "interface-widget"
+  >;
+
+  expectTypeOf<InterfaceWidgetOutput>().toHaveProperty("itemName");
+  expectTypeOf<InterfaceWidgetOutput["itemName"]>().toBeString();
+  expectTypeOf<InterfaceWidgetOutput["quantity"]>().toBeNumber();
+});
+
+test("ToolResponseMetadata extracts correct type when using interface declaration", () => {
+  type InterfaceWidgetMeta = ToolResponseMetadata<
+    InterfaceTestServer,
+    "interface-widget"
+  >;
+
+  expectTypeOf<InterfaceWidgetMeta>().toHaveProperty("processedBy");
+  expectTypeOf<InterfaceWidgetMeta["processedBy"]>().toBeString();
+  expectTypeOf<InterfaceWidgetMeta["version"]>().toBeNumber();
+});
+
+test("generateHelpers works with interface-typed server", () => {
+  const { useCallTool, useToolInfo } = generateHelpers<InterfaceTestServer>();
+
+  const { data } = useCallTool("interface-widget");
+  if (data) {
+    expectTypeOf(data.structuredContent.itemName).toBeString();
+    expectTypeOf(data.structuredContent.quantity).toBeNumber();
+  }
+
+  const toolInfo = useToolInfo<"interface-widget">();
+  if (toolInfo.isSuccess) {
+    expectTypeOf(toolInfo.output.itemName).toBeString();
+    expectTypeOf(toolInfo.output.quantity).toBeNumber();
+    expectTypeOf(toolInfo.responseMetadata.processedBy).toBeString();
+    expectTypeOf(toolInfo.responseMetadata.version).toBeNumber();
+  }
 });

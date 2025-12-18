@@ -80,12 +80,17 @@ type McpServerOriginalToolConfig = Omit<
   "inputSchema" | "outputSchema"
 >;
 
+type Simplify<T> = { [K in keyof T]: T[K] };
+
 type ExtractStructuredContent<T> = T extends { structuredContent: infer SC }
-  ? SC
+  ? Simplify<SC>
   : never;
 
-type ExtractMeta<T> =
-  Extract<T, { _meta: unknown }> extends { _meta: infer M } ? M : unknown;
+type ExtractMeta<T> = [Extract<T, { _meta: unknown }>] extends [never]
+  ? unknown
+  : Extract<T, { _meta: unknown }> extends { _meta: infer M }
+    ? Simplify<M>
+    : unknown;
 
 /**
  * Type-level marker interface for cross-package type inference.
@@ -99,8 +104,6 @@ type ExtractMeta<T> =
 export interface McpServerTypes<TTools extends Record<string, ToolDef>> {
   readonly tools: TTools;
 }
-
-type Simplify<T> = { [K in keyof T]: T[K] };
 type ShapeOutput<Shape extends ZodRawShapeCompat> = Simplify<
   {
     [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
@@ -134,7 +137,7 @@ type ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> = {
 
 type ToolHandler<
   TInput extends ZodRawShapeCompat,
-  TReturn extends CallToolResult = CallToolResult,
+  TReturn extends { content: CallToolResult["content"] } = CallToolResult,
 > = (
   args: ShapeOutput<TInput>,
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
@@ -148,7 +151,7 @@ export class McpServer<
   registerWidget<
     TName extends string,
     TInput extends ZodRawShapeCompat,
-    TReturn extends CallToolResult,
+    TReturn extends { content: CallToolResult["content"] },
   >(
     name: TName,
     resourceConfig: McpServerOriginalResourceConfig,
@@ -239,7 +242,7 @@ export class McpServer<
   override registerTool<
     TName extends string,
     InputArgs extends ZodRawShapeCompat,
-    TReturn extends CallToolResult,
+    TReturn extends { content: CallToolResult["content"] },
   >(
     name: TName,
     config: ToolConfig<InputArgs>,
