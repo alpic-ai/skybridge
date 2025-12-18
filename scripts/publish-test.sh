@@ -12,7 +12,7 @@ npm version "${TEST_VERSION}" --no-git-tag-version
 cd ../..
 
 echo "Publishing skybridge to npm with 'dev' tag..."
-pnpm --filter skybridge publish --tag dev --access public
+pnpm --filter skybridge publish --tag dev --access public --no-git-checks
 
 # Then devtools
 # cd packages/devtools
