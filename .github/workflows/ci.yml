@@ -6,8 +6,8 @@ on:
     branches: [main]
 
 jobs:
-  install:
-    name: Install
+  test:
+    name: Install and test
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,38 +23,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - uses: actions/cache/save@v4
-        with:
-          path: |
-            node_modules
-            packages/core/node_modules
-            packages/devtools/node_modules
-          key: build-${{ github.sha }}
-
-  test:
-    name: Run tests
-    needs: install
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-          cache: "pnpm"
-
-      - uses: actions/cache/restore@v4
-        with:
-          path: |
-            node_modules
-            packages/core/node_modules
-            packages/devtools/node_modules
-          key: build-${{ github.sha }}
 
       - name: Run tests
         run: pnpm test
