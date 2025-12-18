@@ -16,6 +16,12 @@ This section contains detailed documentation for all hooks and utilities provide
 | [`useToolInfo`](./use-tool-info)       | Get initial tool input, output and metadata |
 | [`useWidgetState`](./use-widget-state) | Persist state across widget renders         |
 
+### Context Sync
+
+| Feature                      | Description                                                         |
+| ---------------------------- | ------------------------------------------------------------------- |
+| [`data-llm`](./data-llm)     | Sync widget UI state with the model for contextual responses        |
+
 ### Utilities
 
 | Utility                         | Description                                                       |
