@@ -22,6 +22,7 @@ import {
 
 const mockManifest = {
   "src/widgets/my-widget.tsx": { file: "my-widget.js" },
+  "src/widgets/folder-widget/index.tsx": { file: "folder-widget.js" },
   "style.css": { file: "style.css" },
 };
 
@@ -114,6 +115,9 @@ describe("McpServer.registerWidget", () => {
     expect(result.contents[0]?.text).toContain(`${serverUrl}/@react-refresh`);
     expect(result.contents[0]?.text).toContain(`${serverUrl}/@vite/client`);
     expect(result.contents[0]?.text).toContain(
+      `${serverUrl}/src/widgets/my-widget`,
+    );
+    expect(result.contents[0]?.text).not.toContain(
       `${serverUrl}/src/widgets/my-widget.tsx`,
     );
   });
@@ -170,5 +174,43 @@ describe("McpServer.registerWidget", () => {
       `${serverUrl}/assets/my-widget.js`,
     );
     expect(result.contents[0]?.text).toContain(`${serverUrl}/assets/style.css`);
+  });
+
+  it("should resolve folder-based widgets (barrel files) in production mode", async () => {
+    setTestEnv({ NODE_ENV: "production" });
+
+    const mockToolCallback = vi.fn();
+    const mockRegisterResourceConfig = { description: "Folder widget" };
+    const mockToolConfig = { description: "Folder tool" };
+
+    server.registerWidget(
+      "folder-widget",
+      mockRegisterResourceConfig,
+      mockToolConfig,
+      mockToolCallback,
+    );
+
+    const resourceCallback = mockRegisterResource.mock
+      .calls[0]?.[3] as unknown as (
+      uri: URL,
+      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+    ) => Promise<{
+      contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
+    }>;
+    expect(resourceCallback).toBeDefined();
+
+    const serverUrl = "https://myapp.com";
+    const mockExtra = createMockExtra(
+      serverUrl,
+    ) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>;
+    const result = await resourceCallback(
+      new URL("ui://widgets/folder-widget.html"),
+      mockExtra,
+    );
+
+    // Should resolve to folder-widget.js from the manifest entry "src/widgets/folder-widget/index.tsx"
+    expect(result.contents[0]?.text).toContain(
+      `${serverUrl}/assets/folder-widget.js`,
+    );
   });
 });
