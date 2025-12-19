@@ -5,7 +5,7 @@
   "license": "MIT",
   "author": "Alpic",
   "bin": {
-    "create-skybridge": "dist/index.mjs"
+    "create-skybridge": "dist/index.js"
   },
   "files": [
     "index.js",
