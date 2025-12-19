@@ -82,21 +82,21 @@ describe("McpServer.registerWidget", () => {
     );
 
     // Get the resource callback function
-    const resourceCallback = mockRegisterResource.mock
+    const appsSdkResourceCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
       extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
     ) => Promise<{
       contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
     }>;
-    expect(resourceCallback).toBeDefined();
+    expect(appsSdkResourceCallback).toBeDefined();
 
     const serverUrl = "http://localhost:3000";
     const mockExtra = createMockExtra(
       "__not_used__",
     ) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>;
-    const result = await resourceCallback(
-      new URL("ui://widgets/my-widget.html"),
+    const result = await appsSdkResourceCallback(
+      new URL("ui://widgets/apps-sdk/my-widget.html"),
       mockExtra,
     );
 
@@ -137,21 +137,21 @@ describe("McpServer.registerWidget", () => {
     );
 
     // Get the resource callback function
-    const resourceCallback = mockRegisterResource.mock
+    const appsSdkResourceCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
       extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
     ) => Promise<{
       contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
     }>;
-    expect(resourceCallback).toBeDefined();
+    expect(appsSdkResourceCallback).toBeDefined();
 
     const serverUrl = "https://myapp.com";
     const mockExtra = createMockExtra(
       serverUrl,
     ) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>;
-    const result = await resourceCallback(
-      new URL("ui://widgets/my-widget.html"),
+    const result = await appsSdkResourceCallback(
+      new URL("ui://widgets/apps-sdk/my-widget.html"),
       mockExtra,
     );
 
@@ -190,21 +190,21 @@ describe("McpServer.registerWidget", () => {
       mockToolCallback,
     );
 
-    const resourceCallback = mockRegisterResource.mock
+    const appsSdkResourceCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
       extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
     ) => Promise<{
       contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
     }>;
-    expect(resourceCallback).toBeDefined();
+    expect(appsSdkResourceCallback).toBeDefined();
 
     const serverUrl = "https://myapp.com";
     const mockExtra = createMockExtra(
       serverUrl,
     ) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>;
-    const result = await resourceCallback(
-      new URL("ui://widgets/folder-widget.html"),
+    const result = await appsSdkResourceCallback(
+      new URL("ui://widgets/apps-sdk/folder-widget.html"),
       mockExtra,
     );
 
@@ -214,7 +214,7 @@ describe("McpServer.registerWidget", () => {
     );
   });
 
-  it("should register resources for both apps-sdk and ext-apps formats", () => {
+  it("should register resources for both apps-sdk and ext-apps formats", async () => {
     const mockToolCallback = vi.fn();
     const mockRegisterResourceConfig = { description: "Test widget" };
     const mockToolConfig = { description: "Test tool" };
@@ -231,7 +231,30 @@ describe("McpServer.registerWidget", () => {
     const [, appsSdkUri] = mockRegisterResource.mock.calls[0] ?? [];
     expect(appsSdkUri).toBe("ui://widgets/apps-sdk/my-widget.html");
 
-    const [, extAppsUri] = mockRegisterResource.mock.calls[1] ?? [];
-    expect(extAppsUri).toBe("ui://widgets/ext-apps/my-widget.html");
+    const extAppsResourceCallback = mockRegisterResource.mock
+      .calls[1]?.[3] as unknown as (
+      uri: URL,
+      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+    ) => Promise<{
+      contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
+    }>;
+    expect(extAppsResourceCallback).toBeDefined();
+
+    const extAppsResult = await extAppsResourceCallback(
+      new URL("ui://widgets/ext-apps/my-widget.html"),
+      createMockExtra("__not_used__") as unknown as RequestHandlerExtra<
+        ServerRequest,
+        ServerNotification
+      >,
+    );
+    expect(extAppsResult).toEqual({
+      contents: [
+        {
+          uri: "ui://widgets/ext-apps/my-widget.html",
+          mimeType: "text/html;profile=mcp-app",
+          text: expect.stringContaining('<div id="root"></div>'),
+        },
+      ],
+    });
   });
 });

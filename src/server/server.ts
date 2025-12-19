@@ -174,28 +174,32 @@ export class McpServer<
       resourceMetadata["openai/widgetDescription"] = toolConfig.description;
     }
 
-    const appsSdkUri = `ui://widgets/apps-sdk/${name}.html`;
-    this.registerWidgetResource({
-      name,
-      uri: appsSdkUri,
+    const appsSdkResourceConfig = {
+      uri: `ui://widgets/apps-sdk/${name}.html`,
       mimeType: "text/html+skybridge",
-      resourceConfig,
-      resourceMetadata,
-    });
+    };
 
-    const extAppsUri = `ui://widgets/ext-apps/${name}.html`;
-    this.registerWidgetResource({
-      name,
-      uri: extAppsUri,
+    const extAppsResourceConfig = {
+      uri: `ui://widgets/ext-apps/${name}.html`,
       mimeType: "text/html;profile=mcp-app",
-      resourceConfig,
-      resourceMetadata,
-    });
+    };
+
+    [appsSdkResourceConfig, extAppsResourceConfig].forEach(
+      ({ uri, mimeType }) => {
+        this.registerWidgetResource({
+          name,
+          widgetUri: uri,
+          mimeType,
+          resourceConfig,
+          resourceMetadata,
+        });
+      },
+    );
 
     const toolMeta: ToolMeta = {
       ...toolConfig._meta,
-      "openai/outputTemplate": appsSdkUri,
-      "ui/resourceUri": extAppsUri,
+      "openai/outputTemplate": appsSdkResourceConfig.uri,
+      "ui/resourceUri": extAppsResourceConfig.uri,
     };
 
     this.registerTool(
@@ -249,22 +253,22 @@ export class McpServer<
 
   private registerWidgetResource({
     name,
-    uri,
+    widgetUri,
     mimeType,
     resourceConfig,
     resourceMetadata,
   }: {
     name: string;
-    uri: string;
+    widgetUri: string;
     mimeType: string;
     resourceConfig: McpServerOriginalResourceConfig;
     resourceMetadata: ResourceMeta;
   }): void {
     this.registerResource(
       name,
-      uri,
+      widgetUri,
       { ...resourceConfig, _meta: resourceMetadata },
-      async (_uri, extra) => {
+      async (uri, extra) => {
         const serverUrl =
           process.env.NODE_ENV === "production"
             ? `https://${extra?.requestInfo?.headers?.["x-forwarded-host"] ?? extra?.requestInfo?.headers?.host}`
@@ -281,7 +285,7 @@ export class McpServer<
               })
             : templateHelper.renderDevelopment({ serverUrl, widgetName: name });
 
-        return { contents: [{ uri, mimeType, text: html }] };
+        return { contents: [{ uri: uri.href, mimeType, text: html }] };
       },
     );
   }
