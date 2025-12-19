@@ -1,6 +1,8 @@
 <div align="center">
 
-<img alt="Skybridge" src="docs/static/img/logo.png" width="220">
+<img alt="Skybridge" src="docs/static/img/github-banner.png" width="100%">
+
+<br />
 
 # Skybridge
 
