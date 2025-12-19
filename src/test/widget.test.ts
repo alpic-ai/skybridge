@@ -104,7 +104,7 @@ describe("McpServer.registerWidget", () => {
     expect(result).toEqual({
       contents: [
         {
-          uri: "ui://widgets/my-widget.html",
+          uri: "ui://widgets/apps-sdk/my-widget.html",
           mimeType: "text/html+skybridge",
           text: expect.stringContaining('<div id="root"></div>'),
         },
@@ -158,7 +158,7 @@ describe("McpServer.registerWidget", () => {
     expect(result).toEqual({
       contents: [
         {
-          uri: "ui://widgets/my-widget.html",
+          uri: "ui://widgets/apps-sdk/my-widget.html",
           mimeType: "text/html+skybridge",
           text: expect.stringContaining('<div id="root"></div>'),
         },
@@ -212,5 +212,26 @@ describe("McpServer.registerWidget", () => {
     expect(result.contents[0]?.text).toContain(
       `${serverUrl}/assets/folder-widget.js`,
     );
+  });
+
+  it("should register resources for both apps-sdk and ext-apps formats", () => {
+    const mockToolCallback = vi.fn();
+    const mockRegisterResourceConfig = { description: "Test widget" };
+    const mockToolConfig = { description: "Test tool" };
+
+    server.registerWidget(
+      "my-widget",
+      mockRegisterResourceConfig,
+      mockToolConfig,
+      mockToolCallback,
+    );
+
+    expect(mockRegisterResource).toHaveBeenCalledTimes(2);
+
+    const [, appsSdkUri] = mockRegisterResource.mock.calls[0] ?? [];
+    expect(appsSdkUri).toBe("ui://widgets/apps-sdk/my-widget.html");
+
+    const [, extAppsUri] = mockRegisterResource.mock.calls[1] ?? [];
+    expect(extAppsUri).toBe("ui://widgets/ext-apps/my-widget.html");
   });
 });
