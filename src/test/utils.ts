@@ -263,6 +263,55 @@ export function createMinimalTestServer() {
   );
 }
 
+interface InterfaceOutput {
+  itemName: string;
+  quantity: number;
+}
+
+interface InterfaceMeta {
+  processedBy: string;
+  version: number;
+}
+
+interface InterfaceReturnType {
+  content: [{ type: "text"; text: string }];
+  structuredContent: InterfaceOutput;
+  _meta: InterfaceMeta;
+}
+
+export function createInterfaceTestServer() {
+  return new McpServer(
+    { name: "interface-test-app", version: "1.0.0" },
+    {},
+  ).registerWidget<
+    "interface-widget",
+    { id: z.ZodString },
+    InterfaceReturnType
+  >(
+    "interface-widget",
+    {},
+    {
+      description: "Widget with interface-typed output",
+      inputSchema: {
+        id: z.string(),
+      },
+    },
+    async ({ id }): Promise<InterfaceReturnType> => {
+      return {
+        content: [{ type: "text", text: `Item ${id}` }],
+        structuredContent: {
+          itemName: "Test Item",
+          quantity: 42,
+        },
+        _meta: {
+          processedBy: "test",
+          version: 1,
+        },
+      };
+    },
+  );
+}
+
 /**
  * Mock extra parameter for resource callback
  */
