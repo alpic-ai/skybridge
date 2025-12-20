@@ -167,7 +167,6 @@ export class McpServer<
     ExtractStructuredContent<TReturn>,
     ExtractMeta<TReturn>
   > {
-    const uri = `ui://widgets/${name}.html`;
     const resourceMetadata: ResourceMeta = {
       ...(resourceConfig._meta ?? {}),
     };
@@ -175,52 +174,32 @@ export class McpServer<
       resourceMetadata["openai/widgetDescription"] = toolConfig.description;
     }
 
-    this.registerResource(
-      name,
-      uri,
-      {
-        ...resourceConfig,
-        _meta: resourceMetadata,
-      },
-      async (_uri, extra) => {
-        const serverUrl =
-          process.env.NODE_ENV === "production"
-            ? `https://${
-                extra?.requestInfo?.headers?.["x-forwarded-host"] ??
-                extra?.requestInfo?.headers?.host
-              }`
-            : `http://localhost:3000`;
+    const appsSdkResourceConfig = {
+      uri: `ui://widgets/apps-sdk/${name}.html`,
+      mimeType: "text/html+skybridge",
+    };
 
-        const html =
-          process.env.NODE_ENV === "production"
-            ? templateHelper.renderProduction({
-                serverUrl,
-                widgetFile: this.lookupDistFileWithIndexFallback(
-                  `src/widgets/${name}`,
-                ),
-                styleFile: this.lookupDistFile("style.css"),
-              })
-            : templateHelper.renderDevelopment({
-                serverUrl,
-                widgetName: name,
-              });
+    const extAppsResourceConfig = {
+      uri: `ui://widgets/ext-apps/${name}.html`,
+      mimeType: "text/html;profile=mcp-app",
+    };
 
-        return {
-          contents: [
-            {
-              uri,
-              mimeType: "text/html+skybridge",
-              text: html,
-            },
-          ],
-        };
+    [appsSdkResourceConfig, extAppsResourceConfig].forEach(
+      ({ uri, mimeType }) => {
+        this.registerWidgetResource({
+          name,
+          widgetUri: uri,
+          mimeType,
+          resourceConfig,
+          resourceMetadata,
+        });
       },
     );
 
     const toolMeta: ToolMeta = {
       ...toolConfig._meta,
-      "openai/outputTemplate": uri,
-      "ui/resourceUri": uri,
+      "openai/outputTemplate": appsSdkResourceConfig.uri,
+      "ui/resourceUri": extAppsResourceConfig.uri,
     };
 
     this.registerTool(
@@ -270,6 +249,45 @@ export class McpServer<
   ): RegisteredTool | McpServer<Record<string, ToolDef>> {
     super.registerTool(name, config, cb);
     return this;
+  }
+
+  private registerWidgetResource({
+    name,
+    widgetUri,
+    mimeType,
+    resourceConfig,
+    resourceMetadata,
+  }: {
+    name: string;
+    widgetUri: string;
+    mimeType: string;
+    resourceConfig: McpServerOriginalResourceConfig;
+    resourceMetadata: ResourceMeta;
+  }): void {
+    this.registerResource(
+      name,
+      widgetUri,
+      { ...resourceConfig, _meta: resourceMetadata },
+      async (uri, extra) => {
+        const serverUrl =
+          process.env.NODE_ENV === "production"
+            ? `https://${extra?.requestInfo?.headers?.["x-forwarded-host"] ?? extra?.requestInfo?.headers?.host}`
+            : `http://localhost:3000`;
+
+        const html =
+          process.env.NODE_ENV === "production"
+            ? templateHelper.renderProduction({
+                serverUrl,
+                widgetFile: this.lookupDistFileWithIndexFallback(
+                  `src/widgets/${name}`,
+                ),
+                styleFile: this.lookupDistFile("style.css"),
+              })
+            : templateHelper.renderDevelopment({ serverUrl, widgetName: name });
+
+        return { contents: [{ uri: uri.href, mimeType, text: html }] };
+      },
+    );
   }
 
   private lookupDistFile(key: string): string {
