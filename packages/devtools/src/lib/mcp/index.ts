@@ -1,5 +1,5 @@
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
-import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { CallToolArgs, OpenAiProperties } from "skybridge/web";
 import { useStore } from "@/lib/store.js";
 import { useSelectedToolName } from "../nuqs.js";

@@ -1,4 +1,8 @@
 {
   "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit"
+  },
   "biome.lsp.bin": "${workspaceFolder}/node_modules/.bin/biome"
 }
