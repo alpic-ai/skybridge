@@ -8,7 +8,7 @@ export const Widget = () => {
   const tool = useSelectedTool();
   const { openaiObject } = useCallToolResult(tool.name);
   const { data: resource } = useSuspenseResource(
-    tool._meta?.["ui/resourceUri"] as string | undefined,
+    tool._meta?.["openai/outputTemplate"] as string | undefined,
   );
   const { setToolData, pushOpenAiLog, updateOpenaiObject } = useStore();
   const iframeRef = useRef<HTMLIFrameElement>(null);

@@ -24,7 +24,7 @@ export const ToolPanel = () => {
   });
 
   const shouldDisplayWidgetSection = Boolean(
-    tool._meta?.["ui/resourceUri"] &&
+    tool._meta?.["openai/outputTemplate"] &&
       toolResult?.response &&
       !toolResult.response.isError,
   );

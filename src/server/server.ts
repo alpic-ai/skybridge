@@ -39,11 +39,11 @@ type OpenaiToolMeta = {
 };
 
 /** @see https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx#resource-discovery */
-type McpAppsToolMeta = {
-  "ui/resourceUri": string;
-};
+// type McpAppsToolMeta = {
+//   "ui/resourceUri": string;
+// };
 
-type ToolMeta = OpenaiToolMeta & McpAppsToolMeta;
+type ToolMeta = OpenaiToolMeta /* & McpAppsToolMeta */;
 
 /** @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields */
 type OpenaiResourceMeta = {
@@ -199,7 +199,7 @@ export class McpServer<
     const toolMeta: ToolMeta = {
       ...toolConfig._meta,
       "openai/outputTemplate": appsSdkResourceConfig.uri,
-      "ui/resourceUri": extAppsResourceConfig.uri,
+      // "ui/resourceUri": extAppsResourceConfig.uri,
     };
 
     this.registerTool(
