@@ -86,11 +86,11 @@ export class McpAppBridge {
     const data = event.data;
     if (data?.jsonrpc !== "2.0") return;
 
-      const request = this.pendingRequests.get(data.id);
-      if (request) {
-        this.pendingRequests.delete(data.id);
-        if (data.error) {
-          request.reject(new Error(data.error.message));
+    const request = this.pendingRequests.get(data.id);
+    if (request) {
+      this.pendingRequests.delete(data.id);
+      if (data.error) {
+        request.reject(new Error(data.error.message));
         return;
       }
       request.resolve(data.result);
