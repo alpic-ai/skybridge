@@ -26,8 +26,13 @@ export class McpAppBridge {
   private nextId = 1;
   private initialized: boolean;
   private appInitializationOptions: McpUiInitializeRequest["params"];
+  private requestTimeout: number;
 
-  constructor(options: McpAppInitializationOptions) {
+  constructor(
+    options: McpAppInitializationOptions,
+    requestTimeout: number = 10_000,
+  ) {
+    this.requestTimeout = requestTimeout;
     this.initialized = false;
     this.appInitializationOptions = {
       appInfo: options.appInfo,
@@ -62,6 +67,10 @@ export class McpAppBridge {
       reject,
     });
     window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
+    setTimeout(() => {
+      reject(new Error("Request timed out"));
+      this.pendingRequests.delete(id);
+    }, this.requestTimeout);
     return promise;
   }
 
@@ -142,12 +151,18 @@ const defaultOptions: McpAppInitializationOptions = {
 
 export function getMcpHost(
   options?: Partial<McpAppInitializationOptions>,
+  requestTimeout?: number,
 ): McpAppBridge {
-  if (instance && options) {
-    console.warn("getMcpHost: options ignored, instance already exists");
+  if (instance && (options || requestTimeout)) {
+    console.warn(
+      "getMcpHost: options and requestTimeout ignored, instance already exists",
+    );
   }
   if (!instance) {
-    instance = new McpAppBridge({ ...defaultOptions, ...options });
+    instance = new McpAppBridge(
+      { ...defaultOptions, ...options },
+      requestTimeout,
+    );
   }
 
   return instance;
@@ -156,8 +171,9 @@ export function getMcpHost(
 export function useMcpAppBridge<K extends keyof McpUiHostContext>(
   key: K,
   options?: Partial<McpAppInitializationOptions>,
+  requestTimeout?: number,
 ): McpUiHostContext[K] | undefined {
-  const host = getMcpHost(options);
+  const host = getMcpHost(options, requestTimeout);
 
   return useSyncExternalStore(host.subscribe(key), () => host.context?.[key]);
 }

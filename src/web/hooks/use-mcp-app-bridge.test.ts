@@ -4,9 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 describe("useMcpAppBridge", () => {
   let mockPostMessage: ReturnType<typeof vi.fn>;
 
-  const useHook = async () => {
-    const { useMcpAppBridge } = await import("./use-mcp-app-bridge.js");
-    return useMcpAppBridge;
+  const importModule = async () => {
+    return import("./use-mcp-app-bridge.js");
   };
 
   beforeEach(() => {
@@ -24,7 +23,7 @@ describe("useMcpAppBridge", () => {
   });
 
   it("should return the theme value from host context", async () => {
-    const useMcpAppBridge = await useHook();
+    const { useMcpAppBridge } = await importModule();
     const { result } = renderHook(() => useMcpAppBridge("theme"));
 
     const initCall = mockPostMessage.mock.calls.find(
@@ -53,5 +52,37 @@ describe("useMcpAppBridge", () => {
     await waitFor(() => {
       expect(result.current).toBe("light");
     });
+  });
+
+  it("should reject the request after timeout", async () => {
+    vi.useFakeTimers();
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    const { useMcpAppBridge, getMcpHost } = await importModule();
+    const bridge = getMcpHost(
+      { appInfo: { name: "test", version: "1.0.0" } },
+      100,
+    );
+
+    renderHook(() => useMcpAppBridge("theme"));
+
+    expect(mockPostMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ method: "ui/initialize" }),
+      "*",
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
+    });
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      new Error("Request timed out"),
+    );
+
+    consoleErrorSpy.mockRestore();
+    vi.useRealTimers();
+    bridge.cleanup();
   });
 });
