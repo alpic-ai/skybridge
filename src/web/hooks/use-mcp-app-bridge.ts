@@ -20,7 +20,7 @@ type McpAppInitializationOptions = Pick<
 
 export class McpAppBridge {
   public context: McpUiHostContext | null = null;
-  private listeners = new Set<() => void>();
+  private listeners = new Map<keyof McpUiHostContext, Set<() => void>>();
   private pendingRequests = new Map<number, PendingRequest<unknown>>();
   private nextId = 1;
   private initialized: boolean;
@@ -35,15 +35,19 @@ export class McpAppBridge {
     };
   }
 
-  subscribe = (onChange: () => void) => {
-    this.listeners.add(onChange);
+  subscribe = (key: keyof McpUiHostContext) => (onChange: () => void) => {
+    this.listeners.set(
+      key,
+      new Set([...(this.listeners.get(key) || []), onChange]),
+    );
     this.init();
-    return () => this.listeners.delete(onChange);
+    return () => this.listeners.get(key)?.delete(onChange);
   };
 
   public cleanup() {
     window.removeEventListener("message", this.handleMessage);
     this.pendingRequests.clear();
+    this.listeners.clear();
   }
 
   private request<R extends { method: string; params?: unknown }, T>({
@@ -51,24 +55,27 @@ export class McpAppBridge {
     params,
   }: R): Promise<T> {
     const id = this.nextId++;
-    return new Promise((resolve, reject) => {
-      this.pendingRequests.set(id, {
-        resolve: resolve as (value: unknown) => void,
-        reject,
-      });
-      window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
+    const { promise, resolve, reject } = Promise.withResolvers<T>();
+    this.pendingRequests.set(id, {
+      resolve: resolve as (value: unknown) => void,
+      reject,
     });
+    window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
+    return promise;
   }
 
-  private emit() {
-    this.listeners.forEach((l) => {
-      l();
+  private emit(key: keyof McpUiHostContext) {
+    this.listeners.get(key)?.forEach((listener) => {
+      listener();
     });
   }
 
   private setContext(context: McpUiHostContext | null) {
-    if (context !== undefined) this.context = context;
-    this.emit();
+    if (context == null) return;
+    this.context = context;
+    for (const key of Object.keys(context)) {
+      this.emit(key);
+    }
   }
 
   private init() {
@@ -94,6 +101,7 @@ export class McpAppBridge {
         request.reject(new Error(data.error.message));
         return;
       }
+
       request.resolve(data.result);
       return;
     }
@@ -150,5 +158,5 @@ export function useMcpAppBridge<K extends keyof McpUiHostContext>(
 ): McpUiHostContext[K] | undefined {
   const host = getMcpHost(options);
 
-  return useSyncExternalStore(host.subscribe, () => host.context?.[key]);
+  return useSyncExternalStore(host.subscribe(key), () => host.context?.[key]);
 }

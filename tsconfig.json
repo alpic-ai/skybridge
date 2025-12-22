@@ -5,7 +5,8 @@
     "outDir": "dist",
     "jsx": "react-jsx",
     "module": "ESNext",
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"]
   },
   "exclude": ["docs", "node_modules", "dist", "packages"]
 }
