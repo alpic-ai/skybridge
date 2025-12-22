@@ -1,21 +1,27 @@
 ---
-sidebar_position: 12
+sidebar_position: 7
 ---
 
-# useTheme
+# useLayout
 
-The `useTheme` hook returns the current color theme (`"light"` or `"dark"`) as set by the host application. Use this to style your widget to match the user's preferred appearance.
+The `useLayout` hook returns layout and visual environment information. These values may change dynamically during the session (e.g., on resize or theme toggle).
 
 ## Basic usage
 
 ```tsx
-import { useTheme } from "skybridge/web";
+import { useLayout } from "skybridge/web";
 
 function ThemedWidget() {
-  const theme = useTheme();
+  const { theme, maxHeight, safeArea } = useLayout();
 
   return (
-    <div className={`widget widget--${theme}`}>
+    <div
+      style={{
+        backgroundColor: theme === "dark" ? "#1a1a1a" : "#ffffff",
+        maxHeight,
+        paddingTop: safeArea.insets.top,
+      }}
+    >
       <p>Current theme: {theme}</p>
     </div>
   );
@@ -25,20 +31,45 @@ function ThemedWidget() {
 ## Returns
 
 ```tsx
-theme: "light" | "dark"
+type LayoutState = {
+  theme: "light" | "dark";
+  maxHeight: number;
+  safeArea: SafeArea;
+};
 ```
 
-The current color theme of the host application.
+### `theme`
+
+The current color theme of the host application (`"light"` or `"dark"`).
+
+### `maxHeight`
+
+The maximum height available for the widget in pixels.
+
+### `safeArea`
+
+Safe area insets for devices with notches, rounded corners, or other display cutouts.
+
+```tsx
+type SafeArea = {
+  insets: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+};
+```
 
 ## Examples
 
 ### Conditional Styling
 
 ```tsx
-import { useTheme } from "skybridge/web";
+import { useLayout } from "skybridge/web";
 
 function ThemedCard() {
-  const theme = useTheme();
+  const { theme } = useLayout();
   const isDark = theme === "dark";
 
   return (
@@ -61,10 +92,10 @@ function ThemedCard() {
 ### CSS Class-Based Theming
 
 ```tsx
-import { useTheme } from "skybridge/web";
+import { useLayout } from "skybridge/web";
 
 function Widget() {
-  const theme = useTheme();
+  const { theme } = useLayout();
 
   return (
     <div className={`widget ${theme === "dark" ? "dark" : "light"}`}>
@@ -107,7 +138,7 @@ function Widget() {
 ### CSS Variables Theme Provider
 
 ```tsx
-import { useTheme } from "skybridge/web";
+import { useLayout } from "skybridge/web";
 import { useEffect } from "react";
 
 const lightTheme = {
@@ -129,7 +160,7 @@ const darkTheme = {
 };
 
 function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const theme = useTheme();
+  const { theme } = useLayout();
   const variables = theme === "dark" ? darkTheme : lightTheme;
 
   useEffect(() => {
@@ -143,26 +174,10 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
 }
 ```
 
-### Theme-Aware Icon
+### Theme-Aware Chart
 
 ```tsx
-import { useTheme } from "skybridge/web";
-
-function ThemeIcon() {
-  const theme = useTheme();
-
-  return (
-    <span role="img" aria-label={`${theme} mode`}>
-      {theme === "dark" ? "🌙" : "☀️"}
-    </span>
-  );
-}
-```
-
-### Chart with Theme Colors
-
-```tsx
-import { useTheme } from "skybridge/web";
+import { useLayout } from "skybridge/web";
 
 type DataPoint = {
   label: string;
@@ -170,7 +185,7 @@ type DataPoint = {
 };
 
 function BarChart({ data }: { data: DataPoint[] }) {
-  const theme = useTheme();
+  const { theme } = useLayout();
   const isDark = theme === "dark";
 
   const colors = {
@@ -201,13 +216,37 @@ function BarChart({ data }: { data: DataPoint[] }) {
 }
 ```
 
+### Safe Area Handling
+
+```tsx
+import { useLayout } from "skybridge/web";
+
+function FullScreenWidget({ children }: { children: React.ReactNode }) {
+  const { safeArea, maxHeight } = useLayout();
+
+  return (
+    <div
+      style={{
+        maxHeight,
+        paddingTop: safeArea.insets.top,
+        paddingRight: safeArea.insets.right,
+        paddingBottom: safeArea.insets.bottom,
+        paddingLeft: safeArea.insets.left,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+```
+
 ### Theme-Sensitive Images
 
 ```tsx
-import { useTheme } from "skybridge/web";
+import { useLayout } from "skybridge/web";
 
 function Logo() {
-  const theme = useTheme();
+  const { theme } = useLayout();
 
   return (
     <img
@@ -218,4 +257,3 @@ function Logo() {
   );
 }
 ```
-

@@ -30,13 +30,12 @@ This section contains detailed documentation for all hooks and utilities provide
 
 ### User Interface
 
-| Hook                                     | Description                                        |
-| ---------------------------------------- | -------------------------------------------------- |
-| [`useTheme`](./use-theme)                | Get the current user theme                         |
-| [`useDisplayMode`](./use-display-mode)   | Get and request widget display mode changes        |
-| [`useRequestModal`](./use-request-modal) | Open a modal portaled outside of the widget iframe |
-| [`useLocale`](./use-locale)              | Get the user's locale                              |
-| [`useUserAgent`](./use-user-agent)       | Get device type and capabilities                   |
+| Hook                                     | Description                                          |
+| ---------------------------------------- | ---------------------------------------------------- |
+| [`useLayout`](./use-layout)              | Get layout and visual environment (theme, safe area) |
+| [`useUser`](./use-user)                  | Get user information (locale, device type)           |
+| [`useDisplayMode`](./use-display-mode)   | Get and request widget display mode changes          |
+| [`useRequestModal`](./use-request-modal) | Open a modal portaled outside of the widget iframe   |
 
 ### Actions
 
@@ -63,14 +62,13 @@ import {
   useCallTool,
   useDisplayMode,
   useFiles,
-  useLocale,
+  useLayout,
   useOpenAiGlobal,
   useOpenExternal,
   useRequestModal,
   useSendFollowUpMessage,
-  useTheme,
   useToolInfo,
-  useUserAgent,
+  useUser,
   useWidgetState,
 } from "skybridge/web";
 ```
