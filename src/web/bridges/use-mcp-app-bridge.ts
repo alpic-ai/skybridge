@@ -10,6 +10,7 @@ import { useSyncExternalStore } from "react";
 type PendingRequest<T> = {
   resolve: (value: T | PromiseLike<T>) => void;
   reject: (reason?: unknown) => void;
+  timeout: NodeJS.Timeout;
 };
 
 type McpAppInitializationOptions = Pick<
@@ -52,6 +53,9 @@ export class McpAppBridge {
 
   public cleanup() {
     window.removeEventListener("message", this.handleMessage);
+    this.pendingRequests.forEach((request) => {
+      clearTimeout(request.timeout);
+    });
     this.pendingRequests.clear();
     this.listeners.clear();
   }
@@ -65,12 +69,13 @@ export class McpAppBridge {
     this.pendingRequests.set(id, {
       resolve: resolve as (value: unknown) => void,
       reject,
+      timeout: setTimeout(() => {
+        reject(new Error("Request timed out"));
+        this.pendingRequests.delete(id);
+      }, this.requestTimeout),
     });
     window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
-    setTimeout(() => {
-      reject(new Error("Request timed out"));
-      this.pendingRequests.delete(id);
-    }, this.requestTimeout);
+
     return promise;
   }
 
@@ -106,6 +111,7 @@ export class McpAppBridge {
 
     const request = this.pendingRequests.get(data.id);
     if (request) {
+      clearTimeout(request.timeout);
       this.pendingRequests.delete(data.id);
       if (data.error) {
         request.reject(new Error(data.error.message));
