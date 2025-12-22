@@ -3,13 +3,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("useMcpAppBridge", () => {
   let mockPostMessage: ReturnType<typeof vi.fn>;
+  let mcpAppModule: typeof import("./use-mcp-app-bridge.js");
 
   const importModule = async () => {
     return import("./use-mcp-app-bridge.js");
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.resetModules();
+    mcpAppModule = await importModule();
     mockPostMessage = vi.fn();
     Object.defineProperty(window, "parent", {
       value: { postMessage: mockPostMessage },
@@ -23,7 +25,7 @@ describe("useMcpAppBridge", () => {
   });
 
   it("should return the theme value from host context", async () => {
-    const { useMcpAppBridge } = await importModule();
+    const { useMcpAppBridge } = mcpAppModule;
     const { result } = renderHook(() => useMcpAppBridge("theme"));
 
     const initCall = mockPostMessage.mock.calls.find(
@@ -60,7 +62,7 @@ describe("useMcpAppBridge", () => {
       .spyOn(console, "error")
       .mockImplementation(() => {});
 
-    const { useMcpAppBridge, getMcpHost } = await importModule();
+    const { useMcpAppBridge, getMcpHost } = mcpAppModule;
     const bridge = getMcpHost(
       { appInfo: { name: "test", version: "1.0.0" } },
       100,

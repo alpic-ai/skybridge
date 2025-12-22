@@ -1,5 +1,5 @@
-import { useOpenAiGlobal } from "./use-openai-global.js";
+import { useAppsSdkBridge } from "../bridges/use-apps-sdk-bridge.js";
 
 export function useTheme() {
-  return useOpenAiGlobal("theme");
+  return useAppsSdkBridge("theme");
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
+import { useAppsSdkBridge } from "../bridges/use-apps-sdk-bridge.js";
 import type { UnknownObject } from "../types.js";
-import { useOpenAiGlobal } from "./use-openai-global.js";
 
 export type ToolPendingState<ToolInput extends UnknownObject> = {
   status: "pending";
@@ -42,9 +42,9 @@ export function useToolInfo<
   TS extends Partial<ToolSignature> = Record<string, never>,
 >() {
   const [status, setStatus] = useState<"pending" | "success">("pending");
-  const input = useOpenAiGlobal("toolInput");
-  const output = useOpenAiGlobal("toolOutput");
-  const responseMetadata = useOpenAiGlobal("toolResponseMetadata");
+  const input = useAppsSdkBridge("toolInput");
+  const output = useAppsSdkBridge("toolOutput");
+  const responseMetadata = useAppsSdkBridge("toolResponseMetadata");
 
   useEffect(() => {
     setStatus(
