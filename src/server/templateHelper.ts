@@ -24,6 +24,7 @@ class TemplateHelper {
   }
 
   renderProduction(data: {
+    host: "apps-sdk" | "ext-apps";
     serverUrl: string;
     widgetFile: string;
     styleFile: string;
@@ -32,7 +33,11 @@ class TemplateHelper {
     return template(data);
   }
 
-  renderDevelopment(data: { serverUrl: string; widgetName: string }): string {
+  renderDevelopment(data: {
+    host: "apps-sdk" | "ext-apps";
+    serverUrl: string;
+    widgetName: string;
+  }): string {
     const template = this.loadTemplate("development");
     return template(data);
   }

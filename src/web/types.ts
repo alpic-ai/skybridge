@@ -30,6 +30,7 @@ export class ToolResponseEvent extends CustomEvent<{
 
 declare global {
   interface Window {
+    skybridge: SkybridgeProperties;
     openai: OpenAiMethods<WidgetState> & OpenAiProperties;
   }
 
@@ -37,6 +38,10 @@ declare global {
     [SET_GLOBALS_EVENT_TYPE]: SetGlobalsEvent;
   }
 }
+
+export type SkybridgeProperties = {
+  host: "apps-sdk" | "ext-apps";
+};
 
 export type OpenAiProperties<
   ToolInput extends UnknownObject = Record<never, unknown>,
