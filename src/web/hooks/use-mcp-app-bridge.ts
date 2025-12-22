@@ -1,9 +1,8 @@
-import {
-  LATEST_PROTOCOL_VERSION,
-  type McpUiHostContext,
-  type McpUiInitializedNotification,
-  type McpUiInitializeRequest,
-  type McpUiInitializeResult,
+import type {
+  McpUiHostContext,
+  McpUiInitializedNotification,
+  McpUiInitializeRequest,
+  McpUiInitializeResult,
 } from "@modelcontextprotocol/ext-apps";
 
 import { useSyncExternalStore } from "react";
@@ -17,6 +16,8 @@ type McpAppInitializationOptions = Pick<
   McpUiInitializeRequest["params"],
   "appInfo"
 >;
+
+const LATEST_PROTOCOL_VERSION = "2025-11-21";
 
 export class McpAppBridge {
   public context: McpUiHostContext | null = null;
