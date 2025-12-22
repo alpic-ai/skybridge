@@ -40,6 +40,11 @@ export class McpAppBridge {
     return () => this.listeners.delete(onChange);
   };
 
+  public cleanup() {
+    window.removeEventListener("message", this.handleMessage);
+    this.pendingRequests.clear();
+  }
+
   private request<R extends { method: string; params?: unknown }, T>({
     method,
     params,
