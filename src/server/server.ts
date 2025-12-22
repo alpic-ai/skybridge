@@ -65,6 +65,14 @@ type McpAppsResourceMeta = {
 
 type ResourceMeta = OpenaiResourceMeta & McpAppsResourceMeta;
 
+export type WidgetHostType = "chatgpt-app" | "mcp-app";
+
+type WidgetResourceConfig = {
+  hostType: WidgetHostType;
+  uri: string;
+  mimeType: string;
+};
+
 type McpServerOriginalResourceConfig = Omit<
   Resource,
   "uri" | "name" | "mimeType"
@@ -174,20 +182,23 @@ export class McpServer<
       resourceMetadata["openai/widgetDescription"] = toolConfig.description;
     }
 
-    const appsSdkResourceConfig = {
+    const appsSdkResourceConfig: WidgetResourceConfig = {
+      hostType: "chatgpt-app",
       uri: `ui://widgets/apps-sdk/${name}.html`,
       mimeType: "text/html+skybridge",
     };
 
-    const extAppsResourceConfig = {
+    const extAppsResourceConfig: WidgetResourceConfig = {
+      hostType: "mcp-app",
       uri: `ui://widgets/ext-apps/${name}.html`,
       mimeType: "text/html;profile=mcp-app",
     };
 
     [appsSdkResourceConfig, extAppsResourceConfig].forEach(
-      ({ uri, mimeType }) => {
+      ({ hostType, uri, mimeType }) => {
         this.registerWidgetResource({
           name,
+          hostType,
           widgetUri: uri,
           mimeType,
           resourceConfig,
@@ -253,12 +264,14 @@ export class McpServer<
 
   private registerWidgetResource({
     name,
+    hostType,
     widgetUri,
     mimeType,
     resourceConfig,
     resourceMetadata,
   }: {
     name: string;
+    hostType: WidgetHostType;
     widgetUri: string;
     mimeType: string;
     resourceConfig: McpServerOriginalResourceConfig;
@@ -277,13 +290,18 @@ export class McpServer<
         const html =
           process.env.NODE_ENV === "production"
             ? templateHelper.renderProduction({
+                hostType,
                 serverUrl,
                 widgetFile: this.lookupDistFileWithIndexFallback(
                   `src/widgets/${name}`,
                 ),
                 styleFile: this.lookupDistFile("style.css"),
               })
-            : templateHelper.renderDevelopment({ serverUrl, widgetName: name });
+            : templateHelper.renderDevelopment({
+                hostType,
+                serverUrl,
+                widgetName: name,
+              });
 
         return { contents: [{ uri: uri.href, mimeType, text: html }] };
       },

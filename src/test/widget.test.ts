@@ -214,7 +214,7 @@ describe("McpServer.registerWidget", () => {
     );
   });
 
-  it("should register resources for both apps-sdk and ext-apps formats", async () => {
+  it("should register resources with correct hostType for both apps-sdk and ext-apps formats", async () => {
     const mockToolCallback = vi.fn();
     const mockRegisterResourceConfig = { description: "Test widget" };
     const mockToolConfig = { description: "Test tool" };
@@ -228,8 +228,33 @@ describe("McpServer.registerWidget", () => {
 
     expect(mockRegisterResource).toHaveBeenCalledTimes(2);
 
-    const [, appsSdkUri] = mockRegisterResource.mock.calls[0] ?? [];
-    expect(appsSdkUri).toBe("ui://widgets/apps-sdk/my-widget.html");
+    const appsSdkCallback = mockRegisterResource.mock
+      .calls[0]?.[3] as unknown as (
+      uri: URL,
+      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+    ) => Promise<{
+      contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
+    }>;
+    const appsSdkResult = await appsSdkCallback(
+      new URL("ui://widgets/apps-sdk/my-widget.html"),
+      createMockExtra("__not_used__") as unknown as RequestHandlerExtra<
+        ServerRequest,
+        ServerNotification
+      >,
+    );
+
+    expect(appsSdkResult).toEqual({
+      contents: [
+        {
+          uri: "ui://widgets/apps-sdk/my-widget.html",
+          mimeType: "text/html+skybridge",
+          text: expect.stringContaining('<div id="root"></div>'),
+        },
+      ],
+    });
+    expect(appsSdkResult.contents[0]?.text).toContain(
+      'window.skybridge = { hostType: "chatgpt-app" }',
+    );
 
     const extAppsResourceCallback = mockRegisterResource.mock
       .calls[1]?.[3] as unknown as (
@@ -247,6 +272,7 @@ describe("McpServer.registerWidget", () => {
         ServerNotification
       >,
     );
+
     expect(extAppsResult).toEqual({
       contents: [
         {
@@ -256,5 +282,8 @@ describe("McpServer.registerWidget", () => {
         },
       ],
     });
+    expect(extAppsResult.contents[0]?.text).toContain(
+      'window.skybridge = { hostType: "mcp-app" }',
+    );
   });
 });

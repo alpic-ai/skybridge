@@ -1,4 +1,5 @@
 import "react";
+import type { WidgetHostType } from "../server/index.js";
 
 declare module "react" {
   // biome-ignore lint/correctness/noUnusedVariables: HTMLAttributes must have the same signature and requires a type parameter
@@ -30,6 +31,7 @@ export class ToolResponseEvent extends CustomEvent<{
 
 declare global {
   interface Window {
+    skybridge: SkybridgeProperties;
     openai: OpenAiMethods<WidgetState> & OpenAiProperties;
   }
 
@@ -37,6 +39,10 @@ declare global {
     [SET_GLOBALS_EVENT_TYPE]: SetGlobalsEvent;
   }
 }
+
+export type SkybridgeProperties = {
+  hostType: WidgetHostType;
+};
 
 export type OpenAiProperties<
   ToolInput extends UnknownObject = Record<never, unknown>,
