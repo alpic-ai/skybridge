@@ -65,10 +65,10 @@ type McpAppsResourceMeta = {
 
 type ResourceMeta = OpenaiResourceMeta & McpAppsResourceMeta;
 
-type WidgetHost = "apps-sdk" | "ext-apps";
+export type WidgetHostType = "chatgpt-app" | "mcp-app";
 
 type WidgetResourceConfig = {
-  host: WidgetHost;
+  hostType: WidgetHostType;
   uri: string;
   mimeType: string;
 };
@@ -183,22 +183,22 @@ export class McpServer<
     }
 
     const appsSdkResourceConfig: WidgetResourceConfig = {
-      host: "apps-sdk",
+      hostType: "chatgpt-app",
       uri: `ui://widgets/apps-sdk/${name}.html`,
       mimeType: "text/html+skybridge",
     };
 
     const extAppsResourceConfig: WidgetResourceConfig = {
-      host: "ext-apps",
+      hostType: "mcp-app",
       uri: `ui://widgets/ext-apps/${name}.html`,
       mimeType: "text/html;profile=mcp-app",
     };
 
     [appsSdkResourceConfig, extAppsResourceConfig].forEach(
-      ({ host, uri, mimeType }) => {
+      ({ hostType, uri, mimeType }) => {
         this.registerWidgetResource({
           name,
-          host,
+          hostType,
           widgetUri: uri,
           mimeType,
           resourceConfig,
@@ -264,14 +264,14 @@ export class McpServer<
 
   private registerWidgetResource({
     name,
-    host,
+    hostType,
     widgetUri,
     mimeType,
     resourceConfig,
     resourceMetadata,
   }: {
     name: string;
-    host: WidgetHost;
+    hostType: WidgetHostType;
     widgetUri: string;
     mimeType: string;
     resourceConfig: McpServerOriginalResourceConfig;
@@ -290,7 +290,7 @@ export class McpServer<
         const html =
           process.env.NODE_ENV === "production"
             ? templateHelper.renderProduction({
-                host,
+                hostType,
                 serverUrl,
                 widgetFile: this.lookupDistFileWithIndexFallback(
                   `src/widgets/${name}`,
@@ -298,7 +298,7 @@ export class McpServer<
                 styleFile: this.lookupDistFile("style.css"),
               })
             : templateHelper.renderDevelopment({
-                host,
+                hostType,
                 serverUrl,
                 widgetName: name,
               });

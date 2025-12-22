@@ -1,4 +1,5 @@
 import "react";
+import type { WidgetHostType } from "../server/index.js";
 
 declare module "react" {
   // biome-ignore lint/correctness/noUnusedVariables: HTMLAttributes must have the same signature and requires a type parameter
@@ -40,7 +41,7 @@ declare global {
 }
 
 export type SkybridgeProperties = {
-  host: "apps-sdk" | "ext-apps";
+  hostType: WidgetHostType;
 };
 
 export type OpenAiProperties<

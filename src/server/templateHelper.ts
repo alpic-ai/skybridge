@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Handlebars from "handlebars";
+import type { WidgetHostType } from "./server.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -24,7 +25,7 @@ class TemplateHelper {
   }
 
   renderProduction(data: {
-    host: "apps-sdk" | "ext-apps";
+    hostType: WidgetHostType;
     serverUrl: string;
     widgetFile: string;
     styleFile: string;
@@ -34,7 +35,7 @@ class TemplateHelper {
   }
 
   renderDevelopment(data: {
-    host: "apps-sdk" | "ext-apps";
+    hostType: WidgetHostType;
     serverUrl: string;
     widgetName: string;
   }): string {
