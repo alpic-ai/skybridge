@@ -133,9 +133,13 @@ const defaultOptions: McpAppInitializationOptions = {
 export function getMcpHost(
   options?: Partial<McpAppInitializationOptions>,
 ): McpAppBridge {
+  if (instance && options) {
+    console.warn("getMcpHost: options ignored, instance already exists");
+  }
   if (!instance) {
     instance = new McpAppBridge({ ...defaultOptions, ...options });
   }
+
   return instance;
 }
 
