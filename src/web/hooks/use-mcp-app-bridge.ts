@@ -1,11 +1,12 @@
-import { useSyncExternalStore } from "react";
 import {
   LATEST_PROTOCOL_VERSION,
   type McpUiHostContext,
   type McpUiInitializedNotification,
   type McpUiInitializeRequest,
   type McpUiInitializeResult,
-} from "../types/ext-apps.js";
+} from "@modelcontextprotocol/ext-apps";
+
+import { useSyncExternalStore } from "react";
 
 type PendingRequest<T> = {
   resolve: (value: T | PromiseLike<T>) => void;

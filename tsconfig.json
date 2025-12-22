@@ -3,7 +3,9 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "dist",
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "bundler"
   },
   "exclude": ["docs", "node_modules", "dist", "packages"]
 }
