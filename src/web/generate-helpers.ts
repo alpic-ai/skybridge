@@ -1,4 +1,9 @@
-import type { InferTools, ToolInput, ToolOutput } from "../server/index.js";
+import type {
+  InferTools,
+  ToolInput,
+  ToolOutput,
+  ToolResponseMetadata,
+} from "../server/index.js";
 import {
   type CallToolAsyncFn,
   type CallToolFn,
@@ -19,10 +24,10 @@ type TypedCallToolReturn<TInput, TOutput> = Prettify<
   }
 >;
 
-type TypedToolInfoReturn<TInput, TOutput> = ToolState<
+type TypedToolInfoReturn<TInput, TOutput, TResponseMetadata> = ToolState<
   Objectify<TInput>,
   Objectify<TOutput>,
-  Objectify<{}>
+  Objectify<TResponseMetadata>
 >;
 
 /**
@@ -125,26 +130,30 @@ export function generateHelpers<ServerType = never>() {
      * const toolInfo = useToolInfo<"search-voyage">();
      * // toolInfo.input is typed as { destination: string; ... }
      * // toolInfo.output is typed as { results: Array<...>; ... }
+     * // toolInfo.responseMetadata is typed based on _meta in callback return
      * // toolInfo.status narrows correctly: "pending" | "success"
      *
      * if (toolInfo.isPending) {
-     *   // TypeScript knows output is undefined here
+     *   // TypeScript knows output and responseMetadata are undefined here
      *   console.log(toolInfo.input.destination);
      * }
      *
      * if (toolInfo.isSuccess) {
-     *   // TypeScript knows output is defined here
+     *   // TypeScript knows output and responseMetadata are defined here
      *   console.log(toolInfo.output.results);
+     *   console.log(toolInfo.responseMetadata);
      * }
      * ```
      */
     useToolInfo: <ToolName extends ToolNames>(): TypedToolInfoReturn<
       ToolInput<ServerType, ToolName>,
-      ToolOutput<ServerType, ToolName>
+      ToolOutput<ServerType, ToolName>,
+      ToolResponseMetadata<ServerType, ToolName>
     > => {
       return useToolInfo() as TypedToolInfoReturn<
         ToolInput<ServerType, ToolName>,
-        ToolOutput<ServerType, ToolName>
+        ToolOutput<ServerType, ToolName>,
+        ToolResponseMetadata<ServerType, ToolName>
       >;
     },
   };

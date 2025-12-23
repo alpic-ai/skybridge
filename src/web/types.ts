@@ -1,4 +1,5 @@
 import "react";
+import type { WidgetHostType } from "../server/index.js";
 
 declare module "react" {
   // biome-ignore lint/correctness/noUnusedVariables: HTMLAttributes must have the same signature and requires a type parameter
@@ -13,7 +14,7 @@ export type Prettify<T> = { [K in keyof T]: T[K] } & {};
 export type Objectify<T> = T & UnknownObject;
 
 type RequiredKeys<T> = {
-  [K in keyof T]-?: {} extends Pick<T, K> ? never : K;
+  [K in keyof T]-?: Record<string, never> extends Pick<T, K> ? never : K;
 }[keyof T];
 export type HasRequiredKeys<T> = RequiredKeys<T> extends never ? false : true;
 
@@ -30,6 +31,7 @@ export class ToolResponseEvent extends CustomEvent<{
 
 declare global {
   interface Window {
+    skybridge: SkybridgeProperties;
     openai: OpenAiMethods<WidgetState> & OpenAiProperties;
   }
 
@@ -38,8 +40,12 @@ declare global {
   }
 }
 
+export type SkybridgeProperties = {
+  hostType: WidgetHostType;
+};
+
 export type OpenAiProperties<
-  ToolInput extends UnknownObject = {},
+  ToolInput extends UnknownObject = Record<never, unknown>,
   ToolOutput extends UnknownObject = UnknownObject,
   ToolResponseMetadata extends UnknownObject = UnknownObject,
   WidgetState extends UnknownObject = UnknownObject,

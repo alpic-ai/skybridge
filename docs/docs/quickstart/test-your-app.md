@@ -39,9 +39,9 @@ Thanks to our Vite plugin, you can edit React components in `web/src/widgets` an
 
 **Note:** When you modify widget components, changes will be reflected immediately. If you modify MCP server code (in `server/`), you may need to reload your connector in **Settings → Connectors → [Your connector] → Refresh**.
 
-## Test with a local emulator
+## Test with a local devtools
 
-You can also test your ChatGPT App with local emulators like [MCPJam Inspector](https://github.com/MCPJam/inspector).
+You can also test your ChatGPT App with local devtools like [MCPJam Inspector](https://github.com/MCPJam/inspector).
 
 ## What's next?
 

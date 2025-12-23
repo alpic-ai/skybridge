@@ -4,12 +4,16 @@ import type {
   ToolInput,
   ToolNames,
   ToolOutput,
+  ToolResponseMetadata,
 } from "../server/index.js";
-import { createTestServer } from "../test/utils.js";
+import { createInterfaceTestServer, createTestServer } from "../test/utils.js";
 import { generateHelpers } from "./generate-helpers.js";
 
 const server = createTestServer();
 type TestServer = typeof server;
+
+const interfaceServer = createInterfaceTestServer();
+type InterfaceTestServer = typeof interfaceServer;
 
 test("InferTools extracts the tool registry type (widgets + registerTool)", () => {
   type Tools = InferTools<TestServer>;
@@ -20,6 +24,9 @@ test("InferTools extracts the tool registry type (widgets + registerTool)", () =
   expectTypeOf<Tools>().toHaveProperty("calculate-price");
   expectTypeOf<Tools>().toHaveProperty("inferred-output-widget");
   expectTypeOf<Tools>().toHaveProperty("inferred-tool");
+  expectTypeOf<Tools>().toHaveProperty("widget-with-metadata");
+  expectTypeOf<Tools>().toHaveProperty("tool-with-metadata");
+  expectTypeOf<Tools>().toHaveProperty("widget-with-mixed-returns");
 });
 
 test("ToolNames returns a union of tool name literals (widgets + registerTool)", () => {
@@ -32,6 +39,9 @@ test("ToolNames returns a union of tool name literals (widgets + registerTool)",
     | "calculate-price"
     | "inferred-output-widget"
     | "inferred-tool"
+    | "widget-with-metadata"
+    | "tool-with-metadata"
+    | "widget-with-mixed-returns"
   >();
 });
 
@@ -88,7 +98,7 @@ test("ToolOutput extracts the correct output type from callback's structuredCont
   }>();
 
   type NoInputOutput = ToolOutput<TestServer, "no-input-widget">;
-  expectTypeOf<NoInputOutput>().toEqualTypeOf<{}>();
+  expectTypeOf<NoInputOutput>().toEqualTypeOf<Record<never, unknown>>();
 });
 
 test("ToolOutput extracts the correct output type from callback (inferred)", () => {
@@ -116,6 +126,9 @@ test("generateHelpers provides autocomplete for tool names (widgets + registerTo
   useCallTool("calculate-price");
   useCallTool("inferred-output-widget");
   useCallTool("inferred-tool");
+  useCallTool("widget-with-metadata");
+  useCallTool("tool-with-metadata");
+  useCallTool("widget-with-mixed-returns");
 
   // @ts-expect-error - "invalid-name" is not a valid tool name
   useCallTool("invalid-name");
@@ -265,6 +278,9 @@ test("generateHelpers provides autocomplete for tool names in useToolInfo (widge
   useToolInfo<"calculate-price">();
   useToolInfo<"inferred-output-widget">();
   useToolInfo<"inferred-tool">();
+  useToolInfo<"widget-with-metadata">();
+  useToolInfo<"tool-with-metadata">();
+  useToolInfo<"widget-with-mixed-returns">();
 
   // @ts-expect-error - "invalid-name" is not a valid tool name
   useToolInfo<"invalid-name">();
@@ -284,5 +300,87 @@ test("useToolInfo infers input and output types", () => {
     >();
     expectTypeOf(toolInfo.output.results).toBeArray();
     expectTypeOf(toolInfo.output.totalCount).toBeNumber();
+  }
+});
+
+test("ToolResponseMetadata extracts _meta type from callback", () => {
+  type WidgetMeta = ToolResponseMetadata<TestServer, "widget-with-metadata">;
+  expectTypeOf<WidgetMeta>().toEqualTypeOf<{
+    requestId: string;
+    timestamp: number;
+    cached: boolean;
+  }>();
+
+  type ToolMeta = ToolResponseMetadata<TestServer, "tool-with-metadata">;
+  expectTypeOf<ToolMeta>().toEqualTypeOf<{
+    executionTime: number;
+    source: string;
+  }>();
+
+  type SearchMeta = ToolResponseMetadata<TestServer, "search-voyage">;
+  expectTypeOf<SearchMeta>().toBeUnknown();
+});
+
+test("useToolInfo infers responseMetadata type from generateHelpers", () => {
+  const { useToolInfo } = generateHelpers<TestServer>();
+  const toolInfo = useToolInfo<"widget-with-metadata">();
+
+  if (toolInfo.isSuccess) {
+    expectTypeOf(toolInfo.responseMetadata.requestId).toBeString();
+    expectTypeOf(toolInfo.responseMetadata.timestamp).toBeNumber();
+    expectTypeOf(toolInfo.responseMetadata.cached).toBeBoolean();
+  }
+});
+
+test("ToolResponseMetadata extracts _meta from mixed return paths", () => {
+  // Widget has multiple return paths: some with _meta, some without
+  // ExtractMeta should still infer the _meta type from branches that have it
+  type MixedMeta = ToolResponseMetadata<
+    TestServer,
+    "widget-with-mixed-returns"
+  >;
+  expectTypeOf<MixedMeta>().toEqualTypeOf<{
+    processedAt: number;
+    region: string;
+  }>();
+});
+
+test("ToolOutput extracts correct type when using interface declaration", () => {
+  type InterfaceWidgetOutput = ToolOutput<
+    InterfaceTestServer,
+    "interface-widget"
+  >;
+
+  expectTypeOf<InterfaceWidgetOutput>().toHaveProperty("itemName");
+  expectTypeOf<InterfaceWidgetOutput["itemName"]>().toBeString();
+  expectTypeOf<InterfaceWidgetOutput["quantity"]>().toBeNumber();
+});
+
+test("ToolResponseMetadata extracts correct type when using interface declaration", () => {
+  type InterfaceWidgetMeta = ToolResponseMetadata<
+    InterfaceTestServer,
+    "interface-widget"
+  >;
+
+  expectTypeOf<InterfaceWidgetMeta>().toHaveProperty("processedBy");
+  expectTypeOf<InterfaceWidgetMeta["processedBy"]>().toBeString();
+  expectTypeOf<InterfaceWidgetMeta["version"]>().toBeNumber();
+});
+
+test("generateHelpers works with interface-typed server", () => {
+  const { useCallTool, useToolInfo } = generateHelpers<InterfaceTestServer>();
+
+  const { data } = useCallTool("interface-widget");
+  if (data) {
+    expectTypeOf(data.structuredContent.itemName).toBeString();
+    expectTypeOf(data.structuredContent.quantity).toBeNumber();
+  }
+
+  const toolInfo = useToolInfo<"interface-widget">();
+  if (toolInfo.isSuccess) {
+    expectTypeOf(toolInfo.output.itemName).toBeString();
+    expectTypeOf(toolInfo.output.quantity).toBeNumber();
+    expectTypeOf(toolInfo.responseMetadata.processedBy).toBeString();
+    expectTypeOf(toolInfo.responseMetadata.version).toBeNumber();
   }
 });

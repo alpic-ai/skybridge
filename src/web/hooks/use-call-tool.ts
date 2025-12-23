@@ -95,7 +95,7 @@ type ToolResponseSignature = Pick<
 
 export const useCallTool = <
   ToolArgs extends CallToolArgs = null,
-  ToolResponse extends Partial<ToolResponseSignature> = {},
+  ToolResponse extends Partial<ToolResponseSignature> = Record<string, never>,
 >(
   name: string,
 ) => {

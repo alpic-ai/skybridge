@@ -6,25 +6,61 @@ on:
     branches: [main]
 
 jobs:
-  test:
-    name: Test
+  install:
+    name: Install
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          registry-url: "https://registry.npmjs.org"
-
-      - uses: pnpm/action-setup@v4
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build project
-        run: pnpm run build
+      - uses: actions/cache/save@v4
+        with:
+          path: |
+            node_modules
+          key: build-${{ github.sha }}
 
-      - name: Run tests
-        run: pnpm run test
+  test:
+    name: ${{ matrix.name }}
+    needs: install
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Unit Tests
+            command: pnpm run test:unit
+          - name: Type Check
+            command: pnpm run test:type
+          - name: Lint & Format
+            command: pnpm run test:format
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+          key: build-${{ github.sha }}
+
+      - name: Run ${{ matrix.name }}
+        run: ${{ matrix.command }}

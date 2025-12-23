@@ -1,7 +1,7 @@
 import { type SetStateAction, useCallback, useEffect, useState } from "react";
+import { useAppsSdkBridge } from "../bridges/use-apps-sdk-bridge.js";
 import { filterWidgetContext, injectWidgetContext } from "../helpers/state.js";
 import type { UnknownObject } from "../types.js";
-import { useOpenAiGlobal } from "./use-openai-global.js";
 
 export function useWidgetState<T extends UnknownObject>(
   defaultState: T | (() => T),
@@ -12,7 +12,7 @@ export function useWidgetState<T extends UnknownObject>(
 export function useWidgetState<T extends UnknownObject>(
   defaultState?: T | (() => T | null) | null,
 ): readonly [T | null, (state: SetStateAction<T | null>) => void] {
-  const widgetStateFromWindow = useOpenAiGlobal("widgetState") as T | null;
+  const widgetStateFromWindow = useAppsSdkBridge("widgetState") as T | null;
 
   const [widgetState, _setWidgetState] = useState<T | null>(() => {
     if (widgetStateFromWindow !== null) {

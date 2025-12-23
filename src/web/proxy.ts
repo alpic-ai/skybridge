@@ -13,6 +13,14 @@ export function installOpenAILoggingProxy() {
     return;
   }
 
+  const descriptor = Object.getOwnPropertyDescriptor(window, "openai");
+  if (descriptor?.configurable === false || descriptor?.writable === false) {
+    console.warn(
+      "[openai-proxy] window.openai is not configurable or writable, skipping proxy installation",
+    );
+    return;
+  }
+
   const originalOpenAI = window.openai;
 
   const handler: ProxyHandler<typeof originalOpenAI> = {

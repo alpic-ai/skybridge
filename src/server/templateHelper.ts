@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Handlebars from "handlebars";
+import type { WidgetHostType } from "./server.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -10,8 +11,9 @@ class TemplateHelper {
   private templateCache = new Map<string, HandlebarsTemplateDelegate>();
 
   private loadTemplate(templateName: string): HandlebarsTemplateDelegate {
-    if (this.templateCache.has(templateName)) {
-      return this.templateCache.get(templateName)!;
+    const cached = this.templateCache.get(templateName);
+    if (cached) {
+      return cached;
     }
 
     const templatePath = join(__dirname, "templates", `${templateName}.hbs`);
@@ -23,6 +25,7 @@ class TemplateHelper {
   }
 
   renderProduction(data: {
+    hostType: WidgetHostType;
     serverUrl: string;
     widgetFile: string;
     styleFile: string;
@@ -31,7 +34,11 @@ class TemplateHelper {
     return template(data);
   }
 
-  renderDevelopment(data: { serverUrl: string; widgetName: string }): string {
+  renderDevelopment(data: {
+    hostType: WidgetHostType;
+    serverUrl: string;
+    widgetName: string;
+  }): string {
     const template = this.loadTemplate("development");
     return template(data);
   }

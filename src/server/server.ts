@@ -1,10 +1,10 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import type {
-  RegisteredTool,
-  ToolCallback,
+import {
+  McpServer as McpServerBase,
+  type RegisteredTool,
+  type ToolCallback,
 } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { McpServer as McpServerBase } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type {
   AnySchema,
   SchemaOutput,
@@ -20,9 +20,14 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 import { templateHelper } from "./templateHelper.js";
 
-export type ToolDef<TInput = unknown, TOutput = unknown> = {
+export type ToolDef<
+  TInput = unknown,
+  TOutput = unknown,
+  TResponseMetadata = unknown,
+> = {
   input: TInput;
   output: TOutput;
+  responseMetadata: TResponseMetadata;
 };
 
 /** @see https://developers.openai.com/apps-sdk/reference#tool-descriptor-parameters */
@@ -34,11 +39,11 @@ type OpenaiToolMeta = {
 };
 
 /** @see https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx#resource-discovery */
-type McpAppsToolMeta = {
-  "ui/resourceUri": string;
-};
+// type McpAppsToolMeta = {
+//   "ui/resourceUri": string;
+// };
 
-type ToolMeta = OpenaiToolMeta & McpAppsToolMeta;
+type ToolMeta = OpenaiToolMeta /* & McpAppsToolMeta */;
 
 /** @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields */
 type OpenaiResourceMeta = {
@@ -60,6 +65,14 @@ type McpAppsResourceMeta = {
 
 type ResourceMeta = OpenaiResourceMeta & McpAppsResourceMeta;
 
+export type WidgetHostType = "chatgpt-app" | "mcp-app";
+
+type WidgetResourceConfig = {
+  hostType: WidgetHostType;
+  uri: string;
+  mimeType: string;
+};
+
 type McpServerOriginalResourceConfig = Omit<
   Resource,
   "uri" | "name" | "mimeType"
@@ -75,9 +88,17 @@ type McpServerOriginalToolConfig = Omit<
   "inputSchema" | "outputSchema"
 >;
 
+type Simplify<T> = { [K in keyof T]: T[K] };
+
 type ExtractStructuredContent<T> = T extends { structuredContent: infer SC }
-  ? SC
+  ? Simplify<SC>
   : never;
+
+type ExtractMeta<T> = [Extract<T, { _meta: unknown }>] extends [never]
+  ? unknown
+  : Extract<T, { _meta: unknown }> extends { _meta: infer M }
+    ? Simplify<M>
+    : unknown;
 
 /**
  * Type-level marker interface for cross-package type inference.
@@ -88,11 +109,9 @@ type ExtractStructuredContent<T> = T extends { structuredContent: infer SC }
  *
  * Inspired by tRPC's _def pattern and Hono's type markers.
  */
-export interface McpServerTypes<TTools extends Record<string, ToolDef> = {}> {
+export interface McpServerTypes<TTools extends Record<string, ToolDef>> {
   readonly tools: TTools;
 }
-
-type Simplify<T> = { [K in keyof T]: T[K] };
 type ShapeOutput<Shape extends ZodRawShapeCompat> = Simplify<
   {
     [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
@@ -109,12 +128,12 @@ type AddTool<
   TName extends string,
   TInput extends ZodRawShapeCompat,
   TOutput,
+  TResponseMetadata = unknown,
 > = McpServer<
   TTools & {
-    [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput>;
+    [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput, TResponseMetadata>;
   }
 >;
-
 type ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> = {
   title?: string;
   description?: string;
@@ -126,21 +145,21 @@ type ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> = {
 
 type ToolHandler<
   TInput extends ZodRawShapeCompat,
-  TReturn extends CallToolResult = CallToolResult,
+  TReturn extends { content: CallToolResult["content"] } = CallToolResult,
 > = (
   args: ShapeOutput<TInput>,
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
 ) => TReturn | Promise<TReturn>;
 
 export class McpServer<
-  TTools extends Record<string, ToolDef> = {},
+  TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
 > extends McpServerBase {
   declare readonly $types: McpServerTypes<TTools>;
 
   registerWidget<
     TName extends string,
     TInput extends ZodRawShapeCompat,
-    TReturn extends CallToolResult,
+    TReturn extends { content: CallToolResult["content"] },
   >(
     name: TName,
     resourceConfig: McpServerOriginalResourceConfig,
@@ -149,8 +168,13 @@ export class McpServer<
       outputSchema?: ZodRawShapeCompat | AnySchema;
     },
     toolCallback: ToolHandler<TInput, TReturn>,
-  ): AddTool<TTools, TName, TInput, ExtractStructuredContent<TReturn>> {
-    const uri = `ui://widgets/${name}.html`;
+  ): AddTool<
+    TTools,
+    TName,
+    TInput,
+    ExtractStructuredContent<TReturn>,
+    ExtractMeta<TReturn>
+  > {
     const resourceMetadata: ResourceMeta = {
       ...(resourceConfig._meta ?? {}),
     };
@@ -158,50 +182,35 @@ export class McpServer<
       resourceMetadata["openai/widgetDescription"] = toolConfig.description;
     }
 
-    this.registerResource(
-      name,
-      uri,
-      {
-        ...resourceConfig,
-        _meta: resourceMetadata,
-      },
-      async (_uri, extra) => {
-        const serverUrl =
-          process.env.NODE_ENV === "production"
-            ? `https://${
-                extra?.requestInfo?.headers?.["x-forwarded-host"] ??
-                extra?.requestInfo?.headers?.host
-              }`
-            : `http://localhost:3000`;
+    const appsSdkResourceConfig: WidgetResourceConfig = {
+      hostType: "chatgpt-app",
+      uri: `ui://widgets/apps-sdk/${name}.html`,
+      mimeType: "text/html+skybridge",
+    };
 
-        const html =
-          process.env.NODE_ENV === "production"
-            ? templateHelper.renderProduction({
-                serverUrl,
-                widgetFile: this.lookupDistFile(`src/widgets/${name}.tsx`),
-                styleFile: this.lookupDistFile("style.css"),
-              })
-            : templateHelper.renderDevelopment({
-                serverUrl,
-                widgetName: name,
-              });
+    const extAppsResourceConfig: WidgetResourceConfig = {
+      hostType: "mcp-app",
+      uri: `ui://widgets/ext-apps/${name}.html`,
+      mimeType: "text/html;profile=mcp-app",
+    };
 
-        return {
-          contents: [
-            {
-              uri,
-              mimeType: "text/html+skybridge",
-              text: html,
-            },
-          ],
-        };
+    [appsSdkResourceConfig, extAppsResourceConfig].forEach(
+      ({ hostType, uri, mimeType }) => {
+        this.registerWidgetResource({
+          name,
+          hostType,
+          widgetUri: uri,
+          mimeType,
+          resourceConfig,
+          resourceMetadata,
+        });
       },
     );
 
     const toolMeta: ToolMeta = {
       ...toolConfig._meta,
-      "openai/outputTemplate": uri,
-      "ui/resourceUri": uri,
+      "openai/outputTemplate": appsSdkResourceConfig.uri,
+      // "ui/resourceUri": extAppsResourceConfig.uri,
     };
 
     this.registerTool(
@@ -217,19 +226,26 @@ export class McpServer<
       TTools,
       TName,
       TInput,
-      ExtractStructuredContent<TReturn>
+      ExtractStructuredContent<TReturn>,
+      ExtractMeta<TReturn>
     >;
   }
 
   override registerTool<
     TName extends string,
     InputArgs extends ZodRawShapeCompat,
-    TReturn extends CallToolResult,
+    TReturn extends { content: CallToolResult["content"] },
   >(
     name: TName,
     config: ToolConfig<InputArgs>,
     cb: ToolHandler<InputArgs, TReturn>,
-  ): AddTool<TTools, TName, InputArgs, ExtractStructuredContent<TReturn>>;
+  ): AddTool<
+    TTools,
+    TName,
+    InputArgs,
+    ExtractStructuredContent<TReturn>,
+    ExtractMeta<TReturn>
+  >;
 
   override registerTool<InputArgs extends ZodRawShapeCompat>(
     name: string,
@@ -246,14 +262,71 @@ export class McpServer<
     return this;
   }
 
+  private registerWidgetResource({
+    name,
+    hostType,
+    widgetUri,
+    mimeType,
+    resourceConfig,
+    resourceMetadata,
+  }: {
+    name: string;
+    hostType: WidgetHostType;
+    widgetUri: string;
+    mimeType: string;
+    resourceConfig: McpServerOriginalResourceConfig;
+    resourceMetadata: ResourceMeta;
+  }): void {
+    this.registerResource(
+      name,
+      widgetUri,
+      { ...resourceConfig, _meta: resourceMetadata },
+      async (uri, extra) => {
+        const serverUrl =
+          process.env.NODE_ENV === "production"
+            ? `https://${extra?.requestInfo?.headers?.["x-forwarded-host"] ?? extra?.requestInfo?.headers?.host}`
+            : `http://localhost:3000`;
+
+        const html =
+          process.env.NODE_ENV === "production"
+            ? templateHelper.renderProduction({
+                hostType,
+                serverUrl,
+                widgetFile: this.lookupDistFileWithIndexFallback(
+                  `src/widgets/${name}`,
+                ),
+                styleFile: this.lookupDistFile("style.css"),
+              })
+            : templateHelper.renderDevelopment({
+                hostType,
+                serverUrl,
+                widgetName: name,
+              });
+
+        return { contents: [{ uri: uri.href, mimeType, text: html }] };
+      },
+    );
+  }
+
   private lookupDistFile(key: string): string {
-    const manifest = JSON.parse(
+    const manifest = this.readManifest();
+    return manifest[key]?.file;
+  }
+
+  private lookupDistFileWithIndexFallback(basePath: string): string {
+    const manifest = this.readManifest();
+
+    const flatFileKey = `${basePath}.tsx`;
+    const indexFileKey = `${basePath}/index.tsx`;
+    return manifest[flatFileKey]?.file ?? manifest[indexFileKey]?.file;
+  }
+
+  private readManifest() {
+    return JSON.parse(
       readFileSync(
         path.join(process.cwd(), "dist", "assets", ".vite", "manifest.json"),
         "utf-8",
       ),
     );
-
-    return manifest[key]?.file;
   }
 }

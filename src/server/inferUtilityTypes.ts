@@ -67,3 +67,17 @@ export type ToolOutput<
   ServerType,
   ToolName extends ToolNames<ServerType>,
 > = ExtractTool<ServerType, ToolName>["output"];
+
+/**
+ * Get the responseMetadata type for a specific tool (widget or regular tool).
+ * This is inferred from the `_meta` property of the tool callback's return value.
+ *
+ * @example
+ * ```ts
+ * type SearchMeta = ToolResponseMetadata<MyServer, "search">;
+ * ```
+ */
+export type ToolResponseMetadata<
+  ServerType,
+  ToolName extends ToolNames<ServerType>,
+> = ExtractTool<ServerType, ToolName>["responseMetadata"];

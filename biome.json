@@ -18,7 +18,14 @@
     "rules": {
       "recommended": true,
       "correctness": {
-        "noUnusedVariables": "error"
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error"
+      },
+      "complexity": {
+        "noBannedTypes": "error"
+      },
+      "style": {
+        "noNonNullAssertion": "error"
       }
     }
   },
@@ -33,6 +40,11 @@
       "source": {
         "organizeImports": "on"
       }
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
     }
   }
 }

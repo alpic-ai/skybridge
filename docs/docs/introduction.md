@@ -9,7 +9,7 @@ slug: /
 **Skybridge is a modular framework for quickly building ChatGPT apps, the _modern TypeScript way_.** 
 
 It comes with: 
-- 👨‍💻 Full blown dev environment with HMR, debug traces, and emulator
+- 👨‍💻 Full blown dev environment with HMR, debug traces, and devtools
 - ✅ End-to-end typesafe APIs
 - 🔄 Widget-to-model synchronization tooling
 - ⚒️ React-query and Zustand-like state management hooks

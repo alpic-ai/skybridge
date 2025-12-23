@@ -11,17 +11,21 @@ export function skybridge(): Plugin {
       const { resolve } = await import("node:path");
 
       const projectRoot = config.root || process.cwd();
-      const widgetsPattern = resolve(
+      const flatWidgetPattern = resolve(
         projectRoot,
         "src/widgets/*.{js,ts,jsx,tsx,html}",
       );
+      const dirWidgetPattern = resolve(projectRoot, "src/widgets/*/index.tsx");
 
-      const input = Object.fromEntries(
-        globSync(widgetsPattern).map((file) => [
-          file.match(/src\/widgets\/(.+)\.tsx$/)?.[1],
-          file,
-        ]),
-      );
+      const flatWidgets = globSync(flatWidgetPattern).map((file) => [
+        file.match(/src\/widgets\/([^/]+)\.tsx$/)?.[1],
+        file,
+      ]);
+      const dirWidgets = globSync(dirWidgetPattern).map((file) => [
+        file.match(/src\/widgets\/([^/]+)\/index\.tsx$/)?.[1],
+        file,
+      ]);
+      const input = Object.fromEntries([...flatWidgets, ...dirWidgets]);
 
       return {
         base: "/assets",

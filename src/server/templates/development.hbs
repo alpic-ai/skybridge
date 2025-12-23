@@ -1,4 +1,5 @@
 <base href="{{serverUrl}}" />
+<script> window.skybridge = { hostType: "{{hostType}}" }; </script>
 <script type="module">
   import { injectIntoGlobalHook } from "{{serverUrl}}/@react-refresh";
   injectIntoGlobalHook(window); window.$RefreshReg$ = () => {};
@@ -7,6 +8,6 @@
 </script>
 <script type="module" src="{{serverUrl}}/@vite/client"></script>
 <div id="root"></div>
-<script type="module">
-  import('{{serverUrl}}/src/widgets/{{widgetName}}.tsx');
+<script type="module" id="dev-widget-entry">
+  import('{{serverUrl}}/src/widgets/{{widgetName}}');
 </script>
