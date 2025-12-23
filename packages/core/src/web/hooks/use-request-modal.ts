@@ -1,11 +1,11 @@
 import type { RequestModalOptions } from "../types.js";
-import { useOpenAiGlobal } from "./use-openai-global.js";
+import { useAppsSdkBridge } from "../bridges/use-apps-sdk-bridge.js";
 
 /**
  * Triggers a modal containing the widget rendered in display mode "modal"
  */
 export function useRequestModal() {
-  const view = useOpenAiGlobal("view");
+  const view = useAppsSdkBridge("view");
   const isOpen = view?.mode === "modal";
   const params = view?.params;
 
