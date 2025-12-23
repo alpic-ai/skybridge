@@ -23,6 +23,7 @@ describe("useDisplayMode", () => {
       requestDisplayMode: vi.fn().mockResolvedValue({ mode: "inline" }),
     };
     vi.stubGlobal("openai", OpenaiMock);
+    vi.stubGlobal("skybridge", { hostType: "chatgpt-app" });
   });
 
   afterEach(() => {

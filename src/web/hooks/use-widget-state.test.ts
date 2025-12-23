@@ -19,6 +19,7 @@ describe("useWidgetState", () => {
       setWidgetState: vi.fn().mockResolvedValue(undefined),
     };
     vi.stubGlobal("openai", OpenaiMock);
+    vi.stubGlobal("skybridge", { hostType: "chatgpt-app" });
   });
 
   afterEach(() => {

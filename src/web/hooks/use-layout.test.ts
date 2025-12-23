@@ -17,6 +17,7 @@ describe("useLayout", () => {
       safeArea: { insets: { top: 0, bottom: 0, left: 0, right: 0 } },
     };
     vi.stubGlobal("openai", OpenaiMock);
+    vi.stubGlobal("skybridge", { hostType: "chatgpt-app" });
   });
 
   afterEach(() => {
