@@ -6,7 +6,7 @@ import type {
 } from "@modelcontextprotocol/ext-apps";
 
 import { useSyncExternalStore } from "react";
-import { NOOP_GET_SNAPSHOT, NOOP_SUBSCRIBE } from "./constants";
+import { NOOP_GET_SNAPSHOT, NOOP_SUBSCRIBE } from "./constants.js";
 
 type PendingRequest<T> = {
   resolve: (value: T | PromiseLike<T>) => void;
