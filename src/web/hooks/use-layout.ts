@@ -1,5 +1,5 @@
+import { useAppsSdkBridge } from "../bridges/use-apps-sdk-bridge.js";
 import type { SafeArea, Theme } from "../types.js";
-import { useOpenAiGlobal } from "./use-openai-global.js";
 
 export type LayoutState = {
   theme: Theme;
@@ -23,9 +23,9 @@ export type LayoutState = {
  * ```
  */
 export function useLayout(): LayoutState {
-  const theme = useOpenAiGlobal("theme");
-  const maxHeight = useOpenAiGlobal("maxHeight");
-  const safeArea = useOpenAiGlobal("safeArea");
+  const theme = useAppsSdkBridge("theme");
+  const maxHeight = useAppsSdkBridge("maxHeight");
+  const safeArea = useAppsSdkBridge("safeArea");
 
   return { theme, maxHeight, safeArea };
 }
