@@ -6,6 +6,7 @@ import type {
 } from "@modelcontextprotocol/ext-apps";
 
 import { useSyncExternalStore } from "react";
+import { NOOP_GET_SNAPSHOT, NOOP_SUBSCRIBE } from "./constants";
 
 type PendingRequest<T> = {
   resolve: (value: T | PromiseLike<T>) => void;
@@ -42,23 +43,28 @@ export class McpAppBridge {
     };
   }
 
-  subscribe = (key: keyof McpUiHostContext) => (onChange: () => void) => {
-    this.listeners.set(
-      key,
-      new Set([...(this.listeners.get(key) || []), onChange]),
-    );
-    this.init();
-    return () => this.listeners.get(key)?.delete(onChange);
+  public subscribe =
+    (key: keyof McpUiHostContext) => (onChange: () => void) => {
+      this.listeners.set(
+        key,
+        new Set([...(this.listeners.get(key) || []), onChange]),
+      );
+      this.init();
+      return () => this.listeners.get(key)?.delete(onChange);
+    };
+
+  public getSnapshot = <K extends keyof McpUiHostContext>(key: K) => {
+    return this.context?.[key];
   };
 
-  public cleanup() {
+  public cleanup = () => {
     window.removeEventListener("message", this.handleMessage);
     this.pendingRequests.forEach((request) => {
       clearTimeout(request.timeout);
     });
     this.pendingRequests.clear();
     this.listeners.clear();
-  }
+  };
 
   private request<R extends { method: string; params?: unknown }, T>({
     method,
@@ -155,13 +161,13 @@ const defaultOptions: McpAppInitializationOptions = {
   appInfo: { name: "skybridge-app", version: "0.0.1" },
 };
 
-export function getMcpHost(
+export function getMcpAppBridge(
   options?: Partial<McpAppInitializationOptions>,
   requestTimeout?: number,
 ): McpAppBridge {
   if (instance && (options || requestTimeout)) {
     console.warn(
-      "getMcpHost: options and requestTimeout ignored, instance already exists",
+      "getMcpAppBridge: options and requestTimeout ignored, instance already exists",
     );
   }
   if (!instance) {
@@ -179,7 +185,11 @@ export function useMcpAppBridge<K extends keyof McpUiHostContext>(
   options?: Partial<McpAppInitializationOptions>,
   requestTimeout?: number,
 ): McpUiHostContext[K] | undefined {
-  const host = getMcpHost(options, requestTimeout);
-
-  return useSyncExternalStore(host.subscribe(key), () => host.context?.[key]);
+  const hostType = window.skybridge.hostType;
+  const bridge =
+    hostType === "mcp-app" ? getMcpAppBridge(options, requestTimeout) : null;
+  return useSyncExternalStore(
+    bridge ? bridge.subscribe(key) : NOOP_SUBSCRIBE,
+    bridge ? () => bridge.getSnapshot(key) : NOOP_GET_SNAPSHOT,
+  );
 }

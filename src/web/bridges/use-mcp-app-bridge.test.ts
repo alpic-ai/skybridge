@@ -18,6 +18,7 @@ describe("useMcpAppBridge", () => {
       writable: true,
       configurable: true,
     });
+    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
   });
 
   afterEach(() => {
@@ -62,8 +63,8 @@ describe("useMcpAppBridge", () => {
       .spyOn(console, "error")
       .mockImplementation(() => {});
 
-    const { useMcpAppBridge, getMcpHost } = mcpAppModule;
-    const bridge = getMcpHost(
+    const { useMcpAppBridge, getMcpAppBridge } = mcpAppModule;
+    const bridge = getMcpAppBridge(
       { appInfo: { name: "test", version: "1.0.0" } },
       100,
     );
