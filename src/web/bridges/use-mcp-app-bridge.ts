@@ -6,7 +6,6 @@ import type {
 } from "@modelcontextprotocol/ext-apps";
 
 import { useSyncExternalStore } from "react";
-import { NOOP_GET_SNAPSHOT, NOOP_SUBSCRIBE } from "./constants.js";
 
 type PendingRequest<T> = {
   resolve: (value: T | PromiseLike<T>) => void;
@@ -22,6 +21,7 @@ type McpAppInitializationOptions = Pick<
 const LATEST_PROTOCOL_VERSION = "2025-11-21";
 
 export class McpAppBridge {
+  private static instance: McpAppBridge | null = null;
   public context: McpUiHostContext | null = null;
   private listeners = new Map<keyof McpUiHostContext, Set<() => void>>();
   private pendingRequests = new Map<number, PendingRequest<unknown>>();
@@ -41,6 +41,30 @@ export class McpAppBridge {
       appCapabilities: {},
       protocolVersion: LATEST_PROTOCOL_VERSION,
     };
+  }
+
+  public static getInstance(
+    options?: Partial<McpAppInitializationOptions>,
+    requestTimeout?: number,
+  ): McpAppBridge {
+    if (window.skybridge.hostType !== "mcp-app") {
+      throw new Error("MCP App Bridge can only be used in the mcp-app runtime");
+    }
+    if (McpAppBridge.instance && (options || requestTimeout)) {
+      console.warn(
+        "McpAppBridge.getInstance: options and requestTimeout ignored, instance already exists",
+      );
+    }
+    if (!McpAppBridge.instance) {
+      const defaultOptions: McpAppInitializationOptions = {
+        appInfo: { name: "skybridge-app", version: "0.0.1" },
+      };
+      McpAppBridge.instance = new McpAppBridge(
+        { ...defaultOptions, ...options },
+        requestTimeout,
+      );
+    }
+    return McpAppBridge.instance;
   }
 
   public subscribe =
@@ -65,6 +89,13 @@ export class McpAppBridge {
     this.pendingRequests.clear();
     this.listeners.clear();
   };
+
+  public static resetInstance(): void {
+    if (McpAppBridge.instance) {
+      McpAppBridge.instance.cleanup();
+      McpAppBridge.instance = null;
+    }
+  }
 
   private request<R extends { method: string; params?: unknown }, T>({
     method,
@@ -155,41 +186,13 @@ export class McpAppBridge {
   }
 }
 
-let instance: McpAppBridge | null = null;
-
-const defaultOptions: McpAppInitializationOptions = {
-  appInfo: { name: "skybridge-app", version: "0.0.1" },
-};
-
-export function getMcpAppBridge(
-  options?: Partial<McpAppInitializationOptions>,
-  requestTimeout?: number,
-): McpAppBridge {
-  if (instance && (options || requestTimeout)) {
-    console.warn(
-      "getMcpAppBridge: options and requestTimeout ignored, instance already exists",
-    );
-  }
-  if (!instance) {
-    instance = new McpAppBridge(
-      { ...defaultOptions, ...options },
-      requestTimeout,
-    );
-  }
-
-  return instance;
-}
-
 export function useMcpAppBridge<K extends keyof McpUiHostContext>(
   key: K,
   options?: Partial<McpAppInitializationOptions>,
   requestTimeout?: number,
-): McpUiHostContext[K] | undefined {
-  const hostType = window.skybridge.hostType;
-  const bridge =
-    hostType === "mcp-app" ? getMcpAppBridge(options, requestTimeout) : null;
-  return useSyncExternalStore(
-    bridge ? bridge.subscribe(key) : NOOP_SUBSCRIBE,
-    bridge ? () => bridge.getSnapshot(key) : NOOP_GET_SNAPSHOT,
+): McpUiHostContext[K] {
+  const bridge = McpAppBridge.getInstance(options, requestTimeout);
+  return useSyncExternalStore(bridge.subscribe(key), () =>
+    bridge.getSnapshot(key),
   );
 }

@@ -1,17 +1,11 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { McpAppBridge, useMcpAppBridge } from "./use-mcp-app-bridge.js";
 
 describe("useMcpAppBridge", () => {
   let mockPostMessage: ReturnType<typeof vi.fn>;
-  let mcpAppModule: typeof import("./use-mcp-app-bridge.js");
-
-  const importModule = async () => {
-    return import("./use-mcp-app-bridge.js");
-  };
 
   beforeEach(async () => {
-    vi.resetModules();
-    mcpAppModule = await importModule();
     mockPostMessage = vi.fn();
     Object.defineProperty(window, "parent", {
       value: { postMessage: mockPostMessage },
@@ -19,6 +13,7 @@ describe("useMcpAppBridge", () => {
       configurable: true,
     });
     vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    McpAppBridge.resetInstance();
   });
 
   afterEach(() => {
@@ -26,7 +21,6 @@ describe("useMcpAppBridge", () => {
   });
 
   it("should return the theme value from host context", async () => {
-    const { useMcpAppBridge } = mcpAppModule;
     const { result } = renderHook(() => useMcpAppBridge("theme"));
 
     const initCall = mockPostMessage.mock.calls.find(
@@ -63,13 +57,7 @@ describe("useMcpAppBridge", () => {
       .spyOn(console, "error")
       .mockImplementation(() => {});
 
-    const { useMcpAppBridge, getMcpAppBridge } = mcpAppModule;
-    const bridge = getMcpAppBridge(
-      { appInfo: { name: "test", version: "1.0.0" } },
-      100,
-    );
-
-    renderHook(() => useMcpAppBridge("theme"));
+    renderHook(() => useMcpAppBridge("theme", undefined, 100));
 
     expect(mockPostMessage).toHaveBeenCalledWith(
       expect.objectContaining({ method: "ui/initialize" }),
@@ -86,6 +74,5 @@ describe("useMcpAppBridge", () => {
 
     consoleErrorSpy.mockRestore();
     vi.useRealTimers();
-    bridge.cleanup();
   });
 });

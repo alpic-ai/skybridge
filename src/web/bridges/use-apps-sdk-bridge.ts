@@ -4,18 +4,31 @@ import {
   SET_GLOBALS_EVENT_TYPE,
   type SetGlobalsEvent,
 } from "../types.js";
-import { NOOP_GET_SNAPSHOT, NOOP_SUBSCRIBE } from "./constants.js";
-
-let appsSdkBridge: AppsSdkBridge | null = null;
-
-export function getAppsSdkBridge(): AppsSdkBridge {
-  if (appsSdkBridge === null) {
-    appsSdkBridge = new AppsSdkBridge();
-  }
-  return appsSdkBridge;
-}
 
 export class AppsSdkBridge {
+  private static instance: AppsSdkBridge | null = null;
+
+  public static getInstance(): AppsSdkBridge {
+    if (
+      window.skybridge.hostType !== "apps-sdk" ||
+      window.openai === undefined
+    ) {
+      throw new Error(
+        "Apps SDK Bridge can only be used in the apps-sdk runtime",
+      );
+    }
+    if (AppsSdkBridge.instance === null) {
+      AppsSdkBridge.instance = new AppsSdkBridge();
+    }
+    return AppsSdkBridge.instance;
+  }
+
+  public static resetInstance(): void {
+    if (AppsSdkBridge.instance) {
+      AppsSdkBridge.instance = null;
+    }
+  }
+
   subscribe = (key: keyof OpenAiProperties) => (onChange: () => void) => {
     const handleSetGlobal = (event: SetGlobalsEvent) => {
       const value = event.detail.globals[key];
@@ -47,12 +60,9 @@ export class AppsSdkBridge {
 
 export function useAppsSdkBridge<K extends keyof OpenAiProperties>(
   key: K,
-): OpenAiProperties[K] | undefined {
-  const hostType = window.skybridge.hostType;
-  const bridge = hostType === "apps-sdk" ? getAppsSdkBridge() : null;
-
-  return useSyncExternalStore(
-    bridge ? bridge.subscribe(key) : NOOP_SUBSCRIBE,
-    bridge ? () => bridge.getSnapshot(key) : NOOP_GET_SNAPSHOT,
+): OpenAiProperties[K] {
+  const bridge = AppsSdkBridge.getInstance();
+  return useSyncExternalStore(bridge.subscribe(key), () =>
+    bridge.getSnapshot(key),
   );
 }
