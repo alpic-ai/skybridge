@@ -51,7 +51,7 @@ jobs:
           pnpm run version ${{ steps.extract_version.outputs.version }}
 
       - name: Publish to npm (Skybridge)
-        run: pnpm publish:skybridge latest
+        run: pnpm publish:core latest
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -59,6 +59,11 @@ jobs:
         run: pnpm publish:packages latest
         env:
           NODE_AUTH_TOKEN: ${{ secrets.ORG_NPM_TOKEN }}
+
+      - name: Publish to npm (create-skybridge)
+        run: pnpm publish:create-skybridge latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.CREATE_SKYBRIDGE_NPM_TOKEN }}
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest

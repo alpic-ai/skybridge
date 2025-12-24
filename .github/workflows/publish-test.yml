@@ -31,7 +31,7 @@ jobs:
         run: pnpm run version
 
       - name: Publish to npm (Skybridge)
-        run: pnpm publish:skybridge
+        run: pnpm publish:core
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -39,3 +39,8 @@ jobs:
         run: pnpm publish:packages
         env:
           NODE_AUTH_TOKEN: ${{ secrets.ORG_NPM_TOKEN }}
+
+      - name: Publish to npm (create-skybridge)
+        run: pnpm publish:create-skybridge
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.CREATE_SKYBRIDGE_NPM_TOKEN }}
