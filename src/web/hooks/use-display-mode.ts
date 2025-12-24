@@ -1,4 +1,4 @@
-import { useAppsSdkBridge } from "../bridges/use-apps-sdk-bridge.js";
+import { useAppsSdkBridge } from "../bridges/index.js";
 import type { DisplayMode } from "../types.js";
 
 export function useDisplayMode() {

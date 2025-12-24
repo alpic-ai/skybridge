@@ -1,4 +1,3 @@
-import { useSyncExternalStore } from "react";
 import {
   type OpenAiProperties,
   SET_GLOBALS_EVENT_TYPE,
@@ -56,13 +55,4 @@ export class AppsSdkBridge {
 
     return window.openai[key];
   };
-}
-
-export function useAppsSdkBridge<K extends keyof OpenAiProperties>(
-  key: K,
-): OpenAiProperties[K] {
-  const bridge = AppsSdkBridge.getInstance();
-  return useSyncExternalStore(bridge.subscribe(key), () =>
-    bridge.getSnapshot(key),
-  );
 }

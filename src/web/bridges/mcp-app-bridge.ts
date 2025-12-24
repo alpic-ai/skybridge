@@ -5,8 +5,6 @@ import type {
   McpUiInitializeResult,
 } from "@modelcontextprotocol/ext-apps";
 
-import { useSyncExternalStore } from "react";
-
 type PendingRequest<T> = {
   resolve: (value: T | PromiseLike<T>) => void;
   reject: (reason?: unknown) => void;
@@ -184,15 +182,4 @@ export class McpAppBridge {
   private notify(notification: McpUiInitializedNotification) {
     window.parent.postMessage({ jsonrpc: "2.0", ...notification }, "*");
   }
-}
-
-export function useMcpAppBridge<K extends keyof McpUiHostContext>(
-  key: K,
-  options?: Partial<McpAppInitializationOptions>,
-  requestTimeout?: number,
-): McpUiHostContext[K] {
-  const bridge = McpAppBridge.getInstance(options, requestTimeout);
-  return useSyncExternalStore(bridge.subscribe(key), () =>
-    bridge.getSnapshot(key),
-  );
 }
