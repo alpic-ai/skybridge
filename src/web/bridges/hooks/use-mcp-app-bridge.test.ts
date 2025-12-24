@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { McpAppBridge, useMcpAppBridge } from "./use-mcp-app-bridge.js";
+import { McpAppBridge } from "../mcp-app-bridge.js";
+import { useMcpAppBridge } from "./use-mcp-app-bridge.js";
 
 describe("useMcpAppBridge", () => {
   let mockPostMessage: ReturnType<typeof vi.fn>;

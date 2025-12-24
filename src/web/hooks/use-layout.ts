@@ -1,4 +1,4 @@
-import { useAppsSdkBridge } from "../bridges/use-apps-sdk-bridge.js";
+import { useAppsSdkBridge } from "../bridges/index.js";
 import type { SafeArea, Theme } from "../types.js";
 
 export type LayoutState = {
