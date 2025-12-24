@@ -49,7 +49,7 @@ export function useAppsSdkBridge<K extends keyof OpenAiProperties>(
   key: K,
 ): OpenAiProperties[K] | undefined {
   const hostType = window.skybridge.hostType;
-  const bridge = hostType === "chatgpt-app" ? getAppsSdkBridge() : null;
+  const bridge = hostType === "apps-sdk" ? getAppsSdkBridge() : null;
 
   return useSyncExternalStore(
     bridge ? bridge.subscribe(key) : NOOP_SUBSCRIBE,

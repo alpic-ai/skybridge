@@ -253,7 +253,7 @@ describe("McpServer.registerWidget", () => {
       ],
     });
     expect(appsSdkResult.contents[0]?.text).toContain(
-      'window.skybridge = { hostType: "chatgpt-app" }',
+      'window.skybridge = { hostType: "apps-sdk" }',
     );
 
     const extAppsResourceCallback = mockRegisterResource.mock
