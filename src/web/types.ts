@@ -58,6 +58,7 @@ export type OpenAiProperties<
   maxHeight: number;
   displayMode: DisplayMode;
   safeArea: SafeArea;
+  view: View;
 
   // state
   toolInput: ToolInput;
@@ -77,6 +78,12 @@ export type CallToolResponse = {
   isError: boolean;
   result: string;
   meta: Record<string, unknown>;
+};
+
+export type RequestModalOptions = {
+  title?: string;
+  params?: Record<string, unknown>;
+  anchor?: { top?: number; left?: number; width?: number; height?: number };
 };
 
 export type OpenAiMethods<WidgetState extends UnknownObject = UnknownObject> = {
@@ -114,7 +121,7 @@ export type OpenAiMethods<WidgetState extends UnknownObject = UnknownObject> = {
    * Opens a modal portaled outside of the widget iFrame.
    * This ensures the modal is correctly displayed and not limited to the widget's area.
    */
-  requestModal: (args: { title: string }) => Promise<void>;
+  requestModal: (args: RequestModalOptions) => Promise<void>;
 
   /** Uploads a new file to the host */
   uploadFile: (file: File) => Promise<FileMetadata>;
@@ -139,7 +146,12 @@ export type CallTool = (
   args: Record<string, unknown>,
 ) => Promise<CallToolResponse>;
 
-export type DisplayMode = "pip" | "inline" | "fullscreen";
+export type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
+
+export type View = {
+  mode: DisplayMode;
+  params?: Record<string, unknown>;
+};
 
 export type Theme = "light" | "dark";
 
