@@ -25,7 +25,7 @@ export type LayoutState = {
 export function useLayout(): LayoutState {
   const theme = useBridge("theme");
   const maxHeight = useAppsSdkBridge("maxHeight");
-  const safeArea = useAppsSdkBridge("safeArea");
+  const safeArea = useBridge("safeArea");
 
   return { theme, maxHeight, safeArea };
 }
