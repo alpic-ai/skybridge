@@ -9,6 +9,9 @@ export type BridgeInterface = Required<
   safeArea: {
     insets: NonNullable<McpUiHostContext["safeAreaInsets"]>;
   };
+  maxHeight: NonNullable<
+    NonNullable<McpUiHostContext["viewport"]>["maxHeight"]
+  >;
 };
 
 type BridgeExternalStore<K extends keyof BridgeInterface> = {
@@ -28,6 +31,7 @@ const DEFAULT_VALUE_FOR_MCP_APP_BRIDGE: BridgeInterface = {
       left: 0,
     },
   },
+  maxHeight: window.innerHeight,
 };
 
 const getExternalStore = <K extends keyof BridgeInterface>(
@@ -51,6 +55,15 @@ const getExternalStore = <K extends keyof BridgeInterface>(
         return safeArea
           ? ({ insets: safeArea } as BridgeInterface[K])
           : defaultValue;
+      },
+    };
+  }
+  if (key === "maxHeight") {
+    return {
+      subscribe: bridge.subscribe("viewport"),
+      getSnapshot: () => {
+        const viewport = bridge.getSnapshot("viewport");
+        return (viewport?.maxHeight ?? defaultValue) as BridgeInterface[K];
       },
     };
   }
