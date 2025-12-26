@@ -43,17 +43,21 @@ const getExternalStore = <K extends keyof BridgeInterface>(
     };
   }
   const bridge = McpAppBridge.getInstance();
-  return {
-    subscribe: bridge.subscribe(key),
-    getSnapshot: () => {
-      if (key === "safeArea") {
+  if (key === "safeArea") {
+    return {
+      subscribe: bridge.subscribe("safeAreaInsets"),
+      getSnapshot: () => {
         const safeArea = bridge.getSnapshot("safeAreaInsets");
         return safeArea
           ? ({ insets: safeArea } as BridgeInterface[K])
           : defaultValue;
-      }
-      return (bridge.getSnapshot(key) ?? defaultValue) as BridgeInterface[K];
-    },
+      },
+    };
+  }
+  return {
+    subscribe: bridge.subscribe(key),
+    getSnapshot: () =>
+      (bridge.getSnapshot(key) ?? defaultValue) as BridgeInterface[K],
   };
 };
 
