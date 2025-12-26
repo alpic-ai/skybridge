@@ -20,6 +20,7 @@ describe("useToolInfo", () => {
       toolResponseMetadata: null,
     };
     vi.stubGlobal("openai", OpenaiMock);
+    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
   });
 
   afterEach(() => {

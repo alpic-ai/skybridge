@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAppsSdkBridge } from "../bridges/use-apps-sdk-bridge.js";
+import { useAppsSdkBridge } from "../bridges/index.js";
 import type { UnknownObject } from "../types.js";
 
 export type ToolPendingState<ToolInput extends UnknownObject> = {

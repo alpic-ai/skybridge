@@ -1,5 +1,5 @@
 import { type SetStateAction, useCallback, useEffect, useState } from "react";
-import { useAppsSdkBridge } from "../bridges/use-apps-sdk-bridge.js";
+import { useAppsSdkBridge } from "../bridges/index.js";
 import { filterWidgetContext, injectWidgetContext } from "../helpers/state.js";
 import type { UnknownObject } from "../types.js";
 

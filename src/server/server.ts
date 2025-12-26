@@ -65,7 +65,7 @@ type McpAppsResourceMeta = {
 
 type ResourceMeta = OpenaiResourceMeta & McpAppsResourceMeta;
 
-export type WidgetHostType = "chatgpt-app" | "mcp-app";
+export type WidgetHostType = "apps-sdk" | "mcp-app";
 
 type WidgetResourceConfig = {
   hostType: WidgetHostType;
@@ -183,7 +183,7 @@ export class McpServer<
     }
 
     const appsSdkResourceConfig: WidgetResourceConfig = {
-      hostType: "chatgpt-app",
+      hostType: "apps-sdk",
       uri: `ui://widgets/apps-sdk/${name}.html`,
       mimeType: "text/html+skybridge",
     };

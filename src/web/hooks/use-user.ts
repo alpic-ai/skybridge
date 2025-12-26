@@ -1,4 +1,4 @@
-import { useAppsSdkBridge } from "../bridges/use-apps-sdk-bridge.js";
+import { useAppsSdkBridge, useBridge } from "../bridges/index.js";
 import type { UserAgent } from "../types.js";
 
 export type UserState = {
@@ -19,7 +19,7 @@ export type UserState = {
  * ```
  */
 export function useUser(): UserState {
-  const locale = useAppsSdkBridge("locale");
+  const locale = useBridge("locale");
   const userAgent = useAppsSdkBridge("userAgent");
 
   return { locale, userAgent };

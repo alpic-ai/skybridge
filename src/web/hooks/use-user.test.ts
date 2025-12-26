@@ -18,6 +18,7 @@ describe("useUser", () => {
       },
     };
     vi.stubGlobal("openai", OpenaiMock);
+    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
   });
 
   afterEach(() => {
