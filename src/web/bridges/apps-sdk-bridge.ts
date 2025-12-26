@@ -1,10 +1,12 @@
 import {
+  type DisplayMode,
   type OpenAiProperties,
   SET_GLOBALS_EVENT_TYPE,
   type SetGlobalsEvent,
 } from "../types.js";
+import type { IBridge } from "./types.js";
 
-export class AppsSdkBridge {
+export class AppsSdkBridge implements IBridge {
   private static instance: AppsSdkBridge | null = null;
 
   public static getInstance(): AppsSdkBridge {
@@ -28,25 +30,26 @@ export class AppsSdkBridge {
     }
   }
 
-  subscribe = (key: keyof OpenAiProperties) => (onChange: () => void) => {
-    const handleSetGlobal = (event: SetGlobalsEvent) => {
-      const value = event.detail.globals[key];
-      if (value === undefined) {
-        return;
-      }
+  public subscribe =
+    (key: keyof OpenAiProperties) => (onChange: () => void) => {
+      const handleSetGlobal = (event: SetGlobalsEvent) => {
+        const value = event.detail.globals[key];
+        if (value === undefined) {
+          return;
+        }
 
-      onChange();
+        onChange();
+      };
+
+      window.addEventListener(SET_GLOBALS_EVENT_TYPE, handleSetGlobal, {
+        passive: true,
+      });
+
+      return () => {
+        window.removeEventListener(SET_GLOBALS_EVENT_TYPE, handleSetGlobal);
+      };
     };
-
-    window.addEventListener(SET_GLOBALS_EVENT_TYPE, handleSetGlobal, {
-      passive: true,
-    });
-
-    return () => {
-      window.removeEventListener(SET_GLOBALS_EVENT_TYPE, handleSetGlobal);
-    };
-  };
-  getSnapshot = <K extends keyof OpenAiProperties>(key: K) => {
+  public getSnapshot = <K extends keyof OpenAiProperties>(key: K) => {
     if (window.openai === undefined) {
       throw new Error(
         `window.openai is not available. Make sure you're calling the hook requiring ${key} within the OpenAI iFrame skybridge runtime.`,
@@ -54,5 +57,9 @@ export class AppsSdkBridge {
     }
 
     return window.openai[key];
+  };
+
+  public requestDisplayMode = ({ mode }: { mode: DisplayMode }) => {
+    return window.openai.requestDisplayMode({ mode });
   };
 }

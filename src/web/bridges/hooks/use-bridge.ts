@@ -4,7 +4,7 @@ import { AppsSdkBridge } from "../apps-sdk-bridge";
 import { McpAppBridge } from "../mcp-app-bridge";
 
 export type BridgeInterface = Required<
-  Pick<McpUiHostContext, "theme" | "locale">
+  Pick<McpUiHostContext, "theme" | "locale" | "displayMode">
 >;
 
 type BridgeExternalStore<K extends keyof BridgeInterface> = {
@@ -15,6 +15,7 @@ type BridgeExternalStore<K extends keyof BridgeInterface> = {
 const DEFAULT_VALUE_FOR_MCP_APP_BRIDGE: BridgeInterface = {
   theme: "light",
   locale: "en-US",
+  displayMode: "inline",
 };
 
 const getExternalStore = <K extends keyof BridgeInterface>(
