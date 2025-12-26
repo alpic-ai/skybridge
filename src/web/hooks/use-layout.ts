@@ -1,4 +1,4 @@
-import { useAppsSdkBridge, useBridge } from "../bridges/index.js";
+import { useBridge } from "../bridges/index.js";
 import type { SafeArea, Theme } from "../types.js";
 
 export type LayoutState = {
@@ -24,7 +24,7 @@ export type LayoutState = {
  */
 export function useLayout(): LayoutState {
   const theme = useBridge("theme");
-  const maxHeight = useAppsSdkBridge("maxHeight");
+  const maxHeight = useBridge("maxHeight");
   const safeArea = useBridge("safeArea");
 
   return { theme, maxHeight, safeArea };
