@@ -1,4 +1,4 @@
-import { useAppsSdkBridge } from "../bridges/use-apps-sdk-bridge.js";
+import { useAppsSdkBridge } from "../bridges/hooks/use-apps-sdk-bridge.js";
 import type { RequestModalOptions } from "../types.js";
 
 /**

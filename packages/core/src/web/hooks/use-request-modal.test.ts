@@ -7,6 +7,7 @@ describe("useRequestModal", () => {
 
   beforeEach(() => {
     requestModalMock = vi.fn();
+    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
     vi.stubGlobal("openai", {
       requestModal: requestModalMock,
       view: { mode: "inline" },
