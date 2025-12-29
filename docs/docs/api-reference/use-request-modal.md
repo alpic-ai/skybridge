@@ -12,10 +12,10 @@ The `useRequestModal` hook returns a function to trigger a modal that is portale
 import { useRequestModal } from "skybridge/web";
 
 function ModalTrigger() {
-  const requestModal = useRequestModal();
+  const { open } = useRequestModal();
 
   return (
-    <button onClick={() => requestModal({ title: "Details" })}>
+    <button onClick={() => open({ title: "Details" })}>
       View Details
     </button>
   );
@@ -25,19 +25,27 @@ function ModalTrigger() {
 ## Returns
 
 ```tsx
-requestModal: (options: { title: string }) => void
+{
+  isOpen: boolean;
+  open: (options: RequestModalOptions) => void;
+  params?: Record<string, unknown>;
+}
 ```
 
-A function that triggers a modal to be displayed.
+### Properties
 
-### Parameters
+- `isOpen: boolean` - Whether the modal is currently open
+- `open: (options: RequestModalOptions) => void` - Function to trigger the modal
+- `params?: Record<string, unknown>` - Parameters passed when the modal was opened
 
-- `options: { title: string }`
-  - **Required**
-  - `title: string` - The title to display in the modal header
+### RequestModalOptions
+
+- `title?: string` - The title to display in the modal header
+- `params?: Record<string, unknown>` - Custom parameters to pass to the modal
+- `anchor?: { top?: number; left?: number; width?: number; height?: number }` - Positioning anchor for the modal
 
 :::info
-When the modal is opened, your widget will be re-rendered with `displayMode` set to `"modal"`. You can use the `useDisplayMode` hook to detect this and render different content accordingly.
+When the modal is opened, your widget will be re-rendered and the `isOpen` property will be `true`. Use this to detect when you're in modal mode and render different content accordingly.
 :::
 
 ## Examples
@@ -45,14 +53,13 @@ When the modal is opened, your widget will be re-rendered with `displayMode` set
 ### Modal with Different Content
 
 ```tsx
-import { useRequestModal, useDisplayMode } from "skybridge/web";
+import { useRequestModal } from "skybridge/web";
 
 function ProductWidget() {
-  const requestModal = useRequestModal();
-  const [displayMode] = useDisplayMode();
+  const { open, isOpen } = useRequestModal();
 
   // When in modal mode, show detailed view
-  if (displayMode === "modal") {
+  if (isOpen) {
     return (
       <div className="product-details">
         <h2>Product Details</h2>
@@ -72,7 +79,7 @@ function ProductWidget() {
     <div className="product-summary">
       <h3>Product Name</h3>
       <p>Brief description...</p>
-      <button onClick={() => requestModal({ title: "Product Details" })}>
+      <button onClick={() => open({ title: "Product Details" })}>
         View Details
       </button>
     </div>
@@ -83,19 +90,18 @@ function ProductWidget() {
 ### Settings Modal
 
 ```tsx
-import { useRequestModal, useDisplayMode } from "skybridge/web";
+import { useRequestModal } from "skybridge/web";
 import { useState } from "react";
 
 function SettingsWidget() {
-  const requestModal = useRequestModal();
-  const [displayMode] = useDisplayMode();
+  const { open, isOpen } = useRequestModal();
   const [settings, setSettings] = useState({
     notifications: true,
     darkMode: false,
     language: "en",
   });
 
-  if (displayMode === "modal") {
+  if (isOpen) {
     return (
       <form className="settings-form">
         <label>
@@ -138,7 +144,7 @@ function SettingsWidget() {
   return (
     <div className="settings-summary">
       <span>⚙️ Settings</span>
-      <button onClick={() => requestModal({ title: "Settings" })}>
+      <button onClick={() => open({ title: "Settings" })}>
         Configure
       </button>
     </div>
@@ -149,7 +155,7 @@ function SettingsWidget() {
 ### Image Gallery Modal
 
 ```tsx
-import { useRequestModal, useDisplayMode } from "skybridge/web";
+import { useRequestModal } from "skybridge/web";
 import { useState } from "react";
 
 type Image = {
@@ -160,11 +166,10 @@ type Image = {
 };
 
 function ImageGallery({ images }: { images: Image[] }) {
-  const requestModal = useRequestModal();
-  const [displayMode] = useDisplayMode();
+  const { open, isOpen } = useRequestModal();
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  if (displayMode === "modal") {
+  if (isOpen) {
     const current = images[selectedIndex];
     return (
       <div className="gallery-modal">
@@ -199,7 +204,7 @@ function ImageGallery({ images }: { images: Image[] }) {
           key={image.id}
           onClick={() => {
             setSelectedIndex(index);
-            requestModal({ title: "Gallery" });
+            open({ title: "Gallery" });
           }}
         >
           <img src={image.thumbnail} alt={image.alt} />
@@ -214,7 +219,7 @@ function ImageGallery({ images }: { images: Image[] }) {
 ### Form Modal
 
 ```tsx
-import { useRequestModal, useDisplayMode, useWidgetState } from "skybridge/web";
+import { useRequestModal, useWidgetState } from "skybridge/web";
 
 type FormData = {
   name: string;
@@ -223,15 +228,14 @@ type FormData = {
 };
 
 function ContactForm() {
-  const requestModal = useRequestModal();
-  const [displayMode] = useDisplayMode();
+  const { open, isOpen } = useRequestModal();
   const [formData, setFormData] = useWidgetState<FormData>({
     name: "",
     email: "",
     submitted: false,
   });
 
-  if (displayMode === "modal") {
+  if (isOpen) {
     if (formData.submitted) {
       return (
         <div className="form-success">
@@ -273,7 +277,7 @@ function ContactForm() {
   }
 
   return (
-    <button onClick={() => requestModal({ title: "Contact Us" })}>
+    <button onClick={() => open({ title: "Contact Us" })}>
       Contact Us
     </button>
   );
