@@ -1,13 +1,9 @@
 import type {
-  McpUiDisplayMode,
   McpUiHostContext,
   McpUiInitializedNotification,
   McpUiInitializeRequest,
   McpUiInitializeResult,
-  McpUiRequestDisplayModeRequest,
-  McpUiRequestDisplayModeResult,
 } from "@modelcontextprotocol/ext-apps";
-import type { IBridge } from "./types";
 
 type PendingRequest<T> = {
   resolve: (value: T | PromiseLike<T>) => void;
@@ -22,7 +18,7 @@ type McpAppInitializationOptions = Pick<
 
 const LATEST_PROTOCOL_VERSION = "2025-11-21";
 
-export class McpAppBridge implements IBridge {
+export class McpAppBridge {
   private static instance: McpAppBridge | null = null;
   public context: McpUiHostContext | null = null;
   private listeners = new Map<keyof McpUiHostContext, Set<() => void>>();
@@ -83,16 +79,6 @@ export class McpAppBridge implements IBridge {
     return this.context?.[key];
   };
 
-  public requestDisplayMode = async ({ mode }: { mode: McpUiDisplayMode }) => {
-    return this.request<
-      McpUiRequestDisplayModeRequest,
-      McpUiRequestDisplayModeResult
-    >({
-      method: "ui/request-display-mode",
-      params: { mode },
-    });
-  };
-
   public cleanup = () => {
     window.removeEventListener("message", this.handleMessage);
     this.pendingRequests.forEach((request) => {
@@ -109,7 +95,7 @@ export class McpAppBridge implements IBridge {
     }
   }
 
-  private request<R extends { method: string; params?: unknown }, T>({
+  public request<R extends { method: string; params?: unknown }, T>({
     method,
     params,
   }: R): Promise<T> {

@@ -1,12 +1,10 @@
 import {
-  type DisplayMode,
   type OpenAiProperties,
   SET_GLOBALS_EVENT_TYPE,
   type SetGlobalsEvent,
 } from "../types.js";
-import type { IBridge } from "./types.js";
 
-export class AppsSdkBridge implements IBridge {
+export class AppsSdkBridge {
   private static instance: AppsSdkBridge | null = null;
 
   public static getInstance(): AppsSdkBridge {
@@ -57,9 +55,5 @@ export class AppsSdkBridge implements IBridge {
     }
 
     return window.openai[key];
-  };
-
-  public requestDisplayMode = ({ mode }: { mode: DisplayMode }) => {
-    return window.openai.requestDisplayMode({ mode });
   };
 }

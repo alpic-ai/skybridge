@@ -1,15 +1,15 @@
-import type { McpUiDisplayMode } from "@modelcontextprotocol/ext-apps";
-
-export interface IBridge {
-  requestDisplayMode({ mode }: { mode: McpUiDisplayMode }): Promise<{
-    mode: McpUiDisplayMode;
+export type IBridgeMethods = {
+  requestDisplayMode({ mode }: { mode: BridgeDisplayMode }): Promise<{
+    mode: BridgeDisplayMode;
   }>;
-}
+};
+
+export type BridgeDisplayMode = "pip" | "inline" | "fullscreen" | "modal";
 
 export interface BridgeInterface {
   theme: "light" | "dark";
   locale: string;
-  displayMode: "pip" | "inline" | "fullscreen" | "modal";
+  displayMode: BridgeDisplayMode;
   safeArea: {
     insets: {
       top: number;
