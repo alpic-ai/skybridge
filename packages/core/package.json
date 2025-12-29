@@ -2,6 +2,10 @@
   "name": "skybridge",
   "version": "0.0.0",
   "description": "Skybridge is a framework for building ChatGPT apps",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alpic-ai/skybridge.git"
+  },
   "type": "module",
   "files": [
     "dist"

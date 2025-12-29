@@ -5,6 +5,10 @@ on:
     branches-ignore:
       - main
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   publish-test:
     runs-on: ubuntu-latest
@@ -14,7 +18,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           registry-url: "https://registry.npmjs.org"
 
       - uses: pnpm/action-setup@v4
@@ -23,15 +27,20 @@ jobs:
 
       - run: pnpm build
 
-      - name: Create test version
+      - name: Set test version
+        id: version
+        run: echo "version=0.0.0-dev.${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Publish core to npm
         working-directory: ./packages/core
         run: |
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          TEST_VERSION="0.0.0-dev.${SHORT_SHA}"
-          npm version $TEST_VERSION --no-git-tag-version
-
-      - name: Publish to npm
-        working-directory: ./packages/core
-        run: npm publish --tag dev --access public
+          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+          npm publish --tag dev --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish create-skybridge to npm
+        working-directory: ./packages/create-skybridge
+        run: |
+          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
+          npm publish --tag dev --access public --provenance

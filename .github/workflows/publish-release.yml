@@ -4,6 +4,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+  id-token: write
+
 env:
   VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
@@ -18,7 +22,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           registry-url: "https://registry.npmjs.org"
 
       - uses: pnpm/action-setup@v4
@@ -46,16 +50,19 @@ jobs:
           echo "Release name: ${{ github.event.release.name }}"
           echo "Release body: ${{ github.event.release.body }}"
 
-      - name: Update package.json version
+      - name: Publish core to npm
         working-directory: ./packages/core
         run: |
           npm version ${{ steps.extract_version.outputs.version }} --no-git-tag-version
-
-      - name: Publish to npm
-        working-directory: ./packages/core
-        run: npm publish --access public
+          npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish create-skybridge to npm
+        working-directory: ./packages/create-skybridge
+        run: |
+          npm version ${{ steps.extract_version.outputs.version }} --no-git-tag-version
+          npm publish --access public --provenance
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
