@@ -80,6 +80,7 @@ function createOpenaiObject(
     "toolInput",
     "toolOutput",
     "toolResponseMetadata",
+    "view",
     "widgetState",
   ];
 
