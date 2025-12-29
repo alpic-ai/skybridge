@@ -1,5 +1,5 @@
 {
-  "name": "skybridge/monorepo",
+  "name": "@skybridge/monorepo",
   "version": "0.0.0",
   "description": "Skybridge is a framework for building ChatGPT apps",
   "private": true,
