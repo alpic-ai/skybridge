@@ -5,3 +5,18 @@ export interface IBridge {
     mode: McpUiDisplayMode;
   }>;
 }
+
+export interface BridgeInterface {
+  theme: "light" | "dark";
+  locale: string;
+  displayMode: "pip" | "inline" | "fullscreen";
+  safeArea: {
+    insets: {
+      top: number;
+      right: number;
+      bottom: number;
+      left: number;
+    };
+  };
+  maxHeight: number;
+}

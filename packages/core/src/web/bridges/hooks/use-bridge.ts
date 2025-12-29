@@ -1,18 +1,7 @@
-import type { McpUiHostContext } from "@modelcontextprotocol/ext-apps";
 import { useSyncExternalStore } from "react";
 import { AppsSdkBridge } from "../apps-sdk-bridge";
 import { McpAppBridge } from "../mcp-app-bridge";
-
-export type BridgeInterface = Required<
-  Pick<McpUiHostContext, "theme" | "locale" | "displayMode">
-> & {
-  safeArea: {
-    insets: NonNullable<McpUiHostContext["safeAreaInsets"]>;
-  };
-  maxHeight: NonNullable<
-    NonNullable<McpUiHostContext["viewport"]>["maxHeight"]
-  >;
-};
+import type { BridgeInterface } from "../types";
 
 type BridgeExternalStore<K extends keyof BridgeInterface> = {
   subscribe: (onChange: () => void) => () => void;
