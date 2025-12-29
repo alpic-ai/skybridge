@@ -8,5 +8,5 @@
     "moduleResolution": "bundler",
     "lib": ["ESNext", "DOM", "DOM.Iterable"]
   },
-  "exclude": ["docs", "node_modules", "dist", "packages"]
+  "exclude": ["node_modules", "dist", "packages"]
 }
