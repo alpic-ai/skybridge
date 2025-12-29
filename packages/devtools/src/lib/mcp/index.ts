@@ -31,6 +31,7 @@ const defaultOpenaiObject: OpenAiProperties = {
   toolInput: {},
   toolOutput: null,
   toolResponseMetadata: null,
+  view: { mode: "inline" },
   widgetState: null,
 };
 
