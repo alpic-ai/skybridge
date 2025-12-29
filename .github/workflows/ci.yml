@@ -47,6 +47,8 @@ jobs:
             command: pnpm run test:type
           - name: Lint & Format
             command: pnpm run test:format
+          - name: Build
+            command: pnpm run build
     steps:
       - uses: actions/checkout@v4
 
