@@ -44,7 +44,7 @@ function createOpenaiMethods(
       openai.widgetState = state;
       setValue("widgetState", state);
     },
-    requestModal: async (args: { title: string }) => {
+    requestModal: async (args: { title?: string }) => {
       log("requestModal", args);
       openai.displayMode = "modal" as DisplayMode; // TODO: To remove once https://github.com/alpic-ai/skybridge/pull/92 is merged
       setValue("displayMode", "modal");
@@ -80,6 +80,7 @@ function createOpenaiObject(
     "toolInput",
     "toolOutput",
     "toolResponseMetadata",
+    "view",
     "widgetState",
   ];
 
