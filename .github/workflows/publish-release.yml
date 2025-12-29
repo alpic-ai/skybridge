@@ -47,10 +47,12 @@ jobs:
           echo "Release body: ${{ github.event.release.body }}"
 
       - name: Update package.json version
+        working-directory: ./packages/core
         run: |
           npm version ${{ steps.extract_version.outputs.version }} --no-git-tag-version
 
       - name: Publish to npm
+        working-directory: ./packages/core
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

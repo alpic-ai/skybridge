@@ -28,6 +28,7 @@ jobs:
         with:
           path: |
             node_modules
+            packages/*/node_modules
           key: build-${{ github.sha }}
 
   test:
@@ -60,6 +61,7 @@ jobs:
         with:
           path: |
             node_modules
+            packages/*/node_modules
           key: build-${{ github.sha }}
 
       - name: Run ${{ matrix.name }}
