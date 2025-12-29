@@ -9,7 +9,7 @@ export interface IBridge {
 export interface BridgeInterface {
   theme: "light" | "dark";
   locale: string;
-  displayMode: "pip" | "inline" | "fullscreen";
+  displayMode: "pip" | "inline" | "fullscreen" | "modal";
   safeArea: {
     insets: {
       top: number;
