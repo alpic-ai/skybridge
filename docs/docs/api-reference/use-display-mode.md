@@ -103,11 +103,11 @@ function AdaptiveWidget() {
 ### Picture-in-Picture Mode
 
 ```tsx
-import { useDisplayMode, useUserAgent } from "skybridge/web";
+import { useDisplayMode, useUser } from "skybridge/web";
 
 function FloatingWidget() {
   const [displayMode, setDisplayMode] = useDisplayMode();
-  const userAgent = useUserAgent();
+  const { userAgent } = useUser();
   const isMobile = userAgent.device.type === "mobile";
 
   return (

@@ -7,7 +7,7 @@ sidebar_position: 9
 The `useOpenAiGlobal` hook is a low-level hook that subscribes to global state values exposed by the OpenAI host. This hook powers many of the other Skybridge hooks and can be used directly when you need access to specific global values.
 
 :::tip
-For most use cases, prefer using the specialized hooks like `useTheme`, `useLocale`, `useDisplayMode`, etc., as they provide a more convenient API.
+For most use cases, prefer using the specialized hooks like `useLayout`, `useUser`, `useDisplayMode`, etc., as they provide a more convenient API.
 :::
 
 ## Basic usage
