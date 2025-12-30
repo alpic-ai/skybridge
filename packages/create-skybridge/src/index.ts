@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import * as prompts from "@clack/prompts";
 import mri from "mri";
 
@@ -110,16 +111,19 @@ async function init() {
   prompts.log.step(`Copying template...`);
 
   try {
-    const templateDir = new URL("../template", import.meta.url).pathname;
+    const templateDir = fileURLToPath(new URL("../template", import.meta.url));
     // Copy template to target directory
     fs.cpSync(templateDir, root, { recursive: true });
     // Rename _gitignore to .gitignore
     fs.renameSync(path.join(root, "_gitignore"), path.join(root, ".gitignore"));
     // Update project name in package.json
-    const pkgPath = path.join(root, "package.json");
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
-    pkg.name = path.basename(root);
-    fs.writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
+    const name = path.basename(root);
+    for (const dir of ["", "server", "web"]) {
+      const pkgPath = path.join(root, dir, "package.json");
+      const pkg = fs.readFileSync(pkgPath, "utf-8");
+      const fixed = pkg.replace(/apps-sdk-template/g, name);
+      fs.writeFileSync(pkgPath, fixed);
+    }
 
     prompts.log.success(`Project created in ${root}`);
     prompts.outro(
