@@ -74,8 +74,13 @@ const getExternalStore = <K extends keyof BridgeInterface>(
   if (key === "userAgent") {
     return {
       subscribe: (onChange) => () => {
-        bridge.subscribe("deviceCapabilities")(onChange);
-        bridge.subscribe("platform")(onChange);
+        const deviceCapabilitiesUnsubscribe = bridge.subscribe("deviceCapabilities")(onChange);
+        const platformUnsubscribe = bridge.subscribe("platform")(onChange);
+
+        return () => {
+          deviceCapabilitiesUnsubscribe();
+          platformUnsubscribe();
+        }
       },
       getSnapshot: () => {
         const userAgentDefaultValue =
