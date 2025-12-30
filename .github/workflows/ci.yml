@@ -29,6 +29,7 @@ jobs:
           path: |
             node_modules
             packages/*/node_modules
+            docs/node_modules
           key: build-${{ github.sha }}
 
   test:
@@ -49,6 +50,8 @@ jobs:
             command: pnpm run test:format
           - name: Build
             command: pnpm run build
+          - name: Docs Build
+            command: pnpm run --filter @skybridge/docs build
     steps:
       - uses: actions/checkout@v4
 
@@ -64,6 +67,7 @@ jobs:
           path: |
             node_modules
             packages/*/node_modules
+            docs/node_modules
           key: build-${{ github.sha }}
 
       - name: Run ${{ matrix.name }}
