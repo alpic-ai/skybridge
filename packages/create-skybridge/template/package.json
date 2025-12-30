@@ -17,7 +17,6 @@
     "web:preview": "pnpm --filter @apps-sdk-template/web preview"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.3.8",
     "tsx": "^4.19.4"
   }
 }
