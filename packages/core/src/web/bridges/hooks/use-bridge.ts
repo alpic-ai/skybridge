@@ -8,25 +8,31 @@ type BridgeExternalStore<K extends keyof BridgeInterface> = {
   getSnapshot: () => BridgeInterface[K];
 };
 
-const DEFAULT_VALUE_FOR_MCP_APP_BRIDGE: BridgeInterface = {
-  theme: "light",
-  locale: "en-US",
-  displayMode: "inline",
-  safeArea: {
-    insets: {
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
+const getDefaultValueFromMcpAppBridge = <K extends keyof BridgeInterface>(
+  key: K,
+): BridgeInterface[K] => {
+  const DEFAULT_VALUES_FOR_MCP_APP_BRIDGE: BridgeInterface = {
+    theme: "light",
+    locale: "en-US",
+    displayMode: "inline",
+    safeArea: {
+      insets: {
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+      },
     },
-  },
-  maxHeight: window.innerHeight,
+    maxHeight: window.innerHeight,
+  };
+
+  return DEFAULT_VALUES_FOR_MCP_APP_BRIDGE[key];
 };
 
 const getExternalStore = <K extends keyof BridgeInterface>(
   key: K,
 ): BridgeExternalStore<K> => {
-  const defaultValue = DEFAULT_VALUE_FOR_MCP_APP_BRIDGE[key];
+  const defaultValue = getDefaultValueFromMcpAppBridge(key);
   const hostType = window.skybridge.hostType;
   if (hostType === "apps-sdk") {
     const bridge = AppsSdkBridge.getInstance();
