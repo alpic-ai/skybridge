@@ -6,6 +6,7 @@
   "scripts": {
     "build": "pnpm --filter './packages/*' build",
     "test": "pnpm --filter './packages/*' test",
+    "format": "pnpm --filter './packages/*' format",
     "test:unit": "pnpm --filter './packages/*' test:unit",
     "test:type": "pnpm --filter './packages/*' test:type",
     "test:format": "pnpm --filter './packages/*' test:format",

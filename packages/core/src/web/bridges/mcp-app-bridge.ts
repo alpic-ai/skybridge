@@ -95,7 +95,7 @@ export class McpAppBridge {
     }
   }
 
-  private request<R extends { method: string; params?: unknown }, T>({
+  public request<R extends { method: string; params?: unknown }, T>({
     method,
     params,
   }: R): Promise<T> {

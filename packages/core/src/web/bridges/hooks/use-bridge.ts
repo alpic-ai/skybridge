@@ -1,11 +1,7 @@
-import type { McpUiHostContext } from "@modelcontextprotocol/ext-apps";
 import { useSyncExternalStore } from "react";
 import { AppsSdkBridge } from "../apps-sdk-bridge";
 import { McpAppBridge } from "../mcp-app-bridge";
-
-export type BridgeInterface = Required<
-  Pick<McpUiHostContext, "theme" | "locale">
->;
+import type { BridgeInterface } from "../types";
 
 type BridgeExternalStore<K extends keyof BridgeInterface> = {
   subscribe: (onChange: () => void) => () => void;
@@ -15,6 +11,16 @@ type BridgeExternalStore<K extends keyof BridgeInterface> = {
 const DEFAULT_VALUE_FOR_MCP_APP_BRIDGE: BridgeInterface = {
   theme: "light",
   locale: "en-US",
+  displayMode: "inline",
+  safeArea: {
+    insets: {
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+    },
+  },
+  maxHeight: window.innerHeight,
 };
 
 const getExternalStore = <K extends keyof BridgeInterface>(
@@ -26,10 +32,30 @@ const getExternalStore = <K extends keyof BridgeInterface>(
     const bridge = AppsSdkBridge.getInstance();
     return {
       subscribe: bridge.subscribe(key),
-      getSnapshot: () => bridge.getSnapshot(key) as BridgeInterface[K],
+      getSnapshot: () => bridge.getSnapshot(key),
     };
   }
   const bridge = McpAppBridge.getInstance();
+  if (key === "safeArea") {
+    return {
+      subscribe: bridge.subscribe("safeAreaInsets"),
+      getSnapshot: () => {
+        const safeArea = bridge.getSnapshot("safeAreaInsets");
+        return safeArea
+          ? ({ insets: safeArea } as BridgeInterface[K])
+          : defaultValue;
+      },
+    };
+  }
+  if (key === "maxHeight") {
+    return {
+      subscribe: bridge.subscribe("viewport"),
+      getSnapshot: () => {
+        const viewport = bridge.getSnapshot("viewport");
+        return (viewport?.maxHeight ?? defaultValue) as BridgeInterface[K];
+      },
+    };
+  }
   return {
     subscribe: bridge.subscribe(key),
     getSnapshot: () =>
@@ -46,6 +72,5 @@ export const useBridge = <K extends keyof BridgeInterface>(
   return useSyncExternalStore(
     externalStore.subscribe,
     externalStore.getSnapshot,
-    () => DEFAULT_VALUE_FOR_MCP_APP_BRIDGE[key],
   );
 };
