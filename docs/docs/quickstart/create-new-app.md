@@ -6,15 +6,15 @@ sidebar_position: 1
 
 The fastest way to start building is using our starter template. It comes pre-configured with an MCP server, UI widgets, and a full dev server with Hot Module Reload.
 
-## Clone the Starter kit
+## Bootstrap your project
 
-You can [create a new repository](https://github.com/new?template_name=apps-sdk-template&template_owner=alpic-ai) using our [ChatGPT Apps starter template](https://github.com/alpic-ai/apps-sdk-template), or clone it manually:
+Set up your app with a single command:
 
 ```bash
-git clone https://github.com/alpic-ai/apps-sdk-template my-chatgpt-app
-cd my-chatgpt-app
-pnpm install
+npx create-skybridge my-chatgpt-app
 ```
+
+Alternatively, clone the [starter template](https://github.com/alpic-ai/apps-sdk-template) directly or [use it as a GitHub template](https://github.com/new?template_name=apps-sdk-template&template_owner=alpic-ai).
 
 :::info Prerequisites
 Make sure you have:
