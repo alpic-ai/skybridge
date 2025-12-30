@@ -3,9 +3,9 @@ import type {
   McpUiRequestDisplayModeResult,
 } from "@modelcontextprotocol/ext-apps";
 import { McpAppBridge } from "./mcp-app-bridge";
-import type { IBridgeMethods } from "./types";
+import type { Methods } from "./types";
 
-export const requestDisplayMode: IBridgeMethods["requestDisplayMode"] = ({
+export const requestDisplayMode: Methods["requestDisplayMode"] = ({
   mode,
 }) => {
   const bridge = McpAppBridge.getInstance();

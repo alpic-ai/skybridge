@@ -1,15 +1,15 @@
-export type IBridgeMethods = {
-  requestDisplayMode({ mode }: { mode: BridgeDisplayMode }): Promise<{
-    mode: BridgeDisplayMode;
+export type Methods = {
+  requestDisplayMode({ mode }: { mode: DisplayMode }): Promise<{
+    mode: DisplayMode;
   }>;
 };
 
-export type BridgeDisplayMode = "pip" | "inline" | "fullscreen" | "modal";
+export type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
 
 export interface BridgeInterface {
   theme: "light" | "dark";
   locale: string;
-  displayMode: BridgeDisplayMode;
+  displayMode: DisplayMode;
   safeArea: {
     insets: {
       top: number;
