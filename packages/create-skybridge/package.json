@@ -1,0 +1,28 @@
+{
+  "name": "create-skybridge",
+  "version": "0.0.0",
+  "type": "module",
+  "license": "MIT",
+  "author": "Alpic",
+  "bin": {
+    "create-skybridge": "index.js"
+  },
+  "files": [
+    "index.js",
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test:type": "tsc --noEmit",
+    "test:format": "biome ci",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "mri": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "typescript": "^5.9.3"
+  }
+}
