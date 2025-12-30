@@ -8,7 +8,9 @@ type BridgeExternalStore<K extends keyof BridgeInterface> = {
   getSnapshot: () => BridgeInterface[K];
 };
 
-const getDefaultValueFromMcpAppBridge = <K extends keyof BridgeInterface>(key: K): BridgeInterface[K] => {
+const getDefaultValueFromMcpAppBridge = <K extends keyof BridgeInterface>(
+  key: K,
+): BridgeInterface[K] => {
   const DEFAULT_VALUES_FOR_MCP_APP_BRIDGE: BridgeInterface = {
     theme: "light",
     locale: "en-US",
@@ -21,11 +23,11 @@ const getDefaultValueFromMcpAppBridge = <K extends keyof BridgeInterface>(key: K
         left: 0,
       },
     },
-    maxHeight: window.innerHeight
-  }
-  
-  return DEFAULT_VALUES_FOR_MCP_APP_BRIDGE[key]
-}
+    maxHeight: window.innerHeight,
+  };
+
+  return DEFAULT_VALUES_FOR_MCP_APP_BRIDGE[key];
+};
 
 const getExternalStore = <K extends keyof BridgeInterface>(
   key: K,
