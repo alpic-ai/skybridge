@@ -1,7 +1,6 @@
-import type { SpawnOptions } from "node:child_process";
-import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import * as prompts from "@clack/prompts";
 import mri from "mri";
 
@@ -14,14 +13,13 @@ const argv = mri<{
 });
 
 const cwd = process.cwd();
-const TEMPLATE_REPO = "https://github.com/alpic-ai/apps-sdk-template";
 const defaultProjectName = "skybridge-project";
 
 // prettier-ignore
 const helpMessage = `\
 Usage: create-skybridge [OPTION]... [DIRECTORY]
 
-Create a new Skybridge project by cloning the starter template.
+Create a new Skybridge project by copying the starter template.
 
 Options:
   -h, --help              show this help message
@@ -31,22 +29,6 @@ Examples:
   create-skybridge my-app
   create-skybridge . --overwrite
 `;
-
-function run([command, ...args]: string[], options?: SpawnOptions) {
-  if (!command) {
-    throw new Error("Command is required");
-  }
-  const { status, error } = spawnSync(command, args, options);
-  if (status != null && status > 0) {
-    process.exit(status);
-  }
-
-  if (error) {
-    console.error(`\n${command} ${args.join(" ")} error!`);
-    console.error(error);
-    process.exit(1);
-  }
-}
 
 async function init() {
   const argTargetDir = argv._[0]
@@ -125,19 +107,22 @@ async function init() {
 
   const root = path.join(cwd, targetDir);
 
-  // 3. Clone the repository
-  prompts.log.step(`Cloning template from ${TEMPLATE_REPO}...`);
+  // 3. Copy the repository
+  prompts.log.step(`Copying template...`);
 
   try {
-    // Clone directly to target directory
-    run(["git", "clone", "--depth", "1", TEMPLATE_REPO, root], {
-      stdio: "inherit",
-    });
-
-    // Remove .git directory to start fresh
-    const gitDir = path.join(root, ".git");
-    if (fs.existsSync(gitDir)) {
-      fs.rmSync(gitDir, { recursive: true, force: true });
+    const templateDir = fileURLToPath(new URL("../template", import.meta.url));
+    // Copy template to target directory
+    fs.cpSync(templateDir, root, { recursive: true });
+    // Rename _gitignore to .gitignore
+    fs.renameSync(path.join(root, "_gitignore"), path.join(root, ".gitignore"));
+    // Update project name in package.json
+    const name = path.basename(root);
+    for (const dir of ["", "server", "web"]) {
+      const pkgPath = path.join(root, dir, "package.json");
+      const pkg = fs.readFileSync(pkgPath, "utf-8");
+      const fixed = pkg.replace(/apps-sdk-template/g, name);
+      fs.writeFileSync(pkgPath, fixed);
     }
 
     prompts.log.success(`Project created in ${root}`);
@@ -145,7 +130,7 @@ async function init() {
       `Done! Next steps:\n\n  cd ${targetDir}\n  pnpm install\n  pnpm dev`,
     );
   } catch (error) {
-    prompts.log.error("Failed to clone repository");
+    prompts.log.error("Failed to copy repository");
     console.error(error);
     process.exit(1);
   }

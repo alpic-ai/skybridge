@@ -13,7 +13,8 @@
   },
   "files": [
     "index.js",
-    "dist"
+    "dist",
+    "template"
   ],
   "scripts": {
     "build": "tsc",
