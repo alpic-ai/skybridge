@@ -4,6 +4,10 @@
   "type": "module",
   "license": "MIT",
   "author": "Alpic",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alpic-ai/skybridge.git"
+  },
   "bin": {
     "create-skybridge": "index.js"
   },
