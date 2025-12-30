@@ -64,9 +64,7 @@ jobs:
         working-directory: ./packages/core
         run: |
           npm version ${{ steps.version.outputs.version }} --no-git-tag-version
-          npm publish --tag ${{ steps.version.outputs.tag }} --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          npm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance
 
       - name: Publish create-skybridge to npm
         working-directory: ./packages/create-skybridge
