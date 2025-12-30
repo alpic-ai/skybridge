@@ -65,15 +65,31 @@ export class McpAppBridge {
     return McpAppBridge.instance;
   }
 
-  public subscribe =
-    (key: keyof McpUiHostContext) => (onChange: () => void) => {
-      this.listeners.set(
-        key,
-        new Set([...(this.listeners.get(key) || []), onChange]),
-      );
+  public subscribe(
+    key: keyof McpUiHostContext,
+  ): (onChange: () => void) => () => void;
+  public subscribe(
+    keys: (keyof McpUiHostContext)[],
+  ): (onChange: () => void) => () => void;
+  public subscribe(
+    keyOrKeys: keyof McpUiHostContext | (keyof McpUiHostContext)[],
+  ): (onChange: () => void) => () => void {
+    const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
+    return (onChange: () => void) => {
+      for (const key of keys) {
+        this.listeners.set(
+          key,
+          new Set([...(this.listeners.get(key) || []), onChange]),
+        );
+      }
       this.init();
-      return () => this.listeners.get(key)?.delete(onChange);
+      return () => {
+        for (const key of keys) {
+          this.listeners.get(key)?.delete(onChange);
+        }
+      };
     };
+  }
 
   public getSnapshot = <K extends keyof McpUiHostContext>(key: K) => {
     return this.context?.[key];
