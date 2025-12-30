@@ -11,7 +11,7 @@ The fastest way to start building is using our starter template. It comes pre-co
 Set up your app with a single command:
 
 ```bash
-npx create-skybridge my-chatgpt-app
+npm create skybridge@dev my-chatgpt-app
 ```
 
 Alternatively, clone the [starter template](https://github.com/alpic-ai/apps-sdk-template) directly or [use it as a GitHub template](https://github.com/new?template_name=apps-sdk-template&template_owner=alpic-ai).
