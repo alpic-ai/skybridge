@@ -12,20 +12,20 @@ The raw `window.openai` API is powerful but imperative. Skybridge wraps these pr
 
 ### Mapping: `window.openai` → Skybridge Hooks
 
-| Raw API | Skybridge Hook | Purpose |
-|---------|----------------|---------|
-| `window.openai.toolOutput` | [`useToolInfo()`](/api-reference/use-tool-info) | Access initial tool input and output |
-| `window.openai.widgetState` | [`useWidgetState()`](/api-reference/use-widget-state) | Manage persistent widget state |
-| `window.openai.callTool()` | [`useCallTool()`](/api-reference/use-call-tool) | Make additional tool calls |
+| Raw API | Skybridge Hook                                                          | Purpose |
+|---------|-------------------------------------------------------------------------|---------|
+| `window.openai.toolOutput` | [`useToolInfo()`](/api-reference/use-tool-info)                         | Access initial tool input and output |
+| `window.openai.widgetState` | [`useWidgetState()`](/api-reference/use-widget-state)                   | Manage persistent widget state |
+| `window.openai.callTool()` | [`useCallTool()`](/api-reference/use-call-tool)                         | Make additional tool calls |
 | `window.openai.sendFollowUpMessage()` | [`useSendFollowUpMessage()`](/api-reference/use-send-follow-up-message) | Send follow-up messages |
-| `window.openai.openExternal()` | [`useOpenExternal()`](/api-reference/use-open-external) | Open external URLs |
-| `window.openai.requestModal()` | [`useRequestModal()`](/api-reference/use-request-modal) | Request modal display |
-| `window.openai.theme` | [`useTheme()`](/api-reference/use-theme) | Access ChatGPT theme |
-| `window.openai.locale` | [`useLocale()`](/api-reference/use-locale) | Access user locale |
-| `window.openai.displayMode` | [`useDisplayMode()`](/api-reference/use-display-mode) | Access display mode |
-| `window.openai.requestDisplayMode()` | [`useDisplayMode()`](/api-reference/use-display-mode) | Request display mode change |
-| `window.openai.userAgent` | [`useUserAgent()`](/api-reference/use-user-agent) | Access user agent info |
-| `window.openai.*` | [`useOpenAiGlobal()`](/api-reference/use-openai-global) | Access any global value |
+| `window.openai.openExternal()` | [`useOpenExternal()`](/api-reference/use-open-external)                 | Open external URLs |
+| `window.openai.requestModal()` | [`useRequestModal()`](/api-reference/use-request-modal)                 | Request modal display |
+| `window.openai.theme` | [`useLayout()`](/api-reference/use-layout)                              | Access ChatGPT theme |
+| `window.openai.locale` | [`useUser()`](/api-reference/use-user)                                  | Access user locale |
+| `window.openai.displayMode` | [`useDisplayMode()`](/api-reference/use-display-mode)                   | Access display mode |
+| `window.openai.requestDisplayMode()` | [`useDisplayMode()`](/api-reference/use-display-mode)                   | Request display mode change |
+| `window.openai.userAgent` | [`useUser()`](/api-reference/use-user)                                  | Access user agent info |
+| `window.openai.*` | [`useOpenAiGlobal()`](/api-reference/use-openai-global)                 | Access any global value |
 
 ## Example: Before & After
 
@@ -94,14 +94,14 @@ function WeatherWidget() {
 ### With Skybridge (React Hooks)
 
 ```tsx
-import { useCallTool, useTheme } from "skybridge/web";
+import { useCallTool, useLayout } from "skybridge/web";
 
 function WeatherWidget() {
   const { callTool, isPending, data, isError, error } = useCallTool<
     { city: string; units: string },
     { structuredContent: { temperature: number } }
   >("getWeather");
-  const theme = useTheme();
+  const { theme } = useLayout();
   const isDark = theme === "dark";
 
   return (

@@ -29,11 +29,10 @@ pnpm add skybridge
 - **[`useWidgetState`](/api-reference/use-widget-state)**: Persist state across widget renders
 
 ### User Interface
-- **[`useTheme`](/api-reference/use-theme)**: Get the current user theme
+- **[`useLayout`](/api-reference/use-layout)**: Get the current user layout and visual environment information
 - **[`useDisplayMode`](/api-reference/use-display-mode)**: Get and request widget display mode changes
 - **[`useRequestModal`](/api-reference/use-request-modal)**: Open a modal portaled outside of the widget iframe
-- **[`useLocale`](/api-reference/use-locale)**: Get the user's locale
-- **[`useUserAgent`](/api-reference/use-user-agent)**: Get device type and capabilities
+- **[`useUser`](/api-reference/use-user)**: Get the session-stable user information (locale and userAgent)
 
 ### Actions
 - **[`useCallTool`](/api-reference/use-call-tool)**: Call tools from within a widget
