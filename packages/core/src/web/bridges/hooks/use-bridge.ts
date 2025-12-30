@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { AppsSdkBridge } from "../apps-sdk-bridge.js";
 import { McpAppBridge } from "../mcp-app-bridge.js";
-import type { BridgeInterface } from "../types.js";
+import type { BridgeInterface, DeviceType } from "../types.js";
 
 type BridgeExternalStore<K extends keyof BridgeInterface> = {
   subscribe: (onChange: () => void) => () => void;
@@ -24,6 +24,15 @@ const getDefaultValueFromMcpAppBridge = <K extends keyof BridgeInterface>(
       },
     },
     maxHeight: window.innerHeight,
+    userAgent: {
+      device: {
+        type: "unknown",
+      },
+      capabilities: {
+        hover: false,
+        touch: false,
+      },
+    },
   };
 
   return DEFAULT_VALUES_FOR_MCP_APP_BRIDGE[key];
@@ -59,6 +68,34 @@ const getExternalStore = <K extends keyof BridgeInterface>(
       getSnapshot: () => {
         const viewport = bridge.getSnapshot("viewport");
         return (viewport?.maxHeight ?? defaultValue) as BridgeInterface[K];
+      },
+    };
+  }
+  if (key === "userAgent") {
+    return {
+      subscribe: (onChange) => () => {
+        bridge.subscribe("deviceCapabilities")(onChange);
+        bridge.subscribe("platform")(onChange);
+      },
+      getSnapshot: () => {
+        const userAgentDefaultValue =
+          defaultValue as BridgeInterface["userAgent"];
+        const capabilities: BridgeInterface["userAgent"]["capabilities"] = {
+          ...userAgentDefaultValue.capabilities,
+          ...(bridge.getSnapshot("deviceCapabilities") ?? {}),
+        };
+        const mcpAppPlatform = bridge.getSnapshot("platform");
+        const deviceType: DeviceType = mcpAppPlatform
+          ? mcpAppPlatform === "web"
+            ? "desktop"
+            : mcpAppPlatform
+          : userAgentDefaultValue.device.type;
+        return {
+          device: {
+            type: deviceType,
+          },
+          capabilities,
+        } as BridgeInterface[K];
       },
     };
   }
