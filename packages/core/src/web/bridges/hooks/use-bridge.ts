@@ -25,8 +25,8 @@ const DEFAULT_VALUE_FOR_MCP_APP_BRIDGE: BridgeInterface = {
 
 const getExternalStore = <K extends keyof BridgeInterface>(
   key: K,
-  defaultValue: BridgeInterface[K] = DEFAULT_VALUE_FOR_MCP_APP_BRIDGE[key],
 ): BridgeExternalStore<K> => {
+  const defaultValue = DEFAULT_VALUE_FOR_MCP_APP_BRIDGE[key];
   const hostType = window.skybridge.hostType;
   if (hostType === "apps-sdk") {
     const bridge = AppsSdkBridge.getInstance();
@@ -65,9 +65,8 @@ const getExternalStore = <K extends keyof BridgeInterface>(
 
 export const useBridge = <K extends keyof BridgeInterface>(
   key: K,
-  defaultValue: BridgeInterface[K] = DEFAULT_VALUE_FOR_MCP_APP_BRIDGE[key],
 ): BridgeInterface[K] => {
-  const externalStore = getExternalStore(key, defaultValue);
+  const externalStore = getExternalStore(key);
 
   return useSyncExternalStore(
     externalStore.subscribe,
