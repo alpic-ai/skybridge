@@ -137,6 +137,11 @@ async function init() {
     run(["mv", path.join(root, "_gitignore"), path.join(root, ".gitignore")], {
       stdio: "inherit",
     });
+    // Update project name in package.json
+    const pkgPath = path.join(root, "package.json");
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+    pkg.name = path.basename(root);
+    fs.writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
 
     prompts.log.success(`Project created in ${root}`);
     prompts.outro(
