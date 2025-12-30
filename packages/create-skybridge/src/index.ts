@@ -1,5 +1,3 @@
-import type { SpawnOptions } from "node:child_process";
-import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import * as prompts from "@clack/prompts";
@@ -30,22 +28,6 @@ Examples:
   create-skybridge my-app
   create-skybridge . --overwrite
 `;
-
-function run([command, ...args]: string[], options?: SpawnOptions) {
-  if (!command) {
-    throw new Error("Command is required");
-  }
-  const { status, error } = spawnSync(command, args, options);
-  if (status != null && status > 0) {
-    process.exit(status);
-  }
-
-  if (error) {
-    console.error(`\n${command} ${args.join(" ")} error!`);
-    console.error(error);
-    process.exit(1);
-  }
-}
 
 async function init() {
   const argTargetDir = argv._[0]
@@ -129,14 +111,10 @@ async function init() {
 
   try {
     const templateDir = new URL("../template", import.meta.url).pathname;
-    // Copy directly to target directory
-    run(["cp", "-r", `${templateDir}/.`, root], {
-      stdio: "inherit",
-    });
-    // Set up .gitignore
-    run(["mv", path.join(root, "_gitignore"), path.join(root, ".gitignore")], {
-      stdio: "inherit",
-    });
+    // Copy template to target directory
+    fs.cpSync(templateDir, root, { recursive: true });
+    // Rename _gitignore to .gitignore
+    fs.renameSync(path.join(root, "_gitignore"), path.join(root, ".gitignore"));
     // Update project name in package.json
     const pkgPath = path.join(root, "package.json");
     const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
