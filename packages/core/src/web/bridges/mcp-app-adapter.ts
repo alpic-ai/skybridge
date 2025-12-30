@@ -1,7 +1,9 @@
 import type {
+  McpUiHostContext,
   McpUiRequestDisplayModeRequest,
   McpUiRequestDisplayModeResult,
 } from "@modelcontextprotocol/ext-apps";
+import type { BridgeExternalStore } from "./hooks/types.js";
 import { McpAppBridge } from "./mcp-app-bridge.js";
 import type { BridgeInterface, Methods } from "./types.js";
 
@@ -24,9 +26,9 @@ type BridgeInterfaceGetter = {
   [K in keyof BridgeInterface]: () => BridgeInterface[K];
 };
 
-export function getMcpAppSnapshot<K extends keyof BridgeInterface>(
+const getMcpAppSnapshot = <K extends keyof BridgeInterface>(
   key: K,
-): BridgeInterface[K] {
+): BridgeInterface[K] => {
   const bridge = McpAppBridge.getInstance();
   const getter: BridgeInterfaceGetter = {
     theme: () => bridge.getSnapshot("theme") ?? "light",
@@ -68,4 +70,31 @@ export function getMcpAppSnapshot<K extends keyof BridgeInterface>(
   };
 
   return getter[key]();
-}
+};
+
+const BRIDGE_MCP_APP_SUBSCRIBE_DEPENDENCY: Record<
+  keyof BridgeInterface,
+  (keyof McpUiHostContext)[]
+> = {
+  theme: ["theme"],
+  locale: ["locale"],
+  safeArea: ["safeAreaInsets"],
+  displayMode: ["displayMode"],
+  maxHeight: ["viewport"],
+  userAgent: ["platform", "deviceCapabilities"],
+};
+
+const getMcpAppSubscribe = <K extends keyof BridgeInterface>(
+  key: K,
+): BridgeExternalStore<K>["subscribe"] => {
+  const bridge = McpAppBridge.getInstance();
+
+  return bridge.subscribe(BRIDGE_MCP_APP_SUBSCRIBE_DEPENDENCY[key]);
+};
+
+export const getMcpAppExternalStore = <K extends keyof BridgeInterface>(
+  key: K,
+): BridgeExternalStore<K> => ({
+  subscribe: getMcpAppSubscribe(key),
+  getSnapshot: () => getMcpAppSnapshot(key),
+});

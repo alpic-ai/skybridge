@@ -1,13 +1,8 @@
 import { useSyncExternalStore } from "react";
 import { AppsSdkBridge } from "../apps-sdk-bridge.js";
-import { getMcpAppSnapshot } from "../mcp-app-adapter.js";
-import { McpAppBridge } from "../mcp-app-bridge.js";
+import { getMcpAppExternalStore } from "../mcp-app-adapter.js";
 import type { BridgeInterface } from "../types.js";
-
-type BridgeExternalStore<K extends keyof BridgeInterface> = {
-  subscribe: (onChange: () => void) => () => void;
-  getSnapshot: () => BridgeInterface[K];
-};
+import type { BridgeExternalStore } from "./types.js";
 
 const getExternalStore = <K extends keyof BridgeInterface>(
   key: K,
@@ -20,12 +15,8 @@ const getExternalStore = <K extends keyof BridgeInterface>(
       getSnapshot: () => bridge.getSnapshot(key),
     };
   }
-  const bridge = McpAppBridge.getInstance();
 
-  return {
-    subscribe: bridge.subscribe(key),
-    getSnapshot: () => getMcpAppSnapshot(key),
-  };
+  return getMcpAppExternalStore(key);
 };
 
 export const useBridge = <K extends keyof BridgeInterface>(
