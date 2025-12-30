@@ -20,7 +20,7 @@ const DEFAULT_VALUE_FOR_MCP_APP_BRIDGE: BridgeInterface = {
       left: 0,
     },
   },
-  maxHeight: window.innerHeight,
+  maxHeight: typeof window !== "undefined" ? window.innerHeight : 400,
 };
 
 const getExternalStore = <K extends keyof BridgeInterface>(
