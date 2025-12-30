@@ -5,9 +5,7 @@ import type {
 import { McpAppBridge } from "./mcp-app-bridge";
 import type { Methods } from "./types";
 
-export const requestDisplayMode: Methods["requestDisplayMode"] = ({
-  mode,
-}) => {
+export const requestDisplayMode: Methods["requestDisplayMode"] = ({ mode }) => {
   const bridge = McpAppBridge.getInstance();
   if (mode !== "modal") {
     return bridge.request<
