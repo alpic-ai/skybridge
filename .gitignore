@@ -1,2 +1,3 @@
 node_modules
 dist
+packages/create-skybridge/template/**/pnpm-lock.yaml
