@@ -60,8 +60,7 @@ export const getMcpAppAdapter = (): {
   ),
   maxHeight: createExternalStore(
     ["viewport"],
-    ({ viewport }) =>
-      viewport?.maxHeight ?? window.innerHeight,
+    ({ viewport }) => viewport?.maxHeight ?? window.innerHeight,
   ),
   userAgent: createExternalStore(
     ["platform", "deviceCapabilities"],
