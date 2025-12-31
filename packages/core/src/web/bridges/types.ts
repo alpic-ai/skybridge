@@ -6,6 +6,7 @@ export type Methods = {
 
 export type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
 
+export type DeviceType = "mobile" | "tablet" | "desktop" | "unknown";
 export interface BridgeInterface {
   theme: "light" | "dark";
   locale: string;
@@ -19,4 +20,13 @@ export interface BridgeInterface {
     };
   };
   maxHeight: number;
+  userAgent: {
+    device: {
+      type: DeviceType;
+    };
+    capabilities: {
+      hover: boolean;
+      touch: boolean;
+    };
+  };
 }
