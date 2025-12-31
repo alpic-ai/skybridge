@@ -3,7 +3,7 @@ import type {
   McpUiRequestDisplayModeRequest,
   McpUiRequestDisplayModeResult,
 } from "@modelcontextprotocol/ext-apps";
-import type { BridgeExternalStore, BridgeSubscribe } from "./hooks/types.js";
+import type { BridgeExternalStore } from "./hooks/types.js";
 import { McpAppBridge } from "./mcp-app-bridge.js";
 import type { BridgeInterface, Methods } from "./types.js";
 
