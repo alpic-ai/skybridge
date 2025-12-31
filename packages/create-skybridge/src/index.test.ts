@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { afterEach, beforeEach, describe, it } from "vitest";
+import { afterEach, beforeEach, describe, it, expect } from "vitest";
 import { init } from "./index.js";
 
 describe("create-skybridge", () => {
@@ -24,5 +24,11 @@ describe("create-skybridge", () => {
     await fs.access(
       path.join(process.cwd(), tempDirName, "project", ".gitignore"),
     );
+    try {
+      await fs.access(
+          path.join(process.cwd(), tempDirName, "project", ".npmrc"),
+      );
+      expect.fail(".npmrc should not be copied")
+    } catch {}
   });
 });
