@@ -1,15 +1,7 @@
-import { useCallback } from "react";
+import { getBridgeMethods } from "../bridges/index.js";
 
 export function useSendFollowUpMessage() {
-  const sendFollowUpMessage = useCallback(
-    async (prompt: string): Promise<void> => {
-      if (!window.openai?.sendFollowUpMessage) {
-        throw new Error("window.openai.sendFollowUpMessage is not available");
-      }
-      return window.openai.sendFollowUpMessage({ prompt });
-    },
-    [],
-  );
+  const { sendFollowUpMessage } = getBridgeMethods();
 
   return sendFollowUpMessage;
 }
