@@ -24,9 +24,9 @@ export const requestDisplayMode: Methods["requestDisplayMode"] = ({ mode }) => {
   throw new Error("Modal display mode is not accessible in MCP App.");
 };
 
-export const sendFollowUpMessage: Methods["sendFollowUpMessage"] = async ({
+export const sendFollowUpMessage: Methods["sendFollowUpMessage"] = async (
   prompt,
-}) => {
+) => {
   const bridge = McpAppBridge.getInstance();
   await bridge.request<McpUiMessageRequest, McpUiMessageResult>({
     method: "ui/message",
