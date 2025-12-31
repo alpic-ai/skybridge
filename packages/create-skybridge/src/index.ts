@@ -4,15 +4,6 @@ import { fileURLToPath } from "node:url";
 import * as prompts from "@clack/prompts";
 import mri from "mri";
 
-const argv = mri<{
-  help?: boolean;
-  overwrite?: boolean;
-}>(process.argv.slice(2), {
-  boolean: ["help", "overwrite"],
-  alias: { h: "help" },
-});
-
-const cwd = process.cwd();
 const defaultProjectName = "skybridge-project";
 
 // prettier-ignore
@@ -30,9 +21,17 @@ Examples:
   create-skybridge . --overwrite
 `;
 
-async function init() {
+export async function init(args: string[] = process.argv.slice(2)) {
+  const argv = mri<{
+    help?: boolean;
+    overwrite?: boolean;
+  }>(args, {
+    boolean: ["help", "overwrite"],
+    alias: { h: "help" },
+  });
+
   const argTargetDir = argv._[0]
-    ? formatTargetDir(String(argv._[0]))
+    ? sanitizeTargetDir(String(argv._[0]))
     : undefined;
   const argOverwrite = argv.overwrite;
 
@@ -54,13 +53,13 @@ async function init() {
         defaultValue: defaultProjectName,
         placeholder: defaultProjectName,
         validate: (value: string) => {
-          return value.length === 0 || formatTargetDir(value).length > 0
+          return value.length === 0 || sanitizeTargetDir(value).length > 0
             ? undefined
             : "Invalid project name";
         },
       });
       if (prompts.isCancel(projectName)) return cancel();
-      targetDir = formatTargetDir(projectName);
+      targetDir = sanitizeTargetDir(projectName);
     } else {
       targetDir = defaultProjectName;
     }
@@ -105,7 +104,7 @@ async function init() {
     }
   }
 
-  const root = path.join(cwd, targetDir);
+  const root = path.join(process.cwd(), targetDir);
 
   // 3. Copy the repository
   prompts.log.step(`Copying template...`);
@@ -136,8 +135,19 @@ async function init() {
   }
 }
 
-function formatTargetDir(targetDir: string) {
-  return targetDir.trim().replace(/\/+$/g, "");
+function sanitizeTargetDir(targetDir: string) {
+  return (
+    targetDir
+      .trim()
+      // Only keep alphanumeric, dash, underscore, dot, @, /
+      .replace(/[^a-zA-Z0-9\-_.@/]/g, "")
+      // Prevent path traversal
+      .replace(/\.\./g, "")
+      // Collapse multiple slashes
+      .replace(/\/+/g, "/")
+      // Remove leading/trailing slashes
+      .replace(/^\/+|\/+$/g, "")
+  );
 }
 
 function isEmpty(path: string) {
@@ -156,8 +166,3 @@ function emptyDir(dir: string) {
     fs.rmSync(path.resolve(dir, file), { recursive: true, force: true });
   }
 }
-
-init().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
