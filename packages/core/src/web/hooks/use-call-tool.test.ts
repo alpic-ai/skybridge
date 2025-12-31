@@ -139,6 +139,38 @@ describe("useCallTool - onSuccess callback", () => {
       expect(onSuccess).not.toHaveBeenCalled();
     });
   });
+
+  it("should always return last call started state", async () => {
+    const { result } = renderHook(() =>
+      useCallTool<typeof args, typeof data>(toolName),
+    );
+
+    const firstCallData = { ...data, result: "first call result" };
+    const secondCallData = { ...data, result: "second call result" };
+    const { promise: firstCallToolPromise, resolve: resolveFirstCallTool } =
+      Promise.withResolvers();
+    const { promise: secondCallToolPromise, resolve: resolveSecondCallTool } =
+      Promise.withResolvers();
+    OpenaiMock.callTool
+      .mockImplementationOnce(() => firstCallToolPromise)
+      .mockImplementationOnce(() => secondCallToolPromise);
+
+    await act(() => {
+      result.current.callTool(args);
+      result.current.callTool(args);
+      resolveFirstCallTool(firstCallData);
+      return firstCallToolPromise;
+    });
+
+    expect(result.current.status).toEqual("pending");
+    expect(result.current.data).toEqual(undefined);
+    resolveSecondCallTool(secondCallData);
+
+    await waitFor(() => {
+      expect(result.current.status).toEqual("success");
+      expect(result.current.data).toEqual(secondCallData);
+    });
+  });
 });
 
 describe("useCallTool - TypeScript typing", () => {
