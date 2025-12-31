@@ -1,5 +1,7 @@
 import type {
   McpUiHostContext,
+  McpUiMessageRequest,
+  McpUiMessageResult,
   McpUiRequestDisplayModeRequest,
   McpUiRequestDisplayModeResult,
 } from "@modelcontextprotocol/ext-apps";
@@ -20,6 +22,24 @@ export const requestDisplayMode: Methods["requestDisplayMode"] = ({ mode }) => {
   }
 
   throw new Error("Modal display mode is not accessible in MCP App.");
+};
+
+export const sendFollowUpMessage: Methods["sendFollowUpMessage"] = async (
+  prompt,
+) => {
+  const bridge = McpAppBridge.getInstance();
+  await bridge.request<McpUiMessageRequest, McpUiMessageResult>({
+    method: "ui/message",
+    params: {
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: prompt,
+        },
+      ],
+    },
+  });
 };
 
 type PickContext<K extends readonly (keyof McpUiHostContext)[]> = {

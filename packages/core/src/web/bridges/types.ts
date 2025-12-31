@@ -2,6 +2,7 @@ export type Methods = {
   requestDisplayMode({ mode }: { mode: DisplayMode }): Promise<{
     mode: DisplayMode;
   }>;
+  sendFollowUpMessage(prompt: string): Promise<void>;
 };
 
 export type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
