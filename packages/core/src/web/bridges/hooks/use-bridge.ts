@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
-import { AppsSdkBridge } from "../apps-sdk-bridge";
-import { McpAppBridge } from "../mcp-app-bridge";
-import type { BridgeInterface } from "../types";
+import { AppsSdkBridge } from "../apps-sdk-bridge.js";
+import { McpAppBridge } from "../mcp-app-bridge.js";
+import type { BridgeInterface } from "../types.js";
 
 type BridgeExternalStore<K extends keyof BridgeInterface> = {
   subscribe: (onChange: () => void) => () => void;
