@@ -1,4 +1,5 @@
 import "react";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { WidgetHostType } from "../server/index.js";
 
 declare module "react" {
@@ -70,10 +71,7 @@ export type OpenAiProperties<
 export type CallToolArgs = Record<string, unknown> | null;
 
 export type CallToolResponse = {
-  content: {
-    type: "text";
-    text: string;
-  }[];
+  content: CallToolResult["content"];
   structuredContent: Record<string, unknown>;
   isError: boolean;
   result: string;
