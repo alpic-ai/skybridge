@@ -43,8 +43,7 @@ ChatGPT Apps let you embed **rich, interactive UIs** directly in conversations. 
 **Create a new ChatGPT app:**
 
 ```bash
-gh repo create my-app --template alpic-ai/apps-sdk-template --clone
-cd my-app && pnpm install
+npm create skybridge@latest
 ```
 
 **Or add to an existing project:**
