@@ -1,7 +1,7 @@
+import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { spawn } from "node:child_process";
 import * as prompts from "@clack/prompts";
 import mri from "mri";
 
