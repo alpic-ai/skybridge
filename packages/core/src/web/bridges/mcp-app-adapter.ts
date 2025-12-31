@@ -32,10 +32,7 @@ const createExternalStore = <
 >(
   keys: Keys,
   getSnapshot: (context: PickContext<Keys>) => R,
-): {
-  subscribe: BridgeSubscribe;
-  getSnapshot: () => R;
-} => {
+) => {
   const bridge = McpAppBridge.getInstance();
 
   return {
@@ -49,50 +46,34 @@ const createExternalStore = <
   };
 };
 
-export const getMcpAppExternalStore = <K extends keyof BridgeInterface>(
-  key: K,
-): BridgeExternalStore<K> => {
-  const adapters: {
-    [P in keyof BridgeInterface]: () => BridgeExternalStore<P>;
-  } = {
-    theme: () =>
-      createExternalStore(["theme"], ({ theme }) => theme ?? "light"),
-
-    locale: () =>
-      createExternalStore(["locale"], ({ locale }) => locale ?? "en-US"),
-
-    safeArea: () =>
-      createExternalStore(["safeAreaInsets"], ({ safeAreaInsets }) => ({
-        insets: safeAreaInsets ?? { top: 0, right: 0, bottom: 0, left: 0 },
-      })),
-
-    displayMode: () =>
-      createExternalStore(
-        ["displayMode"],
-        ({ displayMode }) => displayMode ?? "inline",
-      ),
-
-    maxHeight: () =>
-      createExternalStore(
-        ["viewport"],
-        ({ viewport }) => viewport?.maxHeight ?? window.innerHeight,
-      ),
-
-    userAgent: () =>
-      createExternalStore(
-        ["platform", "deviceCapabilities"],
-        ({ platform, deviceCapabilities }) => ({
-          device: {
-            type: platform === "web" ? "desktop" : (platform ?? "unknown"),
-          },
-          capabilities: {
-            hover: true,
-            touch: true,
-            ...deviceCapabilities,
-          },
-        }),
-      ),
-  };
-
-  return adapters[key]();
-};
+export const getMcpAppAdapter = (): {
+  [K in keyof BridgeInterface]: BridgeExternalStore<K>;
+} => ({
+  theme: createExternalStore(["theme"], ({ theme }) => theme ?? "light"),
+  locale: createExternalStore(["locale"], ({ locale }) => locale ?? "en-US"),
+  safeArea: createExternalStore(["safeAreaInsets"], ({ safeAreaInsets }) => ({
+    insets: safeAreaInsets ?? { top: 0, right: 0, bottom: 0, left: 0 },
+  })),
+  displayMode: createExternalStore(
+    ["displayMode"],
+    ({ displayMode }) => displayMode ?? "inline",
+  ),
+  maxHeight: createExternalStore(
+    ["viewport"],
+    ({ viewport }) =>
+      viewport?.maxHeight ?? window.innerHeight,
+  ),
+  userAgent: createExternalStore(
+    ["platform", "deviceCapabilities"],
+    ({ platform, deviceCapabilities }) => ({
+      device: {
+        type: platform === "web" ? "desktop" : (platform ?? "unknown"),
+      },
+      capabilities: {
+        hover: true,
+        touch: true,
+        ...deviceCapabilities,
+      },
+    }),
+  ),
+});
