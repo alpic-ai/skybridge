@@ -41,9 +41,11 @@ const server = new McpServer(
       question: z.string().describe("The user question."),
     },
   },
-  async ({ question }) => {
+  async ({ question  }) => {
     try {
-      const answer = Answers[Math.floor(Math.random() * Answers.length)];
+      // deterministic answer
+      const hash = question.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const answer = Answers[hash % Answers.length];
       return {
         /**
          * Arbitrary JSON passed only to the component.
@@ -55,7 +57,7 @@ const server = new McpServer(
          * Structured data that is used to hydrate your component.
          * ChatGPT injects this object into your iframe as window.openai.toolOutput
          */
-        structuredContent: { question, answer },
+        structuredContent: { answer },
         /**
          * Optional free-form text that the model receives verbatim
          */
