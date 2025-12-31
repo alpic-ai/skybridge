@@ -114,8 +114,8 @@ export const useCallTool = <
     toolArgs: ToolArgs,
   ): Promise<CombinedCallToolResponse> => {
     setCallToolState({ status: "pending", data: undefined, error: undefined });
+    const { callTool } = getBridgeMethods();
     try {
-      const { callTool } = getBridgeMethods();
       const data = await callTool<ToolArgs, CombinedCallToolResponse>(
         name,
         toolArgs,

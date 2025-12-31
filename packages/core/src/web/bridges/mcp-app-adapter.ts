@@ -30,15 +30,13 @@ export const callTool = async <
     },
   });
 
-  const text: string[] = [];
-
-  response.content.forEach((content) => {
-    if (content.type === "text") {
-      text.push(content.text);
-    }
-  });
-
-  const result = text.join("\n");
+  const result = response.content
+    .filter(
+      (content): content is { type: "text"; text: string } =>
+        content.type === "text",
+    )
+    .map(({ text }) => text)
+    .join("\n");
 
   return {
     content: response.content,
