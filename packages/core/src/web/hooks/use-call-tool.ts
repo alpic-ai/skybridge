@@ -1,4 +1,6 @@
 import { useState } from "react";
+
+import { getBridgeMethods } from "../bridges/get-bridge-methods.js";
 import type {
   CallToolArgs,
   CallToolResponse,
@@ -113,10 +115,11 @@ export const useCallTool = <
   ): Promise<CombinedCallToolResponse> => {
     setCallToolState({ status: "pending", data: undefined, error: undefined });
     try {
-      const data = await window.openai.callTool<
-        ToolArgs,
-        CombinedCallToolResponse
-      >(name, toolArgs);
+      const { callTool } = getBridgeMethods();
+      const data = await callTool<ToolArgs, CombinedCallToolResponse>(
+        name,
+        toolArgs,
+      );
       setCallToolState({ status: "success", data, error: undefined });
 
       return data;

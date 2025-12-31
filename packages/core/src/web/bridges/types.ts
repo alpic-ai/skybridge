@@ -1,4 +1,20 @@
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+
+export type CallToolArgs = Record<string, unknown> | null;
+
+export type CallToolResponse = {
+  content: CallToolResult["content"];
+  structuredContent: NonNullable<CallToolResult["structuredContent"]>;
+  isError: NonNullable<CallToolResult["isError"]>;
+  result: string;
+  meta: NonNullable<CallToolResult["_meta"]>;
+};
+
 export type Methods = {
+  callTool<
+    ToolArgs extends CallToolArgs = null,
+    ToolResponse extends CallToolResponse = CallToolResponse,
+  >(name: string, args: ToolArgs): Promise<ToolResponse>;
   requestDisplayMode({ mode }: { mode: DisplayMode }): Promise<{
     mode: DisplayMode;
   }>;
