@@ -3,7 +3,7 @@ import type {
   McpUiRequestDisplayModeRequest,
   McpUiRequestDisplayModeResult,
 } from "@modelcontextprotocol/ext-apps";
-import type { BridgeExternalStore } from "./hooks/types.js";
+import type { BridgeExternalStore, BridgeSubscribe } from "./hooks/types.js";
 import { McpAppBridge } from "./mcp-app-bridge.js";
 import type { BridgeInterface, Methods } from "./types.js";
 
@@ -22,79 +22,81 @@ export const requestDisplayMode: Methods["requestDisplayMode"] = ({ mode }) => {
   throw new Error("Modal display mode is not accessible in MCP App.");
 };
 
-type BridgeInterfaceGetter = {
-  [K in keyof BridgeInterface]: () => BridgeInterface[K];
+type PickContext<K extends readonly (keyof McpUiHostContext)[]> = {
+  [P in K[number]]: McpUiHostContext[P];
 };
 
-const getMcpAppSnapshot = <K extends keyof BridgeInterface>(
-  key: K,
-): BridgeInterface[K] => {
+const createExternalStore = <
+  const Keys extends readonly (keyof McpUiHostContext)[],
+  R,
+>(
+  keys: Keys,
+  getSnapshot: (context: PickContext<Keys>) => R,
+): {
+  subscribe: BridgeSubscribe;
+  getSnapshot: () => R;
+} => {
   const bridge = McpAppBridge.getInstance();
-  const getter: BridgeInterfaceGetter = {
-    theme: () => bridge.getSnapshot("theme") ?? "light",
-    locale: () => bridge.getSnapshot("locale") ?? "en-US",
-    safeArea: () => {
-      const insets = bridge.getSnapshot("safeAreaInsets");
-      return {
-        insets: insets ?? {
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0,
-        },
-      };
-    },
-    displayMode: () => bridge.getSnapshot("displayMode") ?? "inline",
-    maxHeight: () =>
-      bridge.getSnapshot("viewport")?.maxHeight ?? window.innerHeight,
-    userAgent: () => {
-      const capabilities = {
-        ...{ hover: true, touch: true },
-        ...(bridge.getSnapshot("deviceCapabilities") ?? {}),
-      };
 
-      const mcpAppPlatform = bridge.getSnapshot("platform");
-      const deviceType = mcpAppPlatform
-        ? mcpAppPlatform === "web"
-          ? "desktop"
-          : mcpAppPlatform
-        : "unknown";
-
-      return {
-        device: {
-          type: deviceType,
-        },
-        capabilities,
-      };
+  return {
+    subscribe: bridge.subscribe(keys),
+    getSnapshot: () => {
+      const context = Object.fromEntries(
+        keys.map((k) => [k, bridge.getSnapshot(k)]),
+      ) as PickContext<Keys>;
+      return getSnapshot(context);
     },
   };
-
-  return getter[key]();
-};
-
-const BRIDGE_MCP_APP_SUBSCRIBE_DEPENDENCY: Record<
-  keyof BridgeInterface,
-  (keyof McpUiHostContext)[]
-> = {
-  theme: ["theme"],
-  locale: ["locale"],
-  safeArea: ["safeAreaInsets"],
-  displayMode: ["displayMode"],
-  maxHeight: ["viewport"],
-  userAgent: ["platform", "deviceCapabilities"],
-};
-
-const getMcpAppSubscribe = <K extends keyof BridgeInterface>(
-  key: K,
-): BridgeExternalStore<K>["subscribe"] => {
-  const bridge = McpAppBridge.getInstance();
-
-  return bridge.subscribe(BRIDGE_MCP_APP_SUBSCRIBE_DEPENDENCY[key]);
 };
 
 export const getMcpAppExternalStore = <K extends keyof BridgeInterface>(
   key: K,
-): BridgeExternalStore<K> => ({
-  subscribe: getMcpAppSubscribe(key),
-  getSnapshot: () => getMcpAppSnapshot(key),
-});
+): BridgeExternalStore<K> => {
+  const adapters: {
+    [P in keyof BridgeInterface]: () => BridgeExternalStore<P>;
+  } = {
+    theme: () =>
+      createExternalStore(["theme"], ({ theme }) => theme ?? "light"),
+
+    locale: () =>
+      createExternalStore(["locale"], ({ locale }) => locale ?? "en-US"),
+
+    safeArea: () =>
+      createExternalStore(["safeAreaInsets"], ({ safeAreaInsets }) => ({
+        insets: safeAreaInsets ?? { top: 0, right: 0, bottom: 0, left: 0 },
+      })),
+
+    displayMode: () =>
+      createExternalStore(
+        ["displayMode"],
+        ({ displayMode }) => displayMode ?? "inline",
+      ),
+
+    maxHeight: () =>
+      createExternalStore(
+        ["viewport"],
+        ({ viewport }) => viewport?.maxHeight ?? window.innerHeight,
+      ),
+
+    userAgent: () =>
+      createExternalStore(
+        ["platform", "deviceCapabilities"],
+        ({ platform, deviceCapabilities }) => ({
+          device: {
+            type: platform
+              ? platform === "web"
+                ? "desktop"
+                : platform
+              : "unknown",
+          },
+          capabilities: {
+            hover: true,
+            touch: true,
+            ...deviceCapabilities,
+          },
+        }),
+      ),
+  };
+
+  return adapters[key]();
+};

@@ -69,10 +69,10 @@ export class McpAppBridge {
     key: keyof McpUiHostContext,
   ): (onChange: () => void) => () => void;
   public subscribe(
-    keys: (keyof McpUiHostContext)[],
+    keys: readonly (keyof McpUiHostContext)[],
   ): (onChange: () => void) => () => void;
   public subscribe(
-    keyOrKeys: keyof McpUiHostContext | (keyof McpUiHostContext)[],
+    keyOrKeys: keyof McpUiHostContext | readonly (keyof McpUiHostContext)[],
   ): (onChange: () => void) => () => void {
     const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
     return (onChange: () => void) => {
