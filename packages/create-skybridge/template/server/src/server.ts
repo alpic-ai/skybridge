@@ -41,10 +41,12 @@ const server = new McpServer(
       question: z.string().describe("The user question."),
     },
   },
-  async ({ question  }) => {
+  async ({ question }) => {
     try {
       // deterministic answer
-      const hash = question.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const hash = question
+        .split("")
+        .reduce((acc, char) => acc + char.charCodeAt(0), 0);
       const answer = Answers[hash % Answers.length];
       return {
         /**

@@ -112,7 +112,10 @@ export async function init(args: string[] = process.argv.slice(2)) {
   try {
     const templateDir = fileURLToPath(new URL("../template", import.meta.url));
     // Copy template to target directory
-    fs.cpSync(templateDir, root, { recursive: true, filter: (src) => src !== ".npmrc" });
+    fs.cpSync(templateDir, root, {
+      recursive: true,
+      filter: (src) => src !== ".npmrc",
+    });
     // Rename _gitignore to .gitignore
     fs.renameSync(path.join(root, "_gitignore"), path.join(root, ".gitignore"));
     // Update project name in package.json
