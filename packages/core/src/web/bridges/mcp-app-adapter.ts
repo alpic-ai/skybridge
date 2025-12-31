@@ -83,7 +83,7 @@ export const getMcpAppExternalStore = <K extends keyof BridgeInterface>(
         ["platform", "deviceCapabilities"],
         ({ platform, deviceCapabilities }) => ({
           device: {
-            type: platform === "web" ? "desktop" : platform ?? "unknown",
+            type: platform === "web" ? "desktop" : (platform ?? "unknown"),
           },
           capabilities: {
             hover: true,
