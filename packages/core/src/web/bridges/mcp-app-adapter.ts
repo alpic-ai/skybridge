@@ -136,15 +136,15 @@ export const getMcpAppAdapter = (): {
     }),
   ),
   toolInput: createExternalStore(
-    ["input"],
-    ({ input }) => input ?? DEFAULT_TOOL_INPUT,
+    ["toolInput"],
+    ({ toolInput }) => toolInput ?? DEFAULT_TOOL_INPUT,
   ),
   toolOutput: createExternalStore(
-    ["result"],
-    ({ result }) => result?.structuredContent ?? null,
+    ["toolResult"],
+    ({ toolResult }) => toolResult?.structuredContent ?? null,
   ),
   toolResponseMetadata: createExternalStore(
-    ["result"],
-    ({ result }) => result?._meta ?? null,
+    ["toolResult"],
+    ({ toolResult }) => toolResult?._meta ?? null,
   ),
 });

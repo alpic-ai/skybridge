@@ -88,11 +88,7 @@ describe("useToolInfo", () => {
     const mockPostMessage = MCPAppHostPostMessageMock;
 
     beforeEach(() => {
-      vi.stubGlobal("parent", {
-        value: { postMessage: mockPostMessage },
-        writable: true,
-        configurable: true,
-      });
+      vi.stubGlobal("parent", { postMessage: mockPostMessage });
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     });
 
