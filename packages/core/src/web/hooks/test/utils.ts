@@ -1,4 +1,5 @@
 import type {
+  McpUiHostContext,
   McpUiInitializeRequest,
   McpUiInitializeResult,
   McpUiToolInputNotification,
@@ -71,5 +72,20 @@ export const fireToolResultNotification = (params: {
         },
       },
     ),
+  );
+};
+
+export const fireHostContextChangedNotification = (
+  context: McpUiHostContext,
+) => {
+  fireEvent(
+    window,
+    new MessageEvent("message", {
+      data: {
+        jsonrpc: "2.0",
+        method: "ui/notifications/host-context-changed",
+        params: context,
+      },
+    }),
   );
 };

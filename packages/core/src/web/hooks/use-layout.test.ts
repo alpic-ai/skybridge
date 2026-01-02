@@ -1,8 +1,12 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { McpAppAdapter } from "../bridges/mcp-app-adapter.js";
 import { McpAppBridge } from "../bridges/mcp-app-bridge.js";
 import type { SafeArea, Theme } from "../types.js";
+import {
+  fireHostContextChangedNotification,
+  MCPAppHostPostMessageMock,
+} from "./test/utils.js";
 import { useLayout } from "./use-layout.js";
 
 describe("useLayout", () => {
@@ -64,18 +68,9 @@ describe("useLayout", () => {
   });
 
   describe("mcp-app host type", () => {
-    let mockPostMessage: ReturnType<typeof vi.fn>;
-
     beforeEach(() => {
-      mockPostMessage = vi.fn();
-      Object.defineProperty(window, "parent", {
-        value: { postMessage: mockPostMessage },
-        writable: true,
-        configurable: true,
-      });
+      vi.stubGlobal("parent", { postMessage: MCPAppHostPostMessageMock });
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
-      McpAppBridge.resetInstance();
-      McpAppAdapter.resetInstance();
     });
 
     afterEach(() => {
@@ -85,38 +80,12 @@ describe("useLayout", () => {
       McpAppAdapter.resetInstance();
     });
 
-    const sendMcpInitializeResponse = (
-      context: Record<string, unknown>,
-    ): void => {
-      const initCall = mockPostMessage.mock.calls.find(
-        (call) => call[0].method === "ui/initialize",
-      );
-      if (initCall) {
-        act(() => {
-          window.dispatchEvent(
-            new MessageEvent("message", {
-              data: {
-                jsonrpc: "2.0",
-                id: initCall[0].id,
-                result: {
-                  protocolVersion: "2025-06-18",
-                  hostInfo: { name: "test-host", version: "1.0.0" },
-                  hostCapabilities: {},
-                  hostContext: context,
-                },
-              },
-            }),
-          );
-        });
-      }
-    };
-
     it("should return theme, maxHeight, and safeArea from mcp host context", async () => {
       const { result } = renderHook(() => useLayout());
 
-      sendMcpInitializeResponse({
+      fireHostContextChangedNotification({
         theme: "dark",
-        viewport: { maxHeight: 800 },
+        viewport: { height: 400, width: 400, maxHeight: 800 },
         safeAreaInsets: { top: 20, right: 0, bottom: 34, left: 0 },
       });
 
@@ -132,9 +101,9 @@ describe("useLayout", () => {
     it("should maintain safeArea referential stability when data has not changed", async () => {
       const { result, rerender } = renderHook(() => useLayout());
 
-      sendMcpInitializeResponse({
+      fireHostContextChangedNotification({
         theme: "light",
-        viewport: { maxHeight: 500 },
+        viewport: { height: 400, width: 400, maxHeight: 500 },
         safeAreaInsets: { top: 44, right: 0, bottom: 34, left: 0 },
       });
 

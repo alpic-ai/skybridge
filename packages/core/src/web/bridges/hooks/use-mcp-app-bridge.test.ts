@@ -1,6 +1,9 @@
-import { act, fireEvent, renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MCPAppHostPostMessageMock } from "../../hooks/test/utils.js";
+import {
+  fireHostContextChangedNotification,
+  MCPAppHostPostMessageMock,
+} from "../../hooks/test/utils.js";
 import { McpAppBridge } from "../mcp-app-bridge.js";
 import { useMcpAppBridge } from "./use-mcp-app-bridge.js";
 
@@ -22,18 +25,7 @@ describe("useMcpAppBridge", () => {
       expect(result.current).toBe("light");
     });
 
-    fireEvent(
-      window,
-      new MessageEvent("message", {
-        data: {
-          jsonrpc: "2.0",
-          method: "ui/notifications/host-context-changed",
-          params: {
-            theme: "dark",
-          },
-        },
-      }),
-    );
+    fireHostContextChangedNotification({ theme: "dark" });
 
     await waitFor(() => {
       expect(result.current).toBe("dark");

@@ -1,8 +1,12 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { McpAppAdapter } from "../bridges/mcp-app-adapter.js";
 import { McpAppBridge } from "../bridges/mcp-app-bridge.js";
 import type { UserAgent } from "../types.js";
+import {
+  fireHostContextChangedNotification,
+  MCPAppHostPostMessageMock,
+} from "./test/utils.js";
 import { useUser } from "./use-user.js";
 
 describe("useUser", () => {
@@ -59,18 +63,13 @@ describe("useUser", () => {
   });
 
   describe("mcp-app host type", () => {
-    let mockPostMessage: ReturnType<typeof vi.fn>;
-
     beforeEach(() => {
-      mockPostMessage = vi.fn();
       Object.defineProperty(window, "parent", {
-        value: { postMessage: mockPostMessage },
+        value: { postMessage: MCPAppHostPostMessageMock },
         writable: true,
         configurable: true,
       });
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
-      McpAppBridge.resetInstance();
-      McpAppAdapter.resetInstance();
     });
 
     afterEach(() => {
@@ -80,36 +79,10 @@ describe("useUser", () => {
       McpAppAdapter.resetInstance();
     });
 
-    const sendMcpInitializeResponse = (
-      context: Record<string, unknown>,
-    ): void => {
-      const initCall = mockPostMessage.mock.calls.find(
-        (call) => call[0].method === "ui/initialize",
-      );
-      if (initCall) {
-        act(() => {
-          window.dispatchEvent(
-            new MessageEvent("message", {
-              data: {
-                jsonrpc: "2.0",
-                id: initCall[0].id,
-                result: {
-                  protocolVersion: "2025-06-18",
-                  hostInfo: { name: "test-host", version: "1.0.0" },
-                  hostCapabilities: {},
-                  hostContext: context,
-                },
-              },
-            }),
-          );
-        });
-      }
-    };
-
     it("should return locale and userAgent from mcp host context", async () => {
       const { result } = renderHook(() => useUser());
 
-      sendMcpInitializeResponse({
+      fireHostContextChangedNotification({
         locale: "fr-FR",
         platform: "web",
         deviceCapabilities: { hover: true, touch: false },
@@ -127,7 +100,7 @@ describe("useUser", () => {
     it("should maintain userAgent referential stability when data has not changed", async () => {
       const { result, rerender } = renderHook(() => useUser());
 
-      sendMcpInitializeResponse({
+      fireHostContextChangedNotification({
         locale: "en-US",
         platform: "web",
         deviceCapabilities: { hover: true, touch: false },
