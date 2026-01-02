@@ -134,8 +134,8 @@ describe("useToolInfo", () => {
           isPending: true,
           isSuccess: false,
           input: {},
-          output: {},
-          responseMetadata: {},
+          output: null,
+          responseMetadata: null,
         });
       });
     });
