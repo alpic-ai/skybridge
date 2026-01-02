@@ -7,7 +7,6 @@ A minimal TypeScript template for building OpenAI Apps SDK compatible MCP server
 ### Prerequisites
 
 - Node.js 22+
-- pnpm (install with `npm install -g pnpm`)
 - HTTP tunnel such as [ngrok](https://ngrok.com/download)
 
 ### Local Development
@@ -15,7 +14,13 @@ A minimal TypeScript template for building OpenAI Apps SDK compatible MCP server
 #### 1. Install
 
 ```bash
+npm install
+# or
+yarn install
+# or
 pnpm install
+# or
+bun install
 ```
 
 #### 2. Start your local server
@@ -23,7 +28,13 @@ pnpm install
 Run the development server from the root directory:
 
 ```bash
+npm run dev
+# or
+yarn dev
+# or
 pnpm dev
+# or
+bun dev
 ```
 
 This command starts an Express server on port 3000. This server packages:
