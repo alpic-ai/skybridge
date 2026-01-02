@@ -72,7 +72,9 @@ function getLLMDescriptionString(): string {
   const byParent = new Map<string | null, DataLLMNode[]>();
   for (const node of Array.from(nodes.values())) {
     const key = node.parentId ?? null;
-    if (!byParent.has(key)) byParent.set(key, []);
+    if (!byParent.has(key)) {
+      byParent.set(key, []);
+    }
     byParent.get(key)?.push(node);
   }
 
@@ -84,7 +86,9 @@ function getLLMDescriptionString(): string {
 
   function traverseTree(parentId: string | null, depth: number) {
     const children = byParent.get(parentId);
-    if (!children) return;
+    if (!children) {
+      return;
+    }
 
     for (const child of children) {
       if (child.content?.trim()) {

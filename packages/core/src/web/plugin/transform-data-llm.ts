@@ -18,8 +18,12 @@ function createBabelPlugin(t: typeof types): PluginObj<State> {
           state.needsDataLLMImport = false;
 
           for (const node of path.node.body) {
-            if (!t.isImportDeclaration(node)) continue;
-            if (node.source.value !== LLM_IMPORT_SOURCE) continue;
+            if (!t.isImportDeclaration(node)) {
+              continue;
+            }
+            if (node.source.value !== LLM_IMPORT_SOURCE) {
+              continue;
+            }
 
             const hasSpecifier = node.specifiers.some(
               (s) =>
@@ -61,7 +65,9 @@ function createBabelPlugin(t: typeof types): PluginObj<State> {
             t.isJSXIdentifier(attribute.name, { name: "data-llm" }),
         );
 
-        if (llmAttributeIndex === -1) return;
+        if (llmAttributeIndex === -1) {
+          return;
+        }
 
         const llmAttribute = attributes[
           llmAttributeIndex
