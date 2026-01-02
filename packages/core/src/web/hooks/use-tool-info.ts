@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAppsSdkBridge } from "../bridges/index.js";
+import { useBridge } from "../bridges/index.js";
 import type { UnknownObject } from "../types.js";
 
 export type ToolPendingState<ToolInput extends UnknownObject> = {
@@ -42,9 +42,9 @@ export function useToolInfo<
   TS extends Partial<ToolSignature> = Record<string, never>,
 >() {
   const [status, setStatus] = useState<"pending" | "success">("pending");
-  const input = useAppsSdkBridge("toolInput");
-  const output = useAppsSdkBridge("toolOutput");
-  const responseMetadata = useAppsSdkBridge("toolResponseMetadata");
+  const input = useBridge("toolInput");
+  const output = useBridge("toolOutput");
+  const responseMetadata = useBridge("toolResponseMetadata");
 
   useEffect(() => {
     setStatus(

@@ -46,4 +46,7 @@ export interface BridgeInterface {
       touch: boolean;
     };
   };
+  toolInput: Record<string, unknown>;
+  toolOutput: Record<string, unknown> | null;
+  toolResponseMetadata: Record<string, unknown> | null;
 }

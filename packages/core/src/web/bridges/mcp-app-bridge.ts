@@ -3,6 +3,9 @@ import type {
   McpUiInitializedNotification,
   McpUiInitializeRequest,
   McpUiInitializeResult,
+  McpUiToolCancelledNotification,
+  McpUiToolInputNotification,
+  McpUiToolResultNotification,
 } from "@modelcontextprotocol/ext-apps";
 
 type PendingRequest<T> = {
@@ -16,12 +19,30 @@ type McpAppInitializationOptions = Pick<
   "appInfo"
 >;
 
+export type McpToolState = {
+  input: McpUiToolInputNotification["params"] | null;
+  result: McpUiToolResultNotification["params"] | null;
+  cancelled: McpUiToolCancelledNotification["params"] | null;
+};
+
+export type McpAppBridgeContext = McpUiHostContext & McpToolState;
+
+export type McpAppBridgeKey = keyof McpAppBridgeContext;
+
 const LATEST_PROTOCOL_VERSION = "2025-11-21";
+
+const isToolStateKey = (key: McpAppBridgeKey): key is keyof McpToolState =>
+  key === "input" || key === "result" || key === "cancelled";
 
 export class McpAppBridge {
   private static instance: McpAppBridge | null = null;
   public context: McpUiHostContext | null = null;
-  private listeners = new Map<keyof McpUiHostContext, Set<() => void>>();
+  public toolState: McpToolState = {
+    input: null,
+    result: null,
+    cancelled: null,
+  };
+  private listeners = new Map<McpAppBridgeKey, Set<() => void>>();
   private pendingRequests = new Map<number, PendingRequest<unknown>>();
   private nextId = 1;
   private initialized: boolean;
@@ -65,14 +86,12 @@ export class McpAppBridge {
     return McpAppBridge.instance;
   }
 
+  public subscribe(key: McpAppBridgeKey): (onChange: () => void) => () => void;
   public subscribe(
-    key: keyof McpUiHostContext,
+    keys: readonly McpAppBridgeKey[],
   ): (onChange: () => void) => () => void;
   public subscribe(
-    keys: readonly (keyof McpUiHostContext)[],
-  ): (onChange: () => void) => () => void;
-  public subscribe(
-    keyOrKeys: keyof McpUiHostContext | readonly (keyof McpUiHostContext)[],
+    keyOrKeys: McpAppBridgeKey | readonly McpAppBridgeKey[],
   ): (onChange: () => void) => () => void {
     const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
     return (onChange: () => void) => {
@@ -91,9 +110,16 @@ export class McpAppBridge {
     };
   }
 
-  public getSnapshot = <K extends keyof McpUiHostContext>(key: K) => {
+  public getSnapshot<K extends keyof McpToolState>(key: K): McpToolState[K];
+  public getSnapshot<K extends keyof McpUiHostContext>(
+    key: K,
+  ): McpUiHostContext[K];
+  public getSnapshot(key: McpAppBridgeKey): McpAppBridgeContext[typeof key] {
+    if (isToolStateKey(key)) {
+      return this.toolState[key];
+    }
     return this.context?.[key];
-  };
+  }
 
   public cleanup = () => {
     window.removeEventListener("message", this.handleMessage);
@@ -130,7 +156,7 @@ export class McpAppBridge {
     return promise;
   }
 
-  private emit(key: keyof McpUiHostContext) {
+  private emit(key: McpAppBridgeKey) {
     this.listeners.get(key)?.forEach((listener) => {
       listener();
     });
@@ -175,6 +201,27 @@ export class McpAppBridge {
 
     if (data.method === "ui/notifications/host-context-changed") {
       this.setContext({ ...this.context, ...data.params });
+      return;
+    }
+
+    if (data.method === "ui/notifications/tool-input") {
+      const params = data.params as McpUiToolInputNotification["params"];
+      this.toolState = { ...this.toolState, input: params.arguments ?? null };
+      this.emit("input");
+      return;
+    }
+
+    if (data.method === "ui/notifications/tool-result") {
+      const params = data.params as McpUiToolResultNotification["params"];
+      this.toolState = { ...this.toolState, result: params };
+      this.emit("result");
+      return;
+    }
+
+    if (data.method === "ui/notifications/tool-cancelled") {
+      const params = data.params as McpUiToolCancelledNotification["params"];
+      this.toolState = { ...this.toolState, cancelled: params };
+      this.emit("cancelled");
     }
   };
 
