@@ -21,7 +21,9 @@ type McpAppInitializationOptions = Pick<
 >;
 
 export type McpToolState = {
-  toolInput: McpUiToolInputNotification["params"]["arguments"] | null;
+  toolInput: NonNullable<
+    McpUiToolInputNotification["params"]["arguments"]
+  > | null;
   toolResult: McpUiToolResultNotification["params"] | null;
   toolCancelled: McpUiToolCancelledNotification["params"] | null;
 };
@@ -220,7 +222,7 @@ export class McpAppBridge {
         return;
       case "ui/notifications/tool-input":
         this.updateContext({
-          toolInput: data.params.arguments,
+          toolInput: data.params.arguments ?? {},
         });
         return;
       case "ui/notifications/tool-result":
