@@ -3,10 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { McpAppAdapter } from "../bridges/mcp-app-adapter.js";
 import { McpAppBridge } from "../bridges/mcp-app-bridge.js";
 import type { UserAgent } from "../types.js";
-import {
-  fireHostContextChangedNotification,
-  MCPAppHostPostMessageMock,
-} from "./test/utils.js";
+import { getMcpAppHostPostMessageMock } from "./test/utils.js";
 import { useUser } from "./use-user.js";
 
 describe("useUser", () => {
@@ -64,11 +61,6 @@ describe("useUser", () => {
 
   describe("mcp-app host type", () => {
     beforeEach(() => {
-      Object.defineProperty(window, "parent", {
-        value: { postMessage: MCPAppHostPostMessageMock },
-        writable: true,
-        configurable: true,
-      });
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     });
 
@@ -80,13 +72,14 @@ describe("useUser", () => {
     });
 
     it("should return locale and userAgent from mcp host context", async () => {
-      const { result } = renderHook(() => useUser());
-
-      fireHostContextChangedNotification({
-        locale: "fr-FR",
-        platform: "web",
-        deviceCapabilities: { hover: true, touch: false },
+      vi.stubGlobal("parent", {
+        postMessage: getMcpAppHostPostMessageMock({
+          locale: "fr-FR",
+          platform: "web",
+          deviceCapabilities: { hover: true, touch: false },
+        }),
       });
+      const { result } = renderHook(() => useUser());
 
       await waitFor(() => {
         expect(result.current.locale).toBe("fr-FR");
@@ -98,13 +91,14 @@ describe("useUser", () => {
     });
 
     it("should maintain userAgent referential stability when data has not changed", async () => {
-      const { result, rerender } = renderHook(() => useUser());
-
-      fireHostContextChangedNotification({
-        locale: "en-US",
-        platform: "web",
-        deviceCapabilities: { hover: true, touch: false },
+      vi.stubGlobal("parent", {
+        postMessage: getMcpAppHostPostMessageMock({
+          locale: "en-US",
+          platform: "web",
+          deviceCapabilities: { hover: true, touch: false },
+        }),
       });
+      const { result, rerender } = renderHook(() => useUser());
 
       await waitFor(() => {
         expect(result.current.userAgent).toBeDefined();

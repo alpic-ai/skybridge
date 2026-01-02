@@ -3,10 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { McpAppAdapter } from "../bridges/mcp-app-adapter.js";
 import { McpAppBridge } from "../bridges/mcp-app-bridge.js";
 import type { SafeArea, Theme } from "../types.js";
-import {
-  fireHostContextChangedNotification,
-  MCPAppHostPostMessageMock,
-} from "./test/utils.js";
+import { getMcpAppHostPostMessageMock } from "./test/utils.js";
 import { useLayout } from "./use-layout.js";
 
 describe("useLayout", () => {
@@ -69,7 +66,6 @@ describe("useLayout", () => {
 
   describe("mcp-app host type", () => {
     beforeEach(() => {
-      vi.stubGlobal("parent", { postMessage: MCPAppHostPostMessageMock });
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     });
 
@@ -81,13 +77,14 @@ describe("useLayout", () => {
     });
 
     it("should return theme, maxHeight, and safeArea from mcp host context", async () => {
-      const { result } = renderHook(() => useLayout());
-
-      fireHostContextChangedNotification({
-        theme: "dark",
-        viewport: { height: 400, width: 400, maxHeight: 800 },
-        safeAreaInsets: { top: 20, right: 0, bottom: 34, left: 0 },
+      vi.stubGlobal("parent", {
+        postMessage: getMcpAppHostPostMessageMock({
+          theme: "dark",
+          viewport: { height: 400, width: 400, maxHeight: 800 },
+          safeAreaInsets: { top: 20, right: 0, bottom: 34, left: 0 },
+        }),
       });
+      const { result } = renderHook(() => useLayout());
 
       await waitFor(() => {
         expect(result.current.theme).toBe("dark");
@@ -99,13 +96,14 @@ describe("useLayout", () => {
     });
 
     it("should maintain safeArea referential stability when data has not changed", async () => {
-      const { result, rerender } = renderHook(() => useLayout());
-
-      fireHostContextChangedNotification({
-        theme: "light",
-        viewport: { height: 400, width: 400, maxHeight: 500 },
-        safeAreaInsets: { top: 44, right: 0, bottom: 34, left: 0 },
+      vi.stubGlobal("parent", {
+        postMessage: getMcpAppHostPostMessageMock({
+          theme: "light",
+          viewport: { height: 400, width: 400, maxHeight: 500 },
+          safeAreaInsets: { top: 44, right: 0, bottom: 34, left: 0 },
+        }),
       });
+      const { result, rerender } = renderHook(() => useLayout());
 
       await waitFor(() => {
         expect(result.current.safeArea).toBeDefined();

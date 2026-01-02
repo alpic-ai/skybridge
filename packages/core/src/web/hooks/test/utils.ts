@@ -9,15 +9,18 @@ import { fireEvent } from "@testing-library/react";
 import { act } from "react";
 import { vi } from "vitest";
 
-const MOCK_HOST_INFO: McpUiInitializeResult = {
-  protocolVersion: "2025-06-18",
-  hostInfo: { name: "test-host", version: "1.0.0" },
-  hostCapabilities: {},
-  hostContext: { theme: "light" },
-};
+const DEFAULT_CONTEXT: McpUiHostContext = {};
 
-export const MCPAppHostPostMessageMock = vi.fn(
-  (message: McpUiInitializeRequest & { id: number }) => {
+export const getMcpAppHostPostMessageMock = (
+  initialContext: McpUiHostContext = DEFAULT_CONTEXT,
+) =>
+  vi.fn((message: McpUiInitializeRequest & { id: number }) => {
+    const result: McpUiInitializeResult = {
+      protocolVersion: "2025-06-18",
+      hostInfo: { name: "test-host", version: "1.0.0" },
+      hostCapabilities: {},
+      hostContext: initialContext,
+    };
     act(() =>
       fireEvent(
         window,
@@ -29,13 +32,12 @@ export const MCPAppHostPostMessageMock = vi.fn(
           data: {
             jsonrpc: "2.0",
             id: message.id,
-            result: MOCK_HOST_INFO,
+            result,
           },
         }),
       ),
     );
-  },
-);
+  });
 
 export const fireToolInputNotification = (args: Record<string, unknown>) => {
   fireEvent(
@@ -72,20 +74,5 @@ export const fireToolResultNotification = (params: {
         },
       },
     ),
-  );
-};
-
-export const fireHostContextChangedNotification = (
-  context: McpUiHostContext,
-) => {
-  fireEvent(
-    window,
-    new MessageEvent("message", {
-      data: {
-        jsonrpc: "2.0",
-        method: "ui/notifications/host-context-changed",
-        params: context,
-      },
-    }),
   );
 };
