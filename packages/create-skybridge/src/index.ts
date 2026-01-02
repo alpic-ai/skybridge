@@ -58,7 +58,9 @@ export async function init(args: string[] = process.argv.slice(2)) {
             : "Invalid project name";
         },
       });
-      if (prompts.isCancel(projectName)) return cancel();
+      if (prompts.isCancel(projectName)) {
+        return cancel();
+      }
       targetDir = sanitizeTargetDir(projectName);
     } else {
       targetDir = defaultProjectName;
@@ -87,7 +89,9 @@ export async function init(args: string[] = process.argv.slice(2)) {
             },
           ],
         });
-        if (prompts.isCancel(res)) return cancel();
+        if (prompts.isCancel(res)) {
+          return cancel();
+        }
         overwrite = res;
       } else {
         overwrite = "no";

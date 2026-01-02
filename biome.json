@@ -31,7 +31,8 @@
         "noBannedTypes": "error"
       },
       "style": {
-        "noNonNullAssertion": "error"
+        "noNonNullAssertion": "error",
+        "useBlockStatements": "error"
       }
     }
   },

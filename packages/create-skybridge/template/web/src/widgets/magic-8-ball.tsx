@@ -5,7 +5,9 @@ import { useToolInfo } from "../helpers";
 
 function Magic8Ball() {
   const { input, output } = useToolInfo<"magic-8-ball">();
-  if (!output) return <div>Shaking...</div>;
+  if (!output) {
+    return <div>Shaking...</div>;
+  }
 
   return (
     <div className="container">

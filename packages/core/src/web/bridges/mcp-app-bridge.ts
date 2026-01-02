@@ -183,7 +183,9 @@ export class McpAppBridge {
   }
 
   private init() {
-    if (this.initialized) return;
+    if (this.initialized) {
+      return;
+    }
     this.initialized = true;
 
     if (typeof window === "undefined" || window.parent === window) {
@@ -198,7 +200,9 @@ export class McpAppBridge {
     event: MessageEvent<McpAppResponse | McpAppNotification>,
   ) => {
     const data = event.data;
-    if (data.jsonrpc !== "2.0") return;
+    if (data.jsonrpc !== "2.0") {
+      return;
+    }
 
     if ("id" in data) {
       const request = this.pendingRequests.get(data.id);
