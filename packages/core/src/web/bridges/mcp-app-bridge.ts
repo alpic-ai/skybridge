@@ -129,7 +129,7 @@ export class McpAppBridge {
   public getSnapshot<K extends keyof McpAppBridgeContext>(
     key: K,
   ): McpAppBridgeContext[K] {
-    return this.context?.[key];
+    return this.context[key];
   }
 
   public cleanup = () => {
