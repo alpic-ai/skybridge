@@ -110,11 +110,11 @@ describe("useUser", () => {
         expect(result.current.userAgent).toBeDefined();
       });
 
-      const firstUserAgentRef = result.current.userAgent;
+      const initialUserAgent = result.current.userAgent;
 
       rerender();
 
-      expect(result.current.userAgent).toBe(firstUserAgentRef);
+      expect(result.current.userAgent).toBe(initialUserAgent);
     });
   });
 });

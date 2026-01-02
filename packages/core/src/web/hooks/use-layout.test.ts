@@ -111,11 +111,11 @@ describe("useLayout", () => {
         expect(result.current.safeArea).toBeDefined();
       });
 
-      const firstSafeAreaRef = result.current.safeArea;
+      const initialSafeArea = result.current.safeArea;
 
       rerender();
 
-      expect(result.current.safeArea).toBe(firstSafeAreaRef);
+      expect(result.current.safeArea).toBe(initialSafeArea);
     });
   });
 });
