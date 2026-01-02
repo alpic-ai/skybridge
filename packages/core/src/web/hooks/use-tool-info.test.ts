@@ -105,7 +105,8 @@ describe("useToolInfo", () => {
 
       if (initCall) {
         act(() => {
-          window.dispatchEvent(
+          fireEvent(
+            window,
             new MessageEvent("message", {
               data: {
                 jsonrpc: "2.0",
@@ -146,7 +147,8 @@ describe("useToolInfo", () => {
       initializeBridge();
 
       act(() => {
-        window.dispatchEvent(
+        fireEvent(
+          window,
           new MessageEvent("message", {
             data: {
               jsonrpc: "2.0",
@@ -175,7 +177,8 @@ describe("useToolInfo", () => {
       initializeBridge();
 
       act(() => {
-        window.dispatchEvent(
+        fireEvent(
+          window,
           new MessageEvent("message", {
             data: {
               jsonrpc: "2.0",
