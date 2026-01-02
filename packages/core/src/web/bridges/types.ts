@@ -11,17 +11,6 @@ export type CallToolResponse = {
   meta: NonNullable<CallToolResult["_meta"]>;
 };
 
-export type Methods = {
-  callTool<
-    ToolArgs extends CallToolArgs = null,
-    ToolResponse extends CallToolResponse = CallToolResponse,
-  >(name: string, args: ToolArgs): Promise<ToolResponse>;
-  requestDisplayMode(mode: DisplayMode): Promise<{
-    mode: DisplayMode;
-  }>;
-  sendFollowUpMessage(prompt: string): Promise<void>;
-};
-
 export type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
 
 export type DeviceType = "mobile" | "tablet" | "desktop" | "unknown";
@@ -65,8 +54,14 @@ export type ExternalStore<K extends keyof BridgeInterface> = {
   getSnapshot: () => BridgeInterface[K];
 };
 
-export interface Adapter extends Methods {
+export interface Adapter {
   getExternalStore<K extends keyof BridgeInterface>(key: K): ExternalStore<K>;
-
-  getMethod<K extends keyof Methods>(key: K): Methods[K];
+  callTool<
+    ToolArgs extends CallToolArgs = null,
+    ToolResponse extends CallToolResponse = CallToolResponse,
+  >(name: string, args: ToolArgs): Promise<ToolResponse>;
+  requestDisplayMode(mode: DisplayMode): Promise<{
+    mode: DisplayMode;
+  }>;
+  sendFollowUpMessage(prompt: string): Promise<void>;
 }

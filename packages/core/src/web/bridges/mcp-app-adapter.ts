@@ -20,7 +20,6 @@ import type {
   CallToolResponse,
   DisplayMode,
   ExternalStore,
-  Methods,
 } from "./types.js";
 
 type PickContext<K extends readonly McpAppBridgeKey[]> = {
@@ -51,10 +50,6 @@ export class McpAppAdapter implements Adapter {
     key: K,
   ): ExternalStore<K> {
     return this.stores[key];
-  }
-
-  public getMethod<K extends keyof Methods>(key: K) {
-    return this[key];
   }
 
   public callTool = async <

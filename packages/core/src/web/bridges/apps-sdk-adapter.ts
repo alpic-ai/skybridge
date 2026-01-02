@@ -5,7 +5,6 @@ import type {
   CallToolResponse,
   DisplayMode,
   ExternalStore,
-  Methods,
 } from "./types.js";
 
 export class AppsSdkAdapter implements Adapter {
@@ -51,8 +50,4 @@ export class AppsSdkAdapter implements Adapter {
   public sendFollowUpMessage = (prompt: string): Promise<void> => {
     return window.openai.sendFollowUpMessage({ prompt });
   };
-
-  public getMethod<K extends keyof Methods>(key: K) {
-    return this[key];
-  }
 }
