@@ -16,8 +16,6 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.24.3",
-    "@t3-oss/env-core": "^0.13.8",
-    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "skybridge": "catalog:",
     "vite": "^7.1.11",

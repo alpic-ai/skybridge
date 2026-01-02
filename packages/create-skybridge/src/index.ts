@@ -114,7 +114,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
     // Copy template to target directory
     fs.cpSync(templateDir, root, {
       recursive: true,
-      filter: (src) => src !== ".npmrc",
+      filter: (src) => !src.endsWith(".npmrc"),
     });
     // Rename _gitignore to .gitignore
     fs.renameSync(path.join(root, "_gitignore"), path.join(root, ".gitignore"));

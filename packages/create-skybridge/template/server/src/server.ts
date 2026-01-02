@@ -49,20 +49,7 @@ const server = new McpServer(
         .reduce((acc, char) => acc + char.charCodeAt(0), 0);
       const answer = Answers[hash % Answers.length];
       return {
-        /**
-         * Arbitrary JSON passed only to the component.
-         * Use it for data that should not influence the model’s reasoning, like the full set of locations that backs a dropdown.
-         * _meta is never shown to the model.
-         */
-        _meta: {},
-        /**
-         * Structured data that is used to hydrate your component.
-         * ChatGPT injects this object into your iframe as window.openai.toolOutput
-         */
         structuredContent: { answer },
-        /**
-         * Optional free-form text that the model receives verbatim
-         */
         content: [],
         isError: false,
       };

@@ -24,11 +24,8 @@ describe("create-skybridge", () => {
     await fs.access(
       path.join(process.cwd(), tempDirName, "project", ".gitignore"),
     );
-    try {
-      await fs.access(
-        path.join(process.cwd(), tempDirName, "project", ".npmrc"),
-      );
-      expect.fail(".npmrc should not be copied");
-    } catch {}
+    expect(
+      fs.access(path.join(process.cwd(), tempDirName, "project", ".npmrc")),
+    ).rejects.toThrowError();
   });
 });
