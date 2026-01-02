@@ -1,13 +1,14 @@
 import { AppsSdkBridge } from "./apps-sdk-bridge.js";
-import { BaseAdapter } from "./base-adapter.js";
-import type { BridgeExternalStore } from "./hooks/types.js";
 import type {
+  Adapter,
   BridgeInterface,
   CallToolResponse,
   DisplayMode,
+  ExternalStore,
+  Methods,
 } from "./types.js";
 
-export class AppsSdkAdapter extends BaseAdapter {
+export class AppsSdkAdapter implements Adapter {
   private static instance: AppsSdkAdapter | null = null;
 
   public static getInstance(): AppsSdkAdapter {
@@ -23,7 +24,7 @@ export class AppsSdkAdapter extends BaseAdapter {
 
   public getExternalStore<K extends keyof BridgeInterface>(
     key: K,
-  ): BridgeExternalStore<K> {
+  ): ExternalStore<K> {
     const bridge = AppsSdkBridge.getInstance();
     return {
       subscribe: bridge.subscribe(key),
@@ -50,4 +51,8 @@ export class AppsSdkAdapter extends BaseAdapter {
   public sendFollowUpMessage = (prompt: string): Promise<void> => {
     return window.openai.sendFollowUpMessage({ prompt });
   };
+
+  public getMethod<K extends keyof Methods>(key: K) {
+    return this[key];
+  }
 }

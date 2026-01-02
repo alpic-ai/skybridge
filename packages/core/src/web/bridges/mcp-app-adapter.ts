@@ -9,30 +9,30 @@ import type {
   CallToolResult,
 } from "@modelcontextprotocol/sdk/types.js";
 import { dequal } from "dequal/lite";
-import { BaseAdapter } from "./base-adapter.js";
-import type { BridgeExternalStore } from "./hooks/types.js";
 import {
   McpAppBridge,
   type McpAppBridgeContext,
   type McpAppBridgeKey,
 } from "./mcp-app-bridge.js";
 import type {
+  Adapter,
   BridgeInterface,
   CallToolResponse,
   DisplayMode,
+  ExternalStore,
+  Methods,
 } from "./types.js";
 
 type PickContext<K extends readonly McpAppBridgeKey[]> = {
   [P in K[number]]: McpAppBridgeContext[P];
 };
 
-export class McpAppAdapter extends BaseAdapter {
+export class McpAppAdapter implements Adapter {
   private static instance: McpAppAdapter | null = null;
   private stores: {
-    [K in keyof BridgeInterface]: BridgeExternalStore<K>;
+    [K in keyof BridgeInterface]: ExternalStore<K>;
   };
   private constructor() {
-    super();
     this.stores = this.initializeStores();
   }
 
@@ -49,8 +49,12 @@ export class McpAppAdapter extends BaseAdapter {
 
   public getExternalStore<K extends keyof BridgeInterface>(
     key: K,
-  ): BridgeExternalStore<K> {
+  ): ExternalStore<K> {
     return this.stores[key];
+  }
+
+  public getMethod<K extends keyof Methods>(key: K) {
+    return this[key];
   }
 
   public callTool = async <
@@ -118,7 +122,7 @@ export class McpAppAdapter extends BaseAdapter {
   };
 
   private initializeStores(): {
-    [K in keyof BridgeInterface]: BridgeExternalStore<K>;
+    [K in keyof BridgeInterface]: ExternalStore<K>;
   } {
     return {
       theme: this.createExternalStore(

@@ -1,12 +1,11 @@
 import { useSyncExternalStore } from "react";
 import { AppsSdkAdapter } from "../apps-sdk-adapter.js";
 import { McpAppAdapter } from "../mcp-app-adapter.js";
-import type { BridgeInterface } from "../types.js";
-import type { BridgeExternalStore } from "./types.js";
+import type { BridgeInterface, ExternalStore } from "../types.js";
 
 const getExternalStore = <K extends keyof BridgeInterface>(
   key: K,
-): BridgeExternalStore<K> => {
+): ExternalStore<K> => {
   const hostType = window.skybridge.hostType;
   if (hostType === "apps-sdk") {
     return AppsSdkAdapter.getInstance().getExternalStore(key);
