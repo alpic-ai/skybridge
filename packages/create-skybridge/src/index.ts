@@ -1,8 +1,11 @@
+import { type SpawnOptions, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as prompts from "@clack/prompts";
 import mri from "mri";
+
+const minimumPnpmVersion = 10;
 
 const defaultProjectName = "skybridge-project";
 
@@ -15,18 +18,20 @@ Create a new Skybridge project by copying the starter template.
 Options:
   -h, --help              show this help message
   --overwrite             remove existing files in target directory
+  --immediate             install dependencies and start development server
 
 Examples:
   create-skybridge my-app
-  create-skybridge . --overwrite
+  create-skybridge . --overwrite --immediate
 `;
 
 export async function init(args: string[] = process.argv.slice(2)) {
   const argv = mri<{
     help?: boolean;
     overwrite?: boolean;
+    immediate?: boolean;
   }>(args, {
-    boolean: ["help", "overwrite"],
+    boolean: ["help", "overwrite", "immediate"],
     alias: { h: "help" },
   });
 
@@ -34,6 +39,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
     ? sanitizeTargetDir(String(argv._[0]))
     : undefined;
   const argOverwrite = argv.overwrite;
+  const argImmediate = argv.immediate;
 
   const help = argv.help;
   if (help) {
@@ -128,11 +134,80 @@ export async function init(args: string[] = process.argv.slice(2)) {
     }
 
     prompts.log.success(`Project created in ${root}`);
-    prompts.outro(
-      `Done! Next steps:\n\n  cd ${targetDir}\n  pnpm install\n  pnpm dev`,
-    );
   } catch (error) {
     prompts.log.error("Failed to copy repository");
+    console.error(error);
+    process.exit(1);
+  }
+
+  // 4. Ask about immediate installation
+  let immediate = argImmediate;
+  if (immediate === undefined) {
+    if (interactive) {
+      const immediateResult = await prompts.confirm({
+        message: `Install with pnpm and start now?`,
+      });
+      if (prompts.isCancel(immediateResult)) {
+        return cancel();
+      }
+      immediate = immediateResult;
+    } else {
+      immediate = false;
+    }
+  }
+
+  const installCmd = ["pnpm", "install"];
+  const runCmd = ["pnpm", "dev"];
+
+  if (!immediate) {
+    prompts.outro(
+      `Done! Next steps:
+  cd ${targetDir}
+  ${installCmd.join(" ")}
+  ${runCmd.join(" ")}
+`,
+    );
+    return;
+  }
+
+  // check if pnpm is installed
+  const result = spawnSync("pnpm", ["--version"], { encoding: "utf-8" });
+  if (result.error || result.status !== 0) {
+    console.error("Error: pnpm is not installed. Please install pnpm first.");
+    process.exit(1);
+  }
+
+  // check if pnpm major is greater or equal to the one set in package.json packageManager, which should do the trick
+  const version = result.stdout.trim();
+  const major = Number(version.split(".")[0]);
+  if (Number.isNaN(major) || major < minimumPnpmVersion) {
+    console.error(
+      `Error: pnpm version ${version} is too old. Minimum required version is ${minimumPnpmVersion}.`,
+    );
+    process.exit(1);
+  }
+
+  prompts.log.step(`Installing dependencies with pnpm...`);
+  run(installCmd, {
+    stdio: "inherit",
+    cwd: root,
+  });
+
+  prompts.log.step("Starting dev server...");
+  run(runCmd, {
+    stdio: "inherit",
+    cwd: root,
+  });
+}
+
+function run([command, ...args]: string[], options?: SpawnOptions) {
+  const { status, error } = spawnSync(command, args, options);
+  if (status != null && status > 0) {
+    process.exit(status);
+  }
+
+  if (error) {
+    console.error(`\n${command} ${args.join(" ")} error!`);
     console.error(error);
     process.exit(1);
   }
