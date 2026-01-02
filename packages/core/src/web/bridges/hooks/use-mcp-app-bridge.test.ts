@@ -1,18 +1,12 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { act, fireEvent, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MCPAppHostPostMessageMock } from "../../hooks/test/utils.js";
 import { McpAppBridge } from "../mcp-app-bridge.js";
 import { useMcpAppBridge } from "./use-mcp-app-bridge.js";
 
 describe("useMcpAppBridge", () => {
-  let mockPostMessage: ReturnType<typeof vi.fn>;
-
   beforeEach(async () => {
-    mockPostMessage = vi.fn();
-    Object.defineProperty(window, "parent", {
-      value: { postMessage: mockPostMessage },
-      writable: true,
-      configurable: true,
-    });
+    vi.stubGlobal("parent", { postMessage: MCPAppHostPostMessageMock });
     vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     McpAppBridge.resetInstance();
   });
@@ -21,34 +15,28 @@ describe("useMcpAppBridge", () => {
     vi.clearAllMocks();
   });
 
-  it("should return the theme value from host context", async () => {
+  it("should return the theme value from host context and update on notification", async () => {
     const { result } = renderHook(() => useMcpAppBridge("theme"));
-
-    const initCall = mockPostMessage.mock.calls.find(
-      (call) => call[0].method === "ui/initialize",
-    );
-
-    if (initCall) {
-      act(() => {
-        window.dispatchEvent(
-          new MessageEvent("message", {
-            data: {
-              jsonrpc: "2.0",
-              id: initCall[0].id,
-              result: {
-                protocolVersion: "2025-06-18",
-                hostInfo: { name: "test-host", version: "1.0.0" },
-                hostCapabilities: {},
-                hostContext: { theme: "light" },
-              },
-            },
-          }),
-        );
-      });
-    }
 
     await waitFor(() => {
       expect(result.current).toBe("light");
+    });
+
+    fireEvent(
+      window,
+      new MessageEvent("message", {
+        data: {
+          jsonrpc: "2.0",
+          method: "ui/notifications/host-context-changed",
+          params: {
+            theme: "dark",
+          },
+        },
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current).toBe("dark");
     });
   });
 
@@ -58,9 +46,12 @@ describe("useMcpAppBridge", () => {
       .spyOn(console, "error")
       .mockImplementation(() => {});
 
+    const nonRespondingMock = vi.fn();
+    vi.stubGlobal("parent", { postMessage: nonRespondingMock });
+
     renderHook(() => useMcpAppBridge("theme", undefined, 100));
 
-    expect(mockPostMessage).toHaveBeenCalledWith(
+    expect(nonRespondingMock).toHaveBeenCalledWith(
       expect.objectContaining({ method: "ui/initialize" }),
       "*",
     );

@@ -1,5 +1,4 @@
 import type {
-  McpUiHostContext,
   McpUiMessageRequest,
   McpUiMessageResult,
   McpUiRequestDisplayModeRequest,
@@ -11,7 +10,11 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 
 import type { BridgeExternalStore } from "./hooks/types.js";
-import { McpAppBridge } from "./mcp-app-bridge.js";
+import {
+  McpAppBridge,
+  type McpAppBridgeContext,
+  type McpAppBridgeKey,
+} from "./mcp-app-bridge.js";
 import type { BridgeInterface, CallToolResponse, Methods } from "./types.js";
 
 export const callTool = async <
@@ -80,14 +83,11 @@ export const sendFollowUpMessage: Methods["sendFollowUpMessage"] = async (
   });
 };
 
-type PickContext<K extends readonly (keyof McpUiHostContext)[]> = {
-  [P in K[number]]: McpUiHostContext[P];
+type PickContext<K extends readonly McpAppBridgeKey[]> = {
+  [P in K[number]]: McpAppBridgeContext[P];
 };
 
-const createExternalStore = <
-  const Keys extends readonly (keyof McpUiHostContext)[],
-  R,
->(
+const createExternalStore = <const Keys extends readonly McpAppBridgeKey[], R>(
   keys: Keys,
   getSnapshot: (context: PickContext<Keys>) => R,
 ) => {
@@ -132,5 +132,17 @@ export const getMcpAppAdapter = (): {
         ...deviceCapabilities,
       },
     }),
+  ),
+  toolInput: createExternalStore(
+    ["toolInput"],
+    ({ toolInput }) => toolInput ?? null,
+  ),
+  toolOutput: createExternalStore(
+    ["toolResult"],
+    ({ toolResult }) => toolResult?.structuredContent ?? null,
+  ),
+  toolResponseMetadata: createExternalStore(
+    ["toolResult"],
+    ({ toolResult }) => toolResult?._meta ?? null,
   ),
 });
