@@ -19,6 +19,7 @@ export type Methods = {
     mode: DisplayMode;
   }>;
   sendFollowUpMessage(prompt: string): Promise<void>;
+  openExternal(href: string): void;
 };
 
 export type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";

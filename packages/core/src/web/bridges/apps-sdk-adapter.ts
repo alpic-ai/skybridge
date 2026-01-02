@@ -17,3 +17,7 @@ export const requestDisplayMode: Methods["requestDisplayMode"] = ({ mode }) => {
 export const sendFollowUpMessage: Methods["sendFollowUpMessage"] = (prompt) => {
   return window.openai.sendFollowUpMessage({ prompt });
 };
+
+export const openExternal: Methods["openExternal"] = (href) => {
+  window.openai.openExternal({ href });
+};

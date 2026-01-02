@@ -1,5 +1,7 @@
+import { getBridgeMethods } from "../bridges/index.js";
+
 export function useOpenExternal() {
-  return (href: string) => {
-    window.openai.openExternal({ href });
-  };
+  const { openExternal } = getBridgeMethods();
+
+  return openExternal;
 }
