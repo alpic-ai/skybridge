@@ -104,8 +104,6 @@ const createExternalStore = <const Keys extends readonly McpAppBridgeKey[], R>(
   };
 };
 
-const DEFAULT_TOOL_INPUT: Record<string, unknown> = {};
-
 export const getMcpAppAdapter = (): {
   [K in keyof BridgeInterface]: BridgeExternalStore<K>;
 } => ({
@@ -137,7 +135,7 @@ export const getMcpAppAdapter = (): {
   ),
   toolInput: createExternalStore(
     ["toolInput"],
-    ({ toolInput }) => toolInput ?? DEFAULT_TOOL_INPUT,
+    ({ toolInput }) => toolInput ?? null,
   ),
   toolOutput: createExternalStore(
     ["toolResult"],

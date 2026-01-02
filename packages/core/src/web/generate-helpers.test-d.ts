@@ -290,9 +290,12 @@ test("useToolInfo infers input and output types", () => {
   const { useToolInfo } = generateHelpers<TestServer>();
   const toolInfo = useToolInfo<"search-voyage">();
 
-  expectTypeOf(toolInfo.input).toExtend<
-    ToolInput<TestServer, "search-voyage">
-  >();
+  // Input is only available when not in idle state
+  if (!(toolInfo.status === "idle")) {
+    expectTypeOf(toolInfo.input).toExtend<
+      ToolInput<TestServer, "search-voyage">
+    >();
+  }
 
   if (toolInfo.status === "success") {
     expectTypeOf(toolInfo.output).toExtend<

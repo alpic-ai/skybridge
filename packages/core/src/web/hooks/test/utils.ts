@@ -1,6 +1,8 @@
 import type {
   McpUiInitializeRequest,
   McpUiInitializeResult,
+  McpUiToolInputNotification,
+  McpUiToolResultNotification,
 } from "@modelcontextprotocol/ext-apps";
 import { fireEvent } from "@testing-library/react";
 import { act } from "react";
@@ -33,3 +35,41 @@ export const MCPAppHostPostMessageMock = vi.fn(
     );
   },
 );
+
+export const fireToolInputNotification = (args: Record<string, unknown>) => {
+  fireEvent(
+    window,
+    new MessageEvent<McpUiToolInputNotification & { jsonrpc: "2.0" }>(
+      "message",
+      {
+        data: {
+          jsonrpc: "2.0",
+          method: "ui/notifications/tool-input",
+          params: {
+            arguments: args,
+          },
+        },
+      },
+    ),
+  );
+};
+
+export const fireToolResultNotification = (params: {
+  content: McpUiToolResultNotification["params"]["content"];
+  structuredContent: Record<string, unknown>;
+  _meta?: Record<string, unknown>;
+}) => {
+  fireEvent(
+    window,
+    new MessageEvent<McpUiToolResultNotification & { jsonrpc: "2.0" }>(
+      "message",
+      {
+        data: {
+          jsonrpc: "2.0",
+          method: "ui/notifications/tool-result",
+          params,
+        },
+      },
+    ),
+  );
+};

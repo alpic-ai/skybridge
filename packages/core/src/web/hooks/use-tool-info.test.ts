@@ -1,7 +1,3 @@
-import type {
-  McpUiToolInputNotification,
-  McpUiToolResultNotification,
-} from "@modelcontextprotocol/ext-apps";
 import { act, fireEvent, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { McpAppBridge } from "../bridges/mcp-app-bridge.js";
@@ -10,7 +6,11 @@ import {
   SET_GLOBALS_EVENT_TYPE,
   SetGlobalsEvent,
 } from "../types.js";
-import { MCPAppHostPostMessageMock } from "./test/utils.js";
+import {
+  fireToolInputNotification,
+  fireToolResultNotification,
+  MCPAppHostPostMessageMock,
+} from "./test/utils.js";
 import { useToolInfo } from "./use-tool-info.js";
 
 describe("useToolInfo", () => {
@@ -41,6 +41,7 @@ describe("useToolInfo", () => {
       expect(result.current).toMatchObject({
         input: { name: "pokemon", args: { name: "pikachu" } },
         status: "pending",
+        isIdle: false,
         isPending: true,
         isSuccess: false,
       });
@@ -75,6 +76,7 @@ describe("useToolInfo", () => {
       await waitFor(() => {
         expect(result.current).toMatchObject({
           status: "success",
+          isIdle: false,
           isPending: false,
           isSuccess: true,
           output: toolOutput,
@@ -98,45 +100,33 @@ describe("useToolInfo", () => {
       McpAppBridge.resetInstance();
     });
 
-    it("should return pending state initially", async () => {
+    it("should return idle state initially when tool input is not yet set", async () => {
       const { result } = renderHook(() => useToolInfo());
 
       await waitFor(() => {
         expect(result.current).toMatchObject({
-          status: "pending",
-          isPending: true,
+          status: "idle",
+          isIdle: true,
+          isPending: false,
           isSuccess: false,
-          input: {},
+          input: null,
           output: null,
           responseMetadata: null,
         });
       });
     });
 
-    it("should return tool input from tool-input notification", async () => {
+    it("should return pending state with tool input from tool-input notification", async () => {
       const { result } = renderHook(() => useToolInfo());
 
       act(() => {
-        fireEvent(
-          window,
-          new MessageEvent<McpUiToolInputNotification & { jsonrpc: "2.0" }>(
-            "message",
-            {
-              data: {
-                jsonrpc: "2.0",
-                method: "ui/notifications/tool-input",
-                params: {
-                  arguments: { name: "pokemon", query: "pikachu" },
-                },
-              },
-            },
-          ),
-        );
+        fireToolInputNotification({ name: "pokemon", query: "pikachu" });
       });
 
       await waitFor(() => {
         expect(result.current).toMatchObject({
           status: "pending",
+          isIdle: false,
           isPending: true,
           isSuccess: false,
           input: { name: "pokemon", query: "pikachu" },
@@ -148,30 +138,21 @@ describe("useToolInfo", () => {
       const { result } = renderHook(() => useToolInfo());
 
       act(() => {
-        fireEvent(
-          window,
-          new MessageEvent<McpUiToolResultNotification & { jsonrpc: "2.0" }>(
-            "message",
-            {
-              data: {
-                jsonrpc: "2.0",
-                method: "ui/notifications/tool-result",
-                params: {
-                  content: [{ type: "text", text: "Pikachu data" }],
-                  structuredContent: { name: "pikachu", color: "yellow" },
-                  _meta: { requestId: "123" },
-                },
-              },
-            },
-          ),
-        );
+        fireToolInputNotification({ name: "pokemon", query: "pikachu" });
+        fireToolResultNotification({
+          content: [{ type: "text", text: "Pikachu data" }],
+          structuredContent: { name: "pikachu", color: "yellow" },
+          _meta: { requestId: "123" },
+        });
       });
 
       await waitFor(() => {
         expect(result.current).toMatchObject({
           status: "success",
+          isIdle: false,
           isPending: false,
           isSuccess: true,
+          input: { name: "pokemon", query: "pikachu" },
           output: { name: "pikachu", color: "yellow" },
           responseMetadata: { requestId: "123" },
         });
