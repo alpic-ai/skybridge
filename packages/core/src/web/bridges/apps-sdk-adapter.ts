@@ -41,11 +41,9 @@ export class AppsSdkAdapter extends BaseAdapter {
     return window.openai.callTool<ToolArgs, ToolResponse>(name, args);
   };
 
-  public requestDisplayMode = ({
-    mode,
-  }: {
-    mode: DisplayMode;
-  }): Promise<{ mode: DisplayMode }> => {
+  public requestDisplayMode = (
+    mode: DisplayMode,
+  ): Promise<{ mode: DisplayMode }> => {
     return window.openai.requestDisplayMode({ mode });
   };
 

@@ -15,7 +15,7 @@ export type Methods = {
     ToolArgs extends CallToolArgs = null,
     ToolResponse extends CallToolResponse = CallToolResponse,
   >(name: string, args: ToolArgs): Promise<ToolResponse>;
-  requestDisplayMode({ mode }: { mode: DisplayMode }): Promise<{
+  requestDisplayMode(mode: DisplayMode): Promise<{
     mode: DisplayMode;
   }>;
   sendFollowUpMessage(prompt: string): Promise<void>;

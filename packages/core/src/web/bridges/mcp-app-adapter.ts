@@ -86,7 +86,7 @@ export class McpAppAdapter extends BaseAdapter {
     } as ToolResponse;
   };
 
-  public requestDisplayMode = ({ mode }: { mode: DisplayMode }) => {
+  public requestDisplayMode = (mode: DisplayMode) => {
     const bridge = McpAppBridge.getInstance();
     if (mode !== "modal") {
       return bridge.request<
