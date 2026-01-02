@@ -6,10 +6,10 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon",
-    "build": "tsc -b web && vite build -c web/vite.config.ts && shx rm -rf server/dist && tsc -p server/tsconfig.json && shx cp -r web/dist server/dist/assets",
+    "build": "vite build -c web/vite.config.ts && shx rm -rf server/dist && tsc -p tsconfig.server.json && shx cp -r web/dist server/dist/assets",
     "start": "node server/dist/index.js",
     "inspector": "mcp-inspector http://localhost:3000/mcp",
-    "server:build": "tsc -p server/tsconfig.json",
+    "server:build": "tsc -p tsconfig.server.json",
     "server:start": "node server/dist/index.js",
     "web:build": "tsc -b web && vite build -c web/vite.config.ts",
     "web:preview": "vite preview -c web/vite.config.ts"
