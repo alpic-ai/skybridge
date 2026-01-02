@@ -1,6 +1,8 @@
 import type {
   McpUiMessageRequest,
   McpUiMessageResult,
+  McpUiOpenLinkRequest,
+  McpUiOpenLinkResult,
   McpUiRequestDisplayModeRequest,
   McpUiRequestDisplayModeResult,
 } from "@modelcontextprotocol/ext-apps";
@@ -80,6 +82,14 @@ export const sendFollowUpMessage: Methods["sendFollowUpMessage"] = async (
         },
       ],
     },
+  });
+};
+
+export const openExternal: Methods["openExternal"] = (href) => {
+  const bridge = McpAppBridge.getInstance();
+  bridge.request<McpUiOpenLinkRequest, McpUiOpenLinkResult>({
+    method: "ui/open-link",
+    params: { url: href },
   });
 };
 
