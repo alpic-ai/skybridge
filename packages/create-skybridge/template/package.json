@@ -6,16 +6,28 @@
   "type": "module",
   "packageManager": "pnpm@10.18.3",
   "scripts": {
-    "dev": "pnpm --filter @apps-sdk-template/server dev",
-    "build": "pnpm web:build && rm -rf server/dist && pnpm --filter=@apps-sdk-template/server --prod deploy server/dist && cp -r web/dist server/dist/assets && pnpm --filter=@apps-sdk-template/server build",
-    "start": "pnpm server:start",
-    "inspector": "pnpm --filter @apps-sdk-template/server inspector",
-    "server:build": "pnpm --filter @apps-sdk-template/server build",
-    "server:start": "pnpm --filter @apps-sdk-template/server start",
+    "dev": "nodemon",
+    "build": "pnpm web:build && rm -rf server/dist && tsc -p server/tsconfig.json && cp -r web/dist server/dist/assets",
+    "start": "node server/dist/index.js",
+    "inspector": "mcp-inspector http://localhost:3000/mcp",
+    "server:build": "tsc -p server/tsconfig.json",
+    "server:start": "node server/dist/index.js",
     "web:build": "pnpm --filter @apps-sdk-template/web build",
     "web:preview": "pnpm --filter @apps-sdk-template/web preview"
   },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.24.3",
+    "express": "^5.1.0",
+    "skybridge": "catalog:",
+    "vite": "^7.1.11",
+    "zod": "^4.1.13"
+  },
   "devDependencies": {
-    "tsx": "^4.19.4"
+    "@modelcontextprotocol/inspector": "^0.17.5",
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.15.30",
+    "nodemon": "^3.1.10",
+    "tsx": "^4.19.4",
+    "typescript": "^5.7.2"
   }
 }
