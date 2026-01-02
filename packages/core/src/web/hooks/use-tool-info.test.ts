@@ -1,3 +1,7 @@
+import type {
+  McpUiToolInputNotification,
+  McpUiToolResultNotification,
+} from "@modelcontextprotocol/ext-apps";
 import { act, fireEvent, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { McpAppBridge } from "../bridges/mcp-app-bridge.js";
@@ -6,6 +10,7 @@ import {
   SET_GLOBALS_EVENT_TYPE,
   SetGlobalsEvent,
 } from "../types.js";
+import { MCPAppHostPostMessageMock } from "./test/utils.js";
 import { useToolInfo } from "./use-tool-info.js";
 
 describe("useToolInfo", () => {
@@ -80,7 +85,7 @@ describe("useToolInfo", () => {
   });
 
   describe("mcp-app host", () => {
-    const mockPostMessage = vi.fn();
+    const mockPostMessage = MCPAppHostPostMessageMock;
 
     beforeEach(() => {
       vi.stubGlobal("parent", {
@@ -97,36 +102,8 @@ describe("useToolInfo", () => {
       McpAppBridge.resetInstance();
     });
 
-    const initializeBridge = () => {
-      const initCall = mockPostMessage.mock.calls.find(
-        (call) => call[0].method === "ui/initialize",
-      );
-
-      if (initCall) {
-        act(() => {
-          fireEvent(
-            window,
-            new MessageEvent("message", {
-              data: {
-                jsonrpc: "2.0",
-                id: initCall[0].id,
-                result: {
-                  protocolVersion: "2025-11-21",
-                  hostInfo: { name: "test-host", version: "1.0.0" },
-                  hostCapabilities: {},
-                  hostContext: {},
-                },
-              },
-            }),
-          );
-        });
-      }
-    };
-
     it("should return pending state initially", async () => {
       const { result } = renderHook(() => useToolInfo());
-
-      initializeBridge();
 
       await waitFor(() => {
         expect(result.current).toMatchObject({
@@ -143,20 +120,21 @@ describe("useToolInfo", () => {
     it("should return tool input from tool-input notification", async () => {
       const { result } = renderHook(() => useToolInfo());
 
-      initializeBridge();
-
       act(() => {
         fireEvent(
           window,
-          new MessageEvent("message", {
-            data: {
-              jsonrpc: "2.0",
-              method: "ui/notifications/tool-input",
-              params: {
-                arguments: { name: "pokemon", query: "pikachu" },
+          new MessageEvent<McpUiToolInputNotification & { jsonrpc: "2.0" }>(
+            "message",
+            {
+              data: {
+                jsonrpc: "2.0",
+                method: "ui/notifications/tool-input",
+                params: {
+                  arguments: { name: "pokemon", query: "pikachu" },
+                },
               },
             },
-          }),
+          ),
         );
       });
 
@@ -173,22 +151,23 @@ describe("useToolInfo", () => {
     it("should return success state with output from tool-result notification", async () => {
       const { result } = renderHook(() => useToolInfo());
 
-      initializeBridge();
-
       act(() => {
         fireEvent(
           window,
-          new MessageEvent("message", {
-            data: {
-              jsonrpc: "2.0",
-              method: "ui/notifications/tool-result",
-              params: {
-                content: [{ type: "text", text: "Pikachu data" }],
-                structuredContent: { name: "pikachu", color: "yellow" },
-                _meta: { requestId: "123" },
+          new MessageEvent<McpUiToolResultNotification & { jsonrpc: "2.0" }>(
+            "message",
+            {
+              data: {
+                jsonrpc: "2.0",
+                method: "ui/notifications/tool-result",
+                params: {
+                  content: [{ type: "text", text: "Pikachu data" }],
+                  structuredContent: { name: "pikachu", color: "yellow" },
+                  _meta: { requestId: "123" },
+                },
               },
             },
-          }),
+          ),
         );
       });
 
