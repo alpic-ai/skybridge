@@ -1,7 +1,5 @@
-import { getBridgeMethods } from "../bridges/index.js";
+import { getBridgeMethod } from "../bridges/index.js";
 
 export function useSendFollowUpMessage() {
-  const { sendFollowUpMessage } = getBridgeMethods();
-
-  return sendFollowUpMessage;
+  return getBridgeMethod("sendFollowUpMessage");
 }

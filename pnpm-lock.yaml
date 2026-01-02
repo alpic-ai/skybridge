@@ -63,6 +63,9 @@ importers:
       cors:
         specifier: ^2.8.5
         version: 2.8.5
+      dequal:
+        specifier: ^2.0.3
+        version: 2.0.3
       express:
         specifier: ^5.1.0
         version: 5.1.0

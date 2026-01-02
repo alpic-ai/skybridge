@@ -1,5 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { McpAppAdapter } from "../bridges/mcp-app-adapter.js";
 import { McpAppBridge } from "../bridges/mcp-app-bridge.js";
 import type { SafeArea, Theme } from "../types.js";
 import { useLayout } from "./use-layout.js";
@@ -74,12 +75,14 @@ describe("useLayout", () => {
       });
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
       McpAppBridge.resetInstance();
+      McpAppAdapter.resetInstance();
     });
 
     afterEach(() => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();
+      McpAppAdapter.resetInstance();
     });
 
     const sendMcpInitializeResponse = (
