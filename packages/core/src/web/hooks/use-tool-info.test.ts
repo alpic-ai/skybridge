@@ -1,5 +1,6 @@
 import { act, fireEvent, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { McpAppAdapter } from "../bridges/mcp-app-adapter.js";
 import { McpAppBridge } from "../bridges/mcp-app-bridge.js";
 import {
   type OpenAiProperties,
@@ -98,6 +99,7 @@ describe("useToolInfo", () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();
+      McpAppAdapter.resetInstance();
     });
 
     it("should return idle state initially when tool input is not yet set", async () => {
