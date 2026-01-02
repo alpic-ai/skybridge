@@ -1,14 +1,14 @@
 import { useCallback } from "react";
-import { getBridgeMethods } from "../bridges/get-bridge-methods.js";
+import { useAdaptor } from "../bridges/hooks/use-adaptor.js";
 import { useBridge } from "../bridges/index.js";
-import type { DisplayMode } from "../types.js";
+import type { DisplayMode } from "../bridges/types.js";
 
 export function useDisplayMode() {
   const displayMode = useBridge("displayMode");
-  const { requestDisplayMode } = getBridgeMethods();
+  const adaptor = useAdaptor();
   const setDisplayMode = useCallback(
-    (mode: DisplayMode) => requestDisplayMode({ mode }),
-    [requestDisplayMode],
+    (mode: DisplayMode) => adaptor.requestDisplayMode(mode),
+    [adaptor],
   );
 
   return [displayMode, setDisplayMode] as const;

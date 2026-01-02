@@ -8,6 +8,7 @@ import type {
   McpUiToolInputNotification,
   McpUiToolResultNotification,
 } from "@modelcontextprotocol/ext-apps";
+import type { Bridge, Subscribe } from "./types.js";
 
 type PendingRequest<T> = {
   resolve: (value: T | PromiseLike<T>) => void;
@@ -53,7 +54,7 @@ type McpAppNotification = { jsonrpc: "2.0" } & (
   | McpUiHostContextChangedNotification
 );
 
-export class McpAppBridge {
+export class McpAppBridge implements Bridge<McpUiHostContext> {
   private static instance: McpAppBridge | null = null;
   public context: McpAppBridgeContext = {
     toolInput: null,
@@ -104,13 +105,11 @@ export class McpAppBridge {
     return McpAppBridge.instance;
   }
 
-  public subscribe(key: McpAppBridgeKey): (onChange: () => void) => () => void;
-  public subscribe(
-    keys: readonly McpAppBridgeKey[],
-  ): (onChange: () => void) => () => void;
+  public subscribe(key: McpAppBridgeKey): Subscribe;
+  public subscribe(keys: readonly McpAppBridgeKey[]): Subscribe;
   public subscribe(
     keyOrKeys: McpAppBridgeKey | readonly McpAppBridgeKey[],
-  ): (onChange: () => void) => () => void {
+  ): Subscribe {
     const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
     return (onChange: () => void) => {
       for (const key of keys) {

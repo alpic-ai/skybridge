@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { getBridgeMethods } from "../bridges/get-bridge-methods.js";
+
+import { useAdaptor } from "../bridges/hooks/use-adaptor.js";
 import type {
   CallToolArgs,
   CallToolResponse,
@@ -110,15 +111,16 @@ export const useCallTool = <
   >({ status: "idle", data: undefined, error: undefined });
 
   const callIdRef = useRef(0);
+  const adaptor = useAdaptor();
 
   const execute = async (
     toolArgs: ToolArgs,
   ): Promise<CombinedCallToolResponse> => {
     const callId = ++callIdRef.current;
     setCallToolState({ status: "pending", data: undefined, error: undefined });
-    const { callTool } = getBridgeMethods();
+
     try {
-      const data = await callTool<ToolArgs, CombinedCallToolResponse>(
+      const data = await adaptor.callTool<ToolArgs, CombinedCallToolResponse>(
         name,
         toolArgs,
       );
