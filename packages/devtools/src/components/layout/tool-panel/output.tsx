@@ -1,14 +1,25 @@
 import ReactJsonView from "@microlink/react-json-view";
 import { CircleAlertIcon } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useSelectedTool } from "@/lib/mcp";
-import { useCallToolResult } from "@/lib/store";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert.js";
+import { useSelectedTool } from "@/lib/mcp/index.js";
+import { useCallToolResult } from "@/lib/store.js";
 
 export const Output = () => {
   const tool = useSelectedTool();
   const result = useCallToolResult(tool.name);
 
   if (!result) return null;
+
+  const getText = () => {
+    const text: string[] = [];
+    result.response.content.forEach((content) => {
+      if (content.type === "text") {
+        text.push(content.text);
+      }
+    });
+
+    return text.join("\n");
+  };
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-card">
@@ -18,9 +29,7 @@ export const Output = () => {
             <Alert variant="error">
               <CircleAlertIcon />
               <AlertTitle>Error</AlertTitle>
-              <AlertDescription>
-                {result.response.content.map((c) => c.text).join("\n")}
-              </AlertDescription>
+              <AlertDescription>{getText()}</AlertDescription>
             </Alert>
           ) : (
             <div className="text-xs">

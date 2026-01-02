@@ -5,9 +5,47 @@ import type {
   McpUiRequestDisplayModeRequest,
   McpUiRequestDisplayModeResult,
 } from "@modelcontextprotocol/ext-apps";
+import type {
+  CallToolRequest,
+  CallToolResult,
+} from "@modelcontextprotocol/sdk/types.js";
+
 import type { BridgeExternalStore } from "./hooks/types.js";
 import { McpAppBridge } from "./mcp-app-bridge.js";
-import type { BridgeInterface, Methods } from "./types.js";
+import type { BridgeInterface, CallToolResponse, Methods } from "./types.js";
+
+export const callTool = async <
+  ToolArgs extends Record<string, unknown> | null = null,
+  ToolResponse extends CallToolResponse = CallToolResponse,
+>(
+  name: string,
+  args: ToolArgs,
+): Promise<ToolResponse> => {
+  const bridge = McpAppBridge.getInstance();
+  const response = await bridge.request<CallToolRequest, CallToolResult>({
+    method: "tools/call",
+    params: {
+      name,
+      arguments: args ?? undefined,
+    },
+  });
+
+  const result = response.content
+    .filter(
+      (content): content is { type: "text"; text: string } =>
+        content.type === "text",
+    )
+    .map(({ text }) => text)
+    .join("\n");
+
+  return {
+    content: response.content,
+    structuredContent: response.structuredContent ?? {},
+    isError: response.isError ?? false,
+    result,
+    meta: response._meta ?? {},
+  } as ToolResponse;
+};
 
 export const requestDisplayMode: Methods["requestDisplayMode"] = ({ mode }) => {
   const bridge = McpAppBridge.getInstance();

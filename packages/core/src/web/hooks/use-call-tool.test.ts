@@ -9,6 +9,8 @@ import {
   type Mock,
   vi,
 } from "vitest";
+
+import type { CallToolResponse } from "../types.js";
 import { useCallTool } from "./use-call-tool.js";
 
 describe("useCallTool - onSuccess callback", () => {
@@ -19,6 +21,7 @@ describe("useCallTool - onSuccess callback", () => {
       callTool: vi.fn(),
     };
     vi.stubGlobal("openai", OpenaiMock);
+    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
   });
 
   afterEach(() => {
@@ -146,6 +149,7 @@ describe("useCallTool - TypeScript typing", () => {
       callTool: vi.fn(),
     };
     vi.stubGlobal("openai", OpenaiMock);
+    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
   });
 
   afterEach(() => {
@@ -154,7 +158,7 @@ describe("useCallTool - TypeScript typing", () => {
   });
 
   it("should have correct return types when ToolArgs is null and ToolResponse is specified", async () => {
-    type TestResponse = {
+    type TestResponse = CallToolResponse & {
       structuredContent: { result: string };
       meta: { id: number };
     };
@@ -162,7 +166,7 @@ describe("useCallTool - TypeScript typing", () => {
     const { result } = renderHook(() =>
       useCallTool<null, TestResponse>("test-tool"),
     );
-    const data = {
+    const data: TestResponse = {
       content: [{ type: "text" as const, text: "test" }],
       structuredContent: { result: "test" },
       isError: false,
@@ -182,7 +186,7 @@ describe("useCallTool - TypeScript typing", () => {
 
   it("should correctly type callToolAsync return value", async () => {
     type TestArgs = { query: string };
-    type TestResponse = {
+    type TestResponse = CallToolResponse & {
       structuredContent: { answer: string };
     };
 
@@ -191,7 +195,7 @@ describe("useCallTool - TypeScript typing", () => {
     );
 
     const testArgs: TestArgs = { query: "test" };
-    const mockResponse = {
+    const mockResponse: TestResponse = {
       content: [{ type: "text" as const, text: "answer" }],
       structuredContent: { answer: "test answer" },
       isError: false,
@@ -209,7 +213,7 @@ describe("useCallTool - TypeScript typing", () => {
   });
 
   it("should correctly type callToolAsync when ToolArgs is null", async () => {
-    type TestResponse = {
+    type TestResponse = CallToolResponse & {
       structuredContent: { data: string };
     };
 
@@ -217,15 +221,12 @@ describe("useCallTool - TypeScript typing", () => {
       useCallTool<null, TestResponse>("test-tool"),
     );
 
-    const mockResponse: TestResponse & {
-      content: Array<{ type: "text"; text: string }>;
-      isError: boolean;
-      result: string;
-    } = {
+    const mockResponse: TestResponse = {
       content: [{ type: "text" as const, text: "data" }],
       structuredContent: { data: "test data" },
       isError: false,
       result: "data",
+      meta: {},
     };
 
     OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);
