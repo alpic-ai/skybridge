@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon",
-    "build": "tsc -b web && vite build -c web/vite.config.ts && rm -rf server/dist && tsc -p server/tsconfig.json && cp -r web/dist server/dist/assets",
+    "build": "tsc -b web && vite build -c web/vite.config.ts && shx rm -rf server/dist && tsc -p server/tsconfig.json && shx cp -r web/dist server/dist/assets",
     "start": "node server/dist/index.js",
     "inspector": "mcp-inspector http://localhost:3000/mcp",
     "server:build": "tsc -p server/tsconfig.json",
@@ -31,6 +31,7 @@
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
     "nodemon": "^3.1.10",
+    "shx": "^0.3.4",
     "tsx": "^4.19.4",
     "typescript": "^5.7.2"
   }
