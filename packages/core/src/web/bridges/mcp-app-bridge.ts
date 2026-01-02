@@ -114,7 +114,9 @@ export class McpAppBridge {
   public getSnapshot<K extends keyof McpUiHostContext>(
     key: K,
   ): McpUiHostContext[K];
-  public getSnapshot(key: McpAppBridgeKey): McpAppBridgeContext[typeof key] {
+  public getSnapshot<K extends keyof McpAppBridgeContext>(
+    key: K,
+  ): McpAppBridgeContext[K] {
     if (isToolStateKey(key)) {
       return this.toolState[key];
     }
