@@ -80,22 +80,21 @@ describe("useToolInfo", () => {
   });
 
   describe("mcp-app host", () => {
-    let mockPostMessage: ReturnType<typeof vi.fn>;
+    const mockPostMessage = vi.fn();
 
     beforeEach(() => {
-      mockPostMessage = vi.fn();
-      Object.defineProperty(window, "parent", {
+      vi.stubGlobal("parent", {
         value: { postMessage: mockPostMessage },
         writable: true,
         configurable: true,
       });
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
-      McpAppBridge.resetInstance();
     });
 
     afterEach(() => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
+      McpAppBridge.resetInstance();
     });
 
     const initializeBridge = () => {
