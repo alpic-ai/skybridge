@@ -13,21 +13,21 @@ import {
   McpAppBridge,
   type McpAppBridgeContext,
   type McpAppBridgeKey,
-} from "./mcp-app-bridge.js";
+} from "../mcp-app-bridge.js";
 import type {
-  Adapter,
+  Adaptor,
   BridgeInterface,
   CallToolResponse,
   DisplayMode,
   ExternalStore,
-} from "./types.js";
+} from "../types.js";
 
 type PickContext<K extends readonly McpAppBridgeKey[]> = {
   [P in K[number]]: McpAppBridgeContext[P];
 };
 
-export class McpAppAdapter implements Adapter {
-  private static instance: McpAppAdapter | null = null;
+export class McpAppAdaptor implements Adaptor {
+  private static instance: McpAppAdaptor | null = null;
   private stores: {
     [K in keyof BridgeInterface]: ExternalStore<K>;
   };
@@ -35,15 +35,15 @@ export class McpAppAdapter implements Adapter {
     this.stores = this.initializeStores();
   }
 
-  public static getInstance(): McpAppAdapter {
-    if (!McpAppAdapter.instance) {
-      McpAppAdapter.instance = new McpAppAdapter();
+  public static getInstance(): McpAppAdaptor {
+    if (!McpAppAdaptor.instance) {
+      McpAppAdaptor.instance = new McpAppAdaptor();
     }
-    return McpAppAdapter.instance;
+    return McpAppAdaptor.instance;
   }
 
   public static resetInstance(): void {
-    McpAppAdapter.instance = null;
+    McpAppAdaptor.instance = null;
   }
 
   public getExternalStore<K extends keyof BridgeInterface>(

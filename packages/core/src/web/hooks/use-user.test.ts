@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { McpAppAdapter } from "../bridges/mcp-app-adapter.js";
+import { McpAppAdaptor } from "../bridges/adaptors/mcp-app-adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app-bridge.js";
 import type { UserAgent } from "../types.js";
 import { getMcpAppHostPostMessageMock } from "./test/utils.js";
@@ -68,7 +68,7 @@ describe("useUser", () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();
-      McpAppAdapter.resetInstance();
+      McpAppAdaptor.resetInstance();
     });
 
     it("should return locale and userAgent from mcp host context", async () => {

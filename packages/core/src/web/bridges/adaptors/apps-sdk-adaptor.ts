@@ -1,24 +1,24 @@
-import { AppsSdkBridge } from "./apps-sdk-bridge.js";
+import { AppsSdkBridge } from "../apps-sdk-bridge.js";
 import type {
-  Adapter,
+  Adaptor,
   BridgeInterface,
   CallToolResponse,
   DisplayMode,
   ExternalStore,
-} from "./types.js";
+} from "../types.js";
 
-export class AppsSdkAdapter implements Adapter {
-  private static instance: AppsSdkAdapter | null = null;
+export class AppsSdkAdaptor implements Adaptor {
+  private static instance: AppsSdkAdaptor | null = null;
 
-  public static getInstance(): AppsSdkAdapter {
-    if (!AppsSdkAdapter.instance) {
-      AppsSdkAdapter.instance = new AppsSdkAdapter();
+  public static getInstance(): AppsSdkAdaptor {
+    if (!AppsSdkAdaptor.instance) {
+      AppsSdkAdaptor.instance = new AppsSdkAdaptor();
     }
-    return AppsSdkAdapter.instance;
+    return AppsSdkAdaptor.instance;
   }
 
   public static resetInstance(): void {
-    AppsSdkAdapter.instance = null;
+    AppsSdkAdaptor.instance = null;
   }
 
   public getExternalStore<K extends keyof BridgeInterface>(

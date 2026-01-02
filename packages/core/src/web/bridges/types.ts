@@ -54,7 +54,7 @@ export type ExternalStore<K extends keyof BridgeInterface> = {
   getSnapshot: () => BridgeInterface[K];
 };
 
-export interface Adapter {
+export interface Adaptor {
   getExternalStore<K extends keyof BridgeInterface>(key: K): ExternalStore<K>;
   callTool<
     ToolArgs extends CallToolArgs = null,
