@@ -1,6 +1,5 @@
 packages:
   - "web"
-  - "server"
 sharedWorkspaceLockfile: false
 
 catalog:
