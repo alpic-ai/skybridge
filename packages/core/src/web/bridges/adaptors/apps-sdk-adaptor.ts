@@ -50,4 +50,8 @@ export class AppsSdkAdaptor implements Adaptor {
   public sendFollowUpMessage = (prompt: string): Promise<void> => {
     return window.openai.sendFollowUpMessage({ prompt });
   };
+
+  public openExternal(href: string): void {
+    window.openai.openExternal({ href });
+  }
 }

@@ -64,4 +64,5 @@ export interface Adaptor {
     mode: DisplayMode;
   }>;
   sendFollowUpMessage(prompt: string): Promise<void>;
+  openExternal(href: string): void;
 }
