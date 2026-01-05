@@ -1,6 +1,6 @@
-import { useSelectedToolOrNull, useSuspenseTools } from "@/lib/mcp";
-import { useSelectedToolName } from "@/lib/nuqs";
-import { cn } from "@/lib/utils";
+import { useSelectedToolOrNull, useSuspenseTools } from "@/lib/mcp/index.js";
+import { useSelectedToolName } from "@/lib/nuqs.js";
+import { cn } from "@/lib/utils.js";
 
 function ToolsList() {
   const tools = useSuspenseTools();

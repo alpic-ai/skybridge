@@ -60,17 +60,29 @@ jobs:
             echo "✅ Dev version: 0.0.0-dev.${GITHUB_SHA::7}"
           fi
 
+      - name: Setting version for core
+        working-directory: ./packages/core
+        run: pnpm version ${{ steps.version.outputs.version }} --no-git-tag-version
+
+      - name: Setting version for create-skybridge
+        working-directory: ./packages/create-skybridge
+        run: pnpm version ${{ steps.version.outputs.version }} --no-git-tag-version
+
+      - name: Setting version for devtools
+        working-directory: ./packages/devtools
+        run: pnpm version ${{ steps.version.outputs.version }} --no-git-tag-version
+
       - name: Publish core to npm
         working-directory: ./packages/core
-        run: |
-          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
-          npm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance
+        run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance --no-git-checks
 
       - name: Publish create-skybridge to npm
         working-directory: ./packages/create-skybridge
-        run: |
-          npm version ${{ steps.version.outputs.version }} --no-git-tag-version
-          npm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance
+        run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance --no-git-checks
+
+      - name: Publish devtools to npm
+        working-directory: ./packages/devtools
+        run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance --no-git-checks
 
       - name: Install Vercel CLI
         if: github.event_name == 'release'

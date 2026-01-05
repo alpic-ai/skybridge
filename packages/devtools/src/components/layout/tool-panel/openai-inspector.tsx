@@ -1,9 +1,9 @@
 import ReactJsonView from "@microlink/react-json-view";
 import { MoonIcon, SunIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
-import { Field, FieldLabel, FieldSet } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button.js";
+import { ButtonGroup } from "@/components/ui/button-group.js";
+import { Field, FieldLabel, FieldSet } from "@/components/ui/field.js";
+import { Input } from "@/components/ui/input.js";
 import {
   Select,
   SelectContent,
@@ -11,10 +11,15 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSelectedTool } from "@/lib/mcp";
-import { useCallToolResult, useStore } from "@/lib/store";
+} from "@/components/ui/select.js";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs.js";
+import { useSelectedTool } from "@/lib/mcp/index.js";
+import { useCallToolResult, useStore } from "@/lib/store.js";
 
 export const OpenAiInspector = () => {
   const tool = useSelectedTool();
@@ -34,7 +39,9 @@ export const OpenAiInspector = () => {
     }
   };
 
-  if (!openaiObject) return null;
+  if (!openaiObject) {
+    return null;
+  }
 
   return (
     <div className="overflow-auto max-h-full min-h-0">

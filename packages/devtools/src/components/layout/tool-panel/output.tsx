@@ -8,7 +8,9 @@ export const Output = () => {
   const tool = useSelectedTool();
   const result = useCallToolResult(tool.name);
 
-  if (!result) return null;
+  if (!result) {
+    return null;
+  }
 
   const getText = () => {
     const text: string[] = [];

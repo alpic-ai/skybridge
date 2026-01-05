@@ -175,7 +175,7 @@ importers:
         version: 19.2.0(react@19.2.0)
       skybridge:
         specifier: '>=0.16.0 <1.0.0'
-        version: 0.16.0(@modelcontextprotocol/sdk@1.24.3(zod@4.1.13))(@types/node@22.18.12)(@types/react@19.2.7)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0))
+        version: 0.16.1(@modelcontextprotocol/sdk@1.24.3(zod@4.1.13))(@types/node@22.18.12)(@types/react@19.2.7)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0))
       vite:
         specifier: ^7.1.11
         version: 7.2.7(@types/node@22.18.12)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)
@@ -7671,8 +7671,8 @@ packages:
     resolution: {integrity: sha512-kUMbT1oBJCpgrnKoSr0o6wPtvRWT9W9UKvGLwfJYO2WuahZRHOpEyL1ckyMGgMWh0UdpmaoFqKKD29WTomNEGA==}
     engines: {node: '>=8'}
 
-  skybridge@0.16.0:
-    resolution: {integrity: sha512-vBvh+KznGtj+uvz9TzKHJwK974RIrbmJJR1llJ2ExyBtRFbWr47YQLuRuQOD+C54xPr7FgiYcxOeUJtLo1Sorw==}
+  skybridge@0.16.1:
+    resolution: {integrity: sha512-YdnWaQ5/hkXMVVA4KEd0JpaZBOlVc3zKSmr7ORZT9KNeDfbFwq1wkCyCkZCa3Nf6+Yv/ZGbGYQ0fPcnX/ftwXA==}
     peerDependencies:
       '@modelcontextprotocol/sdk': '>=1.0.0'
       react: '>=18.0.0'
@@ -17958,7 +17958,7 @@ snapshots:
     dependencies:
       unicode-emoji-modifier-base: 1.0.0
 
-  skybridge@0.16.0(@modelcontextprotocol/sdk@1.24.3(zod@4.1.13))(@types/node@22.18.12)(@types/react@19.2.7)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0)):
+  skybridge@0.16.1(@modelcontextprotocol/sdk@1.24.3(zod@4.1.13))(@types/node@22.18.12)(@types/react@19.2.7)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0)):
     dependencies:
       '@babel/core': 7.28.5
       '@modelcontextprotocol/sdk': 1.24.3(zod@4.1.13)
