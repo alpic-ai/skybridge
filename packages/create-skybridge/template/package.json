@@ -4,18 +4,36 @@
   "private": true,
   "description": "Alpic MCP Server Template",
   "type": "module",
-  "packageManager": "pnpm@10.18.3",
   "scripts": {
-    "dev": "pnpm --filter @apps-sdk-template/server dev",
-    "build": "pnpm web:build && rm -rf server/dist && pnpm --filter=@apps-sdk-template/server --prod deploy server/dist && cp -r web/dist server/dist/assets && pnpm --filter=@apps-sdk-template/server build",
-    "start": "pnpm server:start",
-    "inspector": "pnpm --filter @apps-sdk-template/server inspector",
-    "server:build": "pnpm --filter @apps-sdk-template/server build",
-    "server:start": "pnpm --filter @apps-sdk-template/server start",
-    "web:build": "pnpm --filter @apps-sdk-template/web build",
-    "web:preview": "pnpm --filter @apps-sdk-template/web preview"
+    "dev": "nodemon",
+    "build": "vite build -c web/vite.config.ts && shx rm -rf server/dist && tsc -p tsconfig.server.json && shx cp -r web/dist server/dist/assets",
+    "start": "node server/dist/index.js",
+    "inspector": "mcp-inspector http://localhost:3000/mcp",
+    "server:build": "tsc -p tsconfig.server.json",
+    "server:start": "node server/dist/index.js",
+    "web:build": "tsc -b web && vite build -c web/vite.config.ts",
+    "web:preview": "vite preview -c web/vite.config.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.24.3",
+    "express": "^5.1.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "skybridge": "^0.15.3",
+    "vite": "^7.1.11",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
-    "tsx": "^4.19.4"
-  }
+    "@modelcontextprotocol/inspector": "^0.17.5",
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.15.30",
+    "@types/react": "^19.1.16",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.4",
+    "nodemon": "^3.1.10",
+    "shx": "^0.3.4",
+    "tsx": "^4.19.4",
+    "typescript": "^5.7.2"
+  },
+  "workspaces": []
 }

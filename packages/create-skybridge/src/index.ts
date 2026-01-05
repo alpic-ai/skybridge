@@ -124,18 +124,16 @@ export async function init(args: string[] = process.argv.slice(2)) {
     // Copy template to target directory
     fs.cpSync(templateDir, root, {
       recursive: true,
-      filter: (src) => !src.endsWith(".npmrc"),
+      filter: (src) => [".npmrc"].every((file) => !src.endsWith(file)),
     });
     // Rename _gitignore to .gitignore
     fs.renameSync(path.join(root, "_gitignore"), path.join(root, ".gitignore"));
     // Update project name in package.json
     const name = path.basename(root);
-    for (const dir of ["", "server", "web"]) {
-      const pkgPath = path.join(root, dir, "package.json");
-      const pkg = fs.readFileSync(pkgPath, "utf-8");
-      const fixed = pkg.replace(/apps-sdk-template/g, name);
-      fs.writeFileSync(pkgPath, fixed);
-    }
+    const pkgPath = path.join(root, "package.json");
+    const pkg = fs.readFileSync(pkgPath, "utf-8");
+    const fixed = pkg.replace(/apps-sdk-template/g, name);
+    fs.writeFileSync(pkgPath, fixed);
 
     prompts.log.success(`Project created in ${root}`);
   } catch (error) {
