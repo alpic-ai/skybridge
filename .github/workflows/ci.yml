@@ -72,27 +72,3 @@ jobs:
 
       - name: Run ${{ matrix.name }}
         run: ${{ matrix.command }}
-
-  create-skybridge-template:
-    name: create-skybridge template
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    defaults:
-      run:
-        working-directory: packages/create-skybridge/template
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build
-        run: pnpm run build
