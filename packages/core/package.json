@@ -65,10 +65,10 @@
     "@types/node": "^22.15.30",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
-    "@vitest/ui": "^2.1.8",
+    "@vitest/ui": "^2.1.9",
     "jsdom": "^25.0.1",
     "typescript": "^5.9.3",
-    "vitest": "^2.1.8",
+    "vitest": "^2.1.9",
     "zod": "^4.1.13"
   },
   "packageManager": "pnpm@10.17.1"
