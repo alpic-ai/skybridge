@@ -61,7 +61,7 @@
     "@types/babel__core": "^7.20.5",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
-    "@types/jsdom": "^21.1.6",
+    "@types/jsdom": "^21.1.7",
     "@types/node": "^22.15.30",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
