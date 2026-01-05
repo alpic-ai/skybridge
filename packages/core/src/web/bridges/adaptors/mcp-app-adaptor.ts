@@ -1,6 +1,8 @@
 import type {
   McpUiMessageRequest,
   McpUiMessageResult,
+  McpUiOpenLinkRequest,
+  McpUiOpenLinkResult,
   McpUiRequestDisplayModeRequest,
   McpUiRequestDisplayModeResult,
 } from "@modelcontextprotocol/ext-apps";
@@ -115,6 +117,14 @@ export class McpAppAdaptor implements Adaptor {
       },
     });
   };
+
+  public openExternal(href: string): void {
+    const bridge = McpAppBridge.getInstance();
+    bridge.request<McpUiOpenLinkRequest, McpUiOpenLinkResult>({
+      method: "ui/open-link",
+      params: { url: href },
+    });
+  }
 
   private initializeStores(): {
     [K in keyof BridgeInterface]: ExternalStore<K>;

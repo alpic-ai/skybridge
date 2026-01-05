@@ -1,5 +1,12 @@
+import { useCallback } from "react";
+import { useAdaptor } from "../bridges/index.js";
+
 export function useOpenExternal() {
-  return (href: string) => {
-    window.openai.openExternal({ href });
-  };
+  const adaptor = useAdaptor();
+  const openExternal = useCallback(
+    (href: string) => adaptor.openExternal(href),
+    [adaptor],
+  );
+
+  return openExternal;
 }
