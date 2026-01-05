@@ -94,6 +94,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.24.3
         version: 1.24.3(zod@4.1.13)
+      '@skybridge/devtools':
+        specifier: workspace:*
+        version: link:../devtools
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
