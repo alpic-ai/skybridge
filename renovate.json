@@ -1,6 +1,13 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
+  "extends": ["config:recommended", "group:recommended"],
+  "prConcurrentLimit": 5,
+  "timezone": "Europe/Paris",
+  "rangeStrategy": "bump",
+  "packageRules": [
+    {
+      "matchPackageNames": "@rjsf/**",
+      "groupName": "React JSON Schema Form packages"
+    }
   ]
 }
