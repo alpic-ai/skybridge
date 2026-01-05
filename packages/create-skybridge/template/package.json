@@ -32,7 +32,7 @@
     "@vitejs/plugin-react": "^5.0.4",
     "nodemon": "^3.1.10",
     "shx": "^0.3.4",
-    "tsx": "^4.19.4",
+    "tsx": "^4.21.0",
     "typescript": "^5.7.2"
   },
   "workspaces": []
