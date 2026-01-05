@@ -33,7 +33,7 @@
     "nodemon": "^3.1.10",
     "shx": "^0.3.4",
     "tsx": "^4.19.4",
-    "typescript": "^5.7.2"
+    "typescript": "^5.9.3"
   },
   "workspaces": []
 }
