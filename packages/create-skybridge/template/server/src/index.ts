@@ -1,5 +1,5 @@
 import express, { type Express } from "express";
-
+import open from "open";
 import { devtoolsStaticServer, widgetsDevServer } from "skybridge/server";
 import type { ViteDevServer } from "vite";
 import { mcp } from "./middleware.js";
@@ -28,6 +28,11 @@ app.listen(3000, (error) => {
   console.log(
     "Make your local server accessible with 'ngrok http 3000' and connect to ChatGPT with URL https://xxxxxx.ngrok-free.app/mcp",
   );
+
+  if (env !== "production") {
+    console.log("Opening devtools at http://localhost:3000");
+    open(`http://localhost:3000`);
+  }
 });
 
 process.on("SIGINT", async () => {

@@ -32,6 +32,7 @@
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.1.2",
     "nodemon": "^3.1.10",
+    "open": "^11.0.0",
     "shx": "^0.3.4",
     "tsx": "^4.19.4",
     "typescript": "^5.7.2"
