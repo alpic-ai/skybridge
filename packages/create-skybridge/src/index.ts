@@ -5,8 +5,6 @@ import { fileURLToPath } from "node:url";
 import * as prompts from "@clack/prompts";
 import mri from "mri";
 
-const minimumPnpmVersion = 10;
-
 const defaultProjectName = "skybridge-project";
 
 // prettier-ignore
@@ -142,12 +140,15 @@ export async function init(args: string[] = process.argv.slice(2)) {
     process.exit(1);
   }
 
+  const userAgent = process.env.npm_config_user_agent;
+  const pkgManager = userAgent?.split(" ")[0]?.split("/")[0] || "npm";
+
   // 4. Ask about immediate installation
   let immediate = argImmediate;
   if (immediate === undefined) {
     if (interactive) {
       const immediateResult = await prompts.confirm({
-        message: `Install with pnpm and start now?`,
+        message: `Install with ${pkgManager} and start now?`,
       });
       if (prompts.isCancel(immediateResult)) {
         return cancel();
@@ -158,8 +159,21 @@ export async function init(args: string[] = process.argv.slice(2)) {
     }
   }
 
-  const installCmd = ["pnpm", "install"];
-  const runCmd = ["pnpm", "dev"];
+  const installCmd = [pkgManager, "install"];
+
+  const runCmd = [pkgManager];
+  switch (pkgManager) {
+    case "yarn":
+    case "pnpm":
+    case "bun":
+      break;
+    case "deno":
+      runCmd.push("task");
+      break;
+    default:
+      runCmd.push("run");
+  }
+  runCmd.push("dev");
 
   if (!immediate) {
     prompts.outro(
@@ -172,24 +186,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
     return;
   }
 
-  // check if pnpm is installed
-  const result = spawnSync("pnpm", ["--version"], { encoding: "utf-8" });
-  if (result.error || result.status !== 0) {
-    console.error("Error: pnpm is not installed. Please install pnpm first.");
-    process.exit(1);
-  }
-
-  // check if pnpm major is greater or equal to the one set in package.json packageManager, which should do the trick
-  const version = result.stdout.trim();
-  const major = Number(version.split(".")[0]);
-  if (Number.isNaN(major) || major < minimumPnpmVersion) {
-    console.error(
-      `Error: pnpm version ${version} is too old. Minimum required version is ${minimumPnpmVersion}.`,
-    );
-    process.exit(1);
-  }
-
-  prompts.log.step(`Installing dependencies with pnpm...`);
+  prompts.log.step(`Installing dependencies with ${pkgManager}...`);
   run(installCmd, {
     stdio: "inherit",
     cwd: root,
