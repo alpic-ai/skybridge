@@ -25,7 +25,6 @@
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "^0.17.5",
-    "@skybridge/devtools": "^0.15.3",
     "@types/express": "^5.0.3",
     "@types/node": "^22.15.30",
     "@types/react": "^19.1.16",
