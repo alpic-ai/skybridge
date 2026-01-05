@@ -1,4 +1,4 @@
-import { BackgroundBeams } from "@/components/ui/shadcn-io/background-beams";
+import { BackgroundBeams } from "@/components/ui/shadcn-io/background-beams/index.js";
 
 export const Intro = () => {
   return (

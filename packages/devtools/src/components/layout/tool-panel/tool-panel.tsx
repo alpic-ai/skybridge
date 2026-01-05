@@ -3,8 +3,8 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { useResizablePanelSize } from "@/hooks/use-resizable-panel-size";
+} from "@/components/ui/resizable.js";
+import { useResizablePanelSize } from "@/hooks/use-resizable-panel-size.js";
 import { useSelectedTool } from "@/lib/mcp/index.js";
 import { useCallToolResult } from "@/lib/store.js";
 import { InputForm } from "./input-form.js";

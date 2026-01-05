@@ -2,8 +2,8 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { useResizablePanelSize } from "@/hooks/use-resizable-panel-size";
+} from "@/components/ui/resizable.js";
+import { useResizablePanelSize } from "@/hooks/use-resizable-panel-size.js";
 import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { Header } from "./header.js";
 import { Intro } from "./intro.js";

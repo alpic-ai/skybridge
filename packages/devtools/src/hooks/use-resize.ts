@@ -33,7 +33,9 @@ export const useResize = ({
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing) return;
+      if (!isResizing) {
+        return;
+      }
 
       let newSize: number;
       if (isVertical) {

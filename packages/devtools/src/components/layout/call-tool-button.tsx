@@ -1,7 +1,7 @@
 import { useKeyPress } from "ahooks";
 import { Loader2, Play } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useCallTool, useSelectedTool } from "@/lib/mcp";
+import { Button } from "@/components/ui/button.js";
+import { useCallTool, useSelectedTool } from "@/lib/mcp/index.js";
 
 export const CallToolButton = ({
   validateForm,
@@ -16,9 +16,13 @@ export const CallToolButton = ({
   const handleClick = async () => {
     if (validateForm) {
       const isValid = await validateForm();
-      if (!isValid) return;
+      if (!isValid) {
+        return;
+      }
     }
-    if (!formData) return;
+    if (!formData) {
+      return;
+    }
 
     await callTool({ toolName: tool.name, args: formData });
   };

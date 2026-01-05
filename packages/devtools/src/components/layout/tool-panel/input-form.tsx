@@ -8,11 +8,11 @@ import type {
 } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useRef } from "react";
-import { useSelectedTool } from "@/lib/mcp";
-import { useCallToolResult, useStore } from "@/lib/store";
-import { cn } from "@/lib/utils";
-import { Card, CardContent } from "../../ui/card";
-import { CallToolButton } from "../call-tool-button";
+import { useSelectedTool } from "@/lib/mcp/index.js";
+import { useCallToolResult, useStore } from "@/lib/store.js";
+import { cn } from "@/lib/utils.js";
+import { Card, CardContent } from "../../ui/card.js";
+import { CallToolButton } from "../call-tool-button.js";
 
 const uiSchema: UiSchema = {
   "ui:submitButtonOptions": {
@@ -123,7 +123,9 @@ export const InputForm = () => {
         <div className="flex items-center gap-2">
           <CallToolButton
             validateForm={async () => {
-              if (ref.current === null) return true;
+              if (ref.current === null) {
+                return true;
+              }
 
               return await ref.current.validateForm();
             }}

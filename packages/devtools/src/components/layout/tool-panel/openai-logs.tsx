@@ -1,8 +1,8 @@
 import { TrashIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { useSelectedTool } from "@/lib/mcp";
-import { type OpenAiLog, useCallToolResult, useStore } from "@/lib/store";
+import { Button } from "@/components/ui/button.js";
+import { useSelectedTool } from "@/lib/mcp/index.js";
+import { type OpenAiLog, useCallToolResult, useStore } from "@/lib/store.js";
 
 function formatTimestamp(timestamp: number): string {
   const date = new Date(timestamp);
