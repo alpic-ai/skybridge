@@ -1,6 +1,6 @@
 import express, { type Express } from "express";
 
-import { widgetsDevServer } from "skybridge/server";
+import { devtoolsStaticServer, widgetsDevServer } from "skybridge/server";
 import type { ViteDevServer } from "vite";
 import { mcp } from "./middleware.js";
 import server from "./server.js";
@@ -14,6 +14,7 @@ app.use(mcp(server));
 const env = process.env.NODE_ENV || "development";
 
 if (env !== "production") {
+  app.use(await devtoolsStaticServer());
   app.use(await widgetsDevServer());
 }
 
