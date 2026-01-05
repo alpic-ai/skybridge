@@ -24,7 +24,6 @@ const require = createRequire(import.meta.url);
  */
 export const devtoolsStaticServer = async (): Promise<RequestHandler> => {
   const router = express.Router();
-  // Resolve @skybridge/devtools package using Node.js module resolution
   let devtoolsPath: string;
   try {
     const devtoolsPackagePath = require.resolve(

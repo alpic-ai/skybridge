@@ -1,0 +1,8 @@
+packages:
+  - "web"
+  - "server"
+sharedWorkspaceLockfile: false
+
+catalog:
+  skybridge: ^0.13.1
+  "@skybridge/devtools": ^0.13.1
