@@ -1,5 +1,6 @@
 import { act, fireEvent, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { McpAppAdaptor } from "../bridges/adaptors/mcp-app-adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app-bridge.js";
 import {
   type OpenAiProperties,
@@ -9,7 +10,7 @@ import {
 import {
   fireToolInputNotification,
   fireToolResultNotification,
-  MCPAppHostPostMessageMock,
+  getMcpAppHostPostMessageMock,
 } from "./test/utils.js";
 import { useToolInfo } from "./use-tool-info.js";
 
@@ -87,10 +88,8 @@ describe("useToolInfo", () => {
   });
 
   describe("mcp-app host", () => {
-    const mockPostMessage = MCPAppHostPostMessageMock;
-
     beforeEach(() => {
-      vi.stubGlobal("parent", { postMessage: mockPostMessage });
+      vi.stubGlobal("parent", { postMessage: getMcpAppHostPostMessageMock() });
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     });
 
@@ -98,6 +97,7 @@ describe("useToolInfo", () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();
+      McpAppAdaptor.resetInstance();
     });
 
     it("should return idle state initially when tool input is not yet set", async () => {
