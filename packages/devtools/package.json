@@ -18,7 +18,7 @@
     "@rjsf/shadcn": "^6.1.2",
     "@rjsf/utils": "^6.1.2",
     "@rjsf/validator-ajv8": "^6.1.2",
-    "@tanstack/react-query": "^5.90.12",
+    "@tanstack/react-query": "^5.90.16",
     "ahooks": "^3.9.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
