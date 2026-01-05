@@ -1,7 +1,7 @@
+import * as fsPromises from "node:fs/promises";
 import path from "node:path";
 import cors from "cors";
 import express, { type RequestHandler } from "express";
-
 /**
  * Install Vite dev server
  * This router MUST be installed at the application root, like so:
@@ -17,8 +17,21 @@ export const widgetsDevServer = async (): Promise<RequestHandler> => {
 
   const { createServer, searchForWorkspaceRoot, loadConfigFromFile } =
     await import("vite");
-  const workspaceRoot = searchForWorkspaceRoot(process.cwd());
-  const webAppRoot = path.join(workspaceRoot, "web");
+
+  // Since 0.16.0, the template is a single package that does not rely on workspace.
+  // It means that, when starting the server, the working dir is the template root
+  // hence we don't need to walk up the tree to find the workspace, which does not exist anymore.
+  let webAppRoot = path.join(process.cwd(), "web");
+
+  // fallback to the old behavior for backward compatibility
+  const hasWebAppRoot = await fsPromises
+    .stat(webAppRoot)
+    .then(() => true)
+    .catch(() => false);
+  if (!hasWebAppRoot) {
+    const workspaceRoot = searchForWorkspaceRoot(process.cwd());
+    webAppRoot = path.join(workspaceRoot, "web");
+  }
 
   const configResult = await loadConfigFromFile(
     { command: "serve", mode: "development" },
