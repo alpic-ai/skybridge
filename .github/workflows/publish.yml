@@ -74,15 +74,15 @@ jobs:
 
       - name: Publish core to npm
         working-directory: ./packages/core
-        run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance
+        run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance --no-git-checks
 
       - name: Publish create-skybridge to npm
         working-directory: ./packages/create-skybridge
-        run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance
+        run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance --no-git-checks
 
       - name: Publish devtools to npm
         working-directory: ./packages/devtools
-        run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance
+        run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance --no-git-checks
 
       - name: Install Vercel CLI
         if: github.event_name == 'release'
