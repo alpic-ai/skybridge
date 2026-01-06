@@ -304,7 +304,9 @@ export class McpServer<
               });
 
         return {
-          contents: [{ uri: uri.href, mimeType, text: html, _meta: resourceMetadata }],
+          contents: [
+            { uri: uri.href, mimeType, text: html, _meta: resourceMetadata },
+          ],
         };
       },
     );
