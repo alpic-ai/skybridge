@@ -26,6 +26,7 @@ export {
   type RequestCheckoutAsyncFn,
   type RequestCheckoutFn,
   type SupportedPaymentMethod,
+  type UseCheckoutOptions,
   useCheckout,
 } from "./use-checkout.js";
 export { useDisplayMode } from "./use-display-mode.js";

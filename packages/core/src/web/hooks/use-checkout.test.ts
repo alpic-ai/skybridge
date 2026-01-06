@@ -324,4 +324,120 @@ describe("useCheckout", () => {
       expect(requestCheckoutMock).toHaveBeenCalledWith(testSession);
     });
   });
+
+  describe("session ID generation", () => {
+    it("should generate session ID automatically if not provided", async () => {
+      const sessionWithoutId: CheckoutSessionRequest = {
+        ...mockSession,
+        id: undefined as unknown as string,
+      };
+      requestCheckoutMock.mockResolvedValueOnce(mockSuccessResponse);
+
+      const { result } = renderHook(() => useCheckout());
+
+      await act(async () => {
+        result.current.requestCheckout(sessionWithoutId);
+      });
+
+      // Verify that requestCheckout was called with a session that has an ID
+      expect(requestCheckoutMock).toHaveBeenCalled();
+      const calledSession = requestCheckoutMock.mock.calls[0]?.[0];
+      expect(calledSession).toBeDefined();
+      expect(calledSession.id).toBeDefined();
+      expect(typeof calledSession.id).toBe("string");
+    });
+
+    it("should preserve provided session ID", async () => {
+      requestCheckoutMock.mockResolvedValueOnce(mockSuccessResponse);
+
+      const { result } = renderHook(() => useCheckout());
+
+      await act(async () => {
+        result.current.requestCheckout(mockSession);
+      });
+
+      expect(requestCheckoutMock).toHaveBeenCalledWith(mockSession);
+      const calledSession = requestCheckoutMock.mock.calls[0]?.[0];
+      expect(calledSession.id).toBe("checkout_session_123");
+    });
+
+    it("should use custom session ID generator", async () => {
+      const customIdGenerator = vi.fn(() => "custom_id_999");
+      requestCheckoutMock.mockResolvedValueOnce(mockSuccessResponse);
+
+      const sessionWithoutId: CheckoutSessionRequest = {
+        ...mockSession,
+        id: undefined as unknown as string,
+      };
+
+      const { result } = renderHook(() =>
+        useCheckout({ checkoutSessionIdGenerator: customIdGenerator }),
+      );
+
+      await act(async () => {
+        result.current.requestCheckout(sessionWithoutId);
+      });
+
+      expect(customIdGenerator).toHaveBeenCalled();
+      const calledSession = requestCheckoutMock.mock.calls[0]?.[0];
+      expect(calledSession.id).toBe("custom_id_999");
+    });
+
+    it("should expose sessionId in return value", async () => {
+      requestCheckoutMock.mockResolvedValueOnce(mockSuccessResponse);
+
+      const { result } = renderHook(() => useCheckout());
+
+      expect(result.current.sessionId).toBeUndefined();
+
+      await act(async () => {
+        result.current.requestCheckout(mockSession);
+      });
+
+      await waitFor(() => {
+        expect(result.current.sessionId).toBe("checkout_session_123");
+      });
+    });
+  });
+
+  describe("direct order access", () => {
+    it("should expose order directly in return value", async () => {
+      requestCheckoutMock.mockResolvedValueOnce(mockSuccessResponse);
+
+      const { result } = renderHook(() => useCheckout());
+
+      expect(result.current.order).toBeUndefined();
+
+      await act(async () => {
+        result.current.requestCheckout(mockSession);
+      });
+
+      await waitFor(() => {
+        expect(result.current.order).toEqual(mockSuccessResponse.order);
+        expect(result.current.order?.id).toBe("order_789");
+      });
+    });
+
+    it("should have order as undefined when status is not success", async () => {
+      const { result } = renderHook(() => useCheckout());
+
+      expect(result.current.order).toBeUndefined();
+      expect(result.current.status).toBe("idle");
+    });
+
+    it("should have order as undefined on error", async () => {
+      requestCheckoutMock.mockResolvedValueOnce(mockErrorResponse);
+
+      const { result } = renderHook(() => useCheckout());
+
+      await act(async () => {
+        result.current.requestCheckout(mockSession);
+      });
+
+      await waitFor(() => {
+        expect(result.current.status).toBe("error");
+        expect(result.current.order).toBeUndefined();
+      });
+    });
+  });
 });
