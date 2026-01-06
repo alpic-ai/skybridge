@@ -1,7 +1,7 @@
 <base href="{{serverUrl}}" />
 <script type="module">window.skybridge = { hostType: "{{hostType}}" };</script>
 <script type="module">
-  import { injectIntoGlobalHook } from "{{serverUrl}}/@react-refresh";
+  import { injectIntoGlobalHook } from "{{serverUrl}}/assets/@react-refresh";
   injectIntoGlobalHook(window); window.$RefreshReg$ = () => {};
   window.$RefreshSig$ = () => (type) => type;
   window.__vite_plugin_react_preamble_installed__ = true;
