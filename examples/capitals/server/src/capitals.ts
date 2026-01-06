@@ -133,6 +133,7 @@ export async function getAllCapitals(): Promise<CapitalSummary[]> {
   }));
 }
 
+
 export async function getCapitalByCountryCode(cca2: string): Promise<Capital> {
   const country = await fetchCountryByCode(cca2);
 

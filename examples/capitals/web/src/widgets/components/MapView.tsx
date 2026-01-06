@@ -4,9 +4,6 @@ import type { MapRef } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useLayout } from "skybridge/web";
 
-const MAPBOX_PUBLIC_TOKEN =
-  "pk.eyJ1IjoidmFsZW50aW5hbHBpYyIsImEiOiJjbWpiZ2pyZnEwYzc3M2hzOTNuMDJpNjZ2In0.OZ0ixWtvanYxaDZnxg4LCg";
-
 type CapitalMarker = {
   name: string;
   countryName: string;
@@ -50,7 +47,7 @@ export function MapView({
   return (
     <MapGL
       ref={mapRef}
-      mapboxAccessToken={MAPBOX_PUBLIC_TOKEN}
+      mapboxAccessToken={import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN}
       initialViewState={{
         longitude: center.lng,
         latitude: center.lat,

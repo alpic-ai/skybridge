@@ -35,7 +35,15 @@ This example serves as a comprehensive reference for building sophisticated, int
 pnpm install
 ```
 
-#### 2. Start your local server
+#### 2. Set up Mapbox API Key
+
+This example requires a Mapbox API key to display the interactive map. You'll need to provide your own Mapbox public token:
+
+1. Sign up for a free account at [Mapbox](https://www.mapbox.com/) if you don't have one
+2. Get your public access token from the [Mapbox account page](https://account.mapbox.com/access-tokens/)
+3. Create a `.env` file in the `web` directory with your Mapbox token. See `.env.example` for the format.
+
+#### 3. Start your local server
 
 Run the development server from the root directory:
 
@@ -48,7 +56,7 @@ This command starts an Express server on port 3000. This server packages:
 - an MCP endpoint on `/mcp` (the app backend)
 - a React application on Vite HMR dev server (the UI elements to be displayed in ChatGPT)
 
-#### 3. Connect to ChatGPT
+#### 4. Connect to ChatGPT
 
 - ChatGPT requires connectors to be publicly accessible. To expose your server on the Internet, run:
 ```bash
@@ -56,7 +64,7 @@ ngrok http 3000
 ```
 - In ChatGPT, navigate to **Settings → Connectors → Create** and add the forwarding URL provided by ngrok suffixed with `/mcp` (e.g. `https://3785c5ddc4b6.ngrok-free.app/mcp`)
 
-#### 4. Test with the emulator
+#### 5. Test with the emulator
 
 Open http://localhost:3000 in your browser to test your widget using the provided emulator without needing to connect to ChatGPT.
 
