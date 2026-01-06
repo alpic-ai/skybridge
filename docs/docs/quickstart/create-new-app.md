@@ -2,6 +2,9 @@
 sidebar_position: 1
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Create your ChatGPT App
 
 The fastest way to start building is using our starter template. It comes pre-configured with an MCP server, UI widgets, and a full dev server with Hot Module Reload.
@@ -10,16 +13,47 @@ The fastest way to start building is using our starter template. It comes pre-co
 
 Set up your app with a single command:
 
+<Tabs groupId="package-manager">
+  <TabItem value="npm" label="npm" default>
+
 ```bash
 npm create skybridge@latest my-chatgpt-app
 ```
 
-Alternatively, clone the [starter template](https://github.com/alpic-ai/apps-sdk-template) directly or [use it as a GitHub template](https://github.com/new?template_name=apps-sdk-template&template_owner=alpic-ai).
+  </TabItem>
+  <TabItem value="pnpm" label="pnpm">
+
+```bash
+pnpm create skybridge my-chatgpt-app
+```
+
+  </TabItem>
+  <TabItem value="yarn" label="yarn">
+
+```bash
+yarn create skybridge my-chatgpt-app
+```
+
+  </TabItem>
+  <TabItem value="bun" label="bun">
+
+```bash
+bun create skybridge my-chatgpt-app
+```
+
+  </TabItem>
+  <TabItem value="deno" label="deno">
+
+```bash
+deno init --npm skybridge my-chatgpt-app
+```
+
+  </TabItem>
+</Tabs>
 
 :::info Prerequisites
 Make sure you have:
-- **Node.js 22+** (see `.nvmrc` in the template for exact version)
-- **pnpm** (install with `npm install -g pnpm`)
+- **Node.js 22+**
 - **[Ngrok](https://ngrok.com/download)** for exposing your local server
 :::
 
@@ -27,9 +61,43 @@ Make sure you have:
 
 Run the development server from the root directory:
 
+<Tabs groupId="package-manager">
+  <TabItem value="npm" label="npm" default>
+
+```bash
+npm run dev
+```
+
+  </TabItem>
+  <TabItem value="pnpm" label="pnpm">
+
 ```bash
 pnpm dev
 ```
+
+  </TabItem>
+  <TabItem value="yarn" label="yarn">
+
+```bash
+yarn dev
+```
+
+  </TabItem>
+  <TabItem value="bun" label="bun">
+
+```bash
+bun dev
+```
+
+  </TabItem>
+  <TabItem value="deno" label="deno">
+
+```bash
+deno task dev
+```
+
+  </TabItem>
+</Tabs>
 
 This command starts an Express server on port 3000 that packages:
 - An MCP endpoint on `/mcp` - the ChatGPT App Backend
