@@ -2,14 +2,14 @@ import "@/index.css";
 
 import { useState } from "react";
 import { mountWidget } from "skybridge/web";
-import { useToolInfo } from "../helpers";
+import { useToolInfo } from "../helpers.js";
 
 function EcomCarousel() {
-  const { output } = useToolInfo<"ecom-carousel">();
+  const { output, isPending } = useToolInfo<"ecom-carousel">();
   type Product = NonNullable<typeof output>["products"][number];
   const [selected, setSelected] = useState<Product | null>(null);
 
-  if (!output) {
+  if (isPending) {
     return (
       <div className={"container"}>
         <div className="message">Loading products...</div>
@@ -17,7 +17,7 @@ function EcomCarousel() {
     );
   }
 
-  if (output.products.length === 0) {
+  if (!output || output.products.length === 0) {
     return (
       <div className={"container"}>
         <div className="message">No product found</div>

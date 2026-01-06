@@ -57,7 +57,7 @@ const server = new McpServer(
 
       return {
         structuredContent: { products: filtered },
-        content: [],
+        content: [{ type: "text", text: JSON.stringify(filtered) }],
         isError: false,
       };
     } catch (error) {
