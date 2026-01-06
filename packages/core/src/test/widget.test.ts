@@ -112,7 +112,9 @@ describe("McpServer.registerWidget", () => {
     });
 
     // Check development-specific content
-    expect(result.contents[0]?.text).toContain(`${serverUrl}/@react-refresh`);
+    expect(result.contents[0]?.text).toContain(
+      `${serverUrl}/assets/@react-refresh`,
+    );
     expect(result.contents[0]?.text).toContain(`${serverUrl}/@vite/client`);
     expect(result.contents[0]?.text).toContain(
       `${serverUrl}/src/widgets/my-widget`,
@@ -167,7 +169,7 @@ describe("McpServer.registerWidget", () => {
 
     // Check production-specific content
     expect(result.contents[0]?.text).not.toContain(
-      `${serverUrl}@react-refresh`,
+      `${serverUrl}/assets/@react-refresh`,
     );
     expect(result.contents[0]?.text).not.toContain(`${serverUrl}@vite/client`);
     expect(result.contents[0]?.text).toContain(
