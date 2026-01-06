@@ -1,5 +1,7 @@
 {
   "$schema": "https://context7.com/schema/context7.json",
+  "url": "https://context7.com/alpic-ai/skybridge",
+  "public_key": "pk_QmCV6r1eoYWNTIq1jxP0h",
   "projectTitle": "Skybridge",
   "description": "Fullstack TypeScript framework for building ChatGPT Apps with type safety, React hooks, and HMR",
   "folders": ["docs/docs", "examples"],
