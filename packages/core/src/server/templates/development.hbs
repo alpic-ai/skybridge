@@ -26,7 +26,15 @@
 
         const errorMessage = document.createElement("div");
         errorMessage.style.cssText = "color: #ef4444; font-size: 14px;";
-        errorMessage.textContent = "Local network access is required for your widget to connect to the local dev server. Please enable it in your browser settings.";
+        errorMessage.textContent = "Local network access is required for your widget to connect to the local dev server. Please enable it in your browser settings. ";
+
+        const link = document.createElement("a");
+        link.href = "https://developer.chrome.com/blog/local-network-access";
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.style.cssText = "color: #ef4444; text-decoration: underline;";
+        link.textContent = "Learn more";
+        errorMessage.appendChild(link);
 
         errorDiv.appendChild(errorTitle);
         errorDiv.appendChild(errorMessage);
