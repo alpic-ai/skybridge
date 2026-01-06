@@ -1,0 +1,39 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "Skybridge",
+  "description": "Fullstack TypeScript framework for building ChatGPT Apps with type safety, React hooks, and HMR",
+  "folders": ["docs/docs"],
+  "excludeFolders": [
+    "node_modules",
+    "dist",
+    "src",
+    "**/__snapshots__",
+    "docs/node_modules",
+    "docs/.docusaurus",
+    "packages",
+    "examples"
+  ],
+  "excludeFiles": [
+    "docusaurus.config.ts",
+    "sidebars.ts",
+    "vercel.json",
+    "package.json",
+    "pnpm-lock.yaml",
+    "tsconfig.json",
+    "README.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "biome.json",
+    "vitest.config.ts",
+    "pnpm-workspace.yaml"
+  ],
+  "rules": [
+    "Use TypeScript for full type safety with Skybridge",
+    "Leverage Skybridge's end-to-end type inference from server to widget",
+    "Use React hooks from skybridge/web (e.g., useToolInfo, useCallTool, useWidgetState) instead of raw window.openai APIs",
+    "Use Zod schemas for input validation in widget registration",
+    "Use data-llm attribute for widget-to-model synchronization to keep the model aware of UI state",
+    "Prefer skybridge/server's registerWidget over raw MCP tool registration for better type inference",
+    "Use the local dev environment with HMR for faster development iterations"
+  ]
+}
