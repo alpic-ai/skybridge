@@ -7,6 +7,15 @@ import type { WidgetHostType } from "./server.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const localNetworkAccessCheckPartial = readFileSync(
+  join(__dirname, "templates", "local-network-access-check.hbs"),
+  "utf-8",
+);
+Handlebars.registerPartial(
+  "local-network-access-check",
+  localNetworkAccessCheckPartial,
+);
+
 class TemplateHelper {
   private templateCache = new Map<string, HandlebarsTemplateDelegate>();
 

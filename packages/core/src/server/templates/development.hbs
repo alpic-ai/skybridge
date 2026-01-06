@@ -7,6 +7,7 @@
   window.__vite_plugin_react_preamble_installed__ = true;
 </script>
 <script type="module" src="{{serverUrl}}/@vite/client"></script>
+{{> local-network-access-check}}
 <div id="root"></div>
 <script type="module" id="dev-widget-entry">
   import('{{serverUrl}}/src/widgets/{{widgetName}}');
