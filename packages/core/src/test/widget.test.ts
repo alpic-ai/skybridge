@@ -26,8 +26,9 @@ const mockManifest = {
   "style.css": { file: "style.css" },
 };
 
-vi.mock("node:fs", async () => {
-  const actual = await vi.importActual<typeof import("node:fs")>("node:fs");
+const actual = vi.hoisted(() => require("node:fs"));
+
+vi.mock("node:fs", () => {
   const readFileSyncImpl = (
     path: Parameters<typeof actual.readFileSync>[0],
     ...args: unknown[]
@@ -37,9 +38,6 @@ vi.mock("node:fs", async () => {
         typeof actual.readFileSync
       >;
     }
-    // Type assertion needed because readFileSync has overloads with different parameter types
-    // Using @ts-expect-error because the overloads are complex and we're forwarding args
-    // @ts-expect-error - readFileSync overloads require complex type handling
     return actual.readFileSync(path, ...args);
   };
   const readFileSync = vi.fn(readFileSyncImpl) as typeof actual.readFileSync;
