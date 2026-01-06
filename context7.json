@@ -2,7 +2,7 @@
   "$schema": "https://context7.com/schema/context7.json",
   "projectTitle": "Skybridge",
   "description": "Fullstack TypeScript framework for building ChatGPT Apps with type safety, React hooks, and HMR",
-  "folders": ["docs/docs"],
+  "folders": ["docs/docs", "examples"],
   "excludeFolders": [
     "node_modules",
     "dist",
@@ -11,7 +11,8 @@
     "docs/node_modules",
     "docs/.docusaurus",
     "packages",
-    "examples"
+    "examples/**/.env",
+    "examples/**/node_modules"
   ],
   "excludeFiles": [
     "docusaurus.config.ts",
