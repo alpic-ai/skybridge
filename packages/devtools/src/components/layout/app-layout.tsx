@@ -23,23 +23,29 @@ function AppLayout() {
     <div className="flex h-screen w-full flex-col overflow-hidden bg-background">
       <Header />
       <ResizablePanelGroup
-        direction="horizontal"
+        orientation="horizontal"
         className="flex flex-1 overflow-hidden"
-        onLayout={(sizes) => {
-          if (sizes[0] !== undefined) {
-            toolsListSize.onResize(sizes[0]);
+        onLayoutChange={(layout) => {
+          const size = layout["tools-list"];
+          if (size !== undefined) {
+            toolsListSize.onResize(size);
           }
         }}
       >
         <ResizablePanel
-          defaultSize={toolsListSize.size}
-          minSize={15}
-          maxSize={40}
+          id="tools-list"
+          defaultSize={`${toolsListSize.size}%`}
+          minSize="15%"
+          maxSize="40%"
         >
           <ToolsList />
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel defaultSize={100 - toolsListSize.size} minSize={30}>
+        <ResizablePanel
+          id="main-content"
+          defaultSize={`${100 - toolsListSize.size}%`}
+          minSize="30%"
+        >
           <div className="flex flex-1 flex-col overflow-hidden relative h-full">
             {selectedTool ? <ToolPanel /> : <Intro />}
           </div>

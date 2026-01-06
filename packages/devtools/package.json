@@ -37,7 +37,7 @@
     "nuqs": "^2.8.6",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-resizable-panels": "^3.0.6",
+    "react-resizable-panels": "^4.2.2",
     "shadcn": "^3.6.3",
     "shiki": "^3.20.0",
     "skybridge": "workspace:*",

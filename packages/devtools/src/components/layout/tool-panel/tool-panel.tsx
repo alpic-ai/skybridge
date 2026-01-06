@@ -32,25 +32,31 @@ export const ToolPanel = () => {
   return (
     <div className="flex-1 flex flex-col overflow-hidden relative z-10">
       <ResizablePanelGroup
-        direction="horizontal"
+        orientation="horizontal"
         className="flex flex-1 overflow-hidden border-b border-border"
-        onLayout={(sizes) => {
-          if (sizes[0] !== undefined) {
-            inputColumnSize.onResize(sizes[0]);
+        onLayoutChange={(layout) => {
+          const size = layout["input-column"];
+          if (size !== undefined) {
+            inputColumnSize.onResize(size);
           }
         }}
       >
         <ResizablePanel
-          defaultSize={inputColumnSize.size}
-          minSize={20}
-          maxSize={60}
+          id="input-column"
+          defaultSize={`${inputColumnSize.size}%`}
+          minSize="20%"
+          maxSize="60%"
         >
           <div className="flex flex-col overflow-hidden h-full">
             <InputForm />
           </div>
         </ResizablePanel>
         <ResizableHandle />
-        <ResizablePanel defaultSize={100 - inputColumnSize.size} minSize={30}>
+        <ResizablePanel
+          id="output-column"
+          defaultSize={`${100 - inputColumnSize.size}%`}
+          minSize="30%"
+        >
           <div className="flex flex-col overflow-hidden h-full">
             <Output />
           </div>
