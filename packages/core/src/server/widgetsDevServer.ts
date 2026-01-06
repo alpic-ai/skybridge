@@ -26,7 +26,7 @@ export const widgetsDevServer = async (): Promise<RequestHandler> => {
     webAppRoot,
   );
 
-  const { build, preview, ...devConfig } = configResult?.config || {};
+  const { ...devConfig } = configResult?.config || {};
 
   const vite = await createServer({
     ...devConfig,
