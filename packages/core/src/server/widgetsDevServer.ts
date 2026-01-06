@@ -1,4 +1,4 @@
-import * as fsPromises from "node:fs/promises";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import cors from "cors";
 import express, { type RequestHandler } from "express";
@@ -24,10 +24,7 @@ export const widgetsDevServer = async (): Promise<RequestHandler> => {
   let webAppRoot = path.join(process.cwd(), "web");
 
   // fallback to the old behavior for backward compatibility
-  const hasWebAppRoot = await fsPromises
-    .stat(webAppRoot)
-    .then(() => true)
-    .catch(() => false);
+  const hasWebAppRoot = existsSync(webAppRoot);
   if (!hasWebAppRoot) {
     const workspaceRoot = searchForWorkspaceRoot(process.cwd());
     webAppRoot = path.join(workspaceRoot, "web");
