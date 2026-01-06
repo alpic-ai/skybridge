@@ -6,7 +6,7 @@ Thank you for your interest in contributing to Skybridge! Every contribution hel
 
 ### Prerequisites
 
-- Node.js 22+
+- Node.js 24+
 - pnpm 10+ (run `corepack enable` to use the version specified in package.json)
 
 ### Setup

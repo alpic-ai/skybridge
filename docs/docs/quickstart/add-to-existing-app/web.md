@@ -10,7 +10,7 @@ This guide shows you how to use `skybridge/web` without `skybridge/server` to ad
 
 You should already have:
 - A working ChatGPT app MCP server backend (in any technology)
-- Node.js 22+
+- Node.js 24+
 
 ## Install
 

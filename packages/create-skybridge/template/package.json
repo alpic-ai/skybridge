@@ -27,7 +27,6 @@
     "@modelcontextprotocol/inspector": "^0.18.0",
     "@skybridge/devtools": ">=0.16.2 <1.0.0",
     "@types/express": "^5.0.6",
-    "@types/node": "^22.19.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
@@ -36,5 +35,8 @@
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
-  "workspaces": []
+  "workspaces": [],
+  "engines": {
+    "node": ">=24.0.0"
+  }
 }

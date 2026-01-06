@@ -53,7 +53,7 @@ deno init --npm skybridge my-chatgpt-app
 
 :::info Prerequisites
 Make sure you have:
-- **Node.js 22+**
+- **Node.js 24+**
 - **[Ngrok](https://ngrok.com/download)** for exposing your local server
 :::
 
