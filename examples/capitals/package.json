@@ -26,13 +26,14 @@
     "react-dom": "^19.1.1",
     "react-map-gl": "^7.1.8",
     "react-router-dom": "^7.11.0",
-    "skybridge": ">=0.16.0 <1.0.0",
+    "skybridge": ">=0.16.3 <1.0.0",
     "tailwindcss": "^4.1.14",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "^0.17.5",
+    "@skybridge/devtools": ">=0.16.3 <1.0.0",
     "@tailwindcss/vite": "^4.1.14",
     "@types/express": "^5.0.3",
     "@types/mapbox-gl": "^3.4.1",
