@@ -1,10 +1,10 @@
 import { Suspense } from "react";
 import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable.js";
-import { useResizablePanelSize } from "@/hooks/use-resizable-panel-size.js";
+  Group,
+  Panel,
+  Separator,
+  useDefaultLayout,
+} from "react-resizable-panels";
 import { useSelectedTool } from "@/lib/mcp/index.js";
 import { useCallToolResult } from "@/lib/store.js";
 import { InputForm } from "./input-form.js";
@@ -16,11 +16,9 @@ import { Widget } from "./widget/widget.js";
 export const ToolPanel = () => {
   const tool = useSelectedTool();
   const toolResult = useCallToolResult(tool.name);
-  const inputColumnSize = useResizablePanelSize({
-    key: "skybridge-devtools-input-column-width",
-    defaultSizePercent: 35,
-    minSizePercent: 20,
-    maxSizePercent: 60,
+  const { defaultLayout, onLayoutChange } = useDefaultLayout({
+    id: "skybridge-devtools-input-column",
+    storage: localStorage,
   });
 
   const shouldDisplayWidgetSection = Boolean(
@@ -31,37 +29,24 @@ export const ToolPanel = () => {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden relative z-10">
-      <ResizablePanelGroup
+      <Group
         orientation="horizontal"
-        className="flex flex-1 overflow-hidden border-b border-border"
-        onLayoutChange={(layout) => {
-          const size = layout["input-column"];
-          if (size !== undefined) {
-            inputColumnSize.onResize(size);
-          }
-        }}
+        className="flex-1 overflow-hidden border-b border-border"
+        defaultLayout={defaultLayout}
+        onLayoutChange={onLayoutChange}
       >
-        <ResizablePanel
-          id="input-column"
-          defaultSize={`${inputColumnSize.size}%`}
-          minSize="20%"
-          maxSize="60%"
-        >
+        <Panel id="input-column" minSize="20" maxSize="60">
           <div className="flex flex-col overflow-hidden h-full">
             <InputForm />
           </div>
-        </ResizablePanel>
-        <ResizableHandle />
-        <ResizablePanel
-          id="output-column"
-          defaultSize={`${100 - inputColumnSize.size}%`}
-          minSize="30%"
-        >
+        </Panel>
+        <Separator className="w-px bg-border" />
+        <Panel id="output-column" minSize="30">
           <div className="flex flex-col overflow-hidden h-full">
             <Output />
           </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+        </Panel>
+      </Group>
       {shouldDisplayWidgetSection && (
         <div className="flex overflow-hidden bg-card relative h-[60%]">
           <div className="flex flex-col flex-1 h-full overflow-hidden bg-card border-r border-border">
