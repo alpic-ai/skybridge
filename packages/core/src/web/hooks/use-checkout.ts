@@ -97,44 +97,6 @@ function isCheckoutErrorResponse(
   return "code" in response && "message" in response;
 }
 
-/**
- * Hook for implementing Instant Checkout in ChatGPT apps.
- *
- * This hook provides a type-safe API for initiating checkout sessions
- * using the ChatGPT Instant Checkout UI.
- *
- * @example
- * ```tsx
- * function CheckoutButton({ session }: { session: CheckoutSessionRequest }) {
- *   const { requestCheckout, isPending, isSuccess, data, error } = useCheckout();
- *
- *   return (
- *     <button
- *       onClick={() => requestCheckout(session, {
- *         onSuccess: (order) => console.log('Order completed:', order.id),
- *         onError: (err) => console.error('Checkout failed:', err),
- *       })}
- *       disabled={isPending}
- *     >
- *       {isPending ? 'Processing...' : 'Checkout'}
- *     </button>
- *   );
- * }
- * ```
- *
- * @example Using async API
- * ```tsx
- * async function handleCheckout(session: CheckoutSessionRequest) {
- *   const { requestCheckoutAsync } = useCheckout();
- *   try {
- *     const order = await requestCheckoutAsync(session);
- *     console.log('Order completed:', order.id);
- *   } catch (error) {
- *     console.error('Checkout failed:', error);
- *   }
- * }
- * ```
- */
 export const useCheckout = () => {
   const [{ status, data, error }, setCheckoutState] = useState<
     Omit<CheckoutState, "isIdle" | "isPending" | "isSuccess" | "isError">
