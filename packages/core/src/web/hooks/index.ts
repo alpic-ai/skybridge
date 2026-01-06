@@ -1,3 +1,4 @@
+export type { AsyncOperationState } from "./use-async-operation.js";
 export {
   type CallToolAsyncFn,
   type CallToolFn,

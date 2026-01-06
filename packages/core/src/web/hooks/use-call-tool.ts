@@ -7,7 +7,6 @@ import type {
 import type { AsyncOperationState } from "./use-async-operation.js";
 import { useAsyncOperation } from "./use-async-operation.js";
 
-// State types for the hook - using shared AsyncOperationState
 export type CallToolState<TData extends CallToolResponse = CallToolResponse> =
   AsyncOperationState<TData, unknown>;
 
@@ -61,7 +60,6 @@ export const useCallTool = <
 ) => {
   type CombinedCallToolResponse = CallToolResponse & ToolResponse;
 
-  // Use the base hook with deduplication enabled to prevent race conditions
   const { state, execute: executeAsync } = useAsyncOperation<
     CombinedCallToolResponse,
     unknown

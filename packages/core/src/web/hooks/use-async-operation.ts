@@ -50,6 +50,55 @@ export type UseAsyncOperationConfig = {
   enableDeduplication?: boolean;
 };
 
+const createState = <TData, TError>(
+  status: "idle" | "pending" | "success" | "error",
+  data: TData | undefined,
+  error: TError | undefined,
+): AsyncOperationState<TData, TError> => {
+  switch (status) {
+    case "idle":
+      return {
+        status: "idle",
+        data: undefined,
+        error: undefined,
+        isIdle: true,
+        isPending: false,
+        isSuccess: false,
+        isError: false,
+      };
+    case "pending":
+      return {
+        status: "pending",
+        data: undefined,
+        error: undefined,
+        isIdle: false,
+        isPending: true,
+        isSuccess: false,
+        isError: false,
+      };
+    case "success":
+      return {
+        status: "success",
+        data: data as TData,
+        error: undefined,
+        isIdle: false,
+        isPending: false,
+        isSuccess: true,
+        isError: false,
+      };
+    case "error":
+      return {
+        status: "error",
+        data: undefined,
+        error: error as TError,
+        isIdle: false,
+        isPending: false,
+        isSuccess: false,
+        isError: true,
+      };
+  }
+};
+
 export const useAsyncOperation = <TData, TError = unknown>(
   config?: UseAsyncOperationConfig,
 ) => {
@@ -86,15 +135,7 @@ export const useAsyncOperation = <TData, TError = unknown>(
     }
   };
 
-  const state = {
-    status,
-    data,
-    error,
-    isIdle: status === "idle",
-    isPending: status === "pending",
-    isSuccess: status === "success",
-    isError: status === "error",
-  } as AsyncOperationState<TData, TError>;
+  const state = createState(status, data, error);
 
   return {
     state,

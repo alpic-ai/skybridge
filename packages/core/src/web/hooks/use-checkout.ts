@@ -8,7 +8,6 @@ import type {
 import type { AsyncOperationState } from "./use-async-operation.js";
 import { useAsyncOperation } from "./use-async-operation.js";
 
-// Re-export types for convenience
 export type {
   CheckoutErrorCode,
   CheckoutErrorResponse,
@@ -28,7 +27,6 @@ export type {
   SupportedPaymentMethod,
 } from "../types.js";
 
-// State types for the hook - using shared AsyncOperationState
 export type CheckoutState = AsyncOperationState<
   CheckoutSuccessResponse,
   CheckoutErrorResponse | Error
@@ -53,10 +51,6 @@ export type RequestCheckoutAsyncFn = (
 ) => Promise<CheckoutSuccessResponse>;
 
 export type UseCheckoutOptions = {
-  /**
-   * Function to generate unique checkout session IDs.
-   * Defaults to crypto.randomUUID()
-   */
   checkoutSessionIdGenerator?: () => string;
 };
 
@@ -67,7 +61,6 @@ function isCheckoutErrorResponse(
 }
 
 export const useCheckout = (options?: UseCheckoutOptions) => {
-  // Enable deduplication to prevent race conditions from rapid checkout button clicks
   const { state, execute: executeAsync } = useAsyncOperation<
     CheckoutSuccessResponse,
     CheckoutErrorResponse | Error
@@ -96,11 +89,10 @@ export const useCheckout = (options?: UseCheckoutOptions) => {
       const response = await window.openai.requestCheckout(sessionWithId);
 
       if (isCheckoutErrorResponse(response)) {
-        const errorResponse = response as CheckoutErrorResponse;
-        throw errorResponse;
+        throw response;
       }
 
-      return response as CheckoutSuccessResponse;
+      return response;
     });
   };
 

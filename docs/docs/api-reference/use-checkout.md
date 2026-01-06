@@ -16,7 +16,7 @@ Instant Checkout is currently in private beta and limited to select marketplace 
 import { useCheckout, CheckoutSessionRequest } from "skybridge/web";
 
 function CheckoutButton({ session }: { session: CheckoutSessionRequest }) {
-  const { requestCheckout, isPending, isSuccess, data } = useCheckout();
+  const { requestCheckout, isPending, isSuccess, order } = useCheckout();
 
   return (
     <div>
@@ -26,7 +26,7 @@ function CheckoutButton({ session }: { session: CheckoutSessionRequest }) {
       >
         {isPending ? "Processing..." : "Checkout"}
       </button>
-      {isSuccess && <p>Order completed: {data.order.id}</p>}
+      {isSuccess && order && <p>Order completed: {order.id}</p>}
     </div>
   );
 }
@@ -43,9 +43,11 @@ const {
   isPending,
   isSuccess,
   status,
+  order,
+  sessionId,
   requestCheckout,
   requestCheckoutAsync,
-} = useCheckout();
+} = useCheckout(options);
 
 requestCheckout(session, {
   onError,
@@ -55,6 +57,18 @@ requestCheckout(session, {
 
 await requestCheckoutAsync(session);
 ```
+
+### `options`
+
+Optional configuration object:
+
+```tsx
+type UseCheckoutOptions = {
+  checkoutSessionIdGenerator?: () => string;
+};
+```
+
+- `checkoutSessionIdGenerator` - Function to generate unique checkout session IDs. Defaults to `crypto.randomUUID()`. Useful for custom ID formats or testing.
 
 ## Returns
 
@@ -142,6 +156,32 @@ type CheckoutErrorResponse = {
   message: string;
 };
 ```
+
+### `order`
+
+```tsx
+order: CheckoutOrder | undefined
+```
+
+Convenience accessor for the order details from the successful checkout. Equivalent to `data?.order`. Only available when `status` is `"success"`.
+
+```tsx
+type CheckoutOrder = {
+  id: string;                    // Order ID
+  checkout_session_id: string;
+  permalink_url?: string;        // Link to order confirmation
+  created_at?: string;
+  status?: CheckoutOrderStatus;
+};
+```
+
+### `sessionId`
+
+```tsx
+sessionId: string | undefined
+```
+
+The checkout session ID used for the current or most recent checkout operation. This is either the ID provided in the `CheckoutSessionRequest` or auto-generated using the `checkoutSessionIdGenerator`.
 
 ## Checkout Session
 
@@ -278,6 +318,52 @@ const testSession: CheckoutSessionRequest = {
   // ...other fields
   payment_mode: "test",
 };
+```
+
+### Using Order and Session ID
+
+```tsx
+import { useCheckout, CheckoutSessionRequest } from "skybridge/web";
+
+function CheckoutStatus({ session }: { session: CheckoutSessionRequest }) {
+  const { requestCheckout, isPending, isSuccess, order, sessionId } = useCheckout();
+
+  return (
+    <div>
+      <button disabled={isPending} onClick={() => requestCheckout(session)}>
+        {isPending ? "Processing..." : "Checkout"}
+      </button>
+      {sessionId && <p>Session ID: {sessionId}</p>}
+      {isSuccess && order && (
+        <div>
+          <p>Order completed: {order.id}</p>
+          {order.permalink_url && (
+            <a href={order.permalink_url}>View order details</a>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Custom Session ID Generator
+
+```tsx
+import { useCheckout } from "skybridge/web";
+
+function CheckoutWithCustomId() {
+  const { requestCheckout, sessionId } = useCheckout({
+    checkoutSessionIdGenerator: () => `session_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+  });
+
+  // sessionId will use your custom format
+  return (
+    <button onClick={() => requestCheckout(session)}>
+      Checkout
+    </button>
+  );
+}
 ```
 
 ## Related
