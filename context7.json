@@ -29,11 +29,18 @@
   ],
   "rules": [
     "Use TypeScript for full type safety with Skybridge",
-    "Leverage Skybridge's end-to-end type inference from server to widget",
-    "Use React hooks from skybridge/web (e.g., useToolInfo, useCallTool, useWidgetState) instead of raw window.openai APIs",
-    "Use Zod schemas for input validation in widget registration",
-    "Use data-llm attribute for widget-to-model synchronization to keep the model aware of UI state",
-    "Prefer skybridge/server's registerWidget over raw MCP tool registration for better type inference",
-    "Use the local dev environment with HMR for faster development iterations"
+    "Use method chaining when defining your MCP server (e.g., new McpServer().registerWidget().registerTool()) to enable type inference with generateHelpers",
+    "Export your server type as 'AppType' (export type AppType = typeof server) to use with generateHelpers for end-to-end type inference",
+    "Use React hooks from skybridge/web (useToolInfo, useCallTool, useWidgetState, useLayout, useUser) instead of raw window.openai APIs for better state management",
+    "Use useToolInfo for initial data hydration - it provides the data from the tool call that rendered the widget",
+    "Use useCallTool for user-triggered actions only - do NOT call tools on mount, pass initial data through structuredContent instead",
+    "Use the data-llm attribute on DOM elements to sync UI state with the ChatGPT model, enabling contextual responses",
+    "Widget endpoint names must match widget file names exactly (e.g., 'pokemon-card' endpoint requires 'pokemon-card.tsx' file in web/src/widgets/)",
+    "Use Zod schemas for input and output validation in widget registration (inputSchema and outputSchema)",
+    "Use generateHelpers to create fully typed hooks with autocomplete - import AppType from server and call generateHelpers<AppType>()",
+    "Prefer skybridge/server's registerWidget over raw MCP tool registration for better type inference and widget management",
+    "Use the local dev environment with HMR (pnpm dev) for faster development iterations without reinstalling the app in ChatGPT",
+    "Widgets run in an iframe with CSP restrictions - useCallTool is the preferred way to fetch additional data as it's guaranteed to be allowed",
+    "Use React Query-inspired patterns: check isPending, isSuccess, isError states from hooks, and use callbacks (onSuccess, onError) for side effects"
   ]
 }
