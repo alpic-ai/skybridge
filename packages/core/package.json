@@ -39,8 +39,8 @@
   "license": "ISC",
   "peerDependencies": {
     "@modelcontextprotocol/sdk": ">=1.0.0",
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
+    "react": ">=19.2.3",
+    "react-dom": ">=19.2.3"
   },
   "dependencies": {
     "@babel/core": "^7.28.5",
