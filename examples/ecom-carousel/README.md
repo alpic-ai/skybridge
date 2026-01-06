@@ -5,6 +5,7 @@ This "Ecommerce Carousel" example demonstrates key Skybridge capabilities:
 - **Interactive Widget Rendering**: A React-based widget that displays an interactive product carousel directly in ChatGPT
 - **Tool Info Access**: Widgets access tool input, output, and metadata via `useToolInfo()` hook
 - **Theme Support**: Adapts to light/dark mode using the `useLayout()` hook
+- **Localization**: Translates UI based on user locale via `useUser()` hook
 - **External API Integration**: Demonstrates fetching data from REST APIs
 - **Hot Module Replacement**: Live reloading of widget components during development
 

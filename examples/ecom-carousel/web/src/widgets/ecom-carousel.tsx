@@ -1,11 +1,37 @@
 import "@/index.css";
 
 import { useState } from "react";
-import { mountWidget, useLayout } from "skybridge/web";
+import { mountWidget, useLayout, useUser } from "skybridge/web";
 import { useToolInfo } from "../helpers.js";
+
+const translations: Record<string, Record<string, string>> = {
+  en: {
+    loading: "Loading products...",
+    noProducts: "No product found",
+  },
+  fr: {
+    loading: "Chargement des produits...",
+    noProducts: "Aucun produit trouvé",
+  },
+  es: {
+    loading: "Cargando productos...",
+    noProducts: "No se encontraron productos",
+  },
+  de: {
+    loading: "Produkte werden geladen...",
+    noProducts: "Keine Produkte gefunden",
+  },
+};
 
 function EcomCarousel() {
   const { theme } = useLayout();
+  const { locale } = useUser();
+
+  const lang = locale?.split("-")[0] ?? "en";
+
+  function translate(key: string) {
+    return translations[lang]?.[key] ?? translations.en[key];
+  }
 
   const { output, isPending } = useToolInfo<"ecom-carousel">();
   type Product = NonNullable<typeof output>["products"][number];
@@ -18,7 +44,7 @@ function EcomCarousel() {
   if (isPending) {
     return (
       <div className={cn("container")}>
-        <div className={cn("message")}>Loading products...</div>
+        <div className={cn("message")}>{translate("loading")}</div>
       </div>
     );
   }
@@ -26,7 +52,7 @@ function EcomCarousel() {
   if (!output || output.products.length === 0) {
     return (
       <div className={cn("container")}>
-        <div className={cn("message")}>No product found</div>
+        <div className={cn("message")}>{translate("noProducts")}</div>
       </div>
     );
   }
