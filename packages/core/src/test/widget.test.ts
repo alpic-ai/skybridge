@@ -105,6 +105,9 @@ describe("McpServer.registerWidget", () => {
           uri: "ui://widgets/apps-sdk/my-widget.html",
           mimeType: "text/html+skybridge",
           text: expect.stringContaining('<div id="root"></div>'),
+          _meta: {
+            "openai/widgetDescription": "Test tool",
+          },
         },
       ],
     });
@@ -161,6 +164,9 @@ describe("McpServer.registerWidget", () => {
           uri: "ui://widgets/apps-sdk/my-widget.html",
           mimeType: "text/html+skybridge",
           text: expect.stringContaining('<div id="root"></div>'),
+          _meta: {
+            "openai/widgetDescription": "Test tool",
+          },
         },
       ],
     });
@@ -216,7 +222,10 @@ describe("McpServer.registerWidget", () => {
 
   it("should register resources with correct hostType for both apps-sdk and ext-apps formats", async () => {
     const mockToolCallback = vi.fn();
-    const mockRegisterResourceConfig = { description: "Test widget" };
+    const mockRegisterResourceConfig = {
+      description: "Test widget",
+      _meta: { "openai/widgetPrefersBorder": true },
+    };
     const mockToolConfig = { description: "Test tool" };
 
     server.registerWidget(
@@ -249,6 +258,10 @@ describe("McpServer.registerWidget", () => {
           uri: "ui://widgets/apps-sdk/my-widget.html",
           mimeType: "text/html+skybridge",
           text: expect.stringContaining('<div id="root"></div>'),
+          _meta: {
+            "openai/widgetDescription": "Test tool",
+            "openai/widgetPrefersBorder": true,
+          },
         },
       ],
     });
@@ -261,7 +274,12 @@ describe("McpServer.registerWidget", () => {
       uri: URL,
       extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
     ) => Promise<{
-      contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
+      contents: Array<{
+        uri: URL | string;
+        mimeType: string;
+        text?: string;
+        _meta?: Record<string, unknown>;
+      }>;
     }>;
     expect(extAppsResourceCallback).toBeDefined();
 
@@ -279,6 +297,10 @@ describe("McpServer.registerWidget", () => {
           uri: "ui://widgets/ext-apps/my-widget.html",
           mimeType: "text/html;profile=mcp-app",
           text: expect.stringContaining('<div id="root"></div>'),
+          _meta: {
+            "openai/widgetDescription": "Test tool",
+            "openai/widgetPrefersBorder": true,
+          },
         },
       ],
     });

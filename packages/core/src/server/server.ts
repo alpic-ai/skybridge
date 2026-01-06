@@ -303,7 +303,9 @@ export class McpServer<
                 widgetName: name,
               });
 
-        return { contents: [{ uri: uri.href, mimeType, text: html }] };
+        return {
+          contents: [{ uri: uri.href, mimeType, text: html, _meta: resourceMetadata }],
+        };
       },
     );
   }
