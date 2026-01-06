@@ -21,7 +21,7 @@
     "react-dom": "^19.1.1",
     "skybridge": ">=0.16.2 <1.0.0",
     "vite": "^7.1.11",
-    "zod": "^4.1.13"
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "^0.17.5",
