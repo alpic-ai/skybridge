@@ -15,7 +15,7 @@
     "web:preview": "vite preview -c web/vite.config.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.25.1",
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "express": "^5.2.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
