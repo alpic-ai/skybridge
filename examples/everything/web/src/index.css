@@ -97,6 +97,11 @@ code {
   background: #000;
 }
 
+.btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
 .btn-outline {
   background: transparent;
   color: #1a1a1a;
@@ -110,4 +115,17 @@ code {
 .btn-active {
   background: #1a1a1a;
   color: #fff;
+}
+
+.input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-family: inherit;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #1a1a1a;
 }

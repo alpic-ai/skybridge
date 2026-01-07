@@ -17,6 +17,9 @@ const server = new McpServer(
     inputSchema: {
       name: z.string().describe("The user name"),
     },
+    _meta: {
+      "openai/widgetAccessible": true,
+    },
   },
   async ({ name }) => {
     const structuredContent = {
