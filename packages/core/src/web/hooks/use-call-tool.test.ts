@@ -36,6 +36,7 @@ describe("useCallTool - onSuccess callback", () => {
     structuredContent: { result: "test" },
     isError: false,
     result: "test result",
+    _meta: { id: 123 },
   };
   const error = new Error("test error");
 
