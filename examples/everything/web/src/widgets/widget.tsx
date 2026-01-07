@@ -7,8 +7,9 @@ import { DataLlmTab } from "./tabs/data-llm-tab";
 import { HomeTab } from "./tabs/home-tab";
 import { ToolInfoTab } from "./tabs/tool-info-tab";
 import { UseCallToolTab } from "./tabs/use-call-tool-tab";
+import { UseDisplayModeTab } from "./tabs/use-display-mode-tab";
 
-const TABS = ["Home", "createStore", "data-llm", "useCallTool", "useToolInfo", ] as const;
+const TABS = ["Home", "createStore", "data-llm", "useCallTool", "useDisplayMode", "useToolInfo"] as const;
 type Tab = (typeof TABS)[number];
 
 function Widget() {
@@ -33,6 +34,7 @@ function Widget() {
       {tab === "createStore" && <CreateStoreTab />}
       {tab === "data-llm" && <DataLlmTab />}
       {tab === "useCallTool" && <UseCallToolTab />}
+      {tab === "useDisplayMode" && <UseDisplayModeTab />}
       {tab === "useToolInfo" && <ToolInfoTab />}
     </div>
   );
