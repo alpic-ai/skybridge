@@ -1,5 +1,4 @@
 export function injectWaitForOpenai(html: string) {
-  console.log("injectWaitForOpenai", html);
   const doc = new DOMParser().parseFromString(html, "text/html");
   const target = doc.querySelector('script[type="module"]#dev-widget-entry');
 
