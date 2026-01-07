@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   mountWidget,
   useLayout,
+  useOpenExternal,
   useRequestModal,
   useUser,
   useWidgetState,
@@ -37,10 +38,13 @@ const translations: Record<string, Record<string, string>> = {
   },
 };
 
+const CHECKOUT_URL = "https://alpic.ai";
+
 function EcomCarousel() {
   const { theme } = useLayout();
   const { locale } = useUser();
   const { open, isOpen } = useRequestModal();
+  const openExternal = useOpenExternal();
 
   const lang = locale?.split("-")[0] ?? "en";
 
@@ -78,17 +82,18 @@ function EcomCarousel() {
     );
   }
 
-  const activeProduct = selected ?? output.products[0];
-  const cartItems: Product[] = [];
-  let total = 0;
-  for (const p of output.products) {
-    if (cart.ids.includes(p.id)) {
-      cartItems.push(p);
-      total += p.price;
-    }
-  }
-
   if (isOpen) {
+    const cartItems: Product[] = [];
+    let total = 0;
+    for (const p of output.products) {
+      if (cart.ids.includes(p.id)) {
+        cartItems.push(p);
+        total += p.price;
+      }
+    }
+    const checkoutUrl = new URL(CHECKOUT_URL);
+    checkoutUrl.searchParams.set("cart", cart.ids.join(","));
+
     return (
       <div className={`${theme} checkout`}>
         <div className="checkout-title">Order summary</div>
@@ -104,12 +109,18 @@ function EcomCarousel() {
           <span>Total</span>
           <span>${total.toFixed(2)}</span>
         </div>
-        <button type="button" className="checkout-button">
+        <button
+          type="button"
+          className="checkout-button"
+          onClick={() => openExternal(checkoutUrl.toString())}
+        >
           Checkout
         </button>
       </div>
     );
   }
+
+  const activeProduct = selected ?? output.products[0];
 
   return (
     <div className={`${theme} container`}>
