@@ -21,7 +21,7 @@
     "@base-ui/react": "^1.0.0",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@microlink/react-json-view": "^1.27.0",
-    "@modelcontextprotocol/sdk": "^1.25.1",
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "@rjsf/core": "^6.1.2",
     "@rjsf/shadcn": "^6.1.2",
     "@rjsf/utils": "^6.1.2",

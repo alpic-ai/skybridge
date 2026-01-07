@@ -15,7 +15,7 @@
     "web:preview": "vite preview -c web/vite.config.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.24.3",
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "@t3-oss/env-core": "^0.13.8",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
