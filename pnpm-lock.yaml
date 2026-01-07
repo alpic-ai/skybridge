@@ -388,7 +388,7 @@ importers:
         version: 6.1.2(react@19.2.3)
       '@rjsf/validator-ajv8':
         specifier: ^6.1.2
-        version: 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))
+        version: 6.1.2(@rjsf/utils@6.1.2(react@19.2.0))
       '@tanstack/react-query':
         specifier: ^5.90.16
         version: 5.90.16(react@19.2.3)
@@ -12647,7 +12647,7 @@ snapshots:
       react: 19.2.3
       react-is: 18.3.1
 
-  '@rjsf/validator-ajv8@6.1.2(@rjsf/utils@6.1.2(react@19.2.3))':
+  '@rjsf/validator-ajv8@6.1.2(@rjsf/utils@6.1.2(react@19.2.0))':
     dependencies:
       '@rjsf/utils': 6.1.2(react@19.2.3)
       ajv: 8.17.1
@@ -12829,7 +12829,7 @@ snapshots:
       '@rjsf/core': 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3)
       '@rjsf/shadcn': 6.1.2(@rjsf/core@6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3))(@rjsf/utils@6.1.2(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)
       '@rjsf/utils': 6.1.2(react@19.2.3)
-      '@rjsf/validator-ajv8': 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))
+      '@rjsf/validator-ajv8': 6.1.2(@rjsf/utils@6.1.2(react@19.2.0))
       '@tanstack/react-query': 5.90.16(react@19.2.3)
       ahooks: 3.9.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       class-variance-authority: 0.7.1
@@ -12888,7 +12888,7 @@ snapshots:
       '@rjsf/core': 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3)
       '@rjsf/shadcn': 6.1.2(@rjsf/core@6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3))(@rjsf/utils@6.1.2(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)
       '@rjsf/utils': 6.1.2(react@19.2.3)
-      '@rjsf/validator-ajv8': 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))
+      '@rjsf/validator-ajv8': 6.1.2(@rjsf/utils@6.1.2(react@19.2.0))
       '@tanstack/react-query': 5.90.16(react@19.2.3)
       ahooks: 3.9.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       class-variance-authority: 0.7.1
@@ -12947,7 +12947,7 @@ snapshots:
       '@rjsf/core': 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3)
       '@rjsf/shadcn': 6.1.2(@rjsf/core@6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3))(@rjsf/utils@6.1.2(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)
       '@rjsf/utils': 6.1.2(react@19.2.3)
-      '@rjsf/validator-ajv8': 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))
+      '@rjsf/validator-ajv8': 6.1.2(@rjsf/utils@6.1.2(react@19.2.0))
       '@tanstack/react-query': 5.90.16(react@19.2.3)
       ahooks: 3.9.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       class-variance-authority: 0.7.1
