@@ -60,6 +60,7 @@
   background: var(--bg-alt);
   padding: 0.5rem;
   box-sizing: border-box;
+  border-radius: 8px 8px 0 0;
 }
 
 .product-info {
