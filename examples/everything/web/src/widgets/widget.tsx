@@ -3,10 +3,11 @@ import "@/index.css";
 import { useState } from "react";
 import { mountWidget } from "skybridge/web";
 import { CreateStoreTab } from "./tabs/create-store-tab";
+import { DataLlmTab } from "./tabs/data-llm-tab";
 import { HomeTab } from "./tabs/home-tab";
 import { ToolInfoTab } from "./tabs/tool-info-tab";
 
-const TABS = ["Home", "createStore", "useToolInfo"] as const;
+const TABS = ["Home", "createStore", "data-llm", "useToolInfo"] as const;
 type Tab = (typeof TABS)[number];
 
 function Widget() {
@@ -29,6 +30,7 @@ function Widget() {
 
       {tab === "Home" && <HomeTab />}
       {tab === "createStore" && <CreateStoreTab />}
+      {tab === "data-llm" && <DataLlmTab />}
       {tab === "useToolInfo" && <ToolInfoTab />}
     </div>
   );

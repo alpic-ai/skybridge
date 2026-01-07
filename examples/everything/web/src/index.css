@@ -96,3 +96,18 @@ code {
 .btn:active {
   background: #000;
 }
+
+.btn-outline {
+  background: transparent;
+  color: #1a1a1a;
+  border: 1px solid #ddd;
+}
+
+.btn-outline:hover {
+  background: #f0f0f0;
+}
+
+.btn-active {
+  background: #1a1a1a;
+  color: #fff;
+}
