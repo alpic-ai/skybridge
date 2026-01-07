@@ -7,6 +7,7 @@ This "Ecommerce Carousel" example demonstrates key Skybridge capabilities:
 - **Theme Support**: Adapts to light/dark mode using the `useLayout()` hook
 - **Localization**: Translates UI based on user locale via `useUser()` hook
 - **Persistent State**: Maintains cart state across re-renders using `useWidgetState()` hook
+- **Modal Dialogs**: Opens checkout modal via `useRequestModal()` hook
 - **External API Integration**: Demonstrates fetching data from REST APIs
 - **Hot Module Replacement**: Live reloading of widget components during development
 

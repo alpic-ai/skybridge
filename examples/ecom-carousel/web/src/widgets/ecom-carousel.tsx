@@ -1,7 +1,13 @@
 import "@/index.css";
 
 import { useState } from "react";
-import { mountWidget, useLayout, useUser, useWidgetState } from "skybridge/web";
+import {
+  mountWidget,
+  useLayout,
+  useRequestModal,
+  useUser,
+  useWidgetState,
+} from "skybridge/web";
 import { useToolInfo } from "../helpers.js";
 
 const translations: Record<string, Record<string, string>> = {
@@ -34,6 +40,7 @@ const translations: Record<string, Record<string, string>> = {
 function EcomCarousel() {
   const { theme } = useLayout();
   const { locale } = useUser();
+  const { open, isOpen } = useRequestModal();
 
   const lang = locale?.split("-")[0] ?? "en";
 
@@ -72,10 +79,48 @@ function EcomCarousel() {
   }
 
   const activeProduct = selected ?? output.products[0];
+  const cartItems: Product[] = [];
+  let total = 0;
+  for (const p of output.products) {
+    if (cart.ids.includes(p.id)) {
+      cartItems.push(p);
+      total += p.price;
+    }
+  }
+
+  if (isOpen) {
+    return (
+      <div className={`${theme} checkout`}>
+        <div className="checkout-title">Order summary</div>
+        <div className="checkout-items">
+          {cartItems.map((item) => (
+            <div key={item.id} className="checkout-item">
+              <span>{item.title}</span>
+              <span>${item.price.toFixed(2)}</span>
+            </div>
+          ))}
+        </div>
+        <div className="checkout-total">
+          <span>Total</span>
+          <span>${total.toFixed(2)}</span>
+        </div>
+        <button type="button" className="checkout-button">
+          Checkout
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={`${theme} container`}>
-      <div className="cart-indicator">🛒 {cart.ids.length}</div>
+      <button
+        type="button"
+        className="cart-indicator"
+        onClick={() => open({ title: "Proceed to checkout ?" })}
+        disabled={cart.ids.length === 0}
+      >
+        🛒 {cart.ids.length}
+      </button>
       <div className="carousel">
         {output.products.map((product) => {
           const inCart = cart.ids.includes(product.id);
