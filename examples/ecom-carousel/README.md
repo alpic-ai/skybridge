@@ -6,6 +6,7 @@ This "Ecommerce Carousel" example demonstrates key Skybridge capabilities:
 - **Tool Info Access**: Widgets access tool input, output, and metadata via `useToolInfo()` hook
 - **Theme Support**: Adapts to light/dark mode using the `useLayout()` hook
 - **Localization**: Translates UI based on user locale via `useUser()` hook
+- **Persistent State**: Maintains cart state across re-renders using `useWidgetState()` hook
 - **External API Integration**: Demonstrates fetching data from REST APIs
 - **Hot Module Replacement**: Live reloading of widget components during development
 
