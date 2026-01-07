@@ -79,6 +79,7 @@ export const Widget = () => {
       <iframe
         ref={iframeRef}
         src="about:blank"
+        onLoad={handleLoad}
         style={{
           width: "100%",
           border: "none",
