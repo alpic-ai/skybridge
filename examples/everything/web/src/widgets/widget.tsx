@@ -9,6 +9,7 @@ import { ToolInfoTab } from "./tabs/tool-info-tab";
 import { UseCallToolTab } from "./tabs/use-call-tool-tab";
 import { UseDisplayModeTab } from "./tabs/use-display-mode-tab";
 import { UseLayoutTab } from "./tabs/use-layout-tab";
+import { UseOpenExternalTab } from "./tabs/use-open-external-tab";
 
 const TABS = [
   "Home",
@@ -17,6 +18,7 @@ const TABS = [
   "useCallTool",
   "useDisplayMode",
   "useLayout",
+  "useOpenExternal",
   "useToolInfo",
 ] as const;
 
@@ -46,6 +48,7 @@ function Widget() {
       {tab === "useCallTool" && <UseCallToolTab />}
       {tab === "useDisplayMode" && <UseDisplayModeTab />}
       {tab === "useLayout" && <UseLayoutTab />}
+      {tab === "useOpenExternal" && <UseOpenExternalTab />}
       {tab === "useToolInfo" && <ToolInfoTab />}
     </div>
   );
