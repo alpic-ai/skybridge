@@ -32,7 +32,13 @@ This example serves as a comprehensive reference for building sophisticated, int
 #### 1. Install
 
 ```bash
+npm install
+# or
+yarn install
+# or
 pnpm install
+# or
+bun install
 ```
 
 #### 2. Set up Mapbox API Key
@@ -48,7 +54,13 @@ This example requires a Mapbox API key to display the interactive map. You'll ne
 Run the development server from the root directory:
 
 ```bash
+npm run dev
+# or
+yarn dev
+# or
 pnpm dev
+# or
+bun dev
 ```
 
 This command starts an Express server on port 3000. This server packages:
