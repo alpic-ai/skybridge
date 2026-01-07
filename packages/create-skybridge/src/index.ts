@@ -7,6 +7,11 @@ import mri from "mri";
 
 const defaultProjectName = "skybridge-project";
 
+const templates = [
+  { value: "default", label: "a minimal implementation" },
+  { value: "ecom", label: "a functional ecommerce carousel" },
+];
+
 // prettier-ignore
 const helpMessage = `\
 Usage: create-skybridge [OPTION]... [DIRECTORY]
@@ -17,6 +22,10 @@ Options:
   -h, --help              show this help message
   --overwrite             remove existing files in target directory
   --immediate             install dependencies and start development server
+  --template <template>   use a specific template
+
+Available templates:
+${templates.map((t) => `  ${t.value.padEnd(23)} ${t.label}`).join("\n")}
 
 Examples:
   create-skybridge my-app
@@ -28,9 +37,10 @@ export async function init(args: string[] = process.argv.slice(2)) {
     help?: boolean;
     overwrite?: boolean;
     immediate?: boolean;
+    template?: string;
   }>(args, {
     boolean: ["help", "overwrite", "immediate"],
-    alias: { h: "help" },
+    alias: { h: "help", t: "template" },
   });
 
   const argTargetDir = argv._[0]
@@ -38,6 +48,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
     : undefined;
   const argOverwrite = argv.overwrite;
   const argImmediate = argv.immediate;
+  const argTemplate = argv.template;
 
   const help = argv.help;
   if (help) {
@@ -71,7 +82,44 @@ export async function init(args: string[] = process.argv.slice(2)) {
     }
   }
 
-  // 2. Handle directory if exist and not empty
+  // 2. Select a template
+  const hasInvalidTemplate =
+    argTemplate && !templates.some((t) => t.value === argTemplate);
+  let template: string | symbol | undefined = argTemplate;
+  if (interactive) {
+    if (!argTemplate || hasInvalidTemplate) {
+      let message = "Please choose a template:";
+      if (hasInvalidTemplate) {
+        message = `${argTemplate} is not a valid template. Please choose one of the following:`;
+      }
+
+      template = await prompts.select({
+        message,
+        options: templates.map((t) => ({
+          value: t.value,
+          label: `${t.value}: ${t.label}`,
+        })),
+      });
+
+      if (prompts.isCancel(template)) {
+        return cancel();
+      }
+    }
+  } else if (hasInvalidTemplate) {
+    prompts.log.error(
+      `Template is not a valid template. Please choose one of the following: ${templates.map((t) => t.value).join(", ")}`,
+    );
+    process.exit(1);
+  }
+
+  let templatePath = "../template";
+  switch (template) {
+    case "ecom":
+      templatePath = "../template-ecom";
+      break;
+  }
+
+  // 3. Handle directory if exist and not empty
   if (fs.existsSync(targetDir) && !isEmpty(targetDir)) {
     let overwrite: "yes" | "no" | undefined = argOverwrite ? "yes" : undefined;
     if (!overwrite) {
@@ -114,18 +162,24 @@ export async function init(args: string[] = process.argv.slice(2)) {
 
   const root = path.join(process.cwd(), targetDir);
 
-  // 3. Copy the repository
+  // 4. Copy the template
   prompts.log.step(`Copying template...`);
 
   try {
-    const templateDir = fileURLToPath(new URL("../template", import.meta.url));
+    const templateDir = fileURLToPath(new URL(templatePath, import.meta.url));
     // Copy template to target directory
     fs.cpSync(templateDir, root, {
       recursive: true,
       filter: (src) => [".npmrc"].every((file) => !src.endsWith(file)),
     });
-    // Rename _gitignore to .gitignore
-    fs.renameSync(path.join(root, "_gitignore"), path.join(root, ".gitignore"));
+    // Write .gitignore
+    fs.writeFileSync(
+      path.join(root, ".gitignore"),
+      `node_modules/
+dist/
+.env*
+.DS_store`,
+    );
     // Update project name in package.json
     const name = path.basename(root);
     const pkgPath = path.join(root, "package.json");
@@ -143,7 +197,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
   const userAgent = process.env.npm_config_user_agent;
   const pkgManager = userAgent?.split(" ")[0]?.split("/")[0] || "npm";
 
-  // 4. Ask about immediate installation
+  // 5. Ask about immediate installation
   let immediate = argImmediate;
   if (immediate === undefined) {
     if (interactive) {

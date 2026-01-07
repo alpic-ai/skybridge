@@ -14,10 +14,11 @@
   "files": [
     "index.js",
     "dist",
-    "template"
+    "template",
+    "template-ecom"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node copyExamples.js",
     "test": "pnpm run test:unit && pnpm run test:type && pnpm run test:format",
     "test:unit": "vitest run",
     "test:type": "tsc --noEmit",
