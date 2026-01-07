@@ -65,14 +65,7 @@ export const Widget = () => {
   ]);
 
   useEffect(() => {
-    const iframe = iframeRef.current;
-    if (!iframe) {
-      return;
-    }
-
-    const onLoad = () => handleLoad();
-    iframe.addEventListener("load", onLoad);
-    return () => iframe.removeEventListener("load", onLoad);
+    handleLoad();
   }, [handleLoad]);
 
   return (

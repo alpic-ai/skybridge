@@ -41,9 +41,7 @@ export function CapitalDetail({ capital }: CapitalDetailProps) {
     <div
       className="h-full flex flex-col bg-slate-900/95 backdrop-blur-sm overflow-hidden"
       data-llm={
-        "The user is currently viewing the capital detail for " +
-        capital.name +
-        "Disregard all previous information about the capital the user was looking at. Here are additional information about the capital in case he asks for it: " +
+        `The user is currently viewing the capital detail for ${capital.name}. Disregard all previous information about the capital the user was looking at. Here are additional information about the capital in case he asks for it: ` +
         JSON.stringify({
           capital: capital.name,
           country: capital.country.name,
@@ -52,7 +50,6 @@ export function CapitalDetail({ capital }: CapitalDetailProps) {
         })
       }
     >
-      {/* Photo */}
       {photo && (
         <div className="relative h-48 shrink-0">
           <img
@@ -61,12 +58,10 @@ export function CapitalDetail({ capital }: CapitalDetailProps) {
             className="w-full h-full object-cover"
           />
 
-          {/* Gradient overlay */}
           <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-transparent to-transparent" />
         </div>
       )}
 
-      {/* Header */}
       <div className="px-4 pt-4 pb-2 flex items-start gap-3">
         <img
           src={capital.flag}
@@ -83,9 +78,7 @@ export function CapitalDetail({ capital }: CapitalDetailProps) {
         </div>
       </div>
 
-      {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-        {/* Key Stats */}
         <div className="grid grid-cols-2 gap-2">
           <StatCard
             icon={<Users className="w-4 h-4" />}
@@ -99,7 +92,6 @@ export function CapitalDetail({ capital }: CapitalDetailProps) {
           />
         </div>
 
-        {/* Currencies */}
         {capital.currencies.length > 0 && (
           <InfoSection icon={<Coins className="w-4 h-4" />} title="Currencies">
             <div className="space-y-1">
@@ -118,7 +110,6 @@ export function CapitalDetail({ capital }: CapitalDetailProps) {
           </InfoSection>
         )}
 
-        {/* Wikipedia Description */}
         {wikipedia.capitalDescription && (
           <div className="text-sm text-slate-300 leading-relaxed">
             {wikipedia.capitalDescription}

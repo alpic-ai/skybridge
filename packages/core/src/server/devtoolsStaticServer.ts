@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import path from "node:path";
 import cors from "cors";
-import express from "express";
+import express, { type RequestHandler } from "express";
 
 const require = createRequire(import.meta.url);
 
@@ -22,9 +22,7 @@ const require = createRequire(import.meta.url);
  *                     ^^^^^^^^ Make sure to install the devtoolsStaticServer before the widgetsDevServer
  * }
  */
-export const devtoolsStaticServer = async (): Promise<
-  ReturnType<typeof express.Router>
-> => {
+export const devtoolsStaticServer = async (): Promise<RequestHandler> => {
   const router = express.Router();
   let devtoolsPath: string;
   try {

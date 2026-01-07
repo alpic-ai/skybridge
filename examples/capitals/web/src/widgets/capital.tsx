@@ -26,7 +26,6 @@ function CapitalExplorer() {
     data,
   } = useCallTool("capital");
 
-  // When fullscreen becomes active, center on the pending capital
   useEffect(() => {
     if (isFullscreen && pendingCapital) {
       setSelectedCapital(pendingCapital);
@@ -54,7 +53,6 @@ function CapitalExplorer() {
         ${isFullscreen ? "fixed inset-0 z-50" : "relative h-[500px] rounded-xl"}
       `}
     >
-      {/* Map Container */}
       <div className="absolute inset-0">
         <MapView
           capitals={allCapitals}
@@ -78,7 +76,6 @@ function CapitalExplorer() {
           onCapitalSelect={handleCapitalClick}
         />
       </div>
-      {/* Right Panel - Capital Details */}
       <div
         className={`
           absolute right-0 top-0 bottom-0 w-80 transition-transform duration-500
@@ -93,7 +90,6 @@ function CapitalExplorer() {
           <CapitalDetail capital={capital} />
         ) : null}
       </div>
-      {/* Fullscreen Exit Button */}
       {isFullscreen && (
         <button
           type="button"

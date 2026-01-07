@@ -31,7 +31,6 @@ export function MapView({
 }: MapViewProps) {
   const mapRef = useRef<MapRef>(null);
 
-  // Fly to center when it changes
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.flyTo({
