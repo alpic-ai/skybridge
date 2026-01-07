@@ -73,3 +73,26 @@ code {
   font-size: 0.875rem;
   font-family: ui-monospace, monospace;
 }
+
+.button-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #333;
+}
+
+.btn:active {
+  background: #000;
+}

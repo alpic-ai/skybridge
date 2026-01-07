@@ -2,10 +2,11 @@ import "@/index.css";
 
 import { useState } from "react";
 import { mountWidget } from "skybridge/web";
+import { CreateStoreTab } from "./tabs/create-store-tab";
 import { HomeTab } from "./tabs/home-tab";
 import { ToolInfoTab } from "./tabs/tool-info-tab";
 
-const TABS = ["Home", "useToolInfo"] as const;
+const TABS = ["Home", "createStore", "useToolInfo"] as const;
 type Tab = (typeof TABS)[number];
 
 function Widget() {
@@ -27,6 +28,7 @@ function Widget() {
       </nav>
 
       {tab === "Home" && <HomeTab />}
+      {tab === "createStore" && <CreateStoreTab />}
       {tab === "useToolInfo" && <ToolInfoTab />}
     </div>
   );
