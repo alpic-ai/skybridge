@@ -20,6 +20,12 @@ body {
   gap: 0.5rem;
   border-bottom: 1px solid #ddd;
   margin-bottom: 1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
