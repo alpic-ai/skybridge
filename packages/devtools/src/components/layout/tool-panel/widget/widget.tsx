@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useSelectedTool, useSuspenseResource } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
@@ -23,7 +23,7 @@ export const Widget = () => {
     }
 
     const iframe = iframeRef.current;
-    if (!iframe?.contentWindow || !iframe?.contentDocument) {
+    if (!iframe || !iframe.contentWindow || !iframe.contentDocument) {
       return;
     }
 
@@ -40,6 +40,10 @@ export const Widget = () => {
       },
     );
 
+    iframe.contentDocument.open();
+    iframe.contentDocument.write(injectWaitForOpenai(html));
+    iframe.contentDocument.close();
+
     const doc = iframe.contentDocument;
 
     const resizeObserver = new ResizeObserver(() => {
@@ -51,7 +55,18 @@ export const Widget = () => {
     setToolData(tool.name, {
       openaiRef: iframeRef as React.RefObject<HTMLIFrameElement>,
     });
-  }, [openaiObject, pushOpenAiLog, setToolData, updateOpenaiObject, tool.name]);
+  }, [
+    openaiObject,
+    pushOpenAiLog,
+    setToolData,
+    updateOpenaiObject,
+    tool.name,
+    html,
+  ]);
+
+  useEffect(() => {
+    handleLoad();
+  }, [handleLoad]);
 
   return (
     <div
@@ -63,12 +78,12 @@ export const Widget = () => {
     >
       <iframe
         ref={iframeRef}
-        srcDoc={injectWaitForOpenai(html)}
-        onLoad={handleLoad}
+        src="about:blank"
         style={{
           width: "100%",
           border: "none",
           display: "block",
+          maxHeight: "300px",
         }}
         sandbox="allow-scripts allow-same-origin"
         title="html-preview"
