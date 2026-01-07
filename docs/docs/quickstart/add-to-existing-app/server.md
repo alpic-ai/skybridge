@@ -10,7 +10,7 @@ This guide shows you how to add `skybridge/server` to an existing MCP server to 
 
 You should already have:
 - A working MCP server using the official [TypeScript MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk)
-- Node.js 22+ 
+- Node.js 24+ 
 
 ## Install Skybridge
 

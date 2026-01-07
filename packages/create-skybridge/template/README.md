@@ -6,7 +6,7 @@ A minimal TypeScript template for building OpenAI Apps SDK compatible MCP server
 
 ### Prerequisites
 
-- Node.js 22+
+- Node.js 24+
 - HTTP tunnel such as [ngrok](https://ngrok.com/download)
 
 ### Local Development

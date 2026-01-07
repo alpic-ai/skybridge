@@ -29,7 +29,6 @@
     "mri": "^1.2.0"
   },
   "devDependencies": {
-    "@types/node": "^25.0.3",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16"
   }
