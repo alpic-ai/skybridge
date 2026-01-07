@@ -31,12 +31,11 @@ describe("useCallTool - onSuccess callback", () => {
 
   const toolName = "test-tool";
   const args = { input: "test input" };
-  const data = {
+  const data: CallToolResponse = {
     content: [{ type: "text" as const, text: "test result" }],
     structuredContent: { result: "test" },
     isError: false,
     result: "test result",
-    meta: {},
   };
   const error = new Error("test error");
 
@@ -192,7 +191,7 @@ describe("useCallTool - TypeScript typing", () => {
   it("should have correct return types when ToolArgs is null and ToolResponse is specified", async () => {
     type TestResponse = CallToolResponse & {
       structuredContent: { result: string };
-      meta: { id: number };
+      _meta: { id: number };
     };
 
     const { result } = renderHook(() =>
@@ -203,7 +202,7 @@ describe("useCallTool - TypeScript typing", () => {
       structuredContent: { result: "test" },
       isError: false,
       result: "test",
-      meta: { id: 123 },
+      _meta: { id: 123 },
     };
 
     OpenaiMock.callTool.mockResolvedValueOnce(data);
@@ -232,7 +231,7 @@ describe("useCallTool - TypeScript typing", () => {
       structuredContent: { answer: "test answer" },
       isError: false,
       result: "answer",
-      meta: {},
+      _meta: {},
     };
 
     OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);
@@ -258,7 +257,7 @@ describe("useCallTool - TypeScript typing", () => {
       structuredContent: { data: "test data" },
       isError: false,
       result: "data",
-      meta: {},
+      _meta: {},
     };
 
     OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);

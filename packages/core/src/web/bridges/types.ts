@@ -8,7 +8,7 @@ export type CallToolResponse = {
   structuredContent: NonNullable<CallToolResult["structuredContent"]>;
   isError: NonNullable<CallToolResult["isError"]>;
   result: string;
-  meta: NonNullable<CallToolResult["_meta"]>;
+  _meta?: CallToolResult["_meta"];
 };
 
 export type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
