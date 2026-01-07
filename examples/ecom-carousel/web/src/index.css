@@ -127,6 +127,7 @@
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
+  margin-right: 1rem;
 }
 
 .cart-indicator:disabled {
