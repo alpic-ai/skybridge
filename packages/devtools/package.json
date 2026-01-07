@@ -30,16 +30,16 @@
     "ahooks": "^3.9.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "framer-motion": "^12.24.5",
+    "framer-motion": "^12.24.10",
     "lodash-es": "^4.17.22",
     "lucide-react": "^0.562.0",
-    "motion": "^12.24.5",
+    "motion": "^12.24.10",
     "nuqs": "^2.8.6",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-resizable-panels": "^4.2.2",
+    "react-resizable-panels": "^4.3.0",
     "shadcn": "^3.6.3",
-    "shiki": "^3.20.0",
+    "shiki": "^3.21.0",
     "skybridge": "workspace:*",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
@@ -62,6 +62,6 @@
     "postcss": "^8.5.6",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.52.0",
-    "vite": "^7.3.0"
+    "vite": "^7.3.1"
   }
 }
