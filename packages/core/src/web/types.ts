@@ -75,7 +75,7 @@ export type CallToolResponse = {
   structuredContent: Record<string, unknown>;
   isError: boolean;
   result: string;
-  _meta: CallToolResult["_meta"];
+  _meta?: CallToolResult["_meta"];
 };
 
 export type RequestModalOptions = {

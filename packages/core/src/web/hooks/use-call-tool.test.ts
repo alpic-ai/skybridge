@@ -31,12 +31,11 @@ describe("useCallTool - onSuccess callback", () => {
 
   const toolName = "test-tool";
   const args = { input: "test input" };
-  const data = {
+  const data: CallToolResponse = {
     content: [{ type: "text" as const, text: "test result" }],
     structuredContent: { result: "test" },
     isError: false,
     result: "test result",
-    meta: {},
   };
   const error = new Error("test error");
 
