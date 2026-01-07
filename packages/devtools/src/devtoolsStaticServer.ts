@@ -6,8 +6,6 @@ import express, { type RequestHandler } from "express";
 const require = createRequire(import.meta.url);
 
 /**
- * @deprecated This file is deprecated. Please import `devtoolsStaticServer` directly from `@skybridge/devtools` instead.
- *
  * Serve the built devtools React app
  * This router serves static files from the devtools's dist directory.
  *

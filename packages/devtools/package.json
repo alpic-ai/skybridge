@@ -9,9 +9,16 @@
   "files": [
     "dist"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && pnpm run build:server",
+    "build:server": "tsc -p tsconfig.server.json",
     "test": "pnpm run test:type && pnpm run test:format",
     "test:type": "tsc --noEmit",
     "test:format": "biome ci",
@@ -30,6 +37,8 @@
     "ahooks": "^3.9.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
     "framer-motion": "^12.24.10",
     "lodash-es": "^4.17.22",
     "lucide-react": "^0.562.0",
@@ -50,11 +59,14 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@tailwindcss/vite": "^4.1.18",
+    "@total-typescript/tsconfig": "^1.0.4",
     "@types/lodash-es": "^4.17.12",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
     "autoprefixer": "^10.4.23",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "eslint": "^9.39.2",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",

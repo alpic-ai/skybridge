@@ -1,0 +1,10 @@
+{
+  "extends": "@total-typescript/tsconfig/tsc/no-dom/library",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/index.ts"]
+}
