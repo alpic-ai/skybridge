@@ -129,3 +129,8 @@ code {
   outline: none;
   border-color: #1a1a1a;
 }
+
+code.dark {
+  background: #1a1a1a;
+  color: #f0f0f0;
+}
