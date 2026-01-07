@@ -1,57 +1,14 @@
-import { useRef, useState } from "react";
-
 import { useAdaptor } from "../bridges/hooks/use-adaptor.js";
 import type {
   CallToolArgs,
   CallToolResponse,
   HasRequiredKeys,
 } from "../types.js";
-
-type CallToolIdleState = {
-  status: "idle";
-  isIdle: true;
-  isPending: false;
-  isSuccess: false;
-  isError: false;
-  data: undefined;
-  error: undefined;
-};
-
-type CallToolPendingState = {
-  status: "pending";
-  isIdle: false;
-  isPending: true;
-  isSuccess: false;
-  isError: false;
-  data: undefined;
-  error: undefined;
-};
-
-type CallToolSuccessState<TData extends CallToolResponse = CallToolResponse> = {
-  status: "success";
-  isIdle: false;
-  isPending: false;
-  isSuccess: true;
-  isError: false;
-  data: TData;
-  error: undefined;
-};
-
-type CallToolErrorState = {
-  status: "error";
-  isIdle: false;
-  isPending: false;
-  isSuccess: false;
-  isError: true;
-  data: undefined;
-  error: unknown;
-};
+import type { AsyncOperationState } from "./use-async-operation.js";
+import { useAsyncOperation } from "./use-async-operation.js";
 
 export type CallToolState<TData extends CallToolResponse = CallToolResponse> =
-  | CallToolIdleState
-  | CallToolPendingState
-  | CallToolSuccessState<TData>
-  | CallToolErrorState;
+  AsyncOperationState<TData, unknown>;
 
 export type SideEffects<ToolArgs, ToolResponse> = {
   onSuccess?: (data: ToolResponse, toolArgs: ToolArgs) => void;
@@ -103,38 +60,22 @@ export const useCallTool = <
 ) => {
   type CombinedCallToolResponse = CallToolResponse & ToolResponse;
 
-  const [{ status, data, error }, setCallToolState] = useState<
-    Omit<
-      CallToolState<CombinedCallToolResponse>,
-      "isIdle" | "isPending" | "isSuccess" | "isError"
-    >
-  >({ status: "idle", data: undefined, error: undefined });
+  const { state, execute: executeAsync } = useAsyncOperation<
+    CombinedCallToolResponse,
+    unknown
+  >({ enableDeduplication: true });
 
-  const callIdRef = useRef(0);
   const adaptor = useAdaptor();
 
   const execute = async (
     toolArgs: ToolArgs,
   ): Promise<CombinedCallToolResponse> => {
-    const callId = ++callIdRef.current;
-    setCallToolState({ status: "pending", data: undefined, error: undefined });
-
-    try {
-      const data = await adaptor.callTool<ToolArgs, CombinedCallToolResponse>(
+    return executeAsync(async () => {
+      return adaptor.callTool<ToolArgs, CombinedCallToolResponse>(
         name,
         toolArgs,
       );
-      if (callId === callIdRef.current) {
-        setCallToolState({ status: "success", data, error: undefined });
-      }
-
-      return data;
-    } catch (error) {
-      if (callId === callIdRef.current) {
-        setCallToolState({ status: "error", data: undefined, error });
-      }
-      throw error;
-    }
+    });
   };
 
   const callToolAsync = ((toolArgs?: ToolArgs) => {
@@ -173,18 +114,8 @@ export const useCallTool = <
       });
   }) as CallToolFn<ToolArgs, CombinedCallToolResponse>;
 
-  const callToolState = {
-    status,
-    data,
-    error,
-    isIdle: status === "idle",
-    isPending: status === "pending",
-    isSuccess: status === "success",
-    isError: status === "error",
-  } as CallToolState<CombinedCallToolResponse>;
-
   return {
-    ...callToolState,
+    ...state,
     callTool,
     callToolAsync,
   };
