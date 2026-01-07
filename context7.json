@@ -1,0 +1,49 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "url": "https://context7.com/alpic-ai/skybridge",
+  "public_key": "pk_QmCV6r1eoYWNTIq1jxP0h",
+  "projectTitle": "Skybridge",
+  "description": "Fullstack TypeScript framework for building ChatGPT Apps with type safety, React hooks, and HMR",
+  "folders": ["docs/docs", "examples"],
+  "excludeFolders": [
+    "node_modules",
+    "dist",
+    "src",
+    "**/__snapshots__",
+    "docs/node_modules",
+    "docs/.docusaurus",
+    "packages",
+    "examples/**/.env",
+    "examples/**/node_modules"
+  ],
+  "excludeFiles": [
+    "docusaurus.config.ts",
+    "sidebars.ts",
+    "vercel.json",
+    "package.json",
+    "pnpm-lock.yaml",
+    "tsconfig.json",
+    "README.md",
+    "CONTRIBUTING.md",
+    "LICENSE",
+    "biome.json",
+    "vitest.config.ts",
+    "pnpm-workspace.yaml"
+  ],
+  "rules": [
+    "Use TypeScript for full type safety with Skybridge",
+    "Use method chaining when defining your MCP server (e.g., new McpServer().registerWidget().registerTool()) to enable type inference with generateHelpers",
+    "Export your server type as 'AppType' (export type AppType = typeof server) to use with generateHelpers for end-to-end type inference",
+    "Use React hooks from skybridge/web (useToolInfo, useCallTool, useWidgetState, useLayout, useUser) instead of raw window.openai APIs for better state management",
+    "Use useToolInfo for initial data hydration - it provides the data from the tool call that rendered the widget",
+    "Use useCallTool for user-triggered actions only - do NOT call tools on mount, pass initial data through structuredContent instead",
+    "Use the data-llm attribute on DOM elements to sync UI state with the ChatGPT model, enabling contextual responses",
+    "Widget endpoint names must match widget file names exactly (e.g., 'pokemon-card' endpoint requires 'pokemon-card.tsx' file in web/src/widgets/)",
+    "Use Zod schemas for input and output validation in widget registration (inputSchema and outputSchema)",
+    "Use generateHelpers to create fully typed hooks with autocomplete - import AppType from server and call generateHelpers<AppType>()",
+    "Prefer skybridge/server's registerWidget over raw MCP tool registration for better type inference and widget management",
+    "Use the local dev environment with HMR (pnpm dev) for faster development iterations without reinstalling the app in ChatGPT",
+    "Widgets run in an iframe with CSP restrictions - useCallTool is the preferred way to fetch additional data as it's guaranteed to be allowed",
+    "Use React Query-inspired patterns: check isPending, isSuccess, isError states from hooks, and use callbacks (onSuccess, onError) for side effects"
+  ]
+}
