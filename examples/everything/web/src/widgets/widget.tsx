@@ -12,53 +12,33 @@ import { UseLayoutTab } from "./tabs/use-layout-tab";
 import { UseOpenExternalTab } from "./tabs/use-open-external-tab";
 import { UseUserTab } from "./tabs/use-user-tab";
 
-const TABS = [
-  "Home",
-  "createStore",
-  "data-llm",
-  "useCallTool",
-  "useDisplayMode",
-  "useLayout",
-  "useOpenExternal",
-  "useToolInfo",
-  "useUser",
-] as const;
+const TABS = {
+  Home: { docPath: "", Component: HomeTab },
+  createStore: { docPath: "create-store", Component: CreateStoreTab },
+  "data-llm": { docPath: "data-llm", Component: DataLlmTab },
+  useCallTool: { docPath: "use-call-tool", Component: UseCallToolTab },
+  useDisplayMode: { docPath: "use-display-mode", Component: UseDisplayModeTab },
+  useLayout: { docPath: "use-layout", Component: UseLayoutTab },
+  useOpenExternal: {
+    docPath: "use-open-external",
+    Component: UseOpenExternalTab,
+  },
+  useToolInfo: { docPath: "use-tool-info", Component: ToolInfoTab },
+  useUser: { docPath: "use-user", Component: UseUserTab },
+};
 
-type Tab = (typeof TABS)[number];
-
-function getDocPath(tab: Tab): string {
-  switch (tab) {
-    case "createStore":
-      return "create-store";
-    case "data-llm":
-      return "data-llm";
-    case "useCallTool":
-      return "use-call-tool";
-    case "useDisplayMode":
-      return "use-display-mode";
-    case "useLayout":
-      return "use-layout";
-    case "useOpenExternal":
-      return "use-open-external";
-    case "useToolInfo":
-      return "use-tool-info";
-    case "useUser":
-      return "use-user";
-    default:
-      return "";
-  }
-}
+type Tab = keyof typeof TABS;
 
 function Widget() {
   const [tab, setTab] = useState<Tab>("Home");
   const openExternal = useOpenExternal();
-  const openDocs = (path: string) =>
-    openExternal(`https://www.skybridge.tech/api-reference/${path}`);
+
+  const { docPath, Component } = TABS[tab];
 
   return (
     <div className="container">
       <nav className="tabs">
-        {TABS.map((t) => (
+        {(Object.keys(TABS) as Tab[]).map((t) => (
           <button
             key={t}
             type="button"
@@ -70,21 +50,15 @@ function Widget() {
         ))}
       </nav>
 
-      {tab === "Home" && <HomeTab />}
-      {tab === "createStore" && <CreateStoreTab />}
-      {tab === "data-llm" && <DataLlmTab />}
-      {tab === "useCallTool" && <UseCallToolTab />}
-      {tab === "useDisplayMode" && <UseDisplayModeTab />}
-      {tab === "useLayout" && <UseLayoutTab />}
-      {tab === "useOpenExternal" && <UseOpenExternalTab />}
-      {tab === "useToolInfo" && <ToolInfoTab />}
-      {tab === "useUser" && <UseUserTab />}
+      <Component />
 
       <div style={{ marginTop: "1.5rem" }}>
         <button
           type="button"
           className="doc-link"
-          onClick={() => openDocs(getDocPath(tab))}
+          onClick={() =>
+            openExternal(`https://www.skybridge.tech/api-reference/${docPath}`)
+          }
         >
           See in docs
         </button>
