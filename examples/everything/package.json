@@ -1,0 +1,42 @@
+{
+  "name": "everything",
+  "version": "0.0.1",
+  "private": true,
+  "description": "A playground widget showcasing all Skybridge hooks and features for building ChatGPT and MCP Apps.",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon",
+    "build": "vite build -c web/vite.config.ts && shx rm -rf server/dist && tsc -p tsconfig.server.json && shx cp -r web/dist server/dist/assets",
+    "start": "node server/dist/index.js",
+    "inspector": "mcp-inspector http://localhost:3000/mcp",
+    "server:build": "tsc -p tsconfig.server.json",
+    "server:start": "node server/dist/index.js",
+    "web:build": "tsc -b web && vite build -c web/vite.config.ts",
+    "web:preview": "vite preview -c web/vite.config.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.1",
+    "express": "^5.2.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "skybridge": ">=0.16.8 <1.0.0",
+    "vite": "^7.3.0",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/inspector": "^0.18.0",
+    "@skybridge/devtools": "^0.16.8",
+    "@types/express": "^5.0.6",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "nodemon": "^3.1.11",
+    "shx": "^0.4.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "workspaces": [],
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}
