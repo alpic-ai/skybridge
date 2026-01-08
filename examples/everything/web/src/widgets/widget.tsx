@@ -1,7 +1,7 @@
 import "@/index.css";
 
 import { useState } from "react";
-import { mountWidget, useOpenExternal } from "skybridge/web";
+import { mountWidget, useOpenExternal, useRequestModal } from "skybridge/web";
 import { CreateStoreTab } from "./tabs/create-store-tab";
 import { DataLlmTab } from "./tabs/data-llm-tab";
 import { HomeTab } from "./tabs/home-tab";
@@ -11,6 +11,7 @@ import { UseDisplayModeTab } from "./tabs/use-display-mode-tab";
 import { UseFilesTab } from "./tabs/use-files-tab";
 import { UseLayoutTab } from "./tabs/use-layout-tab";
 import { UseOpenExternalTab } from "./tabs/use-open-external-tab";
+import { UseRequestModalTab } from "./tabs/use-request-modal-tab";
 import { UseUserTab } from "./tabs/use-user-tab";
 
 const TABS = {
@@ -25,6 +26,10 @@ const TABS = {
     docPath: "use-open-external",
     Component: UseOpenExternalTab,
   },
+  useRequestModal: {
+    docPath: "use-request-modal",
+    Component: UseRequestModalTab,
+  },
   useToolInfo: { docPath: "use-tool-info", Component: ToolInfoTab },
   useUser: { docPath: "use-user", Component: UseUserTab },
 };
@@ -34,8 +39,22 @@ type Tab = keyof typeof TABS;
 function Widget() {
   const [tab, setTab] = useState<Tab>("Home");
   const openExternal = useOpenExternal();
+  const { isOpen } = useRequestModal();
 
   const { docPath, Component } = TABS[tab];
+
+  // modal content need to be set at root
+  // opening is triggered by UseRequestModalTab
+  if (isOpen) {
+    return (
+      <div
+        className="container"
+        style={{ textAlign: "center", fontSize: "1.5rem" }}
+      >
+        🤠 Howdy !
+      </div>
+    );
+  }
 
   return (
     <div className="container">
