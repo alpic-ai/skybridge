@@ -106,6 +106,11 @@ describe("McpServer.registerWidget", () => {
           mimeType: "text/html+skybridge",
           text: expect.stringContaining('<div id="root"></div>'),
           _meta: {
+            "openai/widgetCSP": {
+              resource_domains: [serverUrl],
+              connect_domains: [serverUrl, "ws://localhost:3000"],
+            },
+            "openai/widgetDomain": serverUrl,
             "openai/widgetDescription": "Test tool",
           },
         },
@@ -149,10 +154,12 @@ describe("McpServer.registerWidget", () => {
     }>;
     expect(appsSdkResourceCallback).toBeDefined();
 
-    const serverUrl = "https://myapp.com";
-    const mockExtra = createMockExtra(
-      serverUrl,
-    ) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>;
+    const host = "myapp.com";
+    const serverUrl = `https://${host}`;
+    const mockExtra = createMockExtra(host) as unknown as RequestHandlerExtra<
+      ServerRequest,
+      ServerNotification
+    >;
     const result = await appsSdkResourceCallback(
       new URL("ui://widgets/apps-sdk/my-widget.html"),
       mockExtra,
@@ -165,6 +172,11 @@ describe("McpServer.registerWidget", () => {
           mimeType: "text/html+skybridge",
           text: expect.stringContaining('<div id="root"></div>'),
           _meta: {
+            "openai/widgetCSP": {
+              resource_domains: [serverUrl],
+              connect_domains: [serverUrl, `wss://${host}`],
+            },
+            "openai/widgetDomain": serverUrl,
             "openai/widgetDescription": "Test tool",
           },
         },
@@ -205,10 +217,12 @@ describe("McpServer.registerWidget", () => {
     }>;
     expect(appsSdkResourceCallback).toBeDefined();
 
-    const serverUrl = "https://myapp.com";
-    const mockExtra = createMockExtra(
-      serverUrl,
-    ) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>;
+    const host = "myapp.com";
+    const serverUrl = `https://${host}`;
+    const mockExtra = createMockExtra(host) as unknown as RequestHandlerExtra<
+      ServerRequest,
+      ServerNotification
+    >;
     const result = await appsSdkResourceCallback(
       new URL("ui://widgets/apps-sdk/folder-widget.html"),
       mockExtra,
@@ -259,6 +273,11 @@ describe("McpServer.registerWidget", () => {
           mimeType: "text/html+skybridge",
           text: expect.stringContaining('<div id="root"></div>'),
           _meta: {
+            "openai/widgetCSP": {
+              resource_domains: ["http://localhost:3000"],
+              connect_domains: ["http://localhost:3000", "ws://localhost:3000"],
+            },
+            "openai/widgetDomain": "http://localhost:3000",
             "openai/widgetDescription": "Test tool",
             "openai/widgetPrefersBorder": true,
           },
@@ -298,8 +317,16 @@ describe("McpServer.registerWidget", () => {
           mimeType: "text/html;profile=mcp-app",
           text: expect.stringContaining('<div id="root"></div>'),
           _meta: {
-            "openai/widgetDescription": "Test tool",
-            "openai/widgetPrefersBorder": true,
+            ui: {
+              csp: {
+                resourceDomains: ["http://localhost:3000"],
+                connectDomains: [
+                  "http://localhost:3000",
+                  "ws://localhost:3000",
+                ],
+              },
+              domain: "http://localhost:3000",
+            },
           },
         },
       ],
@@ -330,5 +357,74 @@ describe("McpServer.registerWidget", () => {
     expect(toolConfig._meta?.ui).toEqual({
       resourceUri: "ui://widgets/ext-apps/my-widget.html",
     });
+  });
+
+  it("should apply meta overrides in correct priority: defaults < ui.* < direct openai/* keys", async () => {
+    const mockToolCallback = vi.fn();
+    const mockRegisterResourceConfig = {
+      description: "Test widget",
+      _meta: {
+        // ui.csp overrides (middle priority)
+        ui: {
+          csp: {
+            resourceDomains: ["https://from-ui-csp.com"],
+            connectDomains: ["https://from-ui-csp.com"],
+          },
+          domain: "https://from-ui-domain.com",
+          prefersBorder: false,
+        },
+        // Direct openai/* keys (highest priority) - should override ui.*
+        "openai/widgetDomain": "https://direct-override.com",
+        "openai/widgetPrefersBorder": true,
+      },
+    };
+    const mockToolConfig = { description: "Test tool" };
+
+    server.registerWidget(
+      "override-test",
+      mockRegisterResourceConfig,
+      mockToolConfig,
+      mockToolCallback,
+    );
+
+    const appsSdkCallback = mockRegisterResource.mock
+      .calls[0]?.[3] as unknown as (
+      uri: URL,
+      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+    ) => Promise<{
+      contents: Array<{
+        uri: URL | string;
+        mimeType: string;
+        text?: string;
+        _meta?: Record<string, unknown>;
+      }>;
+    }>;
+
+    const result = await appsSdkCallback(
+      new URL("ui://widgets/apps-sdk/override-test.html"),
+      createMockExtra("__not_used__") as unknown as RequestHandlerExtra<
+        ServerRequest,
+        ServerNotification
+      >,
+    );
+
+    const meta = result.contents[0]?._meta as Record<string, unknown>;
+
+    // CSP arrays are merged by index - user value replaces at index 0, defaults remain at other indices
+    expect(meta["openai/widgetCSP"]).toEqual({
+      resource_domains: ["https://from-ui-csp.com"],
+      connect_domains: ["https://from-ui-csp.com", "ws://localhost:3000"],
+      frame_domains: undefined,
+      redirect_domains: undefined,
+    });
+
+    // Domain should be overridden by direct openai/* key (highest priority)
+    expect(meta["openai/widgetDomain"]).toBe("https://direct-override.com");
+
+    // PrefersBorder should be overridden by direct openai/* key (highest priority)
+    expect(meta["openai/widgetPrefersBorder"]).toBe(true);
+
+    // Description should be from defaults (toolConfig.description)
+    expect(meta["openai/widgetDescription"]).toBe("Test tool");
   });
 });
