@@ -12,17 +12,17 @@
   ],
   "exports": {
     "./server": {
-      "types": "./dist/src/server/index.d.ts",
-      "default": "./dist/src/server/index.js"
+      "types": "./dist/server/index.d.ts",
+      "default": "./dist/server/index.js"
     },
     "./web": {
-      "types": "./dist/src/web/index.d.ts",
-      "default": "./dist/src/web/index.js"
+      "types": "./dist/web/index.d.ts",
+      "default": "./dist/web/index.js"
     }
   },
   "scripts": {
-    "build": "tsc && pnpm run build:templates",
-    "build:templates": "cp -r src/server/templates dist/src/server/",
+    "build": "shx rm -rf dist && tsc && pnpm run build:templates",
+    "build:templates": "cp -r src/server/templates dist/server/",
     "format": "biome check --write --error-on-warnings",
     "test": "pnpm run test:unit && pnpm run test:type && pnpm run test:format",
     "test:unit": "vitest run",
@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.28.5",
+    "@oclif/core": "^4.8.0",
     "cors": "^2.8.5",
     "dequal": "^2.0.3",
     "es-toolkit": "^1.43.0",
@@ -63,13 +64,26 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsdom": "^27.0.0",
+    "@types/node": "^24.10.4",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitest/ui": "^4.0.16",
     "jsdom": "^27.4.0",
+    "shx": "^0.3.4",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16",
     "zod": "^4.3.5"
   },
-  "packageManager": "pnpm@10.27.0"
+  "packageManager": "pnpm@10.27.0",
+  "bin": {
+    "sb": "./bin/run.js",
+    "skybridge": "./bin/run.js"
+  },
+  "oclif": {
+    "bin": "skybridge",
+    "commands": "./dist/commands",
+    "dirname": "skybridge",
+    "topicSeparator": " "
+  }
 }
