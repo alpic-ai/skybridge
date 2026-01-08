@@ -1,12 +1,12 @@
 {
   "extends": "@total-typescript/tsconfig/tsc/dom/library",
   "compilerOptions": {
-    "rootDir": ".",
+    "rootDir": "src",
     "outDir": "dist",
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ESNext", "DOM", "DOM.Iterable"]
   },
-  "exclude": ["node_modules", "dist", "packages"]
+  "include": ["src/**/*"]
 }
