@@ -14,6 +14,7 @@ import { UseOpenExternalTab } from "./tabs/use-open-external-tab";
 import { UseRequestModalTab } from "./tabs/use-request-modal-tab";
 import { UseSendFollowUpMessageTab } from "./tabs/use-send-follow-up-message-tab";
 import { UseUserTab } from "./tabs/use-user-tab";
+import { UseWidgetStateTab } from "./tabs/use-widget-state-tab";
 
 const TABS = {
   Home: { docPath: "", Component: HomeTab },
@@ -37,6 +38,7 @@ const TABS = {
   },
   useToolInfo: { docPath: "use-tool-info", Component: ToolInfoTab },
   useUser: { docPath: "use-user", Component: UseUserTab },
+  useWidgetState: { docPath: "use-widget-state", Component: UseWidgetStateTab },
 };
 
 type Tab = keyof typeof TABS;
