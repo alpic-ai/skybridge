@@ -18,7 +18,7 @@ function findPackageJson(startDir: string): string | null {
   return null;
 }
 
-function getSkybridgeVersion(): string {
+function getPackageVersion(): string {
   const currentFileDir = path.dirname(fileURLToPath(import.meta.url));
   const packageJsonPath = findPackageJson(currentFileDir);
 
@@ -34,7 +34,7 @@ export const useVersion = () => {
   const [version, setVersion] = useState<string>();
 
   useEffect(() => {
-    const v = getSkybridgeVersion();
+    const v = getPackageVersion();
     setVersion(v);
   }, []);
 

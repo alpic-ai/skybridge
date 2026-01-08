@@ -1,18 +1,15 @@
 import { spawn } from "node:child_process";
-import { Command, Flags } from "@oclif/core";
+import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { useEffect } from "react";
 import { useVersion } from "../cli/use-version.js";
 
 export default class Dev extends Command {
   static override description = "Start development server";
-  static override examples = ["<%= config.bin %> <%= command.id %>"];
+  static override examples = ["skybridge dev"];
   static override flags = {};
 
   public async run(): Promise<void> {
-    const { flags } = await this.parse(Dev);
-
-    // Clear console for fullscreen experience
     console.clear();
 
     const App = () => {
