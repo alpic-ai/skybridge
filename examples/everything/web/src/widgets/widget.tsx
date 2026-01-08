@@ -1,7 +1,7 @@
 import "@/index.css";
 
 import { useState } from "react";
-import { mountWidget } from "skybridge/web";
+import { mountWidget, useOpenExternal } from "skybridge/web";
 import { CreateStoreTab } from "./tabs/create-store-tab";
 import { DataLlmTab } from "./tabs/data-llm-tab";
 import { HomeTab } from "./tabs/home-tab";
@@ -26,8 +26,34 @@ const TABS = [
 
 type Tab = (typeof TABS)[number];
 
+function getDocPath(tab: Tab): string {
+  switch (tab) {
+    case "createStore":
+      return "create-store";
+    case "data-llm":
+      return "data-llm";
+    case "useCallTool":
+      return "use-call-tool";
+    case "useDisplayMode":
+      return "use-display-mode";
+    case "useLayout":
+      return "use-layout";
+    case "useOpenExternal":
+      return "use-open-external";
+    case "useToolInfo":
+      return "use-tool-info";
+    case "useUser":
+      return "use-user";
+    default:
+      return "";
+  }
+}
+
 function Widget() {
   const [tab, setTab] = useState<Tab>("Home");
+  const openExternal = useOpenExternal();
+  const openDocs = (path: string) =>
+    openExternal(`https://www.skybridge.tech/api-reference/${path}`);
 
   return (
     <div className="container">
@@ -53,6 +79,16 @@ function Widget() {
       {tab === "useOpenExternal" && <UseOpenExternalTab />}
       {tab === "useToolInfo" && <ToolInfoTab />}
       {tab === "useUser" && <UseUserTab />}
+
+      <div style={{ marginTop: "1.5rem" }}>
+        <button
+          type="button"
+          className="doc-link"
+          onClick={() => openDocs(getDocPath(tab))}
+        >
+          See in docs
+        </button>
+      </div>
     </div>
   );
 }

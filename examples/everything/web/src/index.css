@@ -37,6 +37,7 @@ body {
   color: #666;
   cursor: pointer;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .tab:hover {
@@ -139,4 +140,26 @@ code {
 code.dark {
   background: #1a1a1a;
   color: #f0f0f0;
+}
+
+.doc-link {
+  padding: 0.25rem 0;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: inherit;
+  color: #888;
+  cursor: pointer;
+}
+
+.doc-link:hover {
+  color: #1a1a1a;
+  background: #f0f0f0;
+  padding: 0.25rem 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.doc-link::after {
+  content: " \2197";
 }
