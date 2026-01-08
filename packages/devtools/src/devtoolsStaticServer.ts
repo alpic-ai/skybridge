@@ -1,7 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import cors from "cors";
-import express, { type RequestHandler } from "express";
+import express, { type Router } from "express";
 
 /**
  * Serve the built devtools React app
@@ -17,7 +17,7 @@ import express, { type RequestHandler } from "express";
  *                     ^^^^^^^^ Make sure to install the devtoolsStaticServer before the widgetsDevServer
  * }
  */
-export const devtoolsStaticServer = async (): Promise<RequestHandler> => {
+export const devtoolsStaticServer = async (): Promise<Router> => {
   const router = express.Router();
 
   const distDir = path.dirname(fileURLToPath(import.meta.url));
