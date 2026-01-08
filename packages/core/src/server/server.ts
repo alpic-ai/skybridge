@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import type { McpUiToolMeta } from "@modelcontextprotocol/ext-apps";
 import {
   McpServer as McpServerBase,
   type RegisteredTool,
@@ -40,7 +41,7 @@ type OpenaiToolMeta = {
 
 /** @see https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx#resource-discovery */
 type McpAppsToolMeta = {
-  "ui/resourceUri": string;
+  ui: McpUiToolMeta;
 };
 
 type ToolMeta = OpenaiToolMeta & McpAppsToolMeta;
@@ -210,7 +211,9 @@ export class McpServer<
     const toolMeta: ToolMeta = {
       ...toolConfig._meta,
       "openai/outputTemplate": appsSdkResourceConfig.uri,
-      "ui/resourceUri": extAppsResourceConfig.uri,
+      ui: {
+        resourceUri: extAppsResourceConfig.uri,
+      },
     };
 
     this.registerTool(

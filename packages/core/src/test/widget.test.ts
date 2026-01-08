@@ -308,4 +308,27 @@ describe("McpServer.registerWidget", () => {
       'window.skybridge = { hostType: "mcp-app" }',
     );
   });
+
+  it("should register tool with ui.resourceUri metadata (not deprecated ui/resourceUri)", async () => {
+    const mockToolCallback = vi.fn();
+    const mockRegisterResourceConfig = { description: "Test widget" };
+    const mockToolConfig = { description: "Test tool" };
+
+    server.registerWidget(
+      "my-widget",
+      mockRegisterResourceConfig,
+      mockToolConfig,
+      mockToolCallback,
+    );
+
+    expect(mockRegisterTool).toHaveBeenCalledTimes(1);
+
+    const toolCallArgs = mockRegisterTool.mock.calls[0];
+    const toolConfig = toolCallArgs?.[1] as { _meta?: Record<string, unknown> };
+
+    expect(toolConfig._meta).toHaveProperty("ui");
+    expect(toolConfig._meta?.ui).toEqual({
+      resourceUri: "ui://widgets/ext-apps/my-widget.html",
+    });
+  });
 });
