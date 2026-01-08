@@ -22,6 +22,7 @@ import type {
   ServerRequest,
   ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
+import { toMerged } from "es-toolkit";
 import { templateHelper } from "./templateHelper.js";
 
 export type ToolDef<
@@ -50,34 +51,66 @@ type McpAppsToolMeta = {
 type ToolMeta = OpenaiToolMeta & McpAppsToolMeta;
 
 /** @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields */
+type OpenaiWidgetCSP = {
+  /** Domains the widget may contact via fetch/XHR */
+  connect_domains: string[];
+  /** Domains for static assets (images, fonts, scripts, styles) */
+  resource_domains: string[];
+  /** Origins allowed for iframe embeds (opts into stricter app review) */
+  frame_domains?: string[];
+  /** Origins that can receive openExternal redirects without safe-link modal */
+  redirect_domains?: string[];
+};
+
 type OpenaiResourceMeta = {
   "openai/widgetDescription"?: string;
   "openai/widgetPrefersBorder"?: boolean;
-  "openai/widgetCSP"?: Record<"connect_domains" | "resource_domains", string[]>;
+  "openai/widgetCSP"?: OpenaiWidgetCSP;
   "openai/widgetDomain"?: string;
 };
 
-/** MCP Apps resource metadata - uses types from @modelcontextprotocol/ext-apps */
-type McpAppsResourceMeta = {
-  ui?: McpUiResourceMeta;
+/**
+ * Extended MCP Apps CSP with upcoming fields from ext-apps PR #158
+ * and Skybridge-specific fields for OpenAI compatibility
+ * @see https://github.com/modelcontextprotocol/ext-apps/pull/158
+ */
+type ExtendedMcpUiResourceCsp = McpUiResourceMeta["csp"] & {
+  /** Origins allowed for nested iframe embeds */
+  frameDomains?: string[];
+  /** Origins permitted for the <base> tag URI directive */
+  baseUriDomains?: string[];
+  /**
+   * Origins that can receive openExternal redirects without safe-link modal (OpenAI-specific)
+   * @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields
+   */
+  redirectDomains?: string[];
 };
 
-type ResourceMeta = OpenaiResourceMeta & McpAppsResourceMeta;
+/** Extended MCP Apps resource metadata with upcoming CSP fields */
+type ExtendedMcpUiResourceMeta = Omit<McpUiResourceMeta, "csp"> & {
+  csp?: ExtendedMcpUiResourceCsp;
+};
+
+/** MCP Apps resource metadata */
+type McpAppsResourceMeta = {
+  ui?: ExtendedMcpUiResourceMeta;
+};
+
+type ResourceMeta = OpenaiResourceMeta | McpAppsResourceMeta;
 
 /** User-provided resource configuration with optional CSP override */
 export type WidgetResourceMeta = {
-  /** MCP Apps UI resource metadata (csp, domain, prefersBorder) */
-  ui?: McpUiResourceMeta;
+  ui?: ExtendedMcpUiResourceMeta;
 } & Resource["_meta"];
 
 export type WidgetHostType = "apps-sdk" | "mcp-app";
 
-type WidgetResourceConfig = {
+type WidgetResourceConfig<T extends ResourceMeta = ResourceMeta> = {
   hostType: WidgetHostType;
   uri: string;
   mimeType: string;
-  /** Function to build _meta for this resource given the serverUrl */
-  buildMeta: (serverUrl: string, wsServerUrl: string) => ResourceMeta;
+  /** Function to build _meta for this resource content given the serverUrl */
+  buildContentMeta: (urls: { serverUrl: string; wsServerUrl: string }) => T;
 };
 
 type McpServerOriginalResourceConfig = Omit<
@@ -186,42 +219,69 @@ export class McpServer<
   > {
     const userMeta = resourceConfig._meta;
 
-    const appsSdkResourceConfig: WidgetResourceConfig = {
+    const appsSdkResourceConfig: WidgetResourceConfig<OpenaiResourceMeta> = {
       hostType: "apps-sdk",
       uri: `ui://widgets/apps-sdk/${name}.html`,
       mimeType: "text/html+skybridge",
-      buildMeta: (serverUrl, wsServerUrl) => ({
-        "openai/widgetCSP": {
-          resource_domains: userMeta?.ui?.csp?.resourceDomains ?? [serverUrl],
-          connect_domains: userMeta?.ui?.csp?.connectDomains ?? [
-            serverUrl,
-            wsServerUrl,
-          ],
-        },
-        "openai/widgetDomain": userMeta?.ui?.domain ?? serverUrl,
-        "openai/widgetDescription": toolConfig.description,
-        ...(userMeta?.ui?.prefersBorder !== undefined && {
-          "openai/widgetPrefersBorder": userMeta.ui.prefersBorder,
-        }),
-        ...userMeta,
-      }),
+      buildContentMeta: ({ serverUrl, wsServerUrl }) => {
+        const userUi = userMeta?.ui;
+
+        const defaults: OpenaiResourceMeta = {
+          "openai/widgetCSP": {
+            resource_domains: [serverUrl],
+            connect_domains: [serverUrl, wsServerUrl],
+          },
+          "openai/widgetDomain": serverUrl,
+          "openai/widgetDescription": toolConfig.description,
+        };
+
+        const userCsp = userUi?.csp;
+
+        const fromUi: Partial<
+          Omit<
+            OpenaiResourceMeta,
+            "openai/widgetCSP" | "openai/widgetDescription"
+          > & {
+            "openai/widgetCSP": Partial<OpenaiWidgetCSP>;
+          }
+        > = {
+          "openai/widgetCSP": {
+            resource_domains: userCsp?.resourceDomains,
+            connect_domains: userCsp?.connectDomains,
+            frame_domains: userCsp?.frameDomains,
+            redirect_domains: userCsp?.redirectDomains,
+          },
+          "openai/widgetDomain": userUi?.domain,
+          "openai/widgetPrefersBorder": userUi?.prefersBorder,
+        };
+
+        const directOpenaiKeys = Object.fromEntries(
+          Object.entries(userMeta ?? {}).filter(([key]) =>
+            key.startsWith("openai/"),
+          ),
+        );
+
+        return toMerged(toMerged(defaults, fromUi), directOpenaiKeys);
+      },
     };
 
-    const extAppsResourceConfig: WidgetResourceConfig = {
+    const extAppsResourceConfig: WidgetResourceConfig<McpAppsResourceMeta> = {
       hostType: "mcp-app",
       uri: `ui://widgets/ext-apps/${name}.html`,
       mimeType: "text/html;profile=mcp-app",
-      buildMeta: (serverUrl, wsServerUrl) => ({
-        ...userMeta,
-        ui: {
-          csp: {
-            resourceDomains: [serverUrl],
-            connectDomains: [serverUrl, wsServerUrl],
+      buildContentMeta: ({ serverUrl, wsServerUrl }) => {
+        const defaults: McpAppsResourceMeta = {
+          ui: {
+            csp: {
+              resourceDomains: [serverUrl],
+              connectDomains: [serverUrl, wsServerUrl],
+            },
+            domain: serverUrl,
           },
-          domain: serverUrl,
-          ...userMeta?.ui,
-        },
-      }),
+        };
+
+        return toMerged(defaults, { ui: userMeta?.ui });
+      },
     };
 
     [appsSdkResourceConfig, extAppsResourceConfig].forEach((widgetConfig) => {
@@ -298,7 +358,12 @@ export class McpServer<
     widgetConfig: WidgetResourceConfig;
     resourceConfig: McpServerOriginalResourceConfig;
   }): void {
-    const { hostType, uri: widgetUri, mimeType, buildMeta } = widgetConfig;
+    const {
+      hostType,
+      uri: widgetUri,
+      mimeType,
+      buildContentMeta,
+    } = widgetConfig;
 
     this.registerResource(
       name,
@@ -328,11 +393,11 @@ export class McpServer<
                 widgetName: name,
               });
 
-        const resourceMeta = buildMeta(serverUrl, wsServerUrl);
+        const contentMeta = buildContentMeta({ serverUrl, wsServerUrl });
 
         return {
           contents: [
-            { uri: uri.href, mimeType, text: html, _meta: resourceMeta },
+            { uri: uri.href, mimeType, text: html, _meta: contentMeta },
           ],
         };
       },

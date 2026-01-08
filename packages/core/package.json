@@ -46,6 +46,7 @@
     "@babel/core": "^7.28.5",
     "cors": "^2.8.5",
     "dequal": "^2.0.3",
+    "es-toolkit": "^1.43.0",
     "express": "^5.2.1",
     "handlebars": "^4.7.8",
     "superjson": "^2.2.6",
