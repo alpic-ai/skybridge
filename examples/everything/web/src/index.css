@@ -74,12 +74,18 @@ body {
   letter-spacing: 0.05em;
 }
 
+pre,
 code {
   background: #f0f0f0;
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   font-size: 0.875rem;
   font-family: ui-monospace, monospace;
+}
+
+pre {
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .button-row {

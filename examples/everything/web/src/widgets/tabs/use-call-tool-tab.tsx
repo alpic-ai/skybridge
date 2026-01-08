@@ -34,7 +34,7 @@ export function UseCallToolTab() {
       {data && (
         <div className="field">
           <span className="field-label">response</span>
-          <code>{JSON.stringify(data)}</code>
+          <pre>{JSON.stringify(data, null, 2)}</pre>
         </div>
       )}
     </div>
