@@ -2,7 +2,7 @@ import { renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useFiles } from "./use-files.js";
 
-describe("useLocale", () => {
+describe("useFiles", () => {
   const OpenaiMock = {
     uploadFile: vi.fn(),
     getFileDownloadUrl: vi.fn(),
@@ -30,7 +30,7 @@ describe("useLocale", () => {
     const fileId = "123";
     const { result } = renderHook(() => useFiles());
 
-    result.current.download({ fileId });
+    result.current.getDownloadUrl({ fileId });
     expect(OpenaiMock.getFileDownloadUrl).toHaveBeenCalledWith({ fileId });
   });
 });
