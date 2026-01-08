@@ -12,6 +12,7 @@ import { UseFilesTab } from "./tabs/use-files-tab";
 import { UseLayoutTab } from "./tabs/use-layout-tab";
 import { UseOpenExternalTab } from "./tabs/use-open-external-tab";
 import { UseRequestModalTab } from "./tabs/use-request-modal-tab";
+import { UseSendFollowUpMessageTab } from "./tabs/use-send-follow-up-message-tab";
 import { UseUserTab } from "./tabs/use-user-tab";
 
 const TABS = {
@@ -29,6 +30,10 @@ const TABS = {
   useRequestModal: {
     docPath: "use-request-modal",
     Component: UseRequestModalTab,
+  },
+  useSendFollowUpMessage: {
+    docPath: "use-send-follow-up-message",
+    Component: UseSendFollowUpMessageTab,
   },
   useToolInfo: { docPath: "use-tool-info", Component: ToolInfoTab },
   useUser: { docPath: "use-user", Component: UseUserTab },
