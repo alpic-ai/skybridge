@@ -8,6 +8,7 @@ import { HomeTab } from "./tabs/home-tab";
 import { ToolInfoTab } from "./tabs/tool-info-tab";
 import { UseCallToolTab } from "./tabs/use-call-tool-tab";
 import { UseDisplayModeTab } from "./tabs/use-display-mode-tab";
+import { UseFilesTab } from "./tabs/use-files-tab";
 import { UseLayoutTab } from "./tabs/use-layout-tab";
 import { UseOpenExternalTab } from "./tabs/use-open-external-tab";
 import { UseUserTab } from "./tabs/use-user-tab";
@@ -18,6 +19,7 @@ const TABS = {
   "data-llm": { docPath: "data-llm", Component: DataLlmTab },
   useCallTool: { docPath: "use-call-tool", Component: UseCallToolTab },
   useDisplayMode: { docPath: "use-display-mode", Component: UseDisplayModeTab },
+  useFiles: { docPath: "use-files", Component: UseFilesTab },
   useLayout: { docPath: "use-layout", Component: UseLayoutTab },
   useOpenExternal: {
     docPath: "use-open-external",

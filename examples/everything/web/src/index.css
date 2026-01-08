@@ -119,6 +119,11 @@ code {
   background: #f0f0f0;
 }
 
+.btn-outline:disabled {
+  color: #ccc;
+  background: #fff;
+}
+
 .btn-active {
   background: #1a1a1a;
   color: #fff;
