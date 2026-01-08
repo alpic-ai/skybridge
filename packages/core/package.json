@@ -50,6 +50,7 @@
     "es-toolkit": "^1.43.0",
     "express": "^5.2.1",
     "handlebars": "^4.7.8",
+    "ink": "^6.6.0",
     "superjson": "^2.2.6",
     "vite": "^7.3.1",
     "zustand": "^5.0.9"
