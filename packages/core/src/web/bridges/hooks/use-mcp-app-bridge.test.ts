@@ -4,9 +4,16 @@ import { getMcpAppHostPostMessageMock } from "../../hooks/test/utils.js";
 import { McpAppBridge } from "../mcp-app-bridge.js";
 import { useMcpAppBridge } from "./use-mcp-app-bridge.js";
 
+class MockResizeObserver {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
+
 describe("useMcpAppBridge", () => {
   beforeEach(async () => {
     vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    vi.stubGlobal("ResizeObserver", MockResizeObserver);
     McpAppBridge.resetInstance();
   });
 
@@ -52,5 +59,26 @@ describe("useMcpAppBridge", () => {
 
     consoleErrorSpy.mockRestore();
     vi.useRealTimers();
+  });
+
+  it("should send size-changed notification after successful initialization", async () => {
+    const postMessageMock = getMcpAppHostPostMessageMock({ theme: "light" });
+    vi.stubGlobal("parent", { postMessage: postMessageMock });
+
+    renderHook(() => useMcpAppBridge("theme"));
+
+    await waitFor(() => {
+      expect(postMessageMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          jsonrpc: "2.0",
+          method: "ui/notifications/size-changed",
+          params: expect.objectContaining({
+            width: expect.any(Number),
+            height: expect.any(Number),
+          }),
+        }),
+        "*",
+      );
+    });
   });
 });
