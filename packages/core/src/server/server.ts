@@ -109,8 +109,12 @@ type WidgetResourceConfig<T extends ResourceMeta = ResourceMeta> = {
   hostType: WidgetHostType;
   uri: string;
   mimeType: string;
-  /** Function to build _meta for this resource content given the serverUrl */
-  buildContentMeta: (urls: { serverUrl: string; wsServerUrl: string }) => T;
+  /** Function to build _meta for this resource content given computed defaults */
+  buildContentMeta: (defaults: {
+    resourceDomains: string[];
+    connectDomains: string[];
+    domain: string;
+  }) => T;
 };
 
 type McpServerOriginalResourceConfig = Omit<
@@ -223,19 +227,18 @@ export class McpServer<
       hostType: "apps-sdk",
       uri: `ui://widgets/apps-sdk/${name}.html`,
       mimeType: "text/html+skybridge",
-      buildContentMeta: ({ serverUrl, wsServerUrl }) => {
+      buildContentMeta: ({ resourceDomains, connectDomains, domain }) => {
         const userUi = userMeta?.ui;
+        const userCsp = userUi?.csp;
 
         const defaults: OpenaiResourceMeta = {
           "openai/widgetCSP": {
-            resource_domains: [serverUrl],
-            connect_domains: [serverUrl, wsServerUrl],
+            resource_domains: resourceDomains,
+            connect_domains: connectDomains,
           },
-          "openai/widgetDomain": serverUrl,
+          "openai/widgetDomain": domain,
           "openai/widgetDescription": toolConfig.description,
         };
-
-        const userCsp = userUi?.csp;
 
         const fromUi: Partial<
           Omit<
@@ -269,14 +272,14 @@ export class McpServer<
       hostType: "mcp-app",
       uri: `ui://widgets/ext-apps/${name}.html`,
       mimeType: "text/html;profile=mcp-app",
-      buildContentMeta: ({ serverUrl, wsServerUrl }) => {
+      buildContentMeta: ({ resourceDomains, connectDomains, domain }) => {
         const defaults: McpAppsResourceMeta = {
           ui: {
             csp: {
-              resourceDomains: [serverUrl],
-              connectDomains: [serverUrl, wsServerUrl],
+              resourceDomains,
+              connectDomains,
             },
-            domain: serverUrl,
+            domain,
           },
         };
 
@@ -370,30 +373,40 @@ export class McpServer<
       widgetUri,
       { ...resourceConfig, _meta: resourceConfig._meta },
       async (uri, extra) => {
-        const serverUrl =
-          process.env.NODE_ENV === "production"
-            ? `https://${extra?.requestInfo?.headers?.["x-forwarded-host"] ?? extra?.requestInfo?.headers?.host}`
-            : `http://localhost:3000`;
+        const isProduction = process.env.NODE_ENV === "production";
+
+        const serverUrl = isProduction
+          ? `https://${extra?.requestInfo?.headers?.["x-forwarded-host"] ?? extra?.requestInfo?.headers?.host}`
+          : "http://localhost:3000";
 
         const wsServerUrl = serverUrl.replace(/^http/, "ws");
 
-        const html =
-          process.env.NODE_ENV === "production"
-            ? templateHelper.renderProduction({
-                hostType,
-                serverUrl,
-                widgetFile: this.lookupDistFileWithIndexFallback(
-                  `src/widgets/${name}`,
-                ),
-                styleFile: this.lookupDistFile("style.css"),
-              })
-            : templateHelper.renderDevelopment({
-                hostType,
-                serverUrl,
-                widgetName: name,
-              });
+        const html = isProduction
+          ? templateHelper.renderProduction({
+              hostType,
+              serverUrl,
+              widgetFile: this.lookupDistFileWithIndexFallback(
+                `src/widgets/${name}`,
+              ),
+              styleFile: this.lookupDistFile("style.css"),
+            })
+          : templateHelper.renderDevelopment({
+              hostType,
+              serverUrl,
+              widgetName: name,
+            });
 
-        const contentMeta = buildContentMeta({ serverUrl, wsServerUrl });
+        const connectDomains = [serverUrl, wsServerUrl];
+        if (!isProduction) {
+          const VITE_HMR_WEBSOCKET_DEFAULT_URL = "ws://localhost:24678";
+          connectDomains.push(VITE_HMR_WEBSOCKET_DEFAULT_URL);
+        }
+
+        const contentMeta = buildContentMeta({
+          resourceDomains: [serverUrl],
+          connectDomains,
+          domain: serverUrl,
+        });
 
         return {
           contents: [

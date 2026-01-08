@@ -108,7 +108,11 @@ describe("McpServer.registerWidget", () => {
           _meta: {
             "openai/widgetCSP": {
               resource_domains: [serverUrl],
-              connect_domains: [serverUrl, "ws://localhost:3000"],
+              connect_domains: [
+                serverUrl,
+                "ws://localhost:3000",
+                "ws://localhost:24678",
+              ],
             },
             "openai/widgetDomain": serverUrl,
             "openai/widgetDescription": "Test tool",
@@ -275,7 +279,11 @@ describe("McpServer.registerWidget", () => {
           _meta: {
             "openai/widgetCSP": {
               resource_domains: ["http://localhost:3000"],
-              connect_domains: ["http://localhost:3000", "ws://localhost:3000"],
+              connect_domains: [
+                "http://localhost:3000",
+                "ws://localhost:3000",
+                "ws://localhost:24678",
+              ],
             },
             "openai/widgetDomain": "http://localhost:3000",
             "openai/widgetDescription": "Test tool",
@@ -323,6 +331,7 @@ describe("McpServer.registerWidget", () => {
                 connectDomains: [
                   "http://localhost:3000",
                   "ws://localhost:3000",
+                  "ws://localhost:24678",
                 ],
               },
               domain: "http://localhost:3000",
@@ -413,7 +422,11 @@ describe("McpServer.registerWidget", () => {
     // CSP arrays are merged by index - user value replaces at index 0, defaults remain at other indices
     expect(meta["openai/widgetCSP"]).toEqual({
       resource_domains: ["https://from-ui-csp.com"],
-      connect_domains: ["https://from-ui-csp.com", "ws://localhost:3000"],
+      connect_domains: [
+        "https://from-ui-csp.com",
+        "ws://localhost:3000",
+        "ws://localhost:24678",
+      ],
       frame_domains: undefined,
       redirect_domains: undefined,
     });
