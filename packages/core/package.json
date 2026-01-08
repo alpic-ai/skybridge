@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.28.5",
+    "@oclif/core": "^4.8.0",
     "cors": "^2.8.5",
     "dequal": "^2.0.3",
     "es-toolkit": "^1.43.0",
@@ -63,13 +64,24 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsdom": "^27.0.0",
+    "@types/node": "^18.19.130",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitest/ui": "^4.0.16",
     "jsdom": "^27.4.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16",
     "zod": "^4.3.5"
   },
-  "packageManager": "pnpm@10.27.0"
+  "packageManager": "pnpm@10.27.0",
+  "bin": {
+    "skybridge": "./bin/run.js"
+  },
+  "oclif": {
+    "bin": "skybridge",
+    "commands": "./dist/commands",
+    "dirname": "skybridge",
+    "topicSeparator": " "
+  }
 }
