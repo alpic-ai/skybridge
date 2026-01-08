@@ -1,6 +1,6 @@
+import { devtoolsStaticServer } from "@skybridge/devtools";
 import express, { type Express } from "express";
-
-import { devtoolsStaticServer, widgetsDevServer } from "skybridge/server";
+import { widgetsDevServer } from "skybridge/server";
 import type { ViteDevServer } from "vite";
 import { getCapitalByCountryCode } from "./capitals.js";
 import { env } from "./env.js";
