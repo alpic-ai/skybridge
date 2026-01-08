@@ -22,8 +22,19 @@ import type {
   ServerRequest,
   ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
-import { toMerged } from "es-toolkit";
+import { mergeWith, union } from "es-toolkit";
 import { templateHelper } from "./templateHelper.js";
+
+const mergeWithUnion = <T extends object, S extends object>(
+  target: T,
+  source: S,
+): T & S => {
+  return mergeWith(target, source, (targetVal, sourceVal) => {
+    if (Array.isArray(targetVal) && Array.isArray(sourceVal)) {
+      return union(targetVal, sourceVal);
+    }
+  });
+};
 
 export type ToolDef<
   TInput = unknown,
@@ -264,7 +275,10 @@ export class McpServer<
           ),
         );
 
-        return toMerged(toMerged(defaults, fromUi), directOpenaiKeys);
+        return mergeWithUnion(
+          mergeWithUnion(defaults, fromUi),
+          directOpenaiKeys,
+        );
       },
     };
 
@@ -283,7 +297,7 @@ export class McpServer<
           },
         };
 
-        return toMerged(defaults, { ui: userMeta?.ui });
+        return mergeWithUnion(defaults, { ui: userMeta?.ui });
       },
     };
 

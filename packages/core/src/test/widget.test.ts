@@ -421,11 +421,12 @@ describe("McpServer.registerWidget", () => {
 
     // CSP arrays are merged by index - user value replaces at index 0, defaults remain at other indices
     expect(meta["openai/widgetCSP"]).toEqual({
-      resource_domains: ["https://from-ui-csp.com"],
+      resource_domains: ["http://localhost:3000", "https://from-ui-csp.com"],
       connect_domains: [
-        "https://from-ui-csp.com",
+        "http://localhost:3000",
         "ws://localhost:3000",
         "ws://localhost:24678",
+        "https://from-ui-csp.com",
       ],
       frame_domains: undefined,
       redirect_domains: undefined,
