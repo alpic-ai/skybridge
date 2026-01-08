@@ -1,9 +1,7 @@
-import { createRequire } from "node:module";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import cors from "cors";
-import express, { type RequestHandler } from "express";
-
-const require = createRequire(import.meta.url);
+import express, { type Router } from "express";
 
 /**
  * Serve the built devtools React app
@@ -19,18 +17,15 @@ const require = createRequire(import.meta.url);
  *                     ^^^^^^^^ Make sure to install the devtoolsStaticServer before the widgetsDevServer
  * }
  */
-export const devtoolsStaticServer = async (): Promise<RequestHandler> => {
+export const devtoolsStaticServer = async (): Promise<Router> => {
   const router = express.Router();
-  let devtoolsPath: string;
-  if (!require.main) {
-    throw new Error("require.main is not set");
-  }
-  devtoolsPath = path.join(path.dirname(require.main.filename), "dist");
+
+  const distDir = path.dirname(fileURLToPath(import.meta.url));
 
   router.use(cors());
-  router.use(express.static(devtoolsPath));
+  router.use(express.static(distDir));
   router.get("/", (_req, res, next) => {
-    const indexHtmlPath = path.join(devtoolsPath, "index.html");
+    const indexHtmlPath = path.join(distDir, "index.html");
     res.sendFile(indexHtmlPath, (error) => {
       if (error) {
         next(error);

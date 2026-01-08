@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import cors from "cors";
-import express, { type RequestHandler } from "express";
+import express, { type Router } from "express";
 /**
  * Install Vite dev server
  * This router MUST be installed at the application root, like so:
@@ -12,7 +12,7 @@ import express, { type RequestHandler } from "express";
  *   app.use(await widgetsRouter());
  * }
  */
-export const widgetsDevServer = async (): Promise<RequestHandler> => {
+export const widgetsDevServer = async (): Promise<Router> => {
   const router = express.Router();
 
   const { createServer, searchForWorkspaceRoot, loadConfigFromFile } =
