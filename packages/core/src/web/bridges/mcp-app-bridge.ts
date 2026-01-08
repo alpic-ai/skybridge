@@ -4,6 +4,7 @@ import type {
   McpUiInitializedNotification,
   McpUiInitializeRequest,
   McpUiInitializeResult,
+  McpUiSizeChangedNotification,
   McpUiToolCancelledNotification,
   McpUiToolInputNotification,
   McpUiToolResultNotification,
@@ -67,6 +68,7 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
   private initialized: boolean;
   private appInitializationOptions: McpUiInitializeRequest["params"];
   private requestTimeout: number;
+  private cleanupSizeObserver: (() => void) | null = null;
 
   constructor(
     options: McpAppInitializationOptions,
@@ -140,6 +142,8 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
     });
     this.pendingRequests.clear();
     this.listeners.clear();
+    this.cleanupSizeObserver?.();
+    this.cleanupSizeObserver = null;
   };
 
   public static resetInstance(): void {
@@ -253,12 +257,76 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
 
       this.updateContext(result.hostContext);
       this.notify({ method: "ui/notifications/initialized" });
+      this.cleanupSizeObserver = this.setupSizeChangedNotifications();
     } catch (err) {
       console.error(err);
     }
   }
 
-  private notify(notification: McpUiInitializedNotification) {
+  private notify(
+    notification: McpUiInitializedNotification | McpUiSizeChangedNotification,
+  ) {
     window.parent.postMessage({ jsonrpc: "2.0", ...notification }, "*");
+  }
+
+  private sendSizeChanged(params: McpUiSizeChangedNotification["params"]) {
+    this.notify({ method: "ui/notifications/size-changed", params });
+  }
+
+  /**
+   * Set up automatic size change notifications using ResizeObserver.
+   * Based on @modelcontextprotocol/ext-apps App.setupSizeChangedNotifications
+   * @see https://github.com/modelcontextprotocol/ext-apps/blob/main/src/app.ts#L940-L989
+   */
+  private setupSizeChangedNotifications(): () => void {
+    let scheduled = false;
+    let lastWidth = 0;
+    let lastHeight = 0;
+
+    const sendBodySizeChanged = () => {
+      if (scheduled) {
+        return;
+      }
+      scheduled = true;
+      requestAnimationFrame(() => {
+        scheduled = false;
+        const html = document.documentElement;
+
+        // Measure actual content size by temporarily setting html to fit-content.
+        // This shrinks html to fit body (including body margins), giving us the
+        // true minimum size needed by the content.
+        const originalWidth = html.style.width;
+        const originalHeight = html.style.height;
+        html.style.width = "fit-content";
+        html.style.height = "fit-content";
+        const rect = html.getBoundingClientRect();
+        html.style.width = originalWidth;
+        html.style.height = originalHeight;
+
+        // Compensate for scrollbar width on Linux/Windows where scrollbars
+        // consume space. On systems with overlay scrollbars (macOS), this
+        // will be 0.
+        const scrollbarWidth = window.innerWidth - html.clientWidth;
+
+        const width = Math.ceil(rect.width + scrollbarWidth);
+        const height = Math.ceil(rect.height);
+
+        // Only send if size actually changed (prevents feedback loops from
+        // style changes)
+        if (width !== lastWidth || height !== lastHeight) {
+          lastWidth = width;
+          lastHeight = height;
+          this.sendSizeChanged({ width, height });
+        }
+      });
+    };
+
+    sendBodySizeChanged();
+
+    const resizeObserver = new ResizeObserver(sendBodySizeChanged);
+    resizeObserver.observe(document.documentElement);
+    resizeObserver.observe(document.body);
+
+    return () => resizeObserver.disconnect();
   }
 }
