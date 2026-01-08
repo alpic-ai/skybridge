@@ -56,8 +56,8 @@ function createOpenaiMethods(
         fileId: "123",
       };
     },
-    downloadFile: async (file: { fileId: string }) => {
-      log("downloadFile", file);
+    getFileDownloadUrl: async (file: { fileId: string }) => {
+      log("getFileDownloadUrl", file);
       return {
         downloadUrl: "https://example.com/file.pdf",
       };

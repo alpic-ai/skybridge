@@ -5,7 +5,7 @@ import { useFiles } from "./use-files.js";
 describe("useLocale", () => {
   const OpenaiMock = {
     uploadFile: vi.fn(),
-    downloadFile: vi.fn(),
+    getFileDownloadUrl: vi.fn(),
   };
 
   beforeEach(() => {
@@ -31,6 +31,6 @@ describe("useLocale", () => {
     const { result } = renderHook(() => useFiles());
 
     result.current.download({ fileId });
-    expect(OpenaiMock.downloadFile).toHaveBeenCalledWith({ fileId });
+    expect(OpenaiMock.getFileDownloadUrl).toHaveBeenCalledWith({ fileId });
   });
 });
