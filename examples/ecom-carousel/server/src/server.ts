@@ -24,6 +24,13 @@ const server = new McpServer(
   "ecom-carousel",
   {
     description: "E-commerce Product Carousel",
+    _meta: {
+      ui: {
+        csp: {
+          resourceDomains: ["https://fakestoreapi.com"],
+        },
+      },
+    },
   },
   {
     description: "Display a carousel of products from the store.",
