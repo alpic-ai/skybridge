@@ -64,27 +64,12 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsdom": "^27.0.0",
-<<<<<<< HEAD
-<<<<<<< HEAD
     "@types/node": "^24.10.4",
-=======
-    "@types/node": "^18.19.130",
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-    "@types/node": "^24.10.4",
->>>>>>> 2a956fc (Refacto core build command)
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitest/ui": "^4.0.16",
     "jsdom": "^27.4.0",
-<<<<<<< HEAD
-<<<<<<< HEAD
     "shx": "^0.3.4",
-=======
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-    "shx": "^0.3.4",
->>>>>>> 2a956fc (Refacto core build command)
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.16",
@@ -92,10 +77,7 @@
   },
   "packageManager": "pnpm@10.27.0",
   "bin": {
-<<<<<<< HEAD
     "sb": "./bin/run.js",
-=======
->>>>>>> 4d48d5e (Initialize CLI)
     "skybridge": "./bin/run.js"
   },
   "oclif": {
@@ -104,12 +86,4 @@
     "dirname": "skybridge",
     "topicSeparator": " "
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-}
->>>>>>> 2a956fc (Refacto core build command)
