@@ -393,8 +393,6 @@ export class McpServer<
           ? `https://${extra?.requestInfo?.headers?.["x-forwarded-host"] ?? extra?.requestInfo?.headers?.host}`
           : "http://localhost:3000";
 
-        const wsServerUrl = serverUrl.replace(/^http/, "ws");
-
         const html = isProduction
           ? templateHelper.renderProduction({
               hostType,
@@ -410,15 +408,11 @@ export class McpServer<
               widgetName: name,
             });
 
-        const connectDomains = [serverUrl, wsServerUrl];
-        if (!isProduction) {
-          const VITE_HMR_WEBSOCKET_DEFAULT_URL = "ws://localhost:24678";
-          connectDomains.push(VITE_HMR_WEBSOCKET_DEFAULT_URL);
-        }
+        const VITE_HMR_WEBSOCKET_DEFAULT_URL = "ws://localhost:24678";
 
         const contentMeta = buildContentMeta({
           resourceDomains: [serverUrl],
-          connectDomains,
+          connectDomains: !isProduction ? [VITE_HMR_WEBSOCKET_DEFAULT_URL] : [],
           domain: serverUrl,
         });
 
