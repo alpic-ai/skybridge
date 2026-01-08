@@ -302,15 +302,7 @@ importers:
         version: 2.2.6
       vite:
         specifier: ^7.3.1
-<<<<<<< HEAD
-<<<<<<< HEAD
         version: 7.3.1(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)
-=======
-        version: 7.3.1(@types/node@18.19.130)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-        version: 7.3.1(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)
->>>>>>> 2a956fc (Refacto core build command)
       zustand:
         specifier: ^5.0.9
         version: 5.0.9(@types/react@19.2.7)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))
@@ -343,18 +335,8 @@ importers:
         specifier: ^27.0.0
         version: 27.0.0
       '@types/node':
-<<<<<<< HEAD
-<<<<<<< HEAD
         specifier: ^24.10.4
         version: 24.10.4
-=======
-        specifier: ^18.19.130
-        version: 18.19.130
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-        specifier: ^24.10.4
-        version: 24.10.4
->>>>>>> 2a956fc (Refacto core build command)
       '@types/react':
         specifier: ^19.2.7
         version: 19.2.7
@@ -367,41 +349,18 @@ importers:
       jsdom:
         specifier: ^27.4.0
         version: 27.4.0
-<<<<<<< HEAD
-<<<<<<< HEAD
       shx:
         specifier: ^0.3.4
         version: 0.3.4
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@24.10.4)(typescript@5.9.3)
-=======
-      ts-node:
-        specifier: ^10.9.2
-        version: 10.9.2(@types/node@18.19.130)(typescript@5.9.3)
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-      shx:
-        specifier: ^0.3.4
-        version: 0.3.4
-      ts-node:
-        specifier: ^10.9.2
-        version: 10.9.2(@types/node@24.10.4)(typescript@5.9.3)
->>>>>>> 2a956fc (Refacto core build command)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
-<<<<<<< HEAD
-<<<<<<< HEAD
         version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.4)(@vitest/ui@4.0.16)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.4)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)
-=======
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@18.19.130)(@vitest/ui@4.0.16)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@18.19.130)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.4)(@vitest/ui@4.0.16)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.4)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)
->>>>>>> 2a956fc (Refacto core build command)
       zod:
         specifier: ^4.3.5
         version: 4.3.5
@@ -11391,14 +11350,7 @@ snapshots:
       '@inquirer/type': 3.0.10(@types/node@24.10.4)
     optionalDependencies:
       '@types/node': 24.10.4
-<<<<<<< HEAD
-<<<<<<< HEAD
     optional: true
-=======
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-    optional: true
->>>>>>> 2a956fc (Refacto core build command)
 
   '@inquirer/confirm@5.1.21(@types/node@25.0.3)':
     dependencies:
@@ -11432,14 +11384,7 @@ snapshots:
       yoctocolors-cjs: 2.1.3
     optionalDependencies:
       '@types/node': 24.10.4
-<<<<<<< HEAD
-<<<<<<< HEAD
     optional: true
-=======
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-    optional: true
->>>>>>> 2a956fc (Refacto core build command)
 
   '@inquirer/core@10.3.2(@types/node@25.0.3)':
     dependencies:
@@ -11463,14 +11408,7 @@ snapshots:
   '@inquirer/type@3.0.10(@types/node@24.10.4)':
     optionalDependencies:
       '@types/node': 24.10.4
-<<<<<<< HEAD
-<<<<<<< HEAD
     optional: true
-=======
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-    optional: true
->>>>>>> 2a956fc (Refacto core build command)
 
   '@inquirer/type@3.0.10(@types/node@25.0.3)':
     optionalDependencies:
@@ -13861,32 +13799,14 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.0.3
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   '@vitest/mocker@4.0.16(msw@2.12.4(@types/node@24.10.4)(typescript@5.9.3))(vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0))':
-=======
-  '@vitest/mocker@4.0.16(msw@2.12.4(@types/node@18.19.130)(typescript@5.9.3))(vite@7.3.1(@types/node@18.19.130)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0))':
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-  '@vitest/mocker@4.0.16(msw@2.12.4(@types/node@24.10.4)(typescript@5.9.3))(vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0))':
->>>>>>> 2a956fc (Refacto core build command)
     dependencies:
       '@vitest/spy': 4.0.16
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-<<<<<<< HEAD
-<<<<<<< HEAD
       msw: 2.12.4(@types/node@24.10.4)(typescript@5.9.3)
       vite: 7.3.1(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)
-=======
-      msw: 2.12.4(@types/node@18.19.130)(typescript@5.9.3)
-      vite: 7.3.1(@types/node@18.19.130)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-      msw: 2.12.4(@types/node@24.10.4)(typescript@5.9.3)
-      vite: 7.3.1(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)
->>>>>>> 2a956fc (Refacto core build command)
 
   '@vitest/mocker@4.0.16(msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3))(vite@7.3.1(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0))':
     dependencies:
@@ -13923,15 +13843,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-<<<<<<< HEAD
-<<<<<<< HEAD
       vitest: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.4)(@vitest/ui@4.0.16)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.4)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)
-=======
-      vitest: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@18.19.130)(@vitest/ui@4.0.16)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@18.19.130)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-      vitest: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.4)(@vitest/ui@4.0.16)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.4)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)
->>>>>>> 2a956fc (Refacto core build command)
 
   '@vitest/utils@4.0.16':
     dependencies:
@@ -17264,14 +17176,7 @@ snapshots:
       typescript: 5.9.3
     transitivePeerDependencies:
       - '@types/node'
-<<<<<<< HEAD
-<<<<<<< HEAD
     optional: true
-=======
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-    optional: true
->>>>>>> 2a956fc (Refacto core build command)
 
   msw@2.12.4(@types/node@25.0.3)(typescript@5.9.3):
     dependencies:
@@ -19555,27 +19460,6 @@ snapshots:
       yn: 3.1.1
 
   ts-node@10.9.2(@types/node@24.10.4)(typescript@5.9.3):
-<<<<<<< HEAD
-    dependencies:
-      '@cspotcode/source-map-support': 0.8.1
-      '@tsconfig/node10': 1.0.12
-      '@tsconfig/node12': 1.0.11
-      '@tsconfig/node14': 1.0.3
-      '@tsconfig/node16': 1.0.4
-      '@types/node': 24.10.4
-      acorn: 8.15.0
-      acorn-walk: 8.3.4
-      arg: 4.1.3
-      create-require: 1.1.1
-      diff: 4.0.2
-      make-error: 1.3.6
-      typescript: 5.9.3
-      v8-compile-cache-lib: 3.0.1
-      yn: 3.1.1
-
-  ts-node@10.9.2(@types/node@25.0.3)(typescript@5.9.3):
-=======
->>>>>>> 4d48d5e (Initialize CLI)
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.12
@@ -19939,22 +19823,6 @@ snapshots:
       terser: 5.44.1
       tsx: 4.21.0
 
-  vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0):
-    dependencies:
-      esbuild: 0.27.2
-      fdir: 6.5.0(picomatch@4.0.3)
-      picomatch: 4.0.3
-      postcss: 8.5.6
-      rollup: 4.52.5
-      tinyglobby: 0.2.15
-    optionalDependencies:
-      '@types/node': 24.10.4
-      fsevents: 2.3.3
-      jiti: 2.6.1
-      lightningcss: 1.30.2
-      terser: 5.44.1
-      tsx: 4.21.0
-
   vite@7.3.1(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0):
     dependencies:
       esbuild: 0.27.2
@@ -19971,24 +19839,10 @@ snapshots:
       terser: 5.44.1
       tsx: 4.21.0
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.4)(@vitest/ui@4.0.16)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.4)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0):
     dependencies:
       '@vitest/expect': 4.0.16
       '@vitest/mocker': 4.0.16(msw@2.12.4(@types/node@24.10.4)(typescript@5.9.3))(vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0))
-=======
-  vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@18.19.130)(@vitest/ui@4.0.16)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@18.19.130)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0):
-    dependencies:
-      '@vitest/expect': 4.0.16
-      '@vitest/mocker': 4.0.16(msw@2.12.4(@types/node@18.19.130)(typescript@5.9.3))(vite@7.3.1(@types/node@18.19.130)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0))
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-  vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@24.10.4)(@vitest/ui@4.0.16)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@24.10.4)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0):
-    dependencies:
-      '@vitest/expect': 4.0.16
-      '@vitest/mocker': 4.0.16(msw@2.12.4(@types/node@24.10.4)(typescript@5.9.3))(vite@7.3.1(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0))
->>>>>>> 2a956fc (Refacto core build command)
       '@vitest/pretty-format': 4.0.16
       '@vitest/runner': 4.0.16
       '@vitest/snapshot': 4.0.16
@@ -20005,27 +19859,11 @@ snapshots:
       tinyexec: 1.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-<<<<<<< HEAD
-<<<<<<< HEAD
       vite: 7.3.1(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
       '@types/node': 24.10.4
-=======
-      vite: 7.3.1(@types/node@18.19.130)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)
-      why-is-node-running: 2.3.0
-    optionalDependencies:
-      '@opentelemetry/api': 1.9.0
-      '@types/node': 18.19.130
->>>>>>> 4d48d5e (Initialize CLI)
-=======
-      vite: 7.3.1(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)
-      why-is-node-running: 2.3.0
-    optionalDependencies:
-      '@opentelemetry/api': 1.9.0
-      '@types/node': 24.10.4
->>>>>>> 2a956fc (Refacto core build command)
       '@vitest/ui': 4.0.16(vitest@4.0.16)
       jsdom: 27.4.0
     transitivePeerDependencies:
