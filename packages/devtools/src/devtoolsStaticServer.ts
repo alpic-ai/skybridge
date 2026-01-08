@@ -22,10 +22,10 @@ const require = createRequire(import.meta.url);
 export const devtoolsStaticServer = async (): Promise<RequestHandler> => {
   const router = express.Router();
   let devtoolsPath: string;
-  devtoolsPath = path.join(
-    path.dirname(require.resolve("@skybridge/devtools/package.json")),
-    "dist",
-  );
+  if (!require.main) {
+    throw new Error("require.main is not set");
+  }
+  devtoolsPath = path.join(path.dirname(require.main.filename), "dist");
 
   router.use(cors());
   router.use(express.static(devtoolsPath));
