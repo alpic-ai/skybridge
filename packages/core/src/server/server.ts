@@ -22,8 +22,19 @@ import type {
   ServerRequest,
   ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
-import { toMerged } from "es-toolkit";
+import { mergeWith, union } from "es-toolkit";
 import { templateHelper } from "./templateHelper.js";
+
+const mergeWithUnion = <T extends object, S extends object>(
+  target: T,
+  source: S,
+): T & S => {
+  return mergeWith(target, source, (targetVal, sourceVal) => {
+    if (Array.isArray(targetVal) && Array.isArray(sourceVal)) {
+      return union(targetVal, sourceVal);
+    }
+  });
+};
 
 export type ToolDef<
   TInput = unknown,
@@ -264,7 +275,10 @@ export class McpServer<
           ),
         );
 
-        return toMerged(toMerged(defaults, fromUi), directOpenaiKeys);
+        return mergeWithUnion(
+          mergeWithUnion(defaults, fromUi),
+          directOpenaiKeys,
+        );
       },
     };
 
@@ -283,7 +297,7 @@ export class McpServer<
           },
         };
 
-        return toMerged(defaults, { ui: userMeta?.ui });
+        return mergeWithUnion(defaults, { ui: userMeta?.ui });
       },
     };
 
@@ -379,8 +393,6 @@ export class McpServer<
           ? `https://${extra?.requestInfo?.headers?.["x-forwarded-host"] ?? extra?.requestInfo?.headers?.host}`
           : "http://localhost:3000";
 
-        const wsServerUrl = serverUrl.replace(/^http/, "ws");
-
         const html = isProduction
           ? templateHelper.renderProduction({
               hostType,
@@ -396,15 +408,11 @@ export class McpServer<
               widgetName: name,
             });
 
-        const connectDomains = [serverUrl, wsServerUrl];
-        if (!isProduction) {
-          const VITE_HMR_WEBSOCKET_DEFAULT_URL = "ws://localhost:24678";
-          connectDomains.push(VITE_HMR_WEBSOCKET_DEFAULT_URL);
-        }
+        const VITE_HMR_WEBSOCKET_DEFAULT_URL = "ws://localhost:24678";
 
         const contentMeta = buildContentMeta({
           resourceDomains: [serverUrl],
-          connectDomains,
+          connectDomains: !isProduction ? [VITE_HMR_WEBSOCKET_DEFAULT_URL] : [],
           domain: serverUrl,
         });
 
