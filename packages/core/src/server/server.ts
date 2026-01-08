@@ -1,6 +1,9 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import type { McpUiToolMeta } from "@modelcontextprotocol/ext-apps";
+import type {
+  McpUiResourceMeta,
+  McpUiToolMeta,
+} from "@modelcontextprotocol/ext-apps";
 import {
   McpServer as McpServerBase,
   type RegisteredTool,
@@ -54,17 +57,18 @@ type OpenaiResourceMeta = {
   "openai/widgetDomain"?: string;
 };
 
-/** @see https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx#ui-resource-format */
+/** MCP Apps resource metadata - uses types from @modelcontextprotocol/ext-apps */
 type McpAppsResourceMeta = {
-  csp?: {
-    connectDomains?: string[];
-    resourceDomains?: string[];
-  };
-  domain?: string;
-  prefersBorder?: boolean;
+  ui?: McpUiResourceMeta;
 };
 
 type ResourceMeta = OpenaiResourceMeta & McpAppsResourceMeta;
+
+/** User-provided resource configuration with optional CSP override */
+export type WidgetResourceMeta = {
+  /** MCP Apps UI resource metadata (csp, domain, prefersBorder) */
+  ui?: McpUiResourceMeta;
+} & Resource["_meta"];
 
 export type WidgetHostType = "apps-sdk" | "mcp-app";
 
@@ -72,12 +76,16 @@ type WidgetResourceConfig = {
   hostType: WidgetHostType;
   uri: string;
   mimeType: string;
+  /** Function to build _meta for this resource given the serverUrl */
+  buildMeta: (serverUrl: string, wsServerUrl: string) => ResourceMeta;
 };
 
 type McpServerOriginalResourceConfig = Omit<
   Resource,
-  "uri" | "name" | "mimeType"
->;
+  "uri" | "name" | "mimeType" | "_meta"
+> & {
+  _meta?: WidgetResourceMeta;
+};
 
 type McpServerOriginalToolConfig = Omit<
   Parameters<
@@ -176,37 +184,53 @@ export class McpServer<
     ExtractStructuredContent<TReturn>,
     ExtractMeta<TReturn>
   > {
-    const resourceMetadata: ResourceMeta = {
-      ...(resourceConfig._meta ?? {}),
-    };
-    if (toolConfig.description !== undefined) {
-      resourceMetadata["openai/widgetDescription"] = toolConfig.description;
-    }
+    const userMeta = resourceConfig._meta;
 
     const appsSdkResourceConfig: WidgetResourceConfig = {
       hostType: "apps-sdk",
       uri: `ui://widgets/apps-sdk/${name}.html`,
       mimeType: "text/html+skybridge",
+      buildMeta: (serverUrl, wsServerUrl) => ({
+        "openai/widgetCSP": {
+          resource_domains: userMeta?.ui?.csp?.resourceDomains ?? [serverUrl],
+          connect_domains: userMeta?.ui?.csp?.connectDomains ?? [
+            serverUrl,
+            wsServerUrl,
+          ],
+        },
+        "openai/widgetDomain": userMeta?.ui?.domain ?? serverUrl,
+        "openai/widgetDescription": toolConfig.description,
+        ...(userMeta?.ui?.prefersBorder !== undefined && {
+          "openai/widgetPrefersBorder": userMeta.ui.prefersBorder,
+        }),
+        ...userMeta,
+      }),
     };
 
     const extAppsResourceConfig: WidgetResourceConfig = {
       hostType: "mcp-app",
       uri: `ui://widgets/ext-apps/${name}.html`,
       mimeType: "text/html;profile=mcp-app",
+      buildMeta: (serverUrl, wsServerUrl) => ({
+        ...userMeta,
+        ui: {
+          csp: {
+            resourceDomains: [serverUrl],
+            connectDomains: [serverUrl, wsServerUrl],
+          },
+          domain: serverUrl,
+          ...userMeta?.ui,
+        },
+      }),
     };
 
-    [appsSdkResourceConfig, extAppsResourceConfig].forEach(
-      ({ hostType, uri, mimeType }) => {
-        this.registerWidgetResource({
-          name,
-          hostType,
-          widgetUri: uri,
-          mimeType,
-          resourceConfig,
-          resourceMetadata,
-        });
-      },
-    );
+    [appsSdkResourceConfig, extAppsResourceConfig].forEach((widgetConfig) => {
+      this.registerWidgetResource({
+        name,
+        widgetConfig,
+        resourceConfig,
+      });
+    });
 
     const toolMeta: ToolMeta = {
       ...toolConfig._meta,
@@ -267,28 +291,26 @@ export class McpServer<
 
   private registerWidgetResource({
     name,
-    hostType,
-    widgetUri,
-    mimeType,
+    widgetConfig,
     resourceConfig,
-    resourceMetadata,
   }: {
     name: string;
-    hostType: WidgetHostType;
-    widgetUri: string;
-    mimeType: string;
+    widgetConfig: WidgetResourceConfig;
     resourceConfig: McpServerOriginalResourceConfig;
-    resourceMetadata: ResourceMeta;
   }): void {
+    const { hostType, uri: widgetUri, mimeType, buildMeta } = widgetConfig;
+
     this.registerResource(
       name,
       widgetUri,
-      { ...resourceConfig, _meta: resourceMetadata },
+      { ...resourceConfig, _meta: resourceConfig._meta },
       async (uri, extra) => {
         const serverUrl =
           process.env.NODE_ENV === "production"
             ? `https://${extra?.requestInfo?.headers?.["x-forwarded-host"] ?? extra?.requestInfo?.headers?.host}`
             : `http://localhost:3000`;
+
+        const wsServerUrl = serverUrl.replace(/^http/, "ws");
 
         const html =
           process.env.NODE_ENV === "production"
@@ -306,9 +328,11 @@ export class McpServer<
                 widgetName: name,
               });
 
+        const resourceMeta = buildMeta(serverUrl, wsServerUrl);
+
         return {
           contents: [
-            { uri: uri.href, mimeType, text: html, _meta: resourceMetadata },
+            { uri: uri.href, mimeType, text: html, _meta: resourceMeta },
           ],
         };
       },

@@ -106,6 +106,11 @@ describe("McpServer.registerWidget", () => {
           mimeType: "text/html+skybridge",
           text: expect.stringContaining('<div id="root"></div>'),
           _meta: {
+            "openai/widgetCSP": {
+              resource_domains: [serverUrl],
+              connect_domains: [serverUrl, "ws://localhost:3000"],
+            },
+            "openai/widgetDomain": serverUrl,
             "openai/widgetDescription": "Test tool",
           },
         },
@@ -149,10 +154,12 @@ describe("McpServer.registerWidget", () => {
     }>;
     expect(appsSdkResourceCallback).toBeDefined();
 
-    const serverUrl = "https://myapp.com";
-    const mockExtra = createMockExtra(
-      serverUrl,
-    ) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>;
+    const host = "myapp.com";
+    const serverUrl = `https://${host}`;
+    const mockExtra = createMockExtra(host) as unknown as RequestHandlerExtra<
+      ServerRequest,
+      ServerNotification
+    >;
     const result = await appsSdkResourceCallback(
       new URL("ui://widgets/apps-sdk/my-widget.html"),
       mockExtra,
@@ -165,6 +172,11 @@ describe("McpServer.registerWidget", () => {
           mimeType: "text/html+skybridge",
           text: expect.stringContaining('<div id="root"></div>'),
           _meta: {
+            "openai/widgetCSP": {
+              resource_domains: [serverUrl],
+              connect_domains: [serverUrl, `wss://${host}`],
+            },
+            "openai/widgetDomain": serverUrl,
             "openai/widgetDescription": "Test tool",
           },
         },
@@ -205,10 +217,12 @@ describe("McpServer.registerWidget", () => {
     }>;
     expect(appsSdkResourceCallback).toBeDefined();
 
-    const serverUrl = "https://myapp.com";
-    const mockExtra = createMockExtra(
-      serverUrl,
-    ) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>;
+    const host = "myapp.com";
+    const serverUrl = `https://${host}`;
+    const mockExtra = createMockExtra(host) as unknown as RequestHandlerExtra<
+      ServerRequest,
+      ServerNotification
+    >;
     const result = await appsSdkResourceCallback(
       new URL("ui://widgets/apps-sdk/folder-widget.html"),
       mockExtra,
@@ -259,6 +273,11 @@ describe("McpServer.registerWidget", () => {
           mimeType: "text/html+skybridge",
           text: expect.stringContaining('<div id="root"></div>'),
           _meta: {
+            "openai/widgetCSP": {
+              resource_domains: ["http://localhost:3000"],
+              connect_domains: ["http://localhost:3000", "ws://localhost:3000"],
+            },
+            "openai/widgetDomain": "http://localhost:3000",
             "openai/widgetDescription": "Test tool",
             "openai/widgetPrefersBorder": true,
           },
@@ -298,7 +317,16 @@ describe("McpServer.registerWidget", () => {
           mimeType: "text/html;profile=mcp-app",
           text: expect.stringContaining('<div id="root"></div>'),
           _meta: {
-            "openai/widgetDescription": "Test tool",
+            ui: {
+              csp: {
+                resourceDomains: ["http://localhost:3000"],
+                connectDomains: [
+                  "http://localhost:3000",
+                  "ws://localhost:3000",
+                ],
+              },
+              domain: "http://localhost:3000",
+            },
             "openai/widgetPrefersBorder": true,
           },
         },
