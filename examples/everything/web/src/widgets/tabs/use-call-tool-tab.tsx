@@ -13,23 +13,32 @@ export function UseCallToolTab() {
         <code>openai/widgetAccessible</code> property is set to true.
       </p>
 
-      <div className="button-row">
+      <form
+        className="button-row"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (name.trim()) {
+            callTool({ name });
+            setName("");
+          }
+        }}
+      >
         <input
           type="text"
           className="input"
           value={name}
           placeholder="Enter a name"
+          disabled={isPending}
           onChange={(e) => setName(e.target.value)}
         />
         <button
-          type="button"
+          type="submit"
           className="btn"
-          onClick={() => callTool({ name })}
           disabled={isPending || name.length === 0}
         >
           {isPending ? "Calling..." : "Call"}
         </button>
-      </div>
+      </form>
 
       {data && (
         <div className="field">
