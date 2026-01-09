@@ -27,10 +27,6 @@ export default class Dev extends Command {
         };
       }, []);
 
-      if (!version) {
-        return null;
-      }
-
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>
           <Box marginBottom={1}>
@@ -42,9 +38,8 @@ export default class Dev extends Command {
           <Box>
             <Text color="green">→{"  "}</Text>
             <Text color="white" bold>
-              Open DevTools to test your app locally
+              Open DevTools to test your app locally:{" "}
             </Text>
-            <Text>:{"  "}</Text>
             <Text color="green">http://localhost:3000/</Text>
           </Box>
           <Box marginBottom={1}>
@@ -59,40 +54,41 @@ export default class Dev extends Command {
           </Text>
           <Box>
             <Text color="#20a832">→{"  "}</Text>
-            <Text color="grey">
-              Make your local server accessible with{" "}
-              <Text color="white" bold>
-                ngrok http 3000
-              </Text>
+            <Text color="grey">Make your local server accessible with </Text>
+            <Text color="white" bold>
+              ngrok http 3000
             </Text>
           </Box>
           <Box marginBottom={1}>
-            <Text color="#20a832">→{"  "}</Text>
-            <Text color="grey">
-              Connect to ChatGPT with URL{" "}
+            <Text>
+              <Text color="#20a832">→{"  "}</Text>
+              <Text color="grey">Connect to ChatGPT with URL </Text>
               <Text color="white" bold>
                 https://xxxxxx.ngrok-free.app/mcp
               </Text>
             </Text>
           </Box>
           <Box>
-            <Text color="#20a832">→{"  "}</Text>
-            <Text>Documentation: </Text>
-            <Text color="white" bold>
-              https://skybridge.tech/
+            <Text>
+              <Text color="#20a832">→{"  "}</Text>
+              <Text>Documentation: </Text>
+              <Text color="white" bold>
+                https://skybridge.tech/
+              </Text>
             </Text>
           </Box>
           <Box marginTop={1}>
-            <Text color="#20a832">→{"  "}</Text>
             <Text>
+              <Text color="#20a832">→{"  "}</Text>
+              <Text>If you like Skybridge, please </Text>
               <Text color="white" bold>
-                If you like Skybridge,{" "}
+                give it a star{" "}
               </Text>
-              please give it a star on GitHub:{" "}
+              <Text>on GitHub: </Text>
               <Text color="white" underline>
                 https://github.com/alpic-ai/skybridge
               </Text>
-              {"  "}🙏
+              <Text color="grey"> 🙏</Text>
             </Text>
           </Box>
         </Box>

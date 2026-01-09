@@ -1,7 +1,7 @@
-import { existsSync, readFileSync } from "fs";
-import path from "path";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { useEffect, useState } from "react";
-import { fileURLToPath } from "url";
 
 function findPackageJson(startDir: string): string | null {
   let currentDir = startDir;
@@ -34,8 +34,7 @@ export const useVersion = () => {
   const [version, setVersion] = useState<string>();
 
   useEffect(() => {
-    const v = getPackageVersion();
-    setVersion(v);
+    setVersion(getPackageVersion());
   }, []);
 
   return version;
