@@ -35,7 +35,7 @@ export const Widget = () => {
     createAndInjectOpenAi(
       iframe.contentWindow,
       openaiObject,
-      (command, args, type = 'default') => {
+      (command, args, type = "default") => {
         pushOpenAiLog(tool.name, {
           timestamp: Date.now(),
           command,
