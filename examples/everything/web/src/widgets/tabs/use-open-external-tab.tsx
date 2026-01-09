@@ -11,7 +11,15 @@ export function UseOpenExternalTab() {
         Open external URLs via the host application.
       </p>
 
-      <div className="button-row">
+      <form
+        className="button-row"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (url.trim()) {
+            openExternal(url);
+          }
+        }}
+      >
         <input
           type="text"
           className="input"
@@ -20,15 +28,10 @@ export function UseOpenExternalTab() {
           onChange={(e) => setUrl(e.target.value)}
           style={{ flex: 1, maxWidth: "20rem" }}
         />
-        <button
-          type="button"
-          className="btn"
-          onClick={() => openExternal(url)}
-          disabled={!url.trim()}
-        >
+        <button type="submit" className="btn" disabled={!url.trim()}>
           Open
         </button>
-      </div>
+      </form>
     </div>
   );
 }
