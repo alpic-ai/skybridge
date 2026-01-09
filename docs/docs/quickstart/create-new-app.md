@@ -99,11 +99,11 @@ deno task dev
   </TabItem>
 </Tabs>
 
-This runs the `skybridge dev` command, which starts a development server with the following features:
+This runs the `skybridge` command, which starts a development server with the following features:
 
 ### What it does
 
-The `skybridge dev` command:
+The `skybridge` command:
 - **Starts an Express server** on port 3000 that packages:
   - An MCP endpoint on `/mcp` - the ChatGPT App Backend
   - A React application on Vite HMR dev server - the ChatGPT App Frontend
@@ -111,7 +111,7 @@ The `skybridge dev` command:
 
 ### Development workflow
 
-When you run `skybridge dev`:
+When you run `skybridge`:
 1. The server starts and displays the welcome screen in your terminal
 2. You can access **DevTools** at `http://localhost:3000/` to test your app locally
 3. The **MCP server** is available at `http://localhost:3000/mcp`
