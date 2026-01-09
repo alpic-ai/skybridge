@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button.js";
 import { useSelectedTool } from "@/lib/mcp/index.js";
 import { type OpenAiLog, useCallToolResult, useStore } from "@/lib/store.js";
+import { cn } from "@/lib/utils";
 
 function formatTimestamp(timestamp: number): string {
   const date = new Date(timestamp);
@@ -39,7 +40,14 @@ function LogEntry({ log }: { log: OpenAiLog }) {
           <span className="text-gray-600 dark:text-gray-500 shrink-0 min-w-[80px]">
             {formatTimestamp(log.timestamp)}
           </span>
-          <span className="text-blue-600 dark:text-blue-400 font-semibold shrink-0 min-w-[120px]">
+          <span
+            className={cn(
+              "font-semibold shrink-0 min-w-[120px]",
+              log.type === "response"
+                ? "text-green-600 dark:text-green-400"
+                : "text-blue-600 dark:text-blue-400",
+            )}
+          >
             {log.command}
           </span>
           <span className="text-gray-500 dark:text-gray-600 mr-1">
