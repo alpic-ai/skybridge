@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
-import { useSelectedTool, useSuspenseResource } from "@/lib/mcp/index.js";
-import mcpClient from "@/lib/mcp/index.js";
+import mcpClient, {
+  useSelectedTool,
+  useSuspenseResource,
+} from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
 import { injectWaitForOpenai } from "./utils.js";
