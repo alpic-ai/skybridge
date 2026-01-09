@@ -117,11 +117,11 @@ code.dark {
   cursor: pointer;
 }
 
-.btn:hover {
+.btn:hover:not(:disabled) {
   opacity: 0.8;
 }
 
-.btn:active {
+.btn:active:not(:disabled) {
   opacity: 0.9;
 }
 
