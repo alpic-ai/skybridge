@@ -134,10 +134,10 @@ To use your app directly in ChatGPT:
 
 3. **Connect ChatGPT to your app**:
 
-   - In ChatGPT, open **Profile → Apps → Create app**.
-   - Paste your ngrok URL with `/mcp` at the end, for example:
-     ```
-     https://xxxxxx.ngrok-free.app/mcp
-     ```
-  - Open a new conversation and select your app using the + button
-  - Try prompting the model
+- In ChatGPT, open **Profile → Apps → Create app**.
+- Paste your ngrok URL with `/mcp` at the end, for example:
+  ```
+  https://xxxxxx.ngrok-free.app/mcp
+  ```
+- Open a new conversation and select your app using the + button.
+- Try prompting the model.
