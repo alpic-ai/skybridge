@@ -34,7 +34,7 @@ export function UseDisplayModeTab() {
           <button
             key={mode.toString()}
             type="button"
-            className={`btn ${displayMode === mode ? "btn-active" : "btn-outline"}`}
+            className={`btn ${displayMode === mode ? "" : "btn-outline"}`}
             onClick={() => setDisplayMode(mode)}
           >
             {mode} ({col} col)

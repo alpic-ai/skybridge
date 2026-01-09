@@ -23,7 +23,7 @@ export function DataLlmTab() {
           <button
             key={p}
             type="button"
-            className={`btn ${page === p ? "btn-active" : "btn-outline"}`}
+            className={`btn ${page === p ? "" : "btn-outline"}`}
             onClick={() => setPage(p)}
           >
             {p}
