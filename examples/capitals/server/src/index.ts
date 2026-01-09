@@ -1,4 +1,3 @@
-import { devtoolsStaticServer } from "@skybridge/devtools";
 import express, { type Express } from "express";
 import { widgetsDevServer } from "skybridge/server";
 import type { ViteDevServer } from "vite";
@@ -36,6 +35,7 @@ app.get("/api/capital/:cca2", async (req, res) => {
 app.use(mcp(server));
 
 if (env.NODE_ENV !== "production") {
+  const { devtoolsStaticServer } = await import("@skybridge/devtools");
   app.use(await devtoolsStaticServer());
   app.use(await widgetsDevServer());
 }
