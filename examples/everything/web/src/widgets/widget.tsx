@@ -80,15 +80,15 @@ function Widget() {
 
       <Component />
 
-      <div style={{ marginTop: "1.5rem" }}>
+      <div style={{ marginTop: "1.75rem", textAlign: "right" }}>
         <button
           type="button"
-          className="doc-link"
+          className="btn btn-muted btn-small"
           onClick={() =>
             openExternal(`https://www.skybridge.tech/api-reference/${docPath}`)
           }
         >
-          See in docs
+          ↗ See in docs
         </button>
       </div>
     </div>
