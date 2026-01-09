@@ -99,16 +99,45 @@ deno task dev
   </TabItem>
 </Tabs>
 
-This command starts an Express server on port 3000 that packages:
-- An MCP endpoint on `/mcp` - the ChatGPT App Backend
-- A React application on Vite HMR dev server - the ChatGPT App Frontend
+This runs the `skybridge` command, which starts a development server with the following features:
 
+### What it does
 
-## What's next?
+The `skybridge` command:
+- **Starts an Express server** on port 3000 that packages:
+  - An MCP endpoint on `/mcp` - the ChatGPT App Backend
+  - A React application on Vite HMR dev server - the ChatGPT App Frontend
+- **Watches for file changes** using nodemon, automatically restarting the server when you modify server-side code
 
-<div className="card-grid">
-  <div className="card">
-    <h3>Test your App</h3>
-    <a href="/quickstart/test-your-app" className="card-link">Connect your local dev server to ChatGPT and start developing with Hot Module Reload →</a>
-  </div>
-</div>
+### Development workflow
+
+When you run `skybridge`:
+1. The server starts and displays the welcome screen in your terminal
+2. You can access **DevTools** at `http://localhost:3000/` to test your app locally
+3. The **MCP server** is available at `http://localhost:3000/mcp`
+4. **File watching** is enabled - changes to server code will automatically restart the server
+5. **Hot Module Reload (HMR)** is active for Widgets components - changes appear instantly in ChatGPT without reconnecting
+
+### Using your app in ChatGPT
+
+To use your app directly in ChatGPT:
+
+1. **Start your server** (see above).
+
+2. **Expose your local server to the internet** (so ChatGPT can reach it). The most common option is [ngrok](https://ngrok.com/). In a new terminal, run:
+
+   ```bash
+   ngrok http 3000
+   ```
+
+   This will give you a public URL such as `https://xxxxxx.ngrok-free.app`.
+
+3. **Connect ChatGPT to your app**:
+
+- In ChatGPT, open **Profile → Apps → Create app**.
+- Paste your ngrok URL with `/mcp` at the end, for example:
+  ```
+  https://xxxxxx.ngrok-free.app/mcp
+  ```
+- Open a new conversation and select your app using the + button.
+- Try prompting the model.

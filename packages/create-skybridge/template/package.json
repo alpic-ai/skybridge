@@ -5,7 +5,7 @@
   "description": "Alpic MCP Server Template",
   "type": "module",
   "scripts": {
-    "dev": "nodemon",
+    "dev": "skybridge",
     "build": "vite build -c web/vite.config.ts && shx rm -rf server/dist && tsc -p tsconfig.server.json && shx cp -r web/dist server/dist/assets",
     "start": "node server/dist/index.js",
     "inspector": "mcp-inspector http://localhost:3000/mcp",
