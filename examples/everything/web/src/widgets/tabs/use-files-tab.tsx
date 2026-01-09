@@ -27,8 +27,12 @@ export function UseFilesTab() {
     if (!fileId) {
       return;
     }
-    const { downloadUrl } = await download({ fileId });
-    window.open(downloadUrl, "_blank");
+    try {
+      const { downloadUrl } = await download({ fileId });
+      window.open(downloadUrl, "_blank");
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
   }
 
   function handleClear() {
