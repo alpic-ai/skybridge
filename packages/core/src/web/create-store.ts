@@ -1,4 +1,5 @@
 import { create, type StateCreator } from "zustand";
+import { getAdaptor } from "./bridges/index.js";
 import {
   getInitialState,
   injectWidgetContext,
@@ -25,13 +26,11 @@ export function createStore<State extends UnknownObject>(
   );
 
   store.subscribe((state: State) => {
-    if (window.openai) {
-      const serializedState = serializeState(state);
-      if (serializedState !== null && serializedState !== undefined) {
-        const stateToPersist = injectWidgetContext(serializedState as State);
-        if (stateToPersist !== null) {
-          window.openai.setWidgetState(stateToPersist);
-        }
+    const serializedState = serializeState(state);
+    if (serializedState !== null && serializedState !== undefined) {
+      const stateToPersist = injectWidgetContext(serializedState as State);
+      if (stateToPersist !== null) {
+        getAdaptor().setWidgetState(stateToPersist);
       }
     }
   });
