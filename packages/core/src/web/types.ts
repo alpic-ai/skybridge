@@ -128,7 +128,7 @@ export type OpenAiMethods<WidgetState extends UnknownObject = UnknownObject> = {
    * Downloads a file from the host that was previously uploaded.
    * Only files uploaded by the same connector instance can be downloaded.
    */
-  downloadFile: (file: FileMetadata) => Promise<{ downloadUrl: string }>;
+  getFileDownloadUrl: (file: FileMetadata) => Promise<{ downloadUrl: string }>;
 };
 
 // Dispatched when any global changes in the host page

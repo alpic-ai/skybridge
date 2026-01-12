@@ -13,7 +13,7 @@ import { useFiles } from "skybridge/web";
 import { useState } from "react";
 
 function FileUploader() {
-  const { upload, download } = useFiles();
+  const { upload } = useFiles();
   const [fileId, setFileId] = useState<string | null>(null);
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,13 +46,13 @@ Uploads a file to the host. Returns a promise that resolves with the file metada
 - `file: File`
   - The file object to upload
 
-### `download`
+### `getDownloadUrl`
 
 ```tsx
-download: (file: { fileId: string }) => Promise<{ downloadUrl: string }>
+getDownloadUrl: (file: { fileId: string }) => Promise<{ downloadUrl: string }>
 ```
 
-Downloads a file that was previously uploaded. Returns a promise that resolves with a `downloadUrl` that can be used to fetch the file content.
+Get the download URL of a file that was previously uploaded. Returns a promise that resolves with a `downloadUrl` that can be used to fetch the file content.
 
 - `file: { fileId: string }`
   - An object containing the `fileId` of the file to download
@@ -70,7 +70,7 @@ import { useFiles } from "skybridge/web";
 import { useState } from "react";
 
 function ImageUploader() {
-  const { upload, download } = useFiles();
+  const { upload, getDownloadUrl } = useFiles();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -81,7 +81,7 @@ function ImageUploader() {
     setIsUploading(true);
     try {
       const { fileId } = await upload(file);
-      const { downloadUrl } = await download({ fileId });
+      const { downloadUrl } = await getDownloadUrl({ fileId });
       setPreviewUrl(downloadUrl);
     } catch (error) {
       console.error("Upload failed:", error);
@@ -117,7 +117,7 @@ type Document = {
 };
 
 function DocumentManager() {
-  const { upload, download } = useFiles();
+  const { upload, getDownloadUrl } = useFiles();
   const [documents, setDocuments] = useState<Document[]>([]);
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,7 +129,7 @@ function DocumentManager() {
   };
 
   const handleDownload = async (doc: Document) => {
-    const { downloadUrl } = await download({ fileId: doc.fileId });
+    const { downloadUrl } = await getDownloadUrl({ fileId: doc.fileId });
     window.open(downloadUrl, "_blank");
   };
 
