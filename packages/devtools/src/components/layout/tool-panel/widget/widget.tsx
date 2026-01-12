@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
-import { useSelectedTool, useSuspenseResource } from "@/lib/mcp/index.js";
+import mcpClient, {
+  useSelectedTool,
+  useSuspenseResource,
+} from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
 import { injectWaitForOpenai } from "./utils.js";
@@ -32,12 +35,18 @@ export const Widget = () => {
     createAndInjectOpenAi(
       iframe.contentWindow,
       openaiObject,
-      (command, args) => {
-        pushOpenAiLog(tool.name, { timestamp: Date.now(), command, args });
+      (command, args, type = "default") => {
+        pushOpenAiLog(tool.name, {
+          timestamp: Date.now(),
+          command,
+          args,
+          type,
+        });
       },
       (key, value) => {
         updateOpenaiObject(tool.name, key, value);
       },
+      (name, args) => mcpClient.callTool(name, args),
     );
 
     iframe.contentDocument.open();

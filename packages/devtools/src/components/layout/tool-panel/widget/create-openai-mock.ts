@@ -11,8 +11,13 @@ import { SET_GLOBALS_EVENT_TYPE, SetGlobalsEvent } from "skybridge/web";
 
 function createOpenaiMethods(
   openai: OpenAiProperties & OpenAiMethods<UnknownObject>,
-  log: (command: string, args: UnknownObject) => void,
+  log: (
+    command: string,
+    args: UnknownObject,
+    type?: "default" | "response",
+  ) => void,
   setValue: (key: keyof OpenAiProperties, value: unknown) => void,
+  callToolFn: (name: string, args: CallToolArgs) => Promise<CallToolResponse>,
 ) {
   const functions = {
     callTool: async <
@@ -23,7 +28,10 @@ function createOpenaiMethods(
       args: ToolArgs,
     ): Promise<ToolResponse> => {
       log("callTool", { name, args });
-      return {} as unknown as ToolResponse;
+
+      const response = await callToolFn(name, args ?? {});
+      log("← callTool response", response, "response");
+      return response as unknown as ToolResponse;
     },
     sendFollowUpMessage: async (args: { prompt: string }) => {
       log("sendFollowUpMessage", args);
@@ -104,8 +112,13 @@ function createOpenaiObject(
 export function createAndInjectOpenAi(
   iframeWindow: Window & { openai?: unknown },
   initialValues: OpenAiProperties | null,
-  log: (command: string, args: UnknownObject) => void,
+  log: (
+    command: string,
+    args: UnknownObject,
+    type?: "default" | "response",
+  ) => void,
   setValue: (key: keyof OpenAiProperties, value: unknown) => void,
+  callToolFn: (name: string, args: CallToolArgs) => Promise<CallToolResponse>,
 ): void {
   const openaiObject = cloneDeep(initialValues);
   const openai = createOpenaiObject(openaiObject, iframeWindow);
@@ -113,6 +126,7 @@ export function createAndInjectOpenAi(
     openai as OpenAiProperties & OpenAiMethods<UnknownObject>,
     log,
     setValue,
+    callToolFn,
   );
   assign(openai, functions);
   iframeWindow.openai = openai as unknown as typeof iframeWindow.openai;

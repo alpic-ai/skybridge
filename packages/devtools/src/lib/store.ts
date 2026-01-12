@@ -11,6 +11,7 @@ export type OpenAiLog = {
   timestamp: number;
   command: string;
   args: UnknownObject;
+  type: "default" | "response";
 };
 
 type ToolData = {
