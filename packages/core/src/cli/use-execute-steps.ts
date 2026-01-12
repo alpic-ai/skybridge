@@ -27,17 +27,15 @@ export const useExecuteSteps = (steps: CommandStep[]) => {
         }
       }
       setStatus("success");
-      // This ensures the success message is rendered before the process exits
-      setTimeout(() => {
+      setImmediate(() => {
         process.exit(0);
-      }, 500);
+      });
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : String(err));
-      // This ensures the error is rendered before the process exits
-      setTimeout(() => {
+      setImmediate(() => {
         process.exit(1);
-      }, 500);
+      });
     }
   }, [steps]);
 
