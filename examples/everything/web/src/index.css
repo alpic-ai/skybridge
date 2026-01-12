@@ -1,3 +1,12 @@
+:root {
+  --bg: #fcfcfc;
+  --bg-surface: #fff;
+  --bg-inset: #e4e4e4;
+  --fg: #000;
+  --fg-muted: #888;
+  --border: #ddd;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,9 +15,10 @@
 
 body {
   font-family: system-ui, -apple-system, sans-serif;
-  color: #1a1a1a;
-  background: #fafafa;
+  color: var(--fg);
+  background: var(--bg);
   line-height: 1.5;
+  border-radius: 15px;
 }
 
 .container {
@@ -18,8 +28,14 @@ body {
 .tabs {
   display: flex;
   gap: 0.5rem;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
   margin-bottom: 1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
@@ -28,18 +44,19 @@ body {
   border: none;
   border-bottom: 2px solid transparent;
   font-size: 0.875rem;
-  color: #666;
+  color: var(--fg-muted);
   cursor: pointer;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .tab:hover {
-  color: #333;
+  color: var(--fg);
 }
 
 .tab.active {
-  color: #1a1a1a;
-  border-bottom-color: #1a1a1a;
+  color: var(--fg);
+  border-bottom-color: var(--fg);
 }
 
 .tab-content {
@@ -52,6 +69,11 @@ body {
   font-size: 0.875rem;
 }
 
+.error {
+  font-size: 0.875rem;
+  color: #c00;
+}
+
 .field {
   display: flex;
   flex-direction: column;
@@ -61,15 +83,96 @@ body {
 .field-label {
   font-size: 0.75rem;
   font-weight: 500;
-  color: #888;
+  color: var(--fg-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
+pre,
 code {
-  background: #f0f0f0;
+  background: var(--bg-inset);
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   font-size: 0.875rem;
   font-family: ui-monospace, monospace;
+}
+
+pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+code.dark {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.button-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  background: var(--fg);
+  color: var(--bg-surface);
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.btn:active:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn:disabled {
+  background: var(--border);
+  cursor: not-allowed;
+}
+
+.btn-small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 4px;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border);
+}
+
+.btn-outline:hover {
+  background: var(--bg-inset);
+}
+
+.btn-outline:disabled {
+  color: var(--border);
+  background: var(--bg-surface);
+}
+
+.muted {
+  opacity: 0.5;
+}
+
+.muted:hover {
+  opacity: 1;
+}
+
+.input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-family: inherit;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--fg);
 }
