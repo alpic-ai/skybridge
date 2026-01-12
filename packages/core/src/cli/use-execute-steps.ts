@@ -19,11 +19,7 @@ export const useExecuteSteps = (steps: CommandStep[]) => {
         const step = steps[i];
         if (step) {
           setCurrentStep(i);
-          const [command, ...args] = step.command.split(" ");
-          if (!command) {
-            throw new Error("Invalid command");
-          }
-          await runCommand(command, args);
+          await runCommand(step.command);
         }
       }
       setStatus("success");

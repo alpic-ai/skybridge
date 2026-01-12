@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "skybridge",
-    "build": "vite build -c web/vite.config.ts && shx rm -rf dist && tsc -p tsconfig.server.json && mkdir -p dist/assets && shx cp -r web/dist/. dist/assets",
-    "start": "node dist/index.js",
+    "build": "skybridge build",
+    "start": "skybridge start",
     "inspector": "mcp-inspector http://localhost:3000/mcp",
     "server:build": "tsc -p tsconfig.server.json",
     "server:start": "node dist/index.js",
@@ -16,16 +16,18 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
+    "cors": "^2.8.5",
     "express": "^5.2.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "skybridge": ">=0.19.0 <1.0.0",
+    "skybridge": "workspace:*",
     "vite": "^7.3.1",
     "zod": "^4.3.5"
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "^0.18.0",
-    "@skybridge/devtools": ">=0.17.1 <1.0.0",
+    "@skybridge/devtools": "workspace:*",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",

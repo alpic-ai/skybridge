@@ -1,6 +1,7 @@
-import { spawn } from "node:child_process";
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
+import { Header } from "../cli/header.js";
+import { runCommand } from "../cli/run-command.js";
 
 export default class Dev extends Command {
   static override description = "Start development server";
@@ -8,19 +9,14 @@ export default class Dev extends Command {
   static override flags = {};
 
   public async run(): Promise<void> {
-    spawn("nodemon", ["--quiet"], {
+    runCommand("nodemon --quiet", {
       stdio: ["ignore", "ignore", "inherit"],
     });
 
     const App = () => {
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>
-          <Box marginBottom={1}>
-            <Text color="cyan" bold>
-              ⛰{"  "}Welcome to Skybridge
-            </Text>
-            <Text color="cyan"> v{this.config.version}</Text>
-          </Box>
+          <Header version={this.config.version} />
           <Box>
             <Text color="green">→{"  "}</Text>
             <Text color="white" bold>
