@@ -1,5 +1,6 @@
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
+import { products } from "./products.js";
 
 interface Product {
   id: number;
@@ -24,13 +25,6 @@ const server = new McpServer(
   "ecom-carousel",
   {
     description: "E-commerce Product Carousel",
-    _meta: {
-      ui: {
-        csp: {
-          resourceDomains: ["https://fakestoreapi.com"],
-        },
-      },
-    },
   },
   {
     description: "Display a carousel of products from the store.",
@@ -42,14 +36,8 @@ const server = new McpServer(
       maxPrice: z.number().optional().describe("Maximum price filter"),
     },
   },
-  async ({ category, maxPrice }) => {
+  ({ category, maxPrice }) => {
     try {
-      const response = await fetch("https://fakestoreapi.com/products");
-      if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
-      }
-
-      const products: Product[] = await response.json();
       const filtered: Product[] = [];
 
       for (const product of products) {
