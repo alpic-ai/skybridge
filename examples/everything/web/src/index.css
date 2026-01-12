@@ -69,6 +69,11 @@ body {
   font-size: 0.875rem;
 }
 
+.error {
+  font-size: 0.875rem;
+  color: #c00;
+}
+
 .field {
   display: flex;
   flex-direction: column;
@@ -151,14 +156,12 @@ code.dark {
   background: var(--bg-surface);
 }
 
-.btn-muted {
-  background: var(--bg-inset);
-  color: var(--fg-muted);
+.muted {
+  opacity: 0.5;
 }
 
-.btn-muted:hover {
-  color: var(--fg);
-  background: var(--bg-surface);
+.muted:hover {
+  opacity: 1;
 }
 
 .input {

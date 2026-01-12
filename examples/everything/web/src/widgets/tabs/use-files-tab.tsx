@@ -5,6 +5,7 @@ export function UseFilesTab() {
   const { upload, download } = useFiles();
   const [fileId, setFileId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleUpload(event: React.ChangeEvent<HTMLInputElement>) {
@@ -13,11 +14,12 @@ export function UseFilesTab() {
       return;
     }
     setIsUploading(true);
+    setError(null);
     try {
       const { fileId } = await upload(file);
       setFileId(fileId);
     } catch (error) {
-      console.error("Upload failed:", error);
+      setError(error instanceof Error ? error.message : "Upload failed");
     } finally {
       setIsUploading(false);
     }
@@ -57,6 +59,8 @@ export function UseFilesTab() {
           disabled={isUploading}
         />
       </div>
+
+      {error && <p className="error">{error}</p>}
 
       {fileId && (
         <div className="field">

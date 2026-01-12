@@ -7,15 +7,17 @@ export function DataLlmTab() {
   const [page, setPage] = useState<Page>("Home");
 
   return (
-    <div className="tab-content" data-llm={`User is viewing the ${page} page`}>
+    <div className="tab-content" data-llm={`User is viewing the $pagepage`}>
       <p className="description">
         The <code>data-llm</code> attribute syncs UI state with the model. As
         you navigate below, the LLM knows which page you're on.
       </p>
 
       <div className="field">
-        <span className="field-label">current context</span>
-        <code>User is viewing the {page} page</code>
+        <span className="field-label">compiled widgetState</span>
+        <pre>{`<DataLLM content="User is viewing the ${page} page}">
+  <div>{/* The page content */}</div>
+</DataLLM>`}</pre>
       </div>
 
       <div className="button-row">
@@ -23,7 +25,7 @@ export function DataLlmTab() {
           <button
             key={p}
             type="button"
-            className={`btn ${page === p ? "" : "btn-outline"}`}
+            className={`btn $page === p ? "" : "btn-outline"`}
             onClick={() => setPage(p)}
           >
             {p}

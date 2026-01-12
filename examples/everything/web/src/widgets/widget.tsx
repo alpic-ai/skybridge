@@ -83,7 +83,7 @@ function Widget() {
       <div style={{ marginTop: "1.75rem", textAlign: "right" }}>
         <button
           type="button"
-          className="btn btn-muted btn-small"
+          className="btn btn-outline muted btn-small"
           onClick={() =>
             openExternal(`https://www.skybridge.tech/api-reference/${docPath}`)
           }
