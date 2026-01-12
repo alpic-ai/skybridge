@@ -39,6 +39,7 @@ export interface BridgeInterface {
   toolInput: Record<string, unknown> | null;
   toolOutput: Record<string, unknown> | null;
   toolResponseMetadata: Record<string, unknown> | null;
+  widgetState: Record<string, unknown> | null;
 }
 
 export type Subscribe = Parameters<typeof useSyncExternalStore>[0];
@@ -65,4 +66,5 @@ export interface Adaptor {
   }>;
   sendFollowUpMessage(prompt: string): Promise<void>;
   openExternal(href: string): void;
+  setWidgetState(state: Record<string, unknown>): void;
 }

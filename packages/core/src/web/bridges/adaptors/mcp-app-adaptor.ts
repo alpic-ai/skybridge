@@ -33,6 +33,9 @@ export class McpAppAdaptor implements Adaptor {
   private stores: {
     [K in keyof BridgeInterface]: ExternalStore<K>;
   };
+  private widgetState: BridgeInterface["widgetState"] = null;
+  private widgetStateListeners = new Set<() => void>();
+
   private constructor() {
     this.stores = this.initializeStores();
   }
@@ -183,8 +186,24 @@ export class McpAppAdaptor implements Adaptor {
         ["toolResult"],
         ({ toolResult }) => toolResult?._meta ?? null,
       ),
+      widgetState: {
+        subscribe: (onChange: () => void) => {
+          this.widgetStateListeners.add(onChange);
+          return () => {
+            this.widgetStateListeners.delete(onChange);
+          };
+        },
+        getSnapshot: () => this.widgetState,
+      },
     };
   }
+
+  public setWidgetState = (state: Record<string, unknown>): void => {
+    this.widgetState = state;
+    this.widgetStateListeners.forEach((listener) => {
+      listener();
+    });
+  };
 
   private createExternalStore<const Keys extends readonly McpAppBridgeKey[], R>(
     keys: Keys,
