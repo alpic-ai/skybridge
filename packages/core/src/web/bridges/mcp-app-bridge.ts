@@ -4,6 +4,8 @@ import type {
   McpUiInitializedNotification,
   McpUiInitializeRequest,
   McpUiInitializeResult,
+  McpUiResourceTeardownRequest,
+  McpUiResourceTeardownResult,
   McpUiSizeChangedNotification,
   McpUiToolCancelledNotification,
   McpUiToolInputNotification,
@@ -36,6 +38,14 @@ export type McpAppBridgeKey = keyof McpAppBridgeContext;
 
 const LATEST_PROTOCOL_VERSION = "2025-11-21";
 
+enum JsonRpcErrorCode {
+  ParseError = -32700,
+  InvalidRequest = -32600,
+  MethodNotFound = -32601,
+  InvalidParams = -32602,
+  InternalError = -32603,
+}
+
 type McpAppResponse = {
   jsonrpc: "2.0";
   id: string | number;
@@ -44,9 +54,14 @@ type McpAppResponse = {
       result: unknown;
     }
   | {
-      error: { code: number; message: string };
+      error: { code: JsonRpcErrorCode; message: string };
     }
 );
+
+type McpAppRequest = {
+  jsonrpc: "2.0";
+  id: string | number;
+} & McpUiResourceTeardownRequest;
 
 type McpAppNotification = { jsonrpc: "2.0" } & (
   | McpUiToolInputNotification
@@ -200,7 +215,7 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
   }
 
   private handleMessage = (
-    event: MessageEvent<McpAppResponse | McpAppNotification>,
+    event: MessageEvent<McpAppResponse | McpAppNotification | McpAppRequest>,
   ) => {
     const data = event.data;
     if (data.jsonrpc !== "2.0") {
@@ -208,40 +223,80 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
     }
 
     if ("id" in data) {
-      const request = this.pendingRequests.get(data.id);
-      if (request) {
-        clearTimeout(request.timeout);
-        this.pendingRequests.delete(data.id);
-        if ("error" in data) {
-          request.reject(new Error(data.error.message));
-          return;
-        }
-
-        request.resolve(data.result);
+      if ("method" in data) {
+        this.handleRequest(data);
+        return;
       }
 
+      this.handleResponse(data);
       return;
     }
 
-    switch (data.method) {
+    this.handleNotification(data);
+  };
+
+  private handleResponse(response: McpAppResponse) {
+    const request = this.pendingRequests.get(response.id);
+    if (request) {
+      clearTimeout(request.timeout);
+      this.pendingRequests.delete(response.id);
+      if ("error" in response) {
+        request.reject(new Error(response.error.message));
+        return;
+      }
+
+      request.resolve(response.result);
+    }
+  }
+
+  private handleNotification = (notification: McpAppNotification) => {
+    switch (notification.method) {
       case "ui/notifications/host-context-changed":
-        this.updateContext(data.params);
+        this.updateContext(notification.params);
         return;
       case "ui/notifications/tool-input":
         this.updateContext({
-          toolInput: data.params.arguments ?? {},
+          toolInput: notification.params.arguments ?? {},
         });
         return;
       case "ui/notifications/tool-result":
         this.updateContext({
-          toolResult: data.params,
+          toolResult: notification.params,
         });
         return;
       case "ui/notifications/tool-cancelled":
         this.updateContext({
-          toolCancelled: data.params,
+          toolCancelled: notification.params,
         });
         return;
+    }
+  };
+
+  private handleRequest = (request: McpAppRequest) => {
+    switch (request.method) {
+      case "ui/resource-teardown":
+        this.cleanup();
+        window.parent.postMessage(
+          {
+            jsonrpc: "2.0",
+            id: request.id,
+            result: {} satisfies McpUiResourceTeardownResult,
+          } satisfies McpAppResponse,
+          "*",
+        );
+        return;
+      default:
+        window.parent.postMessage(
+          {
+            jsonrpc: "2.0",
+            id: request.id,
+            error: {
+              code: JsonRpcErrorCode.MethodNotFound,
+              message: "Unsupported Request",
+            },
+          } satisfies McpAppResponse,
+          "*",
+        );
     }
   };
 
