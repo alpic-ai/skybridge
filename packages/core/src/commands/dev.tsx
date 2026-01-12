@@ -2,19 +2,18 @@ import { spawn } from "node:child_process";
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { useEffect } from "react";
-import { useVersion } from "../cli/use-version.js";
+import { getPackageVersion } from "../cli/use-version.js";
 
 export default class Dev extends Command {
   static override description = "Start development server";
-  static override examples = ["skybridge dev"];
+  static override examples = ["skybridge"];
   static override flags = {};
+  static readonly packageVersion = getPackageVersion();
 
   public async run(): Promise<void> {
     console.clear();
 
     const App = () => {
-      const version = useVersion();
-
       useEffect(() => {
         const nodemon = spawn("nodemon", ["--quiet"], {
           stdio: ["ignore", "ignore", "inherit"],
@@ -33,7 +32,7 @@ export default class Dev extends Command {
             <Text color="cyan" bold>
               ⛰{"  "}Welcome to Skybridge
             </Text>
-            <Text color="cyan"> v{version}</Text>
+            <Text color="cyan"> v{Dev.packageVersion}</Text>
           </Box>
           <Box>
             <Text color="green">→{"  "}</Text>
