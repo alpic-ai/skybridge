@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useFiles } from "skybridge/web";
 
 export function UseFilesTab() {
-  const { upload, download } = useFiles();
+  const { upload, getDownloadUrl } = useFiles();
   const [fileId, setFileId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ export function UseFilesTab() {
       return;
     }
     try {
-      const { downloadUrl } = await download({ fileId });
+      const { downloadUrl } = await getDownloadUrl({ fileId });
       window.open(downloadUrl, "_blank");
     } catch (error) {
       console.error("Download failed:", error);
