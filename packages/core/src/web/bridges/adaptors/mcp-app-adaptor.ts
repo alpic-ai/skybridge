@@ -149,8 +149,14 @@ export class McpAppAdaptor implements Adaptor {
         ({ displayMode }) => displayMode ?? "inline",
       ),
       maxHeight: this.createExternalStore(
-        ["viewport"],
-        ({ viewport }) => viewport?.maxHeight ?? window.innerHeight,
+        ["containerDimensions"],
+        ({ containerDimensions }) => {
+          if (containerDimensions && "maxHeight" in containerDimensions) {
+            return containerDimensions.maxHeight ?? window.innerHeight;
+          }
+
+          return window.innerHeight;
+        },
       ),
       userAgent: this.createExternalStore(
         ["platform", "deviceCapabilities"],
