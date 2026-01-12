@@ -10,7 +10,7 @@ export const commandSteps: CommandStep[] = [
   },
   {
     label: "Compiling server",
-    command: "shx rm -rf server/dist && tsc -p tsconfig.server.json",
+    command: "shx rm -rf dist && tsc -p tsconfig.server.json",
   },
   {
     label: "Copying static assets",
