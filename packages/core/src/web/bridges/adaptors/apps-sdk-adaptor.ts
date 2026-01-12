@@ -55,7 +55,7 @@ export class AppsSdkAdaptor implements Adaptor {
     window.openai.openExternal({ href });
   }
 
-  public setWidgetState = (state: Record<string, unknown>): void => {
-    window.openai.setWidgetState(state);
+  public setWidgetState = (state: Record<string, unknown>): Promise<void> => {
+    return window.openai.setWidgetState(state);
   };
 }

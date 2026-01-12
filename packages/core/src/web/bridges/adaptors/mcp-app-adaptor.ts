@@ -198,7 +198,9 @@ export class McpAppAdaptor implements Adaptor {
     };
   }
 
-  public setWidgetState = (state: Record<string, unknown>): void => {
+  public setWidgetState = async (
+    state: Record<string, unknown>,
+  ): Promise<void> => {
     this.widgetState = state;
     this.widgetStateListeners.forEach((listener) => {
       listener();
