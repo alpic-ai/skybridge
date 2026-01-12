@@ -45,6 +45,8 @@ const config: Config = {
     ],
   ],
 
+  plugins: ["@docusaurus/plugin-vercel-analytics"],
+
   themeConfig: {
     image: "img/logo.png",
     colorMode: {
