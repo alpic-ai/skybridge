@@ -14,6 +14,9 @@ This "Ecommerce Carousel" example demonstrates key Skybridge capabilities:
 
 This example serves as a comprehensive reference for building sophisticated, interactive widgets that leverage Skybridge's full feature set.
 
+## Live Demo
+Try it for yourself: `https://ecommerce.skybridge.tech/mcp`
+
 ## Getting Started
 
 ### Prerequisites

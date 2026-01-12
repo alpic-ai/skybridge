@@ -2,6 +2,9 @@
 
 A playground widget showcasing all Skybridge hooks and features for building ChatGPT and MCP Apps.
 
+## Live Demo
+Try it for yourself: `https://everything.skybridge.tech/mcp`
+
 ## Getting Started
 
 ### Prerequisites
