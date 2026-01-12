@@ -1,6 +1,6 @@
+import { spawn } from "node:child_process";
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
-import { spawn } from "node:child_process";
 
 export default class Dev extends Command {
   static override description = "Start development server";

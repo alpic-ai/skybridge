@@ -1,34 +1,12 @@
 import { useCallback, useState } from "react";
 import { runCommand } from "./run-command.js";
 
-interface BuildStep {
+export interface CommandStep {
   label: string;
-  commands: Array<{ command: string; args: string[] }>;
+  command: string;
 }
 
-export const buildSteps: BuildStep[] = [
-  {
-    label: "Building widgets",
-    commands: [
-      { command: "vite", args: ["build", "-c", "web/vite.config.ts"] },
-    ],
-  },
-  {
-    label: "Compiling server",
-    commands: [
-      { command: "shx", args: ["rm", "-rf", "server/dist"] },
-      { command: "tsc", args: ["-p", "tsconfig.server.json"] },
-    ],
-  },
-  {
-    label: "Copying static assets",
-    commands: [
-      { command: "shx", args: ["cp", "-r", "web/dist", "dist/assets"] },
-    ],
-  },
-];
-
-export const useExecuteBuild = () => {
+export const useExecuteSteps = (steps: CommandStep[]) => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [status, setStatus] = useState<"running" | "success" | "error">(
     "running",
@@ -37,13 +15,15 @@ export const useExecuteBuild = () => {
 
   const execute = useCallback(async () => {
     try {
-      for (let i = 0; i < buildSteps.length; i++) {
-        const step = buildSteps[i];
+      for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
         if (step) {
           setCurrentStep(i);
-          for (const cmd of step.commands) {
-            await runCommand(cmd.command, cmd.args);
+          const [command, ...args] = step.command.split(" ");
+          if (!command) {
+            throw new Error("Invalid command");
           }
+          await runCommand(command, args);
         }
       }
       setStatus("success");
@@ -59,7 +39,7 @@ export const useExecuteBuild = () => {
         process.exit(1);
       }, 500);
     }
-  }, []);
+  }, [steps]);
 
   return { currentStep, status, error, execute };
 };

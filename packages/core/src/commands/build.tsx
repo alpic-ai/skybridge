@@ -1,7 +1,22 @@
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { useEffect } from "react";
-import { buildSteps, useExecuteBuild } from "../cli/use-execute-build.js";
+import { type CommandStep, useExecuteSteps } from "../cli/use-execute-steps.js";
+
+export const commandSteps: CommandStep[] = [
+  {
+    label: "Building widgets",
+    command: "vite build -c web/vite.config.ts",
+  },
+  {
+    label: "Compiling server",
+    command: "shx rm -rf server/dist && tsc -p tsconfig.server.json",
+  },
+  {
+    label: "Copying static assets",
+    command: "shx cp -r web/dist dist/assets",
+  },
+];
 
 export default class Build extends Command {
   static override description = "Build the widgets and MCP server";
@@ -10,7 +25,8 @@ export default class Build extends Command {
 
   public async run(): Promise<void> {
     const App = () => {
-      const { currentStep, status, error, execute } = useExecuteBuild();
+      const { currentStep, status, error, execute } =
+        useExecuteSteps(commandSteps);
 
       useEffect(() => {
         execute();
@@ -26,7 +42,7 @@ export default class Build extends Command {
             <Text color="green"> → building for production…</Text>
           </Box>
 
-          {buildSteps.map((step, index) => {
+          {commandSteps.map((step, index) => {
             const isCurrent = index === currentStep && status === "running";
             const isCompleted = index < currentStep || status === "success";
             const isError = status === "error" && index === currentStep;
