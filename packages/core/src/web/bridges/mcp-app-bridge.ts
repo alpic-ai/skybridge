@@ -38,6 +38,14 @@ export type McpAppBridgeKey = keyof McpAppBridgeContext;
 
 const LATEST_PROTOCOL_VERSION = "2025-11-21";
 
+enum JsonRpcErrorCode {
+  ParseError = -32700,
+  InvalidRequest = -32600,
+  MethodNotFound = -32601,
+  InvalidParams = -32602,
+  InternalError = -32603,
+}
+
 type McpAppResponse = {
   jsonrpc: "2.0";
   id: string | number;
@@ -46,7 +54,7 @@ type McpAppResponse = {
       result: unknown;
     }
   | {
-      error: { code: number; message: string };
+      error: { code: JsonRpcErrorCode; message: string };
     }
 );
 
@@ -277,6 +285,18 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
           "*",
         );
         return;
+      default:
+        window.parent.postMessage(
+          {
+            jsonrpc: "2.0",
+            id: request.id,
+            error: {
+              code: JsonRpcErrorCode.MethodNotFound,
+              message: "Unsupported Request",
+            },
+          } satisfies McpAppResponse,
+          "*",
+        );
     }
   };
 
