@@ -1,79 +1,20 @@
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
-import { useEffect, useState } from "react";
-import { runCommand } from "../cli/run-command.js";
-import { getPackageVersion } from "../cli/use-version.js";
-
-interface BuildStep {
-  label: string;
-  commands: Array<{ command: string; args: string[] }>;
-}
-
-const buildSteps: BuildStep[] = [
-  {
-    label: "Building widgets",
-    commands: [
-      { command: "vite", args: ["build", "-c", "web/vite.config.ts"] },
-    ],
-  },
-  {
-    label: "Compiling server",
-    commands: [
-      { command: "shx", args: ["rm", "-rf", "server/dist"] },
-      { command: "tsc", args: ["-p", "tsconfig.server.json"] },
-    ],
-  },
-  {
-    label: "Copying static assets",
-    commands: [
-      { command: "shx", args: ["cp", "-r", "web/dist", "server/dist/assets"] },
-    ],
-  },
-];
+import { useEffect } from "react";
+import { buildSteps, useExecuteBuild } from "../cli/use-execute-build.js";
 
 export default class Build extends Command {
   static override description = "Build the widgets and MCP server";
   static override examples = ["skybridge build"];
   static override flags = {};
-  static readonly packageVersion = getPackageVersion();
 
   public async run(): Promise<void> {
     const App = () => {
-      const [currentStep, setCurrentStep] = useState<number>(0);
-      const [status, setStatus] = useState<"running" | "success" | "error">(
-        "running",
-      );
-      const [error, setError] = useState<string | null>(null);
+      const { currentStep, status, error, execute } = useExecuteBuild();
 
       useEffect(() => {
-        const executeBuild = async () => {
-          try {
-            for (let i = 0; i < buildSteps.length; i++) {
-              const step = buildSteps[i];
-              if (step) {
-                setCurrentStep(i);
-                for (const cmd of step.commands) {
-                  await runCommand(cmd.command, cmd.args);
-                }
-              }
-            }
-            setStatus("success");
-            // This ensures the success message is rendered before the process exits
-            setTimeout(() => {
-              process.exit(0);
-            }, 500);
-          } catch (err) {
-            setStatus("error");
-            setError(err instanceof Error ? err.message : String(err));
-            // This ensures the error is rendered before the process exits
-            setTimeout(() => {
-              process.exit(1);
-            }, 500);
-          }
-        };
-
-        executeBuild();
-      }, []);
+        execute();
+      }, [execute]);
 
       return (
         <Box flexDirection="column" padding={1}>
@@ -81,7 +22,7 @@ export default class Build extends Command {
             <Text color="cyan" bold>
               ⛰{"  "}Skybridge
             </Text>
-            <Text color="cyan"> v{Build.packageVersion}</Text>
+            <Text color="cyan"> v{this.config.version}</Text>
             <Text color="green"> → building for production…</Text>
           </Box>
 

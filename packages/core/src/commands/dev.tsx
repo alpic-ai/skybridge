@@ -1,38 +1,25 @@
-import { spawn } from "node:child_process";
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
-import { useEffect } from "react";
-import { getPackageVersion } from "../cli/use-version.js";
+import { spawn } from "node:child_process";
 
 export default class Dev extends Command {
   static override description = "Start development server";
   static override examples = ["skybridge"];
   static override flags = {};
-  static readonly packageVersion = getPackageVersion();
 
   public async run(): Promise<void> {
-    console.clear();
+    spawn("nodemon", ["--quiet"], {
+      stdio: ["ignore", "ignore", "inherit"],
+    });
 
     const App = () => {
-      useEffect(() => {
-        const nodemon = spawn("nodemon", ["--quiet"], {
-          stdio: ["ignore", "ignore", "inherit"],
-        });
-
-        return () => {
-          if (nodemon && !nodemon.killed) {
-            nodemon.kill();
-          }
-        };
-      }, []);
-
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>
           <Box marginBottom={1}>
             <Text color="cyan" bold>
               ⛰{"  "}Welcome to Skybridge
             </Text>
-            <Text color="cyan"> v{Dev.packageVersion}</Text>
+            <Text color="cyan"> v{this.config.version}</Text>
           </Box>
           <Box>
             <Text color="green">→{"  "}</Text>
