@@ -50,7 +50,7 @@ This section contains detailed documentation for all hooks and utilities provide
 
 | Hook                                     | Description                                                 |
 | ---------------------------------------- | ----------------------------------------------------------- |
-| [`useOpenAiGlobal`](./use-openai-global) | Low-level hook to subscribe to `window.openai` state values |
+| [`useAppsSdkBridge`](./use-apps-sdk-bridge) | Low-level hook to subscribe to `window.openai` state values |
 
 ## Import
 
@@ -63,7 +63,7 @@ import {
   useDisplayMode,
   useFiles,
   useLayout,
-  useOpenAiGlobal,
+  useAppsSdkBridge,
   useOpenExternal,
   useRequestModal,
   useSendFollowUpMessage,

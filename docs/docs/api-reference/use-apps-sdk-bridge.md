@@ -2,9 +2,9 @@
 sidebar_position: 9
 ---
 
-# useOpenAiGlobal
+# useAppsSdkBridge
 
-The `useOpenAiGlobal` hook is a low-level hook that subscribes to global state values exposed by the OpenAI host. This hook powers many of the other Skybridge hooks and can be used directly when you need access to specific global values.
+The `useAppsSdkBridge` hook is a low-level hook that subscribes to global state values exposed by the OpenAI host. This hook powers many of the other Skybridge hooks and can be used directly when you need access to specific global values.
 
 :::tip
 For most use cases, prefer using the specialized hooks like `useLayout`, `useUser`, `useDisplayMode`, etc., as they provide a more convenient API.
@@ -13,10 +13,10 @@ For most use cases, prefer using the specialized hooks like `useLayout`, `useUse
 ## Basic usage
 
 ```tsx
-import { useOpenAiGlobal } from "skybridge/web";
+import { useAppsSdkBridge } from "skybridge/web";
 
 function ThemeDisplay() {
-  const theme = useOpenAiGlobal("theme");
+  const theme = useAppsSdkBridge("theme");
 
   return <p>Current theme: {theme}</p>;
 }
@@ -60,10 +60,10 @@ The current value of the specified global, or `undefined` if not available.
 ### Reading Safe Area Insets
 
 ```tsx
-import { useOpenAiGlobal } from "skybridge/web";
+import { useAppsSdkBridge } from "skybridge/web";
 
 function SafeAreaAwareWidget() {
-  const safeArea = useOpenAiGlobal("safeArea");
+  const safeArea = useAppsSdkBridge("safeArea");
 
   if (!safeArea) {
     return <div>Loading...</div>;
@@ -87,10 +87,10 @@ function SafeAreaAwareWidget() {
 ### Respecting Max Height
 
 ```tsx
-import { useOpenAiGlobal } from "skybridge/web";
+import { useAppsSdkBridge } from "skybridge/web";
 
 function ScrollableContent() {
-  const maxHeight = useOpenAiGlobal("maxHeight");
+  const maxHeight = useAppsSdkBridge("maxHeight");
 
   return (
     <div
@@ -108,10 +108,10 @@ function ScrollableContent() {
 ### Accessing Tool Input
 
 ```tsx
-import { useOpenAiGlobal } from "skybridge/web";
+import { useAppsSdkBridge } from "skybridge/web";
 
 function ToolInputDisplay() {
-  const toolInput = useOpenAiGlobal("toolInput");
+  const toolInput = useAppsSdkBridge("toolInput");
 
   return (
     <div>
@@ -125,13 +125,13 @@ function ToolInputDisplay() {
 ### Multiple Globals
 
 ```tsx
-import { useOpenAiGlobal } from "skybridge/web";
+import { useAppsSdkBridge } from "skybridge/web";
 
 function EnvironmentInfo() {
-  const theme = useOpenAiGlobal("theme");
-  const locale = useOpenAiGlobal("locale");
-  const displayMode = useOpenAiGlobal("displayMode");
-  const userAgent = useOpenAiGlobal("userAgent");
+  const theme = useAppsSdkBridge("theme");
+  const locale = useAppsSdkBridge("locale");
+  const displayMode = useAppsSdkBridge("displayMode");
+  const userAgent = useAppsSdkBridge("userAgent");
 
   return (
     <div>
