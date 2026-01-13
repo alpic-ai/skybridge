@@ -461,7 +461,7 @@ importers:
         version: 1.25.2(hono@4.11.3)(zod@4.3.5)
       '@rjsf/core':
         specifier: ^6.1.2
-        version: 6.1.2(@rjsf/utils@6.1.2(react@19.2.0))(react@19.2.3)
+        version: 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3)
       '@rjsf/shadcn':
         specifier: ^6.1.2
         version: 6.1.2(@rjsf/core@6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3))(@rjsf/utils@6.1.2(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)
@@ -8060,14 +8060,6 @@ packages:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
-  skybridge@0.20.0:
-    resolution: {integrity: sha512-4dSU20+r0TPfeYlGESW2kiaZY4gedNR0IbzxGcOtW0fa6QguHv4mXb8v5swuCV9yxqmuC9PTJNe9TAu3qOHl0A==}
-    hasBin: true
-    peerDependencies:
-      '@modelcontextprotocol/sdk': '>=1.0.0'
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
-
   slash@3.0.0:
     resolution: {integrity: sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q==}
     engines: {node: '>=8'}
@@ -13154,8 +13146,8 @@ snapshots:
       '@fontsource-variable/jetbrains-mono': 5.2.8
       '@microlink/react-json-view': 1.27.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
-      '@rjsf/core': 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3)
-      '@rjsf/shadcn': 6.1.2(@rjsf/core@6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3))(@rjsf/utils@6.1.2(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)
+      '@rjsf/core': 6.1.2(@rjsf/utils@6.1.2(react@19.2.0))(react@19.2.3)
+      '@rjsf/shadcn': 6.1.2(@rjsf/core@6.1.2(@rjsf/utils@6.1.2(react@19.2.0))(react@19.2.3))(@rjsf/utils@6.1.2(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)
       '@rjsf/utils': 6.1.2(react@19.2.3)
       '@rjsf/validator-ajv8': 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))
       '@tanstack/react-query': 5.90.16(react@19.2.3)
@@ -13215,7 +13207,7 @@ snapshots:
       '@fontsource-variable/jetbrains-mono': 5.2.8
       '@microlink/react-json-view': 1.27.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
-      '@rjsf/core': 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3)
+      '@rjsf/core': 6.1.2(@rjsf/utils@6.1.2(react@19.2.0))(react@19.2.3)
       '@rjsf/shadcn': 6.1.2(@rjsf/core@6.1.2(@rjsf/utils@6.1.2(react@19.2.0))(react@19.2.3))(@rjsf/utils@6.1.2(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)
       '@rjsf/utils': 6.1.2(react@19.2.3)
       '@rjsf/validator-ajv8': 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))
@@ -19289,42 +19281,6 @@ snapshots:
       react-dom: 19.2.3(react@19.2.3)
       superjson: 2.2.6
       vite: 7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)
-      zustand: 5.0.9(@types/react@19.2.7)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))
-    transitivePeerDependencies:
-      - '@types/node'
-      - '@types/react'
-      - bufferutil
-      - immer
-      - jiti
-      - less
-      - lightningcss
-      - react-devtools-core
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-      - tsx
-      - use-sync-external-store
-      - utf-8-validate
-      - yaml
-
-  skybridge@0.20.0(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.7)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3)):
-    dependencies:
-      '@babel/core': 7.28.5
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
-      '@oclif/core': 4.8.0
-      cors: 2.8.5
-      dequal: 2.0.3
-      es-toolkit: 1.43.0
-      express: 5.2.1
-      handlebars: 4.7.8
-      ink: 6.6.0(@types/react@19.2.7)(react@19.2.3)
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
-      superjson: 2.2.6
-      vite: 7.3.1(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)
       zustand: 5.0.9(@types/react@19.2.7)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))
     transitivePeerDependencies:
       - '@types/node'

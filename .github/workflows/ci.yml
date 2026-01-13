@@ -88,10 +88,13 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Install template dependencies with workspace:*
         run: |
           cd packages/create-skybridge/template
-          pnpm install skybridge@workspace:* @skybridge/devtools@workspace:* --no-frozen-lockfile
+          pnpm add skybridge@workspace:* @skybridge/devtools@workspace:*
 
       - name: Build core and devtools
         run: |
