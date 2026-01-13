@@ -27,7 +27,7 @@ function ThemeDisplay() {
 ### `key`
 
 ```tsx
-key: keyof OpenAiProperties
+key: keyof AppsSdkProperties
 ```
 
 **Required**
@@ -50,7 +50,7 @@ The key of the global value to subscribe to. Available keys include:
 ## Returns
 
 ```tsx
-value: OpenAiProperties[K] | undefined
+value: AppsSdkProperties[K] | undefined
 ```
 
 The current value of the specified global, or `undefined` if not available.
@@ -151,10 +151,10 @@ function EnvironmentInfo() {
 
 ## Type Reference
 
-### `OpenAiProperties`
+### `AppsSdkProperties`
 
 ```tsx
-type OpenAiProperties = {
+type AppsSdkProperties = {
   theme: "light" | "dark";
   userAgent: UserAgent;
   locale: string;

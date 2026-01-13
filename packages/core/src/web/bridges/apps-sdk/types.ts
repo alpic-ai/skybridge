@@ -16,7 +16,7 @@ export class ToolResponseEvent extends CustomEvent<{
 
 declare global {
   interface Window {
-    openai: OpenAiMethods<WidgetState> & OpenAiProperties;
+    openai: AppsSdkMethods<WidgetState> & AppsSdkProperties;
   }
 
   interface WindowEventMap {
@@ -24,7 +24,7 @@ declare global {
   }
 }
 
-export type OpenAiProperties<
+export type AppsSdkProperties<
   ToolInput extends UnknownObject = Record<never, unknown>,
   ToolOutput extends UnknownObject = UnknownObject,
   ToolResponseMetadata extends UnknownObject = UnknownObject,
@@ -53,57 +53,60 @@ export type RequestModalOptions = {
   anchor?: { top?: number; left?: number; width?: number; height?: number };
 };
 
-export type OpenAiMethods<WidgetState extends UnknownObject = UnknownObject> = {
-  /** Calls a tool on your MCP. Returns the full response. */
-  callTool: <
-    ToolArgs extends CallToolArgs = null,
-    ToolResponse extends CallToolResponse = CallToolResponse,
-  >(
-    name: string,
-    args: ToolArgs,
-  ) => Promise<ToolResponse>;
+export type AppsSdkMethods<WidgetState extends UnknownObject = UnknownObject> =
+  {
+    /** Calls a tool on your MCP. Returns the full response. */
+    callTool: <
+      ToolArgs extends CallToolArgs = null,
+      ToolResponse extends CallToolResponse = CallToolResponse,
+    >(
+      name: string,
+      args: ToolArgs,
+    ) => Promise<ToolResponse>;
 
-  /** Triggers a followup turn in the ChatGPT conversation */
-  sendFollowUpMessage: (args: { prompt: string }) => Promise<void>;
+    /** Triggers a followup turn in the ChatGPT conversation */
+    sendFollowUpMessage: (args: { prompt: string }) => Promise<void>;
 
-  /** Opens an external link, redirects web page or mobile app */
-  openExternal(args: { href: string }): void;
+    /** Opens an external link, redirects web page or mobile app */
+    openExternal(args: { href: string }): void;
 
-  /** For transitioning an app from inline to fullscreen or pip */
-  requestDisplayMode: (args: { mode: DisplayMode }) => Promise<{
+    /** For transitioning an app from inline to fullscreen or pip */
+    requestDisplayMode: (args: { mode: DisplayMode }) => Promise<{
+      /**
+       * The granted display mode. The host may reject the request.
+       * For mobile, PiP is always coerced to fullscreen.
+       */
+      mode: DisplayMode;
+    }>;
+
     /**
-     * The granted display mode. The host may reject the request.
-     * For mobile, PiP is always coerced to fullscreen.
+     * Sets the widget state.
+     * This state is persisted across widget renders.
      */
-    mode: DisplayMode;
-  }>;
+    setWidgetState: (state: WidgetState) => Promise<void>;
 
-  /**
-   * Sets the widget state.
-   * This state is persisted across widget renders.
-   */
-  setWidgetState: (state: WidgetState) => Promise<void>;
+    /**
+     * Opens a modal portaled outside of the widget iFrame.
+     * This ensures the modal is correctly displayed and not limited to the widget's area.
+     */
+    requestModal: (args: RequestModalOptions) => Promise<void>;
 
-  /**
-   * Opens a modal portaled outside of the widget iFrame.
-   * This ensures the modal is correctly displayed and not limited to the widget's area.
-   */
-  requestModal: (args: RequestModalOptions) => Promise<void>;
+    /** Uploads a new file to the host */
+    uploadFile: (file: File) => Promise<FileMetadata>;
 
-  /** Uploads a new file to the host */
-  uploadFile: (file: File) => Promise<FileMetadata>;
-
-  /**
-   * Downloads a file from the host that was previously uploaded.
-   * Only files uploaded by the same connector instance can be downloaded.
-   */
-  getFileDownloadUrl: (file: FileMetadata) => Promise<{ downloadUrl: string }>;
-};
+    /**
+     * Downloads a file from the host that was previously uploaded.
+     * Only files uploaded by the same connector instance can be downloaded.
+     */
+    getFileDownloadUrl: (
+      file: FileMetadata,
+    ) => Promise<{ downloadUrl: string }>;
+  };
 
 // Dispatched when any global changes in the host page
 export const SET_GLOBALS_EVENT_TYPE = "openai:set_globals";
 export class SetGlobalsEvent extends CustomEvent<{
-  globals: Partial<OpenAiProperties>;
+  globals: Partial<AppsSdkProperties>;
 }> {
   override readonly type = SET_GLOBALS_EVENT_TYPE;
 }

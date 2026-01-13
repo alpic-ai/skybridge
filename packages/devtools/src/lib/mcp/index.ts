@@ -1,6 +1,6 @@
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import type { CallToolArgs, OpenAiProperties } from "skybridge/web";
+import type { AppsSdkProperties, CallToolArgs } from "skybridge/web";
 import { useStore } from "@/lib/store.js";
 import { useSelectedToolName } from "../nuqs.js";
 import { McpClient } from "./client.js";
@@ -11,7 +11,7 @@ client.connect("http://localhost:3000/mcp").then(() => {
   console.info("Connected to MCP server");
 });
 
-const defaultOpenaiObject: OpenAiProperties = {
+const defaultOpenaiObject: AppsSdkProperties = {
   theme: "light",
   userAgent: {
     device: { type: "desktop" },

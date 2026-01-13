@@ -1,22 +1,22 @@
 import { assign, cloneDeep } from "lodash-es";
 import type {
+  AppsSdkMethods,
+  AppsSdkProperties,
   CallToolArgs,
   CallToolResponse,
   DisplayMode,
-  OpenAiMethods,
-  OpenAiProperties,
   UnknownObject,
 } from "skybridge/web";
 import { SET_GLOBALS_EVENT_TYPE, SetGlobalsEvent } from "skybridge/web";
 
 function createOpenaiMethods(
-  openai: OpenAiProperties & OpenAiMethods<UnknownObject>,
+  openai: AppsSdkProperties & AppsSdkMethods<UnknownObject>,
   log: (
     command: string,
     args: UnknownObject,
     type?: "default" | "response",
   ) => void,
-  setValue: (key: keyof OpenAiProperties, value: unknown) => void,
+  setValue: (key: keyof AppsSdkProperties, value: unknown) => void,
   callToolFn: (name: string, args: CallToolArgs) => Promise<CallToolResponse>,
 ) {
   const functions = {
@@ -70,16 +70,16 @@ function createOpenaiMethods(
         downloadUrl: "https://example.com/file.pdf",
       };
     },
-  } satisfies OpenAiMethods<UnknownObject>;
+  } satisfies AppsSdkMethods<UnknownObject>;
 
   return functions;
 }
 
 function createOpenaiObject(
-  initialValues: OpenAiProperties | null,
+  initialValues: AppsSdkProperties | null,
   iframeWindow: Window,
 ) {
-  const globalPropertyKeys: (keyof OpenAiProperties)[] = [
+  const globalPropertyKeys: (keyof AppsSdkProperties)[] = [
     "theme",
     "userAgent",
     "locale",
@@ -97,7 +97,7 @@ function createOpenaiObject(
     set(target, prop, value, receiver) {
       const result = Reflect.set(target, prop, value, receiver);
 
-      if (globalPropertyKeys.includes(prop as keyof OpenAiProperties)) {
+      if (globalPropertyKeys.includes(prop as keyof AppsSdkProperties)) {
         const event = new SetGlobalsEvent(SET_GLOBALS_EVENT_TYPE, {
           detail: { globals: { [prop]: value } },
         });
@@ -111,19 +111,19 @@ function createOpenaiObject(
 
 export function createAndInjectOpenAi(
   iframeWindow: Window & { openai?: unknown },
-  initialValues: OpenAiProperties | null,
+  initialValues: AppsSdkProperties | null,
   log: (
     command: string,
     args: UnknownObject,
     type?: "default" | "response",
   ) => void,
-  setValue: (key: keyof OpenAiProperties, value: unknown) => void,
+  setValue: (key: keyof AppsSdkProperties, value: unknown) => void,
   callToolFn: (name: string, args: CallToolArgs) => Promise<CallToolResponse>,
 ): void {
   const openaiObject = cloneDeep(initialValues);
   const openai = createOpenaiObject(openaiObject, iframeWindow);
   const functions = createOpenaiMethods(
-    openai as OpenAiProperties & OpenAiMethods<UnknownObject>,
+    openai as AppsSdkProperties & AppsSdkMethods<UnknownObject>,
     log,
     setValue,
     callToolFn,

@@ -1,8 +1,8 @@
 export { AppsSdkAdaptor } from "./adaptor.js";
 export { AppsSdkBridge } from "./bridge.js";
 export type {
-  OpenAiMethods,
-  OpenAiProperties,
+  AppsSdkMethods,
+  AppsSdkProperties,
   RequestModalOptions,
   ToolResponseEvent,
 } from "./types.js";

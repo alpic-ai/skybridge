@@ -1,11 +1,11 @@
 import type { Bridge, Subscribe } from "../types.js";
 import {
-  type OpenAiProperties,
+  type AppsSdkProperties,
   SET_GLOBALS_EVENT_TYPE,
   type SetGlobalsEvent,
 } from "./types.js";
 
-export class AppsSdkBridge implements Bridge<OpenAiProperties> {
+export class AppsSdkBridge implements Bridge<AppsSdkProperties> {
   private static instance: AppsSdkBridge | null = null;
 
   public static getInstance(): AppsSdkBridge {
@@ -29,12 +29,12 @@ export class AppsSdkBridge implements Bridge<OpenAiProperties> {
     }
   }
 
-  public subscribe(key: keyof OpenAiProperties): Subscribe;
-  public subscribe(keys: readonly (keyof OpenAiProperties)[]): Subscribe;
+  public subscribe(key: keyof AppsSdkProperties): Subscribe;
+  public subscribe(keys: readonly (keyof AppsSdkProperties)[]): Subscribe;
   public subscribe(
-    keyOrKeys: keyof OpenAiProperties | readonly (keyof OpenAiProperties)[],
+    keyOrKeys: keyof AppsSdkProperties | readonly (keyof AppsSdkProperties)[],
   ): Subscribe {
-    const keys: readonly (keyof OpenAiProperties)[] = Array.isArray(keyOrKeys)
+    const keys: readonly (keyof AppsSdkProperties)[] = Array.isArray(keyOrKeys)
       ? keyOrKeys
       : [keyOrKeys];
     return (onChange: () => void) => {
@@ -58,7 +58,7 @@ export class AppsSdkBridge implements Bridge<OpenAiProperties> {
     };
   }
 
-  public getSnapshot = <K extends keyof OpenAiProperties>(key: K) => {
+  public getSnapshot = <K extends keyof AppsSdkProperties>(key: K) => {
     if (window.openai === undefined) {
       throw new Error(
         `window.openai is not available. Make sure you're calling the hook requiring ${key} within the OpenAI iFrame skybridge runtime.`,
