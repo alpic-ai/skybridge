@@ -1,14 +1,11 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getMcpAppHostPostMessageMock } from "../../hooks/test/utils.js";
+import {
+  getMcpAppHostPostMessageMock,
+  MockResizeObserver,
+} from "../../hooks/test/utils.js";
 import { McpAppBridge } from "../mcp-app-bridge.js";
 import { useMcpAppBridge } from "./use-mcp-app-bridge.js";
-
-class MockResizeObserver {
-  observe = vi.fn();
-  unobserve = vi.fn();
-  disconnect = vi.fn();
-}
 
 describe("useMcpAppBridge", () => {
   beforeEach(async () => {

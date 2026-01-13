@@ -8,6 +8,12 @@ import { fireEvent } from "@testing-library/react";
 import { act } from "react";
 import { vi } from "vitest";
 
+export class MockResizeObserver {
+  observe(): void {}
+  unobserve(): void {}
+  disconnect(): void {}
+}
+
 const DEFAULT_CONTEXT: McpUiHostContext = {};
 
 export const getMcpAppHostPostMessageMock = (
