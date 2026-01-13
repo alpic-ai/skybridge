@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "^0.17.5",
-    "@skybridge/devtools": ">=0.17.1 <1.0.0",
+    "@skybridge/devtools": ">=0.22.0 <1.0.0",
     "@tailwindcss/vite": "^4.1.14",
     "@types/express": "^5.0.3",
     "@types/mapbox-gl": "^3.4.1",

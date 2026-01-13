@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "^0.18.0",
-    "@skybridge/devtools": ">=0.20.0 <1.0.0",
+    "@skybridge/devtools": ">=0.22.0 <1.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/react": "^19.2.7",
