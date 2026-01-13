@@ -51,7 +51,13 @@ export class McpClient {
       name: toolName,
       arguments: args ?? {},
     });
-    return result as CallToolResponse;
+
+    // Transform _meta → meta to match OpenAI's behavior
+    const { _meta, ...rest } = result;
+    return {
+      ...rest,
+      meta: _meta,
+    } as CallToolResponse;
   }
 
   async listResources() {

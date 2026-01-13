@@ -85,11 +85,11 @@ The type of arguments your tool accepts. Defaults to `null` for tools that don't
 
 ```tsx
 ToolResponse extends Partial<
-  { structuredContent: Record<string, unknown>; _meta: Record<string, unknown> }
+  { structuredContent: Record<string, unknown>; meta: Record<string, unknown> }
 > = {}
 ```
 
-The type of the response returned by your tool. This allows you to specify the exact shape of both the `structuredContent` and `_meta` fields of your tool's response.
+The type of the response returned by your tool. This allows you to specify the exact shape of both the `structuredContent` and `meta` fields of your tool's response.
 
 ## Returns
 
@@ -164,7 +164,7 @@ type CallToolResponse = {
   result: string;
   /** structuredContent and meta are shaped according to your ToolResponse type parameter */
   structuredContent: Record<string, unknown>;
-  _meta: Record<string, unknown>;
+  meta: Record<string, unknown>;
 };
 ```
 

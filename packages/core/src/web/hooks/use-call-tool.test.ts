@@ -191,7 +191,7 @@ describe("useCallTool - TypeScript typing", () => {
   it("should have correct return types when ToolArgs is null and ToolResponse is specified", async () => {
     type TestResponse = CallToolResponse & {
       structuredContent: { result: string };
-      _meta: { id: number };
+      meta: { id: number };
     };
 
     const { result } = renderHook(() =>
@@ -202,7 +202,7 @@ describe("useCallTool - TypeScript typing", () => {
       structuredContent: { result: "test" },
       isError: false,
       result: "test",
-      _meta: { id: 123 },
+      meta: { id: 123 },
     };
 
     OpenaiMock.callTool.mockResolvedValueOnce(data);
@@ -231,7 +231,7 @@ describe("useCallTool - TypeScript typing", () => {
       structuredContent: { answer: "test answer" },
       isError: false,
       result: "answer",
-      _meta: {},
+      meta: {},
     };
 
     OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);
@@ -257,7 +257,7 @@ describe("useCallTool - TypeScript typing", () => {
       structuredContent: { data: "test data" },
       isError: false,
       result: "data",
-      _meta: {},
+      meta: {},
     };
 
     OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);

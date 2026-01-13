@@ -71,7 +71,7 @@ test("callToolAsync returns correctly typed promise", () => {
   type Args = { name: string };
   type Response = {
     structuredContent: { greeting: string };
-    _meta: { id: number };
+    meta: { id: number };
   };
 
   const { callToolAsync } = useCallTool<Args, Response>("test-tool");
@@ -79,7 +79,7 @@ test("callToolAsync returns correctly typed promise", () => {
   const promise = callToolAsync({ name: "test" });
 
   expectTypeOf(promise).resolves.toHaveProperty("structuredContent");
-  expectTypeOf(promise).resolves.toHaveProperty("_meta");
+  expectTypeOf(promise).resolves.toHaveProperty("meta");
 });
 
 test("state narrowing works correctly with status", () => {
