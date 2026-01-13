@@ -7,7 +7,3 @@ export const getAdaptor = (): Adaptor => {
     ? AppsSdkAdaptor.getInstance()
     : McpAppAdaptor.getInstance();
 };
-
-export const useAdaptor = (): Adaptor => {
-  return getAdaptor();
-};

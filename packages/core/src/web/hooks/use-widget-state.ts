@@ -1,5 +1,5 @@
 import { type SetStateAction, useCallback, useEffect, useState } from "react";
-import { useAdaptor, useBridge } from "../bridges/index.js";
+import { getAdaptor, useBridge } from "../bridges/index.js";
 import { filterWidgetContext, injectWidgetContext } from "../helpers/state.js";
 import type { UnknownObject } from "../types.js";
 
@@ -12,7 +12,7 @@ export function useWidgetState<T extends UnknownObject>(
 export function useWidgetState<T extends UnknownObject>(
   defaultState?: T | (() => T | null) | null,
 ): readonly [T | null, (state: SetStateAction<T | null>) => void] {
-  const adaptor = useAdaptor();
+  const adaptor = getAdaptor();
   const widgetStateFromBridge = useBridge("widgetState") as T | null;
 
   const [widgetState, _setWidgetState] = useState<T | null>(() => {
@@ -26,7 +26,6 @@ export function useWidgetState<T extends UnknownObject>(
   });
 
   useEffect(() => {
-    // Fixes openai implementation bug
     if (widgetStateFromBridge !== null) {
       _setWidgetState(filterWidgetContext(widgetStateFromBridge));
     }
