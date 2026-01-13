@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { mountWidget, useDisplayMode } from "skybridge/web";
 import { Spinner } from "@/components/ui/shadcn-io/spinner/index.js";
 import { useCallTool, useToolInfo } from "../helpers.js";
@@ -105,13 +105,13 @@ function CapitalExplorer() {
 
 function CapitalWidget() {
   return (
-    <BrowserRouter>
+    <MemoryRouter initialEntries={["/"]}>
       <Routes>
         <Route path="/" element={<CapitalExplorer />}>
           <Route path="/:capitalName" element={<CapitalExplorer />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </MemoryRouter>
   );
 }
 
