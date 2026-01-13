@@ -180,7 +180,7 @@ describe("DataLLM", () => {
 
       await vi.waitFor(() => {
         const widgetState = adaptor
-          .getExternalStore("widgetState")
+          .getHostContextStore("widgetState")
           .getSnapshot();
         expect(widgetState?.__widget_context).toContain("- Test content");
       });
@@ -198,7 +198,7 @@ describe("DataLLM", () => {
 
       await vi.waitFor(() => {
         const widgetState = adaptor
-          .getExternalStore("widgetState")
+          .getHostContextStore("widgetState")
           .getSnapshot();
         expect(widgetState?.existingKey).toBe("existingValue");
         expect(widgetState?.__widget_context).toContain("- Test content");
@@ -221,7 +221,7 @@ describe("DataLLM", () => {
 
       await vi.waitFor(() => {
         const widgetState = adaptor
-          .getExternalStore("widgetState")
+          .getHostContextStore("widgetState")
           .getSnapshot();
         const context = widgetState?.__widget_context as string;
         expect(context).toContain("- First component");

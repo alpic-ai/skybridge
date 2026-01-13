@@ -25,7 +25,7 @@ export function injectWidgetContext<T extends UnknownObject>(
   }
 
   const currentState = getAdaptor()
-    .getExternalStore("widgetState")
+    .getHostContextStore("widgetState")
     .getSnapshot() as (T & { [WIDGET_CONTEXT_KEY]?: unknown }) | null;
 
   if (
@@ -54,7 +54,7 @@ export function getInitialState<State extends UnknownObject>(
   defaultState?: State | (() => State),
 ): State | null {
   const widgetState = getAdaptor()
-    .getExternalStore("widgetState")
+    .getHostContextStore("widgetState")
     .getSnapshot() as State | null;
 
   if (widgetState !== null && widgetState !== undefined) {

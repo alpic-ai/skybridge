@@ -49,7 +49,7 @@ export type UserAgent = {
   };
 };
 
-export interface BridgeInterface {
+export interface HostContext {
   theme: Theme;
   locale: string;
   displayMode: DisplayMode;
@@ -70,9 +70,9 @@ export interface Bridge<Context> {
   getSnapshot<K extends keyof Context>(key: K): Context[K] | undefined;
 }
 
-export type ExternalStore<K extends keyof BridgeInterface> = {
+export type HostContextStore<K extends keyof HostContext> = {
   subscribe: Subscribe;
-  getSnapshot: () => BridgeInterface[K];
+  getSnapshot: () => HostContext[K];
 };
 
 export type WidgetState = Record<string, unknown>;
@@ -82,7 +82,7 @@ export type SetWidgetStateAction =
   | ((prevState: WidgetState | null) => WidgetState);
 
 export interface Adaptor {
-  getExternalStore<K extends keyof BridgeInterface>(key: K): ExternalStore<K>;
+  getHostContextStore<K extends keyof HostContext>(key: K): HostContextStore<K>;
   callTool<
     ToolArgs extends CallToolArgs = null,
     ToolResponse extends CallToolResponse = CallToolResponse,
