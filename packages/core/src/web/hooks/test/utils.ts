@@ -1,6 +1,5 @@
 import type {
   McpUiHostContext,
-  McpUiInitializeRequest,
   McpUiInitializeResult,
   McpUiToolInputNotification,
   McpUiToolResultNotification,
@@ -9,34 +8,63 @@ import { fireEvent } from "@testing-library/react";
 import { act } from "react";
 import { vi } from "vitest";
 
+export class MockResizeObserver {
+  observe(): void {}
+  unobserve(): void {}
+  disconnect(): void {}
+}
+
 const DEFAULT_CONTEXT: McpUiHostContext = {};
 
 export const getMcpAppHostPostMessageMock = (
   initialContext: McpUiHostContext = DEFAULT_CONTEXT,
 ) =>
-  vi.fn((message: McpUiInitializeRequest & { id: number }) => {
-    const result: McpUiInitializeResult = {
-      protocolVersion: "2025-06-18",
-      hostInfo: { name: "test-host", version: "1.0.0" },
-      hostCapabilities: {},
-      hostContext: initialContext,
-    };
-    act(() =>
-      fireEvent(
-        window,
-        new MessageEvent<{
-          jsonrpc: "2.0";
-          id: number;
-          result: McpUiInitializeResult;
-        }>("message", {
-          data: {
-            jsonrpc: "2.0",
-            id: message.id,
-            result,
-          },
-        }),
-      ),
-    );
+  vi.fn((message: { method: string; id: number }) => {
+    switch (message.method) {
+      case "ui/initialize": {
+        const result: McpUiInitializeResult = {
+          protocolVersion: "2025-06-18",
+          hostInfo: { name: "test-host", version: "1.0.0" },
+          hostCapabilities: {},
+          hostContext: initialContext,
+        };
+        act(() =>
+          fireEvent(
+            window,
+            new MessageEvent<{
+              jsonrpc: "2.0";
+              id: number;
+              result: McpUiInitializeResult;
+            }>("message", {
+              data: {
+                jsonrpc: "2.0",
+                id: message.id,
+                result,
+              },
+            }),
+          ),
+        );
+        break;
+      }
+      case "ui/update-model-context": {
+        act(() =>
+          fireEvent(
+            window,
+            new MessageEvent<{ jsonrpc: "2.0"; id: number; result: unknown }>(
+              "message",
+              {
+                data: {
+                  jsonrpc: "2.0",
+                  id: message.id,
+                  result: {},
+                },
+              },
+            ),
+          ),
+        );
+        break;
+      }
+    }
   });
 
 export const fireToolInputNotification = (args: Record<string, unknown>) => {

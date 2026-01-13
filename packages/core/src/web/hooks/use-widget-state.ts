@@ -1,5 +1,5 @@
 import { type SetStateAction, useCallback, useEffect, useState } from "react";
-import { useAppsSdkBridge } from "../bridges/index.js";
+import { getAdaptor, useBridge } from "../bridges/index.js";
 import { filterWidgetContext, injectWidgetContext } from "../helpers/state.js";
 import type { UnknownObject } from "../types.js";
 
@@ -12,11 +12,12 @@ export function useWidgetState<T extends UnknownObject>(
 export function useWidgetState<T extends UnknownObject>(
   defaultState?: T | (() => T | null) | null,
 ): readonly [T | null, (state: SetStateAction<T | null>) => void] {
-  const widgetStateFromWindow = useAppsSdkBridge("widgetState") as T | null;
+  const adaptor = getAdaptor();
+  const widgetStateFromBridge = useBridge("widgetState") as T | null;
 
   const [widgetState, _setWidgetState] = useState<T | null>(() => {
-    if (widgetStateFromWindow !== null) {
-      return filterWidgetContext(widgetStateFromWindow);
+    if (widgetStateFromBridge !== null) {
+      return filterWidgetContext(widgetStateFromBridge);
     }
 
     return typeof defaultState === "function"
@@ -25,24 +26,26 @@ export function useWidgetState<T extends UnknownObject>(
   });
 
   useEffect(() => {
-    // Fixes openai implementation bug
-    if (widgetStateFromWindow !== null) {
-      _setWidgetState(filterWidgetContext(widgetStateFromWindow));
+    if (widgetStateFromBridge !== null) {
+      _setWidgetState(filterWidgetContext(widgetStateFromBridge));
     }
-  }, [widgetStateFromWindow]);
+  }, [widgetStateFromBridge]);
 
-  const setWidgetState = useCallback((state: SetStateAction<T | null>) => {
-    _setWidgetState((prevState) => {
-      const newState = typeof state === "function" ? state(prevState) : state;
-      const stateToSet = injectWidgetContext(newState);
+  const setWidgetState = useCallback(
+    (state: SetStateAction<T | null>) => {
+      _setWidgetState((prevState) => {
+        const newState = typeof state === "function" ? state(prevState) : state;
+        const stateToSet = injectWidgetContext(newState);
 
-      if (stateToSet !== null) {
-        window.openai.setWidgetState(stateToSet);
-      }
+        if (stateToSet !== null) {
+          adaptor.setWidgetState(stateToSet);
+        }
 
-      return filterWidgetContext(stateToSet);
-    });
-  }, []);
+        return filterWidgetContext(stateToSet);
+      });
+    },
+    [adaptor],
+  );
 
   return [widgetState, setWidgetState] as const;
 }

@@ -5,6 +5,7 @@ import type {
   McpUiOpenLinkResult,
   McpUiRequestDisplayModeRequest,
   McpUiRequestDisplayModeResult,
+  McpUiUpdateModelContextRequest,
 } from "@modelcontextprotocol/ext-apps";
 import type {
   CallToolRequest,
@@ -22,6 +23,7 @@ import type {
   CallToolResponse,
   DisplayMode,
   ExternalStore,
+  SetWidgetStateAction,
 } from "../types.js";
 
 type PickContext<K extends readonly McpAppBridgeKey[]> = {
@@ -33,6 +35,9 @@ export class McpAppAdaptor implements Adaptor {
   private stores: {
     [K in keyof BridgeInterface]: ExternalStore<K>;
   };
+  private _widgetState: BridgeInterface["widgetState"] = null;
+  private widgetStateListeners = new Set<() => void>();
+
   private constructor() {
     this.stores = this.initializeStores();
   }
@@ -183,8 +188,36 @@ export class McpAppAdaptor implements Adaptor {
         ["toolResult"],
         ({ toolResult }) => toolResult?._meta ?? null,
       ),
+      widgetState: {
+        subscribe: (onChange: () => void) => {
+          this.widgetStateListeners.add(onChange);
+          return () => {
+            this.widgetStateListeners.delete(onChange);
+          };
+        },
+        getSnapshot: () => this._widgetState,
+      },
     };
   }
+
+  public setWidgetState = async (
+    stateOrUpdater: SetWidgetStateAction,
+  ): Promise<void> => {
+    const newState =
+      typeof stateOrUpdater === "function"
+        ? stateOrUpdater(this._widgetState)
+        : stateOrUpdater;
+
+    const bridge = McpAppBridge.getInstance();
+    await bridge.request<McpUiUpdateModelContextRequest, unknown>({
+      method: "ui/update-model-context",
+      params: { structuredContent: newState },
+    });
+    this._widgetState = newState;
+    this.widgetStateListeners.forEach((listener) => {
+      listener();
+    });
+  };
 
   private createExternalStore<const Keys extends readonly McpAppBridgeKey[], R>(
     keys: Keys,

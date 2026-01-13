@@ -39,6 +39,7 @@ export interface BridgeInterface {
   toolInput: Record<string, unknown> | null;
   toolOutput: Record<string, unknown> | null;
   toolResponseMetadata: Record<string, unknown> | null;
+  widgetState: Record<string, unknown> | null;
 }
 
 export type Subscribe = Parameters<typeof useSyncExternalStore>[0];
@@ -54,6 +55,12 @@ export type ExternalStore<K extends keyof BridgeInterface> = {
   getSnapshot: () => BridgeInterface[K];
 };
 
+export type WidgetState = Record<string, unknown>;
+
+export type SetWidgetStateAction =
+  | WidgetState
+  | ((prevState: WidgetState | null) => WidgetState);
+
 export interface Adaptor {
   getExternalStore<K extends keyof BridgeInterface>(key: K): ExternalStore<K>;
   callTool<
@@ -65,4 +72,5 @@ export interface Adaptor {
   }>;
   sendFollowUpMessage(prompt: string): Promise<void>;
   openExternal(href: string): void;
+  setWidgetState(stateOrUpdater: SetWidgetStateAction): Promise<void>;
 }

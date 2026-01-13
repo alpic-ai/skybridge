@@ -96,6 +96,7 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
       appCapabilities: {},
       protocolVersion: LATEST_PROTOCOL_VERSION,
     };
+    this.init();
   }
 
   public static getInstance(
@@ -135,7 +136,6 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
           new Set([...(this.listeners.get(key) || []), onChange]),
         );
       }
-      this.init();
       return () => {
         for (const key of keys) {
           this.listeners.get(key)?.delete(onChange);

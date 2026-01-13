@@ -5,6 +5,7 @@ import type {
   CallToolResponse,
   DisplayMode,
   ExternalStore,
+  SetWidgetStateAction,
 } from "../types.js";
 
 export class AppsSdkAdaptor implements Adaptor {
@@ -54,4 +55,15 @@ export class AppsSdkAdaptor implements Adaptor {
   public openExternal(href: string): void {
     window.openai.openExternal({ href });
   }
+
+  public setWidgetState = (
+    stateOrUpdater: SetWidgetStateAction,
+  ): Promise<void> => {
+    const newState =
+      typeof stateOrUpdater === "function"
+        ? stateOrUpdater(window.openai.widgetState)
+        : stateOrUpdater;
+
+    return window.openai.setWidgetState(newState);
+  };
 }

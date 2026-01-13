@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-import { useAdaptor } from "../bridges/hooks/use-adaptor.js";
+import { getAdaptor } from "../bridges/hooks/get-adaptor.js";
 import type {
   CallToolArgs,
   CallToolResponse,
@@ -111,7 +111,7 @@ export const useCallTool = <
   >({ status: "idle", data: undefined, error: undefined });
 
   const callIdRef = useRef(0);
-  const adaptor = useAdaptor();
+  const adaptor = getAdaptor();
 
   const execute = async (
     toolArgs: ToolArgs,

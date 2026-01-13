@@ -1,4 +1,5 @@
 import superjson, { type SuperJSONResult } from "superjson";
+import { getAdaptor } from "../bridges/index.js";
 import { WIDGET_CONTEXT_KEY } from "../data-llm.js";
 import type { UnknownObject } from "../types.js";
 
@@ -23,19 +24,18 @@ export function injectWidgetContext<T extends UnknownObject>(
     return null;
   }
 
-  const currentWindowState = window.openai?.widgetState as
-    | (T & { [WIDGET_CONTEXT_KEY]?: unknown })
-    | null
-    | undefined;
+  const currentState = getAdaptor()
+    .getExternalStore("widgetState")
+    .getSnapshot() as (T & { [WIDGET_CONTEXT_KEY]?: unknown }) | null;
 
   if (
-    currentWindowState !== null &&
-    currentWindowState !== undefined &&
-    WIDGET_CONTEXT_KEY in currentWindowState
+    currentState !== null &&
+    currentState !== undefined &&
+    WIDGET_CONTEXT_KEY in currentState
   ) {
     return {
       ...newState,
-      [WIDGET_CONTEXT_KEY]: currentWindowState[WIDGET_CONTEXT_KEY],
+      [WIDGET_CONTEXT_KEY]: currentState[WIDGET_CONTEXT_KEY],
     } as T;
   }
 
@@ -53,13 +53,12 @@ export function deserializeState(value: SuperJSONResult): unknown {
 export function getInitialState<State extends UnknownObject>(
   defaultState?: State | (() => State),
 ): State | null {
-  const widgetStateFromWindow = window.openai?.widgetState as
-    | State
-    | null
-    | undefined;
+  const widgetState = getAdaptor()
+    .getExternalStore("widgetState")
+    .getSnapshot() as State | null;
 
-  if (widgetStateFromWindow !== null && widgetStateFromWindow !== undefined) {
-    return filterWidgetContext(widgetStateFromWindow);
+  if (widgetState !== null && widgetState !== undefined) {
+    return filterWidgetContext(widgetState);
   }
 
   return typeof defaultState === "function"

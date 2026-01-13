@@ -86,10 +86,6 @@ type OpenaiResourceMeta = {
  * @see https://github.com/modelcontextprotocol/ext-apps/pull/158
  */
 type ExtendedMcpUiResourceCsp = McpUiResourceMeta["csp"] & {
-  /** Origins allowed for nested iframe embeds */
-  frameDomains?: string[];
-  /** Origins permitted for the <base> tag URI directive */
-  baseUriDomains?: string[];
   /**
    * Origins that can receive openExternal redirects without safe-link modal (OpenAI-specific)
    * @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields
@@ -125,6 +121,7 @@ type WidgetResourceConfig<T extends ResourceMeta = ResourceMeta> = {
     resourceDomains: string[];
     connectDomains: string[];
     domain: string;
+    baseUriDomains: string[];
   }) => T;
 };
 
@@ -414,6 +411,7 @@ export class McpServer<
           resourceDomains: [serverUrl],
           connectDomains: !isProduction ? [VITE_HMR_WEBSOCKET_DEFAULT_URL] : [],
           domain: serverUrl,
+          baseUriDomains: [serverUrl],
         });
 
         return {

@@ -5,6 +5,7 @@ import {
   useEffect,
   useId,
 } from "react";
+import { getAdaptor } from "./bridges/index.js";
 
 export type DataLLMContent = string;
 
@@ -30,10 +31,11 @@ function removeNode(id: string) {
 
 function onChange() {
   const description = getLLMDescriptionString();
-  window.openai.setWidgetState({
-    ...window.openai.widgetState,
+  const adaptor = getAdaptor();
+  adaptor.setWidgetState((prevState) => ({
+    ...prevState,
     [WIDGET_CONTEXT_KEY]: description,
-  });
+  }));
 }
 
 const ParentIdContext = createContext<string | null>(null);
