@@ -55,8 +55,13 @@ export type ExternalStore<K extends keyof BridgeInterface> = {
   getSnapshot: () => BridgeInterface[K];
 };
 
+export type WidgetState = Record<string, unknown>;
+
+export type SetWidgetStateAction =
+  | WidgetState
+  | ((prevState: WidgetState | null) => WidgetState);
+
 export interface Adaptor {
-  get widgetState(): BridgeInterface["widgetState"];
   getExternalStore<K extends keyof BridgeInterface>(key: K): ExternalStore<K>;
   callTool<
     ToolArgs extends CallToolArgs = null,
@@ -67,5 +72,5 @@ export interface Adaptor {
   }>;
   sendFollowUpMessage(prompt: string): Promise<void>;
   openExternal(href: string): void;
-  setWidgetState(state: Record<string, unknown>): Promise<void>;
+  setWidgetState(stateOrUpdater: SetWidgetStateAction): Promise<void>;
 }

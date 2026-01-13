@@ -5,14 +5,11 @@ import type {
   CallToolResponse,
   DisplayMode,
   ExternalStore,
+  SetWidgetStateAction,
 } from "../types.js";
 
 export class AppsSdkAdaptor implements Adaptor {
   private static instance: AppsSdkAdaptor | null = null;
-
-  public get widgetState(): Record<string, unknown> | null {
-    return window.openai.widgetState;
-  }
 
   public static getInstance(): AppsSdkAdaptor {
     if (!AppsSdkAdaptor.instance) {
@@ -59,7 +56,14 @@ export class AppsSdkAdaptor implements Adaptor {
     window.openai.openExternal({ href });
   }
 
-  public setWidgetState = (state: Record<string, unknown>): Promise<void> => {
-    return window.openai.setWidgetState(state);
+  public setWidgetState = (
+    stateOrUpdater: SetWidgetStateAction,
+  ): Promise<void> => {
+    const newState =
+      typeof stateOrUpdater === "function"
+        ? stateOrUpdater(window.openai.widgetState)
+        : stateOrUpdater;
+
+    return window.openai.setWidgetState(newState);
   };
 }

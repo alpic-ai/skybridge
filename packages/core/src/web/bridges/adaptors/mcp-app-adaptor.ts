@@ -23,6 +23,7 @@ import type {
   CallToolResponse,
   DisplayMode,
   ExternalStore,
+  SetWidgetStateAction,
 } from "../types.js";
 
 type PickContext<K extends readonly McpAppBridgeKey[]> = {
@@ -36,10 +37,6 @@ export class McpAppAdaptor implements Adaptor {
   };
   private _widgetState: BridgeInterface["widgetState"] = null;
   private widgetStateListeners = new Set<() => void>();
-
-  public get widgetState(): BridgeInterface["widgetState"] {
-    return this._widgetState;
-  }
 
   private constructor() {
     this.stores = this.initializeStores();
@@ -198,20 +195,25 @@ export class McpAppAdaptor implements Adaptor {
             this.widgetStateListeners.delete(onChange);
           };
         },
-        getSnapshot: () => this.widgetState,
+        getSnapshot: () => this._widgetState,
       },
     };
   }
 
   public setWidgetState = async (
-    state: Record<string, unknown>,
+    stateOrUpdater: SetWidgetStateAction,
   ): Promise<void> => {
+    const newState =
+      typeof stateOrUpdater === "function"
+        ? stateOrUpdater(this._widgetState)
+        : stateOrUpdater;
+
     const bridge = McpAppBridge.getInstance();
     await bridge.request<McpUiUpdateModelContextRequest, unknown>({
       method: "ui/update-model-context",
-      params: { structuredContent: state },
+      params: { structuredContent: newState },
     });
-    this._widgetState = state;
+    this._widgetState = newState;
     this.widgetStateListeners.forEach((listener) => {
       listener();
     });

@@ -32,10 +32,10 @@ function removeNode(id: string) {
 function onChange() {
   const description = getLLMDescriptionString();
   const adaptor = getAdaptor();
-  adaptor.setWidgetState({
-    ...adaptor.widgetState,
+  adaptor.setWidgetState((prevState) => ({
+    ...prevState,
     [WIDGET_CONTEXT_KEY]: description,
-  });
+  }));
 }
 
 const ParentIdContext = createContext<string | null>(null);
