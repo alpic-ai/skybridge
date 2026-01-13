@@ -20,45 +20,50 @@ export const getMcpAppHostPostMessageMock = (
   initialContext: McpUiHostContext = DEFAULT_CONTEXT,
 ) =>
   vi.fn((message: { method: string; id: number }) => {
-    if (message.method === "ui/initialize") {
-      const result: McpUiInitializeResult = {
-        protocolVersion: "2025-06-18",
-        hostInfo: { name: "test-host", version: "1.0.0" },
-        hostCapabilities: {},
-        hostContext: initialContext,
-      };
-      act(() =>
-        fireEvent(
-          window,
-          new MessageEvent<{
-            jsonrpc: "2.0";
-            id: number;
-            result: McpUiInitializeResult;
-          }>("message", {
-            data: {
-              jsonrpc: "2.0",
-              id: message.id,
-              result,
-            },
-          }),
-        ),
-      );
-    } else if (message.method === "ui/update-model-context") {
-      act(() =>
-        fireEvent(
-          window,
-          new MessageEvent<{ jsonrpc: "2.0"; id: number; result: unknown }>(
-            "message",
-            {
+    switch (message.method) {
+      case "ui/initialize": {
+        const result: McpUiInitializeResult = {
+          protocolVersion: "2025-06-18",
+          hostInfo: { name: "test-host", version: "1.0.0" },
+          hostCapabilities: {},
+          hostContext: initialContext,
+        };
+        act(() =>
+          fireEvent(
+            window,
+            new MessageEvent<{
+              jsonrpc: "2.0";
+              id: number;
+              result: McpUiInitializeResult;
+            }>("message", {
               data: {
                 jsonrpc: "2.0",
                 id: message.id,
-                result: {},
+                result,
               },
-            },
+            }),
           ),
-        ),
-      );
+        );
+        break;
+      }
+      case "ui/update-model-context": {
+        act(() =>
+          fireEvent(
+            window,
+            new MessageEvent<{ jsonrpc: "2.0"; id: number; result: unknown }>(
+              "message",
+              {
+                data: {
+                  jsonrpc: "2.0",
+                  id: message.id,
+                  result: {},
+                },
+              },
+            ),
+          ),
+        );
+        break;
+      }
     }
   });
 
