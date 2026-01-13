@@ -236,90 +236,91 @@ export class McpServer<
   > {
     const userMeta = resourceConfig._meta;
 
-    const appsSdkResourceConfig: WidgetResourceConfig<OpenaiResourceMeta> = {
-      hostType: "apps-sdk",
-      uri: `ui://widgets/apps-sdk/${name}.html`,
-      mimeType: "text/html+skybridge",
-      buildContentMeta: ({ resourceDomains, connectDomains, domain }) => {
-        const userUi = userMeta?.ui;
-        const userCsp = userUi?.csp;
-
-        const defaults: OpenaiResourceMeta = {
-          "openai/widgetCSP": {
-            resource_domains: resourceDomains,
-            connect_domains: connectDomains,
-          },
-          "openai/widgetDomain": domain,
-          "openai/widgetDescription": toolConfig.description,
-        };
-
-        const fromUi: Partial<
-          Omit<
-            OpenaiResourceMeta,
-            "openai/widgetCSP" | "openai/widgetDescription"
-          > & {
-            "openai/widgetCSP": Partial<OpenaiWidgetCSP>;
-          }
-        > = {
-          "openai/widgetCSP": {
-            resource_domains: userCsp?.resourceDomains,
-            connect_domains: userCsp?.connectDomains,
-            frame_domains: userCsp?.frameDomains,
-            redirect_domains: userCsp?.redirectDomains,
-          },
-          "openai/widgetDomain": userUi?.domain,
-          "openai/widgetPrefersBorder": userUi?.prefersBorder,
-        };
-
-        const directOpenaiKeys = Object.fromEntries(
-          Object.entries(userMeta ?? {}).filter(([key]) =>
-            key.startsWith("openai/"),
-          ),
-        );
-
-        return mergeWithUnion(
-          mergeWithUnion(defaults, fromUi),
-          directOpenaiKeys,
-        );
-      },
-    };
-
-    const extAppsResourceConfig: WidgetResourceConfig<McpAppsResourceMeta> = {
-      hostType: "mcp-app",
-      uri: `ui://widgets/ext-apps/${name}.html`,
-      mimeType: "text/html;profile=mcp-app",
-      buildContentMeta: ({ resourceDomains, connectDomains, domain }) => {
-        const defaults: McpAppsResourceMeta = {
-          ui: {
-            csp: {
-              resourceDomains,
-              connectDomains,
-            },
-            domain,
-          },
-        };
-
-        return mergeWithUnion(defaults, { ui: userMeta?.ui });
-      },
-    };
-
-    [appsSdkResourceConfig, extAppsResourceConfig].forEach((widgetConfig) => {
-      this.registerWidgetResource({
-        name,
-        widgetConfig,
-        resourceConfig,
-      });
-    });
-
     const toolMeta: ToolMeta = {
       ...toolConfig._meta,
     };
 
     if (!resourceConfig.hosts || resourceConfig.hosts.includes("apps-sdk")) {
-      toolMeta["openai/outputTemplate"] = appsSdkResourceConfig.uri;
+      const widgetConfig: WidgetResourceConfig<OpenaiResourceMeta> = {
+        hostType: "apps-sdk",
+        uri: `ui://widgets/apps-sdk/${name}.html`,
+        mimeType: "text/html+skybridge",
+        buildContentMeta: ({ resourceDomains, connectDomains, domain }) => {
+          const userUi = userMeta?.ui;
+          const userCsp = userUi?.csp;
+
+          const defaults: OpenaiResourceMeta = {
+            "openai/widgetCSP": {
+              resource_domains: resourceDomains,
+              connect_domains: connectDomains,
+            },
+            "openai/widgetDomain": domain,
+            "openai/widgetDescription": toolConfig.description,
+          };
+
+          const fromUi: Partial<
+            Omit<
+              OpenaiResourceMeta,
+              "openai/widgetCSP" | "openai/widgetDescription"
+            > & {
+              "openai/widgetCSP": Partial<OpenaiWidgetCSP>;
+            }
+          > = {
+            "openai/widgetCSP": {
+              resource_domains: userCsp?.resourceDomains,
+              connect_domains: userCsp?.connectDomains,
+              frame_domains: userCsp?.frameDomains,
+              redirect_domains: userCsp?.redirectDomains,
+            },
+            "openai/widgetDomain": userUi?.domain,
+            "openai/widgetPrefersBorder": userUi?.prefersBorder,
+          };
+
+          const directOpenaiKeys = Object.fromEntries(
+            Object.entries(userMeta ?? {}).filter(([key]) =>
+              key.startsWith("openai/"),
+            ),
+          );
+
+          return mergeWithUnion(
+            mergeWithUnion(defaults, fromUi),
+            directOpenaiKeys,
+          );
+        },
+      };
+      this.registerWidgetResource({
+        name,
+        widgetConfig,
+        resourceConfig,
+      });
+      toolMeta["openai/outputTemplate"] = widgetConfig.uri;
     }
+
     if (!resourceConfig.hosts || resourceConfig.hosts.includes("mcp-app")) {
-      toolMeta.ui = { resourceUri: extAppsResourceConfig.uri };
+      const widgetConfig: WidgetResourceConfig<McpAppsResourceMeta> = {
+        hostType: "mcp-app",
+        uri: `ui://widgets/ext-apps/${name}.html`,
+        mimeType: "text/html;profile=mcp-app",
+        buildContentMeta: ({ resourceDomains, connectDomains, domain }) => {
+          const defaults: McpAppsResourceMeta = {
+            ui: {
+              csp: {
+                resourceDomains,
+                connectDomains,
+              },
+              domain,
+            },
+          };
+
+          return mergeWithUnion(defaults, { ui: userMeta?.ui });
+        },
+      };
+      this.registerWidgetResource({
+        name,
+        widgetConfig,
+        resourceConfig,
+      });
+      toolMeta.ui = { resourceUri: widgetConfig.uri };
     }
 
     this.registerTool(
