@@ -1,5 +1,7 @@
-import type { RequestModalOptions } from "../bridges/apps-sdk/types.js";
-import { useAppsSdkBridge } from "../bridges/apps-sdk/use-apps-sdk-bridge.js";
+import {
+  type RequestModalOptions,
+  useAppsSdkBridge,
+} from "../bridges/apps-sdk";
 
 /**
  * Triggers a modal containing the widget rendered in display mode "modal"

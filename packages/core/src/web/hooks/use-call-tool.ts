@@ -1,7 +1,10 @@
 import { useRef, useState } from "react";
 
-import { getAdaptor } from "../bridges/hooks/get-adaptor.js";
-import type { CallToolArgs, CallToolResponse } from "../bridges/types.js";
+import {
+  type CallToolArgs,
+  type CallToolResponse,
+  getAdaptor,
+} from "../bridges";
 import type { HasRequiredKeys } from "../types.js";
 
 type CallToolIdleState = {

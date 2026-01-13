@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { getAdaptor } from "../bridges/index.js";
+import { getAdaptor } from "../bridges";
 
 export function useOpenExternal() {
   const adaptor = getAdaptor();

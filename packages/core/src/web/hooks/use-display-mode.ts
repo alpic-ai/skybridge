@@ -1,6 +1,5 @@
 import { useCallback } from "react";
-import { getAdaptor } from "../bridges/hooks/get-adaptor.js";
-import { useBridge } from "../bridges/index.js";
+import { getAdaptor, useBridge } from "../bridges";
 import type { DisplayMode } from "../bridges/types.js";
 
 export function useDisplayMode() {

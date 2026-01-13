@@ -1,4 +1,4 @@
-import { useBridge } from "../bridges/index.js";
+import { useBridge } from "../bridges";
 import type { UnknownObject } from "../types.js";
 
 export type ToolIdleState = {

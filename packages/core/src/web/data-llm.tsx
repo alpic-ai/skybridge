@@ -5,7 +5,7 @@ import {
   useEffect,
   useId,
 } from "react";
-import { getAdaptor } from "./bridges/index.js";
+import { getAdaptor } from "./bridges";
 
 export type DataLLMContent = string;
 

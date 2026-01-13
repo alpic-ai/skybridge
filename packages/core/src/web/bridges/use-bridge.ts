@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
-import type { BridgeInterface } from "../types.js";
 import { getAdaptor } from "./get-adaptor.js";
+import type { BridgeInterface } from "./types.js";
 
 export const useBridge = <K extends keyof BridgeInterface>(
   key: K,

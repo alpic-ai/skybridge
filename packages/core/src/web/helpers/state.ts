@@ -1,5 +1,5 @@
 import superjson, { type SuperJSONResult } from "superjson";
-import { getAdaptor } from "../bridges/index.js";
+import { getAdaptor } from "../bridges";
 import { WIDGET_CONTEXT_KEY } from "../data-llm.js";
 import type { UnknownObject } from "../types.js";
 

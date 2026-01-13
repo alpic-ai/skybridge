@@ -1,5 +1,5 @@
 export * from "./apps-sdk";
-export { getAdaptor } from "./hooks/get-adaptor.js";
-export { useBridge } from "./hooks/use-bridge.js";
+export { getAdaptor } from "./get-adaptor.js";
 export * from "./mcp-app";
 export * from "./types.js";
+export { useBridge } from "./use-bridge.js";

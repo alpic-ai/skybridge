@@ -1,5 +1,4 @@
-import { useBridge } from "../bridges/index.js";
-import type { UserAgent } from "../bridges/types.js";
+import { type UserAgent, useBridge } from "../bridges";
 
 export type UserState = {
   locale: string;
