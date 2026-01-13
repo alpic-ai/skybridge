@@ -12,7 +12,10 @@ import { McpAppAdaptor } from "./bridges/mcp-app/adaptor.js";
 import { McpAppBridge } from "./bridges/mcp-app/bridge.js";
 import { createStore } from "./create-store.js";
 import { WIDGET_CONTEXT_KEY } from "./data-llm.js";
-import { getMcpAppHostPostMessageMock, MockResizeObserver } from "./hooks/test/utils.js";
+import {
+  getMcpAppHostPostMessageMock,
+  MockResizeObserver,
+} from "./hooks/test/utils.js";
 
 describe("createStore", () => {
   afterEach(() => {

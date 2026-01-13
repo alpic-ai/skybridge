@@ -60,8 +60,14 @@ describe("useMcpAppContext", () => {
 
   it("should send size-changed notification after successful initialization", async () => {
     // Mock body dimensions to non-zero (size-changed only sends when dimensions change)
-    Object.defineProperty(document.body, "scrollWidth", { value: 800, configurable: true });
-    Object.defineProperty(document.body, "scrollHeight", { value: 600, configurable: true });
+    Object.defineProperty(document.body, "scrollWidth", {
+      value: 800,
+      configurable: true,
+    });
+    Object.defineProperty(document.body, "scrollHeight", {
+      value: 600,
+      configurable: true,
+    });
 
     const postMessageMock = getMcpAppHostPostMessageMock({ theme: "light" });
     vi.stubGlobal("parent", { postMessage: postMessageMock });
