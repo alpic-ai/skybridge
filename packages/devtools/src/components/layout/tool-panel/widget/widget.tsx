@@ -53,14 +53,6 @@ export const Widget = () => {
     iframe.contentDocument.write(injectWaitForOpenai(html));
     iframe.contentDocument.close();
 
-    const doc = iframe.contentDocument;
-
-    const resizeObserver = new ResizeObserver(() => {
-      iframe.style.height = `${doc.documentElement.scrollHeight}px`;
-    });
-
-    resizeObserver.observe(doc.body);
-
     setToolData(tool.name, {
       openaiRef: iframeRef as React.RefObject<HTMLIFrameElement>,
     });
@@ -83,6 +75,7 @@ export const Widget = () => {
       className="relative overflow-auto"
       style={{
         width: "100%",
+        height: "100%",
       }}
     >
       <iframe
@@ -91,9 +84,9 @@ export const Widget = () => {
         onLoad={handleLoad}
         style={{
           width: "100%",
+          height: "100%",
           border: "none",
           display: "block",
-          maxHeight: "300px",
         }}
         sandbox="allow-scripts allow-same-origin"
         title="html-preview"
