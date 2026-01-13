@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select.js";
+import { Switch } from "@/components/ui/switch.js";
 import {
   Tabs,
   TabsContent,
@@ -109,6 +110,57 @@ export const OpenAiInspector = () => {
                 value={openaiObject.locale}
                 onChange={(e) => handleValueChange("locale", e.target.value)}
               />
+            </Field>
+            <Field>
+              <FieldLabel>Capabilities</FieldLabel>
+              <div className="flex gap-8">
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="hover"
+                    className="text-xs text-muted-foreground cursor-pointer"
+                  >
+                    Hover
+                  </label>
+                  <Switch
+                    id="hover"
+                    checked={
+                      openaiObject.userAgent?.capabilities?.hover ?? false
+                    }
+                    onCheckedChange={(checked) =>
+                      handleValueChange("userAgent", {
+                        ...openaiObject.userAgent,
+                        capabilities: {
+                          ...openaiObject.userAgent?.capabilities,
+                          hover: checked,
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="touch"
+                    className="text-xs text-muted-foreground cursor-pointer"
+                  >
+                    Touch
+                  </label>
+                  <Switch
+                    id="touch"
+                    checked={
+                      openaiObject.userAgent?.capabilities?.touch ?? false
+                    }
+                    onCheckedChange={(checked) =>
+                      handleValueChange("userAgent", {
+                        ...openaiObject.userAgent,
+                        capabilities: {
+                          ...openaiObject.userAgent?.capabilities,
+                          touch: checked,
+                        },
+                      })
+                    }
+                  />
+                </div>
+              </div>
             </Field>
           </FieldSet>
         </TabsContent>
