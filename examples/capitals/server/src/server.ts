@@ -34,6 +34,7 @@ const server = new McpServer(
           resourceDomains: [
             "https://upload.wikimedia.org",
             "https://flagcdn.com",
+            "blob:",
           ],
           connectDomains: ["https://*.mapbox.com"],
         },
