@@ -424,4 +424,45 @@ describe("McpServer.registerWidget", () => {
     // Description should be from defaults (toolConfig.description)
     expect(meta["openai/widgetDescription"]).toBe("Test tool");
   });
+
+  it("should register tool with ui.resourceUri metadata only", async () => {
+    const mockToolCallback = vi.fn();
+    server.registerWidget(
+      "my-widget",
+      { description: "Test widget", hosts: ["mcp-app"] },
+      { description: "Test tool" },
+      mockToolCallback,
+    );
+
+    expect(mockRegisterTool).toHaveBeenCalledTimes(1);
+
+    const toolCallArgs = mockRegisterTool.mock.calls[0];
+    const toolConfig = toolCallArgs?.[1] as { _meta?: Record<string, unknown> };
+
+    expect(toolConfig._meta).toHaveProperty("ui");
+    expect(toolConfig._meta?.ui).toEqual({
+      resourceUri: "ui://widgets/ext-apps/my-widget.html",
+    });
+    expect(toolConfig._meta?.["openai/outputTemplate"]).to.be.undefined;
+  });
+
+  it("should register tool with uopenai/outputTemplate metadata only", async () => {
+    const mockToolCallback = vi.fn();
+    server.registerWidget(
+      "my-widget",
+      { description: "Test widget", hosts: ["apps-sdk"] },
+      { description: "Test tool" },
+      mockToolCallback,
+    );
+
+    expect(mockRegisterTool).toHaveBeenCalledTimes(1);
+
+    const toolCallArgs = mockRegisterTool.mock.calls[0];
+    const toolConfig = toolCallArgs?.[1] as { _meta?: Record<string, unknown> };
+
+    expect(toolConfig._meta).not.toHaveProperty("ui");
+    expect(toolConfig._meta?.["openai/outputTemplate"]).to.eq(
+      "ui://widgets/apps-sdk/my-widget.html",
+    );
+  });
 });
