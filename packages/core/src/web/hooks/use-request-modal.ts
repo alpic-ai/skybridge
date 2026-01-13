@@ -1,11 +1,13 @@
-import { useAppsSdkBridge } from "../bridges/hooks/use-apps-sdk-bridge.js";
-import type { RequestModalOptions } from "../types.js";
+import {
+  type RequestModalOptions,
+  useAppsSdkContext,
+} from "../bridges/apps-sdk/index.js";
 
 /**
  * Triggers a modal containing the widget rendered in display mode "modal"
  */
 export function useRequestModal() {
-  const view = useAppsSdkBridge("view");
+  const view = useAppsSdkContext("view");
   const isOpen = view?.mode === "modal";
   const params = view?.params;
 

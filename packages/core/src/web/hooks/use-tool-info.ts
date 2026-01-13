@@ -1,4 +1,4 @@
-import { useBridge } from "../bridges/index.js";
+import { useHostContext } from "../bridges/index.js";
 import type { UnknownObject } from "../types.js";
 
 export type ToolIdleState = {
@@ -67,9 +67,9 @@ function deriveStatus(
 export function useToolInfo<
   TS extends Partial<ToolSignature> = Record<string, never>,
 >() {
-  const input = useBridge("toolInput");
-  const output = useBridge("toolOutput");
-  const responseMetadata = useBridge("toolResponseMetadata");
+  const input = useHostContext("toolInput");
+  const output = useHostContext("toolOutput");
+  const responseMetadata = useHostContext("toolResponseMetadata");
 
   const status = deriveStatus(input, output, responseMetadata);
 

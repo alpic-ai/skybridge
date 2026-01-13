@@ -1,12 +1,11 @@
 import { act, fireEvent, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { McpAppAdaptor } from "../bridges/adaptors/mcp-app-adaptor.js";
-import { McpAppBridge } from "../bridges/mcp-app-bridge.js";
 import {
-  type OpenAiProperties,
+  type AppsSdkContext,
   SET_GLOBALS_EVENT_TYPE,
   SetGlobalsEvent,
-} from "../types.js";
+} from "../bridges/apps-sdk/index.js";
+import { McpAppAdaptor, McpAppBridge } from "../bridges/mcp-app/index.js";
 import {
   fireToolInputNotification,
   fireToolResultNotification,
@@ -17,7 +16,7 @@ import { useToolInfo } from "./use-tool-info.js";
 describe("useToolInfo", () => {
   describe("apps-sdk host", () => {
     let OpenaiMock: Pick<
-      OpenAiProperties,
+      AppsSdkContext,
       "toolInput" | "toolOutput" | "toolResponseMetadata"
     >;
 

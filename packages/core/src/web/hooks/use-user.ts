@@ -1,5 +1,4 @@
-import { useBridge } from "../bridges/index.js";
-import type { UserAgent } from "../types.js";
+import { type UserAgent, useHostContext } from "../bridges/index.js";
 
 export type UserState = {
   locale: string;
@@ -19,8 +18,8 @@ export type UserState = {
  * ```
  */
 export function useUser(): UserState {
-  const locale = useBridge("locale");
-  const userAgent = useBridge("userAgent");
+  const locale = useHostContext("locale");
+  const userAgent = useHostContext("userAgent");
 
   return { locale, userAgent };
 }

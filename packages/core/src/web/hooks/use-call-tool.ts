@@ -1,11 +1,11 @@
 import { useRef, useState } from "react";
 
-import { getAdaptor } from "../bridges/hooks/get-adaptor.js";
-import type {
-  CallToolArgs,
-  CallToolResponse,
-  HasRequiredKeys,
-} from "../types.js";
+import {
+  type CallToolArgs,
+  type CallToolResponse,
+  getAdaptor,
+} from "../bridges/index.js";
+import type { HasRequiredKeys } from "../types.js";
 
 type CallToolIdleState = {
   status: "idle";

@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { McpAppBridge } from "../bridges/mcp-app-bridge.js";
+import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import { useOpenExternal } from "./use-open-external.js";
 
 describe("useOpenExternal", () => {

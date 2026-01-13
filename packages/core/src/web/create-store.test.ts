@@ -8,8 +8,8 @@ import {
   vi,
 } from "vitest";
 import type { StateCreator } from "zustand";
-import { McpAppAdaptor } from "./bridges/adaptors/mcp-app-adaptor.js";
-import { McpAppBridge } from "./bridges/mcp-app-bridge.js";
+import { McpAppAdaptor } from "./bridges/mcp-app/adaptor.js";
+import { McpAppBridge } from "./bridges/mcp-app/bridge.js";
 import { createStore } from "./create-store.js";
 import { WIDGET_CONTEXT_KEY } from "./data-llm.js";
 import { getMcpAppHostPostMessageMock } from "./hooks/test/utils.js";
@@ -125,7 +125,9 @@ describe("createStore", () => {
 
     it("should initialize with null widgetState", () => {
       const adaptor = McpAppAdaptor.getInstance();
-      const widgetState = adaptor.getExternalStore("widgetState").getSnapshot();
+      const widgetState = adaptor
+        .getHostContextStore("widgetState")
+        .getSnapshot();
 
       expect(widgetState).toBeNull();
     });
@@ -168,7 +170,7 @@ describe("createStore", () => {
       const adaptor = McpAppAdaptor.getInstance();
       const listener = vi.fn();
 
-      adaptor.getExternalStore("widgetState").subscribe(listener);
+      adaptor.getHostContextStore("widgetState").subscribe(listener);
       await adaptor.setWidgetState({ count: 42 });
 
       expect(postMessageMock).toHaveBeenCalledWith(
@@ -176,7 +178,7 @@ describe("createStore", () => {
         "*",
       );
       expect(listener).toHaveBeenCalled();
-      expect(adaptor.getExternalStore("widgetState").getSnapshot()).toEqual({
+      expect(adaptor.getHostContextStore("widgetState").getSnapshot()).toEqual({
         count: 42,
       });
     });

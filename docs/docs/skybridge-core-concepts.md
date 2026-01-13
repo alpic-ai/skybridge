@@ -25,7 +25,7 @@ The raw `window.openai` API is powerful but imperative. Skybridge wraps these pr
 | `window.openai.displayMode` | [`useDisplayMode()`](/api-reference/use-display-mode)                   | Access display mode |
 | `window.openai.requestDisplayMode()` | [`useDisplayMode()`](/api-reference/use-display-mode)                   | Request display mode change |
 | `window.openai.userAgent` | [`const { userAgent } = useUser()`](/api-reference/use-user)            | Access user agent info |
-| `window.openai.*` | [`useOpenAiGlobal()`](/api-reference/use-openai-global)                 | Access any global value |
+| `window.openai.*` | [`useAppsSdkContext()`](/api-reference/use-apps-sdk-context)                 | Access any global value |
 
 ## Example: Before & After
 

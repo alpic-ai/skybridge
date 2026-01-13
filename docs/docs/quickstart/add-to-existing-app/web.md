@@ -41,7 +41,7 @@ pnpm add skybridge
 - **[`useFiles`](/api-reference/use-files)**: Upload and download files
 
 ### Others
-- **[`useOpenAiGlobal`](/api-reference/use-openai-global)**: Low-level hook to subscribe to `window.openai` state values
+- **[`useAppsSdkContext`](/api-reference/use-apps-sdk-context)**: Low-level hook to subscribe to `window.openai` state values
 - **[`generateHelpers`](/api-reference/generateHelpers)**: Generate typed helpers for your widgets (requires `skybridge/server`)
 
 For complete documentation of all hooks with examples and options, see the [API Reference](/api-reference).

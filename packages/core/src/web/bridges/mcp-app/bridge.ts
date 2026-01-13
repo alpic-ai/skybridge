@@ -11,7 +11,8 @@ import type {
   McpUiToolInputNotification,
   McpUiToolResultNotification,
 } from "@modelcontextprotocol/ext-apps";
-import type { Bridge, Subscribe } from "./types.js";
+import type { Bridge, Subscribe } from "../types.js";
+import type { McpAppContext, McpAppContextKey } from "./types.js";
 
 type PendingRequest<T> = {
   resolve: (value: T | PromiseLike<T>) => void;
@@ -23,18 +24,6 @@ type McpAppInitializationOptions = Pick<
   McpUiInitializeRequest["params"],
   "appInfo"
 >;
-
-export type McpToolState = {
-  toolInput: NonNullable<
-    McpUiToolInputNotification["params"]["arguments"]
-  > | null;
-  toolResult: McpUiToolResultNotification["params"] | null;
-  toolCancelled: McpUiToolCancelledNotification["params"] | null;
-};
-
-export type McpAppBridgeContext = McpUiHostContext & McpToolState;
-
-export type McpAppBridgeKey = keyof McpAppBridgeContext;
 
 const LATEST_PROTOCOL_VERSION = "2025-11-21";
 
@@ -72,12 +61,12 @@ type McpAppNotification = { jsonrpc: "2.0" } & (
 
 export class McpAppBridge implements Bridge<McpUiHostContext> {
   private static instance: McpAppBridge | null = null;
-  public context: McpAppBridgeContext = {
+  public context: McpAppContext = {
     toolInput: null,
     toolCancelled: null,
     toolResult: null,
   };
-  private listeners = new Map<McpAppBridgeKey, Set<() => void>>();
+  private listeners = new Map<McpAppContextKey, Set<() => void>>();
   private pendingRequests = new Map<string | number, PendingRequest<unknown>>();
   private nextId = 1;
   private initialized: boolean;
@@ -123,10 +112,10 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
     return McpAppBridge.instance;
   }
 
-  public subscribe(key: McpAppBridgeKey): Subscribe;
-  public subscribe(keys: readonly McpAppBridgeKey[]): Subscribe;
+  public subscribe(key: McpAppContextKey): Subscribe;
+  public subscribe(keys: readonly McpAppContextKey[]): Subscribe;
   public subscribe(
-    keyOrKeys: McpAppBridgeKey | readonly McpAppBridgeKey[],
+    keyOrKeys: McpAppContextKey | readonly McpAppContextKey[],
   ): Subscribe {
     const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [keyOrKeys];
     return (onChange: () => void) => {
@@ -144,9 +133,7 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
     };
   }
 
-  public getSnapshot<K extends keyof McpAppBridgeContext>(
-    key: K,
-  ): McpAppBridgeContext[K] {
+  public getSnapshot<K extends keyof McpAppContext>(key: K): McpAppContext[K] {
     return this.context[key];
   }
 
@@ -187,13 +174,13 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
     return promise;
   }
 
-  private emit(key: McpAppBridgeKey) {
+  private emit(key: McpAppContextKey) {
     this.listeners.get(key)?.forEach((listener) => {
       listener();
     });
   }
 
-  private updateContext(context: Partial<McpAppBridgeContext>) {
+  private updateContext(context: Partial<McpAppContext>) {
     this.context = { ...this.context, ...context };
     for (const key of Object.keys(context)) {
       this.emit(key);

@@ -1,7 +1,7 @@
 import { cloneDeep, set } from "lodash-es";
 import type {
+  AppsSdkContext,
   CallToolResponse,
-  OpenAiProperties,
   UnknownObject,
 } from "skybridge/web";
 import { create } from "zustand";
@@ -19,7 +19,7 @@ type ToolData = {
   response: CallToolResponse;
   openaiRef: React.RefObject<HTMLIFrameElement> | null;
   openaiLogs: OpenAiLog[];
-  openaiObject: OpenAiProperties | null;
+  openaiObject: AppsSdkContext | null;
 };
 
 export type Store = {
@@ -30,7 +30,7 @@ export type Store = {
   pushOpenAiLog: (tool: string, log: Omit<OpenAiLog, "id">) => void;
   updateOpenaiObject: (
     tool: string,
-    key: keyof OpenAiProperties,
+    key: keyof AppsSdkContext,
     value: unknown,
   ) => void;
 };
@@ -46,7 +46,7 @@ export const useStore = create<Store>()((setState) => ({
     ),
   updateOpenaiObject: (
     tool: string,
-    key: keyof OpenAiProperties,
+    key: keyof AppsSdkContext,
     value: unknown,
   ) =>
     setState((state) => {

@@ -1,8 +1,8 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { McpAppAdaptor } from "../bridges/adaptors/mcp-app-adaptor.js";
-import { McpAppBridge } from "../bridges/mcp-app-bridge.js";
-import type { SafeArea, Theme } from "../types.js";
+import { McpAppAdaptor } from "../bridges/mcp-app/adaptor.js";
+import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
+import type { SafeArea, Theme } from "../bridges/types.js";
 import { getMcpAppHostPostMessageMock } from "./test/utils.js";
 import { useLayout } from "./use-layout.js";
 

@@ -35,7 +35,7 @@ const server = new McpServer(
             "https://upload.wikimedia.org",
             "https://flagcdn.com",
           ],
-          connectDomains: ["https://api.mapbox.com"],
+          connectDomains: ["https://*.mapbox.com"],
         },
       },
     },

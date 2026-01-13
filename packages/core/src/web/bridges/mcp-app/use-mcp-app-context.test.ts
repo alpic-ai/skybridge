@@ -4,10 +4,10 @@ import {
   getMcpAppHostPostMessageMock,
   MockResizeObserver,
 } from "../../hooks/test/utils.js";
-import { McpAppBridge } from "../mcp-app-bridge.js";
-import { useMcpAppBridge } from "./use-mcp-app-bridge.js";
+import { McpAppBridge } from "./bridge.js";
+import { useMcpAppContext } from "./use-mcp-app-context.js";
 
-describe("useMcpAppBridge", () => {
+describe("useMcpAppContext", () => {
   beforeEach(async () => {
     vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     vi.stubGlobal("ResizeObserver", MockResizeObserver);
@@ -23,7 +23,7 @@ describe("useMcpAppBridge", () => {
     vi.stubGlobal("parent", {
       postMessage: getMcpAppHostPostMessageMock({ theme: "light" }),
     });
-    const { result } = renderHook(() => useMcpAppBridge("theme"));
+    const { result } = renderHook(() => useMcpAppContext("theme"));
 
     await waitFor(() => {
       expect(result.current).toBe("light");
@@ -39,7 +39,7 @@ describe("useMcpAppBridge", () => {
     const nonRespondingMock = vi.fn();
     vi.stubGlobal("parent", { postMessage: nonRespondingMock });
 
-    renderHook(() => useMcpAppBridge("theme", undefined, 100));
+    renderHook(() => useMcpAppContext("theme", undefined, 100));
 
     expect(nonRespondingMock).toHaveBeenCalledWith(
       expect.objectContaining({ method: "ui/initialize" }),
@@ -62,7 +62,7 @@ describe("useMcpAppBridge", () => {
     const postMessageMock = getMcpAppHostPostMessageMock({ theme: "light" });
     vi.stubGlobal("parent", { postMessage: postMessageMock });
 
-    renderHook(() => useMcpAppBridge("theme"));
+    renderHook(() => useMcpAppContext("theme"));
 
     await waitFor(() => {
       expect(postMessageMock).toHaveBeenCalledWith(

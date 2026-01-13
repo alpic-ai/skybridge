@@ -12,30 +12,27 @@ import type {
   CallToolResult,
 } from "@modelcontextprotocol/sdk/types.js";
 import { dequal } from "dequal/lite";
-import {
-  McpAppBridge,
-  type McpAppBridgeContext,
-  type McpAppBridgeKey,
-} from "../mcp-app-bridge.js";
 import type {
   Adaptor,
-  BridgeInterface,
   CallToolResponse,
   DisplayMode,
-  ExternalStore,
+  HostContext,
+  HostContextStore,
   SetWidgetStateAction,
 } from "../types.js";
+import { McpAppBridge } from "./bridge.js";
+import type { McpAppContext, McpAppContextKey } from "./types.js";
 
-type PickContext<K extends readonly McpAppBridgeKey[]> = {
-  [P in K[number]]: McpAppBridgeContext[P];
+type PickContext<K extends readonly McpAppContextKey[]> = {
+  [P in K[number]]: McpAppContext[P];
 };
 
 export class McpAppAdaptor implements Adaptor {
   private static instance: McpAppAdaptor | null = null;
   private stores: {
-    [K in keyof BridgeInterface]: ExternalStore<K>;
+    [K in keyof HostContext]: HostContextStore<K>;
   };
-  private _widgetState: BridgeInterface["widgetState"] = null;
+  private _widgetState: HostContext["widgetState"] = null;
   private widgetStateListeners = new Set<() => void>();
 
   private constructor() {
@@ -53,9 +50,9 @@ export class McpAppAdaptor implements Adaptor {
     McpAppAdaptor.instance = null;
   }
 
-  public getExternalStore<K extends keyof BridgeInterface>(
+  public getHostContextStore<K extends keyof HostContext>(
     key: K,
-  ): ExternalStore<K> {
+  ): HostContextStore<K> {
     return this.stores[key];
   }
 
@@ -132,28 +129,28 @@ export class McpAppAdaptor implements Adaptor {
   }
 
   private initializeStores(): {
-    [K in keyof BridgeInterface]: ExternalStore<K>;
+    [K in keyof HostContext]: HostContextStore<K>;
   } {
     return {
-      theme: this.createExternalStore(
+      theme: this.createHostContextStore(
         ["theme"],
         ({ theme }) => theme ?? "light",
       ),
-      locale: this.createExternalStore(
+      locale: this.createHostContextStore(
         ["locale"],
         ({ locale }) => locale ?? "en-US",
       ),
-      safeArea: this.createExternalStore(
+      safeArea: this.createHostContextStore(
         ["safeAreaInsets"],
         ({ safeAreaInsets }) => ({
           insets: safeAreaInsets ?? { top: 0, right: 0, bottom: 0, left: 0 },
         }),
       ),
-      displayMode: this.createExternalStore(
+      displayMode: this.createHostContextStore(
         ["displayMode"],
         ({ displayMode }) => displayMode ?? "inline",
       ),
-      maxHeight: this.createExternalStore(
+      maxHeight: this.createHostContextStore(
         ["containerDimensions"],
         ({ containerDimensions }) => {
           if (containerDimensions && "maxHeight" in containerDimensions) {
@@ -163,7 +160,7 @@ export class McpAppAdaptor implements Adaptor {
           return window.innerHeight;
         },
       ),
-      userAgent: this.createExternalStore(
+      userAgent: this.createHostContextStore(
         ["platform", "deviceCapabilities"],
         ({ platform, deviceCapabilities }) => ({
           device: {
@@ -176,15 +173,15 @@ export class McpAppAdaptor implements Adaptor {
           },
         }),
       ),
-      toolInput: this.createExternalStore(
+      toolInput: this.createHostContextStore(
         ["toolInput"],
         ({ toolInput }) => toolInput ?? null,
       ),
-      toolOutput: this.createExternalStore(
+      toolOutput: this.createHostContextStore(
         ["toolResult"],
         ({ toolResult }) => toolResult?.structuredContent ?? null,
       ),
-      toolResponseMetadata: this.createExternalStore(
+      toolResponseMetadata: this.createHostContextStore(
         ["toolResult"],
         ({ toolResult }) => toolResult?._meta ?? null,
       ),
@@ -219,10 +216,10 @@ export class McpAppAdaptor implements Adaptor {
     });
   };
 
-  private createExternalStore<const Keys extends readonly McpAppBridgeKey[], R>(
-    keys: Keys,
-    computeSnapshot: (context: PickContext<Keys>) => R,
-  ) {
+  private createHostContextStore<
+    const Keys extends readonly McpAppContextKey[],
+    R,
+  >(keys: Keys, computeSnapshot: (context: PickContext<Keys>) => R) {
     const bridge = McpAppBridge.getInstance();
     let cachedValue: R | undefined;
 

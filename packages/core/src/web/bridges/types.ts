@@ -1,5 +1,16 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { useSyncExternalStore } from "react";
+import type { WidgetHostType } from "../../server/index.js";
+
+export type SkybridgeProperties = {
+  hostType: WidgetHostType;
+};
+
+declare global {
+  interface Window {
+    skybridge: SkybridgeProperties;
+  }
+}
 
 export type CallToolArgs = Record<string, unknown> | null;
 
@@ -13,29 +24,38 @@ export type CallToolResponse = {
 
 export type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
 
+export type Theme = "light" | "dark";
+
 export type DeviceType = "mobile" | "tablet" | "desktop" | "unknown";
-export interface BridgeInterface {
-  theme: "light" | "dark";
+
+export type SafeAreaInsets = {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+};
+
+export type SafeArea = {
+  insets: SafeAreaInsets;
+};
+
+export type UserAgent = {
+  device: {
+    type: DeviceType;
+  };
+  capabilities: {
+    hover: boolean;
+    touch: boolean;
+  };
+};
+
+export interface HostContext {
+  theme: Theme;
   locale: string;
   displayMode: DisplayMode;
-  safeArea: {
-    insets: {
-      top: number;
-      right: number;
-      bottom: number;
-      left: number;
-    };
-  };
+  safeArea: SafeArea;
   maxHeight: number;
-  userAgent: {
-    device: {
-      type: DeviceType;
-    };
-    capabilities: {
-      hover: boolean;
-      touch: boolean;
-    };
-  };
+  userAgent: UserAgent;
   toolInput: Record<string, unknown> | null;
   toolOutput: Record<string, unknown> | null;
   toolResponseMetadata: Record<string, unknown> | null;
@@ -50,9 +70,9 @@ export interface Bridge<Context> {
   getSnapshot<K extends keyof Context>(key: K): Context[K] | undefined;
 }
 
-export type ExternalStore<K extends keyof BridgeInterface> = {
+export type HostContextStore<K extends keyof HostContext> = {
   subscribe: Subscribe;
-  getSnapshot: () => BridgeInterface[K];
+  getSnapshot: () => HostContext[K];
 };
 
 export type WidgetState = Record<string, unknown>;
@@ -62,7 +82,7 @@ export type SetWidgetStateAction =
   | ((prevState: WidgetState | null) => WidgetState);
 
 export interface Adaptor {
-  getExternalStore<K extends keyof BridgeInterface>(key: K): ExternalStore<K>;
+  getHostContextStore<K extends keyof HostContext>(key: K): HostContextStore<K>;
   callTool<
     ToolArgs extends CallToolArgs = null,
     ToolResponse extends CallToolResponse = CallToolResponse,

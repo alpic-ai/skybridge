@@ -1,12 +1,12 @@
-import { AppsSdkBridge } from "../apps-sdk-bridge.js";
 import type {
   Adaptor,
-  BridgeInterface,
   CallToolResponse,
   DisplayMode,
-  ExternalStore,
+  HostContext,
+  HostContextStore,
   SetWidgetStateAction,
 } from "../types.js";
+import { AppsSdkBridge } from "./bridge.js";
 
 export class AppsSdkAdaptor implements Adaptor {
   private static instance: AppsSdkAdaptor | null = null;
@@ -22,9 +22,9 @@ export class AppsSdkAdaptor implements Adaptor {
     AppsSdkAdaptor.instance = null;
   }
 
-  public getExternalStore<K extends keyof BridgeInterface>(
+  public getHostContextStore<K extends keyof HostContext>(
     key: K,
-  ): ExternalStore<K> {
+  ): HostContextStore<K> {
     const bridge = AppsSdkBridge.getInstance();
     return {
       subscribe: bridge.subscribe(key),

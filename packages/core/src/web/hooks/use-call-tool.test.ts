@@ -10,7 +10,7 @@ import {
   vi,
 } from "vitest";
 
-import type { CallToolResponse } from "../types.js";
+import type { CallToolResponse } from "../bridges/types.js";
 import { useCallTool } from "./use-call-tool.js";
 
 describe("useCallTool - onSuccess callback", () => {

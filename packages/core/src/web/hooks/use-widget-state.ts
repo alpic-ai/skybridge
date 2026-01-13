@@ -1,5 +1,5 @@
 import { type SetStateAction, useCallback, useEffect, useState } from "react";
-import { getAdaptor, useBridge } from "../bridges/index.js";
+import { getAdaptor, useHostContext } from "../bridges/index.js";
 import { filterWidgetContext, injectWidgetContext } from "../helpers/state.js";
 import type { UnknownObject } from "../types.js";
 
@@ -13,7 +13,7 @@ export function useWidgetState<T extends UnknownObject>(
   defaultState?: T | (() => T | null) | null,
 ): readonly [T | null, (state: SetStateAction<T | null>) => void] {
   const adaptor = getAdaptor();
-  const widgetStateFromBridge = useBridge("widgetState") as T | null;
+  const widgetStateFromBridge = useHostContext("widgetState") as T | null;
 
   const [widgetState, _setWidgetState] = useState<T | null>(() => {
     if (widgetStateFromBridge !== null) {
