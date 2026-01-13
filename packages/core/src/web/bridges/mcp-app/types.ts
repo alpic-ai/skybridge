@@ -13,6 +13,6 @@ export type McpToolState = {
   toolCancelled: McpUiToolCancelledNotification["params"] | null;
 };
 
-export type McpAppBridgeContext = McpUiHostContext & McpToolState;
+export type McpAppContext = McpUiHostContext & McpToolState;
 
-export type McpAppBridgeKey = keyof McpAppBridgeContext;
+export type McpAppContextKey = keyof McpAppContext;

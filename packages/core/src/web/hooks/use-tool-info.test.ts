@@ -1,7 +1,7 @@
 import { act, fireEvent, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  type AppsSdkProperties,
+  type AppsSdkContext,
   SET_GLOBALS_EVENT_TYPE,
   SetGlobalsEvent,
 } from "../bridges/apps-sdk/index.js";
@@ -16,7 +16,7 @@ import { useToolInfo } from "./use-tool-info.js";
 describe("useToolInfo", () => {
   describe("apps-sdk host", () => {
     let OpenaiMock: Pick<
-      AppsSdkProperties,
+      AppsSdkContext,
       "toolInput" | "toolOutput" | "toolResponseMetadata"
     >;
 

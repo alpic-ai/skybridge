@@ -2,9 +2,9 @@
 sidebar_position: 9
 ---
 
-# useAppsSdkBridge
+# useAppsSdkContext
 
-The `useAppsSdkBridge` hook is a low-level hook that subscribes to global state values exposed by the OpenAI host. This hook powers many of the other Skybridge hooks and can be used directly when you need access to specific global values.
+The `useAppsSdkContext` hook is a low-level hook that subscribes to global state values exposed by the OpenAI host. This hook powers many of the other Skybridge hooks and can be used directly when you need access to specific global values.
 
 :::tip
 For most use cases, prefer using the specialized hooks like `useLayout`, `useUser`, `useDisplayMode`, etc., as they provide a more convenient API.
@@ -13,10 +13,10 @@ For most use cases, prefer using the specialized hooks like `useLayout`, `useUse
 ## Basic usage
 
 ```tsx
-import { useAppsSdkBridge } from "skybridge/web";
+import { useAppsSdkContext } from "skybridge/web";
 
 function ThemeDisplay() {
-  const theme = useAppsSdkBridge("theme");
+  const theme = useAppsSdkContext("theme");
 
   return <p>Current theme: {theme}</p>;
 }
@@ -27,7 +27,7 @@ function ThemeDisplay() {
 ### `key`
 
 ```tsx
-key: keyof AppsSdkProperties
+key: keyof AppsSdkContext
 ```
 
 **Required**
@@ -50,7 +50,7 @@ The key of the global value to subscribe to. Available keys include:
 ## Returns
 
 ```tsx
-value: AppsSdkProperties[K] | undefined
+value: AppsSdkContext[K] | undefined
 ```
 
 The current value of the specified global, or `undefined` if not available.
@@ -60,10 +60,10 @@ The current value of the specified global, or `undefined` if not available.
 ### Reading Safe Area Insets
 
 ```tsx
-import { useAppsSdkBridge } from "skybridge/web";
+import { useAppsSdkContext } from "skybridge/web";
 
 function SafeAreaAwareWidget() {
-  const safeArea = useAppsSdkBridge("safeArea");
+  const safeArea = useAppsSdkContext("safeArea");
 
   if (!safeArea) {
     return <div>Loading...</div>;
@@ -87,10 +87,10 @@ function SafeAreaAwareWidget() {
 ### Respecting Max Height
 
 ```tsx
-import { useAppsSdkBridge } from "skybridge/web";
+import { useAppsSdkContext } from "skybridge/web";
 
 function ScrollableContent() {
-  const maxHeight = useAppsSdkBridge("maxHeight");
+  const maxHeight = useAppsSdkContext("maxHeight");
 
   return (
     <div
@@ -108,10 +108,10 @@ function ScrollableContent() {
 ### Accessing Tool Input
 
 ```tsx
-import { useAppsSdkBridge } from "skybridge/web";
+import { useAppsSdkContext } from "skybridge/web";
 
 function ToolInputDisplay() {
-  const toolInput = useAppsSdkBridge("toolInput");
+  const toolInput = useAppsSdkContext("toolInput");
 
   return (
     <div>
@@ -125,13 +125,13 @@ function ToolInputDisplay() {
 ### Multiple Globals
 
 ```tsx
-import { useAppsSdkBridge } from "skybridge/web";
+import { useAppsSdkContext } from "skybridge/web";
 
 function EnvironmentInfo() {
-  const theme = useAppsSdkBridge("theme");
-  const locale = useAppsSdkBridge("locale");
-  const displayMode = useAppsSdkBridge("displayMode");
-  const userAgent = useAppsSdkBridge("userAgent");
+  const theme = useAppsSdkContext("theme");
+  const locale = useAppsSdkContext("locale");
+  const displayMode = useAppsSdkContext("displayMode");
+  const userAgent = useAppsSdkContext("userAgent");
 
   return (
     <div>
@@ -151,10 +151,10 @@ function EnvironmentInfo() {
 
 ## Type Reference
 
-### `AppsSdkProperties`
+### `AppsSdkContext`
 
 ```tsx
-type AppsSdkProperties = {
+type AppsSdkContext = {
   theme: "light" | "dark";
   userAgent: UserAgent;
   locale: string;

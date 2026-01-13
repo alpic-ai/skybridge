@@ -21,10 +21,10 @@ import type {
   SetWidgetStateAction,
 } from "../types.js";
 import { McpAppBridge } from "./bridge.js";
-import type { McpAppBridgeContext, McpAppBridgeKey } from "./types.js";
+import type { McpAppContext, McpAppContextKey } from "./types.js";
 
-type PickContext<K extends readonly McpAppBridgeKey[]> = {
-  [P in K[number]]: McpAppBridgeContext[P];
+type PickContext<K extends readonly McpAppContextKey[]> = {
+  [P in K[number]]: McpAppContext[P];
 };
 
 export class McpAppAdaptor implements Adaptor {
@@ -217,7 +217,7 @@ export class McpAppAdaptor implements Adaptor {
   };
 
   private createHostContextStore<
-    const Keys extends readonly McpAppBridgeKey[],
+    const Keys extends readonly McpAppContextKey[],
     R,
   >(keys: Keys, computeSnapshot: (context: PickContext<Keys>) => R) {
     const bridge = McpAppBridge.getInstance();

@@ -16,7 +16,7 @@ export class ToolResponseEvent extends CustomEvent<{
 
 declare global {
   interface Window {
-    openai: AppsSdkMethods<WidgetState> & AppsSdkProperties;
+    openai: AppsSdkMethods<WidgetState> & AppsSdkContext;
   }
 
   interface WindowEventMap {
@@ -24,7 +24,7 @@ declare global {
   }
 }
 
-export type AppsSdkProperties<
+export type AppsSdkContext<
   ToolInput extends UnknownObject = Record<never, unknown>,
   ToolOutput extends UnknownObject = UnknownObject,
   ToolResponseMetadata extends UnknownObject = UnknownObject,
@@ -106,7 +106,7 @@ export type AppsSdkMethods<WidgetState extends UnknownObject = UnknownObject> =
 // Dispatched when any global changes in the host page
 export const SET_GLOBALS_EVENT_TYPE = "openai:set_globals";
 export class SetGlobalsEvent extends CustomEvent<{
-  globals: Partial<AppsSdkProperties>;
+  globals: Partial<AppsSdkContext>;
 }> {
   override readonly type = SET_GLOBALS_EVENT_TYPE;
 }
