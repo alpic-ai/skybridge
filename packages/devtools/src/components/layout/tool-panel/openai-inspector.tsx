@@ -112,6 +112,38 @@ export const OpenAiInspector = () => {
               />
             </Field>
             <Field>
+              <FieldLabel>Device Type</FieldLabel>
+              <Select
+                value={openaiObject.userAgent?.device?.type ?? "desktop"}
+                onValueChange={(value) =>
+                  handleValueChange("userAgent", {
+                    ...openaiObject.userAgent,
+                    device: {
+                      ...openaiObject.userAgent?.device,
+                      type: value as "mobile" | "desktop",
+                    },
+                  })
+                }
+                aria-label="Select device type"
+                items={[
+                  { label: "Mobile", value: "mobile" },
+                  { label: "Desktop", value: "desktop" },
+                ]}
+                name="deviceType"
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="mobile">Mobile</SelectItem>
+                    <SelectItem value="desktop">Desktop</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field>
               <FieldLabel>Capabilities</FieldLabel>
               <div className="flex gap-8">
                 <div className="flex items-center gap-2">
