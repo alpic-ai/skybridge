@@ -32,9 +32,8 @@ function removeNode(id: string) {
 function onChange() {
   const description = getLLMDescriptionString();
   const adaptor = getAdaptor();
-  const currentState = adaptor.getExternalStore("widgetState").getSnapshot();
   adaptor.setWidgetState({
-    ...currentState,
+    ...adaptor.widgetState,
     [WIDGET_CONTEXT_KEY]: description,
   });
 }

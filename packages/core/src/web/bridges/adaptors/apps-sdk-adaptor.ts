@@ -10,6 +10,10 @@ import type {
 export class AppsSdkAdaptor implements Adaptor {
   private static instance: AppsSdkAdaptor | null = null;
 
+  public get widgetState(): Record<string, unknown> | null {
+    return window.openai.widgetState;
+  }
+
   public static getInstance(): AppsSdkAdaptor {
     if (!AppsSdkAdaptor.instance) {
       AppsSdkAdaptor.instance = new AppsSdkAdaptor();

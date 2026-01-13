@@ -56,6 +56,7 @@ export type ExternalStore<K extends keyof BridgeInterface> = {
 };
 
 export interface Adaptor {
+  get widgetState(): BridgeInterface["widgetState"];
   getExternalStore<K extends keyof BridgeInterface>(key: K): ExternalStore<K>;
   callTool<
     ToolArgs extends CallToolArgs = null,
