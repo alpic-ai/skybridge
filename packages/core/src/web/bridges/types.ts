@@ -1,5 +1,16 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { useSyncExternalStore } from "react";
+import type { WidgetHostType } from "../../server/index.js";
+
+export type SkybridgeProperties = {
+  hostType: WidgetHostType;
+};
+
+declare global {
+  interface Window {
+    skybridge: SkybridgeProperties;
+  }
+}
 
 export type CallToolArgs = Record<string, unknown> | null;
 
@@ -13,29 +24,38 @@ export type CallToolResponse = {
 
 export type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
 
+export type Theme = "light" | "dark";
+
 export type DeviceType = "mobile" | "tablet" | "desktop" | "unknown";
+
+export type SafeAreaInsets = {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+};
+
+export type SafeArea = {
+  insets: SafeAreaInsets;
+};
+
+export type UserAgent = {
+  device: {
+    type: DeviceType;
+  };
+  capabilities: {
+    hover: boolean;
+    touch: boolean;
+  };
+};
+
 export interface BridgeInterface {
-  theme: "light" | "dark";
+  theme: Theme;
   locale: string;
   displayMode: DisplayMode;
-  safeArea: {
-    insets: {
-      top: number;
-      right: number;
-      bottom: number;
-      left: number;
-    };
-  };
+  safeArea: SafeArea;
   maxHeight: number;
-  userAgent: {
-    device: {
-      type: DeviceType;
-    };
-    capabilities: {
-      hover: boolean;
-      touch: boolean;
-    };
-  };
+  userAgent: UserAgent;
   toolInput: Record<string, unknown> | null;
   toolOutput: Record<string, unknown> | null;
   toolResponseMetadata: Record<string, unknown> | null;

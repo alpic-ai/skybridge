@@ -1,4 +1,3 @@
-import { AppsSdkBridge } from "../apps-sdk-bridge.js";
 import type {
   Adaptor,
   BridgeInterface,
@@ -7,6 +6,7 @@ import type {
   ExternalStore,
   SetWidgetStateAction,
 } from "../types.js";
+import { AppsSdkBridge } from "./bridge.js";
 
 export class AppsSdkAdaptor implements Adaptor {
   private static instance: AppsSdkAdaptor | null = null;

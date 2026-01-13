@@ -2,7 +2,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { McpAppAdaptor } from "../bridges/mcp-app/adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
-import type { UserAgent } from "../types.js";
+import type { UserAgent } from "../bridges/types.js";
 import { getMcpAppHostPostMessageMock } from "./test/utils.js";
 import { useUser } from "./use-user.js";
 

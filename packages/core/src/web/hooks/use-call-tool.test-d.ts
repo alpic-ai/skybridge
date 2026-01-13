@@ -1,5 +1,5 @@
 import { expectTypeOf, test } from "vitest";
-import type { CallToolResponse } from "../types.js";
+import type { CallToolResponse } from "../bridges/types.js";
 import {
   type CallToolState,
   type SideEffects,

@@ -4,6 +4,7 @@ import type {
   ToolOutput,
   ToolResponseMetadata,
 } from "../server/index.js";
+import type { CallToolResponse } from "./bridges/types.js";
 import {
   type CallToolAsyncFn,
   type CallToolFn,
@@ -11,7 +12,7 @@ import {
   useCallTool,
 } from "./hooks/use-call-tool.js";
 import { type ToolState, useToolInfo } from "./hooks/use-tool-info.js";
-import type { CallToolResponse, Objectify, Prettify } from "./types.js";
+import type { Objectify, Prettify } from "./types.js";
 
 type TypedCallToolResponse<TOutput> = CallToolResponse & {
   structuredContent: TOutput;

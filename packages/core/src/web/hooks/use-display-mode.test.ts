@@ -8,7 +8,7 @@ import {
   type Mock,
   vi,
 } from "vitest";
-import type { DisplayMode } from "../types.js";
+import type { DisplayMode } from "../bridges/types.js";
 import { useDisplayMode } from "./use-display-mode.js";
 
 describe("useDisplayMode", () => {

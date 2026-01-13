@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
-import type { OpenAiProperties } from "../../types.js";
-import { AppsSdkBridge } from "../apps-sdk-bridge.js";
+import { AppsSdkBridge } from "./bridge.js";
+import type { OpenAiProperties } from "./types.js";
 
 export function useAppsSdkBridge<K extends keyof OpenAiProperties>(
   key: K,

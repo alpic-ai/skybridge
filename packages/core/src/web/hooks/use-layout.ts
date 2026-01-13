@@ -1,5 +1,5 @@
 import { useBridge } from "../bridges/index.js";
-import type { SafeArea, Theme } from "../types.js";
+import type { SafeArea, Theme } from "../bridges/types.js";
 
 export type LayoutState = {
   theme: Theme;

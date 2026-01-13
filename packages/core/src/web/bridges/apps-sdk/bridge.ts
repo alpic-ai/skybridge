@@ -1,9 +1,9 @@
+import type { Bridge, Subscribe } from "../types.js";
 import {
   type OpenAiProperties,
   SET_GLOBALS_EVENT_TYPE,
   type SetGlobalsEvent,
-} from "../types.js";
-import type { Bridge, Subscribe } from "./types.js";
+} from "./types.js";
 
 export class AppsSdkBridge implements Bridge<OpenAiProperties> {
   private static instance: AppsSdkBridge | null = null;
