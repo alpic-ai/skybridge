@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { getAdaptor, useHostContext } from "../bridges";
+import { getAdaptor, useHostContext } from "../bridges/index.js";
 import type { DisplayMode } from "../bridges/types.js";
 
 export function useDisplayMode() {

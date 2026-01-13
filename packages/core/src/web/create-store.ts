@@ -1,5 +1,5 @@
 import { create, type StateCreator } from "zustand";
-import { getAdaptor } from "./bridges";
+import { getAdaptor } from "./bridges/index.js";
 import {
   getInitialState,
   injectWidgetContext,

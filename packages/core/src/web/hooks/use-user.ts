@@ -1,4 +1,4 @@
-import { type UserAgent, useHostContext } from "../bridges";
+import { type UserAgent, useHostContext } from "../bridges/index.js";
 
 export type UserState = {
   locale: string;

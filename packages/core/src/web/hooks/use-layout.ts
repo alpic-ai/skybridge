@@ -1,4 +1,4 @@
-import { type SafeArea, type Theme, useHostContext } from "../bridges";
+import { type SafeArea, type Theme, useHostContext } from "../bridges/index.js";
 
 export type LayoutState = {
   theme: Theme;

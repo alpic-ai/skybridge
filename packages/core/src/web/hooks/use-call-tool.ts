@@ -4,7 +4,7 @@ import {
   type CallToolArgs,
   type CallToolResponse,
   getAdaptor,
-} from "../bridges";
+} from "../bridges/index.js";
 import type { HasRequiredKeys } from "../types.js";
 
 type CallToolIdleState = {

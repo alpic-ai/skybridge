@@ -4,8 +4,8 @@ import {
   type OpenAiProperties,
   SET_GLOBALS_EVENT_TYPE,
   SetGlobalsEvent,
-} from "../bridges/apps-sdk";
-import { McpAppAdaptor, McpAppBridge } from "../bridges/mcp-app";
+} from "../bridges/apps-sdk/index.js";
+import { McpAppAdaptor, McpAppBridge } from "../bridges/mcp-app/index.js";
 import {
   fireToolInputNotification,
   fireToolResultNotification,

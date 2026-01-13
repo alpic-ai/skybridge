@@ -1,4 +1,4 @@
-import { useHostContext } from "../bridges";
+import { useHostContext } from "../bridges/index.js";
 import type { UnknownObject } from "../types.js";
 
 export type ToolIdleState = {
