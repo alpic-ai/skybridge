@@ -1,6 +1,12 @@
 import { McpServer } from "skybridge/server";
 import * as z from "zod";
-import { type Capital, type CapitalSummary, getAllCapitals, getCapitalByName, getCapitalSlug } from "./capitals.js";
+import {
+  type Capital,
+  type CapitalSummary,
+  getAllCapitals,
+  getCapitalByName,
+  getCapitalSlug,
+} from "./capitals.js";
 
 // Cache allCapitals to be mindful of country REST API
 let cachedAllCapitals: CapitalSummary[] | null = null;
@@ -22,14 +28,33 @@ const server = new McpServer(
   "capital",
   {
     description: "Interactive world capitals explorer with map visualization",
+    _meta: {
+      ui: {
+        csp: {
+          resourceDomains: [
+            "https://upload.wikimedia.org",
+            "https://flagcdn.com",
+          ],
+          connectDomains: ["https://api.mapbox.com"],
+        },
+      },
+    },
   },
   {
     description:
       "Use this tool to explore world capitals. Displays an interactive map with detailed information about capital cities including population, currencies, and beautiful photos. Always use it when users ask about capitals, countries, or want to explore geography.",
     inputSchema: {
-      name: z.string().describe("Capital city name in English (e.g., 'Paris', 'Tokyo', 'Washington')"),
+      name: z
+        .string()
+        .describe(
+          "Capital city name in English (e.g., 'Paris', 'Tokyo', 'Washington')",
+        ),
     },
-    annotations: { readOnlyHint: true, openWorldHint: true, destructiveHint: false },
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: true,
+      destructiveHint: false,
+    },
     _meta: {
       "openai/widgetAccessible": true,
     },
@@ -78,7 +103,9 @@ function formatCapitalForModel(capital: Capital): string {
   }
 
   if (capital.wikipedia.countryDescription) {
-    parts.push(`About ${capital.country.name}: ${capital.wikipedia.countryDescription}`);
+    parts.push(
+      `About ${capital.country.name}: ${capital.wikipedia.countryDescription}`,
+    );
   }
 
   parts.push(

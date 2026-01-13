@@ -11,7 +11,7 @@ export function UseWidgetStateTab() {
 
       <div className="field">
         <span className="field-label">Count</span>
-        <code>{state.count}</code>
+        <code>{state.count ?? 0}</code>
       </div>
 
       <div className="button-row">
