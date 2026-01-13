@@ -59,7 +59,7 @@ type McpAppsToolMeta = {
   ui: McpUiToolMeta;
 };
 
-type ToolMeta = OpenaiToolMeta & McpAppsToolMeta;
+type ToolMeta = Partial<OpenaiToolMeta & McpAppsToolMeta>;
 
 /** @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields */
 type OpenaiWidgetCSP = {
@@ -133,6 +133,8 @@ type McpServerOriginalResourceConfig = Omit<
   "uri" | "name" | "mimeType" | "_meta"
 > & {
   _meta?: WidgetResourceMeta;
+  /** Restrict host types to a specific subset */
+  hosts?: WidgetHostType[];
 };
 
 type McpServerOriginalToolConfig = Omit<
@@ -311,11 +313,14 @@ export class McpServer<
 
     const toolMeta: ToolMeta = {
       ...toolConfig._meta,
-      "openai/outputTemplate": appsSdkResourceConfig.uri,
-      ui: {
-        resourceUri: extAppsResourceConfig.uri,
-      },
     };
+
+    if (!resourceConfig.hosts || resourceConfig.hosts.includes("apps-sdk")) {
+      toolMeta["openai/outputTemplate"] = appsSdkResourceConfig.uri;
+    }
+    if (!resourceConfig.hosts || resourceConfig.hosts.includes("mcp-app")) {
+      toolMeta.ui = { resourceUri: extAppsResourceConfig.uri };
+    }
 
     this.registerTool(
       name,
