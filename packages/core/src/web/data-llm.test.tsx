@@ -8,8 +8,7 @@ import {
   type Mock,
   vi,
 } from "vitest";
-import { McpAppAdaptor } from "./bridges/mcp-app/adaptor.js";
-import { McpAppBridge } from "./bridges/mcp-app/bridge.js";
+import { McpAppAdaptor, McpAppBridge } from "./bridges/mcp-app/index.js";
 import { DataLLM } from "./data-llm.js";
 import {
   getMcpAppHostPostMessageMock,
