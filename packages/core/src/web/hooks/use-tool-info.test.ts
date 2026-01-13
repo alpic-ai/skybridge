@@ -10,6 +10,7 @@ import {
   fireToolInputNotification,
   fireToolResultNotification,
   getMcpAppHostPostMessageMock,
+  MockResizeObserver,
 } from "./test/utils.js";
 import { useToolInfo } from "./use-tool-info.js";
 
@@ -90,6 +91,7 @@ describe("useToolInfo", () => {
     beforeEach(() => {
       vi.stubGlobal("parent", { postMessage: getMcpAppHostPostMessageMock() });
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+      vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
     afterEach(() => {

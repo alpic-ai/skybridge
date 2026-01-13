@@ -12,7 +12,7 @@ import { McpAppAdaptor } from "./bridges/mcp-app/adaptor.js";
 import { McpAppBridge } from "./bridges/mcp-app/bridge.js";
 import { createStore } from "./create-store.js";
 import { WIDGET_CONTEXT_KEY } from "./data-llm.js";
-import { getMcpAppHostPostMessageMock } from "./hooks/test/utils.js";
+import { getMcpAppHostPostMessageMock, MockResizeObserver } from "./hooks/test/utils.js";
 
 describe("createStore", () => {
   afterEach(() => {
@@ -116,6 +116,7 @@ describe("createStore", () => {
   describe("mcp-app mode", () => {
     beforeEach(() => {
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+      vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
     afterEach(() => {
