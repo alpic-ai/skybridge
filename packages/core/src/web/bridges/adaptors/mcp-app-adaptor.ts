@@ -88,7 +88,7 @@ export class McpAppAdaptor implements Adaptor {
       structuredContent: response.structuredContent ?? {},
       isError: response.isError ?? false,
       result,
-      _meta: response._meta ?? {},
+      meta: response._meta ?? {},
     } as ToolResponse;
   };
 

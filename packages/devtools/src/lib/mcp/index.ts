@@ -75,7 +75,7 @@ export const useCallTool = () => {
           ...defaultOpenaiObject,
           toolInput: args ?? {},
           toolOutput: response.structuredContent,
-          toolResponseMetadata: response._meta ?? null,
+          toolResponseMetadata: response.meta ?? null,
           widgetState: null,
         },
       });

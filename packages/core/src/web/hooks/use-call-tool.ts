@@ -92,7 +92,7 @@ export type CallToolAsyncFn<TArgs, TResponse> =
 
 type ToolResponseSignature = Pick<
   CallToolResponse,
-  "structuredContent" | "_meta"
+  "structuredContent" | "meta"
 >;
 
 export const useCallTool = <
