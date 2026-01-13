@@ -12,11 +12,6 @@ import type {
   CallToolResult,
 } from "@modelcontextprotocol/sdk/types.js";
 import { dequal } from "dequal/lite";
-import {
-  McpAppBridge,
-  type McpAppBridgeContext,
-  type McpAppBridgeKey,
-} from "../mcp-app-bridge.js";
 import type {
   Adaptor,
   BridgeInterface,
@@ -25,6 +20,8 @@ import type {
   ExternalStore,
   SetWidgetStateAction,
 } from "../types.js";
+import { McpAppBridge } from "./bridge.js";
+import type { McpAppBridgeContext, McpAppBridgeKey } from "./types.js";
 
 type PickContext<K extends readonly McpAppBridgeKey[]> = {
   [P in K[number]]: McpAppBridgeContext[P];

@@ -8,8 +8,8 @@ import {
   vi,
 } from "vitest";
 import type { StateCreator } from "zustand";
-import { McpAppAdaptor } from "./bridges/adaptors/mcp-app-adaptor.js";
-import { McpAppBridge } from "./bridges/mcp-app-bridge.js";
+import { McpAppAdaptor } from "./bridges/mcp-app/adaptor.js";
+import { McpAppBridge } from "./bridges/mcp-app/bridge.js";
 import { createStore } from "./create-store.js";
 import { WIDGET_CONTEXT_KEY } from "./data-llm.js";
 import { getMcpAppHostPostMessageMock } from "./hooks/test/utils.js";

@@ -11,7 +11,8 @@ import type {
   McpUiToolInputNotification,
   McpUiToolResultNotification,
 } from "@modelcontextprotocol/ext-apps";
-import type { Bridge, Subscribe } from "./types.js";
+import type { Bridge, Subscribe } from "../types.js";
+import type { McpAppBridgeContext, McpAppBridgeKey } from "./types.js";
 
 type PendingRequest<T> = {
   resolve: (value: T | PromiseLike<T>) => void;
@@ -23,18 +24,6 @@ type McpAppInitializationOptions = Pick<
   McpUiInitializeRequest["params"],
   "appInfo"
 >;
-
-export type McpToolState = {
-  toolInput: NonNullable<
-    McpUiToolInputNotification["params"]["arguments"]
-  > | null;
-  toolResult: McpUiToolResultNotification["params"] | null;
-  toolCancelled: McpUiToolCancelledNotification["params"] | null;
-};
-
-export type McpAppBridgeContext = McpUiHostContext & McpToolState;
-
-export type McpAppBridgeKey = keyof McpAppBridgeContext;
 
 const LATEST_PROTOCOL_VERSION = "2025-11-21";
 

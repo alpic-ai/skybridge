@@ -1,7 +1,8 @@
 import type { McpUiInitializeRequest } from "@modelcontextprotocol/ext-apps";
 
 import { useSyncExternalStore } from "react";
-import { McpAppBridge, type McpAppBridgeContext } from "../mcp-app-bridge.js";
+import { McpAppBridge } from "./bridge.js";
+import type { McpAppBridgeContext } from "./types.js";
 
 type McpAppInitializationOptions = Pick<
   McpUiInitializeRequest["params"],

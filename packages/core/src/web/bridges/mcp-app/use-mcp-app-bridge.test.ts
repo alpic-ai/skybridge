@@ -4,7 +4,7 @@ import {
   getMcpAppHostPostMessageMock,
   MockResizeObserver,
 } from "../../hooks/test/utils.js";
-import { McpAppBridge } from "../mcp-app-bridge.js";
+import { McpAppBridge } from "./bridge.js";
 import { useMcpAppBridge } from "./use-mcp-app-bridge.js";
 
 describe("useMcpAppBridge", () => {

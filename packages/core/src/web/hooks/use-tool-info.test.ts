@@ -1,7 +1,7 @@
 import { act, fireEvent, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { McpAppAdaptor } from "../bridges/adaptors/mcp-app-adaptor.js";
-import { McpAppBridge } from "../bridges/mcp-app-bridge.js";
+import { McpAppAdaptor } from "../bridges/mcp-app/adaptor.js";
+import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import {
   type OpenAiProperties,
   SET_GLOBALS_EVENT_TYPE,
