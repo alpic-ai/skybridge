@@ -1,6 +1,7 @@
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { useEffect } from "react";
+import { Header } from "../cli/header.js";
 import { type CommandStep, useExecuteSteps } from "../cli/use-execute-steps.js";
 
 export const commandSteps: CommandStep[] = [
@@ -10,7 +11,7 @@ export const commandSteps: CommandStep[] = [
   },
   {
     label: "Compiling server",
-    command: "shx rm -rf server/dist && tsc -p tsconfig.server.json",
+    command: "shx rm -rf dist && tsc -p tsconfig.server.json",
   },
   {
     label: "Copying static assets",
@@ -34,13 +35,9 @@ export default class Build extends Command {
 
       return (
         <Box flexDirection="column" padding={1}>
-          <Box marginBottom={1}>
-            <Text color="cyan" bold>
-              ⛰{"  "}Skybridge
-            </Text>
-            <Text color="cyan"> v{this.config.version}</Text>
+          <Header version={this.config.version}>
             <Text color="green"> → building for production…</Text>
-          </Box>
+          </Header>
 
           {commandSteps.map((step, index) => {
             const isCurrent = index === currentStep && status === "running";

@@ -78,9 +78,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    defaults:
-      run:
-        working-directory: packages/create-skybridge/template
     steps:
       - uses: actions/checkout@v6
 
@@ -92,10 +89,22 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm run build
+      - name: Install template dependencies with workspace:*
+        run: |
+          cd packages/create-skybridge/template
+          pnpm add skybridge@workspace:* @skybridge/devtools@workspace:*
+
+      - name: Build core and devtools
+        run: |
+          pnpm --filter skybridge build
+          pnpm --filter @skybridge/devtools build
+
+      - name: Build template
+        run: |
+          cd packages/create-skybridge/template
+          pnpm run build
 
   windows:
     name: Windows build

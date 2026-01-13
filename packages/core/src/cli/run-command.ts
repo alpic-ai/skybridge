@@ -1,12 +1,18 @@
-import { spawn } from "node:child_process";
+import { type SpawnOptions, spawn } from "node:child_process";
 
-export function runCommand(command: string, args: string[]): Promise<void> {
+export function runCommand(
+  command: string,
+  options: SpawnOptions = {
+    stdio: ["ignore", "inherit", "inherit"],
+  },
+): Promise<void> {
   return new Promise((resolve, reject) => {
     const stdoutChunks: Buffer[] = [];
     const stderrChunks: Buffer[] = [];
 
-    const proc = spawn(command, args, {
-      stdio: ["ignore", "pipe", "pipe"],
+    const proc = spawn(command, {
+      ...options,
+      shell: true,
     });
 
     if (proc.stdout) {
