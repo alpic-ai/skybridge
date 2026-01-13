@@ -29,7 +29,7 @@
     "@skybridge/devtools": ">=0.22.0 <1.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "@types/react": "^19.2.7",
+    "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
     "nodemon": "^3.1.11",
@@ -38,6 +38,6 @@
     "typescript": "^5.9.3"
   },
   "engines": {
-    "node": ">=24.12.0"
+    "node": ">=24.13.0"
   }
 }
