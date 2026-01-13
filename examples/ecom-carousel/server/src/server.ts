@@ -32,6 +32,7 @@ const server = new McpServer(
         },
       },
     },
+    hosts: ["apps-sdk"],
   },
   {
     description: "Display a carousel of products from the store.",

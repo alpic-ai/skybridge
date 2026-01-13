@@ -39,6 +39,7 @@ const server = new McpServer(
         },
       },
     },
+    hosts: ["apps-sdk"],
   },
   {
     description:
