@@ -5,6 +5,7 @@ import type {
   McpUiOpenLinkResult,
   McpUiRequestDisplayModeRequest,
   McpUiRequestDisplayModeResult,
+  McpUiUpdateModelContextRequest,
 } from "@modelcontextprotocol/ext-apps";
 import type {
   CallToolRequest,
@@ -201,6 +202,11 @@ export class McpAppAdaptor implements Adaptor {
   public setWidgetState = async (
     state: Record<string, unknown>,
   ): Promise<void> => {
+    const bridge = McpAppBridge.getInstance();
+    await bridge.request<McpUiUpdateModelContextRequest, unknown>({
+      method: "ui/update-model-context",
+      params: { structuredContent: state },
+    });
     this.widgetState = state;
     this.widgetStateListeners.forEach((listener) => {
       listener();
