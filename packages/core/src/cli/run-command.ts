@@ -3,7 +3,7 @@ import { type SpawnOptions, spawn } from "node:child_process";
 export function runCommand(
   command: string,
   options: SpawnOptions = {
-    stdio: ["ignore", "pipe", "pipe"],
+    stdio: ["ignore", "inherit", "inherit"],
   },
 ): Promise<void> {
   return new Promise((resolve, reject) => {

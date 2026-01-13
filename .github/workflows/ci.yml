@@ -91,8 +91,7 @@ jobs:
       - name: Replace template dependencies with workspace:*
         run: |
           cd packages/create-skybridge/template
-          sed -i 's/"skybridge": "[^"]*"/"skybridge": "workspace:*"/' package.json
-          sed -i 's/"@skybridge\/devtools": "[^"]*"/"@skybridge\/devtools": "workspace:*"/' package.json
+          pnpm install skybridge@workspace:* @skybridge/devtools@workspace:*
 
       - name: Install dependencies for build
         run: pnpm install --no-frozen-lockfile
