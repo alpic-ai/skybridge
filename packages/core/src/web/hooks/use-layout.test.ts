@@ -3,7 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { McpAppAdaptor } from "../bridges/mcp-app/adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import type { SafeArea, Theme } from "../bridges/types.js";
-import { getMcpAppHostPostMessageMock } from "./test/utils.js";
+import {
+  getMcpAppHostPostMessageMock,
+  MockResizeObserver,
+} from "./test/utils.js";
 import { useLayout } from "./use-layout.js";
 
 describe("useLayout", () => {
@@ -67,6 +70,7 @@ describe("useLayout", () => {
   describe("mcp-app host type", () => {
     beforeEach(() => {
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+      vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
     afterEach(() => {

@@ -332,26 +332,23 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
       scheduled = true;
       requestAnimationFrame(() => {
         scheduled = false;
-        const html = document.documentElement;
 
-        // Measure actual content size by temporarily setting html to fit-content.
-        // This shrinks html to fit body (including body margins), giving us the
-        // true minimum size needed by the content.
-        const originalWidth = html.style.width;
-        const originalHeight = html.style.height;
-        html.style.width = "fit-content";
-        html.style.height = "fit-content";
-        const rect = html.getBoundingClientRect();
-        html.style.width = originalWidth;
-        html.style.height = originalHeight;
+        let width: number;
+        let height: number;
 
-        // Compensate for scrollbar width on Linux/Windows where scrollbars
-        // consume space. On systems with overlay scrollbars (macOS), this
-        // will be 0.
-        const scrollbarWidth = window.innerWidth - html.clientWidth;
-
-        const width = Math.ceil(rect.width + scrollbarWidth);
-        const height = Math.ceil(rect.height);
+        // In fullscreen mode, use viewport size since the widget should fill
+        // the entire available space provided by the host.
+        if (this.context.displayMode === "fullscreen") {
+          width = window.innerWidth;
+          height = window.innerHeight;
+        } else {
+          // Use scrollWidth/scrollHeight to measure actual rendered content size.
+          // This works better than fit-content for viewport-based layouts (vw/vh)
+          // and fluid elements like maps that want to fill available space.
+          const body = document.body;
+          width = Math.ceil(body.scrollWidth);
+          height = Math.ceil(body.scrollHeight);
+        }
 
         // Only send if size actually changed (prevents feedback loops from
         // style changes)
