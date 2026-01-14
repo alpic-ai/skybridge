@@ -133,6 +133,9 @@
   "integrations": {
     "ga4": {
       "measurementId": "G-0W0ZMXTSDZ"
+    },
+    "posthog": {
+      "apiKey": "phc_wz9NIcD7SmH0BEN39lARJwJNjXgggazjuWCCt62eeKT"
     }
   }
 }
