@@ -1,0 +1,74 @@
+---
+title: Test Your App
+---
+
+Skybridge provides two ways to test your app: **local DevTools** for rapid iteration, and **ChatGPT** for integration testing.
+
+## Local Development (Recommended)
+
+Open `http://localhost:3000/` in your browser to access DevTools. This is the fastest way to develop:
+
+- **Tool listing** - See all registered tools and widgets
+- **Input forms** - Test tools with custom inputs
+- **Widget preview** - Render widgets in a mocked ChatGPT environment
+- **Theme/locale switching** - Test different display modes
+
+The DevTools mock the `window.openai` API, so your widget code works identically in both environments.
+
+<Tip>
+**Fast Iteration**
+
+For full details on the emulator, HMR, and Vite plugin, see [Fast Iteration](/concepts/fast-iteration).
+</Tip>
+
+<Info>
+**Want LLM-based conversations locally?**
+
+For complete local emulation with real LLM conversations, check out [MCP Jam](https://mcpjam.com/) - a third-party tool that provides a full ChatGPT-like environment for testing MCP servers.
+</Info>
+
+## Testing in ChatGPT
+
+When you're ready to test the full integration with the LLM:
+
+### 1. Expose your server
+
+ChatGPT needs a public URL. Use [ngrok](https://ngrok.com/) to expose your local server:
+
+```bash
+ngrok http 3000
+```
+
+Copy the forwarding URL (e.g., `https://abc123.ngrok-free.app`).
+
+### 2. Connect to ChatGPT
+
+1. In ChatGPT, go to **Profile → Apps → Create app**
+2. Enter your ngrok URL with `/mcp` at the end:
+   ```
+   https://abc123.ngrok-free.app/mcp
+   ```
+3. Click **Create**
+
+### 3. Test your app
+
+1. Start a new conversation
+2. Select your app using the **+** button
+3. Prompt the model to trigger your tools
+
+### Hot Module Reload
+
+Widget changes in `web/src/widgets/` appear instantly in ChatGPT without reconnecting.
+
+Server changes in `server/src/` require starting a new conversation to take effect.
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card title="Core Concepts" icon="lightbulb" href="/concepts">
+    Learn how Skybridge extends the raw APIs with React hooks
+  </Card>
+  <Card title="Guides" icon="book" href="/guides/fetching-data">
+    Learn patterns for data fetching, state management, and more
+  </Card>
+</CardGroup>

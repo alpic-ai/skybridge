@@ -1,0 +1,88 @@
+---
+title: API Reference
+description: Detailed documentation for all hooks and utilities provided by Skybridge.
+---
+
+## State Management
+
+<CardGroup cols={2}>
+  <Card title="useToolInfo" icon="database" href="/api-reference/use-tool-info">
+    Get initial tool input, output and metadata
+  </Card>
+  <Card title="useWidgetState" icon="floppy-disk" href="/api-reference/use-widget-state">
+    Persist state across widget renders
+  </Card>
+</CardGroup>
+
+## Context Sync
+
+<Card title="data-llm" icon="brain" href="/api-reference/data-llm">
+  Sync widget UI state with the model for contextual responses
+</Card>
+
+## Utilities
+
+<Card title="createStore" icon="box" href="/api-reference/create-store">
+  Create a Zustand store that automatically syncs with widget state
+</Card>
+
+## User Interface
+
+<CardGroup cols={2}>
+  <Card title="useLayout" icon="table-layout" href="/api-reference/use-layout">
+    Get layout and visual environment (theme, safe area)
+  </Card>
+  <Card title="useUser" icon="user" href="/api-reference/use-user">
+    Get user information (locale, device type)
+  </Card>
+  <Card title="useDisplayMode" icon="expand" href="/api-reference/use-display-mode">
+    Get and request widget display mode changes
+  </Card>
+  <Card title="useRequestModal" icon="window-maximize" href="/api-reference/use-request-modal">
+    Open a modal portaled outside of the widget iframe
+  </Card>
+</CardGroup>
+
+## Actions
+
+<CardGroup cols={2}>
+  <Card title="useCallTool" icon="screwdriver-wrench" href="/api-reference/use-call-tool">
+    Call tools from within a widget
+  </Card>
+  <Card title="useOpenExternal" icon="arrow-up-right-from-square" href="/api-reference/use-open-external">
+    Open external links
+  </Card>
+  <Card title="useSendFollowUpMessage" icon="message" href="/api-reference/use-send-follow-up-message">
+    Send a follow-up message in the conversation
+  </Card>
+  <Card title="useFiles" icon="file" href="/api-reference/use-files">
+    Upload and download files
+  </Card>
+</CardGroup>
+
+## Advanced
+
+<Card title="useAppsSdkContext" icon="code" href="/api-reference/use-apps-sdk-context">
+  Low-level hook to subscribe to `window.openai` state values
+</Card>
+
+## Import
+
+All hooks and utilities are exported from `skybridge/web`:
+
+```tsx
+import {
+  createStore,
+  useCallTool,
+  useDisplayMode,
+  useFiles,
+  useLayout,
+  useAppsSdkContext,
+  useOpenExternal,
+  useRequestModal,
+  useSendFollowUpMessage,
+  useToolInfo,
+  useUser,
+  useWidgetState,
+} from "skybridge/web";
+```

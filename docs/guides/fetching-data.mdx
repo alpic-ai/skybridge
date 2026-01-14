@@ -1,0 +1,262 @@
+---
+title: Fetching Data
+---
+
+
+How to get data into your widget and fetch more when the user interacts.
+
+## Two Patterns
+
+| Pattern | Hook | When to use |
+|---------|------|-------------|
+| Initial hydration | `useToolInfo` | Data passed when widget loads |
+| User-triggered | `useCallTool` | User clicks button, needs more data |
+
+## Initial Hydration with useToolInfo
+
+When ChatGPT calls your widget's tool, the server returns `structuredContent`. Access it with `useToolInfo`:
+
+```tsx
+import { useToolInfo } from "skybridge/web";
+
+type FlightData = {
+  flights: Array<{ id: string; name: string; price: number }>;
+};
+
+export function FlightWidget() {
+  const { isSuccess, output } = useToolInfo<FlightData>();
+
+  if (!isSuccess) {
+    return <div>Loading...</div>;
+  }
+
+  const { flights } = output.structuredContent;
+
+  return (
+    <ul>
+      {flights.map(flight => (
+        <li key={flight.id}>{flight.name} - ${flight.price}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### Status Flags
+
+```tsx
+const { isIdle, isPending, isSuccess, isError, output, error } = useToolInfo();
+```
+
+| Flag | Meaning |
+|------|---------|
+| `isIdle` | Widget hasn't received data yet |
+| `isPending` | Tool is still executing |
+| `isSuccess` | Data is available in `output` |
+| `isError` | Tool failed, check `error` |
+
+## User-Triggered Fetching with useCallTool
+
+When the user clicks something and you need more data:
+
+```tsx
+import { useCallTool } from "skybridge/web";
+
+export function FlightWidget() {
+  const { callTool, isPending, data, isError, error } = useCallTool("get_flight_details");
+
+  const handleViewDetails = (flightId: string) => {
+    callTool({ flightId });
+  };
+
+  return (
+    <div>
+      <button onClick={() => handleViewDetails("AF123")} disabled={isPending}>
+        {isPending ? "Loading..." : "View Details"}
+      </button>
+
+      {isError && <p>Error: {String(error)}</p>}
+      {data && <pre>{JSON.stringify(data.structuredContent, null, 2)}</pre>}
+    </div>
+  );
+}
+```
+
+### With Callbacks
+
+```tsx
+const { callTool } = useCallTool("book_hotel");
+
+const handleBooking = () => {
+  callTool(
+    { hotelId: "123" },
+    {
+      onSuccess: (response) => {
+        console.log("Booking confirmed:", response.structuredContent);
+        setBookingComplete(true);
+      },
+      onError: (error) => {
+        console.error("Booking failed:", error);
+        setShowErrorModal(true);
+      },
+      onSettled: () => {
+        // Runs after success or error
+        setSubmitting(false);
+      },
+    }
+  );
+};
+```
+
+### With Async/Await
+
+```tsx
+const { callToolAsync, isPending } = useCallTool("check_availability");
+
+const handleCheck = async (date: string) => {
+  try {
+    const result = await callToolAsync({ date });
+    if (result.structuredContent.available) {
+      setStep("payment");
+    } else {
+      setShowUnavailableMessage(true);
+    }
+  } catch (error) {
+    setError(error);
+  }
+};
+```
+
+## Type Safety with generateHelpers
+
+Use `generateHelpers` for autocomplete and type inference. See [generateHelpers](/api-reference/generate-helpers) for setup.
+
+```tsx
+// Import from your typed helpers file, not skybridge/web
+import { useCallTool } from "../skybridge";
+
+const { callTool, data } = useCallTool("search-hotels");
+//                                       ^ autocomplete for tool names
+callTool({ city: "Paris", checkIn: "2025-12-15" });
+//         ^ type-checked inputs
+```
+
+## Common Patterns
+
+### Loading State
+
+```tsx
+function ProductWidget() {
+  const { isPending, data } = useCallTool("get_product");
+
+  if (isPending) {
+    return <Skeleton />;
+  }
+
+  if (!data) {
+    return <EmptyState />;
+  }
+
+  return <ProductDetails product={data.structuredContent} />;
+}
+```
+
+### Refetching
+
+```tsx
+function StockWidget() {
+  const { callTool, data, isPending } = useCallTool("get_stock_price");
+  const [lastFetch, setLastFetch] = useState<Date | null>(null);
+
+  const refresh = () => {
+    callTool({ symbol: "AAPL" }, {
+      onSuccess: () => setLastFetch(new Date()),
+    });
+  };
+
+  return (
+    <div>
+      <button onClick={refresh} disabled={isPending}>
+        {isPending ? "Refreshing..." : "Refresh"}
+      </button>
+      {lastFetch && <p>Last updated: {lastFetch.toLocaleTimeString()}</p>}
+      {data && <StockPrice price={data.structuredContent.price} />}
+    </div>
+  );
+}
+```
+
+### Chained Calls
+
+```tsx
+function BookingWidget() {
+  const { callToolAsync: checkAvailability } = useCallTool("check_availability");
+  const { callToolAsync: createBooking } = useCallTool("create_booking");
+
+  const handleBook = async (roomId: string, dates: DateRange) => {
+    const availability = await checkAvailability({ roomId, ...dates });
+
+    if (!availability.structuredContent.available) {
+      setError("Room not available for these dates");
+      return;
+    }
+
+    const booking = await createBooking({
+      roomId,
+      ...dates,
+      priceId: availability.structuredContent.priceId,
+    });
+
+    setConfirmation(booking.structuredContent);
+  };
+}
+```
+
+## Anti-patterns
+
+### Don't fetch on mount
+
+```tsx
+// Bad: Fetches data on every mount
+function BadWidget() {
+  const { callTool } = useCallTool("get_data");
+
+  useEffect(() => {
+    callTool({}); // Don't do this!
+  }, []);
+}
+
+// Good: Use initial data from structuredContent
+function GoodWidget() {
+  const { output } = useToolInfo();
+  // Data is already here from the tool call
+}
+```
+
+### Don't ignore loading states
+
+```tsx
+// Bad: Assumes data is always present
+function BadWidget() {
+  const { data } = useCallTool("search");
+  return <div>{data.structuredContent.results.length}</div>; // Crashes!
+}
+
+// Good: Handle all states
+function GoodWidget() {
+  const { data, isPending, isError } = useCallTool("search");
+
+  if (isPending) return <Loading />;
+  if (isError) return <Error />;
+  if (!data) return null;
+
+  return <div>{data.structuredContent.results.length}</div>;
+}
+```
+
+## Related
+
+- [useToolInfo API](/api-reference/use-tool-info)
+- [useCallTool API](/api-reference/use-call-tool)
+- [Type Safety](/concepts/type-safety)
+- [Data Flow](/concepts/data-flow)

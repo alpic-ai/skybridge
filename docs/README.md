@@ -1,21 +1,24 @@
-# Skybridge Documentation Website
+# Skybridge Documentation
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
-
-## Installation
+This documentation site is built with [Mintlify](https://mintlify.com/).
 
 ## Local Development
 
 ```bash
-pnpm start
+pnpm install
+pnpm dev
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+Opens a local preview at `http://localhost:3000`.
 
-## Build
+## Linting
 
 ```bash
-pnpm build
+pnpm lint
 ```
 
+Checks for broken links.
+
 ## Deployment
+
+Documentation is automatically deployed on push to main.
