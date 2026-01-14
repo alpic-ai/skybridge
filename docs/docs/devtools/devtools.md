@@ -1,51 +1,40 @@
 ---
 sidebar_position: 1
+title: DevTools
 ---
 
-# Skybridge MCP Devtools
+# DevTools
 
-This is the standalone frontend devtools for the Skybridge MCP application.  
-It is a React-based web app, designed for both local development and deployment.
+Skybridge provides a lightweight emulator running inside your browser for testing widgets locally.
 
-## Getting Started
+:::tip Full Guide
+For the complete development workflow, HMR setup, and when to use DevTools vs ChatGPT, see [Fast Iteration](/concepts/fast-iteration).
+:::
 
-**Install dependencies:**
+## Quick Start
 
-```sh
-pnpm install
-```
+When you run `pnpm dev`, DevTools is available at `http://localhost:3000/`.
 
-**To start the development server:**
+**Features:**
+- Tool listing and input forms
+- Widget preview with mocked `window.openai`
+- Theme/locale/display mode switching
+- Response inspector for `content`, `structuredContent`, `_meta`
 
-```sh
-pnpm dev
-```
+## Custom Integration
 
-- Open your browser to the URL printed in the terminal (usually http://localhost:5173/).
+If you're not using the Skybridge starter template, add DevTools to your server:
 
-**To build for production:**
+```typescript
+import { devtoolsStaticServer, widgetsDevServer } from "skybridge/server";
 
-```sh
-pnpm build
-```
-
-## Project Structure
-
-- `src/` — React source code
-- `dist/` — Output directory for production build (auto-generated)
-- `index.html` — Main HTML template
-- `vite.config.ts` — Vite configuration
-- `eslint.config.js` — ESLint configuration
-
-## Usage
-
-To use the devtools in a Skybridge app during development, add the following to your server setup:
-
-```js
-if (env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== "production") {
   app.use(await devtoolsStaticServer());
   app.use(await widgetsDevServer());
 }
 ```
 
-This will serve the devtools and widget development server in non-production environments.
+## Related
+
+- [Fast Iteration](/concepts/fast-iteration) - Development workflow and concepts
+- [Test Your App](/quickstart/test-your-app) - Testing in ChatGPT dev mode

@@ -52,14 +52,7 @@ your-project/
 
 ### Widget naming convention
 
-:::warning Widget naming convention
-The widget file name must match the widget name you register on the server.
-:::
-
-For example:
-- If you create `web/src/widgets/search-results.tsx`
-- You must register it as `search-results` on the server
-- This allows Skybridge to automatically map tool calls to widget components
+Widget file name must match the registration name. See [Data Flow: Widget Naming](/concepts/data-flow#widget-naming).
 
 ## Set up the web project
 
@@ -110,6 +103,7 @@ In your server code, register the widget using `server.registerWidget()`:
 
 ```typescript
 import { McpServer } from "skybridge/server";
+import { z } from "zod";
 
 const server = new McpServer({ name: "my-app", version: "1.0" }, {});
 
@@ -119,16 +113,16 @@ server.registerWidget(
   {
     description: "My first widget",
     inputSchema: {
-      message: { type: "string" },
+      message: z.string(),
     },
   },
   async ({ message }) => {
     // Your widget logic here
-    return { 
-      content: [{ 
-        type: "text", 
+    return {
+      content: [{
+        type: "text",
         text: message || "Hello World"
-      }] 
+      }]
     };
   }
 );
@@ -140,6 +134,7 @@ Update your server startup to serve the MCP endpoint. If you're using Express:
 
 ```typescript
 import { McpServer } from "skybridge/server";
+import { z } from "zod";
 import express from "express";
 
 const app = express();
@@ -147,10 +142,10 @@ const server = new McpServer({ name: "my-app", version: "1.0" }, {});
 
 // Register your widgets
 server.registerWidget("my-widget", {}, {
-  inputSchema: { message: { type: "string" } },
+  inputSchema: { message: z.string() },
 }, async ({ message }) => {
-  return { 
-    content: [{ type: "text", text: message }] 
+  return {
+    content: [{ type: "text", text: message }]
   };
 });
 
@@ -163,105 +158,12 @@ app.listen(3000, () => {
 });
 ```
 
-## Advanced: Full type safety with TypeScript
+## Type Safety
 
-For full type inference and autocomplete in your widgets, follow these additional steps.
+For full type inference and autocomplete, use method chaining and `generateHelpers`. See [Type Safety](/concepts/type-safety) for the complete setup.
 
-### Use method chaining for your MCP server.
-
-:::warning Method chaining required
-Use method chaining when registering widgets to enable TypeScript type inference.
-:::
-
-```typescript
-import { McpServer } from "skybridge/server";
-import { z } from "zod";
-
-// ✅ Good - Using method chaining
-const server = new McpServer({ name: "my-app", version: "1.0" }, {})
-  .registerWidget("search-results", {}, {
-    inputSchema: {
-      query: z.string(),
-    },
-    outputSchema: {
-      results: z.array(z.object({ id: z.string(), title: z.string() })),
-      totalCount: z.number(),
-    },
-  }, async ({ query }) => {
-    return { content: [{ type: "text", text: `Found results for ${query}` }] };
-  })
-  .registerWidget("get-details", {}, {
-    inputSchema: { itemId: z.string() },
-  }, async ({ itemId }) => {
-    return { content: [{ type: "text", text: `Details for ${itemId}` }] };
-  });
-
-// Export the server type
-export type AppType = typeof server;
-```
-
-```typescript
-// ❌ Bad - Without method chaining
-const server = new McpServer({ name: "my-app", version: "1.0" }, {});
-
-server.registerWidget("search-results", {}, { /* ... */ }, async () => { /* ... */ });
-server.registerWidget("get-details", {}, { /* ... */ }, async () => { /* ... */ });
-
-export type AppType = typeof server; // Type inference fails
-```
-
-### Generate typed helpers
-
-Create a one-time setup file to get fully typed hooks with autocomplete.
-
-Create `web/src/skybridge.ts`:
-
-```typescript
-import type { AppType } from "../../server/src/index"; // type-only import
-import { generateHelpers } from "skybridge/web";
-
-export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
-```
-
-### Use typed hooks in widgets
-
-Now you can use these typed hooks in your widgets with full autocomplete:
-
-```tsx
-import { useCallTool, useToolInfo } from "../skybridge";
-
-export function SearchWidget() {
-  const { callTool, data, isPending } = useCallTool("search-results");
-  //                                                 ^ autocomplete for widget names
-  
-  const toolInfo = useToolInfo<"search-results">();
-  //                              ^ autocomplete for widget names
-
-  const handleSearch = () => {
-    callTool({ query: "TypeScript" });
-    //         ^ autocomplete for input fields
-  };
-
-  if (toolInfo.isSuccess) {
-    return (
-      <div>
-        <button onClick={handleSearch} disabled={isPending}>
-          Search
-        </button>
-        <div>Found {toolInfo.output.structuredContent.totalCount} results</div>
-        {/*                                         ^ typed output */}
-      </div>
-    );
-  }
-
-  return <div>Searching for {toolInfo.input.query}...</div>;
-  {/*                                    ^ typed input */}
-}
-```
-
-### Benefits of typed hooks
-
-With this setup, you get:
-- Autocomplete for widget names
-- Autocomplete for input field names
-
+Quick summary:
+1. Use method chaining when registering widgets
+2. Export `type AppType = typeof server`
+3. Create a `skybridge.ts` file with `generateHelpers<AppType>()`
+4. Import typed hooks from your helper file

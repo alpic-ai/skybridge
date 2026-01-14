@@ -36,72 +36,16 @@ const { callTool } = useCallTool("search-voyage");
 
 ### Server Must Use Method Chaining
 
-For `generateHelpers` to work correctly, your MCP server **must** be defined using method chaining. This ensures TypeScript can properly infer the tool registry type.
-
-✅ **Works** - Using method chaining:
+Your MCP server **must** use method chaining for type inference to work. See [Type Safety: Method Chaining](/concepts/type-safety#method-chaining) for details.
 
 ```ts
-import { McpServer } from "skybridge/server";
-import { z } from "zod";
-
+// ✅ Works — chain registerWidget/registerTool calls
 const server = new McpServer({ name: "my-app", version: "1.0" }, {})
-  .registerWidget(
-    "search-voyage",
-    {},
-    {
-      inputSchema: { destination: z.string() },
-    },
-    async ({ destination }) => {
-      return {
-        content: [{ type: "text", text: `Found trips to ${destination}` }],
-      };
-    }
-  )
-  .registerTool(
-    "calculate-price",
-    {
-      inputSchema: { tripId: z.string() },
-    },
-    async ({ tripId }) => {
-      return { content: [{ type: "text", text: `Price for ${tripId}` }] };
-    }
-  );
+  .registerWidget("search-voyage", {}, { inputSchema: { destination: z.string() } }, async ({ destination }) => {
+    return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
+  });
 
-export type AppType = typeof server; // ✅ Type inference works correctly
-```
-
-❌ **Doesn't work** - Without method chaining:
-
-```ts
-import { McpServer } from "skybridge/server";
-import { z } from "zod";
-
-const server = new McpServer({ name: "my-app", version: "1.0" }, {});
-
-server.registerWidget(
-  "search-voyage",
-  {},
-  {
-    inputSchema: { destination: z.string() },
-  },
-  async ({ destination }) => {
-    return {
-      content: [{ type: "text", text: `Found trips to ${destination}` }],
-    };
-  }
-);
-
-server.registerTool(
-  "calculate-price",
-  {
-    inputSchema: { tripId: z.string() },
-  },
-  async ({ tripId }) => {
-    return { content: [{ type: "text", text: `Price for ${tripId}` }] };
-  }
-);
-
-export type AppType = typeof server; // ❌ Type inference fails - tool registry is empty
+export type AppType = typeof server;
 ```
 
 ### Export Server Type
@@ -120,7 +64,7 @@ export type AppType = typeof server;
 Create a bridge file that connects your server types to your widgets:
 
 ```ts
-// web/src/skybridge.ts
+// web/src/helpers.ts
 import type { AppType } from "../server"; // type-only import
 import { generateHelpers } from "skybridge/web";
 
@@ -187,7 +131,7 @@ An object containing typed versions of `useCallTool` and `useToolInfo` hooks:
 
 ### `useCallTool`
 
-A typed version of the [`useCallTool`](./use-call-tool) hook that provides autocomplete for tool names and full type inference for inputs and outputs.
+A typed version of the [`useCallTool`](/api-reference/hooks/use-call-tool) hook that provides autocomplete for tool names and full type inference for inputs and outputs.
 
 ```tsx
 const {
@@ -215,7 +159,7 @@ The name of the tool to call. This must match a tool name from your server's reg
 
 #### Return Value
 
-The typed `useCallTool` returns the same structure as the untyped version, but with automatically inferred types. See the [`useCallTool` API reference](./use-call-tool) for detailed documentation on all return properties.
+The typed `useCallTool` returns the same structure as the untyped version, but with automatically inferred types. See the [`useCallTool` API reference](/api-reference/hooks/use-call-tool) for detailed documentation on all return properties.
 
 ### `useToolInfo`
 

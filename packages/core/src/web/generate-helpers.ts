@@ -58,7 +58,7 @@ type TypedToolInfoReturn<TInput, TOutput, TResponseMetadata> = ToolState<
  *
  * @example
  * ```typescript
- * // web/src/skybridge.ts (one-time setup)
+ * // web/src/helpers.ts (one-time setup)
  * import type { AppType } from "../server";
  * import { generateHelpers } from "skybridge/web";
  *

@@ -1,0 +1,324 @@
+---
+sidebar_position: 3
+title: registerWidget
+---
+
+# registerWidget
+
+Register an interactive widget with a React UI.
+
+## Signature
+
+```typescript
+server.registerWidget(
+  name: string,
+  resourceConfig: WidgetResourceConfig,
+  toolConfig: WidgetToolConfig,
+  handler: WidgetHandler
+): McpServer
+```
+
+## Parameters
+
+### name
+
+The widget identifier. Must match the widget file name in `web/src/widgets/`:
+
+```typescript
+// server.registerWidget("pokemon-card", ...) → web/src/widgets/pokemon-card.tsx
+// server.registerWidget("search-results", ...) → web/src/widgets/search-results.tsx
+```
+
+This convention enables automatic routing between server tools and widget components.
+
+:::info Requires skybridge/server and skybridge/web
+This naming convention applies when using both Skybridge packages together. If you're using your own MCP server implementation, you'll need to handle widget routing manually.
+:::
+
+### resourceConfig
+
+Metadata for the widget resource:
+
+```typescript
+type WidgetResourceConfig = {
+  description?: string;  // Shown in tool discovery
+  _meta?: {
+    ui?: {
+      csp?: {
+        resourceDomains?: string[];  // Static assets (images, fonts, scripts)
+        connectDomains?: string[];   // Fetch/XHR requests
+        frameDomains?: string[];     // Iframe embeds
+        redirectDomains?: string[];  // External redirects
+      };
+      domain?: string;         // Primary widget domain
+      prefersBorder?: boolean; // Widget border preference
+    };
+  };
+};
+```
+
+See [CSP & Domains](#csp--domains) for details on configuring external domains.
+
+### toolConfig
+
+Schema and metadata for the tool:
+
+```typescript
+type WidgetToolConfig = {
+  title?: string;              // Display title
+  description?: string;        // Shown to the model
+  inputSchema?: ZodObject;     // Input validation
+  outputSchema?: ZodObject;    // Output type hints
+  annotations?: ToolAnnotations;
+  _meta?: {
+    // Enable widget-initiated tool calls (see useCallTool)
+    "openai/widgetAccessible"?: boolean;
+    // Custom status messages
+    "openai/toolInvocation/invoking"?: string;  // While running
+    "openai/toolInvocation/invoked"?: string;   // After completion
+  };
+};
+```
+
+### handler
+
+Async function that executes when the tool is called:
+
+```typescript
+type WidgetHandler = (input: Input) => Promise<{
+  content?: ContentBlock[];           // Text for the model
+  structuredContent: StructuredData;  // Data for the widget
+  _meta?: Record<string, unknown>;    // Response metadata
+}>;
+```
+
+## Return Value
+
+Returns the server instance for method chaining:
+
+```typescript
+const server = new McpServer(config, {})
+  .registerWidget("a", ...)
+  .registerWidget("b", ...)  // Chained
+  .registerWidget("c", ...); // Chained
+```
+
+## Response Fields
+
+The handler returns three fields: `content` (text for the model), `structuredContent` (data for the widget), and `_meta` (optional metadata). See [Data Flow: Response Fields](/concepts/data-flow#response-fields-explained) for details.
+
+```typescript
+return {
+  content: [{ type: "text", text: "Found 5 flights to Paris" }],
+  structuredContent: { flights: [...] },  // Access via useToolInfo
+  _meta: { searchId: "abc123" }           // Optional metadata
+};
+```
+
+## Input Schema
+
+Define expected inputs with Zod:
+
+```typescript
+{
+  inputSchema: {
+    // Required fields
+    query: z.string().describe("Search query"),
+
+    // Optional with default
+    limit: z.number().optional().default(10),
+
+    // Enum
+    sortBy: z.enum(["price", "rating", "distance"]),
+
+    // Nested object
+    filters: z.object({
+      minPrice: z.number().optional(),
+      maxPrice: z.number().optional(),
+    }).optional(),
+
+    // Array
+    amenities: z.array(z.string()).optional(),
+  }
+}
+```
+
+## Output Schema
+
+Optional type hints for the output:
+
+```typescript
+{
+  inputSchema: { ... },
+  outputSchema: {
+    results: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      price: z.number(),
+    })),
+    totalCount: z.number(),
+  }
+}
+```
+
+:::note
+Output schema is primarily for documentation and type inference. Runtime validation is not enforced.
+:::
+
+## Examples
+
+### Basic Widget
+
+```typescript
+server.registerWidget("greeting", {
+  description: "Display a greeting",
+}, {
+  inputSchema: {
+    name: z.string(),
+  },
+}, async ({ name }) => {
+  return {
+    content: [{ type: "text", text: `Greeting ${name}` }],
+    structuredContent: { name, message: `Hello, ${name}!` },
+  };
+});
+```
+
+### With External API
+
+```typescript
+server.registerWidget("weather", {
+  description: "Show weather for a location",
+  _meta: {
+    ui: {
+      csp: {
+        // Allow widget to fetch from weather API
+        connectDomains: ["https://api.weather.com"],
+      },
+    },
+  },
+}, {
+  inputSchema: {
+    city: z.string(),
+    units: z.enum(["metric", "imperial"]).optional().default("metric"),
+  },
+  outputSchema: {
+    temperature: z.number(),
+    conditions: z.string(),
+    humidity: z.number(),
+  },
+}, async ({ city, units }) => {
+  const weather = await fetchWeather(city, units);
+
+  return {
+    content: [{
+      type: "text",
+      text: `Current weather in ${city}: ${weather.temperature}°, ${weather.conditions}`
+    }],
+    structuredContent: weather,
+  };
+});
+```
+
+:::tip
+If your widget makes client-side API calls, remember to add those domains to `connectDomains`. Server-side calls in the handler don't need CSP configuration.
+:::
+
+### With Error Handling
+
+```typescript
+server.registerWidget("user-profile", {
+  description: "Show user profile",
+}, {
+  inputSchema: {
+    userId: z.string(),
+  },
+}, async ({ userId }) => {
+  const user = await getUser(userId);
+
+  if (!user) {
+    return {
+      content: [{ type: "text", text: `User ${userId} not found` }],
+      structuredContent: { error: "not_found", userId },
+    };
+  }
+
+  return {
+    content: [{ type: "text", text: `Showing profile for ${user.name}` }],
+    structuredContent: user,
+  };
+});
+```
+
+## CSP & Domains
+
+ChatGPT apps run widgets in a sandboxed iframe with strict Content Security Policy. If your widget needs to:
+- **Fetch data from external APIs** → add to `connectDomains`
+- **Load images, fonts, or scripts from CDNs** → add to `resourceDomains`
+- **Embed external iframes** → add to `frameDomains`
+- **Redirect to external sites** → add to `redirectDomains`
+
+:::note
+Skybridge automatically includes your server's domain in the CSP. You only need to configure additional external domains.
+:::
+
+### Configuration
+
+```typescript
+server.registerWidget("flight-search", {
+  description: "Search for flights",
+  _meta: {
+    ui: {
+      csp: {
+        // APIs your widget calls via fetch/XHR
+        connectDomains: ["https://api.flights.com"],
+        // CDNs for images, fonts, scripts
+        resourceDomains: ["https://cdn.flights.com", "https://fonts.googleapis.com"],
+        // External sites for iframe embeds (stricter app review)
+        frameDomains: ["https://maps.google.com"],
+        // Allowed redirect destinations (skips safe-link modal)
+        redirectDomains: ["https://booking.flights.com"],
+      },
+      // Removes default widget border
+      prefersBorder: false,
+    },
+  },
+}, { ... }, async (input) => { ... });
+```
+
+### CSP Fields
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `connectDomains` | Domains for fetch/XHR requests | `["https://api.example.com"]` |
+| `resourceDomains` | Static assets (images, fonts, scripts, styles) | `["https://cdn.example.com"]` |
+| `frameDomains` | Origins for iframe embeds | `["https://youtube.com"]` |
+| `redirectDomains` | External redirect destinations | `["https://checkout.example.com"]` |
+
+### Priority & Merging
+
+CSP arrays are **merged** (not overridden). User domains are added to defaults:
+
+```typescript
+// Skybridge auto-includes: ["https://your-server.com"]
+// You add: ["https://api.example.com"]
+// Result: ["https://your-server.com", "https://api.example.com"]
+```
+
+You can also use direct OpenAI metadata keys for advanced control:
+
+```typescript
+_meta: {
+  ui: { csp: { connectDomains: ["https://api.example.com"] } },
+  // Direct keys override ui.* equivalents
+  "openai/widgetDomain": "https://custom-domain.com",
+}
+```
+
+Priority: defaults < `ui.*` < direct `openai/*` keys.
+
+## Related
+
+- [McpServer](/api-reference/server/mcp-server) - Server class
+- [useToolInfo](/api-reference/hooks/use-tool-info) - Access widget data
+- [Data Flow concept](/concepts/data-flow) - Understanding the communication loop

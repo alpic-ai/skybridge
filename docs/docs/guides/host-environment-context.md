@@ -1,0 +1,301 @@
+---
+sidebar_position: 5
+title: Host Environment Context
+---
+
+# Host Environment Context
+
+How to make your widget adapt to ChatGPT's theme, locale, display mode, and device.
+
+## Available Hooks
+
+| Hook | What it provides |
+|------|------------------|
+| `useLayout` | Theme, safe areas, max height |
+| `useUser` | Locale, user agent, device capabilities |
+| `useDisplayMode` | Current display mode, mode switching |
+| `useRequestModal` | Open widget in modal |
+| `useOpenExternal` | Open external URLs |
+
+## Theme Adaptation with useLayout
+
+Match ChatGPT's light/dark theme:
+
+```tsx
+import { useLayout } from "skybridge/web";
+
+function ThemedWidget() {
+  const { theme } = useLayout();
+  const isDark = theme === "dark";
+
+  return (
+    <div style={{
+      backgroundColor: isDark ? "#1a1a1a" : "#ffffff",
+      color: isDark ? "#ffffff" : "#000000",
+      padding: "16px",
+    }}>
+      <h1>Hello</h1>
+    </div>
+  );
+}
+```
+
+### With CSS Variables
+
+```tsx
+function ThemedWidget() {
+  const { theme } = useLayout();
+
+  return (
+    <div
+      className="widget"
+      data-theme={theme}
+      style={{
+        "--bg": theme === "dark" ? "#1a1a1a" : "#ffffff",
+        "--text": theme === "dark" ? "#ffffff" : "#000000",
+      } as React.CSSProperties}
+    >
+      {/* Content */}
+    </div>
+  );
+}
+```
+
+```css
+.widget {
+  background: var(--bg);
+  color: var(--text);
+}
+```
+
+### Safe Areas
+
+Handle device notches and navigation bars:
+
+```tsx
+const { safeArea } = useLayout();
+
+<div style={{
+  paddingTop: safeArea.top,
+  paddingBottom: safeArea.bottom,
+  paddingLeft: safeArea.left,
+  paddingRight: safeArea.right,
+}}>
+  {/* Content */}
+</div>
+```
+
+### Max Height
+
+Respect the container's max height:
+
+```tsx
+const { maxHeight } = useLayout();
+
+<div style={{
+  maxHeight: maxHeight ?? "100vh",
+  overflow: "auto",
+}}>
+  {/* Scrollable content */}
+</div>
+```
+
+## User Info with useUser
+
+Access locale and device capabilities:
+
+```tsx
+import { useUser } from "skybridge/web";
+
+function LocalizedWidget() {
+  const { locale, userAgent } = useUser();
+
+  // Format currency based on locale
+  const formatPrice = (amount: number) => {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
+  };
+
+  // Check device capabilities
+  const isMobile = userAgent.device.type === "mobile";
+  const hasHover = userAgent.capabilities.hover;
+
+  return (
+    <div>
+      <p>Price: {formatPrice(99.99)}</p>
+      {isMobile ? (
+        <button className="large-tap-target">Buy Now</button>
+      ) : (
+        <button className={hasHover ? "hoverable" : ""}>Buy Now</button>
+      )}
+    </div>
+  );
+}
+```
+
+### Available User Agent Properties
+
+```typescript
+const { userAgent } = useUser();
+
+userAgent.device.type;        // "mobile" | "tablet" | "desktop"
+userAgent.capabilities.hover; // true if device has hover capability
+userAgent.capabilities.touch; // true if device has touch capability
+```
+
+## Display Mode with useDisplayMode
+
+Widgets can render in different display modes:
+
+| Mode | Description |
+|------|-------------|
+| `pip` | Picture-in-picture (small floating window) |
+| `inline` | Inline with the conversation |
+| `fullscreen` | Full screen takeover |
+| `modal` | Modal overlay |
+
+```tsx
+import { useDisplayMode } from "skybridge/web";
+
+function AdaptiveWidget() {
+  const { displayMode, setDisplayMode } = useDisplayMode();
+
+  // Render differently based on mode
+  if (displayMode === "pip") {
+    return <CompactView />;
+  }
+
+  return (
+    <div>
+      <FullView />
+      <button onClick={() => setDisplayMode("fullscreen")}>
+        Go Fullscreen
+      </button>
+    </div>
+  );
+}
+```
+
+### Requesting Mode Change
+
+```tsx
+const { setDisplayMode } = useDisplayMode();
+
+// Go fullscreen for immersive content
+<button onClick={() => setDisplayMode("fullscreen")}>
+  View Full Map
+</button>
+
+// Back to inline
+<button onClick={() => setDisplayMode("inline")}>
+  Close Map
+</button>
+```
+
+## Modal Requests with useRequestModal
+
+Open a modal version of your widget:
+
+```tsx
+import { useRequestModal } from "skybridge/web";
+
+function ProductCard({ product }) {
+  const { open } = useRequestModal();
+
+  const showDetails = () => {
+    open({
+      title: product.name,
+      params: { productId: product.id },
+    });
+  };
+
+  return (
+    <div onClick={showDetails}>
+      <img src={product.image} alt={product.name} />
+      <p>{product.name}</p>
+    </div>
+  );
+}
+
+// In your modal component, access params via useToolInfo or similar
+```
+
+## External Links with useOpenExternal
+
+Open URLs outside the widget:
+
+```tsx
+import { useOpenExternal } from "skybridge/web";
+
+function LinkWidget() {
+  const openExternal = useOpenExternal();
+
+  const openDocs = () => {
+    openExternal({ url: "https://docs.example.com" });
+  };
+
+  const openApp = () => {
+    // Open mobile app if available
+    openExternal({ url: "myapp://deep-link" });
+  };
+
+  return (
+    <div>
+      <button onClick={openDocs}>View Documentation</button>
+      <button onClick={openApp}>Open in App</button>
+    </div>
+  );
+}
+```
+
+:::note
+External links open in a new tab/window. Some URLs may be blocked by the iframe's CSP policy.
+:::
+
+## Responsive Design Pattern
+
+Combine hooks for a fully adaptive widget:
+
+```tsx
+function ResponsiveWidget() {
+  const { theme, safeArea, maxHeight } = useLayout();
+  const { locale, userAgent } = useUser();
+  const { displayMode, setDisplayMode } = useDisplayMode();
+
+  const isMobile = userAgent.device.type === "mobile";
+  const isDark = theme === "dark";
+
+  return (
+    <div
+      style={{
+        backgroundColor: isDark ? "#1a1a1a" : "#ffffff",
+        color: isDark ? "#ffffff" : "#000000",
+        paddingTop: safeArea.top,
+        paddingBottom: safeArea.bottom,
+        maxHeight: maxHeight ?? "100vh",
+        overflow: "auto",
+      }}
+    >
+      {displayMode === "pip" ? (
+        <MiniView onExpand={() => setDisplayMode("inline")} />
+      ) : (
+        <FullView
+          isMobile={isMobile}
+          locale={locale}
+          onMinimize={() => setDisplayMode("pip")}
+        />
+      )}
+    </div>
+  );
+}
+```
+
+## Related
+
+- [useLayout API](/api-reference/hooks/use-layout)
+- [useUser API](/api-reference/hooks/use-user)
+- [useDisplayMode API](/api-reference/hooks/use-display-mode)
+- [useRequestModal API](/api-reference/hooks/use-request-modal)
+- [useOpenExternal API](/api-reference/hooks/use-open-external)

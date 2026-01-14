@@ -9,6 +9,10 @@ import TabItem from '@theme/TabItem';
 
 The fastest way to start building is using our starter template. It comes pre-configured with an MCP server, UI widgets, and a full dev server with Hot Module Reload.
 
+:::tip Before You Start
+New to ChatGPT Apps or MCP? Read [MCP and ChatGPT Apps Fundamentals](/mcp-and-chatgpt-fundamentals) first to understand the concepts.
+:::
+
 ## Bootstrap your project
 
 Set up your app with a single command:
@@ -55,6 +59,12 @@ deno init --npm skybridge my-chatgpt-app
 Make sure you have:
 - **Node.js 24+**
 - **[Ngrok](https://ngrok.com/download)** for exposing your local server
+- Basic knowledge of **React** and **TypeScript**
+- Familiarity with **Zod** for schema validation (we'll use it for type-safe tool definitions)
+:::
+
+:::caution Widget Naming Convention
+Widget file name must match the registration name (e.g., `"my-widget"` → `my-widget.tsx`). See [registerWidget](/api-reference/server/register-widget#name).
 :::
 
 ## Start the development server
@@ -118,26 +128,14 @@ When you run `skybridge`:
 4. **File watching** is enabled - changes to server code will automatically restart the server
 5. **Hot Module Reload (HMR)** is active for Widgets components - changes appear instantly in ChatGPT without reconnecting
 
-### Using your app in ChatGPT
+## Next step
 
-To use your app directly in ChatGPT:
+Your dev server is running. Now learn how to test your app locally and in ChatGPT:
 
-1. **Start your server** (see above).
-
-2. **Expose your local server to the internet** (so ChatGPT can reach it). The most common option is [ngrok](https://ngrok.com/). In a new terminal, run:
-
-   ```bash
-   ngrok http 3000
-   ```
-
-   This will give you a public URL such as `https://xxxxxx.ngrok-free.app`.
-
-3. **Connect ChatGPT to your app**:
-
-- In ChatGPT, open **Profile → Apps → Create app**.
-- Paste your ngrok URL with `/mcp` at the end, for example:
-  ```
-  https://xxxxxx.ngrok-free.app/mcp
-  ```
-- Open a new conversation and select your app using the + button.
-- Try prompting the model.
+<div className="card-grid">
+  <div className="card">
+    <h3>Test Your App</h3>
+    <p>Learn how to test locally with DevTools and in ChatGPT</p>
+    <a href="/quickstart/test-your-app" className="card-link">Continue →</a>
+  </div>
+</div>

@@ -1,0 +1,240 @@
+---
+sidebar_position: 3
+title: Managing State
+---
+
+# Managing State
+
+How to persist widget state across renders and re-mounts.
+
+## Decision Tree
+
+```
+What kind of state do you need?
+
+├── Need to sync with LLM? → data-llm attribute
+│   (The model needs to know what user is viewing)
+│
+├── Simple key/value state? → useWidgetState
+│   (Form inputs, selected items, flags — persisted in ChatGPT)
+│
+└── Complex state with actions? → createStore
+    (Multiple related values, computed state, async actions)
+```
+
+## useWidgetState
+
+Persistent state that survives re-renders and display mode changes. Unlike React's `useState`, this state is stored by ChatGPT and restored when your widget remounts.
+
+```tsx
+import { useWidgetState } from "skybridge/web";
+
+function CounterWidget() {
+  const [state, setState] = useWidgetState({ count: 0 });
+
+  if (!state) return null;
+
+  return (
+    <div>
+      <p>Count: {state.count}</p>
+      <button onClick={() => setState(prev => ({ count: prev.count + 1 }))}>
+        Increment
+      </button>
+    </div>
+  );
+}
+```
+
+### API
+
+```tsx
+const [state, setState] = useWidgetState<T>(defaultState);
+```
+
+- `state`: Current state (or `null` if not yet initialized)
+- `setState`: Update function (accepts value or updater function)
+- `defaultState`: Initial state (used if no persisted state exists)
+
+### Patterns
+
+**Form state:**
+```tsx
+const [formData, setFormData] = useWidgetState({
+  name: "",
+  email: "",
+  message: "",
+});
+
+const updateField = (field: string, value: string) => {
+  setFormData(prev => ({ ...prev, [field]: value }));
+};
+```
+
+**Selection state:**
+```tsx
+const [selected, setSelected] = useWidgetState<Set<string>>(new Set());
+
+const toggleItem = (id: string) => {
+  setSelected(prev => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    return next;
+  });
+};
+```
+
+## createStore
+
+A Zustand store that automatically syncs with ChatGPT's persistent state. Unlike `useWidgetState`, this provides actions, computed values, and middleware support for complex state management.
+
+```tsx
+import { createStore } from "skybridge/web";
+
+type CartItem = { id: string; name: string; price: number; quantity: number };
+
+type CartState = {
+  items: CartItem[];
+  addItem: (item: Omit<CartItem, "quantity">) => void;
+  removeItem: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  total: () => number;
+  clear: () => void;
+};
+
+const useCartStore = createStore<CartState>((set, get) => ({
+  items: [],
+
+  addItem: (item) => set((state) => {
+    const existing = state.items.find(i => i.id === item.id);
+    if (existing) {
+      return {
+        items: state.items.map(i =>
+          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+        ),
+      };
+    }
+    return { items: [...state.items, { ...item, quantity: 1 }] };
+  }),
+
+  removeItem: (id) => set((state) => ({
+    items: state.items.filter(i => i.id !== id),
+  })),
+
+  updateQuantity: (id, quantity) => set((state) => ({
+    items: state.items.map(i =>
+      i.id === id ? { ...i, quantity } : i
+    ),
+  })),
+
+  total: () => get().items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  ),
+
+  clear: () => set({ items: [] }),
+}), { items: [] }); // Default state for first load
+```
+
+Usage:
+```tsx
+function CartWidget() {
+  const items = useCartStore(state => state.items);
+  const addItem = useCartStore(state => state.addItem);
+  const total = useCartStore(state => state.total());
+
+  return (
+    <div>
+      <ul>
+        {items.map(item => (
+          <li key={item.id}>{item.name} x{item.quantity}</li>
+        ))}
+      </ul>
+      <p>Total: ${total}</p>
+    </div>
+  );
+}
+```
+
+### Automatic Persistence
+
+`createStore` automatically:
+- Syncs state to `window.openai.setWidgetState()` on every change
+- Restores state from `window.openai.widgetState` on load
+- Filters out functions (actions) during serialization
+
+## Comparison Table
+
+| Feature | `useWidgetState` | `createStore` |
+|---------|------------------|---------------|
+| Setup complexity | Simple | Moderate |
+| State shape | Any object | Object with actions |
+| Multiple consumers | Re-renders all | Selective subscriptions |
+| Computed values | Manual | Built-in with `get()` |
+| Async actions | Manual with callbacks | Built-in |
+| Best for | Simple forms, flags | Shopping carts, complex flows |
+
+## Combining with data-llm
+
+State management is separate from LLM context. Use both when needed:
+
+```tsx
+function ProductListWidget() {
+  const [selected, setSelected] = useWidgetState<string | null>(null);
+  const products = useToolInfo<Product[]>().output?.structuredContent.products;
+
+  const selectedProduct = products?.find(p => p.id === selected);
+
+  return (
+    <div data-llm={selected
+      ? `User selected: ${selectedProduct?.name}`
+      : "User browsing product list"
+    }>
+      {products?.map(product => (
+        <div
+          key={product.id}
+          onClick={() => setSelected(product.id)}
+          data-llm={`Product: ${product.name} - $${product.price}`}
+        >
+          {product.name}
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+- `useWidgetState` persists the selection
+- `data-llm` tells the model what the user sees
+
+## When State Persists
+
+Widget state persists:
+- When the widget re-renders (component update)
+- When the user scrolls away and back
+- When the display mode changes
+
+Widget state **resets** when:
+- A new conversation starts
+- The tool is called again with new input
+- The user explicitly clears it
+
+## Migration from useState
+
+If you're using React `useState` and losing state on re-renders:
+
+```tsx
+// Before: State lost on re-mount
+const [selected, setSelected] = useState<string | null>(null);
+
+// After: State persists
+const [selected, setSelected] = useWidgetState<string | null>(null);
+```
+
+The API is intentionally similar to `useState` for easy migration.
+
+## Related
+
+- [useWidgetState API](/api-reference/hooks/use-widget-state)
+- [createStore API](/api-reference/utilities/create-store)
+- [LLM Context Sync](/concepts/llm-context-sync)

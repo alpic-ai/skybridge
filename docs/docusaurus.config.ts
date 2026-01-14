@@ -18,6 +18,12 @@ const config: Config = {
   url: "https://skybridge.tech",
   baseUrl: "/",
 
+  markdown: {
+    mermaid: true,
+  },
+
+  themes: ["@docusaurus/theme-mermaid"],
+
   i18n: {
     defaultLocale: "en",
     locales: ["en"],
