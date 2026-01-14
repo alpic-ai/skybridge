@@ -66,6 +66,14 @@ Ready to build your first ChatGPT App with Skybridge? Choose your path:
   </div>
 </div>
 
+## Example Projects
+
+| Example                                                                 | Source Code | Live Demo                                                              |
+|-------------------------------------------------------------------------|-------------|------------------------------------------------------------------------|
+| **Capitals Explorer** – Interactive world map with capital city details | [examples/capitals](https://github.com/alpic-ai/skybridge/tree/main/examples/capitals) | [capitals.skybridge.tech/mcp](https://capitals.skybridge.tech/mcp)     |
+| **Ecommerce Carousel** – Product carousel with cart and checkout        | [examples/ecom-carousel](https://github.com/alpic-ai/skybridge/tree/main/examples/ecom-carousel) | [ecommerce.skybridge.tech/mcp](https://ecommerce.skybridge.tech/mcp)   |
+| **Everything** – Playground showcasing all Skybridge hooks & features   | [examples/everything](https://github.com/alpic-ai/skybridge/tree/main/examples/everything) | [everything.skybridge.tech/mcp](https://everything.skybridge.tech/mcp) |
+
 ## Want to dig deeper?
 
 <div className="card-grid">
