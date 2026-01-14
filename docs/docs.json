@@ -129,5 +129,10 @@
     "socials": {
       "github": "https://github.com/alpic-ai/skybridge"
     }
+  },
+  "integrations": {
+    "ga4": {
+      "measurementId": "G-0W0ZMXTSDZ"
+    }
   }
 }
