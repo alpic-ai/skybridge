@@ -1,0 +1,152 @@
+---
+title: Fast Iteration
+---
+
+
+**Problem:** Testing widgets in ChatGPT's dev mode is slow. It requires ngrok tunneling, manual refreshes, and provides limited debugging feedback.
+
+**Solution:** Skybridge includes a local emulator and Vite HMR plugin that let you develop widgets entirely on your machine with instant feedback.
+
+## The Challenge
+
+When building ChatGPT Apps the traditional way, your development loop looks like:
+
+1. Make a code change
+2. Restart your server
+3. Tunnel with ngrok (if not already running)
+4. Go to ChatGPT dev mode
+5. Trigger the tool manually by chatting
+6. Wait for the widget to load
+7. See if your change worked
+8. Repeat
+
+This can take 30-60 seconds per iteration. With complex widgets, that adds up fast.
+
+## The Skybridge Approach
+
+With Skybridge, the loop becomes:
+
+1. Make a code change
+2. See it instantly in your browser
+
+That's it. The local emulator mocks the ChatGPT environment, and Vite's HMR updates your widget without a full reload.
+
+## Local Emulator
+
+When you run `pnpm dev`, Skybridge starts:
+- Your MCP server at `http://localhost:3000/mcp`
+- DevTools UI at `http://localhost:3000/`
+
+The DevTools UI provides:
+- **Tool listing** - See all registered tools and widgets
+- **Input forms** - Test tools with custom inputs
+- **Widget preview** - Render widgets in a mocked ChatGPT environment
+
+<a href="/images/emulator.png" target="_blank">
+  <img src="/images/emulator.png" alt="Skybridge DevTools Emulator" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
+</a>
+
+### Using the Emulator
+
+1. Open `http://localhost:3000/` in your browser
+2. Select a tool from the sidebar
+3. Fill in the input form and click "Call Tool"
+4. See the widget render in the preview pane
+
+The emulator mocks:
+- `window.openai` API (theme, locale, display mode, etc.)
+- Tool call responses
+- Widget state persistence
+- Follow-up message sending
+
+<Note>
+**Emulator limitations**
+
+The local emulator uses ChatGPT's rendering environment but has some differences:
+- **CSP policies**: Some external resources may be blocked in production but allowed locally
+- **LLM responses**: Follow-up messages don't trigger actual LLM responses—test these in ChatGPT dev mode
+</Note>
+
+## HMR with Vite Plugin
+
+Skybridge includes a Vite plugin that enables Hot Module Replacement for widgets:
+
+```typescript
+// vite.config.ts
+import { skybridge } from "skybridge/web";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [react(), skybridge()],
+});
+```
+
+The plugin:
+- **Auto-discovers widgets** in `src/widgets/` (both flat files and directories)
+- **Enables HMR** so changes appear instantly without page reload
+- **Transforms `data-llm`** attributes at build time
+- **Configures build output** with proper asset paths
+
+<Info>
+**Starter template required**
+
+These features require the Skybridge starter template structure (`pnpm create skybridge`). If you're adding Skybridge to an existing app, you'll need to configure the Vite plugin manually.
+</Info>
+
+When you save a file, only the changed component re-renders. Form inputs, scroll position, and local state are preserved.
+
+## Automatic Environment Detection
+
+Your widget code works identically in ChatGPT and local DevTools. Skybridge detects the environment and uses the appropriate communication layer:
+
+| Environment | Communication |
+|-------------|---------------|
+| ChatGPT | `window.openai` API |
+| DevTools | postMessage to emulator |
+
+You don't need to know which is active—just use the hooks.
+
+## When to Use What
+
+**Local Emulator (90% of development time)**
+- Rapid UI iteration
+- Testing tool inputs/outputs
+- Debugging state management
+- Day-to-day development
+
+**ChatGPT Dev Mode (10% of development time)**
+- Final integration testing
+- Real LLM conversation flow
+- Verifying `data-llm` context
+- Pre-ship validation
+
+<Tip>
+**Workflow**
+
+Build locally → validate in ChatGPT → ship. See [Test Your App](/quickstart/test-your-app#testing-in-chatgpt) for ChatGPT setup.
+</Tip>
+
+## DevTools Features
+
+The DevTools UI includes:
+
+### Tool Inspector
+See all registered tools and their schemas. Click to fill input forms automatically.
+
+### Widget Preview
+Renders your widget in an iframe with mocked `window.openai`. Supports:
+- Theme switching (light/dark)
+- Display mode switching (pip/inline/fullscreen)
+- Locale changing
+
+
+### Response Inspector
+View the full tool response including `content`, `structuredContent`, and `_meta`.
+
+## Related
+
+- [Test Your App](/quickstart/test-your-app) - Full testing workflow including ChatGPT dev mode
+- [DevTools](/devtools) - Detailed DevTools documentation
+- [useLayout API](/api-reference/use-layout) - Access theme and layout info
+- [useCallTool API](/api-reference/use-call-tool) - Make tool calls from widgets

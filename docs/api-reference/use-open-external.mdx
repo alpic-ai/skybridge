@@ -1,0 +1,197 @@
+---
+title: useOpenExternal
+---
+
+
+The `useOpenExternal` hook returns a function to open external links. This is the proper way to navigate users to external URLs from within a widget, as it delegates to the host application to handle the navigation appropriately.
+
+## Basic usage
+
+```tsx
+import { useOpenExternal } from "skybridge/web";
+
+function ExternalLink() {
+  const openExternal = useOpenExternal();
+
+  return (
+    <button onClick={() => openExternal("https://example.com")}>
+      Visit Website
+    </button>
+  );
+}
+```
+
+## Returns
+
+```tsx
+openExternal: (href: string) => void
+```
+
+A function that opens the provided URL in the host's browser or redirects the mobile app accordingly.
+
+### Parameters
+
+- `href: string`
+  - **Required**
+  - The URL to open
+
+## Examples
+
+### Link Button Component
+
+```tsx
+import { useOpenExternal } from "skybridge/web";
+
+type ExternalLinkButtonProps = {
+  href: string;
+  children: React.ReactNode;
+};
+
+function ExternalLinkButton({ href, children }: ExternalLinkButtonProps) {
+  const openExternal = useOpenExternal();
+
+  return (
+    <button
+      onClick={() => openExternal(href)}
+      className="external-link-button"
+    >
+      {children}
+      <span aria-hidden="true"> ↗</span>
+    </button>
+  );
+}
+
+// Usage
+function App() {
+  return (
+    <ExternalLinkButton href="https://docs.example.com">
+      View Documentation
+    </ExternalLinkButton>
+  );
+}
+```
+
+### Product Card with External Link
+
+```tsx
+import { useOpenExternal } from "skybridge/web";
+
+type Product = {
+  name: string;
+  price: number;
+  url: string;
+  imageUrl: string;
+};
+
+function ProductCard({ product }: { product: Product }) {
+  const openExternal = useOpenExternal();
+
+  return (
+    <div className="product-card">
+      <img src={product.imageUrl} alt={product.name} />
+      <h3>{product.name}</h3>
+      <p>${product.price}</p>
+      <button onClick={() => openExternal(product.url)}>
+        Buy Now
+      </button>
+    </div>
+  );
+}
+```
+
+### Social Links
+
+```tsx
+import { useOpenExternal } from "skybridge/web";
+
+const socialLinks = [
+  { name: "Twitter", url: "https://twitter.com/example", icon: "🐦" },
+  { name: "GitHub", url: "https://github.com/example", icon: "🐙" },
+  { name: "LinkedIn", url: "https://linkedin.com/in/example", icon: "💼" },
+];
+
+function SocialLinks() {
+  const openExternal = useOpenExternal();
+
+  return (
+    <div className="social-links">
+      {socialLinks.map((link) => (
+        <button
+          key={link.name}
+          onClick={() => openExternal(link.url)}
+          aria-label={`Visit ${link.name}`}
+        >
+          {link.icon}
+        </button>
+      ))}
+    </div>
+  );
+}
+```
+
+### Article with References
+
+```tsx
+import { useOpenExternal } from "skybridge/web";
+
+type Reference = {
+  title: string;
+  url: string;
+};
+
+function ArticleReferences({ references }: { references: Reference[] }) {
+  const openExternal = useOpenExternal();
+
+  return (
+    <section className="references">
+      <h4>References</h4>
+      <ol>
+        {references.map((ref, index) => (
+          <li key={index}>
+            <button
+              onClick={() => openExternal(ref.url)}
+              className="reference-link"
+            >
+              {ref.title}
+            </button>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+```
+
+### Dynamic URL Opening
+
+```tsx
+import { useOpenExternal } from "skybridge/web";
+import { useState } from "react";
+
+function SearchRedirect() {
+  const openExternal = useOpenExternal();
+  const [query, setQuery] = useState("");
+
+  const handleSearch = () => {
+    if (query.trim()) {
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+      openExternal(searchUrl);
+    }
+  };
+
+  return (
+    <div className="search-redirect">
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search..."
+        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+      />
+      <button onClick={handleSearch}>
+        Search on Google
+      </button>
+    </div>
+  );
+}
+```

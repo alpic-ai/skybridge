@@ -1,0 +1,182 @@
+---
+title: Type Utilities
+---
+
+
+TypeScript utilities for extracting types from your MCP server.
+
+## Import
+
+```typescript
+import type {
+  InferTools,
+  ToolNames,
+  ToolInput,
+  ToolOutput,
+  ToolResponseMetadata,
+} from "skybridge/web";
+```
+
+## InferTools
+
+Extract the full tool registry from a server type:
+
+```typescript
+import type { InferTools } from "skybridge/web";
+import type { AppType } from "../../server/src/index";
+
+type Tools = InferTools<AppType>;
+// { "search-hotels": ToolDef<...>, "hotel-details": ToolDef<...> }
+```
+
+## ToolNames
+
+Get a union of all tool names:
+
+```typescript
+import type { ToolNames } from "skybridge/web";
+import type { AppType } from "../../server/src/index";
+
+type Names = ToolNames<AppType>;
+// "search-hotels" | "hotel-details"
+```
+
+Use for type-safe tool name parameters:
+
+```typescript
+function logToolCall(name: ToolNames<AppType>) {
+  console.log(`Called: ${name}`);
+}
+
+logToolCall("search-hotels"); // OK
+logToolCall("invalid-tool"); // Type error
+```
+
+## ToolInput
+
+Get the input type for a specific tool:
+
+```typescript
+import type { ToolInput } from "skybridge/web";
+import type { AppType } from "../../server/src/index";
+
+type SearchInput = ToolInput<AppType, "search-hotels">;
+// { city: string; checkIn: string; checkOut: string; guests?: number }
+```
+
+## ToolOutput
+
+Get the output type for a specific tool:
+
+```typescript
+import type { ToolOutput } from "skybridge/web";
+import type { AppType } from "../../server/src/index";
+
+type SearchOutput = ToolOutput<AppType, "search-hotels">;
+// { hotels: Array<{ id: string; name: string; price: number }> }
+```
+
+## ToolResponseMetadata
+
+Get the response metadata type for a specific tool:
+
+```typescript
+import type { ToolResponseMetadata } from "skybridge/web";
+import type { AppType } from "../../server/src/index";
+
+type SearchMeta = ToolResponseMetadata<AppType, "search-hotels">;
+// { searchId: string; cached: boolean } | undefined
+```
+
+## Usage Examples
+
+### Type-safe Component Props
+
+```typescript
+import type { ToolOutput } from "skybridge/web";
+import type { AppType } from "../../server/src/index";
+
+type HotelData = ToolOutput<AppType, "search-hotels">;
+
+function HotelList({ hotels }: { hotels: HotelData["hotels"] }) {
+  return (
+    <ul>
+      {hotels.map(hotel => (
+        <li key={hotel.id}>{hotel.name}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### Type-safe API Wrapper
+
+```typescript
+import type { ToolInput, ToolOutput, ToolNames } from "skybridge/web";
+import type { AppType } from "../../server/src/index";
+
+async function callServerTool<T extends ToolNames<AppType>>(
+  name: T,
+  input: ToolInput<AppType, T>
+): Promise<ToolOutput<AppType, T>> {
+  // Implementation
+}
+
+// Usage - fully typed
+const result = await callServerTool("search-hotels", {
+  city: "Paris",
+  checkIn: "2025-01-01",
+  checkOut: "2025-01-05",
+});
+// result is typed as SearchOutput
+```
+
+### Conditional Types Based on Tool
+
+```typescript
+import type { ToolNames, ToolOutput } from "skybridge/web";
+import type { AppType } from "../../server/src/index";
+
+function renderToolResult<T extends ToolNames<AppType>>(
+  toolName: T,
+  output: ToolOutput<AppType, T>
+) {
+  switch (toolName) {
+    case "search-hotels":
+      // TypeScript knows output shape
+      return <HotelList hotels={output.hotels} />;
+    case "hotel-details":
+      return <HotelDetails hotel={output} />;
+  }
+}
+```
+
+## How It Works
+
+The type system uses TypeScript's conditional types and mapped types:
+
+```typescript
+// Simplified version of how InferTools works
+type InferTools<ServerType> = ServerType extends {
+  $types: McpServerTypes<infer Registry>;
+}
+  ? Registry
+  : never;
+
+// The $types property carries type information without runtime cost
+class McpServer<Registry = {}> {
+  $types!: McpServerTypes<Registry>;
+
+  registerWidget<Name, Input, Output>(...): McpServer<
+    Registry & { [K in Name]: ToolDef<Input, Output> }
+  > {
+    // Each call returns a new type with the tool added
+  }
+}
+```
+
+## Related
+
+- [generateHelpers](/api-reference/generate-helpers) - Generate typed hooks
+- [Type Safety concept](/concepts/type-safety) - Understanding the type system
+- [McpServer](/api-reference/mcp-server) - Server class with $types
