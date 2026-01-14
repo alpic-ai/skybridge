@@ -35,7 +35,7 @@ export type AppsSdkContext<
   locale: string;
 
   // layout
-  maxHeight: number;
+  maxHeight: number | undefined;
   displayMode: DisplayMode;
   safeArea: SafeArea;
   view: View;
