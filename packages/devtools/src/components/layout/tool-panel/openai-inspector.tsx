@@ -3,6 +3,7 @@ import { MoonIcon, SunIcon } from "lucide-react";
 import { Button } from "@/components/ui/button.js";
 import { ButtonGroup } from "@/components/ui/button-group.js";
 import { Field, FieldLabel, FieldSet } from "@/components/ui/field.js";
+import { Input } from "@/components/ui/input.js";
 import {
   Select,
   SelectContent,
@@ -109,6 +110,24 @@ export const OpenAiInspector = () => {
               <LocaleSelector
                 value={openaiObject.locale ?? ""}
                 onValueChange={(value) => handleValueChange("locale", value)}
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Max Height</FieldLabel>
+              <Input
+                type="number"
+                value={
+                  openaiObject.maxHeight !== undefined
+                    ? String(openaiObject.maxHeight)
+                    : ""
+                }
+                onChange={(e) => {
+                  const value = e.target.value.trim();
+                  handleValueChange(
+                    "maxHeight",
+                    value === "" ? undefined : Number(value),
+                  );
+                }}
               />
             </Field>
             <Field>
