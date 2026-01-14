@@ -131,6 +131,43 @@ export const OpenAiInspector = () => {
               />
             </Field>
             <Field>
+              <FieldLabel>Safe Area Insets</FieldLabel>
+              <div className="grid grid-cols-2 gap-4">
+                {(["top", "bottom", "left", "right"] as const).map((key) => {
+                  const label = key.charAt(0).toUpperCase() + key.slice(1);
+                  return (
+                    <div key={key}>
+                      <label
+                        htmlFor={`safeArea-${key}`}
+                        className="text-xs text-muted-foreground block mb-1"
+                      >
+                        {label}
+                      </label>
+                      <Input
+                        id={`safeArea-${key}`}
+                        type="number"
+                        value={
+                          openaiObject.safeArea?.insets?.[key] !== undefined
+                            ? String(openaiObject.safeArea.insets[key])
+                            : "0"
+                        }
+                        onChange={(e) => {
+                          const value = e.target.value.trim();
+                          handleValueChange("safeArea", {
+                            ...openaiObject.safeArea,
+                            insets: {
+                              ...openaiObject.safeArea?.insets,
+                              [key]: value === "" ? 0 : Number(value),
+                            },
+                          });
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </Field>
+            <Field>
               <FieldLabel>Device Type</FieldLabel>
               <Select
                 value={openaiObject.userAgent?.device?.type ?? "desktop"}
