@@ -1,5 +1,5 @@
-import * as React from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button.js";
 import {
   Command,
@@ -92,7 +92,7 @@ export const LocaleSelector = ({
   value,
   onValueChange,
 }: LocaleSelectorProps) => {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
   const selectedLocale = locales.find((locale) => locale.value === value);
 

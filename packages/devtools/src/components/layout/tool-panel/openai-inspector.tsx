@@ -19,9 +19,9 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs.js";
-import { LocaleSelector } from "./locale-selector.js";
 import { useSelectedTool } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
+import { LocaleSelector } from "./locale-selector.js";
 
 export const OpenAiInspector = () => {
   const tool = useSelectedTool();
