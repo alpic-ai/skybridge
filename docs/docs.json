@@ -1,6 +1,7 @@
 {
   "$schema": "https://mintlify.com/schema.json",
   "name": "Skybridge",
+  "theme": "mint",
   "colors": {
     "primary": "#0069ED",
     "light": "#0069ED",
@@ -11,100 +12,106 @@
     "light": "/images/logo.png",
     "dark": "/images/logo.png"
   },
-  "tabs": [
-    {
-      "name": "API Reference",
-      "url": "api-reference"
-    }
-  ],
-  "navigation": [
-    {
-      "group": "Get Started",
-      "pages": [
-        "home",
-        "quickstart/create-new-app",
-        {
-          "group": "Add to Existing App",
-          "pages": [
-            "quickstart/add-to-existing-app",
-            "quickstart/add-to-existing-app/server",
-            "quickstart/add-to-existing-app/web"
-          ]
-        },
-        "quickstart/test-your-app",
-        "mcp-and-chatgpt-fundamentals"
-      ]
-    },
-    {
-      "group": "Concepts",
-      "pages": [
-        "concepts/index",
-        "concepts/data-flow",
-        "concepts/llm-context-sync",
-        "concepts/fast-iteration",
-        "concepts/type-safety"
-      ]
-    },
-    {
-      "group": "Guides",
-      "pages": [
-        "guides/fetching-data",
-        "guides/managing-state",
-        "guides/communicating-with-model",
-        "guides/host-environment-context"
-      ]
-    },
-    {
-      "group": "DevTools",
-      "pages": ["devtools/index"]
-    },
-    {
-      "group": "Resources",
-      "pages": ["faq"]
-    },
-    {
-      "group": "Overview",
-      "pages": ["api-reference"]
-    },
-    {
-      "group": "Server",
-      "pages": [
-        "api-reference/mcp-server",
-        "api-reference/register-widget"
-      ]
-    },
-    {
-      "group": "Hooks",
-      "pages": [
-        "api-reference/use-tool-info",
-        "api-reference/use-widget-state",
-        "api-reference/use-call-tool",
-        "api-reference/use-layout",
-        "api-reference/use-user",
-        "api-reference/use-display-mode",
-        "api-reference/use-request-modal",
-        "api-reference/use-open-external",
-        "api-reference/use-send-follow-up-message",
-        "api-reference/use-files"
-      ]
-    },
-    {
-      "group": "Utilities",
-      "pages": [
-        "api-reference/create-store",
-        "api-reference/generate-helpers",
-        "api-reference/data-llm"
-      ]
-    },
-    {
-      "group": "Types",
-      "pages": ["api-reference/infer-utility-types"]
-    },
-    {
-      "group": "Advanced",
-      "pages": ["api-reference/use-apps-sdk-context"]
-    }
-  ],
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "home",
+              "quickstart/create-new-app",
+              {
+                "group": "Add to Existing App",
+                "pages": [
+                  "quickstart/add-to-existing-app",
+                  "quickstart/add-to-existing-app/server",
+                  "quickstart/add-to-existing-app/web"
+                ]
+              },
+              "quickstart/test-your-app",
+              "mcp-and-chatgpt-fundamentals"
+            ]
+          },
+          {
+            "group": "Concepts",
+            "pages": [
+              "concepts/index",
+              "concepts/data-flow",
+              "concepts/llm-context-sync",
+              "concepts/fast-iteration",
+              "concepts/type-safety"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/fetching-data",
+              "guides/managing-state",
+              "guides/communicating-with-model",
+              "guides/host-environment-context"
+            ]
+          },
+          {
+            "group": "DevTools",
+            "pages": ["devtools/index"]
+          },
+          {
+            "group": "Resources",
+            "pages": ["faq"]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": ["api-reference"]
+          },
+          {
+            "group": "Server",
+            "pages": [
+              "api-reference/mcp-server",
+              "api-reference/register-widget"
+            ]
+          },
+          {
+            "group": "Hooks",
+            "pages": [
+              "api-reference/use-tool-info",
+              "api-reference/use-widget-state",
+              "api-reference/use-call-tool",
+              "api-reference/use-layout",
+              "api-reference/use-user",
+              "api-reference/use-display-mode",
+              "api-reference/use-request-modal",
+              "api-reference/use-open-external",
+              "api-reference/use-send-follow-up-message",
+              "api-reference/use-files"
+            ]
+          },
+          {
+            "group": "Utilities",
+            "pages": [
+              "api-reference/create-store",
+              "api-reference/generate-helpers",
+              "api-reference/data-llm"
+            ]
+          },
+          {
+            "group": "Types",
+            "pages": ["api-reference/infer-utility-types"]
+          },
+          {
+            "group": "Advanced",
+            "pages": ["api-reference/use-apps-sdk-context"]
+          }
+        ]
+      }
+    ]
+  },
   "navbar": {
     "links": [
       {
