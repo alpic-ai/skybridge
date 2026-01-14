@@ -12,6 +12,16 @@
     "light": "/images/logo.png",
     "dark": "/images/logo.png"
   },
+  "metadata": {
+    "og:site_name": "Skybridge Documentation",
+    "og:type": "website"
+  },
+  "feedback": {
+    "thumbsRating": true
+  },
+  "search": {
+    "prompt": "Search Skybridge docs..."
+  },
   "navigation": {
     "tabs": [
       {
@@ -19,6 +29,7 @@
         "groups": [
           {
             "group": "Get Started",
+            "icon": "rocket",
             "pages": [
               "home",
               "quickstart/create-new-app",
@@ -36,6 +47,7 @@
           },
           {
             "group": "Concepts",
+            "icon": "lightbulb",
             "pages": [
               "concepts/index",
               "concepts/data-flow",
@@ -46,6 +58,7 @@
           },
           {
             "group": "Guides",
+            "icon": "book",
             "pages": [
               "guides/fetching-data",
               "guides/managing-state",
@@ -55,10 +68,12 @@
           },
           {
             "group": "DevTools",
+            "icon": "wrench",
             "pages": ["devtools/index"]
           },
           {
             "group": "Resources",
+            "icon": "circle-question",
             "pages": ["faq"]
           }
         ]
@@ -68,10 +83,12 @@
         "groups": [
           {
             "group": "Overview",
+            "icon": "house",
             "pages": ["api-reference"]
           },
           {
             "group": "Server",
+            "icon": "server",
             "pages": [
               "api-reference/mcp-server",
               "api-reference/register-widget"
@@ -79,6 +96,7 @@
           },
           {
             "group": "Hooks",
+            "icon": "fishing-rod",
             "pages": [
               "api-reference/use-tool-info",
               "api-reference/use-widget-state",
@@ -94,6 +112,7 @@
           },
           {
             "group": "Utilities",
+            "icon": "toolbox",
             "pages": [
               "api-reference/create-store",
               "api-reference/generate-helpers",
@@ -102,10 +121,12 @@
           },
           {
             "group": "Types",
+            "icon": "brackets-curly",
             "pages": ["api-reference/infer-utility-types"]
           },
           {
             "group": "Advanced",
+            "icon": "gear",
             "pages": ["api-reference/use-apps-sdk-context"]
           }
         ]
