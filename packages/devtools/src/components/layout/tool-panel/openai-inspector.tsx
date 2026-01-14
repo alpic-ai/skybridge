@@ -3,7 +3,6 @@ import { MoonIcon, SunIcon } from "lucide-react";
 import { Button } from "@/components/ui/button.js";
 import { ButtonGroup } from "@/components/ui/button-group.js";
 import { Field, FieldLabel, FieldSet } from "@/components/ui/field.js";
-import { Input } from "@/components/ui/input.js";
 import {
   Select,
   SelectContent,
@@ -19,6 +18,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs.js";
+import { LocaleSelector } from "./locale-selector.js";
 import { useSelectedTool } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 
@@ -106,9 +106,9 @@ export const OpenAiInspector = () => {
             </Field>
             <Field>
               <FieldLabel>Locale</FieldLabel>
-              <Input
-                value={openaiObject.locale}
-                onChange={(e) => handleValueChange("locale", e.target.value)}
+              <LocaleSelector
+                value={openaiObject.locale ?? ""}
+                onValueChange={(value) => handleValueChange("locale", value)}
               />
             </Field>
             <Field>
