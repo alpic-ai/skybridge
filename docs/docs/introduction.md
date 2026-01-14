@@ -74,18 +74,8 @@ Ready to build your first ChatGPT App with Skybridge? Choose your path:
 | **Ecommerce Carousel** – Product carousel with cart and checkout        | [examples/ecom-carousel](https://github.com/alpic-ai/skybridge/tree/main/examples/ecom-carousel) | [ecommerce.skybridge.tech/mcp](https://ecommerce.skybridge.tech/mcp)   |
 | **Everything** – Playground showcasing all Skybridge hooks & features   | [examples/everything](https://github.com/alpic-ai/skybridge/tree/main/examples/everything) | [everything.skybridge.tech/mcp](https://everything.skybridge.tech/mcp) |
 
-## Want to dig deeper?
+## Learn More
 
-<div className="card-grid">
-  <div className="card">
-    <h3>💡 MCP and ChatGPT Apps Fundamentals</h3>
-    <p>Learn the fundamentals of MCP servers and ChatGPT Apps</p>
-    <a href="/mcp-and-chatgpt-fundamentals" className="card-link">Learn More →</a>
-  </div>
-  
-  <div className="card">
-    <h3>🔄 Skybridge Core Concepts</h3>
-    <p>Learn how Skybridge extends the raw OpenAI APIs with React hooks and utilities</p>
-    <a href="/skybridge-core-concepts" className="card-link">Explore →</a>
-  </div>
-</div>
+- [MCP and ChatGPT Apps Fundamentals](/mcp-and-chatgpt-fundamentals) — How ChatGPT Apps work under the hood
+- [Data Flow](/concepts/data-flow) — How data moves between tools, widgets, and the model
+- [Type Safety](/concepts/type-safety) — End-to-end TypeScript inference with generateHelpers

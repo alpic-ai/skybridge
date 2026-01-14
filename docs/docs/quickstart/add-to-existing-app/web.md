@@ -25,26 +25,26 @@ pnpm add skybridge
 `skybridge/web` provides React hooks and utilities for building advanced ChatGPT Apps:
 
 ### State Management
-- **[`useToolInfo`](/api-reference/use-tool-info)**: Get initial tool input, output and metadata
-- **[`useWidgetState`](/api-reference/use-widget-state)**: Persist state across widget renders
+- **[`useToolInfo`](/api-reference/hooks/use-tool-info)**: Get initial tool input, output and metadata
+- **[`useWidgetState`](/api-reference/hooks/use-widget-state)**: Persist state across widget renders
 
 ### User Interface
-- **[`useLayout`](/api-reference/use-layout)**: Get the current user layout and visual environment information
-- **[`useDisplayMode`](/api-reference/use-display-mode)**: Get and request widget display mode changes
-- **[`useRequestModal`](/api-reference/use-request-modal)**: Open a modal portaled outside of the widget iframe
-- **[`useUser`](/api-reference/use-user)**: Get the session-stable user information (locale and userAgent)
+- **[`useLayout`](/api-reference/hooks/use-layout)**: Get the current user layout and visual environment information
+- **[`useDisplayMode`](/api-reference/hooks/use-display-mode)**: Get and request widget display mode changes
+- **[`useRequestModal`](/api-reference/hooks/use-request-modal)**: Open a modal portaled outside of the widget iframe
+- **[`useUser`](/api-reference/hooks/use-user)**: Get the session-stable user information (locale and userAgent)
 
 ### Actions
-- **[`useCallTool`](/api-reference/use-call-tool)**: Call tools from within a widget
-- **[`useOpenExternal`](/api-reference/use-open-external)**: Open external links
-- **[`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message)**: Send a follow-up message in the conversation
-- **[`useFiles`](/api-reference/use-files)**: Upload and download files
+- **[`useCallTool`](/api-reference/hooks/use-call-tool)**: Call tools from within a widget
+- **[`useOpenExternal`](/api-reference/hooks/use-open-external)**: Open external links
+- **[`useSendFollowUpMessage`](/api-reference/hooks/use-send-follow-up-message)**: Send a follow-up message in the conversation
+- **[`useFiles`](/api-reference/hooks/use-files)**: Upload and download files
 
 ### Others
-- **[`useAppsSdkContext`](/api-reference/use-apps-sdk-context)**: Low-level hook to subscribe to `window.openai` state values
-- **[`generateHelpers`](/api-reference/generateHelpers)**: Generate typed helpers for your widgets (requires `skybridge/server`)
+- **[`useAppsSdkContext`](/api-reference/hooks/use-apps-sdk-context)**: Low-level hook to subscribe to `window.openai` state values
+- **[`generateHelpers`](/api-reference/utilities/generate-helpers)**: Generate typed helpers for your widgets (requires `skybridge/server`)
 
-For complete documentation of all hooks with examples and options, see the [API Reference](/api-reference).
+Each hook is documented in the API Reference section in the sidebar.
 
 ## Basic example
 
@@ -109,14 +109,14 @@ To learn more about how to build a ChatGPT App, please read the Core Concepts an
   </div>
   
   <div className="card">
-    <h3>Skybridge Core Concepts</h3>
-    <p>Learn how Skybridge extends the raw APIs with React hooks</p>
-    <a href="/skybridge-core-concepts" className="card-link">Explore →</a>
+    <h3>Data Flow</h3>
+    <p>Understand how tools, widgets, and the model communicate</p>
+    <a href="/concepts/data-flow" className="card-link">Explore →</a>
   </div>
 
   <div className="card">
-    <h3>API Reference</h3>
-    <p>Complete documentation of all hooks with examples and options</p>
-    <a href="/api-reference" className="card-link">Browse API →</a>
+    <h3>Type Safety</h3>
+    <p>End-to-end type inference from server to widget</p>
+    <a href="/concepts/type-safety" className="card-link">Learn More →</a>
   </div>
 </div>

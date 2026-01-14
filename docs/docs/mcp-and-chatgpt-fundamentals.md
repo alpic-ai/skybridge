@@ -60,6 +60,22 @@ Widgets run inside an iframe and have access to a special [`window.openai`](http
 
 This API is powerful but low-level and imperative—which is where Skybridge comes in.
 
+### Skybridge Hook Mapping
+
+Skybridge wraps the raw `window.openai` API with React hooks:
+
+| Raw API | Skybridge Hook | Purpose |
+|---------|----------------|---------|
+| `window.openai.toolOutput` | [`useToolInfo()`](/api-reference/hooks/use-tool-info) | Access initial tool input/output |
+| `window.openai.widgetState` | [`useWidgetState()`](/api-reference/hooks/use-widget-state) | Persistent widget state |
+| `window.openai.callTool()` | [`useCallTool()`](/api-reference/hooks/use-call-tool) | Make additional tool calls |
+| `window.openai.sendFollowUpMessage()` | [`useSendFollowUpMessage()`](/api-reference/hooks/use-send-follow-up-message) | Send follow-up messages |
+| `window.openai.openExternal()` | [`useOpenExternal()`](/api-reference/hooks/use-open-external) | Open external URLs |
+| `window.openai.requestModal()` | [`useRequestModal()`](/api-reference/hooks/use-request-modal) | Request modal display |
+| `window.openai.theme` | [`useLayout()`](/api-reference/hooks/use-layout) | Access ChatGPT theme |
+| `window.openai.locale` | [`useUser()`](/api-reference/hooks/use-user) | Access user locale |
+| `window.openai.displayMode` | [`useDisplayMode()`](/api-reference/hooks/use-display-mode) | Access/change display mode |
+
 ## What Skybridge Adds
 
 Skybridge is a modular ChatGPT Apps framework that bridges the gap between standard MCP servers and [OpenAI APIs](https://developers.openai.com/apps-sdk/reference/). It includes:
@@ -70,7 +86,7 @@ Skybridge is a modular ChatGPT Apps framework that bridges the gap between stand
 
 This lets you build rich, React-based UI experiences directly within ChatGPT conversations—all with full type safety and a developer experience you'll love.
 
-**Next:** Learn how Skybridge extends these primitives in [Skybridge Core Concepts](/skybridge-core-concepts).
+**Next:** Start building with the [Quickstart Guide](/quickstart/create-new-app).
 
 
 
