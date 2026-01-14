@@ -79,3 +79,4 @@ Ready to build your first ChatGPT App with Skybridge? Choose your path:
 - [MCP and ChatGPT Apps Fundamentals](/mcp-and-chatgpt-fundamentals) — How ChatGPT Apps work under the hood
 - [Data Flow](/concepts/data-flow) — How data moves between tools, widgets, and the model
 - [Type Safety](/concepts/type-safety) — End-to-end TypeScript inference with generateHelpers
+- [Fetching Data](/guides/fetching-data) — useToolInfo and useCallTool patterns

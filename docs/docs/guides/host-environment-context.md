@@ -104,6 +104,10 @@ const { maxHeight } = useLayout();
 
 Access locale and device capabilities:
 
+:::note Locale provided by OpenAI
+The locale value comes from OpenAI's host environment, not directly from the user's browser. It may not always match the user's actual browser locale settings.
+:::
+
 ```tsx
 import { useUser } from "skybridge/web";
 

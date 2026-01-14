@@ -5,7 +5,7 @@ title: Communicating with the Model
 
 # Communicating with the Model
 
-Two channels: passive context sync via `data-llm`, active messages via `useSendFollowUpMessage`.
+To communicate with the model, you can use two channels: passive context sync via `data-llm` and active messages via `useSendFollowUpMessage`.
 
 ## Context Sync with data-llm
 

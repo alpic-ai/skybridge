@@ -261,4 +261,5 @@ Widget context:
 ## Related
 
 - [data-llm API Reference](/api-reference/utilities/data-llm) - Full API documentation
+- [Communicating with the Model Guide](/guides/communicating-with-model) - More patterns
 - [useSendFollowUpMessage](/api-reference/hooks/use-send-follow-up-message) - Send messages to the conversation

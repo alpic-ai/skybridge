@@ -52,7 +52,7 @@ your-project/
 
 ### Widget naming convention
 
-Widget file name must match the registration name. See [Data Flow: Widget Naming](/concepts/data-flow#widget-naming).
+Widget file name must match the registration name (e.g., `"my-widget"` → `my-widget.tsx`). See [registerWidget](/api-reference/server/register-widget#name).
 
 ## Set up the web project
 

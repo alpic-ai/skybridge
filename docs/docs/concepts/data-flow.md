@@ -221,7 +221,7 @@ Direct API calls don't add to context. Use them only for data the model doesn't 
 :::
 
 :::warning Direct fetch requires CSP configuration
-If you use `fetch()` directly from widgets, you need to configure Content Security Policy (CSP) headers. ChatGPT blocks requests to domains not explicitly allowed. Add allowed domains to `connectDomains` in your widget configuration. See [registerWidget](/api-reference/server/register-widget#connectdomains).
+If you use `fetch()` directly from widgets, you need to configure Content Security Policy (CSP) headers. ChatGPT blocks requests to domains not explicitly allowed. Add allowed domains to `connectDomains` in your widget configuration. See [registerWidget](/api-reference/server/register-widget).
 :::
 
 ## The Communication Loop
@@ -237,6 +237,7 @@ This loop creates a seamless experience where the conversation, the UI, and your
 ## Related
 
 - [LLM Context Sync](/concepts/llm-context-sync) - Keep the model informed of widget state (read this next)
+- [Fetching Data Guide](/guides/fetching-data) - Patterns for useToolInfo and useCallTool
 - [useToolInfo API](/api-reference/hooks/use-tool-info) - Initial data access
 - [useCallTool API](/api-reference/hooks/use-call-tool) - User-triggered data fetching
 - [useWidgetState API](/api-reference/hooks/use-widget-state) - Persistent widget state
