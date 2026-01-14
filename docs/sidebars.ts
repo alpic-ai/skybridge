@@ -44,6 +44,16 @@ const sidebars: SidebarsConfig = {
         "concepts/type-safety",
       ],
     },
+    {
+      type: "category",
+      label: "Guides",
+      items: [
+        "guides/fetching-data",
+        "guides/managing-state",
+        "guides/communicating-with-model",
+        "guides/host-environment-context",
+      ],
+    },
     "devtools/devtools",
     {
       type: "category",

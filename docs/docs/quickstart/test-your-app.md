@@ -70,8 +70,8 @@ Server changes in `server/src/` require starting a new conversation to take effe
   </div>
 
   <div className="card">
-    <h3>API Reference</h3>
-    <p>Detailed documentation for all hooks and utilities</p>
-    <a href="/api-reference/hooks/use-tool-info" className="card-link">Browse API →</a>
+    <h3>Guides</h3>
+    <p>Learn patterns for data fetching, state management, and more</p>
+    <a href="/guides/fetching-data" className="card-link">Browse Guides →</a>
   </div>
 </div>
