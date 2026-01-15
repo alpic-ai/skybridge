@@ -157,7 +157,7 @@ export class McpAppAdaptor implements Adaptor {
             return containerDimensions.maxHeight;
           }
 
-          return window.innerHeight;
+          return undefined;
         },
       ),
       userAgent: this.createHostContextStore(

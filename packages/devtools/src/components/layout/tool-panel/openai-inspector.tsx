@@ -108,7 +108,7 @@ export const OpenAiInspector = () => {
             <Field>
               <FieldLabel>Locale</FieldLabel>
               <LocaleSelector
-                value={openaiObject.locale ?? ""}
+                value={openaiObject.locale}
                 onValueChange={(value) => handleValueChange("locale", value)}
               />
             </Field>
