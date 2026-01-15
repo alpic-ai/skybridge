@@ -1,0 +1,34 @@
+name: Docs Preview
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**'
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Mintlify Preview
+        id: preview
+        run: |
+          RESPONSE=$(curl -s -X POST "https://api.mintlify.com/api/v1/deployments/preview" \
+            -H "Authorization: Bearer ${{ secrets.MINTLIFY_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"branch": "${{ github.head_ref }}"}')
+          echo "Response: $RESPONSE"
+          URL=$(echo $RESPONSE | jq -r '.url // .previewUrl // empty')
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+      - name: Comment PR
+        if: steps.preview.outputs.url != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '📚 **Docs Preview:** ${{ steps.preview.outputs.url }}'
+            })
