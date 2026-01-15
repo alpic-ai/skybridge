@@ -8,13 +8,8 @@ on:
     types: [published]
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
-
-env:
-  VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
-  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
 jobs:
   publish:
@@ -84,21 +79,6 @@ jobs:
         working-directory: ./packages/devtools
         run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance --no-git-checks
 
-      - name: Install Vercel CLI
+      - name: Deploy docs to Mintlify
         if: github.event_name == 'release'
-        run: npm install --global vercel@latest
-
-      - name: Pull Vercel Environment Information
-        if: github.event_name == 'release'
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./docs
-
-      - name: Build Docs for Vercel
-        if: github.event_name == 'release'
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./docs
-
-      - name: Deploy Docs to Vercel
-        if: github.event_name == 'release'
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: ./docs
+        run: git push origin HEAD:mintlify --force

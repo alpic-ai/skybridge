@@ -1,0 +1,127 @@
+---
+title: useDisplayMode
+description: "Read and control widget display modes: inline, fullscreen, or picture-in-picture."
+---
+
+
+The `useDisplayMode` hook allows you to read and control the display mode of your widget. Widgets can be displayed in three modes: `inline`, `fullscreen`, or `pip` (picture-in-picture).
+
+## Basic usage
+
+```tsx
+import { useDisplayMode } from "skybridge/web";
+
+function ExpandableWidget() {
+  const [displayMode, setDisplayMode] = useDisplayMode();
+
+  return (
+    <div>
+      <p>Current mode: {displayMode}</p>
+      <button onClick={() => setDisplayMode("fullscreen")}>
+        Go Fullscreen
+      </button>
+      <button onClick={() => setDisplayMode("inline")}>
+        Back to Inline
+      </button>
+    </div>
+  );
+}
+```
+
+## Returns
+
+The hook returns a tuple with two elements:
+
+### `displayMode`
+
+```tsx
+displayMode: "inline" | "fullscreen" | "pip"
+```
+
+The current display mode of the widget:
+
+- `inline` - The widget is displayed inline within the chat
+- `fullscreen` - The widget takes up the full screen
+- `pip` - The widget is displayed in picture-in-picture mode (on mobile, this is coerced to fullscreen)
+
+### `setDisplayMode`
+
+```tsx
+setDisplayMode: (mode: DisplayMode) => void
+```
+
+A function to request a new display mode. Note that the host may reject the request.
+
+## Examples
+
+### Fullscreen Media Player
+
+```tsx
+import { useDisplayMode } from "skybridge/web";
+
+function MediaPlayer() {
+  const [displayMode, setDisplayMode] = useDisplayMode();
+  const isFullscreen = displayMode === "fullscreen";
+
+  return (
+    <div className={isFullscreen ? "fullscreen-player" : "inline-player"}>
+      <video src="/media/video.mp4" controls />
+      <button onClick={() => setDisplayMode(isFullscreen ? "inline" : "fullscreen")}>
+        {isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+      </button>
+    </div>
+  );
+}
+```
+
+### Adaptive Layout
+
+```tsx
+import { useDisplayMode } from "skybridge/web";
+
+function AdaptiveWidget() {
+  const [displayMode] = useDisplayMode();
+
+  if (displayMode === "fullscreen") {
+    return (
+      <div className="detailed-view">
+        <h1>Full Details</h1>
+        {/* Show comprehensive content */}
+      </div>
+    );
+  }
+
+  return (
+    <div className="compact-view">
+      <h3>Summary</h3>
+      {/* Show condensed content */}
+    </div>
+  );
+}
+```
+
+### Picture-in-Picture Mode
+
+```tsx
+import { useDisplayMode, useUser } from "skybridge/web";
+
+function FloatingWidget() {
+  const [displayMode, setDisplayMode] = useDisplayMode();
+  const { userAgent } = useUser();
+  const isMobile = userAgent.device.type === "mobile";
+
+  return (
+    <div>
+      <p>Mode: {displayMode}</p>
+      {!isMobile && (
+        <button onClick={() => setDisplayMode("pip")}>
+          Float (PiP)
+        </button>
+      )}
+      {isMobile && (
+        <p>PiP mode is not available on mobile devices</p>
+      )}
+    </div>
+  );
+}
+```

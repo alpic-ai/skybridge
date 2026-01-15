@@ -1,0 +1,29 @@
+---
+title: Core Concepts
+description: "Understand the four key concepts that power Skybridge: data flow, LLM context sync, fast iteration, and type safety."
+---
+
+<Info>
+We assume that you are already familiar with ChatGPT Apps and MCP Servers here. If you're not, read [MCP and ChatGPT Apps Fundamentals](/mcp-and-chatgpt-fundamentals) first.
+</Info>
+
+Four concepts power Skybridge:
+
+<CardGroup cols={2}>
+  <Card title="Data Flow" icon="arrows-rotate" href="/concepts/data-flow">
+    How data moves between server, ChatGPT, and widget
+  </Card>
+  <Card title="LLM Context Sync" icon="brain" href="/concepts/llm-context-sync">
+    Keep the model aware of widget state via `data-llm`
+  </Card>
+  <Card title="Fast Iteration" icon="bolt" href="/concepts/fast-iteration">
+    Local development with instant feedback
+  </Card>
+  <Card title="Type Safety" icon="shield-check" href="/concepts/type-safety">
+    End-to-end TypeScript types from server to widget
+  </Card>
+</CardGroup>
+
+<Tip>
+**Start with Data Flow** — it establishes the three-actor model that other concepts build on.
+</Tip>

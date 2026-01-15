@@ -1,0 +1,35 @@
+---
+title: FAQ
+description: "Common questions and troubleshooting for Skybridge type safety, deployment, and ChatGPT App development."
+---
+
+# Frequently Asked Questions
+
+## Type Safety Issues
+
+### "Property does not exist on type" when using typed hooks
+
+Make sure you're importing from your generated helpers file, not directly from `skybridge/web`:
+
+```typescript
+// Wrong
+import { useCallTool } from "skybridge/web";
+
+// Right
+import { useCallTool } from "../skybridge";
+```
+
+### No autocomplete for tool names
+
+Check that:
+1. Your server exports `type AppType = typeof server`
+2. Your `skybridge.ts` imports this type correctly
+3. You're using [method chaining](/concepts/type-safety#method-chaining-requirement) when registering tools
+
+## Network Issues
+
+### Seeing the error "CORS error: Permission was denied for this request to access the `unknown` address space."
+
+Your widget needs to access the local dev server over your local network. This error appears when your browser blocks such access.
+
+**To fix this, enable local network access in your browser settings so it can connect to localhost and other local network addresses.**

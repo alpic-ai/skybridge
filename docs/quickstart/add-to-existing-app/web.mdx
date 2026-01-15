@@ -1,0 +1,115 @@
+---
+title: Use skybridge/web
+description: "Add React hooks and utilities to your ChatGPT App widgets with skybridge/web standalone package."
+---
+
+# Use skybridge/web
+
+This guide shows you how to use `skybridge/web` without `skybridge/server` to add React hooks and utilities to your widgets.
+
+## Prerequisites
+
+You should already have:
+- A working ChatGPT app MCP server backend (in any technology)
+- Node.js 24+
+
+## Install
+
+Add Skybridge to your project:
+
+```bash
+pnpm add skybridge
+```
+
+## Package overview
+
+`skybridge/web` provides React hooks and utilities for building advanced ChatGPT Apps:
+
+### State Management
+- **[`useToolInfo`](/api-reference/use-tool-info)**: Get initial tool input, output and metadata
+- **[`useWidgetState`](/api-reference/use-widget-state)**: Persist state across widget renders
+
+### User Interface
+- **[`useLayout`](/api-reference/use-layout)**: Get the current user layout and visual environment information
+- **[`useDisplayMode`](/api-reference/use-display-mode)**: Get and request widget display mode changes
+- **[`useRequestModal`](/api-reference/use-request-modal)**: Open a modal portaled outside of the widget iframe
+- **[`useUser`](/api-reference/use-user)**: Get the session-stable user information (locale and userAgent)
+
+### Actions
+- **[`useCallTool`](/api-reference/use-call-tool)**: Call tools from within a widget
+- **[`useOpenExternal`](/api-reference/use-open-external)**: Open external links
+- **[`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message)**: Send a follow-up message in the conversation
+- **[`useFiles`](/api-reference/use-files)**: Upload and download files
+
+### Others
+- **[`useAppsSdkContext`](/api-reference/use-apps-sdk-context)**: Low-level hook to subscribe to `window.openai` state values
+- **[`generateHelpers`](/api-reference/generate-helpers)**: Generate typed helpers for your widgets (requires `skybridge/server`)
+
+Each hook is documented in the API Reference section in the sidebar.
+
+## Basic example
+
+Here's a simple widget using Skybridge hooks:
+
+```tsx
+import { mountWidget, useToolInfo } from "skybridge/web";
+
+const MyWidget: React.FC = () => {
+  const toolInfo = useToolInfo();
+
+  if (toolInfo.isPending) {
+    return <div>Loading...</div>;
+  }
+
+  if (toolInfo.isSuccess) {
+    return (
+      <div>
+        <h2>Results</h2>
+        <pre>{JSON.stringify(toolInfo.output.structuredContent, null, 2)}</pre>
+      </div>
+    );
+  }
+
+  return <div>No results</div>;
+};
+
+mountWidget(<MyWidget />);
+```
+
+## Type safety without server
+
+If you're not using `skybridge/server`, you won't get automatic type inference. You can still add types manually:
+
+```tsx
+import { useToolInfo } from "skybridge/web";
+
+interface MyToolInput {
+  query: string;
+  limit?: number;
+}
+
+const MyWidget: React.FC = () => {
+  const toolInfo = useToolInfo<MyToolInput>();
+
+  // toolInfo.input is now typed as MyToolInput
+  console.log(toolInfo.input.query);
+
+  return <div>Widget content</div>;
+};
+```
+
+## Learn more
+
+To learn more about how to build a ChatGPT App, please read the Core Concepts and Interaction Model sections below.
+
+<CardGroup cols={3}>
+  <Card title="MCP Fundamentals" icon="graduation-cap" href="/mcp-and-chatgpt-fundamentals">
+    Learn the fundamentals of MCP servers and ChatGPT Apps
+  </Card>
+  <Card title="Data Flow" icon="arrows-rotate" href="/concepts/data-flow">
+    Understand how tools, widgets, and the model communicate
+  </Card>
+  <Card title="Type Safety" icon="shield-check" href="/concepts/type-safety">
+    End-to-end type inference from server to widget
+  </Card>
+</CardGroup>

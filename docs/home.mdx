@@ -1,0 +1,79 @@
+---
+title: Introduction
+description: "Build production-ready ChatGPT Apps faster with full-stack TypeScript tooling and modern developer experience."
+---
+
+**Skybridge is a modular framework for quickly building ChatGPT apps, the _modern TypeScript way_.**
+
+It comes with:
+- 👨‍💻 Full blown dev environment with HMR, debug traces, and devtools
+- ✅ End-to-end typesafe APIs
+- 🔄 Widget-to-model synchronization tooling
+- ⚒️ React-query and Zustand-like state management hooks
+
+## Why does Skybridge exist?
+
+OpenAI announced the [ChatGPT Apps SDK](https://developers.openai.com/apps-sdk) in October 2025, giving developers a new way of interacting with ChatGPT. While it provides powerful primitives with UI rendering, state persistence, tool calls, follow-up messages and layout management, it is very low-level and lacks modern fullstack DX standards like end-to-end typesafe APIs, hooks, error handling or data state management.
+
+In addition, ChatGPT Apps introduce a new challenge: building apps for **dual interaction surfaces**. With Apps interacting with both the user and the model, you need to make sure everything the user sees and does in the UI is also shared with the model, and vice-versa.
+
+<img src="/images/chatgpt-apps-interaction.png" alt="ChatGPT Apps architecture" style={{maxWidth: '500px', width: '100%', display: 'block', margin: '0 auto'}} />
+
+Finally, there are no developer tools or environment. Developers can test their apps only inside ChatGPT Developer mode, which has infinite caching policies, no hot module replacement, and requires you to refresh or re-install your app to test any change - losing precious minutes at each small iteration.
+
+After building dozens of ChatGPT Apps, we quickly saw repeating patterns and frustrations, and realized developers were spending too much time stitching together SDKs and managing low-level wiring instead of focusing on their product.
+
+We built Skybridge so other developers wouldn't have to deal with these same frustrations. Our goal is to bring full-stack development standards back into ChatGPT Apps and help teams ship production-ready apps much faster.
+
+## What is Skybridge?
+
+Skybridge is a _modular_ ChatGPT Apps framework aiming to **maximize Developer Experience while minimizing boilerplate code**.
+
+It includes 3 main parts:
+- **`skybridge/server`**: A drop-in replacement for the official MCP SDK that adds widget registration and type inference capabilities.
+- **`skybridge/web`**: A React library providing hooks, components, and the runtime glue to render your widgets inside ChatGPT's iframe environment.
+- a **local Dev Environment**: our Vite plugin adds Hot Module Reload to your ChatGPT Apps, with optimized assets building for both local and production environments.
+
+**Skybridge** bridges the gap between standard **MCP servers** and [**OpenAI APIs**](https://developers.openai.com/apps-sdk/reference/), allowing you to build rich, React-based UI experiences directly within ChatGPT conversations—all with full type safety and a developer experience you'll love.
+
+## What Skybridge is NOT
+
+- **It is NOT another MCP SDK.** `skybridge/server` simply extends the official [TypeScript MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk), and `skybridge/web` focuses on improving the ChatGPT Apps APIs, making it compatible with any MCP Server and runtime.
+
+## Get Started
+
+Ready to build your first ChatGPT App with Skybridge? Choose your path:
+
+<CardGroup cols={2}>
+  <Card title="Create New App" icon="rocket" href="/quickstart/create-new-app">
+    Start from scratch with our starter kit. Get up and running in 5 minutes with our dev server and HMR.
+  </Card>
+  <Card title="Add to Existing App" icon="plus" href="/quickstart/add-to-existing-app">
+    Already have an MCP server? Add Skybridge to enable our React helpers and widgets abstractions.
+  </Card>
+</CardGroup>
+
+## Example Projects
+
+| Example | Source | Demo |
+|---------|--------|------|
+| **Capitals Explorer** – Interactive world map | [GitHub](https://github.com/alpic-ai/skybridge/tree/main/examples/capitals) | [Live](https://capitals.skybridge.tech/mcp) |
+| **Ecommerce Carousel** – Cart and checkout | [GitHub](https://github.com/alpic-ai/skybridge/tree/main/examples/ecom-carousel) | [Live](https://ecommerce.skybridge.tech/mcp) |
+| **Everything** – All hooks & features | [GitHub](https://github.com/alpic-ai/skybridge/tree/main/examples/everything) | [Live](https://everything.skybridge.tech/mcp) |
+
+## Learn More
+
+<CardGroup cols={2}>
+  <Card title="MCP Fundamentals" icon="graduation-cap" href="/mcp-and-chatgpt-fundamentals">
+    How ChatGPT Apps work under the hood
+  </Card>
+  <Card title="Data Flow" icon="arrows-rotate" href="/concepts/data-flow">
+    How data moves between tools, widgets, and the model
+  </Card>
+  <Card title="Type Safety" icon="shield-check" href="/concepts/type-safety">
+    End-to-end TypeScript inference with generateHelpers
+  </Card>
+  <Card title="Fetching Data" icon="download" href="/guides/fetching-data">
+    useToolInfo and useCallTool patterns
+  </Card>
+</CardGroup>
