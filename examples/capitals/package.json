@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "skybridge",
-    "build": "vite build -c web/vite.config.ts && shx rm -rf dist && tsc -p tsconfig.server.json && mkdir -p dist/assets && shx cp -r web/dist/. dist/assets",
-    "start": "node dist/index.js",
+    "build": "skybridge build",
+    "start": "skybridge start",
     "inspector": "mcp-inspector http://localhost:3000/mcp",
     "server:build": "tsc -p tsconfig.server.json",
     "server:start": "node dist/index.js",

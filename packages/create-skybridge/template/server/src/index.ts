@@ -34,15 +34,6 @@ app.listen(3000, (error) => {
     console.error("Failed to start server:", error);
     process.exit(1);
   }
-
-  console.log(`Server listening on port 3000 - ${env}`);
-  console.log(
-    "Make your local server accessible with 'ngrok http 3000' and connect to ChatGPT with URL https://xxxxxx.ngrok-free.app/mcp",
-  );
-
-  if (env !== "production") {
-    console.log("Devtools available at http://localhost:3000");
-  }
 });
 
 process.on("SIGINT", async () => {
