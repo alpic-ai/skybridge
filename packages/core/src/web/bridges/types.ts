@@ -95,8 +95,6 @@ export interface Adaptor {
   sendFollowUpMessage(prompt: string): Promise<void>;
   openExternal(href: string): void;
   setWidgetState(stateOrUpdater: SetWidgetStateAction): Promise<void>;
-  useFiles(): {
-    upload: (file: File) => Promise<FileMetadata>;
-    getDownloadUrl: (file: FileMetadata) => Promise<{ downloadUrl: string }>;
-  };
+  uploadFile(file: File): Promise<FileMetadata>;
+  getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
 }

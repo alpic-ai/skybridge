@@ -1,5 +1,9 @@
 import { getAdaptor } from "../bridges";
 
 export function useFiles() {
-  return getAdaptor().useFiles();
+  const adaptor = getAdaptor();
+  return {
+    upload: adaptor.uploadFile,
+    getDownloadUrl: adaptor.getFileDownloadUrl,
+  };
 }
