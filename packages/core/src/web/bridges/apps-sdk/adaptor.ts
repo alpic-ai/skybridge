@@ -66,4 +66,12 @@ export class AppsSdkAdaptor implements Adaptor {
 
     return window.openai.setWidgetState(newState);
   };
+
+  public uploadFile = (file: File) => {
+    return window.openai.uploadFile(file);
+  };
+
+  public getFileDownloadUrl = (file: { fileId: string }) => {
+    return window.openai.getFileDownloadUrl(file);
+  };
 }

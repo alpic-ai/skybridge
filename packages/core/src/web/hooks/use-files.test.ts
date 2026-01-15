@@ -9,6 +9,7 @@ describe("useFiles", () => {
   };
 
   beforeEach(() => {
+    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
     vi.stubGlobal("openai", OpenaiMock);
   });
 

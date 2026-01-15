@@ -81,6 +81,8 @@ export type SetWidgetStateAction =
   | WidgetState
   | ((prevState: WidgetState | null) => WidgetState);
 
+export type FileMetadata = { fileId: string };
+
 export interface Adaptor {
   getHostContextStore<K extends keyof HostContext>(key: K): HostContextStore<K>;
   callTool<
@@ -93,4 +95,6 @@ export interface Adaptor {
   sendFollowUpMessage(prompt: string): Promise<void>;
   openExternal(href: string): void;
   setWidgetState(stateOrUpdater: SetWidgetStateAction): Promise<void>;
+  uploadFile(file: File): Promise<FileMetadata>;
+  getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
 }
