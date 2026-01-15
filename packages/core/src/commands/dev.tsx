@@ -1,4 +1,4 @@
-import { Command } from "@oclif/core";
+import { Command, Flags } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { Header } from "../cli/header.js";
 import { runCommand } from "../cli/run-command.js";
@@ -6,11 +6,26 @@ import { runCommand } from "../cli/run-command.js";
 export default class Dev extends Command {
   static override description = "Start development server";
   static override examples = ["skybridge"];
-  static override flags = {};
+  static override flags = {
+    "use-forwarded-host": Flags.boolean({
+      description:
+        "Uses the forwarded host header to construct widget URLs instead of localhost, useful when accessing the dev server through a tunnel (e.g., ngrok)",
+    }),
+  };
 
   public async run(): Promise<void> {
+    const { flags } = await this.parse(Dev);
+
+    const env = {
+      ...process.env,
+      ...(flags["use-forwarded-host"]
+        ? { SKYBRIDGE_USE_FORWARDED_HOST: "true" }
+        : {}),
+    };
+
     runCommand("nodemon --quiet", {
       stdio: ["ignore", "ignore", "inherit"],
+      env,
     });
 
     const App = () => {

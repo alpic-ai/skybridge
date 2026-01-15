@@ -391,10 +391,13 @@ export class McpServer<
       { ...resourceConfig, _meta: resourceConfig._meta },
       async (uri, extra) => {
         const isProduction = process.env.NODE_ENV === "production";
+        const useForwardedHost =
+          process.env.SKYBRIDGE_USE_FORWARDED_HOST === "true";
 
-        const serverUrl = isProduction
-          ? `https://${extra?.requestInfo?.headers?.["x-forwarded-host"] ?? extra?.requestInfo?.headers?.host}`
-          : "http://localhost:3000";
+        const serverUrl =
+          isProduction || useForwardedHost
+            ? `https://${extra?.requestInfo?.headers?.["x-forwarded-host"] ?? extra?.requestInfo?.headers?.host}`
+            : "http://localhost:3000";
 
         const html = isProduction
           ? templateHelper.renderProduction({
