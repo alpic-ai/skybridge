@@ -1,11 +1,9 @@
 import type { UnknownObject } from "../../types.js";
-import type { CallToolArgs, CallToolResponse } from "../types.js";
+import type { CallToolArgs, CallToolResponse, FileMetadata } from "../types.js";
 
 type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
 
 type WidgetState = UnknownObject;
-
-type FileMetadata = { fileId: string };
 
 export const TOOL_RESPONSE_EVENT_TYPE = "openai:tool_response";
 export class ToolResponseEvent extends CustomEvent<{

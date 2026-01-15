@@ -216,6 +216,17 @@ export class McpAppAdaptor implements Adaptor {
     });
   };
 
+  public useFiles() {
+    return {
+      upload: () => {
+        throw new Error("File upload is not supported in MCP App.");
+      },
+      getDownloadUrl: () => {
+        throw new Error("File download is not supported in MCP App.");
+      },
+    };
+  }
+
   private createHostContextStore<
     const Keys extends readonly McpAppContextKey[],
     R,

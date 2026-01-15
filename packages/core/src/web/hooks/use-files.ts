@@ -1,6 +1,5 @@
+import { getAdaptor } from "../bridges";
+
 export function useFiles() {
-  return {
-    upload: window.openai.uploadFile,
-    getDownloadUrl: window.openai.getFileDownloadUrl,
-  };
+  return getAdaptor().useFiles();
 }
