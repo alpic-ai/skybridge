@@ -38,7 +38,7 @@ export const Header = () => {
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" className="h-8 gap-2">
             <a
-              href="https://www.skybridge.tech/"
+              href="https://docs.skybridge.tech/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2"

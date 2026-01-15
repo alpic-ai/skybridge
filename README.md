@@ -19,7 +19,7 @@ The fullstack TypeScript framework for ChatGPT Apps.<br />
 
 <br />
 
-[Documentation](https://skybridge.tech) · [Quick Start](https://github.com/new?template_name=apps-sdk-template&template_owner=alpic-ai) · [Examples](https://github.com/alpic-ai/apps-sdk-template)
+[Documentation](https://docs.skybridge.tech) · [Quick Start](https://github.com/new?template_name=apps-sdk-template&template_owner=alpic-ai) · [Examples](https://github.com/alpic-ai/apps-sdk-template)
 
 </div>
 
@@ -58,7 +58,7 @@ deno add skybridge
 
 <div align="center">
 
-**👉 [Read the Docs](https://skybridge.tech) 👈**
+**👉 [Read the Docs](https://docs.skybridge.tech) 👈**
 
 </div>
 
