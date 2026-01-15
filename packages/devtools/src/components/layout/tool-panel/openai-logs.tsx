@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button.js";
 import { useSelectedTool } from "@/lib/mcp/index.js";
 import { type OpenAiLog, useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils";
+import { ViewResourceButton } from "../view-resource-button.js";
 
 function formatTimestamp(timestamp: number): string {
   const date = new Date(timestamp);
@@ -103,12 +104,15 @@ export function OpenAiLogs() {
         <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200">
           OpenAI API Logs
         </h3>
-        {openaiLogs.length > 0 && (
-          <Button variant="ghost" size="sm" onClick={handleClearLogs}>
-            <TrashIcon className="w-3 h-3" />
-            Clear
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <ViewResourceButton />
+          {openaiLogs.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={handleClearLogs}>
+              <TrashIcon className="w-3 h-3" />
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
       <div
         ref={containerRef}
