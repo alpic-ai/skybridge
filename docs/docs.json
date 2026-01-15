@@ -3,9 +3,9 @@
   "name": "Skybridge",
   "theme": "mint",
   "colors": {
-    "primary": "#0069ED",
-    "light": "#0069ED",
-    "dark": "#0069ED"
+    "primary": "#2563EB",
+    "light": "#3B82F6",
+    "dark": "#2563EB"
   },
   "favicon": "/images/favicon.ico",
   "logo": {
