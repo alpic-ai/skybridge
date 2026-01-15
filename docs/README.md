@@ -21,4 +21,4 @@ Checks for broken links.
 
 ## Deployment
 
-Documentation is automatically deployed on push to main.
+Documentation is deployed on mintlify branch pushes, which automatically happen on release workflow.
