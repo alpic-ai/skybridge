@@ -13,6 +13,7 @@ import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { Card, CardContent } from "../../ui/card.js";
 import { CallToolButton } from "../call-tool-button.js";
+import { ViewToolMetaButton } from "../view-tool-meta-button.js";
 
 const uiSchema: UiSchema = {
   "ui:submitButtonOptions": {
@@ -121,6 +122,7 @@ export const InputForm = () => {
       <div className="shrink-0 border-b border-border px-6 py-4 flex items-center justify-between h-[72px]">
         <h2 className="font-semibold text-foreground">{tool.name}</h2>
         <div className="flex items-center gap-2">
+          <ViewToolMetaButton />
           <CallToolButton
             validateForm={async () => {
               if (ref.current === null) {

@@ -2,7 +2,7 @@ import { type SafeArea, type Theme, useHostContext } from "../bridges/index.js";
 
 export type LayoutState = {
   theme: Theme;
-  maxHeight: number;
+  maxHeight: number | undefined;
   safeArea: SafeArea;
 };
 

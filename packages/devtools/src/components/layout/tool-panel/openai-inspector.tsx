@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select.js";
+import { Switch } from "@/components/ui/switch.js";
 import {
   Tabs,
   TabsContent,
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/tabs.js";
 import { useSelectedTool } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
+import { LocaleSelector } from "./locale-selector.js";
 
 export const OpenAiInspector = () => {
   const tool = useSelectedTool();
@@ -105,10 +107,148 @@ export const OpenAiInspector = () => {
             </Field>
             <Field>
               <FieldLabel>Locale</FieldLabel>
-              <Input
+              <LocaleSelector
                 value={openaiObject.locale}
-                onChange={(e) => handleValueChange("locale", e.target.value)}
+                onValueChange={(value) => handleValueChange("locale", value)}
               />
+            </Field>
+            <Field>
+              <FieldLabel>Max Height</FieldLabel>
+              <Input
+                type="number"
+                value={
+                  openaiObject.maxHeight !== undefined
+                    ? String(openaiObject.maxHeight)
+                    : ""
+                }
+                onChange={(e) => {
+                  const value = e.target.value.trim();
+                  handleValueChange(
+                    "maxHeight",
+                    value === "" ? undefined : Number(value),
+                  );
+                }}
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Safe Area Insets</FieldLabel>
+              <div className="grid grid-cols-2 gap-4">
+                {(["top", "bottom", "left", "right"] as const).map((key) => {
+                  const label = key.charAt(0).toUpperCase() + key.slice(1);
+                  return (
+                    <div key={key}>
+                      <label
+                        htmlFor={`safeArea-${key}`}
+                        className="text-xs text-muted-foreground block mb-1"
+                      >
+                        {label}
+                      </label>
+                      <Input
+                        id={`safeArea-${key}`}
+                        type="number"
+                        value={
+                          openaiObject.safeArea?.insets?.[key] !== undefined
+                            ? String(openaiObject.safeArea.insets[key])
+                            : "0"
+                        }
+                        onChange={(e) => {
+                          const value = e.target.value.trim();
+                          handleValueChange("safeArea", {
+                            ...openaiObject.safeArea,
+                            insets: {
+                              ...openaiObject.safeArea?.insets,
+                              [key]: value === "" ? 0 : Number(value),
+                            },
+                          });
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </Field>
+            <Field>
+              <FieldLabel>Device Type</FieldLabel>
+              <Select
+                value={openaiObject.userAgent?.device?.type ?? "desktop"}
+                onValueChange={(value) =>
+                  handleValueChange("userAgent", {
+                    ...openaiObject.userAgent,
+                    device: {
+                      ...openaiObject.userAgent?.device,
+                      type: value as "mobile" | "desktop",
+                    },
+                  })
+                }
+                aria-label="Select device type"
+                items={[
+                  { label: "Mobile", value: "mobile" },
+                  { label: "Desktop", value: "desktop" },
+                ]}
+                name="deviceType"
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="mobile">Mobile</SelectItem>
+                    <SelectItem value="desktop">Desktop</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field>
+              <FieldLabel>Capabilities</FieldLabel>
+              <div className="flex gap-8">
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="hover"
+                    className="text-xs text-muted-foreground cursor-pointer"
+                  >
+                    Hover
+                  </label>
+                  <Switch
+                    id="hover"
+                    checked={
+                      openaiObject.userAgent?.capabilities?.hover ?? false
+                    }
+                    onCheckedChange={(checked) =>
+                      handleValueChange("userAgent", {
+                        ...openaiObject.userAgent,
+                        capabilities: {
+                          ...openaiObject.userAgent?.capabilities,
+                          hover: checked,
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="touch"
+                    className="text-xs text-muted-foreground cursor-pointer"
+                  >
+                    Touch
+                  </label>
+                  <Switch
+                    id="touch"
+                    checked={
+                      openaiObject.userAgent?.capabilities?.touch ?? false
+                    }
+                    onCheckedChange={(checked) =>
+                      handleValueChange("userAgent", {
+                        ...openaiObject.userAgent,
+                        capabilities: {
+                          ...openaiObject.userAgent?.capabilities,
+                          touch: checked,
+                        },
+                      })
+                    }
+                  />
+                </div>
+              </div>
             </Field>
           </FieldSet>
         </TabsContent>

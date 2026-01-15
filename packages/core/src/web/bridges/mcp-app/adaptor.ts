@@ -154,10 +154,10 @@ export class McpAppAdaptor implements Adaptor {
         ["containerDimensions"],
         ({ containerDimensions }) => {
           if (containerDimensions && "maxHeight" in containerDimensions) {
-            return containerDimensions.maxHeight ?? window.innerHeight;
+            return containerDimensions.maxHeight;
           }
 
-          return window.innerHeight;
+          return undefined;
         },
       ),
       userAgent: this.createHostContextStore(

@@ -54,7 +54,7 @@ export interface HostContext {
   locale: string;
   displayMode: DisplayMode;
   safeArea: SafeArea;
-  maxHeight: number;
+  maxHeight: number | undefined;
   userAgent: UserAgent;
   toolInput: Record<string, unknown> | null;
   toolOutput: Record<string, unknown> | null;

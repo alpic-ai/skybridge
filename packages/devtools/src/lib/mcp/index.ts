@@ -18,7 +18,7 @@ const defaultOpenaiObject: AppsSdkContext = {
     capabilities: { hover: true, touch: false },
   },
   locale: "en-US",
-  maxHeight: 600,
+  maxHeight: undefined,
   displayMode: "inline",
   safeArea: {
     insets: {
