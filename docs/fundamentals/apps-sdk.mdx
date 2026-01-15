@@ -41,14 +41,14 @@ Skybridge wraps the raw `window.openai` API with React hooks:
 | Raw API | Skybridge Hook | Purpose |
 |---------|----------------|---------|
 | `window.openai.toolOutput` | [`useToolInfo()`](/api-reference/use-tool-info) | Access initial tool input/output |
-| `window.openai.widgetState` | [`useWidgetState()`](/api-reference/use-widget-state) | Persistent widget state |
+| `window.openai.widgetState` and `window.openai.setWidgetState` | [`useWidgetState()`](/api-reference/use-widget-state) | Persistent widget state |
 | `window.openai.callTool()` | [`useCallTool()`](/api-reference/use-call-tool) | Make additional tool calls |
 | `window.openai.sendFollowUpMessage()` | [`useSendFollowUpMessage()`](/api-reference/use-send-follow-up-message) | Send follow-up messages |
 | `window.openai.openExternal()` | [`useOpenExternal()`](/api-reference/use-open-external) | Open external URLs |
-| `window.openai.requestModal()` | [`useRequestModal()`](/api-reference/use-request-modal) | Request modal display |
+| `window.openai.view` and `window.openai.requestModal()` | [`useRequestModal()`](/api-reference/use-request-modal) | Request modal display |
 | `window.openai.theme` | [`useLayout()`](/api-reference/use-layout) | Access ChatGPT theme |
 | `window.openai.locale` | [`useUser()`](/api-reference/use-user) | Access user locale |
-| `window.openai.displayMode` | [`useDisplayMode()`](/api-reference/use-display-mode) | Access/change display mode |
+| `window.openai.displayMode` and `window.openai.requestDisplayMode` | [`useDisplayMode()`](/api-reference/use-display-mode) | Access/change display mode |
 | `window.openai.uploadFile()` | [`useFiles()`](/api-reference/use-files) | Upload and download files |
 
 ## Apps SDK Exclusive Features
