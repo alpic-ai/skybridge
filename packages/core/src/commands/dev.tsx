@@ -55,7 +55,7 @@ export default class Dev extends Command {
               <Text color="#20a832">→{"  "}</Text>
               <Text>Documentation: </Text>
               <Text color="white" bold>
-                https://skybridge.tech/
+                https://docs.skybridge.tech/
               </Text>
             </Text>
           </Box>

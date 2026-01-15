@@ -85,7 +85,7 @@ function Widget() {
           type="button"
           className="btn btn-outline muted btn-small"
           onClick={() =>
-            openExternal(`https://www.skybridge.tech/api-reference/${docPath}`)
+            openExternal(`https://docs.skybridge.tech/api-reference/${docPath}`)
           }
         >
           ↗ See in docs
