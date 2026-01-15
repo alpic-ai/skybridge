@@ -1,8 +1,14 @@
 ---
 title: useFiles
 description: "Upload and download files within widgets, with host-managed storage across tool calls."
+tag: "ChatGPT"
 ---
 
+<Warning>
+**Runtime Support**: ChatGPT Apps only
+
+This hook is not available in MCP Apps. Calling it in an MCP Apps environment will throw an error.
+</Warning>
 
 The `useFiles` hook provides methods for uploading and downloading files within your widget. Files are managed by the host and can be referenced across tool calls.
 
