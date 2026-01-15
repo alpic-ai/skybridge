@@ -10,9 +10,7 @@
     "test:unit": "pnpm --filter \"./packages/*\" test:unit",
     "test:type": "pnpm --filter \"./packages/*\" test:type",
     "test:format": "pnpm --filter \"./packages/*\" test:format",
-    "docs:dev": "pnpm --filter @skybridge/docs start",
-    "docs:build": "pnpm --filter @skybridge/docs build",
-    "docs:serve": "pnpm --filter @skybridge/docs serve"
+    "docs:dev": "pnpm --filter @skybridge/docs dev"
   },
   "keywords": [
     "chatgpt",

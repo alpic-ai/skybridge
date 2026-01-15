@@ -49,7 +49,8 @@
                   "quickstart/add-to-existing-app/web"
                 ]
               },
-              "quickstart/test-your-app"
+              "quickstart/test-your-app",
+              "mcp-and-chatgpt-fundamentals"
             ]
           },
           {
