@@ -3,6 +3,8 @@ title: API Reference
 description: Detailed documentation for all hooks and utilities provided by Skybridge.
 ---
 
+Skybridge exports hooks and utilities from `skybridge/web` that work across multiple runtimes. See the [compatibility matrix](#runtime-compatibility) below for platform-specific availability.
+
 ## State Management
 
 <CardGroup cols={2}>
@@ -86,3 +88,24 @@ import {
   useWidgetState,
 } from "skybridge/web";
 ```
+
+## Runtime Compatibility
+
+Skybridge supports two runtime environments: **Apps SDK** (ChatGPT) and **MCP Apps** (open specification). Most hooks work in both, but some features are platform-specific.
+
+| Hook | Apps SDK | MCP Apps | Notes |
+|------|:--------:|:--------:|-------|
+| [useToolInfo](/api-reference/use-tool-info) | ✅ | ✅ | |
+| [useWidgetState](/api-reference/use-widget-state) | ✅ | 🔜 | MCP Apps: coming soon |
+| [useCallTool](/api-reference/use-call-tool) | ✅ | ✅ | |
+| [useSendFollowUpMessage](/api-reference/use-send-follow-up-message) | ✅ | ✅ | |
+| [useOpenExternal](/api-reference/use-open-external) | ✅ | ✅ | |
+| [useLayout](/api-reference/use-layout) | ✅ | ✅ | |
+| [useUser](/api-reference/use-user) | ✅ | ✅ | |
+| [useDisplayMode](/api-reference/use-display-mode) | ✅ | ⚠️ | MCP Apps: no "modal" mode |
+| [useFiles](/api-reference/use-files) | ✅ | ❌ | Apps SDK only |
+| [useRequestModal](/api-reference/use-request-modal) | ✅ | 🔜 | MCP Apps: coming soon |
+
+<Tip>
+Learn more about runtime differences in [Platform Agnosticism](/concepts/platform-agnosticism).
+</Tip>

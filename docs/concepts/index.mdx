@@ -1,17 +1,20 @@
 ---
 title: Core Concepts
-description: "Understand the four key concepts that power Skybridge: data flow, LLM context sync, fast iteration, and type safety."
+description: "Understand the five key concepts that power Skybridge: platform agnosticism, data flow, LLM context sync, fast iteration, and type safety."
 ---
 
 <Info>
-We assume that you are already familiar with ChatGPT Apps and MCP Servers here. If you're not, read [MCP and ChatGPT Apps Fundamentals](/mcp-and-chatgpt-fundamentals) first.
+We assume that you are already familiar with ChatGPT Apps, MCP Apps, and MCP Servers. If you're not, read [Fundamentals](/fundamentals) first.
 </Info>
 
-Four concepts power Skybridge:
+Five concepts power Skybridge:
 
 <CardGroup cols={2}>
+  <Card title="Platform Agnosticism" icon="shuffle" href="/concepts/platform-agnosticism">
+    Write once, run anywhere - Apps SDK and MCP Apps
+  </Card>
   <Card title="Data Flow" icon="arrows-rotate" href="/concepts/data-flow">
-    How data moves between server, ChatGPT, and widget
+    How data moves between server, host, and widget
   </Card>
   <Card title="LLM Context Sync" icon="brain" href="/concepts/llm-context-sync">
     Keep the model aware of widget state via `data-llm`
@@ -25,5 +28,5 @@ Four concepts power Skybridge:
 </CardGroup>
 
 <Tip>
-**Start with Data Flow** — it establishes the three-actor model that other concepts build on.
+**Start with Platform Agnosticism** — it explains how Skybridge abstracts runtime differences so you can focus on your app.
 </Tip>

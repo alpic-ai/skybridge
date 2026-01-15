@@ -1,6 +1,6 @@
 ---
 title: Test Your App
-description: "Test your ChatGPT App locally with DevTools or in ChatGPT Developer Mode for integration testing."
+description: "Test your app locally with DevTools or in ChatGPT Developer Mode for integration testing."
 ---
 
 Skybridge provides two ways to test your app: **local DevTools** for rapid iteration, and **ChatGPT** for integration testing.
@@ -11,10 +11,14 @@ Open `http://localhost:3000/` in your browser to access DevTools. This is the fa
 
 - **Tool listing** - See all registered tools and widgets
 - **Input forms** - Test tools with custom inputs
-- **Widget preview** - Render widgets in a mocked ChatGPT environment
+- **Widget preview** - Render widgets in a mocked Apps SDK environment
 - **Theme/locale switching** - Test different display modes
 
 The DevTools mock the `window.openai` API, so your widget code works identically in both environments.
+
+<Note>
+DevTools currently uses the Apps SDK runtime. For MCP Apps testing, connect your server to a compatible client like Goose.
+</Note>
 
 <Tip>
 **Fast Iteration**

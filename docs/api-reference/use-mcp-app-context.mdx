@@ -1,0 +1,196 @@
+---
+title: useMcpAppContext
+description: "Low-level hook for subscribing to MCP App host context values directly."
+tag: "MCP Apps"
+---
+
+The `useMcpAppContext` hook is a low-level hook that subscribes to context values from the MCP Apps host. This hook powers many of the other Skybridge hooks when running in MCP Apps clients and can be used directly when you need access to specific context values.
+
+<Tip>
+For most use cases, prefer using the specialized hooks like `useLayout`, `useUser`, `useToolInfo`, etc., as they provide a more convenient API that works across both runtimes.
+</Tip>
+
+## Basic usage
+
+```tsx
+import { useMcpAppContext } from "skybridge/web";
+
+function ThemeDisplay() {
+  const theme = useMcpAppContext("theme");
+
+  return <p>Current theme: {theme}</p>;
+}
+```
+
+## Parameters
+
+### `key`
+
+```tsx
+key: keyof McpAppContext
+```
+
+**Required**
+
+The key of the context value to subscribe to. Available keys include:
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `theme` | `"light" \| "dark"` | The current color theme |
+| `locale` | `string` | The user's locale (e.g., `"en-US"`) |
+| `displayMode` | `"inline" \| "fullscreen"` | The widget's display mode |
+| `maxHeight` | `number` | Maximum height available for the widget |
+| `toolInput` | `object \| null` | The input arguments passed to the tool |
+| `toolResult` | `object \| null` | The tool execution result |
+| `toolCancelled` | `object \| null` | Tool cancellation details (if cancelled) |
+
+### `options`
+
+```tsx
+options?: { appInfo?: { name: string; version: string } }
+```
+
+**Optional**
+
+Initialization options for the MCP App bridge. Only used on first instantiation.
+
+### `requestTimeout`
+
+```tsx
+requestTimeout?: number
+```
+
+**Optional**
+
+Timeout in milliseconds for the initialization request. Defaults to 10000 (10 seconds).
+
+## Returns
+
+```tsx
+value: McpAppContext[K] | undefined
+```
+
+The current value of the specified context key, or `undefined` if not yet available.
+
+## Examples
+
+### Reading Theme
+
+```tsx
+import { useMcpAppContext } from "skybridge/web";
+
+function ThemedWidget() {
+  const theme = useMcpAppContext("theme");
+
+  return (
+    <div style={{
+      backgroundColor: theme === "dark" ? "#1a1a1a" : "#ffffff",
+      color: theme === "dark" ? "#ffffff" : "#000000"
+    }}>
+      <p>Current theme: {theme}</p>
+    </div>
+  );
+}
+```
+
+### Accessing Tool Input
+
+```tsx
+import { useMcpAppContext } from "skybridge/web";
+
+function ToolInputDisplay() {
+  const toolInput = useMcpAppContext("toolInput");
+
+  if (!toolInput) {
+    return <p>No tool input yet...</p>;
+  }
+
+  return (
+    <div>
+      <h3>Tool Input:</h3>
+      <pre>{JSON.stringify(toolInput, null, 2)}</pre>
+    </div>
+  );
+}
+```
+
+### Checking Tool Result
+
+```tsx
+import { useMcpAppContext } from "skybridge/web";
+
+function ToolResultDisplay() {
+  const toolResult = useMcpAppContext("toolResult");
+  const toolCancelled = useMcpAppContext("toolCancelled");
+
+  if (toolCancelled) {
+    return <p>Tool was cancelled: {toolCancelled.reason}</p>;
+  }
+
+  if (!toolResult) {
+    return <p>Waiting for tool result...</p>;
+  }
+
+  return (
+    <div>
+      <h3>Tool Result:</h3>
+      <pre>{JSON.stringify(toolResult, null, 2)}</pre>
+    </div>
+  );
+}
+```
+
+### Multiple Context Values
+
+```tsx
+import { useMcpAppContext } from "skybridge/web";
+
+function EnvironmentInfo() {
+  const theme = useMcpAppContext("theme");
+  const locale = useMcpAppContext("locale");
+  const displayMode = useMcpAppContext("displayMode");
+  const maxHeight = useMcpAppContext("maxHeight");
+
+  return (
+    <div>
+      <h3>MCP App Environment</h3>
+      <ul>
+        <li>Theme: {theme}</li>
+        <li>Locale: {locale}</li>
+        <li>Display Mode: {displayMode}</li>
+        <li>Max Height: {maxHeight}px</li>
+      </ul>
+    </div>
+  );
+}
+```
+
+## Type Reference
+
+### `McpAppContext`
+
+```tsx
+type McpAppContext = McpUiHostContext & McpToolState;
+```
+
+Combines the host context from the MCP ext-apps spec with tool execution state.
+
+### `McpToolState`
+
+```tsx
+type McpToolState = {
+  toolInput: Record<string, unknown> | null;
+  toolResult: {
+    content: Array<{ type: string; text?: string }>;
+    isError?: boolean;
+  } | null;
+  toolCancelled: {
+    reason?: string;
+  } | null;
+};
+```
+
+## Related
+
+- [useAppsSdkContext](/api-reference/use-apps-sdk-context) - The Apps SDK equivalent for ChatGPT
+- [MCP Apps Fundamentals](/fundamentals/mcp-apps) - Understanding the MCP Apps runtime
