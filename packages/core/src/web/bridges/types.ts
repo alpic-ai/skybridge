@@ -83,6 +83,11 @@ export type SetWidgetStateAction =
 
 export type FileMetadata = { fileId: string };
 
+export type RequestModalOptions = {
+  title?: string;
+  params?: Record<string, unknown>;
+  anchor?: { top?: number; left?: number; width?: number; height?: number };
+};
 export interface Adaptor {
   getHostContextStore<K extends keyof HostContext>(key: K): HostContextStore<K>;
   callTool<
@@ -97,4 +102,9 @@ export interface Adaptor {
   setWidgetState(stateOrUpdater: SetWidgetStateAction): Promise<void>;
   uploadFile(file: File): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
+  useRequestModal(): {
+    isOpen: boolean;
+    open: (options: RequestModalOptions) => void;
+    params?: Record<string, unknown>;
+  };
 }

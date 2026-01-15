@@ -46,19 +46,23 @@ type Tab = keyof typeof TABS;
 function Widget() {
   const [tab, setTab] = useState<Tab>("Home");
   const openExternal = useOpenExternal();
-  const { isOpen } = useRequestModal();
+  const { isOpen, params } = useRequestModal();
 
   const { docPath, Component } = TABS[tab];
 
   // modal content need to be set at root
   // opening is triggered by UseRequestModalTab
   if (isOpen) {
+    let message = "No message provided";
+    if (typeof params?.message === "string") {
+      message = params.message;
+    }
     return (
       <div
         className="container"
         style={{ textAlign: "center", fontSize: "1.5rem" }}
       >
-        🤠 Howdy !
+        {message}
       </div>
     );
   }
