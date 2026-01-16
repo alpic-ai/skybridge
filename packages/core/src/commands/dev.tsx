@@ -17,7 +17,6 @@ export default class Dev extends Command {
     const { flags } = await this.parse(Dev);
 
     const env = {
-      ...process.env,
       ...(flags["use-forwarded-host"]
         ? { SKYBRIDGE_USE_FORWARDED_HOST: "true" }
         : {}),
