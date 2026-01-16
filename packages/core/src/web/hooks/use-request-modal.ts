@@ -3,7 +3,7 @@ import {
   getAdaptor,
   type RequestModalOptions,
   useHostContext,
-} from "../bridges";
+} from "../bridges/index.js";
 
 /**
  * Triggers a modal containing the widget rendered in display mode "modal"
