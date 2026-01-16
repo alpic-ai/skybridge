@@ -3,7 +3,7 @@
   "url": "https://context7.com/alpic-ai/skybridge",
   "public_key": "pk_QmCV6r1eoYWNTIq1jxP0h",
   "projectTitle": "Skybridge",
-  "description": "Fullstack TypeScript framework for building ChatGPT Apps with type safety, React hooks, and HMR",
+  "description": "Fullstack TypeScript framework for building ChatGPT and MCP Apps with type safety, React hooks, and HMR",
   "folders": ["docs/docs", "examples"],
   "excludeFolders": [
     "node_modules",
@@ -37,7 +37,7 @@
     "Use React hooks from skybridge/web (useToolInfo, useCallTool, useWidgetState, useLayout, useUser) instead of raw window.openai APIs for better state management",
     "Use useToolInfo for initial data hydration - it provides the data from the tool call that rendered the widget",
     "Use useCallTool for user-triggered actions only - do NOT call tools on mount, pass initial data through structuredContent instead",
-    "Use the data-llm attribute on DOM elements to sync UI state with the ChatGPT model, enabling contextual responses",
+    "Use the data-llm attribute on DOM elements to sync UI state with the model, enabling contextual responses",
     "Widget endpoint names must match widget file names exactly (e.g., 'pokemon-card' endpoint requires 'pokemon-card.tsx' file in web/src/widgets/)",
     "Use Zod schemas for input and output validation in widget registration (inputSchema and outputSchema)",
     "Use generateHelpers to create fully typed hooks with autocomplete - import AppType from server and call generateHelpers<AppType>()",

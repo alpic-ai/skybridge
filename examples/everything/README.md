@@ -43,7 +43,7 @@ bun dev
 This command starts an Express server on port 3000. This server packages:
 
 - an MCP endpoint on `/mcp` (the app backend)
-- a React application on Vite HMR dev server (the UI elements to be displayed in ChatGPT)
+- a React application on Vite HMR dev server (the UI elements to be displayed in the host)
 
 #### 3. Connect to ChatGPT
 
@@ -62,7 +62,7 @@ ngrok http 3000
 
 #### 2. Edit widgets with Hot Module Replacement (HMR)
 
-Edit and save components in `web/src/widgets/` — changes appear instantly in ChatGPT
+Edit and save components in `web/src/widgets/` — changes appear instantly in the host
 
 #### 3. Edit server code
 

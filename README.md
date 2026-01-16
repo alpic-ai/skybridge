@@ -65,10 +65,12 @@ deno add skybridge
 
 <br />
 
-## 📦 The Stack
+## 📦 Architecture
 
-- **`skybridge/server`** — Drop-in MCP SDK replacement with widget registration and type inference.
-- **`skybridge/web`** — React hooks for Apps SDK (ChatGPT) and MCP Apps runtimes.
+Skybridge is a fullstack framework with unified server and client modules:
+
+- **`skybridge/server`** — Define tools and widgets with full type inference. Extends the MCP SDK.
+- **`skybridge/web`** — React hooks that consume your server types. Works with Apps SDK (ChatGPT) and MCP Apps.
 - **Dev Environment** — Vite plugin with HMR, DevTools emulator, and optimized builds.
 
 ### Server
@@ -116,9 +118,11 @@ function FlightsWidget() {
 
 Explore production-ready examples:
 
-- **[Capitals Explorer](https://capitals.skybridge.tech/try)** — Interactive world map with geolocation and Wikipedia integration
-- **[Ecommerce Carousel](https://ecommerce.skybridge.tech/try)** — Product carousel with cart, localization, and modals
-- **[Everything](https://everything.skybridge.tech/try)** — Comprehensive playground showcasing all hooks and features
+| Example | Description | Demo | Code |
+|---------|-------------|------|------|
+| **Capitals Explorer** | Interactive world map with geolocation and Wikipedia integration | [Try Demo](https://capitals.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/capitals) |
+| **Ecommerce Carousel** | Product carousel with cart, localization, and modals | [Try Demo](https://ecommerce.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/ecom-carousel) |
+| **Everything** | Comprehensive playground showcasing all hooks and features | [Try Demo](https://everything.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/everything) |
 
 See all examples in the [Showcase](https://docs.skybridge.tech/showcase) or browse the [examples/](examples/) directory.
 

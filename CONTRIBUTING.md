@@ -1,6 +1,6 @@
 # Contributing to Skybridge
 
-Thank you for your interest in contributing to Skybridge! Every contribution helps make this framework better for everyone building ChatGPT apps.
+Thank you for your interest in contributing to Skybridge! Every contribution helps make this framework better for everyone building ChatGPT and MCP Apps.
 
 ## Getting Started
 
