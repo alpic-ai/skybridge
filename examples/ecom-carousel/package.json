@@ -5,7 +5,7 @@
   "description": "An e-commerce carousel example",
   "type": "module",
   "scripts": {
-    "dev": "skybridge",
+    "dev": "skybridge dev",
     "build": "skybridge build",
     "start": "skybridge start",
     "inspector": "mcp-inspector http://localhost:3000/mcp",
