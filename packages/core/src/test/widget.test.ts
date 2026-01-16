@@ -285,7 +285,7 @@ describe("McpServer.registerWidget", () => {
       ],
     });
     expect(appsSdkResult.contents[0]?.text).toContain(
-      'window.skybridge = { hostType: "apps-sdk" }',
+      'window.skybridge = { hostType: "apps-sdk", serverUrl: "http://localhost:3000" };',
     );
 
     const extAppsResourceCallback = mockRegisterResource.mock
@@ -329,7 +329,7 @@ describe("McpServer.registerWidget", () => {
       ],
     });
     expect(extAppsResult.contents[0]?.text).toContain(
-      'window.skybridge = { hostType: "mcp-app" }',
+      'window.skybridge = { hostType: "mcp-app", serverUrl: "http://localhost:3000" };',
     );
   });
 
