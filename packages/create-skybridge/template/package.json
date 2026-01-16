@@ -5,7 +5,7 @@
   "description": "Alpic MCP Server Template",
   "type": "module",
   "scripts": {
-    "dev": "skybridge",
+    "dev": "skybridge dev",
     "build": "skybridge build",
     "start": "skybridge start",
     "inspector": "mcp-inspector http://localhost:3000/mcp",
