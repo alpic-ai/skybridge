@@ -1,6 +1,6 @@
 <div align="center">
 
-<img alt="Skybridge" src="docs/images/github-banner.png" width="100%">
+<img alt="Skybridge" src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/github-banner.png" width="100%">
 
 <br />
 
