@@ -11,7 +11,6 @@ const server = new McpServer(
   "widget",
   {
     description: "A playground to discover the Skybridge framework",
-    hosts: ["apps-sdk"],
   },
   {
     description: "A simple greeting tool",
