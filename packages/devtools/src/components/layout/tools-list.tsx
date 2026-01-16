@@ -21,7 +21,7 @@ function ToolsList() {
           <div className="p-2">
             {tools?.length === 0 ? (
               <div className="p-4 text-center text-sm text-muted-foreground">
-                No tools available
+                No tools registered yet.
               </div>
             ) : (
               <div className="space-y-1">
