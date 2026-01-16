@@ -1,5 +1,5 @@
 <base href="{{serverUrl}}" />
-<script type="module">window.skybridge = { hostType: "{{hostType}}" };</script>
+<script type="module">window.skybridge = { hostType: "{{hostType}}", serverUrl: "{{serverUrl}}" };</script>
 <script type="module">
   import { injectIntoGlobalHook } from "{{serverUrl}}/assets/@react-refresh";
   injectIntoGlobalHook(window); window.$RefreshReg$ = () => {};
