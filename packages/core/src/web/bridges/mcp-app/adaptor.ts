@@ -259,6 +259,10 @@ export class McpAppAdaptor implements Adaptor {
     });
   }
 
+  public setOpenInAppUrl(_href: string): Promise<void> {
+    throw new Error("setOpenInAppUrl is not implemented in MCP App.");
+  }
+
   private createHostContextStore<
     const Keys extends readonly McpAppContextKey[],
     R,
