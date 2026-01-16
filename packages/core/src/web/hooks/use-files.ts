@@ -1,4 +1,4 @@
-import { getAdaptor } from "../bridges";
+import { getAdaptor } from "../bridges/index.js";
 
 export function useFiles() {
   const adaptor = getAdaptor();
