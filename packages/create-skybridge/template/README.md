@@ -1,6 +1,6 @@
-# ChatGPT Apps SDK Alpic Starter
+# Skybridge Starter
 
-A minimal TypeScript template for building OpenAI Apps SDK compatible MCP servers with widget rendering in ChatGPT.
+A minimal TypeScript template for building ChatGPT and MCP Apps with widget rendering.
 
 ## Getting Started
 
@@ -40,7 +40,7 @@ bun dev
 This command starts an Express server on port 3000. This server packages:
 
 - an MCP endpoint on `/mcp` (the app backend)
-- a React application on Vite HMR dev server (the UI elements to be displayed in ChatGPT)
+- a React application on Vite HMR dev server (the UI elements to be displayed in the host)
 
 #### 3. Connect to ChatGPT
 
@@ -59,7 +59,7 @@ ngrok http 3000
 
 #### 2. Edit widgets with Hot Module Replacement (HMR)
 
-Edit and save components in `web/src/widgets/` — changes appear instantly in ChatGPT
+Edit and save components in `web/src/widgets/` — changes appear instantly in the host
 
 #### 3. Edit server code
 

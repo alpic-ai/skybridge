@@ -15,7 +15,7 @@ What kind of state do you need?
 │   (The model needs to know what user is viewing)
 │
 ├── Simple key/value state? → useWidgetState
-│   (Form inputs, selected items, flags — persisted in ChatGPT)
+│   (Form inputs, selected items, flags — persisted by the host)
 │
 └── Complex state with actions? → createStore
     (Multiple related values, computed state, async actions)
@@ -23,7 +23,7 @@ What kind of state do you need?
 
 ## useWidgetState
 
-Persistent state that survives re-renders and display mode changes. Unlike React's `useState`, this state is stored by ChatGPT and restored when your widget remounts.
+Persistent state that survives re-renders and display mode changes. Unlike React's `useState`, this state is stored by the host and restored when your widget remounts.
 
 ```tsx
 import { useWidgetState } from "skybridge/web";
@@ -85,7 +85,7 @@ const toggleItem = (id: string) => {
 
 ## createStore
 
-A Zustand store that automatically syncs with ChatGPT's persistent state. Unlike `useWidgetState`, this provides actions, computed values, and middleware support for complex state management.
+A Zustand store that automatically syncs with the host's persistent state. Unlike `useWidgetState`, this provides actions, computed values, and middleware support for complex state management.
 
 ```tsx
 import { createStore } from "skybridge/web";

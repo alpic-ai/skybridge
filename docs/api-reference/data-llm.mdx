@@ -1,10 +1,10 @@
 ---
 title: data-llm Attribute
-description: "Create a feedback loop between your widget UI state and ChatGPT for contextual responses."
+description: "Create a feedback loop between your widget UI state and the model for contextual responses."
 ---
 
 
-The `data-llm` attribute allows your widget to communicate its current UI state back to the ChatGPT model. This creates a feedback loop where the model can understand what the user is seeing and respond contextually to their questions.
+The `data-llm` attribute allows your widget to communicate its current UI state back to the model. This creates a feedback loop where the model can understand what the user is seeing and respond contextually to their questions.
 
 ## Basic usage
 
@@ -44,7 +44,7 @@ export function FlightWidget() {
 
 ## Why it exists
 
-ChatGPT Apps introduce a unique challenge: the model needs to understand both the conversation history **and** what the user is currently viewing in your widget. Without `data-llm`, the model only knows about the initial tool call that rendered your widget. As users interact with your UI, the model remains unaware of state changes unless you explicitly sync them.
+Apps introduce a unique challenge: the model needs to understand both the conversation history **and** what the user is currently viewing in your widget. Without `data-llm`, the model only knows about the initial tool call that rendered your widget. As users interact with your UI, the model remains unaware of state changes unless you explicitly sync them.
 
 **Example scenario:**
 1. User asks "Show me flights to Paris"
@@ -391,7 +391,7 @@ Avoid `data-llm` when:
 2. Each component gets a unique ID and registers itself in a global map
 3. When content changes, the entire tree is traversed and formatted
 4. The formatted string is stored in `window.openai.widgetState.__widget_context`
-5. ChatGPT reads this value and includes it in the model's context
+5. The host reads this value and includes it in the model's context
 
 ### Component lifecycle
 

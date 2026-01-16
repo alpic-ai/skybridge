@@ -82,7 +82,7 @@
           {
             "group": "Resources",
             "icon": "circle-question",
-            "pages": ["showcase", "faq"]
+            "pages": ["faq"]
           }
         ]
       },
@@ -139,6 +139,16 @@
               "api-reference/use-apps-sdk-context",
               "api-reference/use-mcp-app-context"
             ]
+          }
+        ]
+      },
+      {
+        "tab": "Showcase",
+        "groups": [
+          {
+            "group": "Showcase",
+            "icon": "star",
+            "pages": ["showcase"]
           }
         ]
       }

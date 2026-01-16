@@ -1,6 +1,6 @@
 ---
 title: registerWidget
-description: "Register an interactive widget with React UI that renders in ChatGPT's iframe environment."
+description: "Register an interactive widget with React UI that renders in the host's iframe environment."
 ---
 
 
@@ -253,7 +253,7 @@ server.registerWidget("user-profile", {
 
 ## CSP & Domains
 
-ChatGPT apps run widgets in a sandboxed iframe with strict Content Security Policy. If your widget needs to:
+Apps run widgets in a sandboxed iframe with strict Content Security Policy. If your widget needs to:
 - **Fetch data from external APIs** → add to `connectDomains`
 - **Load images, fonts, or scripts from CDNs** → add to `resourceDomains`
 - **Embed external iframes** → add to `frameDomains`

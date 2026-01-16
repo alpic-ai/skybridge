@@ -10,7 +10,7 @@ description: "Keep the LLM informed about widget state with data-llm attributes 
 
 ## The Dual Interaction Surface
 
-ChatGPT Apps have a unique challenge: **two interaction surfaces**.
+Apps have a unique challenge: **two interaction surfaces**.
 
 ```mermaid
 flowchart TB
@@ -62,7 +62,7 @@ export function FlightWidget() {
 }
 ```
 
-Now when the user asks about "this one", ChatGPT appends this context to the conversation:
+Now when the user asks about "this one", the host appends this context to the conversation:
 
 ```
 Widget context:
@@ -80,7 +80,7 @@ The model can now understand "this one" = Flight AF123.
 2. **Runtime**: `DataLLM` components register their content in a global tree
 3. **State sync**: When content changes, the tree generates a hierarchical string
 4. **Model context**: This string is stored in `window.openai.widgetState.__widget_context`
-5. **LLM reads**: ChatGPT includes this context when generating responses
+5. **LLM reads**: The host includes this context when generating responses
 
 ```tsx
 // What you write:
@@ -132,7 +132,7 @@ User selects flight → `data-llm`. User clicks "Book" → `sendFollowUpMessage`
 <div data-llm="User is logged in">
 ```
 
-**Why?** The `data-llm` content is sent to ChatGPT's servers and included in the model's context. Avoid exposing tokens, passwords, internal IDs, or any data you wouldn't want in a prompt.
+**Why?** The `data-llm` content is sent to the host's servers and included in the model's context. Avoid exposing tokens, passwords, internal IDs, or any data you wouldn't want in a prompt.
 
 ### Don't: Sync everything
 
@@ -197,7 +197,7 @@ window.openai.widgetState = {
 This key is:
 - Automatically managed by `DataLLM` components
 - Filtered out when you use `useWidgetState` (you only see your own state)
-- Read by ChatGPT when the user sends a message (passive context)
+- Read by the host when the user sends a message (passive context)
 
 ## Example: Multi-step Wizard
 
