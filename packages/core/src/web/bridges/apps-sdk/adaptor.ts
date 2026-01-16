@@ -4,6 +4,7 @@ import type {
   DisplayMode,
   HostContext,
   HostContextStore,
+  RequestModalOptions,
   SetWidgetStateAction,
 } from "../types.js";
 import { AppsSdkBridge } from "./bridge.js";
@@ -74,4 +75,8 @@ export class AppsSdkAdaptor implements Adaptor {
   public getFileDownloadUrl = (file: { fileId: string }) => {
     return window.openai.getFileDownloadUrl(file);
   };
+
+  public openModal(options: RequestModalOptions) {
+    return window.openai.requestModal(options);
+  }
 }

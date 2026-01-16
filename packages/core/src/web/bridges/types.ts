@@ -59,6 +59,10 @@ export interface HostContext {
   toolInput: Record<string, unknown> | null;
   toolOutput: Record<string, unknown> | null;
   toolResponseMetadata: Record<string, unknown> | null;
+  view: {
+    mode: DisplayMode;
+    params?: Record<string, unknown>;
+  };
   widgetState: Record<string, unknown> | null;
 }
 
@@ -83,6 +87,11 @@ export type SetWidgetStateAction =
 
 export type FileMetadata = { fileId: string };
 
+export type RequestModalOptions = {
+  title?: string;
+  params?: Record<string, unknown>;
+  anchor?: { top?: number; left?: number; width?: number; height?: number };
+};
 export interface Adaptor {
   getHostContextStore<K extends keyof HostContext>(key: K): HostContextStore<K>;
   callTool<
@@ -97,4 +106,5 @@ export interface Adaptor {
   setWidgetState(stateOrUpdater: SetWidgetStateAction): Promise<void>;
   uploadFile(file: File): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
+  openModal(options: RequestModalOptions): void;
 }

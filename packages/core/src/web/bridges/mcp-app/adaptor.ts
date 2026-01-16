@@ -18,6 +18,7 @@ import type {
   DisplayMode,
   HostContext,
   HostContextStore,
+  RequestModalOptions,
   SetWidgetStateAction,
 } from "../types.js";
 import { McpAppBridge } from "./bridge.js";
@@ -34,6 +35,11 @@ export class McpAppAdaptor implements Adaptor {
   };
   private _widgetState: HostContext["widgetState"] = null;
   private widgetStateListeners = new Set<() => void>();
+
+  private _viewState: HostContext["view"] = {
+    mode: "inline",
+  };
+  private viewListeners = new Set<() => void>();
 
   private constructor() {
     this.stores = this.initializeStores();
@@ -185,6 +191,15 @@ export class McpAppAdaptor implements Adaptor {
         ["toolResult"],
         ({ toolResult }) => toolResult?._meta ?? null,
       ),
+      view: {
+        subscribe: (onChange: () => void) => {
+          this.viewListeners.add(onChange);
+          return () => {
+            this.viewListeners.delete(onChange);
+          };
+        },
+        getSnapshot: () => this._viewState,
+      },
       widgetState: {
         subscribe: (onChange: () => void) => {
           this.widgetStateListeners.add(onChange);
@@ -228,6 +243,20 @@ export class McpAppAdaptor implements Adaptor {
    */
   public getFileDownloadUrl(): Promise<{ downloadUrl: string }> {
     throw new Error("File download is not supported in MCP App.");
+  }
+
+  public openModal(options: RequestModalOptions) {
+    this._viewState = { mode: "modal", params: options.params };
+    this.viewListeners.forEach((listener) => {
+      listener();
+    });
+  }
+
+  public closeModal() {
+    this._viewState = { mode: "inline" };
+    this.viewListeners.forEach((listener) => {
+      listener();
+    });
   }
 
   private createHostContextStore<

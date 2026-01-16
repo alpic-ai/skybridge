@@ -1,5 +1,10 @@
 import type { UnknownObject } from "../../types.js";
-import type { CallToolArgs, CallToolResponse, FileMetadata } from "../types.js";
+import type {
+  CallToolArgs,
+  CallToolResponse,
+  FileMetadata,
+  RequestModalOptions,
+} from "../types.js";
 
 type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
 
@@ -43,12 +48,6 @@ export type AppsSdkContext<
   toolOutput: ToolOutput | { text: string } | null;
   toolResponseMetadata: ToolResponseMetadata | null;
   widgetState: WidgetState | null;
-};
-
-export type RequestModalOptions = {
-  title?: string;
-  params?: Record<string, unknown>;
-  anchor?: { top?: number; left?: number; width?: number; height?: number };
 };
 
 export type AppsSdkMethods<WidgetState extends UnknownObject = UnknownObject> =

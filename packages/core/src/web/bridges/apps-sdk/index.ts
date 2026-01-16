@@ -3,7 +3,6 @@ export { AppsSdkBridge } from "./bridge.js";
 export type {
   AppsSdkContext,
   AppsSdkMethods,
-  RequestModalOptions,
   ToolResponseEvent,
 } from "./types.js";
 export {

@@ -1,19 +1,23 @@
+import { useCallback } from "react";
 import {
+  getAdaptor,
   type RequestModalOptions,
-  useAppsSdkContext,
-} from "../bridges/apps-sdk/index.js";
+  useHostContext,
+} from "../bridges";
 
 /**
  * Triggers a modal containing the widget rendered in display mode "modal"
  */
 export function useRequestModal() {
-  const view = useAppsSdkContext("view");
-  const isOpen = view?.mode === "modal";
-  const params = view?.params;
-
-  const open = (options: RequestModalOptions) => {
-    window.openai.requestModal(options);
+  const adaptor = getAdaptor();
+  const view = useHostContext("view");
+  const open = useCallback(
+    (opts: RequestModalOptions) => adaptor.openModal(opts),
+    [adaptor],
+  );
+  return {
+    isOpen: view.mode === "modal",
+    params: view.params,
+    open,
   };
-
-  return { isOpen, open, params };
 }

@@ -20,5 +20,14 @@ export const mountWidget = (component: React.ReactNode) => {
     installOpenAILoggingProxy();
   }
 
-  rootInstance.render(createElement(StrictMode, null, component));
+  const hostType = window.skybridge?.hostType;
+
+  (async () => {
+    let app = component;
+    if (hostType === "mcp-app") {
+      const { ModalProvider } = await import("./components/modal-provider.js");
+      app = createElement(ModalProvider, null, component);
+    }
+    rootInstance.render(createElement(StrictMode, null, app));
+  })();
 };

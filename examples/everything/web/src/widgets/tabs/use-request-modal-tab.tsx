@@ -1,11 +1,7 @@
 import { useRequestModal } from "skybridge/web";
 
 export function UseRequestModalTab() {
-  const { open, isOpen } = useRequestModal();
-
-  if (isOpen) {
-    return <div className="tab-content">🤠 Howdy !</div>;
-  }
+  const { open } = useRequestModal();
 
   return (
     <div className="tab-content">
@@ -14,7 +10,11 @@ export function UseRequestModalTab() {
       </p>
 
       <div className="button-row">
-        <button type="button" className="btn" onClick={() => open({})}>
+        <button
+          type="button"
+          className="btn"
+          onClick={() => open({ params: { message: "🤠 Howdy ! " } })}
+        >
           Open modal
         </button>
       </div>
