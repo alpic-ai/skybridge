@@ -1,10 +1,10 @@
-import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import {
   Group,
   Panel,
   Separator,
   useDefaultLayout,
 } from "react-resizable-panels";
+import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { Header } from "./header.js";
 import { Intro } from "./intro.js";
 import { ToolPanel } from "./tool-panel/tool-panel.js";

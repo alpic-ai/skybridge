@@ -42,7 +42,6 @@ export class McpClient {
       // A server without any tool throws a "Method not found" error for listTools
       if (
         error instanceof Error &&
-        error.name === "McpError" &&
         error.message.includes("MCP error -32601: Method not found")
       ) {
         return [];
