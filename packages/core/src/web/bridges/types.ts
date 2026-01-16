@@ -59,6 +59,10 @@ export interface HostContext {
   toolInput: Record<string, unknown> | null;
   toolOutput: Record<string, unknown> | null;
   toolResponseMetadata: Record<string, unknown> | null;
+  view: {
+    mode: DisplayMode;
+    params?: Record<string, unknown>;
+  };
   widgetState: Record<string, unknown> | null;
 }
 
@@ -102,9 +106,5 @@ export interface Adaptor {
   setWidgetState(stateOrUpdater: SetWidgetStateAction): Promise<void>;
   uploadFile(file: File): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
-  useRequestModal(): {
-    isOpen: boolean;
-    open: (options: RequestModalOptions) => void;
-    params?: Record<string, unknown>;
-  };
+  openModal(options: RequestModalOptions): void;
 }

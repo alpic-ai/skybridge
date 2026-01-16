@@ -1,4 +1,3 @@
-import { useSyncExternalStore } from "react";
 import type {
   Adaptor,
   CallToolResponse,
@@ -77,18 +76,7 @@ export class AppsSdkAdaptor implements Adaptor {
     return window.openai.getFileDownloadUrl(file);
   };
 
-  public useRequestModal() {
-    const bridge = AppsSdkBridge.getInstance();
-    const view = useSyncExternalStore(bridge.subscribe("view"), () =>
-      bridge.getSnapshot("view"),
-    );
-    const isOpen = view?.mode === "modal";
-    const params = view?.params;
-
-    const open = (options: RequestModalOptions) => {
-      window.openai.requestModal(options);
-    };
-
-    return { isOpen, open, params };
+  public openModal(options: RequestModalOptions) {
+    return window.openai.requestModal(options);
   }
 }

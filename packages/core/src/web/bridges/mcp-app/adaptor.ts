@@ -12,7 +12,6 @@ import type {
   CallToolResult,
 } from "@modelcontextprotocol/sdk/types.js";
 import { dequal } from "dequal/lite";
-import { useSyncExternalStore } from "react";
 import type {
   Adaptor,
   CallToolResponse,
@@ -37,30 +36,10 @@ export class McpAppAdaptor implements Adaptor {
   private _widgetState: HostContext["widgetState"] = null;
   private widgetStateListeners = new Set<() => void>();
 
-  private _modalState: { isOpen: boolean; options: RequestModalOptions } = {
-    isOpen: false,
-    options: {},
+  private _viewState: HostContext["view"] = {
+    mode: "inline",
   };
-  public readonly modalStore = {
-    listeners: new Set<() => void>(),
-    subscribe: (onChange: () => void) => {
-      this.modalStore.listeners.add(onChange);
-      return () => this.modalStore.listeners.delete(onChange);
-    },
-    getSnapshot: () => this._modalState,
-    open: (options: RequestModalOptions) => {
-      this._modalState = { isOpen: true, options };
-      for (const listener of this.modalStore.listeners) {
-        listener();
-      }
-    },
-    close: () => {
-      this._modalState = { isOpen: false, options: {} };
-      for (const listener of this.modalStore.listeners) {
-        listener();
-      }
-    },
-  };
+  private viewListeners = new Set<() => void>();
 
   private constructor() {
     this.stores = this.initializeStores();
@@ -212,6 +191,15 @@ export class McpAppAdaptor implements Adaptor {
         ["toolResult"],
         ({ toolResult }) => toolResult?._meta ?? null,
       ),
+      view: {
+        subscribe: (onChange: () => void) => {
+          this.viewListeners.add(onChange);
+          return () => {
+            this.viewListeners.delete(onChange);
+          };
+        },
+        getSnapshot: () => this._viewState,
+      },
       widgetState: {
         subscribe: (onChange: () => void) => {
           this.widgetStateListeners.add(onChange);
@@ -257,17 +245,18 @@ export class McpAppAdaptor implements Adaptor {
     throw new Error("File download is not supported in MCP App.");
   }
 
-  public useRequestModal() {
-    const state = useSyncExternalStore(
-      this.modalStore.subscribe,
-      this.modalStore.getSnapshot,
-    );
+  public openModal(options: RequestModalOptions) {
+    this._viewState = { mode: "modal", params: options.params };
+    this.viewListeners.forEach((listener) => {
+      listener();
+    });
+  }
 
-    return {
-      isOpen: state.isOpen,
-      params: state.options.params,
-      open: this.modalStore.open,
-    };
+  public closeModal() {
+    this._viewState = { mode: "inline" };
+    this.viewListeners.forEach((listener) => {
+      listener();
+    });
   }
 
   private createHostContextStore<

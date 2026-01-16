@@ -21,13 +21,17 @@ const modalStyles = `
 `;
 
 export function ModalProvider({ children }: { children: ReactNode }) {
-  const store = McpAppAdaptor.getInstance().modalStore;
+  const adaptor = McpAppAdaptor.getInstance();
 
-  const { isOpen } = useSyncExternalStore(store.subscribe, store.getSnapshot);
+  const { mode } = useSyncExternalStore(
+    adaptor.getHostContextStore("view").subscribe,
+    adaptor.getHostContextStore("view").getSnapshot,
+  );
+  const isOpen = mode === "modal";
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      store.close();
+      adaptor.closeModal();
     }
   };
 
@@ -37,12 +41,12 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     }
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        store.close();
+        adaptor.closeModal();
       }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [isOpen, store]);
+  }, [isOpen, adaptor]);
 
   return (
     <>
