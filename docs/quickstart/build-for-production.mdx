@@ -1,0 +1,80 @@
+---
+sidebar_position: 3
+---
+
+When you're ready to deploy your ChatGPT App to production, Skybridge provides two commands: `skybridge build` to compile your app, and `skybridge start` to run it in production mode.
+
+## Build for Production
+
+Before deploying, you need to build your application. Run the build command from your project root:
+
+<CodeGroup>
+```bash npm
+npm run build
+```
+```bash pnpm
+pnpm build
+```
+```bash yarn
+yarn build
+```
+```bash bun
+bun build
+```
+```bash deno
+deno task build
+```
+</CodeGroup>
+
+This runs the `skybridge build` command, which compiles your widgets and server code for production.
+
+## Start Production Server
+
+Once your app is built, start the production server:
+
+<CodeGroup>
+```bash npm
+npm start
+```
+```bash pnpm
+pnpm start
+```
+```bash yarn
+yarn start
+```
+```bash bun
+bun start
+```
+```bash deno
+deno task start
+```
+</CodeGroup>
+
+This runs the `skybridge start` command, which starts your production server.
+
+### How it works
+
+The production server runs your compiled application from the `dist/` directory with `NODE_ENV=production`. Unlike the development server, it:
+
+- **Serves pre-built assets** - Widgets and styles are served as static files from `/assets` (compiled during `skybridge build`)
+- **MCP endpoint** - Exposes your MCP server at `/mcp` for ChatGPT to connect to
+- **No dev tools** - DevTools and Vite dev server are excluded in production for better performance
+- **Optimized rendering** - Uses production templates that load pre-bundled JavaScript and CSS files
+
+The server listens on port 3000 by default. When deployed, ChatGPT connects to your MCP endpoint (e.g., `https://your-domain.com/mcp`) to access your tools and widgets.
+
+## What's Next?
+
+<div className="card-grid">
+  <div className="card">
+    <h3>Core Concepts</h3>
+    <p>Learn how Skybridge extends the raw APIs with React hooks</p>
+    <a href="/concepts" className="card-link">Explore →</a>
+  </div>
+  <div className="card">
+    <h3>API Reference</h3>
+    <p>Browse the complete API documentation</p>
+    <a href="/api-reference" className="card-link">View API →</a>
+  </div>
+</div>
+
