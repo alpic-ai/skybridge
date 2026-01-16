@@ -52,6 +52,8 @@ jobs:
             command: pnpm run build
           - name: Docs Build
             command: pnpm run --filter @skybridge/docs build
+          - name: Docs Lint
+            command: pnpm run --filter @skybridge/docs lint
     steps:
       - uses: actions/checkout@v6
 
