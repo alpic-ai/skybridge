@@ -2,7 +2,6 @@
 
 import { createElement, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { ModalProvider } from "./components/modal-provider.js";
 import { installOpenAILoggingProxy } from "./proxy.js";
 
 let rootInstance: Root | null = null;
@@ -22,10 +21,13 @@ export const mountWidget = (component: React.ReactNode) => {
   }
 
   const hostType = window.skybridge?.hostType;
-  const app =
-    hostType === "mcp-app"
-      ? createElement(ModalProvider, null, component)
-      : component;
 
-  rootInstance.render(createElement(StrictMode, null, app));
+  (async () => {
+    let app = component;
+    if (hostType === "mcp-app") {
+      const { ModalProvider } = await import("./components/modal-provider.js");
+      app = createElement(ModalProvider, null, component);
+    }
+    rootInstance.render(createElement(StrictMode, null, app));
+  })();
 };
