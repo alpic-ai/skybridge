@@ -1,6 +1,8 @@
 ---
-title: Create your ChatGPT App
+title: Quickstart
 description: "Get started with Skybridge in 5 minutes using our starter template with HMR and pre-configured MCP server."
+icon: "bolt"
+iconType: "regular"
 ---
 
 The fastest way to start building is using our starter template. It comes pre-configured with an MCP server, UI widgets, and a full dev server with Hot Module Reload.
@@ -8,7 +10,7 @@ The fastest way to start building is using our starter template. It comes pre-co
 <Tip>
 **Before You Start**
 
-New to ChatGPT Apps or MCP? Read [MCP and ChatGPT Apps Fundamentals](/mcp-and-chatgpt-fundamentals) first to understand the concepts.
+New to ChatGPT or MCP Apps? Read [Fundamentals](/fundamentals) first to understand the concepts.
 </Tip>
 
 ## Bootstrap your project
@@ -77,8 +79,8 @@ This runs the `skybridge` command, which starts a development server with the fo
 
 The `skybridge` command:
 - **Starts an Express server** on port 3000 that packages:
-  - An MCP endpoint on `/mcp` - the ChatGPT App Backend
-  - A React application on Vite HMR dev server - the ChatGPT App Frontend
+  - An MCP endpoint on `/mcp` - the App Backend
+  - A React application on Vite HMR dev server - the App Frontend
 - **Watches for file changes** using nodemon, automatically restarting the server when you modify server-side code
 
 ### Development workflow
@@ -88,7 +90,7 @@ When you run `skybridge`:
 2. You can access **DevTools** at `http://localhost:3000/` to test your app locally
 3. The **MCP server** is available at `http://localhost:3000/mcp`
 4. **File watching** is enabled - changes to server code will automatically restart the server
-5. **Hot Module Reload (HMR)** is active for Widgets components - changes appear instantly in ChatGPT without reconnecting
+5. **Hot Module Reload (HMR)** is active for Widgets components - changes appear instantly in the host without reconnecting
 
 ## Next step
 

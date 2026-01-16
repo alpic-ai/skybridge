@@ -1,0 +1,117 @@
+---
+title: Apps SDK (ChatGPT)
+sidebarTitle: Apps SDK
+description: "Deep dive into OpenAI's Apps SDK: the window.openai API, exclusive features, and how ChatGPT renders widgets."
+---
+
+The [OpenAI Apps SDK](https://developers.openai.com/apps-sdk/) is the proprietary runtime for ChatGPT Apps, [announced in October 2025](https://alpic.ai/blog/inside-openai-s-apps-sdk-how-to-build-interactive-chatgpt-apps-with-mcp). It extends MCP with interactive UI widgets that render directly inside ChatGPT conversations.
+
+## Widget Rendering Flow
+
+Here's what happens when ChatGPT renders a widget:
+
+1. User asks ChatGPT to perform an action (e.g., "Show me flight options to Paris")
+2. ChatGPT calls your MCP tool (e.g., `search_flights`)
+3. Your tool returns a result with data and a reference to a UI resource
+4. ChatGPT fetches the resource (your compiled React component) and renders it in an iframe
+5. The widget is hydrated with your tool's `structuredContent` and `_meta` properties
+
+## The `window.openai` API
+
+Widgets run inside an iframe and have access to a special [`window.openai`](https://developers.openai.com/apps-sdk/build/chatgpt-ui#understand-the-windowopenai-api) global that enables communication with the host:
+
+| API | Description |
+|-----|-------------|
+| `toolOutput` | Access the initial data passed from your tool |
+| `widgetState` | Persist UI state across interactions |
+| `callTool()` | Trigger additional tool calls from the UI |
+| `sendFollowUpMessage()` | Send messages back into the chat |
+| `setWidgetState()` | Update persistent state |
+| `requestModal()` | Open a modal window outside the iframe |
+| `uploadFile()` | Upload files to host-managed storage |
+| `getFileDownloadUrl()` | Get download URLs for uploaded files |
+| `openExternal()` | Open external URLs safely |
+
+This API is powerful but low-level and imperative—which is where Skybridge comes in.
+
+## Skybridge Hook Mapping
+
+Skybridge wraps the raw `window.openai` API with React hooks:
+
+| Raw API | Skybridge Hook | Purpose |
+|---------|----------------|---------|
+| `window.openai.toolOutput` | [`useToolInfo()`](/api-reference/use-tool-info) | Access initial tool input/output |
+| `window.openai.widgetState` and `window.openai.setWidgetState` | [`useWidgetState()`](/api-reference/use-widget-state) | Persistent widget state |
+| `window.openai.callTool()` | [`useCallTool()`](/api-reference/use-call-tool) | Make additional tool calls |
+| `window.openai.sendFollowUpMessage()` | [`useSendFollowUpMessage()`](/api-reference/use-send-follow-up-message) | Send follow-up messages |
+| `window.openai.openExternal()` | [`useOpenExternal()`](/api-reference/use-open-external) | Open external URLs |
+| `window.openai.view` and `window.openai.requestModal()` | [`useRequestModal()`](/api-reference/use-request-modal) | Request modal display |
+| `window.openai.theme` | [`useLayout()`](/api-reference/use-layout) | Access ChatGPT theme |
+| `window.openai.locale` | [`useUser()`](/api-reference/use-user) | Access user locale |
+| `window.openai.displayMode` and `window.openai.requestDisplayMode` | [`useDisplayMode()`](/api-reference/use-display-mode) | Access/change display mode |
+| `window.openai.uploadFile()` | [`useFiles()`](/api-reference/use-files) | Upload and download files |
+
+## Apps SDK Exclusive Features
+
+These features are **only available in ChatGPT** and not supported in MCP Apps:
+
+### Modal Windows
+
+Open content in a separate modal window outside the iframe:
+
+```tsx
+import { useRequestModal } from "skybridge/web";
+
+function Widget() {
+  const { requestModal } = useRequestModal();
+
+  return (
+    <button onClick={() => requestModal({
+      title: "Details",
+      params: { itemId: "123" }
+    })}>
+      Open Modal
+    </button>
+  );
+}
+```
+
+### File Operations
+
+Upload and download files with host-managed storage:
+
+```tsx
+import { useFiles } from "skybridge/web";
+
+function Widget() {
+  const { upload, getDownloadUrl } = useFiles();
+
+  const handleUpload = async (file: File) => {
+    const { fileId } = await upload(file);
+    const { downloadUrl } = await getDownloadUrl({ fileId });
+    // Use downloadUrl...
+  };
+
+  return <input type="file" onChange={handleUpload} />;
+}
+```
+
+## Testing in ChatGPT
+
+To test your app in ChatGPT:
+
+1. Go to [ChatGPT Settings](https://chatgpt.com/settings) > Developer Settings
+2. Enable Developer Mode
+3. Add your MCP server URL
+4. Start a new conversation and invoke your tools
+
+<Warning>
+ChatGPT has aggressive caching. Use the DevTools emulator for fast iteration, then test in ChatGPT for final validation. See [Fast Iteration](/concepts/fast-iteration).
+</Warning>
+
+## Related
+
+- [MCP Apps](/fundamentals/mcp-apps) - The open alternative runtime
+- [Platform Agnosticism](/concepts/platform-agnosticism) - How Skybridge handles both runtimes
+- [useRequestModal](/api-reference/use-request-modal) - Modal API reference
+- [useFiles](/api-reference/use-files) - File operations API reference

@@ -3,9 +3,9 @@
   "name": "Skybridge",
   "theme": "mint",
   "colors": {
-    "primary": "#0069ED",
-    "light": "#0069ED",
-    "dark": "#0069ED"
+    "primary": "#2563EB",
+    "light": "#3B82F6",
+    "dark": "#2563EB"
   },
   "favicon": "/images/favicon.ico",
   "logo": {
@@ -32,6 +32,14 @@
             "icon": "rocket",
             "pages": [
               "home",
+              {
+                "group": "Fundamentals",
+                "pages": [
+                  "fundamentals",
+                  "fundamentals/apps-sdk",
+                  "fundamentals/mcp-apps"
+                ]
+              },
               "quickstart/create-new-app",
               {
                 "group": "Add to Existing App",
@@ -41,8 +49,7 @@
                   "quickstart/add-to-existing-app/web"
                 ]
               },
-              "quickstart/test-your-app",
-              "mcp-and-chatgpt-fundamentals"
+              "quickstart/test-your-app"
             ]
           },
           {
@@ -50,6 +57,7 @@
             "icon": "lightbulb",
             "pages": [
               "concepts/index",
+              "concepts/platform-agnosticism",
               "concepts/data-flow",
               "concepts/llm-context-sync",
               "concepts/fast-iteration",
@@ -74,7 +82,7 @@
           {
             "group": "Resources",
             "icon": "circle-question",
-            "pages": ["showcase", "faq"]
+            "pages": ["faq"]
           }
         ]
       },
@@ -99,14 +107,14 @@
             "icon": "fishing-rod",
             "pages": [
               "api-reference/use-tool-info",
-              "api-reference/use-widget-state",
               "api-reference/use-call-tool",
               "api-reference/use-layout",
               "api-reference/use-user",
               "api-reference/use-display-mode",
-              "api-reference/use-request-modal",
               "api-reference/use-open-external",
               "api-reference/use-send-follow-up-message",
+              "api-reference/use-widget-state",
+              "api-reference/use-request-modal",
               "api-reference/use-files"
             ]
           },
@@ -127,7 +135,20 @@
           {
             "group": "Advanced",
             "icon": "gear",
-            "pages": ["api-reference/use-apps-sdk-context"]
+            "pages": [
+              "api-reference/use-apps-sdk-context",
+              "api-reference/use-mcp-app-context"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Showcase",
+        "groups": [
+          {
+            "group": "Showcase",
+            "icon": "star",
+            "pages": ["showcase"]
           }
         ]
       }

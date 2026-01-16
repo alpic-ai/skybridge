@@ -4,7 +4,7 @@
 
 This capitals explorer example demonstrates key Skybridge capabilities:
 
-- **Interactive Widget Rendering**: A React-based widget that displays an interactive map of world capitals directly in ChatGPT
+- **Interactive Widget Rendering**: A React-based widget that displays an interactive map of world capitals directly in AI conversations
 - **Display Mode Switching**: Seamless transition between inline and fullscreen display modes using `useDisplayMode()`
 - **Tool Calling from Widgets**: Widgets can call server tools programmatically using `useCallTool()` to fetch additional data
 - **Tool Info Access**: Widgets access tool input, output, and metadata via `useToolInfo()` hook
@@ -69,7 +69,7 @@ bun dev
 This command starts an Express server on port 3000. This server packages:
 
 - an MCP endpoint on `/mcp` (the app backend)
-- a React application on Vite HMR dev server (the UI elements to be displayed in ChatGPT)
+- a React application on Vite HMR dev server (the UI elements to be displayed in the host)
 
 #### 4. Connect to ChatGPT
 

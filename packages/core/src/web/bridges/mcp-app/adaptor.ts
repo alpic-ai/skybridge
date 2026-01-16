@@ -216,6 +216,20 @@ export class McpAppAdaptor implements Adaptor {
     });
   };
 
+  /**
+   * @throws File upload is not supported in MCP App.
+   */
+  public uploadFile(): Promise<{ fileId: string }> {
+    throw new Error("File upload is not supported in MCP App.");
+  }
+
+  /**
+   * @throws File download is not supported in MCP App.
+   */
+  public getFileDownloadUrl(): Promise<{ downloadUrl: string }> {
+    throw new Error("File download is not supported in MCP App.");
+  }
+
   private createHostContextStore<
     const Keys extends readonly McpAppContextKey[],
     R,

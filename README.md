@@ -1,15 +1,15 @@
 <div align="center">
 
-<img alt="Skybridge" src="docs/static/img/github-banner.png" width="100%">
+<img alt="Skybridge" src="docs/images/github-banner.png" width="100%">
 
 <br />
 
 # Skybridge
 
-**Build ChatGPT Apps. The Modern TypeScript Way.**
+**Build ChatGPT & MCP Apps. The Modern TypeScript Way.**
 
-The fullstack TypeScript framework for ChatGPT Apps.<br />
-**Type-safe. React-powered. Zero config.**
+The fullstack TypeScript framework for AI-embedded widgets.<br />
+**Type-safe. React-powered. Platform-agnostic.**
 
 <br />
 
@@ -19,7 +19,7 @@ The fullstack TypeScript framework for ChatGPT Apps.<br />
 
 <br />
 
-[Documentation](https://docs.skybridge.tech) · [Quick Start](https://github.com/new?template_name=apps-sdk-template&template_owner=alpic-ai) · [Examples](https://github.com/alpic-ai/apps-sdk-template)
+[Documentation](https://docs.skybridge.tech) · [Quick Start](https://docs.skybridge.tech/quickstart/create-new-app) · [Showcase](https://docs.skybridge.tech/showcase)
 
 </div>
 
@@ -27,7 +27,7 @@ The fullstack TypeScript framework for ChatGPT Apps.<br />
 
 ## ✨ Why Skybridge?
 
-ChatGPT Apps let you embed **rich, interactive UIs** directly in conversations. But the raw SDK is low-level—no hooks, no type safety, no dev tools, and no HMR.
+ChatGPT Apps and MCP Apps let you embed **rich, interactive UIs** directly in AI conversations. But the raw SDKs are low-level—no hooks, no type safety, no dev tools, and no HMR.
 
 **Skybridge fixes that.**
 
@@ -35,12 +35,13 @@ ChatGPT Apps let you embed **rich, interactive UIs** directly in conversations. 
 |:--|:--|
 | 👨‍💻 **Full Dev Environment** — HMR, debug traces, and local devtools. No more refresh loops. | ✅ **End-to-End Type Safety** — tRPC-style inference from server to widget. Autocomplete everywhere. |
 | 🔄 **Widget-to-Model Sync** — Keep the model aware of UI state with `data-llm`. Dual surfaces, one source of truth. | ⚒️ **React Query-style Hooks** — `isPending`, `isError`, callbacks. State management you already know. |
+| 🌐 **Platform Agnostic** — Write once, run anywhere. Works with ChatGPT (Apps SDK) and MCP-compatible clients. | 📦 **Showcase Examples** — Production-ready examples to learn from and build upon. |
 
 <br />
 
 ## 🚀 Get Started
 
-**Create a new ChatGPT app:**
+**Create a new app:**
 
 ```bash
 npm create skybridge@latest
@@ -64,10 +65,13 @@ deno add skybridge
 
 <br />
 
-## 📦 The Stack
+## 📦 Architecture
 
-- **`skybridge/server`** — Drop-in MCP SDK replacement with widget registration and type inference.
-- **`skybridge/web`** — React hooks and components for ChatGPT's runtime.
+Skybridge is a fullstack framework with unified server and client modules:
+
+- **`skybridge/server`** — Define tools and widgets with full type inference. Extends the MCP SDK.
+- **`skybridge/web`** — React hooks that consume your server types. Works with Apps SDK (ChatGPT) and MCP Apps.
+- **Dev Environment** — Vite plugin with HMR, DevTools emulator, and optimized builds.
 
 ### Server
 
@@ -90,8 +94,8 @@ import { useToolInfo } from "skybridge/web";
 function FlightsWidget() {
   const { output } = useToolInfo();
 
-  return output.structuredContent.flights.map(f =>
-    <FlightCard key={f.id} flight={f} />
+  return output.structuredContent.flights.map(flight =>
+    <FlightCard key={flight.id} flight={flight} />
   );
 }
 ```
@@ -105,7 +109,22 @@ function FlightsWidget() {
 - **Widget → Tool Calls** — Trigger server actions from UI.
 - **Dual Surface Sync** — Keep model aware of what users see with `data-llm`.
 - **React Query-style API** — `isPending`, `isError`, callbacks.
+- **Platform Agnostic** — Works with ChatGPT (Apps SDK) and MCP Apps clients (Goose, VSCode, etc.).
 - **MCP Compatible** — Extends the official SDK. Works with any MCP client.
+
+<br />
+
+## 📖 Showcase
+
+Explore production-ready examples:
+
+| Example | Description | Demo | Code |
+|---------|-------------|------|------|
+| **Capitals Explorer** | Interactive world map with geolocation and Wikipedia integration | [Try Demo](https://capitals.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/capitals) |
+| **Ecommerce Carousel** | Product carousel with cart, localization, and modals | [Try Demo](https://ecommerce.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/ecom-carousel) |
+| **Everything** | Comprehensive playground showcasing all hooks and features | [Try Demo](https://everything.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/everything) |
+
+See all examples in the [Showcase](https://docs.skybridge.tech/showcase) or browse the [examples/](examples/) directory.
 
 <br />
 

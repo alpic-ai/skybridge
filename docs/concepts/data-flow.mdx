@@ -1,10 +1,10 @@
 ---
 title: Data Flow
-description: "Learn how data moves between ChatGPT, your MCP server, and widgets in Skybridge applications."
+description: "Learn how data moves between the host, your MCP server, and widgets in Skybridge applications."
 ---
 
 
-**Problem:** ChatGPT Apps involve three actors (ChatGPT, your server, your widget) communicating in complex patterns. Understanding this flow is essential.
+**Problem:** Apps involve three actors (the host, your server, your widget) communicating in complex patterns. Understanding this flow is essential.
 
 **Solution:** Skybridge provides clear abstractions for each communication pattern.
 
@@ -29,9 +29,9 @@ flowchart LR
     style Server fill:#2d7a9a,stroke:#1e6a87,color:#fff
 ```
 
-1. **ChatGPT (Host)**: The conversational interface where users type messages and the model responds
+1. **The Host**: The conversational interface where users type messages and the model responds (ChatGPT, Goose, etc.)
 2. **Your MCP Server**: The backend that exposes tools and business logic
-3. **Your Widget (Guest)**: The React component rendered in an iframe inside ChatGPT
+3. **Your Widget (Guest)**: The React component rendered in an iframe inside the host
 
 ## Key Terms
 
@@ -71,7 +71,7 @@ server.registerWidget("chart", { /* ... */ }, { /* ... */ }, async (args) => {
 
 ### 1. Tool → Widget (Initial Hydration)
 
-When ChatGPT calls one of your widgets, it returns `structuredContent` to hydrate the React component:
+When the host calls one of your widgets, it returns `structuredContent` to hydrate the React component:
 
 **Server:**
 ```typescript
@@ -180,7 +180,7 @@ This creates a continuous loop: the widget can ask the model for help, and the m
 - **`data-llm`**: For passive context—the model reads it when the user asks a question
 - **`sendFollowUpMessage`**: For active prompts—triggers a new model response immediately
 
-If the model's response triggers another widget, ChatGPT renders a new widget instance (not nested inside the current one).
+If the model's response triggers another widget, the host renders a new widget instance (not nested inside the current one).
 </Tip>
 
 ## Response Fields Explained
@@ -189,7 +189,7 @@ Tool responses have three fields:
 
 | Field | Purpose | Consumed by |
 |-------|---------|-------------|
-| `content` | Text description for the model | ChatGPT (shown in conversation) |
+| `content` | Text description for the model | The host (shown in conversation) |
 | `structuredContent` | Typed data for the widget | Widget (`useToolInfo`, `useCallTool`) |
 | `_meta` | Response metadata | Both (optional) |
 
@@ -230,16 +230,16 @@ Direct API calls don't add to context. Use them only for data the model doesn't 
 <Warning>
 **Direct fetch requires CSP configuration**
 
-If you use `fetch()` directly from widgets, you need to configure Content Security Policy (CSP) headers. ChatGPT blocks requests to domains not explicitly allowed. Add allowed domains to `connectDomains` in your widget configuration. See [registerWidget](/api-reference/register-widget).
+If you use `fetch()` directly from widgets, you need to configure Content Security Policy (CSP) headers. The host blocks requests to domains not explicitly allowed. Add allowed domains to `connectDomains` in your widget configuration. See [registerWidget](/api-reference/register-widget).
 </Warning>
 
 ## The Communication Loop
 
-1. **ChatGPT calls your tool** → Server responds with `structuredContent`
+1. **Host calls your tool** → Server responds with `structuredContent`
 2. **Widget hydrates** with [`useToolInfo`](/api-reference/use-tool-info)
 3. **User interacts** → Widget updates `data-llm` → Model sees the context
 4. **User triggers action** → Widget calls [`useCallTool`](/api-reference/use-call-tool) → Server responds
-5. **Widget sends follow-up** → [`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message) → ChatGPT replies
+5. **Widget sends follow-up** → [`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message) → Model replies
 
 This loop creates a seamless experience where the conversation, the UI, and your backend work together.
 
