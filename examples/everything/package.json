@@ -8,11 +8,7 @@
     "dev": "skybridge dev",
     "build": "skybridge build",
     "start": "skybridge start",
-    "inspector": "mcp-inspector http://localhost:3000/mcp",
-    "server:build": "tsc -p tsconfig.server.json",
-    "server:start": "node dist/index.js",
-    "web:build": "tsc -b web && vite build -c web/vite.config.ts",
-    "web:preview": "vite preview -c web/vite.config.ts"
+    "inspector": "mcp-inspector http://localhost:3000/mcp"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.1",
