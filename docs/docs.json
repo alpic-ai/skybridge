@@ -83,7 +83,7 @@
           {
             "group": "Resources",
             "icon": "circle-question",
-            "pages": ["faq"]
+            "pages": ["faq", "telemetry"]
           }
         ]
       },

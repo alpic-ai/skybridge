@@ -1,0 +1,138 @@
+---
+title: Telemetry
+description: "Learn what data Skybridge collects, why we collect it, and how to opt out."
+icon: "chart-line"
+iconType: "regular"
+---
+
+# Telemetry
+
+Skybridge collects anonymous usage telemetry to help us understand how the CLI is being used and improve the developer experience. **Telemetry is completely optional** and you can opt out at any time.
+
+<Info>
+**Your Privacy Matters**
+
+We only collect aggregate usage data. We never collect personal information, project code, file contents, or any sensitive data.
+</Info>
+
+## What We Collect
+
+When you run a Skybridge CLI command, we collect the following anonymous information:
+
+| Data | Description | Example |
+|------|-------------|---------|
+| **Command** | The CLI command that was executed | `dev`, `build`, `start` |
+| **Version** | The Skybridge CLI version | `1.2.3` |
+| **Machine ID** | A random UUID generated on first run | `a1b2c3d4-...` |
+| **Session ID** | A unique ID for this command execution | `e5f6g7h8-...` |
+| **Outcome** | Whether the command succeeded or failed | `success` or `failure` |
+| **Error** | Error message if the command failed | `Port 3000 in use` |
+| **Platform** | Your operating system | `darwin`, `linux`, `win32` |
+| **Node Version** | Your Node.js version | `v24.0.0` |
+| **Is CI** | Whether running in a CI environment | `true` or `false` |
+
+### What We Don't Collect
+
+- ❌ Project names or file paths
+- ❌ Source code or file contents
+- ❌ Environment variables or secrets
+- ❌ IP addresses or location data
+- ❌ Personal identifiable information
+
+## Why We Collect Telemetry
+
+Telemetry helps us:
+
+- **Understand usage patterns** — Which commands are most used? Where do developers spend time?
+- **Identify common errors** — What problems do developers encounter most frequently?
+- **Prioritize improvements** — Which platforms and Node versions should we support?
+- **Measure adoption** — How is Skybridge being adopted over time?
+
+## How to Opt Out
+
+You have multiple ways to disable telemetry:
+
+### Using the CLI
+
+The easiest way to disable telemetry:
+
+```bash
+skybridge telemetry disable
+```
+
+To re-enable it later:
+
+```bash
+skybridge telemetry enable
+```
+
+Check your current telemetry status:
+
+```bash
+skybridge telemetry status
+```
+
+### Using Environment Variables
+
+Set `SKYBRIDGE_TELEMETRY_DISABLED=1` to disable telemetry:
+
+```bash
+# In your shell profile (.bashrc, .zshrc, etc.)
+export SKYBRIDGE_TELEMETRY_DISABLED=1
+```
+
+Or use the standard `DO_NOT_TRACK` environment variable:
+
+```bash
+export DO_NOT_TRACK=1
+```
+
+### Configuration File
+
+Telemetry settings are stored in `~/.skybridge/config.json`:
+
+```json
+{
+  "machineId": "a1b2c3d4-e5f6-...",
+  "telemetry": {
+    "enabled": false
+  }
+}
+```
+
+<Note>
+Environment variables take precedence over the configuration file. If `SKYBRIDGE_TELEMETRY_DISABLED=1` or `DO_NOT_TRACK=1` is set, telemetry will be disabled regardless of the config file setting.
+</Note>
+
+## CI Environments
+
+In CI environments (GitHub Actions, GitLab CI, Jenkins, etc.), telemetry is **enabled by default** and the machine ID is set to the CI provider name (e.g., `GitHub Actions`).
+
+To disable telemetry in CI, set the environment variable in your CI configuration:
+
+```yaml
+# GitHub Actions example
+env:
+  SKYBRIDGE_TELEMETRY_DISABLED: "1"
+```
+
+## Debug Mode
+
+To see what telemetry data would be sent without actually sending it, enable debug mode:
+
+```bash
+SKYBRIDGE_TELEMETRY_DEBUG=1 skybridge dev
+```
+
+This will print the telemetry event to stderr instead of sending it, useful for understanding exactly what data is collected.
+
+## Data Handling
+
+- Telemetry data is sent to [PostHog](https://posthog.com/), a privacy-focused analytics platform
+- Data is stored on PostHog's US servers
+- We retain aggregated data for product analytics purposes
+- Individual events are anonymized and cannot be linked to specific users
+
+<Card title="Telemetry CLI Reference" icon="terminal" href="/api-reference/cli-telemetry">
+  View the complete CLI reference for telemetry commands
+</Card>
