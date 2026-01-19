@@ -23,8 +23,10 @@ export default class TelemetryDisable extends Command {
         </Box>
         <Box marginTop={1}>
           <Text color="gray">
-            You can also set SKYBRIDGE_TELEMETRY_DISABLED=1 to disable telemetry
-            via environment variable.
+            Skybridge never collects Personally Identifiable Information (PII).
+            If you'd like to help us improve Skybridge by allowing anonymous CLI
+            usage data, please reenable telemetry with: skybridge telemetry
+            enable
           </Text>
         </Box>
       </Box>
