@@ -1,7 +1,12 @@
 import "@/index.css";
 
 import { useEffect } from "react";
-import { mountWidget, useDisplayMode, useWidgetState } from "skybridge/web";
+import {
+  mountWidget,
+  useDisplayMode,
+  useLayout,
+  useWidgetState,
+} from "skybridge/web";
 import { BarChart } from "../components/BarChart";
 import { DonutChart } from "../components/DonutChart";
 import { type Output, useCallTool, useToolInfo } from "../helpers";
@@ -29,6 +34,8 @@ function Productivity() {
 
   const [displayMode, setDisplayMode] = useDisplayMode();
 
+  const { theme } = useLayout();
+
   useEffect(() => {
     if (isSuccess && output) {
       setState({ weekOffset: input.weekOffset, ...output });
@@ -51,7 +58,7 @@ function Productivity() {
   }
 
   return (
-    <div className="container">
+    <div className={`container ${theme}`}>
       <header className="header">
         <span>📊 weekly productivity: {state.totalHours} hours</span>
 

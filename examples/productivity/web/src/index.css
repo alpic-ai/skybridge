@@ -9,6 +9,14 @@
   --text-inverse: #fff;
 }
 
+.dark {
+  --bg: #1a1a1a;
+  --text: #eee;
+  --text-muted: #888;
+  --border: #333;
+  --text-inverse: #1a1a1a;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
