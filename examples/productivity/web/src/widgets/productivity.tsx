@@ -58,7 +58,14 @@ function Productivity() {
   }
 
   return (
-    <div className={`container ${theme}`}>
+    <div
+      className={`container ${theme}`}
+      data-llm={
+        displayMode === "fullscreen"
+          ? "User is viewing the full dashboard: bar chart showing daily hours breakdown by activity and donut chart showing weekly distribution"
+          : "User is viewing the compact dashboard: bar chart showing daily hours breakdown by activity (meetings, work, learning)"
+      }
+    >
       <header className="header">
         <span>📊 weekly productivity: {state.totalHours} hours</span>
 
