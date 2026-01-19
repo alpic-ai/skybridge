@@ -96,6 +96,11 @@
             "pages": ["api-reference"]
           },
           {
+            "group": "CLI",
+            "icon": "terminal",
+            "pages": ["api-reference/cli"]
+          },
+          {
             "group": "Server",
             "icon": "server",
             "pages": [
