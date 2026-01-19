@@ -1,3 +1,9 @@
+:root {
+  --color-meetings: #ff5277;
+  --color-work: #3b9eff;
+  --color-learning: #3dd966;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -9,6 +15,7 @@
   flex-direction: column;
   justify-content: space-between;
   height: 100%;
+  min-height: 250px;
   padding: 1rem;
   font-family: system-ui, sans-serif;
   font-size: 0.75rem;
@@ -18,7 +25,8 @@
   color: #444;
 }
 
-.header {
+.header,
+.footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -33,12 +41,37 @@
   color: #333;
 }
 
-.footer {
+.legend,
+.nav {
   display: flex;
-  justify-content: center;
   align-items: center;
   gap: 0.75rem;
-  font-weight: 600;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.6rem;
+  color: #666;
+}
+
+.legend-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+}
+
+.meetings {
+  background: var(--color-meetings);
+}
+
+.work {
+  background: var(--color-work);
+}
+
+.learning {
+  background: var(--color-learning);
 }
 
 .nav-btn {
@@ -69,4 +102,73 @@
   font-weight: 500;
   color: #555;
   text-align: center;
+}
+
+.chart {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  flex: 1;
+  gap: 0.5rem;
+  padding: 1rem 0;
+}
+
+.bar-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+}
+
+.bar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  height: 100%;
+}
+
+.bar-segment {
+  width: 100%;
+  transition: height 0.3s ease;
+}
+
+.bar-segment:first-child {
+  border-radius: 4px 4px 0 0;
+}
+
+.day-label {
+  margin-top: 0.25rem;
+  font-size: 0.6rem;
+  color: #888;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem;
+  border-radius: 4px;
+  background: #333;
+  color: #fff;
+  font-size: 0.6rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 10;
+}
+
+.bar-container:hover .tooltip {
+  opacity: 1;
+}
+
+.tooltip-total {
+  margin-top: 0.25rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid #555;
+  font-weight: 600;
 }

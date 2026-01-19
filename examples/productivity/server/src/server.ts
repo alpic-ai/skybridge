@@ -1,5 +1,49 @@
+import { createHash } from "node:crypto";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
+
+const ActivityTypes = ["meetings", "work", "learning"] as const;
+type ActivityType = (typeof ActivityTypes)[number];
+type Activity = { type: ActivityType; hours: number };
+type Day = { index: number; activities: Activity[]; hours: number };
+type Week = { days: Day[]; activities: Activity[]; totalHours: number };
+
+// Deterministic random hours (1-4) using hash
+function randomHours(seed: number, day: number, type: string): number {
+  const hash = createHash("md5").update(`${seed}-${day}-${type}`).digest();
+  return (hash[0] % 4) + 1;
+}
+
+function getWeek(weekOffset: number): Week {
+  const seed = Math.abs(weekOffset) + 1;
+  const totals: Record<ActivityType, number> = {
+    meetings: 0,
+    work: 0,
+    learning: 0,
+  };
+
+  const days: Day[] = [];
+  let totalHours = 0;
+
+  for (let day = 0; day < 7; day++) {
+    const activities: Activity[] = [];
+    let dayHours = 0;
+    for (const type of ActivityTypes) {
+      const hours = randomHours(seed, day, type);
+      activities.push({ type, hours });
+      dayHours += hours;
+      totals[type] += hours;
+    }
+    totalHours += dayHours;
+    days.push({ index: day, activities, hours: dayHours });
+  }
+
+  return {
+    days,
+    activities: ActivityTypes.map((type) => ({ type, hours: totals[type] })),
+    totalHours,
+  };
+}
 
 const server = new McpServer(
   {
@@ -32,7 +76,7 @@ const server = new McpServer(
       if (weekOffset > 0) {
         throw new Error("Offset must be negative or zero");
       }
-      const structuredContent = { totalHours: 30 + ((weekOffset * 7) % 15) };
+      const structuredContent = getWeek(weekOffset);
       return {
         structuredContent,
         content: [
