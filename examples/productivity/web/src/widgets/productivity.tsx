@@ -2,7 +2,7 @@ import "@/index.css";
 
 import { useEffect } from "react";
 import { mountWidget, useDisplayMode, useWidgetState } from "skybridge/web";
-import { Chart } from "../components/Chart";
+import { BarChart } from "../components/BarChart";
 import { DonutChart } from "../components/DonutChart";
 import { type Output, useCallTool, useToolInfo } from "../helpers";
 
@@ -68,7 +68,7 @@ function Productivity() {
         </button>
       </header>
       <div className="charts">
-        <Chart days={state.days} />
+        <BarChart days={state.days} />
         {displayMode === "fullscreen" && (
           <>
             <div className="separator" />

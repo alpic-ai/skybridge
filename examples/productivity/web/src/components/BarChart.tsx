@@ -2,7 +2,7 @@ import type { Day } from "../helpers";
 
 const DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 
-export function Chart({ days }: { days: Day[] }) {
+export function BarChart({ days }: { days: Day[] }) {
   let maxHours = 0;
   for (const day of days) {
     if (day.hours > maxHours) {
