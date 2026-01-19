@@ -5,10 +5,10 @@
 This capitals explorer example demonstrates key Skybridge capabilities:
 
 - **Interactive Widget Rendering**: A React-based widget that displays an interactive map of world capitals directly in AI conversations
-- **Display Mode Switching**: Seamless transition between inline and fullscreen display modes using `useDisplayMode()`
-- **Tool Calling from Widgets**: Widgets can call server tools programmatically using `useCallTool()` to fetch additional data
-- **Tool Info Access**: Widgets access tool input, output, and metadata via `useToolInfo()` hook
-- **Dynamic LLM Context with `data-llm`**: Uses the `data-llm` attribute to dynamically provide context to the LLM based on user interactions (e.g., which capital the user is currently viewing), enabling the LLM to understand the current widget state and respond accordingly
+- **Display Mode Switching**: Seamless transition between inline and fullscreen display modes using [useDisplayMode()](https://docs.skybridge.tech/api-reference/use-display-mode)
+- **Tool Calling from Widgets**: Widgets can call server tools programmatically using [useCallTool()](https://docs.skybridge.tech/api-reference/use-call-tool) to fetch additional data
+- **Tool Info Access**: Widgets can access tool input, output, and metadata via [useToolInfo()](https://docs.skybridge.tech/api-reference/use-tool-info) hook
+- **Dynamic LLM Context with `data-llm`**: Uses the [data-llm](https://docs.skybridge.tech/api-reference/data-llm) attribute to dynamically provide context to the LLM based on user interactions (e.g., which capital the user is currently viewing), enabling the LLM to understand the current widget state and respond accordingly when asked
 - **Rich UI Components**: Multi-panel interface with:
   - Interactive map visualization with clickable capital markers
   - Left sidebar showing nearby capitals sorted by distance
@@ -16,12 +16,15 @@ This capitals explorer example demonstrates key Skybridge capabilities:
 - **Structured Content & Metadata**: Server passes structured data and metadata (like all capitals list) to widgets via `_meta` and `structuredContent`
 - **External API Integration**: Demonstrates fetching data from REST Countries API and Wikipedia
 - **React Router Integration**: Shows how to use React Router within widgets for navigation
-- **Hot Module Replacement**: Live reloading of widget components during development
+- **Hot Module Replacement**: [Live reloading](https://docs.skybridge.tech/concepts/fast-iteration#hmr-with-vite-plugin) of widget components during development
+- **Local Emulator**: Local [devtools](https://docs.skybridge.tech/devtools) exposed on http://localhost:3000 
 
 This example serves as a comprehensive reference for building sophisticated, interactive widgets that leverage Skybridge's full feature set.
 
 ## Live Demo
-Try it for yourself: `https://capitals.skybridge.tech/mcp`
+
+[Try it for yourself in Alpic's Playground](https://capitals.skybridge.tech/try) or with your 
+client of choice `https://capitals.skybridge.tech/mcp`
 
 ## Getting Started
 
@@ -83,13 +86,16 @@ ngrok http 3000
 
 Open http://localhost:3000 in your browser to test your widget using the provided emulator without needing to connect to ChatGPT.
 
+
 ## Deploy to Production
 
-- Use [Alpic](https://alpic.ai/) to deploy your OpenAI App to production
-- In ChatGPT, navigate to **Settings → Connectors → Create** and add your MCP server URL (e.g., `https://your-app-name.alpic.live`)
+You can deploy this app to your platform of choice or just
+
+[![Deploy it on Alpic](https://assets.alpic.ai/button.svg)](https://app.alpic.ai/new/clone?repositoryUrl=https://github.com/alpic-ai/skybridge&rootDir=examples/capitals)
 
 ## Resources
 
+- [Skybridge Documentation](https://docs.skybridge.tech/home)
 - [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)
