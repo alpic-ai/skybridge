@@ -15,6 +15,7 @@ export function BarChart({ days }: { days: Day[] }) {
       {days.map((day) => (
         <div key={day.index} className="bar-container">
           <div className="bar">
+            <span className="bar-total">{day.hours}h</span>
             {day.activities.map((a) => (
               <div
                 key={a.type}
@@ -30,7 +31,6 @@ export function BarChart({ days }: { days: Day[] }) {
                 {a.type}: {a.hours}h
               </div>
             ))}
-            <div className="tooltip-total">total: {day.hours}h</div>
           </div>
         </div>
       ))}

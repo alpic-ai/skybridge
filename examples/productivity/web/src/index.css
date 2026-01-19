@@ -174,8 +174,16 @@
   transition: height 0.3s ease;
 }
 
-.bar-segment:first-child {
+.bar-segment:first-of-type {
   border-radius: 4px 4px 0 0;
+}
+
+.bar-total {
+  padding-bottom: 0.25rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
 }
 
 .day-label {
@@ -189,6 +197,9 @@
   bottom: 1.5rem;
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
   padding: 0.5rem;
   border-radius: 4px;
   background: var(--text);
@@ -203,11 +214,4 @@
 
 .bar-container:hover .tooltip {
   opacity: 1;
-}
-
-.tooltip-total {
-  margin-top: 0.25rem;
-  padding-top: 0.25rem;
-  border-top: 1px solid var(--text-muted);
-  font-weight: 600;
 }

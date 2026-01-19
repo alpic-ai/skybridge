@@ -82,7 +82,7 @@ function Productivity() {
           {state.activities.map((a) => (
             <div key={a.type} className="donut-recap-item">
               <span className={`legend-dot ${a.type}`} />
-              {a.type} - {a.hours}H
+              {a.type}: {a.hours}H
             </div>
           ))}
         </div>
