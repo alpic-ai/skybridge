@@ -34,10 +34,6 @@
 }
 
 .title {
-  color: #666;
-}
-
-.total {
   color: #333;
 }
 
@@ -95,6 +91,18 @@
 .nav-btn:disabled {
   background: #ccc;
   cursor: not-allowed;
+}
+
+.nav-btn.ghost {
+  padding: 0.25rem;
+  background: transparent;
+  color: #888;
+  font-size: 1rem;
+}
+
+.nav-btn.ghost:hover {
+  background: transparent;
+  color: #333;
 }
 
 .week-label {

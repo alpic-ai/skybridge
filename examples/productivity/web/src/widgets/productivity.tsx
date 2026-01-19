@@ -1,7 +1,7 @@
 import "@/index.css";
 
 import { useEffect } from "react";
-import { mountWidget, useWidgetState } from "skybridge/web";
+import { mountWidget, useDisplayMode, useWidgetState } from "skybridge/web";
 import { Chart } from "../components/Chart";
 import { type Output, useCallTool, useToolInfo } from "../helpers";
 
@@ -25,6 +25,8 @@ function Productivity() {
     useCallTool<"productivity">("productivity");
 
   const [state, setState] = useWidgetState<WidgetState>(undefined);
+
+  const [displayMode, setDisplayMode] = useDisplayMode();
 
   useEffect(() => {
     if (isSuccess && output) {
@@ -50,8 +52,21 @@ function Productivity() {
   return (
     <div className="container">
       <header className="header">
-        <span className="title">📊 weekly productivity</span>
-        <span className="total">total: {state.totalHours} hours</span>
+        <span className="title">
+          📊 weekly productivity: {state.totalHours} hours
+        </span>
+
+        <button
+          type="button"
+          className="nav-btn ghost"
+          onClick={() =>
+            setDisplayMode(
+              displayMode === "fullscreen" ? "inline" : "fullscreen",
+            )
+          }
+        >
+          {displayMode === "fullscreen" ? "↙" : "↗"}
+        </button>
       </header>
       <Chart days={state.days} />
       <footer className="footer">
