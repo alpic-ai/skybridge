@@ -5,23 +5,14 @@ import {
   mountWidget,
   useDisplayMode,
   useLayout,
+  useUser,
   useWidgetState,
 } from "skybridge/web";
 import { BarChart } from "../components/BarChart";
 import { DonutChart } from "../components/DonutChart";
 import { Legend } from "../components/Legend";
 import { type Output, useCallTool, useToolInfo } from "../helpers";
-
-function getWeekLabel(offset: number): string {
-  switch (offset) {
-    case 0:
-      return "This week";
-    case -1:
-      return "Last week";
-    default:
-      return `${Math.abs(offset)} weeks ago`;
-  }
-}
+import { translate } from "../i18n";
 
 type WidgetState = { weekOffset: number } & Output;
 
@@ -36,6 +27,20 @@ function Productivity() {
   const [displayMode, setDisplayMode] = useDisplayMode();
 
   const { theme } = useLayout();
+  const { locale } = useUser();
+
+  const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
+
+  function getWeekLabel(offset: number): string {
+    switch (offset) {
+      case 0:
+        return t("thisWeek");
+      case -1:
+        return t("lastWeek");
+      default:
+        return `${Math.abs(offset)} ${t("weeksAgo")}`;
+    }
+  }
 
   useEffect(() => {
     if (isSuccess && output) {
@@ -55,7 +60,7 @@ function Productivity() {
   }
 
   if (isPending || !state) {
-    return <div className="container">Loading...</div>;
+    return <div className="container">{t("loading")}</div>;
   }
 
   return (
@@ -68,7 +73,9 @@ function Productivity() {
       }
     >
       <header className="header">
-        <span>📊 weekly productivity: {state.totalHours} hours</span>
+        <span>
+          📊 {t("weeklyProductivity")}: {state.totalHours}h
+        </span>
 
         <button
           type="button"
@@ -93,7 +100,7 @@ function Productivity() {
             />
           </>
         )}
-        <Legend activities={state.activities} />
+        <Legend activities={state.activities} locale={locale} />
       </div>
       <footer className="footer">
         <div className="nav">
