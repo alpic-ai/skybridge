@@ -63,21 +63,20 @@ export function UseSetOpenInAppUrlTab() {
       </form>
       {showSuccess && (
         <div
+          className="success"
           style={{
-            color: "#0a8",
-            fontSize: "0.875rem",
             maxWidth: "28rem",
             wordBreak: "break-word",
           }}
         >
-          ✓ URL successfully set, enter fullscreen mode and click the open in app button to open the URL in the host application.
+          ✓ URL successfully set, enter fullscreen mode and click the open in
+          app button to open the URL in the host application.
         </div>
       )}
       {error && (
         <div
+          className="error"
           style={{
-            color: "#c00",
-            fontSize: "0.875rem",
             maxWidth: "28rem",
             wordBreak: "break-word",
           }}

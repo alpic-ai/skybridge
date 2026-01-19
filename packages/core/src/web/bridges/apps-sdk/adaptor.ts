@@ -81,6 +81,8 @@ export class AppsSdkAdaptor implements Adaptor {
   }
 
   public setOpenInAppUrl(href: string): Promise<void> {
+    href = href.trim();
+
     if (!href) {
       throw new Error("The href parameter is required.");
     }
@@ -97,7 +99,7 @@ export class AppsSdkAdaptor implements Adaptor {
 
     if (domainUrl.origin !== hrefUrl.origin) {
       throw new Error(
-        `Provided href is not compatible with widget domain: origin differs`,
+        "Provided href is not compatible with widget domain: origin differs",
       );
     }
 
