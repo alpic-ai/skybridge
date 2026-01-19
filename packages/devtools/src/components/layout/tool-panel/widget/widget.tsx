@@ -9,11 +9,13 @@ import { injectWaitForOpenai } from "./utils.js";
 
 export const Widget = () => {
   const tool = useSelectedTool();
-  const { openaiObject } = useCallToolResult(tool.name);
+  const toolResult = useCallToolResult(tool.name);
+  const { openaiObject, openInAppUrl } = toolResult ?? {};
   const { data: resource } = useSuspenseResource(
     tool._meta?.["openai/outputTemplate"] as string | undefined,
   );
-  const { setToolData, pushOpenAiLog, updateOpenaiObject } = useStore();
+  const { setToolData, pushOpenAiLog, updateOpenaiObject, setOpenInAppUrl } =
+    useStore();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hasLoadedRef = useRef(false);
@@ -32,6 +34,16 @@ export const Widget = () => {
 
     hasLoadedRef.current = true;
 
+    // Hydrate openInAppUrl from resource metadata if available and not already set
+    if (!openInAppUrl) {
+      const widgetDomain = (resource._meta as Record<string, unknown>)?.[
+        "openai/widgetDomain"
+      ];
+      if (widgetDomain && typeof widgetDomain === "string") {
+        setOpenInAppUrl(tool.name, widgetDomain);
+      }
+    }
+
     createAndInjectOpenAi(
       iframe.contentWindow,
       openaiObject,
@@ -47,6 +59,9 @@ export const Widget = () => {
         updateOpenaiObject(tool.name, key, value);
       },
       (name, args) => mcpClient.callTool(name, args),
+      (href) => {
+        setOpenInAppUrl(tool.name, href);
+      },
     );
 
     iframe.contentDocument.open();
@@ -58,11 +73,14 @@ export const Widget = () => {
     });
   }, [
     openaiObject,
+    openInAppUrl,
     pushOpenAiLog,
     setToolData,
     updateOpenaiObject,
+    setOpenInAppUrl,
     tool.name,
     html,
+    resource,
   ]);
 
   useEffect(() => {

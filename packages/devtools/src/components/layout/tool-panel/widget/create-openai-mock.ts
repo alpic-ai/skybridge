@@ -18,6 +18,7 @@ function createOpenaiMethods(
   ) => void,
   setValue: (key: keyof AppsSdkContext, value: unknown) => void,
   callToolFn: (name: string, args: CallToolArgs) => Promise<CallToolResponse>,
+  setOpenInAppUrlFn: (href: string) => void,
 ) {
   const functions = {
     callTool: async <
@@ -72,6 +73,7 @@ function createOpenaiMethods(
     },
     setOpenInAppUrl: async (args: { href: string }) => {
       log("setOpenInAppUrl", args);
+      setOpenInAppUrlFn(args.href);
     },
   } satisfies AppsSdkMethods<UnknownObject>;
 
@@ -122,6 +124,7 @@ export function createAndInjectOpenAi(
   ) => void,
   setValue: (key: keyof AppsSdkContext, value: unknown) => void,
   callToolFn: (name: string, args: CallToolArgs) => Promise<CallToolResponse>,
+  setOpenInAppUrlFn: (href: string) => void,
 ): void {
   const openaiObject = cloneDeep(initialValues);
   const openai = createOpenaiObject(openaiObject, iframeWindow);
@@ -130,6 +133,7 @@ export function createAndInjectOpenAi(
     log,
     setValue,
     callToolFn,
+    setOpenInAppUrlFn,
   );
   assign(openai, functions);
   iframeWindow.openai = openai as unknown as typeof iframeWindow.openai;
