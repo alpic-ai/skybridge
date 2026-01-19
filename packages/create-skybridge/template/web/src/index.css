@@ -31,8 +31,8 @@
 }
 
 .ball:hover {
-  transform: scale(1.05);
-  animation-play-state: paused;
+  transform: scale(1.05) translateY(-8px);
+  animation: colorShift 15s ease-in-out infinite;
   box-shadow:
     0 20px 50px rgba(0, 0, 0, 0.6),
     0 10px 25px rgba(0, 0, 0, 0.4),
