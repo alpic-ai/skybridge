@@ -30,6 +30,7 @@
   height: 100%;
   min-height: 250px;
   padding: 1rem;
+  border-radius: 10px;
   font-family: system-ui, sans-serif;
   font-size: 0.75rem;
   letter-spacing: 0.05rem;
