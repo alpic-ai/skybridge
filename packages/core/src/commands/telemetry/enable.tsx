@@ -3,7 +3,7 @@ import { Box, render, Text } from "ink";
 import { setEnabled } from "../../hooks/telemetry.js";
 
 export default class TelemetryEnable extends Command {
-  static override description = "Enable Skybridge telemetry";
+  static override description = "Enable Skybridge telemetry on this machine";
 
   public async run(): Promise<void> {
     await this.parse(TelemetryEnable);
