@@ -119,13 +119,18 @@
   gap: 0.5rem;
 }
 
+.donut-container {
+  position: relative;
+  align-self: center;
+}
+
 .donut {
   height: 8rem;
-  align-self: center;
   transform: rotate(-90deg);
 }
 
 .donut circle {
+  cursor: pointer;
   transition:
     stroke-dasharray 0.3s ease,
     stroke-dashoffset 0.3s ease;
@@ -194,24 +199,33 @@
 
 .tooltip {
   position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
   padding: 0.5rem;
   border-radius: 4px;
   background: var(--text);
   color: var(--text-inverse);
   font-size: 0.6rem;
   white-space: nowrap;
-  opacity: 0;
   pointer-events: none;
+}
+
+.bar-container .tooltip {
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  opacity: 0;
   transition: opacity 0.2s;
   z-index: 10;
 }
 
 .bar-container:hover .tooltip {
   opacity: 1;
+}
+
+.donut-container .tooltip {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }

@@ -1,4 +1,5 @@
-import type { Output } from "../helpers";
+import { useState } from "react";
+import type { Activity, Output } from "../helpers";
 
 const COLORS: Record<string, string> = {
   meetings: "var(--color-primary)",
@@ -15,29 +16,40 @@ export function DonutChart({
   activities: Output["activities"];
   totalHours: number;
 }) {
+  const [hovered, setHovered] = useState<Activity | null>(null);
   let offset = 0;
 
   return (
-    <svg className="donut" viewBox="0 0 100 100">
-      <title>Weekly activity breakdown</title>
-      {activities.map((a) => {
-        const length = (a.hours / totalHours) * CIRCUMFERENCE;
-        const currentOffset = offset;
-        offset += length;
-        return (
-          <circle
-            key={a.type}
-            cx="50"
-            cy="50"
-            r="40"
-            fill="none"
-            stroke={COLORS[a.type]}
-            strokeWidth="20"
-            strokeDasharray={`${length} ${CIRCUMFERENCE}`}
-            strokeDashoffset={-currentOffset}
-          />
-        );
-      })}
-    </svg>
+    <div className="donut-container">
+      <svg className="donut" viewBox="0 0 100 100">
+        <title>Weekly activity breakdown</title>
+        {activities.map((a) => {
+          const length = (a.hours / totalHours) * CIRCUMFERENCE;
+          const currentOffset = offset;
+          offset += length;
+          return (
+            // biome-ignore lint/a11y/noStaticElementInteractions: display tooltip
+            <circle
+              key={a.type}
+              cx="50"
+              cy="50"
+              r="40"
+              fill="none"
+              stroke={COLORS[a.type]}
+              strokeWidth="20"
+              strokeDasharray={`${length} ${CIRCUMFERENCE}`}
+              strokeDashoffset={-currentOffset}
+              onMouseEnter={() => setHovered(a)}
+              onMouseLeave={() => setHovered(null)}
+            />
+          );
+        })}
+      </svg>
+      {hovered && (
+        <div className="tooltip">
+          {hovered.type}: {Math.round((hovered.hours / totalHours) * 100)}%
+        </div>
+      )}
+    </div>
   );
 }
