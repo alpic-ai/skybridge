@@ -90,7 +90,7 @@
     "dirname": "skybridge",
     "topicSeparator": " ",
     "hooks": {
-      "finally": "./dist/hooks/telemetry"
+      "finally": "./dist/cli/telemetry"
     }
   }
 }

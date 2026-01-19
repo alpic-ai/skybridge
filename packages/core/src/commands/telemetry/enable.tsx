@@ -1,6 +1,6 @@
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
-import { setEnabled } from "../../hooks/telemetry.js";
+import { setEnabled } from "../../cli/telemetry.js";
 
 export default class TelemetryEnable extends Command {
   static override description = "Enable Skybridge telemetry on this machine";

@@ -1,9 +1,10 @@
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
-import { getMachineId, isEnabled } from "../../hooks/telemetry.js";
+import { getMachineId, isEnabled } from "../../cli/telemetry.js";
 
 export default class TelemetryStatus extends Command {
-  static override description = "Get Skybridge current telemetry settings for this machine";
+  static override description =
+    "Get Skybridge current telemetry settings for this machine";
 
   public async run(): Promise<void> {
     await this.parse(TelemetryStatus);
