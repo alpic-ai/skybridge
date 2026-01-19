@@ -9,6 +9,7 @@ import {
 } from "skybridge/web";
 import { BarChart } from "../components/BarChart";
 import { DonutChart } from "../components/DonutChart";
+import { Legend } from "../components/Legend";
 import { type Output, useCallTool, useToolInfo } from "../helpers";
 
 function getWeekLabel(offset: number): string {
@@ -92,14 +93,7 @@ function Productivity() {
             />
           </>
         )}
-        <div className="donut-recap">
-          {state.activities.map((a) => (
-            <div key={a.type} className="donut-recap-item">
-              <span className={`legend-dot ${a.type}`} />
-              {a.type}: {a.hours}H
-            </div>
-          ))}
-        </div>
+        <Legend activities={state.activities} />
       </div>
       <footer className="footer">
         <div className="nav">

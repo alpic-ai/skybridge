@@ -150,7 +150,7 @@
   align-self: stretch;
 }
 
-.donut-recap {
+.legend {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -158,7 +158,7 @@
   width: 8rem;
 }
 
-.donut-recap-item {
+.legend-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
