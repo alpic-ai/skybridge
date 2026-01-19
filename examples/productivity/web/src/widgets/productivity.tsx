@@ -5,6 +5,7 @@ import {
   mountWidget,
   useDisplayMode,
   useLayout,
+  useOpenExternal,
   useSendFollowUpMessage,
   useUser,
   useWidgetState,
@@ -29,7 +30,9 @@ function Productivity() {
 
   const { theme } = useLayout();
   const { locale } = useUser();
+
   const sendFollowUpMessage = useSendFollowUpMessage();
+  const openExternal = useOpenExternal();
 
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
 
@@ -109,7 +112,9 @@ function Productivity() {
           <button
             type="button"
             className="btn"
-            onClick={() => sendFollowUpMessage("Analyze my productivity trends")}
+            onClick={() =>
+              sendFollowUpMessage("Analyze my productivity trends")
+            }
           >
             Insights
           </button>
@@ -133,7 +138,15 @@ function Productivity() {
             →
           </button>
         </div>
-        <span className="footer-side" />
+        <span className="footer-side footer-side-right">
+          <button
+            type="button"
+            className="btn"
+            onClick={() => openExternal("https://docs.skybridge.tech")}
+          >
+            Docs
+          </button>
+        </span>
       </footer>
     </div>
   );

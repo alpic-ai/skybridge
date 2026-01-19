@@ -54,6 +54,10 @@
   font-size: inherit;
 }
 
+.footer-side-right {
+  text-align: right;
+}
+
 .legend-dot {
   width: 0.5rem;
   height: 0.5rem;
