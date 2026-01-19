@@ -70,6 +70,9 @@ function createOpenaiMethods(
         downloadUrl: "https://example.com/file.pdf",
       };
     },
+    setOpenInAppUrl: async (args: { href: string }) => {
+      log("setOpenInAppUrl", args);
+    },
   } satisfies AppsSdkMethods<UnknownObject>;
 
   return functions;
