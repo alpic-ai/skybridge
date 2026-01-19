@@ -42,15 +42,16 @@
 .footer {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   font-weight: 600;
 }
 
-.header {
-  justify-content: space-between;
+.footer-side {
+  width: 6rem;
 }
 
-.footer {
-  justify-content: center;
+.footer-side .btn {
+  font-size: inherit;
 }
 
 .legend-dot {
@@ -101,7 +102,6 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  font-size: 0.75rem;
 }
 
 .nav .btn {
@@ -191,18 +191,25 @@
   border-radius: 4px 4px 0 0;
 }
 
+.bar-total,
+.day-label,
+.tooltip {
+  font-size: 0.6rem;
+}
+
+.bar-total,
+.day-label {
+  color: var(--text-muted);
+}
+
 .bar-total {
   padding-bottom: 0.25rem;
-  font-size: 0.6rem;
   font-weight: 600;
-  color: var(--text-muted);
   text-align: center;
 }
 
 .day-label {
   margin-top: 0.25rem;
-  font-size: 0.6rem;
-  color: var(--text-muted);
 }
 
 .tooltip {
@@ -211,7 +218,6 @@
   border-radius: 4px;
   background: var(--text);
   color: var(--text-inverse);
-  font-size: 0.6rem;
   white-space: nowrap;
   pointer-events: none;
 }

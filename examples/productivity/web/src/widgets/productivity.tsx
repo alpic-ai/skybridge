@@ -5,6 +5,7 @@ import {
   mountWidget,
   useDisplayMode,
   useLayout,
+  useSendFollowUpMessage,
   useUser,
   useWidgetState,
 } from "skybridge/web";
@@ -28,6 +29,7 @@ function Productivity() {
 
   const { theme } = useLayout();
   const { locale } = useUser();
+  const sendFollowUpMessage = useSendFollowUpMessage();
 
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
 
@@ -103,6 +105,15 @@ function Productivity() {
         <Legend activities={state.activities} locale={locale} />
       </div>
       <footer className="footer">
+        <span className="footer-side">
+          <button
+            type="button"
+            className="btn"
+            onClick={() => sendFollowUpMessage("Analyze my productivity trends")}
+          >
+            Insights
+          </button>
+        </span>
         <div className="nav">
           <button
             type="button"
@@ -122,6 +133,7 @@ function Productivity() {
             →
           </button>
         </div>
+        <span className="footer-side" />
       </footer>
     </div>
   );
