@@ -65,6 +65,19 @@ deno add skybridge
 
 <br />
 
+## CLI Usage
+
+Skybridge provides a project scaffolding CLI to quickly create a new Skybridge app.
+
+### Create a new project
+
+```bash
+npx create-skybridge
+npx create-skybridge <project-name>
+npx create-skybridge --help
+```
+
+
 ## 📦 Architecture
 
 Skybridge is a fullstack framework with unified server and client modules:
