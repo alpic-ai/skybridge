@@ -19,13 +19,12 @@ function getWeekLabel(offset: number): string {
 type WidgetState = { weekOffset: number } & Output;
 
 function Productivity() {
-  const toolInfo = useToolInfo<"productivity">();
+  const { isSuccess, input, output, isPending } = useToolInfo<"productivity">();
+
   const { callTool: navigate, isPending: isNavigating } =
     useCallTool<"productivity">("productivity");
 
   const [state, setState] = useWidgetState<WidgetState>(undefined);
-
-  const { isSuccess, input, output } = toolInfo;
 
   useEffect(() => {
     if (isSuccess && output) {
@@ -44,7 +43,7 @@ function Productivity() {
     );
   }
 
-  if (toolInfo.isPending || !state) {
+  if (isPending || !state) {
     return <div className="container">Loading...</div>;
   }
 
