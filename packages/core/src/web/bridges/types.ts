@@ -4,6 +4,7 @@ import type { WidgetHostType } from "../../server/index.js";
 
 export type SkybridgeProperties = {
   hostType: WidgetHostType;
+  serverUrl: string;
 };
 
 declare global {
@@ -107,4 +108,5 @@ export interface Adaptor {
   uploadFile(file: File): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
   openModal(options: RequestModalOptions): void;
+  setOpenInAppUrl(href: string): Promise<void>;
 }

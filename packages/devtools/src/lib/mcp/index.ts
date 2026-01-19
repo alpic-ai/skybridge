@@ -64,6 +64,7 @@ export const useCallTool = () => {
         openaiRef: null,
         openaiLogs: [],
         openaiObject: null,
+        openInAppUrl: null,
       });
       const response = await client.callTool(toolName, args);
       setToolData(toolName, {
@@ -78,6 +79,7 @@ export const useCallTool = () => {
           toolResponseMetadata: response.meta ?? null,
           widgetState: null,
         },
+        openInAppUrl: null,
       });
       return response;
     },

@@ -1,0 +1,124 @@
+---
+title: useSetOpenInAppUrl
+description: "Set the URL that will be opened when users click the 'open in app' button in fullscreen mode."
+---
+
+The `useSetOpenInAppUrl` hook returns a function to set the URL that will be opened when the user clicks the "open in app" button. This button appears in the top right corner when the widget is displayed in fullscreen mode.
+
+## Basic usage
+
+```tsx
+import { useSetOpenInAppUrl } from "skybridge/web";
+
+function SetAppUrl() {
+  const setOpenInAppUrl = useSetOpenInAppUrl();
+
+  const handleSetUrl = async () => {
+    try {
+      await setOpenInAppUrl("https://example.com/app");
+    } catch (error) {
+      console.error("Failed to set URL:", error);
+    }
+  };
+
+  return (
+    <button onClick={handleSetUrl}>
+      Set App URL
+    </button>
+  );
+}
+```
+
+## Returns
+
+```tsx
+setOpenInAppUrl: (href: string) => Promise<void>
+```
+
+An async function that sets the URL to be opened when the user clicks the "open in app" button. The function returns a Promise that resolves when the URL has been successfully set.
+
+### Parameters
+
+- `href: string`
+  - **Required**
+  - The URL to set. Must be a valid URL with the same origin as the widget's server URL.
+  - The URL will be opened in the host application when the user clicks the "open in app" button.
+
+### Errors
+
+The function may throw errors in the following cases:
+
+- If `href` is empty or only whitespace: `"The href parameter is required."`
+- If the widget domain is not set: `"The widgetDomain property has not been set on the widget resource meta object."`
+- If the `href` origin differs from the widget's server URL origin: `"Provided href is not compatible with widget domain: origin differs"`
+
+## Examples
+
+### Setting URL with Form Input
+
+```tsx
+import { useSetOpenInAppUrl } from "skybridge/web";
+import { useState } from "react";
+
+function UrlSetter() {
+  const setOpenInAppUrl = useSetOpenInAppUrl();
+  const [url, setUrl] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
+
+    try {
+      await setOpenInAppUrl(url);
+      setSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to set URL");
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        placeholder="Enter URL"
+      />
+      <button type="submit">Set URL</button>
+      {success && <p>✓ URL successfully set!</p>}
+      {error && <p>× {error}</p>}
+    </form>
+  );
+}
+```
+
+### Dynamic URL Based on State
+
+```tsx
+import { useSetOpenInAppUrl, useDisplayMode } from "skybridge/web";
+import { useEffect } from "react";
+
+function ProductDetail({ productId }: { productId: string }) {
+  const setOpenInAppUrl = useSetOpenInAppUrl();
+  const [displayMode] = useDisplayMode();
+
+  useEffect(() => {
+    if (displayMode === "fullscreen") {
+      const productUrl = `https://example.com/products/${productId}`;
+      setOpenInAppUrl(productUrl).catch(console.error);
+    }
+  }, [displayMode, productId, setOpenInAppUrl]);
+
+  return (
+    <div>
+      <h2>Product {productId}</h2>
+      {/* Product details */}
+    </div>
+  );
+}
+```
+
+

@@ -20,6 +20,7 @@ type ToolData = {
   openaiRef: React.RefObject<HTMLIFrameElement> | null;
   openaiLogs: OpenAiLog[];
   openaiObject: AppsSdkContext | null;
+  openInAppUrl: string | null;
 };
 
 export type Store = {
@@ -33,6 +34,7 @@ export type Store = {
     key: keyof AppsSdkContext,
     value: unknown,
   ) => void;
+  setOpenInAppUrl: (tool: string, href: string) => void;
 };
 
 export const useStore = create<Store>()((setState) => ({
@@ -67,6 +69,10 @@ export const useStore = create<Store>()((setState) => ({
         { ...log, id: crypto.randomUUID() },
       ]);
     }),
+  setOpenInAppUrl: (tool: string, href: string) =>
+    setState((state) =>
+      updateNestedState(state, `tools.${tool}.openInAppUrl`, href),
+    ),
 }));
 
 export const useCallToolResult = (toolName: string) => {

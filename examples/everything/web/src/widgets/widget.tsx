@@ -13,6 +13,7 @@ import { UseLayoutTab } from "./tabs/use-layout-tab";
 import { UseOpenExternalTab } from "./tabs/use-open-external-tab";
 import { UseRequestModalTab } from "./tabs/use-request-modal-tab";
 import { UseSendFollowUpMessageTab } from "./tabs/use-send-follow-up-message-tab";
+import { UseSetOpenInAppUrlTab } from "./tabs/use-set-open-in-app-url";
 import { UseUserTab } from "./tabs/use-user-tab";
 import { UseWidgetStateTab } from "./tabs/use-widget-state-tab";
 
@@ -35,6 +36,10 @@ const TABS = {
   useSendFollowUpMessage: {
     docPath: "use-send-follow-up-message",
     Component: UseSendFollowUpMessageTab,
+  },
+  useSetOpenInAppUrl: {
+    docPath: "use-set-open-in-app-url",
+    Component: UseSetOpenInAppUrlTab,
   },
   useToolInfo: { docPath: "use-tool-info", Component: ToolInfoTab },
   useUser: { docPath: "use-user", Component: UseUserTab },
