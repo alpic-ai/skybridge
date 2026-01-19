@@ -27,7 +27,9 @@ import { ResourceTabContent } from "./resource-tab.js";
 
 export const OpenAiInspector = () => {
   const tool = useSelectedTool();
-  const { openaiRef, openaiObject } = useCallToolResult(tool.name);
+  const { openaiRef, openaiObject, openInAppUrl } = useCallToolResult(
+    tool.name,
+  );
   const { setToolData } = useStore();
   const resourceUri = tool._meta?.["openai/outputTemplate"] as
     | string
@@ -255,6 +257,16 @@ export const OpenAiInspector = () => {
                   />
                 </div>
               </div>
+            </Field>
+            <Field>
+              <FieldLabel>Open in App URL</FieldLabel>
+              <Input
+                type="text"
+                value={openInAppUrl ?? ""}
+                readOnly
+                placeholder="Not set"
+                className="font-mono text-xs"
+              />
             </Field>
           </FieldSet>
         </TabsContent>

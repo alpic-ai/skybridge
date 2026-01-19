@@ -10,7 +10,7 @@ import { injectWaitForOpenai } from "./utils.js";
 export const Widget = () => {
   const tool = useSelectedTool();
   const toolResult = useCallToolResult(tool.name);
-  const { openaiObject, openInAppUrl } = toolResult ?? {};
+  const { openaiObject } = toolResult ?? {};
   const { data: resource } = useSuspenseResource(
     tool._meta?.["openai/outputTemplate"] as string | undefined,
   );
@@ -34,14 +34,9 @@ export const Widget = () => {
 
     hasLoadedRef.current = true;
 
-    // Hydrate openInAppUrl from resource metadata if available and not already set
-    if (!openInAppUrl) {
-      const widgetDomain = (resource._meta as Record<string, unknown>)?.[
-        "openai/widgetDomain"
-      ];
-      if (widgetDomain && typeof widgetDomain === "string") {
-        setOpenInAppUrl(tool.name, widgetDomain);
-      }
+    const widgetDomain = resource.contents[0]._meta?.["openai/widgetDomain"];
+    if (widgetDomain && typeof widgetDomain === "string") {
+      setOpenInAppUrl(tool.name, widgetDomain);
     }
 
     createAndInjectOpenAi(
@@ -73,7 +68,6 @@ export const Widget = () => {
     });
   }, [
     openaiObject,
-    openInAppUrl,
     pushOpenAiLog,
     setToolData,
     updateOpenaiObject,
@@ -106,7 +100,7 @@ export const Widget = () => {
           border: "none",
           display: "block",
         }}
-        sandbox="allow-scripts allow-same-origin"
+        sandbox="allow-scripts allow-same-origin allow-forms"
         title="html-preview"
       />
     </div>
