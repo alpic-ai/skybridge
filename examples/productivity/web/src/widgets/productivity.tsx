@@ -1,7 +1,7 @@
 import "@/index.css";
 
-import { useEffect, useState } from "react";
-import { mountWidget } from "skybridge/web";
+import { useEffect } from "react";
+import { mountWidget, useWidgetState } from "skybridge/web";
 import { Chart } from "../components/Chart";
 import { type Output, useCallTool, useToolInfo } from "../helpers";
 
@@ -23,7 +23,7 @@ function Productivity() {
   const { callTool: navigate, isPending: isNavigating } =
     useCallTool<"productivity">("productivity");
 
-  const [state, setState] = useState<WidgetState | undefined>();
+  const [state, setState] = useWidgetState<WidgetState>(undefined);
 
   const { isSuccess, input, output } = toolInfo;
 
@@ -31,7 +31,7 @@ function Productivity() {
     if (isSuccess && output) {
       setState({ weekOffset: input.weekOffset, ...output });
     }
-  }, [isSuccess, input, output]);
+  }, [isSuccess, input, output, setState]);
 
   function goToWeek(newOffset: number) {
     navigate(
