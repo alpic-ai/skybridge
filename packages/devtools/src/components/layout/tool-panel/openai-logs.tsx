@@ -103,12 +103,14 @@ export function OpenAiLogs() {
         <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200">
           OpenAI API Logs
         </h3>
-        {openaiLogs.length > 0 && (
-          <Button variant="ghost" size="sm" onClick={handleClearLogs}>
-            <TrashIcon className="w-3 h-3" />
-            Clear
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {openaiLogs.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={handleClearLogs}>
+              <TrashIcon className="w-3 h-3" />
+              Clear
+            </Button>
+          )}
+        </div>
       </div>
       <div
         ref={containerRef}

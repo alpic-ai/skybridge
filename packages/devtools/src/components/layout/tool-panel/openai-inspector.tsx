@@ -1,5 +1,6 @@
 import ReactJsonView from "@microlink/react-json-view";
 import { MoonIcon, SunIcon } from "lucide-react";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button.js";
 import { ButtonGroup } from "@/components/ui/button-group.js";
 import { Field, FieldLabel, FieldSet } from "@/components/ui/field.js";
@@ -22,11 +23,15 @@ import {
 import { useSelectedTool } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { LocaleSelector } from "./locale-selector.js";
+import { ResourceTabContent } from "./resource-tab.js";
 
 export const OpenAiInspector = () => {
   const tool = useSelectedTool();
   const { openaiRef, openaiObject } = useCallToolResult(tool.name);
   const { setToolData } = useStore();
+  const resourceUri = tool._meta?.["openai/outputTemplate"] as
+    | string
+    | undefined;
 
   const handleValueChange = (key: string, value: unknown) => {
     const openai = openaiRef?.current?.contentWindow?.openai;
@@ -51,6 +56,7 @@ export const OpenAiInspector = () => {
         <TabsList className="border-b border-border w-full">
           <TabsTrigger value="properties">Properties</TabsTrigger>
           <TabsTrigger value="widget-state">Widget State</TabsTrigger>
+          {resourceUri && <TabsTrigger value="resource">Resource</TabsTrigger>}
         </TabsList>
         <TabsContent value="properties" className="p-4">
           <FieldSet>
@@ -265,6 +271,19 @@ export const OpenAiInspector = () => {
             collapseStringsAfterLength={80}
           />
         </TabsContent>
+        {resourceUri && (
+          <TabsContent value="resource" className="p-4">
+            <Suspense
+              fallback={
+                <div className="text-xs text-muted-foreground">
+                  Loading resource...
+                </div>
+              }
+            >
+              <ResourceTabContent resourceUri={resourceUri} />
+            </Suspense>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
