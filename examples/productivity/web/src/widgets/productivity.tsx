@@ -3,6 +3,7 @@ import "@/index.css";
 import { useEffect } from "react";
 import { mountWidget, useDisplayMode, useWidgetState } from "skybridge/web";
 import { Chart } from "../components/Chart";
+import { DonutChart } from "../components/DonutChart";
 import { type Output, useCallTool, useToolInfo } from "../helpers";
 
 function getWeekLabel(offset: number): string {
@@ -52,13 +53,11 @@ function Productivity() {
   return (
     <div className="container">
       <header className="header">
-        <span className="title">
-          📊 weekly productivity: {state.totalHours} hours
-        </span>
+        <span>📊 weekly productivity: {state.totalHours} hours</span>
 
         <button
           type="button"
-          className="nav-btn ghost"
+          className="btn"
           onClick={() =>
             setDisplayMode(
               displayMode === "fullscreen" ? "inline" : "fullscreen",
@@ -68,33 +67,44 @@ function Productivity() {
           {displayMode === "fullscreen" ? "↙" : "↗"}
         </button>
       </header>
-      <Chart days={state.days} />
-      <footer className="footer">
-        <div className="legend">
+      <div className="charts">
+        <Chart days={state.days} />
+        {displayMode === "fullscreen" && (
+          <>
+            <div className="separator" />
+            <DonutChart
+              activities={state.activities}
+              totalHours={state.totalHours}
+            />
+          </>
+        )}
+        <div className="donut-recap">
           {state.activities.map((a) => (
-            <div key={a.type} className="legend-item">
+            <div key={a.type} className="donut-recap-item">
               <span className={`legend-dot ${a.type}`} />
-              <span>{a.type}</span>
+              {a.type} - {a.hours}H
             </div>
           ))}
         </div>
+      </div>
+      <footer className="footer">
         <div className="nav">
           <button
             type="button"
-            className="nav-btn"
+            className="btn"
             onClick={() => goToWeek(state.weekOffset - 1)}
             disabled={isNavigating}
           >
-            prev
+            ←
           </button>
           <span className="week-label">{getWeekLabel(state.weekOffset)}</span>
           <button
             type="button"
-            className="nav-btn"
+            className="btn"
             onClick={() => goToWeek(state.weekOffset + 1)}
             disabled={isNavigating || state.weekOffset >= 0}
           >
-            next
+            →
           </button>
         </div>
       </footer>

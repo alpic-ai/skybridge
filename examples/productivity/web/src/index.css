@@ -1,7 +1,12 @@
 :root {
-  --color-meetings: #ff5277;
-  --color-work: #3b9eff;
-  --color-learning: #3dd966;
+  --color-primary: #ff5277;
+  --color-secondary: #3b9eff;
+  --color-tertiary: #3dd966;
+  --bg: #fafafa;
+  --text: #333;
+  --text-muted: #888;
+  --border: #ddd;
+  --text-inverse: #fff;
 }
 
 * {
@@ -21,35 +26,23 @@
   font-size: 0.75rem;
   letter-spacing: 0.05rem;
   text-transform: uppercase;
-  background: #fafafa;
-  color: #444;
+  background: var(--bg);
+  color: var(--text);
 }
 
 .header,
 .footer {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   font-weight: 600;
 }
 
-.title {
-  color: #333;
+.header {
+  justify-content: space-between;
 }
 
-.legend,
-.nav {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.6rem;
-  color: #666;
+.footer {
+  justify-content: center;
 }
 
 .legend-dot {
@@ -59,66 +52,104 @@
 }
 
 .meetings {
-  background: var(--color-meetings);
+  background: var(--color-primary);
 }
 
 .work {
-  background: var(--color-work);
+  background: var(--color-secondary);
 }
 
 .learning {
-  background: var(--color-learning);
+  background: var(--color-tertiary);
 }
 
-.nav-btn {
-  padding: 0.5rem 0.75rem;
+.btn {
+  padding: 0.25rem;
   border: none;
-  border-radius: 6px;
   font: inherit;
-  font-size: 0.66rem;
+  font-size: 1rem;
   letter-spacing: inherit;
   text-transform: inherit;
-  background: #555;
-  color: #fff;
+  background: transparent;
+  color: var(--text-muted);
   cursor: pointer;
-  transition: background 0.2s;
 }
 
-.nav-btn:hover:not(:disabled) {
-  background: #333;
+.btn:hover:not(:disabled) {
+  color: var(--text);
 }
 
-.nav-btn:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.nav-btn.ghost {
-  padding: 0.25rem;
-  background: transparent;
-  color: #888;
-  font-size: 1rem;
-}
-
-.nav-btn.ghost:hover {
-  background: transparent;
-  color: #333;
+.btn:disabled {
+  color: var(--border);
 }
 
 .week-label {
-  min-width: 6.25rem;
   font-weight: 500;
-  color: #555;
+  color: var(--text-muted);
   text-align: center;
 }
 
-.chart {
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.nav .btn {
+  padding: 0.35rem 0.5rem;
+}
+
+.nav .week-label {
+  min-width: 6rem;
+}
+
+.charts {
+  display: flex;
+  flex: 1;
+  gap: 2rem;
+  padding: 1rem 0;
+}
+
+.bar-chart {
   display: flex;
   justify-content: space-around;
   align-items: flex-end;
   flex: 1;
   gap: 0.5rem;
-  padding: 1rem 0;
+}
+
+.donut {
+  height: 8rem;
+  align-self: center;
+  transform: rotate(-90deg);
+}
+
+.donut circle {
+  transition:
+    stroke-dasharray 0.3s ease,
+    stroke-dashoffset 0.3s ease;
+}
+
+.separator {
+  width: 1px;
+  background: var(--border);
+  align-self: stretch;
+}
+
+.donut-recap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 8rem;
+}
+
+.donut-recap-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
 }
 
 .bar-container {
@@ -150,7 +181,7 @@
 .day-label {
   margin-top: 0.25rem;
   font-size: 0.6rem;
-  color: #888;
+  color: var(--text-muted);
 }
 
 .tooltip {
@@ -160,8 +191,8 @@
   transform: translateX(-50%);
   padding: 0.5rem;
   border-radius: 4px;
-  background: #333;
-  color: #fff;
+  background: var(--text);
+  color: var(--text-inverse);
   font-size: 0.6rem;
   white-space: nowrap;
   opacity: 0;
@@ -177,6 +208,6 @@
 .tooltip-total {
   margin-top: 0.25rem;
   padding-top: 0.25rem;
-  border-top: 1px solid #555;
+  border-top: 1px solid var(--text-muted);
   font-weight: 600;
 }

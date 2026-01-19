@@ -11,7 +11,7 @@ export function Chart({ days }: { days: Day[] }) {
   }
 
   return (
-    <div className="chart">
+    <div className="bar-chart">
       {days.map((day) => (
         <div key={day.index} className="bar-container">
           <div className="bar">
