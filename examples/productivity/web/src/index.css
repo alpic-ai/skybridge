@@ -1,7 +1,72 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 .container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 1rem;
+  font-family: system-ui, sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.05rem;
+  text-transform: uppercase;
+  background: #fafafa;
+  color: #444;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+
+.title {
+  color: #666;
+}
+
+.total {
+  color: #333;
+}
+
+.footer {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  font-family: system-ui, sans-serif;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+
+.nav-btn {
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.66rem;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  background: #555;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: #333;
+}
+
+.nav-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.week-label {
+  min-width: 6.25rem;
+  font-weight: 500;
+  color: #555;
+  text-align: center;
 }
