@@ -1,29 +1,68 @@
 ---
 title: DevTools
-description: "Test your app widgets locally with Skybridge's browser-based emulator and debugging tools."
+description: "Test your app widgets locally with Skybridge's browser-based DevTools and debugging tools."
 ---
 
-Skybridge provides a lightweight emulator running inside your browser for testing widgets locally.
+DevTools is designed to help you test your apps locally in a short feedback loop fashion. It lets you develop and debug widgets without needing to deploy or use external services.
 
 <Note>
-The emulator currently renders widgets using the **Apps SDK runtime** (mocked `window.openai`). MCP Apps rendering is not yet supported in DevTools. For MCP Apps testing, connect your server to a compatible client like Goose.
+DevTools currently renders widgets using the **Apps SDK runtime** (mocked `window.openai`). MCP Apps rendering is not yet supported in DevTools. For MCP Apps testing, connect your server to a compatible client like Goose.
 </Note>
-
-<Tip>
-**Full Guide**
-
-For the complete development workflow, HMR setup, and when to use DevTools vs ChatGPT, see [Fast Iteration](/concepts/fast-iteration).
-</Tip>
 
 ## Quick Start
 
-When you run `pnpm dev`, DevTools is available at `http://localhost:3000/`.
+When you run `pnpm dev`, DevTools is automatically available at `http://localhost:3000/`.
 
-**Features:**
-- Tool listing and input forms
-- Widget preview with mocked `window.openai`
-- Theme/locale/display mode switching
-- Response inspector for `content`, `structuredContent`, `_meta`
+<img src="/images/devtools-landing.png" alt="Skybridge DevTools Overview" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
+
+## Automatic Tool Discovery
+
+DevTools automatically discovers all tools registered in your MCP server. Simply start your development server, and all available tools will appear in the sidebar, ready to test.
+
+## Testing Tools
+
+DevTools generates a form based on each tool's input schema, making it easy to test your tools with different inputs. Fill in the form and click "Call Tool" to execute the tool and see its output.
+
+<img src="/images/devtools-toolcall.png" alt="DevTools Tool Input Form" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
+
+## Widget Inspection
+
+When a tool renders a widget, DevTools provides comprehensive inspection capabilities:
+
+### OpenAI Object View & Edition
+
+Inspect and edit the `window.openai` object properties in real-time:
+- **Display Mode**: Switch between inline, fullscreen, pip, and modal modes
+- **Theme**: Toggle between light and dark themes
+- **Locale**: Change the locale settings
+- **User Agent**: Modify device type (mobile/desktop) and capabilities (hover/touch)
+- **Safe Area**: Adjust safe area insets
+- **Max Height**: Set widget height constraints
+
+Changes are immediately reflected in the widget preview, allowing you to test how your widget behaves under different conditions.
+
+### Inspectable Widget State
+
+View and monitor the widget's state as it changes. The widget state inspector shows the current state object in a JSON tree view, making it easy to debug state management and track state updates.
+
+### OpenAI API Logs
+
+See all OpenAI API calls made by your widget in real-time. The logs panel displays:
+- Timestamp of each API call
+- Command name (e.g., `setWidgetState`, `callTool`, `requestDisplayMode`)
+- Arguments passed to each method
+- Response data (when applicable)
+
+This helps you understand how your widget interacts with the OpenAI API and debug any issues.
+
+<img src="/images/devtools-widget.png" alt="DevTools Widget Inspection Panel" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
+
+## Limitations
+
+DevTools uses ChatGPT's rendering environment but has some differences:
+
+- **CSP policies**: Some external resources may be blocked in production but allowed locally
+- **LLM responses**: Follow-up messages don't trigger actual LLM responses—test these in ChatGPT dev mode
 
 ## Custom Integration
 

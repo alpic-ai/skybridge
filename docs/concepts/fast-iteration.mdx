@@ -1,12 +1,12 @@
 ---
 title: Fast Iteration
-description: "Develop Apps locally with Skybridge's emulator and Vite HMR for instant feedback without ngrok."
+description: "Develop Apps locally with Skybridge's DevTools and Vite HMR for instant feedback without ngrok."
 ---
 
 
 **Problem:** Testing widgets in ChatGPT's dev mode is slow. It requires ngrok tunneling, manual refreshes, and provides limited debugging feedback.
 
-**Solution:** Skybridge includes a local emulator and Vite HMR plugin that let you develop widgets entirely on your machine with instant feedback.
+**Solution:** Skybridge includes DevTools and a Vite HMR plugin that let you develop widgets entirely on your machine with instant feedback.
 
 ## The Challenge
 
@@ -30,9 +30,9 @@ With Skybridge, the loop becomes:
 1. Make a code change
 2. See it instantly in your browser
 
-That's it. The local emulator mocks the ChatGPT environment, and Vite's HMR updates your widget without a full reload.
+That's it. DevTools mocks the ChatGPT environment, and Vite's HMR updates your widget without a full reload.
 
-## Local Emulator
+## DevTools
 
 When you run `pnpm dev`, Skybridge starts:
 - Your MCP server at `http://localhost:3000/mcp`
@@ -43,28 +43,13 @@ The DevTools UI provides:
 - **Input forms** - Test tools with custom inputs
 - **Widget preview** - Render widgets in a mocked ChatGPT environment
 
-<img src="/images/emulator.png" alt="Skybridge DevTools Emulator" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
+<Info>
+**Full DevTools Guide**
 
-### Using the Emulator
+For comprehensive documentation on all DevTools features, including widget inspection, OpenAI API logs, and custom integration, see the [DevTools Guide](/devtools).
+</Info>
 
-1. Open `http://localhost:3000/` in your browser
-2. Select a tool from the sidebar
-3. Fill in the input form and click "Call Tool"
-4. See the widget render in the preview pane
-
-The emulator mocks:
-- `window.openai` API (theme, locale, display mode, etc.)
-- Tool call responses
-- Widget state persistence
-- Follow-up message sending
-
-<Note>
-**Emulator limitations**
-
-The local emulator uses ChatGPT's rendering environment but has some differences:
-- **CSP policies**: Some external resources may be blocked in production but allowed locally
-- **LLM responses**: Follow-up messages don't trigger actual LLM responses—test these in ChatGPT dev mode
-</Note>
+<img src="/images/devtools-landing.png" alt="Skybridge DevTools" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
 
 ## HMR with Vite Plugin
 
@@ -102,13 +87,13 @@ Your widget code works identically in ChatGPT and local DevTools. Skybridge dete
 | Environment | Communication |
 |-------------|---------------|
 | ChatGPT | `window.openai` API |
-| DevTools | postMessage to emulator |
+| DevTools | postMessage to DevTools |
 
 You don't need to know which is active—just use the hooks.
 
 ## When to Use What
 
-**Local Emulator (90% of development time)**
+**DevTools (90% of development time)**
 - Rapid UI iteration
 - Testing tool inputs/outputs
 - Debugging state management
@@ -145,7 +130,7 @@ View the full tool response including `content`, `structuredContent`, and `_meta
 
 ## Related
 
+- [DevTools Guide](/devtools) - Complete DevTools documentation and features
 - [Test Your App](/quickstart/test-your-app) - Full testing workflow including ChatGPT dev mode
-- [DevTools](/devtools) - Detailed DevTools documentation
 - [useLayout API](/api-reference/use-layout) - Access theme and layout info
 - [useCallTool API](/api-reference/use-call-tool) - Make tool calls from widgets
