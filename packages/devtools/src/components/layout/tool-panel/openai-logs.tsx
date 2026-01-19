@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button.js";
 import { useSelectedTool } from "@/lib/mcp/index.js";
 import { type OpenAiLog, useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils";
-import { ViewResourceButton } from "../view-resource-button.js";
 
 function formatTimestamp(timestamp: number): string {
   const date = new Date(timestamp);

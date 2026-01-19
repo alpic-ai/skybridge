@@ -12,9 +12,10 @@ export function UseSetOpenInAppUrlTab() {
   return (
     <div className="tab-content">
       <p className="description">
-        Set the URL that will be opened when the user clicks on the widget in
-        the host application. The open in app button is shown top right in
-        fullscreen mode.
+        Set the URL that will be opened when the user clicks the "open in app"
+        button. This button appears in the top right corner when the widget is
+        displayed in fullscreen mode. The URL must have the same origin as your
+        widget's server URL.
       </p>
 
       <div className="button-row" style={{ marginBottom: "1rem" }}>

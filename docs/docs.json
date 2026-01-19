@@ -113,6 +113,7 @@
               "api-reference/use-user",
               "api-reference/use-display-mode",
               "api-reference/use-open-external",
+              "api-reference/use-set-open-in-app-url",
               "api-reference/use-send-follow-up-message",
               "api-reference/use-widget-state",
               "api-reference/use-request-modal",
