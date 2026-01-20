@@ -1,6 +1,18 @@
-# Skybridge Starter
+# Productivity Example
 
-A productivity tracking app showcasing MCP Apps capabilities.
+## What This Example Showcases
+This "Productivity" example demonstrates key Skybridge capabilities for MCP Apps:
+- **Interactive Widget Rendering**: A React-based widget that displays interactive productivity charts directly in AI conversations
+- **Tool Info Access**: Widgets access tool input, output, and metadata via `useToolInfo()` hook
+- **Theme Support**: Adapts to light/dark mode using the `useLayout()` hook
+- **Localization**: Translates UI based on user locale via `useUser()` hook (supports English, French, Spanish, and Chinese)
+- **Persistent State**: Maintains widget state across re-renders using `useWidgetState()` hook
+- **Display Mode Toggle**: Switches between inline and fullscreen views using `useDisplayMode()` hook
+- **Follow-up Messages**: Sends follow-up messages to the AI using `useSendFollowUpMessage()` hook
+- **External Links**: Opens external URLs via `useOpenExternal()` hook
+- **Widget-to-Tool Communication**: Calls backend tools from the widget using type-safe `useCallTool()` hook
+- **LLM Context via data-llm**: Provides contextual information to the AI about the current widget state
+- **Hot Module Replacement**: Live reloading of widget components during development
 
 ## Getting Started
 
