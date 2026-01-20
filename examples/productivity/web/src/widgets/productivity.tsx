@@ -73,7 +73,7 @@ function Productivity() {
 
   return (
     <div
-      className={`container ${theme}`}
+      className={`container ${theme} ${displayMode}`}
       data-llm={
         displayMode === "fullscreen"
           ? "User is viewing the full dashboard: bar chart showing daily hours breakdown by activity and donut chart showing weekly distribution"
