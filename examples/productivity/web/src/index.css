@@ -23,13 +23,16 @@
   padding: 0;
 }
 
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .container {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%;
-  min-height: 250px;
-  max-height: 50vh;
   padding: 1rem;
   border-radius: 10px;
   font-family: system-ui, sans-serif;
@@ -38,6 +41,11 @@
   text-transform: uppercase;
   background: var(--bg);
   color: var(--text);
+  width: 100vw;
+  height: 100vh;
+  max-height: 300px;
+  max-width: 1000px;
+  margin: auto;
 }
 
 .header,
@@ -248,9 +256,4 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-}
-
-.fullscreen {
-  padding: 5rem 5rem 10rem 5rem;
-  max-height: 100%;
 }

@@ -73,7 +73,7 @@ function ShowProductivityInsights() {
 
   return (
     <div
-      className={`container ${theme} ${displayMode}`}
+      className={`container ${theme}`}
       data-llm={
         displayMode === "fullscreen"
           ? "User is viewing the full dashboard: bar chart showing daily hours breakdown by activity and donut chart showing weekly distribution"
