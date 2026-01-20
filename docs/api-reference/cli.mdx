@@ -30,15 +30,21 @@ skybridge dev
 |------|-------------|
 | `--use-forwarded-host` | Uses the forwarded host header to construct widget URLs instead of localhost. Useful when accessing the dev server through a tunnel (e.g., ngrok). |
 
+The `--use-forwarded-host`  allows your widgets to work on any device connected to the internet, not just on your local machine. Useful when developing on multiple devices or when you need to test your app from different devices.
+
+**Important limitation:** Hot Module Reloading (HMR) is not available when using `--use-forwarded-host` because HMR uses a different port than the dev server and requires the WebSocket Secure (WSS) protocol, which most tunnel solutions don't support. To see your changes during development, simply reopen the conversation in ChatGPT to refresh the widget.
+
 **Example with ngrok:**
 
 ```bash
-# Terminal 1: Start Skybridge with forwarded host support
+# Terminal 1: Start Skybridge
 skybridge dev --use-forwarded-host
 
 # Terminal 2: Expose your local server
 ngrok http 3000
 ```
+
+**Note:** Only use `--use-forwarded-host` when you need to develop or test on multiple devices. For local-only development, the standard `skybridge dev` command is sufficient.
 
 When using `--use-forwarded-host`, Skybridge will use the ngrok URL (e.g., `https://abc123.ngrok-free.app`) for widget URLs instead of `localhost:3000`.
 
