@@ -1,0 +1,26 @@
+[
+  {
+    "query": "I run a small pizza chain called Tony's Pizza. We have an online ordering API that handles menu, cart, and checkout. I want customers to order through ChatGPT - like 'get me a large pepperoni' and it adds to cart, confirms toppings, and places the order.",
+    "expected_behavior": "PASS. Brief recap of what we're building, note any open questions, offer to move on to implementation."
+  },
+  {
+    "query": "We're a law firm with 500+ contract templates. Our attorneys waste hours finding the right template. I want an app where they describe what they need - 'NDA for a software contractor in California' - and it returns the right template with prefilled fields.",
+    "expected_behavior": "PASS. Brief recap of what we're building, offer to move on to implementation."
+  },
+  {
+    "query": "I want to build a ChatGPT app for my business",
+    "expected_behavior": "NEED REFINEMENT. Too vague. Ask: What does the business do? What problem to solve? What data/APIs available?"
+  },
+  {
+    "query": "I have a travel blog with 200 articles about destinations. Can I make a ChatGPT app that lets people read my articles?",
+    "expected_behavior": "NEED REFINEMENT. Flag that reading articles isn't conversational. Suggest pivots: destination recommendations, Q&A from article knowledge, or trip planning."
+  },
+  {
+    "query": "I want to bring our entire Salesforce CRM into ChatGPT so sales reps can do everything they do in Salesforce but through chat.",
+    "expected_behavior": "NEED REFINEMENT. Flag 'Extract, don't port' violation. Ask what 2-3 daily tasks are most tedious. Suggest scoping to high-frequency actions like logging calls or checking deal status."
+  },
+  {
+    "query": "I want to build an app that shows a grid of 20 KPIs updating in real-time - revenue, active users, conversion rates, etc.",
+    "expected_behavior": "NEED REFINEMENT. Flag that dashboards aren't conversational. Suggest pivots: query-based KPI lookup, anomaly alerts, or comparative analysis through conversation."
+  }
+]
