@@ -12,7 +12,6 @@
 .dark {
   --bg: #1a1a1a;
   --text: #eee;
-  --text-muted: #888;
   --border: #333;
   --text-inverse: #1a1a1a;
 }
@@ -41,10 +40,8 @@ body {
   text-transform: uppercase;
   background: var(--bg);
   color: var(--text);
-  width: 100vw;
-  height: 100vh;
-  max-height: 300px;
-  max-width: 1000px;
+  width: min(100vw, 1000px);
+  height: clamp(250px, 100vh, 350px);
   margin: auto;
 }
 
@@ -54,6 +51,24 @@ body {
   align-items: center;
   justify-content: space-between;
   font-weight: 600;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lang-select {
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font: inherit;
+  font-size: 0.65rem;
+  text-transform: none;
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
 }
 
 .footer-side {
@@ -206,13 +221,8 @@ body {
 }
 
 .bar-total,
-.day-label,
-.tooltip {
-  font-size: 0.6rem;
-}
-
-.bar-total,
 .day-label {
+  font-size: 0.6rem;
   color: var(--text-muted);
 }
 
@@ -230,6 +240,7 @@ body {
   position: absolute;
   padding: 0.5rem;
   border-radius: 4px;
+  font-size: 0.6rem;
   background: var(--text);
   color: var(--text-inverse);
   white-space: nowrap;

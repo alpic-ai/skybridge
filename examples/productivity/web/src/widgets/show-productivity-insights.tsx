@@ -13,7 +13,7 @@ import { BarChart } from "../components/BarChart";
 import { DonutChart } from "../components/DonutChart";
 import { Legend } from "../components/Legend";
 import { type Output, useCallTool, useToolInfo } from "../helpers";
-import { useIntl } from "../i18n";
+import { supportedLanguages, useIntl } from "../i18n";
 
 type WidgetState = { weekOffset: number } & Output;
 
@@ -35,7 +35,7 @@ function ShowProductivityInsights() {
   const openExternal = useOpenExternal();
   const lastSyncedInputOffset = useRef<number | null>(null);
 
-  const { t } = useIntl();
+  const { t, locale, setLocale } = useIntl();
 
   function getWeekLabel(offset: number): string {
     switch (offset) {
@@ -85,17 +85,30 @@ function ShowProductivityInsights() {
           📊 {t("weeklyProductivity")}: {widgetState.totalHours}h
         </span>
 
-        <button
-          type="button"
-          className="btn"
-          onClick={() =>
-            setDisplayMode(
-              displayMode === "fullscreen" ? "inline" : "fullscreen",
-            )
-          }
-        >
-          {displayMode === "fullscreen" ? "↙" : "↗"}
-        </button>
+        <div className="header-controls">
+          <select
+            className="lang-select"
+            value={locale}
+            onChange={(e) => setLocale(e.target.value)}
+          >
+            {supportedLanguages.map((lang) => (
+              <option key={lang} value={lang}>
+                {lang.toUpperCase()}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className="btn"
+            onClick={() =>
+              setDisplayMode(
+                displayMode === "fullscreen" ? "inline" : "fullscreen",
+              )
+            }
+          >
+            {displayMode === "fullscreen" ? "↙" : "↗"}
+          </button>
+        </div>
       </header>
       <div className="charts">
         <BarChart days={widgetState.days} />
