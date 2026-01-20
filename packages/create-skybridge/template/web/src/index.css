@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,600&display=swap");
 
 .container {
   display: flex;
@@ -9,7 +9,12 @@
 }
 
 .ball {
-  background: radial-gradient(circle at 30% 30%, #454565 0%, #1c1c30 40%, #0a0a10 100%);
+  background: radial-gradient(
+    circle at 30% 30%,
+    #454565 0%,
+    #1c1c30 40%,
+    #0a0a10 100%
+  );
   border-radius: 50%;
   width: 12rem;
   height: 12rem;
@@ -24,7 +29,9 @@
     0 10px 30px rgba(0, 0, 0, 0.5),
     0 5px 15px rgba(0, 0, 0, 0.3),
     inset 0 -20px 40px rgba(0, 0, 0, 0.6);
-  animation: float 3s ease-in-out infinite, colorShift 15s ease-in-out infinite;
+  animation:
+    float 3s ease-in-out infinite,
+    colorShift 15s ease-in-out infinite;
   transition: transform 0.3s ease;
   cursor: pointer;
   border: 1px solid rgba(30, 30, 50, 0.6);
@@ -40,7 +47,8 @@
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -49,40 +57,69 @@
 }
 
 @keyframes colorShift {
-  0%, 100% {
-    background: radial-gradient(circle at 30% 30%, #454565 0%, #1c1c30 40%, #0a0a10 100%);
+  0%,
+  100% {
+    background: radial-gradient(
+      circle at 30% 30%,
+      #454565 0%,
+      #1c1c30 40%,
+      #0a0a10 100%
+    );
   }
   25% {
-    background: radial-gradient(circle at 30% 30%, #3f4a65 0%, #181e30 40%, #090a10 100%);
+    background: radial-gradient(
+      circle at 30% 30%,
+      #3f4a65 0%,
+      #181e30 40%,
+      #090a10 100%
+    );
   }
   50% {
-    background: radial-gradient(circle at 30% 30%, #3a5065 0%, #152230 40%, #080a10 100%);
+    background: radial-gradient(
+      circle at 30% 30%,
+      #3a5065 0%,
+      #152230 40%,
+      #080a10 100%
+    );
   }
   75% {
-    background: radial-gradient(circle at 30% 30%, #3f4a65 0%, #181e30 40%, #090a10 100%);
+    background: radial-gradient(
+      circle at 30% 30%,
+      #3f4a65 0%,
+      #181e30 40%,
+      #090a10 100%
+    );
   }
 }
 
 .ball::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 8%;
   left: 20%;
   width: 30%;
   height: 20%;
-  background: radial-gradient(ellipse, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  background: radial-gradient(
+    ellipse,
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 70%
+  );
   border-radius: 50%;
   pointer-events: none;
 }
 
 .ball::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 8%;
   right: 25%;
   width: 25%;
   height: 10%;
-  background: radial-gradient(ellipse, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  background: radial-gradient(
+    ellipse,
+    rgba(255, 255, 255, 0.1) 0%,
+    transparent 70%
+  );
   border-radius: 50%;
   pointer-events: none;
 }
@@ -99,7 +136,7 @@
 }
 
 .answer {
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-style: italic;
   font-size: 1.25rem;
   font-weight: 600;
