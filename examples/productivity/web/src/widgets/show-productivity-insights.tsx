@@ -17,11 +17,13 @@ import { useIntl } from "../i18n";
 
 type WidgetState = { weekOffset: number } & Output;
 
-function Productivity() {
-  const { isSuccess, input, output, isPending } = useToolInfo<"productivity">();
+function ShowProductivityInsights() {
+  const { isSuccess, input, output, isPending } =
+    useToolInfo<"show-productivity-insights">();
 
-  const { callTool: navigate, isPending: isNavigating } =
-    useCallTool("productivity");
+  const { callTool: navigate, isPending: isNavigating } = useCallTool(
+    "show-productivity-insights",
+  );
 
   const [widgetState, setWidgetState] = useWidgetState<WidgetState>(undefined);
 
@@ -155,6 +157,6 @@ function Productivity() {
   );
 }
 
-export default Productivity;
+export default ShowProductivityInsights;
 
-mountWidget(<Productivity />);
+mountWidget(<ShowProductivityInsights />);

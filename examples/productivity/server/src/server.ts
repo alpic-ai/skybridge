@@ -47,17 +47,17 @@ function getWeek(weekOffset: number): Week {
 
 const server = new McpServer(
   {
-    name: "productivity",
+    name: "productivity-charts-example-server",
     version: "0.0.1",
   },
   { capabilities: {} },
 ).registerWidget(
-  "productivity",
+  "show-productivity-insights",
   {
     description: "Weekly Productivity Chart",
   },
   {
-    description: "Display user's weekly productivity chart",
+    description: "Display user's weekly productivity charts",
     inputSchema: {
       weekOffset: z
         .number()

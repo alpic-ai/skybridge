@@ -4,6 +4,6 @@ import type { AppType } from "../../server/src/server";
 
 export const { useToolInfo, useCallTool } = generateHelpers<AppType>();
 
-export type Output = ToolOutput<AppType, "productivity">;
+export type Output = ToolOutput<AppType, "show-productivity-insights">;
 export type Day = Output["days"][number];
 export type Activity = Day["activities"][number];

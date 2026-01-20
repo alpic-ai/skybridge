@@ -6,13 +6,17 @@ This "Productivity" example demonstrates key Skybridge capabilities for MCP Apps
 - **Tool Info Access**: Widgets access tool input, output, and metadata via `useToolInfo()` hook
 - **Theme Support**: Adapts to light/dark mode using the `useLayout()` hook
 - **Localization**: Translates UI based on user locale via `useUser()` hook (supports English, French, Spanish, and Chinese)
-- **Persistent State**: Maintains widget state across re-renders using `useWidgetState()` hook
 - **Display Mode Toggle**: Switches between inline and fullscreen views using `useDisplayMode()` hook
 - **Follow-up Messages**: Sends follow-up messages to the AI using `useSendFollowUpMessage()` hook
 - **External Links**: Opens external URLs via `useOpenExternal()` hook
 - **Widget-to-Tool Communication**: Calls backend tools from the widget using type-safe `useCallTool()` hook
 - **LLM Context via data-llm**: Provides contextual information to the AI about the current widget state
 - **Hot Module Replacement**: Live reloading of widget components during development
+
+## Example Prompts
+- Show me this week's productivity insights
+- How much time did I spend learning last week?
+- Analyze my productivity trends over the last month
 
 ## Getting Started
 
