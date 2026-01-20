@@ -1,14 +1,6 @@
-type TranslationKey =
-  | "weeklyProductivity"
-  | "thisWeek"
-  | "lastWeek"
-  | "weeksAgo"
-  | "loading"
-  | "meetings"
-  | "work"
-  | "learning";
+import { useUser } from "skybridge/web";
 
-const translations: Record<string, Record<TranslationKey, string>> = {
+const translations = {
   en: {
     weeklyProductivity: "weekly productivity",
     thisWeek: "This week",
@@ -51,8 +43,21 @@ const translations: Record<string, Record<TranslationKey, string>> = {
   },
 };
 
-export function translate(locale: string, key: TranslationKey): string {
+type Translations = typeof translations;
+type SupportedLanguage = keyof Translations;
+type TranslationKey = keyof Translations["en"];
+
+function isSupportedLanguage(lang: string): lang is SupportedLanguage {
+  return lang in translations;
+}
+
+export function useIntl() {
+  const { locale } = useUser();
   const lang = locale.split("-")[0];
-  const t = translations[lang] || translations.en;
-  return t[key];
+  const messages = translations[isSupportedLanguage(lang) ? lang : "en"];
+
+  return {
+    t: (key: TranslationKey) => messages[key],
+    locale,
+  };
 }

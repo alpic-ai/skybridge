@@ -7,14 +7,13 @@ import {
   useLayout,
   useOpenExternal,
   useSendFollowUpMessage,
-  useUser,
   useWidgetState,
 } from "skybridge/web";
 import { BarChart } from "../components/BarChart";
 import { DonutChart } from "../components/DonutChart";
 import { Legend } from "../components/Legend";
 import { type Output, useCallTool, useToolInfo } from "../helpers";
-import { translate } from "../i18n";
+import { useIntl } from "../i18n";
 
 type WidgetState = { weekOffset: number } & Output;
 
@@ -22,20 +21,19 @@ function Productivity() {
   const { isSuccess, input, output, isPending } = useToolInfo<"productivity">();
 
   const { callTool: navigate, isPending: isNavigating } =
-    useCallTool<"productivity">("productivity");
+    useCallTool("productivity");
 
-  const [state, setState] = useWidgetState<WidgetState>(undefined);
+  const [widgetState, setWidgetState] = useWidgetState<WidgetState>(undefined);
 
   const [displayMode, setDisplayMode] = useDisplayMode();
 
   const { theme } = useLayout();
-  const { locale } = useUser();
 
   const sendFollowUpMessage = useSendFollowUpMessage();
   const openExternal = useOpenExternal();
   const lastSyncedInputOffset = useRef<number | null>(null);
 
-  const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
+  const { t } = useIntl();
 
   function getWeekLabel(offset: number): string {
     switch (offset) {
@@ -52,22 +50,22 @@ function Productivity() {
     const weekOffset = input?.weekOffset ?? 0;
     if (isSuccess && output && lastSyncedInputOffset.current !== weekOffset) {
       lastSyncedInputOffset.current = weekOffset;
-      setState({ weekOffset, ...output });
+      setWidgetState({ weekOffset, ...output });
     }
-  }, [isSuccess, input, output, setState]);
+  }, [isSuccess, input, output, setWidgetState]);
 
   function goToWeek(newOffset: number) {
     navigate(
       { weekOffset: newOffset },
       {
         onSuccess: ({ structuredContent }) => {
-          setState({ weekOffset: newOffset, ...structuredContent });
+          setWidgetState({ weekOffset: newOffset, ...structuredContent });
         },
       },
     );
   }
 
-  if (isPending || !state) {
+  if (isPending || !widgetState) {
     return <div className="container">{t("loading")}</div>;
   }
 
@@ -82,7 +80,7 @@ function Productivity() {
     >
       <header className="header">
         <span>
-          📊 {t("weeklyProductivity")}: {state.totalHours}h
+          📊 {t("weeklyProductivity")}: {widgetState.totalHours}h
         </span>
 
         <button
@@ -98,17 +96,17 @@ function Productivity() {
         </button>
       </header>
       <div className="charts">
-        <BarChart days={state.days} />
+        <BarChart days={widgetState.days} />
         {displayMode === "fullscreen" && (
           <>
             <div className="separator" />
             <DonutChart
-              activities={state.activities}
-              totalHours={state.totalHours}
+              activities={widgetState.activities}
+              totalHours={widgetState.totalHours}
             />
           </>
         )}
-        <Legend activities={state.activities} locale={locale} />
+        <Legend activities={widgetState.activities} />
       </div>
       <footer className="footer">
         <span className="footer-side">
@@ -126,17 +124,19 @@ function Productivity() {
           <button
             type="button"
             className="btn"
-            onClick={() => goToWeek(state.weekOffset - 1)}
+            onClick={() => goToWeek(widgetState.weekOffset - 1)}
             disabled={isNavigating}
           >
             ←
           </button>
-          <span className="week-label">{getWeekLabel(state.weekOffset)}</span>
+          <span className="week-label">
+            {getWeekLabel(widgetState.weekOffset)}
+          </span>
           <button
             type="button"
             className="btn"
-            onClick={() => goToWeek(state.weekOffset + 1)}
-            disabled={isNavigating || state.weekOffset >= 0}
+            onClick={() => goToWeek(widgetState.weekOffset + 1)}
+            disabled={isNavigating || widgetState.weekOffset >= 0}
           >
             →
           </button>

@@ -1,19 +1,14 @@
 import type { Output } from "../helpers";
-import { translate } from "../i18n";
+import { useIntl } from "../i18n";
 
-export function Legend({
-  activities,
-  locale,
-}: {
-  activities: Output["activities"];
-  locale: string;
-}) {
+export function Legend({ activities }: { activities: Output["activities"] }) {
+  const { t } = useIntl();
   return (
     <div className="legend">
       {activities.map((a) => (
         <div key={a.type} className="legend-item">
           <span className={`legend-dot ${a.type}`} />
-          {translate(locale, a.type)}: {a.hours}H
+          {t(a.type)}: {a.hours}H
         </div>
       ))}
     </div>

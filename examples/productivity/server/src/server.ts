@@ -61,6 +61,7 @@ const server = new McpServer(
     inputSchema: {
       weekOffset: z
         .number()
+        .max(0)
         .optional()
         .default(0)
         .describe(
@@ -72,36 +73,17 @@ const server = new McpServer(
     },
   },
   async ({ weekOffset }) => {
-    try {
-      if (weekOffset > 0) {
-        throw new Error("Offset must be negative or zero");
-      }
-      const structuredContent = getWeek(weekOffset);
-      return {
-        structuredContent,
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(structuredContent),
-          },
-        ],
-        isError: false,
-      };
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Error while computing productivity";
-      return {
-        content: [
-          {
-            type: "text",
-            text: message,
-          },
-        ],
-        isError: true,
-      };
-    }
+    const structuredContent = getWeek(weekOffset);
+    return {
+      structuredContent,
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(structuredContent),
+        },
+      ],
+      isError: false,
+    };
   },
 );
 
