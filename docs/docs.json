@@ -146,12 +146,11 @@
       },
       {
         "tab": "Showcase",
-        "groups": [
-          {
-            "group": "Showcase",
-            "icon": "star",
-            "pages": ["showcase"]
-          }
+        "pages": [
+          "showcase",
+          "showcase/capitals",
+          "showcase/ecommerce-carousel",
+          "showcase/everything"
         ]
       }
     ]
