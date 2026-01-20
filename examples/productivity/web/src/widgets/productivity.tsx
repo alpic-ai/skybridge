@@ -1,6 +1,6 @@
 import "@/index.css";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   mountWidget,
   useDisplayMode,
@@ -33,6 +33,7 @@ function Productivity() {
 
   const sendFollowUpMessage = useSendFollowUpMessage();
   const openExternal = useOpenExternal();
+  const lastSyncedInputOffset = useRef<number | null>(null);
 
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
 
@@ -48,8 +49,10 @@ function Productivity() {
   }
 
   useEffect(() => {
-    if (isSuccess && output) {
-      setState({ weekOffset: input.weekOffset, ...output });
+    const weekOffset = input?.weekOffset ?? 0;
+    if (isSuccess && output && lastSyncedInputOffset.current !== weekOffset) {
+      lastSyncedInputOffset.current = weekOffset;
+      setState({ weekOffset, ...output });
     }
   }, [isSuccess, input, output, setState]);
 
