@@ -1,8 +1,8 @@
 import { Command, Flags } from "@oclif/core";
 import { Box, render, Text } from "ink";
-import nodemon, { type NodemonSettings } from "nodemon";
-import { useEffect } from "react";
 import { Header } from "../cli/header.js";
+import { useNodemon } from "../cli/use-nodemon.js";
+import { useTypeScriptCheck } from "../cli/use-typescript-check.js";
 
 export default class Dev extends Command {
   static override description = "Start development server";
@@ -25,21 +25,8 @@ export default class Dev extends Command {
     };
 
     const App = () => {
-      useEffect(() => {
-        nodemon({
-          env,
-          configFile: "nodemon.json",
-        } as NodemonSettings);
-
-        nodemon
-          // @ts-expect-error - nodemon types don't include "restart" event
-          .on("restart", (files: string[]) => {
-            console.log(
-              "\n\x1b[32m✓\x1b[0m  App restarted due to file changes: \x1b[36m%s\x1b[0m",
-              files.join(", "),
-            );
-          });
-      }, []);
+      const tsErrors = useTypeScriptCheck();
+      const messages = useNodemon(env);
 
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>
@@ -100,10 +87,58 @@ export default class Dev extends Command {
               <Text color="grey"> 🙏</Text>
             </Text>
           </Box>
+          {tsErrors.length > 0 && (
+            <Box marginTop={1} flexDirection="column">
+              <Text color="red" bold>
+                ⚠️ TypeScript errors found:
+              </Text>
+              {tsErrors.map((error) => (
+                <Box
+                  key={`${error.file}:${error.line}:${error.col}`}
+                  marginLeft={2}
+                  flexDirection="column"
+                >
+                  <Box>
+                    <Text color="white">{error.file}</Text>
+                    <Text color="grey">
+                      ({error.line},{error.col}):{" "}
+                    </Text>
+                  </Box>
+                  <Box marginLeft={2}>
+                    <Text color="red">{error.message}</Text>
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          )}
+          {messages.length > 0 && (
+            <Box marginTop={1} flexDirection="column">
+              <Text color="white" bold>
+                Logs:
+              </Text>
+              {messages.map((message, index) => (
+                <Box
+                  key={`${message.type}-${index}-${message.text.slice(0, 20)}`}
+                  marginLeft={2}
+                >
+                  {message.type === "restart" ? (
+                    <>
+                      <Text color="green">✓{"  "}</Text>
+                      <Text color="white">{message.text}</Text>
+                    </>
+                  ) : message.type === "error" ? (
+                    <Text color="red">{message.text}</Text>
+                  ) : (
+                    <Text>{message.text}</Text>
+                  )}
+                </Box>
+              ))}
+            </Box>
+          )}
         </Box>
       );
     };
 
-    render(<App />, { exitOnCtrlC: true, patchConsole: false });
+    render(<App />, { exitOnCtrlC: true, patchConsole: true });
   }
 }
