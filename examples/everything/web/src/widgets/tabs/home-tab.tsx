@@ -1,4 +1,8 @@
+import { useOpenExternal } from "skybridge/web";
+
 export function HomeTab() {
+  const openExternal = useOpenExternal();
+
   return (
     <div className="tab-content">
       <p className="description">
@@ -12,11 +16,16 @@ export function HomeTab() {
       <p className="description">
         Read the full code implementation on{" "}
         <a
-          href="https://github.com/alpic-ai/skybridge/tree/main/examples/everything"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            openExternal(
+              "https://github.com/alpic-ai/skybridge/tree/main/examples/everything"
+            );
+          }}
+          style={{ cursor: "pointer" }}
         >
-          github.com/alpic-ai/skybridge/tree/main/examples/everything
+          Github
         </a>
       </p>
     </div>
