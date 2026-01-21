@@ -1,6 +1,6 @@
+import { spawn } from "node:child_process";
+import { isAbsolute, relative } from "node:path";
 import { useEffect, useRef, useState } from "react";
-import { spawn } from "child_process";
-import { relative, isAbsolute } from "node:path";
 
 type TsError = {
   file: string;
