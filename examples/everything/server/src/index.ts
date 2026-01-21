@@ -3,6 +3,9 @@ import { widgetsDevServer } from "skybridge/server";
 import type { ViteDevServer } from "vite";
 import { mcp } from "./middleware.js";
 import server from "./server.js";
+import { fileURLToPath } from "url";
+import path from "path";
+import cors from "cors";
 
 const app = express() as Express & { vite: ViteDevServer };
 
@@ -16,6 +19,15 @@ if (env !== "production") {
   const { devtoolsStaticServer } = await import("@skybridge/devtools");
   app.use(await devtoolsStaticServer());
   app.use(await widgetsDevServer());
+}
+
+
+if (env === "production") {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
+  app.use("/assets", cors());
+  app.use("/assets", express.static(path.join(__dirname, "assets")));
 }
 
 app.listen(3000, (error) => {

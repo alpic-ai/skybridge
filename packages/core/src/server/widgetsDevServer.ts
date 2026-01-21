@@ -2,6 +2,8 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import cors from "cors";
 import express, { type Router } from "express";
+import { assetBaseUrlTransformPlugin } from "./asset-base-url-transform-plugin.js";
+
 /**
  * Install Vite dev server
  * This router MUST be installed at the application root, like so:
@@ -50,6 +52,9 @@ export const widgetsDevServer = async (): Promise<Router> => {
     optimizeDeps: {
       include: ["react", "react-dom/client"],
     },
+    plugins: [
+      assetBaseUrlTransformPlugin({ devServerOrigin: "http://localhost:3000" }),
+    ],
   });
 
   router.use(cors());

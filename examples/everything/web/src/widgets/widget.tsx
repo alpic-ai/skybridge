@@ -5,6 +5,7 @@ import { mountWidget, useOpenExternal, useRequestModal } from "skybridge/web";
 import { CreateStoreTab } from "./tabs/create-store-tab";
 import { DataLlmTab } from "./tabs/data-llm-tab";
 import { HomeTab } from "./tabs/home-tab";
+import { ImageTab } from "./tabs/image-tab";
 import { ToolInfoTab } from "./tabs/tool-info-tab";
 import { UseCallToolTab } from "./tabs/use-call-tool-tab";
 import { UseDisplayModeTab } from "./tabs/use-display-mode-tab";
@@ -21,6 +22,7 @@ const TABS = {
   Home: { docPath: "", Component: HomeTab },
   createStore: { docPath: "create-store", Component: CreateStoreTab },
   "data-llm": { docPath: "data-llm", Component: DataLlmTab },
+  image: { docPath: "image", Component: ImageTab },
   useCallTool: { docPath: "use-call-tool", Component: UseCallToolTab },
   useDisplayMode: { docPath: "use-display-mode", Component: UseDisplayModeTab },
   useFiles: { docPath: "use-files", Component: UseFilesTab },
