@@ -1,5 +1,8 @@
-import nodemon, { type NodemonSettings } from "nodemon";
+import nodemonOriginal, { type NodemonSettings } from "nodemon";
 import { useEffect, useState } from "react";
+import type { ExtendedNodemon } from "./nodemon.d.ts";
+
+const nodemon = nodemonOriginal as ExtendedNodemon;
 
 type Message = {
   text: string;
@@ -31,21 +34,15 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
     };
 
     const setupStdoutListener = () => {
-      // @ts-expect-error - nodemon types don't include "stdout" property
       if (nodemon.stdout) {
-        // @ts-expect-error - nodemon types don't include "stdout" property
         nodemon.stdout.off("data", handleStdoutData);
-        // @ts-expect-error - nodemon types don't include "stdout" property
         nodemon.stdout.on("data", handleStdoutData);
       }
     };
 
     const setupStderrListener = () => {
-      // @ts-expect-error - nodemon types don't include "stderr" property
       if (nodemon.stderr) {
-        // @ts-expect-error - nodemon types don't include "stderr" property
         nodemon.stderr.off("data", handleStderrData);
-        // @ts-expect-error - nodemon types don't include "stderr" property
         nodemon.stderr.on("data", handleStderrData);
       }
     };
@@ -55,27 +52,21 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
       setupStderrListener();
     });
 
-    nodemon
-      // @ts-expect-error - nodemon types don't include "restart" event
-      .on("restart", (files: string[]) => {
-        const restartMessage = `Server restarted due to file changes: ${files.join(", ")}`;
-        setMessages((prev) => [
-          ...prev,
-          { text: restartMessage, type: "restart" },
-        ]);
-        setupStdoutListener();
-        setupStderrListener();
-      });
+    nodemon.on("restart", (files: string[]) => {
+      const restartMessage = `Server restarted due to file changes: ${files.join(", ")}`;
+      setMessages((prev) => [
+        ...prev,
+        { text: restartMessage, type: "restart" },
+      ]);
+      setupStdoutListener();
+      setupStderrListener();
+    });
 
     return () => {
-      // @ts-expect-error - nodemon types don't include "stdout" property
       if (nodemon.stdout) {
-        // @ts-expect-error - nodemon types don't include "stdout" property
         nodemon.stdout.off("data", handleStdoutData);
       }
-      // @ts-expect-error - nodemon types don't include "stderr" property
       if (nodemon.stderr) {
-        // @ts-expect-error - nodemon types don't include "stderr" property
         nodemon.stderr.off("data", handleStderrData);
       }
       nodemon.emit("quit");
