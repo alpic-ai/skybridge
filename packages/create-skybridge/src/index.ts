@@ -126,19 +126,13 @@ export async function init(args: string[] = process.argv.slice(2)) {
   const root = path.join(process.cwd(), targetDir);
 
   // 3. Download from repo or copy template
-  if (argRepo) {
-    prompts.log.step(`Downloading ${argRepo}...`);
-    try {
+  try {
+    if (argRepo) {
+      prompts.log.step(`Downloading ${argRepo}...`);
       await downloadTemplate(argRepo, { dir: root });
       prompts.log.success(`Project created in ${root}`);
-    } catch (error) {
-      prompts.log.error("Failed to download repository");
-      console.error(error);
-      process.exit(1);
-    }
-  } else {
-    prompts.log.step(`Copying template...`);
-    try {
+    } else {
+      prompts.log.step(`Copying template...`);
       const templateDir = fileURLToPath(
         new URL("../template", import.meta.url),
       );
@@ -153,11 +147,11 @@ export async function init(args: string[] = process.argv.slice(2)) {
         path.join(root, ".gitignore"),
       );
       prompts.log.success(`Project created in ${root}`);
-    } catch (error) {
-      prompts.log.error("Failed to copy repository");
-      console.error(error);
-      process.exit(1);
     }
+  } catch (error) {
+    prompts.log.error("Failed to create project from template");
+    console.error(error);
+    process.exit(1);
   }
 
   // Update project name in package.json
