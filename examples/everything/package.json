@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.1",
+    "cors": "^2.8.5",
     "express": "^5.2.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
@@ -21,7 +22,8 @@
   },
   "devDependencies": {
     "@modelcontextprotocol/inspector": "^0.18.0",
-    "@skybridge/devtools": ">=0.22.0 <1.0.0",
+    "@skybridge/devtools": ">=0.23.4 <1.0.0",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",

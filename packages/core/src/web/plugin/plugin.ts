@@ -37,6 +37,13 @@ export function skybridge(): Plugin {
             input,
           },
         },
+        experimental: {
+          renderBuiltUrl: (filename) => {
+            return {
+              runtime: `window.skybridge.serverUrl + "/assets/${filename}"`,
+            };
+          },
+        },
       };
     },
     enforce: "pre",
