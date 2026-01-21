@@ -1,0 +1,45 @@
+{
+  "name": "skybridge-mixed-auth-example",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Skybridge Mixed Auth Example - Coffee Shop Finder",
+  "type": "module",
+  "scripts": {
+    "dev": "skybridge",
+    "build": "skybridge build",
+    "start": "skybridge start",
+    "inspector": "mcp-inspector http://localhost:3000/mcp",
+    "server:build": "tsc -p tsconfig.server.json",
+    "server:start": "node dist/index.js",
+    "web:build": "tsc -b web && vite build -c web/vite.config.ts",
+    "web:preview": "vite preview -c web/vite.config.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.1",
+    "@workos-inc/node": "^7.72.2",
+    "dotenv": "^16.5.0",
+    "express": "^5.2.1",
+    "jose": "^6.0.11",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "skybridge": ">=0.22.0 <1.0.0",
+    "vite": "^7.3.0",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/inspector": "^0.18.0",
+    "@skybridge/devtools": ">=0.22.0 <1.0.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.15.30",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "nodemon": "^3.1.11",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "workspaces": [],
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}
