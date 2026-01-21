@@ -1,0 +1,270 @@
+:root {
+  --color-primary: #ff5277;
+  --color-secondary: #3b9eff;
+  --color-tertiary: #3dd966;
+  --bg: #fafafa;
+  --text: #333;
+  --text-muted: #888;
+  --border: #ddd;
+  --text-inverse: #fff;
+}
+
+.dark {
+  --bg: #1a1a1a;
+  --text: #eee;
+  --border: #333;
+  --text-inverse: #1a1a1a;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 10px;
+  font-family: system-ui, sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.05rem;
+  text-transform: uppercase;
+  background: var(--bg);
+  color: var(--text);
+  width: clamp(600px, 100vw, 1500px);
+  height: clamp(250px, 100vh, 450px);
+  margin: auto;
+}
+
+.header,
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lang-select {
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font: inherit;
+  font-size: 0.65rem;
+  text-transform: none;
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.footer-side {
+  width: 6rem;
+}
+
+.footer-side .btn {
+  font-size: inherit;
+}
+
+.footer-side-right {
+  text-align: right;
+}
+
+.legend-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+}
+
+.meetings {
+  background: var(--color-primary);
+}
+
+.work {
+  background: var(--color-secondary);
+}
+
+.learning {
+  background: var(--color-tertiary);
+}
+
+.btn {
+  padding: 0.25rem;
+  border: none;
+  font: inherit;
+  font-size: 1rem;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.btn:disabled {
+  color: var(--border);
+}
+
+.week-label {
+  font-weight: 500;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.nav .btn {
+  padding: 0.35rem 0.5rem;
+}
+
+.nav .week-label {
+  min-width: 6rem;
+}
+
+.charts {
+  display: flex;
+  flex: 1;
+  gap: 2rem;
+  padding: 1rem 0;
+}
+
+.bar-chart {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  flex: 1;
+  gap: 0.5rem;
+}
+
+.donut-container {
+  position: relative;
+  align-self: center;
+}
+
+.donut {
+  height: clamp(6rem, 20vh, 15rem);
+  transform: rotate(-90deg);
+}
+
+.donut circle {
+  cursor: pointer;
+  transition:
+    stroke-dasharray 0.3s ease,
+    stroke-dashoffset 0.3s ease;
+}
+
+.separator {
+  width: 1px;
+  background: var(--border);
+  align-self: stretch;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 8rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+}
+
+.bar-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+}
+
+.bar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: clamp(30px, 100vw, 70px);
+  height: 100%;
+}
+
+.bar-segment {
+  width: 100%;
+  transition: height 0.3s ease;
+}
+
+.bar-segment:first-of-type {
+  border-radius: 4px 4px 0 0;
+}
+
+.bar-total,
+.day-label {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+
+.bar-total {
+  padding-bottom: 0.25rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.day-label {
+  margin-top: 0.25rem;
+}
+
+.tooltip {
+  position: absolute;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 0.6rem;
+  background: var(--text);
+  color: var(--text-inverse);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.bar-container .tooltip {
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 10;
+}
+
+.bar-container:hover .tooltip {
+  opacity: 1;
+}
+
+.donut-container .tooltip {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
