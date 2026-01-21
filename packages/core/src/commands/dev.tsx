@@ -1,7 +1,8 @@
 import { Command, Flags } from "@oclif/core";
 import { Box, render, Text } from "ink";
+import nodemon from "nodemon";
+import { useEffect } from "react";
 import { Header } from "../cli/header.js";
-import { runCommand } from "../cli/run-command.js";
 
 export default class Dev extends Command {
   static override description = "Start development server";
@@ -23,12 +24,32 @@ export default class Dev extends Command {
         : {}),
     };
 
-    runCommand("nodemon --quiet", {
-      stdio: ["ignore", "ignore", "inherit"],
-      env,
-    });
-
     const App = () => {
+      useEffect(() => {
+        nodemon({
+          watch: ["server/src"],
+          script: "server/src/index.ts",
+          ext: "ts,json",
+          env,
+        });
+
+        nodemon
+          // @ts-expect-error - nodemon types don't include "restart" event
+          .on("restart", (files: string[]) => {
+            console.log(
+              "\n\x1b[32m✓\x1b[0m  App restarted due to file changes: \x1b[36m%s\x1b[0m",
+              files.join(", "),
+            );
+          })
+          .on("quit", () => {
+            process.exit();
+          });
+
+        return () => {
+          nodemon.emit("quit");
+        };
+      }, []);
+
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>
           <Header version={this.config.version} />
