@@ -9,6 +9,16 @@ export function HomeTab() {
         Use the tabs above to explore each API and see how your widget can
         interact with the host application.
       </p>
+      <p className="description">
+        Read the full code implementation on{" "}
+        <a
+          href="https://github.com/alpic-ai/skybridge/tree/main/examples/everything"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          github.com/alpic-ai/skybridge/examples/everything
+        </a>
+      </p>
     </div>
   );
 }
