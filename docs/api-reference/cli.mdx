@@ -1,0 +1,201 @@
+---
+title: "CLI Reference"
+description: "Complete reference for Skybridge CLI commands"
+---
+
+Skybridge provides two CLI tools: the main `skybridge` CLI for development and production workflows, and `create-skybridge` for bootstrapping new projects.
+
+## Skybridge CLI
+
+The main CLI is available as both `skybridge` and `sb` commands after installing `skybridge` in your project.
+
+### skybridge dev
+
+Start the development server with hot module reloading and DevTools.
+
+```bash
+skybridge dev
+```
+
+**What it does:**
+- Starts a development server at `http://localhost:3000/`
+- Opens DevTools for local testing at `http://localhost:3000/`
+- Exposes MCP server at `http://localhost:3000/mcp`
+- Enables file watching with automatic server restart
+- Enables Hot Module Reloading (HMR) for widgets
+
+#### Flags
+
+| Flag | Description |
+|------|-------------|
+| `--use-forwarded-host` | Uses the forwarded host header to construct widget URLs instead of localhost. Useful when accessing the dev server through a tunnel (e.g., ngrok). |
+
+The `--use-forwarded-host`  allows your widgets to work on any device connected to the internet, not just on your local machine. Useful when developing on multiple devices or when you need to test your app from different devices.
+
+**Important limitation:** Hot Module Reloading (HMR) is not available when using `--use-forwarded-host` because HMR uses a different port than the dev server and requires the WebSocket Secure (WSS) protocol, which most tunnel solutions don't support. To see your changes during development, simply reopen the conversation in ChatGPT to refresh the widget.
+
+**Example with ngrok:**
+
+```bash
+# Terminal 1: Start Skybridge
+skybridge dev --use-forwarded-host
+
+# Terminal 2: Expose your local server
+ngrok http 3000
+```
+
+**Note:** Only use `--use-forwarded-host` when you need to develop or test on multiple devices. For local-only development, the standard `skybridge dev` command is sufficient.
+
+When using `--use-forwarded-host`, Skybridge will use the ngrok URL (e.g., `https://abc123.ngrok-free.app`) for widget URLs instead of `localhost:3000`.
+
+---
+
+### skybridge build
+
+Build your widgets and MCP server for production deployment.
+
+```bash
+skybridge build
+```
+
+**What it does:**
+
+1. **Building widgets** - Compiles your React widgets using Vite
+2. **Compiling server** - Transpiles TypeScript server code
+3. **Copying static assets** - Moves built assets to the `dist/` directory
+
+The output is placed in the `dist/` directory, ready for production deployment.
+
+---
+
+### skybridge start
+
+Start the production server.
+
+```bash
+skybridge start
+```
+
+**Requirements:**
+- Must run `skybridge build` first
+- Requires `dist/index.js` to exist
+
+**What it does:**
+- Runs the compiled server from `dist/index.js`
+- Sets `NODE_ENV=production`
+- Serves the MCP endpoint at `http://localhost:3000/mcp`
+- Serves pre-built widget assets from `/assets`
+
+---
+
+## create-skybridge
+
+A standalone CLI for bootstrapping new Skybridge projects.
+
+```bash
+npm create skybridge@latest [directory]
+```
+
+Or with other package managers:
+
+<CodeGroup>
+```bash npm
+npm create skybridge@latest
+```
+```bash pnpm
+pnpm create skybridge@latest
+```
+```bash yarn
+yarn create skybridge
+```
+```bash bun
+bun create skybridge
+```
+</CodeGroup>
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `[directory]` | Target directory for the new project. If not specified, you'll be prompted to enter a project name. Use `.` to create in the current directory. |
+
+### Options
+
+| Option | Description |
+|--------|-------------|
+| `-h, --help` | Show help message |
+| `--overwrite` | Remove existing files in target directory without prompting |
+| `--immediate` | Install dependencies and start the development server automatically after scaffolding |
+
+### Examples
+
+**Create a new project interactively:**
+
+```bash
+npm create skybridge@latest
+```
+
+**Create a project in a specific directory:**
+
+```bash
+npm create skybridge@latest my-app
+```
+
+**Create in current directory, overwrite existing files, and start immediately:**
+
+```bash
+npm create skybridge@latest . --overwrite --immediate
+```
+
+### What it creates
+
+The scaffolder copies a starter template that includes:
+
+- `server/index.ts` - MCP server with example tools
+- `web/` - React widgets with example components
+- `package.json` - Pre-configured with all dependencies
+- `tsconfig.json` files - TypeScript configuration
+- `vite.config.ts` - Vite configuration for widget bundling
+- `nodemon.json` - File watching configuration for development
+
+---
+
+## Package Manager Scripts
+
+When you create a new Skybridge project, the `package.json` includes these scripts:
+
+| Script | Command | Description |
+|--------|---------|-------------|
+| `dev` | `skybridge dev` | Start development server |
+| `build` | `skybridge build` | Build for production |
+| `start` | `skybridge start` | Start production server |
+
+Run them with your package manager:
+
+<CodeGroup>
+```bash npm
+npm run dev
+npm run build
+npm start
+```
+```bash pnpm
+pnpm dev
+pnpm build
+pnpm start
+```
+```bash yarn
+yarn dev
+yarn build
+yarn start
+```
+```bash bun
+bun dev
+bun build
+bun start
+```
+```bash deno
+deno task dev
+deno task build
+deno task start
+```
+</CodeGroup>
