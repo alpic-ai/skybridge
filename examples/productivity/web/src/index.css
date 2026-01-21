@@ -40,8 +40,8 @@ body {
   text-transform: uppercase;
   background: var(--bg);
   color: var(--text);
-  width: min(100vw, 1000px);
-  height: clamp(250px, 100vh, 350px);
+  width: clamp(600px, 100vw, 1500px);
+  height: clamp(250px, 100vh, 450px);
   margin: auto;
 }
 
@@ -162,7 +162,7 @@ body {
 }
 
 .donut {
-  height: 8rem;
+  height: clamp(6rem, 20vh, 15rem);
   transform: rotate(-90deg);
 }
 
@@ -207,7 +207,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  width: 100%;
+  width: clamp(30px, 100vw, 70px);
   height: 100%;
 }
 
