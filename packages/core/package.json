@@ -22,6 +22,7 @@
     }
   },
   "scripts": {
+    "prepublishOnly": "shx cp ../../README.md ./README.md",
     "build": "shx rm -rf dist && tsc && pnpm run build:templates",
     "build:templates": "cp -r src/server/templates dist/server/",
     "format": "biome check --write --error-on-warnings",
