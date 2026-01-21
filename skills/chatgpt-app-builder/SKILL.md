@@ -1,5 +1,5 @@
 ---
-name: creating-chatgpt-app
+name: chatgpt-app-builder
 description: |
   Guide developers through creating ChatGPT apps.
   Covers the full lifecycle: brainstorming ideas against UX guidelines,
