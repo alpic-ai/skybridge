@@ -38,14 +38,7 @@ export default class Dev extends Command {
               "\n\x1b[32m✓\x1b[0m  App restarted due to file changes: \x1b[36m%s\x1b[0m",
               files.join(", "),
             );
-          })
-          .on("quit", () => {
-            process.exit();
           });
-
-        return () => {
-          nodemon.emit("quit");
-        };
       }, []);
 
       return (
