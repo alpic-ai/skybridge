@@ -1,3 +1,4 @@
+import { cpSync, rmSync } from "node:fs";
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { useEffect } from "react";
@@ -11,11 +12,12 @@ export const commandSteps: CommandStep[] = [
   },
   {
     label: "Compiling server",
-    command: "shx rm -rf dist && tsc -p tsconfig.server.json",
+    run: () => rmSync("dist", { recursive: true, force: true }),
+    command: "tsc -p tsconfig.server.json",
   },
   {
     label: "Copying static assets",
-    command: "shx cp -r web/dist dist/assets",
+    run: () => cpSync("web/dist", "dist/assets", { recursive: true }),
   },
 ];
 
