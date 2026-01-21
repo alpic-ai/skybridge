@@ -1,6 +1,6 @@
 import { Command, Flags } from "@oclif/core";
 import { Box, render, Text } from "ink";
-import nodemon from "nodemon";
+import nodemon, { type NodemonSettings } from "nodemon";
 import { useEffect } from "react";
 import { Header } from "../cli/header.js";
 
@@ -27,11 +27,9 @@ export default class Dev extends Command {
     const App = () => {
       useEffect(() => {
         nodemon({
-          watch: ["server/src"],
-          script: "server/src/index.ts",
-          ext: "ts,json",
           env,
-        });
+          configFile: "nodemon.json",
+        } as NodemonSettings);
 
         nodemon
           // @ts-expect-error - nodemon types don't include "restart" event
