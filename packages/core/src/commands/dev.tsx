@@ -126,6 +126,8 @@ export default class Dev extends Command {
                       <Text color="green">✓{"  "}</Text>
                       <Text color="white">{message.text}</Text>
                     </>
+                  ) : message.type === "error" ? (
+                    <Text color="red">{message.text}</Text>
                   ) : (
                     <Text>{message.text}</Text>
                   )}

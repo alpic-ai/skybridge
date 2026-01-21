@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 type Message = {
   text: string;
-  type: "log" | "restart";
+  type: "log" | "restart" | "error";
 };
 
 export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
@@ -23,6 +23,13 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
       }
     };
 
+    const handleStderrData = (chunk: Buffer) => {
+      const message = chunk.toString().trim();
+      if (message) {
+        setMessages((prev) => [...prev, { text: message, type: "error" }]);
+      }
+    };
+
     const setupStdoutListener = () => {
       // @ts-expect-error - nodemon types don't include "stdout" property
       if (nodemon.stdout) {
@@ -33,7 +40,20 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
       }
     };
 
-    nodemon.on("readable", setupStdoutListener);
+    const setupStderrListener = () => {
+      // @ts-expect-error - nodemon types don't include "stderr" property
+      if (nodemon.stderr) {
+        // @ts-expect-error - nodemon types don't include "stderr" property
+        nodemon.stderr.off("data", handleStderrData);
+        // @ts-expect-error - nodemon types don't include "stderr" property
+        nodemon.stderr.on("data", handleStderrData);
+      }
+    };
+
+    nodemon.on("readable", () => {
+      setupStdoutListener();
+      setupStderrListener();
+    });
 
     nodemon
       // @ts-expect-error - nodemon types don't include "restart" event
@@ -44,6 +64,7 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
           { text: restartMessage, type: "restart" },
         ]);
         setupStdoutListener();
+        setupStderrListener();
       });
 
     return () => {
@@ -51,6 +72,11 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
       if (nodemon.stdout) {
         // @ts-expect-error - nodemon types don't include "stdout" property
         nodemon.stdout.off("data", handleStdoutData);
+      }
+      // @ts-expect-error - nodemon types don't include "stderr" property
+      if (nodemon.stderr) {
+        // @ts-expect-error - nodemon types don't include "stderr" property
+        nodemon.stderr.off("data", handleStderrData);
       }
       nodemon.emit("quit");
     };
