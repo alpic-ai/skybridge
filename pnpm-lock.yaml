@@ -444,8 +444,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
       skybridge:
-        specifier: '>=0.25.0 <1.0.0'
-        version: 0.25.0(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.8)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
+        specifier: workspace:*
+        version: link:../../core
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -457,8 +457,8 @@ importers:
         specifier: ^0.18.0
         version: 0.18.0(@types/node@25.0.3)(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(hono@4.11.3)(typescript@5.9.3)
       '@skybridge/devtools':
-        specifier: '>=0.22.0 <1.0.0'
-        version: 0.22.0(@types/node@25.0.3)(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(hono@4.11.3)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)
+        specifier: workspace:*
+        version: link:../../devtools
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
