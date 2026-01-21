@@ -14,4 +14,4 @@ ChatGPT apps are conversational experiences that extend ChatGPT through tools an
 
 ## Brainstorm
 
-When a user has an app idea and wants to validate it fits ChatGPT, read [references/brainstorm.md](references/brainstorm.md).
+When a user has an app idea, read [references/brainstorm.md](references/brainstorm.md).
