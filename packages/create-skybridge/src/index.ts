@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as prompts from "@clack/prompts";
+import { downloadTemplate } from "giget";
 import mri from "mri";
 
 const defaultProjectName = "skybridge-project";
@@ -15,27 +16,37 @@ Create a new Skybridge project by copying the starter template.
 
 Options:
   -h, --help              show this help message
+  --repo <uri>            use a git repository instead of the built-in template
   --overwrite             remove existing files in target directory
   --immediate             install dependencies and start development server
 
+Repository URI formats:
+  github:user/repo
+  gitlab:user/repo/subdirectory
+  bitbucket:user/repo#branch
+
 Examples:
   create-skybridge my-app
+  create-skybridge my-app --repo github:alpic-ai/skybridge/examples/ecom-carousel
   create-skybridge . --overwrite --immediate
 `;
 
 export async function init(args: string[] = process.argv.slice(2)) {
   const argv = mri<{
     help?: boolean;
+    repo?: string;
     overwrite?: boolean;
     immediate?: boolean;
   }>(args, {
     boolean: ["help", "overwrite", "immediate"],
+    string: ["repo"],
     alias: { h: "help" },
   });
 
   const argTargetDir = argv._[0]
     ? sanitizeTargetDir(String(argv._[0]))
     : undefined;
+  const argRepo = argv.repo;
   const argOverwrite = argv.overwrite;
   const argImmediate = argv.immediate;
 
@@ -114,28 +125,53 @@ export async function init(args: string[] = process.argv.slice(2)) {
 
   const root = path.join(process.cwd(), targetDir);
 
-  // 3. Copy the repository
-  prompts.log.step(`Copying template...`);
+  // 3. Download from repo or copy template
+  if (argRepo) {
+    prompts.log.step(`Downloading ${argRepo}...`);
+    try {
+      await downloadTemplate(argRepo, { dir: root });
+      prompts.log.success(`Project created in ${root}`);
+    } catch (error) {
+      prompts.log.error("Failed to download repository");
+      console.error(error);
+      process.exit(1);
+    }
+  } else {
+    prompts.log.step(`Copying template...`);
+    try {
+      const templateDir = fileURLToPath(
+        new URL("../template", import.meta.url),
+      );
+      // Copy template to target directory
+      fs.cpSync(templateDir, root, {
+        recursive: true,
+        filter: (src) => [".npmrc"].every((file) => !src.endsWith(file)),
+      });
+      // Rename _gitignore to .gitignore
+      fs.renameSync(
+        path.join(root, "_gitignore"),
+        path.join(root, ".gitignore"),
+      );
+      prompts.log.success(`Project created in ${root}`);
+    } catch (error) {
+      prompts.log.error("Failed to copy repository");
+      console.error(error);
+      process.exit(1);
+    }
+  }
 
+  // Update project name in package.json
+  const pkgPath = path.join(root, "package.json");
+  if (!fs.existsSync(pkgPath)) {
+    prompts.log.error("No package.json found in project");
+    process.exit(1);
+  }
   try {
-    const templateDir = fileURLToPath(new URL("../template", import.meta.url));
-    // Copy template to target directory
-    fs.cpSync(templateDir, root, {
-      recursive: true,
-      filter: (src) => [".npmrc"].every((file) => !src.endsWith(file)),
-    });
-    // Rename _gitignore to .gitignore
-    fs.renameSync(path.join(root, "_gitignore"), path.join(root, ".gitignore"));
-    // Update project name in package.json
-    const name = path.basename(root);
-    const pkgPath = path.join(root, "package.json");
-    const pkg = fs.readFileSync(pkgPath, "utf-8");
-    const fixed = pkg.replace(/apps-sdk-template/g, name);
-    fs.writeFileSync(pkgPath, fixed);
-
-    prompts.log.success(`Project created in ${root}`);
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+    pkg.name = path.basename(root);
+    fs.writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
   } catch (error) {
-    prompts.log.error("Failed to copy repository");
+    prompts.log.error("Failed to update project name in package.json");
     console.error(error);
     process.exit(1);
   }
