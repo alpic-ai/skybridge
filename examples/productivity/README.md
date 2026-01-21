@@ -18,6 +18,9 @@ This "Productivity" example demonstrates key Skybridge capabilities for MCP Apps
 - How much time did I spend learning last week?
 - Analyze my productivity trends over the last month
 
+## Live Demo
+Try it for yourself: `https://productivity.skybridge.tech/mcp`
+
 ## Getting Started
 
 ### Prerequisites

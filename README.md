@@ -118,11 +118,12 @@ function FlightsWidget() {
 
 Explore production-ready examples:
 
-| Example | Description | Demo | Code |
-|---------|-------------|------|------|
-| **Capitals Explorer** | Interactive world map with geolocation and Wikipedia integration | [Try Demo](https://capitals.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/capitals) |
-| **Ecommerce Carousel** | Product carousel with cart, localization, and modals | [Try Demo](https://ecommerce.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/ecom-carousel) |
-| **Everything** | Comprehensive playground showcasing all hooks and features | [Try Demo](https://everything.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/everything) |
+| Example                | Description                                                                      | Demo                                                | Code                                                                                |
+|------------------------|----------------------------------------------------------------------------------|-----------------------------------------------------|-------------------------------------------------------------------------------------|
+| **Capitals Explorer**  | Interactive world map with geolocation and Wikipedia integration                 | [Try Demo](https://capitals.skybridge.tech/try)     | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/capitals)      |
+| **Ecommerce Carousel** | Product carousel with cart, localization, and modals                             | [Try Demo](https://ecommerce.skybridge.tech/try)    | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/ecom-carousel) |
+| **Everything**         | Comprehensive playground showcasing all hooks and features                       | [Try Demo](https://everything.skybridge.tech/try)   | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/everything)    |
+| **Productivity**       | Data visualization dashboard demonstrating Skybridge capabilities for MCP Apps   | [Try Demo](https://productivity.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/productivity)  |
 
 See all examples in the [Showcase](https://docs.skybridge.tech/showcase) or browse the [examples/](examples/) directory.
 
