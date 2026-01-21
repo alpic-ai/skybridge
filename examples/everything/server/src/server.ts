@@ -11,6 +11,13 @@ const server = new McpServer(
   "widget",
   {
     description: "A playground to discover the Skybridge framework",
+    _meta: {
+      ui: {
+        csp: {
+          redirectDomains: ["https://docs.skybridge.tech", "https://alpic.ai"],
+        },
+      },
+    },
   },
   {
     description: "A simple greeting tool",
