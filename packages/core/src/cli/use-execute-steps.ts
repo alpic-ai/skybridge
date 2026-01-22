@@ -3,7 +3,8 @@ import { runCommand } from "./run-command.js";
 
 export interface CommandStep {
   label: string;
-  command: string;
+  command?: string;
+  run?: () => void | Promise<void>;
 }
 
 export const useExecuteSteps = (steps: CommandStep[]) => {
@@ -19,7 +20,12 @@ export const useExecuteSteps = (steps: CommandStep[]) => {
         const step = steps[i];
         if (step) {
           setCurrentStep(i);
-          await runCommand(step.command);
+          if (step.run) {
+            await step.run();
+          }
+          if (step.command) {
+            await runCommand(step.command);
+          }
         }
       }
       setStatus("success");
