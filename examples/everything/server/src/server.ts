@@ -8,7 +8,7 @@ const server = new McpServer(
   },
   { capabilities: {} },
 ).registerWidget(
-  "widget",
+  "show-everything",
   {
     description: "A playground to discover the Skybridge framework",
     _meta: {

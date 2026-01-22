@@ -2,7 +2,7 @@ import { useToolInfo } from "../../helpers";
 
 export function ToolInfoTab() {
   const { input, output, responseMetadata, isPending } =
-    useToolInfo<"widget">();
+    useToolInfo<"show-everything">();
 
   if (isPending) {
     return <div className="tab-content">Awaiting for tool response...</div>;

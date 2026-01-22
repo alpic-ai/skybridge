@@ -3,7 +3,7 @@ import { useCallTool } from "../../helpers";
 
 export function UseCallToolTab() {
   const [name, setName] = useState("");
-  const { data, isPending, callTool } = useCallTool("widget");
+  const { data, isPending, callTool } = useCallTool("show-everything");
 
   return (
     <div className="tab-content">
