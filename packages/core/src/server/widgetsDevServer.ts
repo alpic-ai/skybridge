@@ -38,7 +38,12 @@ export const widgetsDevServer = async (): Promise<Router> => {
     webAppRoot,
   );
 
-  const { build, preview, ...devConfig } = configResult?.config || {};
+  const {
+    build,
+    preview,
+    plugins: userPlugins = [],
+    ...devConfig
+  } = configResult?.config || {};
 
   const vite = await createServer({
     ...devConfig,
@@ -53,6 +58,7 @@ export const widgetsDevServer = async (): Promise<Router> => {
       include: ["react", "react-dom/client"],
     },
     plugins: [
+      ...userPlugins,
       assetBaseUrlTransformPlugin({ devServerOrigin: "http://localhost:3000" }),
     ],
   });
