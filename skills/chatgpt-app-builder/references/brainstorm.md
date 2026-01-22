@@ -33,14 +33,13 @@ Create `SPEC.md` immediately:
 
 ### Value Proposition
 - What problem it solves and for whom
-- Core actions/workflows users will perform
 
 ### Product Context
 - Existing products
-- data sources, APIs, and services the app connects to
+- Data sources, APIs, and services the app connects to
 - Any constraints or dependencies
 
-After creating SPEC.md, briefly recap and offer to move to implementation.
+After creating SPEC.md, briefly recap and offer to move to architecture.
 
 Example SPEC.md:
 ```markdown

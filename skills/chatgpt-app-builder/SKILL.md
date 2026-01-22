@@ -12,6 +12,7 @@ description: |
 
 ChatGPT apps are conversational experiences that extend ChatGPT through tools and custom UI widgets. They're built as MCP servers that ChatGPT invokes during conversations.
 
-## Brainstorm
+## Workflow
 
-When a user has an app idea, read [references/brainstorm.md](references/brainstorm.md).
+1. **Brainstorm**: validate the idea and create SPEC.md. See [references/brainstorm.md](references/brainstorm.md).
+2. **Architecture**: specify tools and widgets, update SPEC.md. See [references/architecture.md](references/architecture.md).
