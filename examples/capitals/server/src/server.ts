@@ -25,7 +25,7 @@ const server = new McpServer(
   },
   { capabilities: {} },
 ).registerWidget(
-  "capital",
+  "explore-capitals",
   {
     description: "Interactive world capitals explorer with map visualization",
     _meta: {
