@@ -1,0 +1,26 @@
+[
+  {
+    "query": "I run a small pizza chain called Tony's Pizza. We have an online ordering API that handles menu, cart, and checkout. I want customers to order through ChatGPT - like 'get me a large pepperoni' and it adds to cart, confirms toppings, and places the order.",
+    "expected_behavior": "PASS. Create SPEC.md with Value Proposition and Product Context. Offer to move to implementation."
+  },
+  {
+    "query": "We're a law firm with 500+ contract templates stored in Google Drive. Our attorneys waste hours finding the right template. I want an app where they describe what they need - 'NDA for a software contractor in California' - and it returns the right template with prefilled fields.",
+    "expected_behavior": "PASS. Create SPEC.md with Value Proposition and Product Context. Offer to move to implementation."
+  },
+  {
+    "query": "I want to build a ChatGPT app for my business",
+    "expected_behavior": "EXPLORE. Too vague - missing problem, user, actions, and existing systems. Ask clarifying questions."
+  },
+  {
+    "query": "I have a travel blog with 200 articles about destinations. Can I make a ChatGPT app that lets people read my articles?",
+    "expected_behavior": "FAILS: Conversational leverage. Reading articles isn't conversational. Suggest pivot: destination recommendations, Q&A, or trip planning where 'just say it' beats clicking."
+  },
+  {
+    "query": "I want to bring our entire Salesforce CRM into ChatGPT so sales reps can do everything they do in Salesforce but through chat.",
+    "expected_behavior": "FAILS: Atomic actions. Full CRM port is too broad. Suggest picking 2-3 high-frequency tasks (logging calls, checking deal status)."
+  },
+  {
+    "query": "I want to build an app that shows a grid of 20 KPIs updating in real-time - revenue, active users, conversion rates, etc.",
+    "expected_behavior": "FAILS: Conversational leverage. Dashboards aren't conversational. Suggest pivot: query-based KPI lookup, anomaly alerts, or comparative analysis."
+  }
+]
