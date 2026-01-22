@@ -48,7 +48,7 @@ const server = new McpServer(
       name: z
         .string()
         .describe(
-          "Capital city name in English (e.g., 'Paris', 'Tokyo', 'Washington')",
+          "Capital city name in English (e.g., 'Paris', 'Tokyo', 'Washington, D.C.', 'London', 'New Delhi')",
         ),
     },
     annotations: {
