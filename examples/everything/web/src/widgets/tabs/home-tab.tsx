@@ -16,7 +16,7 @@ export function HomeTab() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          github.com/alpic-ai/skybridge/examples/everything
+          github.com/alpic-ai/skybridge/tree/main/examples/everything
         </a>
       </p>
     </div>
