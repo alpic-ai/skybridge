@@ -10,12 +10,16 @@ export const commandSteps: CommandStep[] = [
     command: "vite build -c web/vite.config.ts",
   },
   {
+    label: "Cleaning dist folder",
+    command: `node -e "require('fs').rmSync('dist', {recursive: true, force: true})"`,
+  },
+  {
     label: "Compiling server",
-    command: "shx rm -rf dist && tsc -p tsconfig.server.json",
+    command: "tsc -p tsconfig.server.json",
   },
   {
     label: "Copying static assets",
-    command: "shx cp -r web/dist dist/assets",
+    command: `node -e "require('fs').cpSync('web/dist', 'dist/assets', {recursive: true})"`
   },
 ];
 
