@@ -6,6 +6,7 @@ import {
   useId,
 } from "react";
 import { getAdaptor } from "./bridges/index.js";
+import { warnIfExceedsTokenLimit } from "./helpers/warn-token-limit.js";
 
 export type DataLLMContent = string;
 
@@ -31,6 +32,7 @@ function removeNode(id: string) {
 
 function onChange() {
   const description = getLLMDescriptionString();
+  warnIfExceedsTokenLimit(description, "data-llm");
   const adaptor = getAdaptor();
   adaptor.setWidgetState((prevState) => ({
     ...prevState,

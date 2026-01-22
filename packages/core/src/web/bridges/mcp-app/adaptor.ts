@@ -12,6 +12,7 @@ import type {
   CallToolResult,
 } from "@modelcontextprotocol/sdk/types.js";
 import { dequal } from "dequal/lite";
+import { warnIfExceedsTokenLimit } from "../../helpers/warn-token-limit.js";
 import type {
   Adaptor,
   CallToolResponse,
@@ -219,6 +220,8 @@ export class McpAppAdaptor implements Adaptor {
       typeof stateOrUpdater === "function"
         ? stateOrUpdater(this._widgetState)
         : stateOrUpdater;
+
+    warnIfExceedsTokenLimit(newState, "setWidgetState");
 
     const bridge = McpAppBridge.getInstance();
     await bridge.request<McpUiUpdateModelContextRequest, unknown>({

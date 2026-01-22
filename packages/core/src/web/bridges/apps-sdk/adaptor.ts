@@ -1,3 +1,4 @@
+import { warnIfExceedsTokenLimit } from "../../helpers/warn-token-limit.js";
 import type {
   Adaptor,
   CallToolResponse,
@@ -64,6 +65,8 @@ export class AppsSdkAdaptor implements Adaptor {
       typeof stateOrUpdater === "function"
         ? stateOrUpdater(window.openai.widgetState)
         : stateOrUpdater;
+
+    warnIfExceedsTokenLimit(newState, "setWidgetState");
 
     return window.openai.setWidgetState(newState);
   };
