@@ -1,0 +1,26 @@
+[
+  {
+    "query": "SPEC.md:\n# Event Tickets\n\n## Value Proposition\nFind concerts and events nearby, see available seats, and purchase tickets.\n\n## Product Context\n- **Existing product**: TicketHub website\n- **API**: Event search API, seat availability API, purchase API\n- **Constraints**: Payment handled via Stripe checkout",
+    "expected_behavior": "Widget (browse_events) for search results + seat selection UI. Tool (purchase_tickets) for checkout link. Widget handles event browsing and seat picking, tool handles payment redirect."
+  },
+  {
+    "query": "SPEC.md:\n# Restaurant Finder\n\n## Value Proposition\nFind nearby restaurants and make reservations.\n\n## Product Context\n- **Existing product**: ReserveNow booking platform\n- **API**: Restaurant search API, reservation API\n- **Constraints**: Reservations require user phone number",
+    "expected_behavior": "Widget (search_restaurants) showing results with 'Reserve' button. Tool (make_reservation) for booking. Phone number collected via widget input."
+  },
+  {
+    "query": "SPEC.md:\n# PTO Checker\n\n## Value Proposition\nLet employees check their PTO balance and request time off for a specific time range.\n\n## Product Context\n- **Existing product**: HR portal\n- **API**: PTO balance API, time-off request API\n- **Constraints**: Requests need manager approval",
+    "expected_behavior": "Two flows: (1) Check balance - tools only, (2) Request time off - widget with calendar/date picker is acceptable. Tool (get_pto_balance) for balance. Widget or tool for requesting time off (both valid)."
+  },
+  {
+    "query": "SPEC.md:\n# Flight Tracker\n\n## Value Proposition\nTrack flight status with geolocalization and get delay alerts.\n\n## Product Context\n- **Existing product**: Airline mobile app\n- **API**: Flight status API, notifications API\n- **Constraints**: Real-time updates every 5 min",
+    "expected_behavior": "Widget (track_flight) showing flight status card with map, times, gate info. Tool (set_alert) for notifications. Widget displays rich visual data."
+  },
+  {
+    "query": "SPEC.md:\n# Movie Showtimes\n\n## Value Proposition\nFind movies playing nearby and see showtimes.\n\n## Product Context\n- **Existing product**: CinemaHub website\n- **API**: Movie listings API\n- **Constraints**: None",
+    "expected_behavior": "Widget (search_movies) showing movie cards with showtimes. One widget, no tools - purely browsing, no booking."
+  },
+  {
+    "query": "SPEC.md:\n# Support Ticket\n\n## Value Proposition\nLet users create support tickets and check ticket status.\n\n## Product Context\n- **Existing product**: HelpDesk support portal\n- **API**: Ticket API (create, get status)\n- **Constraints**: Tickets require category and description",
+    "expected_behavior": "Tools only - no widget needed. Tool (create_ticket) takes description and category, returns ticket ID. Tool (get_ticket_status) returns status text. Pure conversational action, no browsing or visual data."
+  }
+]

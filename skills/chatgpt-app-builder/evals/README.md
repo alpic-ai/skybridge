@@ -20,7 +20,5 @@ Each eval file is a JSON array:
 In Claude Code:
 
 ```
-Run the evals in evals/<filename>.json. For each query, spawn an agent
-with the relevant skill context and compare the response against
-expected_behavior. Report pass/fail for each.
+Run the evals in evals/<filename>.json. For each query, spawn a Sonnet agent with the relevant skill context and compare the response against expected_behavior. Report pass/fail for each.
 ```
