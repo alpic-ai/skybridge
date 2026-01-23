@@ -18,9 +18,24 @@ describe("create-skybridge", () => {
     });
   });
 
-  it("should scaffold a new project", async () => {
+  it("should copy the template", async () => {
     const name = `../../${tempDirName}//project$`;
     await init([name]);
+    await fs.access(
+      path.join(process.cwd(), tempDirName, "project", ".gitignore"),
+    );
+    expect(
+      fs.access(path.join(process.cwd(), tempDirName, "project", ".npmrc")),
+    ).rejects.toThrowError();
+  });
+
+  it("should download template from repo", async () => {
+    const name = `../../${tempDirName}//project$`;
+    await init([
+      name,
+      "--repo",
+      "github:alpic-ai/skybridge/examples/ecom-carousel",
+    ]);
     await fs.access(
       path.join(process.cwd(), tempDirName, "project", ".gitignore"),
     );
