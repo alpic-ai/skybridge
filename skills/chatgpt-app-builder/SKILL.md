@@ -16,3 +16,4 @@ ChatGPT apps are conversational experiences that extend ChatGPT through tools an
 
 1. **Brainstorm**: validate the idea and create SPEC.md. See [references/brainstorm.md](references/brainstorm.md).
 2. **Architecture**: specify tools and widgets, update SPEC.md. See [references/architecture.md](references/architecture.md).
+3. **Bootstrap**: scaffold the project. See [references/bootstrap.md](references/bootstrap.md).

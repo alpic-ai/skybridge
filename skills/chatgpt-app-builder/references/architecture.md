@@ -130,4 +130,42 @@ Present the final architecture to the user, adjust based on feedback.
 
 ## Step 5: Update SPEC.md
 
-Finalize and offer to move to implementation.
+Update SPEC.md with the UX flows and API design, then offer to move to [bootstrap](bootstrap.md).
+
+**Example:**
+
+```markdown
+...
+
+## UX Flows
+
+Book a flight:
+1. Search flights by destination and dates
+2. Browse results, select flight
+3. Enter passenger details
+4. Checkout (redirect to Stripe)
+
+Cancel booking:
+1. Provide email
+2. Select booking to cancel
+
+## Tools and Widgets
+
+**Widget: search_flights**
+- **Input**: `{ destination, dates }`
+- **Output**: `{ flights[] }`
+- **Views**: results list, flight detail, passenger form
+- **Behavior**: manages passenger state locally, calls `create_checkout` tool
+
+**Tool: create_checkout**
+- **Input**: `{ flightId, passengers[] }`
+- **Output**: `{ checkoutUrl }`
+
+**Tool: list_bookings**
+- **Input**: `{ email }`
+- **Output**: `{ bookings[] }`
+
+**Tool: cancel_booking**
+- **Input**: `{ bookingId }`
+- **Output**: `{ success, booking }`
+```

@@ -39,7 +39,7 @@ Create `SPEC.md` immediately:
 - Data sources, APIs, and services the app connects to
 - Any constraints or dependencies
 
-After creating SPEC.md, briefly recap and offer to move to architecture.
+After creating SPEC.md, briefly recap and offer to move to [architecture](architecture.md).
 
 Example SPEC.md:
 ```markdown
