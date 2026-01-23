@@ -25,7 +25,7 @@ export default class Start extends Command {
 
     runCommand("node dist/index.js", {
       stdio: ["ignore", "ignore", "inherit"],
-      env: { ...process.env, NODE_ENV: "production" },
+      env: process.env,
     });
 
     const App = () => {
