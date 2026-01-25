@@ -7,8 +7,7 @@
   "scripts": {
     "dev": "skybridge dev",
     "build": "skybridge build",
-    "start": "skybridge start",
-    "inspector": "mcp-inspector http://localhost:3000/mcp"
+    "start": "skybridge start"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
@@ -28,7 +27,6 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@modelcontextprotocol/inspector": "^0.17.5",
     "@skybridge/devtools": ">=0.26.1 <1.0.0",
     "@tailwindcss/vite": "^4.1.14",
     "@types/express": "^5.0.3",
