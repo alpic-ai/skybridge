@@ -1,7 +1,7 @@
-import { useKeyPress } from "ahooks";
-import { Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button.js";
 import { useCallTool, useSelectedTool } from "@/lib/mcp/index.js";
+import { useKeyPress } from "ahooks";
+import { Loader2, Play } from "lucide-react";
 
 export const CallToolButton = ({
   validateForm,
