@@ -1,4 +1,6 @@
-import nodemonOriginal, { type NodemonSettings } from "nodemon";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import nodemonOriginal from "nodemon";
 import { useEffect, useState } from "react";
 import type { ExtendedNodemon } from "./nodemon.d.ts";
 
@@ -13,11 +15,20 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
   const [messages, setMessages] = useState<Array<Message>>([]);
 
   useEffect(() => {
+    // Get the path to the server entry point (always use compiled .js file)
+    const currentFile = fileURLToPath(import.meta.url);
+    const cliDir = resolve(currentFile, "..");
+    const entryPath = resolve(cliDir, "server-entry.js");
+
+    // Start nodemon with the entry point that dynamically imports server.ts
     nodemon({
       env,
-      configFile: "nodemon.json",
+      watch: ["server/src"],
+      ext: "ts,json",
+      exec: `tsx ${entryPath}`,
       stdout: false,
-    } as NodemonSettings);
+      stderr: false,
+    } as Parameters<typeof nodemon>[0]);
 
     const handleStdoutData = (chunk: Buffer) => {
       const message = chunk.toString().trim();

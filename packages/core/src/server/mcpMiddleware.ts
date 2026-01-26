@@ -1,11 +1,12 @@
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import type { NextFunction, Request, Response } from "express";
+import type { RequestHandler } from "express";
+import type { McpServer } from "../server/server.js";
 
-import type { McpServer } from "skybridge/server";
-
-export const mcp =
-  (server: McpServer) =>
-  async (req: Request, res: Response, next: NextFunction) => {
+/**
+ * Creates Express middleware for handling MCP requests
+ */
+export function createMcpMiddleware(server: McpServer): RequestHandler {
+  return async (req, res, next) => {
     // Only handle requests to the /mcp path
     if (req.path !== "/mcp") {
       return next();
@@ -52,3 +53,4 @@ export const mcp =
       next();
     }
   };
+}

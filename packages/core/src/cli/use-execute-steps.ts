@@ -7,7 +7,7 @@ export interface CommandStep {
   run?: () => void | Promise<void>;
 }
 
-export const useExecuteSteps = (steps: CommandStep[]) => {
+export const useExecuteSteps = (steps: CommandStep[], cleanup?: () => void) => {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [status, setStatus] = useState<"running" | "success" | "error">(
     "running",
@@ -38,8 +38,12 @@ export const useExecuteSteps = (steps: CommandStep[]) => {
       setImmediate(() => {
         process.exit(1);
       });
+    } finally {
+      if (cleanup) {
+        cleanup();
+      }
     }
-  }, [steps]);
+  }, [steps, cleanup]);
 
   return { currentStep, status, error, execute };
 };
