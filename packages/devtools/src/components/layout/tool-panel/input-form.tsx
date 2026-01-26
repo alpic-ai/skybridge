@@ -11,7 +11,7 @@ import type {
   UiSchema,
 } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "../../ui/card.js";
 import { CallToolButton } from "../call-tool-button.js";
 import { ViewToolMetaButton } from "../view-tool-meta-button.js";
@@ -107,16 +107,35 @@ const JsonContent = ({
 }: {
   formData: Record<string, unknown> | null;
   setFormData: (data: Record<string, unknown> | null) => void;
-}) => (
-  <div className="flex flex-col gap-2">
-    <textarea
-      className="w-full h-full p-2 rounded-md border border-border"
-      rows={12}
-      value={JSON.stringify(formData, null, 2)}
-      onChange={(e) => setFormData(JSON.parse(e.target.value))}
-    />
-  </div>
-);
+}) => {
+
+  const [json, setJson] = useState(JSON.stringify(formData, null, 2));
+
+  useEffect(() => {
+    setJson(JSON.stringify(formData, null, 2));
+  }, [formData]);
+
+  const handleChange = (value: string) => {
+    setJson(value);
+    try {
+      const parsed = JSON.parse(value);
+      setFormData(parsed);
+    } catch {
+      // Ignore parse errors while typing
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <textarea
+        className="w-full h-full p-2 rounded-md border border-border"
+        rows={12}
+        value={json}
+        onChange={(e) => handleChange(e.target.value)}
+      />
+    </div>
+  )
+};
 
 export const InputForm = () => {
   const ref = useRef<Form<unknown, RJSFSchema>>(null);
@@ -155,7 +174,7 @@ export const InputForm = () => {
       </div>
 
       <div className="flex-1 overflow-auto px-6 py-6 bg-muted/50">
-        <Tabs>
+        <Tabs defaultValue="form">
           <TabsList>
             <TabsTrigger value="form">Form</TabsTrigger>
             <TabsTrigger value="json">JSON</TabsTrigger>
