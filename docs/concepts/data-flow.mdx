@@ -38,8 +38,8 @@ flowchart LR
 Tool responses contain three fields:
 
 - **`content`**: Text array shown to the model in the conversation
-- **`structuredContent`**: Typed JSON data passed to your widget
-- **`_meta`**: Optional metadata for both
+- **`structuredContent`**: Typed JSON data surfaced to your widget and the host
+- **`_meta`**: Delivered only to the widget and hidden from the model
 
 ## Tools vs Widgets
 
@@ -48,7 +48,7 @@ Before diving into data flow, understand the difference:
 | | `registerTool()` | `registerWidget()` |
 |---|---|---|
 | **Has UI?** | No | Yes |
-| **Returns** | `content` only (text for the model) | `structuredContent` (data for the widget) + `content` |
+| **Returns** | `content` and/or `structuredContent` | `structuredContent` and optional `content`/`_meta`
 | **Renders** | Nothing | A React component |
 | **Use case** | Background operations, calculations | Interactive UI |
 
@@ -189,9 +189,9 @@ Tool responses have three fields:
 
 | Field | Purpose | Consumed by |
 |-------|---------|-------------|
-| `content` | Text description for the model | The host (shown in conversation) |
-| `structuredContent` | Typed data for the widget | Widget (`useToolInfo`, `useCallTool`) |
-| `_meta` | Response metadata | Both (optional) |
+| `content` | Text description | The host (shown in conversation) |
+| `structuredContent` | Typed data | Host and widget (`useToolInfo`, `useCallTool`) |
+| `_meta` | Response metadata | Widget|
 
 ```typescript
 return {
@@ -200,8 +200,7 @@ return {
     flights: [{ id: "AF123", name: "Air France 123" }, /* ... */]
   },
   _meta: {
-    searchId: "abc123",
-    cached: false
+    flightImages: [{ url: "https://assets.airfrance.com/flights/AF123.jpg" }, /* ... */]
   }
 };
 ```

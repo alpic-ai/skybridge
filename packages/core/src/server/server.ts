@@ -317,6 +317,8 @@ export class McpServer<
         widgetConfig,
         resourceConfig,
       });
+      // @ts-expect-error - For backwards compatibility with Claude current implementation of the specs
+      toolMeta["ui/resourceUri"] = widgetConfig.uri;
       toolMeta.ui = { resourceUri: widgetConfig.uri };
     }
 
