@@ -2,9 +2,6 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import type { RequestHandler } from "express";
 import type { McpServer } from "../server/server.js";
 
-/**
- * Creates Express middleware for handling MCP requests
- */
 export function createMcpMiddleware(server: McpServer): RequestHandler {
   return async (req, res, next) => {
     // Only handle requests to the /mcp path

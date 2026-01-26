@@ -15,12 +15,11 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
   const [messages, setMessages] = useState<Array<Message>>([]);
 
   useEffect(() => {
-    // Get the path to the server entry point (always use compiled .js file)
-    const currentFile = fileURLToPath(import.meta.url);
-    const cliDir = resolve(currentFile, "..");
-    const entryPath = resolve(cliDir, "server-entry.js");
+    const entryPath = resolve(
+      fileURLToPath(import.meta.url),
+      "../server-entry.js",
+    );
 
-    // Start nodemon with the entry point that dynamically imports server.ts
     nodemon({
       env,
       watch: ["server/src"],

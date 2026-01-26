@@ -1,4 +1,5 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express, { type Express } from "express";
 import { createMcpMiddleware, McpServer } from "skybridge/server";
@@ -6,12 +7,15 @@ import type { ViteDevServer } from "vite";
 
 // Dynamically import the user's server.ts
 const serverPath = path.resolve(process.cwd(), "server/src/server.ts");
-const serverModule = await import(serverPath).catch(() => {
+let serverModule: { default: McpServer };
+try {
+  serverModule = await import(serverPath);
+} catch {
   console.error(
     "Error: A server.ts file must be present in the server/src directory",
   );
   process.exit(1);
-});
+}
 const server = serverModule.default;
 
 if (!server) {
@@ -21,7 +25,7 @@ if (!server) {
 
 if (!(server instanceof McpServer)) {
   console.error(
-    "Error: server.ts must export an instance of McpServer from 'skybridge/server'",
+    "Error: server.ts must export an instance of McpServer imported from 'skybridge/server'",
   );
   process.exit(1);
 }
@@ -29,8 +33,6 @@ if (!(server instanceof McpServer)) {
 const app = express() as Express & { vite?: ViteDevServer };
 
 app.use(express.json());
-
-// Add MCP middleware
 app.use(createMcpMiddleware(server));
 
 const env = process.env.NODE_ENV || "development";
@@ -43,9 +45,11 @@ if (env !== "production") {
 }
 
 if (env === "production") {
-  const distDir = path.join(process.cwd(), "dist");
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+
   app.use("/assets", cors());
-  app.use("/assets", express.static(path.join(distDir, "assets")));
+  app.use("/assets", express.static(path.join(__dirname, "assets")));
 }
 
 const port = 3000;
