@@ -13,6 +13,8 @@ import { useEffect } from "react";
 import { Header } from "../cli/header.js";
 import { type CommandStep, useExecuteSteps } from "../cli/use-execute-steps.js";
 
+let indexTsWasCreated = false;
+
 export const commandSteps: CommandStep[] = [
   {
     label: "Preparing build environment",
@@ -28,18 +30,19 @@ export const commandSteps: CommandStep[] = [
       }
 
       const indexTsPath = join(serverSrcDir, "index.ts");
-      if (existsSync(indexTsPath)) {
-        throw new Error(
-          `There should be no index.ts file in server/src. Please remove it before building.`,
+      if (!existsSync(indexTsPath)) {
+        const serverEntryPath = resolve(
+          fileURLToPath(import.meta.url),
+          "../../cli/server-entry.js",
         );
+        const buildEntryContent = readFileSync(serverEntryPath, "utf-8");
+        writeFileSync(
+          join(serverSrcDir, "index.ts"),
+          buildEntryContent,
+          "utf-8",
+        );
+        indexTsWasCreated = true;
       }
-
-      const serverEntryPath = resolve(
-        fileURLToPath(import.meta.url),
-        "../../cli/server-entry.js",
-      );
-      const buildEntryContent = readFileSync(serverEntryPath, "utf-8");
-      writeFileSync(join(serverSrcDir, "index.ts"), buildEntryContent, "utf-8");
     },
   },
   {
@@ -58,10 +61,12 @@ export const commandSteps: CommandStep[] = [
 ];
 
 const cleanup = () => {
-  const projectRoot = process.cwd();
-  const serverIndex = resolve(projectRoot, "server/src/index.ts");
-  if (existsSync(serverIndex)) {
-    rmSync(serverIndex);
+  if (indexTsWasCreated) {
+    const projectRoot = process.cwd();
+    const serverIndex = resolve(projectRoot, "server/src/index.ts");
+    if (existsSync(serverIndex)) {
+      rmSync(serverIndex);
+    }
   }
 };
 
