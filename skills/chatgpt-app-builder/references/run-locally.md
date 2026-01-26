@@ -10,7 +10,7 @@ Install dependencies and start the dev server in the background:
 
 For Deno projects, use `deno task dev` instead.
 
-When started, output the local MCP server and playground URL.
+When started, output the local MCP server and devtools URL.
 
 ## 2. Connect to ChatGPT
 
