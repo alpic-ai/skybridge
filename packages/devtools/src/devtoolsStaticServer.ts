@@ -1,7 +1,7 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express, { type Router } from "express";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 /**
  * Serve the built devtools React app
@@ -24,6 +24,8 @@ export const devtoolsStaticServer = async (): Promise<Router> => {
 
   router.use(cors());
   router.use(express.static(distDir));
+  // this will serve the assets folder from the ChatGPT app folder in the dv mode
+  router.use("/assets", express.static("assets"));
   router.get("/", (_req, res, next) => {
     const indexHtmlPath = path.join(distDir, "index.html");
     res.sendFile(indexHtmlPath, (error) => {
