@@ -58,7 +58,7 @@
             "icon": "lightbulb",
             "pages": [
               "concepts/index",
-              "concepts/platform-agnosticism",
+              "concepts/write-once-run-everywhere",
               "concepts/data-flow",
               "concepts/llm-context-sync",
               "concepts/fast-iteration",
