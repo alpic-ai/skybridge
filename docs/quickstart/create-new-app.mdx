@@ -1,15 +1,13 @@
 ---
 title: Quickstart
-description: "Get started with Skybridge in 5 minutes using our starter template with HMR and pre-configured MCP server."
+description: "Get started with a fully working App in 5 minutes thanks to our starter template."
 icon: "bolt"
 iconType: "regular"
 ---
 
-The fastest way to start building is using our starter template. It comes pre-configured with an MCP server, UI widgets, and a full dev server with Hot Module Reload.
+The fastest way to start building is using our starter template. It comes pre-configured with an MCP server, a basicUI widget, and a full dev server with a local emulator and HMR.
 
 <Tip>
-**Before You Start**
-
 New to ChatGPT or MCP Apps? Read [Fundamentals](/fundamentals) first to understand the concepts.
 </Tip>
 
@@ -19,19 +17,19 @@ Set up your app with a single command:
 
 <CodeGroup>
 ```bash npm
-npm create skybridge@latest my-chatgpt-app
+npm create skybridge@latest my-app
 ```
 ```bash pnpm
-pnpm create skybridge my-chatgpt-app
+pnpm create skybridge my-app
 ```
 ```bash yarn
-yarn create skybridge my-chatgpt-app
+yarn create skybridge my-app
 ```
 ```bash bun
-bun create skybridge my-chatgpt-app
+bun create skybridge my-app
 ```
 ```bash deno
-deno init --npm skybridge my-chatgpt-app
+deno init --npm skybridge my-app
 ```
 </CodeGroup>
 
@@ -92,10 +90,8 @@ When you run `skybridge`:
 4. **File watching** is enabled - changes to server code will automatically restart the server
 5. **Hot Module Reload (HMR)** is active for Widgets components - changes appear instantly in the host without reconnecting
 
-## Next step
-
-Your dev server is running. Now learn how to test your app locally and in ChatGPT:
+## Next steps
 
 <Card title="Test Your App" icon="flask-vial" href="/quickstart/test-your-app">
-  Learn how to test locally with DevTools and in ChatGPT
+  Learn how to test your app locally, in ChatGPT and compatible MCP Clients.
 </Card>
