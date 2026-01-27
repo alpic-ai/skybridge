@@ -399,10 +399,15 @@ export class McpServer<
         const isClaude =
           extra?.requestInfo?.headers?.["user-agent"] === "Claude-User";
 
-        const serverUrl =
-          isProduction || useForwardedHost
-            ? `https://${extra?.requestInfo?.headers?.["x-forwarded-host"] ?? extra?.requestInfo?.headers?.host}`
-            : "http://localhost:3000";
+        const hostFromHeaders =
+          extra?.requestInfo?.headers?.["x-forwarded-host"] ??
+          extra?.requestInfo?.headers?.host;
+
+        const useExternalHost = isProduction || useForwardedHost || isClaude;
+
+        const serverUrl = useExternalHost
+          ? `https://${hostFromHeaders}`
+          : "http://localhost:3000";
 
         const html = isProduction
           ? templateHelper.renderProduction({
@@ -416,6 +421,7 @@ export class McpServer<
           : templateHelper.renderDevelopment({
               hostType,
               serverUrl,
+              useLocalNetworkAccess: !useExternalHost,
               widgetName: name,
             });
 
@@ -427,7 +433,7 @@ export class McpServer<
           domain: isClaude
             ? `${crypto
                 .createHash("sha256")
-                .update(`${serverUrl}/mcp`)
+                .update(`https://${hostFromHeaders}/mcp`)
                 .digest("hex")
                 .slice(0, 32)}.claudemcpcontent.com`
             : serverUrl,
