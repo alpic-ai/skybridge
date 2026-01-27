@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type {
@@ -395,6 +396,8 @@ export class McpServer<
         const isProduction = process.env.NODE_ENV === "production";
         const useForwardedHost =
           process.env.SKYBRIDGE_USE_FORWARDED_HOST === "true";
+        const isClaude =
+          extra?.requestInfo?.headers?.["user-agent"] === "Claude-User";
 
         const serverUrl =
           isProduction || useForwardedHost
@@ -421,7 +424,13 @@ export class McpServer<
         const contentMeta = buildContentMeta({
           resourceDomains: [serverUrl],
           connectDomains: !isProduction ? [VITE_HMR_WEBSOCKET_DEFAULT_URL] : [],
-          domain: serverUrl,
+          domain: isClaude
+            ? `${crypto
+                .createHash("sha256")
+                .update(`${serverUrl}/mcp`)
+                .digest("hex")
+                .slice(0, 32)}.claudemcpcontent.com`
+            : serverUrl,
           baseUriDomains: [serverUrl],
         });
 
