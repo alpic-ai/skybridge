@@ -5,7 +5,6 @@ import express, { type Express } from "express";
 import { createMcpMiddleware, McpServer } from "skybridge/server";
 import type { ViteDevServer } from "vite";
 
-// Dynamically import the user's server.ts
 const serverPath = path.resolve(process.cwd(), "server/src/server.ts");
 let serverModule: { default: McpServer };
 try {
