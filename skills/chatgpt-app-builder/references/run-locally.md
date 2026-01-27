@@ -12,6 +12,8 @@ For Deno projects, use `deno task dev` instead.
 
 When started, output the local MCP server and devtools URL.
 
+Hot reload enabled (nodemon for server, HMR for widgets).
+
 ## 2. Connect to ChatGPT
 
 Run ngrok in the background to expose the app:
