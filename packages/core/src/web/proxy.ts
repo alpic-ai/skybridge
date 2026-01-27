@@ -7,9 +7,6 @@ const colors = {
 
 export function installOpenAILoggingProxy() {
   if (typeof window === "undefined" || !window.openai) {
-    console.warn(
-      "[openai-proxy] window.openai not found, skipping proxy installation",
-    );
     return;
   }
 

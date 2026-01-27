@@ -52,6 +52,11 @@ export const widgetsDevServer = async (): Promise<Router> => {
     server: {
       allowedHosts: true,
       middlewareMode: true,
+      hmr: {
+        protocol: "ws",
+        host: "localhost",
+        port: 24678,
+      },
     },
     root: webAppRoot,
     optimizeDeps: {
