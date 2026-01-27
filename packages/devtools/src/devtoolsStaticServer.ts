@@ -24,7 +24,7 @@ export const devtoolsStaticServer = async (): Promise<Router> => {
 
   router.use(cors());
   router.use(express.static(distDir));
-  // this will serve the assets folder from the ChatGPT app folder in the dv mode
+  // this will serve the assets folder from the ChatGPT app folder in the dev mode
   router.use("/assets", express.static("assets"));
   router.get("/", (_req, res, next) => {
     const indexHtmlPath = path.join(distDir, "index.html");
