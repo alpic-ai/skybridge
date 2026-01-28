@@ -1,23 +1,64 @@
 ---
 title: Fundamentals
-description: "Understanding MCP and the two runtime environments Skybridge supports: Apps SDK (ChatGPT) and MCP Apps."
+description: "Understanding Model Context Protocol (MCP) and the two runtime environments Skybridge supports: Apps SDK (ChatGPT) and MCP Apps."
 ---
 
-Skybridge enables you to build **ChatGPT Apps** and **MCP Apps**—interactive UI widgets that render inside AI conversations. Before diving into Skybridge's APIs, understand the underlying protocols and runtimes it builds upon.
+Skybridge enables you to build **ChatGPT Apps** and **MCP Apps** - interactive UI widgets that render inside AI conversations. Before diving into Skybridge's APIs, understand the underlying protocols and runtimes it builds upon.
 
 ## MCP (Model Context Protocol)
 
 [MCP](https://modelcontextprotocol.io) is an open standard that allows AI models to connect with external tools, resources, and services. Think of it as an API layer specifically designed for LLMs.
 
-An MCP server exposes:
-- **Tools**: Functions the model can call (e.g., `search_flights`, `get_weather`)
-- **Resources**: Data the model can access (e.g., files, UI components)
+### What is an MCP Client?
 
-When you ask an AI assistant a question, it can invoke tools on your MCP server to fetch data or perform actions on your behalf.
+An **MCP Client** is a frontend application that implements the MCP protocol, and that can consume MCP Servers. Major MCP Clients include:
+- General-purpose AI apps: ChatGPT, Claude, Goose, etc
+- IDEs: Cursor, VSCode, Amp, etc
+- Coding agents: Claude Code, Codex CLI, Gemini CLI, etc
+- Any other software that implements the MCP protocol
 
-## Two Runtimes, One Codebase
+### What is an MCP Server?
 
-Skybridge supports two runtime environments for rendering widgets:
+An **MCP server** is a backend service that implements the MCP protocol. It exposes capabilities to MCP Clients through:
+
+- **Tools**: Functions the model can call (e.g., `search_flights`, `get_weather`, `book_hotel`)
+- **Resources**: Data the model can access (e.g., files, database records, UI components)
+
+When you ask an AI assistant a question, it can invoke tools on your MCP server to fetch data or perform actions on your behalf. The server handles your business logic, database queries, API calls, and any other backend operations.
+
+### MCP Apps and ChatGPT Apps: The Same Foundation
+
+Both ChatGPT Apps and MCP Apps are built on top of MCP servers, and extend the MCP protocol to allow rich UI rendering. Both use the same foundations and concepts, but differ in implementation: ChatGPT Apps are built on top of the OpenAI Apps SDK, while MCP Apps are built on top of the MCP Apps extension.
+
+To avoid repetition, we will now refer to both ChatGPT Apps and MCP Apps as **AI Apps.**
+
+An **AI App** consists of two components working together:
+
+1. **MCP Server**: Your backend that handles business logic and exposes tools via the MCP protocol
+2. **UI Widgets**: HTML components that render in the AI Client's interface as interactive UIs
+
+
+<img
+  src="/images/fundamentals-chatgpt-apps.png"
+  alt="MCP Apps Architecture"
+  style={{ width: "100%", maxWidth: "500px", display: "block", margin: "0 auto" }}
+/>
+
+When a tool is called, it can return both:
+- **Text content**: What the model sees and responds with
+- **Widget content**: A visual UI that renders for the user
+
+This creates a **dual-surface interaction model**: users interact with both the conversational interface (the AI) and your custom UI (the widget).
+
+<Note>
+Read our [in-depth blog article](https://alpic.ai/blog/inside-openai-s-apps-sdk-how-to-build-interactive-chatgpt-apps-with-mcp) for a detailed technical breakdown of how AI Apps work under the hood.
+</Note>
+
+## Runtime Environments
+
+While both ChatGPT Apps and MCP Apps use the same MCP server architecture, they differ in how they render and communicate with UI widgets. Think of it this way: your App is the engine, and the runtime environment is the interface layer.
+
+Skybridge supports the two main runtime environments for rendering widgets:
 
 <CardGroup cols={2}>
   <Card title="Apps SDK (ChatGPT)" icon="message" href="/fundamentals/apps-sdk">
@@ -28,30 +69,20 @@ Skybridge supports two runtime environments for rendering widgets:
   </Card>
 </CardGroup>
 
-## Comparison at a Glance
+
+Skybridge abstracts away the differences between these runtime environments so you can write your widgets once and run them anywhere. Learn more in our <a href="/concepts/write-once-run-everywhere">Write Once, Run Everywhere</a> guide.
+
+
+## Runtimes Comparison at a Glance
 
 | Feature | Apps SDK (ChatGPT) | MCP Apps |
 |---------|-------------------|----------|
 | **Protocol** | Proprietary `window.openai` | Open MCP ext-apps spec |
 | **Client Support** | ChatGPT only | Goose, VSCode, Postman, ... |
-| **Specification** | Closed | [Open source](https://github.com/modelcontextprotocol/ext-apps) |
+| **Documentation** | [Apps SDK Docs](https://developers.openai.com/apps-sdk) | [ext-apps specs](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx) |
 
-## What is a ChatGPT / MCP App?
 
-A ChatGPT or MCP App consists of two components:
 
-1. **MCP Server**: Handles your business logic and exposes tools
-2. **UI Widgets**: React components that render in the AI's interface
-
-When a tool is called, it can return both:
-- **Text content**: What the model sees and responds with
-- **Widget content**: A visual UI that renders for the user
-
-This creates a **dual-surface interaction model**: users interact with both the conversational interface (the AI) and your custom UI (the widget).
-
-<Note>
-Read our [in-depth blog article](https://alpic.ai/blog/inside-openai-s-apps-sdk-how-to-build-interactive-chatgpt-apps-with-mcp) for a detailed technical breakdown of how ChatGPT Apps work under the hood.
-</Note>
 
 ## Next Steps
 
@@ -62,7 +93,7 @@ Read our [in-depth blog article](https://alpic.ai/blog/inside-openai-s-apps-sdk-
   <Card title="MCP Apps Deep Dive" icon="plug" href="/fundamentals/mcp-apps">
     The open specification, JSON-RPC bridge, and client support
   </Card>
-  <Card title="Platform Agnosticism" icon="shuffle" href="/concepts/platform-agnosticism">
+  <Card title="Write Once, Run Everywhere" icon="shuffle" href="/concepts/write-once-run-everywhere">
     How Skybridge abstracts these differences for you
   </Card>
   <Card title="Quickstart" icon="rocket" href="/quickstart/create-new-app">
