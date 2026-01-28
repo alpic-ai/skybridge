@@ -24,12 +24,12 @@ flowchart LR
     Widget -->|"UI pages exposed<br/>as MCP resources"| Server
 
     style User fill:#f1f5f9,stroke:#64748b,color:#334155
-    style Model fill:#f1f5f9,stroke:#64748b,color:#334155
-    style Widget fill:#f1f5f9,stroke:#64748b,color:#334155
-    style Server fill:#2d7a9a,stroke:#1e6a87,color:#fff
+    style Model fill:#2563EB,stroke:#1e40af,color:#fff
+    style Widget fill:#2563EB,stroke:#1e40af,color:#fff
+    style Server fill:#dbeafe,stroke:#93c5fd,color:#1e40af
 ```
 
-1. **The Host**: The conversational interface where users type messages and the model responds (ChatGPT, Goose, etc.)
+1. **The MCP Host**: The conversational interface where users type messages and the model responds (ChatGPT, Claude, Goose, VSCode, etc.)
 2. **Your MCP Server**: The backend that exposes tools and business logic
 3. **Your Widget (Guest)**: The React component rendered in an iframe inside the host
 
@@ -43,7 +43,7 @@ Tool responses contain three fields:
 
 ## Tools vs Widgets
 
-Before diving into data flow, understand the difference:
+Before diving into the data flow, understand the difference between tools and widgets in Skybridge:
 
 | | `registerTool()` | `registerWidget()` |
 |---|---|---|
@@ -175,10 +175,10 @@ export function FlightWidget() {
 This creates a continuous loop: the widget can ask the model for help, and the model responds naturally in the conversation.
 
 <Tip>
-**When to use sendFollowUpMessage vs data-llm**
+**When to use useSendFollowUpMessage vs data-llm**
 
 - **`data-llm`**: For passive context—the model reads it when the user asks a question
-- **`sendFollowUpMessage`**: For active prompts—triggers a new model response immediately
+- **`useSendFollowUpMessage`**: For active prompts—triggers a new model response immediately
 
 If the model's response triggers another widget, the host renders a new widget instance (not nested inside the current one).
 </Tip>
@@ -213,7 +213,7 @@ return {
 | User-triggered fetch | `useCallTool` | Model sees the result, can answer questions |
 | Silent background fetch | Direct API call | Model doesn't need to know |
 | Describe current UI state | `data-llm` | Passive context for user questions |
-| Trigger model response | `sendFollowUpMessage` | Active prompt, immediate reply |
+| Trigger model response | `useSendFollowUpMessage` | Active prompt, immediate reply |
 | Persist widget state | `useWidgetState` | Survives re-renders |
 
 <Tip>

@@ -1,7 +1,14 @@
 ---
 title: useSetOpenInAppUrl
 description: "Set the URL that will be opened when users click the 'open in app' button in fullscreen mode."
+tag: "ChatGPT"
 ---
+
+<Warning>
+**Runtime Support**: ChatGPT Apps only
+
+This hook is not available in MCP Apps. Calling it in an MCP Apps environment will throw an error.
+</Warning>
 
 The `useSetOpenInAppUrl` hook returns a function to set the URL that will be opened when the user clicks the "open in app" button. This button appears in the top right corner when the widget is displayed in fullscreen mode.
 

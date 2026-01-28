@@ -5,9 +5,9 @@ tag: "ChatGPT"
 ---
 
 <Warning>
-**Runtime Support**: ChatGPT Apps only
+**Runtime Support**: ChatGPT Apps | MCP Apps (polyfilled)
 
-MCP ext-apps spec doesn't yet define widget state. Support planned once spec evolves.
+In MCP Apps, `useWidgetState` is polyfilled. State does **not** persist across widget renders.
 </Warning>
 
 The `useWidgetState` hook provides persistent state management for your widget. Unlike React's `useState`, this state is persisted by the host and survives across widget re-renders and display mode changes.

@@ -16,21 +16,28 @@ Here's what happens when ChatGPT renders a widget:
 4. ChatGPT fetches the resource (your compiled React component) and renders it in an iframe
 5. The widget is hydrated with your tool's `structuredContent` and `_meta` properties
 
+<img src="/images/fundamentals-chatgpt-apps.png" alt="ChatGPT Apps Rendering Flow" style={{ width: "100%", maxWidth: "500px", display: "block", margin: "0 auto" }} />
+
+
+
 ## The `window.openai` API
 
 Widgets run inside an iframe and have access to a special [`window.openai`](https://developers.openai.com/apps-sdk/build/chatgpt-ui#understand-the-windowopenai-api) global that enables communication with the host:
 
 | API | Description |
 |-----|-------------|
-| `toolOutput` | Access the initial data passed from your tool |
-| `widgetState` | Persist UI state across interactions |
+| `toolInput` | Arguments supplied when the tool was invoked |
+| `toolOutput` | Your `structuredContent` — initial data passed from your tool |
+| `toolResponseMetadata` | The `_meta` payload; only the widget sees it, never the model |
+| `widgetState` / `setWidgetState()` | Persist UI state across interactions |
 | `callTool()` | Trigger additional tool calls from the UI |
 | `sendFollowUpMessage()` | Send messages back into the chat |
-| `setWidgetState()` | Update persistent state |
+| `requestDisplayMode()` | Request inline, PiP, or fullscreen display |
 | `requestModal()` | Open a modal window outside the iframe |
 | `uploadFile()` | Upload files to host-managed storage |
 | `getFileDownloadUrl()` | Get download URLs for uploaded files |
 | `openExternal()` | Open external URLs safely |
+| `setOpenInAppUrl()` | Set URL for the "Open in &lt;App&gt;" button in fullscreen mode |
 
 This API is powerful but low-level and imperative—which is where Skybridge comes in.
 
@@ -40,41 +47,33 @@ Skybridge wraps the raw `window.openai` API with React hooks:
 
 | Raw API | Skybridge Hook | Purpose |
 |---------|----------------|---------|
-| `window.openai.toolOutput` | [`useToolInfo()`](/api-reference/use-tool-info) | Access initial tool input/output |
+| `window.openai.toolInput`, `toolOutput`, `toolResponseMetadata` | [`useToolInfo()`](/api-reference/use-tool-info) | Access tool input, output, and `_meta` |
 | `window.openai.widgetState` and `window.openai.setWidgetState` | [`useWidgetState()`](/api-reference/use-widget-state) | Persistent widget state |
 | `window.openai.callTool()` | [`useCallTool()`](/api-reference/use-call-tool) | Make additional tool calls |
 | `window.openai.sendFollowUpMessage()` | [`useSendFollowUpMessage()`](/api-reference/use-send-follow-up-message) | Send follow-up messages |
 | `window.openai.openExternal()` | [`useOpenExternal()`](/api-reference/use-open-external) | Open external URLs |
 | `window.openai.view` and `window.openai.requestModal()` | [`useRequestModal()`](/api-reference/use-request-modal) | Request modal display |
-| `window.openai.theme` | [`useLayout()`](/api-reference/use-layout) | Access ChatGPT theme |
-| `window.openai.locale` | [`useUser()`](/api-reference/use-user) | Access user locale |
+| `window.openai.theme`, `maxHeight`, `safeArea` | [`useLayout()`](/api-reference/use-layout) | Theme, max height, safe area insets |
+| `window.openai.locale`, `userAgent` | [`useUser()`](/api-reference/use-user) | Locale and device/capabilities |
 | `window.openai.displayMode` and `window.openai.requestDisplayMode` | [`useDisplayMode()`](/api-reference/use-display-mode) | Access/change display mode |
-| `window.openai.uploadFile()` | [`useFiles()`](/api-reference/use-files) | Upload and download files |
+| `window.openai.uploadFile()`, `getFileDownloadUrl()` | [`useFiles()`](/api-reference/use-files) | Upload and download files |
+| `window.openai.setOpenInAppUrl()` | [`useSetOpenInAppUrl()`](/api-reference/use-set-open-in-app-url) | "Open in App" button URL in fullscreen |
 
-## Apps SDK Exclusive Features
+## Apps SDK APIs not yet supported in Skybridge
+
+The following [Apps SDK widget APIs](https://developers.openai.com/apps-sdk/reference) are not yet wrapped by Skybridge hooks:
+
+| Raw API | Purpose |
+|---------|---------|
+| `window.openai.notifyIntrinsicHeight(...)` | Report dynamic widget heights to the host to avoid scroll clipping |
+| `window.openai.requestClose()` | Close the widget from the UI (e.g. user dismisses) |
+| `window.openai.requestCheckout(...)` | Open ChatGPT Instant Checkout UI (monetization) |
+
+You can call these directly on `window.openai` when running in ChatGPT, if needed. Support may be added in a future release.
+
+## Skybridge Apps SDK Exclusive Features
 
 These features are **only available in ChatGPT** and not supported in MCP Apps:
-
-### Modal Windows
-
-Open content in a separate modal window outside the iframe:
-
-```tsx
-import { useRequestModal } from "skybridge/web";
-
-function Widget() {
-  const { requestModal } = useRequestModal();
-
-  return (
-    <button onClick={() => requestModal({
-      title: "Details",
-      params: { itemId: "123" }
-    })}>
-      Open Modal
-    </button>
-  );
-}
-```
 
 ### File Operations
 
@@ -96,22 +95,35 @@ function Widget() {
 }
 ```
 
+### Open in App URL
+
+Set a URL for the "Open in App" button that appears in fullscreen mode:
+
+```tsx
+import { useSetOpenInAppUrl } from "skybridge/web";
+
+function Widget() {
+  const { setOpenInAppUrl } = useSetOpenInAppUrl();
+
+  useEffect(() => {
+    setOpenInAppUrl("https://myapp.com/view/123");
+  }, []);
+
+  return <div>Widget content</div>;
+}
+```
+
 ## Testing in ChatGPT
 
-To test your app in ChatGPT:
-
-1. Go to [ChatGPT Settings](https://chatgpt.com/settings) > Developer Settings
-2. Enable Developer Mode
-3. Add your MCP server URL
-4. Start a new conversation and invoke your tools
+Please see the [Test Your App](/quickstart/test-your-app#testing-in-chatgpt) guide for more information.
 
 <Warning>
-ChatGPT has aggressive caching. Use DevTools for fast iteration, then test in ChatGPT for final validation. See [Fast Iteration](/concepts/fast-iteration).
+ChatGPT has aggressive caching. Use [DevTools](/devtools) for fast iteration, then test in ChatGPT for final validation. See [Fast Iteration](/concepts/fast-iteration).
 </Warning>
 
 ## Related
 
 - [MCP Apps](/fundamentals/mcp-apps) - The open alternative runtime
 - [Write Once, Run Everywhere](/concepts/write-once-run-everywhere) - How Skybridge handles both runtimes
-- [useRequestModal](/api-reference/use-request-modal) - Modal API reference
+- [useSetOpenInAppUrl](/api-reference/use-set-open-in-app-url) - Open in App URL API reference
 - [useFiles](/api-reference/use-files) - File operations API reference

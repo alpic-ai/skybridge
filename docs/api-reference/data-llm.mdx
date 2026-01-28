@@ -3,8 +3,7 @@ title: data-llm Attribute
 description: "Create a feedback loop between your widget UI state and the model for contextual responses."
 ---
 
-
-The `data-llm` attribute allows your widget to communicate its current UI state back to the model. This creates a feedback loop where the model can understand what the user is seeing and respond contextually to their questions.
+The `data-llm` attribute allows your widget to communicate its current UI state back to the model. In MCP Apps, it is polyfilled with the same limitation as [useWidgetState](/api-reference/use-widget-state): state does not persist across widget renders. This creates a feedback loop where the model can understand what the user is seeing and respond contextually to their questions.
 
 ## Basic usage
 

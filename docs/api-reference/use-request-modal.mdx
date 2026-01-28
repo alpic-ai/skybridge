@@ -5,9 +5,9 @@ tag: "ChatGPT"
 ---
 
 <Warning>
-**Runtime Support**: ChatGPT Apps | MCP Apps (coming soon)
+**Runtime Support**: ChatGPT Apps | MCP Apps (polyfilled)
 
-MCP Apps support is planned. Modals will render inside the widget iframe rather than being portaled to the host.
+In MCP Apps, `useRequestModal` is polyfilled. Modals render inside the widget iframe rather than being portaled to the host.
 </Warning>
 
 The `useRequestModal` hook returns a function to trigger a modal that is portaled outside of the widget iframe. This ensures the modal is correctly displayed and not limited to the widget's area, allowing for a better user experience when displaying detailed content or forms.

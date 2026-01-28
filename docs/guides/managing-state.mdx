@@ -158,9 +158,13 @@ function CartWidget() {
 ### Automatic Persistence
 
 `createStore` automatically:
-- Syncs state to `window.openai.setWidgetState()` on every change
-- Restores state from `window.openai.widgetState` on load
+- Syncs state to the host's persistent storage (Apps SDK: `window.openai.setWidgetState()`, MCP Apps: polyfilled)
+- Restores state from the host on load (Apps SDK: `window.openai.widgetState`, MCP Apps: polyfilled)
 - Filters out functions (actions) during serialization
+
+<Note>
+**MCP Apps Limitation**: In MCP Apps, state persistence is polyfilled and does not survive widget re-renders. State is only maintained within the current widget render cycle.
+</Note>
 
 ## Comparison Table
 
@@ -208,10 +212,14 @@ function ProductListWidget() {
 
 ## When State Persists
 
-Widget state persists:
+**In Apps SDK (ChatGPT)**, widget state persists:
 - When the widget re-renders (component update)
 - When the user scrolls away and back
 - When the display mode changes
+
+**In MCP Apps**, widget state only persists:
+- Within the current widget render cycle (component updates)
+- State is lost when the widget is re-mounted or the tool is called again
 
 Widget state **resets** when:
 - A new conversation starts
@@ -237,3 +245,5 @@ The API is intentionally similar to `useState` for easy migration.
 - [useWidgetState API](/api-reference/use-widget-state)
 - [createStore API](/api-reference/create-store)
 - [LLM Context Sync](/concepts/llm-context-sync)
+- [MCP Apps](/fundamentals/mcp-apps) - MCP Apps limitations
+- [Apps SDK (ChatGPT)](/fundamentals/apps-sdk) - Apps SDK features

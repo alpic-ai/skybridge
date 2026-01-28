@@ -4,7 +4,7 @@ description: "Develop Apps locally with Skybridge's DevTools and Vite HMR for in
 ---
 
 
-**Problem:** Testing widgets in ChatGPT's dev mode is slow. It requires ngrok tunneling, manual refreshes, and provides limited debugging feedback.
+**Problem:** Testing widgets in remote MCP Clients (e.g. ChatGPT, Claude, etc.) is slow. It requires ngrok tunneling, manual refreshes, and provides limited debugging feedback.
 
 **Solution:** Skybridge includes DevTools and a Vite HMR plugin that let you develop widgets entirely on your machine with instant feedback.
 
@@ -15,7 +15,7 @@ When building Apps the traditional way, your development loop looks like:
 1. Make a code change
 2. Restart your server
 3. Tunnel with ngrok (if not already running)
-4. Go to ChatGPT dev mode
+4. Go to Claude or ChatGPT dev mode
 5. Trigger the tool manually by chatting
 6. Wait for the widget to load
 7. See if your change worked
@@ -30,7 +30,7 @@ With Skybridge, the loop becomes:
 1. Make a code change
 2. See it instantly in your browser
 
-That's it. DevTools mocks the ChatGPT environment, and Vite's HMR updates your widget without a full reload.
+That's it. DevTools mocks the Apps SDK (ChatGPT) environment, and Vite's HMR updates your widget without a full reload.
 
 ## DevTools
 
@@ -41,7 +41,13 @@ When you run `pnpm dev`, Skybridge starts:
 The DevTools UI provides:
 - **Tool listing** - See all registered tools and widgets
 - **Input forms** - Test tools with custom inputs
-- **Widget preview** - Render widgets in a mocked ChatGPT environment
+- **Widget preview** - Render widgets in a mocked Apps SDK (ChatGPT) environment
+
+<Note>
+**MCP Apps and DevTools**
+
+DevTools uses the **Apps SDK runtime** (mocked `window.openai`). MCP Apps widget rendering is not yet supported in DevTools. For MCP Apps, use DevTools for tool development and UI logic; validate widgets in a real client (e.g. [Goose](https://goose.ai/), Claude) before shipping. See [DevTools Guide](/devtools) and [Test Your App](/quickstart/test-your-app#testing-in-claude).
+</Note>
 
 <Info>
 **Full DevTools Guide**
@@ -82,13 +88,13 @@ When you save a file, only the changed component re-renders. Form inputs, scroll
 
 ## Automatic Environment Detection
 
-Your widget code works identically in ChatGPT and local DevTools. Skybridge detects the environment and uses the appropriate communication layer:
+Your widget code works identically in ChatGPT, MCP Apps clients like Claude, and local DevTools. Skybridge detects the environment and uses the appropriate communication layer:
 
 | Environment | Communication |
 |-------------|---------------|
 | ChatGPT | `window.openai` API |
-| DevTools | postMessage to DevTools |
-
+| MCP Apps (Goose, Claude, …) | MCP protocol via postMessage |
+| DevTools | Mocked Apps SDK (postMessage) |
 You don't need to know which is active—just use the hooks.
 
 ## When to Use What
@@ -99,7 +105,7 @@ You don't need to know which is active—just use the hooks.
 - Debugging state management
 - Day-to-day development
 
-**ChatGPT Dev Mode (10% of development time)**
+**ChatGPT, Claude, or other MCP Apps clients (10% of development time)**
 - Final integration testing
 - Real LLM conversation flow
 - Verifying `data-llm` context
@@ -108,7 +114,9 @@ You don't need to know which is active—just use the hooks.
 <Tip>
 **Workflow**
 
-Build locally → validate in ChatGPT → ship. See [Test Your App](/quickstart/test-your-app#testing-in-chatgpt) for ChatGPT setup.
+Build locally → validate in [ChatGPT](/quickstart/test-your-app#testing-in-chatgpt) or [MCP Apps](/quickstart/test-your-app#testing-in-claude) → ship. 
+
+See [Test Your App](/quickstart/test-your-app) for detailed testing setup instructions.
 </Tip>
 
 ## DevTools Features
@@ -131,6 +139,6 @@ View the full tool response including `content`, `structuredContent`, and `_meta
 ## Related
 
 - [DevTools Guide](/devtools) - Complete DevTools documentation and features
-- [Test Your App](/quickstart/test-your-app) - Full testing workflow including ChatGPT dev mode
+- [Test Your App](/quickstart/test-your-app) - Full testing workflow including ChatGPT and MCP Apps clients
 - [useLayout API](/api-reference/use-layout) - Access theme and layout info
 - [useCallTool API](/api-reference/use-call-tool) - Make tool calls from widgets

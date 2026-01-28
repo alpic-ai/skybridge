@@ -1,35 +1,34 @@
 ---
 title: MCP Apps
 sidebarTitle: MCP Apps
-description: "Understanding the open MCP ext-apps specification: JSON-RPC bridge, client support, and differences from Apps SDK."
+description: "Deep dive into the MCP ext-apps specification: MCP protocol, Skybridge hooks, and how MCP Apps clients render widgets."
 ---
 
-MCP Apps are based on the [MCP ext-apps specification](https://github.com/modelcontextprotocol/ext-apps)—an open standard for rendering interactive UI widgets inside AI conversations. Unlike the proprietary Apps SDK, MCP Apps work across multiple AI clients.
+[MCP Apps](https://github.com/modelcontextprotocol/ext-apps) are based on the **MCP ext-apps specification** — an open standard for rendering interactive UI widgets inside AI conversations. 
 
-## How MCP Apps Work
+Unlike the proprietary Apps SDK, MCP Apps work across multiple clients (e.g. Claude, Goose, VSCode). Skybridge implements the protocol via the `McpAppAdaptor` so you use the same hooks regardless of runtime.
 
-MCP Apps use a **JSON-RPC postMessage bridge** for communication between the widget iframe and the host application:
+## Widget Rendering Flow
 
-```mermaid
-flowchart TB
-    subgraph Widget["Widget (iframe)"]
-        React["Your React component runs here"]
-    end
+Here's what happens when an MCP Apps client renders a widget:
 
-    Widget -->|"JSON-RPC Messages (postMessage)"| Host
+1. User asks the AI to perform an action (e.g., "Show me flight options to Paris")
+2. The client calls your MCP tool (e.g., `search_flights`)
+3. Your tool returns a result with data and a reference to a UI resource
+4. The client fetches the resource (your compiled React component) and renders it in an iframe
+5. The widget communicates with the host via the **MCP protocol** and is hydrated with your tool's `structuredContent` and `_meta` properties
 
-    subgraph Host["Host Application"]
-        Clients["Goose, VSCode, Postman, ..."]
-    end
-```
+The widget–host connection looks like this:
 
-The widget sends requests and receives responses via structured JSON-RPC messages, rather than calling methods on a global object.
+<img src="/images/mcp-apps-explainer.avif" alt="MCP Apps architecture: MCP Server, MCP Host (ChatGPT, Claude), Host UI with Sandbox and Guest App iframe" style={{ width: "100%", maxWidth: "600px", display: "block", margin: "0 auto" }} />
 
-## Supported Methods
+The Host UI in this diagram designates the MCP Client (Claude, Goose, VSCode, etc.), and the Guest App is your App running in an iframe.
 
-The MCP ext-apps spec defines these communication methods:
+## The MCP ext-apps protocol
 
-### Guest-to-Host Requests
+Widgets run inside an iframe and talk to the host via the **same [MCP protocol](https://modelcontextprotocol.io/)** used by your server. The [ext-apps](https://github.com/modelcontextprotocol/ext-apps) spec defines **guest-to-host** requests and **host-to-guest** notifications for the widget:
+
+### Guest-to-host requests
 
 | Method | Description |
 |--------|-------------|
@@ -40,70 +39,73 @@ The MCP ext-apps spec defines these communication methods:
 | `ui/update-model-context` | Update widget state for the model |
 | `tools/call` | Invoke MCP tools |
 
-### Host-to-Guest Notifications
+### Host-to-guest notifications
 
 | Notification | Description |
 |--------------|-------------|
-| `notifications/context-changed` | Theme, locale, or display mode changed |
-| `notifications/tool-input` | Tool arguments provided |
-| `notifications/tool-result` | Tool execution completed |
+| `ui/notifications/host-context-changed` | Theme, locale, display mode, viewport, or other host context updated |
+| `ui/notifications/tool-input` | Tool arguments provided |
+| `ui/notifications/tool-result` | Tool execution completed |
+| `ui/notifications/tool-cancelled` | Tool call was cancelled |
+| `ui/notifications/tool-input-partial` | Streaming partial tool arguments (e.g. while the model is still sending) |
 
-## Client Support
+## Skybridge Hook Mapping
 
-MCP Apps are supported by clients implementing the ext-apps specification, these include Goose, VSCode, Postman, ...
+Skybridge wraps the MCP ext-apps protocol with the **same React hooks** as the Apps SDK. The `McpAppAdaptor` translates hook usage into the protocol under the hood:
 
-<Note>
-MCP Apps is an emerging specification. Client support is expanding as more AI applications adopt the standard.
-</Note>
+| Protocol | Skybridge Hook | Purpose |
+|----------|----------------|---------|
+| `ui/notifications/tool-input`, `tool-result`, `metadata` | [`useToolInfo()`](/api-reference/use-tool-info) | Access tool input, output, and `_meta` |
+| `ui/update-model-context` | [`useWidgetState()`](/api-reference/use-widget-state), [`data-llm`](/api-reference/data-llm) | Persistent widget state / model context |
+| `tools/call` | [`useCallTool()`](/api-reference/use-call-tool) | Make additional tool calls |
+| `ui/message` | [`useSendFollowUpMessage()`](/api-reference/use-send-follow-up-message) | Send follow-up messages |
+| `ui/open-link` | [`useOpenExternal()`](/api-reference/use-open-external) | Open external URLs |
+| `ui/request-display-mode` | [`useDisplayMode()`](/api-reference/use-display-mode) | Access/change display mode |
+| `ui/notifications/host-context-changed` (theme, maxHeight, safeArea) | [`useLayout()`](/api-reference/use-layout) | Theme, max height, safe area insets |
+| `ui/notifications/host-context-changed` (locale, userAgent) | [`useUser()`](/api-reference/use-user) | Locale and device/capabilities |
+| Modal (polyfilled) | [`useRequestModal()`](/api-reference/use-request-modal) | Request modal display (renders in-iframe) |
 
-## Skybridge Implementation
+## MCP Apps methods not yet supported in Skybridge
 
-Skybridge implements the MCP ext-apps specification via the `McpAppAdaptor`.
-This happens automatically: you write the same hooks regardless of runtime.
+The following [MCP ext-apps protocol methods](https://github.com/modelcontextprotocol/ext-apps) are not yet wrapped by Skybridge hooks:
 
-## Differences from Apps SDK
+| Protocol Method | Purpose |
+|-----------------|---------|
+| `ui/notifications/tool-input-partial` | Streaming partial tool arguments (e.g. while the model is still sending) |
+| `ui/notifications/tool-cancelled` | Tool call was cancelled |
+
+You can access `tool-input-partial` and `tool-cancelled` directly via [`useMcpAppContext`](/api-reference/use-mcp-app-context) when running in MCP Apps clients, if needed. Support may be added in a future release.
+
+## MCP Apps limitations
+
+Not all Skybridge features exist in the ext-apps spec. When using Skybridge in MCP Apps clients, the following features are either not supported or polyfilled:
 
 | Feature | Apps SDK | MCP Apps |
 |---------|----------|----------|
-| **Modal Windows** | Portaled to host | Coming soon (in-iframe) |
-| **File Upload/Download** | Supported | Not supported |
-| **Display Mode "modal"** | Supported | Not supported |
+| [useFiles](/api-reference/use-files), [useSetOpenInAppUrl](/api-reference/use-set-open-in-app-url) | ✅ | ❌ Not supported |
+| [useRequestModal](/api-reference/use-request-modal) | Portaled to host | ⚠️ Polyfilled (renders in-iframe) |
+| [useWidgetState](/api-reference/use-widget-state), [data-llm](/api-reference/data-llm) | Persisted by host | ⚠️ Polyfilled (state doesn't persist across widget renders) |
 
-### Handling Platform Differences
 
-When using Apps SDK features in MCP Apps:
+**Graceful degradation**: Unsupported features throw; polyfilled ones work with limitations. See the [compatibility matrix](/api-reference#runtime-compatibility) for details.
 
-- **`useFiles()`**: Not yet supported
-- **`useRequestModal()`**: Coming soon (will render in-iframe)
-- **`useDisplayMode("modal")`**: Not yet supported
-- **`useWidgetState()`**: Not yet supported (MCP spec doesn't define widget state)
-
-<Tip>
-**Graceful degradation planned**: We're working to ensure host-specific features never throw errors. Instead, they'll degrade gracefully—running in a minimal but functional way so your app works everywhere.
-</Tip>
 
 <Warning>
 Always check the [compatibility matrix](/api-reference#runtime-compatibility) before using platform-specific features.
 </Warning>
 
-## Protocol Coverage
-
-Skybridge is actively implementing the MCP ext-apps specification. Track our progress and see detailed coverage in [GitHub Issue #14](https://github.com/alpic-ai/skybridge/issues/14).
 
 ## Testing MCP Apps
 
-Since DevTools currently uses the Apps SDK runtime, testing MCP Apps requires:
-
-1. Running your MCP server locally
-2. Connecting from a client that supports MCP Apps (e.g., Goose)
-3. Invoking tools that render widgets
+Please see the [Test Your App](/quickstart/test-your-app#testing-in-claude) guide for more information.
 
 <Tip>
-Use DevTools for rapid development, then validate in MCP Apps clients for final testing.
+DevTools uses the Apps SDK runtime. Use DevTools for fast iteration, then validate in an MCP Apps client (e.g. Goose) for final testing.
 </Tip>
 
 ## Related
 
 - [Apps SDK (ChatGPT)](/fundamentals/apps-sdk) - The ChatGPT-specific runtime
-- [Write Once, Run Everywhere](/concepts/write-once-run-everywhere) - How Skybridge abstracts these differences
+- [Write Once, Run Everywhere](/concepts/write-once-run-everywhere) - How Skybridge abstracts both runtimes
 - [API Reference](/api-reference#runtime-compatibility) - Full compatibility matrix
+- [useMcpAppContext](/api-reference/use-mcp-app-context) - Low-level MCP context hook

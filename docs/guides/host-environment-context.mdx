@@ -10,11 +10,15 @@ How to make your widget adapt to the host's theme, locale, display mode, and dev
 
 | Hook | What it provides |
 |------|------------------|
-| `useLayout` | Theme, safe areas, max height |
-| `useUser` | Locale, user agent, device capabilities |
-| `useDisplayMode` | Current display mode, mode switching |
-| `useRequestModal` | Open widget in modal |
-| `useOpenExternal` | Open external URLs |
+| [`useLayout`](/api-reference/use-layout) | Theme, safe areas, max height |
+| [`useUser`](/api-reference/use-user) | Locale, user agent, device capabilities |
+| [`useDisplayMode`](/api-reference/use-display-mode) | Current display mode, mode switching |
+| [`useRequestModal`](/api-reference/use-request-modal) | Open widget in modal |
+| [`useOpenExternal`](/api-reference/use-open-external) | Open external URLs |
+
+<Warning>
+**MCP Apps Runtime**: `useRequestModal` is polyfilled in MCP Apps. Modals render inside the widget iframe rather than being portaled to the host. See [useRequestModal API](/api-reference/use-request-modal) for details.
+</Warning>
 
 ## Theme Adaptation with useLayout
 
@@ -201,7 +205,7 @@ const { setDisplayMode } = useDisplayMode();
 
 ## Modal Requests with useRequestModal
 
-Open a modal version of your widget:
+Modal Display Mode is not accessible via useDisplayMode, it can only be opened via useRequestModal.
 
 ```tsx
 import { useRequestModal } from "skybridge/web";
@@ -226,6 +230,10 @@ function ProductCard({ product }) {
 
 // In your modal component, access params via useToolInfo or similar
 ```
+
+<Warning>
+**MCP Apps Runtime**: `useRequestModal` is polyfilled in MCP Apps. Modals render inside the widget iframe rather than being portaled to the host. See [useRequestModal API](/api-reference/use-request-modal) for details.
+</Warning>
 
 ## External Links with useOpenExternal
 
