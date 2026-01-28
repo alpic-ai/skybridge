@@ -13,14 +13,15 @@ description: "Keep the LLM informed about widget state with data-llm attributes 
 Apps have a unique challenge: **two interaction surfaces**.
 
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#64748b' }}}%%
 flowchart TB
-    subgraph chat["ChatGPT Conversation"]
+    subgraph chat["Conversation"]
         U1["User: Show me flights to Paris"]
         A1["Assistant: Here are available flights:"]
     end
 
     subgraph widget["Your Widget"]
-        F1["Flight AF123 - $450 (selected)"]
+        F1["Flight AF123 - $450 ✓ selected"]
         F2["Flight BA456 - $520"]
         F3["Flight LH789 - $480"]
     end
@@ -30,10 +31,14 @@ flowchart TB
     chat --> widget
     widget --> U2
 
-    style F1 fill:#2d7a9a,color:#fff
+    style chat fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px
+    style widget fill:#dbeafe,stroke:#93c5fd,stroke-width:2px
+    style F1 fill:#2563EB,stroke:#1e40af,color:#fff
+    style F2 fill:#eff6ff,stroke:#93c5fd,color:#1e40af
+    style F3 fill:#eff6ff,stroke:#93c5fd,color:#1e40af
 ```
 
-The user clicked Flight AF123, but the model only sees the conversation text—it doesn't know what "this one" refers to.
+The user clicked Flight AF123, but the model only sees the conversation—it doesn't know what "this one" refers to.
 
 ## How data-llm Solves This
 
@@ -79,8 +84,8 @@ The model can now understand "this one" = Flight AF123.
 1. **Build time**: The Vite plugin transforms `data-llm` attributes into `DataLLM` React components
 2. **Runtime**: `DataLLM` components register their content in a global tree
 3. **State sync**: When content changes, the tree generates a hierarchical string
-4. **Model context**: This string is stored in `window.openai.widgetState.__widget_context`
-5. **LLM reads**: The host includes this context when generating responses
+4. **Model context**: This string is stored in widget state under the reserved key `__widget_context` (Apps SDK: `window.openai.widgetState`; MCP Apps: equivalent store via the polyfilled `useWidgetState`)
+5. **LLM reads**: The host (ChatGPT, Claude, etc.) includes this context when generating responses
 
 ```tsx
 // What you write:
@@ -93,14 +98,14 @@ The model can now understand "this one" = Flight AF123.
 ```
 
 <Tip>
-**data-llm vs sendFollowUpMessage**
+**data-llm vs useSendFollowUpMessage**
 
-| | `data-llm` | `sendFollowUpMessage` |
+| | `data-llm` | `useSendFollowUpMessage` |
 |---|---|---|
 | **When** | User types a message | Immediately |
 | **Use for** | Describe UI state | Prompt the model |
 
-User selects flight → `data-llm`. User clicks "Book" → `sendFollowUpMessage`.
+User selects flight → `data-llm`. User clicks "Book" → `useSendFollowUpMessage`.
 </Tip>
 
 ## Best Practices
@@ -181,9 +186,10 @@ const selectedNames = items.filter(item => item.selected).map(item => item.name)
 
 ## __widget_context Reserved Key
 
-Skybridge uses a reserved key `__widget_context` in widget state:
+Skybridge uses a reserved key `__widget_context` in widget state. In **Apps SDK (ChatGPT)**, widget state lives in `window.openai.widgetState`; in **MCP Apps**, the same key is used in the polyfilled `useWidgetState` store.
 
 ```typescript
+// Apps SDK example
 window.openai.widgetState = {
   // Your app state
   selectedItemId: "123",
@@ -197,7 +203,7 @@ window.openai.widgetState = {
 This key is:
 - Automatically managed by `DataLLM` components
 - Filtered out when you use `useWidgetState` (you only see your own state)
-- Read by the host when the user sends a message (passive context)
+- Read by the host when the user sends a message (passive context)—whether running in ChatGPT or MCP Apps clients (Claude, Goose, etc.)
 
 ## Example: Multi-step Wizard
 
