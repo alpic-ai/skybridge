@@ -28,7 +28,7 @@ export default class Start extends Command {
       `Server running at: \x1b[32m\x1b[1mhttp://localhost:3000/mcp\x1b[0m`,
     );
 
-    runCommand("node dist/index.js", {
+    await runCommand("node dist/index.js", {
       stdio: ["ignore", "inherit", "inherit"],
       env: { ...process.env, NODE_ENV: "production" },
     });
