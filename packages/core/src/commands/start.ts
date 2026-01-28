@@ -1,8 +1,6 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { Command } from "@oclif/core";
-import { Box, render, Text } from "ink";
-import { Header } from "../cli/header.js";
 import { runCommand } from "../cli/run-command.js";
 
 export default class Start extends Command {
@@ -23,25 +21,16 @@ export default class Start extends Command {
       process.exit(1);
     }
 
+    console.log(
+      `\x1b[36m\x1b[1m⛰  Welcome to Skybridge\x1b[0m \x1b[36mv${this.config.version}\x1b[0m`,
+    );
+    console.log(
+      `Server running at: \x1b[32m\x1b[1mhttp://localhost:3000/mcp\x1b[0m`,
+    );
+
     runCommand("node dist/index.js", {
-      stdio: ["ignore", "ignore", "inherit"],
+      stdio: ["ignore", "inherit", "inherit"],
       env: { ...process.env, NODE_ENV: "production" },
     });
-
-    const App = () => {
-      return (
-        <Box flexDirection="column" padding={1} marginLeft={1}>
-          <Header version={this.config.version} />
-          <Box>
-            <Text>Server running at: </Text>
-            <Text color="green" bold>
-              http://localhost:3000/mcp
-            </Text>
-          </Box>
-        </Box>
-      );
-    };
-
-    render(<App />, { exitOnCtrlC: true, patchConsole: false });
   }
 }
