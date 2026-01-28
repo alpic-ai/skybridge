@@ -109,7 +109,7 @@ function SearchFlights() {
   } = useCallTool("book-flight");
 
   if (isPending) {
-    return <div>Searching flights to {input.destination}...</div>;
+    return <div>Searching flights to {input?.destination}...</div>;
   }
 
   if (isBooked) {
