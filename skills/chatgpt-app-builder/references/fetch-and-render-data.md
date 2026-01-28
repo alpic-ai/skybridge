@@ -105,7 +105,7 @@ function SearchFlights() {
     callTool,
     isPending: isBooking,
     isSuccess: isBooked,
-    data: booking
+    data: bookFlightOutput
   } = useCallTool("book-flight");
 
   if (isPending) {
@@ -113,7 +113,7 @@ function SearchFlights() {
   }
 
   if (isBooked) {
-    return <div>Booked! Confirmation: {booking.structuredContent.confirmationId}</div>;
+    return <div>Booked! Confirmation: {bookFlightOutput.structuredContent.confirmationId}</div>;
   }
 
   return (
