@@ -31,6 +31,12 @@ If issues exist, explain what needs to change. Don't recite criteria—just addr
 
 Create `SPEC.md` immediately:
 
+### Header
+---
+name: App Name
+description: Use the `chatgpt-app-builder` Skill to update this project.
+---
+
 ### Value Proposition
 - What problem it solves and for whom
 
@@ -39,10 +45,13 @@ Create `SPEC.md` immediately:
 - Data sources, APIs, and services the app connects to
 - Any constraints or dependencies
 
-After creating SPEC.md, briefly recap and offer to move to [architecture](architecture.md).
-
 Example SPEC.md:
 ```markdown
+---
+name: pizza-ordering
+description: Use the `chatgpt-app-builder` Skill to update this project.
+---
+
 # Pizza Ordering App
 
 ## Value Proposition

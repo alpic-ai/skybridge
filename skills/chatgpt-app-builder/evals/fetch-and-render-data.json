@@ -1,0 +1,18 @@
+[
+  {
+    "query": "I'm building a restaurant finder. Users search by cuisine and location, browse restaurants with photos, and reserve a table. Show me the code.",
+    "expected_behavior": "Server: registerWidget('search-restaurants') with inputSchema {cuisine, location}, returns structuredContent {restaurants[]}, _meta {images[]} for photos. registerTool('make-reservation') with inputSchema {restaurantId, partySize, date}. UI: useToolInfo<'search-restaurants'>() for input/output/responseMetadata, useCallTool('make-reservation') for Reserve button."
+  },
+  {
+    "query": "I want a product catalog where users browse by category and see product cards with thumbnails. They can add items to cart and then generate a checkout session.",
+    "expected_behavior": "Server: registerWidget returns structuredContent {products[]} with id/name/price, _meta {thumbnails[]} to hide images from LLM. registerTool('create-checkout'). UI: useToolInfo with responseMetadata.thumbnails for images, useCallTool for Checkout button."
+  },
+  {
+    "query": "I need weather functionality. Users ask about weather in any city and can set temperature alerts. No visual UI needed.",
+    "expected_behavior": "Server: Two registerTool calls only (get-weather, set-alert). No registerWidget since output is conversational text. Returns content array for LLM. No UI components needed."
+  },
+  {
+    "query": "Building a job board. Users search jobs by keywords and location, see listings with salary info, and apply with one click. Show loading state while searching.",
+    "expected_behavior": "Server: registerWidget('search-jobs') with inputSchema {keywords, location}, registerTool('apply-job'). UI: useToolInfo<'search-jobs'>() with isPending for loading state, useCallTool('apply-job') with jobId on Apply button."
+  }
+]

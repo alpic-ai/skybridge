@@ -1,0 +1,18 @@
+[
+  {
+    "query": "My widget looks jarring when ChatGPT is in dark mode. How do I make the colors match?",
+    "expected_behavior": "Uses useLayout hook from skybridge/web. Destructures theme ('light' | 'dark'). Shows conditional styling based on theme value. May also mention maxHeight and safeArea for complete layout handling."
+  },
+  {
+    "query": "I want to show dates and numbers formatted for the user's language. Like if they're French, dates should be DD/MM/YYYY.",
+    "expected_behavior": "Uses useUser hook from skybridge/web. Destructures locale. Shows using locale with Intl.DateTimeFormat or similar for formatting. Extracts language code with locale.split('-')[0] if needed."
+  },
+  {
+    "query": "My widget has a complex grid that doesn't work well on phones. Can I show a simpler list view on mobile?",
+    "expected_behavior": "Uses useUser hook from skybridge/web. Destructures userAgent. Checks userAgent.device.type ('mobile' | 'tablet' | 'desktop' | 'unknown'). Shows conditional rendering or className based on device type."
+  },
+  {
+    "query": "I have hover tooltips that don't work on tablets. How do I handle touch devices differently?",
+    "expected_behavior": "Uses useUser hook from skybridge/web. Destructures userAgent. Checks userAgent.capabilities.hover (false for touch-only) or userAgent.capabilities.touch. Shows alternative interaction pattern for touch devices (e.g., tap instead of hover)."
+  }
+]
