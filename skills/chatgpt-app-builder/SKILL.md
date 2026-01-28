@@ -16,8 +16,8 @@ SPEC.md keeps track of the app's requirements and design decisions. Keep it up t
 
 ## Setup
 
-1. **Brainstorm** → [brainstorm.md](references/brainstorm.md): when user has an idea but no SPEC.md yet
-2. **Bootstrap** → [bootstrap.md](references/bootstrap.md): when starting a new project with ready SPEC.md
+1. **Discover** → [discover.md](references/discover.md): when user has an idea but no SPEC.md yet
+2. **Copy template** → [copy-template.md](references/copy-template.md): when starting a new project with ready SPEC.md
 3. **Run locally** → [run-locally.md](references/run-locally.md): when ready to test, need dev server or ChatGPT connection
 
 ## Architecture
@@ -32,6 +32,6 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 - **Style and localize** → [style-and-localize.md](references/style-and-localize.md): when adapting to theme, layout, locale, or device capabilities
 - **Display modes** → [control-display-modes.md](references/control-display-modes.md): when switching between inline, PiP, fullscreen, or modal
 - **External links** → [open-external-links.md](references/open-external-links.md): when redirecting to external URLs or setting "open in app" target
-- 
+
 
 Full API docs: [https://docs.skybridge.tech/api-reference.md](https://docs.skybridge.tech/api-reference.md)
