@@ -46,7 +46,7 @@ Shared across components, complex mutations. `createStore` is a thin wrapper aro
 import { createStore } from "skybridge/web";
 
 const useCartStore = createStore<CartState>((set) => ({
-  items: [],
+  cart: [],
   add: (item) => set((s) => ({ items: [...s.items, item] })),
   remove: (id) => set((s) => ({ items: s.items.filter(i => i.id !== id) })),
 }));
@@ -59,8 +59,8 @@ function ProductCard({ product }) {
 
 // CartSummary.tsx
 function CartSummary() {
-  const items = useCartStore((s) => s.items);
-  return <span>{items.length} items</span>;
+  const items = useCartStore((s) => s.cart);
+  return <span>{cart.length} items</span>;
 }
 ```
 
@@ -109,7 +109,7 @@ Todo list. User checks off tasks, asks "what should I prioritize?"
 function TaskList() {
   // PERSIST: All tasks with completed status
   const [tasks, setTasks] = useWidgetState({
-    items: [
+    tasks: [
       { id: 1, title: "Buy groceries", completed: false },
       { id: 2, title: "Call mom", completed: true },
     ]
@@ -130,7 +130,7 @@ function TaskList() {
           task={t}
           onView={() => setViewing(t)}
           onToggle={() => setTasks(prev => ({
-            items: prev.items.map(task =>
+            tasks: prev.items.map(task =>
               task.id === t.id ? { ...task, completed: !task.completed } : task
             )
           }))}
