@@ -6,6 +6,7 @@
   window.__vite_plugin_react_preamble_installed__ = true;
 </script>
 <script type="module" src="{{serverUrl}}/@vite/client"></script>
+{{#if useLocalNetworkAccess}}
 <script type="module">
   // Checks for browser support and shows error if local network access is denied
   (async () => {
@@ -59,6 +60,7 @@
     }
   })();
 </script>
+{{/if}}
 <div id="root"></div>
 <script type="module" id="dev-widget-entry">
   import('{{serverUrl}}/src/widgets/{{widgetName}}');
