@@ -47,8 +47,8 @@ import { createStore } from "skybridge/web";
 
 const useCartStore = createStore<CartState>((set) => ({
   cart: [],
-  add: (item) => set((s) => ({ items: [...s.items, item] })),
-  remove: (id) => set((s) => ({ items: s.items.filter(i => i.id !== id) })),
+  add: (item) => set((s) => ({ cart: [...s.cart, item] })),
+  remove: (id) => set((s) => ({ cart: s.cart.filter(i => i.id !== id) })),
 }));
 
 // ProductCard.tsx
@@ -59,7 +59,7 @@ function ProductCard({ product }) {
 
 // CartSummary.tsx
 function CartSummary() {
-  const items = useCartStore((s) => s.cart);
+  const cart = useCartStore((s) => s.cart);
   return <span>{cart.length} items</span>;
 }
 ```
