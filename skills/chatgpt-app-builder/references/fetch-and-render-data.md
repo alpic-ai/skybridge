@@ -59,16 +59,16 @@ const server = new McpServer(
     }
   )
   .registerTool(
-    "create-checkout",
+    "book-flight",
     {
-      description: "Create checkout session",
+      description: "Book a flight",
       inputSchema: { flightId: z.string() },
     },
     async ({ flightId }) => {
-      const checkoutUrl = await createCheckoutSession(flightId);
+      const confirmationId = await bookFlight(flightId);
       return {
-        structuredContent: { checkoutUrl },
-        content: [{ type: "text", text: "Checkout session created." }],
+        structuredContent: { confirmationId },
+        content: [{ type: "text", text: `Flight booked. Confirmation: ${confirmationId}` }],
       };
     }
   );
@@ -101,10 +101,19 @@ import { useToolInfo, useCallTool } from "../helpers";
 
 function SearchFlights() {
   const { input, output, isPending, responseMetadata } = useToolInfo<"search-flights">();
-  const { callTool } = useCallTool("create-checkout");
+  const {
+    callTool,
+    isPending: isBooking,
+    isSuccess: isBooked,
+    data: booking
+  } = useCallTool("book-flight");
 
   if (isPending) {
     return <div>Searching flights to {input.destination}...</div>;
+  }
+
+  if (isBooked) {
+    return <div>Booked! Confirmation: {booking.structuredContent.confirmationId}</div>;
   }
 
   return (
@@ -115,8 +124,11 @@ function SearchFlights() {
           <li key={i}>
             <img src={responseMetadata.images[i]} />
             {flight.departureTime} - ${flight.price}
-            <button onClick={() => callTool({ flightId: flight.id })}>
-              Book
+            <button
+              onClick={() => callTool({ flightId: flight.id })}
+              disabled={isBooking}
+            >
+              {isBooking ? "Booking..." : "Book"}
             </button>
           </li>
         ))}
