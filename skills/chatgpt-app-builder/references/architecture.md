@@ -134,7 +134,7 @@ Present the final architecture to the user, adjust based on feedback.
 
 ## Step 5: Update SPEC.md
 
-Update SPEC.md with the UX flows and API design, then offer to move to [bootstrap](bootstrap.md).
+Update SPEC.md with the UX flows and API design.
 
 **Example:**
 

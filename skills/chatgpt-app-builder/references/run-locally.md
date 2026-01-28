@@ -14,9 +14,11 @@ When started, output the local MCP server and devtools URL.
 
 Hot reload enabled (nodemon for server, HMR for widgets).
 
-## 2. Connect to ChatGPT
+## 2. Connect to ChatGPT (Optional)
 
-Run ngrok in the background to expose the app:
+Ask user if they want to test in ChatGPT or just use local devtools.
+
+If connecting to ChatGPT, expose the local server via ngrok:
 
 ```bash
 ngrok http 3000

@@ -20,4 +20,6 @@ deno init --npm skybridge {app-name}
 
 4. [Start the dev server](run-locally.md)
 
-5. Implement handlers per [fetch-and-render-data.md](fetch-and-render-data.md). Remove starter code.
+5. Replace the starter code with your implementation:
+- Server handlers → [fetch-and-render-data.md](fetch-and-render-data.md)
+- UI widgets → [manage-and-share-widget-state.md](communicate-with-llm.md)  
