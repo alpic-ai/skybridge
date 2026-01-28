@@ -24,9 +24,9 @@ my-app/
 ## Server Handlers
 
 Output:
-**`content`**: Text array shown to the model in the conversation
-**`structuredContent`**: Typed JSON data surfaced to your widget and the host
-**`_meta`** (optional): Delivered only to the widget and hidden from the model
+**`content`**: Text shown to LLM
+**`structuredContent`**: Structured data pushed to LLM context and consumed by UI components.
+**`_meta`** (optional): Data only the widget needs, hidden from LLM (e.g., image URLs, UI hints). Keeps LLM context clean.
 
 **Example**:
 

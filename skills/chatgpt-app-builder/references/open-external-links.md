@@ -51,7 +51,7 @@ server.registerWidget(
     _meta: {
       ui: {
         csp: {
-          redirectDomains: ["https://airfrance.com"],
+          redirectDomains: ["https://some-airline.com"],
         },
       },
     },

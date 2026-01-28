@@ -18,14 +18,14 @@ Single component, simple access patterns.
 
 ```tsx
 function SeatPicker({ seats }) {
-  const [selectedSeat, setSelectedSeat] = useWidgetState({ selectedSeat: null });
+  const [{ selectedSeat }, setState] = useWidgetState({ selectedSeat: null });
 
   return (
     <div className="seat-grid">
       {seats.map(seat => (
         <button
           key={seat.id}
-          onClick={() => setSelectedSeat(seat.id)}
+          onClick={() => setState((prev) => ({ ...prev, selectedSeat: seat.id }))}
           className={selectedSeat === seat.id ? "selected" : ""}
         >
           {seat.id}
@@ -90,7 +90,7 @@ function ProductDetail({ product }) {
 const [selected, setSelected] = useState(null);
 
 // DO: useWidgetState persists and LLM sees it
-const [selected, setSelected] = useWidgetState({ selected: null });
+const [{ selected }, setState] = useWidgetState({ selected: null });
 ```
 
 ```tsx
@@ -108,7 +108,7 @@ Todo list. User checks off tasks, asks "what should I prioritize?"
 ```tsx
 function TaskList() {
   // PERSIST: All tasks with completed status
-  const [tasks, setTasks] = useWidgetState({
+  const [{ tasks }, setState] = useWidgetState({
     tasks: [
       { id: 1, title: "Buy groceries", completed: false },
       { id: 2, title: "Call mom", completed: true },
@@ -122,15 +122,16 @@ function TaskList() {
     // CONTEXT: What user is looking at — LLM answers "how should I handle this task?"
     <div data-llm={viewing
       ? `Viewing: "${viewing.title}"`
-      : `${tasks.items.filter(t => !t.completed).length} tasks remaining`
+      : `${tasks.filter(t => !t.completed).length} tasks remaining`
     }>
-      {tasks.items.map(t => (
+      {tasks.map(t => (
         <Task
           key={t.id}
           task={t}
           onView={() => setViewing(t)}
-          onToggle={() => setTasks(prev => ({
-            tasks: prev.items.map(task =>
+          onToggle={() => setState((prev) => ({
+            ...prev,
+            tasks: prev.tasks.map(task =>
               task.id === t.id ? { ...task, completed: !task.completed } : task
             )
           }))}
@@ -145,6 +146,6 @@ function TaskList() {
 
 | What | API | Why |
 |------|-----|-----|
-| `tasks.items` | `useWidgetState` | Persists. Tasks and progress survive reopen. |
+| `tasks` | `useWidgetState` | Persists. Tasks and progress survive reopen. |
 | `viewing` | `useState` | Ephemeral. Current focus resets on reopen. |
 | `"Viewing: Buy groceries"` | `data-llm` | LLM context. Understands "this task" in conversation. |
