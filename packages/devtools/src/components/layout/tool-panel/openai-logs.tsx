@@ -101,7 +101,7 @@ export function OpenAiLogs() {
     <div className="flex flex-col h-full overflow-hidden min-h-0">
       <div className="flex items-center justify-between mb-3 h-8 flex-none">
         <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-200">
-          OpenAI API Logs
+          MCP client logs
         </h3>
         <div className="flex items-center gap-2">
           {openaiLogs.length > 0 && (
