@@ -27,7 +27,7 @@ app.use(
       grant_types_supported: ["authorization_code", "refresh_token"],
       code_challenge_methods_supported: ["S256"],
     },
-    // MCP_SERVER_URL: your server's public URL (localhost:3000, ngrok, or prod)
+    // MCP_SERVER_URL: the server's public URL (localhost:3000, ngrok, or prod)
     resourceServerUrl: new URL(process.env.MCP_SERVER_URL),
   }),
 );

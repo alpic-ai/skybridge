@@ -34,4 +34,8 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 - **External links** → [open-external-links.md](references/open-external-links.md): when redirecting to external URLs or setting "open in app" target
 - **OAuth** → [oauth.md](references/oauth.md): when tools need user authentication to access user-specific data
 
+## Deploy
+
+Ship to production → [deploy.md](references/deploy.md): when ready to deploy via Alpic
+
 Full API docs: [https://docs.skybridge.tech/api-reference.md](https://docs.skybridge.tech/api-reference.md)
