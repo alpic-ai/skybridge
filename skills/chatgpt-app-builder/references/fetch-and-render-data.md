@@ -151,6 +151,3 @@ export default SearchFlights;
 
 mountWidget(<SearchFlights />);
 ```
-
-
-
