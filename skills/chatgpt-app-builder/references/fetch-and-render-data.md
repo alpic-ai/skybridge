@@ -9,7 +9,8 @@
 ```
 my-app/
 ├── server/src/
-│   └── server.ts          # McpServer with tool and widget registration
+│   ├── index.ts          # HTTP server with middlewares
+│   └── server.ts         # McpServer with tool and widget registration
 ├── web/src/
 │   ├── widgets/          # React components (filename = widget name)
 │   │   └── search-flights.tsx
@@ -24,9 +25,14 @@ my-app/
 ## Server Handlers
 
 Output:
-**`content`**: Text shown to LLM
-**`structuredContent`**: Structured data pushed to LLM context and consumed by UI components.
-**`_meta`** (optional): Data only the widget needs, hidden from LLM (e.g., image URLs, UI hints). Keeps LLM context clean.
+- **`content`**: Text shown to LLM
+- **`structuredContent`**: Structured data pushed to LLM context and consumed by UI components.
+- **`_meta`** (optional): Data only the widget needs, hidden from LLM (e.g., image URLs, UI hints). Keeps LLM context clean.
+
+Annotations (set `true` when):
+- **`readOnlyHint`**: only reads data, no side effects
+- **`openWorldHint`**: publishes content or reaches outside user's account
+- **`destructiveHint`**: deletes or overwrites user data
 
 **Example**:
 
@@ -42,7 +48,10 @@ const server = new McpServer(
   .registerWidget(
     "search-flights",
     { description: "Search for flights" },
-    { inputSchema: { destination: z.string(), dates: z.string() } },
+    {
+      inputSchema: { destination: z.string(), dates: z.string() },
+      annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
+    },
     async ({ destination, dates }) => {
       const flights = await fetchFlights(destination, dates);
       const structuredContent = { flights: [] };
@@ -63,6 +72,7 @@ const server = new McpServer(
     {
       description: "Book a flight",
       inputSchema: { flightId: z.string() },
+      annotations: { readOnlyHint: false, openWorldHint: false, destructiveHint: false },
     },
     async ({ flightId }) => {
       const confirmationId = await bookFlight(flightId);
@@ -141,6 +151,3 @@ export default SearchFlights;
 
 mountWidget(<SearchFlights />);
 ```
-
-
-
