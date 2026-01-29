@@ -29,8 +29,7 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 - **Fetch and render data** → [fetch-and-render-data.md](references/fetch-and-render-data.md): when implementing server handlers and widget data fetching
 - **State and context** → [state-and-context.md](references/state-and-context.md): when persisting widget UI state and updating LLM context
 - **Prompt LLM** → [prompt-llm.md](references/prompt-llm.md): when widget needs to trigger LLM response
-- **Style and localize** → [style-and-localize.md](references/style-and-localize.md): when adapting to theme, layout, locale, or device capabilities
-- **Display modes** → [control-display-modes.md](references/control-display-modes.md): when switching between inline, PiP, fullscreen, or modal
+- **UI guidelines** → [ui-guidelines.md](references/ui-guidelines.md): display modes, layout constraints, theme, device, and locale
 - **External links** → [open-external-links.md](references/open-external-links.md): when redirecting to external URLs or setting "open in app" target
 - **OAuth** → [oauth.md](references/oauth.md): when tools need user authentication to access user-specific data
 - **CSP** → [csp.md](references/csp.md): when declaring allowed domains for fetch, assets, redirects, or iframes
