@@ -1,13 +1,10 @@
 ---
 title: useWidgetState
 description: "React hook for persistent widget state that survives re-renders and display mode changes."
-tag: "ChatGPT"
 ---
 
 <Warning>
-**Runtime Support**: ChatGPT Apps only
-
-MCP ext-apps spec doesn't yet define widget state. Support planned once spec evolves.
+**Runtime Support**: In MCP Apps, `useWidgetState` is polyfilled. State does **not** persist across widget renders.
 </Warning>
 
 The `useWidgetState` hook provides persistent state management for your widget. Unlike React's `useState`, this state is persisted by the host and survives across widget re-renders and display mode changes.

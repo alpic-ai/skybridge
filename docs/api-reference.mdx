@@ -60,13 +60,21 @@ Skybridge exports hooks and utilities from `skybridge/web` that work across mult
   <Card title="useFiles" icon="file" href="/api-reference/use-files">
     Upload and download files
   </Card>
+  <Card title="useSetOpenInAppUrl" icon="link" href="/api-reference/use-set-open-in-app-url">
+    Set URL for "open in app" button in fullscreen mode in ChatGPT
+  </Card>
 </CardGroup>
 
 ## Advanced
 
-<Card title="useAppsSdkContext" icon="code" href="/api-reference/use-apps-sdk-context">
-  Low-level hook to subscribe to `window.openai` state values
-</Card>
+<CardGroup cols={2}>
+  <Card title="useAppsSdkContext" icon="code" href="/api-reference/use-apps-sdk-context">
+    Low-level hook to subscribe to `window.openai` state values (Apps SDK)
+  </Card>
+  <Card title="useMcpAppContext" icon="plug" href="/api-reference/use-mcp-app-context">
+    Low-level hook to subscribe to MCP App host context (MCP Apps)
+  </Card>
+</CardGroup>
 
 ## Import
 
@@ -79,7 +87,9 @@ import {
   useDisplayMode,
   useFiles,
   useLayout,
+  useSetOpenInAppUrl,
   useAppsSdkContext,
+  useMcpAppContext,
   useOpenExternal,
   useRequestModal,
   useSendFollowUpMessage,
@@ -93,19 +103,24 @@ import {
 
 Skybridge supports two runtime environments: **Apps SDK** (ChatGPT) and **MCP Apps** (open specification). Most hooks work in both, but some features are platform-specific.
 
-| Hook | Apps SDK | MCP Apps | Notes |
-|------|:--------:|:--------:|-------|
+| Hook / Feature | Apps SDK | MCP Apps | Notes |
+|----------------|:--------:|:--------:|-------|
 | [useToolInfo](/api-reference/use-tool-info) | ✅ | ✅ | |
-| [useWidgetState](/api-reference/use-widget-state) | ✅ | 🔜 | MCP Apps: coming soon |
+| [useWidgetState](/api-reference/use-widget-state) | ✅ | ⚠️ | MCP Apps: polyfilled; state doesn't persist across widget renders |
+| [data-llm](/api-reference/data-llm) | ✅ | ⚠️ | MCP Apps: polyfilled (same limitation as useWidgetState) |
 | [useCallTool](/api-reference/use-call-tool) | ✅ | ✅ | |
 | [useSendFollowUpMessage](/api-reference/use-send-follow-up-message) | ✅ | ✅ | |
 | [useOpenExternal](/api-reference/use-open-external) | ✅ | ✅ | |
 | [useLayout](/api-reference/use-layout) | ✅ | ✅ | |
 | [useUser](/api-reference/use-user) | ✅ | ✅ | |
-| [useDisplayMode](/api-reference/use-display-mode) | ✅ | ⚠️ | MCP Apps: no "modal" mode |
+| [useDisplayMode](/api-reference/use-display-mode) | ✅ | ✅ | |
 | [useFiles](/api-reference/use-files) | ✅ | ❌ | Apps SDK only |
-| [useRequestModal](/api-reference/use-request-modal) | ✅ | 🔜 | MCP Apps: coming soon |
+| [useSetOpenInAppUrl](/api-reference/use-set-open-in-app-url) | ✅ | ❌ | Apps SDK only |
+| [useRequestModal](/api-reference/use-request-modal) | ✅ | ⚠️ | MCP Apps: polyfilled; renders in iframe instead of host modal |
+| [useAppsSdkContext](/api-reference/use-apps-sdk-context) | ✅ | ❌ | Apps SDK only |
+| [useMcpAppContext](/api-reference/use-mcp-app-context) | ❌ | ✅ | MCP Apps only |
 
 <Tip>
 Learn more about runtime differences in [Write Once, Run Everywhere](/concepts/write-once-run-everywhere).
 </Tip>
+

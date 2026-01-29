@@ -60,6 +60,10 @@ const { isIdle, isPending, isSuccess, isError, output, error } = useToolInfo();
 
 When the user clicks something and you need more data:
 
+<Note>
+**Tool Accessibility**: In Apps SDK (ChatGPT), tools must have `_meta["openai/widgetAccessible"]` set to `true` to be callable from widgets. In MCP Apps, all tools are accessible by default. See [useCallTool API](/api-reference/use-call-tool) for details.
+</Note>
+
 ```tsx
 import { useCallTool } from "skybridge/web";
 
