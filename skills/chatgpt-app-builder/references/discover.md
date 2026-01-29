@@ -1,10 +1,8 @@
 # Brainstorming Workflow
 
-Validate whether a ChatGPT app idea is a good fit. Stay high level—focus on the problem, user, and core action. Do not
-discuss implementation details (tools, APIs, data schemas, field mappings).
+Validate whether a ChatGPT app idea is a good fit. Stay high level—focus on the problem, user, and core action. Do not discuss implementation details (tools, APIs, data schemas, field mappings).
 
-If you have enough context to validate, move forward. Don't ask questions you can infer or that only matter during     
-implementation.
+If you have enough context to validate, move forward. Don't ask questions you can infer or that only matter during implementation.
 
 ## 1. Explore the idea
 
@@ -18,7 +16,7 @@ When you have a clear idea of what the app does, move to the next step.
 
 ## 2. Validate against UX principles
 
-A ChatGPT app should do something _better_ because it lives in conversation. Good fits: booking, ordering, checking status, tracking. Poor fits: reading long content, complex multi-step workflows, ads.
+A ChatGPT app should do something _better_ because it lives in conversation. Good fits: booking ordering, checking status, tracking. Poor fits: reading long content, complex multi-step workflows, ads.
 
 Ask yourself:
 - Does natural language beat forms/buttons here? If not, find the part where "just say it" wins.

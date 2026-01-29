@@ -9,7 +9,8 @@
 ```
 my-app/
 ├── server/src/
-│   └── server.ts          # McpServer with tool and widget registration
+│   ├── index.ts          # HTTP server with middlewares
+│   └── server.ts         # McpServer with tool and widget registration
 ├── web/src/
 │   ├── widgets/          # React components (filename = widget name)
 │   │   └── search-flights.tsx
