@@ -17,15 +17,15 @@ export function HomeTab() {
         Read the full code implementation on{" "}
         <a
           href="#"
+          role="button"
           onClick={(e) => {
             e.preventDefault();
             openExternal(
               "https://github.com/alpic-ai/skybridge/tree/main/examples/everything"
             );
           }}
-          style={{ cursor: "pointer" }}
         >
-          Github
+          GitHub
         </a>
       </p>
     </div>
