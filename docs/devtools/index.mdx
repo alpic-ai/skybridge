@@ -49,7 +49,7 @@ This inspector mocks the **Apps SDK runtime** (`window.openai`). For testing MCP
 
 View and monitor the widget's state as it changes. The widget state inspector shows the current state object in a JSON tree view, making it easy to debug state management and track state updates.
 
-### Apps SDK API Logs
+### MCP client logs
 
 See all Apps SDK API calls made by your widget in real-time. The logs panel displays:
 - Timestamp of each API call
@@ -57,7 +57,7 @@ See all Apps SDK API calls made by your widget in real-time. The logs panel disp
 - Arguments passed to each method
 - Response data (when applicable)
 
-This helps you understand how your widget interacts with the Apps SDK API and debug any issues.
+This helps you understand how your widget interacts with the MCP client and debug any issues.
 
 <Note>
 These logs show **Apps SDK** (`window.openai`) calls. In MCP Apps, widgets use the MCP ext-apps protocol instead. The Skybridge hooks abstract these differences, so your widget code works in both runtimes.
