@@ -33,9 +33,11 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 - **Display modes** → [control-display-modes.md](references/control-display-modes.md): when switching between inline, PiP, fullscreen, or modal
 - **External links** → [open-external-links.md](references/open-external-links.md): when redirecting to external URLs or setting "open in app" target
 - **OAuth** → [oauth.md](references/oauth.md): when tools need user authentication to access user-specific data
+- **CSP** → [csp.md](references/csp.md): when declaring allowed domains for fetch, assets, redirects, or iframes
 
 ## Deploy
 
-Ship to production → [deploy.md](references/deploy.md): when ready to deploy via Alpic
+- **Ship to production** → [deploy.md](references/deploy.md): when ready to deploy via Alpic
+- **Publish to ChatGPT Directory** → [publish.md](references/publish.md): when ready to submit for review
 
 Full API docs: [https://docs.skybridge.tech/api-reference.md](https://docs.skybridge.tech/api-reference.md)
