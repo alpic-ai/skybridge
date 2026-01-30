@@ -1,12 +1,11 @@
 import "@/index.css";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   mountWidget,
   useLayout,
   useOpenExternal,
   useRequestModal,
-  useSetOpenInAppUrl,
   useUser,
   useWidgetState,
 } from "skybridge/web";
@@ -46,20 +45,12 @@ function EcomCarousel() {
   const { locale } = useUser();
   const { open, isOpen } = useRequestModal();
   const openExternal = useOpenExternal();
-  const setOpenInAppUrl = useSetOpenInAppUrl();
 
   const lang = locale?.split("-")[0] ?? "en";
 
   function translate(key: string) {
     return translations[lang]?.[key] ?? translations.en[key];
   }
-
-  useEffect(() => {
-    if (window.skybridge?.hostType !== "apps-sdk") {
-      return;
-    }
-    setOpenInAppUrl(CHECKOUT_URL).catch(console.error);
-  }, [setOpenInAppUrl]);
 
   const { output, isPending } = useToolInfo<"ecom-carousel">();
   type Product = NonNullable<typeof output>["products"][number];
