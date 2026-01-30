@@ -15,18 +15,16 @@ export function HomeTab() {
       </p>
       <p className="description">
         Read the full code implementation on{" "}
-        <a
-          href="#"
-          role="button"
-          onClick={(e) => {
-            e.preventDefault();
+        <button
+          onClick={() =>
             openExternal(
               "https://github.com/alpic-ai/skybridge/tree/main/examples/everything"
-            );
-          }}
+            )
+          }
+          className="link-button"
         >
           GitHub
-        </a>
+        </button>
       </p>
     </div>
   );
