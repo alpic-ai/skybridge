@@ -11,6 +11,7 @@ Understand:
 - Who is the target user?
 - What actions/data does it involve?
 - What exists today (website, API, product)?
+- What does the UI journey look like? Think about how the widget evolves as users interact—start inline for quick info, expand to fullscreen for detail, or float as PiP for persistent sessions.
 
 When you have a clear idea of what the app does, move to the next step.
 
@@ -43,6 +44,9 @@ description: Use the `chatgpt-app-builder` Skill to update this project.
 - Data sources, APIs, and services the app connects to
 - Any constraints or dependencies
 
+### User Experience
+- How the widget evolves through key flows (display modes, navigation)
+
 Example SPEC.md:
 ```markdown
 ---
@@ -53,10 +57,15 @@ description: Use the `chatgpt-app-builder` Skill to update this project.
 # Pizza Ordering App
 
 ## Value Proposition
-Order pizza through conversation - browse the menu, customize orders, and track delivery without leaving ChatGPT.
+Order pizza through conversation—browse the menu, customize orders, and track delivery without leaving ChatGPT.
 
 ## Product Context
 - **Existing product**: PizzaCo mobile app and website
 - **API**: REST API at api.pizzaco.com (OAuth2, 100 req/min)
 - **Constraints**: Payment handled via existing PizzaCo account, no credit card input in ChatGPT
+
+## User Experience
+Menu browsing starts inline with a carousel of popular pizzas; users can expand to fullscreen for the full menu with filters.
+Order customization shows inline with an "Edit" button to fullscreen for detailed toppings/crust options.
+Delivery tracking displays inline status with ETA, and a "Track Live" button launches PiP mode with a real-time map that persists while chatting.
 ```
