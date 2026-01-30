@@ -1,3 +1,7 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.js";
+import { useSelectedTool } from "@/lib/mcp/index.js";
+import { useCallToolResult, useStore } from "@/lib/store.js";
+import { cn } from "@/lib/utils.js";
 import type Form from "@rjsf/core";
 import { Form as FormComponent } from "@rjsf/shadcn";
 import type {
@@ -7,10 +11,7 @@ import type {
   UiSchema,
 } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
-import { useRef } from "react";
-import { useSelectedTool } from "@/lib/mcp/index.js";
-import { useCallToolResult, useStore } from "@/lib/store.js";
-import { cn } from "@/lib/utils.js";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "../../ui/card.js";
 import { CallToolButton } from "../call-tool-button.js";
 import { ViewToolMetaButton } from "../view-tool-meta-button.js";
@@ -100,6 +101,42 @@ const FormContent = ({
   );
 };
 
+const JsonContent = ({
+  formData,
+  setFormData,
+}: {
+  formData: Record<string, unknown> | null;
+  setFormData: (data: Record<string, unknown> | null) => void;
+}) => {
+
+  const [json, setJson] = useState(JSON.stringify(formData, null, 2));
+
+  useEffect(() => {
+    setJson(JSON.stringify(formData, null, 2));
+  }, [formData]);
+
+  const handleChange = (value: string) => {
+    setJson(value);
+    try {
+      const parsed = JSON.parse(value);
+      setFormData(parsed);
+    } catch {
+      // Ignore parse errors while typing
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <textarea
+        className="w-full h-full p-2 rounded-md border border-border"
+        rows={12}
+        value={json}
+        onChange={(e) => handleChange(e.target.value)}
+      />
+    </div>
+  )
+};
+
 export const InputForm = () => {
   const ref = useRef<Form<unknown, RJSFSchema>>(null);
   const tool = useSelectedTool();
@@ -137,13 +174,28 @@ export const InputForm = () => {
       </div>
 
       <div className="flex-1 overflow-auto px-6 py-6 bg-muted/50">
-        <FormContent
-          key={tool.name}
-          schema={tool.inputSchema as RJSFSchema}
-          formData={formData}
-          setFormData={setFormData}
-          ref={ref}
-        />
+        <Tabs defaultValue="form">
+          <TabsList>
+            <TabsTrigger value="form">Form</TabsTrigger>
+            <TabsTrigger value="json">JSON</TabsTrigger>
+          </TabsList>
+          <TabsContent value="form">
+            <FormContent
+              key={tool.name}
+              schema={tool.inputSchema as RJSFSchema}
+              formData={formData}
+              setFormData={setFormData}
+              ref={ref}
+            />
+          </TabsContent>
+          <TabsContent value="json">
+            <JsonContent
+              key={tool.name}
+              formData={formData}
+              setFormData={setFormData}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
