@@ -1,4 +1,6 @@
-import nodemonOriginal, { type NodemonSettings } from "nodemon";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import nodemonOriginal from "nodemon";
 import { useEffect, useState } from "react";
 import type { ExtendedNodemon } from "./nodemon.d.ts";
 
@@ -13,11 +15,19 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
   const [messages, setMessages] = useState<Array<Message>>([]);
 
   useEffect(() => {
+    const entryPath = resolve(
+      fileURLToPath(import.meta.url),
+      "../server-entry.js",
+    );
+
     nodemon({
       env,
-      configFile: "nodemon.json",
+      watch: ["server/src"],
+      ext: "ts,json",
+      exec: `tsx ${entryPath}`,
       stdout: false,
-    } as NodemonSettings);
+      stderr: false,
+    } as Parameters<typeof nodemon>[0]);
 
     const handleStdoutData = (chunk: Buffer) => {
       const message = chunk.toString().trim();
