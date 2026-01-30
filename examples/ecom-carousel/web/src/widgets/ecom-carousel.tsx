@@ -1,11 +1,12 @@
 import "@/index.css";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   mountWidget,
   useLayout,
   useOpenExternal,
   useRequestModal,
+  useSetOpenInAppUrl,
   useUser,
   useWidgetState,
 } from "skybridge/web";
@@ -38,19 +39,29 @@ const translations: Record<string, Record<string, string>> = {
   },
 };
 
-const CHECKOUT_URL = "https://alpic.ai";
+const CHECKOUT_URL = "https://docs.skybridge.tech";
 
 function EcomCarousel() {
   const { theme } = useLayout();
   const { locale } = useUser();
   const { open, isOpen } = useRequestModal();
   const openExternal = useOpenExternal();
+  const setOpenInAppUrl = useSetOpenInAppUrl();
 
   const lang = locale?.split("-")[0] ?? "en";
 
   function translate(key: string) {
     return translations[lang]?.[key] ?? translations.en[key];
   }
+
+  const isAppsSdkHost = window.skybridge?.hostType === "apps-sdk";
+
+  useEffect(() => {
+    if (!isAppsSdkHost) {
+      return;
+    }
+    setOpenInAppUrl(CHECKOUT_URL).catch(console.error);
+  }, [isAppsSdkHost, setOpenInAppUrl]);
 
   const { output, isPending } = useToolInfo<"ecom-carousel">();
   type Product = NonNullable<typeof output>["products"][number];
