@@ -54,14 +54,12 @@ function EcomCarousel() {
     return translations[lang]?.[key] ?? translations.en[key];
   }
 
-  const isAppsSdkHost = window.skybridge?.hostType === "apps-sdk";
-
   useEffect(() => {
-    if (!isAppsSdkHost) {
+    if (window.skybridge?.hostType !== "apps-sdk") {
       return;
     }
     setOpenInAppUrl(CHECKOUT_URL).catch(console.error);
-  }, [isAppsSdkHost, setOpenInAppUrl]);
+  }, [setOpenInAppUrl]);
 
   const { output, isPending } = useToolInfo<"ecom-carousel">();
   type Product = NonNullable<typeof output>["products"][number];
