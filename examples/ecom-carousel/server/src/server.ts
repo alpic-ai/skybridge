@@ -29,10 +29,7 @@ const server = new McpServer(
       ui: {
         csp: {
           resourceDomains: ["https://fakestoreapi.com"],
-          redirectDomains: [
-            "https://docs.skybridge.tech",
-            "https://github.com/alpic-ai/skybridge/issues/248",
-          ],
+          redirectDomains: ["https://docs.skybridge.tech"],
         },
       },
     },
