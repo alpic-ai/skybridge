@@ -50,7 +50,7 @@ const translations: Record<string, Record<string, string>> = {
   },
 };
 
-const CHECKOUT_URL = "https://alpic.ai";
+const CHECKOUT_URL = "https://docs.skybridge.tech";
 
 function EcomCarousel() {
   const { theme } = useLayout();
