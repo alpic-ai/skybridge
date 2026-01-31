@@ -17,24 +17,36 @@ const translations: Record<string, Record<string, string>> = {
     noProducts: "No product found",
     addToCart: "Add to cart",
     removeFromCart: "Remove",
+    checkout: "Checkout",
+    orderSummary: "Order summary",
+    total: "Total",
   },
   fr: {
     loading: "Chargement des produits...",
     noProducts: "Aucun produit trouvé",
     addToCart: "Ajouter",
     removeFromCart: "Retirer",
+    checkout: "Payer",
+    orderSummary: "Récapitulatif de commande",
+    total: "Total",
   },
   es: {
     loading: "Cargando productos...",
     noProducts: "No se encontraron productos",
     addToCart: "Añadir",
     removeFromCart: "Quitar",
+    checkout: "Pagar",
+    orderSummary: "Resumen del pedido",
+    total: "Total",
   },
   de: {
     loading: "Produkte werden geladen...",
     noProducts: "Keine Produkte gefunden",
     addToCart: "Hinzufügen",
     removeFromCart: "Entfernen",
+    checkout: "Zur Kasse",
+    orderSummary: "Bestellübersicht",
+    total: "Gesamt",
   },
 };
 
@@ -96,7 +108,7 @@ function EcomCarousel() {
 
     return (
       <div className={`${theme} checkout`}>
-        <div className="checkout-title">Order summary</div>
+        <div className="checkout-title">{translate("orderSummary")}</div>
         <div className="checkout-items">
           {cartItems.map((item) => (
             <div key={item.id} className="checkout-item">
@@ -106,7 +118,7 @@ function EcomCarousel() {
           ))}
         </div>
         <div className="checkout-total">
-          <span>Total</span>
+          <span>{translate("total")}</span>
           <span>${total.toFixed(2)}</span>
         </div>
         <button
@@ -114,7 +126,7 @@ function EcomCarousel() {
           className="checkout-button"
           onClick={() => openExternal(checkoutUrl.toString())}
         >
-          Checkout
+          {translate("checkout")}
         </button>
       </div>
     );
