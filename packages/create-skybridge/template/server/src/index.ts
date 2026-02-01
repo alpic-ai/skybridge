@@ -13,6 +13,9 @@ app.use(express.json());
 
 app.use(mcp(server));
 
+const parsedPort = Number.parseInt(process.env.PORT ?? "", 10);
+const port = Number.isFinite(parsedPort) ? parsedPort : 3000;
+
 const env = process.env.NODE_ENV || "development";
 
 if (env !== "production") {
@@ -29,7 +32,7 @@ if (env === "production") {
   app.use("/assets", express.static(path.join(__dirname, "assets")));
 }
 
-app.listen(3000, (error) => {
+app.listen(port, (error) => {
   if (error) {
     console.error("Failed to start server:", error);
     process.exit(1);

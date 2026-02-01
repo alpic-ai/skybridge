@@ -64,7 +64,7 @@ The production server runs your compiled application from the `dist/` directory 
 - **No dev tools** - DevTools and Vite dev server are excluded in production for better performance
 - **Optimized rendering** - Uses production templates that load pre-bundled JavaScript and CSS files
 
-The server listens on port 3000 by default. 
+The server listens on port 3000 by default. Override it with `skybridge start --port <port>` or by setting `PORT`.
 
 When deployed remotely, the MCP Client (ChatGPT, Claude, etc.) connects to your MCP endpoint (e.g., `https://your-domain.com/mcp`) to access your tools and widgets.
 
@@ -78,4 +78,3 @@ When deployed remotely, the MCP Client (ChatGPT, Claude, etc.) connects to your 
     Browse the complete API documentation
   </Card>
 </CardGroup>
-

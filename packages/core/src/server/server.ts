@@ -398,6 +398,8 @@ export class McpServer<
           process.env.SKYBRIDGE_USE_FORWARDED_HOST === "true";
         const isClaude =
           extra?.requestInfo?.headers?.["user-agent"] === "Claude-User";
+        const parsedPort = Number.parseInt(process.env.PORT ?? "", 10);
+        const port = Number.isFinite(parsedPort) ? parsedPort : 3000;
 
         const hostFromHeaders =
           extra?.requestInfo?.headers?.["x-forwarded-host"] ??
@@ -407,7 +409,7 @@ export class McpServer<
 
         const serverUrl = useExternalHost
           ? `https://${hostFromHeaders}`
-          : "http://localhost:3000";
+          : `http://localhost:${port}`;
 
         const html = isProduction
           ? templateHelper.renderProduction({
