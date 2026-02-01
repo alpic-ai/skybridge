@@ -18,9 +18,9 @@ skybridge dev
 ```
 
 **What it does:**
-- Starts a development server at `http://localhost:3000/`
-- Opens DevTools for local testing at `http://localhost:3000/`
-- Exposes MCP server at `http://localhost:3000/mcp`
+- Starts a development server at `http://localhost:3000/` by default
+- Opens DevTools for local testing at `http://localhost:3000/` by default
+- Exposes MCP server at `http://localhost:3000/mcp` by default
 - Enables file watching with automatic server restart
 - Enables Hot Module Reloading (HMR) for widgets
 
@@ -28,6 +28,7 @@ skybridge dev
 
 | Flag | Description |
 |------|-------------|
+| `-p, --port <port>` | Port to run the development server on. |
 | `--use-forwarded-host` | Uses the forwarded host header to construct widget URLs instead of localhost. Useful when accessing the dev server through a tunnel (e.g., ngrok). |
 
 The `--use-forwarded-host`  allows your widgets to work on any device connected to the internet, not just on your local machine. Useful when developing on multiple devices or when you need to test your app from different devices.
@@ -38,15 +39,15 @@ The `--use-forwarded-host`  allows your widgets to work on any device connected 
 
 ```bash
 # Terminal 1: Start Skybridge
-skybridge dev --use-forwarded-host
+skybridge dev --use-forwarded-host --port 4000
 
 # Terminal 2: Expose your local server
-ngrok http 3000
+ngrok http 4000
 ```
 
 **Note:** Only use `--use-forwarded-host` when you need to develop or test on multiple devices. For local-only development, the standard `skybridge dev` command is sufficient.
 
-When using `--use-forwarded-host`, Skybridge will use the ngrok URL (e.g., `https://abc123.ngrok-free.app`) for widget URLs instead of `localhost:3000`.
+When using `--use-forwarded-host`, Skybridge will use the ngrok URL (e.g., `https://abc123.ngrok-free.app`) for widget URLs instead of the local `localhost` address.
 
 ---
 
@@ -83,8 +84,14 @@ skybridge start
 **What it does:**
 - Runs the compiled server from `dist/index.js`
 - Sets `NODE_ENV=production`
-- Serves the MCP endpoint at `http://localhost:3000/mcp`
+- Serves the MCP endpoint at `http://localhost:3000/mcp` by default
 - Serves pre-built widget assets from `/assets`
+
+#### Flags
+
+| Flag | Description |
+|------|-------------|
+| `-p, --port <port>` | Port to run the production server on. |
 
 ---
 
