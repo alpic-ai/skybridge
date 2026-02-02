@@ -1,7 +1,3 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.js";
-import { useSelectedTool } from "@/lib/mcp/index.js";
-import { useCallToolResult, useStore } from "@/lib/store.js";
-import { cn } from "@/lib/utils.js";
 import type Form from "@rjsf/core";
 import { Form as FormComponent } from "@rjsf/shadcn";
 import type {
@@ -12,6 +8,15 @@ import type {
 } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useEffect, useRef, useState } from "react";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs.js";
+import { useSelectedTool } from "@/lib/mcp/index.js";
+import { useCallToolResult, useStore } from "@/lib/store.js";
+import { cn } from "@/lib/utils.js";
 import { Card, CardContent } from "../../ui/card.js";
 import { CallToolButton } from "../call-tool-button.js";
 import { ViewToolMetaButton } from "../view-tool-meta-button.js";
@@ -108,7 +113,6 @@ const JsonContent = ({
   formData: Record<string, unknown> | null;
   setFormData: (data: Record<string, unknown> | null) => void;
 }) => {
-
   const [json, setJson] = useState(JSON.stringify(formData, null, 2));
 
   useEffect(() => {
@@ -134,7 +138,7 @@ const JsonContent = ({
         onChange={(e) => handleChange(e.target.value)}
       />
     </div>
-  )
+  );
 };
 
 export const InputForm = () => {
