@@ -173,7 +173,35 @@ export async function init(args: string[] = process.argv.slice(2)) {
   const userAgent = process.env.npm_config_user_agent;
   const pkgManager = userAgent?.split(" ")[0]?.split("/")[0] || "npm";
 
-  // 4. Ask about immediate installation
+  // 4. Ask about skills installation
+  if (interactive) {
+    const skillsResult = await prompts.confirm({
+      message: "Install the coding agents skills? (recommended)",
+      initialValue: true,
+    });
+    if (prompts.isCancel(skillsResult)) {
+      return cancel();
+    }
+    if (skillsResult) {
+      run(
+        [
+          "npx",
+          "--yes",
+          "skills",
+          "add",
+          "alpic-ai/skybridge",
+          "-s",
+          "chatgpt-app-builder",
+        ],
+        {
+          stdio: "inherit",
+          cwd: targetDir,
+        },
+      );
+    }
+  }
+
+  // 5. Ask about immediate installation
   let immediate = argImmediate;
   if (immediate === undefined) {
     if (interactive) {
