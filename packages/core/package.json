@@ -74,7 +74,7 @@
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
     "@vitest/ui": "^4.0.17",
-    "jsdom": "^27.4.0",
+    "jsdom": "^28.0.0",
     "shx": "^0.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
