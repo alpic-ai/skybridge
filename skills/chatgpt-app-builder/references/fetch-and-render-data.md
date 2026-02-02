@@ -14,7 +14,7 @@ my-app/
 ├── web/src/
 │   ├── widgets/          # React components (filename = widget name)
 │   │   └── search-flights.tsx
-│   ├── index.css         # Global CSS
+│   ├── index.css         # Global CSS, must be imported in every widget
 │   └── helpers.ts        # Type-safe hooks via generateHelpers
 └── package.json
 ```
@@ -63,7 +63,7 @@ const server = new McpServer(
       return {
         structuredContent,
         content: [{ type: "text", text: `Found ${flights.length} flights.` }],
-        _meta
+        _meta // mind the underscore prefix
       };
     }
   )
@@ -112,10 +112,10 @@ import { useToolInfo, useCallTool } from "../helpers";
 function SearchFlights() {
   const { input, output, isPending, responseMetadata } = useToolInfo<"search-flights">();
   const {
-    callTool,
+    callTool, // returns void, use `data` to get the actual output
+    data: bookFlightOutput,
     isPending: isBooking,
     isSuccess: isBooked,
-    data: bookFlightOutput
   } = useCallTool("book-flight");
 
   if (isPending) {

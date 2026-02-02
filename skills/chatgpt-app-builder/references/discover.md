@@ -1,4 +1,4 @@
-# Brainstorming Workflow
+# Discovery Workflow
 
 Validate whether a ChatGPT app idea is a good fit. Stay high level—focus on the problem, user, and core action. Do not discuss implementation details (tools, APIs, data schemas, field mappings).
 
@@ -28,11 +28,11 @@ If issues exist, explain what needs to change. Don't recite criteria—just addr
 
 ## 3. Wrapping up
 
-Create `SPEC.md` immediately:
+Create `SPEC.md` in target directory (use cwd if empty project, otherwise create `{app-name}/`):
 
 ### Header
 ---
-name: App Name
+name: {app-name}
 description: Use the `chatgpt-app-builder` Skill to update this project.
 ---
 
@@ -50,7 +50,7 @@ description: Use the `chatgpt-app-builder` Skill to update this project.
 Example SPEC.md:
 ```markdown
 ---
-name: pizza-ordering
+name: pizzaco-chatgpt
 description: Use the `chatgpt-app-builder` Skill to update this project.
 ---
 
