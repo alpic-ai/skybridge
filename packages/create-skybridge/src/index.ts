@@ -185,9 +185,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
     if (skillsResult) {
       run(
         [
-          "npx",
-          "--yes",
-          "skills",
+          ...getPkgExecCmd(pkgManager, "skills"),
           "add",
           "alpic-ai/skybridge",
           "-s",
@@ -299,5 +297,20 @@ function emptyDir(dir: string) {
       continue;
     }
     fs.rmSync(path.resolve(dir, file), { recursive: true, force: true });
+  }
+}
+
+function getPkgExecCmd(pkgManager: string, cmd: string): string[] {
+  switch (pkgManager) {
+    case "yarn":
+      return ["yarn", "dlx", cmd];
+    case "pnpm":
+      return ["pnpm", "dlx", cmd];
+    case "bun":
+      return ["bunx", cmd];
+    case "deno":
+      return ["deno", "run", "-A", `npm:${cmd}`];
+    default:
+      return ["npx", cmd];
   }
 }
