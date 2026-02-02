@@ -79,6 +79,10 @@ Based on the UX flow:
 ❌ `update_quantity` tool (form input is widget state)
 ✅ Tools are for backend operations only: `create_checkout`, `submit_order`, `make_reservation`
 
+**Don't lazy-load:** Tool calls are expensive. Return all needed data upfront.
+❌ `search_flights` widget + `get_flight_details` tool (lazy-loading details)
+✅ `search_flights` widget returns full flight data including details
+
 --- 
 
 For each identified flow:
@@ -130,7 +134,7 @@ Present the final architecture to the user, adjust based on feedback.
 
 ## Step 5: Update SPEC.md
 
-Update SPEC.md with the UX flows and API design, then offer to move to [bootstrap](bootstrap.md).
+Update SPEC.md with the UX flows and API design.
 
 **Example:**
 

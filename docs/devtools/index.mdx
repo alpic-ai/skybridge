@@ -6,7 +6,7 @@ description: "Test your app widgets locally with Skybridge's browser-based DevTo
 DevTools is designed to help you test your apps locally in a short feedback loop fashion. It lets you develop and debug widgets without needing to deploy or use external services.
 
 <Note>
-DevTools currently renders widgets using the **Apps SDK runtime** (mocked `window.openai`). MCP Apps rendering is not yet supported in DevTools. For MCP Apps testing, connect your server to a compatible client like Goose.
+DevTools currently renders widgets using the **Apps SDK runtime** (mocked `window.openai`). MCP Apps rendering is not yet supported in DevTools. 
 </Note>
 
 ## Quick Start
@@ -29,10 +29,10 @@ DevTools generates a form based on each tool's input schema, making it easy to t
 
 When a tool renders a widget, DevTools provides comprehensive inspection capabilities:
 
-### OpenAI Object View & Edition
+### Apps SDK Environment Inspector
 
-Inspect and edit the `window.openai` object properties in real-time:
-- **Display Mode**: Switch between inline, fullscreen, pip, and modal modes
+Inspect and edit the Apps SDK environment properties in real-time (mocked `window.openai`):
+- **Display Mode**: Switch between inline, fullscreen, and picture-in-picture modes
 - **Theme**: Toggle between light and dark themes
 - **Locale**: Change the locale settings
 - **User Agent**: Modify device type (mobile/desktop) and capabilities (hover/touch)
@@ -41,28 +41,37 @@ Inspect and edit the `window.openai` object properties in real-time:
 
 Changes are immediately reflected in the widget preview, allowing you to test how your widget behaves under different conditions.
 
+<Note>
+This inspector mocks the **Apps SDK runtime** (`window.openai`). For testing MCP Apps-specific behavior, use a MCP Apps Client like Goose or MCPJam.
+</Note>
+
 ### Inspectable Widget State
 
 View and monitor the widget's state as it changes. The widget state inspector shows the current state object in a JSON tree view, making it easy to debug state management and track state updates.
 
-### OpenAI API Logs
+### MCP client logs
 
-See all OpenAI API calls made by your widget in real-time. The logs panel displays:
+See all Apps SDK API calls made by your widget in real-time. The logs panel displays:
 - Timestamp of each API call
 - Command name (e.g., `setWidgetState`, `callTool`, `requestDisplayMode`)
 - Arguments passed to each method
 - Response data (when applicable)
 
-This helps you understand how your widget interacts with the OpenAI API and debug any issues.
+This helps you understand how your widget interacts with the MCP client and debug any issues.
+
+<Note>
+These logs show **Apps SDK** (`window.openai`) calls. In MCP Apps, widgets use the MCP ext-apps protocol instead. The Skybridge hooks abstract these differences, so your widget code works in both runtimes.
+</Note>
 
 <img src="/images/devtools-widget.png" alt="DevTools Widget Inspection Panel" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
 
 ## Limitations
 
-DevTools uses ChatGPT's rendering environment but has some differences:
+DevTools uses the **Apps SDK runtime** (mocked `window.openai`) but has some differences from production:
 
 - **CSP policies**: Some external resources may be blocked in production but allowed locally
-- **LLM responses**: Follow-up messages don't trigger actual LLM responses—test these in ChatGPT dev mode
+- **LLM responses**: Follow-up messages don't trigger actual LLM responses—test these in ChatGPT dev mode or MCP Apps clients
+- **MCP Apps runtime**: DevTools does not support MCP Apps widget rendering—test MCP Apps widgets in real clients like Goose or Claude
 
 ## Custom Integration
 
@@ -80,4 +89,4 @@ if (process.env.NODE_ENV !== "production") {
 ## Related
 
 - [Fast Iteration](/concepts/fast-iteration) - Development workflow and concepts
-- [Test Your App](/quickstart/test-your-app) - Testing in ChatGPT dev mode
+- [Test Your App](/quickstart/test-your-app) - Testing in production settings (ChatGPT, Claude, other MCP Apps Clients)

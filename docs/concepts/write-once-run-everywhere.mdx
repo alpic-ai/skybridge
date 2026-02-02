@@ -1,0 +1,96 @@
+---
+title: Write Once, Run Everywhere
+sidebarTitle: Write Once, Run Everywhere
+description: "How Skybridge abstracts runtime differences so your apps work across all ChatGPT and MCP Apps hosts."
+---
+
+Skybridge is designed to be **runtime-agnostic**. Your widget code works the same whether it runs in MCP Apps compatible clients (like Claude, Goose, VSCode) via the MCP ext-apps specification, or in ChatGPT via the Apps SDK.
+
+## The Problem
+
+Different AI runtimes use different APIs to communicate with embedded widgets:
+
+- **ChatGPT** uses the Apps SDK with `window.openai` global
+- **MCP Apps** use JSON-RPC postMessage protocol (MCP ext-apps spec)
+
+Without abstraction, you'd need to write different code for each platform — or lock yourself into one ecosystem.
+
+## Skybridge's Solution
+
+Skybridge introduces an **adaptor layer** that normalizes these differences:
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#2563EB', 'primaryTextColor': '#fff', 'primaryBorderColor': '#1e40af', 'lineColor': '#64748b', 'secondaryColor': '#3B82F6', 'tertiaryColor': '#dbeafe' }}}%%
+flowchart TB
+    subgraph Code["Your Widget Code"]
+        Hooks["useToolInfo, useCallTool, etc."]
+    end
+
+    Code --> Skybridge
+
+    subgraph Skybridge["Skybridge Hooks"]
+        Unified["Unified React Interface"]
+    end
+
+    Skybridge --> AppsSdk
+    Skybridge --> McpApp
+
+    subgraph AppsSdk["Apps SDK Adaptor"]
+        OpenAI["window.openai"]
+    end
+
+    subgraph McpApp["MCP App Adaptor"]
+        JsonRpc["JSON-RPC Bridge"]
+    end
+
+    AppsSdk --> ChatGPT["ChatGPT"]
+    McpApp --> McpClients["Claude, Goose, VSCode..."]
+
+    style Code fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#334155
+    style Skybridge fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#334155
+    style AppsSdk fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#334155
+    style McpApp fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#334155
+    style ChatGPT fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#475569
+    style McpClients fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#475569
+    style Hooks fill:#2563EB,stroke:#1e40af,stroke-width:2px,color:#fff
+    style Unified fill:#2563EB,stroke:#1e40af,stroke-width:2px,color:#fff
+    style OpenAI fill:#2563EB,stroke:#1e40af,stroke-width:2px,color:#fff
+    style JsonRpc fill:#2563EB,stroke:#1e40af,stroke-width:2px,color:#fff
+```
+
+These include [useToolInfo](/api-reference/use-tool-info), [useCallTool](/api-reference/use-call-tool), and other [API hooks](/api-reference). Skybridge automatically detects which runtime is available and uses the appropriate adaptor.
+
+## Benefits
+
+<CardGroup cols={2}>
+  <Card title="Future-Proof" icon="shield">
+    As new AI platforms adopt MCP, your widgets will work without code changes
+  </Card>
+  <Card title="No Vendor Lock-in" icon="unlock">
+    Build once, deploy to multiple AI clients: ChatGPT, Claude, Goose, VSCode, and more
+  </Card>
+  <Card title="Single Codebase" icon="code">
+    One set of hooks, one mental model, multiple platforms
+  </Card>
+  <Card title="Graceful Degradation" icon="stairs">
+    Platform-specific features degrade gracefully with clear warnings
+  </Card>
+</CardGroup>
+
+## Runtime Compatibility
+
+Not all features are available on all platforms. See the [API Reference](/api-reference#runtime-compatibility) for a full compatibility matrix.
+
+**Runtime-specific features:**
+- [useFiles](/api-reference/use-files), [useSetOpenInAppUrl](/api-reference/use-set-open-in-app-url) are Apps SDK only
+- [useWidgetState](/api-reference/use-widget-state) and [data-llm](/api-reference/data-llm) attribute in MCP Apps is polyfilled to persist state, and doesn't persist state across widget renders
+- [useRequestModal](/api-reference/use-request-modal) in MCP Apps is polyfilled to render in an iframe instead of a host modal
+
+
+
+
+## Related
+
+- [MCP Apps](/fundamentals/mcp-apps) - The open MCP ext-apps specification and client support
+- [Apps SDK (ChatGPT)](/fundamentals/apps-sdk) - ChatGPT-specific features and APIs
+- [API Reference](/api-reference) - Full hook compatibility matrix

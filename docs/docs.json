@@ -34,6 +34,7 @@
               "home",
               {
                 "group": "Fundamentals",
+                "icon": "graduation-cap",
                 "pages": [
                   "fundamentals",
                   "fundamentals/apps-sdk",
@@ -41,14 +42,6 @@
                 ]
               },
               "quickstart/create-new-app",
-              {
-                "group": "Add to Existing App",
-                "pages": [
-                  "quickstart/add-to-existing-app",
-                  "quickstart/add-to-existing-app/server",
-                  "quickstart/add-to-existing-app/web"
-                ]
-              },
               "quickstart/test-your-app",
               "quickstart/build-for-production"
             ]
@@ -58,7 +51,7 @@
             "icon": "lightbulb",
             "pages": [
               "concepts/index",
-              "concepts/platform-agnosticism",
+              "concepts/write-once-run-everywhere",
               "concepts/data-flow",
               "concepts/llm-context-sync",
               "concepts/fast-iteration",

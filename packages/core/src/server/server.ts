@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type {
@@ -395,11 +396,18 @@ export class McpServer<
         const isProduction = process.env.NODE_ENV === "production";
         const useForwardedHost =
           process.env.SKYBRIDGE_USE_FORWARDED_HOST === "true";
+        const isClaude =
+          extra?.requestInfo?.headers?.["user-agent"] === "Claude-User";
 
-        const serverUrl =
-          isProduction || useForwardedHost
-            ? `https://${extra?.requestInfo?.headers?.["x-forwarded-host"] ?? extra?.requestInfo?.headers?.host}`
-            : "http://localhost:3000";
+        const hostFromHeaders =
+          extra?.requestInfo?.headers?.["x-forwarded-host"] ??
+          extra?.requestInfo?.headers?.host;
+
+        const useExternalHost = isProduction || useForwardedHost || isClaude;
+
+        const serverUrl = useExternalHost
+          ? `https://${hostFromHeaders}`
+          : "http://localhost:3000";
 
         const html = isProduction
           ? templateHelper.renderProduction({
@@ -413,6 +421,7 @@ export class McpServer<
           : templateHelper.renderDevelopment({
               hostType,
               serverUrl,
+              useLocalNetworkAccess: !useExternalHost,
               widgetName: name,
             });
 
@@ -421,7 +430,13 @@ export class McpServer<
         const contentMeta = buildContentMeta({
           resourceDomains: [serverUrl],
           connectDomains: !isProduction ? [VITE_HMR_WEBSOCKET_DEFAULT_URL] : [],
-          domain: serverUrl,
+          domain: isClaude
+            ? `${crypto
+                .createHash("sha256")
+                .update(`https://${hostFromHeaders}/mcp`)
+                .digest("hex")
+                .slice(0, 32)}.claudemcpcontent.com`
+            : serverUrl,
           baseUriDomains: [serverUrl],
         });
 

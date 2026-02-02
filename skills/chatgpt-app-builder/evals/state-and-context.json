@@ -1,0 +1,22 @@
+[
+  {
+    "query": "Build a quiz widget. Users answer multiple choice questions and see their score update. When they close and reopen the widget, they should continue where they left off.",
+    "expected_behavior": "useWidgetState for score and answered questions - persists across reopens, LLM sees progress. useState would lose state on close."
+  },
+  {
+    "query": "I need a dashboard with a sidebar showing metric filters and a main area with charts. When users toggle metrics in the sidebar, the charts should update to show those metrics.",
+    "expected_behavior": "createStore for selectedMetrics - shared between sidebar and chart components. NOT separate useWidgetState in each component."
+  },
+  {
+    "query": "Property listing browser. Users scroll through apartments and hover over cards to see a quick preview popup. Nothing special needs to happen with the hover state.",
+    "expected_behavior": "useState for hovered item - ephemeral UI state, resets on reopen, LLM doesn't need it. NOT useWidgetState."
+  },
+  {
+    "query": "Job board widget where users browse listings. When they find one they like and ask 'Am I qualified for this?' or 'What's the salary range?', the AI should know which job they mean.",
+    "expected_behavior": "data-llm on job card with human-readable summary (title, company, key requirements). NOT JSON.stringify. Enables LLM to understand 'this job'."
+  },
+  {
+    "query": "Photo gallery for selecting images. Users can pick multiple photos to create an album. Sometimes they browse without selecting anything, and might ask 'help me pick the best ones'.",
+    "expected_behavior": "useWidgetState for selections (persists, LLM sees picks). data-llm with fallback: shows selected photo names OR 'Browsing N photos, none selected' when empty."
+  }
+]
