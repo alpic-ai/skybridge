@@ -1,0 +1,42 @@
+[
+  {
+    "query": "I want to build a ChatGPT app for my toy store",
+    "expected_behavior": "Must start with discovery workflow. Should ask Phase 1 questions (problem, user, pain, core actions). Must NOT jump to implementation, copy template, or write code."
+  },
+  {
+    "query": "I have a SPEC.md ready. How do I set up the project?",
+    "expected_behavior": "Should reference copy-template.md for bootstrapping. Should mention run-locally.md for dev server. Should NOT start discovery since SPEC.md exists."
+  },
+  {
+    "query": "What state management library does createStore wrap?",
+    "expected_behavior": "Must read state-and-context.md and answer: Zustand. createStore is a thin wrapper around Zustand."
+  },
+  {
+    "query": "How do I return an auth error that prompts the user to sign in?",
+    "expected_behavior": "Must read oauth.md. Answer: return isError: true with _meta containing 'mcp/www_authenticate' key pointing to oauth-protected-resource endpoint."
+  },
+  {
+    "query": "What CSP property triggers stricter review during publishing?",
+    "expected_behavior": "Must read csp.md. Answer: frameDomains (for iframe embeds) triggers stricter review."
+  },
+  {
+    "query": "What hook do I use to trigger an LLM response from a button click?",
+    "expected_behavior": "Must read prompt-llm.md. Answer: useSendFollowUpMessage from skybridge/web."
+  },
+  {
+    "query": "How do I set the 'Open in App' button URL in fullscreen mode?",
+    "expected_behavior": "Must read open-external-links.md. Answer: useSetOpenInAppUrl hook. Must have same origin as widget server by default."
+  },
+  {
+    "query": "What happens to PiP mode on mobile devices?",
+    "expected_behavior": "Must read ui-guidelines.md. Answer: PiP coerces to fullscreen on mobile."
+  },
+  {
+    "query": "How do I pass large data like images to the widget without the LLM seeing it?",
+    "expected_behavior": "Must read fetch-and-render-data.md. Answer: Use _meta in the return object. _meta never reaches the model, only the widget sees it via responseMetadata."
+  },
+  {
+    "query": "What's the difference between data-llm and useWidgetState?",
+    "expected_behavior": "Must read state-and-context.md. Answer: useWidgetState persists data and LLM can read it. data-llm is one-way context annotation for LLM to understand 'this one' references—widget doesn't read it back."
+  }
+]
