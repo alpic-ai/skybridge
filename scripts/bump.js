@@ -7,7 +7,7 @@
  *   node scripts/bump.js 0.30.0   # Uses specific version
  */
 import { execSync } from "child_process";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
@@ -31,12 +31,18 @@ console.log(`Setting skybridge version to: ${version}`);
 
 const versionRange = `>=${version} <1.0.0`;
 
+// Find all example package.json files dynamically
+const exampleTargets = [];
+for (const d of readdirSync(join(rootDir, "examples"), { withFileTypes: true })) {
+  const p = `examples/${d.name}/package.json`;
+  if (d.isDirectory() && existsSync(join(rootDir, p))) {
+    exampleTargets.push(p);
+  }
+}
+
 const targets = [
   "packages/create-skybridge/template/package.json",
-  "examples/capitals/package.json",
-  "examples/everything/package.json",
-  "examples/ecom-carousel/package.json",
-  "examples/productivity/package.json",
+  ...exampleTargets,
 ];
 
 for (const target of targets) {
