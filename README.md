@@ -124,6 +124,7 @@ Explore production-ready examples:
 | **Ecommerce Carousel** | Product carousel with cart, localization, and modals                             | [Try Demo](https://ecommerce.skybridge.tech/try)    | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/ecom-carousel) |
 | **Everything**         | Comprehensive playground showcasing all hooks and features                       | [Try Demo](https://everything.skybridge.tech/try)   | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/everything)    |
 | **Productivity**       | Data visualization dashboard demonstrating Skybridge capabilities for MCP Apps   | [Try Demo](https://productivity.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/productivity)  |
+| **Manifest Starter**       | Starter app with Manifest UI agentic components out-of-the-box   | [Try Demo](https://manifest-ui.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/manifest-ui)  |
 
 See all examples in the [Showcase](https://docs.skybridge.tech/showcase) or browse the [examples/](examples/) directory.
 
