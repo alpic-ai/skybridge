@@ -14,11 +14,12 @@ ChatGPT apps are conversational experiences that extend ChatGPT through tools an
 
 SPEC.md keeps track of the app's requirements and design decisions. Keep it up to date as you work on the app.
 
+**No SPEC.md? Stop.** → Read [discover.md](references/discover.md) first. Nothing else until SPEC.md exists.
+
 ## Setup
 
-1. **Discover** → [discover.md](references/discover.md): when user has an idea but no SPEC.md yet
-2. **Copy template** → [copy-template.md](references/copy-template.md): when starting a new project with ready SPEC.md
-3. **Run locally** → [run-locally.md](references/run-locally.md): when ready to test, need dev server or ChatGPT connection
+1. **Copy template** → [copy-template.md](references/copy-template.md): when starting a new project with ready SPEC.md
+2. **Run locally** → [run-locally.md](references/run-locally.md): when ready to test, need dev server or ChatGPT connection
 
 ## Architecture
 

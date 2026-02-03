@@ -25,9 +25,9 @@ my-app/
 ## Server Handlers
 
 Output:
-- **`content`**: Text shown to LLM
-- **`structuredContent`**: Structured data pushed to LLM context and consumed by UI components.
-- **`_meta`** (optional): Data only the widget needs, hidden from LLM (e.g., image URLs, UI hints). Keeps LLM context clean.
+- **`structuredContent`**: concise JSON the widget uses and the model reads. Include only what the model should see.
+- **`content`** (optional): narration (Markdown or plaintext) shown to LLM
+- **`_meta`** (optional): large or sensitive data exclusively for the widget. _meta never reaches the model.
 
 Annotations (set `true` when):
 - **`readOnlyHint`**: only reads data, no side effects

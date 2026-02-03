@@ -2,6 +2,7 @@
 
 ## Contents
 - [Display Modes](#display-modes) — inline, fullscreen, PiP, switching
+- [Modal](#modal) — overlay on top of any display mode
 - [Adapting to Host](#adapting-to-host) — layout constraints, theme
 - [Adapting to User](#adapting-to-user) — device, locale
 
@@ -48,7 +49,10 @@ Persistent floating window that stays visible during conversation.
 ### Switching Modes
 
 Use `useDisplayMode` to read current mode and request changes.
-Switch modes upon user interaction only-do not switch mode programmatically. Host may reject the request.
+
+**Constraints:**
+- User-triggered only—never switch programmatically
+- Host may reject the request
 
 ```tsx
 import { useDisplayMode } from "skybridge/web";
@@ -71,6 +75,41 @@ function ExpandableWidget() {
       {/* Compact layout */}
       <button onClick={() => setDisplayMode("fullscreen")}>Expand</button>
     </div>
+  );
+}
+```
+
+## Modal
+
+Overlay rendered outside the widget iframe, on top of the current display mode.
+
+**Use for:** Confirmations, additional input before an action.
+
+**Constraints:**
+- Triggered by user interaction only
+- Host injects close controls
+
+```tsx
+import { useRequestModal } from "skybridge/web";
+
+function SettingsWidget() {
+  const { isOpen, open, params } = useRequestModal();
+
+  if (isOpen) {
+    return (
+      <div className="modal">
+        <h2>Are you sure?</h2>
+        <p>This will delete item {params.itemId}</p>
+        <button onClick={() => console.log("Confirmed")}>Yes, Delete</button>
+        <button onClick={() => console.log("Cancelled")}>Cancel</button>
+      </div>
+    );
+  }
+
+  return (
+    <button onClick={() => open({ title: "Confirm", params: { itemId: "123" } })}>
+      Delete Item
+    </button>
   );
 }
 ```

@@ -34,5 +34,13 @@
   {
     "query": "My widget content is too tall and causes awkward scrolling in the chat. How do I constrain its height?",
     "expected_behavior": "Uses useLayout hook from skybridge/web. Destructures maxHeight. Applies maxHeight to container style. Content should auto-fit without nested scrolling in inline mode."
+  },
+  {
+    "query": "I need a confirmation dialog before deleting items. User clicks delete, sees 'Are you sure?', then confirms or cancels.",
+    "expected_behavior": "Uses useRequestModal hook from skybridge/web. Destructures isOpen, open, params. Calls open() with params on delete click. Renders confirmation UI when isOpen is true. Modal is an overlay on top of current display mode, not a mode switch."
+  },
+  {
+    "query": "I want users to enter a custom name before saving, but I don't want to clutter the main widget with a form.",
+    "expected_behavior": "Uses useRequestModal hook from skybridge/web. Opens modal with form content. Modal renders outside widget iframe, not constrained by widget boundaries. Triggered by user interaction only."
   }
 ]
