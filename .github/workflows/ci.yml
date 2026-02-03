@@ -6,35 +6,8 @@ on:
     branches: [main]
 
 jobs:
-  install:
-    name: Install
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: ".nvmrc"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - uses: actions/cache/save@v5
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-            docs/node_modules
-          key: build-${{ github.sha }}
-
   test:
     name: ${{ matrix.name }}
-    needs: install
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -64,13 +37,8 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
 
-      - uses: actions/cache/restore@v5
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-            docs/node_modules
-          key: build-${{ github.sha }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Run ${{ matrix.name }}
         run: ${{ matrix.command }}
