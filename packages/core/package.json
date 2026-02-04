@@ -48,7 +48,7 @@
   "dependencies": {
     "@babel/core": "^7.28.6",
     "@oclif/core": "^4.8.0",
-    "ci-info": "^4.3.1",
+    "ci-info": "^4.4.0",
     "cors": "^2.8.5",
     "dequal": "^2.0.3",
     "es-toolkit": "^1.43.0",

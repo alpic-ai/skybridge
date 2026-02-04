@@ -298,8 +298,8 @@ importers:
         specifier: ^4.8.0
         version: 4.8.0
       ci-info:
-        specifier: ^4.3.1
-        version: 4.3.1
+        specifier: ^4.4.0
+        version: 4.4.0
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -3435,6 +3435,10 @@ packages:
 
   ci-info@4.3.1:
     resolution: {integrity: sha512-Wdy2Igu8OcBpI2pZePZ5oWjPC38tmDVx5WKUXKwlLYkA0ozo85sLsLvkBbBn/sZaSCMFOGZJ14fvW9t5/d7kdA==}
+    engines: {node: '>=8'}
+
+  ci-info@4.4.0:
+    resolution: {integrity: sha512-77PSwercCZU2Fc4sX94eF8k8Pxte6JAwL4/ICZLFjJLqegs7kCuAsqqj/70NQF6TvDpgFjkubQB2FW2ZZddvQg==}
     engines: {node: '>=8'}
 
   citty@0.1.6:
@@ -12694,6 +12698,8 @@ snapshots:
       zod: 3.23.8
 
   ci-info@4.3.1: {}
+
+  ci-info@4.4.0: {}
 
   citty@0.1.6:
     dependencies:
