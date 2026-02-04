@@ -30,8 +30,8 @@ importers:
   examples/capitals:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ^1.25.2
-        version: 1.25.2(hono@4.11.3)(zod@4.3.5)
+        specifier: ^1.26.0
+        version: 1.26.0(zod@4.3.5)
       '@t3-oss/env-core':
         specifier: ^0.13.8
         version: 0.13.10(arktype@2.1.27)(typescript@5.9.3)(zod@4.3.5)
@@ -64,7 +64,7 @@ importers:
         version: 7.11.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       skybridge:
         specifier: '>=0.29.1 <1.0.0'
-        version: 0.29.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2)
+        version: 0.29.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2)
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
@@ -77,7 +77,7 @@ importers:
     devDependencies:
       '@skybridge/devtools':
         specifier: '>=0.26.1 <1.0.0'
-        version: 0.26.1(@types/node@22.19.3)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(hono@4.11.3)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-router@7.11.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2)(zod@4.3.5)
+        version: 0.26.1(@types/node@22.19.3)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-router@7.11.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2)(zod@4.3.5)
       '@tailwindcss/vite':
         specifier: ^4.1.14
         version: 4.1.18(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -121,8 +121,8 @@ importers:
   examples/ecom-carousel:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ^1.25.2
-        version: 1.25.2(hono@4.11.3)(zod@4.3.5)
+        specifier: ^1.26.0
+        version: 1.26.0(zod@4.3.5)
       express:
         specifier: ^5.2.1
         version: 5.2.1
@@ -134,7 +134,7 @@ importers:
         version: 19.2.3(react@19.2.3)
       skybridge:
         specifier: '>=0.29.1 <1.0.0'
-        version: 0.29.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
+        version: 0.29.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -144,7 +144,7 @@ importers:
     devDependencies:
       '@skybridge/devtools':
         specifier: '>=0.26.1 <1.0.0'
-        version: 0.26.1(@types/node@22.19.3)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(hono@4.11.3)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)
+        version: 0.26.1(@types/node@22.19.3)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -176,8 +176,8 @@ importers:
   examples/everything:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ^1.25.1
-        version: 1.25.2(hono@4.11.3)(zod@4.3.5)
+        specifier: ^1.26.0
+        version: 1.26.0(zod@4.3.5)
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -192,7 +192,7 @@ importers:
         version: 19.2.3(react@19.2.3)
       skybridge:
         specifier: '>=0.29.1 <1.0.0'
-        version: 0.29.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
+        version: 0.29.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
       vite:
         specifier: ^7.3.0
         version: 7.3.1(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -202,7 +202,7 @@ importers:
     devDependencies:
       '@skybridge/devtools':
         specifier: '>=0.26.1 <1.0.0'
-        version: 0.26.1(@types/node@25.0.3)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(hono@4.11.3)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)
+        version: 0.26.1(@types/node@25.0.3)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
@@ -234,8 +234,8 @@ importers:
   examples/productivity:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ^1.25.2
-        version: 1.25.2(hono@4.11.3)(zod@4.3.5)
+        specifier: ^1.26.0
+        version: 1.26.0(zod@4.3.5)
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -250,7 +250,7 @@ importers:
         version: 19.2.3(react@19.2.3)
       skybridge:
         specifier: '>=0.29.1 <1.0.0'
-        version: 0.29.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.8)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
+        version: 0.29.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.8)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -260,7 +260,7 @@ importers:
     devDependencies:
       '@skybridge/devtools':
         specifier: '>=0.26.1 <1.0.0'
-        version: 0.26.1(@types/node@25.0.3)(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(hono@4.11.3)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)
+        version: 0.26.1(@types/node@25.0.3)(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
@@ -342,10 +342,10 @@ importers:
     devDependencies:
       '@modelcontextprotocol/ext-apps':
         specifier: ^1.0.0
-        version: 1.0.0(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.5)
+        version: 1.0.0(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.5)
       '@modelcontextprotocol/sdk':
-        specifier: ^1.25.2
-        version: 1.25.2(hono@4.11.3)(zod@4.3.5)
+        specifier: ^1.26.0
+        version: 1.26.0(zod@4.3.5)
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -420,8 +420,8 @@ importers:
   packages/create-skybridge/template:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ^1.25.2
-        version: 1.25.2(hono@4.11.3)(zod@4.3.5)
+        specifier: ^1.26.0
+        version: 1.26.0(zod@4.3.5)
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -436,7 +436,7 @@ importers:
         version: 19.2.3(react@19.2.3)
       skybridge:
         specifier: '>=0.29.1 <1.0.0'
-        version: 0.29.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.8)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
+        version: 0.29.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.8)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.0.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -446,7 +446,7 @@ importers:
     devDependencies:
       '@skybridge/devtools':
         specifier: '>=0.26.1 <1.0.0'
-        version: 0.26.1(@types/node@25.0.3)(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(hono@4.11.3)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)
+        version: 0.26.1(@types/node@25.0.3)(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
@@ -487,8 +487,8 @@ importers:
         specifier: ^1.27.1
         version: 1.27.1(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@modelcontextprotocol/sdk':
-        specifier: ^1.25.2
-        version: 1.25.2(hono@4.11.3)(zod@4.3.5)
+        specifier: ^1.26.0
+        version: 1.26.0(zod@4.3.5)
       '@rjsf/core':
         specifier: ^6.1.2
         version: 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3)
@@ -548,7 +548,7 @@ importers:
         version: 4.4.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       shadcn:
         specifier: ^3.6.3
-        version: 3.6.3(@types/node@25.0.3)(hono@4.11.3)(typescript@5.9.3)
+        version: 3.6.3(@types/node@25.0.3)(typescript@5.9.3)
       shiki:
         specifier: ^3.21.0
         version: 3.21.0
@@ -1225,8 +1225,8 @@ packages:
   '@fontsource-variable/jetbrains-mono@5.2.8':
     resolution: {integrity: sha512-WBA9elru6Jdp5df2mES55wuOO0WIrn3kpXnI4+W2ek5u3ZgLS9XS4gmIlcQhiZOWEKl95meYdvK7xI+ETLCq/Q==}
 
-  '@hono/node-server@1.19.7':
-    resolution: {integrity: sha512-vUcD0uauS7EU2caukW8z5lJKtoGMokxNbJtBiwHgpqxEXokaHCBkQUmCHhjFB1VUTWdqj25QoMkMKzgjq+uhrw==}
+  '@hono/node-server@1.19.9':
+    resolution: {integrity: sha512-vHL6w3ecZsky+8P5MD+eFfaGTyCeOHUIFYMGpQGbrBTSmNNoxv0if69rEZ5giu36weC5saFuznL411gRX7bJDw==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
@@ -1639,8 +1639,8 @@ packages:
       react-dom:
         optional: true
 
-  '@modelcontextprotocol/sdk@1.25.2':
-    resolution: {integrity: sha512-LZFeo4F9M5qOhC/Uc1aQSrBHxMrvxett+9KLHt7OhcExtoiRN9DKgbZffMP/nxjutWDQpfMDfP3nkHI4X9ijww==}
+  '@modelcontextprotocol/sdk@1.26.0':
+    resolution: {integrity: sha512-Y5RmPncpiDtTXDbLKswIJzTqu2hyBKxTNsgKqKclDbhIgg1wgtf1fRuvxgTnRfcnxtvvgbIEcqUOzZrJ6iSReg==}
     engines: {node: '>=18'}
     peerDependencies:
       '@cfworker/json-schema': ^4.1.1
@@ -4023,8 +4023,8 @@ packages:
     resolution: {integrity: sha512-JhFGDVJ7tmDJItKhYgJCGLOWjuK9vPxiXoUFLwLDc99NlmklilbiQJwoctZtt13+xMw91MCk/REan6MWHqDjyA==}
     engines: {node: '>=12.0.0'}
 
-  express-rate-limit@7.5.1:
-    resolution: {integrity: sha512-7iN8iPMDzOMHPUYllBEsQdWVB6fPDMPqwjBaFrgr4Jgr/+okjvzAy+UHlYYL/Vs0OsOrMkwS6PJDkFlJwoxUnw==}
+  express-rate-limit@8.2.1:
+    resolution: {integrity: sha512-PCZEIEIxqwhzw4KF0n7QF4QqruVTcF73O5kFKUnGOyjbCCgizBBiFaYpd/fnBLUMPw/BWw9OsiN7GgrNYr7j6g==}
     engines: {node: '>= 16'}
     peerDependencies:
       express: '>= 4.11'
@@ -4471,8 +4471,8 @@ packages:
     resolution: {integrity: sha512-NQO+lgVUCtHxZ792FodgW0zflK+ozS9X9dwGp9XvvmPlH7pyxd588cn24TD3rmPm/N0AIRXF10Otah8yKqGw4w==}
     engines: {node: '>=12'}
 
-  hono@4.11.3:
-    resolution: {integrity: sha512-PmQi306+M/ct/m5s66Hrg+adPnkD5jiO6IjA7WhWw0gSBSo1EcRegwuI1deZ+wd5pzCGynCcn2DprnE4/yEV4w==}
+  hono@4.11.7:
+    resolution: {integrity: sha512-l7qMiNee7t82bH3SeyUCt9UF15EVmaBvsppY2zQtrbIhl/yzBTny+YUxsVjSjQ6gaqaeVtZmGocom8TzBlA4Yw==}
     engines: {node: '>=16.9.0'}
 
   html-encoding-sniffer@6.0.0:
@@ -4617,6 +4617,10 @@ packages:
   intersection-observer@0.12.2:
     resolution: {integrity: sha512-7m1vEcPCxXYI8HqnL8CKI6siDyD+eIWSwgB3DZA+ZTogxk9I4CDnj4wilt9x/+/QbHI4YG5YZNmC6458/e9Ktg==}
     deprecated: The Intersection Observer polyfill is no longer needed and can safely be removed. Intersection Observer has been Baseline since 2019.
+
+  ip-address@10.0.1:
+    resolution: {integrity: sha512-NWv9YLW4PoW2B7xtzaS3NCot75m6nK7Icdv0o3lfMceJVRfSoQwqD4wEH5rLwoKJwUiZ/rfpiVBhnaF0FK4HoA==}
+    engines: {node: '>= 12'}
 
   ip-address@10.1.0:
     resolution: {integrity: sha512-XXADHxXmvT9+CRxhXg56LJovE+bmWnEWB78LB83VZTprKTmaC5QfruXocxzTZ2Kl0DNwKuBdlIhjL8LeY8Sf8Q==}
@@ -8198,9 +8202,9 @@ snapshots:
 
   '@fontsource-variable/jetbrains-mono@5.2.8': {}
 
-  '@hono/node-server@1.19.7(hono@4.11.3)':
+  '@hono/node-server@1.19.9(hono@4.11.7)':
     dependencies:
-      hono: 4.11.3
+      hono: 4.11.7
 
   '@humanfs/core@0.19.1': {}
 
@@ -8895,9 +8899,9 @@ snapshots:
       - supports-color
       - typescript
 
-  '@modelcontextprotocol/ext-apps@1.0.0(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.5)':
+  '@modelcontextprotocol/ext-apps@1.0.0(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.5)':
     dependencies:
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       zod: 4.3.5
     optionalDependencies:
       '@oven/bun-darwin-aarch64': 1.3.5
@@ -8920,9 +8924,9 @@ snapshots:
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
 
-  '@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@3.25.76)':
+  '@modelcontextprotocol/sdk@1.26.0(zod@3.25.76)':
     dependencies:
-      '@hono/node-server': 1.19.7(hono@4.11.3)
+      '@hono/node-server': 1.19.9(hono@4.11.7)
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
       content-type: 1.0.5
@@ -8931,7 +8935,8 @@ snapshots:
       eventsource: 3.0.7
       eventsource-parser: 3.0.6
       express: 5.2.1
-      express-rate-limit: 7.5.1(express@5.2.1)
+      express-rate-limit: 8.2.1(express@5.2.1)
+      hono: 4.11.7
       jose: 6.1.3
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
@@ -8939,12 +8944,11 @@ snapshots:
       zod: 3.25.76
       zod-to-json-schema: 3.25.1(zod@3.25.76)
     transitivePeerDependencies:
-      - hono
       - supports-color
 
-  '@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5)':
+  '@modelcontextprotocol/sdk@1.26.0(zod@4.3.5)':
     dependencies:
-      '@hono/node-server': 1.19.7(hono@4.11.3)
+      '@hono/node-server': 1.19.9(hono@4.11.7)
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
       content-type: 1.0.5
@@ -8953,7 +8957,8 @@ snapshots:
       eventsource: 3.0.7
       eventsource-parser: 3.0.6
       express: 5.2.1
-      express-rate-limit: 7.5.1(express@5.2.1)
+      express-rate-limit: 8.2.1(express@5.2.1)
+      hono: 4.11.7
       jose: 6.1.3
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
@@ -8961,7 +8966,6 @@ snapshots:
       zod: 4.3.5
       zod-to-json-schema: 3.25.1(zod@4.3.5)
     transitivePeerDependencies:
-      - hono
       - supports-color
 
   '@mswjs/interceptors@0.40.0':
@@ -10122,12 +10126,12 @@ snapshots:
     dependencies:
       escape-string-regexp: 5.0.0
 
-  '@skybridge/devtools@0.26.1(@types/node@22.19.3)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(hono@4.11.3)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-router@7.11.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2)(zod@4.3.5)':
+  '@skybridge/devtools@0.26.1(@types/node@22.19.3)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-router@7.11.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2)(zod@4.3.5)':
     dependencies:
       '@base-ui/react': 1.0.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@fontsource-variable/jetbrains-mono': 5.2.8
       '@microlink/react-json-view': 1.27.1(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@rjsf/core': 6.1.2(@rjsf/utils@6.1.2(react@19.2.0))(react@19.2.3)
       '@rjsf/shadcn': 6.1.2(@rjsf/core@6.1.2(@rjsf/utils@6.1.2(react@19.2.0))(react@19.2.3))(@rjsf/utils@6.1.2(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)
       '@rjsf/utils': 6.1.2(react@19.2.3)
@@ -10147,9 +10151,9 @@ snapshots:
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
       react-resizable-panels: 4.4.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      shadcn: 3.6.3(@types/node@22.19.3)(hono@4.11.3)(typescript@5.9.3)
+      shadcn: 3.6.3(@types/node@22.19.3)(typescript@5.9.3)
       shiki: 3.21.0
-      skybridge: 0.26.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2)
+      skybridge: 0.26.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2)
       tailwind-merge: 3.4.0
       tailwindcss: 4.1.18
       tailwindcss-animate: 1.0.7(tailwindcss@4.1.18)
@@ -10165,7 +10169,6 @@ snapshots:
       - '@types/react-dom'
       - babel-plugin-macros
       - bufferutil
-      - hono
       - immer
       - jiti
       - less
@@ -10188,12 +10191,12 @@ snapshots:
       - yaml
       - zod
 
-  '@skybridge/devtools@0.26.1(@types/node@22.19.3)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(hono@4.11.3)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)':
+  '@skybridge/devtools@0.26.1(@types/node@22.19.3)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)':
     dependencies:
       '@base-ui/react': 1.0.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@fontsource-variable/jetbrains-mono': 5.2.8
       '@microlink/react-json-view': 1.27.1(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@rjsf/core': 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3)
       '@rjsf/shadcn': 6.1.2(@rjsf/core@6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3))(@rjsf/utils@6.1.2(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)
       '@rjsf/utils': 6.1.2(react@19.2.3)
@@ -10213,9 +10216,9 @@ snapshots:
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
       react-resizable-panels: 4.4.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      shadcn: 3.6.3(@types/node@22.19.3)(hono@4.11.3)(typescript@5.9.3)
+      shadcn: 3.6.3(@types/node@22.19.3)(typescript@5.9.3)
       shiki: 3.21.0
-      skybridge: 0.26.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
+      skybridge: 0.26.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
       tailwind-merge: 3.4.0
       tailwindcss: 4.1.18
       tailwindcss-animate: 1.0.7(tailwindcss@4.1.18)
@@ -10231,7 +10234,6 @@ snapshots:
       - '@types/react-dom'
       - babel-plugin-macros
       - bufferutil
-      - hono
       - immer
       - jiti
       - less
@@ -10254,12 +10256,12 @@ snapshots:
       - yaml
       - zod
 
-  '@skybridge/devtools@0.26.1(@types/node@25.0.3)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(hono@4.11.3)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)':
+  '@skybridge/devtools@0.26.1(@types/node@25.0.3)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)':
     dependencies:
       '@base-ui/react': 1.0.0(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@fontsource-variable/jetbrains-mono': 5.2.8
       '@microlink/react-json-view': 1.27.1(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@rjsf/core': 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3)
       '@rjsf/shadcn': 6.1.2(@rjsf/core@6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3))(@rjsf/utils@6.1.2(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)
       '@rjsf/utils': 6.1.2(react@19.2.3)
@@ -10279,9 +10281,9 @@ snapshots:
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
       react-resizable-panels: 4.4.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      shadcn: 3.6.3(@types/node@25.0.3)(hono@4.11.3)(typescript@5.9.3)
+      shadcn: 3.6.3(@types/node@25.0.3)(typescript@5.9.3)
       shiki: 3.21.0
-      skybridge: 0.26.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
+      skybridge: 0.26.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
       tailwind-merge: 3.4.0
       tailwindcss: 4.1.18
       tailwindcss-animate: 1.0.7(tailwindcss@4.1.18)
@@ -10297,7 +10299,6 @@ snapshots:
       - '@types/react-dom'
       - babel-plugin-macros
       - bufferutil
-      - hono
       - immer
       - jiti
       - less
@@ -10320,12 +10321,12 @@ snapshots:
       - yaml
       - zod
 
-  '@skybridge/devtools@0.26.1(@types/node@25.0.3)(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(hono@4.11.3)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)':
+  '@skybridge/devtools@0.26.1(@types/node@25.0.3)(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-router-dom@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-router@7.11.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(terser@5.44.1)(tsx@4.21.0)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)(zod@4.3.5)':
     dependencies:
       '@base-ui/react': 1.0.0(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@fontsource-variable/jetbrains-mono': 5.2.8
       '@microlink/react-json-view': 1.27.1(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@rjsf/core': 6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3)
       '@rjsf/shadcn': 6.1.2(@rjsf/core@6.1.2(@rjsf/utils@6.1.2(react@19.2.3))(react@19.2.3))(@rjsf/utils@6.1.2(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(tailwindcss@4.1.18)
       '@rjsf/utils': 6.1.2(react@19.2.3)
@@ -10345,9 +10346,9 @@ snapshots:
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
       react-resizable-panels: 4.4.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      shadcn: 3.6.3(@types/node@25.0.3)(hono@4.11.3)(typescript@5.9.3)
+      shadcn: 3.6.3(@types/node@25.0.3)(typescript@5.9.3)
       shiki: 3.21.0
-      skybridge: 0.26.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.8)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
+      skybridge: 0.26.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.8)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2)
       tailwind-merge: 3.4.0
       tailwindcss: 4.1.18
       tailwindcss-animate: 1.0.7(tailwindcss@4.1.18)
@@ -10363,7 +10364,6 @@ snapshots:
       - '@types/react-dom'
       - babel-plugin-macros
       - bufferutil
-      - hono
       - immer
       - jiti
       - less
@@ -12283,9 +12283,10 @@ snapshots:
 
   expect-type@1.2.2: {}
 
-  express-rate-limit@7.5.1(express@5.2.1):
+  express-rate-limit@8.2.1(express@5.2.1):
     dependencies:
       express: 5.2.1
+      ip-address: 10.0.1
 
   express@4.18.2:
     dependencies:
@@ -12925,7 +12926,7 @@ snapshots:
 
   hex-rgb@5.0.0: {}
 
-  hono@4.11.3: {}
+  hono@4.11.7: {}
 
   html-encoding-sniffer@6.0.0(@noble/hashes@1.8.0):
     dependencies:
@@ -13169,6 +13170,8 @@ snapshots:
   interpret@1.4.0: {}
 
   intersection-observer@0.12.2: {}
+
+  ip-address@10.0.1: {}
 
   ip-address@10.1.0: {}
 
@@ -15552,7 +15555,7 @@ snapshots:
 
   setprototypeof@1.2.0: {}
 
-  shadcn@3.6.3(@types/node@22.19.3)(hono@4.11.3)(typescript@5.9.3):
+  shadcn@3.6.3(@types/node@22.19.3)(typescript@5.9.3):
     dependencies:
       '@antfu/ni': 25.0.0
       '@babel/core': 7.28.6
@@ -15560,7 +15563,7 @@ snapshots:
       '@babel/plugin-transform-typescript': 7.28.5(@babel/core@7.28.6)
       '@babel/preset-typescript': 7.28.5(@babel/core@7.28.6)
       '@dotenvx/dotenvx': 1.51.2
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@3.25.76)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@3.25.76)
       '@types/validate-npm-package-name': 4.0.2
       browserslist: 4.28.1
       commander: 14.0.2
@@ -15592,11 +15595,10 @@ snapshots:
       - '@cfworker/json-schema'
       - '@types/node'
       - babel-plugin-macros
-      - hono
       - supports-color
       - typescript
 
-  shadcn@3.6.3(@types/node@25.0.3)(hono@4.11.3)(typescript@5.9.3):
+  shadcn@3.6.3(@types/node@25.0.3)(typescript@5.9.3):
     dependencies:
       '@antfu/ni': 25.0.0
       '@babel/core': 7.28.6
@@ -15604,7 +15606,7 @@ snapshots:
       '@babel/plugin-transform-typescript': 7.28.5(@babel/core@7.28.6)
       '@babel/preset-typescript': 7.28.5(@babel/core@7.28.6)
       '@dotenvx/dotenvx': 1.51.2
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@3.25.76)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@3.25.76)
       '@types/validate-npm-package-name': 4.0.2
       browserslist: 4.28.1
       commander: 14.0.2
@@ -15636,7 +15638,6 @@ snapshots:
       - '@cfworker/json-schema'
       - '@types/node'
       - babel-plugin-macros
-      - hono
       - supports-color
       - typescript
 
@@ -15761,10 +15762,10 @@ snapshots:
 
   sisteransi@1.0.5: {}
 
-  skybridge@0.26.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2):
+  skybridge@0.26.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2):
     dependencies:
       '@babel/core': 7.28.6
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@oclif/core': 4.8.0
       ci-info: 4.3.1
       cors: 2.8.5
@@ -15800,10 +15801,10 @@ snapshots:
       - utf-8-validate
       - yaml
 
-  skybridge@0.26.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2):
+  skybridge@0.26.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2):
     dependencies:
       '@babel/core': 7.28.6
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@oclif/core': 4.8.0
       ci-info: 4.3.1
       cors: 2.8.5
@@ -15839,10 +15840,10 @@ snapshots:
       - utf-8-validate
       - yaml
 
-  skybridge@0.26.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2):
+  skybridge@0.26.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2):
     dependencies:
       '@babel/core': 7.28.6
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@oclif/core': 4.8.0
       ci-info: 4.3.1
       cors: 2.8.5
@@ -15878,10 +15879,10 @@ snapshots:
       - utf-8-validate
       - yaml
 
-  skybridge@0.26.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.8)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2):
+  skybridge@0.26.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.8)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2):
     dependencies:
       '@babel/core': 7.28.6
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@oclif/core': 4.8.0
       ci-info: 4.3.1
       cors: 2.8.5
@@ -15917,10 +15918,10 @@ snapshots:
       - utf-8-validate
       - yaml
 
-  skybridge@0.29.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2):
+  skybridge@0.29.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2):
     dependencies:
       '@babel/core': 7.28.6
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@oclif/core': 4.8.0
       ci-info: 4.3.1
       cors: 2.8.5
@@ -15956,10 +15957,10 @@ snapshots:
       - utf-8-validate
       - yaml
 
-  skybridge@0.29.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2):
+  skybridge@0.29.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2):
     dependencies:
       '@babel/core': 7.28.6
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@oclif/core': 4.8.0
       ci-info: 4.3.1
       cors: 2.8.5
@@ -15995,10 +15996,10 @@ snapshots:
       - utf-8-validate
       - yaml
 
-  skybridge@0.29.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2):
+  skybridge@0.29.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2):
     dependencies:
       '@babel/core': 7.28.6
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@oclif/core': 4.8.0
       ci-info: 4.3.1
       cors: 2.8.5
@@ -16034,10 +16035,10 @@ snapshots:
       - utf-8-validate
       - yaml
 
-  skybridge@0.29.1(@modelcontextprotocol/sdk@1.25.2(hono@4.11.3)(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.8)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2):
+  skybridge@0.29.1(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@types/node@25.0.3)(@types/react@19.2.8)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2):
     dependencies:
       '@babel/core': 7.28.6
-      '@modelcontextprotocol/sdk': 1.25.2(hono@4.11.3)(zod@4.3.5)
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@oclif/core': 4.8.0
       ci-info: 4.3.1
       cors: 2.8.5
