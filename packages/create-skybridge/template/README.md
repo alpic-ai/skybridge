@@ -1,13 +1,13 @@
 # Skybridge Starter
 
-A minimal TypeScript template for building ChatGPT and MCP Apps with widget rendering.
+A minimal TypeScript template for building MCP and ChatGPT Apps with the [Skybridge](https://docs.skybridge.tech/home) framework. 
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 24+
-- HTTP tunnel such as [ngrok](https://ngrok.com/download)
+- HTTP tunnel such as [ngrok](https://ngrok.com/download) if you want to test with remote MCP Clients like ChatGPT or Claude.ai.
 
 ### Local Development
 
@@ -37,41 +37,63 @@ pnpm dev
 bun dev
 ```
 
-This command starts an Express server on port 3000. This server packages:
+This command starts:
+- Your MCP server at `http://localhost:3000/mcp`.
+- Skybridge DevTools UI at `http://localhost:3000/`.
 
-- an MCP endpoint on `/mcp` (the app backend)
-- a React application on Vite HMR dev server (the UI elements to be displayed in the host)
+#### 3. Project structure
 
-#### 3. Connect to ChatGPT
-
-- ChatGPT requires connectors to be publicly accessible. To expose your server on the Internet, run:
-```bash
-ngrok http 3000
 ```
-- In ChatGPT, navigate to **Settings → Connectors → Create** and add the forwarding URL provided by ngrok suffixed with `/mcp` (e.g. `https://3785c5ddc4b6.ngrok-free.app/mcp`)
+├── server/
+│   └── src/
+│       ├── index.ts      # Entry point
+│       ├── middleware.ts # MCP middleware
+│       └── server.ts     # Widget registry & routes
+├── web/
+│   ├── src/
+│   │   ├── widgets/      # React components (one per widget)
+│   │   ├── helpers.ts    # Shared utilities
+│   │   └── index.css     # Global styles
+│   └── vite.config.ts
+├── alpic.json            # Deployment config
+├── nodemon.json          # Dev server config
+└── package.json
+```
 
 ### Create your first widget
 
 #### 1. Add a new widget
 
-- Register a widget in `server/server.ts` with a unique name (e.g., `my-widget`)
-- Create a matching React component at `web/src/widgets/my-widget.tsx`. The file name must match the widget name exactly
+- Register a widget in `server/src/server.ts` with a unique name (e.g., `my-widget`) using [`registerWidget`](https://docs.skybridge.tech/api-reference/register-widget)
+- Create a matching React component at `web/src/widgets/my-widget.tsx`. **The file name must match the widget name exactly**.
 
 #### 2. Edit widgets with Hot Module Replacement (HMR)
 
-Edit and save components in `web/src/widgets/` — changes appear instantly in the host
+Edit and save components in `web/src/widgets/` — changes will appear instantly inside your testing MCP Client.
 
 #### 3. Edit server code
 
-Modify files in `server/` and reload your ChatGPT connector in **Settings → Connectors → [Your connector] → Reload**
+Modify files in `server/` and refresh the connection with your testing MCP Client to see the changes.
+
+### Testing your App
+
+You can test your App locally by using our DevTools UI on `localhost:3000` while running the `pnpm dev` command.
+
+To test your app with other MCP Clients like ChatGPT, Claude or VSCode, see [Testing Your App](https://docs.skybridge.tech/quickstart/test-your-app).
+
 
 ## Deploy to Production
 
-- Use [Alpic](https://alpic.ai/) to deploy your OpenAI App to production
-- In ChatGPT, navigate to **Settings → Connectors → Create** and add your MCP server URL (e.g., `https://your-app-name.alpic.live`)
+Skybridge is infrastructure vendor agnostic, and your app can be deployed on any cloud platform supporting MCP.
+
+Deploy your app in minutes with [Alpic](https://alpic.ai/).
+1. Create an account on [Alpic platform](https://app.alpic.ai/). 
+2. Connect your GitHub repository to automatically deploy at each commit. 
+3. Use your remote App URL to connect it to MCP Clients, or use the Alpic Playground to easily test your App.
 
 ## Resources
-
+- [Skybridge Documentation](https://docs.skybridge.tech/)
 - [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
+- [MCP Apps Documentation](https://github.com/modelcontextprotocol/ext-apps/tree/main)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)
