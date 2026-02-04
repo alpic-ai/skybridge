@@ -8,7 +8,7 @@
     "dev": "skybridge dev",
     "build": "skybridge build",
     "start": "skybridge start",
-    "inspector": "mcp-inspector http://localhost:3000/mcp"
+    "deploy": "alpic deploy"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
@@ -21,13 +21,13 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@modelcontextprotocol/inspector": "^0.18.0",
     "@skybridge/devtools": ">=0.26.1 <1.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
+    "alpic": "^1.83.1",
     "nodemon": "^3.1.11",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
