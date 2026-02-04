@@ -1,16 +1,16 @@
 ---
-name: chatgpt-app-builder
+name: mcp-app-builder
 description: |
-  Guide developers through creating ChatGPT apps.
+  Guide developers through creating MCP apps.
   Covers the full lifecycle: brainstorming ideas against UX guidelines, bootstrapping projects, implementing tools/widgets, debugging, running dev servers, deploying and connecting apps to ChatGPT.
-  Use when a user wants to create or update a ChatGPT app / MCP server for ChatGPT, or use the Skybridge framework.
+  Use when a user wants to create or update a MCP app, MCP server or use the Skybridge framework.
 ---
 
-# Creating Apps For LLMs
+# Creating MCP Apps
 
-ChatGPT apps are conversational experiences that extend ChatGPT through tools and custom UI widgets. They're built as MCP servers invoked during conversations.
+Those are conversational experiences that extend AI assistants through tools and custom UI widgets. They're built as MCP servers invoked during conversations.
 
-⚠️ The app is consumed by two users at once: the **human** and the **ChatGPT LLM**. They collaborate through the widget—the human interacts with it, the LLM sees its state. Internalize this before writing code: the widget is your shared surface.
+⚠️ The app is consumed by two users at once: the **human** and the **AI Assistant LLM**. They collaborate through the widget—the human interacts with it, the LLM sees its state. Internalize this before writing code: the widget is your shared surface.
 
 SPEC.md keeps track of the app's requirements and design decisions. Keep it up to date as you work on the app.
 
@@ -19,7 +19,7 @@ SPEC.md keeps track of the app's requirements and design decisions. Keep it up t
 ## Setup
 
 1. **Copy template** → [copy-template.md](references/copy-template.md): when starting a new project with ready SPEC.md
-2. **Run locally** → [run-locally.md](references/run-locally.md): when ready to test, need dev server or ChatGPT connection
+2. **Run locally** → [run-locally.md](references/run-locally.md): when ready to test, need dev server or ChatGPT/Claude connection
 
 ## Architecture
 
@@ -38,6 +38,6 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 ## Deploy
 
 - **Ship to production** → [deploy.md](references/deploy.md): when ready to deploy via Alpic
-- **Publish to ChatGPT Directory** → [publish.md](references/publish.md): when ready to submit for review
+- **Publish to ChatGPT/Claude Directories** → [publish.md](references/publish.md): when ready to submit for review
 
 Full API docs: [https://docs.skybridge.tech/api-reference.md](https://docs.skybridge.tech/api-reference.md)

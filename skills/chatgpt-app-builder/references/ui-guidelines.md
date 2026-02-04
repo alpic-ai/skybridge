@@ -27,7 +27,7 @@ Widget appears embedded in conversation above the model response.
 
 ### Fullscreen
 
-Immersive experience for complex tasks. ChatGPT composer remains overlaid at bottom.
+Immersive experience for complex tasks. Host composer remains overlaid at bottom.
 
 **Use for:** Multi-step workflows, rich editing, explorable content, detailed comparisons.
 

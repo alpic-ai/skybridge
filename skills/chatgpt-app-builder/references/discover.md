@@ -14,18 +14,18 @@
 
 ---
 
-## Phase 2: Why ChatGPT?
+## Phase 2: Why LLM?
 
 1. **Conversational win**: Where does "just say it" beat clicking?
 2. **LLM adds**: What does the LLM contribute? (intent, generation, reasoning)
-3. **ChatGPT lacks**: Your data? APIs? Ability to take real actions?
+3. **What LLM lacks**: Your data? APIs? Ability to take real actions?
 
 **Fail patterns** (stop if any match):
 - Long-form or static content better suited for a website
 - Complex multi-step workflows that exceed display modes
 - Dashboards (use tables, lists, or short paragraphs instead)
 - Full app ports instead of focused atomic actions
-- No clear answer to "why inside ChatGPT vs standalone?"
+- No clear answer to "why inside an AI assistant vs standalone?"
 
 → If fails: explain gap, suggest different interface or narrower scope.
 
@@ -56,11 +56,6 @@ Assemble from phases. Target: cwd if empty, else `{app-name}/`.
 ### Example
 
 ```markdown
----
-name: pizzaco-chatgpt
-description: Use the `chatgpt-app-builder` Skill to update this project.
----
-
 # Pizza Ordering App
 
 ## Value Proposition
@@ -68,10 +63,10 @@ Order pizza through conversation. Target: PizzaCo customers wanting quick orders
 
 **Core actions**: Browse menu, customize order, track delivery.
 
-## Why ChatGPT?
+## Why LLM?
 **Conversational win**: "My usual but with mushrooms" = one sentence vs. multiple screens.
 **LLM adds**: Intent from natural descriptions, handles modifications.
-**ChatGPT lacks**: Real menu and pricing data, order placement.
+**What LLM lacks**: Real menu and pricing data, order placement.
 
 ## UI Overview
 **First view**: Popular pizzas with quick "reorder last" option.

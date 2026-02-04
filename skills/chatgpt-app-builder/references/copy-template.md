@@ -1,6 +1,6 @@
 # Start From Template
 
-Scaffold a project by setting up the Skybridge template starter. Skybridge is a TypeScript framework for building ChatGPT apps (MCP servers) with type-safe APIs and React widgets.
+Scaffold a project by setting up the Skybridge template starter. Skybridge is a TypeScript framework for building MCP servers with type-safe APIs and React widgets.
 
 ## Workflow
 
