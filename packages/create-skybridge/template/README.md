@@ -1,13 +1,13 @@
 # Skybridge Starter
 
-A minimal TypeScript template for building MCP and ChatGPT Apps with the [Skybridge](https://docs.skybridge.tech/home) framework. 
+A minimal TypeScript template for building MCP and ChatGPT Apps with the [Skybridge](https://docs.skybridge.tech/home) framework.
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 24+
-- HTTP tunnel such as [ngrok](https://ngrok.com/download) if you want to test with remote MCP Clients like ChatGPT or Claude.ai.
+- HTTP tunnel such as [ngrok](https://ngrok.com/download) if you want to test with remote MCP hosts like ChatGPT or Claude.ai.
 
 ### Local Development
 
@@ -69,7 +69,7 @@ This command starts:
 
 #### 2. Edit widgets with Hot Module Replacement (HMR)
 
-Edit and save components in `web/src/widgets/` — changes will appear instantly inside your testing MCP Client.
+Edit and save components in `web/src/widgets/` — changes will appear instantly inside your App.
 
 #### 3. Edit server code
 
