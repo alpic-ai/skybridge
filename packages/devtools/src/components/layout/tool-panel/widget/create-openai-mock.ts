@@ -7,10 +7,13 @@ import type {
   DisplayMode,
   UnknownObject,
 } from "skybridge/web";
+
+type OpenAIWidgetState = { modelContent: Record<string, unknown> | null };
+
 import { SET_GLOBALS_EVENT_TYPE, SetGlobalsEvent } from "skybridge/web";
 
 function createOpenaiMethods(
-  openai: AppsSdkContext & AppsSdkMethods<UnknownObject>,
+  openai: AppsSdkContext & AppsSdkMethods,
   log: (
     command: string,
     args: UnknownObject,
@@ -48,7 +51,7 @@ function createOpenaiMethods(
         mode: args.mode,
       };
     },
-    setWidgetState: async (state: UnknownObject) => {
+    setWidgetState: async (state: OpenAIWidgetState) => {
       log("setWidgetState", state);
       openai.widgetState = state;
       setValue("widgetState", state);
@@ -75,7 +78,7 @@ function createOpenaiMethods(
       log("setOpenInAppUrl", args);
       setOpenInAppUrlFn(args.href);
     },
-  } satisfies AppsSdkMethods<UnknownObject>;
+  } satisfies AppsSdkMethods;
 
   return functions;
 }
@@ -129,7 +132,7 @@ export function createAndInjectOpenAi(
   const openaiObject = cloneDeep(initialValues);
   const openai = createOpenaiObject(openaiObject, iframeWindow);
   const functions = createOpenaiMethods(
-    openai as AppsSdkContext & AppsSdkMethods<UnknownObject>,
+    openai as AppsSdkContext & AppsSdkMethods,
     log,
     setValue,
     callToolFn,
