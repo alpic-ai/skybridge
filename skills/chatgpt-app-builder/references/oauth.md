@@ -5,13 +5,13 @@ Enable user authentication so tools can access user-specific data.
 ## How it works
 
 1. MCP server exposes OAuth discovery endpoints
-2. ChatGPT reads them, handles OAuth flow with user and token refresh
-3. ChatGPT sends access token in `Authorization: Bearer <token>` header
+2. Host reads them, handles OAuth flow with user and token refresh
+3. Host sends access token in `Authorization: Bearer <token>` header
 4. Tool handlers validate token and get user info
 
 ## 1. Discovery Endpoints
 
-Serve two JSON endpoints so ChatGPT knows where to authenticate users:
+Serve two JSON endpoints so the LLM host knows where to authenticate users:
 
 ```typescript
 // index.ts
