@@ -11,7 +11,7 @@
     "deploy": "alpic deploy"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.25.2",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "@t3-oss/env-core": "^0.13.8",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
