@@ -223,7 +223,10 @@ export class McpAppAdaptor implements Adaptor {
     const bridge = McpAppBridge.getInstance();
     await bridge.request<McpUiUpdateModelContextRequest, unknown>({
       method: "ui/update-model-context",
-      params: { structuredContent: newState },
+      params: {
+        structuredContent: newState,
+        content: [{ type: "text", text: JSON.stringify(newState) }],
+      },
     });
     this._widgetState = newState;
     this.widgetStateListeners.forEach((listener) => {
