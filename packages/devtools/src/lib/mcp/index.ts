@@ -7,7 +7,17 @@ import { McpClient } from "./client.js";
 
 const client = new McpClient();
 
-client.connect("http://localhost:3000/mcp").then(() => {
+const resolveMcpServerUrl = (): string => {
+  if (typeof window !== "undefined") {
+    return `${window.location.origin}/mcp`;
+  }
+
+  const parsedPort = Number.parseInt(process.env.PORT ?? "", 10);
+  const port = Number.isFinite(parsedPort) ? parsedPort : 3000;
+  return `http://localhost:${port}/mcp`;
+};
+
+client.connect(resolveMcpServerUrl()).then(() => {
   console.info("Connected to MCP server");
 });
 
