@@ -1,8 +1,10 @@
 # Deploy
 
-Push code to a GitHub repo, then deploy via Alpic.
+**Option A — Alpic CLI:** Get an API key from **Team settings** in the [Alpic dashboard](https://app.alpic.ai), set `ALPIC_API_KEY` in the environment, then run `npx alpic deploy` from the project root (or `npx alpic deploy ./path`). On first run the CLI will prompt to create a new project or link to an existing one; the choice is saved in `.alpic/project.json` for future deploys.
 
-Guide user through these steps:
+**Option B — Dashboard (GitHub):** Push code to a GitHub repo, then deploy via Alpic.
+
+Guide user through these steps for the dashboard flow:
 
 1. **Push to GitHub** — commit and push code
 
