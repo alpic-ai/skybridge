@@ -21,11 +21,19 @@ export ALPIC_API_KEY=your_api_key
 
 ## Deploy command
 
-Run the Alpic CLI with:
+Install the Alpic CLI globally:
 
 ```bash
-npx alpic deploy [directory]
+npm install -g alpic
 ```
+
+Then run:
+
+```bash
+alpic deploy [directory]
+```
+
+You can also use `npx alpic deploy` without a global install.
 
 **Arguments**
 
@@ -38,13 +46,13 @@ npx alpic deploy [directory]
 Deploy the current directory:
 
 ```bash
-npx alpic deploy
+alpic deploy
 ```
 
 Deploy a specific app directory:
 
 ```bash
-npx alpic deploy ./my-app
+alpic deploy ./my-app
 ```
 
 ## What it does
@@ -63,7 +71,7 @@ When the directory is not linked to a project, you will be asked to:
 
 - **Link to an existing project** — Select a project and environment from your Alpic team.
 
-After that, `.alpic/project.json` is created so the next `npx alpic deploy` uses the same project and environment without prompting.
+After that, `.alpic/project.json` is created so the next `alpic deploy` uses the same project and environment without prompting.
 
 ## Output
 
