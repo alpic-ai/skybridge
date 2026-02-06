@@ -1,11 +1,50 @@
-import { cpSync, rmSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { useEffect } from "react";
 import { Header } from "../cli/header.js";
 import { type CommandStep, useExecuteSteps } from "../cli/use-execute-steps.js";
 
+let indexTsWasCreated = false;
+
 export const commandSteps: CommandStep[] = [
+  {
+    label: "Preparing build environment",
+    run: () => {
+      const projectRoot = process.cwd();
+      const serverSrcDir = resolve(projectRoot, "server/src");
+      const serverTsPath = join(serverSrcDir, "server.ts");
+
+      if (!existsSync(serverTsPath)) {
+        throw new Error(
+          `server.ts not found at ${serverTsPath}. Please ensure your server.ts file exists in server/src/`,
+        );
+      }
+
+      const indexTsPath = join(serverSrcDir, "index.ts");
+      if (!existsSync(indexTsPath)) {
+        const serverEntryPath = resolve(
+          fileURLToPath(import.meta.url),
+          "../../cli/server-entry.js",
+        );
+        const buildEntryContent = readFileSync(serverEntryPath, "utf-8");
+        writeFileSync(
+          join(serverSrcDir, "index.ts"),
+          buildEntryContent,
+          "utf-8",
+        );
+        indexTsWasCreated = true;
+      }
+    },
+  },
   {
     label: "Building widgets",
     command: "vite build -c web/vite.config.ts",
@@ -21,6 +60,16 @@ export const commandSteps: CommandStep[] = [
   },
 ];
 
+const cleanup = () => {
+  if (indexTsWasCreated) {
+    const projectRoot = process.cwd();
+    const serverIndex = resolve(projectRoot, "server/src/index.ts");
+    if (existsSync(serverIndex)) {
+      rmSync(serverIndex);
+    }
+  }
+};
+
 export default class Build extends Command {
   static override description = "Build the widgets and MCP server";
   static override examples = ["skybridge build"];
@@ -28,8 +77,10 @@ export default class Build extends Command {
 
   public async run(): Promise<void> {
     const App = () => {
-      const { currentStep, status, error, execute } =
-        useExecuteSteps(commandSteps);
+      const { currentStep, status, error, execute } = useExecuteSteps(
+        commandSteps,
+        cleanup,
+      );
 
       useEffect(() => {
         execute();
