@@ -118,8 +118,8 @@ export async function init(args: string[] = process.argv.slice(2)) {
         emptyDir(targetDir);
         break;
       case "no":
-        cancel();
-        return;
+        prompts.log.error("Target directory is not empty.");
+        process.exit(1);
     }
   }
 
@@ -283,20 +283,28 @@ function sanitizeTargetDir(targetDir: string) {
   );
 }
 
-function isEmpty(path: string) {
-  const files = fs.readdirSync(path);
-  return files.length === 0 || (files.length === 1 && files[0] === ".git");
+// Skip user's SPEC.md and IDE/agent preferences (.idea, .claude, etc.)
+function isSkippedEntry(entry: fs.Dirent) {
+  return (
+    (entry.name.startsWith(".") && entry.isDirectory()) ||
+    entry.name === "SPEC.md"
+  );
+}
+
+function isEmpty(dirPath: string) {
+  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+  return entries.every(isSkippedEntry);
 }
 
 function emptyDir(dir: string) {
   if (!fs.existsSync(dir)) {
     return;
   }
-  for (const file of fs.readdirSync(dir)) {
-    if (file === ".git") {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (isSkippedEntry(entry)) {
       continue;
     }
-    fs.rmSync(path.resolve(dir, file), { recursive: true, force: true });
+    fs.rmSync(path.join(dir, entry.name), { recursive: true, force: true });
   }
 }
 

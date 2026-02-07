@@ -8,7 +8,7 @@
     "dev": "skybridge dev",
     "build": "skybridge build",
     "start": "skybridge start",
-    "inspector": "mcp-inspector http://localhost:3000/mcp"
+    "deploy": "alpic deploy"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
@@ -22,13 +22,12 @@
     "react-dom": "^19.1.1",
     "react-map-gl": "^7.1.8",
     "react-router-dom": "^7.11.0",
-    "skybridge": ">=0.26.1 <1.0.0",
+    "skybridge": ">=0.29.1 <1.0.0",
     "tailwindcss": "^4.1.14",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@modelcontextprotocol/inspector": "^0.17.5",
     "@skybridge/devtools": ">=0.26.1 <1.0.0",
     "@tailwindcss/vite": "^4.1.14",
     "@types/express": "^5.0.3",
@@ -37,6 +36,7 @@
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
+    "alpic": "^1.83.1",
     "nodemon": "^3.1.10",
     "tsx": "^4.19.4",
     "tw-animate-css": "^1.4.0",

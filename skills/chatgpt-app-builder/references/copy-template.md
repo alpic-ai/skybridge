@@ -1,25 +1,24 @@
-# Bootstrap Workflow
+# Start From Template
 
-Scaffold a project by setting up the Skybridge template starter. Skybridge is a TypeScript framework for building ChatGPT apps (MCP servers) with type-safe APIs and React widgets.
+Scaffold a project by setting up the Skybridge template starter. Skybridge is a TypeScript framework for building MCP servers with type-safe APIs and React widgets.
 
 ## Workflow
 
-1. Infer `{app-name}` from SPEC.md title: extract business domain, kebab-case, strip "app"/"chatgpt"/"mcp" suffixes
-   - "Pizza Ordering MCP App" → `pizza-ordering`
-   - "Flight Tracker For ChatGPT" → `flight-tracker`
+1. Ask: "Which package manager?" (npm / pnpm / yarn / bun / deno)
 
-2. Ask: "Which package manager?" (npm / pnpm / yarn / bun / deno)
-
-3. Run:
+2. Run (do not `rm` beforehand—create handles conflicts):
 ```bash
-{pm} create skybridge@latest {app-name}
+{pm} create skybridge@latest {target-dir}
 
 # deno
-deno init --npm skybridge {app-name}
+deno init --npm skybridge {target-dir}
 ```
 
-4. [Start the dev server](run-locally.md)
+3. [Start the dev server](run-locally.md). Read logs to assess readiness/health; fix any errors (TypeScript, etc.) before proceeding.
 
-5. Replace the starter code with your implementation:
-- Server handlers → [fetch-and-render-data.md](fetch-and-render-data.md)
-- UI widgets → [manage-and-share-widget-state.md](communicate-with-llm.md)  
+4. Start implementing your app using these core concepts:
+- Server handlers and widget components → [fetch-and-render-data.md](fetch-and-render-data.md)
+- Widget state and LLM context → [state-and-context.md](state-and-context.md)
+- Display modes → [ui-guidelines.md](ui-guidelines.md)
+
+5. Delete unused widgets files and leftover code.
