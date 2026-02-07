@@ -86,7 +86,7 @@ To test your app with other MCP Clients like ChatGPT, Claude or VSCode, see [Tes
 
 Skybridge is infrastructure vendor agnostic, and your app can be deployed on any cloud platform supporting MCP.
 
-Deploy your app in minutes with [Alpic](https://alpic.ai/).
+The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 1. Create an account on [Alpic platform](https://app.alpic.ai/). 
 2. Connect your GitHub repository to automatically deploy at each commit. 
 3. Use your remote App URL to connect it to MCP Clients, or use the Alpic Playground to easily test your App.
