@@ -18,7 +18,7 @@ This example serves as a comprehensive reference for building sophisticated, int
 
 ## Live Demo
 
-[Try it in Alpic's Playground](https://ecommerce.skybridge.tech/try) to launch the live widget experience, or use the MCP URL with your client of choice: [https://ecommerce.skybridge.tech/mcp](https://ecommerce.skybridge.tech/mcp).
+[Try it in Alpic's Playground](https://ecommerce.skybridge.tech/try) to launch the live widget experience, or use the MCP URL with your client of choice: `https://ecommerce.skybridge.tech/mcp`.
 
 ## Getting Started
 

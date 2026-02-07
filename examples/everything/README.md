@@ -23,7 +23,7 @@ This example demonstrates every major Skybridge capability in a single widget wi
 
 ## Live Demo
 
-[Try it in Alpic's Playground](https://everything.skybridge.tech/try) to launch the live widget experience, or use the MCP URL with your client of choice: [https://everything.skybridge.tech/mcp](https://everything.skybridge.tech/mcp).
+[Try it in Alpic's Playground](https://everything.skybridge.tech/try) to launch the live widget experience, or use the MCP URL with your client of choice: `https://everything.skybridge.tech/mcp`.
 
 ## Getting Started
 

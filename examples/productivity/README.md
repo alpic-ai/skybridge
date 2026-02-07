@@ -24,7 +24,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): int
 
 ## Live Demo
 
-[Try it in Alpic's Playground](https://productivity.skybridge.tech/try) to launch the live widget experience, or use the MCP URL with your client of choice: [https://productivity.skybridge.tech/mcp](https://productivity.skybridge.tech/mcp).
+[Try it in Alpic's Playground](https://productivity.skybridge.tech/try) to launch the live widget experience, or use the MCP URL with your client of choice: `https://productivity.skybridge.tech/mcp`.
 
 ## Getting Started
 
