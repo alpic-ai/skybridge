@@ -37,7 +37,7 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 
 ## Deploy
 
-- **Ship to production** → [deploy.md](references/deploy.md): when ready to deploy via Alpic
+- **Ship to production** → [deploy.md](references/deploy.md): when ready to deploy via Alpic. Use the **Alpic CLI** (`npx alpic deploy`) for CLI-based deploy, or the dashboard for GitHub-based deploy.
 - **Publish to ChatGPT/Claude Directories** → [publish.md](references/publish.md): when ready to submit for review
 
 Full API docs: [https://docs.skybridge.tech/api-reference.md](https://docs.skybridge.tech/api-reference.md)
