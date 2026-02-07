@@ -8,7 +8,7 @@
     "dev": "skybridge dev",
     "build": "skybridge build",
     "start": "skybridge start",
-    "inspector": "mcp-inspector http://localhost:3000/mcp"
+    "deploy": "alpic deploy"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
