@@ -8,7 +8,9 @@ import type {
 
 type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
 
-type WidgetState = UnknownObject;
+type WidgetState = {
+  modelContent: Record<string, unknown> | null;
+};
 
 export const TOOL_RESPONSE_EVENT_TYPE = "openai:tool_response";
 export class ToolResponseEvent extends CustomEvent<{
@@ -19,7 +21,7 @@ export class ToolResponseEvent extends CustomEvent<{
 
 declare global {
   interface Window {
-    openai: AppsSdkMethods<WidgetState> & AppsSdkContext;
+    openai: AppsSdkMethods & AppsSdkContext;
   }
 
   interface WindowEventMap {
@@ -31,7 +33,6 @@ export type AppsSdkContext<
   ToolInput extends UnknownObject = Record<never, unknown>,
   ToolOutput extends UnknownObject = UnknownObject,
   ToolResponseMetadata extends UnknownObject = UnknownObject,
-  WidgetState extends UnknownObject = UnknownObject,
 > = {
   theme: Theme;
   userAgent: UserAgent;
@@ -50,61 +51,58 @@ export type AppsSdkContext<
   widgetState: WidgetState | null;
 };
 
-export type AppsSdkMethods<WidgetState extends UnknownObject = UnknownObject> =
-  {
-    /** Calls a tool on your MCP. Returns the full response. */
-    callTool: <
-      ToolArgs extends CallToolArgs = null,
-      ToolResponse extends CallToolResponse = CallToolResponse,
-    >(
-      name: string,
-      args: ToolArgs,
-    ) => Promise<ToolResponse>;
+export type AppsSdkMethods = {
+  /** Calls a tool on your MCP. Returns the full response. */
+  callTool: <
+    ToolArgs extends CallToolArgs = null,
+    ToolResponse extends CallToolResponse = CallToolResponse,
+  >(
+    name: string,
+    args: ToolArgs,
+  ) => Promise<ToolResponse>;
 
-    /** Triggers a followup turn in the ChatGPT conversation */
-    sendFollowUpMessage: (args: { prompt: string }) => Promise<void>;
+  /** Triggers a followup turn in the ChatGPT conversation */
+  sendFollowUpMessage: (args: { prompt: string }) => Promise<void>;
 
-    /** Opens an external link, redirects web page or mobile app */
-    openExternal(args: { href: string }): void;
+  /** Opens an external link, redirects web page or mobile app */
+  openExternal(args: { href: string }): void;
 
-    /** For transitioning an app from inline to fullscreen or pip */
-    requestDisplayMode: (args: { mode: DisplayMode }) => Promise<{
-      /**
-       * The granted display mode. The host may reject the request.
-       * For mobile, PiP is always coerced to fullscreen.
-       */
-      mode: DisplayMode;
-    }>;
-
+  /** For transitioning an app from inline to fullscreen or pip */
+  requestDisplayMode: (args: { mode: DisplayMode }) => Promise<{
     /**
-     * Sets the widget state.
-     * This state is persisted across widget renders.
+     * The granted display mode. The host may reject the request.
+     * For mobile, PiP is always coerced to fullscreen.
      */
-    setWidgetState: (state: WidgetState) => Promise<void>;
+    mode: DisplayMode;
+  }>;
 
-    /**
-     * Opens a modal portaled outside of the widget iFrame.
-     * This ensures the modal is correctly displayed and not limited to the widget's area.
-     */
-    requestModal: (args: RequestModalOptions) => Promise<void>;
+  /**
+   * Sets the widget state.
+   * This state is persisted across widget renders.
+   */
+  setWidgetState: (state: WidgetState) => Promise<void>;
 
-    /** Uploads a new file to the host */
-    uploadFile: (file: File) => Promise<FileMetadata>;
+  /**
+   * Opens a modal portaled outside of the widget iFrame.
+   * This ensures the modal is correctly displayed and not limited to the widget's area.
+   */
+  requestModal: (args: RequestModalOptions) => Promise<void>;
 
-    /**
-     * Downloads a file from the host that was previously uploaded.
-     * Only files uploaded by the same connector instance can be downloaded.
-     */
-    getFileDownloadUrl: (
-      file: FileMetadata,
-    ) => Promise<{ downloadUrl: string }>;
+  /** Uploads a new file to the host */
+  uploadFile: (file: File) => Promise<FileMetadata>;
 
-    /**
-     * Sets the open in app URL.
-     * This URL will be opened in the app when the user clicks on the top right button in fullscreen mode.
-     */
-    setOpenInAppUrl: (args: { href: string }) => Promise<void>;
-  };
+  /**
+   * Downloads a file from the host that was previously uploaded.
+   * Only files uploaded by the same connector instance can be downloaded.
+   */
+  getFileDownloadUrl: (file: FileMetadata) => Promise<{ downloadUrl: string }>;
+
+  /**
+   * Sets the open in app URL.
+   * This URL will be opened in the app when the user clicks on the top right button in fullscreen mode.
+   */
+  setOpenInAppUrl: (args: { href: string }) => Promise<void>;
+};
 
 // Dispatched when any global changes in the host page
 export const SET_GLOBALS_EVENT_TYPE = "openai:set_globals";

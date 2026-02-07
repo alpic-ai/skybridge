@@ -38,7 +38,7 @@ describe("useWidgetState", () => {
   });
 
   it("should initialize with window.openai.widgetState when available", () => {
-    OpenaiMock.widgetState = windowState;
+    OpenaiMock.widgetState = { modelContent: windowState };
     const { result } = renderHook(() => useWidgetState(defaultState));
 
     expect(result.current[0]).toEqual(windowState);
@@ -52,7 +52,9 @@ describe("useWidgetState", () => {
       result.current[1](newState);
     });
 
-    expect(OpenaiMock.setWidgetState).toHaveBeenCalledWith(newState);
+    expect(OpenaiMock.setWidgetState).toHaveBeenCalledWith({
+      modelContent: newState,
+    });
     expect(result.current[0]).toEqual(newState);
   });
 
@@ -64,20 +66,19 @@ describe("useWidgetState", () => {
     });
 
     expect(OpenaiMock.setWidgetState).toHaveBeenCalledWith({
-      count: 1,
-      name: "test",
+      modelContent: { count: 1, name: "test" },
     });
     expect(result.current[0]).toEqual({ count: 1, name: "test" });
   });
 
   it("should update state when window.openai.widgetState changes", () => {
-    OpenaiMock.widgetState = defaultState;
+    OpenaiMock.widgetState = { modelContent: defaultState };
     const { result, rerender } = renderHook(() => useWidgetState(defaultState));
 
     expect(result.current[0]).toEqual(defaultState);
 
     // Simulate window.openai.widgetState changing
-    OpenaiMock.widgetState = windowState;
+    OpenaiMock.widgetState = { modelContent: windowState };
     // Trigger re-render to simulate the useEffect running
     rerender();
 
