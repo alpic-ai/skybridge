@@ -425,11 +425,15 @@ export class McpServer<
               widgetName: name,
             });
 
-        const VITE_HMR_WEBSOCKET_DEFAULT_URL = "ws://localhost:24678";
+        const connectDomains = [serverUrl];
+        if (!isProduction) {
+          const VITE_HMR_WEBSOCKET_DEFAULT_URL = "ws://localhost:24678";
+          connectDomains.push(VITE_HMR_WEBSOCKET_DEFAULT_URL);
+        }
 
         const contentMeta = buildContentMeta({
           resourceDomains: [serverUrl],
-          connectDomains: !isProduction ? [VITE_HMR_WEBSOCKET_DEFAULT_URL] : [],
+          connectDomains,
           domain: isClaude
             ? `${crypto
                 .createHash("sha256")
