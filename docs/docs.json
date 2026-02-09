@@ -41,6 +41,7 @@
                   "fundamentals/mcp-apps"
                 ]
               },
+              "quickstart/skills",
               "quickstart/create-new-app",
               "quickstart/test-your-app",
               "quickstart/build-for-production",
