@@ -1,0 +1,35 @@
+---
+title: Migrate
+description: "Migrate ChatGPT App or ext-apps to Skybridge"
+icon: "right-to-bracket"
+---
+
+Already have an app built with the [OpenAI Apps SDK](https://developers.openai.com/apps-sdk/) or [`@modelcontextprotocol/ext-apps`](https://github.com/modelcontextprotocol/ext-apps)? The Skybridge [Skill](/devtools/skills) can migrate it for you — it teaches your coding agent the full Skybridge framework so it can scaffold, rewrite, and wire up your project automatically.
+
+## Install the skill
+
+<CodeGroup>
+```bash npm
+npx skills add alpic-ai/skybridge -s skybridge
+```
+```bash pnpm
+pnpm dlx skills add alpic-ai/skybridge -s skybridge
+```
+```bash yarn
+yarn dlx skills add alpic-ai/skybridge -s skybridge
+```
+```bash bun
+bunx skills add alpic-ai/skybridge -s skybridge
+```
+```bash deno
+deno run -A npm:skills add alpic-ai/skybridge -s skybridge
+```
+</CodeGroup>
+
+## Prompt your agent
+
+```
+Migrate my app to /skybridge
+```
+
+That's it! Once migrated, keep using the [🧠 Skill](/devtools/skills) for ongoing development — brainstorming ideas, designing widgets and tools, running dev server, debugging, deploying, and more.
