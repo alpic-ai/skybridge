@@ -201,6 +201,7 @@ type AddTool<
     path: string,
     ...handlers: RequestHandler[]
   ): AddTool<TTools, TName, TInput, TOutput, TResponseMetadata>;
+  run(): Promise<void>;
 };
 type ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> = {
   title?: string;
