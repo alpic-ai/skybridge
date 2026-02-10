@@ -108,7 +108,7 @@ describe("McpServer.registerWidget", () => {
           _meta: {
             "openai/widgetCSP": {
               resource_domains: [serverUrl],
-              connect_domains: ["ws://localhost:24678"],
+              connect_domains: [serverUrl, "ws://localhost:24678"],
             },
             "openai/widgetDomain": serverUrl,
             "openai/widgetDescription": "Test tool",
@@ -174,7 +174,7 @@ describe("McpServer.registerWidget", () => {
           _meta: {
             "openai/widgetCSP": {
               resource_domains: [serverUrl],
-              connect_domains: [],
+              connect_domains: [serverUrl],
             },
             "openai/widgetDomain": serverUrl,
             "openai/widgetDescription": "Test tool",
@@ -265,6 +265,7 @@ describe("McpServer.registerWidget", () => {
         ServerNotification
       >,
     );
+    const serverUrl = "http://localhost:3000";
 
     expect(appsSdkResult).toEqual({
       contents: [
@@ -274,10 +275,10 @@ describe("McpServer.registerWidget", () => {
           text: expect.stringContaining('<div id="root"></div>'),
           _meta: {
             "openai/widgetCSP": {
-              resource_domains: ["http://localhost:3000"],
-              connect_domains: ["ws://localhost:24678"],
+              resource_domains: [serverUrl],
+              connect_domains: [serverUrl, "ws://localhost:24678"],
             },
-            "openai/widgetDomain": "http://localhost:3000",
+            "openai/widgetDomain": serverUrl,
             "openai/widgetDescription": "Test tool",
             "openai/widgetPrefersBorder": true,
           },
@@ -319,10 +320,10 @@ describe("McpServer.registerWidget", () => {
           _meta: {
             ui: {
               csp: {
-                resourceDomains: ["http://localhost:3000"],
-                connectDomains: ["ws://localhost:24678"],
+                resourceDomains: [serverUrl],
+                connectDomains: [serverUrl, "ws://localhost:24678"],
               },
-              domain: "http://localhost:3000",
+              domain: serverUrl,
             },
           },
         },
@@ -396,6 +397,7 @@ describe("McpServer.registerWidget", () => {
         _meta?: Record<string, unknown>;
       }>;
     }>;
+    const serverUrl = "http://localhost:3000";
 
     const result = await appsSdkCallback(
       new URL("ui://widgets/apps-sdk/override-test.html"),
@@ -409,8 +411,12 @@ describe("McpServer.registerWidget", () => {
 
     // CSP arrays are merged with union - all unique domains from defaults and user config are preserved
     expect(meta["openai/widgetCSP"]).toEqual({
-      resource_domains: ["http://localhost:3000", "https://from-ui-csp.com"],
-      connect_domains: ["ws://localhost:24678", "https://from-ui-csp.com"],
+      resource_domains: [serverUrl, "https://from-ui-csp.com"],
+      connect_domains: [
+        serverUrl,
+        "ws://localhost:24678",
+        "https://from-ui-csp.com",
+      ],
       frame_domains: undefined,
       redirect_domains: undefined,
     });
