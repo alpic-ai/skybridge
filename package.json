@@ -22,12 +22,12 @@
   "author": "Frédéric Barthelet",
   "license": "ISC",
   "devDependencies": {
-    "@biomejs/biome": "^2.3.11",
+    "@biomejs/biome": "^2.3.14",
     "@total-typescript/tsconfig": "^1.0.4",
-    "@types/node": "^24.10.8",
+    "@types/node": "^24.10.12",
     "typescript": "^5.9.3"
   },
-  "packageManager": "pnpm@10.28.0",
+  "packageManager": "pnpm@10.29.2",
   "engines": {
     "node": ">=24.13.0"
   }
