@@ -6,8 +6,8 @@ import { useSelectedToolName } from "../nuqs.js";
 import { McpClient } from "./client.js";
 
 const client = new McpClient();
-
-client.connect("http://localhost:3000/mcp").then(() => {
+const mcpServerUrl = process.env.MCP_SERVER_URL || 'http://localhost:3000/mcp';
+client.connect(mcpServerUrl).then(() => {
   console.info("Connected to MCP server");
 });
 
