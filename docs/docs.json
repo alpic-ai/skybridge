@@ -3,8 +3,8 @@
   "name": "Skybridge",
   "theme": "mint",
   "colors": {
-    "primary": "#2563EB",
-    "light": "#3B82F6",
+    "primary": "#08F5F9",
+    "light": "#08F5F9",
     "dark": "#2563EB"
   },
   "favicon": "/images/favicon.ico",
@@ -180,5 +180,6 @@
     "posthog": {
       "apiKey": "phc_wz9NIcD7SmH0BEN39lARJwJNjXgggazjuWCCt62eeKT"
     }
-  }
+  },
+  "description": "The #1 full stack open-source TS framework"
 }
