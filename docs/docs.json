@@ -41,7 +41,6 @@
                   "fundamentals/mcp-apps"
                 ]
               },
-              "quickstart/skills",
               "quickstart/create-new-app",
               "quickstart/test-your-app",
               "quickstart/build-for-production",
@@ -73,7 +72,7 @@
           {
             "group": "DevTools",
             "icon": "wrench",
-            "pages": ["devtools/index"]
+            "pages": ["devtools/skills", "devtools/index"]
           },
           {
             "group": "Resources",
