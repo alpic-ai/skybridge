@@ -66,13 +66,14 @@ jobs:
           pnpm --filter skybridge build
           pnpm --filter @skybridge/devtools build
 
-      - name: Install template dependencies with workspace:*
-        run: pnpm add skybridge@workspace:* @skybridge/devtools@workspace:* --filter apps-sdk-template
+      - name: Install template dependencies with workspace package versions
+        run: pnpm add "skybridge@workspace:0.0.0" "@skybridge/devtools@workspace:0.0.0" --filter apps-sdk-template
+
+      - name: Install (link workspace packages)
+        run: pnpm install
 
       - name: Build template
-        run: |
-          cd packages/create-skybridge/template
-          pnpm run build
+        run: pnpm --filter apps-sdk-template run build
 
   windows:
     name: Windows build
