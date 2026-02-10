@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { readFileSync } from "node:fs";
+import http from "node:http";
 import path from "node:path";
 import type {
   McpUiResourceMeta,
@@ -267,13 +268,13 @@ export class McpServer<
 
     const express = this.express;
     return new Promise((resolve, reject) => {
-      const server = express.listen(3000, () => {
-        resolve();
-      });
-
+      const server = http.createServer(express);
       server.on("error", (error: Error) => {
         console.error("Failed to start server:", error);
         reject(error);
+      });
+      server.listen(3000, () => {
+        resolve();
       });
     });
   }
