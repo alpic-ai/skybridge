@@ -1,27 +1,32 @@
 ---
-title: Introduction
+title: "Introduction"
 description: "Build production-ready ChatGPT and MCP Apps faster with full-stack TypeScript tooling and modern developer experience."
-sidebarTitle: Introduction
+sidebarTitle: "Introduction"
 icon: "house"
 ---
 
-**Skybridge is a framework for quickly building ChatGPT and MCP Apps, the _modern TypeScript way_.**
+**_Skybridge is a framework for quickly building ChatGPT and MCP Apps, the modern TypeScript way._**
 
 It comes with:
-- 🌐 Write Once, Run Everywhere — Write once, run anywhere. It works seamlessly with ChatGPT (Apps SDK) and MCP-compatible clients.
-- 👨‍💻 Full Dev Environment — HMR, debug traces, and local devtools.
-- ✅ End-to-End Type Safety — tRPC-style inference from server to widget. Autocomplete everywhere.
-- 🔄 Widget-to-Model Sync — Keep the model aware of UI state with data-llm.
-- ⚒️ React Query-style Hooks — isPending, isError, callbacks. State management you already know.
-- 📦 Showcase Examples — Production-ready examples to learn from and build upon.
+
+- 🌐 Write once, run everywhere: Skybridge works seamlessly with ChatGPT (Apps SDK) and MCP-compatible clients.
+- 👨‍💻 Full dev environment: HMR, debug traces, and local devtools.
+- ✅ End-to-end type safety: tRPC-style inference from server to widget. Autocomplete everywhere.
+- 🔄 Widget-to-model sync: Keep the model aware of UI state with data-llm.
+- ⚒️ React Query-style hooks: isPending, isError, callbacks. State management you already know.
+- 📦 Showcase examples: production-ready examples to learn from and build upon.
 
 ## Why does Skybridge exist?
 
-OpenAI announced the [ChatGPT Apps SDK](https://developers.openai.com/apps-sdk) in October 2025, giving developers a new way of interacting with ChatGPT. Shortly after, the open [MCP ext-apps specification](https://github.com/modelcontextprotocol/ext-apps) emerged, enabling similar UI widgets across multiple AI assistants and MCP clients. While these runtimes provide powerful primitives with UI rendering, state persistence, tool calls, follow-up messages and layout management, they are very low-level and lack modern fullstack DX standards like end-to-end typesafe APIs, hooks, error handling or data state management.
+OpenAI announced the [ChatGPT Apps SDK](https://developers.openai.com/apps-sdk) in October 2025, giving developers (and users) a new way of interacting with ChatGPT. Shortly after, the open [MCP ext-apps specification](https://github.com/modelcontextprotocol/ext-apps) emerged, enabling similar UI widgets across multiple AI assistants and MCP clients. While these runtimes provide powerful primitives with UI rendering, state persistence, tool calls, follow-up messages and layout management, they are very low-level and lack modern fullstack DX standards like end-to-end typesafe APIs, hooks, error handling or data state management.
 
 In addition, these apps introduce a new challenge: building for **dual interaction surfaces**. With widgets interacting with both the user and the model, you need to make sure everything the user sees and does in the UI is also shared with the model, and vice-versa.
 
-<img src="/images/chatgpt-apps-interaction.png" alt="Apps architecture" style={{maxWidth: '500px', width: '100%', display: 'block', margin: '0 auto'}} />
+<img
+  src="/images/chatgpt-apps-interaction.png"
+  alt="Apps architecture"
+  style={{ maxWidth:"500px",width:"100%",display:"block",margin:"0 auto" }}
+/>
 
 Finally, there are no developer tools or environment. Developers can test their apps only inside ChatGPT Developer mode, which has infinite caching policies, no hot module replacement, and requires you to refresh or re-install your app to test any change - losing precious minutes at each small iteration.
 
@@ -34,6 +39,7 @@ We built **Skybridge** so other developers wouldn't have to deal with these same
 Skybridge is a fullstack framework aiming to **maximize Developer Experience while minimizing boilerplate code**.
 
 It includes 3 main parts:
+
 - **`skybridge/server`**: A drop-in replacement for the official MCP SDK that adds widget registration and type inference capabilities.
 - **`skybridge/web`**: A React library providing hooks, components, and the runtime glue to render your widgets inside AI conversation environments.
 - **`skybridge/devtools`** : A dev environment, with a local emulator and dev tools, and a Vite-based dev server allowing Hot Module Reload directly inside ChatGPT or MCP Client.
@@ -42,8 +48,8 @@ It includes 3 main parts:
 
 ## What Skybridge is NOT
 
-- **It is NOT another MCP SDK.** `skybridge/server` simply extends the official [TypeScript MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk), and `skybridge/web` focuses on improving host runtime APIs, making it compatible with any MCP Server and runtime.
-- **It is NOT an agentic framework.** It allows you to build ChatGPT and MCP Apps that run inside ChatGPT and MCP Clients. It doesn't provide any agentic frontend to run your App.
+- **It is NOT another MCP SDK.** `skybridge/server` simply extends the official [TypeScript MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk), and `skybridge/web` focuses on improving host runtime APIs, making it compatible with any MCP server and runtime.
+- **It is NOT an agentic framework.** It allows you to build ChatGPT and MCP Apps that run inside ChatGPT and MCP clients. It doesn't provide any agentic frontend to run your App.
 
 ## Get Started
 
