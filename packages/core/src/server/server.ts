@@ -193,7 +193,6 @@ type AddTool<
     [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput, TResponseMetadata>;
   }
 > & {
-  run(): Promise<void>;
   use(
     ...handlers: RequestHandler[]
   ): AddTool<TTools, TName, TInput, TOutput, TResponseMetadata>;
