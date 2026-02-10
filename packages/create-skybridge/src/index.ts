@@ -67,8 +67,8 @@ export async function init(args: string[] = process.argv.slice(2)) {
         message: "Project name:",
         defaultValue: defaultProjectName,
         placeholder: defaultProjectName,
-        validate: (value: string) => {
-          return value.length === 0 || sanitizeTargetDir(value).length > 0
+        validate: (value) => {
+          return !value || sanitizeTargetDir(value).length > 0
             ? undefined
             : "Invalid project name";
         },
