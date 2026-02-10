@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { readFileSync } from "node:fs";
+import http from "node:http";
 import path from "node:path";
 import type {
   McpUiResourceMeta,
@@ -24,6 +25,8 @@ import type {
   ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
 import { mergeWith, union } from "es-toolkit";
+import type { Express, RequestHandler } from "express";
+import { createServer } from "./express.js";
 import { templateHelper } from "./templateHelper.js";
 
 const mergeWithUnion = <T extends object, S extends object>(
@@ -190,7 +193,16 @@ type AddTool<
   TTools & {
     [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput, TResponseMetadata>;
   }
->;
+> & {
+  use(
+    ...handlers: RequestHandler[]
+  ): AddTool<TTools, TName, TInput, TOutput, TResponseMetadata>;
+  use(
+    path: string,
+    ...handlers: RequestHandler[]
+  ): AddTool<TTools, TName, TInput, TOutput, TResponseMetadata>;
+  run(): Promise<void>;
+};
 type ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> = {
   title?: string;
   description?: string;
@@ -208,10 +220,65 @@ type ToolHandler<
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
 ) => TReturn | Promise<TReturn>;
 
+type MiddlewareConfig = {
+  path?: string;
+  handlers: RequestHandler[];
+};
+
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
 > extends McpServerBase {
   declare readonly $types: McpServerTypes<TTools>;
+  private express?: Express;
+  private customMiddleware: MiddlewareConfig[] = [];
+
+  use(...handlers: RequestHandler[]): this;
+  use(path: string, ...handlers: RequestHandler[]): this;
+  use(
+    pathOrHandler: string | RequestHandler,
+    ...handlers: RequestHandler[]
+  ): this {
+    if (typeof pathOrHandler === "string") {
+      this.customMiddleware.push({
+        path: pathOrHandler,
+        handlers,
+      });
+    } else {
+      this.customMiddleware.push({
+        handlers: [pathOrHandler, ...handlers],
+      });
+    }
+
+    return this;
+  }
+
+  async run(): Promise<void> {
+    if (!this.express) {
+      this.express = await createServer({
+        server: this,
+      });
+
+      for (const middleware of this.customMiddleware) {
+        if (middleware.path) {
+          this.express.use(middleware.path, ...middleware.handlers);
+        } else {
+          this.express.use(...middleware.handlers);
+        }
+      }
+    }
+
+    const express = this.express;
+    return new Promise((resolve, reject) => {
+      const server = http.createServer(express);
+      server.on("error", (error: Error) => {
+        console.error("Failed to start server:", error);
+        reject(error);
+      });
+      server.listen(3000, () => {
+        resolve();
+      });
+    });
+  }
 
   registerWidget<
     TName extends string,

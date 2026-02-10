@@ -41,6 +41,7 @@
   "license": "ISC",
   "peerDependencies": {
     "@modelcontextprotocol/sdk": ">=1.0.0",
+    "@skybridge/devtools": ">=0.26.1",
     "nodemon": ">=3.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"

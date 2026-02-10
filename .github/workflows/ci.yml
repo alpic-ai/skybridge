@@ -61,10 +61,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install template dependencies with workspace:*
-        run: |
-          cd packages/create-skybridge/template
-          pnpm add skybridge@workspace:* @skybridge/devtools@workspace:*
+      - name: Install template dependencies with workspace package versions
+        run: pnpm add "skybridge@workspace:0.0.0" "@skybridge/devtools@workspace:0.0.0" --filter apps-sdk-template
 
       - name: Build core and devtools
         run: |
@@ -72,9 +70,7 @@ jobs:
           pnpm --filter @skybridge/devtools build
 
       - name: Build template
-        run: |
-          cd packages/create-skybridge/template
-          pnpm run build
+        run: pnpm --filter apps-sdk-template run build
 
   windows:
     name: Windows build

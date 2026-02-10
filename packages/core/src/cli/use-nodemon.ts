@@ -1,4 +1,4 @@
-import nodemonOriginal, { type NodemonSettings } from "nodemon";
+import nodemonOriginal from "nodemon";
 import { useEffect, useState } from "react";
 import type { ExtendedNodemon } from "./nodemon.d.ts";
 
@@ -17,7 +17,7 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
       env,
       configFile: "nodemon.json",
       stdout: false,
-    } as NodemonSettings);
+    });
 
     const handleStdoutData = (chunk: Buffer) => {
       const message = chunk.toString().trim();
