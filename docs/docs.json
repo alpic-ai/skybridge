@@ -3,14 +3,17 @@
   "name": "Skybridge",
   "theme": "mint",
   "colors": {
-    "primary": "#2563EB",
-    "light": "#3B82F6",
-    "dark": "#2563EB"
+    "primary": "#002FFF",
+    "light": "#08F5F9",
+    "dark": "#002FFF"
   },
-  "favicon": "/images/favicon.ico",
+  "favicon": {
+    "light": "/images/SkybridgeFaviconmidnight.svg",
+    "dark": "/images/SkybridgeFaviconwhite.svg"
+  },
   "logo": {
-    "light": "/images/logo.png",
-    "dark": "/images/logo.png"
+    "light": "/images/Skybridgewhite(1).svg",
+    "dark": "/images/Skybridgemidnight.svg"
   },
   "metadata": {
     "og:site_name": "Skybridge Documentation",
@@ -180,5 +183,30 @@
     "posthog": {
       "apiKey": "phc_wz9NIcD7SmH0BEN39lARJwJNjXgggazjuWCCt62eeKT"
     }
+  },
+  "description": "The #1 full stack open-source TS framework for building ChatGPT and MCP Apps",
+  "background": {
+    "color": {
+      "dark": "#051413"
+    }
+  },
+  "fonts": {
+    "family": "Inter",
+    "weight": 400,
+    "heading": {
+      "family": "Inter",
+      "weight": 600
+    }
+  },
+  "seo": {
+    "indexing": "navigable"
+  },
+  "errors": {
+    "404": {
+      "title": "Oops, well that's awkward..."
+    }
+  },
+  "interaction": {
+    "drilldown": false
   }
 }
