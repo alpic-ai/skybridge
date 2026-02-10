@@ -16,6 +16,8 @@ import { assetBaseUrlTransformPlugin } from "./asset-base-url-transform-plugin.j
  */
 export const widgetsDevServer = async (): Promise<Router> => {
   const router = express.Router();
+  const parsedPort = Number.parseInt(process.env.PORT ?? "", 10);
+  const port = Number.isFinite(parsedPort) ? parsedPort : 3000;
 
   const { createServer, searchForWorkspaceRoot, loadConfigFromFile } =
     await import("vite");
@@ -64,7 +66,9 @@ export const widgetsDevServer = async (): Promise<Router> => {
     },
     plugins: [
       ...userPlugins,
-      assetBaseUrlTransformPlugin({ devServerOrigin: "http://localhost:3000" }),
+      assetBaseUrlTransformPlugin({
+        devServerOrigin: `http://localhost:${port}`,
+      }),
     ],
   });
 
