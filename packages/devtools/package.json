@@ -58,7 +58,7 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
+    "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.1.18",
     "@total-typescript/tsconfig": "^1.0.4",
     "@types/cors": "^2.8.19",
@@ -68,7 +68,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
     "autoprefixer": "^10.4.24",
-    "eslint": "^9.39.2",
+    "eslint": "^10.0.0",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.0",
     "globals": "^17.3.0",
