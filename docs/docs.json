@@ -12,8 +12,8 @@
     "dark": "/images/SkybridgeFaviconwhite.svg"
   },
   "logo": {
-    "light": "/images/Skybridgewhite(1).svg",
-    "dark": "/images/Skybridgemidnight.svg"
+    "light": "/images/Skybridgemidnight.svg",
+    "dark": "/images/Skybridgewhite(1).svg"
   },
   "metadata": {
     "og:site_name": "Skybridge Documentation",
