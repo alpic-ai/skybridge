@@ -1,6 +1,6 @@
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
-@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
 
 @custom-variant dark (&:is(.dark *));
 
