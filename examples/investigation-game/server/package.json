@@ -1,0 +1,35 @@
+{
+  "name": "@apps-sdk-template/server",
+  "version": "0.0.1",
+  "private": true,
+  "main": "dist/index.js",
+  "description": "Alpic MCP Server Template",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "inspector": "mcp-inspector http://localhost:3000/mcp"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "@t3-oss/env-core": "^0.13.8",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "skybridge": "0.27.1",
+    "vite": "^7.1.11",
+    "zod": "^3.25.51"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/inspector": "^0.17.1",
+    "@skybridge/devtools": "^0.27.1",
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.15.30",
+    "nodemon": "^3.1.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
