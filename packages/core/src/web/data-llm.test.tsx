@@ -28,7 +28,7 @@ describe("DataLLM", () => {
 
     beforeEach(() => {
       OpenaiMock = {
-        widgetState: {},
+        widgetState: { modelContent: {} },
         setWidgetState: vi.fn(),
       };
       // Use Object.defineProperty to ensure it persists
@@ -53,7 +53,7 @@ describe("DataLLM", () => {
       // Keep the mock available for React cleanup, but reset it
       if (typeof window !== "undefined" && window.openai) {
         window.openai.setWidgetState = vi.fn();
-        window.openai.widgetState = {};
+        window.openai.widgetState = { modelContent: {} };
       }
     });
 
@@ -65,12 +65,15 @@ describe("DataLLM", () => {
       );
 
       expect(OpenaiMock.setWidgetState).toHaveBeenCalled();
-      const callArgs = OpenaiMock.setWidgetState.mock.calls[0]?.[0];
+      const callArgs =
+        OpenaiMock.setWidgetState.mock.calls[0]?.[0]?.modelContent;
       expect(callArgs).toHaveProperty("__widget_context");
       expect(callArgs?.__widget_context).toContain("- Test content");
     });
     it("should preserve existing widgetState when updating context", () => {
-      OpenaiMock.widgetState = { existingKey: "existingValue" };
+      OpenaiMock.widgetState = {
+        modelContent: { existingKey: "existingValue" },
+      };
 
       render(
         <DataLLM content="Test content">
@@ -78,7 +81,8 @@ describe("DataLLM", () => {
         </DataLLM>,
       );
 
-      const callArgs = OpenaiMock.setWidgetState.mock.calls[0]?.[0];
+      const callArgs =
+        OpenaiMock.setWidgetState.mock.calls[0]?.[0]?.modelContent;
       expect(callArgs).toHaveProperty("existingKey", "existingValue");
       expect(callArgs).toHaveProperty("__widget_context");
     });
@@ -98,7 +102,7 @@ describe("DataLLM", () => {
       const callArgs =
         OpenaiMock.setWidgetState.mock.calls[
           OpenaiMock.setWidgetState.mock.calls.length - 1
-        ]?.[0];
+        ]?.[0]?.modelContent;
       const context = callArgs?.__widget_context as string;
       expect(context).toContain("- Level 1");
       expect(context).toContain("  - Level 2A");
@@ -127,7 +131,7 @@ describe("DataLLM", () => {
       const lastCallArgs =
         OpenaiMock.setWidgetState.mock.calls[
           OpenaiMock.setWidgetState.mock.calls.length - 1
-        ]?.[0];
+        ]?.[0]?.modelContent;
       expect(lastCallArgs?.__widget_context).toContain("- Updated content");
     });
 
@@ -148,7 +152,7 @@ describe("DataLLM", () => {
       const lastCallArgs =
         OpenaiMock.setWidgetState.mock.calls[
           OpenaiMock.setWidgetState.mock.calls.length - 1
-        ]?.[0];
+        ]?.[0]?.modelContent;
       expect(lastCallArgs?.__widget_context).not.toContain("Content to remove");
     });
   });

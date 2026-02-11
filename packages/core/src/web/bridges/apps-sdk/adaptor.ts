@@ -27,6 +27,15 @@ export class AppsSdkAdaptor implements Adaptor {
     key: K,
   ): HostContextStore<K> {
     const bridge = AppsSdkBridge.getInstance();
+
+    if (key === "widgetState") {
+      return {
+        subscribe: bridge.subscribe("widgetState"),
+        getSnapshot: () =>
+          bridge.getSnapshot("widgetState")?.modelContent ?? null,
+      } as HostContextStore<K>;
+    }
+
     return {
       subscribe: bridge.subscribe(key),
       getSnapshot: () => bridge.getSnapshot(key),
@@ -60,12 +69,12 @@ export class AppsSdkAdaptor implements Adaptor {
   public setWidgetState = (
     stateOrUpdater: SetWidgetStateAction,
   ): Promise<void> => {
-    const newState =
+    const modelContent =
       typeof stateOrUpdater === "function"
-        ? stateOrUpdater(window.openai.widgetState)
+        ? stateOrUpdater(window.openai.widgetState?.modelContent ?? null)
         : stateOrUpdater;
 
-    return window.openai.setWidgetState(newState);
+    return window.openai.setWidgetState({ modelContent });
   };
 
   public uploadFile = (file: File) => {
