@@ -15,7 +15,9 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
   useEffect(() => {
     nodemon({
       env,
-      configFile: "nodemon.json",
+      watch: ["server/src"],
+      ext: "ts,json",
+      exec: "tsx server/src/index.ts",
       stdout: false,
     });
 
