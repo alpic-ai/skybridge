@@ -1,6 +1,6 @@
 import { McpServer } from "skybridge/server";
 
-const server = new McpServer(
+const server: McpServer = new McpServer(
   {
     name: "murder-in-the-valley",
     version: "0.0.1",

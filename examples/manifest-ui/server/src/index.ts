@@ -1,7 +1,7 @@
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
-const server = new McpServer(
+const server: McpServer = new McpServer(
   {
     name: "alpic-openai-app",
     version: "0.0.1",
