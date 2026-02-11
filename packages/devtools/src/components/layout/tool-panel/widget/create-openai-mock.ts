@@ -8,7 +8,7 @@ import type {
   UnknownObject,
 } from "skybridge/web";
 
-type OpenAIWidgetState = { modelContent: Record<string, unknown> | null };
+type OpenAIWidgetState = { modelContent: Record<string, unknown> };
 
 import { SET_GLOBALS_EVENT_TYPE, SetGlobalsEvent } from "skybridge/web";
 

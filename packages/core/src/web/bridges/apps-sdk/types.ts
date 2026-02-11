@@ -9,7 +9,7 @@ import type {
 type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
 
 type WidgetState = {
-  modelContent: Record<string, unknown> | null;
+  modelContent: Record<string, unknown>;
 };
 
 export const TOOL_RESPONSE_EVENT_TYPE = "openai:tool_response";
@@ -33,6 +33,7 @@ export type AppsSdkContext<
   ToolInput extends UnknownObject = Record<never, unknown>,
   ToolOutput extends UnknownObject = UnknownObject,
   ToolResponseMetadata extends UnknownObject = UnknownObject,
+  WS extends WidgetState = WidgetState,
 > = {
   theme: Theme;
   userAgent: UserAgent;
@@ -48,10 +49,10 @@ export type AppsSdkContext<
   toolInput: ToolInput;
   toolOutput: ToolOutput | { text: string } | null;
   toolResponseMetadata: ToolResponseMetadata | null;
-  widgetState: WidgetState | null;
+  widgetState: WS | null;
 };
 
-export type AppsSdkMethods = {
+export type AppsSdkMethods<WS extends WidgetState = WidgetState> = {
   /** Calls a tool on your MCP. Returns the full response. */
   callTool: <
     ToolArgs extends CallToolArgs = null,
@@ -80,7 +81,7 @@ export type AppsSdkMethods = {
    * Sets the widget state.
    * This state is persisted across widget renders.
    */
-  setWidgetState: (state: WidgetState) => Promise<void>;
+  setWidgetState: (state: WS) => Promise<void>;
 
   /**
    * Opens a modal portaled outside of the widget iFrame.
