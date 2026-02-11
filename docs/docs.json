@@ -151,6 +151,7 @@
         "tab": "Showcase",
         "pages": [
           "showcase",
+          "showcase/auth",
           "showcase/capitals",
           "showcase/ecommerce-carousel",
           "showcase/everything",
