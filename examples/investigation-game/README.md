@@ -59,9 +59,7 @@ This command starts:
 ```
 ├── server/
 │   └── src/
-│       ├── index.ts        # Entry point
-│       ├── middleware.ts   # MCP middleware
-│       └── server.ts       # Widget registry & game story
+│       └── index.ts        # Server entry point
 ├── web/
 │   ├── src/
 │   │   ├── data/           # Suspects, puzzle, and image data

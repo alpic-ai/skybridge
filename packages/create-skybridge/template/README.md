@@ -46,9 +46,7 @@ This command starts:
 ```
 ├── server/
 │   └── src/
-│       ├── index.ts      # Entry point
-│       ├── middleware.ts # MCP middleware
-│       └── server.ts     # Widget registry & routes
+│       └── index.ts      # Server entry point
 ├── web/
 │   ├── src/
 │   │   ├── widgets/      # React components (one per widget)
