@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import nodemonOriginal from "nodemon";
 import { useEffect, useState } from "react";
 import type { ExtendedNodemon } from "./nodemon.d.ts";
@@ -13,13 +15,19 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
   const [messages, setMessages] = useState<Array<Message>>([]);
 
   useEffect(() => {
-    nodemon({
-      env,
-      watch: ["server/src"],
-      ext: "ts,json",
-      exec: "tsx server/src/index.ts",
-      stdout: false,
-    });
+    const configFile = resolve(process.cwd(), "nodemon.json");
+
+    const config = existsSync(configFile)
+      ? {
+          configFile,
+        }
+      : {
+          watch: ["server/src"],
+          ext: "ts,json",
+          exec: "tsx server/src/index.ts",
+        };
+
+    nodemon({ ...config, env, stdout: false });
 
     const handleStdoutData = (chunk: Buffer) => {
       const message = chunk.toString().trim();
