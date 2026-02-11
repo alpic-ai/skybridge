@@ -19,7 +19,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@skybridge/devtools": ">=0.31.2 <1.0.0",
+    "@skybridge/devtools": ">=0.31.3 <1.0.0",
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
