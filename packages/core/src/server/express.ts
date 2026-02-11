@@ -1,5 +1,4 @@
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import cors from "cors";
 import express from "express";
@@ -22,11 +21,10 @@ export async function createServer({
   }
 
   if (env === "production") {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
+    const assetsPath = path.join(process.cwd(), "dist", "assets");
 
     app.use("/assets", cors());
-    app.use("/assets", express.static(path.join(__dirname, "assets")));
+    app.use("/assets", express.static(assetsPath));
   }
 
   app.use("/mcp", mcpMiddleware(server));
