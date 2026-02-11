@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Github } from 'lucide-react';
-import { ReactNode } from 'react';
+import { Github } from "lucide-react";
+import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 
 /**
  * Represents a logo in the hero section.
@@ -80,19 +80,19 @@ export interface HeroProps {
   };
 }
 
-const defaultData: NonNullable<HeroProps['data']> = {
+const defaultData: NonNullable<HeroProps["data"]> = {
   logo1: {
-    text: 'Acme',
-    alt: 'Acme',
+    text: "Acme",
+    alt: "Acme",
   },
-  title: 'Build beautiful chat experiences with Manifest UI',
+  title: "Build beautiful chat experiences with Manifest UI",
   subtitle:
-    'Create beautiful chat experiences with our comprehensive component library designed for agentic applications.',
+    "Create beautiful chat experiences with our comprehensive component library designed for agentic applications.",
   primaryButton: {
-    label: 'Get Started',
+    label: "Get Started",
   },
   secondaryButton: {
-    label: 'GitHub',
+    label: "GitHub",
     icon: <Github className="h-5 w-5" />,
   },
 };
@@ -110,12 +110,12 @@ function LogoDisplay({ logo }: { logo: HeroLogo }) {
         <>
           <img
             src={logo.url}
-            alt={logo.alt || 'Logo'}
+            alt={logo.alt || "Logo"}
             className="h-8 sm:h-10 w-auto object-contain dark:hidden"
           />
           <img
             src={logo.urlLight}
-            alt={logo.alt || 'Logo'}
+            alt={logo.alt || "Logo"}
             className="h-8 sm:h-10 w-auto object-contain hidden dark:block"
           />
         </>
@@ -123,7 +123,11 @@ function LogoDisplay({ logo }: { logo: HeroLogo }) {
     }
     // Single logo for both modes
     return (
-      <img src={logo.url} alt={logo.alt || 'Logo'} className="h-16 sm:h-20 w-auto object-contain" />
+      <img
+        src={logo.url}
+        alt={logo.alt || "Logo"}
+        className="h-16 sm:h-20 w-auto object-contain"
+      />
     );
   }
   // Text logos get a bordered square container
@@ -174,7 +178,7 @@ function LogoDisplay({ logo }: { logo: HeroLogo }) {
 export function Hero({ data, actions }: HeroProps) {
   const logo1 = data?.logo1 ?? defaultData.logo1;
   const logo2 = data?.logo2;
-  const logoSeparator = data?.logoSeparator ?? 'x';
+  const logoSeparator = data?.logoSeparator ?? "x";
   const title = data?.title ?? defaultData.title;
   const subtitle = data?.subtitle ?? defaultData.subtitle;
   const primaryButton = data?.primaryButton ?? defaultData.primaryButton;
@@ -231,13 +235,21 @@ export function Hero({ data, actions }: HeroProps) {
                 className="min-w-[140px]"
                 onClick={actions?.onPrimaryClick}
               >
-                {primaryButton.icon && <span className="mr-2">{primaryButton.icon}</span>}
+                {primaryButton.icon && (
+                  <span className="mr-2">{primaryButton.icon}</span>
+                )}
                 {primaryButton.label}
               </Button>
             )}
             {hasSecondaryButton && (
-              <Button size="lg" className="min-w-[140px]" onClick={actions?.onSecondaryClick}>
-                {secondaryButton.icon && <span className="mr-2">{secondaryButton.icon}</span>}
+              <Button
+                size="lg"
+                className="min-w-[140px]"
+                onClick={actions?.onSecondaryClick}
+              >
+                {secondaryButton.icon && (
+                  <span className="mr-2">{secondaryButton.icon}</span>
+                )}
                 {secondaryButton.label}
               </Button>
             )}
@@ -248,19 +260,21 @@ export function Hero({ data, actions }: HeroProps) {
         {hasTechLogos && (
           <div className="flex flex-col items-center mt-12 sm:mt-16 pt-8 sm:pt-10 border-t w-full max-w-2xl">
             {techLogosLabel && (
-              <p className="text-sm text-muted-foreground mb-4">{techLogosLabel}</p>
+              <p className="text-sm text-muted-foreground mb-4">
+                {techLogosLabel}
+              </p>
             )}
             <div className="flex items-center justify-center gap-4 flex-wrap">
-              {techLogos.map((logo, index) => (
+              {techLogos.map((logo) => (
                 <div
-                  key={index}
+                  key={logo.name}
                   className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-lg border bg-background p-2"
                   title={logo.name}
                 >
                   {logo.url && (
                     <img
                       src={logo.url}
-                      alt={logo.alt || logo.name || 'Tech logo'}
+                      alt={logo.alt || logo.name || "Tech logo"}
                       className="max-w-full max-h-full object-contain opacity-60 grayscale"
                     />
                   )}

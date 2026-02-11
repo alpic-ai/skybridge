@@ -1,4 +1,4 @@
 import { generateHelpers } from "skybridge/web";
-import type { AppType } from "../../server/src/server.js";
+import type { AppType } from "../../server/src/index";
 
 export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
