@@ -33,7 +33,9 @@ const versionRange = `>=${version} <1.0.0`;
 
 // Find all example package.json files dynamically
 const exampleTargets = [];
-for (const d of readdirSync(join(rootDir, "examples"), { withFileTypes: true })) {
+for (const d of readdirSync(join(rootDir, "examples"), {
+  withFileTypes: true,
+})) {
   const p = `examples/${d.name}/package.json`;
   if (d.isDirectory() && existsSync(join(rootDir, p))) {
     exampleTargets.push(p);
@@ -59,6 +61,9 @@ for (const target of targets) {
 
   if (pkg.dependencies?.skybridge) {
     pkg.dependencies.skybridge = versionRange;
+  }
+  if (pkg.devDependencies?.["@skybridge/devtools"]) {
+    pkg.devDependencies["@skybridge/devtools"] = versionRange;
   }
 
   writeFileSync(file, JSON.stringify(pkg, null, 2) + "\n");
