@@ -71,9 +71,7 @@ This command starts:
 ```
 ├── server/
 │   └── src/
-│       ├── index.ts      # Entry point
-│       ├── middleware.ts # MCP middleware
-│       └── server.ts     # Widget registry & tool handlers
+│       └── index.ts      # Server entry point
 ├── web/
 │   ├── src/
 │   │   ├── components/   # Chart UI
