@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /**
- * Update skybridge version in template and example apps
+ * Update skybridge, @skybridge/devtools, and alpic versions
+ * in template and example apps
  *
  * Usage:
- *   node scripts/bump.js          # Uses latest published version
- *   node scripts/bump.js 0.30.0   # Uses specific version
+ *   node scripts/bump.js          # Uses latest published versions
+ *   node scripts/bump.js 0.30.0   # Uses specific skybridge version
  */
 import { execSync } from "child_process";
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "fs";
@@ -14,31 +15,42 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = dirname(__dirname);
 
-// Get version from arg or fetch latest from npm
-let version = process.argv[2];
-if (!version) {
+function fetchLatestVersion(packageName) {
   try {
-    version = execSync("npm view skybridge version", {
+    return execSync(`npm view ${packageName} version`, {
       encoding: "utf8",
     }).trim();
   } catch {
-    console.error("Error: Could not fetch latest version from npm");
-    process.exit(1);
+    console.error(`Error: Could not fetch latest version of ${packageName}`);
+    return null;
   }
 }
 
-console.log(`Setting skybridge version to: ${version}`);
+// Get skybridge version from arg or fetch latest from npm
+const skybridgeVersion = process.argv[2] || fetchLatestVersion("skybridge");
+if (!skybridgeVersion) {
+  process.exit(1);
+}
 
-const versionRange = `>=${version} <1.0.0`;
+const devtoolsVersion = fetchLatestVersion("@skybridge/devtools");
+const alpicVersion = fetchLatestVersion("alpic");
+
+const skybridgeRange = `>=${skybridgeVersion} <1.0.0`;
+const devtoolsRange = devtoolsVersion ? `>=${devtoolsVersion} <1.0.0` : null;
+const alpicRange = alpicVersion ? `^${alpicVersion}` : null;
+
+console.log(`skybridge:          ${skybridgeRange}`);
+if (devtoolsRange) console.log(`@skybridge/devtools: ${devtoolsRange}`);
+if (alpicRange) console.log(`alpic:               ${alpicRange}`);
 
 // Find all example package.json files dynamically
 const exampleTargets = [];
-for (const d of readdirSync(join(rootDir, "examples"), {
+for (const dirEntry of readdirSync(join(rootDir, "examples"), {
   withFileTypes: true,
 })) {
-  const p = `examples/${d.name}/package.json`;
-  if (d.isDirectory() && existsSync(join(rootDir, p))) {
-    exampleTargets.push(p);
+  const packagePath = `examples/${dirEntry.name}/package.json`;
+  if (dirEntry.isDirectory() && existsSync(join(rootDir, packagePath))) {
+    exampleTargets.push(packagePath);
   }
 }
 
@@ -60,13 +72,18 @@ for (const target of targets) {
   const pkg = JSON.parse(readFileSync(file, "utf8"));
 
   if (pkg.dependencies?.skybridge) {
-    pkg.dependencies.skybridge = versionRange;
+    pkg.dependencies.skybridge = skybridgeRange;
   }
-  if (pkg.devDependencies?.["@skybridge/devtools"]) {
-    pkg.devDependencies["@skybridge/devtools"] = versionRange;
+
+  if (devtoolsRange && pkg.devDependencies?.["@skybridge/devtools"]) {
+    pkg.devDependencies["@skybridge/devtools"] = devtoolsRange;
+  }
+
+  if (alpicRange && pkg.devDependencies?.alpic) {
+    pkg.devDependencies.alpic = alpicRange;
   }
 
   writeFileSync(file, JSON.stringify(pkg, null, 2) + "\n");
 }
 
-console.log(`Done. Updated to skybridge ${versionRange}`);
+console.log("\nDone.");

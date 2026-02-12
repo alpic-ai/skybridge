@@ -33,7 +33,7 @@
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
-    "alpic": "^1.83.1",
+    "alpic": "^1.85.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
