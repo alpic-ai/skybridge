@@ -1,6 +1,6 @@
-import { useRef, useEffect } from "react";
-import MapGL, { Marker, NavigationControl } from "react-map-gl";
+import { useEffect, useRef } from "react";
 import type { MapRef } from "react-map-gl";
+import MapGL, { Marker, NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useLayout } from "skybridge/web";
 

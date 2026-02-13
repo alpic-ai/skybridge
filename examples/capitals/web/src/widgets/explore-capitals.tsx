@@ -7,7 +7,6 @@ import { CapitalDetail } from "./components/CapitalDetail.js";
 import { MapView } from "./components/MapView.js";
 import { NearbyList } from "./components/NearbyList.js";
 
-// biome-ignore lint/correctness/useImportExtensions: biome doesn't support .css imports
 import "@/index.css";
 
 function CapitalExplorer() {

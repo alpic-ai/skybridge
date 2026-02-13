@@ -95,10 +95,10 @@ importers:
     dependencies:
       '@modelcontextprotocol/sdk':
         specifier: ^1.26.0
-        version: 1.26.0(zod@4.3.5)
+        version: 1.26.0(zod@4.3.6)
       '@t3-oss/env-core':
         specifier: ^0.13.8
-        version: 0.13.10(arktype@2.1.27)(typescript@5.9.3)(zod@4.3.5)
+        version: 0.13.10(arktype@2.1.27)(typescript@5.9.3)(zod@4.3.6)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -128,16 +128,10 @@ importers:
         version: 7.11.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       skybridge:
         specifier: '>=0.31.3 <1.0.0'
-        version: 0.31.3(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.31.3)(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2)
-      tailwind-merge:
-        specifier: ^3.4.0
-        version: 3.4.0
+        version: 0.31.3(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.31.3)(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2)
       tailwindcss:
         specifier: ^4.1.14
         version: 4.1.18
-      zod:
-        specifier: ^4.1.13
-        version: 4.3.5
     devDependencies:
       '@skybridge/devtools':
         specifier: '>=0.31.3 <1.0.0'
@@ -161,14 +155,11 @@ importers:
         specifier: ^19.1.9
         version: 19.2.3(@types/react@19.2.7)
       '@vitejs/plugin-react':
-        specifier: ^5.0.4
-        version: 5.1.2(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+        specifier: ^5.1.4
+        version: 5.1.4(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
         specifier: ^1.85.0
         version: 1.85.0(@opentelemetry/api@1.9.0)
-      nodemon:
-        specifier: ^3.1.10
-        version: 3.1.11
       tsx:
         specifier: ^4.19.4
         version: 4.21.0
@@ -187,9 +178,6 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.26.0
         version: 1.26.0(zod@4.3.5)
-      express:
-        specifier: ^5.2.1
-        version: 5.2.1
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -209,9 +197,6 @@ importers:
       '@skybridge/devtools':
         specifier: '>=0.31.3 <1.0.0'
         version: 0.31.3
-      '@types/express':
-        specifier: ^5.0.6
-        version: 5.0.6
       '@types/node':
         specifier: ^22.19.3
         version: 22.19.3
@@ -227,9 +212,6 @@ importers:
       alpic:
         specifier: ^1.85.0
         version: 1.85.0(@opentelemetry/api@1.9.0)
-      nodemon:
-        specifier: ^3.1.11
-        version: 3.1.11
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -242,12 +224,6 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.26.0
         version: 1.26.0(zod@4.3.5)
-      cors:
-        specifier: ^2.8.5
-        version: 2.8.5
-      express:
-        specifier: ^5.2.1
-        version: 5.2.1
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -267,12 +243,6 @@ importers:
       '@skybridge/devtools':
         specifier: '>=0.31.3 <1.0.0'
         version: 0.31.3
-      '@types/cors':
-        specifier: ^2.8.19
-        version: 2.8.19
-      '@types/express':
-        specifier: ^5.0.6
-        version: 5.0.6
       '@types/react':
         specifier: ^19.2.7
         version: 19.2.7
@@ -285,9 +255,6 @@ importers:
       alpic:
         specifier: ^1.85.0
         version: 1.85.0(@opentelemetry/api@1.9.0)
-      nodemon:
-        specifier: ^3.1.11
-        version: 3.1.11
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -303,12 +270,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      cors:
-        specifier: ^2.8.5
-        version: 2.8.6
-      express:
-        specifier: ^5.2.1
-        version: 5.2.1
       react:
         specifier: ^19.2.3
         version: 19.2.4
@@ -340,12 +301,6 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.14
         version: 4.1.18(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
-      '@types/cors':
-        specifier: ^2.8.19
-        version: 2.8.19
-      '@types/express':
-        specifier: ^5.0.6
-        version: 5.0.6
       '@types/react':
         specifier: ^19.2.8
         version: 19.2.13
@@ -358,9 +313,6 @@ importers:
       alpic:
         specifier: ^1.85.0
         version: 1.85.0(@opentelemetry/api@1.9.0)
-      nodemon:
-        specifier: ^3.1.11
-        version: 3.1.11
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -385,12 +337,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      cors:
-        specifier: ^2.8.5
-        version: 2.8.6
-      express:
-        specifier: ^5.2.1
-        version: 5.2.1
       lucide-react:
         specifier: ^0.563.0
         version: 0.563.0(react@19.2.4)
@@ -425,12 +371,6 @@ importers:
       '@skybridge/devtools':
         specifier: '>=0.31.3 <1.0.0'
         version: 0.31.3
-      '@types/cors':
-        specifier: ^2.8.19
-        version: 2.8.19
-      '@types/express':
-        specifier: ^5.0.6
-        version: 5.0.6
       '@types/node':
         specifier: ^25.0.10
         version: 25.2.3
@@ -446,9 +386,6 @@ importers:
       alpic:
         specifier: ^1.85.0
         version: 1.85.0(@opentelemetry/api@1.9.0)
-      nodemon:
-        specifier: ^3.1.11
-        version: 3.1.11
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -461,12 +398,6 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.26.0
         version: 1.26.0(zod@4.3.5)
-      cors:
-        specifier: ^2.8.5
-        version: 2.8.5
-      express:
-        specifier: ^5.2.1
-        version: 5.2.1
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -486,12 +417,6 @@ importers:
       '@skybridge/devtools':
         specifier: '>=0.31.3 <1.0.0'
         version: 0.31.3
-      '@types/cors':
-        specifier: ^2.8.19
-        version: 2.8.19
-      '@types/express':
-        specifier: ^5.0.6
-        version: 5.0.6
       '@types/react':
         specifier: ^19.2.8
         version: 19.2.8
@@ -504,9 +429,6 @@ importers:
       alpic:
         specifier: ^1.85.0
         version: 1.85.0(@opentelemetry/api@1.9.0)
-      nodemon:
-        specifier: ^3.1.11
-        version: 3.1.11
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -650,12 +572,6 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.26.0
         version: 1.26.0(zod@4.3.6)
-      cors:
-        specifier: ^2.8.6
-        version: 2.8.6
-      express:
-        specifier: ^5.2.1
-        version: 5.2.1
       react:
         specifier: ^19.2.4
         version: 19.2.4
@@ -663,7 +579,7 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.31.3 <1.0.0'
+        specifier: '>=0.31.2 <1.0.0'
         version: 0.31.3(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.31.3)(@types/node@25.2.3)(@types/react@19.2.13)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.4))(yaml@2.8.2)
       vite:
         specifier: ^7.3.1
@@ -675,12 +591,6 @@ importers:
       '@skybridge/devtools':
         specifier: '>=0.31.3 <1.0.0'
         version: 0.31.3
-      '@types/cors':
-        specifier: ^2.8.19
-        version: 2.8.19
-      '@types/express':
-        specifier: ^5.0.6
-        version: 5.0.6
       '@types/react':
         specifier: ^19.2.13
         version: 19.2.13
@@ -693,9 +603,6 @@ importers:
       alpic:
         specifier: ^1.85.0
         version: 1.85.0(@opentelemetry/api@1.9.0)
-      nodemon:
-        specifier: ^3.1.11
-        version: 3.1.11
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -4144,10 +4051,6 @@ packages:
   copy-anything@4.0.5:
     resolution: {integrity: sha512-7Vv6asjS4gMOuILabD3l739tsaxFQmC+a7pLZm02zyvs8p977bL3zEgq3yDk5rn9B0PbYgIv++jmHcuUab4RhA==}
     engines: {node: '>=18'}
-
-  cors@2.8.5:
-    resolution: {integrity: sha512-KIHbLJqu73RGr/hnbrO9uBeixNGuvSQjul/jdFvS/KFSIH1hWVd1ng7zOHx+YrEfInLG7q4n6GHQ9cDtxv/P6g==}
-    engines: {node: '>= 0.10'}
 
   cors@2.8.6:
     resolution: {integrity: sha512-tJtZBBHA6vjIAaF6EnIaq6laBBP9aq/Y3ouVJjEfoHbRBcHBAHYcMh/w8LDrk2PvIMMq8gmopa5D4V8RmbrxGw==}
@@ -11079,11 +10982,11 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
-  '@t3-oss/env-core@0.13.10(arktype@2.1.27)(typescript@5.9.3)(zod@4.3.5)':
+  '@t3-oss/env-core@0.13.10(arktype@2.1.27)(typescript@5.9.3)(zod@4.3.6)':
     optionalDependencies:
       arktype: 2.1.27
       typescript: 5.9.3
-      zod: 4.3.5
+      zod: 4.3.6
 
   '@tailwindcss/node@4.1.18':
     dependencies:
@@ -12228,11 +12131,6 @@ snapshots:
   copy-anything@4.0.5:
     dependencies:
       is-what: 5.5.0
-
-  cors@2.8.5:
-    dependencies:
-      object-assign: 4.1.1
-      vary: 1.1.2
 
   cors@2.8.6:
     dependencies:
@@ -16245,46 +16143,6 @@ snapshots:
 
   sisteransi@1.0.5: {}
 
-  skybridge@0.31.3(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.31.3)(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2):
-    dependencies:
-      '@babel/core': 7.29.0
-      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
-      '@oclif/core': 4.8.0
-      '@skybridge/devtools': 0.31.3
-      ci-info: 4.4.0
-      cors: 2.8.6
-      dequal: 2.0.3
-      es-toolkit: 1.44.0
-      express: 5.2.1
-      handlebars: 4.7.8
-      ink: 6.6.0(@types/react@19.2.7)(react@19.2.0)
-      nodemon: 3.1.11
-      posthog-node: 5.24.14
-      react: 19.2.0
-      react-dom: 19.2.0(react@19.2.0)
-      superjson: 2.2.6
-      vite: 7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
-      zustand: 5.0.11(@types/react@19.2.7)(immer@9.0.21)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
-    transitivePeerDependencies:
-      - '@types/node'
-      - '@types/react'
-      - bufferutil
-      - immer
-      - jiti
-      - less
-      - lightningcss
-      - react-devtools-core
-      - sass
-      - sass-embedded
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-      - tsx
-      - use-sync-external-store
-      - utf-8-validate
-      - yaml
-
   skybridge@0.31.3(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.31.3)(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.3))(yaml@2.8.2):
     dependencies:
       '@babel/core': 7.29.0
@@ -16425,6 +16283,46 @@ snapshots:
       superjson: 2.2.6
       vite: 7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       zustand: 5.0.11(@types/react@19.2.13)(immer@9.0.21)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+    transitivePeerDependencies:
+      - '@types/node'
+      - '@types/react'
+      - bufferutil
+      - immer
+      - jiti
+      - less
+      - lightningcss
+      - react-devtools-core
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+      - tsx
+      - use-sync-external-store
+      - utf-8-validate
+      - yaml
+
+  skybridge@0.31.3(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.31.3)(@types/node@22.19.3)(@types/react@19.2.7)(immer@9.0.21)(jiti@2.6.1)(lightningcss@1.30.2)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(terser@5.44.1)(tsx@4.21.0)(use-sync-external-store@1.6.0(react@19.2.0))(yaml@2.8.2):
+    dependencies:
+      '@babel/core': 7.29.0
+      '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.6)
+      '@oclif/core': 4.8.0
+      '@skybridge/devtools': 0.31.3
+      ci-info: 4.4.0
+      cors: 2.8.6
+      dequal: 2.0.3
+      es-toolkit: 1.44.0
+      express: 5.2.1
+      handlebars: 4.7.8
+      ink: 6.6.0(@types/react@19.2.7)(react@19.2.0)
+      nodemon: 3.1.11
+      posthog-node: 5.24.14
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+      superjson: 2.2.6
+      vite: 7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      zustand: 5.0.11(@types/react@19.2.7)(immer@9.0.21)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
     transitivePeerDependencies:
       - '@types/node'
       - '@types/react'

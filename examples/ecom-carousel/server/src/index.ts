@@ -1,31 +1,77 @@
-import express, { type Express } from "express";
-import { widgetsDevServer } from "skybridge/server";
-import type { ViteDevServer } from "vite";
-import { mcp } from "./middleware.js";
-import server from "./server.js";
+import { McpServer } from "skybridge/server";
+import { z } from "zod";
+import { products } from "./products.js";
 
-const app = express() as Express & { vite: ViteDevServer };
-
-app.use(express.json());
-
-app.use(mcp(server));
-
-const env = process.env.NODE_ENV || "development";
-
-if (env !== "production") {
-  const { devtoolsStaticServer } = await import("@skybridge/devtools");
-  app.use(await devtoolsStaticServer());
-  app.use(await widgetsDevServer());
+interface Product {
+  id: number;
+  title: string;
+  price: number;
+  description: string;
+  category: string;
+  image: string;
+  rating: {
+    rate: number;
+    count: number;
+  };
 }
 
-app.listen(3000, (error) => {
-  if (error) {
-    console.error("Failed to start server:", error);
-    process.exit(1);
-  }
-});
+const server: McpServer = new McpServer(
+  {
+    name: "ecom-carousel-app",
+    version: "0.0.1",
+  },
+  { capabilities: {} },
+).registerWidget(
+  "ecom-carousel",
+  {
+    description: "E-commerce Product Carousel",
+    _meta: {
+      ui: {
+        csp: {
+          resourceDomains: ["https://fakestoreapi.com"],
+          redirectDomains: ["https://docs.skybridge.tech"],
+        },
+      },
+    },
+  },
+  {
+    description: "Display a carousel of products from the store.",
+    inputSchema: {
+      category: z
+        .enum(["electronics", "jewelery", "men's clothing", "women's clothing"])
+        .optional()
+        .describe("Filter by product category"),
+      maxPrice: z.number().optional().describe("Maximum price filter"),
+    },
+  },
+  ({ category, maxPrice }) => {
+    try {
+      const filtered: Product[] = [];
 
-process.on("SIGINT", async () => {
-  console.log("Server shutdown complete");
-  process.exit(0);
-});
+      for (const product of products) {
+        if (category && product.category !== category) {
+          continue;
+        }
+        if (maxPrice !== undefined && product.price > maxPrice) {
+          continue;
+        }
+        filtered.push(product);
+      }
+
+      return {
+        structuredContent: { products: filtered },
+        content: [{ type: "text", text: JSON.stringify(filtered) }],
+        isError: false,
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error: ${error}` }],
+        isError: true,
+      };
+    }
+  },
+);
+
+server.run();
+
+export type AppType = typeof server;
