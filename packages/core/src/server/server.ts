@@ -320,7 +320,7 @@ export class McpServer<
               connect_domains: connectDomains,
             },
             "openai/widgetDomain": domain,
-            "openai/widgetDescription": toolConfig.description,
+            "openai/widgetDescription": resourceConfig.description,
           };
 
           const fromUi: Partial<
