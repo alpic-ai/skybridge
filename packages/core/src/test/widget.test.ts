@@ -111,7 +111,7 @@ describe("McpServer.registerWidget", () => {
               connect_domains: [serverUrl, "ws://localhost:24678"],
             },
             "openai/widgetDomain": serverUrl,
-            "openai/widgetDescription": "Test tool",
+            "openai/widgetDescription": "Test widget",
           },
         },
       ],
@@ -177,7 +177,7 @@ describe("McpServer.registerWidget", () => {
               connect_domains: [serverUrl],
             },
             "openai/widgetDomain": serverUrl,
-            "openai/widgetDescription": "Test tool",
+            "openai/widgetDescription": "Test widget",
           },
         },
       ],
@@ -279,7 +279,7 @@ describe("McpServer.registerWidget", () => {
               connect_domains: [serverUrl, "ws://localhost:24678"],
             },
             "openai/widgetDomain": serverUrl,
-            "openai/widgetDescription": "Test tool",
+            "openai/widgetDescription": "Test widget",
             "openai/widgetPrefersBorder": true,
           },
         },
@@ -428,7 +428,7 @@ describe("McpServer.registerWidget", () => {
     expect(meta["openai/widgetPrefersBorder"]).toBe(true);
 
     // Description should be from defaults (toolConfig.description)
-    expect(meta["openai/widgetDescription"]).toBe("Test tool");
+    expect(meta["openai/widgetDescription"]).toBe("Test widget");
   });
 
   it("should register tool with ui.resourceUri metadata only", async () => {
