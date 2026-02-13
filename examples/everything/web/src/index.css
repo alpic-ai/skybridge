@@ -5,6 +5,19 @@
   --fg: #000;
   --fg-muted: #888;
   --border: #ddd;
+  --link: #0066cc;
+  --link-hover: #004499;
+}
+
+.dark {
+  --bg: #1a1a1a;
+  --bg-surface: #2a2a2a;
+  --bg-inset: #333;
+  --fg: #eee;
+  --fg-muted: #999;
+  --border: #444;
+  --link: #6cb6ff;
+  --link-hover: #8ecaff;
 }
 
 * {
@@ -19,6 +32,15 @@ body {
   background: var(--bg);
   line-height: 1.5;
   border-radius: 15px;
+}
+
+a {
+  color: var(--link);
+  text-decoration: underline;
+}
+
+a:hover {
+  color: var(--link-hover);
 }
 
 .container {

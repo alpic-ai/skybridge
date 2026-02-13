@@ -1,7 +1,12 @@
 import "@/index.css";
 
 import { useState } from "react";
-import { mountWidget, useOpenExternal, useRequestModal } from "skybridge/web";
+import {
+  mountWidget,
+  useLayout,
+  useOpenExternal,
+  useRequestModal,
+} from "skybridge/web";
 import { CreateStoreTab } from "./tabs/create-store-tab";
 import { DataLlmTab } from "./tabs/data-llm-tab";
 import { HomeTab } from "./tabs/home-tab";
@@ -54,6 +59,7 @@ function Widget() {
   const [tab, setTab] = useState<Tab>("Home");
   const openExternal = useOpenExternal();
   const { isOpen, params } = useRequestModal();
+  const { theme } = useLayout();
 
   const { docPath, Component } = TABS[tab];
 
@@ -66,7 +72,7 @@ function Widget() {
     }
     return (
       <div
-        className="container"
+        className={`${theme} container`}
         style={{ textAlign: "center", fontSize: "1.5rem" }}
       >
         {message}
@@ -75,7 +81,7 @@ function Widget() {
   }
 
   return (
-    <div className="container">
+    <div className={`${theme} container`}>
       <nav className="tabs">
         {(Object.keys(TABS) as Tab[]).map((t) => (
           <button
