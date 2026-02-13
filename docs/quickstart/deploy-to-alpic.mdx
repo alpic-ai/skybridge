@@ -1,5 +1,5 @@
 ---
-title: Deploy
+title: Deploy to Alpic
 description: "Deploy your app to Alpic using the Alpic CLI."
 icon: "cloud-arrow-up"
 sidebar_position: 4
@@ -76,6 +76,29 @@ After that, `.alpic/project.json` is created so the next `alpic deploy` uses the
 ## Output
 
 On success, the CLI prints the MCP server URL. You can also open the deployment details page in the Alpic dashboard to follow logs and status.
+
+
+## Alpic MCP Server
+
+Alpic provides its own MCP Server that lets you manage your deployed apps directly from ChatGPT.
+
+### Connect
+
+In ChatGPT, go to **Settings → Connectors → Create** and paste:
+
+```
+https://mcp.alpic.ai/mcp
+```
+
+### What You Can Do
+
+- **List teams and projects** — browse everything you have deployed.
+- **View deployment logs** — debug issues without leaving the conversation. You can ask ChatGPT to analyze your logs and help you understand what went wrong.
+- **Check analytics** — monitor sessions, requests, and errors at a glance.
+
+<Tip>
+  See the [Alpic MCP Server docs](https://docs.alpic.ai/features/mcp-server) for the full list of tools and widgets.
+</Tip>
 
 ## What's Next?
 

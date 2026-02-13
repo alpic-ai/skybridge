@@ -48,7 +48,7 @@
               "quickstart/migrate",
               "quickstart/test-your-app",
               "quickstart/build-for-production",
-              "quickstart/deploy"
+              "quickstart/deploy-to-alpic"
             ]
           },
           {
