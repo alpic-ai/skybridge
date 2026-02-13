@@ -14,9 +14,9 @@ function CapitalExplorer() {
   const [displayMode, setDisplayMode] = useDisplayMode();
   const isFullscreen = displayMode === "fullscreen";
 
-  const { input, output, responseMetadata, isPending } =
+  const { output, responseMetadata, isPending } =
     useToolInfo<"explore-capitals">();
-  const [selectedCapital, setSelectedCapital] = useState(input?.name);
+  const [selectedCapital, setSelectedCapital] = useState<string | null>(null);
   const [pendingCapital, setPendingCapital] = useState<string | null>(null);
   const allCapitals = responseMetadata?.allCapitals || [];
 
@@ -25,6 +25,12 @@ function CapitalExplorer() {
     isPending: isTraveling,
     data,
   } = useCallTool("explore-capitals");
+
+  useEffect(() => {
+    if (output?.capital.name) {
+      setSelectedCapital(output.capital.name);
+    }
+  }, [output?.capital.name]);
 
   useEffect(() => {
     if (isFullscreen && pendingCapital) {
