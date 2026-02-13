@@ -8,8 +8,9 @@ import type {
 
 type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
 
-type WidgetState = {
+export type WidgetState = {
   modelContent: Record<string, unknown>;
+  imageIds?: string[];
 };
 
 export const TOOL_RESPONSE_EVENT_TYPE = "openai:tool_response";

@@ -8,6 +8,7 @@ import type {
   SetWidgetStateAction,
 } from "../types.js";
 import { AppsSdkBridge } from "./bridge.js";
+import type { WidgetState } from "./types.js";
 
 export class AppsSdkAdaptor implements Adaptor {
   private static instance: AppsSdkAdaptor | null = null;
@@ -78,7 +79,17 @@ export class AppsSdkAdaptor implements Adaptor {
   };
 
   public uploadFile = (file: File) => {
-    return window.openai.uploadFile(file);
+    return window.openai.uploadFile(file).then(async (metadata) => {
+      const state: WidgetState = window.openai.widgetState
+        ? { ...window.openai.widgetState }
+        : { modelContent: {} };
+      if (!state.imageIds) {
+        state.imageIds = [];
+      }
+      state.imageIds.push(metadata.fileId);
+      await window.openai.setWidgetState(state);
+      return metadata;
+    });
   };
 
   public getFileDownloadUrl = (file: { fileId: string }) => {
