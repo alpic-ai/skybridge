@@ -1,0 +1,139 @@
+---
+title: useRequestClose
+description: "Request the host to close the current widget programmatically."
+tag: "ChatGPT"
+---
+
+<Warning>
+**Runtime Support**: ChatGPT Apps only
+
+This hook is not available in MCP Apps. Calling it in an MCP Apps environment will throw an error.
+</Warning>
+
+The `useRequestClose` hook returns a function to request the host to close the current widget. This allows widgets to programmatically ask the host application to close them, for example after completing a task or when the user explicitly requests to close.
+
+## Basic usage
+
+```tsx
+import { useRequestClose } from "skybridge/web";
+
+function CloseButton() {
+  const requestClose = useRequestClose();
+
+  return (
+    <button onClick={() => requestClose()}>
+      Close Widget
+    </button>
+  );
+}
+```
+
+## Returns
+
+```tsx
+requestClose: () => void
+```
+
+A function that requests the host to close the current widget. The host may or may not honor this request depending on the current context.
+
+## Examples
+
+### Close After Task Completion
+
+```tsx
+import { useRequestClose, useCallTool } from "skybridge/web";
+
+function SubmitForm() {
+  const requestClose = useRequestClose();
+  const { callToolAsync, isPending } = useCallTool("submit_form");
+
+  const handleSubmit = async (data: FormData) => {
+    try {
+      await callToolAsync({ data });
+      // Close the widget after successful submission
+      requestClose();
+    } catch (error) {
+      console.error("Submission failed:", error);
+    }
+  };
+
+  return (
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      handleSubmit(new FormData(e.currentTarget));
+    }}>
+      <input name="message" placeholder="Enter your message" />
+      <button type="submit" disabled={isPending}>
+        {isPending ? "Submitting..." : "Submit and Close"}
+      </button>
+    </form>
+  );
+}
+```
+
+### Confirmation Dialog Before Close
+
+```tsx
+import { useRequestClose } from "skybridge/web";
+import { useState } from "react";
+
+function WidgetWithConfirmation() {
+  const requestClose = useRequestClose();
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  if (showConfirm) {
+    return (
+      <div className="confirm-dialog">
+        <p>Are you sure you want to close?</p>
+        <button onClick={() => requestClose()}>Yes, close</button>
+        <button onClick={() => setShowConfirm(false)}>Cancel</button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h2>Widget Content</h2>
+      <p>Your widget content here...</p>
+      <button onClick={() => setShowConfirm(true)}>Close</button>
+    </div>
+  );
+}
+```
+
+### Auto-Close After Timeout
+
+```tsx
+import { useRequestClose } from "skybridge/web";
+import { useEffect, useState } from "react";
+
+function TimedNotification({ message, autoCloseMs = 5000 }: {
+  message: string;
+  autoCloseMs?: number;
+}) {
+  const requestClose = useRequestClose();
+  const [timeLeft, setTimeLeft] = useState(autoCloseMs / 1000);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft((t) => {
+        if (t <= 1) {
+          requestClose();
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [requestClose]);
+
+  return (
+    <div className="notification">
+      <p>{message}</p>
+      <p className="timer">Closing in {timeLeft}s...</p>
+      <button onClick={() => requestClose()}>Close Now</button>
+    </div>
+  );
+}
+```

@@ -104,6 +104,12 @@ export type AppsSdkMethods<WS extends WidgetState = WidgetState> = {
    * This URL will be opened in the app when the user clicks on the top right button in fullscreen mode.
    */
   setOpenInAppUrl: (args: { href: string }) => Promise<void>;
+
+  /**
+   * Requests the host to close the current widget.
+   * This allows widgets to ask ChatGPT to close them programmatically.
+   */
+  requestClose: () => void;
 };
 
 // Dispatched when any global changes in the host page

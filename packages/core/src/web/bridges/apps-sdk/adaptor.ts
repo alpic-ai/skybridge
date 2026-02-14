@@ -125,4 +125,8 @@ export class AppsSdkAdaptor implements Adaptor {
 
     return window.openai.setOpenInAppUrl({ href });
   }
+
+  public requestClose(): void {
+    window.openai.requestClose();
+  }
 }

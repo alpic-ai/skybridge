@@ -109,4 +109,5 @@ export interface Adaptor {
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
   openModal(options: RequestModalOptions): void;
   setOpenInAppUrl(href: string): Promise<void>;
+  requestClose(): void;
 }

@@ -266,6 +266,13 @@ export class McpAppAdaptor implements Adaptor {
     throw new Error("setOpenInAppUrl is not implemented in MCP App.");
   }
 
+  /**
+   * @throws requestClose is not supported in MCP App.
+   */
+  public requestClose(): void {
+    throw new Error("requestClose is not supported in MCP App.");
+  }
+
   private createHostContextStore<
     const Keys extends readonly McpAppContextKey[],
     R,
