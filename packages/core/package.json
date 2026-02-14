@@ -55,8 +55,8 @@
     "es-toolkit": "^1.44.0",
     "express": "^5.2.1",
     "handlebars": "^4.7.8",
-    "ink": "^6.6.0",
-    "posthog-node": "^5.24.14",
+    "ink": "^6.7.0",
+    "posthog-node": "^5.24.15",
     "superjson": "^2.2.6",
     "vite": "^7.3.1",
     "zustand": "^5.0.11"
@@ -71,8 +71,8 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsdom": "^27.0.0",
-    "@types/node": "^24.10.12",
-    "@types/react": "^19.2.13",
+    "@types/node": "^24.10.13",
+    "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitest/ui": "^4.0.18",
     "jsdom": "^28.0.0",
@@ -82,7 +82,7 @@
     "vitest": "^4.0.18",
     "zod": "^4.3.6"
   },
-  "packageManager": "pnpm@10.29.2",
+  "packageManager": "pnpm@10.29.3",
   "bin": {
     "sb": "./bin/run.js",
     "skybridge": "./bin/run.js"
