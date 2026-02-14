@@ -266,11 +266,12 @@ export class McpAppAdaptor implements Adaptor {
     throw new Error("setOpenInAppUrl is not implemented in MCP App.");
   }
 
-  /**
-   * @throws requestClose is not supported in MCP App.
-   */
   public requestClose(): void {
-    throw new Error("requestClose is not supported in MCP App.");
+    const bridge = McpAppBridge.getInstance();
+    bridge.request<{ method: "ui/request-close"; params: {} }, unknown>({
+      method: "ui/request-close",
+      params: {},
+    });
   }
 
   private createHostContextStore<

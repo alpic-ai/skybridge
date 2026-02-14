@@ -1,14 +1,11 @@
 ---
 title: useRequestClose
 description: "Request the host to close the current widget programmatically."
-tag: "ChatGPT"
 ---
 
-<Warning>
-**Runtime Support**: ChatGPT Apps only
-
-This hook is not available in MCP Apps. Calling it in an MCP Apps environment will throw an error.
-</Warning>
+<Info>
+**Runtime Support**: In MCP Apps, `useRequestClose` sends a `ui/request-close` request to the host. The host may not support this method yet depending on its implementation.
+</Info>
 
 The `useRequestClose` hook returns a function to request the host to close the current widget. This allows widgets to programmatically ask the host application to close them, for example after completing a task or when the user explicitly requests to close.
 
