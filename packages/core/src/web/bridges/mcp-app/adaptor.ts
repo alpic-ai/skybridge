@@ -220,6 +220,13 @@ export class McpAppAdaptor implements Adaptor {
         ? stateOrUpdater(this._widgetState)
         : stateOrUpdater;
 
+    // must happen before the async bridge call to ensure the state is updated immediately for the UI,
+    // otherwise successive calls to setWidgetState may have stale state
+    this._widgetState = newState;
+    this.widgetStateListeners.forEach((listener) => {
+      listener();
+    });
+
     const bridge = McpAppBridge.getInstance();
     await bridge.request<McpUiUpdateModelContextRequest, unknown>({
       method: "ui/update-model-context",
@@ -227,10 +234,6 @@ export class McpAppAdaptor implements Adaptor {
         structuredContent: newState,
         content: [{ type: "text", text: JSON.stringify(newState) }],
       },
-    });
-    this._widgetState = newState;
-    this.widgetStateListeners.forEach((listener) => {
-      listener();
     });
   };
 
