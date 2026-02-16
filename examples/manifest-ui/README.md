@@ -1,14 +1,15 @@
 # Manifest UI Starter
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home) and [Manifest UI](https://ui.manifest.build): a full-stack starter with agentic UI components for building interactive widgets.
+An example MCP app built with [Skybridge](https://docs.skybridge.tech/home) and [Manifest UI](https://ui.manifest.build): an event ticket browsing app that displays upcoming events using agentic UI components.
 
 ## What This Example Showcases
 
-- **Interactive Widget Rendering**: A React-based widget that displays a hero component directly in AI conversations
-- **Agentic UI Components**: Choose from a wide selection of [Manifest UI](https://ui.manifest.build) blocks and components made for agentic usage
-- **Shadcn/ui and Tailwind**: Official [shadcn/ui registry](https://ui.shadcn.com/docs/directory?q=manifest) with full compatibility
-- **1-Command Install**: Install new components with simple CLI commands like `npx shadcn@latest add @manifest/post-card`
-- **External Links**: Opens external URLs via `useOpenExternal()` hook
+- **Interactive Widget Rendering**: A React-based widget that displays a carousel of event cards directly in AI conversations
+- **Agentic UI Components**: Uses the [Manifest UI](https://ui.manifest.build) `EventList` and `EventCard` components from the official [shadcn/ui registry](https://ui.shadcn.com/docs/directory?q=manifest)
+- **1-Command Install**: Install new components with simple CLI commands like `npx shadcn@latest add @manifest/event-list`
+- **Picture-in-Picture Detail View**: Clicking an event switches to PiP mode with a full event card via `useDisplayMode()` hook
+- **Follow-Up Messages**: Sends event details back to the AI for personalized recommendations via `useSendFollowUpMessage()` hook
+- **Tool Info Access**: Widgets access tool input, output, and metadata via `useToolInfo()` hook
 - **Hot Module Replacement**: Live reloading of widget components during development
 
 ## Live Demo
@@ -60,20 +61,24 @@ This command starts:
 ```
 ├── server/
 │   └── src/
-│       └── index.ts        # Entry point, widget registry & tool handlers
+│       └── index.ts          # Entry point, widget registry & static event data
 ├── web/
 │   ├── src/
 │   │   ├── components/
-│   │   │   └── ui/         # Manifest UI / shadcn components (hero, button, etc.)
+│   │   │   └── ui/
+│   │   │       ├── event-list.tsx  # Manifest UI EventList component
+│   │   │       ├── event-card.tsx  # Manifest UI EventCard component
+│   │   │       ├── button.tsx      # shadcn/ui Button component
+│   │   │       └── types.ts       # Shared types (Event, etc.)
 │   │   ├── lib/
-│   │   │   └── utils.ts    # Utility functions
+│   │   │   └── utils.ts      # Utility functions
 │   │   ├── widgets/
-│   │   │   └── hello-world.tsx  # Example widget
-│   │   ├── helpers.ts      # Shared utilities
-│   │   └── index.css       # Global styles
-│   ├── components.json     # shadcn/ui config
+│   │   │   └── browse-events.tsx  # Event browsing widget
+│   │   ├── helpers.ts         # Typed Skybridge helpers
+│   │   └── index.css          # Global styles
+│   ├── components.json        # shadcn/ui config with Manifest UI registry
 │   └── vite.config.ts
-├── alpic.json              # Deployment config
+├── alpic.json                 # Deployment config
 └── package.json
 ```
 
@@ -95,22 +100,20 @@ Choose your component from [Manifest UI website](https://ui.manifest.build) and 
 ```bash
 cd web
 
-# Install the post-card component with npx
-npx shadcn@latest add @manifest/post-card
+# Install a component with npx
+npx shadcn@latest add @manifest/event-list
 ```
 
 And use it in your widget:
 
 ```tsx
+import { EventList } from "../components/ui/event-list";
+
 return (
-  <Hero
-    data={{
-      title: "Hello world!",
-      subtitle: "Let's build some apps",
-    }}
-    actions={{
-      onPrimaryClick: () => openExternal("https://docs.skybridge.tech"),
-    }}
+  <EventList
+    data={{ events, title: "Upcoming Events" }}
+    appearance={{ variant: "carousel" }}
+    actions={{ onEventSelect: (event) => console.log(event.title) }}
   />
 );
 ```
