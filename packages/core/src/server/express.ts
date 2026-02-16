@@ -6,8 +6,10 @@ import type { McpServer } from "./server";
 
 export async function createServer({
   server,
+  customMiddleware = [],
 }: {
   server: McpServer;
+  customMiddleware?: { path?: string; handlers: express.RequestHandler[] }[];
 }): Promise<express.Express> {
   const app = express();
   app.use(express.json());
@@ -25,6 +27,14 @@ export async function createServer({
 
     app.use("/assets", cors());
     app.use("/assets", express.static(assetsPath));
+  }
+
+  for (const middleware of customMiddleware) {
+    if (middleware.path) {
+      app.use(middleware.path, ...middleware.handlers);
+    } else {
+      app.use(...middleware.handlers);
+    }
   }
 
   app.use("/mcp", mcpMiddleware(server));
