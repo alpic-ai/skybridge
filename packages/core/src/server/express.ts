@@ -14,7 +14,7 @@ export async function createServer({
   const app = express();
   app.use(express.json());
   const env = process.env.NODE_ENV || "development";
-  
+
   for (const middleware of customMiddleware) {
     if (middleware.path) {
       app.use(middleware.path, ...middleware.handlers);
