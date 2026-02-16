@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
-    "express": "^5.2.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "skybridge": ">=0.31.3 <1.0.0",
@@ -21,13 +20,11 @@
   },
   "devDependencies": {
     "@skybridge/devtools": ">=0.31.3 <1.0.0",
-    "@types/express": "^5.0.6",
     "@types/node": "^22.19.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
     "alpic": "^1.85.0",
-    "nodemon": "^3.1.11",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
