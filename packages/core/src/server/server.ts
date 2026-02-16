@@ -256,15 +256,8 @@ export class McpServer<
     if (!this.express) {
       this.express = await createServer({
         server: this,
+        customMiddleware: this.customMiddleware,
       });
-
-      for (const middleware of this.customMiddleware) {
-        if (middleware.path) {
-          this.express.use(middleware.path, ...middleware.handlers);
-        } else {
-          this.express.use(...middleware.handlers);
-        }
-      }
     }
 
     const express = this.express;
