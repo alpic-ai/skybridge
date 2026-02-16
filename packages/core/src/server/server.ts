@@ -267,6 +267,15 @@ export class McpServer<
         console.error("Failed to start server:", error);
         reject(error);
       });
+
+      const shutdown = () => {
+        server.close(() => process.exit(0));
+        setTimeout(() => process.exit(1), 3000);
+      };
+
+      process.on("SIGTERM", shutdown);
+      process.on("SIGINT", shutdown);
+
       server.listen(3000, () => {
         resolve();
       });
