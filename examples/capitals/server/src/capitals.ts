@@ -133,7 +133,6 @@ export async function getAllCapitals(): Promise<CapitalSummary[]> {
   }));
 }
 
-
 export async function getCapitalByCountryCode(cca2: string): Promise<Capital> {
   const country = await fetchCountryByCode(cca2);
 
@@ -178,11 +177,26 @@ export async function getCapitalByCountryCode(cca2: string): Promise<Capital> {
 }
 
 export async function getCapitalByName(capitalName: string): Promise<Capital> {
-  // Find the country code from the minimal list, then fetch full details
   const allCapitals = await getAllCapitals();
-  const match = allCapitals.find(
-    (c) => c.name.toLowerCase() === capitalName.toLowerCase(),
-  );
+  const query = capitalName.toLowerCase().trim();
+  let match: CapitalSummary | undefined;
+  for (const c of allCapitals) {
+    const capital = c.name.toLowerCase();
+    if (capital === query) {
+      match = c;
+      break;
+    }
+    // when values intersect, keep the one with the closest length
+    if (capital.includes(query) || query.includes(capital)) {
+      if (
+        !match ||
+        Math.abs(capital.length - query.length) <
+          Math.abs(match.name.toLowerCase().length - query.length)
+      ) {
+        match = c;
+      }
+    }
+  }
 
   if (!match) {
     throw new Error(`Capital "${capitalName}" not found`);
