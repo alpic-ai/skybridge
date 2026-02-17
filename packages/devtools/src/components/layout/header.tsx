@@ -63,11 +63,7 @@ export const Header = () => {
                 Sign out
               </Button>
             ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={connectToServer}
-              >
+              <Button variant="outline" size="sm" onClick={connectToServer}>
                 <PlugZap className="h-3.5 w-3.5" />
                 Connect
               </Button>

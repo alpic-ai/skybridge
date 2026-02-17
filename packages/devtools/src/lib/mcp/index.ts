@@ -61,7 +61,10 @@ export async function connectToServer(): Promise<void> {
 
 export async function finishOAuthCallback(code: string): Promise<void> {
   const provider = new BrowserOAuthProvider();
-  await auth(provider, { serverUrl: DEFAULT_SERVER_URL, authorizationCode: code });
+  await auth(provider, {
+    serverUrl: DEFAULT_SERVER_URL,
+    authorizationCode: code,
+  });
   await connectToServer();
 }
 
