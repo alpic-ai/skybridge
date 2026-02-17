@@ -13,12 +13,11 @@ import { queryClient } from "../query-client.js";
 import { BrowserOAuthProvider } from "./browser-oauth-provider.js";
 import { McpClient } from "./client.js";
 
-const DEFAULT_SERVER_URL = "http://localhost:3000/mcp";
-
 const client = new McpClient();
 let currentAuthProvider: BrowserOAuthProvider | null = null;
 
 export async function connectToServer(): Promise<void> {
+  const serverUrl = `${window.location.origin}/mcp`;
   const { setStatus, setRequiresAuth, setError } = useAuthStore.getState();
   setStatus("connecting");
   setError(null);
@@ -29,7 +28,7 @@ export async function connectToServer(): Promise<void> {
 
   try {
     const resourceMetadata =
-      await discoverOAuthProtectedResourceMetadata(DEFAULT_SERVER_URL);
+      await discoverOAuthProtectedResourceMetadata(serverUrl);
     if (resourceMetadata?.authorization_servers?.length) {
       requiresAuth = true;
     }
@@ -42,10 +41,10 @@ export async function connectToServer(): Promise<void> {
   try {
     if (requiresAuth) {
       currentAuthProvider = new BrowserOAuthProvider();
-      await client.connect(DEFAULT_SERVER_URL, currentAuthProvider);
+      await client.connect(serverUrl, currentAuthProvider);
     } else {
       currentAuthProvider = null;
-      await client.connect(DEFAULT_SERVER_URL);
+      await client.connect(serverUrl);
     }
     setStatus("authenticated");
     queryClient.invalidateQueries({ queryKey: ["list-tools"] });
@@ -60,9 +59,10 @@ export async function connectToServer(): Promise<void> {
 }
 
 export async function finishOAuthCallback(code: string): Promise<void> {
+  const serverUrl = `${window.location.origin}/mcp`;
   const provider = new BrowserOAuthProvider();
   await auth(provider, {
-    serverUrl: DEFAULT_SERVER_URL,
+    serverUrl: serverUrl,
     authorizationCode: code,
   });
   await connectToServer();

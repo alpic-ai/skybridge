@@ -8,6 +8,11 @@ export default class Dev extends Command {
   static override description = "Start development server";
   static override examples = ["skybridge"];
   static override flags = {
+    port: Flags.integer({
+      char: "p",
+      description: "Port to run the server on",
+      default: 3000,
+    }),
     "use-forwarded-host": Flags.boolean({
       description:
         "Uses the forwarded host header to construct widget URLs instead of localhost, useful when accessing the dev server through a tunnel (e.g., ngrok)",
@@ -17,8 +22,11 @@ export default class Dev extends Command {
   public async run(): Promise<void> {
     const { flags } = await this.parse(Dev);
 
+    const port = flags.port;
+
     const env = {
       ...process.env,
+      SKYBRIDGE_PORT: String(port),
       ...(flags["use-forwarded-host"]
         ? { SKYBRIDGE_USE_FORWARDED_HOST: "true" }
         : {}),
@@ -36,13 +44,13 @@ export default class Dev extends Command {
             <Text color="white" bold>
               Open DevTools to test your app locally:{" "}
             </Text>
-            <Text color="green">http://localhost:3000/</Text>
+            <Text color="green">{`http://localhost:${port}/`}</Text>
           </Box>
           <Box marginBottom={1}>
             <Text color="#20a832">→{"  "}</Text>
             <Text>MCP server running at:{"  "}</Text>
             <Text color="white" bold>
-              http://localhost:3000/mcp
+              {`http://localhost:${port}/mcp`}
             </Text>
           </Box>
           <Text color="white" underline>
@@ -52,7 +60,7 @@ export default class Dev extends Command {
             <Text color="#20a832">→{"  "}</Text>
             <Text color="grey">Make your local server accessible with </Text>
             <Text color="white" bold>
-              ngrok http 3000
+              {`ngrok http ${port}`}
             </Text>
           </Box>
           <Box marginBottom={1}>

@@ -64,7 +64,9 @@ export const widgetsDevServer = async (): Promise<Router> => {
     },
     plugins: [
       ...userPlugins,
-      assetBaseUrlTransformPlugin({ devServerOrigin: "http://localhost:3000" }),
+      assetBaseUrlTransformPlugin({
+        devServerOrigin: `http://localhost:${process.env.SKYBRIDGE_PORT ?? "3000"}`,
+      }),
     ],
   });
 

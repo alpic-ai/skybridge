@@ -258,7 +258,8 @@ export class McpServer<
         console.error("Failed to start server:", error);
         reject(error);
       });
-      server.listen(3000, () => {
+      const port = parseInt(process.env.SKYBRIDGE_PORT ?? "3000", 10);
+      server.listen(port, () => {
         resolve();
       });
     });
@@ -456,9 +457,10 @@ export class McpServer<
 
         const useExternalHost = isProduction || useForwardedHost || isClaude;
 
+        const devPort = process.env.SKYBRIDGE_PORT || "3000";
         const serverUrl = useExternalHost
           ? `https://${hostFromHeaders}`
-          : "http://localhost:3000";
+          : `http://localhost:${devPort}`;
 
         const html = isProduction
           ? templateHelper.renderProduction({
