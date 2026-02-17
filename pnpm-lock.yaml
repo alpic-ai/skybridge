@@ -38,9 +38,6 @@ importers:
       dotenv:
         specifier: ^16.5.0
         version: 16.6.1
-      express:
-        specifier: ^5.2.1
-        version: 5.2.1
       jose:
         specifier: ^6.0.11
         version: 6.1.3
@@ -63,9 +60,6 @@ importers:
       '@skybridge/devtools':
         specifier: '>=0.31.4 <1.0.0'
         version: 0.31.4
-      '@types/express':
-        specifier: ^5.0.6
-        version: 5.0.6
       '@types/node':
         specifier: ^22.15.30
         version: 22.19.3
