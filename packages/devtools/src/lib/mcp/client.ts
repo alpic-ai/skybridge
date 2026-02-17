@@ -1,3 +1,4 @@
+import type { OAuthClientProvider } from "@modelcontextprotocol/sdk/client/auth.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { CallToolArgs, CallToolResponse } from "skybridge/web";
@@ -6,10 +7,15 @@ export class McpClient {
   private client: Client | null = null;
   private transport: StreamableHTTPClientTransport | null = null;
 
-  async connect(serverUrl: string | URL): Promise<void> {
+  async connect(
+    serverUrl: string | URL,
+    authProvider?: OAuthClientProvider,
+  ): Promise<void> {
     const url = typeof serverUrl === "string" ? new URL(serverUrl) : serverUrl;
 
-    this.transport = new StreamableHTTPClientTransport(url);
+    this.transport = new StreamableHTTPClientTransport(url, {
+      authProvider,
+    });
 
     this.client = new Client(
       {
@@ -120,6 +126,13 @@ export class McpClient {
     return (this.client as any)._serverVersion as
       | { name: string; version: string }
       | undefined;
+  }
+
+  async finishAuth(authorizationCode: string): Promise<void> {
+    if (!this.transport) {
+      throw new Error("Transport not available. Call connect() first.");
+    }
+    await this.transport.finishAuth(authorizationCode);
   }
 
   async close(): Promise<void> {
