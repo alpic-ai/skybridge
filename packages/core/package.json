@@ -9,9 +9,12 @@
   "type": "module",
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "tsconfig.base.json"
   ],
   "exports": {
+    "./tsconfig": "./tsconfig.base.json",
+    "./tsconfig.json": "./tsconfig.base.json",
     "./server": {
       "types": "./dist/server/index.d.ts",
       "default": "./dist/server/index.js"

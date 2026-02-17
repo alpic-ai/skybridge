@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    // Module resolution options
+    "module": "NodeNext",
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": true,
+
+    // Output options
+    "noEmit": false,
+    "incremental": true,
+    "sourceMap": true,
+
+    // Language and environment options
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+
+    // Strictness and checking options
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Code quality & diagnostics
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  }
+}

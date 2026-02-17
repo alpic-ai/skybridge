@@ -11,8 +11,12 @@ export default class Start extends Command {
   public async run(): Promise<void> {
     console.clear();
 
-    const distPath = resolve(process.cwd(), "dist/index.js");
-    if (!existsSync(distPath)) {
+    const candidates = [
+      resolve(process.cwd(), "dist/server/src/index.js"),
+      resolve(process.cwd(), "dist/index.js"),
+    ];
+
+    if (!candidates.some(existsSync)) {
       console.error("❌ Error: dist/index.js not found");
       console.error("");
       console.error("Please build your project first:");
@@ -28,7 +32,7 @@ export default class Start extends Command {
       `Server running at: \x1b[32m\x1b[1mhttp://localhost:3000/mcp\x1b[0m`,
     );
 
-    await runCommand("node dist/index.js", {
+    await runCommand(`node ${candidates.find(existsSync)}`, {
       stdio: ["ignore", "inherit", "inherit"],
       env: { ...process.env, NODE_ENV: "production" },
     });
