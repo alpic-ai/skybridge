@@ -15,6 +15,14 @@ export async function createServer({
   app.use(express.json());
   const env = process.env.NODE_ENV || "development";
 
+  for (const middleware of customMiddleware) {
+    if (middleware.path) {
+      app.use(middleware.path, ...middleware.handlers);
+    } else {
+      app.use(...middleware.handlers);
+    }
+  }
+
   if (env !== "production") {
     const { devtoolsStaticServer } = await import("@skybridge/devtools");
     app.use(await devtoolsStaticServer());
@@ -27,14 +35,6 @@ export async function createServer({
 
     app.use("/assets", cors());
     app.use("/assets", express.static(assetsPath));
-  }
-
-  for (const middleware of customMiddleware) {
-    if (middleware.path) {
-      app.use(middleware.path, ...middleware.handlers);
-    } else {
-      app.use(...middleware.handlers);
-    }
   }
 
   app.use("/mcp", mcpMiddleware(server));
