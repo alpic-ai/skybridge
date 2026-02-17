@@ -1,81 +1,52 @@
 ---
 title: Deploy
-description: "Deploy your app to Alpic using the Alpic CLI."
+description: "Deploy your App and share it to your users"
 icon: "cloud-arrow-up"
 sidebar_position: 4
 ---
 
-**Alpic** is a developer-friendly cloud platform for deploying and hosting MCP Apps. This guide will walk you through the process of deploying your app using the Alpic CLI.
+You can deploy your Skybridge App as a Node.js server on any compatible infrastructure provider.
 
-Alternatively, you can deploy your Skybridge app as a Node.js server on any compatible infrastructure provider.
+Below are some easy options closely integrated with Skybridge.
 
-## Authentication
+## Alpic Cloud platform
 
-At the moment, only API key authentication is supported.
+### Instant deploy to Alpic
 
-Set the `ALPIC_API_KEY` environment variable before running any deploy. You can create an API key from **Team settings** in the [Alpic dashboard](https://app.alpic.ai).
+**[Alpic](https://alpic.ai)** is a developer-friendly cloud platform for deploying and hosting MCP Apps. It is also the company behind Skybridge :) 
 
-```bash
-export ALPIC_API_KEY=your_api_key
+To deploy your App on Alpic you can:
+1. Create a free account on [app.alpic.ai](https://app.alpic.ai)
+2. Deploy your App either by:
+   - Pushing your App to Github, and connecting it to Alpic for automatic deployment at each commit.
+   - Using the [Alpic CLI](https://docs.alpic.ai/cli/overview):
+
+<CodeGroup>
+```bash npm
+npm run deploy
 ```
-
-## Deploy command
-
-Install the Alpic CLI globally:
-
-```bash
-npm install -g alpic
+```bash pnpm
+pnpm deploy
 ```
-
-Then run:
-
-```bash
-alpic deploy [directory]
+```bash yarn
+yarn deploy
 ```
-
-You can also use `npx alpic deploy` without a global install.
-
-**Arguments**
-
-| Argument | Description |
-|----------|-------------|
-| `directory` | Directory to deploy (default: current directory). |
-
-**Examples**
-
-Deploy the current directory:
-
-```bash
-alpic deploy
+```bash bun
+bun run deploy
 ```
+</CodeGroup>
 
-Deploy a specific app directory:
+Once your App is deployed, you will be able to access specific MCP analytics, logs, and test your app remotely in the Alpic Playground.
 
-```bash
-alpic deploy ./my-app
+Learn more about deploying to Alpic in the [Alpic documentation](https://docs.alpic.ai/).
+
+
+### Alpic MCP App
+
+Alpic also provides its own [MCP App](https://docs.alpic.ai/features/mcp-server) that lets you manage your apps directly from your favorite MCP Client. Connect to the Alpic MCP Server using:
 ```
-
-## What it does
-
-1. **Resolves project** — If the directory is not yet linked to an Alpic project, you are prompted to create a new project or link to an existing one. Project and environment are stored in `.alpic/project.json` for future deploys.
-
-2. **Collects source files** — Uses Git to determine which files to pack. Git must be installed.
-
-3. **Uploads and deploys** — Creates a gzipped tarball, uploads it to Alpic, and triggers a deployment.
-
-## First-time deploy
-
-When the directory is not linked to a project, you will be asked to:
-
-- **Create a new project** — Enter a project name, choose a runtime (Node.js 24, Node.js 22, Python 3.14, or Python 3.13), and optionally set a root directory within the project. The CLI may suggest a runtime based on your project files (`package.json`, `pyproject.toml`, etc.).
-
-- **Link to an existing project** — Select a project and environment from your Alpic team.
-
-After that, `.alpic/project.json` is created so the next `alpic deploy` uses the same project and environment without prompting.
-
-## Output
-
-On success, the CLI prints the MCP server URL. You can also open the deployment details page in the Alpic dashboard to follow logs and status.
+https://mcp.alpic.ai/mcp
+``` 
 
 ## What's Next?
 
