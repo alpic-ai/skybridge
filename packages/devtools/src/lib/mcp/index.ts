@@ -4,7 +4,7 @@ import {
   UnauthorizedError,
 } from "@modelcontextprotocol/sdk/client/auth.js";
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
-import { useMutation, useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { AppsSdkContext, CallToolArgs } from "skybridge/web";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { useStore } from "@/lib/store.js";
@@ -68,10 +68,10 @@ export async function finishOAuthCallback(code: string): Promise<void> {
   await connectToServer();
 }
 
-export function logout(): void {
+export async function logout(): Promise<void> {
   currentAuthProvider?.invalidateCredentials("all");
   currentAuthProvider = null;
-  client.close();
+  await client.close();
   useAuthStore.getState().reset();
   queryClient.invalidateQueries({ queryKey: ["list-tools"] });
 }
@@ -101,13 +101,11 @@ const defaultOpenaiObject: AppsSdkContext = {
 };
 
 export const useSuspenseTools = () => {
-  const status = useAuthStore((s) => s.status);
-  const { data } = useQuery<Tool[]>({
+  const { data } = useSuspenseQuery<Tool[]>({
     queryKey: ["list-tools"],
     queryFn: () => client.listTools(),
-    enabled: status === "authenticated",
   });
-  return data ?? [];
+  return data;
 };
 
 export const useServerInfo = () => {

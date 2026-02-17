@@ -26,17 +26,20 @@ async function init() {
           .getState()
           .setError(e instanceof Error ? e.message : "OAuth callback failed");
       }
+    } else {
+      useAuthStore.getState().setStatus("error");
+      useAuthStore
+        .getState()
+        .setError("OAuth callback missing authorization code");
     }
   } else {
-    try {
-      await connectToServer();
-    } catch (e) {
+    connectToServer().catch((e) => {
       console.error("Connection failed:", e);
-    }
+    });
   }
 }
 
-await init();
+init();
 
 // biome-ignore lint: This is default vite entry point
 createRoot(document.getElementById("root")!).render(
