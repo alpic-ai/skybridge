@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
   id-token: write
 
 jobs:
@@ -82,3 +83,16 @@ jobs:
       - name: Deploy docs to Mintlify
         if: github.event_name == 'release'
         run: git push origin HEAD:mintlify --force
+
+      - name: Bump versions
+        # if: github.event_name == 'release'
+        run: node scripts/bump.js ${{ steps.version.outputs.version }} && pnpm install --no-frozen-lockfile
+
+      - name: Open bump PR
+        # if: github.event_name == 'release'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: "chore: bump skybridge versions to ${{ steps.version.outputs.version }}"
+          title: "chore: bump skybridge versions to ${{ steps.version.outputs.version }}"
+          body: "Automated version bump of skybridge dependencies in templates and examples."
+          branch: chore/bump-versions
