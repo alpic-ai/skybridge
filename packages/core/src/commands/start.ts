@@ -16,13 +16,16 @@ export default class Start extends Command {
       resolve(process.cwd(), "dist/index.js"),
     ];
 
-    if (!candidates.some(existsSync)) {
-      console.error("❌ Error: dist/index.js not found");
+    const indexPath = candidates.find(existsSync);
+
+    if (!indexPath) {
+      console.error("❌ Error: No build output found");
       console.error("");
       console.error("Please build your project first:");
       console.error("  skybridge build");
       console.error("");
       process.exit(1);
+      return;
     }
 
     console.log(
@@ -32,7 +35,7 @@ export default class Start extends Command {
       `Server running at: \x1b[32m\x1b[1mhttp://localhost:3000/mcp\x1b[0m`,
     );
 
-    await runCommand(`node ${candidates.find(existsSync)}`, {
+    await runCommand(`node ${indexPath}`, {
       stdio: ["ignore", "inherit", "inherit"],
       env: { ...process.env, NODE_ENV: "production" },
     });
