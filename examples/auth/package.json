@@ -8,13 +8,13 @@
     "dev": "skybridge dev",
     "build": "skybridge build",
     "start": "skybridge start",
-    "deploy": "alpic deploy"
+    "deploy": "alpic deploy",
+    "test:type": "tsc --noEmit"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
     "@workos-inc/node": "^7.72.2",
     "dotenv": "^16.5.0",
-    "express": "^5.2.1",
     "jose": "^6.0.11",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -24,7 +24,6 @@
   },
   "devDependencies": {
     "@skybridge/devtools": ">=0.31.4 <1.0.0",
-    "@types/express": "^5.0.6",
     "@types/node": "^22.15.30",
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",

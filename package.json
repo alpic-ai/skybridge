@@ -8,7 +8,7 @@
     "test": "pnpm --filter \"./packages/*\" test",
     "format": "pnpm --filter \"./packages/*\" format",
     "test:unit": "pnpm --filter \"./packages/*\" test:unit",
-    "test:type": "pnpm --filter \"./packages/*\" test:type",
+    "test:type": "pnpm -r test:type",
     "test:format": "pnpm --filter \"./packages/*\" test:format",
     "docs:dev": "pnpm --filter @skybridge/docs dev",
     "bump": "node scripts/bump.js && pnpm i"

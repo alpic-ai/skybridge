@@ -193,16 +193,7 @@ type AddTool<
   TTools & {
     [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput, TResponseMetadata>;
   }
-> & {
-  use(
-    ...handlers: RequestHandler[]
-  ): AddTool<TTools, TName, TInput, TOutput, TResponseMetadata>;
-  use(
-    path: string,
-    ...handlers: RequestHandler[]
-  ): AddTool<TTools, TName, TInput, TOutput, TResponseMetadata>;
-  run(): Promise<void>;
-};
+>;
 type ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> = {
   title?: string;
   description?: string;

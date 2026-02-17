@@ -15,7 +15,7 @@ interface Product {
   };
 }
 
-const server: McpServer = new McpServer(
+const server = new McpServer(
   {
     name: "ecom-carousel-app",
     version: "0.0.1",

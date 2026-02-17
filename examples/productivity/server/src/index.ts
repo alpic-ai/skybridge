@@ -45,7 +45,7 @@ function getWeek(weekOffset: number): Week {
   };
 }
 
-const server: McpServer = new McpServer(
+const server = new McpServer(
   {
     name: "productivity-charts-example-server",
     version: "0.0.1",

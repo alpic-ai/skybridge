@@ -19,7 +19,7 @@ const Answers = [
   "You may rely on it",
 ];
 
-const server: McpServer = new McpServer(
+const server = new McpServer(
   {
     name: "alpic-openai-app",
     version: "0.0.1",
