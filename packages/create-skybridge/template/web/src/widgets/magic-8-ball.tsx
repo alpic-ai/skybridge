@@ -1,7 +1,7 @@
 import "@/index.css";
 
 import { mountWidget } from "skybridge/web";
-import { useToolInfo } from "../helpers";
+import { useToolInfo } from "../helpers.js";
 
 function Magic8Ball() {
   const { input, output } = useToolInfo<"magic-8-ball">();
