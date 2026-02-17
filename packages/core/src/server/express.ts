@@ -72,6 +72,9 @@ const mcpMiddleware = (server: McpServer): express.RequestHandler => {
       });
 
       await server.connect(transport);
+      // Express strips the mount path from req.url (e.g. "/mcp" becomes "/").
+      // Restore it so the SDK builds the correct requestInfo.url.
+      req.url = req.originalUrl;
       await transport.handleRequest(req, res, req.body);
     } catch (error) {
       console.error("Error handling MCP request:", error);
