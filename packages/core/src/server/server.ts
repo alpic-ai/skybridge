@@ -497,7 +497,10 @@ export class McpServer<
           domain: isClaude
             ? `${crypto
                 .createHash("sha256")
-                .update(`https://${hostFromHeaders}/mcp`)
+                .update(
+                  extra.requestInfo?.url?.href ||
+                    `https://${hostFromHeaders}/mcp`,
+                )
                 .digest("hex")
                 .slice(0, 32)}.claudemcpcontent.com`
             : serverUrl,
