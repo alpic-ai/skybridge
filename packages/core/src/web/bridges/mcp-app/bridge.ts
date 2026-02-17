@@ -9,6 +9,7 @@ import type {
   McpUiSizeChangedNotification,
   McpUiToolCancelledNotification,
   McpUiToolInputNotification,
+  McpUiToolInputPartialNotification,
   McpUiToolResultNotification,
 } from "@modelcontextprotocol/ext-apps";
 import type { Bridge, Subscribe } from "../types.js";
@@ -54,6 +55,7 @@ type McpAppRequest = {
 
 type McpAppNotification = { jsonrpc: "2.0" } & (
   | McpUiToolInputNotification
+  | McpUiToolInputPartialNotification
   | McpUiToolResultNotification
   | McpUiToolCancelledNotification
   | McpUiHostContextChangedNotification
@@ -240,6 +242,11 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
     switch (notification.method) {
       case "ui/notifications/host-context-changed":
         this.updateContext(notification.params);
+        return;
+      case "ui/notifications/tool-input-partial":
+        this.updateContext({
+          toolInput: notification.params.arguments ?? {},
+        });
         return;
       case "ui/notifications/tool-input":
         this.updateContext({
