@@ -20,7 +20,7 @@ async function getCachedAllCapitals(): Promise<CapitalSummary[]> {
   return cachedAllCapitals;
 }
 
-const server: McpServer = new McpServer(
+const server = new McpServer(
   {
     name: "world-capitals-explorer",
     version: "0.0.1",
