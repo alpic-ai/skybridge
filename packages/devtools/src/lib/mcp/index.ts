@@ -1,15 +1,80 @@
+import {
+  auth,
+  discoverOAuthProtectedResourceMetadata,
+  UnauthorizedError,
+} from "@modelcontextprotocol/sdk/client/auth.js";
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { AppsSdkContext, CallToolArgs } from "skybridge/web";
+import { useAuthStore } from "@/lib/auth-store.js";
 import { useStore } from "@/lib/store.js";
 import { useSelectedToolName } from "../nuqs.js";
+import { queryClient } from "../query-client.js";
+import { BrowserOAuthProvider } from "./browser-oauth-provider.js";
 import { McpClient } from "./client.js";
 
-const client = new McpClient();
+const DEFAULT_SERVER_URL = "http://localhost:3000/mcp";
 
-client.connect("http://localhost:3000/mcp").then(() => {
-  console.info("Connected to MCP server");
-});
+const client = new McpClient();
+let currentAuthProvider: BrowserOAuthProvider | null = null;
+
+export async function connectToServer(): Promise<void> {
+  const { setStatus, setRequiresAuth, setError } = useAuthStore.getState();
+  setStatus("connecting");
+  setError(null);
+
+  await client.close();
+
+  let requiresAuth = false;
+
+  try {
+    const resourceMetadata =
+      await discoverOAuthProtectedResourceMetadata(DEFAULT_SERVER_URL);
+    if (resourceMetadata?.authorization_servers?.length) {
+      requiresAuth = true;
+    }
+  } catch {
+    // 404 or network error means no OAuth required
+  }
+
+  setRequiresAuth(requiresAuth);
+
+  try {
+    if (requiresAuth) {
+      currentAuthProvider = new BrowserOAuthProvider();
+      await client.connect(DEFAULT_SERVER_URL, currentAuthProvider);
+    } else {
+      currentAuthProvider = null;
+      await client.connect(DEFAULT_SERVER_URL);
+    }
+    setStatus("authenticated");
+    queryClient.invalidateQueries({ queryKey: ["list-tools"] });
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      setStatus("unauthenticated");
+      return;
+    }
+    setStatus("error");
+    setError(error instanceof Error ? error.message : "Connection failed");
+  }
+}
+
+export async function finishOAuthCallback(code: string): Promise<void> {
+  const provider = new BrowserOAuthProvider();
+  await auth(provider, {
+    serverUrl: DEFAULT_SERVER_URL,
+    authorizationCode: code,
+  });
+  await connectToServer();
+}
+
+export async function logout(): Promise<void> {
+  currentAuthProvider?.invalidateCredentials("all");
+  currentAuthProvider = null;
+  await client.close();
+  useAuthStore.getState().reset();
+  queryClient.invalidateQueries({ queryKey: ["list-tools"] });
+}
 
 const defaultOpenaiObject: AppsSdkContext = {
   theme: "light",
@@ -44,6 +109,10 @@ export const useSuspenseTools = () => {
 };
 
 export const useServerInfo = () => {
+  const status = useAuthStore((s) => s.status);
+  if (status !== "authenticated") {
+    return undefined;
+  }
   return client.getServerInfo();
 };
 
