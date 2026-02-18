@@ -1,5 +1,29 @@
 import net from "node:net";
 
+const DEFAULT_PORT = 3000;
+
+export async function resolvePort(flagPort?: number) {
+  if (flagPort && flagPort > 1) {
+    return { port: flagPort, fallback: false };
+  }
+
+  const rawEnv = process.env.PORT;
+  if (rawEnv) {
+    const parsed = Number(rawEnv);
+    if (Number.isInteger(parsed) && parsed > 0) {
+      return { port: parsed, fallback: false };
+    }
+    return {
+      port: await detectAvailablePort(DEFAULT_PORT),
+      fallback: false,
+      envWarning: `Invalid PORT="${rawEnv}", ignoring and using default`,
+    };
+  }
+
+  const port = await detectAvailablePort(DEFAULT_PORT);
+  return { port, fallback: port !== DEFAULT_PORT };
+}
+
 /**
  * Returns the given port if available, otherwise lets the OS
  * pick a free port via `listen(0)`.
@@ -13,7 +37,9 @@ export async function detectAvailablePort(
   host?: string,
 ): Promise<number> {
   const available = await isPortAvailable(startPort, host);
-  if (available) return startPort;
+  if (available) {
+    return startPort;
+  }
 
   return new Promise((resolve, reject) => {
     const server = net.createServer();

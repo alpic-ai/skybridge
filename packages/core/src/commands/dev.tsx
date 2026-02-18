@@ -1,6 +1,6 @@
 import { Command, Flags } from "@oclif/core";
 import { Box, render, Text } from "ink";
-import { detectAvailablePort } from "../cli/detect-port.js";
+import { resolvePort } from "../cli/detect-port.js";
 import { Header } from "../cli/header.js";
 import { useNodemon } from "../cli/use-nodemon.js";
 import { useTypeScriptCheck } from "../cli/use-typescript-check.js";
@@ -12,6 +12,7 @@ export default class Dev extends Command {
     port: Flags.integer({
       char: "p",
       description: "Port to run the server on",
+      min: 1,
     }),
     "use-forwarded-host": Flags.boolean({
       description:
@@ -22,13 +23,14 @@ export default class Dev extends Command {
   public async run(): Promise<void> {
     const { flags } = await this.parse(Dev);
 
-    const DEFAULT_PORT = 3000;
-    const port = flags.port ?? (await detectAvailablePort(DEFAULT_PORT));
-    const portFallback = !flags.port && port !== DEFAULT_PORT;
+    const { port, fallback, envWarning } = await resolvePort(flags.port);
+    if (envWarning) {
+      this.warn(envWarning);
+    }
 
     const env = {
       ...process.env,
-      SKYBRIDGE_PORT: String(port),
+      __PORT: String(port),
       ...(flags["use-forwarded-host"]
         ? { SKYBRIDGE_USE_FORWARDED_HOST: "true" }
         : {}),
@@ -41,10 +43,10 @@ export default class Dev extends Command {
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>
           <Header version={this.config.version} />
-          {portFallback && (
+          {fallback && (
             <Box marginBottom={1}>
               <Text color="yellow">
-                Port {DEFAULT_PORT} is in use, falling back to port {port}
+                Port 3000 is in use, falling back to port {port}
               </Text>
             </Box>
           )}

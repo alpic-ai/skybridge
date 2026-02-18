@@ -16,8 +16,12 @@ import { McpClient } from "./client.js";
 const client = new McpClient();
 let currentAuthProvider: BrowserOAuthProvider | null = null;
 
+const getServerUrl = () => {
+  return `${window.location.origin}/mcp`;
+};
+
 export async function connectToServer(): Promise<void> {
-  const serverUrl = `${window.location.origin}/mcp`;
+  const serverUrl = getServerUrl();
   const { setStatus, setRequiresAuth, setError } = useAuthStore.getState();
   setStatus("connecting");
   setError(null);
@@ -59,7 +63,7 @@ export async function connectToServer(): Promise<void> {
 }
 
 export async function finishOAuthCallback(code: string): Promise<void> {
-  const serverUrl = `${window.location.origin}/mcp`;
+  const serverUrl = getServerUrl();
   const provider = new BrowserOAuthProvider();
   await auth(provider, {
     serverUrl: serverUrl,

@@ -48,7 +48,7 @@ export const widgetsDevServer = async (): Promise<Router> => {
   } = configResult?.config || {};
 
   const hmrPort = await detectAvailablePort(DEFAULT_HMR_PORT, "localhost");
-  process.env.SKYBRIDGE_HMR_PORT = String(hmrPort);
+  process.env.__SKYBRIDGE_HMR_PORT = String(hmrPort);
 
   const vite = await createServer({
     ...devConfig,
@@ -70,7 +70,7 @@ export const widgetsDevServer = async (): Promise<Router> => {
     plugins: [
       ...userPlugins,
       assetBaseUrlTransformPlugin({
-        devServerOrigin: `http://localhost:${process.env.SKYBRIDGE_PORT ?? "3000"}`,
+        devServerOrigin: `http://localhost:${process.env.__PORT ?? "3000"}`,
       }),
     ],
   });

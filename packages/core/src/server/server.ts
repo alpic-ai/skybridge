@@ -26,9 +26,9 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 import { mergeWith, union } from "es-toolkit";
 import type { Express, RequestHandler } from "express";
+import { DEFAULT_HMR_PORT } from "./const.js";
 import { createServer } from "./express.js";
 import { templateHelper } from "./templateHelper.js";
-import { DEFAULT_HMR_PORT } from "./const.js";
 
 const mergeWithUnion = <T extends object, S extends object>(
   target: T,
@@ -259,7 +259,7 @@ export class McpServer<
         console.error("Failed to start server:", error);
         reject(error);
       });
-      const port = parseInt(process.env.SKYBRIDGE_PORT ?? "3000", 10);
+      const port = parseInt(process.env.__PORT ?? "3000", 10);
       server.listen(port, () => {
         resolve();
       });
@@ -458,7 +458,7 @@ export class McpServer<
 
         const useExternalHost = isProduction || useForwardedHost || isClaude;
 
-        const devPort = process.env.SKYBRIDGE_PORT || "3000";
+        const devPort = process.env.__PORT || "3000";
         const serverUrl = useExternalHost
           ? `https://${hostFromHeaders}`
           : `http://localhost:${devPort}`;
@@ -481,7 +481,7 @@ export class McpServer<
 
         const connectDomains = [serverUrl];
         if (!isProduction) {
-          const hmrPort = process.env.SKYBRIDGE_HMR_PORT ?? DEFAULT_HMR_PORT;
+          const hmrPort = process.env.__SKYBRIDGE_HMR_PORT ?? DEFAULT_HMR_PORT;
           const VITE_HMR_WEBSOCKET_DEFAULT_URL = `ws://localhost:${hmrPort}`;
           connectDomains.push(VITE_HMR_WEBSOCKET_DEFAULT_URL);
         }

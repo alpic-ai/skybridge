@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { Command, Flags } from "@oclif/core";
-import { detectAvailablePort } from "../cli/detect-port.js";
+import { resolvePort } from "../cli/detect-port.js";
 import { runCommand } from "../cli/run-command.js";
 
 export default class Start extends Command {
@@ -11,13 +11,16 @@ export default class Start extends Command {
     port: Flags.integer({
       char: "p",
       description: "Port to run the server on",
+      min: 1,
     }),
   };
 
   public async run(): Promise<void> {
     const { flags } = await this.parse(Start);
-    const DEFAULT_PORT = 3000;
-    const port = flags.port ?? (await detectAvailablePort(DEFAULT_PORT));
+    const { port, fallback, envWarning } = await resolvePort(flags.port);
+    if (envWarning) {
+      this.warn(envWarning);
+    }
 
     console.clear();
 
@@ -41,9 +44,9 @@ export default class Start extends Command {
     console.log(
       `\x1b[36m\x1b[1m⛰  Welcome to Skybridge\x1b[0m \x1b[36mv${this.config.version}\x1b[0m`,
     );
-    if (!flags.port && port !== DEFAULT_PORT) {
+    if (fallback) {
       console.log(
-        `\x1b[33mPort ${DEFAULT_PORT} is in use, falling back to port ${port}\x1b[0m`,
+        `\x1b[33mPort 3000 is in use, falling back to port ${port}\x1b[0m`,
       );
     }
     console.log(
@@ -55,7 +58,7 @@ export default class Start extends Command {
       env: {
         ...process.env,
         NODE_ENV: "production",
-        SKYBRIDGE_PORT: String(port),
+        __PORT: String(port),
       },
     });
   }
