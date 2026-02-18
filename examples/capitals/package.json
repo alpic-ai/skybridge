@@ -23,7 +23,7 @@
     "react-dom": "^19.1.1",
     "react-map-gl": "^7.1.8",
     "react-router-dom": "^7.11.0",
-    "skybridge": ">=0.31.4 <1.0.0",
+    "skybridge": ">=0.0.0-dev.8490ca2 <1.0.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.14",
     "zod": "^4.3.5"

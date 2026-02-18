@@ -1,6 +1,6 @@
 {
   "name": "skybridge",
-  "version": "0.0.0",
+  "version": "0.0.0-dev.8490ca2",
   "description": "Skybridge is a framework for building ChatGPT and MCP Apps",
   "repository": {
     "type": "git",
