@@ -28,6 +28,7 @@ import { mergeWith, union } from "es-toolkit";
 import type { Express, RequestHandler } from "express";
 import { createServer } from "./express.js";
 import { templateHelper } from "./templateHelper.js";
+import { DEFAULT_HMR_PORT } from "./const.js";
 
 const mergeWithUnion = <T extends object, S extends object>(
   target: T,
@@ -480,7 +481,8 @@ export class McpServer<
 
         const connectDomains = [serverUrl];
         if (!isProduction) {
-          const VITE_HMR_WEBSOCKET_DEFAULT_URL = "ws://localhost:24678";
+          const hmrPort = process.env.SKYBRIDGE_HMR_PORT ?? DEFAULT_HMR_PORT;
+          const VITE_HMR_WEBSOCKET_DEFAULT_URL = `ws://localhost:${hmrPort}`;
           connectDomains.push(VITE_HMR_WEBSOCKET_DEFAULT_URL);
         }
 

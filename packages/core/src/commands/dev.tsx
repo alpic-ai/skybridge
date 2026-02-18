@@ -1,5 +1,6 @@
 import { Command, Flags } from "@oclif/core";
 import { Box, render, Text } from "ink";
+import { detectAvailablePort } from "../cli/detect-port.js";
 import { Header } from "../cli/header.js";
 import { useNodemon } from "../cli/use-nodemon.js";
 import { useTypeScriptCheck } from "../cli/use-typescript-check.js";
@@ -11,7 +12,6 @@ export default class Dev extends Command {
     port: Flags.integer({
       char: "p",
       description: "Port to run the server on",
-      default: 3000,
     }),
     "use-forwarded-host": Flags.boolean({
       description:
@@ -22,7 +22,9 @@ export default class Dev extends Command {
   public async run(): Promise<void> {
     const { flags } = await this.parse(Dev);
 
-    const port = flags.port;
+    const DEFAULT_PORT = 3000;
+    const port = flags.port ?? (await detectAvailablePort(DEFAULT_PORT));
+    const portFallback = !flags.port && port !== DEFAULT_PORT;
 
     const env = {
       ...process.env,
@@ -39,6 +41,13 @@ export default class Dev extends Command {
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>
           <Header version={this.config.version} />
+          {portFallback && (
+            <Box marginBottom={1}>
+              <Text color="yellow">
+                Port {DEFAULT_PORT} is in use, falling back to port {port}
+              </Text>
+            </Box>
+          )}
           <Box>
             <Text color="green">→{"  "}</Text>
             <Text color="white" bold>
