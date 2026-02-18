@@ -14,12 +14,12 @@
     "@modelcontextprotocol/sdk": "^1.26.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "skybridge": ">=0.31.4 <1.0.0",
+    "skybridge": ">=0.32.0 <1.0.0",
     "vite": "^7.3.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@skybridge/devtools": ">=0.31.4 <1.0.0",
+    "@skybridge/devtools": ">=0.32.0 <1.0.0",
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
