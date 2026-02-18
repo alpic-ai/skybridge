@@ -1,9 +1,9 @@
 import "@/index.css";
 
 import { mountWidget, useOpenExternal } from "skybridge/web";
-import { Hero } from "../components/ui/hero";
+import { Hero } from "../components/ui/hero.js";
 import { Github } from "lucide-react";
-import { useToolInfo } from "../helpers";
+import { useToolInfo } from "../helpers.js";
 
 const DEFAULT_TITLE = "Skybridge";
 const DEFAULT_SUBTITLE = "Build ChatGPT & MCP Apps. The Modern TypeScript Way.";
@@ -14,7 +14,6 @@ function HelloWorld() {
 
   const title = input?.title || DEFAULT_TITLE;
   const subtitle = input?.subtitle || DEFAULT_SUBTITLE;
-
 
   // Looking for more components ? Browse https://ui.manifest.build to see all components made for agentic apps.
   return (

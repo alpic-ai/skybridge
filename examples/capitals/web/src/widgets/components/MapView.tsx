@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { MapRef } from "react-map-gl";
-import MapGL, { Marker, NavigationControl } from "react-map-gl";
+import { Map as MapboxMap, Marker, NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useLayout } from "skybridge/web";
 
@@ -44,7 +44,7 @@ export function MapView({
   const { theme } = useLayout();
 
   return (
-    <MapGL
+    <MapboxMap
       ref={mapRef}
       mapboxAccessToken={import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN}
       initialViewState={{
@@ -122,6 +122,6 @@ export function MapView({
           </Marker>
         );
       })}
-    </MapGL>
+    </MapboxMap>
   );
 }

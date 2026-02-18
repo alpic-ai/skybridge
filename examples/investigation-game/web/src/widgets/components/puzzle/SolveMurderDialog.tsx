@@ -2,10 +2,14 @@ import { useCallback, useState } from "react";
 import type { DragEvent, Dispatch, SetStateAction } from "react";
 import { useSendFollowUpMessage } from "skybridge/web";
 
-import type { BlankState, SentenceSegment, WordItem } from "../../../data/puzzle";
-import { puzzleSentences } from "../../../data/puzzle";
-import { BlankDropZone } from "./BlankDropZone";
-import { WordChip } from "./WordChip";
+import type {
+  BlankState,
+  SentenceSegment,
+  WordItem,
+} from "../../../data/puzzle.js";
+import { puzzleSentences } from "../../../data/puzzle.js";
+import { BlankDropZone } from "./BlankDropZone.js";
+import { WordChip } from "./WordChip.js";
 
 type SolveMurderDialogProps = {
   isOpen: boolean;
@@ -27,14 +31,23 @@ export function SolveMurderDialog({
   setBlanks,
 }: SolveMurderDialogProps) {
   const sendFollowUpMessage = useSendFollowUpMessage();
-  const [draggedWord, setDraggedWord] = useState<{ wordId: string; fromBlank?: string } | null>(null);
+  const [draggedWord, setDraggedWord] = useState<{
+    wordId: string;
+    fromBlank?: string;
+  } | null>(null);
   const [dragOverBlank, setDragOverBlank] = useState<string | null>(null);
-  const [feedbackMessage, setFeedbackMessage] = useState<{ text: string; type: "error" | "warning" } | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<{
+    text: string;
+    type: "error" | "warning";
+  } | null>(null);
 
   const getAllBlankIds = (): string[] => {
     return puzzleSentences.flatMap((sentence) =>
       sentence
-        .filter((seg): seg is Extract<SentenceSegment, { type: "blank" }> => seg.type === "blank")
+        .filter(
+          (seg): seg is Extract<SentenceSegment, { type: "blank" }> =>
+            seg.type === "blank",
+        )
         .map((seg) => seg.id),
     );
   };
@@ -62,12 +75,19 @@ export function SolveMurderDialog({
     return errorCount;
   }, [blanks]);
 
-  const handleDragStartFromBank = (e: DragEvent<HTMLDivElement>, wordId: string) => {
+  const handleDragStartFromBank = (
+    e: DragEvent<HTMLDivElement>,
+    wordId: string,
+  ) => {
     e.dataTransfer.effectAllowed = "move";
     setDraggedWord({ wordId });
   };
 
-  const handleDragStartFromBlank = (e: DragEvent<HTMLSpanElement>, wordId: string, fromBlankId: string) => {
+  const handleDragStartFromBlank = (
+    e: DragEvent<HTMLSpanElement>,
+    wordId: string,
+    fromBlankId: string,
+  ) => {
     e.dataTransfer.effectAllowed = "move";
     setDraggedWord({ wordId, fromBlank: fromBlankId });
   };
@@ -131,7 +151,9 @@ export function SolveMurderDialog({
   const handleSubmit = () => {
     const errors = countErrors();
     if (errors === 0) {
-      sendFollowUpMessage("User solved the murder! Congratulate him for his fine detective skills");
+      sendFollowUpMessage(
+        "User solved the murder! Congratulate him for his fine detective skills",
+      );
       setTimeout(() => {
         onVictory();
       }, 500);
@@ -142,7 +164,9 @@ export function SolveMurderDialog({
     }
   };
 
-  const allBlanksFilled = getAllBlankIds().every((id) => blanks[id] !== null && blanks[id] !== undefined);
+  const allBlanksFilled = getAllBlankIds().every(
+    (id) => blanks[id] !== null && blanks[id] !== undefined,
+  );
 
   if (!isOpen) return null;
 
@@ -156,12 +180,16 @@ export function SolveMurderDialog({
           >
             ×
           </button>
-          <h3 className="font-pixel text-xs sm:text-sm text-purple-200 tracking-wider">SOLVE THE MURDER</h3>
+          <h3 className="font-pixel text-xs sm:text-sm text-purple-200 tracking-wider">
+            SOLVE THE MURDER
+          </h3>
         </div>
 
         <div className="flex flex-1 overflow-hidden">
           <div className="w-1/3 p-3 sm:p-4 border-r border-purple-500/30 flex flex-col overflow-y-auto">
-            <p className="font-pixel text-[8px] sm:text-[10px] text-slate-400 mb-3 shrink-0">DRAG WORDS</p>
+            <p className="font-pixel text-[8px] sm:text-[10px] text-slate-400 mb-3 shrink-0">
+              DRAG WORDS
+            </p>
             <div className="flex flex-wrap gap-2 content-start">
               {wordBank.map((item) => (
                 <WordChip
@@ -177,10 +205,15 @@ export function SolveMurderDialog({
           </div>
 
           <div className="w-2/3 p-3 sm:p-4 overflow-y-auto">
-            <p className="font-pixel text-[8px] sm:text-[10px] text-slate-400 mb-3">COMPLETE THE STORY</p>
+            <p className="font-pixel text-[8px] sm:text-[10px] text-slate-400 mb-3">
+              COMPLETE THE STORY
+            </p>
             <div className="space-y-4">
               {puzzleSentences.map((sentence, sIdx) => (
-                <p key={sIdx} className="text-[11px] sm:text-sm text-slate-300 leading-relaxed">
+                <p
+                  key={sIdx}
+                  className="text-[11px] sm:text-sm text-slate-300 leading-relaxed"
+                >
                   {sentence.map((segment, segIdx) =>
                     segment.type === "text" ? (
                       <span key={segIdx}>{segment.content}</span>
@@ -209,7 +242,9 @@ export function SolveMurderDialog({
             {feedbackMessage && (
               <p
                 className={`font-pixel text-[10px] sm:text-xs ${
-                  feedbackMessage.type === "error" ? "text-red-400" : "text-yellow-400"
+                  feedbackMessage.type === "error"
+                    ? "text-red-400"
+                    : "text-yellow-400"
                 }`}
               >
                 {feedbackMessage.text}

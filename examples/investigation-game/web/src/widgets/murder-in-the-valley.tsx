@@ -1,20 +1,26 @@
 import "@/index.css";
 import { useCallback, useState } from "react";
 
-import { mountWidget, useDisplayMode, useSendFollowUpMessage } from "skybridge/web";
+import {
+  mountWidget,
+  useDisplayMode,
+  useSendFollowUpMessage,
+} from "skybridge/web";
 
-import { suspects } from "../data/suspects";
-import { ScreenTransition } from "./components/ScreenTransition";
-import { IntroScreen } from "./screens/IntroScreen";
-import { MainScreen } from "./screens/MainScreen";
-import { StartScreen } from "./screens/StartScreen";
-import { VictoryScreen } from "./screens/VictoryScreen";
+import { suspects } from "../data/suspects.js";
+import { ScreenTransition } from "./components/ScreenTransition.js";
+import { IntroScreen } from "./screens/IntroScreen.js";
+import { MainScreen } from "./screens/MainScreen.js";
+import { StartScreen } from "./screens/StartScreen.js";
+import { VictoryScreen } from "./screens/VictoryScreen.js";
 
 type GameState = "start" | "intro" | "main" | "victory";
 
 function MurderWidget() {
   const [gameState, setGameState] = useState<GameState>("start");
-  const [highlightedSuspect, setHighlightedSuspect] = useState<string | null>(null);
+  const [highlightedSuspect, setHighlightedSuspect] = useState<string | null>(
+    null,
+  );
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [, setDisplayMode] = useDisplayMode();
   const sendFollowUpMessage = useSendFollowUpMessage();
@@ -35,7 +41,9 @@ function MurderWidget() {
   if (gameState === "start") {
     return (
       <ScreenTransition screenKey="start">
-        <div className={`transition-all duration-400 ${isTransitioning ? "opacity-0 scale-98" : "opacity-100 scale-100"}`}>
+        <div
+          className={`transition-all duration-400 ${isTransitioning ? "opacity-0 scale-98" : "opacity-100 scale-100"}`}
+        >
           <StartScreen
             onStart={() => {
               transitionTo("intro");
@@ -50,7 +58,9 @@ function MurderWidget() {
   if (gameState === "intro") {
     return (
       <ScreenTransition screenKey="intro">
-        <div className={`transition-all duration-400 ${isTransitioning ? "opacity-0 scale-98" : "opacity-100 scale-100"}`}>
+        <div
+          className={`transition-all duration-400 ${isTransitioning ? "opacity-0 scale-98" : "opacity-100 scale-100"}`}
+        >
           <IntroScreen onContinue={() => transitionTo("main")} />
         </div>
       </ScreenTransition>

@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@skybridge/devtools": ">=0.31.4 <1.0.0",
+    "@types/node": "^25.2.3",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",

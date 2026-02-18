@@ -1,4 +1,4 @@
-import type { Day } from "../helpers";
+import type { Day } from "../helpers.js";
 
 const DAY_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
 

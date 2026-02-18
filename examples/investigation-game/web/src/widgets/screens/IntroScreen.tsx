@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
-import { DialogueBox } from "../components/DialogueBox";
-import { SparkEffect } from "../components/effects/SparkEffect";
-import { DeadRobotClaude } from "../components/svg/DeadRobotClaude";
-import { useTypewriter } from "../hooks/useTypewriter";
+import { DialogueBox } from "../components/DialogueBox.js";
+import { SparkEffect } from "../components/effects/SparkEffect.js";
+import { DeadRobotClaude } from "../components/svg/DeadRobotClaude.js";
+import { useTypewriter } from "../hooks/useTypewriter.js";
 
 const introDialogue = [
   "The Valley is a small, peaceful community located in the mountains, known for its beautiful scenery and its passion for AI.",

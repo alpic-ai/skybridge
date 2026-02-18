@@ -2,7 +2,7 @@
 
 import { Github } from "lucide-react";
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button.js";
 
 /**
  * Represents a logo in the hero section.
