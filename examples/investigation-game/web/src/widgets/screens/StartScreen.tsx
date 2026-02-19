@@ -1,12 +1,12 @@
 import { useOpenExternal } from "skybridge/web";
 
-import { alpicLogo } from "../../data/images";
-import { RainEffect } from "../components/effects/RainEffect";
-import { LightningBolt } from "../components/svg/LightningBolt";
-import { LightningBoltAlt } from "../components/svg/LightningBoltAlt";
-import { SilhouetteHunched } from "../components/svg/SilhouetteHunched";
-import { SilhouetteLeaning } from "../components/svg/SilhouetteLeaning";
-import { SilhouetteStanding } from "../components/svg/SilhouetteStanding";
+import { alpicLogo } from "../../data/images.js";
+import { RainEffect } from "../components/effects/RainEffect.js";
+import { LightningBolt } from "../components/svg/LightningBolt.js";
+import { LightningBoltAlt } from "../components/svg/LightningBoltAlt.js";
+import { SilhouetteHunched } from "../components/svg/SilhouetteHunched.js";
+import { SilhouetteLeaning } from "../components/svg/SilhouetteLeaning.js";
+import { SilhouetteStanding } from "../components/svg/SilhouetteStanding.js";
 
 type StartScreenProps = {
   onStart: () => void;

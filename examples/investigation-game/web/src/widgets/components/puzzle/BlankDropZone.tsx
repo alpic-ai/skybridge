@@ -1,5 +1,5 @@
 import type { DragEvent } from "react";
-import type { WordItem } from "../../../data/puzzle";
+import type { WordItem } from "../../../data/puzzle.js";
 
 type BlankDropZoneProps = {
   blankId: string;

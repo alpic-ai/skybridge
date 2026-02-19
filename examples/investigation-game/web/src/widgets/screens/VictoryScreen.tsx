@@ -1,7 +1,7 @@
 import { useOpenExternal } from "skybridge/web";
 
-import { elonImage } from "../../data/images";
-import { PrisonBars } from "../components/svg/PrisonBars";
+import { elonImage } from "../../data/images.js";
+import { PrisonBars } from "../components/svg/PrisonBars.js";
 
 export function VictoryScreen() {
   const openExternal = useOpenExternal();
@@ -11,7 +11,8 @@ export function VictoryScreen() {
       <div
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(34, 197, 94, 0.15) 0%, transparent 70%)",
+          background:
+            "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(34, 197, 94, 0.15) 0%, transparent 70%)",
         }}
       />
 
@@ -20,7 +21,9 @@ export function VictoryScreen() {
           <p className="text-[10px] sm:text-xs text-slate-300 leading-relaxed">
             If you want to build a cool App like this one, you should check out{" "}
             <button
-              onClick={() => openExternal("https://github.com/alpic-ai/skybridge")}
+              onClick={() =>
+                openExternal("https://github.com/alpic-ai/skybridge")
+              }
               className="text-amber-400 hover:text-amber-300 transition-colors cursor-pointer font-semibold"
             >
               Skybridge
@@ -33,13 +36,19 @@ export function VictoryScreen() {
         <h2 className="victory-title font-pixel text-sm sm:text-base lg:text-xl text-green-400 tracking-wider">
           CASE SOLVED!
         </h2>
-        <p className="mt-2 font-pixel text-[10px] sm:text-xs text-purple-300">The murderer has been caught</p>
+        <p className="mt-2 font-pixel text-[10px] sm:text-xs text-purple-300">
+          The murderer has been caught
+        </p>
       </div>
 
       <div className="flex items-center justify-center mt-4 sm:mt-6 lg:mt-8">
         <div className="relative">
           <div className="w-32 h-40 sm:w-40 sm:h-52 lg:w-48 lg:h-60 rounded-lg overflow-hidden border-4 border-slate-600">
-            <img src={elonImage} alt="Elon" className="w-full h-full object-cover grayscale-30" />
+            <img
+              src={elonImage}
+              alt="Elon"
+              className="w-full h-full object-cover grayscale-30"
+            />
           </div>
 
           <div className="absolute inset-0 flex items-center justify-center">
@@ -47,7 +56,9 @@ export function VictoryScreen() {
           </div>
 
           <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-black px-3 py-1 border border-slate-600">
-            <span className="font-pixel text-[8px] sm:text-[10px] text-red-400">GUILTY</span>
+            <span className="font-pixel text-[8px] sm:text-[10px] text-red-400">
+              GUILTY
+            </span>
           </div>
         </div>
       </div>
@@ -55,7 +66,8 @@ export function VictoryScreen() {
       <div className="absolute bottom-4 sm:bottom-6 left-4 right-4">
         <div className="dialogue-box px-3 py-2 sm:px-4 sm:py-3">
           <p className="font-pixel text-[8px] sm:text-[10px] text-amber-100 leading-relaxed text-center">
-            Elon killed Claude by accident when Sam's stolen code didn't work—Dario had changed it the day before.
+            Elon killed Claude by accident when Sam's stolen code didn't
+            work—Dario had changed it the day before.
           </p>
         </div>
       </div>

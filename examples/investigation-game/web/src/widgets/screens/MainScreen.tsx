@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-import type { Suspect } from "../../data/suspects";
-import { initialWordBank } from "../../data/puzzle";
-import type { BlankState, WordItem } from "../../data/puzzle";
-import { SuspectCard } from "../components/SuspectCard";
-import { SolveMurderDialog } from "../components/puzzle/SolveMurderDialog";
+import type { Suspect } from "../../data/suspects.js";
+import { initialWordBank } from "../../data/puzzle.js";
+import type { BlankState, WordItem } from "../../data/puzzle.js";
+import { SuspectCard } from "../components/SuspectCard.js";
+import { SolveMurderDialog } from "../components/puzzle/SolveMurderDialog.js";
 
 type MainScreenProps = {
   suspects: Suspect[];
@@ -13,7 +13,12 @@ type MainScreenProps = {
   onVictory: () => void;
 };
 
-export function MainScreen({ suspects, highlightedSuspect, onInterrogate, onVictory }: MainScreenProps) {
+export function MainScreen({
+  suspects,
+  highlightedSuspect,
+  onInterrogate,
+  onVictory,
+}: MainScreenProps) {
   const [showSolveDialog, setShowSolveDialog] = useState(false);
   const [wordBank, setWordBank] = useState<WordItem[]>(initialWordBank);
   const [blanks, setBlanks] = useState<BlankState>({});
@@ -35,7 +40,9 @@ export function MainScreen({ suspects, highlightedSuspect, onInterrogate, onVict
         <h2 className="header-glow font-pixel text-sm sm:text-base lg:text-lg text-purple-200 tracking-wider">
           THE SUSPECTS
         </h2>
-        <p className="mt-1 text-[10px] sm:text-xs text-slate-400">Choose a suspect to interrogate</p>
+        <p className="mt-1 text-[10px] sm:text-xs text-slate-400">
+          Choose a suspect to interrogate
+        </p>
       </div>
 
       <div className="absolute bottom-3 sm:bottom-4 lg:bottom-5 left-0 right-0 flex justify-evenly items-start px-2 sm:px-4">

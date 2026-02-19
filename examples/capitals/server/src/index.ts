@@ -124,7 +124,9 @@ const router = Router();
 
 router.get("/api/capital/:cca2", async (req: Request, res: Response) => {
   try {
-    const { cca2 } = req.params;
+    const cca2 = Array.isArray(req.params.cca2)
+      ? req.params.cca2[0]
+      : req.params.cca2;
 
     // Validate that cca2 is a valid 2-letter country code format
     if (!cca2 || cca2.length !== 2 || !/^[A-Za-z]{2}$/.test(cca2)) {

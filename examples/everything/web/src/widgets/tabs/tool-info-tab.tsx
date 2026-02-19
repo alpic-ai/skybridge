@@ -1,4 +1,4 @@
-import { useToolInfo } from "../../helpers";
+import { useToolInfo } from "../../helpers.js";
 
 export function ToolInfoTab() {
   const { input, output, responseMetadata, isPending } =

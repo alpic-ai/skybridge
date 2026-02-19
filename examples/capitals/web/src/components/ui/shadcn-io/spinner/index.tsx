@@ -4,7 +4,7 @@ import {
   LoaderPinwheelIcon,
   type LucideProps,
 } from "lucide-react";
-import { cn } from "../../../../utils";
+import { cn } from "../../../../utils.js";
 
 type SpinnerVariantProps = Omit<SpinnerProps, "variant">;
 type SvgSpinnerVariantProps = Omit<
