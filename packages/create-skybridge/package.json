@@ -25,7 +25,7 @@
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@clack/prompts": "^1.0.0",
+    "@clack/prompts": "^1.0.1",
     "giget": "^3.1.2",
     "mri": "^1.2.0"
   },
