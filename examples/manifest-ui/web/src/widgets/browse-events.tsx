@@ -6,10 +6,10 @@ import {
   useDisplayMode,
   useSendFollowUpMessage,
 } from "skybridge/web";
-import { EventList } from "../components/ui/event-list";
-import { EventCard } from "../components/ui/event-card";
-import { useToolInfo } from "../helpers";
-import type { Event } from "../components/ui/types";
+import { EventCard } from "../components/ui/event-card.js";
+import { EventList } from "../components/ui/event-list.js";
+import type { Event } from "../components/ui/types.js";
+import { useToolInfo } from "../helpers.js";
 
 function BrowseEvents() {
   const sendFollowUpMessage = useSendFollowUpMessage();

@@ -13,7 +13,7 @@ import {
   TrendingUp,
   XCircle,
 } from "lucide-react";
-import type { Event, EventSignal } from "./types";
+import type { Event, EventSignal } from "./types.js";
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════

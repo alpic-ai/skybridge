@@ -1,8 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
 import {
   ChevronDown,
   ChevronLeft,
@@ -11,9 +8,12 @@ import {
   X,
 } from "lucide-react";
 import { Suspense, useCallback, useRef, useState } from "react";
-import type { Event } from "./types";
-import { EventCard } from "./event-card";
-import { LazyLeafletMap, MapPlaceholder } from "./shared";
+import { Button } from "@/components/ui/button.js";
+import { Checkbox } from "@/components/ui/checkbox.js";
+import { cn } from "@/lib/utils.js";
+import { EventCard } from "./event-card.js";
+import { LazyLeafletMap, MapPlaceholder } from "./shared.js";
+import type { Event } from "./types.js";
 
 // SVG pin marker - teardrop shape like Google Maps
 function createPinSvg(isSelected: boolean) {
