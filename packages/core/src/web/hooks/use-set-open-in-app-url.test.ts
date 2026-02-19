@@ -42,26 +42,14 @@ describe("useSetOpenInAppUrl", () => {
       );
     });
 
-    it("should throw an error when serverUrl is not set", () => {
-      vi.stubGlobal("skybridge", {
-        hostType: "apps-sdk",
-        serverUrl: undefined,
-      });
-      AppsSdkAdaptor.resetInstance();
-
+    it("should call setOpenInAppUrl when href origin differs from serverUrl origin", async () => {
       const { result } = renderHook(() => useSetOpenInAppUrl());
 
-      expect(() => result.current("https://example.com/path")).toThrow(
-        "The widgetDomain property has not been set on the widget resource meta object.",
-      );
-    });
+      const href = "https://different-domain.com/path";
+      await result.current(href);
 
-    it("should throw an error when href origin differs from serverUrl origin", () => {
-      const { result } = renderHook(() => useSetOpenInAppUrl());
-
-      expect(() => result.current("https://different-domain.com/path")).toThrow(
-        "Provided href is not compatible with widget domain: origin differs",
-      );
+      expect(setOpenInAppUrlMock).toHaveBeenCalledTimes(1);
+      expect(setOpenInAppUrlMock).toHaveBeenCalledWith({ href });
     });
   });
 });

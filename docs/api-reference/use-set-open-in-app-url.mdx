@@ -48,16 +48,15 @@ An async function that sets the URL to be opened when the user clicks the "open 
 
 - `href: string`
   - **Required**
-  - The URL to set. Must be a valid URL with the same origin as the widget's server URL.
-  - The URL will be opened in the host application when the user clicks the "open in app" button.
+  - The URL to set.
+  - If the origin matches the widget's server URL, ChatGPT navigates to the full `href`.
+  - If the origin differs from the widget's server URL, ChatGPT ignores the `href` and falls back to the widget's server URL.
 
 ### Errors
 
 The function may throw errors in the following cases:
 
 - If `href` is empty or only whitespace: `"The href parameter is required."`
-- If the widget domain is not set: `"The widgetDomain property has not been set on the widget resource meta object."`
-- If the `href` origin differs from the widget's server URL origin: `"Provided href is not compatible with widget domain: origin differs"`
 
 ## Examples
 

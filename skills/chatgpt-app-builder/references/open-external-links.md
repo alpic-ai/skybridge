@@ -5,7 +5,7 @@
 
 ## "Open in App" button
 
-Top right corner in fullscreen mode. Must have same origin as widget server (default). Set programmatically.
+Top right corner in fullscreen mode. Set programmatically. If the origin matches the widget server URL, ChatGPT navigates to the full href (any path). If the origin differs, ChatGPT falls back to the widget server URL.
 
 **Example**:
 ```tsx
