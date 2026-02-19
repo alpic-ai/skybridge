@@ -69,6 +69,20 @@ body {
   font-size: 0.875rem;
 }
 
+.link-button {
+  background: none;
+  border: none;
+  color: #0066cc;
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.link-button:hover {
+  color: #004499;
+}
+
 .error {
   font-size: 0.875rem;
   color: #c00;
