@@ -107,22 +107,6 @@ export class AppsSdkAdaptor implements Adaptor {
       throw new Error("The href parameter is required.");
     }
 
-    const serverUrl = window.skybridge.serverUrl;
-    if (!serverUrl) {
-      throw new Error(
-        "The widgetDomain property has not been set on the widget resource meta object.",
-      );
-    }
-
-    const domainUrl = new URL(serverUrl);
-    const hrefUrl = new URL(href, serverUrl);
-
-    if (domainUrl.origin !== hrefUrl.origin) {
-      throw new Error(
-        "Provided href is not compatible with widget domain: origin differs",
-      );
-    }
-
     return window.openai.setOpenInAppUrl({ href });
   }
 }
