@@ -2,7 +2,9 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import cors from "cors";
 import express, { type Router } from "express";
+import { detectAvailablePort } from "../cli/detect-port.js";
 import { assetBaseUrlTransformPlugin } from "./asset-base-url-transform-plugin.js";
+import { DEFAULT_HMR_PORT } from "./const.js";
 
 /**
  * Install Vite dev server
@@ -45,6 +47,9 @@ export const widgetsDevServer = async (): Promise<Router> => {
     ...devConfig
   } = configResult?.config || {};
 
+  const hmrPort = await detectAvailablePort(DEFAULT_HMR_PORT, "localhost");
+  process.env.__SKYBRIDGE_HMR_PORT = String(hmrPort);
+
   const vite = await createServer({
     ...devConfig,
     configFile: false, // Keep this to prevent vite from trying to resolve path in the target config file
@@ -55,7 +60,7 @@ export const widgetsDevServer = async (): Promise<Router> => {
       hmr: {
         protocol: "ws",
         host: "localhost",
-        port: 24678,
+        port: hmrPort,
       },
     },
     root: webAppRoot,
@@ -64,7 +69,9 @@ export const widgetsDevServer = async (): Promise<Router> => {
     },
     plugins: [
       ...userPlugins,
-      assetBaseUrlTransformPlugin({ devServerOrigin: "http://localhost:3000" }),
+      assetBaseUrlTransformPlugin({
+        devServerOrigin: `http://localhost:${process.env.__PORT ?? "3000"}`,
+      }),
     ],
   });
 

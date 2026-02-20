@@ -1,5 +1,6 @@
 import { Command, Flags } from "@oclif/core";
 import { Box, render, Text } from "ink";
+import { resolvePort } from "../cli/detect-port.js";
 import { Header } from "../cli/header.js";
 import { useNodemon } from "../cli/use-nodemon.js";
 import { useTypeScriptCheck } from "../cli/use-typescript-check.js";
@@ -8,6 +9,11 @@ export default class Dev extends Command {
   static override description = "Start development server";
   static override examples = ["skybridge"];
   static override flags = {
+    port: Flags.integer({
+      char: "p",
+      description: "Port to run the server on",
+      min: 1,
+    }),
     "use-forwarded-host": Flags.boolean({
       description:
         "Uses the forwarded host header to construct widget URLs instead of localhost, useful when accessing the dev server through a tunnel (e.g., ngrok)",
@@ -17,8 +23,14 @@ export default class Dev extends Command {
   public async run(): Promise<void> {
     const { flags } = await this.parse(Dev);
 
+    const { port, fallback, envWarning } = await resolvePort(flags.port);
+    if (envWarning) {
+      this.warn(envWarning);
+    }
+
     const env = {
       ...process.env,
+      __PORT: String(port),
       ...(flags["use-forwarded-host"]
         ? { SKYBRIDGE_USE_FORWARDED_HOST: "true" }
         : {}),
@@ -31,18 +43,25 @@ export default class Dev extends Command {
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>
           <Header version={this.config.version} />
+          {fallback && (
+            <Box marginBottom={1}>
+              <Text color="yellow">
+                Port 3000 is in use, falling back to port {port}
+              </Text>
+            </Box>
+          )}
           <Box>
             <Text color="green">→{"  "}</Text>
             <Text color="white" bold>
               Open DevTools to test your app locally:{" "}
             </Text>
-            <Text color="green">http://localhost:3000/</Text>
+            <Text color="green">{`http://localhost:${port}/`}</Text>
           </Box>
           <Box marginBottom={1}>
             <Text color="#20a832">→{"  "}</Text>
             <Text>MCP server running at:{"  "}</Text>
             <Text color="white" bold>
-              http://localhost:3000/mcp
+              {`http://localhost:${port}/mcp`}
             </Text>
           </Box>
           <Text color="white" underline>
@@ -52,7 +71,7 @@ export default class Dev extends Command {
             <Text color="#20a832">→{"  "}</Text>
             <Text color="grey">Make your local server accessible with </Text>
             <Text color="white" bold>
-              ngrok http 3000
+              {`ngrok http ${port}`}
             </Text>
           </Box>
           <Box marginBottom={1}>
