@@ -4,6 +4,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a p
 
 ## What This Example Showcases
 
+- **Transport-Level Auth**: Auth is enforced at the `/mcp` transport level via the MCP SDK's `requireBearerAuth` middleware — unauthenticated requests receive HTTP 401 before reaching any tool handler
 - **OAuth Authentication**: Full OAuth2 setup with WorkOS AuthKit for user sign-in
 - **JWT Verification**: Server-side token validation using JWKS for secure identity extraction
 - **Personalized Results**: Authenticated users see favorites highlighted and sorted first
@@ -72,7 +73,7 @@ This command starts:
 ├── server/
 │   └── src/
 │       ├── index.ts        # Server entry: McpServer + OAuth + widget + run()
-│       ├── auth.ts          # JWT verification & WorkOS user lookup
+│       ├── auth.ts          # verifyAccessToken for requireBearerAuth
 │       ├── env.ts           # Env validation
 │       └── coffee-data.ts   # Mock coffee shop data & search
 ├── web/
