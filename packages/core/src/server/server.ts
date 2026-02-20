@@ -122,12 +122,15 @@ type WidgetResourceConfig<T extends ResourceMeta = ResourceMeta> = {
   uri: string;
   mimeType: string;
   /** Function to build _meta for this resource content given computed defaults */
-  buildContentMeta: (defaults: {
-    resourceDomains: string[];
-    connectDomains: string[];
-    domain: string;
-    baseUriDomains: string[];
-  }) => T;
+  buildContentMeta: (
+    defaults: {
+      resourceDomains: string[];
+      connectDomains: string[];
+      domain: string;
+      baseUriDomains: string[];
+    },
+    overrides: { domain?: string },
+  ) => T;
 };
 
 type McpServerOriginalResourceConfig = Omit<
@@ -296,7 +299,10 @@ export class McpServer<
         hostType: "apps-sdk",
         uri: `ui://widgets/apps-sdk/${name}.html`,
         mimeType: "text/html+skybridge",
-        buildContentMeta: ({ resourceDomains, connectDomains, domain }) => {
+        buildContentMeta: (
+          { resourceDomains, connectDomains, domain },
+          overrides,
+        ) => {
           const userUi = userMeta?.ui;
           const userCsp = userUi?.csp;
 
@@ -334,8 +340,8 @@ export class McpServer<
           );
 
           return mergeWithUnion(
-            mergeWithUnion(defaults, fromUi),
-            directOpenaiKeys,
+            mergeWithUnion(mergeWithUnion(defaults, fromUi), directOpenaiKeys),
+            { "openai/widgetDomain": overrides.domain },
           );
         },
       };
@@ -352,7 +358,10 @@ export class McpServer<
         hostType: "mcp-app",
         uri: `ui://widgets/ext-apps/${name}.html`,
         mimeType: "text/html;profile=mcp-app",
-        buildContentMeta: ({ resourceDomains, connectDomains, domain }) => {
+        buildContentMeta: (
+          { resourceDomains, connectDomains, domain },
+          overrides,
+        ) => {
           const defaults: McpAppsResourceMeta = {
             ui: {
               csp: {
@@ -363,7 +372,9 @@ export class McpServer<
             },
           };
 
-          return mergeWithUnion(defaults, { ui: userMeta?.ui });
+          return mergeWithUnion(defaults, {
+            ui: { ...userMeta?.ui, ...overrides },
+          });
         },
       };
       this.registerWidgetResource({
@@ -486,21 +497,28 @@ export class McpServer<
           connectDomains.push(VITE_HMR_WEBSOCKET_DEFAULT_URL);
         }
 
-        const contentMeta = buildContentMeta({
-          resourceDomains: [serverUrl],
-          connectDomains,
-          domain: isClaude
-            ? `${crypto
+        const contentMetaOverrides = isClaude
+          ? {
+              domain: `${crypto
                 .createHash("sha256")
                 .update(
                   extra.requestInfo?.url?.href ||
                     `https://${hostFromHeaders}/mcp`,
                 )
                 .digest("hex")
-                .slice(0, 32)}.claudemcpcontent.com`
-            : serverUrl,
-          baseUriDomains: [serverUrl],
-        });
+                .slice(0, 32)}.claudemcpcontent.com`,
+            }
+          : {};
+
+        const contentMeta = buildContentMeta(
+          {
+            resourceDomains: [serverUrl],
+            connectDomains,
+            domain: serverUrl,
+            baseUriDomains: [serverUrl],
+          },
+          contentMetaOverrides,
+        );
 
         return {
           contents: [
