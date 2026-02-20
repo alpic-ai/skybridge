@@ -82,22 +82,22 @@ Claude uses the MCP Apps runtime and requires a public URL to connect to your ap
 
 #### 1. Expose your server
 
-Claude needs a public URL to access your AI App. Use [ngrok](https://ngrok.com/) to expose your local server:
+Claude needs a public URL to access your AI App. Use [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-local-tunnel/) to expose your local server:
 
 ```bash
-ngrok http 3000
+cloudflared tunnel --url http://localhost:3000
 ```
 
-Copy the forwarding URL (e.g., `https://abc123.ngrok-free.app`).
+Copy the generated URL (e.g., `https://abc123.trycloudflare.com`).
 
 #### 2. Connect to Claude
 
 1. In Claude, go to **Settings → Connectors → Add Custom Connector** and configure your MCP server connection
-2. Enter your App name and ngrok URL with `/mcp` at the end:
+2. Enter your App name and cloudflared URL with `/mcp` at the end:
    ```
-   https://abc123.ngrok-free.app/mcp
+   https://abc123.trycloudflare.com/mcp
    ```
-3. Click on **Add** 
+3. Click on **Add**
 
 #### 3. Test your app
 
