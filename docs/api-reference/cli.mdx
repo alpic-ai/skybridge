@@ -39,6 +39,8 @@ PORT=8080 skybridge dev
 
 The flag takes precedence over the environment variable.
 
+<Note>The `-p, --port` flag and `PORT` environment variable are available since **v0.33.0**. If you're on an older version, upgrade your `skybridge` dependency first.</Note>
+
 The `--use-forwarded-host`  allows your widgets to work on any device connected to the internet, not just on your local machine. Useful when developing on multiple devices or when you need to test your app from different devices.
 
 **Important limitation:** Hot Module Reloading (HMR) is not available when using `--use-forwarded-host` because HMR uses a different port than the dev server and requires the WebSocket Secure (WSS) protocol, which most tunnel solutions don't support. To see your changes during development, simply reopen the conversation in ChatGPT to refresh the widget.
