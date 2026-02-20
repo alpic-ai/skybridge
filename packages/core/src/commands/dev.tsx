@@ -50,7 +50,7 @@ export default class Dev extends Command {
               </Text>
             </Box>
           )}
-          <Box>
+          <Box marginBottom={1}>
             <Text color="green">→{"  "}</Text>
             <Text color="white" bold>
               Open DevTools to test your app locally:{" "}
@@ -64,31 +64,14 @@ export default class Dev extends Command {
               {`http://localhost:${port}/mcp`}
             </Text>
           </Box>
-          <Text color="white" underline>
-            To test on ChatGPT:
-          </Text>
           <Box>
-            <Text color="#20a832">→{"  "}</Text>
-            <Text color="grey">Make your local server accessible with </Text>
-            <Text color="white" bold>
-              {`ngrok http ${port}`}
-            </Text>
-          </Box>
-          <Box marginBottom={1}>
             <Text>
               <Text color="#20a832">→{"  "}</Text>
-              <Text color="grey">Connect to ChatGPT with URL </Text>
-              <Text color="white" bold>
-                https://xxxxxx.ngrok-free.app/mcp
+              <Text color="grey">
+                Test on ChatGPT, Claude, or any MCP client:{" "}
               </Text>
-            </Text>
-          </Box>
-          <Box>
-            <Text>
-              <Text color="#20a832">→{"  "}</Text>
-              <Text>Documentation: </Text>
               <Text color="white" bold>
-                https://docs.skybridge.tech/
+                https://docs.skybridge.tech/quickstart/test-your-app
               </Text>
             </Text>
           </Box>
