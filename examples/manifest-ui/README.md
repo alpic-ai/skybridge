@@ -1,48 +1,27 @@
-<p align="center">
-  <a href="https://manifest.build/#gh-light-mode-only">
-    <img alt="manifest" src="https://manifest.build/assets/images/logo-transparent.svg" height="55px" alt="Manifest logo" title="Manifest - 1-file backend to ship fast
-" />
-  </a>
-  <a href="https://manifest.build/#gh-dark-mode-only">
-    <img alt="manifest" src="https://manifest.build/assets/images/logo-light.svg" height="55px" alt="Manifest logo" title="Manifest - 1-file backend to ship fast
-" />
-  </a>
-</p>
+# Manifest UI Starter
 
-# Skybridge + Manifest UI Starter
+An example MCP app built with [Skybridge](https://docs.skybridge.tech/home) and [Manifest UI](https://ui.manifest.build): an event ticket browsing app that displays upcoming events using agentic UI components.
 
 ## What This Example Showcases
 
-Kick start development with full-stack capabilities using Skybridge and [Manifest UI](https://ui.manifest.build) agentic component library for the frontend UI components.
-
-### Skybridge features
-
-- **Interactive Widget Rendering**: A React-based widget that displays an interactive product carousel directly in AI conversations
+- **Interactive Widget Rendering**: A React-based widget that displays a carousel of event cards directly in AI conversations
+- **Agentic UI Components**: Uses the [Manifest UI](https://ui.manifest.build) `EventList` and `EventCard` components from the official [shadcn/ui registry](https://ui.shadcn.com/docs/directory?q=manifest)
+- **1-Command Install**: Install new components with simple CLI commands like `npx shadcn@latest add @manifest/event-list`
+- **Picture-in-Picture Detail View**: Clicking an event switches to PiP mode with a full event card via `useDisplayMode()` hook
+- **Follow-Up Messages**: Sends event details back to the AI for personalized recommendations via `useSendFollowUpMessage()` hook
 - **Tool Info Access**: Widgets access tool input, output, and metadata via `useToolInfo()` hook
-- **Theme Support**: Adapts to light/dark mode using the `useLayout()` hook
-- **Localization**: Translates UI based on user locale via `useUser()` hook
-- **Persistent State**: Maintains cart state across re-renders using `useWidgetState()` hook
-- **Modal Dialogs**: Opens checkout modal via `useRequestModal()` hook
-- **External Links**: Opens external URL for checkout completion via `useOpenExternal()` hook
-- **External API Integration**: Demonstrates fetching data from REST APIs
 - **Hot Module Replacement**: Live reloading of widget components during development
 
-### Manifest UI features
-
-- **Agentic UI components**: Choose from a wide selection of blocks and components made for agentic usage
-- **Shadcn/ui and Tailwind**: Official [shadcn/ui registry](https://ui.shadcn.com/docs/directory?q=manifest) with full compatibility with the 2 most popular UI/CSS libs
-- **1-Command install**: With simple CLI commands like `npx shadcn@latest add @manifest/post-card`
-- **100% Customizable**: Style once, apply everywhere 
-
 ## Live Demo
-Try it for yourself: `https://manifest-ui.skybridge.tech/mcp`
+
+[Try it in Alpic's Playground](https://manifest-ui.skybridge.tech/try) to launch the live widget experience, or use the MCP URL with your client of choice: `https://manifest-ui.skybridge.tech/mcp`.
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 22+
-- HTTP tunnel such as [ngrok](https://ngrok.com/download)
+- HTTP tunnel such as [ngrok](https://ngrok.com/download) if you want to test with remote MCP hosts like ChatGPT or Claude.ai.
 
 ### Local Development
 
@@ -72,67 +51,97 @@ pnpm dev
 bun dev
 ```
 
-This command starts an Express server on port 3000. This server packages:
+This command starts:
 
-- an MCP endpoint on `/mcp` (the app backend)
-- a React application on Vite HMR dev server (the UI elements to be displayed in the host)
+- Your MCP server at `http://localhost:3000/mcp`.
+- Skybridge DevTools UI at `http://localhost:3000/`.
 
-#### 3. Connect to ChatGPT
+#### 3. Project structure
 
-- ChatGPT requires connectors to be publicly accessible. To expose your server on the Internet, run:
-```bash
-ngrok http 3000
 ```
-- In ChatGPT, navigate to **Settings → Connectors → Create** and add the forwarding URL provided by ngrok suffixed with `/mcp` (e.g. `https://3785c5ddc4b6.ngrok-free.app/mcp`)
+├── server/
+│   └── src/
+│       └── index.ts          # Entry point, widget registry & static event data
+├── web/
+│   ├── src/
+│   │   ├── components/
+│   │   │   └── ui/
+│   │   │       ├── event-list.tsx  # Manifest UI EventList component
+│   │   │       ├── event-card.tsx  # Manifest UI EventCard component
+│   │   │       ├── button.tsx      # shadcn/ui Button component
+│   │   │       └── types.ts       # Shared types (Event, etc.)
+│   │   ├── lib/
+│   │   │   └── utils.ts      # Utility functions
+│   │   ├── widgets/
+│   │   │   └── browse-events.tsx  # Event browsing widget
+│   │   ├── helpers.ts         # Typed Skybridge helpers
+│   │   └── index.css          # Global styles
+│   ├── components.json        # shadcn/ui config with Manifest UI registry
+│   └── vite.config.ts
+├── alpic.json                 # Deployment config
+└── package.json
+```
 
 ### Create your first widget
 
 #### 1. Add a new widget
 
-- Register a widget in `server/server.ts` with a unique name (e.g., `my-widget`)
-- Create a matching React component at `web/src/widgets/my-widget.tsx`. The file name must match the widget name exactly
+- Register a widget in `server/src/index.ts` with a unique name (e.g., `my-widget`) using [`registerWidget`](https://docs.skybridge.tech/api-reference/register-widget)
+- Create a matching React component at `web/src/widgets/my-widget.tsx`. **The file name must match the widget name exactly**.
 
 #### 2. Edit widgets with Hot Module Replacement (HMR)
 
-Edit and save components in `web/src/widgets/` — changes appear instantly in the host
+Edit and save components in `web/src/widgets/` — changes will appear instantly inside your App.
 
-#### 3. Install new components (Manifest UI)
+#### 3. Install new Manifest UI components
 
-Choose your component from [Manifest UI website](https://ui.manifest.build) and copy the CLI Command and run it in the `/web` folder:
+Choose your component from [Manifest UI website](https://ui.manifest.build) and run the CLI command in the `/web` folder:
 
 ```bash
 cd web
 
-# Install the post-card component with npx
-npx shadcn@latest add @manifest/post-card
+# Install a component with npx
+npx shadcn@latest add @manifest/event-list
 ```
 
 And use it in your widget:
 
 ```tsx
- return (
-    <Hero
-      data={{
-        title: "Hello world!",
-        subtitle: "Let's build some apps", 
-      }}
-      actions={{
-        onPrimaryClick: () => openExternal("https://docs.skybridge.tech"),
-      }}
-    />
+import { EventList } from "../components/ui/event-list";
+
+return (
+  <EventList
+    data={{ events, title: "Upcoming Events" }}
+    appearance={{ variant: "carousel" }}
+    actions={{ onEventSelect: (event) => console.log(event.title) }}
+  />
+);
 ```
 
-#### 3. Edit server code
+#### 4. Edit server code
 
-Modify files in `server/` and reload your ChatGPT connector in **Settings → Connectors → [Your connector] → Reload**
+Modify files in `server/` and refresh the connection with your testing MCP Client to see the changes.
+
+### Testing your App
+
+You can test your App locally by using our DevTools UI on `http://localhost:3000` while running the dev command.
+
+To test your app with other MCP Clients like ChatGPT, Claude or VSCode, see [Testing Your App](https://docs.skybridge.tech/quickstart/test-your-app).
 
 ## Deploy to Production
 
-- Use [Alpic](https://alpic.ai/) to deploy your OpenAI App to production
-- In ChatGPT, navigate to **Settings → Connectors → Create** and add your MCP server URL (e.g., `https://your-app-name.alpic.live`)
+Skybridge is infrastructure vendor agnostic, and your app can be deployed on any cloud platform supporting MCP.
+
+The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
+
+1. Create an account on [Alpic platform](https://app.alpic.ai/).
+2. Connect your GitHub repository to automatically deploy at each commit.
+3. Use your remote App URL to connect it to MCP Clients, or use the Alpic Playground to easily test your App.
 
 ## Resources
 
+- [Skybridge Documentation](https://docs.skybridge.tech/)
+- [Manifest UI Documentation](https://ui.manifest.build)
 - [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)
