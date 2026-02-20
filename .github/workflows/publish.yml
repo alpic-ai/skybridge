@@ -96,4 +96,5 @@ jobs:
           title: "chore: bump skybridge versions to ${{ steps.version.outputs.version }}"
           body: "Automated version bump of skybridge dependencies in templates and examples."
           branch: chore/bump-versions
+          base: main
           delete-branch: true
