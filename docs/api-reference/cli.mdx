@@ -28,7 +28,16 @@ skybridge dev
 
 | Flag | Description |
 |------|-------------|
+| `-p, --port <number>` | Port to run the server on. Defaults to `3000`, or the next available port if `3000` is in use. |
 | `--use-forwarded-host` | Uses the forwarded host header to construct widget URLs instead of localhost. Useful when accessing the dev server through a tunnel (e.g., ngrok). |
+
+You can also set the port via the `PORT` environment variable:
+
+```bash
+PORT=8080 skybridge dev
+```
+
+The flag takes precedence over the environment variable.
 
 The `--use-forwarded-host`  allows your widgets to work on any device connected to the internet, not just on your local machine. Useful when developing on multiple devices or when you need to test your app from different devices.
 
