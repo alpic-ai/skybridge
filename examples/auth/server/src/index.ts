@@ -1,7 +1,9 @@
+import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
 import { mcpAuthMetadataRouter } from "@modelcontextprotocol/sdk/server/auth/router.js";
+import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import { McpServer } from "skybridge/server";
 import * as z from "zod";
-import { tryGetAuth } from "./auth.js";
+import { verifyAccessToken } from "./auth.js";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
 
@@ -9,14 +11,15 @@ import { env } from "./env.js";
  * Auth Example - Full OAuth Authentication with WorkOS AuthKit
  *
  * This example demonstrates a fully authenticated MCP server where users
- * must sign in via OAuth before using any tools. All tools have access
- * to the authenticated user's identity.
+ * must sign in via OAuth before using any tools. Auth is enforced at the
+ * transport level — unauthenticated requests to /mcp receive HTTP 401.
  *
  * Auth flow:
- * 1. ChatGPT discovers OAuth metadata via /.well-known/oauth-authorization-server
+ * 1. MCP client discovers OAuth metadata via /.well-known/oauth-authorization-server
  * 2. User is prompted to sign in via WorkOS AuthKit
- * 3. All subsequent tool calls include a Bearer JWT token
- * 4. The server verifies the token and extracts user identity
+ * 3. MCP client connects to /mcp with a Bearer JWT token
+ * 4. requireBearerAuth verifies the token via verifyAccessToken
+ * 5. Tool handlers read user identity via extra.authInfo
  */
 
 const server = new McpServer(
@@ -26,7 +29,7 @@ const server = new McpServer(
   },
   { capabilities: {} },
 )
-  // Mount OAuth metadata so ChatGPT can discover auth endpoints
+  // Mount OAuth metadata so MCP clients can discover auth endpoints
   .use(
     mcpAuthMetadataRouter({
       oauthMetadata: {
@@ -44,6 +47,7 @@ const server = new McpServer(
       resourceServerUrl: new URL(env.SERVER_URL),
     }),
   )
+  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
   .registerWidget(
     "search-coffee-paris",
     {
@@ -83,34 +87,19 @@ const server = new McpServer(
         "openai/widgetAccessible": true,
       },
     },
-    async ({ query, minRating }, extra) => {
-      const auth = await tryGetAuth(extra);
+    ({ query, minRating }, extra) => {
+      const auth = extra.authInfo as AuthInfo;
 
-      if (!auth) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: "Authentication required. Please sign in to search coffee shops.",
-            },
-          ],
-          isError: true,
-          _meta: {
-            "mcp/www_authenticate": [
-              `Bearer resource_metadata="${env.SERVER_URL}/.well-known/oauth-protected-resource"`,
-            ],
-          },
-        };
-      }
+      const email = auth.extra?.email as string;
+      const firstName = auth.extra?.firstName as string | null;
 
       const results = searchCoffeeShops({
         query,
         minRating,
-        userId: auth.userId,
+        userId: auth.clientId,
       });
 
-      const displayName =
-        auth.firstName ?? auth.email.split("@")[0];
+      const displayName = firstName ?? email.split("@")[0];
 
       return {
         structuredContent: {
