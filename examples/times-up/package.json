@@ -1,0 +1,37 @@
+{
+  "name": "times-up",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Time's Up - a word-guessing party game powered by Skybridge",
+  "type": "module",
+  "scripts": {
+    "dev": "skybridge dev",
+    "build": "skybridge build",
+    "start": "skybridge start",
+    "deploy": "alpic deploy"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "@openai/apps-sdk-ui": "^0.2.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-intl": "^8.1.3",
+    "skybridge": ">=0.32.0 <1.0.0",
+    "tailwindcss": "^4.1.8",
+    "vite": "^7.3.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@skybridge/devtools": ">=0.32.0 <1.0.0",
+    "@tailwindcss/vite": "^4.1.8",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.4",
+    "alpic": "^1.90.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=24.13.1"
+  }
+}
