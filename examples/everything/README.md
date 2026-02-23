@@ -30,7 +30,6 @@ This example demonstrates every major Skybridge capability in a single widget wi
 ### Prerequisites
 
 - Node.js 24+
-- HTTP tunnel such as [ngrok](https://ngrok.com/download) if you want to test with remote MCP hosts like ChatGPT or Claude.ai.
 
 ### Local Development
 
