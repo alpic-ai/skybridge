@@ -151,12 +151,12 @@
         "tab": "Showcase",
         "pages": [
           "showcase",
-          "showcase/auth",
           "showcase/capitals",
           "showcase/ecommerce-carousel",
           "showcase/everything",
           "showcase/investigation-game",
-          "showcase/productivity"
+          "showcase/productivity",
+          "showcase/auth"
         ]
       }
     ]
