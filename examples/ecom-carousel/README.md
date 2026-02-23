@@ -24,8 +24,7 @@ This example serves as a comprehensive reference for building sophisticated, int
 
 ### Prerequisites
 
-- Node.js 22+
-- HTTP tunnel such as [ngrok](https://ngrok.com/download) if you want to test with remote MCP hosts like ChatGPT or Claude.ai.
+- Node.js 24+
 
 ### Local Development
 

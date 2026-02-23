@@ -24,8 +24,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): an 
 
 ### Prerequisites
 
-- Node.js 22+
-- HTTP tunnel such as [ngrok](https://ngrok.com/download) if you want to test with remote MCP hosts like ChatGPT or Claude.ai.
+- Node.js 24+
 - **Mapbox API key** (see step 2 below)
 
 ### Local Development
