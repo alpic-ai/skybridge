@@ -1,0 +1,40 @@
+---
+title: Time's Up
+description: Word-guessing party game for MCP Apps
+---
+
+A word-guessing party game where the user sees a secret word and gives hints to the AI, which tries to guess it. Features hidden metadata, PiP display mode, multilingual support, and widget-to-tool communication.
+
+<img
+  src="/images/showcase-times-up.png"
+  alt="Time's Up showcase"
+  style={{ width: "100%", maxWidth: "960px", borderRadius: "12px" }}
+/>
+
+## Links
+
+<CardGroup cols={2}>
+  <Card
+    title="Try the demo"
+    icon="play"
+    href="https://times-up.skybridge.tech/try"
+  >
+    Launch the live widget experience.
+  </Card>
+  <Card
+    title="View source on GitHub"
+    icon="github"
+    href="https://github.com/alpic-ai/skybridge/tree/main/examples/times-up"
+  >
+    Browse the full example code.
+  </Card>
+</CardGroup>
+
+## Skybridge APIs used
+
+- [`registerWidget`](/api-reference/register-widget) — with `_meta` for hidden card data and `resourceDomains` CSP config
+- [`useToolInfo`](/api-reference/use-tool-info) — access the drawn card's metadata (word + illustration)
+- [`useCallTool`](/api-reference/use-call-tool) — draw new cards from within the widget
+- [`useDisplayMode`](/api-reference/use-display-mode) — switch to PiP when the game starts
+- [`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message) — notify the AI of newly drawn cards
+- [`useUser`](/api-reference/use-user) — adapt the displayed word to the user's locale
