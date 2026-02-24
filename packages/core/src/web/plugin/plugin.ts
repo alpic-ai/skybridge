@@ -1,5 +1,10 @@
 import type { Plugin } from "vite";
 import { transform as dataLlmTransform } from "./transform-data-llm.js";
+import { validateWidget } from "./validate-widget.js";
+
+// Matches widget entry files (e.g. src/widgets/foo.tsx, src/widgets/foo/index.tsx) with optional Vite query strings
+const WIDGET_ENTRY_RE =
+  /\/src\/widgets\/(?:[^/]+\.(?:jsx|tsx)|[^/]+\/index\.tsx)(?:\?.*)?$/;
 
 export function skybridge(): Plugin {
   return {
@@ -48,6 +53,12 @@ export function skybridge(): Plugin {
     },
     enforce: "pre",
     async transform(code, id) {
+      if (WIDGET_ENTRY_RE.test(id)) {
+        for (const warning of validateWidget(code, id)) {
+          this.warn(warning.message);
+        }
+      }
+
       return await dataLlmTransform(code, id);
     },
   };
