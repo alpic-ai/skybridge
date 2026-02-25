@@ -27,8 +27,17 @@ export function ClaudeTerminal() {
   const termRef = useRef<Terminal | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
 
-  const { status, pid, error, connect, disconnect, sendInput, sendResize, sendRestart, setOnData } =
-    useClaudeWs();
+  const {
+    status,
+    pid,
+    error,
+    connect,
+    disconnect,
+    sendInput,
+    sendResize,
+    sendRestart,
+    setOnData,
+  } = useClaudeWs();
 
   // Initialize xterm once on mount
   useEffect(() => {
@@ -59,7 +68,6 @@ export function ClaudeTerminal() {
       },
       fontFamily: '"JetBrains Mono Variable", "JetBrains Mono", monospace',
       fontSize: 13,
-      lineHeight: 1.4,
       cursorBlink: true,
       allowTransparency: false,
       scrollback: 5000,
@@ -116,7 +124,9 @@ export function ClaudeTerminal() {
 
         <div className="flex items-center gap-3">
           {error && (
-            <span className="text-xs text-red-400 max-w-48 truncate">{error}</span>
+            <span className="text-xs text-red-400 max-w-48 truncate">
+              {error}
+            </span>
           )}
 
           <div className="flex items-center gap-1.5">
@@ -132,7 +142,9 @@ export function ClaudeTerminal() {
           </div>
 
           <div className="flex items-center gap-1">
-            {(status === "disconnected" || status === "error" || status === "idle") && (
+            {(status === "disconnected" ||
+              status === "error" ||
+              status === "idle") && (
               <Button
                 variant="ghost"
                 size="sm"
