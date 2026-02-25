@@ -22,9 +22,7 @@
     "test": "pnpm run test:type && pnpm run test:format",
     "test:type": "tsc --noEmit",
     "test:format": "biome ci",
-    "preview": "vite preview",
-    "claude-server": "node dist/server/start.js",
-    "claude-server:dev": "tsx src/server/start.ts"
+    "preview": "vite preview"
   },
   "dependencies": {
     "cors": "^2.8.6",
