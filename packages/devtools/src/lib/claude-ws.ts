@@ -24,9 +24,11 @@ type ClaudeWsStore = ClaudeWsState & ClaudeWsActions;
 function getWsUrl(): string {
   const port =
     (typeof window !== "undefined" &&
-      (window as unknown as { __CLAUDE_WS_PORT__?: number }).__CLAUDE_WS_PORT__) ||
+      (window as unknown as { __CLAUDE_WS_PORT__?: number })
+        .__CLAUDE_WS_PORT__) ||
     3001;
-  const hostname = typeof window !== "undefined" ? window.location.hostname : "localhost";
+  const hostname =
+    typeof window !== "undefined" ? window.location.hostname : "localhost";
   return `ws://${hostname}:${port}`;
 }
 
@@ -46,6 +48,10 @@ export const useClaudeWs = create<ClaudeWsStore>((set, get) => ({
   connect() {
     const existing = get()._ws;
     if (existing) {
+      existing.onopen = null;
+      existing.onmessage = null;
+      existing.onerror = null;
+      existing.onclose = null;
       existing.close();
     }
 
@@ -58,7 +64,12 @@ export const useClaudeWs = create<ClaudeWsStore>((set, get) => ({
     };
 
     ws.onmessage = (event) => {
-      let msg: { type: string; data?: string; pid?: number; code?: number | null };
+      let msg: {
+        type: string;
+        data?: string;
+        pid?: number;
+        code?: number | null;
+      };
       try {
         msg = JSON.parse(event.data as string);
       } catch {
@@ -75,10 +86,16 @@ export const useClaudeWs = create<ClaudeWsStore>((set, get) => ({
     };
 
     ws.onerror = () => {
+      if (get()._ws !== ws) {
+        return;
+      }
       set({ status: "error", error: "WebSocket connection failed" });
     };
 
     ws.onclose = () => {
+      if (get()._ws !== ws) {
+        return;
+      }
       set((state) => ({
         status: state.status === "error" ? "error" : "disconnected",
         _ws: null,

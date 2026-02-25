@@ -24,6 +24,7 @@ function AppLayout() {
     storage: localStorage,
   });
   const [claudeOpen, setClaudeOpen] = useState(false);
+  const [claudeFullscreen, setClaudeFullscreen] = useState(false);
 
   const isConnected = status === "authenticated";
 
@@ -67,14 +68,28 @@ function AppLayout() {
         </div>
       )}
 
+      {/* Backdrop — closes modal on outside click, hidden in fullscreen */}
+      {claudeOpen && !claudeFullscreen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setClaudeOpen(false)}
+        />
+      )}
+
       {/* Floating Claude terminal — always mounted to keep session alive */}
       <div
         className={cn(
-          "fixed bottom-16 right-4 z-50 w-[680px] h-[480px] rounded-lg border border-zinc-800 shadow-2xl overflow-hidden",
+          "fixed z-50 rounded-lg border border-zinc-800 shadow-2xl overflow-hidden transition-all duration-200",
+          claudeFullscreen
+            ? "inset-0 rounded-none border-0"
+            : "bottom-16 right-4 w-[800px] h-[560px]",
           !claudeOpen && "hidden",
         )}
       >
-        <ClaudeTerminal />
+        <ClaudeTerminal
+          isFullscreen={claudeFullscreen}
+          onToggleFullscreen={() => setClaudeFullscreen((f) => !f)}
+        />
       </div>
 
       {/* Toggle button */}
