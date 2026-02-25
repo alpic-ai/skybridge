@@ -1,3 +1,4 @@
+@import "@xterm/xterm/css/xterm.css";
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";

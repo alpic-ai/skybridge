@@ -14,7 +14,11 @@ const server = new McpServer(
     _meta: {
       ui: {
         csp: {
-          redirectDomains: ["https://docs.skybridge.tech", "https://alpic.ai", "https://github.com"],
+          redirectDomains: [
+            "https://docs.skybridge.tech",
+            "https://alpic.ai",
+            "https://github.com",
+          ],
         },
       },
     },
