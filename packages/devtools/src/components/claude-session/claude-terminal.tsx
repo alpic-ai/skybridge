@@ -1,6 +1,6 @@
 import { FitAddon } from "@xterm/addon-fit";
 import { Terminal } from "@xterm/xterm";
-import { RefreshCw, SquareTerminal, Unplug, Wifi } from "lucide-react";
+import { Maximize2, Minimize2, RefreshCw, SquareTerminal, Unplug, Wifi } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useClaudeWs } from "@/lib/claude-ws.js";
 import { cn } from "@/lib/utils.js";
@@ -22,7 +22,12 @@ const STATUS_LABELS: Record<string, string> = {
   error: "Error",
 };
 
-export function ClaudeTerminal() {
+interface ClaudeTerminalProps {
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
+}
+
+export function ClaudeTerminal({ isFullscreen, onToggleFullscreen }: ClaudeTerminalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const termRef = useRef<Terminal | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
@@ -171,15 +176,18 @@ export function ClaudeTerminal() {
               </Button>
             )}
 
-            {status === "connected" && (
+            {onToggleFullscreen && (
               <Button
                 variant="ghost"
                 size="sm"
                 className="h-7 text-xs text-zinc-300 hover:text-white hover:bg-zinc-800"
-                onClick={disconnect}
+                onClick={onToggleFullscreen}
               >
-                <Unplug className="h-3.5 w-3.5" />
-                Disconnect
+                {isFullscreen ? (
+                  <Minimize2 className="h-3.5 w-3.5" />
+                ) : (
+                  <Maximize2 className="h-3.5 w-3.5" />
+                )}
               </Button>
             )}
           </div>

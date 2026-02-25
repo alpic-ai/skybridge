@@ -46,6 +46,10 @@ export const useClaudeWs = create<ClaudeWsStore>((set, get) => ({
   connect() {
     const existing = get()._ws;
     if (existing) {
+      existing.onopen = null;
+      existing.onmessage = null;
+      existing.onerror = null;
+      existing.onclose = null;
       existing.close();
     }
 
@@ -75,10 +79,12 @@ export const useClaudeWs = create<ClaudeWsStore>((set, get) => ({
     };
 
     ws.onerror = () => {
+      if (get()._ws !== ws) return;
       set({ status: "error", error: "WebSocket connection failed" });
     };
 
     ws.onclose = () => {
+      if (get()._ws !== ws) return;
       set((state) => ({
         status: state.status === "error" ? "error" : "disconnected",
         _ws: null,
