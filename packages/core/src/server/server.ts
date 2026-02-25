@@ -497,16 +497,17 @@ export class McpServer<
           connectDomains.push(VITE_HMR_WEBSOCKET_DEFAULT_URL);
         }
 
+        const pathname = extra?.requestInfo?.url?.pathname;
+        const url = `https://${hostFromHeaders}${pathname}`;
+        const hash = crypto
+          .createHash("sha256")
+          .update(url)
+          .digest("hex")
+          .slice(0, 32);
+
         const contentMetaOverrides = isClaude
           ? {
-              domain: `${crypto
-                .createHash("sha256")
-                .update(
-                  extra.requestInfo?.url?.href ||
-                    `https://${hostFromHeaders}/mcp`,
-                )
-                .digest("hex")
-                .slice(0, 32)}.claudemcpcontent.com`,
+              domain: `${hash}.claudemcpcontent.com`,
             }
           : {};
 
