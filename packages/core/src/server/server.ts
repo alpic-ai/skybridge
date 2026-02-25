@@ -497,7 +497,7 @@ export class McpServer<
           connectDomains.push(VITE_HMR_WEBSOCKET_DEFAULT_URL);
         }
 
-        const pathname = extra?.requestInfo?.url?.pathname;
+        const pathname = extra?.requestInfo?.url?.pathname ?? "";
         const url = `https://${hostFromHeaders}${pathname}`;
         const hash = crypto
           .createHash("sha256")
