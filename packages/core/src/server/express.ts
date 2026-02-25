@@ -24,8 +24,9 @@ export async function createServer({
   }
 
   if (env !== "production") {
-    const { devtoolsStaticServer } = await import("@skybridge/devtools");
-    app.use(await devtoolsStaticServer());
+    const { devtoolsStaticServer, createClaudeSessionServer } = await import("@skybridge/devtools");
+    const { port: claudeWsPort } = createClaudeSessionServer({ cwd: process.cwd() });
+    app.use(await devtoolsStaticServer({ claudeWsPort }));
     const { widgetsDevServer } = await import("./widgetsDevServer.js");
     app.use(await widgetsDevServer());
   }
