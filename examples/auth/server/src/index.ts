@@ -90,8 +90,8 @@ const server = new McpServer(
     ({ query, minRating }, extra) => {
       const auth = extra.authInfo as AuthInfo;
 
-      const email = auth.extra?.email as string;
-      const firstName = auth.extra?.firstName as string | null;
+      const email = auth.extra?.email as string | undefined;
+      const firstName = auth.extra?.firstName as string | null | undefined;
 
       const results = searchCoffeeShops({
         query,
