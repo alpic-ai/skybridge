@@ -99,7 +99,7 @@ const server = new McpServer(
         userId: auth.clientId,
       });
 
-      const displayName = firstName ?? email.split("@")[0];
+      const displayName = firstName ?? email?.split("@")[0] ?? "User";
 
       return {
         structuredContent: {
