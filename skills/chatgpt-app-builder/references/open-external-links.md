@@ -40,6 +40,15 @@ function ExternalLink() {
 }
 ```
 
+
+You can control return-path behavior with an optional second argument (ChatGPT only):
+
+```tsx
+openExternal("https://example.com", { redirectUrl: false });
+```
+
+Use `redirectUrl: false` to skip automatic `?redirectUrl=...` appending.
+
 Shows confirmation dialog unless domain is whitelisted:
 
 ```typescript

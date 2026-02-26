@@ -67,7 +67,7 @@ export type AppsSdkMethods<WS extends WidgetState = WidgetState> = {
   sendFollowUpMessage: (args: { prompt: string }) => Promise<void>;
 
   /** Opens an external link, redirects web page or mobile app */
-  openExternal(args: { href: string }): void;
+  openExternal(args: { href: string; redirectUrl?: false }): void;
 
   /** For transitioning an app from inline to fullscreen or pip */
   requestDisplayMode: (args: { mode: DisplayMode }) => Promise<{

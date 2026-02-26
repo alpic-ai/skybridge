@@ -4,6 +4,7 @@ import type {
   DisplayMode,
   HostContext,
   HostContextStore,
+  OpenExternalOptions,
   RequestModalOptions,
   SetWidgetStateAction,
 } from "../types.js";
@@ -63,8 +64,8 @@ export class AppsSdkAdaptor implements Adaptor {
     return window.openai.sendFollowUpMessage({ prompt });
   };
 
-  public openExternal(href: string): void {
-    window.openai.openExternal({ href });
+  public openExternal(href: string, options: OpenExternalOptions = {}): void {
+    window.openai.openExternal({ href, ...options });
   }
 
   public setWidgetState = (

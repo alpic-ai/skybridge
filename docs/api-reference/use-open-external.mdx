@@ -24,7 +24,10 @@ function ExternalLink() {
 ## Returns
 
 ```tsx
-openExternal: (href: string) => void
+openExternal: (
+  href: string,
+  options?: { redirectUrl?: false }
+) => void
 ```
 
 A function that opens the provided URL in the host's browser or redirects the mobile app accordingly.
@@ -34,6 +37,9 @@ A function that opens the provided URL in the host's browser or redirects the mo
 - `href: string`
   - **Required**
   - The URL to open
+- `options.redirectUrl?: false`
+  - **Optional**
+  - Pass `false` to disable the host from appending a `?redirectUrl=...` query param
 
 ## Examples
 
@@ -158,6 +164,27 @@ function ArticleReferences({ references }: { references: Reference[] }) {
         ))}
       </ol>
     </section>
+  );
+}
+```
+
+
+### Disable redirect URL appending
+
+```tsx
+import { useOpenExternal } from "skybridge/web";
+
+function ExternalLinkNoReturn() {
+  const openExternal = useOpenExternal();
+
+  return (
+    <button
+      onClick={() =>
+        openExternal("https://example.com", { redirectUrl: false })
+      }
+    >
+      Visit Website
+    </button>
   );
 }
 ```

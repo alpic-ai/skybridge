@@ -93,6 +93,11 @@ export type RequestModalOptions = {
   params?: Record<string, unknown>;
   anchor?: { top?: number; left?: number; width?: number; height?: number };
 };
+
+export type OpenExternalOptions = {
+  redirectUrl?: false;
+};
+
 export interface Adaptor {
   getHostContextStore<K extends keyof HostContext>(key: K): HostContextStore<K>;
   callTool<
@@ -103,7 +108,7 @@ export interface Adaptor {
     mode: DisplayMode;
   }>;
   sendFollowUpMessage(prompt: string): Promise<void>;
-  openExternal(href: string): void;
+  openExternal(href: string, options?: OpenExternalOptions): void;
   setWidgetState(stateOrUpdater: SetWidgetStateAction): Promise<void>;
   uploadFile(file: File): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;

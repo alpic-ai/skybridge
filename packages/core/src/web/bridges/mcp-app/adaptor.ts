@@ -18,6 +18,7 @@ import type {
   DisplayMode,
   HostContext,
   HostContextStore,
+  OpenExternalOptions,
   RequestModalOptions,
   SetWidgetStateAction,
 } from "../types.js";
@@ -126,7 +127,7 @@ export class McpAppAdaptor implements Adaptor {
     });
   };
 
-  public openExternal(href: string): void {
+  public openExternal(href: string, _options?: OpenExternalOptions): void {
     const bridge = McpAppBridge.getInstance();
     bridge.request<McpUiOpenLinkRequest, McpUiOpenLinkResult>({
       method: "ui/open-link",
