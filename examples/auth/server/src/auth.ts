@@ -16,11 +16,9 @@ const workos = new WorkOS(env.WORKOS_API_KEY);
  * Used with `requireBearerAuth({ verifier: { verifyAccessToken } })`.
  */
 export async function verifyAccessToken(token: string): Promise<AuthInfo> {
-  let payload: jose.JWTPayload;
-  const result = await jose.jwtVerify(token, jwks, {
+  const { payload } = await jose.jwtVerify(token, jwks, {
     issuer: `https://${env.AUTHKIT_DOMAIN}`,
   });
-  payload = result.payload;
 
   if (!payload.sub || typeof payload.sub !== "string") {
     throw new Error("Invalid token: missing sub claim");
