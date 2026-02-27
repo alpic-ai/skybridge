@@ -3,3 +3,6 @@ packages:
   - "packages/*"
   - "packages/create-skybridge/template"
   - "examples/*"
+
+onlyBuiltDependencies:
+  - node-pty
