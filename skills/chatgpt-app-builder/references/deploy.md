@@ -15,12 +15,12 @@ Execute `npx alpic@latest login` to login to Alpic.
 
 2. **Deploy to Alpic**
 
-If it's a new project, **ask the user for the project name**.
+If it's a first time deployment (absence of `.alpic/` folder in the project directory), **ask the user for the project name**.
 Then, execute `npx alpic@latest deploy --yes --project-name {project-name} {path-to-project}`.
 
-3. **Subsequent deploys**
+3. **Subsequent deployments**
 
-For existing projects (presence of `.alpic/` folder), execute `npx alpic@latest deploy --yes {path-to-project}`.
+For subsequent deployments (presence of `.alpic/` folder in the project directory), execute `npx alpic@latest deploy --yes {path-to-project}`.
 
 4. **Setup GitHub integration**
 
