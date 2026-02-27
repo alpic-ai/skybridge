@@ -1,22 +1,33 @@
 # Deploy
 
-Push code to a GitHub repo, then deploy via Alpic.
+Deploy to Alpic using Alpic CLI.
 
-Guide user through these steps:
+## Parameters
 
-1. **Push to GitHub** — commit and push code
+- {path-to-project} is the path to the project directory. It is relative to the current working directory.
+- When executing a command requiring `{path-to-project}`, check that you provided the correct path to the project.
 
-2. **Login to Alpic** — go to [app.alpic.ai](https://app.alpic.ai), authenticate with GitHub
+## Steps
 
-3. **Import repo** — select organization and repository, import it
+1. **Make sure the user is logged in to Alpic**
 
-4. **Configure**:
-   - **Branch**: pick the branch to deploy from (pushes trigger redeploys)
-   - **Environment variables**
-   - **Build settings**: Alpic auto-detects, verify build command and output directory
+Execute `npx alpic@latest login` to login to Alpic.
 
-5. **Deploy** — click Deploy, get production URL
+2. **Deploy to Alpic**
 
-Updates deploy automatically on push to the configured branch.
+If it's a new project, **ask the user for the project name**.
+Then, execute `npx alpic@latest deploy --yes --project-name {project-name} {path-to-project}`.
+
+3. **Subsequent deploys**
+
+For existing projects (presence of `.alpic/` folder), execute `npx alpic@latest deploy --yes {path-to-project}`.
+
+4. **Setup GitHub integration**
+
+If it's a new project, ask the user first if they want to setup git.
+If yes:
+
+- **Push to GitHub** — Commit and push code
+- **Link to Alpic project** - Use `npx alpic@latest git connect --yes {path-to-project}`
 
 Full docs: [docs.alpic.ai/quickstart](https://docs.alpic.ai/quickstart)
