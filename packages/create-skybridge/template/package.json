@@ -11,7 +11,7 @@
     "deploy": "alpic deploy"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.26.0",
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "skybridge": ">=0.32.0 <1.0.0",
@@ -23,11 +23,11 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
-    "alpic": "^1.90.0",
+    "alpic": "^1.91.6",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "engines": {
-    "node": ">=24.13.1"
+    "node": ">=24.14.0"
   }
 }
