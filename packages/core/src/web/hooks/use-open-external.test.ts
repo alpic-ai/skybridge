@@ -29,6 +29,19 @@ describe("useOpenExternal", () => {
       expect(openExternalMock).toHaveBeenCalledTimes(1);
       expect(openExternalMock).toHaveBeenCalledWith({ href });
     });
+
+    it("should forward redirectUrl false option to window.openai.openExternal", () => {
+      const { result } = renderHook(() => useOpenExternal());
+
+      const href = "https://example.com";
+      result.current(href, { redirectUrl: false });
+
+      expect(openExternalMock).toHaveBeenCalledTimes(1);
+      expect(openExternalMock).toHaveBeenCalledWith({
+        href,
+        redirectUrl: false,
+      });
+    });
   });
 
   describe("mcp-app host", () => {
@@ -49,7 +62,7 @@ describe("useOpenExternal", () => {
       const { result } = renderHook(() => useOpenExternal());
 
       const href = "https://example.com";
-      result.current(href);
+      result.current(href, { redirectUrl: false });
 
       expect(mockPostMessage).toHaveBeenCalledWith(
         expect.objectContaining({

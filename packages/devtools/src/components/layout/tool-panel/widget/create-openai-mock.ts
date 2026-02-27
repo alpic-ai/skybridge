@@ -40,7 +40,7 @@ function createOpenaiMethods(
     sendFollowUpMessage: async (args: { prompt: string }) => {
       log("sendFollowUpMessage", args);
     },
-    openExternal: (args: { href: string }) => {
+    openExternal: (args: { href: string; redirectUrl?: false }) => {
       log("openExternal", args);
     },
     requestDisplayMode: async (args: { mode: DisplayMode }) => {

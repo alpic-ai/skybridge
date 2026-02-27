@@ -18,6 +18,7 @@ import type {
   DisplayMode,
   HostContext,
   HostContextStore,
+  OpenExternalOptions,
   RequestModalOptions,
   SetWidgetStateAction,
 } from "../types.js";
@@ -126,7 +127,13 @@ export class McpAppAdaptor implements Adaptor {
     });
   };
 
-  public openExternal(href: string): void {
+  public openExternal(href: string, options?: OpenExternalOptions): void {
+    if (options?.redirectUrl === false) {
+      console.warn(
+        "[skybridge] redirectUrl option is not supported by the MCP ui/open-link protocol and will be ignored.",
+      );
+    }
+
     const bridge = McpAppBridge.getInstance();
     bridge.request<McpUiOpenLinkRequest, McpUiOpenLinkResult>({
       method: "ui/open-link",

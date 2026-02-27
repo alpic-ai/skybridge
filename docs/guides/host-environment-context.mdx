@@ -246,12 +246,12 @@ function LinkWidget() {
   const openExternal = useOpenExternal();
 
   const openDocs = () => {
-    openExternal({ url: "https://docs.example.com" });
+    openExternal("https://docs.example.com");
   };
 
   const openApp = () => {
-    // Open mobile app if available
-    openExternal({ url: "myapp://deep-link" });
+    // Open mobile app if available, do not include ChatGPT redirect URL
+    openExternal("myapp://deep-link", { redirectUrl: false });
   };
 
   return (
