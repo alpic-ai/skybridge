@@ -24,7 +24,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.4",
     "@total-typescript/tsconfig": "^1.0.4",
-    "@types/node": "^24.10.15",
+    "@types/node": "^24.11.0",
     "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@10.30.3",
