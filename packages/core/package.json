@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.29.0",
-    "@oclif/core": "^4.8.1",
+    "@oclif/core": "^4.8.2",
     "ci-info": "^4.4.0",
     "cors": "^2.8.6",
     "dequal": "^2.0.3",
@@ -74,7 +74,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsdom": "^28.0.0",
-    "@types/node": "^24.10.15",
+    "@types/node": "^24.11.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitest/ui": "^4.0.18",
