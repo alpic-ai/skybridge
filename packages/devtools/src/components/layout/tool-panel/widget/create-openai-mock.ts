@@ -5,6 +5,7 @@ import type {
   CallToolArgs,
   CallToolResponse,
   DisplayMode,
+  RequestDisplayMode,
   UnknownObject,
 } from "skybridge/web";
 
@@ -43,7 +44,7 @@ function createOpenaiMethods(
     openExternal: (args: { href: string; redirectUrl?: false }) => {
       log("openExternal", args);
     },
-    requestDisplayMode: async (args: { mode: DisplayMode }) => {
+    requestDisplayMode: async (args: { mode: RequestDisplayMode }) => {
       log("requestDisplayMode", args);
       openai.displayMode = args.mode;
       setValue("displayMode", args.mode);
