@@ -24,6 +24,7 @@ export type CallToolResponse = {
 };
 
 export type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
+export type RequestDisplayMode = Exclude<DisplayMode, "modal">;
 
 export type Theme = "light" | "dark";
 
@@ -104,8 +105,8 @@ export interface Adaptor {
     ToolArgs extends CallToolArgs = null,
     ToolResponse extends CallToolResponse = CallToolResponse,
   >(name: string, args: ToolArgs): Promise<ToolResponse>;
-  requestDisplayMode(mode: DisplayMode): Promise<{
-    mode: DisplayMode;
+  requestDisplayMode(mode: RequestDisplayMode): Promise<{
+    mode: RequestDisplayMode;
   }>;
   sendFollowUpMessage(prompt: string): Promise<void>;
   openExternal(href: string, options?: OpenExternalOptions): void;

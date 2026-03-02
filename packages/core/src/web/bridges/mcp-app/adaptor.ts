@@ -15,10 +15,10 @@ import { dequal } from "dequal/lite";
 import type {
   Adaptor,
   CallToolResponse,
-  DisplayMode,
   HostContext,
   HostContextStore,
   OpenExternalOptions,
+  RequestDisplayMode,
   RequestModalOptions,
   SetWidgetStateAction,
 } from "../types.js";
@@ -96,19 +96,15 @@ export class McpAppAdaptor implements Adaptor {
     } as ToolResponse;
   };
 
-  public requestDisplayMode = (mode: DisplayMode) => {
+  public requestDisplayMode = (mode: RequestDisplayMode) => {
     const bridge = McpAppBridge.getInstance();
-    if (mode !== "modal") {
-      return bridge.request<
-        McpUiRequestDisplayModeRequest,
-        McpUiRequestDisplayModeResult
-      >({
-        method: "ui/request-display-mode",
-        params: { mode },
-      });
-    }
-
-    throw new Error("Modal display mode is not accessible in MCP App.");
+    return bridge.request<
+      McpUiRequestDisplayModeRequest,
+      McpUiRequestDisplayModeResult
+    >({
+      method: "ui/request-display-mode",
+      params: { mode },
+    });
   };
 
   public sendFollowUpMessage = async (prompt: string) => {

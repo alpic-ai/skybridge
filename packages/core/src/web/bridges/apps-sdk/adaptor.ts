@@ -1,10 +1,10 @@
 import type {
   Adaptor,
   CallToolResponse,
-  DisplayMode,
   HostContext,
   HostContextStore,
   OpenExternalOptions,
+  RequestDisplayMode,
   RequestModalOptions,
   SetWidgetStateAction,
 } from "../types.js";
@@ -55,8 +55,8 @@ export class AppsSdkAdaptor implements Adaptor {
   };
 
   public requestDisplayMode = (
-    mode: DisplayMode,
-  ): Promise<{ mode: DisplayMode }> => {
+    mode: RequestDisplayMode,
+  ): Promise<{ mode: RequestDisplayMode }> => {
     return window.openai.requestDisplayMode({ mode });
   };
 

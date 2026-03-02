@@ -7,6 +7,7 @@ import type {
 } from "../types.js";
 
 type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
+type RequestDisplayMode = Exclude<DisplayMode, "modal">;
 
 export type WidgetState = {
   modelContent: Record<string, unknown>;
@@ -70,12 +71,12 @@ export type AppsSdkMethods<WS extends WidgetState = WidgetState> = {
   openExternal(args: { href: string; redirectUrl?: false }): void;
 
   /** For transitioning an app from inline to fullscreen or pip */
-  requestDisplayMode: (args: { mode: DisplayMode }) => Promise<{
+  requestDisplayMode: (args: { mode: RequestDisplayMode }) => Promise<{
     /**
      * The granted display mode. The host may reject the request.
      * For mobile, PiP is always coerced to fullscreen.
      */
-    mode: DisplayMode;
+    mode: RequestDisplayMode;
   }>;
 
   /**
