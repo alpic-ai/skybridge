@@ -455,7 +455,7 @@ export class McpServer<
     this.registerResource(
       name,
       widgetUri,
-      { ...resourceConfig, _meta: resourceConfig._meta },
+      { ...resourceConfig, mimeType, _meta: resourceConfig._meta },
       async (uri, extra) => {
         const isProduction = process.env.NODE_ENV === "production";
         const useForwardedHost =
