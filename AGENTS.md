@@ -2,124 +2,82 @@
 
 ## What is Skybridge
 
-Skybridge is a fullstack TypeScript framework for building **ChatGPT Apps** and **MCP Apps** — interactive React widgets that render inside AI conversations (ChatGPT, Claude, Goose, VSCode, etc.).
+Skybridge is a **fullstack TypeScript framework** for building ChatGPT Apps and MCP Apps — interactive React widgets that render inside AI conversations.
 
-It wraps two low-level runtimes behind a unified set of React hooks:
+The core loop: an MCP server exposes tools. When the host (ChatGPT, Claude, Goose, VSCode…) calls a tool, the server returns structured data **and** a reference to a React widget. The host renders that widget in an iframe. The widget can read tool output, call other tools, send follow-up messages, and sync UI state back to the model — all over the MCP protocol.
 
-- **Apps SDK** (ChatGPT only): proprietary `window.openai` API. Widgets run in an iframe, hydrated with tool output.
-- **MCP Apps** (open standard): the `ext-apps` spec over JSON-RPC postMessage. Works with any MCP-compatible client.
+Skybridge wraps two host runtimes behind one API:
+- **Apps SDK** — ChatGPT's proprietary `window.openai` runtime
+- **MCP Apps** — the open `ext-apps` spec (JSON-RPC postMessage)
 
-Developers write one codebase. Skybridge's adaptor layer detects the runtime and bridges the hooks to the right protocol.
+Developers write one server + one widget. Skybridge detects the runtime at load time.
 
-### Key primitives
-
-| Side | What you use | Purpose |
-|------|-------------|---------|
-| Server (`skybridge/server`) | `McpServer`, `registerWidget()`, `registerTool()` | Define tools and widgets. Returns `{ content, structuredContent, _meta }` |
-| Client (`skybridge/web`) | `useToolInfo()`, `useCallTool()`, `useWidgetState()`, `data-llm`, `createStore()` | Consume tool data, trigger actions, sync state to the model |
-| Build (`skybridge/web`) | `skybridge()` Vite plugin, `mountWidget()` | HMR, widget transformation, entry point mounting |
-
-### Data flow
-
-1. Host calls MCP tool -> server returns `structuredContent` + `_meta`
-2. Widget hydrates via `useToolInfo()`
-3. User interacts -> widget updates `data-llm` attributes -> model sees context
-4. Widget triggers server action via `useCallTool()` or prompts model via `useSendFollowUpMessage()`
+For deep understanding, read `docs/home.mdx`, `docs/fundamentals/`, and `docs/concepts/`.
 
 ## Monorepo layout
 
 ```
 packages/
-  core/           # The `skybridge` npm package — server, web, CLI, Vite plugin
-    src/server/   #   McpServer, Express, widget registration
-    src/web/      #   React hooks, bridges, data-llm, Vite plugin, createStore
-    src/cli/      #   oclif CLI (skybridge dev/build/start)
-    src/commands/ #   CLI command implementations
-  devtools/       # @skybridge/devtools — browser DevTools emulator (React + Tailwind + Vite)
-  create-skybridge/ # `npm create skybridge` scaffolding CLI
+  core/             # npm: `skybridge` — the framework
+    src/server/     #   MCP server (extends @modelcontextprotocol/sdk), widget registration, Express
+    src/web/        #   React hooks, runtime adaptors, data-llm, Vite plugin, createStore
+    src/cli/        #   CLI entry (oclif)
+    src/commands/   #   dev / build / start commands
+  devtools/         # npm: @skybridge/devtools — local emulator UI (Vite + React + Tailwind)
+  create-skybridge/ # npm create skybridge — project scaffolder
 
-examples/         # 8 showcase apps (capitals, ecom-carousel, everything, productivity, manifest-ui, auth, investigation-game, times-up)
-
-docs/             # Mintlify docs site (docs.skybridge.tech)
-  fundamentals/   #   Apps SDK, MCP Apps explainers
-  concepts/       #   Write-once-run-everywhere, data-flow, type-safety, etc.
-  guides/         #   Fetching data, managing state, communicating with model
-  api-reference/  #   Hook-by-hook reference with runtime compatibility matrix
-
-skills/           # Claude agent skills for guided app building
-  chatgpt-app-builder/  # ChatGPT-specific step-by-step references + evals
-  mcp-app-builder/      # MCP Apps-specific references
-  skybridge/            # General Skybridge skill
+examples/           # 8 showcase apps — good for understanding patterns
+docs/               # Mintlify site (docs.skybridge.tech)
+skills/             # Claude Code skills for guided app building
+  chatgpt-app-builder/   # ChatGPT-specific references + evals
+  mcp-app-builder/       # MCP Apps-specific references
+  skybridge/             # General Skybridge skill
 ```
+
+When you need to understand a concept, read the corresponding `docs/` page or the source in `packages/core/src/`.
 
 ## Development
 
-### Prerequisites
-
-- Node.js >= 24.14.0
-- pnpm 10+ (`corepack enable`)
-
-### Setup
+**Prerequisites:** Node.js >= 24.14.0, pnpm 10+ (`corepack enable`).
 
 ```bash
-pnpm install
+pnpm install        # setup
 ```
 
-### Commands
-
-| Scope | Command | What it does |
-|-------|---------|-------------|
-| All packages | `pnpm test` | Runs `test:unit` + `test:type` + `test:format` across packages |
-| All packages | `pnpm build` | Builds all packages |
-| All packages | `pnpm format` | Auto-fix lint + format via Biome |
-| Single package | `pnpm --filter skybridge test` | Test only `packages/core` |
-| Single package | `pnpm --filter @skybridge/devtools dev` | Dev server for devtools |
-| Docs | `pnpm docs:dev` | Mintlify dev server |
-
-### Validation before pushing
-
-Run from root:
+### Validation
 
 ```bash
-pnpm test          # unit tests (vitest) + type check (tsc --noEmit) + lint (biome ci)
-pnpm build         # ensure everything compiles
+pnpm test           # unit tests (vitest) + typecheck (tsc --noEmit) + lint (biome ci)
+pnpm build          # compile all packages
 ```
 
-For faster iteration on a single package:
+Per-package:
 
 ```bash
-pnpm --filter skybridge test:unit    # just vitest
-pnpm --filter skybridge test:type    # just tsc
-pnpm --filter skybridge test:format  # just biome
+pnpm --filter skybridge test:unit
+pnpm --filter skybridge test:type
+pnpm --filter skybridge test:format
 ```
+
+Always run `pnpm test && pnpm build` from root before pushing.
 
 ## Code rules
 
-### Biome (lint + format)
+**Biome** handles lint + format (see `biome.json`):
+- Double quotes, 2-space indent, auto-sorted imports
+- Errors on: unused variables/imports, non-null assertions, missing block braces
 
-Configured in root `biome.json`. Key rules:
+`packages/core/biome.json` extends root and enforces `.js` import extensions (ESM output).
 
-- **Double quotes**, 2-space indent
-- `noUnusedVariables`, `noUnusedImports`: error
-- `noNonNullAssertion`: error — use proper narrowing instead
-- `useBlockStatements`: error — always use braces
-- `organizeImports`: auto-sorted on format
+**TypeScript**: strict mode, no `any`, ESM-only. See `packages/core/tsconfig.base.json`.
 
-The `packages/core` biome config extends root and additionally enforces `useImportExtensions` with `.js` extensions (required for ESM output).
-
-### TypeScript
-
-- Strict mode everywhere
-- No `any` — use proper types
-- ESM-only (`"type": "module"` throughout)
-- `packages/core` exports a shared `tsconfig.base.json` (`skybridge/tsconfig`)
+Run `pnpm format` to auto-fix.
 
 ## Cross-cutting concerns
 
 When the public API of `packages/core/` changes:
-
-1. Update `skills/chatgpt-app-builder/` and `skills/mcp-app-builder/` references to match
+1. Update `skills/` references (chatgpt-app-builder, mcp-app-builder)
 2. Update `docs/` — especially `api-reference/` and `guides/`
-3. Keep examples working — run `pnpm build` from root to verify
+3. Run `pnpm build` from root to verify examples still compile
 
-When adding a new hook or changing hook behavior, update the runtime compatibility matrix in `docs/api-reference.mdx`.
+When adding/changing a hook, update the runtime compatibility matrix in `docs/api-reference.mdx`.
