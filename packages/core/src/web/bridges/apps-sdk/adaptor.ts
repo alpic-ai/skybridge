@@ -60,8 +60,14 @@ export class AppsSdkAdaptor implements Adaptor {
     return window.openai.requestDisplayMode({ mode });
   };
 
-  public sendFollowUpMessage = (prompt: string): Promise<void> => {
-    return window.openai.sendFollowUpMessage({ prompt });
+  public sendFollowUpMessage = (
+    prompt: string,
+    options?: { scrollToBottom?: boolean },
+  ): Promise<void> => {
+    return window.openai.sendFollowUpMessage({
+      prompt,
+      ...options,
+    });
   };
 
   public openExternal(href: string, options: OpenExternalOptions = {}): void {

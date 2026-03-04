@@ -65,7 +65,10 @@ export type AppsSdkMethods<WS extends WidgetState = WidgetState> = {
   ) => Promise<ToolResponse>;
 
   /** Triggers a followup turn in the ChatGPT conversation */
-  sendFollowUpMessage: (args: { prompt: string }) => Promise<void>;
+  sendFollowUpMessage: (args: {
+    prompt: string;
+    scrollToBottom?: boolean;
+  }) => Promise<void>;
 
   /** Opens an external link, redirects web page or mobile app */
   openExternal(args: { href: string; redirectUrl?: false }): void;

@@ -107,7 +107,10 @@ export class McpAppAdaptor implements Adaptor {
     });
   };
 
-  public sendFollowUpMessage = async (prompt: string) => {
+  public sendFollowUpMessage = async (
+    prompt: string,
+    options?: { scrollToBottom?: boolean },
+  ) => {
     const bridge = McpAppBridge.getInstance();
     await bridge.request<McpUiMessageRequest, McpUiMessageResult>({
       method: "ui/message",

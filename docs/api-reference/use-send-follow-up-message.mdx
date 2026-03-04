@@ -24,7 +24,10 @@ function FollowUpButton() {
 ## Returns
 
 ```tsx
-sendFollowUpMessage: (prompt: string) => Promise<void>
+sendFollowUpMessage: (
+  prompt: string,
+  options?: { scrollToBottom?: boolean }
+) => Promise<void>
 ```
 
 An async function that sends a follow-up message to continue the conversation.
@@ -34,6 +37,11 @@ An async function that sends a follow-up message to continue the conversation.
 - `prompt: string`
   - **Required**
   - The message to send as a follow-up prompt
+
+- `options?: { scrollToBottom?: boolean }`
+  - **Optional**
+  - Configuration options for the follow-up message
+  - `scrollToBottom`: When `true` (default), automatically scrolls to the bottom of the conversation after posting the message. Set to `false` to prevent auto-scroll.
 
 ## Examples
 
@@ -61,6 +69,39 @@ function QuickActions() {
           {action.label}
         </button>
       ))}
+    </div>
+  );
+}
+```
+
+### Custom Scroll Behavior
+
+```tsx
+import { useSendFollowUpMessage } from "skybridge/web";
+
+function CustomScrollExample() {
+  const sendFollowUpMessage = useSendFollowUpMessage();
+
+  const handleBackgroundUpdate = () => {
+    // Send a follow-up without scrolling to keep the user's current position
+    sendFollowUpMessage("Update the data in the background", {
+      scrollToBottom: false,
+    });
+  };
+
+  const handleInteractivePrompt = () => {
+    // Send a follow-up with automatic scroll (default behavior)
+    sendFollowUpMessage("Tell me more about this topic");
+  };
+
+  return (
+    <div>
+      <button onClick={handleBackgroundUpdate}>
+        Update Data (No Scroll)
+      </button>
+      <button onClick={handleInteractivePrompt}>
+        Ask Question (Auto-scroll)
+      </button>
     </div>
   );
 }
