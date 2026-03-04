@@ -41,7 +41,8 @@ An async function that sends a follow-up message to continue the conversation.
 - `options?: { scrollToBottom?: boolean }`
   - **Optional**
   - Configuration options for the follow-up message
-  - `scrollToBottom`: When `true` (default), automatically scrolls to the bottom of the conversation after posting the message. Set to `false` to prevent auto-scroll.
+  - `scrollToBottom`: When `true`, automatically scrolls to the bottom of the conversation after posting the message. Set to `false` to prevent auto-scroll. Defaults to the host platform's default behavior when not specified.
+  - **Note**: This option is only supported in Apps SDK hosts. In MCP app hosts, this option will be ignored with a warning.
 
 ## Examples
 

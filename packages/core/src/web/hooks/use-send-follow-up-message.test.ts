@@ -94,5 +94,21 @@ describe("useSendFollowUpMessage", () => {
         "*",
       );
     });
+
+    it("should warn when scrollToBottom option is used in MCP host", () => {
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+      const { result } = renderHook(() => useSendFollowUpMessage());
+
+      const prompt = "Test message";
+      result.current(prompt, { scrollToBottom: false });
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        "[skybridge] scrollToBottom option is not supported by the MCP ui/message protocol and will be ignored.",
+      );
+
+      consoleWarnSpy.mockRestore();
+    });
   });
 });
