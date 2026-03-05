@@ -30,6 +30,7 @@ export async function verifyAccessToken(token: string): Promise<AuthInfo> {
     token,
     clientId: user.id,
     scopes: [],
+    expiresAt: payload.exp,
     extra: {
       email: user.email,
       firstName: user.firstName,
