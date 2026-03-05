@@ -33,15 +33,15 @@ const server = new McpServer(
   .use(
     mcpAuthMetadataRouter({
       oauthMetadata: {
-        issuer: `https://${env.AUTHKIT_DOMAIN}`,
+        issuer: env.SERVER_URL,
         authorization_endpoint: `https://${env.AUTHKIT_DOMAIN}/oauth2/authorize`,
         token_endpoint: `https://${env.AUTHKIT_DOMAIN}/oauth2/token`,
         registration_endpoint: `https://${env.AUTHKIT_DOMAIN}/oauth2/register`,
         response_types_supported: ["code"],
         response_modes_supported: ["query"],
-        scopes_supported: ["openid", "profile", "email", "offline_access"],
+        scopes_supported: ["openid"],
         grant_types_supported: ["authorization_code", "refresh_token"],
-        token_endpoint_auth_methods_supported: ["none"],
+        token_endpoint_auth_methods_supported: ["client_secret_post"],
         code_challenge_methods_supported: ["S256"],
       },
       resourceServerUrl: new URL(env.SERVER_URL),
@@ -59,7 +59,6 @@ const server = new McpServer(
           },
         },
       },
-      hosts: ["apps-sdk"],
     },
     {
       description:
