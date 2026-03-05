@@ -41,7 +41,7 @@ const server = new McpServer(
         response_modes_supported: ["query"],
         scopes_supported: ["openid"],
         grant_types_supported: ["authorization_code", "refresh_token"],
-        token_endpoint_auth_methods_supported: ["client_secret_post"],
+        token_endpoint_auth_methods_supported: ["none", "client_secret_post"],
         code_challenge_methods_supported: ["S256"],
       },
       resourceServerUrl: new URL(env.SERVER_URL),
