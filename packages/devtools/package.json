@@ -60,7 +60,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-resizable-panels": "^4.6.5",
-    "shadcn": "^3.8.5",
+    "shadcn": "^4.0.0",
     "shiki": "^4.0.0",
     "skybridge": "workspace:*",
     "tailwind-merge": "^3.5.0",
