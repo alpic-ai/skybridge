@@ -157,7 +157,8 @@
           "showcase/investigation-game",
           "showcase/productivity",
           "showcase/times-up",
-          "showcase/auth"
+          "showcase/auth-clerk",
+          "showcase/auth-workos"
         ]
       }
     ]
