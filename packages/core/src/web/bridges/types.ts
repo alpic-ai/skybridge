@@ -108,7 +108,10 @@ export interface Adaptor {
   requestDisplayMode(mode: RequestDisplayMode): Promise<{
     mode: RequestDisplayMode;
   }>;
-  sendFollowUpMessage(prompt: string): Promise<void>;
+  sendFollowUpMessage(
+    prompt: string,
+    options?: { scrollToBottom?: boolean },
+  ): Promise<void>;
   openExternal(href: string, options?: OpenExternalOptions): void;
   setWidgetState(stateOrUpdater: SetWidgetStateAction): Promise<void>;
   uploadFile(file: File): Promise<FileMetadata>;

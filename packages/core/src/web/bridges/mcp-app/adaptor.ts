@@ -107,7 +107,15 @@ export class McpAppAdaptor implements Adaptor {
     });
   };
 
-  public sendFollowUpMessage = async (prompt: string) => {
+  public sendFollowUpMessage = async (
+    prompt: string,
+    options?: { scrollToBottom?: boolean },
+  ) => {
+    if (options?.scrollToBottom !== undefined) {
+      console.warn(
+        "[skybridge] scrollToBottom option is not supported by the MCP ui/message protocol and will be ignored.",
+      );
+    }
     const bridge = McpAppBridge.getInstance();
     await bridge.request<McpUiMessageRequest, McpUiMessageResult>({
       method: "ui/message",
