@@ -835,8 +835,8 @@ importers:
         specifier: ^4.7.2
         version: 4.7.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       shadcn:
-        specifier: ^3.8.5
-        version: 3.8.5(@types/node@25.2.3)(typescript@5.9.3)
+        specifier: ^4.0.2
+        version: 4.0.2(@types/node@25.2.3)(typescript@5.9.3)
       shiki:
         specifier: ^4.0.2
         version: 4.0.2
@@ -7545,8 +7545,8 @@ packages:
   setprototypeof@1.2.0:
     resolution: {integrity: sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==}
 
-  shadcn@3.8.5:
-    resolution: {integrity: sha512-jPRx44e+eyeV7xwY3BLJXcfrks00+M0h5BGB9l6DdcBW4BpAj4x3lVmVy0TXPEs2iHEisxejr62sZAAw6B1EVA==}
+  shadcn@4.0.2:
+    resolution: {integrity: sha512-U6BxywcVt5Vy+iLdjoyWTPcuz2RQNad09tjJsW8hyKtxlx7VAvzHIvoNxvXN+gxWt/HX8kt/cVNk8AXcmPUaNQ==}
     hasBin: true
 
   sharp-ico@0.1.5:
@@ -8639,14 +8639,14 @@ snapshots:
 
   '@alpic-ai/api@1.89.0(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@orpc/contract': 1.13.5(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.13.4(@opentelemetry/api@1.9.0)
       zod: 4.3.6
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
   '@alpic-ai/api@1.90.0(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@orpc/contract': 1.13.5(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.13.4(@opentelemetry/api@1.9.0)
       zod: 4.3.6
     transitivePeerDependencies:
       - '@opentelemetry/api'
@@ -18282,7 +18282,7 @@ snapshots:
 
   setprototypeof@1.2.0: {}
 
-  shadcn@3.8.5(@types/node@25.2.3)(typescript@5.9.3):
+  shadcn@4.0.2(@types/node@25.2.3)(typescript@5.9.3):
     dependencies:
       '@antfu/ni': 25.0.0
       '@babel/core': 7.29.0
@@ -18829,7 +18829,7 @@ snapshots:
   string-width@7.2.0:
     dependencies:
       emoji-regex: 10.6.0
-      get-east-asian-width: 1.4.0
+      get-east-asian-width: 1.5.0
       strip-ansi: 7.1.2
 
   string-width@8.2.0:
