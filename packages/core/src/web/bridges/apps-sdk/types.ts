@@ -11,6 +11,7 @@ type RequestDisplayMode = Exclude<DisplayMode, "modal">;
 
 export type WidgetState = {
   modelContent: Record<string, unknown>;
+  privateContent: Record<string, unknown>;
   imageIds?: string[];
 };
 

@@ -76,14 +76,18 @@ export class AppsSdkAdaptor implements Adaptor {
         ? stateOrUpdater(window.openai.widgetState?.modelContent ?? null)
         : stateOrUpdater;
 
-    return window.openai.setWidgetState({ modelContent });
+    return window.openai.setWidgetState({
+      privateContent: {},
+      ...window.openai.widgetState,
+      modelContent,
+    });
   };
 
   public uploadFile = (file: File) => {
     return window.openai.uploadFile(file).then(async (metadata) => {
       const state: WidgetState = window.openai.widgetState
         ? { ...window.openai.widgetState }
-        : { modelContent: {} };
+        : { modelContent: {}, privateContent: {} };
       if (!state.imageIds) {
         state.imageIds = [];
       }

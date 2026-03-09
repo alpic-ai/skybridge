@@ -54,6 +54,7 @@ describe("useWidgetState", () => {
 
     expect(OpenaiMock.setWidgetState).toHaveBeenCalledWith({
       modelContent: newState,
+      privateContent: {},
     });
     expect(result.current[0]).toEqual(newState);
   });
@@ -67,6 +68,7 @@ describe("useWidgetState", () => {
 
     expect(OpenaiMock.setWidgetState).toHaveBeenCalledWith({
       modelContent: { count: 1, name: "test" },
+      privateContent: {},
     });
     expect(result.current[0]).toEqual({ count: 1, name: "test" });
   });
