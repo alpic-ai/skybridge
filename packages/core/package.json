@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.29.0",
-    "@oclif/core": "^4.8.3",
+    "@oclif/core": "^4.8.4",
     "ci-info": "^4.4.0",
     "cors": "^2.8.6",
     "dequal": "^2.0.3",
@@ -85,7 +85,7 @@
     "vitest": "^4.0.18",
     "zod": "^4.3.6"
   },
-  "packageManager": "pnpm@10.31.0",
+  "packageManager": "pnpm@10.32.0",
   "bin": {
     "sb": "./bin/run.js",
     "skybridge": "./bin/run.js"
