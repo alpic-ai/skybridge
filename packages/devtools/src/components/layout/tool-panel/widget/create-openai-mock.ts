@@ -2,14 +2,13 @@ import { assign, cloneDeep } from "lodash-es";
 import type {
   AppsSdkContext,
   AppsSdkMethods,
+  AppsSdkWidgetState,
   CallToolArgs,
   CallToolResponse,
   DisplayMode,
   RequestDisplayMode,
   UnknownObject,
 } from "skybridge/web";
-
-type OpenAIWidgetState = { modelContent: Record<string, unknown> };
 
 import { SET_GLOBALS_EVENT_TYPE, SetGlobalsEvent } from "skybridge/web";
 
@@ -52,7 +51,7 @@ function createOpenaiMethods(
         mode: args.mode,
       };
     },
-    setWidgetState: async (state: OpenAIWidgetState) => {
+    setWidgetState: async (state: AppsSdkWidgetState) => {
       log("setWidgetState", state);
       openai.widgetState = state;
       setValue("widgetState", state);

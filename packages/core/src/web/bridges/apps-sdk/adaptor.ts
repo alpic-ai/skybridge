@@ -9,7 +9,7 @@ import type {
   SetWidgetStateAction,
 } from "../types.js";
 import { AppsSdkBridge } from "./bridge.js";
-import type { WidgetState } from "./types.js";
+import type { AppsSdkWidgetState } from "./types.js";
 
 export class AppsSdkAdaptor implements Adaptor {
   private static instance: AppsSdkAdaptor | null = null;
@@ -85,7 +85,7 @@ export class AppsSdkAdaptor implements Adaptor {
 
   public uploadFile = (file: File) => {
     return window.openai.uploadFile(file).then(async (metadata) => {
-      const state: WidgetState = window.openai.widgetState
+      const state: AppsSdkWidgetState = window.openai.widgetState
         ? { ...window.openai.widgetState }
         : { modelContent: {}, privateContent: {} };
       if (!state.imageIds) {
