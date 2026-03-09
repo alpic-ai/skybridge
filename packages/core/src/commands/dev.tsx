@@ -118,11 +118,8 @@ export default class Dev extends Command {
               <Text color="white" bold>
                 Logs:
               </Text>
-              {messages.map((message, index) => (
-                <Box
-                  key={`${message.type}-${index}-${message.text.slice(0, 20)}`}
-                  marginLeft={2}
-                >
+              {messages.map((message) => (
+                <Box key={message.id} marginLeft={2}>
                   {message.type === "restart" ? (
                     <>
                       <Text color="green">✓{"  "}</Text>

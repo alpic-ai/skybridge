@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import nodemonOriginal from "nodemon";
@@ -7,6 +8,7 @@ import type { ExtendedNodemon } from "./nodemon.d.ts";
 const nodemon = nodemonOriginal as ExtendedNodemon;
 
 type Message = {
+  id: string;
   text: string;
   type: "log" | "restart" | "error";
 };
@@ -32,14 +34,20 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
     const handleStdoutData = (chunk: Buffer) => {
       const message = chunk.toString().trim();
       if (message) {
-        setMessages((prev) => [...prev, { text: message, type: "log" }]);
+        setMessages((prev) => [
+          ...prev,
+          { id: randomUUID(), text: message, type: "log" },
+        ]);
       }
     };
 
     const handleStderrData = (chunk: Buffer) => {
       const message = chunk.toString().trim();
       if (message) {
-        setMessages((prev) => [...prev, { text: message, type: "error" }]);
+        setMessages((prev) => [
+          ...prev,
+          { id: randomUUID(), text: message, type: "error" },
+        ]);
       }
     };
 
@@ -66,7 +74,7 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
       const restartMessage = `Server restarted due to file changes: ${files.join(", ")}`;
       setMessages((prev) => [
         ...prev,
-        { text: restartMessage, type: "restart" },
+        { id: randomUUID(), text: restartMessage, type: "restart" },
       ]);
       setupStdoutListener();
       setupStderrListener();
