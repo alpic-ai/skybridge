@@ -47,7 +47,16 @@ const server = new McpServer(
       resourceServerUrl: new URL(env.SERVER_URL),
     }),
   )
-  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
+  .use(
+    "/mcp",
+    requireBearerAuth({
+      verifier: { verifyAccessToken },
+      resourceMetadataUrl: new URL(
+        "/.well-known/oauth-protected-resource",
+        env.SERVER_URL,
+      ).toString(),
+    }),
+  )
   .registerWidget(
     "search-coffee-paris",
     {
