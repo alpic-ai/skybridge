@@ -28,6 +28,15 @@ import { mergeWith, union } from "es-toolkit";
 import type { Express, RequestHandler } from "express";
 import { DEFAULT_HMR_PORT } from "./const.js";
 import { createServer } from "./express.js";
+import type {
+  McpExtra,
+  McpMethodString,
+  McpMiddlewareEntry,
+  McpMiddlewareFilter,
+  McpMiddlewareFn,
+  McpTypedMiddlewareFn,
+} from "./middleware.js";
+import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
 import { templateHelper } from "./templateHelper.js";
 
 const mergeWithUnion = <T extends object, S extends object>(
@@ -226,6 +235,8 @@ export class McpServer<
   declare readonly $types: McpServerTypes<TTools>;
   private express?: Express;
   private customMiddleware: MiddlewareConfig[] = [];
+  private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
+  private mcpMiddlewareApplied = false;
 
   use(...handlers: RequestHandler[]): this;
   use(path: string, ...handlers: RequestHandler[]): this;
@@ -247,7 +258,128 @@ export class McpServer<
     return this;
   }
 
+  /**
+   * Register MCP protocol-level middleware (catch-all).
+   */
+  mcpMiddleware(handler: McpMiddlewareFn): this;
+  /**
+   * Register MCP protocol-level middleware for all requests (`extra` is `McpExtra`).
+   */
+  mcpMiddleware(
+    filter: "request",
+    handler: (
+      request: { method: string; params: Record<string, unknown> },
+      extra: McpExtra,
+      next: () => Promise<unknown>,
+    ) => Promise<unknown> | unknown,
+  ): this;
+  /**
+   * Register MCP protocol-level middleware for all notifications (`extra` is `undefined`).
+   */
+  mcpMiddleware(
+    filter: "notification",
+    handler: (
+      request: { method: string; params: Record<string, unknown> },
+      extra: undefined,
+      next: () => Promise<unknown>,
+    ) => Promise<unknown> | unknown,
+  ): this;
+  /**
+   * Register MCP protocol-level middleware for an exact method.
+   * Narrows both `params` and `extra` based on the method string.
+   */
+  mcpMiddleware<M extends McpMethodString>(
+    filter: M,
+    handler: McpTypedMiddlewareFn<M>,
+  ): this;
+  /**
+   * Register MCP protocol-level middleware with a method filter.
+   * Filter can be an exact method (`"tools/call"`), wildcard (`"tools/*"`),
+   * category (`"request"` | `"notification"`), or an array of those.
+   */
+  mcpMiddleware(filter: McpMiddlewareFilter, handler: McpMiddlewareFn): this;
+  mcpMiddleware(
+    filterOrHandler: McpMiddlewareFilter | McpMiddlewareFn,
+    // biome-ignore lint/suspicious/noExplicitAny: overloads narrow the handler type at call sites; implementation must accept all variants
+    maybeHandler?: any,
+  ): this {
+    if (this.mcpMiddlewareApplied) {
+      throw new Error(
+        "Cannot register MCP middleware after run() or connect() has been called",
+      );
+    }
+
+    const handler = maybeHandler as McpMiddlewareFn | undefined;
+
+    if (typeof filterOrHandler === "function") {
+      this.mcpMiddlewareEntries.push({
+        filter: null,
+        handler: filterOrHandler,
+      });
+    } else if (handler) {
+      this.mcpMiddlewareEntries.push({
+        filter: filterOrHandler,
+        handler,
+      });
+    } else {
+      throw new Error(
+        "mcpMiddleware requires a handler function when a filter is provided",
+      );
+    }
+
+    return this;
+  }
+
+  private applyMcpMiddleware(): void {
+    if (this.mcpMiddlewareApplied) {
+      return;
+    }
+    this.mcpMiddlewareApplied = true;
+
+    if (this.mcpMiddlewareEntries.length === 0) {
+      return;
+    }
+
+    const { requestHandlers, notificationHandlers } = getHandlerMaps(
+      this.server,
+    );
+    const entries = this.mcpMiddlewareEntries;
+
+    // Wrap existing handlers and proxy future .set() for lazy SDK registration
+    const instrumentMap = (
+      map: Map<string, (...args: unknown[]) => Promise<unknown>>,
+      isNotification: boolean,
+    ) => {
+      for (const [method, handler] of map) {
+        map.set(
+          method,
+          buildMiddlewareChain(method, isNotification, handler, entries),
+        );
+      }
+      const originalSet = map.set.bind(map);
+      map.set = (
+        method: string,
+        handler: (...args: unknown[]) => Promise<unknown>,
+      ) =>
+        originalSet(
+          method,
+          buildMiddlewareChain(method, isNotification, handler, entries),
+        );
+    };
+
+    instrumentMap(requestHandlers, false);
+    instrumentMap(notificationHandlers, true);
+  }
+
+  override async connect(
+    transport: Parameters<typeof McpServerBase.prototype.connect>[0],
+  ): Promise<void> {
+    this.applyMcpMiddleware();
+    return super.connect(transport);
+  }
+
   async run(): Promise<void> {
+    this.applyMcpMiddleware();
     if (!this.express) {
       this.express = await createServer({
         server: this,
