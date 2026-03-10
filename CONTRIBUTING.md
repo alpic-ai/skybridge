@@ -55,6 +55,10 @@ Start a [discussion](https://github.com/alpic-ai/skybridge/discussions) to share
 
 Keep PRs focused on a single change. For larger features, consider opening an issue first to discuss the approach.
 
+### Documentation
+
+When changing docs or features that affect the docs website, see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for general documentation philosophy, guidelines and doc change checklist.
+
 ## Code Guidelines
 
 - Write TypeScript with proper types (avoid `any`)
