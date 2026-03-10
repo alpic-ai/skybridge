@@ -33,14 +33,18 @@ const protectedResourceHandler: RequestHandler = (_req, res) => {
   });
 };
 
-// Proxies Stytch's own AS metadata — real OAuth endpoints come from Stytch, not hardcoded here.
+// Proxies Stytch's AS metadata but overrides authorization_endpoint to point
+// to the static HTML page served by this server.
 const authorizationServerHandler: RequestHandler = async (_req, res, next) => {
   try {
     const stytchDomain = env.STYTCH_DOMAIN.replace(/\/$/, "");
     const metadata = await fetch(
       `${stytchDomain}/.well-known/oauth-authorization-server`,
     ).then((r) => r.json());
-    res.json(metadata);
+    res.json({
+      ...metadata,
+      authorization_endpoint: `${env.SERVER_URL}/assets/authorize.html`,
+    });
   } catch (err) {
     next(err);
   }

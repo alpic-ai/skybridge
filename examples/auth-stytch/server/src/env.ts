@@ -13,7 +13,6 @@ export const env = {
     (process.env.NODE_ENV as "development" | "production") || "development",
   SERVER_URL: process.env.SERVER_URL || "http://localhost:3000",
   STYTCH_PROJECT_ID: requireEnv("STYTCH_PROJECT_ID"),
-  STYTCH_PROJECT_SECRET: requireEnv("STYTCH_PROJECT_SECRET"),
   STYTCH_DOMAIN: (() => {
     const value = requireEnv("STYTCH_DOMAIN");
     try {
