@@ -158,7 +158,8 @@
           "showcase/productivity",
           "showcase/times-up",
           "showcase/auth-clerk",
-          "showcase/auth-workos"
+          "showcase/auth-workos",
+          "showcase/auth-stytch"
         ]
       }
     ]
