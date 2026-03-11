@@ -1,0 +1,33 @@
+---
+title: Auth — Auth0
+description: Full OAuth authentication with Auth0 and personalized coffee shop search.
+---
+
+Auth (Auth0) is an example that demonstrates full OAuth authentication using [Auth0](https://auth0.com/), with a personalized coffee shop finder widget that displays user-specific favorites.
+
+<img
+  src="/images/showcase-auth.png"
+  alt="Auth — Auth0"
+  style={{ width: "100%", maxWidth: "960px", borderRadius: "12px" }}
+/>
+
+<Note>
+  Auth0 does not support [Dynamic Client Registration](https://datatracker.ietf.org/doc/html/rfc7591), which MCP clients require to register themselves automatically. This example relies on the **Alpic DCR proxy** — the full OAuth flow only works when deployed on Alpic. See the [README](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-auth0) for local development instructions.
+</Note>
+
+## Links
+
+<CardGroup cols={2}>
+  <Card
+    title="View source on GitHub"
+    icon="github"
+    href="https://github.com/alpic-ai/skybridge/tree/main/examples/auth-auth0"
+  >
+    Browse the full example code.
+  </Card>
+</CardGroup>
+
+## Skybridge APIs used
+
+- [`registerWidget`](/api-reference/register-widget)
+- [`useToolInfo`](/api-reference/use-tool-info)
