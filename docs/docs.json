@@ -159,7 +159,8 @@
           "showcase/times-up",
           "showcase/auth-clerk",
           "showcase/auth-workos",
-          "showcase/auth-stytch"
+          "showcase/auth-stytch",
+          "showcase/auth-auth0"
         ]
       }
     ]
