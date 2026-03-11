@@ -49,6 +49,10 @@ export class BrowserOAuthProvider implements OAuthClientProvider {
     localStorage.setItem(KEYS.tokens, JSON.stringify(tokens));
   }
 
+  state(): string {
+    return crypto.randomUUID();
+  }
+
   redirectToAuthorization(authorizationUrl: URL): void {
     window.location.href = authorizationUrl.toString();
   }
