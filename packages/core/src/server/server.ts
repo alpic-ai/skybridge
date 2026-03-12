@@ -429,7 +429,7 @@ export class McpServer<
     if (!resourceConfig.hosts || resourceConfig.hosts.includes("apps-sdk")) {
       const widgetConfig: WidgetResourceConfig<OpenaiResourceMeta> = {
         hostType: "apps-sdk",
-        uri: `ui://widgets/apps-sdk/${name}.html`,
+        uri: `ui://widgets/apps-sdk/${name}.html?v=${Date.now()}`,
         mimeType: "text/html+skybridge",
         buildContentMeta: (
           { resourceDomains, connectDomains, domain },
