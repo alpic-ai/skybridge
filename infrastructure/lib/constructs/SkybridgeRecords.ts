@@ -17,7 +17,7 @@ export class SkybridgeRecords extends Construct {
     // Redirect apex and www to docs
     new HttpsRedirect(this, "ApexRedirect", {
       zone: hostedZone,
-      recordNames: ["www"],
+      recordNames: [domain, `www.${domain}`],
       targetDomain: `docs.${domain}`,
     });
 
