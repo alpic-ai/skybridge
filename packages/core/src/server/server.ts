@@ -394,7 +394,7 @@ export class McpServer<
     return super.connect(transport);
   }
 
-  async run(): Promise<void> {
+  async run(): Promise<{ fetch: (...args: unknown[]) => unknown } | undefined> {
     this.applyMcpMiddleware();
     if (!this.express) {
       this.express = await createServer({
@@ -404,17 +404,26 @@ export class McpServer<
     }
 
     const express = this.express;
-    return new Promise((resolve, reject) => {
+    const port = parseInt(process.env.__PORT ?? "3000", 10);
+
+    await new Promise<void>((resolve, reject) => {
       const server = http.createServer(express);
       server.on("error", (error: Error) => {
         console.error("Failed to start server:", error);
         reject(error);
       });
-      const port = parseInt(process.env.__PORT ?? "3000", 10);
       server.listen(port, () => {
         resolve();
       });
     });
+
+    try {
+      const cloudflareNode = "cloudflare:node";
+      const { httpServerHandler } = await import(cloudflareNode);
+      return httpServerHandler({ port });
+    } catch {
+      return undefined;
+    }
   }
 
   registerWidget<
