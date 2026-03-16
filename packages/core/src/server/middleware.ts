@@ -1,10 +1,25 @@
 import type { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
+  CallToolResult,
+  CancelTaskResult,
   ClientNotification,
   ClientRequest,
+  CompleteResult,
+  EmptyResult,
+  GetPromptResult,
+  GetTaskPayloadResult,
+  GetTaskResult,
+  InitializeResult,
+  ListPromptsResult,
+  ListResourcesResult,
+  ListResourceTemplatesResult,
+  ListTasksResult,
+  ListToolsResult,
+  ReadResourceResult,
   ServerNotification,
   ServerRequest,
+  ServerResult,
 } from "@modelcontextprotocol/sdk/types.js";
 
 /**
@@ -46,11 +61,51 @@ export type McpExtraFor<M extends string> = M extends ClientRequest["method"]
     ? undefined
     : McpExtra | undefined;
 
-/** Typed middleware fn for a specific method — narrows both params and extra. */
+/** Maps each MCP request method to its SDK result type. */
+interface McpResultMap {
+  ping: EmptyResult;
+  initialize: InitializeResult;
+  "tools/list": ListToolsResult;
+  "tools/call": CallToolResult;
+  "resources/list": ListResourcesResult;
+  "resources/templates/list": ListResourceTemplatesResult;
+  "resources/read": ReadResourceResult;
+  "resources/subscribe": EmptyResult;
+  "resources/unsubscribe": EmptyResult;
+  "prompts/list": ListPromptsResult;
+  "prompts/get": GetPromptResult;
+  "completion/complete": CompleteResult;
+  "logging/setLevel": EmptyResult;
+  "tasks/get": GetTaskResult;
+  "tasks/result": GetTaskPayloadResult;
+  "tasks/list": ListTasksResult;
+  "tasks/cancel": CancelTaskResult;
+}
+
+/**
+ * Map an MCP method string to its corresponding result type.
+ * For request methods, resolves to the specific SDK result type.
+ * For wildcard patterns (e.g. `"tools/*"`), resolves to the union of matching result types.
+ * For notification methods, resolves to `undefined`.
+ * For unknown/unmatched methods, falls back to `ServerResult`.
+ */
+export type McpResultFor<M extends string> = M extends keyof McpResultMap
+  ? McpResultMap[M]
+  : M extends `${infer Prefix}/*`
+    ? [McpResultMap[keyof McpResultMap & `${Prefix}/${string}`]] extends [never]
+      ? M extends ToWildcard<ClientNotification["method"]>
+        ? undefined
+        : ServerResult
+      : McpResultMap[keyof McpResultMap & `${Prefix}/${string}`]
+    : M extends ClientNotification["method"]
+      ? undefined
+      : ServerResult;
+
+/** Typed middleware fn for a specific method — narrows params, extra, and next() result. */
 export type McpTypedMiddlewareFn<M extends string> = (
   request: { method: M; params: McpRequestParams<M> },
   extra: McpExtraFor<M>,
-  next: () => Promise<unknown>,
+  next: () => Promise<McpResultFor<M>>,
 ) => Promise<unknown> | unknown;
 
 /** Extracts `"prefix/*"` from `"prefix/anything"` — distributive over unions. */
@@ -59,7 +114,7 @@ type ToWildcard<T extends string> = T extends `${infer Prefix}/${string}`
   : never;
 
 /** Wildcard prefixes derived from method strings (e.g. `"tools/*"` from `"tools/call"`). */
-type McpWildcard = ToWildcard<McpMethodString>;
+export type McpWildcard = ToWildcard<McpMethodString>;
 
 /** Category keywords matching all requests or all notifications. */
 type McpCategory = "request" | "notification";
