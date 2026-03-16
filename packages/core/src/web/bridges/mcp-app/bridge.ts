@@ -1,4 +1,4 @@
-import { App, PostMessageTransport } from "@modelcontextprotocol/ext-apps";
+import { App } from "@modelcontextprotocol/ext-apps";
 import type { Implementation } from "@modelcontextprotocol/sdk/types.js";
 import type { Bridge, Subscribe } from "../types.js";
 import type { McpAppContext, McpAppContextKey } from "./types.js";
@@ -12,12 +12,10 @@ export class McpAppBridge implements Bridge<McpAppContext> {
   };
   private listeners = new Map<McpAppContextKey, Set<() => void>>();
   private app: App;
-  private transport: PostMessageTransport;
   private connectPromise: Promise<void>;
 
   constructor(options: { appInfo: Implementation }) {
     this.app = new App(options.appInfo);
-    this.transport = new PostMessageTransport(window.parent, window.parent);
 
     this.app.ontoolinput = (params) => {
       this.updateContext({ toolInput: params.arguments ?? {} });
@@ -49,7 +47,7 @@ export class McpAppBridge implements Bridge<McpAppContext> {
 
   private async connect() {
     try {
-      await this.app.connect(this.transport);
+      await this.app.connect();
       const hostContext = this.app.getHostContext();
       if (hostContext) {
         this.updateContext(hostContext);
