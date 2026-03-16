@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.29.0",
-    "@oclif/core": "^4.8.4",
+    "@oclif/core": "^4.9.0",
     "ci-info": "^4.4.0",
     "cors": "^2.8.6",
     "dequal": "^2.0.3",
@@ -60,12 +60,12 @@
     "express": "^5.2.1",
     "handlebars": "^4.7.8",
     "ink": "^6.8.0",
-    "posthog-node": "^5.28.0",
+    "posthog-node": "^5.28.2",
     "superjson": "^2.2.6",
-    "zustand": "^5.0.11"
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@modelcontextprotocol/ext-apps": "^1.2.0",
+    "@modelcontextprotocol/ext-apps": "^1.2.2",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
@@ -77,15 +77,15 @@
     "@types/node": "^24.12.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitest/ui": "^4.0.18",
+    "@vitest/ui": "^4.1.0",
     "jsdom": "^29.0.0",
     "shx": "^0.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.18",
+    "vitest": "^4.1.0",
     "zod": "^4.3.6"
   },
-  "packageManager": "pnpm@10.32.0",
+  "packageManager": "pnpm@10.32.1",
   "bin": {
     "sb": "./bin/run.js",
     "skybridge": "./bin/run.js"
