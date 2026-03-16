@@ -37,8 +37,8 @@ export class McpAppBridge implements Bridge<McpAppContext> {
       this.updateContext(params);
     };
 
-    this.app.onteardown = () => {
-      this.cleanup();
+    this.app.onteardown = async () => {
+      await this.cleanup();
       return {};
     };
 
