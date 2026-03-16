@@ -38,6 +38,7 @@ const server = new McpServer(
         issuer: env.SERVER_URL,
         authorization_endpoint: `https://${env.AUTH0_DOMAIN}/authorize?audience=${encodeURIComponent(env.AUTH0_AUDIENCE)}`,
         token_endpoint: `https://${env.AUTH0_DOMAIN}/oauth/token`,
+        registration_endpoint: `https://${env.AUTH0_DOMAIN}/oidc/register`,
         response_types_supported: ["code"],
         code_challenge_methods_supported: ["S256"],
         response_modes_supported: ["query"],
