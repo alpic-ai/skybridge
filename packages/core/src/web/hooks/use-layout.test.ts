@@ -84,7 +84,7 @@ describe("useLayout", () => {
       vi.stubGlobal("parent", {
         postMessage: getMcpAppHostPostMessageMock({
           theme: "dark",
-          containerDimensions: { height: 400, width: 400, maxHeight: 800 },
+          containerDimensions: { maxHeight: 800, width: 400 },
           safeAreaInsets: { top: 20, right: 0, bottom: 34, left: 0 },
         }),
       });
@@ -103,7 +103,7 @@ describe("useLayout", () => {
       vi.stubGlobal("parent", {
         postMessage: getMcpAppHostPostMessageMock({
           theme: "light",
-          containerDimensions: { height: 400, width: 400, maxHeight: 500 },
+          containerDimensions: { maxHeight: 500, width: 400 },
           safeAreaInsets: { top: 44, right: 0, bottom: 34, left: 0 },
         }),
       });

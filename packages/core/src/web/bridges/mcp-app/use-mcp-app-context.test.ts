@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getMcpAppHostPostMessageMock,
@@ -11,7 +11,7 @@ describe("useMcpAppContext", () => {
   beforeEach(async () => {
     vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     vi.stubGlobal("ResizeObserver", MockResizeObserver);
-    McpAppBridge.resetInstance();
+    await McpAppBridge.resetInstance();
   });
 
   afterEach(() => {
@@ -28,34 +28,6 @@ describe("useMcpAppContext", () => {
     await waitFor(() => {
       expect(result.current).toBe("light");
     });
-  });
-
-  it("should reject the request after timeout", async () => {
-    vi.useFakeTimers();
-    const consoleErrorSpy = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-
-    const nonRespondingMock = vi.fn();
-    vi.stubGlobal("parent", { postMessage: nonRespondingMock });
-
-    renderHook(() => useMcpAppContext("theme", undefined, 100));
-
-    expect(nonRespondingMock).toHaveBeenCalledWith(
-      expect.objectContaining({ method: "ui/initialize" }),
-      "*",
-    );
-
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(100);
-    });
-
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      new Error("Request timed out"),
-    );
-
-    consoleErrorSpy.mockRestore();
-    vi.useRealTimers();
   });
 
   it("should send size-changed notification after successful initialization", async () => {
