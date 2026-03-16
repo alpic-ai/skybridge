@@ -1,5 +1,9 @@
-import { CnameRecord, PublicHostedZone } from "aws-cdk-lib/aws-route53";
-import { HttpsRedirect } from "aws-cdk-lib/aws-route53-patterns";
+import {
+  ARecord,
+  CnameRecord,
+  PublicHostedZone,
+  RecordTarget,
+} from "aws-cdk-lib/aws-route53";
 import { Construct } from "constructs";
 
 type SkybridgeRecordsProps = {
@@ -14,10 +18,9 @@ export class SkybridgeRecords extends Construct {
       zoneName: domain,
     });
 
-    // Redirect apex to docs
-    new HttpsRedirect(this, "ApexRedirect", {
+    new ARecord(this, "Apex", {
       zone: hostedZone,
-      targetDomain: `docs.${domain}`,
+      target: RecordTarget.fromIpAddresses("216.150.1.1"),
     });
 
     // Showcase apps pointing to alpic.ai
