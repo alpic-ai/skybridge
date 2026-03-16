@@ -1,6 +1,6 @@
 {
   "name": "skybridge",
-  "version": "0.0.0",
+  "version": "0.33.4",
   "description": "Skybridge is a framework for building ChatGPT and MCP Apps",
   "repository": {
     "type": "git",
@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@babel/core": "^7.29.0",
-    "@oclif/core": "^4.8.3",
+    "@oclif/core": "^4.8.4",
     "ci-info": "^4.4.0",
     "cors": "^2.8.6",
     "dequal": "^2.0.3",
@@ -78,14 +78,14 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitest/ui": "^4.0.18",
-    "jsdom": "^28.1.0",
+    "jsdom": "^29.0.0",
     "shx": "^0.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18",
     "zod": "^4.3.6"
   },
-  "packageManager": "pnpm@10.31.0",
+  "packageManager": "pnpm@10.32.0",
   "bin": {
     "sb": "./bin/run.js",
     "skybridge": "./bin/run.js"

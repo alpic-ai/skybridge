@@ -11,6 +11,7 @@ const KEYS = {
   clientInfo: `${PREFIX}:client-info`,
   tokens: `${PREFIX}:tokens`,
   codeVerifier: `${PREFIX}:code-verifier`,
+  state: `${PREFIX}:state`,
 } as const;
 
 export class BrowserOAuthProvider implements OAuthClientProvider {
@@ -49,6 +50,16 @@ export class BrowserOAuthProvider implements OAuthClientProvider {
     localStorage.setItem(KEYS.tokens, JSON.stringify(tokens));
   }
 
+  state(): string {
+    const stored = localStorage.getItem(KEYS.state);
+    if (stored) {
+      return stored;
+    }
+    const generated = crypto.randomUUID();
+    localStorage.setItem(KEYS.state, generated);
+    return generated;
+  }
+
   redirectToAuthorization(authorizationUrl: URL): void {
     window.location.href = authorizationUrl.toString();
   }
@@ -70,6 +81,7 @@ export class BrowserOAuthProvider implements OAuthClientProvider {
     }
     if (scope === "all" || scope === "verifier") {
       localStorage.removeItem(KEYS.codeVerifier);
+      localStorage.removeItem(KEYS.state);
     }
   }
 }

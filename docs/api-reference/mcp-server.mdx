@@ -55,6 +55,122 @@ Register a tool without UI (inherited from MCP SDK).
 server.registerTool(name, config, handler);
 ```
 
+### use
+
+Register Express middleware on the underlying HTTP server. Supports optional path filtering.
+
+```typescript
+// Global middleware
+server.use(cors());
+
+// Path-scoped middleware
+server.use("/api", authMiddleware);
+```
+
+### mcpMiddleware
+
+Register MCP protocol-level middleware using an onion model. Middleware wraps request/notification handlers and can inspect, modify, or short-circuit them.
+
+Must be registered **before** calling `server.run()` or `server.connect()`.
+
+```typescript
+server.mcpMiddleware(handler);
+server.mcpMiddleware(filter, handler);
+```
+
+#### Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `filter` | `McpMiddlewareFilter` | Optional. Determines which methods the middleware applies to. Omit for catch-all. |
+| `handler` | `McpMiddlewareFn` | The middleware function. Call `next()` to continue the chain. |
+
+#### Filter patterns
+
+| Pattern | Example | Matches |
+|---------|---------|---------|
+| Exact method | `"tools/call"` | Only `tools/call` |
+| Wildcard | `"tools/*"` | Any method starting with `tools/` |
+| Category | `"request"` | All requests (with `extra` context) |
+| Category | `"notification"` | All notifications (`extra` is `undefined`) |
+| Array | `["tools/call", "resources/read"]` | Multiple patterns (OR logic) |
+
+#### Middleware signature
+
+```typescript
+type McpMiddlewareFn = (
+  request: { method: string; params: Record<string, unknown> },
+  extra: McpExtra | undefined,
+  next: () => Promise<unknown>,
+) => Promise<unknown> | unknown;
+```
+
+- `request` — the incoming MCP request with `method` and `params`
+- `extra` — SDK context (`McpExtra`) for requests, `undefined` for notifications
+- `next()` — invoke the next middleware or original handler. Can only be called once per middleware.
+
+#### Type-safe filters
+
+When using an exact method string, both `params` and `extra` are narrowed automatically:
+
+```typescript
+server.mcpMiddleware("tools/call", (request, extra, next) => {
+  // request.params is typed as CallToolRequest["params"]
+  // extra is typed as McpExtra (not undefined)
+  console.log(`Tool called: ${request.params.name}`);
+  return next();
+});
+```
+
+#### Examples
+
+**Logging all requests:**
+
+```typescript
+server.mcpMiddleware("request", (request, extra, next) => {
+  console.log(`[MCP] ${request.method}`, request.params);
+  return next();
+});
+```
+
+**Auth guard on tool calls:**
+
+```typescript
+server.mcpMiddleware("tools/call", async (request, extra, next) => {
+  const token = extra.requestInfo?.headers?.["authorization"];
+  if (!token) {
+    throw new Error("Unauthorized");
+  }
+  return next();
+});
+```
+
+**Modifying params:**
+
+```typescript
+server.mcpMiddleware("tools/call", (request, extra, next) => {
+  request.params = { ...request.params, injectedAt: Date.now() };
+  return next();
+});
+```
+
+**Multiple middleware (onion order):**
+
+```typescript
+const server = new McpServer({ name: "my-app", version: "1.0" }, {})
+  .mcpMiddleware((request, extra, next) => {
+    console.log("outer: before");
+    const result = await next();
+    console.log("outer: after");
+    return result;
+  })
+  .mcpMiddleware((request, extra, next) => {
+    console.log("inner: before");
+    return next();
+  });
+// Logs: outer: before → inner: before → handler → outer: after
+```
+
 ## Type Export Pattern
 
 Export the server type for client-side type inference:
@@ -125,6 +241,20 @@ const server = new McpServer(
 
 export type AppType = typeof server;
 export default server;
+```
+
+## Exported Types
+
+The following middleware types are available from `skybridge/server`:
+
+```typescript
+import type {
+  McpExtra,
+  McpMiddlewareFn,
+  McpMiddlewareFilter,
+  McpTypedMiddlewareFn,
+  McpMethodString,
+} from "skybridge/server";
 ```
 
 ## Related

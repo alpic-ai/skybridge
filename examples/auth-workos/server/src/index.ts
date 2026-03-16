@@ -33,7 +33,7 @@ const server = new McpServer(
   .use(
     mcpAuthMetadataRouter({
       oauthMetadata: {
-        issuer: env.SERVER_URL,
+        issuer: `https://${env.AUTHKIT_DOMAIN}`,
         authorization_endpoint: `https://${env.AUTHKIT_DOMAIN}/oauth2/authorize`,
         token_endpoint: `https://${env.AUTHKIT_DOMAIN}/oauth2/token`,
         registration_endpoint: `https://${env.AUTHKIT_DOMAIN}/oauth2/register`,
