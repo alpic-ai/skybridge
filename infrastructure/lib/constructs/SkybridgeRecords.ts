@@ -1,9 +1,4 @@
-import {
-  ARecord,
-  CnameRecord,
-  PublicHostedZone,
-  RecordTarget,
-} from "aws-cdk-lib/aws-route53";
+import { CnameRecord, PublicHostedZone } from "aws-cdk-lib/aws-route53";
 import { Construct } from "constructs";
 
 type SkybridgeRecordsProps = {
@@ -16,11 +11,6 @@ export class SkybridgeRecords extends Construct {
 
     const hostedZone = new PublicHostedZone(this, "HostedZone", {
       zoneName: domain,
-    });
-
-    new ARecord(this, "Apex", {
-      zone: hostedZone,
-      target: RecordTarget.fromIpAddresses("216.150.1.1"),
     });
 
     // Showcase apps pointing to alpic.ai
