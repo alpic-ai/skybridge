@@ -58,10 +58,10 @@ describe("useOpenExternal", () => {
       vi.stubGlobal("parent", { postMessage: postMessageMock });
     });
 
-    afterEach(() => {
+    afterEach(async () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
-      McpAppBridge.resetInstance();
+      await McpAppBridge.resetInstance();
     });
 
     it("should return a function that sends ui/open-link request to the MCP host", async () => {

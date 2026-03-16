@@ -125,8 +125,8 @@ describe("createStore", () => {
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
-    afterEach(() => {
-      McpAppBridge.resetInstance();
+    afterEach(async () => {
+      await McpAppBridge.resetInstance();
       McpAppAdaptor.resetInstance();
     });
 

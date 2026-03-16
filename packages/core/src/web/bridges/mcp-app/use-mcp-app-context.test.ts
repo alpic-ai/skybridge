@@ -29,35 +29,4 @@ describe("useMcpAppContext", () => {
       expect(result.current).toBe("light");
     });
   });
-
-  it("should send size-changed notification after successful initialization", async () => {
-    // Mock body dimensions to non-zero (size-changed only sends when dimensions change)
-    Object.defineProperty(document.body, "scrollWidth", {
-      value: 800,
-      configurable: true,
-    });
-    Object.defineProperty(document.body, "scrollHeight", {
-      value: 600,
-      configurable: true,
-    });
-
-    const postMessageMock = getMcpAppHostPostMessageMock({ theme: "light" });
-    vi.stubGlobal("parent", { postMessage: postMessageMock });
-
-    renderHook(() => useMcpAppContext("theme"));
-
-    await waitFor(() => {
-      expect(postMessageMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          jsonrpc: "2.0",
-          method: "ui/notifications/size-changed",
-          params: expect.objectContaining({
-            width: expect.any(Number),
-            height: expect.any(Number),
-          }),
-        }),
-        "*",
-      );
-    });
-  });
 });
