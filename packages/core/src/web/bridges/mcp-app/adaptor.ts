@@ -1,16 +1,3 @@
-import type {
-  McpUiMessageRequest,
-  McpUiMessageResult,
-  McpUiOpenLinkRequest,
-  McpUiOpenLinkResult,
-  McpUiRequestDisplayModeRequest,
-  McpUiRequestDisplayModeResult,
-  McpUiUpdateModelContextRequest,
-} from "@modelcontextprotocol/ext-apps";
-import type {
-  CallToolRequest,
-  CallToolResult,
-} from "@modelcontextprotocol/sdk/types.js";
 import { dequal } from "dequal/lite";
 import type {
   Adaptor,
@@ -70,13 +57,10 @@ export class McpAppAdaptor implements Adaptor {
     name: string,
     args: ToolArgs,
   ): Promise<ToolResponse> => {
-    const bridge = McpAppBridge.getInstance();
-    const response = await bridge.request<CallToolRequest, CallToolResult>({
-      method: "tools/call",
-      params: {
-        name,
-        arguments: args ?? undefined,
-      },
+    const app = await McpAppBridge.getInstance().getApp();
+    const response = await app.callServerTool({
+      name,
+      arguments: args ?? undefined,
     });
 
     const result = response.content
@@ -96,30 +80,21 @@ export class McpAppAdaptor implements Adaptor {
     } as ToolResponse;
   };
 
-  public requestDisplayMode = (mode: RequestDisplayMode) => {
-    const bridge = McpAppBridge.getInstance();
-    return bridge.request<
-      McpUiRequestDisplayModeRequest,
-      McpUiRequestDisplayModeResult
-    >({
-      method: "ui/request-display-mode",
-      params: { mode },
-    });
+  public requestDisplayMode = async (mode: RequestDisplayMode) => {
+    const app = await McpAppBridge.getInstance().getApp();
+    return app.requestDisplayMode({ mode });
   };
 
   public sendFollowUpMessage = async (prompt: string) => {
-    const bridge = McpAppBridge.getInstance();
-    await bridge.request<McpUiMessageRequest, McpUiMessageResult>({
-      method: "ui/message",
-      params: {
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: prompt,
-          },
-        ],
-      },
+    const app = await McpAppBridge.getInstance().getApp();
+    await app.sendMessage({
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: prompt,
+        },
+      ],
     });
   };
 
@@ -130,11 +105,12 @@ export class McpAppAdaptor implements Adaptor {
       );
     }
 
-    const bridge = McpAppBridge.getInstance();
-    bridge.request<McpUiOpenLinkRequest, McpUiOpenLinkResult>({
-      method: "ui/open-link",
-      params: { url: href },
-    });
+    McpAppBridge.getInstance()
+      .getApp()
+      .then((app) => app.openLink({ url: href }))
+      .catch((err) => {
+        console.error("Failed to open external link:", err);
+      });
   }
 
   private initializeStores(): {
@@ -230,14 +206,15 @@ export class McpAppAdaptor implements Adaptor {
       listener();
     });
 
-    const bridge = McpAppBridge.getInstance();
-    await bridge.request<McpUiUpdateModelContextRequest, unknown>({
-      method: "ui/update-model-context",
-      params: {
+    try {
+      const app = await McpAppBridge.getInstance().getApp();
+      await app.updateModelContext({
         structuredContent: newState,
         content: [{ type: "text", text: JSON.stringify(newState) }],
-      },
-    });
+      });
+    } catch (error) {
+      console.error("Failed to update widget state in MCP App.", error);
+    }
   };
 
   /**
