@@ -8,6 +8,8 @@
     "dev": "skybridge dev",
     "build": "skybridge build",
     "start": "skybridge start",
+    "cloudflare:dev": "skybridge build && wrangler dev",
+    "cloudflare:deploy": "skybridge build && wrangler deploy",
     "deploy": "alpic deploy"
   },
   "dependencies": {
@@ -25,7 +27,8 @@
     "@vitejs/plugin-react": "^6.0.1",
     "alpic": "^1.96.1",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "wrangler": "^4.75.0"
   },
   "engines": {
     "node": ">=24.14.0"
