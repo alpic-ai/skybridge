@@ -1,5 +1,6 @@
 packages:
   - "docs"
+  - "infrastructure"
   - "packages/*"
   - "packages/create-skybridge/template"
   - "examples/*"
