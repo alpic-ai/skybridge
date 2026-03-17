@@ -31,6 +31,9 @@ export class SkybridgeRecords extends Construct {
       "productivity",
       "times-up",
       "auth0",
+      "clerk",
+      "stytch",
+      "workos",
     ]) {
       new CnameRecord(this, `${subdomain}App`, {
         zone: hostedZone,
