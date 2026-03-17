@@ -8,8 +8,8 @@
     "dev": "skybridge dev",
     "build": "skybridge build",
     "start": "skybridge start",
-    "cloudflare:dev": "skybridge build && wrangler dev",
-    "cloudflare:deploy": "skybridge build && wrangler deploy",
+    "cloudflare:dev": "skybridge build && cp _headers dist/ && wrangler dev",
+    "cloudflare:deploy": "skybridge build && cp _headers dist/ && wrangler deploy",
     "deploy": "alpic deploy"
   },
   "dependencies": {
