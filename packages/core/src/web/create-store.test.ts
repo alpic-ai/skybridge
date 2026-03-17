@@ -1,3 +1,4 @@
+import { cleanup } from "@testing-library/react";
 import {
   afterEach,
   beforeEach,
@@ -125,7 +126,8 @@ describe("createStore", () => {
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+      cleanup();
       McpAppBridge.resetInstance();
       McpAppAdaptor.resetInstance();
     });

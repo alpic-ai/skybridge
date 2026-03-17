@@ -94,7 +94,7 @@ describe("useToolInfo", () => {
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
-    afterEach(() => {
+    afterEach(async () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();

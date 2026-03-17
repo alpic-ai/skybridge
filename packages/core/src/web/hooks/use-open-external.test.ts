@@ -1,6 +1,10 @@
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
+import {
+  getMcpAppHostPostMessageMock,
+  MockResizeObserver,
+} from "./test/utils.js";
 import { useOpenExternal } from "./use-open-external.js";
 
 describe("useOpenExternal", () => {
@@ -45,33 +49,37 @@ describe("useOpenExternal", () => {
   });
 
   describe("mcp-app host", () => {
-    const mockPostMessage = vi.fn();
+    let postMessageMock: ReturnType<typeof getMcpAppHostPostMessageMock>;
 
     beforeEach(() => {
-      vi.stubGlobal("parent", { postMessage: mockPostMessage });
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+      vi.stubGlobal("ResizeObserver", MockResizeObserver);
+      postMessageMock = getMcpAppHostPostMessageMock();
+      vi.stubGlobal("parent", { postMessage: postMessageMock });
     });
 
-    afterEach(() => {
+    afterEach(async () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();
     });
 
-    it("should return a function that sends ui/open-link request to the MCP host", () => {
+    it("should return a function that sends ui/open-link request to the MCP host", async () => {
       const { result } = renderHook(() => useOpenExternal());
 
       const href = "https://example.com";
       result.current(href, { redirectUrl: false });
 
-      expect(mockPostMessage).toHaveBeenCalledWith(
-        expect.objectContaining({
-          jsonrpc: "2.0",
-          method: "ui/open-link",
-          params: { url: href },
-        }),
-        "*",
-      );
+      await waitFor(() => {
+        expect(postMessageMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            jsonrpc: "2.0",
+            method: "ui/open-link",
+            params: { url: href },
+          }),
+          "*",
+        );
+      });
     });
   });
 });
