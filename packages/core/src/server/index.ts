@@ -11,7 +11,9 @@ export type {
   McpMethodString,
   McpMiddlewareFilter,
   McpMiddlewareFn,
+  McpResultFor,
   McpTypedMiddlewareFn,
+  McpWildcard,
 } from "./middleware.js";
 export type { McpServerTypes, ToolDef, WidgetHostType } from "./server.js";
 export { McpServer } from "./server.js";

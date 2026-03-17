@@ -22,6 +22,7 @@ import type {
   Resource,
   ServerNotification,
   ServerRequest,
+  ServerResult,
   ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
 import { mergeWith, union } from "es-toolkit";
@@ -30,11 +31,14 @@ import { DEFAULT_HMR_PORT } from "./const.js";
 import { createServer } from "./express.js";
 import type {
   McpExtra,
+  McpExtraFor,
   McpMethodString,
   McpMiddlewareEntry,
   McpMiddlewareFilter,
   McpMiddlewareFn,
+  McpResultFor,
   McpTypedMiddlewareFn,
+  McpWildcard,
 } from "./middleware.js";
 import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
 import { templateHelper } from "./templateHelper.js";
@@ -270,7 +274,7 @@ export class McpServer<
     handler: (
       request: { method: string; params: Record<string, unknown> },
       extra: McpExtra,
-      next: () => Promise<unknown>,
+      next: () => Promise<ServerResult>,
     ) => Promise<unknown> | unknown,
   ): this;
   /**
@@ -281,16 +285,28 @@ export class McpServer<
     handler: (
       request: { method: string; params: Record<string, unknown> },
       extra: undefined,
-      next: () => Promise<unknown>,
+      next: () => Promise<undefined>,
     ) => Promise<unknown> | unknown,
   ): this;
   /**
    * Register MCP protocol-level middleware for an exact method.
-   * Narrows both `params` and `extra` based on the method string.
+   * Narrows `params`, `extra`, and `next()` result based on the method string.
    */
   mcpMiddleware<M extends McpMethodString>(
     filter: M,
     handler: McpTypedMiddlewareFn<M>,
+  ): this;
+  /**
+   * Register MCP protocol-level middleware for a wildcard pattern (e.g. `"tools/*"`).
+   * `next()` returns the union of result types for matching methods.
+   */
+  mcpMiddleware<W extends McpWildcard>(
+    filter: W,
+    handler: (
+      request: { method: string; params: Record<string, unknown> },
+      extra: McpExtraFor<W>,
+      next: () => Promise<McpResultFor<W>>,
+    ) => Promise<unknown> | unknown,
   ): this;
   /**
    * Register MCP protocol-level middleware with a method filter.
