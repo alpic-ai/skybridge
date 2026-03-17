@@ -57,6 +57,11 @@ const server = new McpServer(
   },
 );
 
+try {
+  const { default: manifest } = await import("./vite-manifest.js");
+  server.setViteManifest(manifest);
+} catch {}
+
 export default await server.run();
 
 export type AppType = typeof server;

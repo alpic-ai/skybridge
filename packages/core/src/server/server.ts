@@ -241,6 +241,7 @@ export class McpServer<
   private customMiddleware: MiddlewareConfig[] = [];
   private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private mcpMiddlewareApplied = false;
+  private viteManifest: Record<string, { file: string }> | null = null;
 
   use(...handlers: RequestHandler[]): this;
   use(path: string, ...handlers: RequestHandler[]): this;
@@ -259,6 +260,11 @@ export class McpServer<
       });
     }
 
+    return this;
+  }
+
+  setViteManifest(manifest: Record<string, { file: string }>): this {
+    this.viteManifest = manifest;
     return this;
   }
 
@@ -701,6 +707,9 @@ export class McpServer<
   }
 
   private readManifest() {
+    if (this.viteManifest) {
+      return this.viteManifest;
+    }
     return JSON.parse(
       readFileSync(
         path.join(process.cwd(), "dist", "assets", ".vite", "manifest.json"),
