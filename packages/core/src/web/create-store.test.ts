@@ -1,3 +1,4 @@
+import { cleanup } from "@testing-library/react";
 import {
   afterEach,
   beforeEach,
@@ -126,7 +127,8 @@ describe("createStore", () => {
     });
 
     afterEach(async () => {
-      await McpAppBridge.resetInstance();
+      cleanup();
+      McpAppBridge.resetInstance();
       McpAppAdaptor.resetInstance();
     });
 

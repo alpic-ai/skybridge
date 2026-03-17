@@ -97,7 +97,7 @@ describe("useToolInfo", () => {
     afterEach(async () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
-      await McpAppBridge.resetInstance();
+      McpAppBridge.resetInstance();
       McpAppAdaptor.resetInstance();
     });
 

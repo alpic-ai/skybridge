@@ -11,7 +11,7 @@ describe("useMcpAppContext", () => {
   beforeEach(async () => {
     vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     vi.stubGlobal("ResizeObserver", MockResizeObserver);
-    await McpAppBridge.resetInstance();
+    McpAppBridge.resetInstance();
   });
 
   afterEach(() => {

@@ -168,6 +168,7 @@ describe("DataLLM", () => {
     });
 
     afterEach(() => {
+      cleanup();
       McpAppBridge.resetInstance();
       McpAppAdaptor.resetInstance();
     });

@@ -37,11 +37,6 @@ export class McpAppBridge implements Bridge<McpAppContext> {
       this.updateContext(params);
     };
 
-    this.app.onteardown = async () => {
-      await this.cleanup();
-      return {};
-    };
-
     this.connectPromise = this.connect();
   }
 
@@ -110,17 +105,13 @@ export class McpAppBridge implements Bridge<McpAppContext> {
     return this.context[key];
   }
 
-  public cleanup = async () => {
+  public cleanup = () => {
     this.listeners.clear();
-    // Neutralize sendSizeChanged so any pending requestAnimationFrame callbacks
-    // from the SDK's auto-resize become no-ops after close.
-    this.app.sendSizeChanged = () => Promise.resolve();
-    await this.app.close().catch(() => {});
   };
 
-  public static async resetInstance(): Promise<void> {
+  public static resetInstance(): void {
     if (McpAppBridge.instance) {
-      await McpAppBridge.instance.cleanup();
+      McpAppBridge.instance.cleanup();
       McpAppBridge.instance = null;
     }
   }
