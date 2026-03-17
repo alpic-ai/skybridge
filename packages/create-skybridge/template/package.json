@@ -14,16 +14,16 @@
     "@modelcontextprotocol/sdk": "^1.27.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "skybridge": ">=0.35.5 <1.0.0",
+    "skybridge": ">=0.35.7 <1.0.0",
     "vite": "^8.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@skybridge/devtools": ">=0.35.5 <1.0.0",
+    "@skybridge/devtools": ">=0.35.7 <1.0.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
-    "alpic": "^1.95.0",
+    "alpic": "^1.96.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
