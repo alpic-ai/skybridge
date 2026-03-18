@@ -40,8 +40,12 @@ const devtoolsRange = devtoolsVersion ? `>=${devtoolsVersion} <1.0.0` : null;
 const alpicRange = alpicVersion ? `^${alpicVersion}` : null;
 
 console.log(`skybridge:          ${skybridgeRange}`);
-if (devtoolsRange) console.log(`@skybridge/devtools: ${devtoolsRange}`);
-if (alpicRange) console.log(`alpic:               ${alpicRange}`);
+if (devtoolsRange) {
+  console.log(`@skybridge/devtools: ${devtoolsRange}`);
+}
+if (alpicRange) {
+  console.log(`alpic:               ${alpicRange}`);
+}
 
 // Find all example package.json files dynamically
 const exampleTargets = [];
