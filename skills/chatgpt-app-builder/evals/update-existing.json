@@ -1,0 +1,26 @@
+[
+  {
+    "query": "SPEC.md:\n# Pet Adoption\n\n## Value Proposition\nHelp users find adoptable pets nearby and submit adoption applications.\n\n## UX Flows\nAdopt a pet:\n1. Search pets by type, breed, location\n2. Browse results, view pet profiles\n3. Submit adoption application\n\n## Tools and Widgets\n**Widget: search_pets**\n- Input: { type, breed, location }\n- Output: { pets[] }\n- Views: pet list, pet profile, application form\n\n**Tool: submit_application**\n- Input: { petId, applicantInfo }\n- Output: { applicationId, status }\n\n---\nUser: I want to add the ability to send a question to the shelter about a specific pet via email.",
+    "expected_behavior": "Follow architecture.md to design the addition. Should propose a tool (contact_shelter) not a widget - sending an email is a backend action with no browsing/visual need. Must update SPEC.md with the new tool before implementing."
+  },
+  {
+    "query": "SPEC.md:\n# Plant Shop\n\n## Value Proposition\nBrowse houseplants, get care recommendations, and order plants.\n\n## Tools and Widgets\n**Widget: browse_plants**\n- Input: { category, lightLevel }\n- Output: { plants[] }\n- Views: plant grid, plant detail, cart\n\n**Tool: place_order**\n- Input: { items[], shippingAddress }\n- Output: { orderId, deliveryDate }\n\n---\nUser: I want to add a get_plant_info tool so the LLM can tell users about a specific plant's care needs.",
+    "expected_behavior": "REJECT per architecture.md: 'Don't duplicate - widget output is returned to the LLM for conversation. Don't create a tool that duplicates what the widget fetches.' The browse_plants widget already returns plant data including details. Explain this and suggest the LLM re-invoke browse_plants instead."
+  },
+  {
+    "query": "SPEC.md:\n# Gym Class Booking\n\n## Value Proposition\nBrowse gym classes by schedule and book a spot.\n\n## Tools and Widgets\n**Widget: browse_classes**\n- Input: { date, classType }\n- Output: { classes[] }\n\n---\nUser: I want to add a save_favorite_class tool so users can bookmark classes they like.",
+    "expected_behavior": "REJECT per architecture.md: 'Widget UI handles its own state - cart, selections, and form inputs live in the widget, not as tools.' Favorites is widget state. Suggest managing favorites within the browse_classes widget using useWidgetState instead."
+  },
+  {
+    "query": "SPEC.md:\n# Furniture Store\n\n## Value Proposition\nBrowse furniture catalog, see room previews, and purchase items.\n\n## Tools and Widgets\n**Widget: browse_furniture**\n- Input: { category, room }\n- Output: { items[] }\n- Views: item grid, item detail with room preview\n\n**Tool: create_checkout**\n- Input: { itemIds[] }\n- Output: { checkoutUrl }\n\n---\nUser: I want to add a load_room_preview tool that fetches the 3D room render when the user taps on an item.",
+    "expected_behavior": "REJECT per architecture.md: 'Don't lazy-load - tool calls are expensive. Return all needed data upfront.' The browse_furniture widget should include room preview data in its output. Suggest returning preview URLs upfront in the widget output instead."
+  },
+  {
+    "query": "SPEC.md:\n# Vet Appointment\n\n## Value Proposition\nBook vet appointments for pets and view appointment history.\n\n## Tools and Widgets\n**Widget: find_vet**\n- Input: { location, specialty }\n- Output: { vets[], availability[] }\n\n**Tool: book_appointment**\n- Input: { vetId, petId, timeSlot }\n- Output: { appointmentId }\n\n---\nUser: I want to add the ability to cancel an appointment.",
+    "expected_behavior": "Follow architecture.md. Should propose a tool (cancel_appointment) - this is a different flow from finding/booking. Tool-only is appropriate since cancellation is conversational (LLM confirms details). Must update SPEC.md before implementing."
+  },
+  {
+    "query": "SPEC.md:\n# Bike Rental\n\n## Value Proposition\nFind available bikes nearby and rent them.\n\n## Tools and Widgets\n**Tool: find_bikes**\n- Input: { location }\n- Output: { bikes[] }\n\n**Tool: rent_bike**\n- Input: { bikeId, duration }\n- Output: { rentalId, unlockCode }\n\n---\nUser: I want to add a map view so users can see bike locations visually and pick one.",
+    "expected_behavior": "Follow architecture.md. This is evolving the existing find flow - visual/map data improves understanding and selection. Should propose converting find_bikes from a tool to a widget with a map view. Must update SPEC.md before implementing."
+  }
+]

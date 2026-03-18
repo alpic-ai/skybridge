@@ -1,7 +1,7 @@
 ---
 name: chatgpt-app-builder
 description: |
-  Guide developers through creating ChatGPT apps.
+  Guide developers through creating and updating ChatGPT apps.
   Covers the full lifecycle: brainstorming ideas against UX guidelines, bootstrapping projects, implementing tools/widgets, debugging, running dev servers, deploying and connecting apps to ChatGPT.
   Use when a user wants to create or update a ChatGPT app / MCP server for ChatGPT, or use the Skybridge framework.
 ---
@@ -14,7 +14,9 @@ ChatGPT apps are conversational experiences that extend ChatGPT through tools an
 
 SPEC.md keeps track of the app's requirements and design decisions. Keep it up to date as you work on the app.
 
-**No SPEC.md? Stop.** → Read [discover.md](references/discover.md) first. Nothing else until SPEC.md exists.
+**No SPEC.md?** → Read [discover.md](references/discover.md) first. Nothing else until SPEC.md exists.
+
+**SPEC.md exists?** → Read SPEC.md, then follow [architecture.md](references/architecture.md) to design the change. Update SPEC.md, then read the relevant Implementation references below before writing code.
 
 ## Setup
 
