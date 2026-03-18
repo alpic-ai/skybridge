@@ -11,6 +11,13 @@ const server = new McpServer(
   "hello-world",
   {
     description: "Hello World widget",
+    _meta: {
+      ui: {
+        csp: {
+          resourceDomains: ["https://avatars.githubusercontent.com"]
+        }
+      }
+    }
   },
   {
     description: "A hero widget with customizable title and subtitle.",
