@@ -49,7 +49,7 @@ importers:
         version: 19.2.4(react@19.2.4)
       skybridge:
         specifier: '>=0.35.8 <1.0.0'
-        version: 0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        version: 0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -58,8 +58,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.7 <1.0.0'
-        version: 0.35.7
+        specifier: '>=0.35.8 <1.0.0'
+        version: 0.35.8
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
@@ -113,7 +113,7 @@ importers:
         version: 19.2.4(react@19.2.4)
       skybridge:
         specifier: '>=0.35.8 <1.0.0'
-        version: 0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        version: 0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^8.0.0
         version: 8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -122,8 +122,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.7 <1.0.0'
-        version: 0.35.7
+        specifier: '>=0.35.8 <1.0.0'
+        version: 0.35.8
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -174,7 +174,7 @@ importers:
         version: 19.2.4(react@19.2.4)
       skybridge:
         specifier: '>=0.35.8 <1.0.0'
-        version: 0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        version: 0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^8.0.0
         version: 8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -183,8 +183,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.7 <1.0.0'
-        version: 0.35.7
+        specifier: '>=0.35.8 <1.0.0'
+        version: 0.35.8
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
@@ -238,7 +238,7 @@ importers:
         version: 19.2.4(react@19.2.4)
       skybridge:
         specifier: '>=0.35.8 <1.0.0'
-        version: 0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        version: 0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^8.0.0
         version: 8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -247,8 +247,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.7 <1.0.0'
-        version: 0.35.7
+        specifier: '>=0.35.8 <1.0.0'
+        version: 0.35.8
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -314,7 +314,7 @@ importers:
         version: 7.11.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       skybridge:
         specifier: '>=0.35.8 <1.0.0'
-        version: 0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.0))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        version: 0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.0))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.4.0
@@ -326,8 +326,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.7 <1.0.0'
-        version: 0.35.7
+        specifier: '>=0.35.8 <1.0.0'
+        version: 0.35.8
       '@tailwindcss/vite':
         specifier: ^4.1.14
         version: 4.1.18(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -378,7 +378,7 @@ importers:
         version: 19.2.3(react@19.2.3)
       skybridge:
         specifier: '>=0.35.8 <1.0.0'
-        version: 0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.7)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
+        version: 0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.8)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -387,8 +387,8 @@ importers:
         version: 4.3.5
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.7 <1.0.0'
-        version: 0.35.7
+        specifier: '>=0.35.8 <1.0.0'
+        version: 0.35.8
       '@types/node':
         specifier: ^22.19.3
         version: 22.19.3
@@ -424,7 +424,7 @@ importers:
         version: 19.2.3(react@19.2.3)
       skybridge:
         specifier: '>=0.35.8 <1.0.0'
-        version: 0.35.8(@modelcontextprotocol/sdk@1.27.0(zod@4.3.5))(@skybridge/devtools@0.35.7)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
+        version: 0.35.8(@modelcontextprotocol/sdk@1.27.0(zod@4.3.5))(@skybridge/devtools@0.35.8)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
       vite:
         specifier: ^7.3.0
         version: 7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -433,8 +433,8 @@ importers:
         version: 4.3.5
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.7 <1.0.0'
-        version: 0.35.7
+        specifier: '>=0.35.8 <1.0.0'
+        version: 0.35.8
       '@types/react':
         specifier: ^19.2.7
         version: 19.2.7
@@ -470,7 +470,7 @@ importers:
         version: 19.2.4(react@19.2.4)
       skybridge:
         specifier: '>=0.35.8 <1.0.0'
-        version: 0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        version: 0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.4.0
@@ -488,8 +488,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.7 <1.0.0'
-        version: 0.35.7
+        specifier: '>=0.35.8 <1.0.0'
+        version: 0.35.8
       '@tailwindcss/vite':
         specifier: ^4.1.14
         version: 4.1.18(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -543,7 +543,7 @@ importers:
         version: 19.2.4(react@19.2.4)
       skybridge:
         specifier: '>=0.35.8 <1.0.0'
-        version: 0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        version: 0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
@@ -561,8 +561,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.7 <1.0.0'
-        version: 0.35.7
+        specifier: '>=0.35.8 <1.0.0'
+        version: 0.35.8
       '@types/node':
         specifier: ^25.0.10
         version: 25.2.3
@@ -598,7 +598,7 @@ importers:
         version: 19.2.3(react@19.2.3)
       skybridge:
         specifier: '>=0.35.8 <1.0.0'
-        version: 0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.7)(@types/react@19.2.8)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
+        version: 0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.8)(@types/react@19.2.8)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -607,8 +607,8 @@ importers:
         version: 4.3.5
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.7 <1.0.0'
-        version: 0.35.7
+        specifier: '>=0.35.8 <1.0.0'
+        version: 0.35.8
       '@types/node':
         specifier: ^25.2.3
         version: 25.2.3
@@ -650,7 +650,7 @@ importers:
         version: 8.1.3(@types/react@19.2.14)(react@19.2.4)(typescript@5.9.3)
       skybridge:
         specifier: '>=0.35.8 <1.0.0'
-        version: 0.35.8(@modelcontextprotocol/sdk@1.27.0(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@25.2.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        version: 0.35.8(@modelcontextprotocol/sdk@1.27.0(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@25.2.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       tailwindcss:
         specifier: ^4.1.8
         version: 4.2.0
@@ -662,8 +662,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.7 <1.0.0'
-        version: 0.35.7
+        specifier: '>=0.35.8 <1.0.0'
+        version: 0.35.8
       '@tailwindcss/vite':
         specifier: ^4.1.8
         version: 4.2.0(vite@8.0.0(@types/node@25.2.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -849,7 +849,7 @@ importers:
         version: 19.2.4(react@19.2.4)
       skybridge:
         specifier: '>=0.35.8 <1.0.0'
-        version: 0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@25.2.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        version: 0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@25.2.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^8.0.0
         version: 8.0.0(@types/node@25.2.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -858,8 +858,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.7 <1.0.0'
-        version: 0.35.7
+        specifier: '>=0.35.8 <1.0.0'
+        version: 0.35.8
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
@@ -3319,8 +3319,8 @@ packages:
   '@skybridge/devtools@0.31.3':
     resolution: {integrity: sha512-qnHgoVePQh6MQi+s9ml8l71xuOQ237GeqH3qLf6dH9yFwU6U/OWq19+DN41YVX+fmZDXKzu1XxDA9PK94R2zUQ==}
 
-  '@skybridge/devtools@0.35.7':
-    resolution: {integrity: sha512-Q4kBbofiyBwrtxAv6hh+pBV7a14DuFfgF/sFal2S/IqsD2XAnidg2i24wus9IPhbse0yyjmVizzzV4bofyJq6g==}
+  '@skybridge/devtools@0.35.8':
+    resolution: {integrity: sha512-nTHA6VxXOtYEAcjFPKM7En5/4BniEYqcjxhiS9DZGqqV6jFcIbw32+ZhkGHtf4j0ZGjAIVRmz0WRbhpgV3tfPQ==}
 
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
@@ -12813,7 +12813,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@skybridge/devtools@0.35.7':
+  '@skybridge/devtools@0.35.8':
     dependencies:
       cors: 2.8.6
       express: 5.2.1
@@ -18717,13 +18717,13 @@ snapshots:
 
   sisteransi@1.0.5: {}
 
-  skybridge@0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.7)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
+  skybridge@0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.8)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.2.2(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.5)
       '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@oclif/core': 4.9.0
-      '@skybridge/devtools': 0.35.7
+      '@skybridge/devtools': 0.35.8
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -18749,13 +18749,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.7)(@types/react@19.2.8)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
+  skybridge@0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.8)(@types/react@19.2.8)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.2.2(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.5)
       '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@oclif/core': 4.9.0
-      '@skybridge/devtools': 0.35.7
+      '@skybridge/devtools': 0.35.8
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -18781,13 +18781,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.2.2(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.6)
       '@oclif/core': 4.9.0
-      '@skybridge/devtools': 0.35.7
+      '@skybridge/devtools': 0.35.8
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -18813,13 +18813,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.0))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.8(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.0))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.2.2(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.6)
       '@oclif/core': 4.9.0
-      '@skybridge/devtools': 0.35.7
+      '@skybridge/devtools': 0.35.8
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -18845,13 +18845,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.8(@modelcontextprotocol/sdk@1.27.0(zod@4.3.5))(@skybridge/devtools@0.35.7)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
+  skybridge@0.35.8(@modelcontextprotocol/sdk@1.27.0(zod@4.3.5))(@skybridge/devtools@0.35.8)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.2.2(@modelcontextprotocol/sdk@1.27.0(zod@4.3.5))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.5)
       '@modelcontextprotocol/sdk': 1.27.0(zod@4.3.5)
       '@oclif/core': 4.9.0
-      '@skybridge/devtools': 0.35.7
+      '@skybridge/devtools': 0.35.8
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -18877,13 +18877,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.8(@modelcontextprotocol/sdk@1.27.0(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@25.2.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.8(@modelcontextprotocol/sdk@1.27.0(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@25.2.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.2.2(@modelcontextprotocol/sdk@1.27.0(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.27.0(zod@4.3.6)
       '@oclif/core': 4.9.0
-      '@skybridge/devtools': 0.35.7
+      '@skybridge/devtools': 0.35.8
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -18909,13 +18909,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.2.2(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.27.1(zod@4.3.6)
       '@oclif/core': 4.9.0
-      '@skybridge/devtools': 0.35.7
+      '@skybridge/devtools': 0.35.8
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -18941,13 +18941,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.2.2(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.27.1(zod@4.3.6)
       '@oclif/core': 4.9.0
-      '@skybridge/devtools': 0.35.7
+      '@skybridge/devtools': 0.35.8
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -18973,13 +18973,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.7)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@25.2.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.8(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.8)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@25.2.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.2.2(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.27.1(zod@4.3.6)
       '@oclif/core': 4.9.0
-      '@skybridge/devtools': 0.35.7
+      '@skybridge/devtools': 0.35.8
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
