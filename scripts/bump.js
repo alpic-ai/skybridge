@@ -32,7 +32,7 @@ if (!skybridgeVersion) {
   process.exit(1);
 }
 
-const devtoolsVersion = fetchLatestVersion("@skybridge/devtools");
+const devtoolsVersion = process.argv[2] || fetchLatestVersion("@skybridge/devtools");
 const alpicVersion = fetchLatestVersion("alpic");
 
 const skybridgeRange = `>=${skybridgeVersion} <1.0.0`;
