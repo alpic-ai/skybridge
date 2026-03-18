@@ -607,20 +607,21 @@ export class McpServer<
       { ...resourceConfig, _meta: resourceConfig._meta },
       async (uri, extra) => {
         const isProduction = process.env.NODE_ENV === "production";
-        const useForwardedHost =
-          process.env.SKYBRIDGE_USE_FORWARDED_HOST === "true";
         const isClaude =
           extra?.requestInfo?.headers?.["user-agent"] === "Claude-User";
 
+        const forwardedHost = extra?.requestInfo?.headers?.["x-forwarded-host"];
+        const forwardedProto =
+          extra?.requestInfo?.headers?.["x-forwarded-proto"] ?? "https";
         const hostFromHeaders =
-          extra?.requestInfo?.headers?.["x-forwarded-host"] ??
-          extra?.requestInfo?.headers?.host;
+          forwardedHost ?? extra?.requestInfo?.headers?.host;
 
-        const useExternalHost = isProduction || useForwardedHost || isClaude;
+        const useExternalHost =
+          isProduction || isClaude || forwardedHost != null;
 
         const devPort = process.env.__PORT || "3000";
         const serverUrl = useExternalHost
-          ? `https://${hostFromHeaders}`
+          ? `${forwardedProto}://${hostFromHeaders}`
           : `http://localhost:${devPort}`;
 
         const html = isProduction
