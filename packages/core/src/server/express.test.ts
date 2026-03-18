@@ -10,7 +10,7 @@ vi.mock("@skybridge/devtools", () => ({
 }));
 
 vi.mock("./widgetsDevServer.js", () => ({
-  widgetsDevServer: () =>
+  widgetsDevServer: (_httpServer: unknown) =>
     ((_req: unknown, _res: unknown, next: () => void) =>
       next()) as RequestHandler,
 }));
@@ -45,8 +45,10 @@ describe("createServer", () => {
       next();
     };
 
+    const httpServer = http.createServer();
     const app = await createServer({
       server: fakeServer,
+      httpServer,
       customMiddleware: [{ handlers: [mw] }],
     });
 
@@ -66,8 +68,10 @@ describe("createServer", () => {
       next();
     };
 
+    const httpServer = http.createServer();
     const app = await createServer({
       server: fakeServer,
+      httpServer,
       customMiddleware: [{ path: "/mcp", handlers: [mw] }],
     });
 
@@ -85,8 +89,10 @@ describe("createServer", () => {
       res.status(401).json({ error: "Unauthorized" });
     };
 
+    const httpServer = http.createServer();
     const app = await createServer({
       server: fakeServer,
+      httpServer,
       customMiddleware: [{ path: "/mcp", handlers: [reject] }],
     });
 

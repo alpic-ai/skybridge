@@ -1,10 +1,9 @@
 import { existsSync } from "node:fs";
+import type http from "node:http";
 import path from "node:path";
 import cors from "cors";
 import express, { type Router } from "express";
-import { detectAvailablePort } from "../cli/detect-port.js";
 import { assetBaseUrlTransformPlugin } from "./asset-base-url-transform-plugin.js";
-import { DEFAULT_HMR_PORT } from "./const.js";
 
 /**
  * Install Vite dev server
@@ -16,7 +15,9 @@ import { DEFAULT_HMR_PORT } from "./const.js";
  *   app.use(await widgetsRouter());
  * }
  */
-export const widgetsDevServer = async (): Promise<Router> => {
+export const widgetsDevServer = async (
+  httpServer: http.Server,
+): Promise<Router> => {
   const router = express.Router();
 
   const { createServer, searchForWorkspaceRoot, loadConfigFromFile } =
@@ -47,9 +48,6 @@ export const widgetsDevServer = async (): Promise<Router> => {
     ...devConfig
   } = configResult?.config || {};
 
-  const hmrPort = await detectAvailablePort(DEFAULT_HMR_PORT, "localhost");
-  process.env.__SKYBRIDGE_HMR_PORT = String(hmrPort);
-
   const vite = await createServer({
     ...devConfig,
     configFile: false, // Keep this to prevent vite from trying to resolve path in the target config file
@@ -58,9 +56,7 @@ export const widgetsDevServer = async (): Promise<Router> => {
       allowedHosts: true,
       middlewareMode: true,
       hmr: {
-        protocol: "ws",
-        host: "localhost",
-        port: hmrPort,
+        server: httpServer,
       },
     },
     root: webAppRoot,

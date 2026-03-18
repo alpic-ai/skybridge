@@ -27,7 +27,6 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 import { mergeWith, union } from "es-toolkit";
 import type { Express, RequestHandler } from "express";
-import { DEFAULT_HMR_PORT } from "./const.js";
 import { createServer } from "./express.js";
 import type {
   McpExtra,
@@ -396,22 +395,24 @@ export class McpServer<
 
   async run(): Promise<void> {
     this.applyMcpMiddleware();
+    const httpServer = http.createServer();
+
     if (!this.express) {
       this.express = await createServer({
         server: this,
+        httpServer,
         customMiddleware: this.customMiddleware,
       });
     }
 
-    const express = this.express;
+    httpServer.on("request", this.express);
     return new Promise((resolve, reject) => {
-      const server = http.createServer(express);
-      server.on("error", (error: Error) => {
+      httpServer.on("error", (error: Error) => {
         console.error("Failed to start server:", error);
         reject(error);
       });
       const port = parseInt(process.env.__PORT ?? "3000", 10);
-      server.listen(port, () => {
+      httpServer.listen(port, () => {
         resolve();
       });
     });
@@ -638,13 +639,7 @@ export class McpServer<
               widgetName: name,
             });
 
-        const connectDomains = [serverUrl];
-        if (!isProduction) {
-          const hmrPort = process.env.__SKYBRIDGE_HMR_PORT ?? DEFAULT_HMR_PORT;
-          const VITE_HMR_WEBSOCKET_DEFAULT_URL = `ws://localhost:${hmrPort}`;
-          connectDomains.push(VITE_HMR_WEBSOCKET_DEFAULT_URL);
-        }
-
+        const connectDomains = [serverUrl, serverUrl.replace(/^http/, "ws")];
         const pathname = extra?.requestInfo?.url?.pathname ?? "";
         const url = `https://${hostFromHeaders}${pathname}`;
         const hash = crypto

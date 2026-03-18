@@ -90,6 +90,7 @@ describe("McpServer.registerWidget", () => {
     expect(appsSdkResourceCallback).toBeDefined();
 
     const serverUrl = "http://localhost:3000";
+    const hmrUrl = "ws://localhost:3000";
     const mockExtra = createMockExtra(
       "__not_used__",
     ) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>;
@@ -108,7 +109,7 @@ describe("McpServer.registerWidget", () => {
           _meta: {
             "openai/widgetCSP": {
               resource_domains: [serverUrl],
-              connect_domains: [serverUrl, "ws://localhost:24678"],
+              connect_domains: [serverUrl, hmrUrl],
             },
             "openai/widgetDomain": serverUrl,
             "openai/widgetDescription": "Test widget",
@@ -156,6 +157,7 @@ describe("McpServer.registerWidget", () => {
 
     const host = "myapp.com";
     const serverUrl = `https://${host}`;
+    const hmrUrl = `wss://${host}`;
     const mockExtra = createMockExtra(host) as unknown as RequestHandlerExtra<
       ServerRequest,
       ServerNotification
@@ -174,7 +176,7 @@ describe("McpServer.registerWidget", () => {
           _meta: {
             "openai/widgetCSP": {
               resource_domains: [serverUrl],
-              connect_domains: [serverUrl],
+              connect_domains: [serverUrl, hmrUrl],
             },
             "openai/widgetDomain": serverUrl,
             "openai/widgetDescription": "Test widget",
@@ -265,7 +267,9 @@ describe("McpServer.registerWidget", () => {
         ServerNotification
       >,
     );
-    const serverUrl = "http://localhost:3000";
+    const host = "localhost:3000";
+    const serverUrl = `http://${host}`;
+    const hmrUrl = `ws://${host}`;
 
     expect(appsSdkResult).toEqual({
       contents: [
@@ -276,7 +280,7 @@ describe("McpServer.registerWidget", () => {
           _meta: {
             "openai/widgetCSP": {
               resource_domains: [serverUrl],
-              connect_domains: [serverUrl, "ws://localhost:24678"],
+              connect_domains: [serverUrl, hmrUrl],
             },
             "openai/widgetDomain": serverUrl,
             "openai/widgetDescription": "Test widget",
@@ -321,7 +325,7 @@ describe("McpServer.registerWidget", () => {
             ui: {
               csp: {
                 resourceDomains: [serverUrl],
-                connectDomains: [serverUrl, "ws://localhost:24678"],
+                connectDomains: [serverUrl, hmrUrl],
               },
               domain: serverUrl,
             },
@@ -397,7 +401,9 @@ describe("McpServer.registerWidget", () => {
         _meta?: Record<string, unknown>;
       }>;
     }>;
-    const serverUrl = "http://localhost:3000";
+    const host = `localhost:3000`;
+    const serverUrl = `http://${host}`;
+    const hmrUrl = `ws://${host}`;
 
     const result = await appsSdkCallback(
       new URL("ui://widgets/apps-sdk/override-test.html"),
@@ -412,11 +418,7 @@ describe("McpServer.registerWidget", () => {
     // CSP arrays are merged with union - all unique domains from defaults and user config are preserved
     expect(meta["openai/widgetCSP"]).toEqual({
       resource_domains: [serverUrl, "https://from-ui-csp.com"],
-      connect_domains: [
-        serverUrl,
-        "ws://localhost:24678",
-        "https://from-ui-csp.com",
-      ],
+      connect_domains: [serverUrl, hmrUrl, "https://from-ui-csp.com"],
       frame_domains: undefined,
       redirect_domains: undefined,
     });
