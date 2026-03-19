@@ -628,7 +628,9 @@ export class McpServer<
         } else if (origin) {
           serverUrl = origin;
         } else if (host) {
-          const proto = ["127.0.0.1:", "localhost:"].some((p) => host.startsWith(p))
+          const proto = ["127.0.0.1:", "localhost:"].some((p) =>
+            host.startsWith(p),
+          )
             ? "http"
             : "https";
           serverUrl = `${proto}://${host}`;

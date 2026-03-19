@@ -717,8 +717,8 @@ importers:
         specifier: ^4.9.0
         version: 4.9.0
       '@skybridge/devtools':
-        specifier: '>=0.26.1'
-        version: 0.31.3
+        specifier: '>=0.35.8 <1.0.0'
+        version: 0.35.8
       ci-info:
         specifier: ^4.4.0
         version: 4.4.0
@@ -3315,9 +3315,6 @@ packages:
   '@sindresorhus/transliterate@1.6.0':
     resolution: {integrity: sha512-doH1gimEu3A46VX6aVxpHTeHrytJAG6HgdxntYnCFiIFHEM/ZGpG8KiZGBChchjQmG0XFIBL552kBTjVcMZXwQ==}
     engines: {node: '>=12'}
-
-  '@skybridge/devtools@0.31.3':
-    resolution: {integrity: sha512-qnHgoVePQh6MQi+s9ml8l71xuOQ237GeqH3qLf6dH9yFwU6U/OWq19+DN41YVX+fmZDXKzu1XxDA9PK94R2zUQ==}
 
   '@skybridge/devtools@0.35.8':
     resolution: {integrity: sha512-nTHA6VxXOtYEAcjFPKM7En5/4BniEYqcjxhiS9DZGqqV6jFcIbw32+ZhkGHtf4j0ZGjAIVRmz0WRbhpgV3tfPQ==}
@@ -12806,13 +12803,6 @@ snapshots:
     dependencies:
       escape-string-regexp: 5.0.0
 
-  '@skybridge/devtools@0.31.3':
-    dependencies:
-      cors: 2.8.6
-      express: 5.2.1
-    transitivePeerDependencies:
-      - supports-color
-
   '@skybridge/devtools@0.35.8':
     dependencies:
       cors: 2.8.6
@@ -13643,7 +13633,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-      vitest: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@25.2.3)(@vitest/ui@4.1.0)(jsdom@29.0.0(@noble/hashes@1.8.0))(msw@2.12.4(@types/node@25.2.3)(typescript@5.9.3))(vite@8.0.0(@types/node@25.2.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+      vitest: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/ui@4.1.0)(jsdom@29.0.0(@noble/hashes@1.8.0))(msw@2.12.4(@types/node@24.12.0)(typescript@5.9.3))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
 
   '@vitest/utils@4.1.0':
     dependencies:

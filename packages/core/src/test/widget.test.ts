@@ -89,11 +89,13 @@ describe("McpServer.registerWidget", () => {
     }>;
     expect(appsSdkResourceCallback).toBeDefined();
 
-    const serverUrl = "http://localhost:3000";
-    const hmrUrl = "ws://localhost:3000";
-    const mockExtra = createMockExtra(
-      "__not_used__",
-    ) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>;
+    const host = "localhost:3000";
+    const serverUrl = `http://${host}`;
+    const hmrUrl = `ws://${host}`;
+    const mockExtra = createMockExtra(host) as unknown as RequestHandlerExtra<
+      ServerRequest,
+      ServerNotification
+    >;
     const result = await appsSdkResourceCallback(
       new URL("ui://widgets/apps-sdk/my-widget.html"),
       mockExtra,
@@ -261,7 +263,7 @@ describe("McpServer.registerWidget", () => {
     }>;
     const appsSdkResult = await appsSdkCallback(
       new URL("ui://widgets/apps-sdk/my-widget.html"),
-      createMockExtra("__not_used__") as unknown as RequestHandlerExtra<
+      createMockExtra("localhost:3000") as unknown as RequestHandlerExtra<
         ServerRequest,
         ServerNotification
       >,
@@ -308,7 +310,7 @@ describe("McpServer.registerWidget", () => {
 
     const extAppsResult = await extAppsResourceCallback(
       new URL("ui://widgets/ext-apps/my-widget.html"),
-      createMockExtra("__not_used__") as unknown as RequestHandlerExtra<
+      createMockExtra(host) as unknown as RequestHandlerExtra<
         ServerRequest,
         ServerNotification
       >,
@@ -406,7 +408,7 @@ describe("McpServer.registerWidget", () => {
 
     const result = await appsSdkCallback(
       new URL("ui://widgets/apps-sdk/override-test.html"),
-      createMockExtra("__not_used__") as unknown as RequestHandlerExtra<
+      createMockExtra(host) as unknown as RequestHandlerExtra<
         ServerRequest,
         ServerNotification
       >,
