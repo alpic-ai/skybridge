@@ -27,8 +27,7 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 import { mergeWith, union } from "es-toolkit";
 import type { Express, RequestHandler } from "express";
-import { DEFAULT_HMR_PORT } from "./const.js";
-import { createServer } from "./express.js";
+import { createApp } from "./express.js";
 import type {
   McpExtra,
   McpExtraFor,
@@ -396,22 +395,24 @@ export class McpServer<
 
   async run(): Promise<void> {
     this.applyMcpMiddleware();
+    const httpServer = http.createServer();
+
     if (!this.express) {
-      this.express = await createServer({
-        server: this,
+      this.express = await createApp({
+        mcpServer: this,
+        httpServer,
         customMiddleware: this.customMiddleware,
       });
     }
 
-    const express = this.express;
+    httpServer.on("request", this.express);
     return new Promise((resolve, reject) => {
-      const server = http.createServer(express);
-      server.on("error", (error: Error) => {
+      httpServer.on("error", (error: Error) => {
         console.error("Failed to start server:", error);
         reject(error);
       });
       const port = parseInt(process.env.__PORT ?? "3000", 10);
-      server.listen(port, () => {
+      httpServer.listen(port, () => {
         resolve();
       });
     });
@@ -606,21 +607,37 @@ export class McpServer<
       { ...resourceConfig, _meta: resourceConfig._meta },
       async (uri, extra) => {
         const isProduction = process.env.NODE_ENV === "production";
-        const useForwardedHost =
-          process.env.SKYBRIDGE_USE_FORWARDED_HOST === "true";
         const isClaude =
           extra?.requestInfo?.headers?.["user-agent"] === "Claude-User";
 
-        const hostFromHeaders =
-          extra?.requestInfo?.headers?.["x-forwarded-host"] ??
-          extra?.requestInfo?.headers?.host;
+        const headers = extra?.requestInfo?.headers || {};
+        const header = (key: string) => {
+          const val = headers[key];
+          return Array.isArray(val) ? val[0] : val;
+        };
 
-        const useExternalHost = isProduction || useForwardedHost || isClaude;
+        let serverUrl: string;
 
-        const devPort = process.env.__PORT || "3000";
-        const serverUrl = useExternalHost
-          ? `https://${hostFromHeaders}`
-          : `http://localhost:${devPort}`;
+        const forwardedHost = header("x-forwarded-host");
+        const origin = header("origin");
+        const host = header("host");
+
+        if (forwardedHost) {
+          const proto = header("x-forwarded-proto") || "https";
+          serverUrl = `${proto}://${forwardedHost}`;
+        } else if (origin) {
+          serverUrl = origin;
+        } else if (host) {
+          const proto = ["127.0.0.1:", "localhost:"].some((p) =>
+            host.startsWith(p),
+          )
+            ? "http"
+            : "https";
+          serverUrl = `${proto}://${host}`;
+        } else {
+          const devPort = process.env.__PORT || "3000";
+          serverUrl = `http://localhost:${devPort}`;
+        }
 
         const html = isProduction
           ? templateHelper.renderProduction({
@@ -634,30 +651,27 @@ export class McpServer<
           : templateHelper.renderDevelopment({
               hostType,
               serverUrl,
-              useLocalNetworkAccess: !useExternalHost,
               widgetName: name,
             });
 
         const connectDomains = [serverUrl];
         if (!isProduction) {
-          const hmrPort = process.env.__SKYBRIDGE_HMR_PORT ?? DEFAULT_HMR_PORT;
-          const VITE_HMR_WEBSOCKET_DEFAULT_URL = `ws://localhost:${hmrPort}`;
-          connectDomains.push(VITE_HMR_WEBSOCKET_DEFAULT_URL);
+          const wsUrl = new URL(serverUrl);
+          wsUrl.protocol = wsUrl.protocol === "https:" ? "wss:" : "ws:";
+          connectDomains.push(wsUrl.origin);
         }
 
-        const pathname = extra?.requestInfo?.url?.pathname ?? "";
-        const url = `https://${hostFromHeaders}${pathname}`;
-        const hash = crypto
-          .createHash("sha256")
-          .update(url)
-          .digest("hex")
-          .slice(0, 32);
-
-        const contentMetaOverrides = isClaude
-          ? {
-              domain: `${hash}.claudemcpcontent.com`,
-            }
-          : {};
+        let contentMetaOverrides: { domain?: string } = {};
+        if (isClaude) {
+          const pathname = extra?.requestInfo?.url?.pathname ?? "";
+          const url = `${serverUrl}${pathname}`;
+          const hash = crypto
+            .createHash("sha256")
+            .update(url)
+            .digest("hex")
+            .slice(0, 32);
+          contentMetaOverrides = { domain: `${hash}.claudemcpcontent.com` };
+        }
 
         const contentMeta = buildContentMeta(
           {

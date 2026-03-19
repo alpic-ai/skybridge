@@ -717,8 +717,8 @@ importers:
         specifier: ^4.9.0
         version: 4.9.0
       '@skybridge/devtools':
-        specifier: '>=0.26.1'
-        version: 0.31.3
+        specifier: '>=0.35.8 <1.0.0'
+        version: 0.35.8
       ci-info:
         specifier: ^4.4.0
         version: 4.4.0
@@ -3315,9 +3315,6 @@ packages:
   '@sindresorhus/transliterate@1.6.0':
     resolution: {integrity: sha512-doH1gimEu3A46VX6aVxpHTeHrytJAG6HgdxntYnCFiIFHEM/ZGpG8KiZGBChchjQmG0XFIBL552kBTjVcMZXwQ==}
     engines: {node: '>=12'}
-
-  '@skybridge/devtools@0.31.3':
-    resolution: {integrity: sha512-qnHgoVePQh6MQi+s9ml8l71xuOQ237GeqH3qLf6dH9yFwU6U/OWq19+DN41YVX+fmZDXKzu1XxDA9PK94R2zUQ==}
 
   '@skybridge/devtools@0.35.8':
     resolution: {integrity: sha512-nTHA6VxXOtYEAcjFPKM7En5/4BniEYqcjxhiS9DZGqqV6jFcIbw32+ZhkGHtf4j0ZGjAIVRmz0WRbhpgV3tfPQ==}
@@ -12805,13 +12802,6 @@ snapshots:
   '@sindresorhus/transliterate@1.6.0':
     dependencies:
       escape-string-regexp: 5.0.0
-
-  '@skybridge/devtools@0.31.3':
-    dependencies:
-      cors: 2.8.6
-      express: 5.2.1
-    transitivePeerDependencies:
-      - supports-color
 
   '@skybridge/devtools@0.35.8':
     dependencies:

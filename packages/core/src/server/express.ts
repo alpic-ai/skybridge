@@ -1,14 +1,17 @@
+import type http from "node:http";
 import path from "node:path";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import cors from "cors";
 import express from "express";
 import type { McpServer } from "./server";
 
-export async function createServer({
-  server,
+export async function createApp({
+  mcpServer,
+  httpServer,
   customMiddleware = [],
 }: {
-  server: McpServer;
+  mcpServer: McpServer;
+  httpServer: http.Server;
   customMiddleware?: { path?: string; handlers: express.RequestHandler[] }[];
 }): Promise<express.Express> {
   const app = express();
@@ -27,7 +30,7 @@ export async function createServer({
     const { devtoolsStaticServer } = await import("@skybridge/devtools");
     app.use(await devtoolsStaticServer());
     const { widgetsDevServer } = await import("./widgetsDevServer.js");
-    app.use(await widgetsDevServer());
+    app.use(await widgetsDevServer(httpServer));
   }
 
   if (env === "production") {
@@ -37,7 +40,7 @@ export async function createServer({
     app.use("/assets", express.static(assetsPath));
   }
 
-  app.use("/mcp", mcpMiddleware(server));
+  app.use("/mcp", mcpMiddleware(mcpServer));
 
   return app;
 }
