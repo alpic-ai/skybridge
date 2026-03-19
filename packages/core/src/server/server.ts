@@ -649,7 +649,6 @@ export class McpServer<
           : templateHelper.renderDevelopment({
               hostType,
               serverUrl,
-              useLocalNetworkAccess: false,
               widgetName: name,
             });
 
