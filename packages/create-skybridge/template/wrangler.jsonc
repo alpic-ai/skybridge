@@ -1,0 +1,12 @@
+{
+  "name": "create-skybridge-template",
+  "compatibility_date": "2026-03-16",
+  "main": "dist/server/src/index.js",
+  "assets": {
+    "directory": "dist"
+  },
+  "compatibility_flags": ["nodejs_compat"],
+  "define": {
+    "process.env.NODE_ENV": "\"production\""
+  }
+}

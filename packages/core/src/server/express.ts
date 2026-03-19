@@ -24,9 +24,11 @@ export async function createServer({
   }
 
   if (env !== "production") {
-    const { devtoolsStaticServer } = await import("@skybridge/devtools");
+    const devtoolsModule = "@skybridge/devtools";
+    const { devtoolsStaticServer } = await import(devtoolsModule);
     app.use(await devtoolsStaticServer());
-    const { widgetsDevServer } = await import("./widgetsDevServer.js");
+    const widgetsModule = "./widgetsDevServer.js";
+    const { widgetsDevServer } = await import(widgetsModule);
     app.use(await widgetsDevServer());
   }
 

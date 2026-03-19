@@ -1,9 +1,19 @@
-import { cpSync, rmSync } from "node:fs";
+import { cpSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { useEffect } from "react";
 import { Header } from "../cli/header.js";
 import { type CommandStep, useExecuteSteps } from "../cli/use-execute-steps.js";
+
+function generateViteManifestModule() {
+  const manifestPath = join("web", "dist", ".vite", "manifest.json");
+  const manifest = readFileSync(manifestPath, "utf-8");
+  writeFileSync(
+    join("dist", "server", "src", "vite-manifest.js"),
+    `export default ${manifest};\n`,
+  );
+}
 
 export const commandSteps: CommandStep[] = [
   {
@@ -17,7 +27,10 @@ export const commandSteps: CommandStep[] = [
   },
   {
     label: "Copying static assets",
-    run: () => cpSync("web/dist", "dist/assets", { recursive: true }),
+    run: () => {
+      cpSync("web/dist", "dist/assets", { recursive: true });
+      generateViteManifestModule();
+    },
   },
 ];
 

@@ -241,6 +241,7 @@ export class McpServer<
   private customMiddleware: MiddlewareConfig[] = [];
   private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private mcpMiddlewareApplied = false;
+  private viteManifest: Record<string, { file: string }> | null = null;
 
   use(...handlers: RequestHandler[]): this;
   use(path: string, ...handlers: RequestHandler[]): this;
@@ -259,6 +260,11 @@ export class McpServer<
       });
     }
 
+    return this;
+  }
+
+  setViteManifest(manifest: Record<string, { file: string }>): this {
+    this.viteManifest = manifest;
     return this;
   }
 
@@ -394,7 +400,7 @@ export class McpServer<
     return super.connect(transport);
   }
 
-  async run(): Promise<void> {
+  async run(): Promise<{ fetch: (...args: unknown[]) => unknown } | undefined> {
     this.applyMcpMiddleware();
     if (!this.express) {
       this.express = await createServer({
@@ -404,17 +410,26 @@ export class McpServer<
     }
 
     const express = this.express;
-    return new Promise((resolve, reject) => {
+    const port = parseInt(process.env.__PORT ?? "3000", 10);
+
+    await new Promise<void>((resolve, reject) => {
       const server = http.createServer(express);
       server.on("error", (error: Error) => {
         console.error("Failed to start server:", error);
         reject(error);
       });
-      const port = parseInt(process.env.__PORT ?? "3000", 10);
       server.listen(port, () => {
         resolve();
       });
     });
+
+    try {
+      const cloudflareNode = "cloudflare:node";
+      const { httpServerHandler } = await import(cloudflareNode);
+      return httpServerHandler({ port });
+    } catch {
+      return undefined;
+    }
   }
 
   registerWidget<
@@ -692,6 +707,9 @@ export class McpServer<
   }
 
   private readManifest() {
+    if (this.viteManifest) {
+      return this.viteManifest;
+    }
     return JSON.parse(
       readFileSync(
         path.join(process.cwd(), "dist", "assets", ".vite", "manifest.json"),
