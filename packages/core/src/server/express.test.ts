@@ -35,9 +35,9 @@ async function postMcp(port: number) {
   });
 }
 
-describe("createServer", () => {
+describe("createApp", () => {
   it("runs global custom middleware before the /mcp handler", async () => {
-    const { createServer } = await import("./express.js");
+    const { createApp } = await import("./express.js");
     const calls: string[] = [];
 
     const mw: RequestHandler = (_req, _res, next) => {
@@ -46,8 +46,8 @@ describe("createServer", () => {
     };
 
     const httpServer = http.createServer();
-    const app = await createServer({
-      server: fakeServer,
+    const app = await createApp({
+      mcpServer: fakeServer,
       httpServer,
       customMiddleware: [{ handlers: [mw] }],
     });
@@ -60,7 +60,7 @@ describe("createServer", () => {
   });
 
   it("runs path-scoped middleware on /mcp", async () => {
-    const { createServer } = await import("./express.js");
+    const { createApp } = await import("./express.js");
     const calls: string[] = [];
 
     const mw: RequestHandler = (_req, _res, next) => {
@@ -69,8 +69,8 @@ describe("createServer", () => {
     };
 
     const httpServer = http.createServer();
-    const app = await createServer({
-      server: fakeServer,
+    const app = await createApp({
+      mcpServer: fakeServer,
       httpServer,
       customMiddleware: [{ path: "/mcp", handlers: [mw] }],
     });
@@ -83,15 +83,15 @@ describe("createServer", () => {
   });
 
   it("allows middleware to short-circuit with 401", async () => {
-    const { createServer } = await import("./express.js");
+    const { createApp } = await import("./express.js");
 
     const reject: RequestHandler = (_req, res) => {
       res.status(401).json({ error: "Unauthorized" });
     };
 
     const httpServer = http.createServer();
-    const app = await createServer({
-      server: fakeServer,
+    const app = await createApp({
+      mcpServer: fakeServer,
       httpServer,
       customMiddleware: [{ path: "/mcp", handlers: [reject] }],
     });

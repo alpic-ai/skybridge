@@ -5,12 +5,12 @@ import cors from "cors";
 import express from "express";
 import type { McpServer } from "./server";
 
-export async function createServer({
-  server,
+export async function createApp({
+  mcpServer,
   httpServer,
   customMiddleware = [],
 }: {
-  server: McpServer;
+  mcpServer: McpServer;
   httpServer: http.Server;
   customMiddleware?: { path?: string; handlers: express.RequestHandler[] }[];
 }): Promise<express.Express> {
@@ -40,7 +40,7 @@ export async function createServer({
     app.use("/assets", express.static(assetsPath));
   }
 
-  app.use("/mcp", mcpMiddleware(server));
+  app.use("/mcp", mcpMiddleware(mcpServer));
 
   return app;
 }

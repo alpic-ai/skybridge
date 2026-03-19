@@ -27,7 +27,7 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 import { mergeWith, union } from "es-toolkit";
 import type { Express, RequestHandler } from "express";
-import { createServer } from "./express.js";
+import { createApp } from "./express.js";
 import type {
   McpExtra,
   McpExtraFor,
@@ -398,8 +398,8 @@ export class McpServer<
     const httpServer = http.createServer();
 
     if (!this.express) {
-      this.express = await createServer({
-        server: this,
+      this.express = await createApp({
+        mcpServer: this,
         httpServer,
         customMiddleware: this.customMiddleware,
       });
@@ -642,7 +642,9 @@ export class McpServer<
 
         const connectDomains = [serverUrl];
         if (!isProduction) {
-          connectDomains.push(serverUrl.replace(/^http/, "ws"));
+          const wsUrl = new URL(serverUrl);
+          wsUrl.protocol = wsUrl.protocol === "https:" ? "wss:" : "ws:";
+          connectDomains.push(wsUrl.origin);
         }
         const pathname = extra?.requestInfo?.url?.pathname ?? "";
         const url = `https://${hostFromHeaders}${pathname}`;
