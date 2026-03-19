@@ -157,7 +157,6 @@ describe("McpServer.registerWidget", () => {
 
     const host = "myapp.com";
     const serverUrl = `https://${host}`;
-    const hmrUrl = `wss://${host}`;
     const mockExtra = createMockExtra(host) as unknown as RequestHandlerExtra<
       ServerRequest,
       ServerNotification
@@ -176,7 +175,7 @@ describe("McpServer.registerWidget", () => {
           _meta: {
             "openai/widgetCSP": {
               resource_domains: [serverUrl],
-              connect_domains: [serverUrl, hmrUrl],
+              connect_domains: [serverUrl],
             },
             "openai/widgetDomain": serverUrl,
             "openai/widgetDescription": "Test widget",

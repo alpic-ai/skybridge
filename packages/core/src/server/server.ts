@@ -640,7 +640,10 @@ export class McpServer<
               widgetName: name,
             });
 
-        const connectDomains = [serverUrl, serverUrl.replace(/^http/, "ws")];
+        const connectDomains = [serverUrl];
+        if (!isProduction) {
+          connectDomains.push(serverUrl.replace(/^http/, "ws"));
+        }
         const pathname = extra?.requestInfo?.url?.pathname ?? "";
         const url = `https://${hostFromHeaders}${pathname}`;
         const hash = crypto
