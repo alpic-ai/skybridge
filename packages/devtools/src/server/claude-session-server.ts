@@ -9,6 +9,7 @@ export interface ClaudeSessionServerOptions {
   command?: string;
   args?: string[];
   env?: Record<string, string>;
+  mcpUrl?: string;
 }
 
 export interface ClaudeSessionServer {
@@ -35,7 +36,9 @@ function send(ws: WebSocket, msg: ServerMessage) {
 function buildEnv(extra: Record<string, string>): Record<string, string> {
   const env: Record<string, string> = {};
   for (const [k, v] of Object.entries(process.env)) {
-    if (v !== undefined) env[k] = v;
+    if (v !== undefined) {
+      env[k] = v;
+    }
   }
   return { ...env, ...extra, TERM: "xterm-256color" };
 }
@@ -43,10 +46,14 @@ function buildEnv(extra: Record<string, string>): Record<string, string> {
 /** Resolve the full path of a command using the user's login shell. */
 function resolveCommandPath(command: string): string {
   // If already an absolute path, use as-is
-  if (command.startsWith("/")) return command;
+  if (command.startsWith("/")) {
+    return command;
+  }
 
   const isWindows = os.platform() === "win32";
-  if (isWindows) return command;
+  if (isWindows) {
+    return command;
+  }
 
   try {
     const shell = process.env.SHELL || "/bin/bash";
@@ -54,7 +61,9 @@ function resolveCommandPath(command: string): string {
       encoding: "utf-8",
       timeout: 5000,
     }).trim();
-    if (result) return result;
+    if (result) {
+      return result;
+    }
   } catch {
     // fall through to returning the bare command name
   }
@@ -62,9 +71,35 @@ function resolveCommandPath(command: string): string {
   return command;
 }
 
+/** Register the Skybridge MCP server with the Claude CLI (idempotent). */
+function setupMcp(command: string, mcpUrl: string, cwd: string): void {
+  const commandPath = resolveCommandPath(command);
+  try {
+    execFileSync(
+      commandPath,
+      ["mcp", "add", "--transport", "http", "app", mcpUrl],
+      {
+        encoding: "utf-8",
+        timeout: 10000,
+        cwd,
+        env: buildEnv({}),
+      },
+    );
+    console.log(`[claude-server] MCP server registered: ${mcpUrl}`);
+  } catch (err) {
+    // Non-fatal — claude may already have the server registered
+    console.warn(
+      "[claude-server] mcp add failed (may already exist):",
+      (err as Error).message,
+    );
+  }
+}
+
 function spawnProcess(
   ws: WebSocket,
-  options: Required<Pick<ClaudeSessionServerOptions, "cwd" | "command" | "args" | "env">>,
+  options: Required<
+    Pick<ClaudeSessionServerOptions, "cwd" | "command" | "args" | "env">
+  >,
 ): pty.IPty {
   const commandPath = resolveCommandPath(options.command);
   console.log(`[claude-server] spawning: ${commandPath}`, options.args);
@@ -98,6 +133,9 @@ export function createClaudeSessionServer(
   const command = options.command ?? "claude";
   const args = options.args ?? [];
   const env = options.env ?? {};
+  const mcpUrl = options.mcpUrl ?? "http://localhost:3000/mcp";
+
+  setupMcp(command, mcpUrl, cwd);
 
   const wss = new WebSocketServer({ port });
 

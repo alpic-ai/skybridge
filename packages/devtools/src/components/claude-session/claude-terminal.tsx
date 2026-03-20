@@ -1,6 +1,12 @@
 import { FitAddon } from "@xterm/addon-fit";
 import { Terminal } from "@xterm/xterm";
-import { Maximize2, Minimize2, RefreshCw, SquareTerminal, Unplug, Wifi } from "lucide-react";
+import {
+  Maximize2,
+  Minimize2,
+  RefreshCw,
+  SquareTerminal,
+  Wifi,
+} from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useClaudeWs } from "@/lib/claude-ws.js";
 import { cn } from "@/lib/utils.js";
@@ -27,7 +33,10 @@ interface ClaudeTerminalProps {
   onToggleFullscreen?: () => void;
 }
 
-export function ClaudeTerminal({ isFullscreen, onToggleFullscreen }: ClaudeTerminalProps) {
+export function ClaudeTerminal({
+  isFullscreen,
+  onToggleFullscreen,
+}: ClaudeTerminalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const termRef = useRef<Terminal | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
@@ -37,7 +46,6 @@ export function ClaudeTerminal({ isFullscreen, onToggleFullscreen }: ClaudeTermi
     pid,
     error,
     connect,
-    disconnect,
     sendInput,
     sendResize,
     sendRestart,
@@ -46,7 +54,9 @@ export function ClaudeTerminal({ isFullscreen, onToggleFullscreen }: ClaudeTermi
 
   // Initialize xterm once on mount
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) {
+      return;
+    }
 
     const term = new Terminal({
       theme: {
