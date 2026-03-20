@@ -63,6 +63,19 @@ const targets = [
   ...exampleTargets,
 ];
 
+// Update @skybridge/devtools peer dependency in core package
+if (devtoolsRange) {
+  const corePackagePath = join(rootDir, "packages/core/package.json");
+  if (existsSync(corePackagePath)) {
+    const corePkg = JSON.parse(readFileSync(corePackagePath, "utf8"));
+    if (corePkg.peerDependencies?.["@skybridge/devtools"]) {
+      console.log("Updating: packages/core/package.json (peerDependencies)");
+      corePkg.peerDependencies["@skybridge/devtools"] = devtoolsRange;
+      writeFileSync(corePackagePath, JSON.stringify(corePkg, null, 2) + "\n");
+    }
+  }
+}
+
 for (const target of targets) {
   const file = join(rootDir, target);
 
