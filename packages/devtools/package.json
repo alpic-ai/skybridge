@@ -27,7 +27,7 @@
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1",
-    "node-pty": "^1.0.0",
+    "node-pty": "1.2.0-beta.12",
     "ws": "^8.18.0"
   },
   "devDependencies": {
