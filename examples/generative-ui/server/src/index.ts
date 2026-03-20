@@ -1,5 +1,5 @@
+import type { Spec } from "@json-render/core";
 import {
-  type Spec,
   autoFixSpec,
   defineCatalog,
   formatSpecIssues,
@@ -8,7 +8,6 @@ import {
 import { schema } from "@json-render/react/schema";
 import { shadcnComponentDefinitions } from "@json-render/shadcn/catalog";
 import { McpServer } from "skybridge/server";
-import { z } from "zod";
 
 const catalog = defineCatalog(schema, {
   components: shadcnComponentDefinitions,
@@ -16,6 +15,7 @@ const catalog = defineCatalog(schema, {
 });
 
 const catalogPrompt = catalog.prompt();
+const specSchema = catalog.zodSchema();
 
 const server = new McpServer(
   {
@@ -37,19 +37,7 @@ const server = new McpServer(
       catalogPrompt,
     ].join("\n"),
     inputSchema: {
-      root: z.string().describe("ID of the root element"),
-      elements: z
-        .record(
-          z.string(),
-          z.object({
-            type: z.string().describe("Component type from the catalog"),
-            props: z.record(z.string(), z.any()).describe("Component props"),
-            children: z
-              .array(z.string())
-              .describe("Ordered list of child element IDs"),
-          }),
-        )
-        .describe("Map of element IDs to element definitions"),
+      spec: specSchema.describe("The json-render UI spec to render"),
     },
     annotations: {
       readOnlyHint: true,
@@ -57,27 +45,8 @@ const server = new McpServer(
       destructiveHint: false,
     },
   },
-  async ({ root, elements }) => {
-    const rawSpec = { root, elements };
-
-    // Validate against the catalog (component types, props, structure)
-    const catalogResult = catalog.validate(rawSpec);
-    if (!catalogResult.success || !catalogResult.data) {
-      const issues = catalogResult.error?.issues ?? [];
-      return {
-        structuredContent: {},
-        content: [
-          {
-            type: "text" as const,
-            text: `Invalid spec: ${issues.map((i) => i.message).join("; ")}`,
-          },
-        ],
-        isError: true,
-      };
-    }
-
-    // Auto-fix common LLM mistakes (visible/on/repeat inside props)
-    const { spec: fixedSpec } = autoFixSpec(catalogResult.data as Spec);
+  async ({ spec: rawSpec }) => {
+    const { spec: fixedSpec } = autoFixSpec(rawSpec as Spec);
 
     // Structural validation (missing root, dangling children, etc.)
     const structural = validateSpec(fixedSpec);
