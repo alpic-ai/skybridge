@@ -68,4 +68,18 @@ describe("useRequestModal", () => {
     expect(requestModalMock).toHaveBeenCalledTimes(1);
     expect(requestModalMock).toHaveBeenCalledWith(options);
   });
+
+  it("should support template URIs in requestModal options", () => {
+    const { result } = renderHook(() => useRequestModal());
+    const { open } = result.current;
+
+    const options = {
+      params: { foo: "bar" },
+      template: "ui://widget/modal-template.html",
+    };
+    open(options);
+
+    expect(requestModalMock).toHaveBeenCalledTimes(1);
+    expect(requestModalMock).toHaveBeenCalledWith(options);
+  });
 });
