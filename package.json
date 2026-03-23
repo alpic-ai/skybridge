@@ -46,7 +46,7 @@
       "@mintlify/previewing>express": "^4.20.0",
       "@mintlify/scraping>zod": "3.24.0",
       "@mintlify/validation>lodash": "^4.17.23",
-      "@mintlify/validation>zod": "3.24.0",
+      "@mintlify/validation>zod": "4.3.6",
       "@modelcontextprotocol/sdk>@hono/node-server": "^1.19.10",
       "@modelcontextprotocol/sdk>express-rate-limit": "^8.2.2",
       "@modelcontextprotocol/sdk>hono": "^4.12.7",
