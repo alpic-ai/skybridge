@@ -43,7 +43,7 @@
       "@mintlify/common>lodash": "^4.17.23",
       "@mintlify/models>axios": "^1.13.5",
       "@mintlify/openapi-parser>ajv": "^8.18.0",
-      "@mintlify/previewing>express": "^4.20.0",
+      "@mintlify/previewing>express": "^5.2.1",
       "@mintlify/scraping>zod": "3.24.0",
       "@mintlify/validation>lodash": "^4.17.23",
       "@mintlify/validation>zod": "3.24.0",
