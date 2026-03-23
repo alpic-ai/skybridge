@@ -225,8 +225,8 @@ describe("createApp", () => {
     const res = await fetch(`http://localhost:${port}/explode`);
     expect(res.status).toBe(500);
 
-    // Server still responds to other routes
-    const health = await postMcp(port);
-    expect(health.status).not.toBe(0);
+    // Server process did not crash — it still accepts connections
+    const followUp = await fetch(`http://localhost:${port}/explode`);
+    expect(followUp.status).toBe(500);
   });
 });

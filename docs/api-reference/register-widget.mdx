@@ -97,7 +97,7 @@ type WidgetHandler = (
 ```
 
 The `extra` parameter provides access to:
-- `extra.authInfo` — Authentication info populated by auth middleware (e.g. `clientId`, `extra.email`)
+- `extra.authInfo` — Authentication info populated by auth middleware (e.g. `authInfo.clientId`, `authInfo.extra.email`)
 - `extra.requestInfo` — HTTP request details (headers, URL)
 - `extra.signal` — Abort signal for cancellation
 
