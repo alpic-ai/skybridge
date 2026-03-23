@@ -457,6 +457,155 @@ describe("McpServer.mcpMiddleware()", () => {
     await server.close();
   });
 
+  it("wildcard filter intercepts matching methods only", async () => {
+    const matchedMethods: string[] = [];
+
+    const server = new McpServer({ name: "test", version: "1.0.0" });
+
+    server.registerTool("t1", { description: "t1" }, () => ({
+      content: [{ type: "text" as const, text: "ok" }],
+    }));
+
+    server.mcpMiddleware("tools/*", async (request, _extra, next) => {
+      matchedMethods.push(request.method);
+      return next();
+    });
+
+    const client = createClient();
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    await client.listTools();
+    await client.callTool({ name: "t1" });
+
+    expect(matchedMethods).toContain("tools/list");
+    expect(matchedMethods).toContain("tools/call");
+    // Should not match initialize or notifications
+    expect(matchedMethods).not.toContain("initialize");
+    expect(matchedMethods).not.toContain("notifications/initialized");
+
+    await client.close();
+    await server.close();
+  });
+
+  it("middleware can modify tool result via McpServer integration", async () => {
+    const server = new McpServer({ name: "test", version: "1.0.0" });
+
+    server.registerTool(
+      "greet",
+      {
+        description: "greet",
+        inputSchema: { name: z.string() },
+      },
+      (args) => ({
+        content: [{ type: "text" as const, text: `hi ${args.name}` }],
+      }),
+    );
+
+    server.mcpMiddleware("tools/call", async (_req, _extra, next) => {
+      const result = (await next()) as {
+        content: { type: string; text: string }[];
+      };
+      return {
+        ...result,
+        content: [
+          ...result.content,
+          { type: "text" as const, text: " (modified)" },
+        ],
+      };
+    });
+
+    const client = createClient();
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    const result = await client.callTool({
+      name: "greet",
+      arguments: { name: "World" },
+    });
+    expect(result.content).toEqual([
+      { type: "text", text: "hi World" },
+      { type: "text", text: " (modified)" },
+    ]);
+
+    await client.close();
+    await server.close();
+  });
+
+  it("middleware can short-circuit via McpServer integration", async () => {
+    const handlerCalled = vi.fn();
+
+    const server = new McpServer({ name: "test", version: "1.0.0" });
+
+    server.registerTool("t1", { description: "t1" }, () => {
+      handlerCalled();
+      return {
+        content: [{ type: "text" as const, text: "original" }],
+      };
+    });
+
+    server.mcpMiddleware("tools/call", async () => ({
+      content: [{ type: "text" as const, text: "short-circuited" }],
+    }));
+
+    const client = createClient();
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    const result = await client.callTool({ name: "t1" });
+    expect(result.content).toEqual([{ type: "text", text: "short-circuited" }]);
+    expect(handlerCalled).not.toHaveBeenCalled();
+
+    await client.close();
+    await server.close();
+  });
+
+  it("middleware can mutate tool call params via McpServer integration", async () => {
+    let receivedName = "";
+
+    const server = new McpServer({ name: "test", version: "1.0.0" });
+
+    server.registerTool(
+      "greet",
+      {
+        description: "greet",
+        inputSchema: { name: z.string() },
+      },
+      (args) => {
+        receivedName = args.name;
+        return {
+          content: [{ type: "text" as const, text: `hi ${args.name}` }],
+        };
+      },
+    );
+
+    server.mcpMiddleware("tools/call", async (request, _extra, next) => {
+      request.params.arguments = { name: "Overridden" };
+      return next();
+    });
+
+    const client = createClient();
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    await client.callTool({
+      name: "greet",
+      arguments: { name: "Original" },
+    });
+    expect(receivedName).toBe("Overridden");
+
+    await client.close();
+    await server.close();
+  });
+
   it("category 'request' filter matches requests but not notifications", async () => {
     const matchedMethods: string[] = [];
 

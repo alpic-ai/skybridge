@@ -103,4 +103,130 @@ describe("createApp", () => {
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: "Unauthorized" });
   });
+
+  it("runs multiple global middleware in registration order", async () => {
+    const { createApp } = await import("./express.js");
+    const calls: string[] = [];
+
+    const mwA: RequestHandler = (_req, _res, next) => {
+      calls.push("A");
+      next();
+    };
+    const mwB: RequestHandler = (_req, _res, next) => {
+      calls.push("B");
+      next();
+    };
+
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
+      customMiddleware: [{ handlers: [mwA] }, { handlers: [mwB] }],
+    });
+
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    await postMcp(port);
+    expect(calls).toEqual(["A", "B"]);
+  });
+
+  it("path-scoped middleware does not run on non-matching paths", async () => {
+    const { createApp } = await import("./express.js");
+    const calls: string[] = [];
+
+    const apiMw: RequestHandler = (_req, _res, next) => {
+      calls.push("api");
+      next();
+    };
+
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
+      customMiddleware: [{ path: "/api", handlers: [apiMw] }],
+    });
+
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    // Hit /mcp — the /api middleware should NOT fire
+    await postMcp(port);
+    expect(calls).toEqual([]);
+  });
+
+  it("supports Express Router via custom middleware", async () => {
+    const { createApp } = await import("./express.js");
+    const { Router } = await import("express");
+
+    const router = Router();
+    router.get("/health", (_req, res) => {
+      res.json({ status: "ok" });
+    });
+
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
+      customMiddleware: [{ handlers: [router as RequestHandler] }],
+    });
+
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    const res = await fetch(`http://localhost:${port}/health`);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ status: "ok" });
+  });
+
+  it("supports path-prefixed Router", async () => {
+    const { createApp } = await import("./express.js");
+    const { Router } = await import("express");
+
+    const router = Router();
+    router.get("/data", (_req, res) => {
+      res.json({ value: 42 });
+    });
+
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
+      customMiddleware: [
+        { path: "/api", handlers: [router as RequestHandler] },
+      ],
+    });
+
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    const res = await fetch(`http://localhost:${port}/api/data`);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ value: 42 });
+  });
+
+  it("server survives middleware errors without crashing", async () => {
+    const { createApp } = await import("./express.js");
+
+    const throwing: RequestHandler = () => {
+      throw new Error("boom");
+    };
+
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
+      customMiddleware: [{ path: "/explode", handlers: [throwing] }],
+    });
+
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    const res = await fetch(`http://localhost:${port}/explode`);
+    expect(res.status).toBe(500);
+
+    // Server still responds to other routes
+    const health = await postMcp(port);
+    expect(health.status).not.toBe(0);
+  });
 });
