@@ -176,8 +176,6 @@ export function generateFlights(
   }
   if (!flights[quickestIdx].tags.includes("Cheapest")) {
     flights[quickestIdx].tags.push("Quickest");
-  } else {
-    flights[quickestIdx].tags.push("Quickest");
   }
 
   return flights;

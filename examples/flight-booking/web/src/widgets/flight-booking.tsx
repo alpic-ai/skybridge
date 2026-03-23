@@ -73,7 +73,7 @@ function FlightBooking() {
             <div className="card-route">
               <div className="airline">
                 <div className="airline-logo">SB</div>
-                {flight.airline} +{flight.flightNumber}
+                {flight.airline} · {flight.flightNumber}
               </div>
 
               <Leg
