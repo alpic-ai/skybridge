@@ -1,5 +1,5 @@
 {
-  "$schema": "https://mintlify.com/schema.json",
+  "$schema": "https://mintlify.com/docs.json",
   "name": "Skybridge",
   "theme": "mint",
   "colors": {
@@ -14,13 +14,6 @@
   "logo": {
     "light": "/images/Skybridgemidnight.svg",
     "dark": "/images/Skybridgewhite(1).svg"
-  },
-  "metadata": {
-    "og:site_name": "Skybridge Documentation",
-    "og:type": "website"
-  },
-  "feedback": {
-    "thumbsRating": true
   },
   "search": {
     "prompt": "Search Skybridge docs..."
@@ -201,15 +194,21 @@
     }
   },
   "fonts": {
-    "family": "Inter",
-    "weight": 400,
+    "body": {
+      "family": "Inter",
+      "weight": 400
+    },
     "heading": {
       "family": "Inter",
       "weight": 600
     }
   },
   "seo": {
-    "indexing": "navigable"
+    "indexing": "navigable",
+    "metatags": {
+      "og:site_name": "Skybridge Documentation",
+      "og:type": "website"
+    }
   },
   "errors": {
     "404": {
