@@ -189,12 +189,12 @@ export async function init(args: string[] = process.argv.slice(2)) {
   if (skill) {
     run(
       [
-        ...getPkgExecCmd(pkgManager, "--yes", "skills"),
+        ...getPkgExecCmd(pkgManager, "skills"),
         "add",
         "alpic-ai/skybridge",
         "-s",
         "skybridge",
-        ...(interactive ? [] : ["--yes"]), //
+        ...(interactive ? [] : ["--yes"]),
       ],
       {
         stdio: "inherit",
@@ -312,17 +312,17 @@ function emptyDir(dir: string) {
   }
 }
 
-function getPkgExecCmd(pkgManager: string, ...cmd: string[]): string[] {
+function getPkgExecCmd(pkgManager: string, cmd: string): string[] {
   switch (pkgManager) {
     case "yarn":
-      return ["yarn", "dlx", ...cmd];
+      return ["yarn", "dlx", cmd];
     case "pnpm":
-      return ["pnpm", "dlx", ...cmd];
+      return ["pnpm", "dlx", cmd];
     case "bun":
-      return ["bunx", ...cmd];
+      return ["bunx", cmd];
     case "deno":
       return ["deno", "run", "-A", `npm:${cmd}`];
     default:
-      return ["npx", ...cmd];
+      return ["npx", "--yes", cmd];
   }
 }
