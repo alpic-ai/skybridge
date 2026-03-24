@@ -1,5 +1,5 @@
 import http from "node:http";
-import type { RequestHandler } from "express";
+import type { ErrorRequestHandler, RequestHandler } from "express";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { McpServer } from "./server";
 
@@ -33,6 +33,10 @@ async function postMcp(port: number) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ jsonrpc: "2.0", method: "initialize", id: 1 }),
   });
+}
+
+async function postApi(port: number) {
+  return fetch(`http://localhost:${port}/api/test`, { method: "POST" });
 }
 
 describe("createApp", () => {
@@ -84,8 +88,10 @@ describe("createApp", () => {
 
   it("allows middleware to short-circuit with 401", async () => {
     const { createApp } = await import("./express.js");
+    const calls: string[] = [];
 
     const reject: RequestHandler = (_req, res) => {
+      calls.push("reject");
       res.status(401).json({ error: "Unauthorized" });
     };
 
@@ -100,6 +106,7 @@ describe("createApp", () => {
     openServer = server;
 
     const res = await postMcp(port);
+    expect(calls).toEqual(["reject"]);
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: "Unauthorized" });
   });
@@ -228,5 +235,87 @@ describe("createApp", () => {
     // Server process did not crash — it still accepts connections
     const followUp = await fetch(`http://localhost:${port}/explode`);
     expect(followUp.status).toBe(500);
+  });
+
+  it("returns 500 JSON-RPC error when the MCP handler throws and no error middleware is registered", async () => {
+    const { createApp } = await import("./express.js");
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const httpServer = http.createServer();
+    const app = await createApp({ mcpServer: fakeServer, httpServer });
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    const res = await postMcp(port);
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({
+      jsonrpc: "2.0",
+      error: { code: -32603, message: "Internal server error" },
+      id: null,
+    });
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "Error handling MCP request:",
+      expect.any(Error),
+    );
+    consoleSpy.mockRestore();
+  });
+
+  it("invokes a custom error handler when the MCP handler throws", async () => {
+    const { createApp } = await import("./express.js");
+    const calls: string[] = [];
+
+    const errorHandler: ErrorRequestHandler = (_err, _req, res, _next) => {
+      calls.push("error-handler");
+      res.status(503).json({ custom: true });
+    };
+
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
+      errorMiddleware: [{ handlers: [errorHandler] }],
+    });
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    const res = await postMcp(port);
+    expect(calls).toEqual(["error-handler"]);
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ custom: true });
+  });
+
+  it("invokes a path-scoped error handler only for matching routes", async () => {
+    const { createApp } = await import("./express.js");
+    const calls: string[] = [];
+
+    const mcpErrorHandler: ErrorRequestHandler = (_err, _req, res, _next) => {
+      calls.push("mcp-error-handler");
+      res.status(503).json({ from: "mcp-error-handler" });
+    };
+
+    const throwingApiRoute: RequestHandler = (_req, _res, next) => {
+      next(new Error("api error"));
+    };
+
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
+      customMiddleware: [{ path: "/api/test", handlers: [throwingApiRoute] }],
+      errorMiddleware: [{ path: "/mcp", handlers: [mcpErrorHandler] }],
+    });
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    const mcpRes = await postMcp(port);
+    expect(calls).toEqual(["mcp-error-handler"]);
+    expect(mcpRes.status).toBe(503);
+    expect(await mcpRes.json()).toEqual({ from: "mcp-error-handler" });
+
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const apiRes = await postApi(port);
+    expect(calls).toEqual(["mcp-error-handler"]);
+    expect(apiRes.status).toBe(500);
+    consoleSpy.mockRestore();
   });
 });

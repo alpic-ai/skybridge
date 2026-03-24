@@ -67,6 +67,42 @@ server.use(cors());
 server.use("/api", authMiddleware);
 ```
 
+### useOnError
+Register [Express error handler](https://expressjs.com/en/guide/error-handling.html) on the underlying HTTP server. Supports optional path filtering.
+
+```typescript
+// Global error handler
+server.useOnError((err, req, res, next) => {
+  console.error(err);
+  res.status(500).send('Something broke!');
+})
+
+// Path-scoped error handler
+server.useOnError('/api', (err, req, res, next) => {
+  console.error(err);
+  res.status(500).send('Something broke!');
+})
+```
+
+There is a default error handler already registered, defined as:
+```typescript
+function defaultErrorHandler(
+  err: unknown,
+  _req: express.Request,
+  res: express.Response,
+  _next: express.NextFunction,
+) {
+  console.error("Error handling MCP request:", err);
+  if (!res.headersSent) {
+    res.status(500).json({
+      jsonrpc: "2.0",
+      error: { code: -32603, message: "Internal server error" },
+      id: null,
+    });
+  }
+}
+```
+
 ### mcpMiddleware
 
 Register MCP protocol-level middleware using an onion model. Middleware wraps request/notification handlers and can inspect, modify, or short-circuit them.
