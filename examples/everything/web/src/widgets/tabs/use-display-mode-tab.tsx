@@ -1,13 +1,13 @@
-import { type DisplayMode, useDisplayMode } from "skybridge/web";
+import { type RequestDisplayMode, useDisplayMode } from "skybridge/web";
 
-const ColByMode = new Map<DisplayMode, number>()
+const ColByMode = new Map<RequestDisplayMode, number>()
   .set("inline", 1)
   .set("pip", 2)
   .set("fullscreen", 3);
 
 export function UseDisplayModeTab() {
   const [displayMode, setDisplayMode] = useDisplayMode();
-  const columns = ColByMode.get(displayMode) ?? 1;
+  const columns = displayMode === "modal" ? 1 : ColByMode.get(displayMode);
 
   return (
     <div className="tab-content">

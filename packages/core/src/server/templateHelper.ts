@@ -37,7 +37,6 @@ class TemplateHelper {
   renderDevelopment(data: {
     hostType: WidgetHostType;
     serverUrl: string;
-    useLocalNetworkAccess: boolean;
     widgetName: string;
   }): string {
     const template = this.loadTemplate("development");

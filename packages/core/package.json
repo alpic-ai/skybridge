@@ -1,6 +1,6 @@
 {
   "name": "skybridge",
-  "version": "0.0.0",
+  "version": "0.35.8",
   "description": "Skybridge is a framework for building ChatGPT and MCP Apps",
   "repository": {
     "type": "git",
@@ -44,28 +44,28 @@
   "license": "ISC",
   "peerDependencies": {
     "@modelcontextprotocol/sdk": ">=1.0.0",
-    "@skybridge/devtools": ">=0.26.1",
+    "@skybridge/devtools": ">=0.35.9 <1.0.0",
     "nodemon": ">=3.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
-    "vite": "^7.3.1"
+    "vite": ">=7.3.1"
   },
   "dependencies": {
     "@babel/core": "^7.29.0",
-    "@oclif/core": "^4.8.1",
+    "@modelcontextprotocol/ext-apps": "^1.3.1",
+    "@oclif/core": "^4.10.2",
     "ci-info": "^4.4.0",
     "cors": "^2.8.6",
     "dequal": "^2.0.3",
-    "es-toolkit": "^1.44.0",
+    "es-toolkit": "^1.45.1",
     "express": "^5.2.1",
     "handlebars": "^4.7.8",
     "ink": "^6.8.0",
-    "posthog-node": "^5.26.0",
+    "posthog-node": "^5.28.5",
     "superjson": "^2.2.6",
-    "zustand": "^5.0.11"
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@modelcontextprotocol/ext-apps": "^1.1.2",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
@@ -73,19 +73,19 @@
     "@types/babel__core": "^7.20.5",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "@types/jsdom": "^28.0.0",
-    "@types/node": "^24.10.15",
+    "@types/jsdom": "^28.0.1",
+    "@types/node": "^24.12.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitest/ui": "^4.0.18",
-    "jsdom": "^28.1.0",
+    "@vitest/ui": "^4.1.1",
+    "jsdom": "^29.0.1",
     "shx": "^0.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.18",
+    "vitest": "^4.1.1",
     "zod": "^4.3.6"
   },
-  "packageManager": "pnpm@10.30.3",
+  "packageManager": "pnpm@10.32.1",
   "bin": {
     "sb": "./bin/run.js",
     "skybridge": "./bin/run.js"

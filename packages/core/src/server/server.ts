@@ -22,12 +22,24 @@ import type {
   Resource,
   ServerNotification,
   ServerRequest,
+  ServerResult,
   ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
 import { mergeWith, union } from "es-toolkit";
 import type { Express, RequestHandler } from "express";
-import { DEFAULT_HMR_PORT } from "./const.js";
-import { createServer } from "./express.js";
+import { createApp } from "./express.js";
+import type {
+  McpExtra,
+  McpExtraFor,
+  McpMethodString,
+  McpMiddlewareEntry,
+  McpMiddlewareFilter,
+  McpMiddlewareFn,
+  McpResultFor,
+  McpTypedMiddlewareFn,
+  McpWildcard,
+} from "./middleware.js";
+import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
 import { templateHelper } from "./templateHelper.js";
 
 const mergeWithUnion = <T extends object, S extends object>(
@@ -226,6 +238,8 @@ export class McpServer<
   declare readonly $types: McpServerTypes<TTools>;
   private express?: Express;
   private customMiddleware: MiddlewareConfig[] = [];
+  private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
+  private mcpMiddlewareApplied = false;
 
   use(...handlers: RequestHandler[]): this;
   use(path: string, ...handlers: RequestHandler[]): this;
@@ -247,23 +261,158 @@ export class McpServer<
     return this;
   }
 
+  /**
+   * Register MCP protocol-level middleware (catch-all).
+   */
+  mcpMiddleware(handler: McpMiddlewareFn): this;
+  /**
+   * Register MCP protocol-level middleware for all requests (`extra` is `McpExtra`).
+   */
+  mcpMiddleware(
+    filter: "request",
+    handler: (
+      request: { method: string; params: Record<string, unknown> },
+      extra: McpExtra,
+      next: () => Promise<ServerResult>,
+    ) => Promise<unknown> | unknown,
+  ): this;
+  /**
+   * Register MCP protocol-level middleware for all notifications (`extra` is `undefined`).
+   */
+  mcpMiddleware(
+    filter: "notification",
+    handler: (
+      request: { method: string; params: Record<string, unknown> },
+      extra: undefined,
+      next: () => Promise<undefined>,
+    ) => Promise<unknown> | unknown,
+  ): this;
+  /**
+   * Register MCP protocol-level middleware for an exact method.
+   * Narrows `params`, `extra`, and `next()` result based on the method string.
+   */
+  mcpMiddleware<M extends McpMethodString>(
+    filter: M,
+    handler: McpTypedMiddlewareFn<M>,
+  ): this;
+  /**
+   * Register MCP protocol-level middleware for a wildcard pattern (e.g. `"tools/*"`).
+   * `next()` returns the union of result types for matching methods.
+   */
+  mcpMiddleware<W extends McpWildcard>(
+    filter: W,
+    handler: (
+      request: { method: string; params: Record<string, unknown> },
+      extra: McpExtraFor<W>,
+      next: () => Promise<McpResultFor<W>>,
+    ) => Promise<unknown> | unknown,
+  ): this;
+  /**
+   * Register MCP protocol-level middleware with a method filter.
+   * Filter can be an exact method (`"tools/call"`), wildcard (`"tools/*"`),
+   * category (`"request"` | `"notification"`), or an array of those.
+   */
+  mcpMiddleware(filter: McpMiddlewareFilter, handler: McpMiddlewareFn): this;
+  mcpMiddleware(
+    filterOrHandler: McpMiddlewareFilter | McpMiddlewareFn,
+    // biome-ignore lint/suspicious/noExplicitAny: overloads narrow the handler type at call sites; implementation must accept all variants
+    maybeHandler?: any,
+  ): this {
+    if (this.mcpMiddlewareApplied) {
+      throw new Error(
+        "Cannot register MCP middleware after run() or connect() has been called",
+      );
+    }
+
+    const handler = maybeHandler as McpMiddlewareFn | undefined;
+
+    if (typeof filterOrHandler === "function") {
+      this.mcpMiddlewareEntries.push({
+        filter: null,
+        handler: filterOrHandler,
+      });
+    } else if (handler) {
+      this.mcpMiddlewareEntries.push({
+        filter: filterOrHandler,
+        handler,
+      });
+    } else {
+      throw new Error(
+        "mcpMiddleware requires a handler function when a filter is provided",
+      );
+    }
+
+    return this;
+  }
+
+  private applyMcpMiddleware(): void {
+    if (this.mcpMiddlewareApplied) {
+      return;
+    }
+    this.mcpMiddlewareApplied = true;
+
+    if (this.mcpMiddlewareEntries.length === 0) {
+      return;
+    }
+
+    const { requestHandlers, notificationHandlers } = getHandlerMaps(
+      this.server,
+    );
+    const entries = this.mcpMiddlewareEntries;
+
+    // Wrap existing handlers and proxy future .set() for lazy SDK registration
+    const instrumentMap = (
+      map: Map<string, (...args: unknown[]) => Promise<unknown>>,
+      isNotification: boolean,
+    ) => {
+      for (const [method, handler] of map) {
+        map.set(
+          method,
+          buildMiddlewareChain(method, isNotification, handler, entries),
+        );
+      }
+      const originalSet = map.set.bind(map);
+      map.set = (
+        method: string,
+        handler: (...args: unknown[]) => Promise<unknown>,
+      ) =>
+        originalSet(
+          method,
+          buildMiddlewareChain(method, isNotification, handler, entries),
+        );
+    };
+
+    instrumentMap(requestHandlers, false);
+    instrumentMap(notificationHandlers, true);
+  }
+
+  override async connect(
+    transport: Parameters<typeof McpServerBase.prototype.connect>[0],
+  ): Promise<void> {
+    this.applyMcpMiddleware();
+    return super.connect(transport);
+  }
+
   async run(): Promise<void> {
+    this.applyMcpMiddleware();
+    const httpServer = http.createServer();
+
     if (!this.express) {
-      this.express = await createServer({
-        server: this,
+      this.express = await createApp({
+        mcpServer: this,
+        httpServer,
         customMiddleware: this.customMiddleware,
       });
     }
 
-    const express = this.express;
+    httpServer.on("request", this.express);
     return new Promise((resolve, reject) => {
-      const server = http.createServer(express);
-      server.on("error", (error: Error) => {
+      httpServer.on("error", (error: Error) => {
         console.error("Failed to start server:", error);
         reject(error);
       });
       const port = parseInt(process.env.__PORT ?? "3000", 10);
-      server.listen(port, () => {
+      httpServer.listen(port, () => {
         resolve();
       });
     });
@@ -458,21 +607,37 @@ export class McpServer<
       { ...resourceConfig, _meta: resourceConfig._meta },
       async (uri, extra) => {
         const isProduction = process.env.NODE_ENV === "production";
-        const useForwardedHost =
-          process.env.SKYBRIDGE_USE_FORWARDED_HOST === "true";
         const isClaude =
           extra?.requestInfo?.headers?.["user-agent"] === "Claude-User";
 
-        const hostFromHeaders =
-          extra?.requestInfo?.headers?.["x-forwarded-host"] ??
-          extra?.requestInfo?.headers?.host;
+        const headers = extra?.requestInfo?.headers || {};
+        const header = (key: string) => {
+          const val = headers[key];
+          return Array.isArray(val) ? val[0] : val;
+        };
 
-        const useExternalHost = isProduction || useForwardedHost || isClaude;
+        let serverUrl: string;
 
-        const devPort = process.env.__PORT || "3000";
-        const serverUrl = useExternalHost
-          ? `https://${hostFromHeaders}`
-          : `http://localhost:${devPort}`;
+        const forwardedHost = header("x-forwarded-host");
+        const origin = header("origin");
+        const host = header("host");
+
+        if (forwardedHost) {
+          const proto = header("x-forwarded-proto") || "https";
+          serverUrl = `${proto}://${forwardedHost}`;
+        } else if (origin) {
+          serverUrl = origin;
+        } else if (host) {
+          const proto = ["127.0.0.1:", "localhost:"].some((p) =>
+            host.startsWith(p),
+          )
+            ? "http"
+            : "https";
+          serverUrl = `${proto}://${host}`;
+        } else {
+          const devPort = process.env.__PORT || "3000";
+          serverUrl = `http://localhost:${devPort}`;
+        }
 
         const html = isProduction
           ? templateHelper.renderProduction({
@@ -486,30 +651,27 @@ export class McpServer<
           : templateHelper.renderDevelopment({
               hostType,
               serverUrl,
-              useLocalNetworkAccess: !useExternalHost,
               widgetName: name,
             });
 
         const connectDomains = [serverUrl];
         if (!isProduction) {
-          const hmrPort = process.env.__SKYBRIDGE_HMR_PORT ?? DEFAULT_HMR_PORT;
-          const VITE_HMR_WEBSOCKET_DEFAULT_URL = `ws://localhost:${hmrPort}`;
-          connectDomains.push(VITE_HMR_WEBSOCKET_DEFAULT_URL);
+          const wsUrl = new URL(serverUrl);
+          wsUrl.protocol = wsUrl.protocol === "https:" ? "wss:" : "ws:";
+          connectDomains.push(wsUrl.origin);
         }
 
-        const pathname = extra?.requestInfo?.url?.pathname ?? "";
-        const url = `https://${hostFromHeaders}${pathname}`;
-        const hash = crypto
-          .createHash("sha256")
-          .update(url)
-          .digest("hex")
-          .slice(0, 32);
-
-        const contentMetaOverrides = isClaude
-          ? {
-              domain: `${hash}.claudemcpcontent.com`,
-            }
-          : {};
+        let contentMetaOverrides: { domain?: string } = {};
+        if (isClaude) {
+          const pathname = extra?.requestInfo?.url?.pathname ?? "";
+          const url = `${serverUrl}${pathname}`;
+          const hash = crypto
+            .createHash("sha256")
+            .update(url)
+            .digest("hex")
+            .slice(0, 32);
+          contentMetaOverrides = { domain: `${hash}.claudemcpcontent.com` };
+        }
 
         const contentMeta = buildContentMeta(
           {

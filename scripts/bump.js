@@ -32,7 +32,7 @@ if (!skybridgeVersion) {
   process.exit(1);
 }
 
-const devtoolsVersion = fetchLatestVersion("@skybridge/devtools");
+const devtoolsVersion = process.argv[2] || fetchLatestVersion("@skybridge/devtools");
 const alpicVersion = fetchLatestVersion("alpic");
 
 const skybridgeRange = `>=${skybridgeVersion} <1.0.0`;
@@ -40,8 +40,12 @@ const devtoolsRange = devtoolsVersion ? `>=${devtoolsVersion} <1.0.0` : null;
 const alpicRange = alpicVersion ? `^${alpicVersion}` : null;
 
 console.log(`skybridge:          ${skybridgeRange}`);
-if (devtoolsRange) console.log(`@skybridge/devtools: ${devtoolsRange}`);
-if (alpicRange) console.log(`alpic:               ${alpicRange}`);
+if (devtoolsRange) {
+  console.log(`@skybridge/devtools: ${devtoolsRange}`);
+}
+if (alpicRange) {
+  console.log(`alpic:               ${alpicRange}`);
+}
 
 // Find all example package.json files dynamically
 const exampleTargets = [];
@@ -58,6 +62,19 @@ const targets = [
   "packages/create-skybridge/template/package.json",
   ...exampleTargets,
 ];
+
+// Update @skybridge/devtools peer dependency in core package
+if (devtoolsRange) {
+  const corePackagePath = join(rootDir, "packages/core/package.json");
+  if (existsSync(corePackagePath)) {
+    const corePkg = JSON.parse(readFileSync(corePackagePath, "utf8"));
+    if (corePkg.peerDependencies?.["@skybridge/devtools"]) {
+      console.log("Updating: packages/core/package.json (peerDependencies)");
+      corePkg.peerDependencies["@skybridge/devtools"] = devtoolsRange;
+      writeFileSync(corePackagePath, JSON.stringify(corePkg, null, 2) + "\n");
+    }
+  }
+}
 
 for (const target of targets) {
   const file = join(rootDir, target);

@@ -10,7 +10,7 @@ vi.mock("@skybridge/devtools", () => ({
 }));
 
 vi.mock("./widgetsDevServer.js", () => ({
-  widgetsDevServer: () =>
+  widgetsDevServer: (_httpServer: unknown) =>
     ((_req: unknown, _res: unknown, next: () => void) =>
       next()) as RequestHandler,
 }));
@@ -35,9 +35,9 @@ async function postMcp(port: number) {
   });
 }
 
-describe("createServer", () => {
+describe("createApp", () => {
   it("runs global custom middleware before the /mcp handler", async () => {
-    const { createServer } = await import("./express.js");
+    const { createApp } = await import("./express.js");
     const calls: string[] = [];
 
     const mw: RequestHandler = (_req, _res, next) => {
@@ -45,8 +45,10 @@ describe("createServer", () => {
       next();
     };
 
-    const app = await createServer({
-      server: fakeServer,
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
       customMiddleware: [{ handlers: [mw] }],
     });
 
@@ -58,7 +60,7 @@ describe("createServer", () => {
   });
 
   it("runs path-scoped middleware on /mcp", async () => {
-    const { createServer } = await import("./express.js");
+    const { createApp } = await import("./express.js");
     const calls: string[] = [];
 
     const mw: RequestHandler = (_req, _res, next) => {
@@ -66,8 +68,10 @@ describe("createServer", () => {
       next();
     };
 
-    const app = await createServer({
-      server: fakeServer,
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
       customMiddleware: [{ path: "/mcp", handlers: [mw] }],
     });
 
@@ -79,14 +83,16 @@ describe("createServer", () => {
   });
 
   it("allows middleware to short-circuit with 401", async () => {
-    const { createServer } = await import("./express.js");
+    const { createApp } = await import("./express.js");
 
     const reject: RequestHandler = (_req, res) => {
       res.status(401).json({ error: "Unauthorized" });
     };
 
-    const app = await createServer({
-      server: fakeServer,
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
       customMiddleware: [{ path: "/mcp", handlers: [reject] }],
     });
 
@@ -96,5 +102,131 @@ describe("createServer", () => {
     const res = await postMcp(port);
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: "Unauthorized" });
+  });
+
+  it("runs multiple global middleware in registration order", async () => {
+    const { createApp } = await import("./express.js");
+    const calls: string[] = [];
+
+    const mwA: RequestHandler = (_req, _res, next) => {
+      calls.push("A");
+      next();
+    };
+    const mwB: RequestHandler = (_req, _res, next) => {
+      calls.push("B");
+      next();
+    };
+
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
+      customMiddleware: [{ handlers: [mwA] }, { handlers: [mwB] }],
+    });
+
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    await postMcp(port);
+    expect(calls).toEqual(["A", "B"]);
+  });
+
+  it("path-scoped middleware does not run on non-matching paths", async () => {
+    const { createApp } = await import("./express.js");
+    const calls: string[] = [];
+
+    const apiMw: RequestHandler = (_req, _res, next) => {
+      calls.push("api");
+      next();
+    };
+
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
+      customMiddleware: [{ path: "/api", handlers: [apiMw] }],
+    });
+
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    // Hit /mcp — the /api middleware should NOT fire
+    await postMcp(port);
+    expect(calls).toEqual([]);
+  });
+
+  it("supports Express Router via custom middleware", async () => {
+    const { createApp } = await import("./express.js");
+    const { Router } = await import("express");
+
+    const router = Router();
+    router.get("/health", (_req, res) => {
+      res.json({ status: "ok" });
+    });
+
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
+      customMiddleware: [{ handlers: [router as RequestHandler] }],
+    });
+
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    const res = await fetch(`http://localhost:${port}/health`);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ status: "ok" });
+  });
+
+  it("supports path-prefixed Router", async () => {
+    const { createApp } = await import("./express.js");
+    const { Router } = await import("express");
+
+    const router = Router();
+    router.get("/data", (_req, res) => {
+      res.json({ value: 42 });
+    });
+
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
+      customMiddleware: [
+        { path: "/api", handlers: [router as RequestHandler] },
+      ],
+    });
+
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    const res = await fetch(`http://localhost:${port}/api/data`);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ value: 42 });
+  });
+
+  it("server survives middleware errors without crashing", async () => {
+    const { createApp } = await import("./express.js");
+
+    const throwing: RequestHandler = () => {
+      throw new Error("boom");
+    };
+
+    const httpServer = http.createServer();
+    const app = await createApp({
+      mcpServer: fakeServer,
+      httpServer,
+      customMiddleware: [{ path: "/explode", handlers: [throwing] }],
+    });
+
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    const res = await fetch(`http://localhost:${port}/explode`);
+    expect(res.status).toBe(500);
+
+    // Server process did not crash — it still accepts connections
+    const followUp = await fetch(`http://localhost:${port}/explode`);
+    expect(followUp.status).toBe(500);
   });
 });

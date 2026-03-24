@@ -1,25 +1,22 @@
-import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
-import { mcpAuthMetadataRouter } from "@modelcontextprotocol/sdk/server/auth/router.js";
+import "dotenv/config";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import { McpServer } from "skybridge/server";
 import * as z from "zod";
-import { verifyAccessToken } from "./auth.js";
 import { searchCoffeeShops } from "./coffee-data.js";
-import { env } from "./env.js";
+import { clerkMiddleware } from "@clerk/express";
+import {
+  mcpAuthClerk,
+  protectedResourceHandlerClerk,
+} from "@clerk/mcp-tools/express";
 
 /**
- * Auth Example - Full OAuth Authentication with WorkOS AuthKit
+ * Auth Example - OAuth Authentication with Clerk
  *
  * This example demonstrates a fully authenticated MCP server where users
  * must sign in via OAuth before using any tools. Auth is enforced at the
  * transport level — unauthenticated requests to /mcp receive HTTP 401.
  *
- * Auth flow:
- * 1. MCP client discovers OAuth metadata via /.well-known/oauth-authorization-server
- * 2. User is prompted to sign in via WorkOS AuthKit
- * 3. MCP client connects to /mcp with a Bearer JWT token
- * 4. requireBearerAuth verifies the token via verifyAccessToken
- * 5. Tool handlers read user identity via extra.authInfo
+ * Tool handlers read user identity via extra.authInfo.
  */
 
 const server = new McpServer(
@@ -29,25 +26,9 @@ const server = new McpServer(
   },
   { capabilities: {} },
 )
-  // Mount OAuth metadata so MCP clients can discover auth endpoints
-  .use(
-    mcpAuthMetadataRouter({
-      oauthMetadata: {
-        issuer: env.SERVER_URL,
-        authorization_endpoint: `https://${env.AUTHKIT_DOMAIN}/oauth2/authorize`,
-        token_endpoint: `https://${env.AUTHKIT_DOMAIN}/oauth2/token`,
-        registration_endpoint: `https://${env.AUTHKIT_DOMAIN}/oauth2/register`,
-        response_types_supported: ["code"],
-        response_modes_supported: ["query"],
-        scopes_supported: ["openid"],
-        grant_types_supported: ["authorization_code", "refresh_token"],
-        token_endpoint_auth_methods_supported: ["client_secret_post"],
-        code_challenge_methods_supported: ["S256"],
-      },
-      resourceServerUrl: new URL(env.SERVER_URL),
-    }),
-  )
-  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
+  .use(clerkMiddleware())
+  .use("/.well-known/oauth-protected-resource", protectedResourceHandlerClerk())
+  .use("/mcp", mcpAuthClerk)
   .registerWidget(
     "search-coffee-paris",
     {

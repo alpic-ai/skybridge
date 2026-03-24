@@ -7,7 +7,7 @@ A minimal TypeScript template for building MCP and ChatGPT Apps with the [Skybri
 ### Prerequisites
 
 - Node.js 24+
-- HTTP tunnel such as [ngrok](https://ngrok.com/download) if you want to test with remote MCP hosts like ChatGPT or Claude.ai.
+- HTTP tunnel such as [Alpic tunnel](https://docs.alpic.ai/cli/tunnel) if you want to test with remote MCP hosts like ChatGPT or Claude.ai.
 
 ### Local Development
 

@@ -14,10 +14,6 @@ export default class Dev extends Command {
       description: "Port to run the server on",
       min: 1,
     }),
-    "use-forwarded-host": Flags.boolean({
-      description:
-        "Uses the forwarded host header to construct widget URLs instead of localhost, useful when accessing the dev server through a tunnel (e.g., ngrok)",
-    }),
   };
 
   public async run(): Promise<void> {
@@ -31,9 +27,6 @@ export default class Dev extends Command {
     const env = {
       ...process.env,
       __PORT: String(port),
-      ...(flags["use-forwarded-host"]
-        ? { SKYBRIDGE_USE_FORWARDED_HOST: "true" }
-        : {}),
     };
 
     const App = () => {
@@ -118,11 +111,8 @@ export default class Dev extends Command {
               <Text color="white" bold>
                 Logs:
               </Text>
-              {messages.map((message, index) => (
-                <Box
-                  key={`${message.type}-${index}-${message.text.slice(0, 20)}`}
-                  marginLeft={2}
-                >
+              {messages.map((message) => (
+                <Box key={message.id} marginLeft={2}>
                   {message.type === "restart" ? (
                     <>
                       <Text color="green">✓{"  "}</Text>

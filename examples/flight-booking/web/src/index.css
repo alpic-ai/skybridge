@@ -1,0 +1,246 @@
+.light {
+  --bg: #fff;
+  --bg-card: #fff;
+  --bg-alt: #f5f7fa;
+  --text: #1a1a2e;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #16a34a;
+  --accent-hover: #15803d;
+  --accent-text: #fff;
+  --tag-bg: #dcfce7;
+  --tag-text: #166534;
+  --tag-cheapest-bg: #fef3c7;
+  --tag-cheapest-text: #92400e;
+  --stops-line: #d1d5db;
+}
+
+.dark {
+  --bg: #1a1a2e;
+  --bg-card: #242442;
+  --bg-alt: #2a2a4a;
+  --text: #f0f0f0;
+  --text-muted: #9ca3af;
+  --border: #374151;
+  --accent: #22c55e;
+  --accent-hover: #16a34a;
+  --accent-text: #fff;
+  --tag-bg: #064e3b;
+  --tag-text: #6ee7b7;
+  --tag-cheapest-bg: #78350f;
+  --tag-cheapest-text: #fde68a;
+  --stops-line: #4b5563;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  gap: 0;
+}
+
+.header {
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.route-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.route-dates {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.carousel {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0 1rem 1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.flight-card {
+  flex: 0 0 280px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.flight-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.tags {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.tag.cheapest {
+  background: var(--tag-cheapest-bg);
+  color: var(--tag-cheapest-text);
+}
+
+.price-block {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.price-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.card-route {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.airline {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.airline-logo {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.5rem;
+  font-weight: 700;
+  color: var(--accent-text);
+}
+
+.leg {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.leg-time {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  min-width: 36px;
+}
+
+.leg-connector {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+.leg-duration {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.leg-line {
+  width: 100%;
+  height: 1px;
+  background: var(--stops-line);
+  position: relative;
+}
+
+.leg-stops {
+  font-size: 0.6rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.leg-stops.direct {
+  color: #10b981;
+}
+
+.leg-airport {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 28px;
+  text-align: center;
+}
+
+.book-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  width: 100%;
+  padding: 0.625rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: auto;
+}
+
+.book-button:hover {
+  background: var(--accent-hover);
+}
+
+.book-button svg {
+  width: 12px;
+  height: 12px;
+}
+
+.message {
+  margin: 1rem;
+  padding: 1rem;
+  background: var(--bg-card);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  text-align: center;
+}
