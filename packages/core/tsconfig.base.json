@@ -15,6 +15,9 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
 
+    // Type declarations
+    "types": ["node", "vite/client"],
+
     // Strictness and checking options
     "strict": true,
     "skipLibCheck": true,
