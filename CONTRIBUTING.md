@@ -57,7 +57,7 @@ Keep PRs focused on a single change. For larger features, consider opening an is
 
 ### Documentation
 
-When changing docs or features that affect the docs website, see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for general documentation philosophy, guidelines and doc change checklist.
+If your PR affects the documentation, read [docs/DOCUMENTATION-MANIFESTO.md](docs/DOCUMENTATION-MANIFESTO.md) before you start. It is the must-read guide for new documentation contributors and covers documentation philosophy, writing guidelines, and the docs change checklist.
 
 ## Code Guidelines
 

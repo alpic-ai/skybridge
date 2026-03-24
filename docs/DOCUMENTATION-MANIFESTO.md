@@ -1,4 +1,4 @@
-# Writing Skybridge Documentation
+# Skybridge Documentation Manifesto
 
 Skybridge aims at providing the best developer experience to MCP Apps and ChatGPT Apps builders. We believe **great documentation** is as important as a great framework.
 
@@ -28,37 +28,59 @@ Never assume the reader is already an expert in Skybridge or MCP Apps. When you 
 
 #### Current documentation structure
 
-1. Get Started: the **home and most important section of our documentation**. It explains the value of Skybridge and how to get started in less than 5 minutes.
+1. <details>
+   <summary>Get Started: the **home and most important section of our documentation**. It should explain the value of Skybridge and help readers get to a first working app in less than 5 minutes.</summary>
+
    - Introduction: why Skybridge was built, what it does, and what it does not do.
-   - Fundamentals: what MCP Apps and ChatGPT Apps are, how they differ from traditional web apps, and how they build on MCP servers. This section also explains how Skybridge maps to the OpenAI Apps SDK and MCP Apps runtimes.
+   - Fundamentals: what MCP Apps and ChatGPT Apps are, how they differ from traditional web apps, and how they build on MCP servers. This section should also explain how Skybridge maps to the OpenAI Apps SDK and MCP runtimes.
    - Quickstart: how to get started with Skybridge in under 5 minutes with our create command or the Skybridge Skill.
    - Migrate: how to migrate your app with the Skybridge Skill.
    - Test your app: how to test your app locally with DevTools or inside your target MCP client such as ChatGPT, Claude, or Cursor.
    - Build for production: how to build your MCP server and UI code for production use.
    - Deploy: how to deploy your app and publish it to MCP client stores.
+   
+   </details>
 
-2. Core concepts: explains the core concepts introduced by Skybridge and MCP Apps.
+2. <details>
+   <summary>Core concepts: explains the core concepts introduced by Skybridge and MCP Apps. This section should give readers the mental models they need to understand how Skybridge works.</summary>
+
    - Write Once, Run Everywhere: how a single codebase targets both ChatGPT Apps and MCP clients such as Claude or Cursor, and how Skybridge abstracts client differences.
-   - Data Flow: how data moves between the host, your app, and the LLM; request and response shapes; and where state lives.
+   - Data Flow: how data moves between the host, your app, and the LLM, and where state lives.
    - LLM Context Sync: how Skybridge keeps the model's context in sync with your app state, and when that sync runs.
    - Fast Iteration: the local development workflow, hot reload, and how to use DevTools to iterate without redeploying.
    - Type Safety: how Skybridge preserves types from your app to the client, including tools, parameters, and views, and how to get the most from TypeScript.
+   
+   </details>
 
-3. Guides: step-by-step patterns for common tasks.
+3. <details>
+   <summary>Guides: step-by-step patterns for common tasks. This section should help readers implement something specific in their app.</summary>
+
    - Fetching data: loading data in your app, when to use tools vs. resources, and patterns for async data.
    - Managing state: app-level state, persistence, and sharing state between tools and views.
-   - Communicating with the model: how the model invokes tools and sees resources or views; prompts, tool results, and context boundaries.
+   - Communicating with the model: how the model invokes tools and sees resources or views, and how prompts, tool results, and context boundaries work together.
    - Host environment context: what the host provides, such as user, session, and locale, and how to use it in your app.
+   
+   </details>
 
-4. Developer tools: how to build and debug Skybridge apps.
+4. <details>
+   <summary>Developer tools: how to build and debug Skybridge apps. This section should help readers develop faster and understand the tooling around Skybridge.</summary>
+
    - Skills: using the Skybridge Skill and similar workflows to scaffold, migrate, and maintain apps from your IDE or chat.
    - Local DevTools: running and debugging your app locally, testing tools and views, and connecting to MCP clients.
+   
+   </details>
 
-5. Resources:
+5. <details>
+   <summary>Resources: supporting material such as FAQs, troubleshooting information, and policy or operational pages.</summary>
+
    - FAQ: common questions and troubleshooting tips from Skybridge users. This section should be updated whenever the same issue appears repeatedly in GitHub issues, discussions, or support channels.
-   - Telemetry: what telemetry data we collect and how to opt out.
+   - Telemetry: what telemetry data we collect, why we collect it, and how to opt out.
+   
+   </details>
 
-6. API Reference: full Skybridge API reference.
+6. <details>
+   <summary>API Reference: full Skybridge API reference. This section should optimize for precision, completeness, and consistency over narrative explanation.</summary>
+
    - Overview: the entry point and how the API is organized, including server vs. web and hooks vs. utilities.
    - CLI: Skybridge CLI commands such as create, build, and dev, plus their options.
    - Server: server-side APIs for defining the MCP server and registering UI.
@@ -78,14 +100,17 @@ Never assume the reader is already an expert in Skybridge or MCP Apps. When you 
      - data-llm: an attribute for exposing DOM content to the model.
    - Types: `infer-utility-types` and other helpers for server-to-client type inference.
    - Advanced: low-level context hooks such as `useAppsSdkContext` and `useMcpAppContext` when you need raw host APIs.
+   
+   </details>
 
-7. Showcase: apps built with Skybridge. This includes example apps in the Skybridge repository and third-party apps built with the framework.
+7. Showcase: apps built with Skybridge. This section should include example apps in the Skybridge repository and third-party apps built with the framework.
 
-#### User flows, in order of importance
+#### User paths, in order of importance
 
-1. A new user who wants to understand what Skybridge is and how to build apps: Introduction, Fundamentals, Core Concepts, and Guides.
-2. A new user who wants to experiment with Skybridge quickly: Quickstart.
-3. A returning user who wants specific implementation details: API Reference, Core Concepts, and Guides.
+1. A new user who wants to understand what Skybridge is: Get Started, then Core concepts.
+2. A new user who wants to try Skybridge quickly: Get Started.
+3. A user who is actively building: Guides, Core concepts, and API Reference.
+4. A returning user who needs exact implementation details: API Reference and the relevant Guide or concept page.
 
 ## How to contribute in practice
 
