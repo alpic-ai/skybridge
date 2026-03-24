@@ -954,8 +954,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.2(@types/node@25.2.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.100.0
-        version: 1.100.0(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.2)
+        specifier: ^1.101.0
+        version: 1.101.0(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.2)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -1108,6 +1108,9 @@ packages:
 
   '@alpic-ai/api@1.100.0':
     resolution: {integrity: sha512-Dgeuj7yNqNy4i5R8r/ZpkhE2/DR8DJv2LiOr+Rta7J7m6IarKJHDfH4CSB+9DIwGVhhbLw9bYGYKClXEBfu+7g==}
+
+  '@alpic-ai/api@1.101.0':
+    resolution: {integrity: sha512-uNQTJSy7WSdnhQNLKZWfF20J+QD5/iOs8lMavEFy1UL+8AYffujQHq8wG1wonIlx2qOXbqgP14v4gSNu7tCEfQ==}
 
   '@ark/schema@0.55.0':
     resolution: {integrity: sha512-IlSIc0FmLKTDGr4I/FzNHauMn0MADA6bCjT1wauu4k6MyxhC1R9gz0olNpIRvK7lGGDwtc/VO0RUDNvVQW5WFg==}
@@ -4354,6 +4357,11 @@ packages:
 
   alpic@1.100.0:
     resolution: {integrity: sha512-2q2wRKo2e/1zxe3jWvKPa+hcY6IeJ6G7ZtcBV4jfdUGUBAlbcI2K3JOJzTcuMR5r+pcV9GVz1XsHRcoYWBPPqw==}
+    engines: {node: '>= 18.20.8'}
+    hasBin: true
+
+  alpic@1.101.0:
+    resolution: {integrity: sha512-ooxU53iX2ux5eZAOBxa0Pu88uQLx6rHo3mtSljZweo0j9ob8Veldw5HslU1Y6j54hJ5AgFXQWlDfSMUnko+sEQ==}
     engines: {node: '>= 18.20.8'}
     hasBin: true
 
@@ -9228,6 +9236,14 @@ snapshots:
   '@alloc/quick-lru@5.2.0': {}
 
   '@alpic-ai/api@1.100.0(@opentelemetry/api@1.9.0)':
+    dependencies:
+      '@orpc/contract': 1.13.9(@opentelemetry/api@1.9.0)
+      ms: 2.1.3
+      zod: 4.3.6
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
+  '@alpic-ai/api@1.101.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@orpc/contract': 1.13.9(@opentelemetry/api@1.9.0)
       ms: 2.1.3
@@ -14137,9 +14153,9 @@ snapshots:
       - typescript
       - valibot
 
-  alpic@1.100.0(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.2):
+  alpic@1.101.0(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.2):
     dependencies:
-      '@alpic-ai/api': 1.100.0(@opentelemetry/api@1.9.0)
+      '@alpic-ai/api': 1.101.0(@opentelemetry/api@1.9.0)
       '@clack/prompts': 1.1.0
       '@oclif/core': 4.10.2
       '@orpc/client': 1.13.9(@opentelemetry/api@1.9.0)
@@ -19164,7 +19180,7 @@ snapshots:
 
   simple-update-notifier@2.0.0:
     dependencies:
-      semver: 7.7.3
+      semver: 7.7.4
 
   sirv@3.0.2:
     dependencies:
