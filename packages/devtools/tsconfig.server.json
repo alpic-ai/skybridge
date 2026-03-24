@@ -6,11 +6,5 @@
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "include": [
-    "src/index.ts",
-    "src/server/claude-session-server.ts",
-    "src/server/screenshot-bridge.ts",
-    "src/server/devtools-mcp-server.ts",
-    "src/server/start.ts"
-  ]
+  "include": ["src/index.ts"]
 }
