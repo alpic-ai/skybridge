@@ -2,7 +2,11 @@
   "extends": "skybridge/tsconfig",
 
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
+    "types": ["node", "vite/client"],
+    "paths": {
+      "@/*": ["./web/src/*"]
+    }
   },
 
   "include": ["server/src", "web/src"]
