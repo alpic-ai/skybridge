@@ -7,6 +7,7 @@ import {
   useDefaultLayout,
 } from "react-resizable-panels";
 import { ClaudeTerminal } from "@/components/claude-session/claude-terminal.js";
+import { useScreenshotBridge } from "@/hooks/useScreenshotBridge.js";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { connectToServer, useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { cn } from "@/lib/utils.js";
@@ -17,6 +18,7 @@ import { ToolPanel } from "./tool-panel/tool-panel.js";
 import ToolsList from "./tools-list.js";
 
 function AppLayout() {
+  useScreenshotBridge();
   const selectedTool = useSelectedToolOrNull();
   const { status, requiresAuth } = useAuthStore();
   const { defaultLayout, onLayoutChange } = useDefaultLayout({
@@ -71,6 +73,7 @@ function AppLayout() {
       {/* Backdrop — closes modal on outside click, hidden in fullscreen */}
       {claudeOpen && !claudeFullscreen && (
         <div
+          aria-hidden="true"
           className="fixed inset-0 z-40"
           onClick={() => setClaudeOpen(false)}
         />

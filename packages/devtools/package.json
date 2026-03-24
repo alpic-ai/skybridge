@@ -57,6 +57,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "framer-motion": "^12.38.0",
+    "html-to-image": "^1.11.13",
     "lodash-es": "^4.17.23",
     "lucide-react": "^1.0.1",
     "motion": "^12.38.0",

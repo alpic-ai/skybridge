@@ -10,6 +10,7 @@ export interface ClaudeSessionServerOptions {
   args?: string[];
   env?: Record<string, string>;
   mcpUrl?: string;
+  devtoolsMcpUrl?: string;
 }
 
 export interface ClaudeSessionServer {
@@ -57,10 +58,15 @@ function resolveCommandPath(command: string): string {
 
   try {
     const shell = process.env.SHELL || "/bin/bash";
-    const result = execFileSync(shell, ["--login", "-c", `which ${command}`], {
-      encoding: "utf-8",
-      timeout: 5000,
-    }).trim();
+    // Pass command as a positional argument ($1) to avoid shell injection
+    const result = execFileSync(
+      shell,
+      ["--login", "-c", 'which "$1"', "--", command],
+      {
+        encoding: "utf-8",
+        timeout: 5000,
+      },
+    ).trim();
     if (result) {
       return result;
     }
@@ -71,13 +77,18 @@ function resolveCommandPath(command: string): string {
   return command;
 }
 
-/** Register the Skybridge MCP server with the Claude CLI (idempotent). */
-function setupMcp(command: string, mcpUrl: string, cwd: string): void {
+/** Register an MCP server with the Claude CLI (idempotent). */
+function setupMcp(
+  command: string,
+  mcpUrl: string,
+  name: string,
+  cwd: string,
+): void {
   const commandPath = resolveCommandPath(command);
   try {
     execFileSync(
       commandPath,
-      ["mcp", "add", "--transport", "http", "app", mcpUrl],
+      ["mcp", "add", "--transport", "http", name, mcpUrl],
       {
         encoding: "utf-8",
         timeout: 10000,
@@ -85,13 +96,8 @@ function setupMcp(command: string, mcpUrl: string, cwd: string): void {
         env: buildEnv({}),
       },
     );
-    console.log(`[claude-server] MCP server registered: ${mcpUrl}`);
-  } catch (err) {
-    // Non-fatal — claude may already have the server registered
-    console.warn(
-      "[claude-server] mcp add failed (may already exist):",
-      (err as Error).message,
-    );
+  } catch {
+    // ignore
   }
 }
 
@@ -102,7 +108,6 @@ function spawnProcess(
   >,
 ): pty.IPty {
   const commandPath = resolveCommandPath(options.command);
-  console.log(`[claude-server] spawning: ${commandPath}`, options.args);
 
   const proc = pty.spawn(commandPath, options.args, {
     name: "xterm-256color",
@@ -133,9 +138,15 @@ export function createClaudeSessionServer(
   const command = options.command ?? "claude";
   const args = options.args ?? [];
   const env = options.env ?? {};
-  const mcpUrl = options.mcpUrl ?? "http://localhost:3000/mcp";
+  const appHost = process.env.HOST ?? "localhost";
+  const appPort = process.env.PORT ?? "3000";
+  const mcpUrl = options.mcpUrl ?? `http://${appHost}:${appPort}/mcp`;
+  const devtoolsMcpUrl = options.devtoolsMcpUrl;
 
-  setupMcp(command, mcpUrl, cwd);
+  setupMcp(command, mcpUrl, "skybridge-app", cwd);
+  if (devtoolsMcpUrl) {
+    setupMcp(command, devtoolsMcpUrl, "skybridge-devtools", cwd);
+  }
 
   const wss = new WebSocketServer({ port });
 

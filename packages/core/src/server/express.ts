@@ -14,9 +14,10 @@ export async function createApp({
   httpServer: http.Server;
   customMiddleware?: { path?: string; handlers: express.RequestHandler[] }[];
 }): Promise<express.Express> {
+  const env = process.env.NODE_ENV || "development";
+
   const app = express();
   app.use(express.json());
-  const env = process.env.NODE_ENV || "development";
 
   for (const middleware of customMiddleware) {
     if (middleware.path) {
@@ -27,11 +28,8 @@ export async function createApp({
   }
 
   if (env !== "production") {
-    const { devtoolsStaticServer, createClaudeSessionServer } = await import("@skybridge/devtools");
-    const { port: claudeWsPort } = createClaudeSessionServer({ cwd: process.cwd() });
-    app.use(await devtoolsStaticServer({ claudeWsPort }));
-    const { widgetsDevServer } = await import("./widgetsDevServer.js");
-    app.use(await widgetsDevServer(httpServer));
+    const { setupDevHarness } = await import("./dev-harness.js");
+    await setupDevHarness(app, httpServer);
   }
 
   if (env === "production") {
