@@ -65,6 +65,20 @@ These logs show **Apps SDK** (`window.openai`) calls. In MCP Apps, widgets use t
 
 <img src="/images/devtools-widget.png" alt="DevTools Widget Inspection Panel" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
 
+## Claude Code Integration <Badge>Beta</Badge>
+
+You can connect Claude Code directly to your running DevTools by adding the `--claude` flag:
+
+```bash
+skybridge dev --claude
+```
+
+This starts the Claude Code harness alongside your dev server. Claude will be able to call your tools and see the rendered widget — so you can ask it to test your app, describe what it sees, or iterate on the UI in a conversational loop.
+
+<img src="/images/devtools-claude.png" alt="Claude Code integrated in Skybridge DevTools" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
+
+No additional authentication setup is needed — the harness uses your local `claude` CLI, so if `claude` is already working in your terminal, it will work here too.
+
 ## Limitations
 
 DevTools uses the **Apps SDK runtime** (mocked `window.openai`) but has some differences from production:
