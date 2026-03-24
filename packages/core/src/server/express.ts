@@ -28,8 +28,10 @@ export async function createApp({
   }
 
   if (env !== "production") {
-    const { setupDevHarness } = await import("./dev-harness.js");
-    await setupDevHarness(app, httpServer);
+    const { setupDevMiddleware } = await import("./dev-middleware.js");
+    await setupDevMiddleware(app, httpServer, {
+      claude: process.env.__CLAUDE_HARNESS === "true",
+    });
   }
 
   if (env === "production") {

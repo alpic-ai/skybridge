@@ -28,20 +28,21 @@ export const devtoolsStaticServer = async (
   const router = express.Router();
 
   const distDir = path.dirname(fileURLToPath(import.meta.url));
+  const claudeEnabled = options.claudeWsPort !== undefined;
   const claudeWsPort = options.claudeWsPort ?? 3001;
 
   const indexHtmlPath = path.join(distDir, "index.html");
   const rawHtml = readFileSync(indexHtmlPath, "utf-8");
   const injectedHtml = rawHtml.replace(
     "</head>",
-    `<script>window.__CLAUDE_WS_PORT__=${claudeWsPort};</script></head>`,
+    `<script>window.__CLAUDE_WS_PORT__=${claudeWsPort};window.__CLAUDE_ENABLED__=${claudeEnabled};</script></head>`,
   );
 
   router.use(cors());
-  router.use(express.static(distDir));
   router.get("/", (_req, res) => {
     res.send(injectedHtml);
   });
+  router.use(express.static(distDir, { index: false }));
 
   return router;
 };
