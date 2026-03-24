@@ -2,7 +2,7 @@
 
 Skybridge aims at providing the best developer experience to MCP Apps and ChatGPT Apps builders. We believe **great documentation** is as important as a great framework.
 
-This manifesto is written for Skybridge contributors. It lives publicly in the repository because we want to build in the open.
+This manifesto is written for **all** Skybridge contributors, whether you're opening your first pull request or you're part of the core maintainers.
 
 ## General concepts
 
