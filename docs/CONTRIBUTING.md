@@ -1,6 +1,6 @@
 # Writing Skybridge Documentation
 
-Our goal with Skybridge is to provide the best developer experience for builders of MCP Apps and ChatGPT Apps. We believe **great documentation** is as important as a great framework.
+Skybridge aims at providing the best developer experience to MCP Apps and ChatGPT Apps builders. We believe **great documentation** is as important as a great framework.
 
 This manifesto is written for Skybridge contributors. It lives publicly in the repository because we want to build in the open.
 
