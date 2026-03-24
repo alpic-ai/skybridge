@@ -15,20 +15,19 @@ export async function setupDevMiddleware(
   httpServer: http.Server,
   options: DevMiddlewareOptions = {},
 ): Promise<void> {
-  let claudeWsPort: number | undefined;
-
   if (options.claude) {
     const bridge = new ScreenshotBridge();
     app.use(bridge.createExpressRouter());
     const port = process.env.__PORT ?? process.env.PORT ?? "3000";
     const devtoolsMcpUrl = `http://localhost:${port}/mcp-devtools`;
     app.use("/mcp-devtools", createDevtoolsMcpRouter(bridge));
-    ({ port: claudeWsPort } = createClaudeSessionServer({
+    const { port: claudeWsPort } = createClaudeSessionServer({
       cwd: process.cwd(),
       devtoolsMcpUrl,
-    }));
+    });
+    process.env.__CLAUDE_WS_PORT__ = String(claudeWsPort);
   }
 
-  app.use(await devtoolsStaticServer({ claudeWsPort }));
+  app.use(await devtoolsStaticServer());
   app.use(await widgetsDevServer(httpServer));
 }
