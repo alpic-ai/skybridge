@@ -40,7 +40,7 @@ Never assume the reader is already an expert in Skybridge or MCP Apps. When you 
 2. Core concepts: explains the core concepts introduced by Skybridge and MCP Apps.
    - Write Once, Run Everywhere: how a single codebase targets both ChatGPT Apps and MCP clients such as Claude or Cursor, and how Skybridge abstracts client differences.
    - Data Flow: how data moves between the host, your app, and the LLM; request and response shapes; and where state lives.
-   - LLM Context Sync: how Skybridge keeps the model's context in sync with your app state, tools, resources, and views, and when that sync runs.
+   - LLM Context Sync: how Skybridge keeps the model's context in sync with your app state, and when that sync runs.
    - Fast Iteration: the local development workflow, hot reload, and how to use DevTools to iterate without redeploying.
    - Type Safety: how Skybridge preserves types from your app to the client, including tools, parameters, and views, and how to get the most from TypeScript.
 
