@@ -26,6 +26,7 @@ export class SkybridgeRecords extends Construct {
       "capitals",
       "ecommerce",
       "flight-booking",
+      "generative-ui",
       "everything",
       "investigation-game",
       "manifest-ui",

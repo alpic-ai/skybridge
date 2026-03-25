@@ -144,6 +144,7 @@
         "tab": "Showcase",
         "pages": [
           "showcase",
+          "showcase/generative-ui",
           "showcase/capitals",
           "showcase/flight-booking",
           "showcase/ecommerce-carousel",
