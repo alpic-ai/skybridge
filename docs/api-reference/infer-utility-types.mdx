@@ -15,7 +15,7 @@ import type {
   ToolInput,
   ToolOutput,
   ToolResponseMetadata,
-} from "skybridge/web";
+} from "skybridge/server";
 ```
 
 ## InferTools
@@ -23,7 +23,7 @@ import type {
 Extract the full tool registry from a server type:
 
 ```typescript
-import type { InferTools } from "skybridge/web";
+import type { InferTools } from "skybridge/server";
 import type { AppType } from "../../server/src/index";
 
 type Tools = InferTools<AppType>;
@@ -35,7 +35,7 @@ type Tools = InferTools<AppType>;
 Get a union of all tool names:
 
 ```typescript
-import type { ToolNames } from "skybridge/web";
+import type { ToolNames } from "skybridge/server";
 import type { AppType } from "../../server/src/index";
 
 type Names = ToolNames<AppType>;
@@ -58,7 +58,7 @@ logToolCall("invalid-tool"); // Type error
 Get the input type for a specific tool:
 
 ```typescript
-import type { ToolInput } from "skybridge/web";
+import type { ToolInput } from "skybridge/server";
 import type { AppType } from "../../server/src/index";
 
 type SearchInput = ToolInput<AppType, "search-hotels">;
@@ -70,7 +70,7 @@ type SearchInput = ToolInput<AppType, "search-hotels">;
 Get the output type for a specific tool:
 
 ```typescript
-import type { ToolOutput } from "skybridge/web";
+import type { ToolOutput } from "skybridge/server";
 import type { AppType } from "../../server/src/index";
 
 type SearchOutput = ToolOutput<AppType, "search-hotels">;
@@ -82,7 +82,7 @@ type SearchOutput = ToolOutput<AppType, "search-hotels">;
 Get the response metadata type for a specific tool:
 
 ```typescript
-import type { ToolResponseMetadata } from "skybridge/web";
+import type { ToolResponseMetadata } from "skybridge/server";
 import type { AppType } from "../../server/src/index";
 
 type SearchMeta = ToolResponseMetadata<AppType, "search-hotels">;
@@ -94,7 +94,7 @@ type SearchMeta = ToolResponseMetadata<AppType, "search-hotels">;
 ### Type-safe Component Props
 
 ```typescript
-import type { ToolOutput } from "skybridge/web";
+import type { ToolOutput } from "skybridge/server";
 import type { AppType } from "../../server/src/index";
 
 type HotelData = ToolOutput<AppType, "search-hotels">;
@@ -113,7 +113,7 @@ function HotelList({ hotels }: { hotels: HotelData["hotels"] }) {
 ### Type-safe API Wrapper
 
 ```typescript
-import type { ToolInput, ToolOutput, ToolNames } from "skybridge/web";
+import type { ToolInput, ToolOutput, ToolNames } from "skybridge/server";
 import type { AppType } from "../../server/src/index";
 
 async function callServerTool<T extends ToolNames<AppType>>(
@@ -135,7 +135,7 @@ const result = await callServerTool("search-hotels", {
 ### Conditional Types Based on Tool
 
 ```typescript
-import type { ToolNames, ToolOutput } from "skybridge/web";
+import type { ToolNames, ToolOutput } from "skybridge/server";
 import type { AppType } from "../../server/src/index";
 
 function renderToolResult<T extends ToolNames<AppType>>(
