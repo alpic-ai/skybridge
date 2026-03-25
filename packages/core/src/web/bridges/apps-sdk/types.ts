@@ -4,6 +4,7 @@ import type {
   CallToolResponse,
   FileMetadata,
   RequestModalOptions,
+  UploadFileOptions,
 } from "../types.js";
 
 type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
@@ -93,12 +94,21 @@ export type AppsSdkMethods<WS extends AppsSdkWidgetState = AppsSdkWidgetState> =
      */
     requestModal: (args: RequestModalOptions) => Promise<void>;
 
-    /** Uploads a new file to the host */
-    uploadFile: (file: File) => Promise<FileMetadata>;
+    /** Uploads a new file to the host. Pass `{ library: true }` to also save to the user's ChatGPT file library. */
+    uploadFile: (
+      file: File,
+      options?: UploadFileOptions,
+    ) => Promise<FileMetadata>;
 
     /**
-     * Downloads a file from the host that was previously uploaded.
-     * Only files uploaded by the same connector instance can be downloaded.
+     * Opens ChatGPT's file library picker and returns app-authorized files.
+     * Feature-detect before using: this method may not be available on all host versions.
+     */
+    selectFiles?: () => Promise<FileMetadata[]>;
+
+    /**
+     * Downloads a file from the host. Works for files uploaded by the widget,
+     * files selected via selectFiles(), or files provided via tool/file params.
      */
     getFileDownloadUrl: (
       file: FileMetadata,

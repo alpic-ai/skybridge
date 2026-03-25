@@ -231,6 +231,13 @@ export class McpAppAdaptor implements Adaptor {
     throw new Error("File download is not supported in MCP App.");
   }
 
+  /**
+   * @throws File selection is not supported in MCP App.
+   */
+  public selectFiles(): Promise<{ fileId: string }[]> {
+    throw new Error("File selection is not supported in MCP App.");
+  }
+
   public openModal(options: RequestModalOptions) {
     this._viewState = { mode: "modal", params: options.params };
     this.viewListeners.forEach((listener) => {
