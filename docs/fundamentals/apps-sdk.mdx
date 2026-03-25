@@ -1,10 +1,10 @@
 ---
 title: Apps SDK (ChatGPT)
 sidebarTitle: Apps SDK
-description: "Deep dive into OpenAI's Apps SDK: the window.openai API, exclusive features, and how ChatGPT renders widgets."
+description: "Deep dive into ChatGPT's runtime: MCP Apps compatibility, the window.openai API, and ChatGPT-only features."
 ---
 
-The [OpenAI Apps SDK](https://developers.openai.com/apps-sdk/) is the proprietary runtime for ChatGPT Apps, [announced in October 2025](https://alpic.ai/blog/inside-openai-s-apps-sdk-how-to-build-interactive-chatgpt-apps-with-mcp). It extends MCP with interactive UI widgets that render directly inside ChatGPT conversations.
+The [OpenAI Apps SDK](https://developers.openai.com/apps-sdk/) is the ChatGPT runtime layer for ChatGPT Apps, [announced in October 2025](https://alpic.ai/blog/inside-openai-s-apps-sdk-how-to-build-interactive-chatgpt-apps-with-mcp). ChatGPT supports the MCP Apps UI model, and also provides `window.openai` for compatibility and ChatGPT-specific extensions.
 
 ## Widget Rendering Flow
 
@@ -22,7 +22,7 @@ Here's what happens when ChatGPT renders a widget:
 
 ## The `window.openai` API
 
-Widgets run inside an iframe and have access to a special [`window.openai`](https://developers.openai.com/apps-sdk/build/chatgpt-ui#understand-the-windowopenai-api) global that enables communication with the host:
+Widgets run inside an iframe and have access to a special [`window.openai`](https://developers.openai.com/apps-sdk/build/chatgpt-ui#understand-the-windowopenai-api) global. In ChatGPT, this acts as a compatibility layer plus an extension surface for host-specific features:
 
 | API | Description |
 |-----|-------------|
