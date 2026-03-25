@@ -53,6 +53,8 @@ describe("useFiles", () => {
     const files = await result.current.selectFiles();
     expect(OpenaiMock.selectFiles).toHaveBeenCalled();
     expect(files).toEqual(selectedFiles);
+
+    delete OpenaiMock.selectFiles;
   });
 
   it("should download a file from ChatGPT", () => {
