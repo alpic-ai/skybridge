@@ -21,11 +21,19 @@ export async function setupDevMiddleware(
     const port = process.env.__PORT ?? process.env.PORT ?? "3000";
     const devtoolsMcpUrl = `http://localhost:${port}/mcp-devtools`;
     app.use("/mcp-devtools", createDevtoolsMcpRouter(bridge));
-    const { port: claudeWsPort } = createClaudeSessionServer({
+
+    const sessionServer = createClaudeSessionServer({
       cwd: process.cwd(),
       devtoolsMcpUrl,
     });
-    process.env.__CLAUDE_WS_PORT__ = String(claudeWsPort);
+    process.env.__CLAUDE_WS_PORT__ = String(sessionServer.port);
+
+    const onExit = () => {
+      sessionServer.cleanup();
+      process.exit(0);
+    };
+    process.once("SIGINT", onExit);
+    process.once("SIGTERM", onExit);
   }
 
   app.use(await devtoolsStaticServer());

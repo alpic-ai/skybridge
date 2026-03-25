@@ -16,6 +16,7 @@ export interface ClaudeSessionServerOptions {
 export interface ClaudeSessionServer {
   port: number;
   close(): void;
+  cleanup(): void;
 }
 
 type ClientMessage =
@@ -77,7 +78,28 @@ function resolveCommandPath(command: string): string {
   return command;
 }
 
-/** Register an MCP server with the Claude CLI (idempotent). */
+/** Check whether an MCP entry already exists with this name and URL in the project scope. */
+function mcpEntryExists(
+  commandPath: string,
+  name: string,
+  mcpUrl: string,
+  cwd: string,
+): boolean {
+  try {
+    const output = execFileSync(commandPath, ["mcp", "list"], {
+      encoding: "utf-8",
+      timeout: 10000,
+      cwd,
+      env: buildEnv({}),
+    });
+    // Each line is roughly: "name  http  <url>"
+    return output.includes(name) && output.includes(mcpUrl);
+  } catch {
+    return false;
+  }
+}
+
+/** Register an MCP server with the Claude CLI at project scope (idempotent). */
 function setupMcp(
   command: string,
   mcpUrl: string,
@@ -85,10 +107,13 @@ function setupMcp(
   cwd: string,
 ): void {
   const commandPath = resolveCommandPath(command);
+  if (mcpEntryExists(commandPath, name, mcpUrl, cwd)) {
+    return;
+  }
   try {
     execFileSync(
       commandPath,
-      ["mcp", "add", "--transport", "http", name, mcpUrl],
+      ["mcp", "add", "--scope", "project", "--transport", "http", name, mcpUrl],
       {
         encoding: "utf-8",
         timeout: 10000,
@@ -98,6 +123,25 @@ function setupMcp(
     );
   } catch {
     // ignore
+  }
+}
+
+/** Remove an MCP server from the project-scoped Claude config. */
+function removeMcp(command: string, name: string, cwd: string): void {
+  const commandPath = resolveCommandPath(command);
+  try {
+    execFileSync(
+      commandPath,
+      ["mcp", "remove", "--scope", "project", name],
+      {
+        encoding: "utf-8",
+        timeout: 10000,
+        cwd,
+        env: buildEnv({}),
+      },
+    );
+  } catch {
+    // ignore — entry may have already been removed
   }
 }
 
@@ -193,6 +237,12 @@ export function createClaudeSessionServer(
     port,
     close() {
       wss.close();
+    },
+    cleanup() {
+      removeMcp(command, "skybridge-app", cwd);
+      if (devtoolsMcpUrl) {
+        removeMcp(command, "skybridge-devtools", cwd);
+      }
     },
   };
 }
