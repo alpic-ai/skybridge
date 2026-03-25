@@ -103,14 +103,14 @@ Never assume the reader is already an expert in Skybridge or MCP Apps. When you 
    
    </details>
 
-7. **Showcase**: apps built with Skybridge. This section should include example apps in the Skybridge repository and third-party apps built with the framework.
+7. **Showcase**: apps built with Skybridge. This section should include example apps in the Skybridge repository and third-party apps built with the framework. Examples should be organized into sub-sections such as Basic, Auth, Third-party integrations, and similar categories.
 
 #### User paths, in order of importance
 
 1. A new user who wants to understand what Skybridge is: Get Started, then Core concepts.
-2. A new user who wants to try Skybridge quickly: Get Started.
+2. A new user who wants to try Skybridge quickly: Quickstart.
 3. A user who is actively building: Guides, Core concepts, and API Reference.
-4. A returning user who needs exact implementation details: API Reference and the relevant Guide or concept page.
+4. A returning user who needs exact implementation details: API Reference and the relevant Guide or Concept page.
 
 ## How to contribute in practice
 
@@ -146,6 +146,7 @@ Use this checklist when your PR changes product behavior, APIs, examples, termin
 
 - **Frontmatter:** Every page should have `title` and `description`. Add `icon` only when it improves recognition, for example on quickstart pages. Use sentence case for titles.
 - **Headings:** Use sentence case, for example "Install the skill", "What we collect", and "Next steps". You can use title-style headings for nav-like sections such as "Get Started" or "Learn More". Do not skip levels.
+- **Related section:** Every page should end with a `Related` section that points readers to the most relevant next pages, so they can keep navigating naturally through the documentation.
 - **Code and commands:** Use `<CodeGroup>` when showing the same command for multiple package managers such as npm, pnpm, yarn, bun, or deno. Use fenced code blocks with a language hint. Use inline code formatting for API names, filenames, and commands.
 - **Callouts:** Use `<Tip>` for optional context or beginner guidance; `<Info>` for prerequisites or important context; `<Warning>` for gotchas; and `<Note>` for deeper external reading. Use `<Card>` and `<CardGroup>` for next steps and navigation. Keep callout body copy lean.
 - **Mintlify component references:** Use [Mintlify llms.txt](https://www.mintlify.com/docs/llms.txt) and [Mintlify components](https://www.mintlify.com/docs/components/index.md) when you need ideas or syntax for supported components.
