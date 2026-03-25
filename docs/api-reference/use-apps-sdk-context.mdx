@@ -41,12 +41,13 @@ The key of the global value to subscribe to. Available keys include:
 | `locale` | `string` | The user's locale (e.g., `"en-US"`) |
 | `displayMode` | `"inline" \| "fullscreen" \| "pip"` | The widget's display mode |
 | `userAgent` | `UserAgent` | Device and capability information |
-| `maxHeight` | `number` | Maximum height available for the widget |
+| `maxHeight` | `number \| undefined` | Maximum height available for the widget (if provided by host) |
 | `safeArea` | `SafeArea` | Safe area insets for the widget |
 | `toolInput` | `object` | The input arguments passed to the tool |
 | `toolOutput` | `object \| null` | The tool's output (when available) |
 | `toolResponseMetadata` | `object \| null` | Additional metadata from the tool response |
 | `widgetState` | `object \| null` | The persisted widget state |
+| `view` | `{ mode: "inline" \| "fullscreen" \| "pip"; params?: Record<string, unknown> }` | Current view state, including modal params |
 
 ## Returns
 
@@ -159,13 +160,17 @@ type AppsSdkContext = {
   theme: "light" | "dark";
   userAgent: UserAgent;
   locale: string;
-  maxHeight: number;
-  displayMode: "inline" | "fullscreen" | "pip";
+  maxHeight: number | undefined;
+  displayMode: "inline" | "fullscreen" | "pip" | "modal";
   safeArea: SafeArea;
   toolInput: Record<string, unknown>;
   toolOutput: Record<string, unknown> | { text: string } | null;
   toolResponseMetadata: Record<string, unknown> | null;
   widgetState: Record<string, unknown> | null;
+  view: {
+    mode: "inline" | "fullscreen" | "pip" | "modal";
+    params?: Record<string, unknown>;
+  };
 };
 ```
 

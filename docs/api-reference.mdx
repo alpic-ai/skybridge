@@ -24,9 +24,14 @@ Skybridge exports hooks and utilities from `skybridge/web` that work across mult
 
 ## Utilities
 
-<Card title="createStore" icon="box" href="/api-reference/create-store">
-  Create a Zustand store that automatically syncs with widget state
-</Card>
+<CardGroup cols={2}>
+  <Card title="createStore" icon="box" href="/api-reference/create-store">
+    Create a Zustand store that automatically syncs with widget state
+  </Card>
+  <Card title="mountWidget" icon="plug-circle-plus" href="/api-reference/mount-widget">
+    Mount your widget React tree into the Skybridge runtime root
+  </Card>
+</CardGroup>
 
 ## User Interface
 
@@ -83,6 +88,7 @@ All hooks and utilities are exported from `skybridge/web`:
 ```tsx
 import {
   createStore,
+  mountWidget,
   useCallTool,
   useDisplayMode,
   useFiles,
