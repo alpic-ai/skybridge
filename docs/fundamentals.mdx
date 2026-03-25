@@ -5,6 +5,16 @@ description: "Understanding Model Context Protocol (MCP), the MCP Apps portable 
 
 Skybridge enables you to build **ChatGPT Apps** and **MCP Apps** - interactive UI widgets that render inside AI conversations. Before diving into Skybridge's APIs, understand the underlying protocols and runtimes it builds upon.
 
+## How widgets appear in MCP Apps Clients
+
+In MCP Apps clients, the model triggers your tool, and the client then renders both the assistant response and your widget from the tool result.
+
+<img
+  src="/images/fundamentals-chatgpt-apps.png"
+  alt="MCP Apps Architecture"
+  style={{ width: "100%", maxWidth: "800px", display: "block", margin: "0 auto" }}
+/>
+
 ## MCP (Model Context Protocol)
 
 [MCP](https://modelcontextprotocol.io) is an open standard that allows AI models to connect with external tools, resources, and services. Think of it as an API layer specifically designed for LLMs.
@@ -38,13 +48,6 @@ An **AI App** consists of two components working together:
 
 1. **MCP Server**: Your backend that handles business logic and exposes tools via the MCP protocol
 2. **UI Widgets**: HTML components that render in the AI Client's interface as interactive UIs
-
-
-<img
-  src="/images/fundamentals-chatgpt-apps.png"
-  alt="MCP Apps Architecture"
-  style={{ width: "100%", maxWidth: "500px", display: "block", margin: "0 auto" }}
-/>
 
 When a tool is called, it can return both:
 - **Text content**: What the model sees and responds with
