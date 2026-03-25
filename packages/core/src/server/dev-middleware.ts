@@ -22,7 +22,7 @@ export async function setupDevMiddleware(
     const devtoolsMcpUrl = `http://localhost:${port}/mcp-devtools`;
     app.use("/mcp-devtools", createDevtoolsMcpRouter(bridge));
 
-    const sessionServer = createClaudeSessionServer({
+    const sessionServer = await createClaudeSessionServer({
       cwd: process.cwd(),
       devtoolsMcpUrl,
     });

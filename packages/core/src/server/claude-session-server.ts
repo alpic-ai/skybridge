@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import * as os from "node:os";
 import * as pty from "node-pty";
 import { type WebSocket, WebSocketServer } from "ws";
+import { detectAvailablePort } from "../cli/detect-port.js";
 
 export interface ClaudeSessionServerOptions {
   port?: number;
@@ -130,16 +131,12 @@ function setupMcp(
 function removeMcp(command: string, name: string, cwd: string): void {
   const commandPath = resolveCommandPath(command);
   try {
-    execFileSync(
-      commandPath,
-      ["mcp", "remove", "--scope", "project", name],
-      {
-        encoding: "utf-8",
-        timeout: 10000,
-        cwd,
-        env: buildEnv({}),
-      },
-    );
+    execFileSync(commandPath, ["mcp", "remove", "--scope", "project", name], {
+      encoding: "utf-8",
+      timeout: 10000,
+      cwd,
+      env: buildEnv({}),
+    });
   } catch {
     // ignore — entry may have already been removed
   }
@@ -174,10 +171,11 @@ function spawnProcess(
   return proc;
 }
 
-export function createClaudeSessionServer(
+export async function createClaudeSessionServer(
   options: ClaudeSessionServerOptions = {},
-): ClaudeSessionServer {
-  const port = options.port ?? 3001;
+): Promise<ClaudeSessionServer> {
+  const preferredPort = options.port ?? 3001;
+  const port = await detectAvailablePort(preferredPort);
   const cwd = options.cwd ?? process.cwd();
   const command = options.command ?? "claude";
   const args = options.args ?? [];
