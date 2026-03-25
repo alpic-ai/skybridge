@@ -1,8 +1,8 @@
 import { execFileSync } from "node:child_process";
+import net from "node:net";
 import * as os from "node:os";
 import * as pty from "node-pty";
 import { type WebSocket, WebSocketServer } from "ws";
-import { detectAvailablePort } from "../cli/detect-port.js";
 
 export interface ClaudeSessionServerOptions {
   port?: number;
@@ -44,6 +44,27 @@ function buildEnv(extra: Record<string, string>): Record<string, string> {
     }
   }
   return { ...env, ...extra, TERM: "xterm-256color" };
+}
+
+/** Returns the given port if available, otherwise lets the OS pick a free one. */
+function detectAvailablePort(preferred: number): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.once("error", () => {
+      const fallback = net.createServer();
+      fallback.once("error", reject);
+      fallback.once("listening", () => {
+        const addr = fallback.address() as net.AddressInfo;
+        fallback.close(() => resolve(addr.port));
+      });
+      fallback.listen(0);
+    });
+    server.once("listening", () => {
+      const addr = server.address() as net.AddressInfo;
+      server.close(() => resolve(addr.port));
+    });
+    server.listen(preferred);
+  });
 }
 
 /** Resolve the full path of a command using the user's login shell. */
@@ -160,11 +181,11 @@ function spawnProcess(
 
   send(ws, { type: "started", pid: proc.pid });
 
-  proc.onData((data) => {
+  proc.onData((data: string) => {
     send(ws, { type: "output", data });
   });
 
-  proc.onExit(({ exitCode }) => {
+  proc.onExit(({ exitCode }: { exitCode: number }) => {
     send(ws, { type: "exit", code: exitCode });
   });
 
@@ -190,16 +211,17 @@ export async function createClaudeSessionServer(
     setupMcp(command, devtoolsMcpUrl, "skybridge-devtools", cwd);
   }
 
+  console.log(`[claude] WebSocket session server listening on port ${port}`);
   const wss = new WebSocketServer({ port });
 
-  wss.on("connection", (ws) => {
+  wss.on("connection", (ws: WebSocket) => {
     let proc: pty.IPty | null = null;
 
     const resolvedOptions = { cwd, command, args, env };
 
     proc = spawnProcess(ws, resolvedOptions);
 
-    ws.on("message", (raw) => {
+    ws.on("message", (raw: Buffer) => {
       let msg: ClientMessage;
       try {
         msg = JSON.parse(raw.toString()) as ClientMessage;

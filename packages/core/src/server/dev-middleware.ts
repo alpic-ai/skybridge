@@ -1,7 +1,9 @@
 import type http from "node:http";
-import { devtoolsStaticServer } from "@skybridge/devtools";
+import {
+  createClaudeSessionServer,
+  devtoolsStaticServer,
+} from "@skybridge/devtools";
 import type express from "express";
-import { createClaudeSessionServer } from "./claude-session-server.js";
 import { createDevtoolsMcpRouter } from "./devtools-mcp-server.js";
 import { ScreenshotBridge } from "./screenshot-bridge.js";
 import { widgetsDevServer } from "./widgetsDevServer.js";

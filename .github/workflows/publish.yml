@@ -28,6 +28,12 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Install workspace devtools package in core
+        run: pnpm add "@skybridge/devtools@workspace:0.0.0" --filter skybridge
+
+      - name: Build devtools
+        run: pnpm --filter @skybridge/devtools build
+
       - run: pnpm build
 
       - name: Set version

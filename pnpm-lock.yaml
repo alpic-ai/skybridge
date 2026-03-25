@@ -824,9 +824,6 @@ importers:
       ink:
         specifier: ^6.8.0
         version: 6.8.0(@types/react@19.2.14)(react@19.2.3)
-      node-pty:
-        specifier: 1.2.0-beta.12
-        version: 1.2.0-beta.12
       nodemon:
         specifier: '>=3.0.0'
         version: 3.1.11
@@ -845,9 +842,6 @@ importers:
       vite:
         specifier: '>=7.3.1'
         version: 7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
-      ws:
-        specifier: ^8.18.0
-        version: 8.18.3
       zustand:
         specifier: ^5.0.12
         version: 5.0.12(@types/react@19.2.14)(immer@9.0.21)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))
@@ -885,9 +879,6 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.14)
-      '@types/ws':
-        specifier: ^8.5.14
-        version: 8.18.1
       '@vitest/ui':
         specifier: ^4.1.1
         version: 4.1.1(vitest@4.1.1)
@@ -1029,6 +1020,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.14)
+      '@types/ws':
+        specifier: ^8.5.14
+        version: 8.18.1
       '@vitejs/plugin-react':
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.2(@types/node@25.2.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -1116,6 +1110,13 @@ importers:
       zustand:
         specifier: ^5.0.12
         version: 5.0.12(@types/react@19.2.14)(immer@9.0.21)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
+    optionalDependencies:
+      node-pty:
+        specifier: 1.2.0-beta.12
+        version: 1.2.0-beta.12
+      ws:
+        specifier: ^8.18.0
+        version: 8.18.3
 
 packages:
 
@@ -17690,7 +17691,8 @@ snapshots:
     dependencies:
       '@types/nlcst': 2.0.3
 
-  node-addon-api@7.1.1: {}
+  node-addon-api@7.1.1:
+    optional: true
 
   node-domexception@1.0.0: {}
 
@@ -17711,6 +17713,7 @@ snapshots:
   node-pty@1.2.0-beta.12:
     dependencies:
       node-addon-api: 7.1.1
+    optional: true
 
   node-releases@2.0.27: {}
 
