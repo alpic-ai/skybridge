@@ -2,6 +2,8 @@
 
 This documentation site is built with [Mintlify](https://mintlify.com/).
 
+If you're contributing to the docs, start with [DOCUMENTATION-MANIFESTO.md](./DOCUMENTATION-MANIFESTO.md). It is required reading for new documentation contributors and explains what belongs in the docs, how to write in Skybridge's voice, and what to verify before opening a PR.
+
 ## Local Development
 
 ```bash
