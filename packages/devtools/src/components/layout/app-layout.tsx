@@ -1,12 +1,16 @@
-import { PlugZap } from "lucide-react";
+import { PlugZap, SquareTerminal, X } from "lucide-react";
+import { useState } from "react";
 import {
   Group,
   Panel,
   Separator,
   useDefaultLayout,
 } from "react-resizable-panels";
+import { ClaudeTerminal } from "@/components/claude-session/claude-terminal.js";
+import { useScreenshotBridge } from "@/hooks/useScreenshotBridge.js";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { connectToServer, useSelectedToolOrNull } from "@/lib/mcp/index.js";
+import { cn } from "@/lib/utils.js";
 import { Button } from "../ui/button.js";
 import { Header } from "./header.js";
 import { Intro } from "./intro.js";
@@ -14,13 +18,19 @@ import { ToolPanel } from "./tool-panel/tool-panel.js";
 import ToolsList from "./tools-list.js";
 
 function AppLayout() {
+  useScreenshotBridge();
   const selectedTool = useSelectedToolOrNull();
   const { status, requiresAuth } = useAuthStore();
   const { defaultLayout, onLayoutChange } = useDefaultLayout({
     id: "skybridge-devtools-tools-list",
     storage: localStorage,
   });
+  const [claudeOpen, setClaudeOpen] = useState(false);
+  const [claudeFullscreen, setClaudeFullscreen] = useState(false);
 
+  const claudeEnabled =
+    (window as unknown as { __CLAUDE_ENABLED__?: boolean })
+      .__CLAUDE_ENABLED__ === true;
   const isConnected = status === "authenticated";
 
   return (
@@ -61,6 +71,54 @@ function AppLayout() {
             )}
           </div>
         </div>
+      )}
+
+      {claudeEnabled && (
+        <>
+          {/* Backdrop — closes modal on outside click, hidden in fullscreen */}
+          {claudeOpen && !claudeFullscreen && (
+            <div
+              aria-hidden="true"
+              className="fixed inset-0 z-40"
+              onClick={() => setClaudeOpen(false)}
+            />
+          )}
+
+          {/* Floating Claude terminal — always mounted to keep session alive */}
+          <div
+            className={cn(
+              "fixed z-50 rounded-lg border border-zinc-800 shadow-2xl overflow-hidden transition-all duration-200",
+              claudeFullscreen
+                ? "inset-0 rounded-none border-0"
+                : "bottom-16 right-4 w-[800px] h-[560px]",
+              !claudeOpen && "hidden",
+            )}
+          >
+            <ClaudeTerminal
+              isFullscreen={claudeFullscreen}
+              onToggleFullscreen={() => setClaudeFullscreen((f) => !f)}
+            />
+          </div>
+
+          {/* Toggle button */}
+          <button
+            type="button"
+            onClick={() => setClaudeOpen((o) => !o)}
+            className={cn(
+              "fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium shadow-lg transition-colors",
+              claudeOpen
+                ? "bg-zinc-800 text-zinc-100 hover:bg-zinc-700"
+                : "bg-primary text-primary-foreground hover:bg-primary/90",
+            )}
+          >
+            {claudeOpen ? (
+              <X className="h-4 w-4" />
+            ) : (
+              <SquareTerminal className="h-4 w-4" />
+            )}
+            Claude
+          </button>
+        </>
       )}
     </div>
   );

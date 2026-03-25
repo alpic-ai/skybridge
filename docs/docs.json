@@ -69,7 +69,7 @@
           {
             "group": "DevTools",
             "icon": "wrench",
-            "pages": ["devtools/skills", "devtools/devtools"]
+            "pages": ["devtools/index", "devtools/skills"]
           },
           {
             "group": "Resources",

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import cors from "cors";
@@ -12,7 +13,7 @@ import express, { type Router } from "express";
  *  const app = express();
  *
  * if (env.NODE_ENV !== "production") {
- *   app.use(await devtoolsStaticServer(server));
+ *   app.use(await devtoolsStaticServer());
  *   app.use(await widgetsDevServer());
  *                     ^^^^^^^^ Make sure to install the devtoolsStaticServer before the widgetsDevServer
  * }
@@ -21,17 +22,23 @@ export const devtoolsStaticServer = async (): Promise<Router> => {
   const router = express.Router();
 
   const distDir = path.dirname(fileURLToPath(import.meta.url));
+  const claudeWsPort = process.env.__CLAUDE_WS_PORT__
+    ? Number(process.env.__CLAUDE_WS_PORT__)
+    : undefined;
+  const claudeEnabled = claudeWsPort !== undefined;
+
+  const indexHtmlPath = path.join(distDir, "index.html");
+  const rawHtml = readFileSync(indexHtmlPath, "utf-8");
+  const injectedHtml = rawHtml.replace(
+    "</head>",
+    `<script>window.__CLAUDE_WS_PORT__=${claudeWsPort ?? 3001};window.__CLAUDE_ENABLED__=${claudeEnabled};</script></head>`,
+  );
 
   router.use(cors());
-  router.use(express.static(distDir));
-  router.get("/", (_req, res, next) => {
-    const indexHtmlPath = path.join(distDir, "index.html");
-    res.sendFile(indexHtmlPath, (error) => {
-      if (error) {
-        next(error);
-      }
-    });
+  router.get("/", (_req, res) => {
+    res.send(injectedHtml);
   });
+  router.use(express.static(distDir, { index: false }));
 
   return router;
 };

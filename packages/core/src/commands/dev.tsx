@@ -14,6 +14,10 @@ export default class Dev extends Command {
       description: "Port to run the server on",
       min: 1,
     }),
+    claude: Flags.boolean({
+      description: "Enable the Claude Code harness (beta)",
+      default: false,
+    }),
   };
 
   public async run(): Promise<void> {
@@ -27,11 +31,13 @@ export default class Dev extends Command {
     const env = {
       ...process.env,
       __PORT: String(port),
+      ...(flags.claude ? { __CLAUDE_HARNESS: "true" } : {}),
     };
 
     const App = () => {
       const tsErrors = useTypeScriptCheck();
       const messages = useNodemon(env);
+      const claudeEnabled = flags.claude;
 
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>
@@ -68,6 +74,14 @@ export default class Dev extends Command {
               </Text>
             </Text>
           </Box>
+          {claudeEnabled && (
+            <Box marginTop={1}>
+              <Text color="yellow">
+                ⚠ Claude Code harness enabled (beta) — Claude can inspect and
+                interact with your app directly.
+              </Text>
+            </Box>
+          )}
           <Box marginTop={1}>
             <Text>
               <Text color="#20a832">→{"  "}</Text>
