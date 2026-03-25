@@ -83,15 +83,23 @@ type WidgetToolConfig = {
 
 ### handler
 
-Async function that executes when the tool is called:
+Async function that executes when the tool is called. Receives the validated input and an `extra` object with request context:
 
 ```typescript
-type WidgetHandler = (input: Input) => Promise<{
+type WidgetHandler = (
+  input: Input,
+  extra: RequestHandlerExtra,
+) => Promise<{
   content?: ContentBlock[];           // Text for the model
   structuredContent: StructuredData;  // Data for the widget
   _meta?: Record<string, unknown>;    // Response metadata
 }>;
 ```
+
+The `extra` parameter provides access to:
+- `extra.authInfo` — Authentication info populated by auth middleware (e.g. `authInfo.clientId`, `authInfo.extra.email`)
+- `extra.requestInfo` — HTTP request details (headers, URL)
+- `extra.signal` — Abort signal for cancellation
 
 ## Return Value
 
@@ -225,7 +233,9 @@ server.registerWidget("weather", {
 If your widget makes client-side API calls, remember to add those domains to `connectDomains`. Server-side calls in the handler don't need CSP configuration.
 </Tip>
 
-### With Error Handling
+### With Auth Context
+
+Access authentication info from the `extra` parameter (requires auth middleware via [`.use()`](/api-reference/mcp-server#use)):
 
 ```typescript
 server.registerWidget("user-profile", {
@@ -234,7 +244,10 @@ server.registerWidget("user-profile", {
   inputSchema: {
     userId: z.string(),
   },
-}, async ({ userId }) => {
+}, async ({ userId }, extra) => {
+  const auth = extra.authInfo;
+  const email = auth?.extra?.email as string | undefined;
+
   const user = await getUser(userId);
 
   if (!user) {
@@ -246,7 +259,7 @@ server.registerWidget("user-profile", {
 
   return {
     content: [{ type: "text", text: `Showing profile for ${user.name}` }],
-    structuredContent: user,
+    structuredContent: { ...user, viewedBy: email },
   };
 });
 ```

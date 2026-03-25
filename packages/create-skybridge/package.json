@@ -1,6 +1,6 @@
 {
   "name": "create-skybridge",
-  "version": "0.35.8",
+  "version": "0.35.10",
   "type": "module",
   "license": "MIT",
   "author": "Alpic",
@@ -30,7 +30,7 @@
     "mri": "^1.2.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.0"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.1"
   }
 }

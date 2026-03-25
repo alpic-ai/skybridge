@@ -1,0 +1,12 @@
+{
+  "extends": "skybridge/tsconfig",
+
+  "compilerOptions": {
+    "outDir": "dist",
+    "paths": {
+      "@/*": ["./web/src/*"]
+    }
+  },
+
+  "include": ["server/src", "web/src"]
+}
