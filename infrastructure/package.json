@@ -13,6 +13,7 @@
     "constructs": "^10.6.0"
   },
   "devDependencies": {
+    "@types/node": "^25.5.0",
     "aws-cdk": "^2.1113.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.2"

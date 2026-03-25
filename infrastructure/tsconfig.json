@@ -5,7 +5,8 @@
     "lib": ["es2020"],
     "strict": true,
     "resolveJsonModule": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": ["node"]
   },
   "exclude": ["node_modules", "cdk.out"]
 }
