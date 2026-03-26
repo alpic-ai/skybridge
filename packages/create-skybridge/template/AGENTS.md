@@ -1,1 +1,1 @@
-Before writing code, first explore the project structure, then invoke the chatgpt-app-builder skill for documentation.
+This is a ChatGPT/MCP app built with Skybridge. ALWAYS use the `chatgpt-app-builder` skill when planning or updating the codebase.

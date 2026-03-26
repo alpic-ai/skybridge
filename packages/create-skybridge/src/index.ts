@@ -174,7 +174,8 @@ export async function init(args: string[] = process.argv.slice(2)) {
   const userAgent = process.env.npm_config_user_agent;
   const pkgManager = userAgent?.split(" ")[0]?.split("/")[0] || "npm";
 
-  // 4. Ask about skills installation
+  // 4. Ask about skills installation (installed by default)
+  let skill = true;
   if (interactive) {
     const skillsResult = await prompts.confirm({
       message: "Install the coding agents skills? (recommended)",
@@ -183,21 +184,24 @@ export async function init(args: string[] = process.argv.slice(2)) {
     if (prompts.isCancel(skillsResult)) {
       return cancel();
     }
-    if (skillsResult) {
-      run(
-        [
-          ...getPkgExecCmd(pkgManager, "skills"),
-          "add",
-          "alpic-ai/skybridge",
-          "-s",
-          "chatgpt-app-builder",
-        ],
-        {
-          stdio: "inherit",
-          cwd: targetDir,
-        },
-      );
-    }
+    skill = skillsResult;
+  }
+
+  if (skill) {
+    run(
+      [
+        ...getPkgExecCmd(pkgManager, "skills"),
+        "add",
+        "alpic-ai/skybridge",
+        "-s",
+        "chatgpt-app-builder",
+        ...(interactive ? [] : ["--yes"]),
+      ],
+      {
+        stdio: "inherit",
+        cwd: targetDir,
+      },
+    );
   }
 
   // 5. Ask about immediate installation
@@ -320,6 +324,6 @@ function getPkgExecCmd(pkgManager: string, cmd: string): string[] {
     case "deno":
       return ["deno", "run", "-A", `npm:${cmd}`];
     default:
-      return ["npx", cmd];
+      return ["npx", "--yes", cmd];
   }
 }
