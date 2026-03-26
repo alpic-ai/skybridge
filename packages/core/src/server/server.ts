@@ -26,7 +26,7 @@ import type {
   ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
 import { mergeWith, union } from "es-toolkit";
-import type { Express, RequestHandler } from "express";
+import type { ErrorRequestHandler, Express, RequestHandler } from "express";
 import { createApp } from "./express.js";
 import type {
   McpExtra,
@@ -232,12 +232,18 @@ type MiddlewareConfig = {
   handlers: RequestHandler[];
 };
 
+type ErrorMiddlewareConfig = {
+  path?: string;
+  handlers: ErrorRequestHandler[];
+};
+
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
 > extends McpServerBase {
   declare readonly $types: McpServerTypes<TTools>;
   private express?: Express;
   private customMiddleware: MiddlewareConfig[] = [];
+  private customErrorMiddleware: ErrorMiddlewareConfig[] = [];
   private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private mcpMiddlewareApplied = false;
 
@@ -258,6 +264,22 @@ export class McpServer<
       });
     }
 
+    return this;
+  }
+
+  useOnError(...handlers: ErrorRequestHandler[]): this;
+  useOnError(path: string, ...handlers: ErrorRequestHandler[]): this;
+  useOnError(
+    pathOrHandler: string | ErrorRequestHandler,
+    ...handlers: ErrorRequestHandler[]
+  ): this {
+    if (typeof pathOrHandler === "string") {
+      this.customErrorMiddleware.push({ path: pathOrHandler, handlers });
+    } else {
+      this.customErrorMiddleware.push({
+        handlers: [pathOrHandler, ...handlers],
+      });
+    }
     return this;
   }
 
@@ -402,6 +424,7 @@ export class McpServer<
         mcpServer: this,
         httpServer,
         customMiddleware: this.customMiddleware,
+        errorMiddleware: this.customErrorMiddleware,
       });
     }
 
