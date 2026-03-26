@@ -15,25 +15,43 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = dirname(__dirname);
 
-function fetchLatestVersion(packageName) {
-  try {
-    return execSync(`npm view ${packageName} version`, {
+function getVersion(packageName, expectedVersion, timeoutMs = 10_000) {
+  if (!expectedVersion) {
+    try {
+      return execSync(`npm view ${packageName} version`, {
+        encoding: "utf8",
+      }).trim();
+    } catch {
+      console.error(`Error: Could not fetch latest version of ${packageName}`);
+      return null;
+    }
+  }
+
+  let latest;
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    latest = execSync(`npm view ${packageName} version`, {
       encoding: "utf8",
     }).trim();
-  } catch {
-    console.error(`Error: Could not fetch latest version of ${packageName}`);
-    return null;
+    if (latest === expectedVersion) {
+      return latest;
+    }
+    console.log(
+      `Waiting for ${packageName}@${expectedVersion} on npm (got ${latest})…`,
+    );
+    execSync("sleep 1");
   }
+
+  console.error(
+    `Timed out waiting for ${packageName}@${expectedVersion}, using ${latest}`,
+  );
+  return latest;
 }
 
-// Get skybridge version from arg or fetch latest from npm
-const skybridgeVersion = process.argv[2] || fetchLatestVersion("skybridge");
-if (!skybridgeVersion) {
-  process.exit(1);
-}
-
-const devtoolsVersion = process.argv[2] || fetchLatestVersion("@skybridge/devtools");
-const alpicVersion = fetchLatestVersion("alpic");
+const explicitVersion = process.argv[2];
+const skybridgeVersion = getVersion("skybridge", explicitVersion);
+const devtoolsVersion = getVersion("@skybridge/devtools", explicitVersion);
+const alpicVersion = getVersion("alpic");
 
 const skybridgeRange = `>=${skybridgeVersion} <1.0.0`;
 const devtoolsRange = devtoolsVersion ? `>=${devtoolsVersion} <1.0.0` : null;
