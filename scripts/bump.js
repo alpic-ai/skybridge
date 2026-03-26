@@ -22,24 +22,37 @@ function getVersion(packageName, expectedVersion, timeoutMs = 10_000) {
         encoding: "utf8",
       }).trim();
     } catch {
-      console.error(`Error: Could not fetch latest version of ${packageName}`);
-      return null;
+      console.error(
+        `Error: Could not fetch latest version of ${packageName}. Aborting.`,
+      );
+      process.exit(1);
     }
   }
 
   let latest;
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
-    latest = execSync(`npm view ${packageName} version`, {
-      encoding: "utf8",
-    }).trim();
+    try {
+      latest = execSync(`npm view ${packageName} version`, {
+        encoding: "utf8",
+      }).trim();
+    } catch {
+      // no-op
+    }
     if (latest === expectedVersion) {
       return latest;
     }
     console.log(
-      `Waiting for ${packageName}@${expectedVersion} on npm (got ${latest})…`,
+      `Waiting for ${packageName}@${expectedVersion} on npm (got ${latest ?? "error"})…`,
     );
     execSync("sleep 1");
+  }
+
+  if (!latest) {
+    console.error(
+      `Error: Could not fetch latest version of ${packageName}. Aborting.`,
+    );
+    process.exit(1);
   }
 
   console.error(
