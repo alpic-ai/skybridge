@@ -4,6 +4,7 @@ import type {
   CallToolResponse,
   FileMetadata,
   RequestModalOptions,
+  SendFollowUpMessageOptions,
 } from "../types.js";
 
 type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
@@ -67,7 +68,10 @@ export type AppsSdkMethods<WS extends AppsSdkWidgetState = AppsSdkWidgetState> =
     ) => Promise<ToolResponse>;
 
     /** Triggers a followup turn in the ChatGPT conversation */
-    sendFollowUpMessage: (args: { prompt: string }) => Promise<void>;
+    sendFollowUpMessage: (args: {
+      prompt: string;
+      scrollToBottom?: SendFollowUpMessageOptions["scrollToBottom"];
+    }) => Promise<void>;
 
     /** Opens an external link, redirects web page or mobile app */
     openExternal(args: { href: string; redirectUrl?: false }): void;
