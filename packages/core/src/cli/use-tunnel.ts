@@ -52,14 +52,16 @@ export function useTunnel(port: number | null): TunnelState {
         second: "2-digit",
         hour12: true,
       });
-      setLogs((prev) => [
-        ...prev,
-        {
-          id: randomUUID(),
-          text: `${time} [tunnel] ${text}`,
-          type,
-        },
-      ]);
+      setLogs((prev) =>
+        [
+          ...prev,
+          {
+            id: randomUUID(),
+            text: `${time} [tunnel] ${text}`,
+            type,
+          },
+        ].slice(-10),
+      );
     };
 
     const handleStdout = (data: Buffer) => {
@@ -108,7 +110,7 @@ export function useTunnel(port: number | null): TunnelState {
 
     tunnelProcess.on("close", (code) => {
       clearTimeout(timeout);
-      if (code !== 0 && code !== null && !connected) {
+      if (code !== 0 && code !== null) {
         const detail = stderrBuffer.trim() || `exited with code ${code}`;
         setLabel({
           text: `${detail}. Try manually: npx alpic tunnel --port ${port}`,
