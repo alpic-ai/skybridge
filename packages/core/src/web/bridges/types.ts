@@ -92,6 +92,7 @@ export type FileMetadata = { fileId: string };
 export type RequestModalOptions = {
   title?: string;
   params?: Record<string, unknown>;
+  template?: string;
   anchor?: { top?: number; left?: number; width?: number; height?: number };
 };
 
