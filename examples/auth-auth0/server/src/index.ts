@@ -36,13 +36,13 @@ const server = new McpServer(
     mcpAuthMetadataRouter({
       oauthMetadata: {
         issuer: env.SERVER_URL,
-        authorization_endpoint: `https://${env.AUTH0_DOMAIN}/authorize?audience=${encodeURIComponent(env.AUTH0_AUDIENCE)}`,
+        authorization_endpoint: `https://${env.AUTH0_DOMAIN}/authorize?audience=${encodeURIComponent(env.AUTH0_AUDIENCE)}&scope=openid%20profile%20email`,
         token_endpoint: `https://${env.AUTH0_DOMAIN}/oauth/token`,
         registration_endpoint: `https://${env.AUTH0_DOMAIN}/oidc/register`,
         response_types_supported: ["code"],
         code_challenge_methods_supported: ["S256"],
         response_modes_supported: ["query"],
-        scopes_supported: ["openid"],
+        scopes_supported: ["openid", "profile", "email"],
         grant_types_supported: ["authorization_code", "refresh_token"],
         token_endpoint_auth_methods_supported: [
           "none",
@@ -92,34 +92,55 @@ const server = new McpServer(
         "openai/widgetAccessible": true,
       },
     },
-    ({ query, minRating }, extra) => {
+    async ({ query, minRating }, extra) => {
       const auth = extra.authInfo as AuthInfo;
 
-      const name = auth.extra?.name as string | undefined;
-      const email = auth.extra?.email as string | undefined;
+      try {
+        const userInfoResponse = await fetch(
+          `https://${env.AUTH0_DOMAIN}/userinfo`,
+          { headers: { Authorization: `Bearer ${auth.token}` } },
+        );
+        console.log(auth.token);
+        console.log(userInfoResponse);
+        const userInfo = userInfoResponse.ok
+          ? ((await userInfoResponse.json()) as {
+              name?: string;
+              email?: string;
+            })
+          : null;
+        console.log(userInfo);
+        const displayName = userInfo?.name ?? "User";
+        const results = searchCoffeeShops({
+          query,
+          minRating,
+          userId: auth?.extra?.sub as string,
+        });
 
-      const results = searchCoffeeShops({
-        query,
-        minRating,
-        userId: auth.clientId,
-      });
-
-      const displayName = name ?? email?.split("@")[0] ?? "User";
-
-      return {
-        structuredContent: {
-          shops: results.shops,
-          totalCount: results.totalCount,
-          userName: displayName,
-        },
-        content: [
-          {
-            type: "text",
-            text: `Found ${results.totalCount} coffee shops in Paris for ${displayName}`,
+        return {
+          structuredContent: {
+            shops: results.shops,
+            totalCount: results.totalCount,
+            userName: displayName,
           },
-        ],
-        isError: false,
-      };
+          content: [
+            {
+              type: "text",
+              text: `Found ${results.totalCount} coffee shops in Paris for ${displayName}`,
+            },
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Failed to search coffee shops: ${error instanceof Error ? error.message : "Unknown error"}`,
+            },
+          ],
+          isError: true,
+        };
+      }
     },
   );
 

@@ -1,51 +1,42 @@
+import {
+  ApiClient,
+  VerifyAccessTokenError,
+  InvalidRequestError,
+} from "@auth0/auth0-api-js";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
-import * as jose from "jose";
-import { env } from "./env.js";
 import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
+import { env } from "./env.js";
 
-interface UserClaims extends Record<string, unknown> {
-  sub: string;
-  email?: string;
-  name?: string;
-}
-
-let jwksClient: ReturnType<typeof jose.createRemoteJWKSet> | null = null;
-
-function getJwksClient() {
-  if (!jwksClient) {
-    const jwksUrl = new URL(
-      `https://${env.AUTH0_DOMAIN}/.well-known/jwks.json`,
-    );
-    jwksClient = jose.createRemoteJWKSet(jwksUrl);
-  }
-  return jwksClient;
-}
+const apiClient = new ApiClient({
+  domain: env.AUTH0_DOMAIN,
+  audience: env.AUTH0_AUDIENCE,
+});
 
 export async function verifyAccessToken(token: string): Promise<AuthInfo> {
-  const issuer = `https://${env.AUTH0_DOMAIN}/`;
-
-  let payload: jose.JWTPayload;
   try {
-    ({ payload } = await jose.jwtVerify(token, getJwksClient(), {
-      issuer,
-      audience: env.AUTH0_AUDIENCE,
-    }));
+    const decoded = await apiClient.verifyAccessToken({
+      accessToken: token,
+    });
+
+    return {
+      token,
+      clientId: decoded?.azp as string,
+      scopes:
+        typeof decoded.scope === "string"
+          ? decoded.scope.split(" ").filter(Boolean)
+          : [],
+      extra: {
+        sub: decoded?.sub as string,
+      },
+      expiresAt: decoded.exp,
+    };
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    throw new InvalidTokenError(`Token verification failed: ${message}`);
+    if (
+      err instanceof VerifyAccessTokenError ||
+      err instanceof InvalidRequestError
+    ) {
+      throw new InvalidTokenError(`Token verification failed: ${err.message}`);
+    }
+    throw err;
   }
-
-  const userClaims: UserClaims = {
-    sub: payload.sub ?? "",
-    email: payload.email as string | undefined,
-    name: payload.name as string | undefined,
-  };
-
-  return {
-    token,
-    clientId: userClaims.sub,
-    scopes: [],
-    extra: userClaims,
-    expiresAt: payload.exp,
-  };
 }
