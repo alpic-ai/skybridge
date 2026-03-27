@@ -1,76 +1,180 @@
 ---
-title: "Introduction"
-description: "Build production-ready ChatGPT and MCP Apps faster with full-stack TypeScript tooling and modern developer experience."
+title: "Start building with Skybridge"
+description: "Everything you need to create MCP and ChatGPT Apps, from brainstorming to production."
 sidebarTitle: "Introduction"
 icon: "house"
 ---
 
-**_Skybridge is a framework for quickly building ChatGPT and MCP Apps, the modern TypeScript way._**
-
-It comes with:
-
-- 🌐 Write once, run everywhere: Skybridge works seamlessly with ChatGPT (Apps SDK) and MCP-compatible clients.
-- 👨‍💻 Full dev environment: HMR, debug traces, and local devtools.
-- ✅ End-to-end type safety: tRPC-style inference from server to widget. Autocomplete everywhere.
-- 🔄 Widget-to-model sync: Keep the model aware of UI state with data-llm.
-- ⚒️ React Query-style hooks: isPending, isError, callbacks. State management you already know.
-- 📦 Showcase examples: production-ready examples to learn from and build upon.
-
-## Why does Skybridge exist?
-
-OpenAI announced the [ChatGPT Apps SDK](https://developers.openai.com/apps-sdk) in October 2025, giving developers (and users) a new way of interacting with ChatGPT. Shortly after, the open [MCP ext-apps specification](https://github.com/modelcontextprotocol/ext-apps) emerged, enabling similar UI widgets across multiple AI assistants and MCP clients. While these runtimes provide powerful primitives with UI rendering, state persistence, tool calls, follow-up messages and layout management, they are very low-level and lack modern fullstack DX standards like end-to-end typesafe APIs, hooks, error handling or data state management.
-
-In addition, these apps introduce a new challenge: building for **dual interaction surfaces**. With widgets interacting with both the user and the model, you need to make sure everything the user sees and does in the UI is also shared with the model, and vice-versa.
-
-<img
-  src="/images/chatgpt-apps-interaction.png"
-  alt="Apps architecture"
-  style={{ maxWidth:"500px",width:"100%",display:"block",margin:"0 auto" }}
-/>
-
-Finally, there are no developer tools or environment. Developers can test their apps only inside ChatGPT Developer mode, which has infinite caching policies, no hot module replacement, and requires you to refresh or re-install your app to test any change - losing precious minutes at each small iteration.
-
-After building dozens of Apps, we quickly saw repeating patterns and frustrations, and realized developers were spending too much time stitching together SDKs and managing low-level wiring instead of focusing on their product.
-
-We built **Skybridge** so other developers wouldn't have to deal with these same frustrations. Our goal is to bring full-stack development standards back into ChatGPT and MCP Apps and help teams ship production-ready apps much faster.
-
-## What is Skybridge?
-
-Skybridge is a fullstack framework aiming to **maximize Developer Experience while minimizing boilerplate code**.
-
-It includes 3 main parts:
-
-- **`skybridge/server`**: A drop-in replacement for the official MCP SDK that adds widget registration and type inference capabilities.
-- **`skybridge/web`**: A React library providing hooks, components, and the runtime glue to render your widgets inside AI conversation environments.
-- **`skybridge/devtools`** : A dev environment, with a local emulator and dev tools, and a Vite-based dev server allowing Hot Module Reload directly inside ChatGPT or MCP Client.
-
-**Skybridge** bridges the gap between standard **MCP servers** and host runtimes ([Apps SDK](https://developers.openai.com/apps-sdk/reference/), [MCP Apps](https://github.com/modelcontextprotocol/ext-apps)), allowing you to build rich, React-based UI experiences directly within AI conversations, all with full type safety and a developer experience you'll love.
-
-## What Skybridge is NOT
-
-- **It is NOT another MCP SDK.** `skybridge/server` simply extends the official [TypeScript MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk), and `skybridge/web` focuses on improving host runtime APIs, making it compatible with any MCP server and runtime.
-- **It is NOT an agentic framework.** It allows you to build ChatGPT and MCP Apps that run inside ChatGPT and MCP clients. It doesn't provide any agentic frontend to run your App.
-
-## Get Started
-
-Ready to build your first app with Skybridge? Choose your path:
-
 <CardGroup cols={2}>
-  <Card title="Create New App" icon="rocket" href="/quickstart/create-new-app">
-    Start from scratch with our starter kit. Get up and running in 5 minutes.
+  <Card title="Quickstart" icon="bolt" href="/quickstart/create-new-app">
+    Scaffold a working app in one command and start building in minutes.
   </Card>
-  <Card title="Explore Example Projects" icon="grid-2" href="/showcase">
-    Explore real-world examples built with Skybridge, including interactive maps, ecommerce carousels, and more.
+  <Card title="Use the Skill" icon="brain" href="/devtools/skills">
+    Let your AI coding assistant guide you through the full app lifecycle.
   </Card>
 </CardGroup>
 
-## Learn More
+---
+
+## All-in-one and dead-simple
+
+A Skybridge app is a TypeScript MCP server paired with React widgets. The server defines tools and returns data; the widget renders it inside the conversation.
+
+<CodeGroup>
+```ts server/src/index.ts
+import { McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({
+  name: "my-app",
+  version: "0.0.1",
+}).registerWidget(
+  "flight-results",
+  { description: "Flight search results" },
+  {
+    description: "Search for flights between two cities.",
+    inputSchema: {
+      origin: z.string().describe("Departure city"),
+      destination: z.string().describe("Arrival city"),
+    },
+  },
+  async ({ origin, destination }) => {
+    const flights = await searchFlights(origin, destination);
+    return { structuredContent: { flights } };
+  },
+);
+```
+
+```tsx web/src/widgets/flight-results.tsx
+import { mountWidget } from "skybridge/web";
+import { useToolInfo } from "../helpers.js";
+
+function FlightResults() {
+  const { input, output, isSuccess } = useToolInfo<"flight-results">();
+
+  if (!isSuccess) return <div>Loading...</div>;
+
+  return (
+    <div>
+      <h2>Flights from {input.origin} to {input.destination}</h2>
+      {output.flights.map((f) => (
+        <div key={f.id}>
+          {f.airline} — ${f.price}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+mountWidget(<FlightResults />);
+```
+</CodeGroup>
+
+That's it: type-safe from server to widget, with autocomplete everywhere.
+
+---
+
+## Design
+
+MCP and ChatGPT Apps are not traditional web apps. They live inside AI conversations, where three entities collaborate: the **user**, the **UI**, and the **model**. Designing well means deciding what each one sees and when. With Skybridge:
+
+- **Don't worry about compatibility.** Design your app once — Skybridge handles the differences between ChatGPT, Claude, and other MCP clients for you.
+- **Use what you already know.** Manage data and LLM context with React Query-style hooks and HTML attributes. No new paradigm to learn.
 
 <CardGroup cols={2}>
-  <Card title="Fundamentals" icon="graduation-cap" href="/fundamentals">
-    How ChatGPT and MCP Apps work under the hood
+  <Card title="Design with Skill" icon="brain" href="/devtools/skills">
+    Brainstorm ideas, validate UX, and design your app architecture with AI assistance.
   </Card>
-  <Card title="Skybridge Concepts" icon="arrows-rotate" href="/concepts">
-    Learn the main concepts governing skybridge: data flows, LLM context sync, fast iteration, and type safety.
+  <Card title="Read the Fundamentals" icon="graduation-cap" href="/fundamentals">
+    Understand MCP, ChatGPT Apps, and how Skybridge bridges the two runtimes.
+  </Card>
+</CardGroup>
+
+---
+
+## Build
+
+Scaffold a new project in one command:
+
+<CodeGroup>
+```bash npm
+npm create skybridge@latest my-app
+```
+```bash pnpm
+pnpm create skybridge my-app
+```
+```bash yarn
+yarn create skybridge my-app
+```
+```bash bun
+bun create skybridge my-app
+```
+</CodeGroup>
+
+You can also empower your AI sidekick with the [Skybridge Skill](/devtools/skills) to do the heavy lifting. From bootstrapping a fresh project to **migrating entire codebases**, we've got you covered:
+
+```bash
+npx skills add alpic-ai/skybridge -s skybridge
+```
+
+<CardGroup cols={3}>
+  <Card title="Build with Skill" icon="brain" href="/devtools/skills">
+    Bootstrap, maintain or migrate projects.
+  </Card>
+  <Card title="Quickstart" icon="bolt" href="/quickstart/create-new-app">
+    Scaffold and run your first app
+  </Card>
+  <Card title="Migrate" icon="right-to-bracket" href="/quickstart/migrate">
+    Migrate an existing app
+  </Card>
+
+</CardGroup>
+
+---
+
+## Test and ship
+
+Skybridge gives you a fast local loop, then smooth paths to production.
+
+<Steps>
+  <Step title="Develop locally">
+    Run `npm run dev` and open `http://localhost:3000/` to access [DevTools](/devtools/devtools) — test tools, preview widgets, switch themes and locales, all without leaving your browser. Widget changes hot-reload instantly.
+  </Step>
+  <Step title="Test in ChatGPT, Claude, and more">
+    Run `npm run dev --tunnel` to get a live LLM playground and a public URL for ChatGPT, Claude, or any MCP client to connect to. Validate real model interactions before shipping.
+  </Step>
+  <Step title="Build and deploy">
+    Run `npm run deploy` to ship to [Alpic Cloud](https://alpic.ai) — or host on any Node.js-compatible infrastructure.
+  </Step>
+</Steps>
+
+<CardGroup cols={3}>
+  <Card title="Test Your App" icon="flask-vial" href="/quickstart/test-your-app">
+    Local DevTools and production testing
+  </Card>
+  <Card title="Build for Production" icon="hammer" href="/quickstart/build-for-production">
+    Compile and optimize
+  </Card>
+  <Card title="Deploy" icon="cloud-arrow-up" href="/quickstart/deploy">
+    Ship to Alpic Cloud or self-host
+  </Card>
+</CardGroup>
+
+---
+
+## Keep learning
+
+<CardGroup cols={2}>
+  <Card title="Fetching Data" icon="database" href="/guides/fetching-data">
+    Initial hydration and user-triggered data fetching patterns.
+  </Card>
+  <Card title="Managing State" icon="floppy-disk" href="/guides/managing-state">
+    Persistent state with useWidgetState and createStore.
+  </Card>
+  <Card title="Communicating with the Model" icon="comments" href="/guides/communicating-with-model">
+    Keep the LLM aware of what happens in your UI.
+  </Card>
+  <Card title="Host Environment Context" icon="palette" href="/guides/host-environment-context">
+    Adapt to theme, locale, display mode, and device.
   </Card>
 </CardGroup>
