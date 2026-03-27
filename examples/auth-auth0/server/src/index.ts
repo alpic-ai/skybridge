@@ -51,10 +51,15 @@ const server = new McpServer(
         ],
       },
       resourceServerUrl: new URL(env.SERVER_URL),
-      scopesSupported: ["openid", "profile", "email"],
     }),
   )
-  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
+  .use(
+    "/mcp",
+    requireBearerAuth({
+      verifier: { verifyAccessToken },
+      requiredScopes: ["openid", "email", "profile"],
+    }),
+  )
   .registerWidget(
     "search-coffee-paris",
     {
