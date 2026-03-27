@@ -36,7 +36,7 @@ const server = new McpServer(
     mcpAuthMetadataRouter({
       oauthMetadata: {
         issuer: env.SERVER_URL,
-        authorization_endpoint: `https://${env.AUTH0_DOMAIN}/authorize?audience=${encodeURIComponent(env.AUTH0_AUDIENCE)}&scope=openid%20profile%20email`,
+        authorization_endpoint: `https://${env.AUTH0_DOMAIN}/authorize?audience=${encodeURIComponent(env.AUTH0_AUDIENCE)}`,
         token_endpoint: `https://${env.AUTH0_DOMAIN}/oauth/token`,
         registration_endpoint: `https://${env.AUTH0_DOMAIN}/oidc/register`,
         response_types_supported: ["code"],
@@ -51,6 +51,7 @@ const server = new McpServer(
         ],
       },
       resourceServerUrl: new URL(env.SERVER_URL),
+      scopesSupported: ["openid", "profile", "email"],
     }),
   )
   .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
