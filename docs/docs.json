@@ -121,6 +121,7 @@
             "icon": "toolbox",
             "pages": [
               "api-reference/create-store",
+              "api-reference/mount-widget",
               "api-reference/generate-helpers",
               "api-reference/data-llm"
             ]

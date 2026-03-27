@@ -1,9 +1,19 @@
 ---
 title: Fundamentals
-description: "Understanding Model Context Protocol (MCP) and the two runtime environments Skybridge supports: Apps SDK (ChatGPT) and MCP Apps."
+description: "Understanding Model Context Protocol (MCP), the MCP Apps portable baseline, and ChatGPT-specific extensions."
 ---
 
 Skybridge enables you to build **ChatGPT Apps** and **MCP Apps** - interactive UI widgets that render inside AI conversations. Before diving into Skybridge's APIs, understand the underlying protocols and runtimes it builds upon.
+
+## How widgets appear in MCP Apps Clients
+
+In MCP Apps clients, the model triggers your tool, and the client then renders both the assistant response and your widget from the tool result.
+
+<img
+  src="/images/fundamentals-chatgpt-apps.png"
+  alt="MCP Apps Architecture"
+  style={{ width: "100%", maxWidth: "800px", display: "block", margin: "0 auto" }}
+/>
 
 ## MCP (Model Context Protocol)
 
@@ -28,7 +38,9 @@ When you ask an AI assistant a question, it can invoke tools on your MCP server 
 
 ### MCP Apps and ChatGPT Apps: The Same Foundation
 
-Both ChatGPT Apps and MCP Apps are built on top of MCP servers, and extend the MCP protocol to allow rich UI rendering. Both use the same foundations and concepts, but differ in implementation: ChatGPT Apps are built on top of the OpenAI Apps SDK, while MCP Apps are built on top of the MCP Apps extension.
+**MCP Apps** is the open UI extension for MCP. It defines the portable contract for interactive widgets in AI clients, including the `ui/*` bridge, `tools/call`, and `_meta.ui.resourceUri`.
+
+**ChatGPT Apps** use that same MCP Apps contract in ChatGPT, and the OpenAI Apps SDK adds `window.openai` APIs for ChatGPT-specific capabilities.
 
 To avoid repetition, we will now refer to both ChatGPT Apps and MCP Apps as **AI Apps.**
 
@@ -36,13 +48,6 @@ An **AI App** consists of two components working together:
 
 1. **MCP Server**: Your backend that handles business logic and exposes tools via the MCP protocol
 2. **UI Widgets**: HTML components that render in the AI Client's interface as interactive UIs
-
-
-<img
-  src="/images/fundamentals-chatgpt-apps.png"
-  alt="MCP Apps Architecture"
-  style={{ width: "100%", maxWidth: "500px", display: "block", margin: "0 auto" }}
-/>
 
 When a tool is called, it can return both:
 - **Text content**: What the model sees and responds with
@@ -56,16 +61,18 @@ Read our [in-depth blog article](https://alpic.ai/blog/inside-openai-s-apps-sdk-
 
 ## Runtime Environments
 
-While both ChatGPT Apps and MCP Apps use the same MCP server architecture, they differ in how they render and communicate with UI widgets. Think of it this way: your App is the engine, and the runtime environment is the interface layer.
+Both ChatGPT Apps and MCP Apps use the same MCP server architecture and the same portable MCP Apps UI contract. The key practical difference is that ChatGPT additionally exposes `window.openai` extensions.
+
+Think of it this way: your app logic and portable bridge stay the same, and ChatGPT can optionally provide extra capabilities.
 
 Skybridge supports the two main runtime environments for rendering widgets:
 
 <CardGroup cols={2}>
   <Card title="Apps SDK (ChatGPT)" icon="message" href="/fundamentals/apps-sdk">
-    OpenAI's proprietary SDK for ChatGPT Apps. Uses `window.openai` API. Full feature set including modals and file operations.
+    ChatGPT host runtime. Implements MCP Apps and adds optional `window.openai` APIs for ChatGPT-only features.
   </Card>
   <Card title="MCP Apps" icon="plug" href="/fundamentals/mcp-apps">
-    Open MCP ext-apps specification. Uses JSON-RPC postMessage bridge. Works across multiple AI clients.
+    Open MCP Apps specification. JSON-RPC postMessage bridge that works across multiple AI clients.
   </Card>
 </CardGroup>
 
@@ -77,9 +84,9 @@ Skybridge abstracts away the differences between these runtime environments so y
 
 | Feature | Apps SDK (ChatGPT) | MCP Apps |
 |---------|-------------------|----------|
-| **Protocol** | Proprietary `window.openai` | Open MCP ext-apps spec |
+| **Protocol** | MCP Apps bridge + optional `window.openai` extensions | Open MCP Apps (`ext-apps`) spec |
 | **Client Support** | ChatGPT only | Goose, VSCode, Postman, ... |
-| **Documentation** | [Apps SDK Docs](https://developers.openai.com/apps-sdk) | [ext-apps specs](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx) |
+| **Documentation** | [Apps SDK Docs](https://developers.openai.com/apps-sdk) and [MCP Apps compatibility in ChatGPT](https://developers.openai.com/apps-sdk/mcp-apps-in-chatgpt/) | [ext-apps specs](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx) |
 
 
 
