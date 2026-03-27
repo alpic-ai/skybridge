@@ -60,7 +60,7 @@ server.registerWidget(
     _meta: {
       ui: {
         csp: {
-          redirectDomains: ["https://some-airline.com"],
+          redirectDomains: ["https://airline.example.com"],
         },
       },
     },
