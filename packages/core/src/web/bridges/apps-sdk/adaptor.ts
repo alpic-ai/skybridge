@@ -6,6 +6,7 @@ import type {
   OpenExternalOptions,
   RequestDisplayMode,
   RequestModalOptions,
+  SendFollowUpMessageOptions,
   SetWidgetStateAction,
 } from "../types.js";
 import { AppsSdkBridge } from "./bridge.js";
@@ -60,8 +61,11 @@ export class AppsSdkAdaptor implements Adaptor {
     return window.openai.requestDisplayMode({ mode });
   };
 
-  public sendFollowUpMessage = (prompt: string): Promise<void> => {
-    return window.openai.sendFollowUpMessage({ prompt });
+  public sendFollowUpMessage = (
+    prompt: string,
+    options: SendFollowUpMessageOptions = {},
+  ): Promise<void> => {
+    return window.openai.sendFollowUpMessage({ prompt, ...options });
   };
 
   public openExternal(href: string, options: OpenExternalOptions = {}): void {

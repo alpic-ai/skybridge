@@ -24,7 +24,10 @@ function FollowUpButton() {
 ## Returns
 
 ```tsx
-sendFollowUpMessage: (prompt: string) => Promise<void>
+sendFollowUpMessage: (
+  prompt: string,
+  options?: { scrollToBottom?: boolean },
+) => Promise<void>
 ```
 
 An async function that sends a follow-up message to continue the conversation.
@@ -34,6 +37,9 @@ An async function that sends a follow-up message to continue the conversation.
 - `prompt: string`
   - **Required**
   - The message to send as a follow-up prompt
+- `options?: { scrollToBottom?: boolean }`
+  - **Optional**
+  - Pass `scrollToBottom: false` to avoid auto-scrolling the host conversation after sending the follow-up message when supported by the Apps SDK host
 
 ## Examples
 
@@ -81,7 +87,9 @@ function SearchResults({ results }: { results: SearchResult[] }) {
   const sendFollowUpMessage = useSendFollowUpMessage();
 
   const handleLearnMore = (result: SearchResult) => {
-    sendFollowUpMessage(`Tell me more about "${result.title}"`);
+    sendFollowUpMessage(`Tell me more about "${result.title}"`, {
+      scrollToBottom: false,
+    });
   };
 
   return (

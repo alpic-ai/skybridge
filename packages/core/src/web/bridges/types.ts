@@ -100,6 +100,10 @@ export type OpenExternalOptions = {
   redirectUrl?: false;
 };
 
+export type SendFollowUpMessageOptions = {
+  scrollToBottom?: boolean;
+};
+
 export interface Adaptor {
   getHostContextStore<K extends keyof HostContext>(key: K): HostContextStore<K>;
   callTool<
@@ -109,7 +113,10 @@ export interface Adaptor {
   requestDisplayMode(mode: RequestDisplayMode): Promise<{
     mode: RequestDisplayMode;
   }>;
-  sendFollowUpMessage(prompt: string): Promise<void>;
+  sendFollowUpMessage(
+    prompt: string,
+    options?: SendFollowUpMessageOptions,
+  ): Promise<void>;
   openExternal(href: string, options?: OpenExternalOptions): void;
   setWidgetState(stateOrUpdater: SetWidgetStateAction): Promise<void>;
   uploadFile(file: File): Promise<FileMetadata>;
