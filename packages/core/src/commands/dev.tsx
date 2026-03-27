@@ -1,8 +1,10 @@
 import { Command, Flags } from "@oclif/core";
 import { Box, render, Text } from "ink";
+import { useMemo } from "react";
 import { resolvePort } from "../cli/detect-port.js";
 import { Header } from "../cli/header.js";
 import { useNodemon } from "../cli/use-nodemon.js";
+import { useTunnel } from "../cli/use-tunnel.js";
 import { useTypeScriptCheck } from "../cli/use-typescript-check.js";
 
 export default class Dev extends Command {
@@ -13,6 +15,10 @@ export default class Dev extends Command {
       char: "p",
       description: "Port to run the server on",
       min: 1,
+    }),
+    tunnel: Flags.boolean({
+      description: "Open an Alpic tunnel for remote testing",
+      default: false,
     }),
   };
 
@@ -31,7 +37,13 @@ export default class Dev extends Command {
 
     const App = () => {
       const tsErrors = useTypeScriptCheck();
-      const messages = useNodemon(env);
+      const nodemonMessages = useNodemon(env);
+      const tunnelState = useTunnel(flags.tunnel ? port : null);
+
+      const messages = useMemo(
+        () => [...nodemonMessages, ...tunnelState.logs].slice(-10),
+        [nodemonMessages, tunnelState.logs],
+      );
 
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>
@@ -57,18 +69,7 @@ export default class Dev extends Command {
               {`http://localhost:${port}/mcp`}
             </Text>
           </Box>
-          <Box>
-            <Text>
-              <Text color="#20a832">→{"  "}</Text>
-              <Text color="grey">
-                Test on ChatGPT, Claude, or any MCP client:{" "}
-              </Text>
-              <Text color="white" bold>
-                https://docs.skybridge.tech/quickstart/test-your-app
-              </Text>
-            </Text>
-          </Box>
-          <Box marginTop={1}>
+          <Box marginBottom={1}>
             <Text>
               <Text color="#20a832">→{"  "}</Text>
               <Text>If you like Skybridge, please </Text>
@@ -82,6 +83,36 @@ export default class Dev extends Command {
               <Text color="grey"> 🙏</Text>
             </Text>
           </Box>
+          {flags.tunnel ? (
+            <Box marginBottom={1}>
+              <Text color="#20a832">{"→  "}</Text>
+              <Text color={tunnelState.labelColor}>
+                Tunnel: {tunnelState.label}
+              </Text>
+            </Box>
+          ) : (
+            <>
+              <Box>
+                <Text>
+                  <Text color="#20a832">{"→  "}</Text>
+                  <Text>
+                    Get a public URL to test on ChatGPT or Claude with the{" "}
+                  </Text>
+                  <Text color="cyan" bold>
+                    --tunnel
+                  </Text>
+                  <Text> flag.</Text>
+                </Text>
+              </Box>
+              <Box>
+                <Text color={"grey"}>
+                  {"   "}
+                  More info:
+                  https://docs.skybridge.tech/quickstart/test-your-app
+                </Text>
+              </Box>
+            </>
+          )}
           {tsErrors.length > 0 && (
             <Box marginTop={1} flexDirection="column">
               <Text color="red" bold>

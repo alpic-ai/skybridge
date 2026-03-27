@@ -4,14 +4,9 @@ import { resolve } from "node:path";
 import nodemonOriginal from "nodemon";
 import { useEffect, useState } from "react";
 import type { ExtendedNodemon } from "./nodemon.d.ts";
+import type { Message } from "./types.js";
 
 const nodemon = nodemonOriginal as ExtendedNodemon;
-
-type Message = {
-  id: string;
-  text: string;
-  type: "log" | "restart" | "error";
-};
 
 export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
   const [messages, setMessages] = useState<Array<Message>>([]);
@@ -34,20 +29,28 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
     const handleStdoutData = (chunk: Buffer) => {
       const message = chunk.toString().trim();
       if (message) {
-        setMessages((prev) => [
-          ...prev,
-          { id: randomUUID(), text: message, type: "log" },
-        ]);
+        setMessages((prev) =>
+          [
+            ...prev,
+            { id: randomUUID(), text: message, type: "log" } satisfies Message,
+          ].slice(-10),
+        );
       }
     };
 
     const handleStderrData = (chunk: Buffer) => {
       const message = chunk.toString().trim();
       if (message) {
-        setMessages((prev) => [
-          ...prev,
-          { id: randomUUID(), text: message, type: "error" },
-        ]);
+        setMessages((prev) =>
+          [
+            ...prev,
+            {
+              id: randomUUID(),
+              text: message,
+              type: "error",
+            } satisfies Message,
+          ].slice(-10),
+        );
       }
     };
 
