@@ -20,7 +20,7 @@ export async function verifyAccessToken(token: string): Promise<AuthInfo> {
 
     return {
       token,
-      clientId: decoded?.azp as string,
+      clientId: (decoded?.client_id || decoded?.azp) as string,
       scopes:
         typeof decoded.scope === "string"
           ? decoded.scope.split(" ").filter(Boolean)

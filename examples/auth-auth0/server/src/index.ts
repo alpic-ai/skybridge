@@ -100,15 +100,14 @@ const server = new McpServer(
           `https://${env.AUTH0_DOMAIN}/userinfo`,
           { headers: { Authorization: `Bearer ${auth.token}` } },
         );
-        console.log(auth.token);
-        console.log(userInfoResponse);
+
         const userInfo = userInfoResponse.ok
           ? ((await userInfoResponse.json()) as {
               name?: string;
               email?: string;
             })
           : null;
-        console.log(userInfo);
+
         const displayName = userInfo?.name ?? "User";
         const results = searchCoffeeShops({
           query,
