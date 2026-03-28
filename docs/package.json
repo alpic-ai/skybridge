@@ -7,9 +7,9 @@
     "lint": "mintlify broken-links"
   },
   "devDependencies": {
-    "mintlify": "^4.2.447"
+    "mintlify": "^4.2.459"
   },
   "engines": {
-    "node": ">=20.20.1"
+    "node": ">=20.20.2"
   }
 }
