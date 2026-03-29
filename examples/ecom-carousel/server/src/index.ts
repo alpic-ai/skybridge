@@ -17,7 +17,7 @@ interface Product {
 
 const server = new McpServer(
   {
-    name: "browse-catalog-app",
+    name: "ecom-carousel-app",
     version: "0.0.1",
   },
   { capabilities: {} },

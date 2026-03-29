@@ -188,6 +188,6 @@ function BrowseCatalog() {
   );
 }
 
-export default EcomCarousel;
+export default BrowseCatalog;
 
 mountWidget(<BrowseCatalog />);
