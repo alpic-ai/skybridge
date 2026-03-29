@@ -67,6 +67,9 @@ importers:
 
   examples/auth-auth0:
     dependencies:
+      '@auth0/auth0-api-js':
+        specifier: ^1.4.0
+        version: 1.4.0
       '@modelcontextprotocol/sdk':
         specifier: ^1.26.0
         version: 1.27.1(zod@4.3.6)
@@ -1201,6 +1204,12 @@ packages:
 
   '@asyncapi/specs@6.8.1':
     resolution: {integrity: sha512-czHoAk3PeXTLR+X8IUaD+IpT+g+zUvkcgMDJVothBsan+oHN3jfcFcFUNdOPAAFoUCQN1hXF1dWuphWy05THlA==}
+
+  '@auth0/auth0-api-js@1.4.0':
+    resolution: {integrity: sha512-f3ELjfcZhvo24uXVnlZNRC4z/Jd0Ecd+4SUu/IsmyLW6FIWWBo5etkMyUPSvnOlqfRBJ8jXJrkShV4ac1O2vPg==}
+
+  '@auth0/auth0-auth-js@1.6.0':
+    resolution: {integrity: sha512-/WYYNlsqhWA6I60pMVLFVeOgjOUCLdJThEAsjN8pAgYY09BTxbPaRIEVDgGu6ckoJpkmKvEYlHPO/vwRNrvX6w==}
 
   '@aws-cdk/asset-awscli-v1@2.2.263':
     resolution: {integrity: sha512-X9JvcJhYcb7PHs8R7m4zMablO5C9PGb/hYfLnxds9h/rKJu6l7MiXE/SabCibuehxPnuO/vk+sVVJiUWrccarQ==}
@@ -9418,6 +9427,17 @@ snapshots:
   '@asyncapi/specs@6.8.1':
     dependencies:
       '@types/json-schema': 7.0.15
+
+  '@auth0/auth0-api-js@1.4.0':
+    dependencies:
+      '@auth0/auth0-auth-js': 1.6.0
+      jose: 6.2.1
+      oauth4webapi: 3.8.5
+
+  '@auth0/auth0-auth-js@1.6.0':
+    dependencies:
+      jose: 6.2.1
+      openid-client: 6.8.2
 
   '@aws-cdk/asset-awscli-v1@2.2.263': {}
 
