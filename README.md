@@ -6,6 +6,8 @@
 
 # Skybridge
 
+[![SafeSkill 69/100](https://img.shields.io/badge/SafeSkill-69%2F100_Use%20with%20Caution-orange)](https://safeskill.dev/scan/alpic-ai-skybridge)
+
 **Build ChatGPT & MCP Apps. The Modern TypeScript Way.**
 
 The fullstack TypeScript framework for AI-embedded widgets.<br />
