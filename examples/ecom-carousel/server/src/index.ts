@@ -17,12 +17,12 @@ interface Product {
 
 const server = new McpServer(
   {
-    name: "ecom-carousel-app",
+    name: "browse-catalog-app",
     version: "0.0.1",
   },
   { capabilities: {} },
 ).registerWidget(
-  "ecom-carousel",
+  "browse-catalog",
   {
     description: "E-commerce Product Carousel",
     _meta: {

@@ -52,7 +52,7 @@ const translations: Record<string, Record<string, string>> = {
 
 const CHECKOUT_URL = "https://docs.skybridge.tech";
 
-function EcomCarousel() {
+function BrowseCatalog() {
   const { theme } = useLayout();
   const { locale } = useUser();
   const { open, isOpen } = useRequestModal();
@@ -64,7 +64,7 @@ function EcomCarousel() {
     return translations[lang]?.[key] ?? translations.en[key];
   }
 
-  const { output, isPending } = useToolInfo<"ecom-carousel">();
+  const { output, isPending } = useToolInfo<"browse-catalog">();
   type Product = NonNullable<typeof output>["products"][number];
   const [selected, setSelected] = useState<Product | null>(null);
 
@@ -190,4 +190,4 @@ function EcomCarousel() {
 
 export default EcomCarousel;
 
-mountWidget(<EcomCarousel />);
+mountWidget(<BrowseCatalog />);
