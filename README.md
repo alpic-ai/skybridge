@@ -1,6 +1,10 @@
 <div align="center">
 
-<img alt="Skybridge" src="docs/images/Skybridgewhite(1).svg" width="100%">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/Skybridgewhite(1).svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/images/Skybridgemidnight.svg">
+  <img alt="Skybridge" src="docs/images/Skybridgemidnight.svg" width="100%">
+</picture>
 
 <br />
 
