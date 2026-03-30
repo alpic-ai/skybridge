@@ -12,7 +12,7 @@
     "test:type": "tsc --noEmit"
   },
   "dependencies": {
-    "@clerk/express": "^2.0.1",
+    "@clerk/express": "^2.0.7",
     "@clerk/mcp-tools": "^0.3.1",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "dotenv": "^16.5.0",
