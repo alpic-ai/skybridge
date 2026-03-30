@@ -195,7 +195,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
         "alpic-ai/skybridge",
         "-s",
         "chatgpt-app-builder",
-        ...(interactive ? [] : ["--yes"]),
+        ...(interactive ? [] : ["--yes", "-a", "claude-code"]),
       ],
       {
         stdio: "inherit",
