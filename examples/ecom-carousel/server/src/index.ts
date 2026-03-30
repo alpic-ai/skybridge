@@ -22,7 +22,7 @@ const server = new McpServer(
   },
   { capabilities: {} },
 ).registerWidget(
-  "ecom-carousel",
+  "browse-catalog",
   {
     description: "E-commerce Product Carousel",
     _meta: {

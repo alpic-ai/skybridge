@@ -1,6 +1,10 @@
 <div align="center">
 
-<img alt="Skybridge" src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/github-banner.png" width="100%">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/Skybridgewhite(1).svg">
+  <source media="(prefers-color-scheme: light)" srcset="docs/images/Skybridgemidnight.svg">
+  <img alt="Skybridge" src="docs/images/Skybridgemidnight.svg" width="100%">
+</picture>
 
 <br />
 
@@ -33,9 +37,9 @@ ChatGPT Apps and MCP Apps let you embed **rich, interactive UIs** directly in AI
 
 | | |
 |:--|:--|
-| 👨‍💻 **Full Dev Environment** — HMR, debug traces, and local devtools. No more refresh loops. | ✅ **End-to-End Type Safety** — tRPC-style inference from server to widget. Autocomplete everywhere. |
+| 🌐 **Write once, run everywhere** — Skybridge works seamlessly with ChatGPT (Apps SDK) and MCP-compatible clients. | ✅ **End-to-End Type Safety** — tRPC-style inference from server to widget. Autocomplete everywhere. |
 | 🔄 **Widget-to-Model Sync** — Keep the model aware of UI state with `data-llm`. Dual surfaces, one source of truth. | ⚒️ **React Query-style Hooks** — `isPending`, `isError`, callbacks. State management you already know. |
-| 🌐 **Platform Agnostic** — Write once, run anywhere. Works with ChatGPT (Apps SDK) and MCP-compatible clients. | 📦 **Showcase Examples** — Production-ready examples to learn from and build upon. |
+| 👨‍💻 **Full dev environment** — HMR, debug traces, and local devtools. | 📦 **Showcase Examples** — Production-ready examples to learn from and build upon. |
 
 <br />
 

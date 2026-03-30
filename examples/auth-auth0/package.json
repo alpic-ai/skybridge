@@ -12,6 +12,7 @@
     "test:type": "tsc --noEmit"
   },
   "dependencies": {
+    "@auth0/auth0-api-js": "^1.4.0",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "cors": "^2.8.6",
     "dotenv": "^16.5.0",
