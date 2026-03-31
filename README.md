@@ -8,8 +8,6 @@
 
 <br />
 
-# Skybridge
-
 **Build ChatGPT & MCP Apps. The Modern TypeScript Way.**
 
 The fullstack TypeScript framework for AI-embedded widgets.<br />
