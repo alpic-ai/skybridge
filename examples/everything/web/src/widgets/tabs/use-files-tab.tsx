@@ -1,13 +1,10 @@
 import { useRef, useState } from "react";
-import type { FileMetadata } from "skybridge/web";
 import { useFiles } from "skybridge/web";
 
 export function UseFilesTab() {
-  const { upload, getDownloadUrl, selectFiles } = useFiles();
+  const { upload, getDownloadUrl } = useFiles();
   const [fileId, setFileId] = useState<string | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<FileMetadata[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [saveToLibrary, setSaveToLibrary] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -19,8 +16,7 @@ export function UseFilesTab() {
     setIsUploading(true);
     setError(null);
     try {
-      const options = saveToLibrary ? { library: true as const } : undefined;
-      const { fileId } = await upload(file, options);
+      const { fileId } = await upload(file);
       setFileId(fileId);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Upload failed");
@@ -29,21 +25,12 @@ export function UseFilesTab() {
     }
   }
 
-  async function handleSelectFiles() {
-    setError(null);
-    try {
-      const files = await selectFiles();
-      setSelectedFiles(files);
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "File selection failed",
-      );
+  async function handleDownload() {
+    if (!fileId) {
+      return;
     }
-  }
-
-  async function handleDownload(id: string) {
     try {
-      const { downloadUrl } = await getDownloadUrl({ fileId: id });
+      const { downloadUrl } = await getDownloadUrl({ fileId });
       window.open(downloadUrl, "_blank");
     } catch (error) {
       console.error("Download failed:", error);
@@ -52,7 +39,6 @@ export function UseFilesTab() {
 
   function handleClear() {
     setFileId(null);
-    setSelectedFiles([]);
     if (inputRef.current) {
       inputRef.current.value = "";
     }
@@ -61,7 +47,7 @@ export function UseFilesTab() {
   return (
     <div className="tab-content">
       <p className="description">
-        Upload, select, and download files via the host application.
+        Upload and download files via the host application.
       </p>
 
       <div className="field">
@@ -74,22 +60,11 @@ export function UseFilesTab() {
         />
       </div>
 
-      <div className="field">
-        <label>
-          <input
-            type="checkbox"
-            checked={saveToLibrary}
-            onChange={(e) => setSaveToLibrary(e.target.checked)}
-          />{" "}
-          Save to ChatGPT file library
-        </label>
-      </div>
-
       {error && <p className="error">{error}</p>}
 
       {fileId && (
         <div className="field">
-          <span className="field-label">Uploaded File ID</span>
+          <span className="field-label">File ID</span>
           <code>{fileId}</code>
         </div>
       )}
@@ -98,51 +73,20 @@ export function UseFilesTab() {
         <button
           type="button"
           className="btn"
-          onClick={() => fileId && handleDownload(fileId)}
+          onClick={handleDownload}
           disabled={!fileId}
         >
-          Download Uploaded
-        </button>
-        <button
-          type="button"
-          className="btn"
-          onClick={handleSelectFiles}
-        >
-          Select Files
+          Download
         </button>
         <button
           type="button"
           className="btn btn-outline"
           onClick={handleClear}
-          disabled={!fileId && selectedFiles.length === 0}
+          disabled={!fileId}
         >
           Clear
         </button>
       </div>
-
-      {selectedFiles.length > 0 && (
-        <div className="field">
-          <span className="field-label">Selected Files</span>
-          <ul>
-            {selectedFiles.map((file) => (
-              <li key={file.fileId}>
-                <code>{file.fileName ?? file.fileId}</code>
-                {file.mimeType && (
-                  <span style={{ opacity: 0.6 }}> ({file.mimeType})</span>
-                )}
-                <button
-                  type="button"
-                  className="btn"
-                  style={{ marginLeft: 8 }}
-                  onClick={() => handleDownload(file.fileId)}
-                >
-                  Download
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   );
 }
