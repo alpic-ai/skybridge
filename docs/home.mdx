@@ -5,81 +5,62 @@ sidebarTitle: "Introduction"
 icon: "house"
 ---
 
-<CardGroup cols={2}>
-  <Card title="Quickstart" icon="bolt" href="/quickstart/create-new-app">
-    Scaffold a working app in one command and start building in minutes.
-  </Card>
-  <Card title="Use the Skill" icon="brain" href="/devtools/skills">
-    Let your AI coding assistant guide you through the full app lifecycle.
-  </Card>
-</CardGroup>
-
----
-
-## All-in-one and dead-simple
-
-A Skybridge app is a TypeScript MCP server paired with React widgets. The server defines tools and returns data; the widget renders it inside the conversation.
+**Skybridge is a fullstack TypeScript framework for building MCP and ChatGPT Apps: interactive widgets that render inside AI conversations. Define tools, write React components, and let Skybridge do the rest:**
 
 <CodeGroup>
 ```ts server/src/index.ts
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
-const server = new McpServer({
-  name: "my-app",
-  version: "0.0.1",
-}).registerWidget(
-  "flight-results",
-  { description: "Flight search results" },
-  {
-    description: "Search for flights between two cities.",
-    inputSchema: {
-      origin: z.string().describe("Departure city"),
-      destination: z.string().describe("Arrival city"),
+const server = new McpServer({ name: "my-app", version: "0.0.1" })
+  .registerWidget(
+    "greeting",
+    { description: "A greeting card" },
+    {
+      description: "Greet someone by name.",
+      inputSchema: { name: z.string() },
     },
-  },
-  async ({ origin, destination }) => {
-    const flights = await searchFlights(origin, destination);
-    return { structuredContent: { flights } };
-  },
-);
+    async ({ name }) => {
+      return { structuredContent: { message: `Hello, ${name}!` } };
+    },
+  );
 ```
 
-```tsx web/src/widgets/flight-results.tsx
+```tsx web/src/widgets/greeting.tsx
 import { mountWidget } from "skybridge/web";
-import { useToolInfo } from "../helpers.js";
+import { useToolInfo } from "../helpers.js"; // auto-generated from server schema
 
-function FlightResults() {
-  const { input, output, isSuccess } = useToolInfo<"flight-results">();
-
-  if (!isSuccess) return <div>Loading...</div>;
-
-  return (
-    <div>
-      <h2>Flights from {input.origin} to {input.destination}</h2>
-      {output.flights.map((f) => (
-        <div key={f.id}>
-          {f.airline} — ${f.price}
-        </div>
-      ))}
-    </div>
-  );
+function Greeting() {
+  const { output } = useToolInfo<"greeting">();
+  return <h1>{output.message}</h1>;
 }
 
-mountWidget(<FlightResults />);
+mountWidget(<Greeting />);
 ```
 </CodeGroup>
 
-That's it: type-safe from server to widget, with autocomplete everywhere.
+<CardGroup cols={2}>
+    <Card title="Quickstart" icon="bolt" href="/quickstart/create-new-app">
+        Scaffold a working app in one command and start building in minutes.
+    </Card>
+    <Card title="Use the Skill" icon="brain" href="/devtools/skills">
+        Let your AI coding assistant guide you through the full app lifecycle.
+    </Card>
+</CardGroup>
 
 ---
 
-## Design
+## Solving the Three Body Problem
 
-MCP and ChatGPT Apps are not traditional web apps. They live inside AI conversations, where three entities collaborate: the **user**, the **UI**, and the **model**. Designing well means deciding what each one sees and when. With Skybridge:
+MCP Apps and ChatGPT Apps are a new kind of software built for a new surface: the conversation itself. Under the hood, an MCP server exposes tools. Some are bound to UI templates, and when the model calls one, the host can render the corresponding widget inline with the tool's output.
 
-- **Don't worry about compatibility.** Design your app once — Skybridge handles the differences between ChatGPT, Claude, and other MCP clients for you.
-- **Use what you already know.** Manage data and LLM context with React Query-style hooks and HTML attributes. No new paradigm to learn.
+This looks simple, but it introduces a fundamental shift. Traditional apps have two actors: the user and the interface. These apps have three: the **user**, the **UI**, and the **model**. This creates **context asymmetry**: each actor holds a partial view of the system. The model is blind to the UI: it can't see visuals or user interactions unless you explicitly sync them back. The user can't see the structured data flowing underneath. Building well means understanding these blind spots and designing the information flow between all three.
+
+## Architecting
+
+The [Skybridge Skill](/devtools/skills) acts as a design partner: helping you brainstorm ideas, validate your UX, and design great apps that actually make sense inside ChatGPT or Claude.
+
+The core design challenge isn't layout or styling: it's **deciding who sees what, and when**. What does the model need to know and when? What should stay hidden from it? Where should natural language replace traditional UI? Skybridge gives you the primitives to make these decisions explicit, and the Skill helps you think through them upfront.
 
 <CardGroup cols={2}>
   <Card title="Design with Skill" icon="brain" href="/devtools/skills">
@@ -92,7 +73,7 @@ MCP and ChatGPT Apps are not traditional web apps. They live inside AI conversat
 
 ---
 
-## Build
+## Building
 
 Scaffold a new project in one command:
 
@@ -132,19 +113,19 @@ npx skills add alpic-ai/skybridge -s skybridge
 
 ---
 
-## Test and ship
+## Testing and shipping
 
 Skybridge gives you a fast local loop, then smooth paths to production.
 
 <Steps>
   <Step title="Develop locally">
-    Run `npm run dev` and open `http://localhost:3000/` to access [DevTools](/devtools/devtools) — test tools, preview widgets, switch themes and locales, all without leaving your browser. Widget changes hot-reload instantly.
+    Run `npm run dev` and open `http://localhost:3000/` to access [DevTools](/devtools/devtools): test tools, preview widgets, switch themes and locales, all without leaving your browser. Widget changes hot-reload instantly.
   </Step>
   <Step title="Test in ChatGPT, Claude, and more">
     Run `npm run dev --tunnel` to get a live LLM playground and a public URL for ChatGPT, Claude, or any MCP client to connect to. Validate real model interactions before shipping.
   </Step>
   <Step title="Build and deploy">
-    Run `npm run deploy` to ship to [Alpic Cloud](https://alpic.ai) — or host on any Node.js-compatible infrastructure.
+    Run `npm run deploy` to ship to [Alpic Cloud](https://alpic.ai), or host on any Node.js-compatible infrastructure.
   </Step>
 </Steps>
 
