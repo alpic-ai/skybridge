@@ -29,6 +29,7 @@ export class SkybridgeRecords extends Construct {
       "generative-ui",
       "everything",
       "investigation-game",
+      "magic-8-ball",
       "manifest-ui",
       "productivity",
       "times-up",
