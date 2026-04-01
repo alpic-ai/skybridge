@@ -1,10 +1,6 @@
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/Skybridgewhite(1).svg">
-  <source media="(prefers-color-scheme: light)" srcset="docs/images/Skybridgemidnight.svg">
-  <img alt="Skybridge" src="docs/images/Skybridgemidnight.svg" width="100%">
-</picture>
+<img alt="Skybridge" src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/github-banner.png" width="100%">
 
 <br />
 
