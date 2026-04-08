@@ -60,7 +60,7 @@
     "es-toolkit": "^1.45.1",
     "express": "^5.2.1",
     "handlebars": "^4.7.9",
-    "ink": "^6.8.0",
+    "ink": "^7.0.0",
     "posthog-node": "^5.28.9",
     "superjson": "^2.2.6",
     "zustand": "^5.0.12"
