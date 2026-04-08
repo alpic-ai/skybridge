@@ -6,7 +6,6 @@
     "source.organizeImports.biome": "always"
   },
   "[mdx]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": {
       "source.fixAll.biome": "never",
       "source.organizeImports.biome": "never"
