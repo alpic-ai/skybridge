@@ -148,7 +148,7 @@ export const transform = async (code: string, id: string) => {
 
   const result = transformSync(code, babelOptions);
 
-  if (!result || !result.code) {
+  if (!result?.code) {
     return null;
   }
 
