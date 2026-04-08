@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "build": "pnpm --filter \"./packages/*\" build",
-    "test": "pnpm --filter \"./packages/*\" test",
-    "format": "pnpm --filter \"./packages/*\" format",
-    "test:unit": "pnpm --filter \"./packages/*\" test:unit",
-    "test:type": "pnpm -r test:type",
-    "test:format": "pnpm --filter \"./packages/*\" test:format",
+    "test": "pnpm -r --if-present test",
+    "format": "pnpm -r --if-present format",
+    "test:unit": "pnpm -r --if-present test:unit",
+    "test:type": "pnpm -r --if-present test:type",
+    "test:format": "pnpm -r --if-present test:format",
     "docs:dev": "pnpm --filter @skybridge/docs dev",
     "bump": "node scripts/bump.js && pnpm i"
   },
