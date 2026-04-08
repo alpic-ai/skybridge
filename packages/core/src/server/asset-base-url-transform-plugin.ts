@@ -21,7 +21,6 @@ export function assetBaseUrlTransform(code: string): string {
 export function assetBaseUrlTransformPlugin(): Plugin {
   return {
     name: "asset-base-url-transform",
-    enforce: "pre",
     transform(code) {
       if (!code) {
         return null;
