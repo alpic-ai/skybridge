@@ -21,6 +21,7 @@
     "build:server": "tsc -p tsconfig.server.json",
     "test": "pnpm run test:type && pnpm run test:format",
     "test:type": "tsc --noEmit",
+    "format": "biome check --write --error-on-warnings",
     "test:format": "biome ci",
     "preview": "vite preview"
   },

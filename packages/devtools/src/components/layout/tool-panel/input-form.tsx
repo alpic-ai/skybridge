@@ -39,9 +39,7 @@ const FormContent = ({
   ref: React.RefObject<Form<unknown, RJSFSchema> | null>;
 }) => {
   const hasNoInput =
-    !schema ||
-    !schema.properties ||
-    Object.keys(schema.properties).length === 0;
+    !schema?.properties || Object.keys(schema.properties).length === 0;
 
   if (hasNoInput) {
     return (
