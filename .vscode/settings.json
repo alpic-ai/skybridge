@@ -1,4 +1,15 @@
 {
   "editor.defaultFormatter": "biomejs.biome",
-  "biome.lsp.bin": "${workspaceFolder}/node_modules/.bin/biome"
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "always",
+    "source.organizeImports.biome": "always"
+  },
+  "[mdx]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.biome": "never",
+      "source.organizeImports.biome": "never"
+    }
+  }
 }
