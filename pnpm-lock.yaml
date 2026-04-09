@@ -1072,6 +1072,9 @@ importers:
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
+      '@types/jsdom':
+        specifier: ^28.0.1
+        version: 28.0.1
       '@types/lodash-es':
         specifier: ^4.17.12
         version: 4.17.12
@@ -1102,6 +1105,9 @@ importers:
       framer-motion:
         specifier: ^12.38.0
         version: 12.38.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      jsdom:
+        specifier: ^29.0.1
+        version: 29.0.1(@noble/hashes@1.8.0)
       lodash-es:
         specifier: ^4.17.23
         version: 4.17.23
@@ -1153,6 +1159,9 @@ importers:
       vite:
         specifier: ^8.0.3
         version: 8.0.3(@types/node@25.5.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.2(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(@vitest/ui@4.1.2)(jsdom@29.0.1(@noble/hashes@1.8.0))(msw@2.12.4(@types/node@25.5.0)(typescript@6.0.2))(vite@8.0.3(@types/node@25.5.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       zustand:
         specifier: ^5.0.12
         version: 5.0.12(@types/react@19.2.14)(immer@9.0.21)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
@@ -8872,10 +8881,6 @@ packages:
   undici-types@7.22.0:
     resolution: {integrity: sha512-RKZvifiL60xdsIuC80UY0dq8Z7DbJUV8/l2hOVbyZAxBzEeQU4Z58+4ZzJ6WN2Lidi9KzT5EbiGX+PI/UGYuRw==}
 
-  undici@7.24.5:
-    resolution: {integrity: sha512-3IWdCpjgxp15CbJnsi/Y9TCDE7HWVN19j1hmzVhoAkY/+CJx449tVxT5wZc1Gwg8J+P0LWvzlBzxYRnHJ+1i7Q==}
-    engines: {node: '>=20.18.1'}
-
   undici@7.24.6:
     resolution: {integrity: sha512-Xi4agocCbRzt0yYMZGMA6ApD7gvtUFaxm4ZmeacWI4cZxaF6C+8I8QfofC20NAePiB/IcvZmzkJ7XPa471AEtA==}
     engines: {node: '>=20.18.1'}
@@ -14487,7 +14492,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.1.0
-      vitest: 4.1.2(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/ui@4.1.2)(jsdom@29.0.1(@noble/hashes@1.8.0))(msw@2.12.4(@types/node@24.12.0)(typescript@6.0.2))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+      vitest: 4.1.2(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(@vitest/ui@4.1.2)(jsdom@29.0.1(@noble/hashes@1.8.0))(msw@2.12.4(@types/node@25.5.0)(typescript@6.0.2))(vite@8.0.3(@types/node@25.5.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
 
   '@vitest/utils@4.1.2':
     dependencies:
@@ -15853,6 +15858,10 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.3
 
+  fdir@6.5.0(picomatch@4.0.4):
+    optionalDependencies:
+      picomatch: 4.0.4
+
   fetch-blob@3.2.0:
     dependencies:
       node-domexception: 1.0.0
@@ -16998,7 +17007,7 @@ snapshots:
       saxes: 6.0.0
       symbol-tree: 3.2.4
       tough-cookie: 6.0.1
-      undici: 7.24.5
+      undici: 7.24.6
       w3c-xmlserializer: 5.0.0
       webidl-conversions: 8.0.1
       whatwg-mimetype: 5.0.0
@@ -20489,8 +20498,8 @@ snapshots:
 
   tinyglobby@0.2.15:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.3)
-      picomatch: 4.0.3
+      fdir: 6.5.0(picomatch@4.0.4)
+      picomatch: 4.0.4
 
   tinyqueue@1.2.3: {}
 
@@ -20696,8 +20705,6 @@ snapshots:
   undici-types@7.18.2: {}
 
   undici-types@7.22.0: {}
-
-  undici@7.24.5: {}
 
   undici@7.24.6: {}
 
@@ -21091,7 +21098,7 @@ snapshots:
       magic-string: 0.30.21
       obug: 2.1.1
       pathe: 2.0.3
-      picomatch: 4.0.3
+      picomatch: 4.0.4
       std-env: 4.0.0
       tinybench: 2.9.0
       tinyexec: 1.0.2
@@ -21121,7 +21128,7 @@ snapshots:
       magic-string: 0.30.21
       obug: 2.1.1
       pathe: 2.0.3
-      picomatch: 4.0.3
+      picomatch: 4.0.4
       std-env: 4.0.0
       tinybench: 2.9.0
       tinyexec: 1.0.2

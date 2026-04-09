@@ -138,6 +138,11 @@ export const useCallTool = () => {
         openaiLogs: [],
         openaiObject: null,
         openInAppUrl: null,
+        cspObservedDomains: {
+          resourceDomains: [],
+          connectDomains: [],
+          frameDomains: [],
+        },
       });
       const response = await client.callTool(toolName, args);
       setToolData(toolName, {
@@ -153,6 +158,11 @@ export const useCallTool = () => {
           widgetState: null,
         },
         openInAppUrl: null,
+        cspObservedDomains: {
+          resourceDomains: [],
+          connectDomains: [],
+          frameDomains: [],
+        },
       });
       return response;
     },

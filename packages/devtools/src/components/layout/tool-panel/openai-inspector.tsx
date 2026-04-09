@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/tabs.js";
 import { useSelectedTool } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
+import { CspInspector } from "./csp-inspector.js";
 import { LocaleSelector } from "./locale-selector.js";
 import { ResourceTabContent } from "./resource-tab.js";
 
@@ -59,6 +60,7 @@ export const OpenAiInspector = () => {
           <TabsTrigger value="properties">Properties</TabsTrigger>
           <TabsTrigger value="widget-state">Widget State</TabsTrigger>
           {resourceUri && <TabsTrigger value="resource">Resource</TabsTrigger>}
+          {resourceUri && <TabsTrigger value="csp">CSP</TabsTrigger>}
         </TabsList>
         <TabsContent value="properties" className="p-4">
           <FieldSet>
@@ -293,6 +295,19 @@ export const OpenAiInspector = () => {
               }
             >
               <ResourceTabContent resourceUri={resourceUri} />
+            </Suspense>
+          </TabsContent>
+        )}
+        {resourceUri && (
+          <TabsContent value="csp" className="p-4">
+            <Suspense
+              fallback={
+                <div className="text-xs text-muted-foreground">
+                  Loading CSP data...
+                </div>
+              }
+            >
+              <CspInspector />
             </Suspense>
           </TabsContent>
         )}
