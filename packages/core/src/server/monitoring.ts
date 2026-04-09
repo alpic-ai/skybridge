@@ -3,8 +3,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { isEnabled } from "../cli/telemetry.js";
 import type { McpMiddlewareEntry, McpMiddlewareFn } from "./middleware.js";
 
-// TODO: replace with the actual Skybridge StatsD server address once provisioned
-const STATSD_HOST = "TODO";
+const STATSD_HOST = "metrics.skybridge.tech";
 const STATSD_PORT = 8125;
 
 let socket: ReturnType<typeof createSocket> | null = null;
