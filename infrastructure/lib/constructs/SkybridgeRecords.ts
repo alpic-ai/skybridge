@@ -7,16 +7,18 @@ type SkybridgeRecordsProps = {
 };
 
 export class SkybridgeRecords extends Construct {
+  public readonly hostedZone: PublicHostedZone;
+
   constructor(scope: Construct, id: string, { domain }: SkybridgeRecordsProps) {
     super(scope, id);
 
-    const hostedZone = new PublicHostedZone(this, "HostedZone", {
+    this.hostedZone = new PublicHostedZone(this, "HostedZone", {
       zoneName: domain,
     });
 
     // Redirect apex and www to docs
     new HttpsRedirect(this, "ApexRedirect", {
-      zone: hostedZone,
+      zone: this.hostedZone,
       recordNames: [domain, `www.${domain}`],
       targetDomain: `docs.${domain}`,
     });
@@ -39,7 +41,7 @@ export class SkybridgeRecords extends Construct {
       "workos",
     ]) {
       new CnameRecord(this, `${subdomain}App`, {
-        zone: hostedZone,
+        zone: this.hostedZone,
         recordName: subdomain,
         domainName: "cname.alpic.ai",
       });
@@ -47,12 +49,12 @@ export class SkybridgeRecords extends Construct {
 
     // Docs (Mintlify)
     new CnameRecord(this, "Docs", {
-      zone: hostedZone,
+      zone: this.hostedZone,
       recordName: "docs",
       domainName: "cname.mintlify-dns.com",
     });
     new CnameRecord(this, "DocsStaging", {
-      zone: hostedZone,
+      zone: this.hostedZone,
       recordName: "docs-staging",
       domainName: "cname.mintlify-dns.com",
     });
