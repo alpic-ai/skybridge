@@ -63,12 +63,7 @@ export const widgetsDevServer = async (
     optimizeDeps: {
       include: ["react", "react-dom/client"],
     },
-    plugins: [
-      ...userPlugins,
-      assetBaseUrlTransformPlugin({
-        devServerOrigin: `http://localhost:${process.env.__PORT ?? "3000"}`,
-      }),
-    ],
+    plugins: [...userPlugins, assetBaseUrlTransformPlugin()],
   });
 
   router.use(cors());
