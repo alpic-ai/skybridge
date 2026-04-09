@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useRef } from "react";
+import { setupCspInterceptor } from "@/lib/csp-interceptor.js";
 import mcpClient, {
   useSelectedTool,
   useSuspenseResource,
 } from "@/lib/mcp/index.js";
-import { useCallToolResult, useStore } from "@/lib/store.js";
+import {
+  type CspObservedDomains,
+  useCallToolResult,
+  useStore,
+} from "@/lib/store.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
 import { injectWaitForOpenai } from "./utils.js";
 
@@ -14,11 +19,17 @@ export const Widget = () => {
   const { data: resource } = useSuspenseResource(
     tool._meta?.["openai/outputTemplate"] as string | undefined,
   );
-  const { setToolData, pushOpenAiLog, updateOpenaiObject, setOpenInAppUrl } =
-    useStore();
+  const {
+    setToolData,
+    pushOpenAiLog,
+    updateOpenaiObject,
+    setOpenInAppUrl,
+    addCspObservedDomain,
+  } = useStore();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hasLoadedRef = useRef(false);
+  const cspCleanupRef = useRef<(() => void) | null>(null);
 
   const html = (resource.contents[0] as { text: string }).text;
 
@@ -63,6 +74,20 @@ export const Widget = () => {
     iframe.contentDocument.write(injectWaitForOpenai(html));
     iframe.contentDocument.close();
 
+    const categoryMap: Record<string, keyof CspObservedDomains> = {
+      resource: "resourceDomains",
+      connect: "connectDomains",
+      frame: "frameDomains",
+    };
+
+    cspCleanupRef.current?.();
+    cspCleanupRef.current = setupCspInterceptor(
+      iframe.contentWindow as Window & typeof globalThis,
+      (origin, category) => {
+        addCspObservedDomain(tool.name, origin, categoryMap[category]);
+      },
+    );
+
     setToolData(tool.name, {
       openaiRef: iframeRef as React.RefObject<HTMLIFrameElement>,
     });
@@ -72,6 +97,7 @@ export const Widget = () => {
     setToolData,
     updateOpenaiObject,
     setOpenInAppUrl,
+    addCspObservedDomain,
     tool.name,
     html,
     resource,
@@ -80,6 +106,12 @@ export const Widget = () => {
   useEffect(() => {
     handleLoad();
   }, [handleLoad]);
+
+  useEffect(() => {
+    return () => {
+      cspCleanupRef.current?.();
+    };
+  }, []);
 
   return (
     <div
