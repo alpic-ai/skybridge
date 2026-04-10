@@ -55,6 +55,7 @@ export function UseFilesTab() {
         <input
           ref={inputRef}
           type="file"
+          accept="image/png,image/jpeg,image/webp"
           onChange={handleUpload}
           disabled={isUploading}
         />

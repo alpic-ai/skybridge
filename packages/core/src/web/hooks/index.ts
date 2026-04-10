@@ -6,7 +6,11 @@ export {
   useCallTool,
 } from "./use-call-tool.js";
 export { useDisplayMode } from "./use-display-mode.js";
-export { useFiles } from "./use-files.js";
+export {
+  SUPPORTED_FILE_EXTENSIONS,
+  SUPPORTED_FILE_TYPES_ACCEPT,
+  useFiles,
+} from "./use-files.js";
 export { type LayoutState, useLayout } from "./use-layout.js";
 export { type OpenExternalFn, useOpenExternal } from "./use-open-external.js";
 export { useRequestModal } from "./use-request-modal.js";
