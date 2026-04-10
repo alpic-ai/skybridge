@@ -23,8 +23,6 @@ function sendMetrics(metrics: string[]): void {
   });
 }
 
-let isFirstInvocation = true;
-
 /**
  * Returns an internal MCP middleware entry that emits StatsD counters over UDP
  * for every tool invocation. Enabled by default; respects the existing telemetry
@@ -39,11 +37,16 @@ let isFirstInvocation = true;
  * When sampling is introduced later, change the guard and rename to _100.
  */
 export function createMonitoringEntry(): McpMiddlewareEntry | null {
-  if (!isEnabled()) {
-    return null;
-  }
+  // isFirstInvocation is scoped to each entry so multiple McpServer instances
+  // in the same process each track their own cold start independently.
+  let isFirstInvocation = true;
 
   const handler: McpMiddlewareFn = async (_req, _extra, next) => {
+    // Check on every call so opt-out takes effect immediately without restart.
+    if (!isEnabled()) {
+      return next();
+    }
+
     const isCold = isFirstInvocation;
     isFirstInvocation = false;
 
