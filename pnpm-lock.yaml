@@ -71,8 +71,8 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -81,8 +81,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
@@ -102,8 +102,8 @@ importers:
         specifier: ^5.1.4
         version: 5.1.4(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.112.1
+        version: 1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.11
         version: 3.1.11
@@ -135,8 +135,8 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^8.0.0
         version: 8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -145,8 +145,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -163,8 +163,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.112.1
+        version: 1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.11
         version: 3.1.11
@@ -196,8 +196,8 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^8.0.0
         version: 8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -206,8 +206,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
@@ -227,8 +227,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.112.1
+        version: 1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.11
         version: 3.1.11
@@ -260,8 +260,8 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^8.0.0
         version: 8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -270,8 +270,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -288,8 +288,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.112.1
+        version: 1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.11
         version: 3.1.11
@@ -336,8 +336,8 @@ importers:
         specifier: ^7.12.0
         version: 7.13.1(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.0))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.0))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.4.0
@@ -349,8 +349,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       '@tailwindcss/vite':
         specifier: ^4.1.14
         version: 4.1.18(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -373,8 +373,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.112.1
+        version: 1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.19.4
         version: 4.21.0
@@ -400,8 +400,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.14)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.17)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -410,8 +410,8 @@ importers:
         version: 4.3.5
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       '@types/node':
         specifier: ^22.19.3
         version: 22.19.3
@@ -425,8 +425,8 @@ importers:
         specifier: ^5.1.2
         version: 5.1.2(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.112.1
+        version: 1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -446,8 +446,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.27.0(zod@4.3.5))(@skybridge/devtools@0.35.14)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17(@modelcontextprotocol/sdk@1.27.0(zod@4.3.5))(@skybridge/devtools@0.35.17)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
       vite:
         specifier: ^7.3.0
         version: 7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -456,8 +456,8 @@ importers:
         version: 4.3.5
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       '@types/node':
         specifier: ^24.0.0
         version: 24.12.0
@@ -471,8 +471,8 @@ importers:
         specifier: ^5.1.2
         version: 5.1.2(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.112.1
+        version: 1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -492,8 +492,8 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.2(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.2(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^8.0.2
         version: 8.0.2(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -502,8 +502,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       '@types/node':
         specifier: ^22.19.3
         version: 22.19.3
@@ -517,8 +517,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.2(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.112.1
+        version: 1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -550,8 +550,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       tailwindcss:
         specifier: ^4.1.18
         version: 4.2.2
@@ -563,8 +563,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       '@types/node':
         specifier: ^25.0.10
         version: 25.2.3
@@ -578,8 +578,8 @@ importers:
         specifier: ^5.1.2
         version: 5.1.4(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.112.1
+        version: 1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -602,8 +602,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.4.0
@@ -621,8 +621,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       '@tailwindcss/vite':
         specifier: ^4.1.14
         version: 4.1.18(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -639,8 +639,8 @@ importers:
         specifier: ^5.1.2
         version: 5.1.4(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.112.1
+        version: 1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -678,8 +678,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
@@ -697,8 +697,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       '@types/node':
         specifier: ^25.0.10
         version: 25.2.3
@@ -712,8 +712,8 @@ importers:
         specifier: ^5.1.2
         version: 5.1.4(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.112.1
+        version: 1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -733,8 +733,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.14)(@types/react@19.2.8)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.17)(@types/react@19.2.8)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -743,8 +743,8 @@ importers:
         version: 4.3.5
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       '@types/node':
         specifier: ^25.2.3
         version: 25.2.3
@@ -758,8 +758,8 @@ importers:
         specifier: ^5.1.2
         version: 5.1.2(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.112.1
+        version: 1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -785,8 +785,8 @@ importers:
         specifier: ^8.1.3
         version: 8.1.3(@types/react@19.2.14)(react@19.2.4)(typescript@5.9.3)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.27.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17(@modelcontextprotocol/sdk@1.27.0(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       tailwindcss:
         specifier: ^4.1.8
         version: 4.2.0
@@ -798,8 +798,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       '@tailwindcss/vite':
         specifier: ^4.1.8
         version: 4.2.0(vite@8.0.0(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -816,8 +816,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.0(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.112.1
+        version: 1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -859,8 +859,8 @@ importers:
         specifier: ^4.10.3
         version: 4.10.3
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       ci-info:
         specifier: ^4.4.0
         version: 4.4.0
@@ -990,8 +990,8 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.3(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.3(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^8.0.3
         version: 8.0.3(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1000,8 +1000,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.35.17 <1.0.0'
+        version: 0.35.17
       '@types/node':
         specifier: ^24.12.0
         version: 24.12.0
@@ -1015,8 +1015,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.3(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.2)
+        specifier: ^1.112.1
+        version: 1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.2)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -1167,8 +1167,8 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@alpic-ai/api@1.104.1':
-    resolution: {integrity: sha512-HNN+CblD+cefHelMk5NZMAOAJ1V0B3/ubDC6T+xxAQrrd3NeQj3U1q4XijynmIamgWYYDEVXUld8LgriqwdeMw==}
+  '@alpic-ai/api@1.112.1':
+    resolution: {integrity: sha512-mq5Z8XK5dgfcYaoB9t/3gV5Wmb+Ej3seGFd+kK5ryu7rUEIGlvHi6Pwl068XorbywnLsMCtx1cZF2Bv2u1pNxA==}
 
   '@ark/schema@0.55.0':
     resolution: {integrity: sha512-IlSIc0FmLKTDGr4I/FzNHauMn0MADA6bCjT1wauu4k6MyxhC1R9gz0olNpIRvK7lGGDwtc/VO0RUDNvVQW5WFg==}
@@ -1503,8 +1503,14 @@ packages:
   '@clack/core@1.1.0':
     resolution: {integrity: sha512-SVcm4Dqm2ukn64/8Gub2wnlA5nS2iWJyCkdNHcvNHPIeBTGojpdJ+9cZKwLfmqy7irD4N5qLteSilJlE0WLAtA==}
 
+  '@clack/core@1.2.0':
+    resolution: {integrity: sha512-qfxof/3T3t9DPU/Rj3OmcFyZInceqj/NVtO9rwIuJqCUgh32gwPjpFQQp/ben07qKlhpwq7GzfWpST4qdJ5Drg==}
+
   '@clack/prompts@1.1.0':
     resolution: {integrity: sha512-pkqbPGtohJAvm4Dphs2M8xE29ggupihHdy1x84HNojZuMtFsHiUlRvqD24tM2+XmI+61LlfNceM3Wr7U5QES5g==}
+
+  '@clack/prompts@1.2.0':
+    resolution: {integrity: sha512-4jmztR9fMqPMjz6H/UZXj0zEmE43ha1euENwkckKKel4XpSfokExPo5AiVStdHSAlHekz4d0CA/r45Ok1E4D3w==}
 
   '@clerk/backend@3.2.3':
     resolution: {integrity: sha512-I3YLnSioYFG+EVFBYm0ilN28+FC8H+hkqMgB5Pdl7AcotQOn3JhiZMqLel2H0P390p8FEJKQNnrvXk3BemeKKQ==}
@@ -2333,6 +2339,10 @@ packages:
     resolution: {integrity: sha512-0mD8vcrrX5uRsxzvI8tbWmSVGngvZA/Qo6O0ZGvLPAWEauSf5GFniwgirhY0SkszuHwu0S1J1ivj/jHmqtIDuA==}
     engines: {node: '>=18.0.0'}
 
+  '@oclif/core@4.10.5':
+    resolution: {integrity: sha512-qcdCF7NrdWPfme6Kr34wwljRCXbCVpL1WVxiNy0Ep6vbWKjxAjFQwuhqkoyL0yjI+KdwtLcOCGn5z2yzdijc8w==}
+    engines: {node: '>=18.0.0'}
+
   '@open-draft/deferred-promise@2.2.0':
     resolution: {integrity: sha512-CecwLWx3rhxVQF6V4bAgPS5t+So2sTbPgAzafKkVizyi7tlwpcFpdFqq+wqF2OwNBmqFuu6tOyouTuxgpMfzmA==}
 
@@ -2407,6 +2417,9 @@ packages:
 
   '@posthog/core@1.24.4':
     resolution: {integrity: sha512-S+TolwBHSSJz7WWtgaELQWQqXviSm3uf1e+qorWUts0bZcgPwWzhnmhCUZAhvn0NVpTQHDJ3epv+hHbPLl5dHg==}
+
+  '@posthog/core@1.25.2':
+    resolution: {integrity: sha512-h2FO7ut/BbfwpAXWpwdDHTzQgUo9ibDFEs6ZO+3cI3KPWQt5XwczK1OLAuPprcjm8T/jl0SH8jSFo5XdU4RbTg==}
 
   '@puppeteer/browsers@2.3.0':
     resolution: {integrity: sha512-ioXoq9gPxkss4MYhD+SFaU9p1IHFUX0ILAWFPyjGaBdjLsYAlZw6j1iLA0N/m12uVHLFDfSYNF7EQccjinIMDA==}
@@ -3711,8 +3724,8 @@ packages:
     resolution: {integrity: sha512-doH1gimEu3A46VX6aVxpHTeHrytJAG6HgdxntYnCFiIFHEM/ZGpG8KiZGBChchjQmG0XFIBL552kBTjVcMZXwQ==}
     engines: {node: '>=12'}
 
-  '@skybridge/devtools@0.35.14':
-    resolution: {integrity: sha512-CC7/M8C6nQc8Hs0evvJ32T6YJnMHCZZQSBn42Kxc+2Bjc24lBDumxH/vJ9RMBCoqQoJwbhKvgIjm9yeKehTDJg==}
+  '@skybridge/devtools@0.35.17':
+    resolution: {integrity: sha512-SSRVhWuNK0ngbZtAWGr0ZP56az9eivVikMK4MxV4BgnmWD7C7bkR8pyNrmIJ4Hgpc1YzpcL670G4yxbaCwz4sQ==}
 
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
@@ -4400,6 +4413,10 @@ packages:
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
 
+  '@vercel/detect-agent@1.2.2':
+    resolution: {integrity: sha512-bKhhKKPuI37oMUlMA90eplt+QSp8T/t2WDfF+CP9PBA/YTkCADI8D/dECB5sJa9BWxq3+jxO52UsDy0F7Gl51g==}
+    engines: {node: '>=14'}
+
   '@vitejs/plugin-react@5.1.2':
     resolution: {integrity: sha512-EcA07pHJouywpzsoTUqNh5NwGayl2PPVEJKUSinGGSxFGYn+shYbqMGBg6FXDqgXum9Ou/ecb+411ssw8HImJQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -4551,8 +4568,8 @@ packages:
   ajv@8.18.0:
     resolution: {integrity: sha512-PlXPeEWMXMZ7sPYOHqmDyCJzcfNrUr3fGNKtezX14ykXOEIvyK81d+qydx89KY5O71FKMPaQ2vBfBFI5NHR63A==}
 
-  alpic@1.104.1:
-    resolution: {integrity: sha512-l6CVtV/+wgC/4UH+Kyb2pv0yN/pePSWbQWBRUdKjD2Y0BNEQx43tHGM2pabRnsvjt59WVWR7f7gENSbdTa5Lbg==}
+  alpic@1.112.1:
+    resolution: {integrity: sha512-0lnAmOOlL03f8DSjOfEPjWOWMXFnWsAzzQx3F5Z7RSUZNyWkwVkyPcfG6CllTRU65nG0XBdit0GcddKm5Wr8Bg==}
     engines: {node: '>= 18.20.8'}
     hasBin: true
 
@@ -4816,6 +4833,10 @@ packages:
 
   brace-expansion@5.0.4:
     resolution: {integrity: sha512-h+DEnpVvxmfVefa4jFbCf5HdH5YMDXRsmKflpf1pILZWRFlTbJpxeU55nJl4Smt5HQaGzg1o6RHFPJaOqnmBDg==}
+    engines: {node: 18 || 20 || >=22}
+
+  brace-expansion@5.0.5:
+    resolution: {integrity: sha512-VZznLgtwhn+Mact9tfiwx64fA9erHH/MCXEUfB/0bX/6Fz6ny5EGTXYltMocqg4xFAQZtnO3DHWWXi8RiuN7cQ==}
     engines: {node: 18 || 20 || >=22}
 
   braces@3.0.3:
@@ -5618,8 +5639,17 @@ packages:
   fast-sha256@1.3.0:
     resolution: {integrity: sha512-n11RGP/lrWEFI/bWdygLxhI+pVeo1ZYIVwvvPkW7azl/rOy+F3HYRZ2K5zeE9mmkhQppyv9sQFx0JM9UabnpPQ==}
 
+  fast-string-truncated-width@1.2.1:
+    resolution: {integrity: sha512-Q9acT/+Uu3GwGj+5w/zsGuQjh9O1TyywhIwAxHudtWrgF09nHOPrvTLhQevPbttcxjr/SNN7mJmfOw/B1bXgow==}
+
+  fast-string-width@1.1.0:
+    resolution: {integrity: sha512-O3fwIVIH5gKB38QNbdg+3760ZmGz0SZMgvwJbA1b2TGXceKE6A2cOlfogh1iw8lr049zPyd7YADHy+B7U4W9bQ==}
+
   fast-uri@3.1.0:
     resolution: {integrity: sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==}
+
+  fast-wrap-ansi@0.1.6:
+    resolution: {integrity: sha512-HlUwET7a5gqjURj70D5jl7aC3Zmy4weA1SHUfM0JFI0Ptq987NH2TwbBFLoERhfwk+E+eaq4EK3jXoT+R3yp3w==}
 
   fastq@1.19.1:
     resolution: {integrity: sha512-GwLTyxkCXjXbxqIhTsMI2Nui8huMPtnxg7krajPJAjnEG/iiOS7i+zCtWGZR9G0NBKbXKh6X9m9UIsYX/N6vvQ==}
@@ -7191,6 +7221,10 @@ packages:
     resolution: {integrity: sha512-oRjTw/97aTBN0RHbYCdtF1MQfvusSIBQM0IZEgzl6426+8jSC0nF1a/GmnVLpfB9yyr6g6FTqWqiZVbxrtaCIg==}
     engines: {node: 18 || 20 || >=22}
 
+  minimatch@10.2.5:
+    resolution: {integrity: sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==}
+    engines: {node: 18 || 20 || >=22}
+
   minimatch@3.1.5:
     resolution: {integrity: sha512-VgjWUsnnT6n+NUk6eZq77zeFdpW2LWDzP6zFGrCbHXiYNul5Dzqk2HHQ5uFH2DNW5Xbp8+jVzaeNt94ssEEl4w==}
 
@@ -7669,6 +7703,15 @@ packages:
 
   posthog-node@5.28.9:
     resolution: {integrity: sha512-iZWyAYkIAq5QqcYz4q2nXOX+Ivn04Yh8AuKqfFVw0SvBpfli49bNAjyE97qbRTLr+irrzRUELgGIkDC14NgugA==}
+    engines: {node: ^20.20.0 || >=22.22.0}
+    peerDependencies:
+      rxjs: ^7.0.0
+    peerDependenciesMeta:
+      rxjs:
+        optional: true
+
+  posthog-node@5.29.2:
+    resolution: {integrity: sha512-rI7kkF0XqDc0G1qjx+Hb4iuY9NAlL+XQNoGOpnEpRNTUcXvjY6WlsRGZ9m2whgc39emrrYdszi/YT8wZkr2xsg==}
     engines: {node: ^20.20.0 || >=22.22.0}
     peerDependencies:
       rxjs: ^7.0.0
@@ -8375,12 +8418,12 @@ packages:
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
 
-  skybridge@0.35.14:
-    resolution: {integrity: sha512-ueXutUx8+48qjf2WnvYixwdMv4pd3mm0qBIpb8NWubrnwGtcWG39XhtEONmnFp8ZAROIDfNIxCTskMIkFCUu/w==}
+  skybridge@0.35.17:
+    resolution: {integrity: sha512-dTTMtrccxt81WuIER2Y3gbHSBlHorCD5RkoaAGWzTh8uYxWLVi0Nd+2/Evyf8Mwoc3USrjzEm7pc1r+AssYwOg==}
     hasBin: true
     peerDependencies:
       '@modelcontextprotocol/sdk': '>=1.0.0'
-      '@skybridge/devtools': '>=0.35.13 <1.0.0'
+      '@skybridge/devtools': '>=0.35.14 <1.0.0'
       nodemon: '>=3.0.0'
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -8876,9 +8919,9 @@ packages:
     resolution: {integrity: sha512-3IWdCpjgxp15CbJnsi/Y9TCDE7HWVN19j1hmzVhoAkY/+CJx449tVxT5wZc1Gwg8J+P0LWvzlBzxYRnHJ+1i7Q==}
     engines: {node: '>=20.18.1'}
 
-  undici@7.24.6:
-    resolution: {integrity: sha512-Xi4agocCbRzt0yYMZGMA6ApD7gvtUFaxm4ZmeacWI4cZxaF6C+8I8QfofC20NAePiB/IcvZmzkJ7XPa471AEtA==}
-    engines: {node: '>=20.18.1'}
+  undici@8.0.2:
+    resolution: {integrity: sha512-B9MeU5wuFhkFAuNeA19K2GDFcQXZxq33fL0nRy2Aq30wdufZbyyvxW3/ChaeipXVfy/wUweZyzovQGk39+9k2w==}
+    engines: {node: '>=22.19.0'}
 
   unicorn-magic@0.3.0:
     resolution: {integrity: sha512-+QBBXBCvifc56fsbuxZQ6Sic3wqqc3WWaqxs58gvJrcOuN83HGTCwz3oS5phzU9LthRNE9VrJCFCLUgHeeFnfA==}
@@ -9538,7 +9581,7 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@alpic-ai/api@1.104.1(@opentelemetry/api@1.9.0)':
+  '@alpic-ai/api@1.112.1(@opentelemetry/api@1.9.0)':
     dependencies:
       '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.0)
       ms: 2.1.3
@@ -9990,9 +10033,21 @@ snapshots:
     dependencies:
       sisteransi: 1.0.5
 
+  '@clack/core@1.2.0':
+    dependencies:
+      fast-wrap-ansi: 0.1.6
+      sisteransi: 1.0.5
+
   '@clack/prompts@1.1.0':
     dependencies:
       '@clack/core': 1.1.0
+      sisteransi: 1.0.5
+
+  '@clack/prompts@1.2.0':
+    dependencies:
+      '@clack/core': 1.2.0
+      fast-string-width: 1.1.0
+      fast-wrap-ansi: 0.1.6
       sisteransi: 1.0.5
 
   '@clerk/backend@3.2.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
@@ -11336,6 +11391,27 @@ snapshots:
       wordwrap: 1.0.0
       wrap-ansi: 7.0.0
 
+  '@oclif/core@4.10.5':
+    dependencies:
+      ansi-escapes: 4.3.2
+      ansis: 3.17.0
+      clean-stack: 3.0.1
+      cli-spinners: 2.9.2
+      debug: 4.4.3(supports-color@8.1.1)
+      ejs: 3.1.10
+      get-package-type: 0.1.0
+      indent-string: 4.0.0
+      is-wsl: 2.2.0
+      lilconfig: 3.1.3
+      minimatch: 10.2.5
+      semver: 7.7.4
+      string-width: 4.2.3
+      supports-color: 8.1.1
+      tinyglobby: 0.2.15
+      widest-line: 3.1.0
+      wordwrap: 1.0.0
+      wrap-ansi: 7.0.0
+
   '@open-draft/deferred-promise@2.2.0': {}
 
   '@open-draft/logger@0.3.0':
@@ -11459,6 +11535,8 @@ snapshots:
   '@posthog/core@1.24.4':
     dependencies:
       cross-spawn: 7.0.6
+
+  '@posthog/core@1.25.2': {}
 
   '@puppeteer/browsers@2.3.0':
     dependencies:
@@ -13594,7 +13672,7 @@ snapshots:
     dependencies:
       escape-string-regexp: 5.0.0
 
-  '@skybridge/devtools@0.35.14':
+  '@skybridge/devtools@0.35.17':
     dependencies:
       cors: 2.8.6
       express: 5.2.1
@@ -14342,6 +14420,8 @@ snapshots:
 
   '@ungap/structured-clone@1.3.0': {}
 
+  '@vercel/detect-agent@1.2.2': {}
+
   '@vitejs/plugin-react@5.1.2(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@babel/core': 7.28.5
@@ -14493,7 +14573,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.1.0
-      vitest: 4.1.4(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(@vitest/ui@4.1.4)(jsdom@29.0.1(@noble/hashes@1.8.0))(msw@2.12.4(@types/node@25.5.0)(typescript@6.0.2))(vite@8.0.3(@types/node@25.5.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+      vitest: 4.1.4(@opentelemetry/api@1.9.0)(@types/node@24.12.0)(@vitest/ui@4.1.4)(jsdom@29.0.1(@noble/hashes@1.8.0))(msw@2.12.4(@types/node@24.12.0)(typescript@6.0.2))(vite@8.0.3(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
 
   '@vitest/utils@4.1.4':
     dependencies:
@@ -14595,15 +14675,16 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  alpic@1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3):
+  alpic@1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3):
     dependencies:
-      '@alpic-ai/api': 1.104.1(@opentelemetry/api@1.9.0)
-      '@clack/prompts': 1.1.0
-      '@oclif/core': 4.10.3
+      '@alpic-ai/api': 1.112.1(@opentelemetry/api@1.9.0)
+      '@clack/prompts': 1.2.0
+      '@oclif/core': 4.10.5
       '@orpc/client': 1.13.13(@opentelemetry/api@1.9.0)
       '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.0)
       '@orpc/openapi-client': 1.13.13(@opentelemetry/api@1.9.0)
       '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.3.6)
+      '@vercel/detect-agent': 1.2.2
       chalk: 5.6.2
       ci-info: 4.4.0
       env-paths: 4.0.0
@@ -14612,10 +14693,10 @@ snapshots:
       open: 11.0.0
       openid-client: 6.8.2
       pipenet: 1.4.0
-      posthog-node: 5.28.9(rxjs@7.8.2)
+      posthog-node: 5.29.2(rxjs@7.8.2)
       semver: 7.7.4
       tar: 7.5.13
-      undici: 7.24.6
+      undici: 8.0.2
       zod: 4.3.6
     transitivePeerDependencies:
       - '@opentelemetry/api'
@@ -14625,15 +14706,16 @@ snapshots:
       - typescript
       - valibot
 
-  alpic@1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.2):
+  alpic@1.112.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.2):
     dependencies:
-      '@alpic-ai/api': 1.104.1(@opentelemetry/api@1.9.0)
-      '@clack/prompts': 1.1.0
-      '@oclif/core': 4.10.3
+      '@alpic-ai/api': 1.112.1(@opentelemetry/api@1.9.0)
+      '@clack/prompts': 1.2.0
+      '@oclif/core': 4.10.5
       '@orpc/client': 1.13.13(@opentelemetry/api@1.9.0)
       '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.0)
       '@orpc/openapi-client': 1.13.13(@opentelemetry/api@1.9.0)
       '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@6.0.2)(zod@4.3.6)
+      '@vercel/detect-agent': 1.2.2
       chalk: 5.6.2
       ci-info: 4.4.0
       env-paths: 4.0.0
@@ -14642,10 +14724,10 @@ snapshots:
       open: 11.0.0
       openid-client: 6.8.2
       pipenet: 1.4.0
-      posthog-node: 5.28.9(rxjs@7.8.2)
+      posthog-node: 5.29.2(rxjs@7.8.2)
       semver: 7.7.4
       tar: 7.5.13
-      undici: 7.24.6
+      undici: 8.0.2
       zod: 4.3.6
     transitivePeerDependencies:
       - '@opentelemetry/api'
@@ -14897,6 +14979,10 @@ snapshots:
       balanced-match: 1.0.2
 
   brace-expansion@5.0.4:
+    dependencies:
+      balanced-match: 4.0.4
+
+  brace-expansion@5.0.5:
     dependencies:
       balanced-match: 4.0.4
 
@@ -15831,7 +15917,17 @@ snapshots:
 
   fast-sha256@1.3.0: {}
 
+  fast-string-truncated-width@1.2.1: {}
+
+  fast-string-width@1.1.0:
+    dependencies:
+      fast-string-truncated-width: 1.2.1
+
   fast-uri@3.1.0: {}
+
+  fast-wrap-ansi@0.1.6:
+    dependencies:
+      fast-string-width: 1.1.0
 
   fastq@1.19.1:
     dependencies:
@@ -17957,6 +18053,10 @@ snapshots:
     dependencies:
       brace-expansion: 5.0.4
 
+  minimatch@10.2.5:
+    dependencies:
+      brace-expansion: 5.0.5
+
   minimatch@3.1.5:
     dependencies:
       brace-expansion: 1.1.13
@@ -18465,6 +18565,12 @@ snapshots:
   posthog-node@5.28.9(rxjs@7.8.2):
     dependencies:
       '@posthog/core': 1.24.4
+    optionalDependencies:
+      rxjs: 7.8.2
+
+  posthog-node@5.29.2(rxjs@7.8.2):
+    dependencies:
+      '@posthog/core': 1.25.2
     optionalDependencies:
       rxjs: 7.8.2
 
@@ -19726,13 +19832,13 @@ snapshots:
 
   sisteransi@1.0.5: {}
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.14)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
+  skybridge@0.35.17(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.17)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.5)
       '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.35.17
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -19758,13 +19864,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.14)(@types/react@19.2.8)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
+  skybridge@0.35.17(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(@skybridge/devtools@0.35.17)(@types/react@19.2.8)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.26.0(zod@4.3.5))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.5)
       '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.5)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.35.17
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -19790,13 +19896,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.17(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.35.17
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -19822,13 +19928,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.17(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.35.17
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -19854,13 +19960,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.0))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.17(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.0))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.26.0(zod@4.3.6))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.26.0(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.35.17
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -19886,13 +19992,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.27.0(zod@4.3.5))(@skybridge/devtools@0.35.14)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
+  skybridge@0.35.17(@modelcontextprotocol/sdk@1.27.0(zod@4.3.5))(@skybridge/devtools@0.35.17)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.27.0(zod@4.3.5))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.5)
       '@modelcontextprotocol/sdk': 1.27.0(zod@4.3.5)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.35.17
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -19918,13 +20024,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.27.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.17(@modelcontextprotocol/sdk@1.27.0(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.27.0(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.27.0(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.35.17
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -19950,13 +20056,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.17(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.27.1(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.35.17
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -19982,13 +20088,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.17(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.27.1(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.35.17
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -20014,13 +20120,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.17(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.27.1(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.35.17
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -20046,13 +20152,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.2(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.17(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.2(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.27.1(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.27.1(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.35.17
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -20078,13 +20184,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.3(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.35.17(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.17)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.3(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.35.17
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
@@ -20705,7 +20811,7 @@ snapshots:
 
   undici@7.24.5: {}
 
-  undici@7.24.6: {}
+  undici@8.0.2: {}
 
   unicorn-magic@0.3.0: {}
 
