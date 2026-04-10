@@ -13,9 +13,11 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
+    "dotenv": "^17.4.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "skybridge": ">=0.35.14 <1.0.0",
+    "stripe": "^18.5.0",
     "vite": "^7.3.1",
     "zod": "^4.3.5"
   },

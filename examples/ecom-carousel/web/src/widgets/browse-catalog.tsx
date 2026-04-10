@@ -9,7 +9,7 @@ import {
   useUser,
   useWidgetState,
 } from "skybridge/web";
-import { useToolInfo } from "../helpers.js";
+import { useCallTool, useToolInfo } from "../helpers.js";
 
 const translations: Record<string, Record<string, string>> = {
   en: {
@@ -20,6 +20,9 @@ const translations: Record<string, Record<string, string>> = {
     checkout: "Checkout",
     orderSummary: "Order summary",
     total: "Total",
+    payWithStripe: "Pay with Stripe",
+    creatingSession: "Creating session...",
+    openCheckout: "Open Stripe Checkout",
   },
   fr: {
     loading: "Chargement des produits...",
@@ -29,6 +32,9 @@ const translations: Record<string, Record<string, string>> = {
     checkout: "Payer",
     orderSummary: "Récapitulatif de commande",
     total: "Total",
+    payWithStripe: "Payer avec Stripe",
+    creatingSession: "Création de la session...",
+    openCheckout: "Ouvrir Stripe Checkout",
   },
   es: {
     loading: "Cargando productos...",
@@ -38,6 +44,9 @@ const translations: Record<string, Record<string, string>> = {
     checkout: "Pagar",
     orderSummary: "Resumen del pedido",
     total: "Total",
+    payWithStripe: "Pagar con Stripe",
+    creatingSession: "Creando sesión...",
+    openCheckout: "Abrir Stripe Checkout",
   },
   de: {
     loading: "Produkte werden geladen...",
@@ -47,10 +56,11 @@ const translations: Record<string, Record<string, string>> = {
     checkout: "Zur Kasse",
     orderSummary: "Bestellübersicht",
     total: "Gesamt",
+    payWithStripe: "Mit Stripe bezahlen",
+    creatingSession: "Sitzung wird erstellt...",
+    openCheckout: "Stripe Checkout öffnen",
   },
 };
-
-const CHECKOUT_URL = "https://docs.skybridge.tech";
 
 function BrowseCatalog() {
   const { theme } = useLayout();
@@ -69,6 +79,12 @@ function BrowseCatalog() {
   const [selected, setSelected] = useState<Product | null>(null);
 
   const [cart, setCart] = useWidgetState<{ ids: number[] }>({ ids: [] });
+
+  const {
+    callTool: createCheckout,
+    isPending: checkoutPending,
+    data: checkoutData,
+  } = useCallTool("create-checkout");
 
   function toggleCart(productId: number) {
     if (cart.ids.includes(productId)) {
@@ -103,8 +119,22 @@ function BrowseCatalog() {
         total += p.price;
       }
     }
-    const checkoutUrl = new URL(CHECKOUT_URL);
-    checkoutUrl.searchParams.set("cart", cart.ids.join(","));
+
+    function handlePay() {
+      createCheckout(
+        { productIds: cart.ids },
+        {
+          onSuccess: (result) => {
+            const url = result.structuredContent?.checkoutUrl;
+            if (typeof url === "string") {
+              openExternal(url);
+            }
+          },
+        },
+      );
+    }
+
+    const checkoutUrl = checkoutData?.structuredContent?.checkoutUrl;
 
     return (
       <div className={`${theme} checkout`}>
@@ -121,13 +151,26 @@ function BrowseCatalog() {
           <span>{translate("total")}</span>
           <span>${total.toFixed(2)}</span>
         </div>
-        <button
-          type="button"
-          className="checkout-button"
-          onClick={() => openExternal(checkoutUrl.toString())}
-        >
-          {translate("checkout")}
-        </button>
+        {typeof checkoutUrl === "string" ? (
+          <button
+            type="button"
+            className="checkout-button"
+            onClick={() => openExternal(checkoutUrl)}
+          >
+            {translate("openCheckout")}
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="checkout-button"
+            onClick={handlePay}
+            disabled={checkoutPending}
+          >
+            {checkoutPending
+              ? translate("creatingSession")
+              : translate("payWithStripe")}
+          </button>
+        )}
       </div>
     );
   }
