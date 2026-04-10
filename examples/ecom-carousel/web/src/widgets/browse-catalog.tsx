@@ -1,11 +1,12 @@
 import "@/index.css";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   mountWidget,
   useLayout,
   useOpenExternal,
   useRequestModal,
+  useSendFollowUpMessage,
   useUser,
   useWidgetState,
 } from "skybridge/web";
@@ -22,7 +23,10 @@ const translations: Record<string, Record<string, string>> = {
     total: "Total",
     payWithStripe: "Pay with Stripe",
     creatingSession: "Creating session...",
-    openCheckout: "Open Stripe Checkout",
+    waitingForPayment: "Waiting for payment...",
+    paymentSuccess: "Payment successful!",
+    paymentExpired: "Checkout session expired",
+    backToProducts: "Back to products",
   },
   fr: {
     loading: "Chargement des produits...",
@@ -34,7 +38,10 @@ const translations: Record<string, Record<string, string>> = {
     total: "Total",
     payWithStripe: "Payer avec Stripe",
     creatingSession: "Création de la session...",
-    openCheckout: "Ouvrir Stripe Checkout",
+    waitingForPayment: "En attente du paiement...",
+    paymentSuccess: "Paiement réussi !",
+    paymentExpired: "Session de paiement expirée",
+    backToProducts: "Retour aux produits",
   },
   es: {
     loading: "Cargando productos...",
@@ -46,7 +53,10 @@ const translations: Record<string, Record<string, string>> = {
     total: "Total",
     payWithStripe: "Pagar con Stripe",
     creatingSession: "Creando sesión...",
-    openCheckout: "Abrir Stripe Checkout",
+    waitingForPayment: "Esperando el pago...",
+    paymentSuccess: "Pago exitoso!",
+    paymentExpired: "Sesión de pago expirada",
+    backToProducts: "Volver a productos",
   },
   de: {
     loading: "Produkte werden geladen...",
@@ -58,15 +68,28 @@ const translations: Record<string, Record<string, string>> = {
     total: "Gesamt",
     payWithStripe: "Mit Stripe bezahlen",
     creatingSession: "Sitzung wird erstellt...",
-    openCheckout: "Stripe Checkout öffnen",
+    waitingForPayment: "Warte auf Zahlung...",
+    paymentSuccess: "Zahlung erfolgreich!",
+    paymentExpired: "Zahlungssitzung abgelaufen",
+    backToProducts: "Zurück zu Produkten",
   },
 };
+
+type CheckoutState =
+  | { phase: "idle" }
+  | { phase: "polling"; sessionId: string }
+  | { phase: "complete" }
+  | { phase: "expired" };
+
+const POLL_INTERVAL_MS = 3000;
+const POLL_TIMEOUT_MS = 5 * 60 * 1000;
 
 function BrowseCatalog() {
   const { theme } = useLayout();
   const { locale } = useUser();
   const { open, isOpen } = useRequestModal();
   const openExternal = useOpenExternal();
+  const sendFollowUpMessage = useSendFollowUpMessage();
 
   const lang = locale?.split("-")[0] ?? "en";
 
@@ -79,12 +102,78 @@ function BrowseCatalog() {
   const [selected, setSelected] = useState<Product | null>(null);
 
   const [cart, setCart] = useWidgetState<{ ids: number[] }>({ ids: [] });
+  const [checkoutState, setCheckoutState] = useState<CheckoutState>({
+    phase: "idle",
+  });
 
-  const {
-    callTool: createCheckout,
-    isPending: checkoutPending,
-    data: checkoutData,
-  } = useCallTool("create-checkout");
+  const { callTool: createCheckout, isPending: checkoutPending } =
+    useCallTool("create-checkout");
+
+  const { callToolAsync: checkStatus } = useCallTool("check-checkout-status");
+
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => stopPolling();
+  }, [stopPolling]);
+
+  function startPolling(sessionId: string) {
+    stopPolling();
+    setCheckoutState({ phase: "polling", sessionId });
+
+    pollingRef.current = setInterval(async () => {
+      try {
+        const result = await checkStatus({ sessionId });
+        const status = result.structuredContent?.status;
+        if (status === "complete") {
+          stopPolling();
+          setCheckoutState({ phase: "complete" });
+
+          const cartItems = (output?.products ?? []).filter((p) =>
+            cart.ids.includes(p.id),
+          );
+          let total = 0;
+          for (const item of cartItems) {
+            total += item.price;
+          }
+          sendFollowUpMessage(
+            `Payment completed! Customer purchased ${cartItems.length} item(s) for a total of $${total.toFixed(2)}: ${cartItems.map((p) => p.title).join(", ")}`,
+          );
+        } else if (status === "expired") {
+          stopPolling();
+          setCheckoutState({ phase: "expired" });
+          sendFollowUpMessage("Customer's checkout session expired.");
+        }
+      } catch {
+        // Stripe may temporarily error — keep polling
+      }
+    }, POLL_INTERVAL_MS);
+
+    timeoutRef.current = setTimeout(() => {
+      stopPolling();
+      if (checkoutState.phase === "polling") {
+        setCheckoutState({ phase: "expired" });
+      }
+    }, POLL_TIMEOUT_MS);
+  }
+
+  function resetCheckout() {
+    stopPolling();
+    setCheckoutState({ phase: "idle" });
+    setCart({ ids: [] });
+  }
 
   function toggleCart(productId: number) {
     if (cart.ids.includes(productId)) {
@@ -110,6 +199,75 @@ function BrowseCatalog() {
     );
   }
 
+  // Payment result views
+  if (checkoutState.phase === "complete") {
+    const paidItems = output.products.filter((p) => cart.ids.includes(p.id));
+    let paidTotal = 0;
+    for (const p of paidItems) {
+      paidTotal += p.price;
+    }
+
+    return (
+      <div className={`${theme} checkout`}>
+        <div className="success-card">
+          <div className="success-icon">
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 48 48"
+              fill="none"
+              role="img"
+              aria-label="Success"
+            >
+              <circle cx="24" cy="24" r="24" fill="#248a52" opacity="0.12" />
+              <circle cx="24" cy="24" r="18" fill="#248a52" opacity="0.2" />
+              <path
+                d="M16 24.5L21.5 30L32 19"
+                stroke="#248a52"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+          <div className="success-title">{translate("paymentSuccess")}</div>
+          <div className="success-items">
+            {paidItems.map((item) => (
+              <div key={item.id} className="success-item">
+                <span className="success-item-name">{item.title}</span>
+                <span className="success-item-price">
+                  ${item.price.toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="success-total">
+            <span>{translate("total")}</span>
+            <span>${paidTotal.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (checkoutState.phase === "expired") {
+    return (
+      <div className={`${theme} checkout`}>
+        <div className="checkout-status expired">
+          {translate("paymentExpired")}
+        </div>
+        <button
+          type="button"
+          className="checkout-button"
+          onClick={resetCheckout}
+        >
+          {translate("backToProducts")}
+        </button>
+      </div>
+    );
+  }
+
+  // Checkout summary view
   if (isOpen) {
     const cartItems: Product[] = [];
     let total = 0;
@@ -126,15 +284,19 @@ function BrowseCatalog() {
         {
           onSuccess: (result) => {
             const url = result.structuredContent?.checkoutUrl;
+            const sid = result.structuredContent?.sessionId;
             if (typeof url === "string") {
               openExternal(url);
+            }
+            if (typeof sid === "string") {
+              startPolling(sid);
             }
           },
         },
       );
     }
 
-    const checkoutUrl = checkoutData?.structuredContent?.checkoutUrl;
+    const isPolling = checkoutState.phase === "polling";
 
     return (
       <div className={`${theme} checkout`}>
@@ -151,13 +313,9 @@ function BrowseCatalog() {
           <span>{translate("total")}</span>
           <span>${total.toFixed(2)}</span>
         </div>
-        {typeof checkoutUrl === "string" ? (
-          <button
-            type="button"
-            className="checkout-button"
-            onClick={() => openExternal(checkoutUrl)}
-          >
-            {translate("openCheckout")}
+        {isPolling ? (
+          <button type="button" className="checkout-button polling" disabled>
+            <span className="spinner" /> {translate("waitingForPayment")}
           </button>
         ) : (
           <button
@@ -175,6 +333,7 @@ function BrowseCatalog() {
     );
   }
 
+  // Product grid view
   const activeProduct = selected ?? output.products[0];
 
   return (

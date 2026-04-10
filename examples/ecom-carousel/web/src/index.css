@@ -192,3 +192,139 @@
   color: var(--accent-text);
   font-weight: bold;
 }
+
+.checkout-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.checkout-button.polling {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Success card */
+
+.success-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 1rem;
+  background: #e6f9ee;
+  border-radius: 10px;
+}
+
+.dark .success-card {
+  background: #1a3a2a;
+}
+
+.success-icon {
+  animation: pop-in 0.4s ease-out;
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.dark .success-icon svg circle {
+  fill: #4cd68a;
+}
+
+.dark .success-icon svg path {
+  stroke: #4cd68a;
+}
+
+.success-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #248a52;
+}
+
+.dark .success-title {
+  color: #4cd68a;
+}
+
+.success-items {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+}
+
+.success-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.success-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 0.5rem;
+}
+
+.success-total {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #248a52;
+  border-top: 1px solid rgba(36, 138, 82, 0.2);
+  padding-top: 0.5rem;
+}
+
+.dark .success-total {
+  color: #4cd68a;
+  border-top-color: rgba(76, 214, 138, 0.2);
+}
+
+.checkout-status {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+.checkout-status.expired {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.dark .checkout-status.expired {
+  color: #fbbf24;
+  background: #3a2a1a;
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--accent-text);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

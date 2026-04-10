@@ -135,6 +135,36 @@ const server = new McpServer(
         ],
       };
     },
+  )
+  .registerTool(
+    "check-checkout-status",
+    {
+      description:
+        "Check the status of a Stripe Checkout session. Returns open, complete, or expired.",
+      inputSchema: {
+        sessionId: z.string().describe("The Stripe Checkout Session ID"),
+      },
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+      },
+    },
+    async ({ sessionId }) => {
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+      return {
+        structuredContent: {
+          status: session.status,
+          paymentStatus: session.payment_status,
+        },
+        content: [
+          {
+            type: "text" as const,
+            text: `Checkout session ${sessionId}: status=${session.status}, payment=${session.payment_status}`,
+          },
+        ],
+      };
+    },
   );
 
 server.run();
