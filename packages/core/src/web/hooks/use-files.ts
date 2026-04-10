@@ -5,5 +5,6 @@ export function useFiles() {
   return {
     upload: adaptor.uploadFile,
     getDownloadUrl: adaptor.getFileDownloadUrl,
+    selectFiles: adaptor.selectFiles,
   };
 }
