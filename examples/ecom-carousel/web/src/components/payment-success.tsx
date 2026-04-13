@@ -5,19 +5,20 @@ function SuccessIcon() {
   return (
     <div className="success-icon">
       <svg
-        width="48"
-        height="48"
-        viewBox="0 0 48 48"
+        width="56"
+        height="56"
+        viewBox="0 0 56 56"
         fill="none"
         role="img"
         aria-label="Success"
       >
-        <circle cx="24" cy="24" r="24" fill="#248a52" opacity="0.12" />
-        <circle cx="24" cy="24" r="18" fill="#248a52" opacity="0.2" />
+        <circle cx="28" cy="28" r="28" fill="currentColor" opacity="0.08" />
+        <circle cx="28" cy="28" r="20" fill="currentColor" opacity="0.15" />
+        <circle cx="28" cy="28" r="14" fill="currentColor" />
         <path
-          d="M16 24.5L21.5 30L32 19"
-          stroke="#248a52"
-          strokeWidth="3"
+          d="M21 28.5L25.5 33L35 23"
+          stroke="white"
+          strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -37,7 +38,13 @@ export function PaymentSuccess({ items }: { items: Product[] }) {
   return (
     <div className="success-card">
       <SuccessIcon />
-      <div className="success-title">{t("paymentSuccess")}</div>
+      <div className="success-header">
+        <div className="success-title">{t("paymentSuccess")}</div>
+        <div className="success-subtitle">
+          {items.length} {items.length === 1 ? "item" : "items"}
+        </div>
+      </div>
+      <div className="success-divider" />
       <div className="success-items">
         {items.map((item) => (
           <div key={item.id} className="success-item">
@@ -46,6 +53,7 @@ export function PaymentSuccess({ items }: { items: Product[] }) {
           </div>
         ))}
       </div>
+      <div className="success-divider" />
       <div className="success-total">
         <span>{t("total")}</span>
         <span>${total.toFixed(2)}</span>

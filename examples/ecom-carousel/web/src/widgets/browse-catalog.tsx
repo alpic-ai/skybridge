@@ -27,10 +27,7 @@ function BrowseCatalog() {
   const { callTool: createCheckout, isPending: checkoutPending } =
     useCallTool("create-checkout");
 
-  const { phase, startPolling, reset } = useCheckoutPolling(
-    cart.ids,
-    output?.products ?? [],
-  );
+  const { phase, startPolling, reset } = useCheckoutPolling();
 
   function toggleCart(productId: number) {
     if (cart.ids.includes(productId)) {

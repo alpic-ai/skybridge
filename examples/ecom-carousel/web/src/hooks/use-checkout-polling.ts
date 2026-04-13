@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useSendFollowUpMessage } from "skybridge/web";
 import { useCallTool } from "../helpers.js";
 
 export type CheckoutPhase = "idle" | "polling" | "complete" | "expired";
@@ -13,26 +12,15 @@ type CheckoutState =
 const POLL_INTERVAL_MS = 3000;
 const POLL_TIMEOUT_MS = 5 * 60 * 1000;
 
-interface Product {
-  id: number;
-  title: string;
-  price: number;
-}
-
-export function useCheckoutPolling(cartIds: number[], products: Product[]) {
+export function useCheckoutPolling() {
   const [checkoutState, setCheckoutState] = useState<CheckoutState>({
     phase: "idle",
   });
 
-  const sendFollowUpMessage = useSendFollowUpMessage();
   const { callToolAsync: checkStatus } = useCallTool("check-checkout-status");
 
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const cartIdsRef = useRef(cartIds);
-  const productsRef = useRef(products);
-  cartIdsRef.current = cartIds;
-  productsRef.current = products;
 
   const stopPolling = useCallback(() => {
     if (pollingRef.current) {
@@ -61,21 +49,9 @@ export function useCheckoutPolling(cartIds: number[], products: Product[]) {
           if (status === "complete") {
             stopPolling();
             setCheckoutState({ phase: "complete" });
-
-            const cartItems = productsRef.current.filter((p) =>
-              cartIdsRef.current.includes(p.id),
-            );
-            let total = 0;
-            for (const item of cartItems) {
-              total += item.price;
-            }
-            sendFollowUpMessage(
-              `Payment completed! Customer purchased ${cartItems.length} item(s) for a total of $${total.toFixed(2)}: ${cartItems.map((p) => p.title).join(", ")}`,
-            );
           } else if (status === "expired") {
             stopPolling();
             setCheckoutState({ phase: "expired" });
-            sendFollowUpMessage("Customer's checkout session expired.");
           }
         } catch {
           // Stripe may temporarily error — keep polling
@@ -89,7 +65,7 @@ export function useCheckoutPolling(cartIds: number[], products: Product[]) {
         );
       }, POLL_TIMEOUT_MS);
     },
-    [stopPolling, checkStatus, sendFollowUpMessage],
+    [stopPolling, checkStatus],
   );
 
   const reset = useCallback(() => {
