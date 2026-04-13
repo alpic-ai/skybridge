@@ -1,20 +1,17 @@
 # Ecommerce Carousel Example
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): an interactive product carousel with cart, localization, and modal checkout.
+An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): an interactive product carousel with cart, localization, and Stripe Checkout integration.
 
 ## What This Example Showcases
 
+- **Stripe Checkout**: Real payment flow using Stripe-hosted Checkout (redirect mode) with session status polling
 - **Interactive Widget Rendering**: A React-based widget that displays an interactive product carousel directly in AI conversations
-- **Tool Info Access**: Widgets access tool input, output, and metadata via `useToolInfo()` hook
+- **Tool Calling from Widget**: Widget invokes `create-checkout` and `check-checkout-status` server tools via `useCallTool()`
+- **LLM Follow-up Messages**: Notifies the LLM of payment outcomes via `useSendFollowUpMessage()`
 - **Theme Support**: Adapts to light/dark mode using the `useLayout()` hook
 - **Localization**: Translates UI based on user locale via `useUser()` hook (English, French, Spanish, German)
 - **Persistent State**: Maintains cart state across re-renders using `useWidgetState()` hook
-- **Modal Dialogs**: Opens checkout modal via `useRequestModal()` hook
-- **External Links**: Opens external URL for checkout completion via `useOpenExternal()` hook
-- **External API Integration**: Demonstrates fetching data from REST APIs
 - **Hot Module Replacement**: Live reloading of widget components during development
-
-This example serves as a comprehensive reference for building sophisticated, interactive widgets that leverage Skybridge's full feature set.
 
 ## Live Demo
 
@@ -25,6 +22,7 @@ This example serves as a comprehensive reference for building sophisticated, int
 ### Prerequisites
 
 - Node.js 24+
+- A Stripe account (sandbox mode works)
 
 ### Local Development
 
@@ -32,26 +30,20 @@ This example serves as a comprehensive reference for building sophisticated, int
 
 ```bash
 npm install
-# or
-yarn install
-# or
-pnpm install
-# or
-bun install
 ```
 
-#### 2. Start your local server
+#### 2. Configure Stripe
 
-Run the development server from the root directory:
+```bash
+cp .env.example .env
+```
+
+The `.env.example` ships with a sandbox key ready to use. To use your own Stripe account, replace the value in `.env` with your test secret key from [Stripe Dashboard > Developers > API keys](https://dashboard.stripe.com/test/apikeys).
+
+#### 3. Start your local server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 This command starts:
