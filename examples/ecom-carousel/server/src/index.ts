@@ -123,6 +123,7 @@ const server = new McpServer(
           mode: "payment",
           line_items: lineItems,
           success_url: "https://docs.skybridge.tech",
+          cancel_url: "https://docs.skybridge.tech",
         });
 
         return {
@@ -132,7 +133,7 @@ const server = new McpServer(
           },
           content: [
             {
-              type: "text" as const,
+              type: "text",
               text: `Checkout session created: ${session.url}`,
             },
           ],
@@ -169,7 +170,7 @@ const server = new McpServer(
           },
           content: [
             {
-              type: "text" as const,
+              type: "text",
               text: `Checkout session ${sessionId}: status=${session.status}, payment=${session.payment_status}`,
             },
           ],

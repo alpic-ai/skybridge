@@ -81,6 +81,13 @@ function BrowseCatalog() {
     return (
       <div className={`${theme} checkout`}>
         <PaymentSuccess items={paidItems} />
+        <button
+          type="button"
+          className="checkout-button"
+          onClick={resetCheckout}
+        >
+          {t("backToProducts")}
+        </button>
       </div>
     );
   }
