@@ -2,9 +2,7 @@ import { createSocket } from "node:dgram";
 import { isEnabled } from "../cli/telemetry.js";
 import type { McpMiddlewareEntry, McpMiddlewareFn } from "./middleware.js";
 
-// TODO: After first `cdk deploy`, read the "MetricsElasticIp" stack output
-// and replace this placeholder with the allocated Elastic IP address.
-const STATSD_HOST = "";
+const STATSD_HOST = "18.208.242.161";
 const STATSD_PORT = 8125;
 
 let socket: ReturnType<typeof createSocket> | null = null;
