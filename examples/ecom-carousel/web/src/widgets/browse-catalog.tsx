@@ -163,9 +163,9 @@ function BrowseCatalog() {
 
     timeoutRef.current = setTimeout(() => {
       stopPolling();
-      if (checkoutState.phase === "polling") {
-        setCheckoutState({ phase: "expired" });
-      }
+      setCheckoutState((prev) =>
+        prev.phase === "polling" ? { phase: "expired" } : prev,
+      );
     }, POLL_TIMEOUT_MS);
   }
 
