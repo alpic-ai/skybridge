@@ -104,3 +104,24 @@ jobs:
           branch: chore/bump-versions
           base: main
           delete-branch: true
+
+  notify-discord:
+    if: github.event_name == 'release'
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RELEASE_VERSION: ${{ github.event.release.tag_name }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+        run: |
+          BODY=$(echo "$RELEASE_BODY" | cut -c 1-1500)
+          PAYLOAD=$(jq -n \
+            --arg title "Skybridge $RELEASE_VERSION released" \
+            --arg url "$RELEASE_URL" \
+            --arg description "$BODY" \
+            --argjson color 5814783 \
+            '{embeds: [{title: $title, url: $url, description: $description, color: $color}]}')
+          curl -f -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK_URL"
