@@ -1,10 +1,5 @@
 import { SecretValue } from "aws-cdk-lib";
-import {
-  AccessKey,
-  Effect,
-  PolicyStatement,
-  User,
-} from "aws-cdk-lib/aws-iam";
+import { AccessKey, Effect, PolicyStatement, User } from "aws-cdk-lib/aws-iam";
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 
@@ -36,7 +31,8 @@ export class CloudWatchReader extends Construct {
         accessKeyId: SecretValue.unsafePlainText(accessKey.accessKeyId),
         secretAccessKey: accessKey.secretAccessKey,
       },
-      description: "AWS credentials for the skybridge-cloudwatch-reader IAM user",
+      description:
+        "AWS credentials for the skybridge-cloudwatch-reader IAM user",
     });
   }
 }
