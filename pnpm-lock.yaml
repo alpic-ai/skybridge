@@ -393,6 +393,9 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: ^1.26.0
         version: 1.26.0(zod@4.3.5)
+      '@t3-oss/env-core':
+        specifier: ^0.13.11
+        version: 0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.3.5)
       dotenv:
         specifier: ^17.4.1
         version: 17.4.2
@@ -13780,6 +13783,12 @@ snapshots:
       arktype: 2.1.27
       typescript: 5.9.3
       zod: 4.3.6
+
+  '@t3-oss/env-core@0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.3.5)':
+    optionalDependencies:
+      arktype: 2.1.27
+      typescript: 5.9.3
+      zod: 4.3.5
 
   '@t3-oss/env-core@0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.3.6)':
     optionalDependencies:

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
+    "@t3-oss/env-core": "^0.13.11",
     "dotenv": "^17.4.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",

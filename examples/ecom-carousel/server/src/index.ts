@@ -1,14 +1,7 @@
-import "dotenv/config";
 import { McpServer } from "skybridge/server";
-import Stripe from "stripe";
 import { z } from "zod";
 import { products } from "./products.js";
-
-const apiKey = process.env.STRIPE_SECRET_KEY;
-if (!apiKey) {
-  throw new Error("STRIPE_SECRET_KEY environment variable is required");
-}
-const stripe = new Stripe(apiKey);
+import { stripe } from "./stripe.js";
 
 interface Product {
   id: number;
