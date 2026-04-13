@@ -30,6 +30,12 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): an 
 
 ```bash
 npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
 ```
 
 #### 2. Configure Stripe
@@ -42,8 +48,16 @@ The `.env.example` ships with a sandbox key ready to use. To use your own Stripe
 
 #### 3. Start your local server
 
+Run the development server from the root directory:
+
 ```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
 This command starts:
