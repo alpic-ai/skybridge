@@ -8,7 +8,7 @@ description: "Learn how data moves between the host, your MCP server, and widget
 
 **Solution:** Skybridge provides clear abstractions for each communication pattern.
 
-## The Three Actors
+## The three actors
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#64748b' }}}%%
@@ -33,7 +33,7 @@ flowchart LR
 2. **Your MCP Server**: The backend that exposes tools and business logic
 3. **Your Widget (Guest)**: The React component rendered in an iframe inside the host
 
-## Key Terms
+## Key terms
 
 Tool responses contain three fields:
 
@@ -41,7 +41,7 @@ Tool responses contain three fields:
 - **`structuredContent`**: Typed JSON data surfaced to your widget and the host
 - **`_meta`**: Delivered only to the widget and hidden from the model
 
-## Tools vs Widgets
+## Tools vs widgets
 
 Before diving into the data flow, understand the difference between tools and widgets in Skybridge:
 
@@ -67,7 +67,7 @@ server.registerWidget("chart", { /* ... */ }, { /* ... */ }, async (args) => {
 });
 ```
 
-## Data Flow Patterns
+## Data flow patterns
 
 ### 1. Tool → Widget (Initial Hydration)
 
@@ -183,7 +183,7 @@ This creates a continuous loop: the widget can ask the model for help, and the m
 If the model's response triggers another widget, the host renders a new widget instance (not nested inside the current one).
 </Tip>
 
-## Response Fields Explained
+## Response fields explained
 
 Tool responses have three fields:
 
@@ -205,7 +205,7 @@ return {
 };
 ```
 
-## When to Use What
+## When to use what
 
 | Need | Use | Why |
 |------|-----|-----|
@@ -232,7 +232,7 @@ Direct API calls don't add to context. Use them only for data the model doesn't 
 If you use `fetch()` directly from widgets, you need to configure Content Security Policy (CSP) headers. The host blocks requests to domains not explicitly allowed. Add allowed domains to `connectDomains` in your widget configuration. See [registerWidget](/api-reference/register-widget).
 </Warning>
 
-## The Communication Loop
+## The communication loop
 
 1. **Host calls your tool** → Server responds with `structuredContent`
 2. **Widget hydrates** with [`useToolInfo`](/api-reference/use-tool-info)

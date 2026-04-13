@@ -6,7 +6,7 @@ description: "Deep dive into ChatGPT's runtime: MCP Apps compatibility, the wind
 
 The [OpenAI Apps SDK](https://developers.openai.com/apps-sdk/) is the ChatGPT runtime layer for ChatGPT Apps, [announced in October 2025](https://alpic.ai/blog/inside-openai-s-apps-sdk-how-to-build-interactive-chatgpt-apps-with-mcp). ChatGPT supports the MCP Apps UI model, and also provides `window.openai` for compatibility and ChatGPT-specific extensions.
 
-## Widget Rendering Flow
+## Widget rendering flow
 
 Here's what happens when ChatGPT renders a widget:
 
@@ -41,7 +41,7 @@ Widgets run inside an iframe and have access to a special [`window.openai`](http
 
 This API is powerful but low-level and imperative—which is where Skybridge comes in.
 
-## Skybridge Hook Mapping
+## Skybridge hook mapping
 
 Skybridge wraps the raw `window.openai` API with React hooks:
 
@@ -59,7 +59,7 @@ Skybridge wraps the raw `window.openai` API with React hooks:
 | `window.openai.uploadFile()`, `getFileDownloadUrl()` | [`useFiles()`](/api-reference/use-files) | Upload and download files |
 | `window.openai.setOpenInAppUrl()` | [`useSetOpenInAppUrl()`](/api-reference/use-set-open-in-app-url) | "Open in App" button URL in fullscreen |
 
-## Apps SDK APIs not yet supported in Skybridge
+## Apps SDK APIs not yet supported
 
 The following [Apps SDK widget APIs](https://developers.openai.com/apps-sdk/reference) are not yet wrapped by Skybridge hooks:
 
@@ -71,11 +71,11 @@ The following [Apps SDK widget APIs](https://developers.openai.com/apps-sdk/refe
 
 You can call these directly on `window.openai` when running in ChatGPT, if needed. Support may be added in a future release.
 
-## Skybridge Apps SDK Exclusive Features
+## Skybridge Apps SDK exclusive features
 
 These features are **only available in ChatGPT** and not supported in MCP Apps:
 
-### File Operations
+### File operations
 
 Upload and download files with host-managed storage:
 
@@ -96,7 +96,6 @@ function Widget() {
 ```
 
 ### Open in App URL
-
 Set a URL for the "Open in App" button that appears in fullscreen mode:
 
 ```tsx

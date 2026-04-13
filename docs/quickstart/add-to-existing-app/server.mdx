@@ -3,8 +3,6 @@ title: Use skybridge/server
 description: "Add widget registration and TypeScript type inference to your existing MCP server with skybridge/server."
 ---
 
-# Use skybridge/server
-
 This guide shows you how to add `skybridge/server` to an existing MCP server to enable widget support with full TypeScript type inference.
 
 ## Prerequisites
@@ -13,14 +11,13 @@ You should already have:
 - A working MCP server using the official [TypeScript MCP SDK](https://github.com/modelcontextprotocol/typescript-sdk)
 - Node.js 24+
 
-## Install Skybridge
+## Install
 
 ```bash
 pnpm add skybridge
 ```
 
 ## Update your server
-
 Replace your `McpServer` import with Skybridge's enhanced version:
 
 ```typescript
@@ -36,7 +33,6 @@ Keep your existing dependency to @modelcontextprotocol/sdk in your project, skyb
 Your existing tools, resources, and prompts will continue to work as before. With `skybridge/server`, you will also be able to register **widgets**, a new class encompassing a Tool and a corresponding UI Resource.
 
 ## Widget structure
-
 Skybridge follows a file-based convention for organizing widgets. Here's the recommended project structure:
 
 ```
@@ -159,7 +155,7 @@ app.listen(3000, () => {
 });
 ```
 
-## Type Safety
+## Type safety
 
 For full type inference and autocomplete, use method chaining and `generateHelpers`. See [Type Safety](/concepts/type-safety) for the complete setup.
 
@@ -168,3 +164,9 @@ Quick summary:
 2. Export `type AppType = typeof server`
 3. Create a `skybridge.ts` file with `generateHelpers<AppType>()`
 4. Import typed hooks from your helper file
+
+## Related
+
+- [Type Safety](/concepts/type-safety) - End-to-end type inference setup
+- [registerWidget](/api-reference/register-widget) - Widget registration API
+- [Test Your App](/quickstart/test-your-app) - Local and production testing

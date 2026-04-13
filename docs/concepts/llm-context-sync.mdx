@@ -8,7 +8,7 @@ description: "Keep the LLM informed about widget state with data-llm attributes 
 
 **Solution:** The `data-llm` attribute creates a live description of your widget's state that the model can read.
 
-## The Dual Interaction Surface
+## The dual interaction surface
 
 Apps have a unique challenge: **two interaction surfaces**.
 
@@ -40,7 +40,7 @@ flowchart TB
 
 The user clicked Flight AF123, but the model only sees the conversation—it doesn't know what "this one" refers to.
 
-## How data-llm Solves This
+## How `data-llm` solves this
 
 Add `data-llm` attributes to describe what the user is seeing:
 
@@ -79,7 +79,7 @@ Widget context:
 
 The model can now understand "this one" = Flight AF123.
 
-## How It Works Under the Hood
+## How it works under the hood
 
 1. **Build time**: The Vite plugin transforms `data-llm` attributes into `DataLLM` React components
 2. **Runtime**: `DataLLM` components register their content in a global tree
@@ -108,7 +108,7 @@ The model can now understand "this one" = Flight AF123.
 User selects flight → `data-llm`. User clicks "Book" → `useSendFollowUpMessage`.
 </Tip>
 
-## Best Practices
+## Best practices
 
 ### Do: Describe what the user sees
 
@@ -170,7 +170,7 @@ Shopping cart
   Total: $110
 ```
 
-## Expression Limitations
+## Expression limitations
 
 Keep `data-llm` expressions simple (strings, ternaries, template literals). Pre-compute complex logic:
 
@@ -184,7 +184,7 @@ const selectedNames = items.filter(item => item.selected).map(item => item.name)
 <div data-llm={`Selected: ${selectedNames}`}>
 ```
 
-## __widget_context Reserved Key
+## `__widget_context` reserved key
 
 Skybridge uses a reserved key `__widget_context` in widget state. In **Apps SDK (ChatGPT)**, widget state lives in `window.openai.widgetState`; in **MCP Apps**, the same key is used in the polyfilled `useWidgetState` store.
 
@@ -205,7 +205,7 @@ This key is:
 - Filtered out when you use `useWidgetState` (you only see your own state)
 - Read by the host when the user sends a message (passive context)—whether running in ChatGPT or MCP Apps clients (Claude, Goose, etc.)
 
-## Example: Multi-step Wizard
+## Example: multi-step wizard
 
 ```tsx
 function CheckoutWizard() {

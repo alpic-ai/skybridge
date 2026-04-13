@@ -3,9 +3,7 @@ title: FAQ
 description: "Common questions and troubleshooting for Skybridge type safety, deployment, and App development."
 ---
 
-# Frequently Asked Questions
-
-## Type Safety Issues
+## Type safety issues
 
 ### "Property does not exist on type" when using typed hooks
 
@@ -26,10 +24,16 @@ Check that:
 2. Your `skybridge.ts` imports this type correctly
 3. You're using [method chaining](/concepts/type-safety#method-chaining-requirement) when registering tools
 
-## Network Issues
+## Network issues
 
 ### Seeing the error "CORS error: Permission was denied for this request to access the `unknown` address space."
 
 Your widget needs to access the local dev server over your local network. This error appears when your browser blocks such access.
 
 **To fix this, enable local network access in your browser settings so it can connect to localhost and other local network addresses.**
+
+## Related
+
+- [Type Safety](/concepts/type-safety) - End-to-end type inference setup
+- [Test Your App](/quickstart/test-your-app) - Local and production testing
+- [DevTools](/devtools/devtools) - Browser-based debugging tools

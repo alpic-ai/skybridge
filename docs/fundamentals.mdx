@@ -5,7 +5,7 @@ description: "Understanding Model Context Protocol (MCP), the MCP Apps portable 
 
 Skybridge enables you to build **ChatGPT Apps** and **MCP Apps** - interactive UI widgets that render inside AI conversations. Before diving into Skybridge's APIs, understand the underlying protocols and runtimes it builds upon.
 
-## How widgets appear in MCP Apps Clients
+## How widgets appear in MCP Apps clients
 
 In MCP Apps clients, the model triggers your tool, and the client then renders both the assistant response and your widget from the tool result.
 
@@ -59,7 +59,7 @@ This creates a **dual-surface interaction model**: users interact with both the 
 Read our [in-depth blog article](https://alpic.ai/blog/inside-openai-s-apps-sdk-how-to-build-interactive-chatgpt-apps-with-mcp) for a detailed technical breakdown of how AI Apps work under the hood.
 </Note>
 
-## Runtime Environments
+## Runtime environments
 
 Both ChatGPT Apps and MCP Apps use the same MCP server architecture and the same portable MCP Apps UI contract. The key practical difference is that ChatGPT additionally exposes `window.openai` extensions.
 
@@ -80,7 +80,7 @@ Skybridge supports the two main runtime environments for rendering widgets:
 Skybridge abstracts away the differences between these runtime environments so you can write your widgets once and run them anywhere. Learn more in our <a href="/concepts/write-once-run-everywhere">Write Once, Run Everywhere</a> guide.
 
 
-## Runtimes Comparison at a Glance
+## Runtimes comparison at a glance
 
 | Feature | Apps SDK (ChatGPT) | MCP Apps |
 |---------|-------------------|----------|
@@ -91,7 +91,7 @@ Skybridge abstracts away the differences between these runtime environments so y
 
 
 
-## Next Steps
+## Related
 
 <CardGroup cols={2}>
   <Card title="Apps SDK Deep Dive" icon="message" href="/fundamentals/apps-sdk">

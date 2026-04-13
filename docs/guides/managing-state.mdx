@@ -6,7 +6,7 @@ description: "Persist widget state across renders with useWidgetState and create
 
 How to persist widget state across renders and re-mounts.
 
-## Decision Tree
+## Decision tree
 
 ```
 What kind of state do you need?
@@ -155,7 +155,7 @@ function CartWidget() {
 }
 ```
 
-### Automatic Persistence
+### Automatic persistence
 
 `createStore` automatically:
 - Syncs state to the host's persistent storage (Apps SDK: `window.openai.setWidgetState()`, MCP Apps: polyfilled)
@@ -166,7 +166,7 @@ function CartWidget() {
 **MCP Apps Limitation**: In MCP Apps, state persistence is polyfilled and does not survive widget re-renders. State is only maintained within the current widget render cycle.
 </Note>
 
-## Comparison Table
+## Comparison table
 
 | Feature | `useWidgetState` | `createStore` |
 |---------|------------------|---------------|
@@ -177,7 +177,7 @@ function CartWidget() {
 | Async actions | Manual with callbacks | Built-in |
 | Best for | Simple forms, flags | Shopping carts, complex flows |
 
-## Combining with data-llm
+## Combining with `data-llm`
 
 State management is separate from LLM context. Use both when needed:
 
@@ -210,7 +210,7 @@ function ProductListWidget() {
 - `useWidgetState` persists the selection
 - `data-llm` tells the model what the user sees
 
-## When State Persists
+## When state persists
 
 **In Apps SDK (ChatGPT)**, widget state persists:
 - When the widget re-renders (component update)
@@ -226,7 +226,7 @@ Widget state **resets** when:
 - The tool is called again with new input
 - The user explicitly clears it
 
-## Migration from useState
+## Migration from `useState`
 
 If you're using React `useState` and losing state on re-renders:
 

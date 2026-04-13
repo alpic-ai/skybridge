@@ -3,8 +3,6 @@ title: Telemetry
 description: "Learn what data Skybridge collects, why we collect it, and how to opt out."
 ---
 
-# Telemetry
-
 Skybridge collects anonymous usage telemetry to help us understand how the CLI is being used and improve the developer experience. **Telemetry is completely optional** and you can opt out at any time.
 
 <Info>
@@ -13,7 +11,7 @@ Skybridge collects anonymous usage telemetry to help us understand how the CLI i
 We only collect aggregate usage data. We never collect personal information, project code, file contents, or any sensitive data.
 </Info>
 
-## What We Collect
+## What we collect
 
 When you run a Skybridge CLI command, we collect the following anonymous information:
 
@@ -29,7 +27,7 @@ When you run a Skybridge CLI command, we collect the following anonymous informa
 | **Node Version** | Your Node.js version | `v24.0.0` |
 | **Is CI** | Whether running in a CI environment | `true` or `false` |
 
-### What We Don't Collect
+### What we don't collect
 
 - ❌ Project names or file paths
 - ❌ Source code or file contents
@@ -37,7 +35,7 @@ When you run a Skybridge CLI command, we collect the following anonymous informa
 - ❌ IP addresses or location data
 - ❌ Personal identifiable information
 
-## Why We Collect Telemetry
+## Why we collect telemetry
 
 Telemetry helps us:
 
@@ -46,14 +44,13 @@ Telemetry helps us:
 - **Prioritize improvements** — Which platforms and Node versions should we support?
 - **Measure adoption** — How is Skybridge being adopted over time?
 
-## How to Opt Out
+## How to opt out
 
 Telemetry configuration is **machine-wide**, not project-specific. Your preference is stored in `~/.skybridge/config.json` and applies to all Skybridge projects on the same machine.
 
 You have multiple ways to disable telemetry:
 
 ### Using the CLI
-
 The easiest way to disable telemetry:
 
 ```bash
@@ -72,7 +69,7 @@ Check your current telemetry status:
 skybridge telemetry status
 ```
 
-### Using Environment Variables
+### Using environment variables
 
 Set `SKYBRIDGE_TELEMETRY_DISABLED=1` to disable telemetry:
 
@@ -87,7 +84,7 @@ Or use the standard `DO_NOT_TRACK` environment variable:
 export DO_NOT_TRACK=1
 ```
 
-### Configuration File
+### Configuration file
 
 Telemetry settings are stored in `~/.skybridge/config.json`:
 
@@ -104,7 +101,7 @@ Telemetry settings are stored in `~/.skybridge/config.json`:
 Environment variables take precedence over the configuration file. If `SKYBRIDGE_TELEMETRY_DISABLED=1` or `DO_NOT_TRACK=1` is set, telemetry will be disabled regardless of the config file setting.
 </Note>
 
-## CI Environments
+## CI environments
 
 In CI environments (GitHub Actions, GitLab CI, Jenkins, etc.), telemetry is **enabled by default** and the machine ID is set to the CI provider name (e.g., `GitHub Actions`).
 
@@ -116,7 +113,7 @@ env:
   SKYBRIDGE_TELEMETRY_DISABLED: "1"
 ```
 
-## Debug Mode
+## Debug mode
 
 To see what telemetry data would be sent without actually sending it, enable debug mode:
 
@@ -126,9 +123,14 @@ SKYBRIDGE_TELEMETRY_DEBUG=1 skybridge dev
 
 This will print the telemetry event to stderr instead of sending it, useful for understanding exactly what data is collected.
 
-## Data Handling
+## Data handling
 
 - Telemetry data is sent to [PostHog](https://posthog.com/), a privacy-focused analytics platform
 - Data is stored on PostHog's US servers
 - We retain aggregated data for product analytics purposes
 - Individual events are anonymized and cannot be linked to specific users
+
+## Related
+
+- [CLI Reference](/api-reference/cli) - Full CLI command reference
+- [Quickstart](/quickstart/create-new-app) - Get started with Skybridge
