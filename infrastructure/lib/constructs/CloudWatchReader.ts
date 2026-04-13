@@ -1,4 +1,4 @@
-import { CfnOutput } from "aws-cdk-lib";
+import { SecretValue } from "aws-cdk-lib";
 import {
   AccessKey,
   Effect,
@@ -32,13 +32,11 @@ export class CloudWatchReader extends Construct {
 
     new Secret(this, "AccessKeySecret", {
       secretName: "skybridge/cloudwatch-reader",
-      secretStringValue: accessKey.secretAccessKey,
-      description: "AWS secret access key for the skybridge-cloudwatch-reader IAM user",
-    });
-
-    new CfnOutput(this, "AccessKeyId", {
-      value: accessKey.accessKeyId,
-      description: "AWS_ACCESS_KEY_ID for CloudWatch reader",
+      secretObjectValue: {
+        accessKeyId: SecretValue.unsafePlainText(accessKey.accessKeyId),
+        secretAccessKey: accessKey.secretAccessKey,
+      },
+      description: "AWS credentials for the skybridge-cloudwatch-reader IAM user",
     });
   }
 }
