@@ -28,6 +28,7 @@ import type {
 import { mergeWith, union } from "es-toolkit";
 import type { ErrorRequestHandler, Express, RequestHandler } from "express";
 import { createApp } from "./express.js";
+import { createMiddlewareEntry } from "./metric.js";
 import type {
   McpExtra,
   McpExtraFor,
@@ -40,7 +41,6 @@ import type {
   McpWildcard,
 } from "./middleware.js";
 import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
-import { createMonitoringEntry } from "./monitoring.js";
 import { templateHelper } from "./templateHelper.js";
 
 const mergeWithUnion = <T extends object, S extends object>(
@@ -374,7 +374,7 @@ export class McpServer<
     }
     this.mcpMiddlewareApplied = true;
 
-    const monitoringEntry = createMonitoringEntry();
+    const monitoringEntry = createMiddlewareEntry();
     const entries = monitoringEntry
       ? [monitoringEntry, ...this.mcpMiddlewareEntries]
       : this.mcpMiddlewareEntries;

@@ -1,6 +1,8 @@
-import { UserData } from "aws-cdk-lib";
+import { CfnOutput } from "aws-cdk-lib";
 import {
   AmazonLinuxCpuType,
+  CfnEIP,
+  CfnEIPAssociation,
   Instance,
   InstanceClass,
   InstanceSize,
@@ -9,29 +11,30 @@ import {
   Peer,
   Port,
   SecurityGroup,
+  SubnetType,
+  UserData,
   Vpc,
 } from "aws-cdk-lib/aws-ec2";
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
-import type { IPublicHostedZone } from "aws-cdk-lib/aws-route53";
-import { ARecord, RecordTarget } from "aws-cdk-lib/aws-route53";
 import { Construct } from "constructs";
-
-type MonitoringProps = {
-  hostedZone: IPublicHostedZone;
-};
 
 /**
  * A t4g.nano EC2 instance running the CloudWatch Agent with StatsD receiver.
  * Receives UDP StatsD metrics from Skybridge apps on port 8125 and forwards
  * them to CloudWatch under the "Skybridge" namespace.
  *
- * Accessible at metrics.skybridge.tech:8125 (UDP).
+ * After the first `cdk deploy`, read the "MetricsElasticIp" stack output and
+ * hardcode it as STATSD_HOST in packages/core/src/server/metric.ts.
  */
-export class Monitoring extends Construct {
-  constructor(scope: Construct, id: string, { hostedZone }: MonitoringProps) {
+export class Metrics extends Construct {
+  constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    const vpc = Vpc.fromLookup(this, "DefaultVpc", { isDefault: true });
+    const vpc = new Vpc(this, "Vpc", {
+      maxAzs: 1,
+      natGateways: 0,
+      subnetConfiguration: [{ name: "Public", subnetType: SubnetType.PUBLIC }],
+    });
 
     const role = new Role(this, "Role", {
       assumedBy: new ServicePrincipal("ec2.amazonaws.com"),
@@ -42,7 +45,7 @@ export class Monitoring extends Construct {
 
     const securityGroup = new SecurityGroup(this, "SecurityGroup", {
       vpc,
-      description: "Skybridge StatsD monitoring ingress",
+      description: "Skybridge StatsD metrics ingress",
       allowAllOutbound: true,
     });
     securityGroup.addIngressRule(
@@ -83,10 +86,17 @@ EOF`,
       userDataCausesReplacement: true,
     });
 
-    new ARecord(this, "MetricsRecord", {
-      zone: hostedZone,
-      recordName: "metrics",
-      target: RecordTarget.fromIpAddresses(instance.instancePublicIp),
+    const eip = new CfnEIP(this, "ElasticIp");
+    new CfnEIPAssociation(this, "ElasticIpAssociation", {
+      instanceId: instance.instanceId,
+      allocationId: eip.attrAllocationId,
+    });
+
+    // Output the IP so it can be hardcoded as STATSD_HOST in metric.ts after deploy.
+    new CfnOutput(this, "MetricsElasticIp", {
+      value: eip.ref,
+      description:
+        "StatsD receiver public IP — hardcode as STATSD_HOST in packages/core/src/server/metric.ts",
     });
   }
 }
