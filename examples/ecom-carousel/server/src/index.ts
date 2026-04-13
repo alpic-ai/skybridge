@@ -97,36 +97,52 @@ const server = new McpServer(
       },
     },
     async ({ productIds }) => {
-      const lineItems = productIds
-        .map((id) => products.find((p) => p.id === id))
-        .filter((p): p is Product => p !== undefined)
-        .map((p) => ({
-          price_data: {
-            currency: "usd",
-            product_data: { name: p.title },
-            unit_amount: Math.round(p.price * 100),
-          },
-          quantity: 1,
-        }));
+      try {
+        const lineItems = productIds
+          .map((id) => products.find((p) => p.id === id))
+          .filter((p): p is Product => p !== undefined)
+          .map((p) => ({
+            price_data: {
+              currency: "usd",
+              product_data: { name: p.title },
+              unit_amount: Math.round(p.price * 100),
+            },
+            quantity: 1,
+          }));
 
-      const session = await stripe.checkout.sessions.create({
-        mode: "payment",
-        line_items: lineItems,
-        success_url: "https://docs.skybridge.tech",
-      });
+        if (lineItems.length === 0) {
+          return {
+            content: [
+              { type: "text", text: "Error: no valid products in the cart" },
+            ],
+            isError: true,
+          };
+        }
 
-      return {
-        structuredContent: {
-          checkoutUrl: session.url,
-          sessionId: session.id,
-        },
-        content: [
-          {
-            type: "text" as const,
-            text: `Checkout session created: ${session.url}`,
+        const session = await stripe.checkout.sessions.create({
+          mode: "payment",
+          line_items: lineItems,
+          success_url: "https://docs.skybridge.tech",
+        });
+
+        return {
+          structuredContent: {
+            checkoutUrl: session.url,
+            sessionId: session.id,
           },
-        ],
-      };
+          content: [
+            {
+              type: "text" as const,
+              text: `Checkout session created: ${session.url}`,
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true,
+        };
+      }
     },
   )
   .registerTool(
@@ -139,24 +155,31 @@ const server = new McpServer(
       },
       annotations: {
         readOnlyHint: true,
-        openWorldHint: false,
+        openWorldHint: true,
       },
     },
     async ({ sessionId }) => {
-      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      try {
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-      return {
-        structuredContent: {
-          status: session.status,
-          paymentStatus: session.payment_status,
-        },
-        content: [
-          {
-            type: "text" as const,
-            text: `Checkout session ${sessionId}: status=${session.status}, payment=${session.payment_status}`,
+        return {
+          structuredContent: {
+            status: session.status,
+            paymentStatus: session.payment_status,
           },
-        ],
-      };
+          content: [
+            {
+              type: "text" as const,
+              text: `Checkout session ${sessionId}: status=${session.status}, payment=${session.payment_status}`,
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true,
+        };
+      }
     },
   );
 

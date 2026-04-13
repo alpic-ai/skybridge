@@ -41,7 +41,9 @@ export function PaymentSuccess({ items }: { items: Product[] }) {
       <div className="success-header">
         <div className="success-title">{t("paymentSuccess")}</div>
         <div className="success-subtitle">
-          {items.length} {items.length === 1 ? "item" : "items"}
+          {items.length === 1
+            ? t("itemCount_one")
+            : t("itemCount_other").replace("{count}", String(items.length))}
         </div>
       </div>
       <div className="success-divider" />

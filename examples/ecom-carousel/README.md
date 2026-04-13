@@ -7,7 +7,6 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): an 
 - **Stripe Checkout**: Real payment flow using Stripe-hosted Checkout (redirect mode) with session status polling
 - **Interactive Widget Rendering**: A React-based widget that displays an interactive product carousel directly in AI conversations
 - **Tool Calling from Widget**: Widget invokes `create-checkout` and `check-checkout-status` server tools via `useCallTool()`
-- **LLM Follow-up Messages**: Notifies the LLM of payment outcomes via `useSendFollowUpMessage()`
 - **Theme Support**: Adapts to light/dark mode using the `useLayout()` hook
 - **Localization**: Translates UI based on user locale via `useUser()` hook (English, French, Spanish, German)
 - **Persistent State**: Maintains cart state across re-renders using `useWidgetState()` hook
@@ -44,7 +43,7 @@ bun install
 cp .env.example .env
 ```
 
-The `.env.example` ships with a sandbox key ready to use. To use your own Stripe account, replace the value in `.env` with your test secret key from [Stripe Dashboard > Developers > API keys](https://dashboard.stripe.com/test/apikeys).
+Open `.env` and paste your Stripe **test** secret key (starts with `sk_test_`). You can find it in the [Stripe Dashboard > Developers > API keys](https://dashboard.stripe.com/test/apikeys).
 
 #### 3. Start your local server
 
@@ -65,7 +64,7 @@ This command starts:
 - Your MCP server at `http://localhost:3000/mcp`.
 - Skybridge DevTools UI at `http://localhost:3000/`.
 
-#### 3. Project structure
+#### 4. Project structure
 
 ```
 ├── server/
