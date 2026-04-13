@@ -23,6 +23,7 @@ export class McpAppAdaptor implements Adaptor {
   };
   private _widgetState: HostContext["widgetState"] = null;
   private widgetStateListeners = new Set<() => void>();
+  private _viewUUID: string | null = null;
 
   private _viewState: HostContext["view"] = {
     mode: "inline",
@@ -31,6 +32,7 @@ export class McpAppAdaptor implements Adaptor {
 
   private constructor() {
     this.stores = this.initializeStores();
+    this.subscribeToViewUUID();
   }
 
   public static getInstance(): McpAppAdaptor {
@@ -206,6 +208,8 @@ export class McpAppAdaptor implements Adaptor {
       listener();
     });
 
+    this.persistToLocalStorage(newState);
+
     try {
       const app = await McpAppBridge.getInstance().getApp();
       await app.updateModelContext({
@@ -247,6 +251,47 @@ export class McpAppAdaptor implements Adaptor {
 
   public setOpenInAppUrl(_href: string): Promise<void> {
     throw new Error("setOpenInAppUrl is not implemented in MCP App.");
+  }
+
+  private subscribeToViewUUID(): void {
+    const bridge = McpAppBridge.getInstance();
+    bridge.subscribe("toolResult")(() => {
+      const toolResult = bridge.getSnapshot("toolResult");
+      const viewUUID = (
+        toolResult?._meta as Record<string, unknown> | undefined
+      )?.viewUUID as string | undefined;
+
+      if (viewUUID && viewUUID !== this._viewUUID) {
+        this._viewUUID = viewUUID;
+        this.restoreFromLocalStorage(viewUUID);
+      }
+    });
+  }
+
+  private restoreFromLocalStorage(viewUUID: string): void {
+    try {
+      const stored = localStorage.getItem(viewUUID);
+      if (stored !== null) {
+        const state = JSON.parse(stored) as Record<string, unknown>;
+        this._widgetState = state;
+        this.widgetStateListeners.forEach((listener) => {
+          listener();
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  private persistToLocalStorage(state: Record<string, unknown> | null): void {
+    if (!this._viewUUID || state === null) {
+      return;
+    }
+    try {
+      localStorage.setItem(this._viewUUID, JSON.stringify(state));
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   private createHostContextStore<
