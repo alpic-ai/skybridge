@@ -28,6 +28,7 @@ import type {
 import { mergeWith, union } from "es-toolkit";
 import type { ErrorRequestHandler, Express, RequestHandler } from "express";
 import { createApp } from "./express.js";
+import { createMiddlewareEntry } from "./metric.js";
 import type {
   McpExtra,
   McpExtraFor,
@@ -373,14 +374,18 @@ export class McpServer<
     }
     this.mcpMiddlewareApplied = true;
 
-    if (this.mcpMiddlewareEntries.length === 0) {
+    const monitoringEntry = createMiddlewareEntry();
+    const entries = monitoringEntry
+      ? [monitoringEntry, ...this.mcpMiddlewareEntries]
+      : this.mcpMiddlewareEntries;
+
+    if (entries.length === 0) {
       return;
     }
 
     const { requestHandlers, notificationHandlers } = getHandlerMaps(
       this.server,
     );
-    const entries = this.mcpMiddlewareEntries;
 
     // Wrap existing handlers and proxy future .set() for lazy SDK registration
     const instrumentMap = (
