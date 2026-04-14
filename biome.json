@@ -57,8 +57,12 @@
     {
       "includes": ["packages/core/**"],
       "linter": {
+        "domains": {
+          "project": "all"
+        },
         "rules": {
           "correctness": {
+            "noUnresolvedImports": "off",
             "useImportExtensions": {
               "level": "error",
               "options": {
