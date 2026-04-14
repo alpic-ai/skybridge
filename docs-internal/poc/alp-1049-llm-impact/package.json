@@ -1,0 +1,16 @@
+{
+  "name": "alp-1049-llm-impact-eval",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run --reporter=verbose"
+  },
+  "dependencies": {
+    "@mcpjam/sdk": "latest",
+    "dotenv": "^16.6.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.4"
+  }
+}
