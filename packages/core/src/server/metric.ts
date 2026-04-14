@@ -1,6 +1,18 @@
 import { createSocket } from "node:dgram";
 import { isEnabled } from "../cli/telemetry.js";
+import { VERSION } from "../version.js";
 import type { McpMiddlewareEntry, McpMiddlewareFn } from "./middleware.js";
+
+function parseMajorMinor(version: string): string | null {
+  const parts = version.split(".");
+  if (parts.length < 2) {
+    return null;
+  }
+  return `${parts[0]}.${parts[1]}`;
+}
+
+const isDev = VERSION.includes("-dev");
+const versionTag = parseMajorMinor(VERSION);
 
 const STATSD_HOST = "18.208.242.161";
 const STATSD_PORT = 8125;
@@ -26,17 +38,22 @@ function sendMetric(metric: string): void {
 }
 
 /**
- * Returns an internal MCP middleware entry that emits a StatsD counter over UDP
+ * Returns an internal MCP middleware entry that emits a DogStatsD counter over UDP
  * for every tool call. Enabled by default; respects the existing telemetry
  * opt-out (SKYBRIDGE_TELEMETRY_DISABLED, DO_NOT_TRACK, or `skybridge telemetry disable`).
  *
- * Metric (StatsD counter format, no native sampling field):
- *   Requests_1:1|c  — every tools/call
+ * Returns `null` when the version string contains "-dev" (e.g. development
+ * builds) or when the version cannot be parsed into major.minor, so that
+ * malformed data does not pollute production metrics.
  *
- * The _1 suffix encodes the sampling denominator (1-in-1 = 100%).
- * When sampling is introduced later, add a guard and rename to _100.
+ * Metric (DogStatsD counter format with tags):
+ *   Requests:1|c|#version:<major>.<minor>  — every tools/call
  */
 export function createMiddlewareEntry(): McpMiddlewareEntry | null {
+  if (isDev || !versionTag) {
+    return null;
+  }
+
   const handler: McpMiddlewareFn = async (_req, _extra, next) => {
     // Check on every call so opt-out takes effect immediately without restart.
     if (!isEnabled()) {
@@ -46,7 +63,7 @@ export function createMiddlewareEntry(): McpMiddlewareEntry | null {
     try {
       return await next();
     } finally {
-      sendMetric("Requests_1:1|c");
+      sendMetric(`Requests:1|c|#version:${versionTag}`);
     }
   };
 
