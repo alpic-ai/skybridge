@@ -16,6 +16,20 @@ type PickContext<K extends readonly McpAppContextKey[]> = {
   [P in K[number]]: McpAppContext[P];
 };
 
+const STORAGE_PREFIX = "sb:";
+const MAX_STORAGE_ENTRIES = 200;
+
+function findStorageKey(viewUUID: string): string | undefined {
+  const suffix = `:${viewUUID}`;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key?.startsWith(STORAGE_PREFIX) && key.endsWith(suffix)) {
+      return key;
+    }
+  }
+  return undefined;
+}
+
 export class McpAppAdaptor implements Adaptor {
   private static instance: McpAppAdaptor | null = null;
   private stores: {
@@ -23,6 +37,7 @@ export class McpAppAdaptor implements Adaptor {
   };
   private _widgetState: HostContext["widgetState"] = null;
   private widgetStateListeners = new Set<() => void>();
+  private _viewUUID: string | null = null;
 
   private _viewState: HostContext["view"] = {
     mode: "inline",
@@ -31,6 +46,7 @@ export class McpAppAdaptor implements Adaptor {
 
   private constructor() {
     this.stores = this.initializeStores();
+    this.subscribeToViewUUID();
   }
 
   public static getInstance(): McpAppAdaptor {
@@ -206,6 +222,8 @@ export class McpAppAdaptor implements Adaptor {
       listener();
     });
 
+    this.persistToLocalStorage(newState);
+
     try {
       const app = await McpAppBridge.getInstance().getApp();
       await app.updateModelContext({
@@ -247,6 +265,74 @@ export class McpAppAdaptor implements Adaptor {
 
   public setOpenInAppUrl(_href: string): Promise<void> {
     throw new Error("setOpenInAppUrl is not implemented in MCP App.");
+  }
+
+  private subscribeToViewUUID(): void {
+    const bridge = McpAppBridge.getInstance();
+    bridge.subscribe("toolResult")(() => {
+      const toolResult = bridge.getSnapshot("toolResult");
+      const viewUUID = (
+        toolResult?._meta as Record<string, unknown> | undefined
+      )?.viewUUID as string | undefined;
+
+      if (viewUUID && viewUUID !== this._viewUUID) {
+        this._viewUUID = viewUUID;
+        this.restoreFromLocalStorage(viewUUID);
+      }
+    });
+  }
+
+  // localStorage keys: sb:{unix_ms}:{viewUUID}
+  // Timestamp is updated on every write (LRU); eviction drops the least recently used entries.
+  private restoreFromLocalStorage(viewUUID: string): void {
+    try {
+      const existingKey = findStorageKey(viewUUID);
+      if (existingKey) {
+        const stored = localStorage.getItem(existingKey);
+        if (stored !== null) {
+          this._widgetState = JSON.parse(stored);
+          this.widgetStateListeners.forEach((listener) => {
+            listener();
+          });
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  private persistToLocalStorage(state: Record<string, unknown> | null): void {
+    if (!this._viewUUID || state === null) {
+      return;
+    }
+    try {
+      // Remove old key for this view, write with fresh timestamp (LRU)
+      const oldKey = findStorageKey(this._viewUUID);
+      if (oldKey) {
+        localStorage.removeItem(oldKey);
+      }
+      const newKey = `${STORAGE_PREFIX}${Date.now()}:${this._viewUUID}`;
+      localStorage.setItem(newKey, JSON.stringify(state));
+
+      // lru cleanup
+      const keys: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(STORAGE_PREFIX)) {
+          keys.push(key);
+        }
+      }
+      if (keys.length <= MAX_STORAGE_ENTRIES) {
+        return;
+      }
+      keys.sort();
+      const toRemove = keys.slice(0, keys.length - MAX_STORAGE_ENTRIES);
+      for (const key of toRemove) {
+        localStorage.removeItem(key);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   private createHostContextStore<

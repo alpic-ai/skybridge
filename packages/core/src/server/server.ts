@@ -28,6 +28,7 @@ import type {
 import { mergeWith, union } from "es-toolkit";
 import type { ErrorRequestHandler, Express, RequestHandler } from "express";
 import { createApp } from "./express.js";
+import { createMiddlewareEntry } from "./metric.js";
 import type {
   McpExtra,
   McpExtraFor,
@@ -373,14 +374,18 @@ export class McpServer<
     }
     this.mcpMiddlewareApplied = true;
 
-    if (this.mcpMiddlewareEntries.length === 0) {
+    const monitoringEntry = createMiddlewareEntry();
+    const entries = monitoringEntry
+      ? [monitoringEntry, ...this.mcpMiddlewareEntries]
+      : this.mcpMiddlewareEntries;
+
+    if (entries.length === 0) {
       return;
     }
 
     const { requestHandlers, notificationHandlers } = getHandlerMaps(
       this.server,
     );
-    const entries = this.mcpMiddlewareEntries;
 
     // Wrap existing handlers and proxy future .set() for lazy SDK registration
     const instrumentMap = (
@@ -559,13 +564,27 @@ export class McpServer<
       toolMeta.ui = { resourceUri: widgetConfig.uri };
     }
 
+    const wrappedToolCallback: ToolHandler<TInput, TReturn> = async (
+      args,
+      extra,
+    ) => {
+      const result = await toolCallback(args, extra);
+      return {
+        ...result,
+        _meta: {
+          ...(result as { _meta?: Record<string, unknown> })._meta,
+          viewUUID: crypto.randomUUID(),
+        },
+      };
+    };
+
     this.registerTool(
       name,
       {
         ...toolConfig,
         _meta: toolMeta,
       },
-      toolCallback,
+      wrappedToolCallback,
     );
 
     return this as AddTool<
