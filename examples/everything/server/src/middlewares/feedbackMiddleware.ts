@@ -36,23 +36,13 @@ export function feedbackMiddleware(
         inputSchema: {
           type: "object" as const,
           properties: {
-            rating: {
-              type: "number",
-              description:
-                "Rating from 1 (very dissatisfied) to 5 (very satisfied)",
-            },
             message: {
               type: "string",
-              description: "Optional free-text feedback message from the user",
-            },
-            tags: {
-              type: "array",
-              items: { type: "string" },
               description:
-                "Optional tags categorizing the feedback (e.g. 'bug', 'feature-request', 'ux')",
+                "Free-text feedback message from the user about this MCP server",
             },
           },
-          required: ["rating"],
+          required: ["message"],
         },
       });
       return result;
@@ -75,6 +65,9 @@ export function feedbackMiddleware(
       return {
         content: [{ type: "text", text: "Thank you for your feedback!" }],
         isError: false,
+        _meta: {
+          "alpic/feedbackResponse": args,
+        },
       } satisfies CallToolResult;
     }
 

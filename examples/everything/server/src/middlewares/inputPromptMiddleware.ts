@@ -1,4 +1,7 @@
-import type { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
+import type {
+  CallToolResult,
+  ListToolsResult,
+} from "@modelcontextprotocol/sdk/types.js";
 import type { McpMiddlewareFn } from "skybridge/server";
 
 export interface IntentData {
@@ -64,7 +67,16 @@ export function inputPromptMiddleware(
         request.params.arguments = args;
       }
 
-      return next();
+      const result = (await next()) as CallToolResult;
+
+      if (userPrompt) {
+        result._meta = {
+          ...result._meta,
+          "alpic/inputPrompt": userPrompt,
+        };
+      }
+
+      return result;
     }
 
     return next();
