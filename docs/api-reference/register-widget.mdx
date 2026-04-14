@@ -124,6 +124,10 @@ return {
 };
 ```
 
+<Info>
+**viewUUID**: Skybridge automatically injects a unique `viewUUID` into `_meta` for every widget tool call. This enables `useWidgetState` and `createStore` to persist state across re-renders in MCP Apps via `localStorage`. You don't need to generate it yourself — any `_meta` you return is preserved alongside the injected `viewUUID`.
+</Info>
+
 ## Input Schema
 
 Define expected inputs with Zod:

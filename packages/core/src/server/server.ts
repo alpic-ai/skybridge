@@ -564,13 +564,27 @@ export class McpServer<
       toolMeta.ui = { resourceUri: widgetConfig.uri };
     }
 
+    const wrappedToolCallback: ToolHandler<TInput, TReturn> = async (
+      args,
+      extra,
+    ) => {
+      const result = await toolCallback(args, extra);
+      return {
+        ...result,
+        _meta: {
+          ...(result as { _meta?: Record<string, unknown> })._meta,
+          viewUUID: crypto.randomUUID(),
+        },
+      };
+    };
+
     this.registerTool(
       name,
       {
         ...toolConfig,
         _meta: toolMeta,
       },
-      toolCallback,
+      wrappedToolCallback,
     );
 
     return this as AddTool<
