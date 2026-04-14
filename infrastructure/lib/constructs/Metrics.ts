@@ -1,4 +1,4 @@
-import { CfnOutput } from "aws-cdk-lib";
+import { CfnOutput, Stack } from "aws-cdk-lib";
 import {
   AmazonLinuxCpuType,
   CfnEIP,
@@ -18,7 +18,8 @@ import {
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 
-const VECTOR_CONFIG = `
+function vectorConfig(region: string): string {
+  return `
 [sources.statsd_in]
 type = "statsd"
 address = "0.0.0.0:8125"
@@ -44,10 +45,12 @@ condition = '''
 type = "aws_cloudwatch_metrics"
 inputs = ["filter_valid_versions"]
 default_namespace = "Skybridge"
-region = "us-east-1"
+region = "${region}"
 `;
+}
 
-const REFRESH_VERSIONS_SCRIPT = `#!/bin/bash
+const REFRESH_VERSIONS_SCRIPT = `
+#!/bin/bash
 # Fetch all published skybridge versions from npm and extract unique major.minor pairs.
 # Vector reloads enrichment tables automatically when the file changes.
 set -euo pipefail
@@ -103,18 +106,19 @@ export class Metrics extends Construct {
 
     const userData = UserData.forLinux();
     userData.addCommands(
-      // Install Vector (ARM64 package for t4g instances)
-      "curl -1sLf https://repositories.timber.io/public/vector/cfg/setup/bash.rpm.sh | bash",
-      "yum install -y vector jq",
+      // Install Vector (pinned ARM64 RPM) and jq
+      "yum install -y jq",
+      "rpm -i https://packages.timber.io/vector/0.45.0/vector-0.45.0-1.aarch64.rpm",
 
       // Write Vector config
       "mkdir -p /etc/vector",
-      `cat > /etc/vector/vector.toml << 'VECTORCFG'${VECTOR_CONFIG}VECTORCFG`,
+      `cat > /etc/vector/vector.toml << 'VECTORCFG'${vectorConfig(Stack.of(this).region)}VECTORCFG`,
 
-      // Seed allowed-versions.csv so Vector can start before the first cron run
+      // Seed allowed-versions.csv so Vector can start even if npm is unreachable
+      "echo 'version' > /etc/vector/allowed-versions.csv",
       `cat > /etc/vector/refresh-versions.sh << 'SCRIPT'${REFRESH_VERSIONS_SCRIPT}SCRIPT`,
       "chmod +x /etc/vector/refresh-versions.sh",
-      "/etc/vector/refresh-versions.sh",
+      "/etc/vector/refresh-versions.sh || true",
 
       // Schedule version list refresh every 15 minutes
       'echo "*/15 * * * * root /etc/vector/refresh-versions.sh" > /etc/cron.d/refresh-skybridge-versions',
