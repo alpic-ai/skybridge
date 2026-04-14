@@ -16,6 +16,20 @@ type PickContext<K extends readonly McpAppContextKey[]> = {
   [P in K[number]]: McpAppContext[P];
 };
 
+const STORAGE_PREFIX = "sb:";
+const MAX_STORAGE_ENTRIES = 200;
+
+function findStorageKey(viewUUID: string): string | undefined {
+  const suffix = `:${viewUUID}`;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key?.startsWith(STORAGE_PREFIX) && key.endsWith(suffix)) {
+      return key;
+    }
+  }
+  return undefined;
+}
+
 export class McpAppAdaptor implements Adaptor {
   private static instance: McpAppAdaptor | null = null;
   private stores: {
@@ -268,15 +282,19 @@ export class McpAppAdaptor implements Adaptor {
     });
   }
 
+  // localStorage keys: sb:{unix_ms}:{viewUUID}
+  // Timestamp is updated on every write (LRU); eviction drops the least recently used entries.
   private restoreFromLocalStorage(viewUUID: string): void {
     try {
-      const stored = localStorage.getItem(viewUUID);
-      if (stored !== null) {
-        const state = JSON.parse(stored) as Record<string, unknown>;
-        this._widgetState = state;
-        this.widgetStateListeners.forEach((listener) => {
-          listener();
-        });
+      const existingKey = findStorageKey(viewUUID);
+      if (existingKey) {
+        const stored = localStorage.getItem(existingKey);
+        if (stored !== null) {
+          this._widgetState = JSON.parse(stored);
+          this.widgetStateListeners.forEach((listener) => {
+            listener();
+          });
+        }
       }
     } catch (err) {
       console.error(err);
@@ -288,7 +306,30 @@ export class McpAppAdaptor implements Adaptor {
       return;
     }
     try {
-      localStorage.setItem(this._viewUUID, JSON.stringify(state));
+      // Remove old key for this view, write with fresh timestamp (LRU)
+      const oldKey = findStorageKey(this._viewUUID);
+      if (oldKey) {
+        localStorage.removeItem(oldKey);
+      }
+      const newKey = `${STORAGE_PREFIX}${Date.now()}:${this._viewUUID}`;
+      localStorage.setItem(newKey, JSON.stringify(state));
+
+      // lru cleanup
+      const keys: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(STORAGE_PREFIX)) {
+          keys.push(key);
+        }
+      }
+      if (keys.length <= MAX_STORAGE_ENTRIES) {
+        return;
+      }
+      keys.sort();
+      const toRemove = keys.slice(0, keys.length - MAX_STORAGE_ENTRIES);
+      for (const key of toRemove) {
+        localStorage.removeItem(key);
+      }
     } catch (err) {
       console.error(err);
     }
