@@ -107,7 +107,7 @@ export class Metrics extends Construct {
     userData.addCommands(
       // Install Vector (pinned ARM64 RPM) and jq
       "yum install -y jq",
-      "rpm -i https://packages.timber.io/vector/0.45.0/vector-0.45.0-1.aarch64.rpm",
+      "rpm -i https://yum.vector.dev/stable/vector-0/aarch64/vector-0.46.1-1.aarch64.rpm",
 
       // Write Vector config
       "mkdir -p /etc/vector",
