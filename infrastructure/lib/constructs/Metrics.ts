@@ -1,4 +1,6 @@
-import { CfnOutput } from "aws-cdk-lib";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { CfnOutput, Stack } from "aws-cdk-lib";
 import {
   AmazonLinuxCpuType,
   CfnEIP,
@@ -18,10 +20,21 @@ import {
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 
+const VECTOR_CONFIG = readFileSync(
+  join(__dirname, "vector", "vector.toml"),
+  "utf-8",
+);
+
+const REFRESH_VERSIONS_SCRIPT = readFileSync(
+  join(__dirname, "vector", "refresh-versions.sh"),
+  "utf-8",
+);
+
 /**
- * A t4g.nano EC2 instance running the CloudWatch Agent with StatsD receiver.
- * Receives UDP StatsD metrics from Skybridge apps on port 8125 and forwards
- * them to CloudWatch under the "Skybridge" namespace.
+ * A t4g.nano EC2 instance running Vector as a StatsD receiver with version
+ * filtering. Incoming metrics are checked against published skybridge versions
+ * (refreshed from npm every minute) and only forwarded to CloudWatch if the
+ * version tag matches a known release.
  *
  * After the first `cdk deploy`, read the "MetricsElasticIp" stack output and
  * hardcode it as STATSD_HOST in packages/core/src/server/metric.ts.
@@ -40,6 +53,7 @@ export class Metrics extends Construct {
       assumedBy: new ServicePrincipal("ec2.amazonaws.com"),
       managedPolicies: [
         ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy"),
+        ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore"),
       ],
     });
 
@@ -56,22 +70,32 @@ export class Metrics extends Construct {
 
     const userData = UserData.forLinux();
     userData.addCommands(
-      "yum install -y amazon-cloudwatch-agent",
-      `cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'EOF'
-{
-  "metrics": {
-    "namespace": "Skybridge",
-    "metrics_collected": {
-      "statsd": {
-        "service_address": ":8125",
-        "metrics_collection_interval": 60,
-        "metrics_aggregation_interval": 60
-      }
-    }
-  }
-}
-EOF`,
-      "/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json",
+      // Install Vector (pinned ARM64 RPM) and jq
+      "yum install -y jq",
+      "rpm -i https://yum.vector.dev/stable/vector-0/aarch64/vector-0.46.1-1.aarch64.rpm",
+
+      // Write Vector config (remove default demo config shipped with the RPM)
+      "rm -f /etc/vector/vector.yaml",
+      "mkdir -p /etc/vector",
+      `cat > /etc/vector/vector.toml << 'VECTORCFG'\n${VECTOR_CONFIG.replace("__REGION__", Stack.of(this).region).trim()}\nVECTORCFG`,
+
+      // Seed allowed-versions.csv so Vector can start even if npm is unreachable
+      "echo 'version' > /etc/vector/allowed-versions.csv",
+      "chmod 644 /etc/vector/allowed-versions.csv",
+      `cat > /etc/vector/refresh-versions.sh << 'SCRIPT'\n${REFRESH_VERSIONS_SCRIPT.trim()}\nSCRIPT`,
+      "chmod +x /etc/vector/refresh-versions.sh",
+      "/etc/vector/refresh-versions.sh || true",
+
+      // Schedule version list refresh every minute via systemd timer (cronie not available on AL2023)
+      `cat > /etc/systemd/system/refresh-versions.service << 'UNIT'\n[Unit]\nDescription=Refresh skybridge allowed versions\n[Service]\nType=oneshot\nExecStart=/etc/vector/refresh-versions.sh\nUNIT`,
+      `cat > /etc/systemd/system/refresh-versions.timer << 'UNIT'\n[Unit]\nDescription=Refresh skybridge allowed versions every minute\n[Timer]\nOnBootSec=60\nOnUnitActiveSec=60\n[Install]\nWantedBy=timers.target\nUNIT`,
+      "systemctl enable --now refresh-versions.timer",
+
+      // Point Vector at our config (the RPM default is vector.yaml which we removed)
+      "mkdir -p /etc/default",
+      "echo 'VECTOR_CONFIG=/etc/vector/vector.toml' > /etc/default/vector",
+      "systemctl enable vector",
+      "systemctl start vector",
     );
 
     const instance = new Instance(this, "Instance", {

@@ -1,0 +1,35 @@
+[sources.statsd_in]
+type = "statsd"
+address = "0.0.0.0:8125"
+mode = "udp"
+
+[enrichment_tables.allowed_versions]
+type = "file"
+
+  [enrichment_tables.allowed_versions.file]
+  path = "/etc/vector/allowed-versions.csv"
+  encoding.type = "csv"
+
+[transforms.filter_known_metrics]
+type = "filter"
+inputs = ["statsd_in"]
+condition = 'includes(["Requests"], .name)'
+
+[transforms.filter_valid_versions]
+type = "filter"
+inputs = ["filter_known_metrics"]
+condition = '''
+  tags_array = find_enrichment_table_records("allowed_versions", { "version": to_string(.tags.version) ?? "" }) ?? []
+  length(tags_array) > 0
+'''
+
+[transforms.strip_host]
+type = "remap"
+inputs = ["filter_valid_versions"]
+source = 'del(.tags.host)'
+
+[sinks.cloudwatch]
+type = "aws_cloudwatch_metrics"
+inputs = ["strip_host"]
+default_namespace = "Skybridge"
+region = "__REGION__"
