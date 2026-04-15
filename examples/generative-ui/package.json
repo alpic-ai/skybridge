@@ -15,7 +15,7 @@
     "@json-render/core": "^0.14.1",
     "@json-render/react": "^0.14.1",
     "@json-render/shadcn": "^0.14.1",
-    "@modelcontextprotocol/sdk": "^1.25.2",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@tailwindcss/vite": "^4.1.18",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
