@@ -3,7 +3,7 @@ import path from "node:path";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import cors from "cors";
 import express from "express";
-import type { McpServer } from "./server";
+import type { McpServer } from "./server.js";
 
 function applyMiddlewares(
   app: express.Express,

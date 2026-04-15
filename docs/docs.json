@@ -38,6 +38,15 @@
                 ]
               },
               "quickstart/create-new-app",
+              {
+                "group": "Add to Existing App",
+                "icon": "puzzle-piece",
+                "pages": [
+                  "quickstart/add-to-existing-app",
+                  "quickstart/add-to-existing-app/server",
+                  "quickstart/add-to-existing-app/web"
+                ]
+              },
               "quickstart/migrate",
               "quickstart/test-your-app",
               "quickstart/build-for-production",
@@ -168,6 +177,7 @@
             "group": "3rd Party Apps",
             "pages": [
               "showcase/awaze",
+              "showcase/evaneos",
               "showcase/lumo"
             ]
           }
