@@ -30,14 +30,13 @@ type = "file"
 
   [enrichment_tables.allowed_versions.file]
   path = "/etc/vector/allowed-versions.csv"
-  encoding.codec = "csv"
-  encoding.csv.fields = ["version"]
+  encoding.type = "csv"
 
 [transforms.filter_valid_versions]
 type = "filter"
 inputs = ["statsd_in"]
 condition = '''
-  tags_array = get_enrichment_table_records("allowed_versions", { "version": to_string(.tags.version) ?? "" }) ?? []
+  tags_array = find_enrichment_table_records("allowed_versions", { "version": to_string(.tags.version) ?? "" }) ?? []
   length(tags_array) > 0
 '''
 
