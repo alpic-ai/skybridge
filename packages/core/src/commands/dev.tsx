@@ -1,8 +1,8 @@
 import { Command, Flags } from "@oclif/core";
 import { Box, render, Text } from "ink";
-import { useMemo } from "react";
 import { resolvePort } from "../cli/detect-port.js";
 import { Header } from "../cli/header.js";
+import { useMessages } from "../cli/use-messages.js";
 import { useNodemon } from "../cli/use-nodemon.js";
 import { useTunnel } from "../cli/use-tunnel.js";
 import { useTypeScriptCheck } from "../cli/use-typescript-check.js";
@@ -37,16 +37,9 @@ export default class Dev extends Command {
 
     const App = () => {
       const tsErrors = useTypeScriptCheck();
-      const nodemonMessages = useNodemon(env);
-      const tunnelState = useTunnel(flags.tunnel ? port : null);
-
-      const messages = useMemo(
-        () =>
-          [...nodemonMessages, ...tunnelState.logs]
-            .sort((a, b) => a.ts - b.ts)
-            .slice(-10),
-        [nodemonMessages, tunnelState.logs],
-      );
+      const [messages, pushMessage] = useMessages();
+      useNodemon(env, pushMessage);
+      const tunnelState = useTunnel(flags.tunnel ? port : null, pushMessage);
 
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>
