@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { CfnOutput, Stack } from "aws-cdk-lib";
 import {
   AmazonLinuxCpuType,
@@ -18,58 +20,20 @@ import {
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 
-function vectorConfig(region: string): string {
-  return `
-[sources.statsd_in]
-type = "statsd"
-address = "0.0.0.0:8125"
-mode = "udp"
+const VECTOR_CONFIG = readFileSync(
+  join(__dirname, "vector", "vector.toml"),
+  "utf-8",
+);
 
-[enrichment_tables.allowed_versions]
-type = "file"
-
-  [enrichment_tables.allowed_versions.file]
-  path = "/etc/vector/allowed-versions.csv"
-  encoding.type = "csv"
-
-[transforms.filter_valid_versions]
-type = "filter"
-inputs = ["statsd_in"]
-condition = '''
-  tags_array = find_enrichment_table_records("allowed_versions", { "version": to_string(.tags.version) ?? "" }) ?? []
-  length(tags_array) > 0
-'''
-
-[sinks.cloudwatch]
-type = "aws_cloudwatch_metrics"
-inputs = ["filter_valid_versions"]
-default_namespace = "Skybridge"
-region = "${region}"
-`;
-}
-
-const REFRESH_VERSIONS_SCRIPT = `
-#!/bin/bash
-# Fetch all published skybridge versions from npm and extract unique major.minor pairs.
-# Vector reloads enrichment tables automatically when the file changes.
-set -euo pipefail
-
-TMP=$(mktemp)
-echo "version" > "$TMP"
-
-curl -sf https://registry.npmjs.org/skybridge \
-  | jq -r '.versions | keys[]' \
-  | awk -F. '{print $1"."$2}' \
-  | sort -uV \
-  >> "$TMP"
-
-mv "$TMP" /etc/vector/allowed-versions.csv
-`;
+const REFRESH_VERSIONS_SCRIPT = readFileSync(
+  join(__dirname, "vector", "refresh-versions.sh"),
+  "utf-8",
+);
 
 /**
  * A t4g.nano EC2 instance running Vector as a StatsD receiver with version
  * filtering. Incoming metrics are checked against published skybridge versions
- * (refreshed from npm every 15 minutes) and only forwarded to CloudWatch if the
+ * (refreshed from npm every minute) and only forwarded to CloudWatch if the
  * version tag matches a known release.
  *
  * After the first `cdk deploy`, read the "MetricsElasticIp" stack output and
@@ -89,6 +53,7 @@ export class Metrics extends Construct {
       assumedBy: new ServicePrincipal("ec2.amazonaws.com"),
       managedPolicies: [
         ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy"),
+        ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore"),
       ],
     });
 
@@ -109,20 +74,26 @@ export class Metrics extends Construct {
       "yum install -y jq",
       "rpm -i https://yum.vector.dev/stable/vector-0/aarch64/vector-0.46.1-1.aarch64.rpm",
 
-      // Write Vector config
+      // Write Vector config (remove default demo config shipped with the RPM)
+      "rm -f /etc/vector/vector.yaml",
       "mkdir -p /etc/vector",
-      `cat > /etc/vector/vector.toml << 'VECTORCFG'${vectorConfig(Stack.of(this).region)}VECTORCFG`,
+      `cat > /etc/vector/vector.toml << 'VECTORCFG'\n${VECTOR_CONFIG.replace("__REGION__", Stack.of(this).region).trim()}\nVECTORCFG`,
 
       // Seed allowed-versions.csv so Vector can start even if npm is unreachable
       "echo 'version' > /etc/vector/allowed-versions.csv",
-      `cat > /etc/vector/refresh-versions.sh << 'SCRIPT'${REFRESH_VERSIONS_SCRIPT}SCRIPT`,
+      "chmod 644 /etc/vector/allowed-versions.csv",
+      `cat > /etc/vector/refresh-versions.sh << 'SCRIPT'\n${REFRESH_VERSIONS_SCRIPT.trim()}\nSCRIPT`,
       "chmod +x /etc/vector/refresh-versions.sh",
       "/etc/vector/refresh-versions.sh || true",
 
-      // Schedule version list refresh every 15 minutes
-      'echo "*/15 * * * * root /etc/vector/refresh-versions.sh" > /etc/cron.d/refresh-skybridge-versions',
+      // Schedule version list refresh every minute via systemd timer (cronie not available on AL2023)
+      `cat > /etc/systemd/system/refresh-versions.service << 'UNIT'\n[Unit]\nDescription=Refresh skybridge allowed versions\n[Service]\nType=oneshot\nExecStart=/etc/vector/refresh-versions.sh\nUNIT`,
+      `cat > /etc/systemd/system/refresh-versions.timer << 'UNIT'\n[Unit]\nDescription=Refresh skybridge allowed versions every minute\n[Timer]\nOnBootSec=60\nOnUnitActiveSec=60\n[Install]\nWantedBy=timers.target\nUNIT`,
+      "systemctl enable --now refresh-versions.timer",
 
-      // Start Vector
+      // Point Vector at our config (the RPM default is vector.yaml which we removed)
+      "mkdir -p /etc/default",
+      "echo 'VECTOR_CONFIG=/etc/vector/vector.toml' > /etc/default/vector",
       "systemctl enable vector",
       "systemctl start vector",
     );
