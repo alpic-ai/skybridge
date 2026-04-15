@@ -41,7 +41,10 @@ export default class Dev extends Command {
       const tunnelState = useTunnel(flags.tunnel ? port : null);
 
       const messages = useMemo(
-        () => [...nodemonMessages, ...tunnelState.logs].slice(-10),
+        () =>
+          [...nodemonMessages, ...tunnelState.logs]
+            .sort((a, b) => a.ts - b.ts)
+            .slice(-10),
         [nodemonMessages, tunnelState.logs],
       );
 
