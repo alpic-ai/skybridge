@@ -192,3 +192,146 @@
   color: var(--accent-text);
   font-weight: bold;
 }
+
+.checkout-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.checkout-button.polling {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Success card */
+
+.success-card {
+  --success: #248a52;
+  --success-bg: #edf8f2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.75rem 1.25rem 1.25rem;
+  background: var(--success-bg);
+  border-radius: 12px;
+}
+
+.dark .success-card {
+  --success: #4cd68a;
+  --success-bg: #162e22;
+}
+
+.success-icon {
+  color: var(--success);
+  animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pop-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.success-header {
+  text-align: center;
+  margin-bottom: 0.25rem;
+}
+
+.success-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.success-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+.success-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--success);
+  opacity: 0.15;
+}
+
+.success-items {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.25rem 0;
+}
+
+.success-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.success-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 0.75rem;
+}
+
+.success-item-price {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.success-total {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--success);
+}
+
+.checkout-status {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+.checkout-status.expired {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.dark .checkout-status.expired {
+  color: #fbbf24;
+  background: #3a2a1a;
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--accent-text);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

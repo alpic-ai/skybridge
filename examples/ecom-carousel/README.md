@@ -1,20 +1,16 @@
 # Ecommerce Carousel Example
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): an interactive product carousel with cart, localization, and modal checkout.
+An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): an interactive product carousel with cart, localization, and Stripe Checkout integration.
 
 ## What This Example Showcases
 
+- **Stripe Checkout**: Real payment flow using Stripe-hosted Checkout (redirect mode) with session status polling
 - **Interactive Widget Rendering**: A React-based widget that displays an interactive product carousel directly in AI conversations
-- **Tool Info Access**: Widgets access tool input, output, and metadata via `useToolInfo()` hook
+- **Tool Calling from Widget**: Widget invokes `create-checkout` and `check-checkout-status` server tools via `useCallTool()`
 - **Theme Support**: Adapts to light/dark mode using the `useLayout()` hook
 - **Localization**: Translates UI based on user locale via `useUser()` hook (English, French, Spanish, German)
 - **Persistent State**: Maintains cart state across re-renders using `useWidgetState()` hook
-- **Modal Dialogs**: Opens checkout modal via `useRequestModal()` hook
-- **External Links**: Opens external URL for checkout completion via `useOpenExternal()` hook
-- **External API Integration**: Demonstrates fetching data from REST APIs
 - **Hot Module Replacement**: Live reloading of widget components during development
-
-This example serves as a comprehensive reference for building sophisticated, interactive widgets that leverage Skybridge's full feature set.
 
 ## Live Demo
 
@@ -25,6 +21,7 @@ This example serves as a comprehensive reference for building sophisticated, int
 ### Prerequisites
 
 - Node.js 24+
+- A Stripe account (sandbox mode works)
 
 ### Local Development
 
@@ -40,7 +37,15 @@ pnpm install
 bun install
 ```
 
-#### 2. Start your local server
+#### 2. Configure Stripe
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` and paste your Stripe **test** secret key (starts with `sk_test_`). You can find it in the [Stripe Dashboard > Developers > API keys](https://dashboard.stripe.com/test/apikeys).
+
+#### 3. Start your local server
 
 Run the development server from the root directory:
 
@@ -59,7 +64,7 @@ This command starts:
 - Your MCP server at `http://localhost:3000/mcp`.
 - Skybridge DevTools UI at `http://localhost:3000/`.
 
-#### 3. Project structure
+#### 4. Project structure
 
 ```
 ├── server/
