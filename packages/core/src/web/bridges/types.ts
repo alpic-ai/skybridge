@@ -87,7 +87,13 @@ export type SetWidgetStateAction =
   | WidgetState
   | ((prevState: WidgetState | null) => WidgetState);
 
-export type FileMetadata = { fileId: string };
+export type FileMetadata = {
+  fileId: string;
+  fileName?: string;
+  mimeType?: string;
+};
+
+export type UploadFileOptions = { library?: boolean };
 
 export type RequestModalOptions = {
   title?: string;
@@ -112,8 +118,9 @@ export interface Adaptor {
   sendFollowUpMessage(prompt: string): Promise<void>;
   openExternal(href: string, options?: OpenExternalOptions): void;
   setWidgetState(stateOrUpdater: SetWidgetStateAction): Promise<void>;
-  uploadFile(file: File): Promise<FileMetadata>;
+  uploadFile(file: File, options?: UploadFileOptions): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
+  selectFiles(): Promise<FileMetadata[]>;
   openModal(options: RequestModalOptions): void;
   setOpenInAppUrl(href: string): Promise<void>;
 }
