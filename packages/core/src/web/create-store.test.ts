@@ -1,3 +1,4 @@
+import { cleanup } from "@testing-library/react";
 import {
   afterEach,
   beforeEach,
@@ -69,7 +70,7 @@ describe("createStore", () => {
         name: "initial",
       });
       const windowState = { count: 20, name: "window" };
-      OpenaiMock.widgetState = windowState;
+      OpenaiMock.widgetState = { modelContent: windowState };
 
       const store = createStore(storeCreator);
 
@@ -93,7 +94,10 @@ describe("createStore", () => {
       });
 
       const callArgs = OpenaiMock.setWidgetState.mock.calls[0]?.[0];
-      expect(callArgs).toEqual({ count: 1 });
+      expect(callArgs).toEqual({
+        modelContent: { count: 1 },
+        privateContent: {},
+      });
     });
 
     it("should filter widget context from initial state", () => {
@@ -105,7 +109,7 @@ describe("createStore", () => {
         count: 5,
         [WIDGET_CONTEXT_KEY]: "context-value",
       };
-      OpenaiMock.widgetState = windowState;
+      OpenaiMock.widgetState = { modelContent: windowState };
 
       const store = createStore(storeCreator);
 
@@ -122,7 +126,8 @@ describe("createStore", () => {
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
-    afterEach(() => {
+    afterEach(async () => {
+      cleanup();
       McpAppBridge.resetInstance();
       McpAppAdaptor.resetInstance();
     });

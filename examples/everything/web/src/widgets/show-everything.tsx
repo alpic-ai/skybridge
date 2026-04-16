@@ -2,21 +2,21 @@ import "@/index.css";
 
 import { useState } from "react";
 import { mountWidget, useOpenExternal, useRequestModal } from "skybridge/web";
-import { CreateStoreTab } from "./tabs/create-store-tab";
-import { DataLlmTab } from "./tabs/data-llm-tab";
-import { HomeTab } from "./tabs/home-tab";
-import { ImageTab } from "./tabs/image-tab";
-import { ToolInfoTab } from "./tabs/tool-info-tab";
-import { UseCallToolTab } from "./tabs/use-call-tool-tab";
-import { UseDisplayModeTab } from "./tabs/use-display-mode-tab";
-import { UseFilesTab } from "./tabs/use-files-tab";
-import { UseLayoutTab } from "./tabs/use-layout-tab";
-import { UseOpenExternalTab } from "./tabs/use-open-external-tab";
-import { UseRequestModalTab } from "./tabs/use-request-modal-tab";
-import { UseSendFollowUpMessageTab } from "./tabs/use-send-follow-up-message-tab";
-import { UseSetOpenInAppUrlTab } from "./tabs/use-set-open-in-app-url";
-import { UseUserTab } from "./tabs/use-user-tab";
-import { UseWidgetStateTab } from "./tabs/use-widget-state-tab";
+import { CreateStoreTab } from "./tabs/create-store-tab.js";
+import { DataLlmTab } from "./tabs/data-llm-tab.js";
+import { HomeTab } from "./tabs/home-tab.js";
+import { ImageTab } from "./tabs/image-tab/index.js";
+import { ToolInfoTab } from "./tabs/tool-info-tab.js";
+import { UseCallToolTab } from "./tabs/use-call-tool-tab.js";
+import { UseDisplayModeTab } from "./tabs/use-display-mode-tab.js";
+import { UseFilesTab } from "./tabs/use-files-tab.js";
+import { UseLayoutTab } from "./tabs/use-layout-tab.js";
+import { UseOpenExternalTab } from "./tabs/use-open-external-tab.js";
+import { UseRequestModalTab } from "./tabs/use-request-modal-tab.js";
+import { UseSendFollowUpMessageTab } from "./tabs/use-send-follow-up-message-tab.js";
+import { UseSetOpenInAppUrlTab } from "./tabs/use-set-open-in-app-url.js";
+import { UseUserTab } from "./tabs/use-user-tab.js";
+import { UseWidgetStateTab } from "./tabs/use-widget-state-tab.js";
 
 const TABS = {
   Home: { docPath: "", Component: HomeTab },

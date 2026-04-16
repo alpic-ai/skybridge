@@ -18,7 +18,7 @@ describe("create-skybridge", () => {
     });
   });
 
-  it("should copy the template", async () => {
+  it("should copy the template", { timeout: 10_000 }, async () => {
     const name = `../../${tempDirName}//project$`;
     await init([name]);
     await fs.access(
@@ -29,7 +29,7 @@ describe("create-skybridge", () => {
     ).rejects.toThrowError();
   });
 
-  it("should download template from repo", async () => {
+  it("should download template from repo", { timeout: 10_000 }, async () => {
     const name = `../../${tempDirName}//project$`;
     await init([
       name,

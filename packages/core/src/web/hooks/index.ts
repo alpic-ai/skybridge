@@ -8,7 +8,7 @@ export {
 export { useDisplayMode } from "./use-display-mode.js";
 export { useFiles } from "./use-files.js";
 export { type LayoutState, useLayout } from "./use-layout.js";
-export { useOpenExternal } from "./use-open-external.js";
+export { type OpenExternalFn, useOpenExternal } from "./use-open-external.js";
 export { useRequestModal } from "./use-request-modal.js";
 export { useSendFollowUpMessage } from "./use-send-follow-up-message.js";
 export { useSetOpenInAppUrl } from "./use-set-open-in-app-url.js";

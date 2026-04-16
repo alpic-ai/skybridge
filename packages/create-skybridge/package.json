@@ -1,6 +1,6 @@
 {
   "name": "create-skybridge",
-  "version": "0.0.0",
+  "version": "0.35.13",
   "type": "module",
   "license": "MIT",
   "author": "Alpic",
@@ -21,16 +21,17 @@
     "test": "pnpm run test:unit && pnpm run test:type && pnpm run test:format",
     "test:unit": "vitest run",
     "test:type": "tsc --noEmit",
+    "format": "biome check --write --error-on-warnings",
     "test:format": "biome ci",
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@clack/prompts": "^0.11.0",
-    "giget": "^2.0.0",
+    "@clack/prompts": "^1.1.0",
+    "giget": "^3.2.0",
     "mri": "^1.2.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.17"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
   }
 }

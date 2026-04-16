@@ -1,0 +1,1135 @@
+[
+    {
+        "id": "a7f3d2e1",
+        "word": {
+            "en": "apple",
+            "fr": "pomme",
+            "it": "mela",
+            "pt": "maçã",
+            "es": "manzana"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f34e.svg"
+    },
+    {
+        "id": "b9c4e8f2",
+        "word": {
+            "en": "banana",
+            "fr": "banane",
+            "it": "banana",
+            "pt": "banana",
+            "es": "plátano"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f34c.svg"
+    },
+    {
+        "id": "c1d5a6b3",
+        "word": {
+            "en": "strawberry",
+            "fr": "fraise",
+            "it": "fragola",
+            "pt": "morango",
+            "es": "fresa"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f353.svg"
+    },
+    {
+        "id": "d4e7b2c8",
+        "word": {
+            "en": "orange",
+            "fr": "orange",
+            "it": "arancia",
+            "pt": "laranja",
+            "es": "naranja"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f34a.svg"
+    },
+    {
+        "id": "e2f8c3d9",
+        "word": {
+            "en": "lemon",
+            "fr": "citron",
+            "it": "limone",
+            "pt": "limão",
+            "es": "limón"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f34b.svg"
+    },
+    {
+        "id": "f5a1d4e7",
+        "word": {
+            "en": "watermelon",
+            "fr": "pastèque",
+            "it": "anguria",
+            "pt": "melancia",
+            "es": "sandía"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f349.svg"
+    },
+    {
+        "id": "g6b2e5f8",
+        "word": {
+            "en": "grapes",
+            "fr": "raisins",
+            "it": "uva",
+            "pt": "uvas",
+            "es": "uvas"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f347.svg"
+    },
+    {
+        "id": "h7c3f6a1",
+        "word": {
+            "en": "cherry",
+            "fr": "cerise",
+            "it": "ciliegia",
+            "pt": "cereja",
+            "es": "cereza"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f352.svg"
+    },
+    {
+        "id": "i8d4a7b2",
+        "word": {
+            "en": "pineapple",
+            "fr": "ananas",
+            "it": "ananas",
+            "pt": "abacaxi",
+            "es": "piña"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f34d.svg"
+    },
+    {
+        "id": "j9e5b8c3",
+        "word": {
+            "en": "peach",
+            "fr": "pêche",
+            "it": "pesca",
+            "pt": "pêssego",
+            "es": "melocotón"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f351.svg"
+    },
+    {
+        "id": "k1f6c9d4",
+        "word": {
+            "en": "pear",
+            "fr": "poire",
+            "it": "pera",
+            "pt": "pêra",
+            "es": "pera"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f350.svg"
+    },
+    {
+        "id": "m2a7d1e5",
+        "word": {
+            "en": "carrot",
+            "fr": "carotte",
+            "it": "carota",
+            "pt": "cenoura",
+            "es": "zanahoria"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f955.svg"
+    },
+    {
+        "id": "n3b8e2f6",
+        "word": {
+            "en": "tomato",
+            "fr": "tomate",
+            "it": "pomodoro",
+            "pt": "tomate",
+            "es": "tomate"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f345.svg"
+    },
+    {
+        "id": "p4c9f3a7",
+        "word": {
+            "en": "broccoli",
+            "fr": "brocoli",
+            "it": "broccolo",
+            "pt": "brócolis",
+            "es": "brócoli"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f966.svg"
+    },
+    {
+        "id": "q5d1a4b8",
+        "word": {
+            "en": "corn",
+            "fr": "maïs",
+            "it": "mais",
+            "pt": "milho",
+            "es": "maíz"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f33d.svg"
+    },
+    {
+        "id": "r6e2b5c9",
+        "word": {
+            "en": "pepper",
+            "fr": "poivron",
+            "it": "peperone",
+            "pt": "pimentão",
+            "es": "pimiento"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f336.svg"
+    },
+    {
+        "id": "s7f3c6d1",
+        "word": {
+            "en": "onion",
+            "fr": "oignon",
+            "it": "cipolla",
+            "pt": "cebola",
+            "es": "cebolla"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f9c5.svg"
+    },
+    {
+        "id": "t8a4d7e2",
+        "word": {
+            "en": "cucumber",
+            "fr": "concombre",
+            "it": "cetriolo",
+            "pt": "pepino",
+            "es": "pepino"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f952.svg"
+    },
+    {
+        "id": "u9b5e8f3",
+        "word": {
+            "en": "cat",
+            "fr": "chat",
+            "it": "gatto",
+            "pt": "gato",
+            "es": "gato"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f408.svg"
+    },
+    {
+        "id": "v1c6f9a4",
+        "word": {
+            "en": "dog",
+            "fr": "chien",
+            "it": "cane",
+            "pt": "cachorro",
+            "es": "perro"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f415.svg"
+    },
+    {
+        "id": "w2d7a1b5",
+        "word": {
+            "en": "elephant",
+            "fr": "éléphant",
+            "it": "elefante",
+            "pt": "elefante",
+            "es": "elefante"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f418.svg"
+    },
+    {
+        "id": "x3e8b2c6",
+        "word": {
+            "en": "butterfly",
+            "fr": "papillon",
+            "it": "farfalla",
+            "pt": "borboleta",
+            "es": "mariposa"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f98b.svg"
+    },
+    {
+        "id": "y4f9c3d7",
+        "word": {
+            "en": "bird",
+            "fr": "oiseau",
+            "it": "uccello",
+            "pt": "pássaro",
+            "es": "pájaro"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f426.svg"
+    },
+    {
+        "id": "z5a1d4e8",
+        "word": {
+            "en": "fish",
+            "fr": "poisson",
+            "it": "pesce",
+            "pt": "peixe",
+            "es": "pez"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f41f.svg"
+    },
+    {
+        "id": "a6b2e5f9",
+        "word": {
+            "en": "rabbit",
+            "fr": "lapin",
+            "it": "coniglio",
+            "pt": "coelho",
+            "es": "conejo"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f407.svg"
+    },
+    {
+        "id": "b7c3f6a2",
+        "word": {
+            "en": "book",
+            "fr": "livre",
+            "it": "libro",
+            "pt": "livro",
+            "es": "libro"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f4d6.svg"
+    },
+    {
+        "id": "d9e5b8c4",
+        "word": {
+            "en": "pencil",
+            "fr": "crayon",
+            "it": "matita",
+            "pt": "lápis",
+            "es": "lápiz"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/270f.svg"
+    },
+    {
+        "id": "e1f6c9d5",
+        "word": {
+            "en": "clock",
+            "fr": "horloge",
+            "it": "orologio",
+            "pt": "relógio",
+            "es": "reloj"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f551.svg"
+    },
+    {
+        "id": "f2a7d1e6",
+        "word": {
+            "en": "star",
+            "fr": "étoile",
+            "it": "stella",
+            "pt": "estrela",
+            "es": "estrella"
+        },
+        "illustrationUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f5/Star_icon-72a7cf.svg"
+    },
+    {
+        "id": "a3b8e2f7",
+        "word": {
+            "en": "heart",
+            "fr": "cœur",
+            "it": "cuore",
+            "pt": "coração",
+            "es": "corazón"
+        },
+        "illustrationUrl": "https://upload.wikimedia.org/wikipedia/commons/4/42/Love_Heart_SVG.svg"
+    },
+    {
+        "id": "b4c9f3a8",
+        "word": {
+            "en": "house",
+            "fr": "maison",
+            "it": "casa",
+            "pt": "casa",
+            "es": "casa"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f3e0.svg"
+    },
+    {
+        "id": "c5d1a4b9",
+        "word": {
+            "en": "tree",
+            "fr": "arbre",
+            "it": "albero",
+            "pt": "árvore",
+            "es": "árbol"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f333.svg"
+    },
+    {
+        "id": "d6e2b5c1",
+        "word": {
+            "en": "car",
+            "fr": "voiture",
+            "it": "macchina",
+            "pt": "carro",
+            "es": "coche"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f697.svg"
+    },
+    {
+        "id": "e7f3c6d2",
+        "word": {
+            "en": "ball",
+            "fr": "ballon",
+            "it": "palla",
+            "pt": "bola",
+            "es": "pelota"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/26bd.svg"
+    },
+    {
+        "id": "f8a4d7e3",
+        "word": {
+            "en": "umbrella",
+            "fr": "parapluie",
+            "it": "ombrello",
+            "pt": "guarda-chuva",
+            "es": "paraguas"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/2602.svg"
+    },
+    {
+        "id": "g9b5e8f4",
+        "word": {
+            "en": "pizza",
+            "fr": "pizza",
+            "it": "pizza",
+            "pt": "pizza",
+            "es": "pizza"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f355.svg"
+    },
+    {
+        "id": "h1c6f9a5",
+        "word": {
+            "en": "cake",
+            "fr": "gâteau",
+            "it": "torta",
+            "pt": "bolo",
+            "es": "pastel"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f370.svg"
+    },
+    {
+        "id": "i2d7a1b6",
+        "word": {
+            "en": "cookie",
+            "fr": "biscuit",
+            "it": "biscotto",
+            "pt": "biscoito",
+            "es": "galleta"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f36a.svg"
+    },
+    {
+        "id": "j3e8b2c7",
+        "word": {
+            "en": "ice cream",
+            "fr": "glace",
+            "it": "gelato",
+            "pt": "sorvete",
+            "es": "helado"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f366.svg"
+    },
+    {
+        "id": "k4f9c3d8",
+        "word": {
+            "en": "donut",
+            "fr": "beignet",
+            "it": "ciambella",
+            "pt": "rosquinha",
+            "es": "dona"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f369.svg"
+    },
+    {
+        "id": "l5a1d4e9",
+        "word": {
+            "en": "hamburger",
+            "fr": "hamburger",
+            "it": "hamburger",
+            "pt": "hambúrguer",
+            "es": "hamburguesa"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f354.svg"
+    },
+    {
+        "id": "m6b2e5f1",
+        "word": {
+            "en": "hot dog",
+            "fr": "hot-dog",
+            "it": "hot dog",
+            "pt": "cachorro-quente",
+            "es": "perrito caliente"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f32d.svg"
+    },
+    {
+        "id": "n7c3f6a3",
+        "word": {
+            "en": "taco",
+            "fr": "taco",
+            "it": "taco",
+            "pt": "taco",
+            "es": "taco"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f32e.svg"
+    },
+    {
+        "id": "o8d4a7b4",
+        "word": {
+            "en": "burrito",
+            "fr": "burrito",
+            "it": "burrito",
+            "pt": "burrito",
+            "es": "burrito"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f32f.svg"
+    },
+    {
+        "id": "p9e5b8c5",
+        "word": {
+            "en": "sushi",
+            "fr": "sushi",
+            "it": "sushi",
+            "pt": "sushi",
+            "es": "sushi"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f363.svg"
+    },
+    {
+        "id": "q1f6c9d6",
+        "word": {
+            "en": "coffee",
+            "fr": "café",
+            "it": "caffè",
+            "pt": "café",
+            "es": "café"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/2615.svg"
+    },
+    {
+        "id": "r2a7d1e7",
+        "word": {
+            "en": "lion",
+            "fr": "lion",
+            "it": "leone",
+            "pt": "leão",
+            "es": "león"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f981.svg"
+    },
+    {
+        "id": "s3b8e2f8",
+        "word": {
+            "en": "tiger",
+            "fr": "tigre",
+            "it": "tigre",
+            "pt": "tigre",
+            "es": "tigre"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f405.svg"
+    },
+    {
+        "id": "t4c9f3a9",
+        "word": {
+            "en": "monkey",
+            "fr": "singe",
+            "it": "scimmia",
+            "pt": "macaco",
+            "es": "mono"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f412.svg"
+    },
+    {
+        "id": "u5d1a4b1",
+        "word": {
+            "en": "panda",
+            "fr": "panda",
+            "it": "panda",
+            "pt": "panda",
+            "es": "panda"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f43c.svg"
+    },
+    {
+        "id": "v6e2b5c2",
+        "word": {
+            "en": "koala",
+            "fr": "koala",
+            "it": "koala",
+            "pt": "coala",
+            "es": "koala"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f428.svg"
+    },
+    {
+        "id": "w7f3c6d3",
+        "word": {
+            "en": "turtle",
+            "fr": "tortue",
+            "it": "tartaruga",
+            "pt": "tartaruga",
+            "es": "tortuga"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f422.svg"
+    },
+    {
+        "id": "x8a4d7e4",
+        "word": {
+            "en": "penguin",
+            "fr": "pingouin",
+            "it": "pinguino",
+            "pt": "pinguim",
+            "es": "pingüino"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f427.svg"
+    },
+    {
+        "id": "y9b5e8f5",
+        "word": {
+            "en": "dolphin",
+            "fr": "dauphin",
+            "it": "delfino",
+            "pt": "golfinho",
+            "es": "delfín"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f42c.svg"
+    },
+    {
+        "id": "z1c6f9a6",
+        "word": {
+            "en": "whale",
+            "fr": "baleine",
+            "it": "balena",
+            "pt": "baleia",
+            "es": "ballena"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f433.svg"
+    },
+    {
+        "id": "a2d7a1b7",
+        "word": {
+            "en": "octopus",
+            "fr": "poulpe",
+            "it": "polpo",
+            "pt": "polvo",
+            "es": "pulpo"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f419.svg"
+    },
+    {
+        "id": "b3e8b2c8",
+        "word": {
+            "en": "crab",
+            "fr": "crabe",
+            "it": "granchio",
+            "pt": "caranguejo",
+            "es": "cangrejo"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f980.svg"
+    },
+    {
+        "id": "c4f9c3d9",
+        "word": {
+            "en": "bee",
+            "fr": "abeille",
+            "it": "ape",
+            "pt": "abelha",
+            "es": "abeja"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f41d.svg"
+    },
+    {
+        "id": "d5a1d4e1",
+        "word": {
+            "en": "ladybug",
+            "fr": "coccinelle",
+            "it": "coccinella",
+            "pt": "joaninha",
+            "es": "mariquita"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f41e.svg"
+    },
+    {
+        "id": "e6b2e5f2",
+        "word": {
+            "en": "snail",
+            "fr": "escargot",
+            "it": "lumaca",
+            "pt": "caracol",
+            "es": "caracol"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f40c.svg"
+    },
+    {
+        "id": "f7c3f6a4",
+        "word": {
+            "en": "guitar",
+            "fr": "guitare",
+            "it": "chitarra",
+            "pt": "violão",
+            "es": "guitarra"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f3b8.svg"
+    },
+    {
+        "id": "g8d4a7b5",
+        "word": {
+            "en": "piano",
+            "fr": "piano",
+            "it": "pianoforte",
+            "pt": "piano",
+            "es": "piano"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f3b9.svg"
+    },
+    {
+        "id": "h9e5b8c6",
+        "word": {
+            "en": "drum",
+            "fr": "tambour",
+            "it": "tamburo",
+            "pt": "tambor",
+            "es": "tambor"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f941.svg"
+    },
+    {
+        "id": "i1f6c9d7",
+        "word": {
+            "en": "trumpet",
+            "fr": "trompette",
+            "it": "tromba",
+            "pt": "trompete",
+            "es": "trompeta"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f3ba.svg"
+    },
+    {
+        "id": "j2a7d1e8",
+        "word": {
+            "en": "microphone",
+            "fr": "microphone",
+            "it": "microfono",
+            "pt": "microfone",
+            "es": "micrófono"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f3a4.svg"
+    },
+    {
+        "id": "k3b8e2f9",
+        "word": {
+            "en": "headphones",
+            "fr": "casque",
+            "it": "cuffie",
+            "pt": "fones de ouvido",
+            "es": "auriculares"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f3a7.svg"
+    },
+    {
+        "id": "l4c9f3a1",
+        "word": {
+            "en": "camera",
+            "fr": "appareil photo",
+            "it": "fotocamera",
+            "pt": "câmera",
+            "es": "cámara"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f4f7.svg"
+    },
+    {
+        "id": "m5d1a4b2",
+        "word": {
+            "en": "television",
+            "fr": "télévision",
+            "it": "televisione",
+            "pt": "televisão",
+            "es": "televisión"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f4fa.svg"
+    },
+    {
+        "id": "n6e2b5c3",
+        "word": {
+            "en": "phone",
+            "fr": "téléphone",
+            "it": "telefono",
+            "pt": "telefone",
+            "es": "teléfono"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f4f1.svg"
+    },
+    {
+        "id": "o7f3c6d4",
+        "word": {
+            "en": "computer",
+            "fr": "ordinateur",
+            "it": "computer",
+            "pt": "computador",
+            "es": "computadora"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f4bb.svg"
+    },
+    {
+        "id": "p8a4d7e5",
+        "word": {
+            "en": "keyboard",
+            "fr": "clavier",
+            "it": "tastiera",
+            "pt": "teclado",
+            "es": "teclado"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/2328.svg"
+    },
+    {
+        "id": "q9b5e8f6",
+        "word": {
+            "en": "mouse",
+            "fr": "souris",
+            "it": "mouse",
+            "pt": "mouse",
+            "es": "ratón"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f5b1.svg"
+    },
+    {
+        "id": "r1c6f9a7",
+        "word": {
+            "en": "watch",
+            "fr": "montre",
+            "it": "orologio",
+            "pt": "relógio",
+            "es": "reloj"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/231a.svg"
+    },
+    {
+        "id": "s2d7a1b8",
+        "word": {
+            "en": "glasses",
+            "fr": "lunettes",
+            "it": "occhiali",
+            "pt": "óculos",
+            "es": "gafas"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f453.svg"
+    },
+    {
+        "id": "t3e8b2c9",
+        "word": {
+            "en": "backpack",
+            "fr": "sac à dos",
+            "it": "zaino",
+            "pt": "mochila",
+            "es": "mochila"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f392.svg"
+    },
+    {
+        "id": "u4f9c3d1",
+        "word": {
+            "en": "balloon",
+            "fr": "ballon",
+            "it": "palloncino",
+            "pt": "balão",
+            "es": "globo"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f388.svg"
+    },
+    {
+        "id": "v5a1d4e2",
+        "word": {
+            "en": "gift",
+            "fr": "cadeau",
+            "it": "regalo",
+            "pt": "presente",
+            "es": "regalo"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f381.svg"
+    },
+    {
+        "id": "w6b2e5f3",
+        "word": {
+            "en": "trophy",
+            "fr": "trophée",
+            "it": "trofeo",
+            "pt": "troféu",
+            "es": "trofeo"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f3c6.svg"
+    },
+    {
+        "id": "x7c3f6a5",
+        "word": {
+            "en": "medal",
+            "fr": "médaille",
+            "it": "medaglia",
+            "pt": "medalha",
+            "es": "medalla"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f3c5.svg"
+    },
+    {
+        "id": "y8d4a7b6",
+        "word": {
+            "en": "crown",
+            "fr": "couronne",
+            "it": "corona",
+            "pt": "coroa",
+            "es": "corona"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f451.svg"
+    },
+    {
+        "id": "z9e5b8c7",
+        "word": {
+            "en": "rocket",
+            "fr": "fusée",
+            "it": "razzo",
+            "pt": "foguete",
+            "es": "cohete"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f680.svg"
+    },
+    {
+        "id": "a1f6c9d8",
+        "word": {
+            "en": "airplane",
+            "fr": "avion",
+            "it": "aereo",
+            "pt": "avião",
+            "es": "avión"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/2708.svg"
+    },
+    {
+        "id": "b2a7d1e9",
+        "word": {
+            "en": "helicopter",
+            "fr": "hélicoptère",
+            "it": "elicottero",
+            "pt": "helicóptero",
+            "es": "helicóptero"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f681.svg"
+    },
+    {
+        "id": "c3b8e2f1",
+        "word": {
+            "en": "bicycle",
+            "fr": "vélo",
+            "it": "bicicletta",
+            "pt": "bicicleta",
+            "es": "bicicleta"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f6b2.svg"
+    },
+    {
+        "id": "d4c9f3a2",
+        "word": {
+            "en": "train",
+            "fr": "train",
+            "it": "treno",
+            "pt": "trem",
+            "es": "tren"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f686.svg"
+    },
+    {
+        "id": "e5d1a4b3",
+        "word": {
+            "en": "ship",
+            "fr": "navire",
+            "it": "nave",
+            "pt": "navio",
+            "es": "barco"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f6a2.svg"
+    },
+    {
+        "id": "f6e2b5c4",
+        "word": {
+            "en": "mountain",
+            "fr": "montagne",
+            "it": "montagna",
+            "pt": "montanha",
+            "es": "montaña"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/26f0.svg"
+    },
+    {
+        "id": "g7f3c6d5",
+        "word": {
+            "en": "beach",
+            "fr": "plage",
+            "it": "spiaggia",
+            "pt": "praia",
+            "es": "playa"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f3d6.svg"
+    },
+    {
+        "id": "h8a4d7e6",
+        "word": {
+            "en": "rainbow",
+            "fr": "arc-en-ciel",
+            "it": "arcobaleno",
+            "pt": "arco-íris",
+            "es": "arcoíris"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f308.svg"
+    },
+    {
+        "id": "i9b5e8f7",
+        "word": {
+            "en": "sun",
+            "fr": "soleil",
+            "it": "sole",
+            "pt": "sol",
+            "es": "sol"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/2600.svg"
+    },
+    {
+        "id": "j1c6f9a8",
+        "word": {
+            "en": "moon",
+            "fr": "lune",
+            "it": "luna",
+            "pt": "lua",
+            "es": "luna"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f319.svg"
+    },
+    {
+        "id": "k2d7a1b9",
+        "word": {
+            "en": "cloud",
+            "fr": "nuage",
+            "it": "nuvola",
+            "pt": "nuvem",
+            "es": "nube"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/2601.svg"
+    },
+    {
+        "id": "l3e8b2c1",
+        "word": {
+            "en": "snowflake",
+            "fr": "flocon de neige",
+            "it": "fiocco di neve",
+            "pt": "floco de neve",
+            "es": "copo de nieve"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/2744.svg"
+    },
+    {
+        "id": "m4f9c3d2",
+        "word": {
+            "en": "fire",
+            "fr": "feu",
+            "it": "fuoco",
+            "pt": "fogo",
+            "es": "fuego"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f525.svg"
+    },
+    {
+        "id": "n5a1d4e3",
+        "word": {
+            "en": "lightning",
+            "fr": "éclair",
+            "it": "fulmine",
+            "pt": "relâmpago",
+            "es": "relámpago"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/26a1.svg"
+    },
+    {
+        "id": "o6b2e5f4",
+        "word": {
+            "en": "flower",
+            "fr": "fleur",
+            "it": "fiore",
+            "pt": "flor",
+            "es": "flor"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f33b.svg"
+    },
+    {
+        "id": "p7c3f6a6",
+        "word": {
+            "en": "rose",
+            "fr": "rose",
+            "it": "rosa",
+            "pt": "rosa",
+            "es": "rosa"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f339.svg"
+    },
+    {
+        "id": "q8d4a7b7",
+        "word": {
+            "en": "tulip",
+            "fr": "tulipe",
+            "it": "tulipano",
+            "pt": "tulipa",
+            "es": "tulipán"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f337.svg"
+    },
+    {
+        "id": "r9e5b8c8",
+        "word": {
+            "en": "mushroom",
+            "fr": "champignon",
+            "it": "fungo",
+            "pt": "cogumelo",
+            "es": "hongo"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f344.svg"
+    },
+    {
+        "id": "s1f6c9d9",
+        "word": {
+            "en": "cactus",
+            "fr": "cactus",
+            "it": "cactus",
+            "pt": "cacto",
+            "es": "cactus"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f335.svg"
+    },
+    {
+        "id": "t2a7d1e1",
+        "word": {
+            "en": "castle",
+            "fr": "château",
+            "it": "castello",
+            "pt": "castelo",
+            "es": "castillo"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f3f0.svg"
+    },
+    {
+        "id": "u3b8e2f2",
+        "word": {
+            "en": "tent",
+            "fr": "tente",
+            "it": "tenda",
+            "pt": "tenda",
+            "es": "tienda de campaña"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/26fa.svg"
+    },
+    {
+        "id": "v4c9f3a3",
+        "word": {
+            "en": "bridge",
+            "fr": "pont",
+            "it": "ponte",
+            "pt": "ponte",
+            "es": "puente"
+        },
+        "illustrationUrl": "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/1f309.svg"
+    }
+]

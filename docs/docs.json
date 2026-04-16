@@ -1,23 +1,19 @@
 {
-  "$schema": "https://mintlify.com/schema.json",
+  "$schema": "https://mintlify.com/docs.json",
   "name": "Skybridge",
   "theme": "mint",
   "colors": {
-    "primary": "#2563EB",
-    "light": "#3B82F6",
-    "dark": "#2563EB"
+    "primary": "#002FFF",
+    "light": "#08F5F9",
+    "dark": "#002FFF"
   },
-  "favicon": "/images/favicon.ico",
+  "favicon": {
+    "light": "/images/SkybridgeFaviconmidnight.svg",
+    "dark": "/images/SkybridgeFaviconwhite.svg"
+  },
   "logo": {
-    "light": "/images/logo.png",
-    "dark": "/images/logo.png"
-  },
-  "metadata": {
-    "og:site_name": "Skybridge Documentation",
-    "og:type": "website"
-  },
-  "feedback": {
-    "thumbsRating": true
+    "light": "/images/Skybridgemidnight.svg",
+    "dark": "/images/Skybridgewhite(1).svg"
   },
   "search": {
     "prompt": "Search Skybridge docs..."
@@ -34,6 +30,7 @@
               "home",
               {
                 "group": "Fundamentals",
+                "icon": "graduation-cap",
                 "pages": [
                   "fundamentals",
                   "fundamentals/apps-sdk",
@@ -43,14 +40,17 @@
               "quickstart/create-new-app",
               {
                 "group": "Add to Existing App",
+                "icon": "puzzle-piece",
                 "pages": [
                   "quickstart/add-to-existing-app",
                   "quickstart/add-to-existing-app/server",
                   "quickstart/add-to-existing-app/web"
                 ]
               },
+              "quickstart/migrate",
               "quickstart/test-your-app",
-              "quickstart/build-for-production"
+              "quickstart/build-for-production",
+              "quickstart/deploy"
             ]
           },
           {
@@ -58,7 +58,7 @@
             "icon": "lightbulb",
             "pages": [
               "concepts/index",
-              "concepts/platform-agnosticism",
+              "concepts/write-once-run-everywhere",
               "concepts/data-flow",
               "concepts/llm-context-sync",
               "concepts/fast-iteration",
@@ -78,7 +78,7 @@
           {
             "group": "DevTools",
             "icon": "wrench",
-            "pages": ["devtools/index"]
+            "pages": ["devtools/skills", "devtools/devtools"]
           },
           {
             "group": "Resources",
@@ -130,6 +130,7 @@
             "icon": "toolbox",
             "pages": [
               "api-reference/create-store",
+              "api-reference/mount-widget",
               "api-reference/generate-helpers",
               "api-reference/data-llm"
             ]
@@ -153,10 +154,33 @@
         "tab": "Showcase",
         "pages": [
           "showcase",
-          "showcase/capitals",
-          "showcase/ecommerce-carousel",
-          "showcase/everything",
-          "showcase/productivity"
+          {
+            "group": "Examples",
+            "pages": [
+              "showcase/generative-ui",
+              "showcase/capitals",
+              "showcase/flight-booking",
+              "showcase/ecommerce-carousel",
+              "showcase/everything",
+              "showcase/investigation-game",
+              "showcase/manifest-ui",
+              "showcase/productivity",
+              "showcase/times-up",
+              "showcase/magic-8-ball",
+              "showcase/auth-clerk",
+              "showcase/auth-workos",
+              "showcase/auth-stytch",
+              "showcase/auth-auth0"
+            ]
+          },
+          {
+            "group": "3rd Party Apps",
+            "pages": [
+              "showcase/awaze",
+              "showcase/evaneos",
+              "showcase/lumo"
+            ]
+          }
         ]
       }
     ]
@@ -186,5 +210,36 @@
     "posthog": {
       "apiKey": "phc_wz9NIcD7SmH0BEN39lARJwJNjXgggazjuWCCt62eeKT"
     }
+  },
+  "description": "The #1 full stack open-source TS framework for building ChatGPT and MCP Apps",
+  "background": {
+    "color": {
+      "dark": "#051413"
+    }
+  },
+  "fonts": {
+    "body": {
+      "family": "Inter",
+      "weight": 400
+    },
+    "heading": {
+      "family": "Inter",
+      "weight": 600
+    }
+  },
+  "seo": {
+    "indexing": "navigable",
+    "metatags": {
+      "og:site_name": "Skybridge Documentation",
+      "og:type": "website"
+    }
+  },
+  "errors": {
+    "404": {
+      "title": "Oops, well that's awkward..."
+    }
+  },
+  "interaction": {
+    "drilldown": false
   }
 }

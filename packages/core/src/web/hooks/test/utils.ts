@@ -36,6 +36,7 @@ export const getMcpAppHostPostMessageMock = (
               id: number;
               result: McpUiInitializeResult;
             }>("message", {
+              source: window.parent,
               data: {
                 jsonrpc: "2.0",
                 id: message.id,
@@ -53,6 +54,7 @@ export const getMcpAppHostPostMessageMock = (
             new MessageEvent<{ jsonrpc: "2.0"; id: number; result: unknown }>(
               "message",
               {
+                source: window.parent,
                 data: {
                   jsonrpc: "2.0",
                   id: message.id,
@@ -73,6 +75,7 @@ export const fireToolInputNotification = (args: Record<string, unknown>) => {
     new MessageEvent<McpUiToolInputNotification & { jsonrpc: "2.0" }>(
       "message",
       {
+        source: window.parent,
         data: {
           jsonrpc: "2.0",
           method: "ui/notifications/tool-input",
@@ -95,6 +98,7 @@ export const fireToolResultNotification = (params: {
     new MessageEvent<McpUiToolResultNotification & { jsonrpc: "2.0" }>(
       "message",
       {
+        source: window.parent,
         data: {
           jsonrpc: "2.0",
           method: "ui/notifications/tool-result",

@@ -1,0 +1,60 @@
+---
+title: Deploy
+description: "Deploy your App and share it to your users"
+icon: "cloud-arrow-up"
+sidebar_position: 4
+---
+
+You can deploy your Skybridge App as a Node.js server on any compatible infrastructure provider.
+
+Below are some easy options closely integrated with Skybridge.
+
+## Alpic Cloud platform
+
+### Instant deploy to Alpic
+
+**[Alpic](https://alpic.ai)** is a developer-friendly cloud platform for deploying and hosting MCP Apps. It is also the company behind Skybridge :) 
+
+To deploy your App on Alpic you can:
+1. Create a free account on [app.alpic.ai](https://app.alpic.ai)
+2. Deploy your App either by:
+   - Pushing your App to Github, and connecting it to Alpic for automatic deployment at each commit.
+   - Using the [Alpic CLI](https://docs.alpic.ai/cli/overview):
+
+<CodeGroup>
+```bash npm
+npm run deploy
+```
+```bash pnpm
+pnpm deploy
+```
+```bash yarn
+yarn deploy
+```
+```bash bun
+bun run deploy
+```
+</CodeGroup>
+
+Once your App is deployed, you will be able to access specific MCP analytics, logs, and test your app remotely in the Alpic Playground.
+
+Learn more about deploying to Alpic in the [Alpic documentation](https://docs.alpic.ai/).
+
+
+### Alpic MCP App
+
+Alpic also provides its own [MCP App](https://docs.alpic.ai/features/mcp-server) that lets you manage your apps directly from your favorite MCP Client. Connect to the Alpic MCP Server using:
+```
+https://mcp.alpic.ai/mcp
+``` 
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card title="Core Concepts" icon="lightbulb" href="/concepts">
+    Learn how Skybridge extends the raw APIs with React hooks
+  </Card>
+  <Card title="API Reference" icon="book" href="/api-reference">
+    Browse the complete API documentation
+  </Card>
+</CardGroup>

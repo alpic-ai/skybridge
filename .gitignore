@@ -1,3 +1,6 @@
 node_modules
 dist
 *.tsbuildinfo
+.env
+cdk.out
+.claude/skills/

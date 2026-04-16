@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: flex; justify-content: center; padding: 2rem; }
+    </style>
+  </head>
+  <body>
+    <div id="login"></div>
+    <script type="module">
+      import { StytchUIClient, Products, OTPMethods, OAuthProviders } from 'https://esm.sh/@stytch/vanilla-js';
+
+      const stytch = new StytchUIClient('%VITE_STYTCH_PUBLIC_TOKEN%');
+
+      const config = {
+        products: [Products.otp, Products.oauth],
+        otpOptions: {
+          expirationMinutes: 10,
+          methods: [OTPMethods.Email],
+        },
+        oauthOptions: {
+          providers: [{ type: OAuthProviders.Google }],
+          loginRedirectURL: window.location.origin + '/assets/authenticate.html',
+          signupRedirectURL: window.location.origin + '/assets/authenticate.html',
+        },
+      };
+
+      const callbacks = {
+        onEvent: (evt) => {
+          if (evt.type !== 'AUTHENTICATE_FLOW_COMPLETE') return;
+          const returnTo = sessionStorage.getItem('returnTo');
+          if (returnTo) {
+            sessionStorage.removeItem('returnTo');
+            window.location.href = returnTo;
+          } else {
+            window.location.href = '/';
+          }
+        },
+      };
+
+      // When @stytch/vanilla-js is loaded via CDN (esm.sh), the <stytch-ui> custom element
+      // is registered in a separate module graph and does not automatically receive the client
+      // instance. mountLogin registers and inserts the element, but we must call render()
+      // manually to pass the client. This extra step is not needed when using the npm package.
+      stytch.mountLogin({ elementId: '#login', config, callbacks });
+
+      await customElements.whenDefined('stytch-ui');
+      const el = document.querySelector('#login stytch-ui');
+      if (el?.render) {
+        el.render({ client: stytch, config, callbacks });
+      }
+    </script>
+  </body>
+</html>

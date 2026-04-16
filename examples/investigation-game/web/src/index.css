@@ -1,0 +1,838 @@
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ========================================
+   MURDER IN THE VALLEY - NOIR THEME
+   ======================================== */
+
+/* Noir Color Palette */
+:root {
+  --noir-black: #0a0a0f;
+  --noir-purple: #1a1025;
+  --noir-blue: #0f1a2a;
+  --lightning-white: #f0f0ff;
+  --lightning-purple: #9b5de5;
+  --lightning-blue: #6366f1;
+  --danger-red: #ff4444;
+  --spotlight-yellow: #fff3cd;
+}
+
+.font-pixel {
+  font-family: "Press Start 2P", monospace;
+}
+
+/* ========================================
+   LIGHTNING ANIMATION
+   ======================================== */
+@keyframes lightning {
+  0%,
+  88%,
+  90%,
+  92%,
+  100% {
+    opacity: 0;
+  }
+  89%,
+  91% {
+    opacity: 1;
+  }
+}
+
+@keyframes lightning-delayed {
+  0%,
+  43%,
+  45%,
+  47%,
+  100% {
+    opacity: 0;
+  }
+  44%,
+  46% {
+    opacity: 0.7;
+  }
+}
+
+.lightning-overlay {
+  animation: lightning 7s infinite;
+}
+
+.lightning-overlay-delayed {
+  animation: lightning-delayed 11s infinite;
+}
+
+/* Additional lightning overlays for more frequent flashes */
+@keyframes lightning-third {
+  0%,
+  58%,
+  60%,
+  62%,
+  100% {
+    opacity: 0;
+  }
+  59%,
+  61% {
+    opacity: 1;
+  }
+}
+
+@keyframes lightning-fourth {
+  0%,
+  23%,
+  25%,
+  27%,
+  100% {
+    opacity: 0;
+  }
+  24%,
+  26% {
+    opacity: 0.8;
+  }
+}
+
+.lightning-overlay-third {
+  animation: lightning-third 9s infinite;
+}
+
+.lightning-overlay-fourth {
+  animation: lightning-fourth 8s infinite;
+}
+
+/* ========================================
+   RAIN ANIMATION
+   ======================================== */
+@keyframes rain-fall {
+  0% {
+    transform: translateY(-100%) translateX(0);
+  }
+  100% {
+    transform: translateY(100vh) translateX(20px);
+  }
+}
+
+.rain-drop {
+  animation: rain-fall linear infinite;
+}
+
+/* ========================================
+   SILHOUETTE ANIMATIONS
+   ======================================== */
+@keyframes silhouette-sway {
+  0%,
+  100% {
+    transform: translateX(0) scaleX(1);
+  }
+  50% {
+    transform: translateX(3px) scaleX(1.01);
+  }
+}
+
+@keyframes silhouette-sway-reverse {
+  0%,
+  100% {
+    transform: translateX(0) scaleX(-1);
+  }
+  50% {
+    transform: translateX(-3px) scaleX(-1.01);
+  }
+}
+
+.silhouette-sway {
+  animation: silhouette-sway 4s ease-in-out infinite;
+}
+
+.silhouette-sway-slow {
+  animation: silhouette-sway 6s ease-in-out infinite;
+}
+
+.silhouette-sway-reverse {
+  animation: silhouette-sway-reverse 5s ease-in-out infinite;
+}
+
+/* ========================================
+   TITLE FLICKER ANIMATION
+   ======================================== */
+@keyframes title-flicker {
+  0%,
+  18%,
+  22%,
+  25%,
+  53%,
+  57%,
+  100% {
+    opacity: 1;
+    text-shadow:
+      0 0 10px var(--lightning-purple),
+      0 0 20px var(--lightning-purple),
+      0 0 40px var(--lightning-blue);
+  }
+  20%,
+  24%,
+  55% {
+    opacity: 0.6;
+    text-shadow: none;
+  }
+}
+
+.title-flicker {
+  animation: title-flicker 8s infinite;
+}
+
+/* ========================================
+   BUTTON PULSE ANIMATION
+   ======================================== */
+@keyframes button-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(155, 93, 229, 0.5),
+      0 0 40px rgba(155, 93, 229, 0.3),
+      inset 0 0 20px rgba(155, 93, 229, 0.1);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow:
+      0 0 30px rgba(155, 93, 229, 0.7),
+      0 0 60px rgba(155, 93, 229, 0.5),
+      inset 0 0 30px rgba(155, 93, 229, 0.2);
+    transform: scale(1.02);
+  }
+}
+
+.button-pulse {
+  animation: button-pulse 2s ease-in-out infinite;
+}
+
+/* ========================================
+   LIGHTNING BOLT SVG ANIMATION
+   ======================================== */
+@keyframes bolt-flash {
+  0%,
+  88%,
+  90%,
+  92%,
+  100% {
+    opacity: 0;
+    filter: blur(0px);
+  }
+  89%,
+  91% {
+    opacity: 1;
+    filter: blur(1px) drop-shadow(0 0 20px var(--lightning-purple));
+  }
+}
+
+@keyframes bolt-flash-delayed {
+  0%,
+  43%,
+  45%,
+  47%,
+  100% {
+    opacity: 0;
+  }
+  44%,
+  46% {
+    opacity: 0.8;
+    filter: blur(1px) drop-shadow(0 0 15px var(--lightning-blue));
+  }
+}
+
+.bolt-flash {
+  animation: bolt-flash 7s infinite;
+}
+
+.bolt-flash-delayed {
+  animation: bolt-flash-delayed 11s infinite;
+}
+
+/* Additional bolt animations for more frequent strikes */
+@keyframes bolt-flash-third {
+  0%,
+  58%,
+  60%,
+  62%,
+  100% {
+    opacity: 0;
+  }
+  59%,
+  61% {
+    opacity: 0.9;
+    filter: blur(1px) drop-shadow(0 0 18px var(--lightning-purple));
+  }
+}
+
+@keyframes bolt-flash-fourth {
+  0%,
+  23%,
+  25%,
+  27%,
+  100% {
+    opacity: 0;
+  }
+  24%,
+  26% {
+    opacity: 0.75;
+    filter: blur(1px) drop-shadow(0 0 15px var(--lightning-blue));
+  }
+}
+
+.bolt-flash-third {
+  animation: bolt-flash-third 9s infinite;
+}
+
+.bolt-flash-fourth {
+  animation: bolt-flash-fourth 8s infinite;
+}
+
+/* ========================================
+   PHASE 2: INTRO SCREEN ANIMATIONS
+   ======================================== */
+
+/* Spotlight reveal animation */
+@keyframes spotlight-reveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes darkness-fade {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.3;
+  }
+}
+
+.spotlight-reveal {
+  animation: spotlight-reveal 3s ease-out forwards;
+}
+
+.darkness-fade {
+  animation: darkness-fade 4s ease-out forwards;
+}
+
+/* Robot spark/damage effects */
+@keyframes spark {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  10%,
+  30% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  20% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 0;
+  }
+}
+
+@keyframes spark-delayed {
+  0%,
+  50%,
+  100% {
+    opacity: 0;
+  }
+  60%,
+  80% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.3;
+  }
+}
+
+.spark {
+  animation: spark 2s ease-in-out infinite;
+}
+
+.spark-delayed {
+  animation: spark-delayed 3s ease-in-out infinite;
+}
+
+.spark-slow {
+  animation: spark 4s ease-in-out infinite;
+}
+
+/* Robot flicker effect */
+@keyframes robot-flicker {
+  0%,
+  100% {
+    filter: brightness(1) drop-shadow(0 0 10px rgba(99, 102, 241, 0.3));
+  }
+  50% {
+    filter: brightness(1.1) drop-shadow(0 0 20px rgba(99, 102, 241, 0.5));
+  }
+  85%,
+  87% {
+    filter: brightness(0.8) drop-shadow(0 0 5px rgba(99, 102, 241, 0.2));
+  }
+  86% {
+    filter: brightness(1.3) drop-shadow(0 0 30px rgba(99, 102, 241, 0.8));
+  }
+}
+
+.robot-flicker {
+  animation: robot-flicker 5s ease-in-out infinite;
+}
+
+/* ========================================
+   DIALOGUE BOX - POKEMON STYLE
+   ======================================== */
+
+/* Dialogue box frame */
+.dialogue-box {
+  background: linear-gradient(to bottom, rgba(10, 10, 30, 0.97), rgba(20, 15, 40, 0.98));
+  border: 4px solid #c4a747;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 0 2px #1a1a2e,
+    inset 0 0 0 4px #c4a747,
+    0 8px 32px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.dialogue-box::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 2px solid rgba(196, 167, 71, 0.3);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* Typewriter cursor */
+@keyframes cursor-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink {
+  animation: cursor-blink 0.8s steps(1) infinite;
+}
+
+/* Continue indicator bounce */
+@keyframes bounce-indicator {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+.bounce-indicator {
+  animation: bounce-indicator 1s ease-in-out infinite;
+}
+
+/* Scene fade in */
+@keyframes scene-fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.scene-fade-in {
+  animation: scene-fade-in 1s ease-out forwards;
+}
+
+/* Dialogue slide up */
+@keyframes dialogue-slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dialogue-slide-up {
+  animation: dialogue-slide-up 0.5s ease-out forwards;
+}
+
+/* ========================================
+   SPRINT 5: POLISH & TRANSITIONS
+   ======================================== */
+
+/* Screen transition - fade out */
+@keyframes screen-fade-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+/* Screen transition - fade in */
+@keyframes screen-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.screen-enter {
+  animation: screen-fade-in 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.screen-exit {
+  animation: screen-fade-out 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Staggered entrance for cards */
+@keyframes card-stagger-in {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.card-stagger-in {
+  animation: card-stagger-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+}
+
+/* Suspect card hover effects */
+.suspect-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.suspect-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(168, 85, 247, 0.15);
+}
+
+.suspect-card:hover .suspect-name {
+  color: #c084fc;
+  text-shadow: 0 0 20px rgba(192, 132, 252, 0.5);
+}
+
+/* Interrogate button hover */
+.interrogate-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.interrogate-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.interrogate-btn:hover::before {
+  transform: translateX(100%);
+}
+
+.interrogate-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+}
+
+.interrogate-btn:active {
+  transform: scale(0.98);
+}
+
+/* Title entrance animation */
+@keyframes title-entrance {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.title-entrance {
+  animation: title-entrance 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Main screen header */
+@keyframes header-glow {
+  0%,
+  100% {
+    text-shadow:
+      0 0 10px rgba(168, 85, 247, 0.3),
+      0 0 20px rgba(168, 85, 247, 0.2);
+  }
+  50% {
+    text-shadow:
+      0 0 20px rgba(168, 85, 247, 0.5),
+      0 0 40px rgba(168, 85, 247, 0.3);
+  }
+}
+
+.header-glow {
+  animation: header-glow 3s ease-in-out infinite;
+}
+
+/* ========================================
+   SOLVE MURDER DIALOG ANIMATIONS
+   ======================================== */
+
+/* Dialog overlay fade in */
+@keyframes dialog-overlay-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.dialog-overlay {
+  animation: dialog-overlay-in 0.3s ease-out forwards;
+}
+
+/* Dialog content scale in */
+@keyframes dialog-content-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.dialog-content {
+  animation: dialog-content-in 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Word chip hover/drag effects */
+.word-chip {
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.word-chip:hover {
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 0 20px rgba(245, 158, 11, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* ========================================
+   VICTORY SCREEN ANIMATIONS
+   ======================================== */
+
+@keyframes victory-enter {
+  0% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.victory-enter {
+  animation: victory-enter 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes victory-title-glow {
+  0%,
+  100% {
+    text-shadow:
+      0 0 10px rgba(34, 197, 94, 0.5),
+      0 0 20px rgba(34, 197, 94, 0.3),
+      0 0 40px rgba(34, 197, 94, 0.2);
+  }
+  50% {
+    text-shadow:
+      0 0 20px rgba(34, 197, 94, 0.8),
+      0 0 40px rgba(34, 197, 94, 0.5),
+      0 0 60px rgba(34, 197, 94, 0.3);
+  }
+}
+
+.victory-title {
+  animation: victory-title-glow 2s ease-in-out infinite;
+}
+
+@keyframes prison-bars-slide {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0.8;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

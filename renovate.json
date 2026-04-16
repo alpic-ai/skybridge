@@ -7,5 +7,12 @@
   ],
   "prConcurrentLimit": 5,
   "timezone": "Europe/Paris",
-  "rangeStrategy": "bump"
+  "rangeStrategy": "bump",
+  "packageRules": [
+    {
+      "description": "Ignore pnpm overrides (security floor pins managed manually)",
+      "matchDepTypes": ["pnpm.overrides"],
+      "enabled": false
+    }
+  ]
 }

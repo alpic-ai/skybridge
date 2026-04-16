@@ -1,65 +1,9 @@
-import type {
-  McpUiHostContext,
-  McpUiHostContextChangedNotification,
-  McpUiInitializedNotification,
-  McpUiInitializeRequest,
-  McpUiInitializeResult,
-  McpUiResourceTeardownRequest,
-  McpUiResourceTeardownResult,
-  McpUiSizeChangedNotification,
-  McpUiToolCancelledNotification,
-  McpUiToolInputNotification,
-  McpUiToolResultNotification,
-} from "@modelcontextprotocol/ext-apps";
+import { App } from "@modelcontextprotocol/ext-apps";
+import type { Implementation } from "@modelcontextprotocol/sdk/types.js";
 import type { Bridge, Subscribe } from "../types.js";
 import type { McpAppContext, McpAppContextKey } from "./types.js";
 
-type PendingRequest<T> = {
-  resolve: (value: T | PromiseLike<T>) => void;
-  reject: (reason?: unknown) => void;
-  timeout: NodeJS.Timeout;
-};
-
-type McpAppInitializationOptions = Pick<
-  McpUiInitializeRequest["params"],
-  "appInfo"
->;
-
-const LATEST_PROTOCOL_VERSION = "2025-11-21";
-
-enum JsonRpcErrorCode {
-  ParseError = -32700,
-  InvalidRequest = -32600,
-  MethodNotFound = -32601,
-  InvalidParams = -32602,
-  InternalError = -32603,
-}
-
-type McpAppResponse = {
-  jsonrpc: "2.0";
-  id: string | number;
-} & (
-  | {
-      result: unknown;
-    }
-  | {
-      error: { code: JsonRpcErrorCode; message: string };
-    }
-);
-
-type McpAppRequest = {
-  jsonrpc: "2.0";
-  id: string | number;
-} & McpUiResourceTeardownRequest;
-
-type McpAppNotification = { jsonrpc: "2.0" } & (
-  | McpUiToolInputNotification
-  | McpUiToolResultNotification
-  | McpUiToolCancelledNotification
-  | McpUiHostContextChangedNotification
-);
-
-export class McpAppBridge implements Bridge<McpUiHostContext> {
+export class McpAppBridge implements Bridge<McpAppContext> {
   private static instance: McpAppBridge | null = null;
   public context: McpAppContext = {
     toolInput: null,
@@ -67,47 +11,71 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
     toolResult: null,
   };
   private listeners = new Map<McpAppContextKey, Set<() => void>>();
-  private pendingRequests = new Map<string | number, PendingRequest<unknown>>();
-  private nextId = 1;
-  private initialized: boolean;
-  private appInitializationOptions: McpUiInitializeRequest["params"];
-  private requestTimeout: number;
-  private cleanupSizeObserver: (() => void) | null = null;
+  private app: App;
+  private connectPromise: Promise<void>;
 
-  constructor(
-    options: McpAppInitializationOptions,
-    requestTimeout: number = 10_000,
-  ) {
-    this.requestTimeout = requestTimeout;
-    this.initialized = false;
-    this.appInitializationOptions = {
-      appInfo: options.appInfo,
-      appCapabilities: {},
-      protocolVersion: LATEST_PROTOCOL_VERSION,
+  constructor(options: { appInfo: Implementation }) {
+    this.app = new App(options.appInfo);
+
+    this.app.ontoolinput = (params) => {
+      this.updateContext({ toolInput: params.arguments ?? {} });
     };
-    this.init();
+
+    this.app.ontoolinputpartial = (params) => {
+      this.updateContext({ toolInput: params.arguments ?? {} });
+    };
+
+    this.app.ontoolresult = (params) => {
+      this.updateContext({ toolResult: params });
+    };
+
+    this.app.ontoolcancelled = (params) => {
+      this.updateContext({ toolCancelled: params });
+    };
+
+    this.app.onhostcontextchanged = (params) => {
+      this.updateContext(params);
+    };
+
+    this.connectPromise = this.connect();
+  }
+
+  private async connect() {
+    try {
+      await this.app.connect();
+      const hostContext = this.app.getHostContext();
+      if (hostContext) {
+        this.updateContext(hostContext);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  public async getApp(): Promise<App> {
+    await this.connectPromise;
+    return this.app;
   }
 
   public static getInstance(
-    options?: Partial<McpAppInitializationOptions>,
-    requestTimeout?: number,
+    options?: Partial<{ appInfo: Implementation }>,
   ): McpAppBridge {
     if (window.skybridge.hostType !== "mcp-app") {
       throw new Error("MCP App Bridge can only be used in the mcp-app runtime");
     }
-    if (McpAppBridge.instance && (options || requestTimeout)) {
+    if (McpAppBridge.instance && options) {
       console.warn(
-        "McpAppBridge.getInstance: options and requestTimeout ignored, instance already exists",
+        "McpAppBridge.getInstance: options ignored, instance already exists",
       );
     }
     if (!McpAppBridge.instance) {
-      const defaultOptions: McpAppInitializationOptions = {
+      const defaultOptions = {
         appInfo: { name: "skybridge-app", version: "0.0.1" },
       };
-      McpAppBridge.instance = new McpAppBridge(
-        { ...defaultOptions, ...options },
-        requestTimeout,
-      );
+      McpAppBridge.instance = new McpAppBridge({
+        ...defaultOptions,
+        ...options,
+      });
     }
     return McpAppBridge.instance;
   }
@@ -138,14 +106,7 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
   }
 
   public cleanup = () => {
-    window.removeEventListener("message", this.handleMessage);
-    this.pendingRequests.forEach((request) => {
-      clearTimeout(request.timeout);
-    });
-    this.pendingRequests.clear();
     this.listeners.clear();
-    this.cleanupSizeObserver?.();
-    this.cleanupSizeObserver = null;
   };
 
   public static resetInstance(): void {
@@ -153,25 +114,6 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
       McpAppBridge.instance.cleanup();
       McpAppBridge.instance = null;
     }
-  }
-
-  public request<R extends { method: string; params?: unknown }, T>({
-    method,
-    params,
-  }: R): Promise<T> {
-    const id = this.nextId++;
-    const { promise, resolve, reject } = Promise.withResolvers<T>();
-    this.pendingRequests.set(id, {
-      resolve: resolve as (value: unknown) => void,
-      reject,
-      timeout: setTimeout(() => {
-        reject(new Error("Request timed out"));
-        this.pendingRequests.delete(id);
-      }, this.requestTimeout),
-    });
-    window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*");
-
-    return promise;
   }
 
   private emit(key: McpAppContextKey) {
@@ -185,187 +127,5 @@ export class McpAppBridge implements Bridge<McpUiHostContext> {
     for (const key of Object.keys(context)) {
       this.emit(key);
     }
-  }
-
-  private init() {
-    if (this.initialized) {
-      return;
-    }
-    this.initialized = true;
-
-    if (typeof window === "undefined" || window.parent === window) {
-      return;
-    }
-
-    window.addEventListener("message", this.handleMessage);
-    this.connect();
-  }
-
-  private handleMessage = (
-    event: MessageEvent<McpAppResponse | McpAppNotification | McpAppRequest>,
-  ) => {
-    const data = event.data;
-    if (data.jsonrpc !== "2.0") {
-      return;
-    }
-
-    if ("id" in data) {
-      if ("method" in data) {
-        this.handleRequest(data);
-        return;
-      }
-
-      this.handleResponse(data);
-      return;
-    }
-
-    this.handleNotification(data);
-  };
-
-  private handleResponse(response: McpAppResponse) {
-    const request = this.pendingRequests.get(response.id);
-    if (request) {
-      clearTimeout(request.timeout);
-      this.pendingRequests.delete(response.id);
-      if ("error" in response) {
-        request.reject(new Error(response.error.message));
-        return;
-      }
-
-      request.resolve(response.result);
-    }
-  }
-
-  private handleNotification = (notification: McpAppNotification) => {
-    switch (notification.method) {
-      case "ui/notifications/host-context-changed":
-        this.updateContext(notification.params);
-        return;
-      case "ui/notifications/tool-input":
-        this.updateContext({
-          toolInput: notification.params.arguments ?? {},
-        });
-        return;
-      case "ui/notifications/tool-result":
-        this.updateContext({
-          toolResult: notification.params,
-        });
-        return;
-      case "ui/notifications/tool-cancelled":
-        this.updateContext({
-          toolCancelled: notification.params,
-        });
-        return;
-    }
-  };
-
-  private handleRequest = (request: McpAppRequest) => {
-    switch (request.method) {
-      case "ui/resource-teardown":
-        this.cleanup();
-        window.parent.postMessage(
-          {
-            jsonrpc: "2.0",
-            id: request.id,
-            result: {} satisfies McpUiResourceTeardownResult,
-          } satisfies McpAppResponse,
-          "*",
-        );
-        return;
-      default:
-        window.parent.postMessage(
-          {
-            jsonrpc: "2.0",
-            id: request.id,
-            error: {
-              code: JsonRpcErrorCode.MethodNotFound,
-              message: "Unsupported Request",
-            },
-          } satisfies McpAppResponse,
-          "*",
-        );
-    }
-  };
-
-  private async connect() {
-    try {
-      const result = await this.request<
-        McpUiInitializeRequest,
-        McpUiInitializeResult
-      >({
-        method: "ui/initialize",
-        params: this.appInitializationOptions,
-      });
-
-      this.updateContext(result.hostContext);
-      this.notify({ method: "ui/notifications/initialized" });
-      this.cleanupSizeObserver = this.setupSizeChangedNotifications();
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  private notify(
-    notification: McpUiInitializedNotification | McpUiSizeChangedNotification,
-  ) {
-    window.parent.postMessage({ jsonrpc: "2.0", ...notification }, "*");
-  }
-
-  private sendSizeChanged(params: McpUiSizeChangedNotification["params"]) {
-    this.notify({ method: "ui/notifications/size-changed", params });
-  }
-
-  /**
-   * Set up automatic size change notifications using ResizeObserver.
-   * Based on @modelcontextprotocol/ext-apps App.setupSizeChangedNotifications
-   * @see https://github.com/modelcontextprotocol/ext-apps/blob/main/src/app.ts#L940-L989
-   */
-  private setupSizeChangedNotifications(): () => void {
-    let scheduled = false;
-    let lastWidth = 0;
-    let lastHeight = 0;
-
-    const sendBodySizeChanged = () => {
-      if (scheduled) {
-        return;
-      }
-      scheduled = true;
-      requestAnimationFrame(() => {
-        scheduled = false;
-
-        let width: number;
-        let height: number;
-
-        // In fullscreen mode, use viewport size since the widget should fill
-        // the entire available space provided by the host.
-        if (this.context.displayMode === "fullscreen") {
-          width = window.innerWidth;
-          height = window.innerHeight;
-        } else {
-          // Use scrollWidth/scrollHeight to measure actual rendered content size.
-          // This works better than fit-content for viewport-based layouts (vw/vh)
-          // and fluid elements like maps that want to fill available space.
-          const body = document.body;
-          width = Math.ceil(body.scrollWidth);
-          height = Math.ceil(body.scrollHeight);
-        }
-
-        // Only send if size actually changed (prevents feedback loops from
-        // style changes)
-        if (width !== lastWidth || height !== lastHeight) {
-          lastWidth = width;
-          lastHeight = height;
-          this.sendSizeChanged({ width, height });
-        }
-      });
-    };
-
-    sendBodySizeChanged();
-
-    const resizeObserver = new ResizeObserver(sendBodySizeChanged);
-    resizeObserver.observe(document.documentElement);
-    resizeObserver.observe(document.body);
-
-    return () => resizeObserver.disconnect();
   }
 }

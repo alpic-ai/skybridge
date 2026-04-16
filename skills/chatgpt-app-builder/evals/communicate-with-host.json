@@ -1,0 +1,18 @@
+[
+  {
+    "query": "I have a color picker widget. When users click a color swatch, I need to remember their choice.",
+    "expected_behavior": "Uses useWidgetState with selectedColor. Shows setState on click."
+  },
+  {
+    "query": "My playlist builder has an 'Add Song' button in the search results and a 'Remove' button in the playlist view. Both components need access to the same playlist.",
+    "expected_behavior": "Suggests createStore for shared state. Shows store with addSong/removeSong actions accessed by both components."
+  },
+  {
+    "query": "Users browse recipes in my widget. When they ask the LLM 'what ingredients do I need?', it doesn't know which recipe they're viewing.",
+    "expected_behavior": "Uses data-llm on the recipe container. Dynamic value with recipe name and key details."
+  },
+  {
+    "query": "I want a 'Compare these options' button that asks the AI to analyze the pros and cons of items the user has shortlisted.",
+    "expected_behavior": "Uses useSendFollowUpMessage. Button onClick calls sendMessage with comparison prompt."
+  }
+]

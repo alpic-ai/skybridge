@@ -1,5 +1,5 @@
-import type { Output } from "../helpers";
-import { useIntl } from "../i18n";
+import type { Output } from "../helpers.js";
+import { useIntl } from "../i18n.js";
 
 export function Legend({ activities }: { activities: Output["activities"] }) {
   const { t } = useIntl();

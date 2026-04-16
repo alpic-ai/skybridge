@@ -9,11 +9,11 @@ import {
   useSendFollowUpMessage,
   useWidgetState,
 } from "skybridge/web";
-import { BarChart } from "../components/BarChart";
-import { DonutChart } from "../components/DonutChart";
-import { Legend } from "../components/Legend";
-import { type Output, useCallTool, useToolInfo } from "../helpers";
-import { supportedLanguages, useIntl } from "../i18n";
+import { BarChart } from "../components/BarChart.js";
+import { DonutChart } from "../components/DonutChart.js";
+import { Legend } from "../components/Legend.js";
+import { type Output, useCallTool, useToolInfo } from "../helpers.js";
+import { supportedLanguages, useIntl } from "../i18n.js";
 
 type WidgetState = { weekOffset: number } & Output;
 

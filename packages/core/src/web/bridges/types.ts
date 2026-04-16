@@ -24,6 +24,7 @@ export type CallToolResponse = {
 };
 
 export type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
+export type RequestDisplayMode = Exclude<DisplayMode, "modal">;
 
 export type Theme = "light" | "dark";
 
@@ -91,19 +92,25 @@ export type FileMetadata = { fileId: string };
 export type RequestModalOptions = {
   title?: string;
   params?: Record<string, unknown>;
+  template?: string;
   anchor?: { top?: number; left?: number; width?: number; height?: number };
 };
+
+export type OpenExternalOptions = {
+  redirectUrl?: false;
+};
+
 export interface Adaptor {
   getHostContextStore<K extends keyof HostContext>(key: K): HostContextStore<K>;
   callTool<
     ToolArgs extends CallToolArgs = null,
     ToolResponse extends CallToolResponse = CallToolResponse,
   >(name: string, args: ToolArgs): Promise<ToolResponse>;
-  requestDisplayMode(mode: DisplayMode): Promise<{
-    mode: DisplayMode;
+  requestDisplayMode(mode: RequestDisplayMode): Promise<{
+    mode: RequestDisplayMode;
   }>;
   sendFollowUpMessage(prompt: string): Promise<void>;
-  openExternal(href: string): void;
+  openExternal(href: string, options?: OpenExternalOptions): void;
   setWidgetState(stateOrUpdater: SetWidgetStateAction): Promise<void>;
   uploadFile(file: File): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;

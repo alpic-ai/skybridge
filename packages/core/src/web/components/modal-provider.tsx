@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useSyncExternalStore } from "react";
-import { McpAppAdaptor } from "../bridges";
+import { McpAppAdaptor } from "../bridges/index.js";
 
 const modalStyles = `
 .sb-modal-backdrop {

@@ -7,8 +7,13 @@ import type {
 } from "../types.js";
 
 type DisplayMode = "pip" | "inline" | "fullscreen" | "modal";
+type RequestDisplayMode = Exclude<DisplayMode, "modal">;
 
-type WidgetState = UnknownObject;
+export type AppsSdkWidgetState = {
+  modelContent: Record<string, unknown>;
+  privateContent: Record<string, unknown>;
+  imageIds?: string[];
+};
 
 export const TOOL_RESPONSE_EVENT_TYPE = "openai:tool_response";
 export class ToolResponseEvent extends CustomEvent<{
@@ -19,7 +24,7 @@ export class ToolResponseEvent extends CustomEvent<{
 
 declare global {
   interface Window {
-    openai: AppsSdkMethods<WidgetState> & AppsSdkContext;
+    openai: AppsSdkMethods & AppsSdkContext;
   }
 
   interface WindowEventMap {
@@ -31,7 +36,7 @@ export type AppsSdkContext<
   ToolInput extends UnknownObject = Record<never, unknown>,
   ToolOutput extends UnknownObject = UnknownObject,
   ToolResponseMetadata extends UnknownObject = UnknownObject,
-  WidgetState extends UnknownObject = UnknownObject,
+  WS extends AppsSdkWidgetState = AppsSdkWidgetState,
 > = {
   theme: Theme;
   userAgent: UserAgent;
@@ -47,10 +52,10 @@ export type AppsSdkContext<
   toolInput: ToolInput;
   toolOutput: ToolOutput | { text: string } | null;
   toolResponseMetadata: ToolResponseMetadata | null;
-  widgetState: WidgetState | null;
+  widgetState: WS | null;
 };
 
-export type AppsSdkMethods<WidgetState extends UnknownObject = UnknownObject> =
+export type AppsSdkMethods<WS extends AppsSdkWidgetState = AppsSdkWidgetState> =
   {
     /** Calls a tool on your MCP. Returns the full response. */
     callTool: <
@@ -65,22 +70,22 @@ export type AppsSdkMethods<WidgetState extends UnknownObject = UnknownObject> =
     sendFollowUpMessage: (args: { prompt: string }) => Promise<void>;
 
     /** Opens an external link, redirects web page or mobile app */
-    openExternal(args: { href: string }): void;
+    openExternal(args: { href: string; redirectUrl?: false }): void;
 
     /** For transitioning an app from inline to fullscreen or pip */
-    requestDisplayMode: (args: { mode: DisplayMode }) => Promise<{
+    requestDisplayMode: (args: { mode: RequestDisplayMode }) => Promise<{
       /**
        * The granted display mode. The host may reject the request.
        * For mobile, PiP is always coerced to fullscreen.
        */
-      mode: DisplayMode;
+      mode: RequestDisplayMode;
     }>;
 
     /**
      * Sets the widget state.
      * This state is persisted across widget renders.
      */
-    setWidgetState: (state: WidgetState) => Promise<void>;
+    setWidgetState: (state: WS) => Promise<void>;
 
     /**
      * Opens a modal portaled outside of the widget iFrame.

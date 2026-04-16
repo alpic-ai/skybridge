@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import type http from "node:http";
 import path from "node:path";
 import cors from "cors";
 import express, { type Router } from "express";
@@ -14,7 +15,9 @@ import { assetBaseUrlTransformPlugin } from "./asset-base-url-transform-plugin.j
  *   app.use(await widgetsRouter());
  * }
  */
-export const widgetsDevServer = async (): Promise<Router> => {
+export const widgetsDevServer = async (
+  httpServer: http.Server,
+): Promise<Router> => {
   const router = express.Router();
 
   const { createServer, searchForWorkspaceRoot, loadConfigFromFile } =
@@ -53,19 +56,14 @@ export const widgetsDevServer = async (): Promise<Router> => {
       allowedHosts: true,
       middlewareMode: true,
       hmr: {
-        protocol: "ws",
-        host: "localhost",
-        port: 24678,
+        server: httpServer,
       },
     },
     root: webAppRoot,
     optimizeDeps: {
       include: ["react", "react-dom/client"],
     },
-    plugins: [
-      ...userPlugins,
-      assetBaseUrlTransformPlugin({ devServerOrigin: "http://localhost:3000" }),
-    ],
+    plugins: [...userPlugins, assetBaseUrlTransformPlugin()],
   });
 
   router.use(cors());

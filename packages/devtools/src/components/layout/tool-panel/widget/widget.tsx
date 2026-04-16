@@ -28,7 +28,7 @@ export const Widget = () => {
     }
 
     const iframe = iframeRef.current;
-    if (!iframe || !iframe.contentWindow || !iframe.contentDocument) {
+    if (!iframe?.contentWindow || !iframe.contentDocument) {
       return;
     }
 

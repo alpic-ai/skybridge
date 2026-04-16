@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { readFileSync } from "node:fs";
+import http from "node:http";
 import path from "node:path";
 import type {
   McpUiResourceMeta,
@@ -21,9 +22,25 @@ import type {
   Resource,
   ServerNotification,
   ServerRequest,
+  ServerResult,
   ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
 import { mergeWith, union } from "es-toolkit";
+import type { ErrorRequestHandler, Express, RequestHandler } from "express";
+import { createApp } from "./express.js";
+import { createMiddlewareEntry } from "./metric.js";
+import type {
+  McpExtra,
+  McpExtraFor,
+  McpMethodString,
+  McpMiddlewareEntry,
+  McpMiddlewareFilter,
+  McpMiddlewareFn,
+  McpResultFor,
+  McpTypedMiddlewareFn,
+  McpWildcard,
+} from "./middleware.js";
+import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
 import { templateHelper } from "./templateHelper.js";
 
 const mergeWithUnion = <T extends object, S extends object>(
@@ -118,12 +135,15 @@ type WidgetResourceConfig<T extends ResourceMeta = ResourceMeta> = {
   uri: string;
   mimeType: string;
   /** Function to build _meta for this resource content given computed defaults */
-  buildContentMeta: (defaults: {
-    resourceDomains: string[];
-    connectDomains: string[];
-    domain: string;
-    baseUriDomains: string[];
-  }) => T;
+  buildContentMeta: (
+    defaults: {
+      resourceDomains: string[];
+      connectDomains: string[];
+      domain: string;
+      baseUriDomains: string[];
+    },
+    overrides: { domain?: string },
+  ) => T;
 };
 
 type McpServerOriginalResourceConfig = Omit<
@@ -208,10 +228,223 @@ type ToolHandler<
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
 ) => TReturn | Promise<TReturn>;
 
+type MiddlewareConfig = {
+  path?: string;
+  handlers: RequestHandler[];
+};
+
+type ErrorMiddlewareConfig = {
+  path?: string;
+  handlers: ErrorRequestHandler[];
+};
+
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
 > extends McpServerBase {
   declare readonly $types: McpServerTypes<TTools>;
+  private express?: Express;
+  private customMiddleware: MiddlewareConfig[] = [];
+  private customErrorMiddleware: ErrorMiddlewareConfig[] = [];
+  private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
+  private mcpMiddlewareApplied = false;
+
+  use(...handlers: RequestHandler[]): this;
+  use(path: string, ...handlers: RequestHandler[]): this;
+  use(
+    pathOrHandler: string | RequestHandler,
+    ...handlers: RequestHandler[]
+  ): this {
+    if (typeof pathOrHandler === "string") {
+      this.customMiddleware.push({
+        path: pathOrHandler,
+        handlers,
+      });
+    } else {
+      this.customMiddleware.push({
+        handlers: [pathOrHandler, ...handlers],
+      });
+    }
+
+    return this;
+  }
+
+  useOnError(...handlers: ErrorRequestHandler[]): this;
+  useOnError(path: string, ...handlers: ErrorRequestHandler[]): this;
+  useOnError(
+    pathOrHandler: string | ErrorRequestHandler,
+    ...handlers: ErrorRequestHandler[]
+  ): this {
+    if (typeof pathOrHandler === "string") {
+      this.customErrorMiddleware.push({ path: pathOrHandler, handlers });
+    } else {
+      this.customErrorMiddleware.push({
+        handlers: [pathOrHandler, ...handlers],
+      });
+    }
+    return this;
+  }
+
+  /**
+   * Register MCP protocol-level middleware (catch-all).
+   */
+  mcpMiddleware(handler: McpMiddlewareFn): this;
+  /**
+   * Register MCP protocol-level middleware for all requests (`extra` is `McpExtra`).
+   */
+  mcpMiddleware(
+    filter: "request",
+    handler: (
+      request: { method: string; params: Record<string, unknown> },
+      extra: McpExtra,
+      next: () => Promise<ServerResult>,
+    ) => Promise<unknown> | unknown,
+  ): this;
+  /**
+   * Register MCP protocol-level middleware for all notifications (`extra` is `undefined`).
+   */
+  mcpMiddleware(
+    filter: "notification",
+    handler: (
+      request: { method: string; params: Record<string, unknown> },
+      extra: undefined,
+      next: () => Promise<undefined>,
+    ) => Promise<unknown> | unknown,
+  ): this;
+  /**
+   * Register MCP protocol-level middleware for an exact method.
+   * Narrows `params`, `extra`, and `next()` result based on the method string.
+   */
+  mcpMiddleware<M extends McpMethodString>(
+    filter: M,
+    handler: McpTypedMiddlewareFn<M>,
+  ): this;
+  /**
+   * Register MCP protocol-level middleware for a wildcard pattern (e.g. `"tools/*"`).
+   * `next()` returns the union of result types for matching methods.
+   */
+  mcpMiddleware<W extends McpWildcard>(
+    filter: W,
+    handler: (
+      request: { method: string; params: Record<string, unknown> },
+      extra: McpExtraFor<W>,
+      next: () => Promise<McpResultFor<W>>,
+    ) => Promise<unknown> | unknown,
+  ): this;
+  /**
+   * Register MCP protocol-level middleware with a method filter.
+   * Filter can be an exact method (`"tools/call"`), wildcard (`"tools/*"`),
+   * category (`"request"` | `"notification"`), or an array of those.
+   */
+  mcpMiddleware(filter: McpMiddlewareFilter, handler: McpMiddlewareFn): this;
+  mcpMiddleware(
+    filterOrHandler: McpMiddlewareFilter | McpMiddlewareFn,
+    // biome-ignore lint/suspicious/noExplicitAny: overloads narrow the handler type at call sites; implementation must accept all variants
+    maybeHandler?: any,
+  ): this {
+    if (this.mcpMiddlewareApplied) {
+      throw new Error(
+        "Cannot register MCP middleware after run() or connect() has been called",
+      );
+    }
+
+    const handler = maybeHandler as McpMiddlewareFn | undefined;
+
+    if (typeof filterOrHandler === "function") {
+      this.mcpMiddlewareEntries.push({
+        filter: null,
+        handler: filterOrHandler,
+      });
+    } else if (handler) {
+      this.mcpMiddlewareEntries.push({
+        filter: filterOrHandler,
+        handler,
+      });
+    } else {
+      throw new Error(
+        "mcpMiddleware requires a handler function when a filter is provided",
+      );
+    }
+
+    return this;
+  }
+
+  private applyMcpMiddleware(): void {
+    if (this.mcpMiddlewareApplied) {
+      return;
+    }
+    this.mcpMiddlewareApplied = true;
+
+    const monitoringEntry = createMiddlewareEntry();
+    const entries = monitoringEntry
+      ? [monitoringEntry, ...this.mcpMiddlewareEntries]
+      : this.mcpMiddlewareEntries;
+
+    if (entries.length === 0) {
+      return;
+    }
+
+    const { requestHandlers, notificationHandlers } = getHandlerMaps(
+      this.server,
+    );
+
+    // Wrap existing handlers and proxy future .set() for lazy SDK registration
+    const instrumentMap = (
+      map: Map<string, (...args: unknown[]) => Promise<unknown>>,
+      isNotification: boolean,
+    ) => {
+      for (const [method, handler] of map) {
+        map.set(
+          method,
+          buildMiddlewareChain(method, isNotification, handler, entries),
+        );
+      }
+      const originalSet = map.set.bind(map);
+      map.set = (
+        method: string,
+        handler: (...args: unknown[]) => Promise<unknown>,
+      ) =>
+        originalSet(
+          method,
+          buildMiddlewareChain(method, isNotification, handler, entries),
+        );
+    };
+
+    instrumentMap(requestHandlers, false);
+    instrumentMap(notificationHandlers, true);
+  }
+
+  override async connect(
+    transport: Parameters<typeof McpServerBase.prototype.connect>[0],
+  ): Promise<void> {
+    this.applyMcpMiddleware();
+    return super.connect(transport);
+  }
+
+  async run(): Promise<void> {
+    this.applyMcpMiddleware();
+    const httpServer = http.createServer();
+
+    if (!this.express) {
+      this.express = await createApp({
+        mcpServer: this,
+        httpServer,
+        customMiddleware: this.customMiddleware,
+        errorMiddleware: this.customErrorMiddleware,
+      });
+    }
+
+    httpServer.on("request", this.express);
+    return new Promise((resolve, reject) => {
+      httpServer.on("error", (error: Error) => {
+        console.error("Failed to start server:", error);
+        reject(error);
+      });
+      const port = parseInt(process.env.__PORT ?? "3000", 10);
+      httpServer.listen(port, () => {
+        resolve();
+      });
+    });
+  }
 
   registerWidget<
     TName extends string,
@@ -243,7 +476,10 @@ export class McpServer<
         hostType: "apps-sdk",
         uri: `ui://widgets/apps-sdk/${name}.html`,
         mimeType: "text/html+skybridge",
-        buildContentMeta: ({ resourceDomains, connectDomains, domain }) => {
+        buildContentMeta: (
+          { resourceDomains, connectDomains, domain },
+          overrides,
+        ) => {
           const userUi = userMeta?.ui;
           const userCsp = userUi?.csp;
 
@@ -253,7 +489,7 @@ export class McpServer<
               connect_domains: connectDomains,
             },
             "openai/widgetDomain": domain,
-            "openai/widgetDescription": toolConfig.description,
+            "openai/widgetDescription": resourceConfig.description,
           };
 
           const fromUi: Partial<
@@ -281,8 +517,8 @@ export class McpServer<
           );
 
           return mergeWithUnion(
-            mergeWithUnion(defaults, fromUi),
-            directOpenaiKeys,
+            mergeWithUnion(mergeWithUnion(defaults, fromUi), directOpenaiKeys),
+            { "openai/widgetDomain": overrides.domain },
           );
         },
       };
@@ -299,7 +535,10 @@ export class McpServer<
         hostType: "mcp-app",
         uri: `ui://widgets/ext-apps/${name}.html`,
         mimeType: "text/html;profile=mcp-app",
-        buildContentMeta: ({ resourceDomains, connectDomains, domain }) => {
+        buildContentMeta: (
+          { resourceDomains, connectDomains, domain },
+          overrides,
+        ) => {
           const defaults: McpAppsResourceMeta = {
             ui: {
               csp: {
@@ -310,7 +549,9 @@ export class McpServer<
             },
           };
 
-          return mergeWithUnion(defaults, { ui: userMeta?.ui });
+          return mergeWithUnion(defaults, {
+            ui: { ...userMeta?.ui, ...overrides },
+          });
         },
       };
       this.registerWidgetResource({
@@ -323,13 +564,27 @@ export class McpServer<
       toolMeta.ui = { resourceUri: widgetConfig.uri };
     }
 
+    const wrappedToolCallback: ToolHandler<TInput, TReturn> = async (
+      args,
+      extra,
+    ) => {
+      const result = await toolCallback(args, extra);
+      return {
+        ...result,
+        _meta: {
+          ...(result as { _meta?: Record<string, unknown> })._meta,
+          viewUUID: crypto.randomUUID(),
+        },
+      };
+    };
+
     this.registerTool(
       name,
       {
         ...toolConfig,
         _meta: toolMeta,
       },
-      toolCallback,
+      wrappedToolCallback,
     );
 
     return this as AddTool<
@@ -394,20 +649,37 @@ export class McpServer<
       { ...resourceConfig, _meta: resourceConfig._meta },
       async (uri, extra) => {
         const isProduction = process.env.NODE_ENV === "production";
-        const useForwardedHost =
-          process.env.SKYBRIDGE_USE_FORWARDED_HOST === "true";
         const isClaude =
           extra?.requestInfo?.headers?.["user-agent"] === "Claude-User";
 
-        const hostFromHeaders =
-          extra?.requestInfo?.headers?.["x-forwarded-host"] ??
-          extra?.requestInfo?.headers?.host;
+        const headers = extra?.requestInfo?.headers || {};
+        const header = (key: string) => {
+          const val = headers[key];
+          return Array.isArray(val) ? val[0] : val;
+        };
 
-        const useExternalHost = isProduction || useForwardedHost || isClaude;
+        let serverUrl: string;
 
-        const serverUrl = useExternalHost
-          ? `https://${hostFromHeaders}`
-          : "http://localhost:3000";
+        const forwardedHost = header("x-forwarded-host");
+        const origin = header("origin");
+        const host = header("host");
+
+        if (forwardedHost) {
+          const proto = header("x-forwarded-proto") || "https";
+          serverUrl = `${proto}://${forwardedHost}`;
+        } else if (origin) {
+          serverUrl = origin;
+        } else if (host) {
+          const proto = ["127.0.0.1:", "localhost:"].some((p) =>
+            host.startsWith(p),
+          )
+            ? "http"
+            : "https";
+          serverUrl = `${proto}://${host}`;
+        } else {
+          const devPort = process.env.__PORT || "3000";
+          serverUrl = `http://localhost:${devPort}`;
+        }
 
         const html = isProduction
           ? templateHelper.renderProduction({
@@ -421,24 +693,37 @@ export class McpServer<
           : templateHelper.renderDevelopment({
               hostType,
               serverUrl,
-              useLocalNetworkAccess: !useExternalHost,
               widgetName: name,
             });
 
-        const VITE_HMR_WEBSOCKET_DEFAULT_URL = "ws://localhost:24678";
+        const connectDomains = [serverUrl];
+        if (!isProduction) {
+          const wsUrl = new URL(serverUrl);
+          wsUrl.protocol = wsUrl.protocol === "https:" ? "wss:" : "ws:";
+          connectDomains.push(wsUrl.origin);
+        }
 
-        const contentMeta = buildContentMeta({
-          resourceDomains: [serverUrl],
-          connectDomains: !isProduction ? [VITE_HMR_WEBSOCKET_DEFAULT_URL] : [],
-          domain: isClaude
-            ? `${crypto
-                .createHash("sha256")
-                .update(`https://${hostFromHeaders}/mcp`)
-                .digest("hex")
-                .slice(0, 32)}.claudemcpcontent.com`
-            : serverUrl,
-          baseUriDomains: [serverUrl],
-        });
+        let contentMetaOverrides: { domain?: string } = {};
+        if (isClaude) {
+          const pathname = extra?.requestInfo?.url?.pathname ?? "";
+          const url = `${serverUrl}${pathname}`;
+          const hash = crypto
+            .createHash("sha256")
+            .update(url)
+            .digest("hex")
+            .slice(0, 32);
+          contentMetaOverrides = { domain: `${hash}.claudemcpcontent.com` };
+        }
+
+        const contentMeta = buildContentMeta(
+          {
+            resourceDomains: [serverUrl],
+            connectDomains,
+            domain: serverUrl,
+            baseUriDomains: [serverUrl],
+          },
+          contentMetaOverrides,
+        );
 
         return {
           contents: [

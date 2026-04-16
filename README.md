@@ -4,8 +4,6 @@
 
 <br />
 
-# Skybridge
-
 **Build ChatGPT & MCP Apps. The Modern TypeScript Way.**
 
 The fullstack TypeScript framework for AI-embedded widgets.<br />
@@ -33,9 +31,9 @@ ChatGPT Apps and MCP Apps let you embed **rich, interactive UIs** directly in AI
 
 | | |
 |:--|:--|
-| 👨‍💻 **Full Dev Environment** — HMR, debug traces, and local devtools. No more refresh loops. | ✅ **End-to-End Type Safety** — tRPC-style inference from server to widget. Autocomplete everywhere. |
+| 🌐 **Write once, run everywhere** — Skybridge works seamlessly with ChatGPT (Apps SDK) and MCP-compatible clients. | ✅ **End-to-End Type Safety** — tRPC-style inference from server to widget. Autocomplete everywhere. |
 | 🔄 **Widget-to-Model Sync** — Keep the model aware of UI state with `data-llm`. Dual surfaces, one source of truth. | ⚒️ **React Query-style Hooks** — `isPending`, `isError`, callbacks. State management you already know. |
-| 🌐 **Platform Agnostic** — Write once, run anywhere. Works with ChatGPT (Apps SDK) and MCP-compatible clients. | 📦 **Showcase Examples** — Production-ready examples to learn from and build upon. |
+| 👨‍💻 **Full dev environment** — HMR, debug traces, and local devtools. | 📦 **Showcase Examples** — Production-ready examples to learn from and build upon. |
 
 <br />
 
@@ -120,10 +118,21 @@ Explore production-ready examples:
 
 | Example                | Description                                                                      | Demo                                                | Code                                                                                |
 |------------------------|----------------------------------------------------------------------------------|-----------------------------------------------------|-------------------------------------------------------------------------------------|
-| **Capitals Explorer**  | Interactive world map with geolocation and Wikipedia integration                 | [Try Demo](https://capitals.skybridge.tech/try)     | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/capitals)      |
-| **Ecommerce Carousel** | Product carousel with cart, localization, and modals                             | [Try Demo](https://ecommerce.skybridge.tech/try)    | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/ecom-carousel) |
-| **Everything**         | Comprehensive playground showcasing all hooks and features                       | [Try Demo](https://everything.skybridge.tech/try)   | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/everything)    |
-| **Productivity**       | Data visualization dashboard demonstrating Skybridge capabilities for MCP Apps   | [Try Demo](https://productivity.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/productivity)  |
+| **Awaze — Cottage Search** | Holiday cottage search and booking experience — browse properties, filter by location, and explore availability | [Try Demo](https://mcp.cottages.com/try) | —                                                                                                   |
+| **Capitals Explorer**     | Interactive world map with geolocation and Wikipedia integration                              | [Try Demo](https://capitals.skybridge.tech/try)           | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/capitals)           |
+| **Ecommerce Carousel**    | Product carousel with cart, localization, and modals                                          | [Try Demo](https://ecommerce.skybridge.tech/try)          | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/ecom-carousel)      |
+| **Everything**            | Comprehensive playground showcasing all hooks and features                                    | [Try Demo](https://everything.skybridge.tech/try)         | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/everything)         |
+| **Investigation Game**    | Interactive murder mystery game with multi-screen gameplay and dynamic story progression      | [Try Demo](https://investigation-game.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/investigation-game) |
+| **Productivity**          | Data visualization dashboard demonstrating Skybridge capabilities for MCP Apps                | [Try Demo](https://productivity.skybridge.tech/try)       | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/productivity)       |
+| **Time's Up**             | Word-guessing party game where the user gives hints and the AI tries to guess the secret word | [Try Demo](https://times-up.skybridge.tech/try)           | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/times-up)           |
+| **Lumo — Interactive AI Tutor** | Adaptive educational tutor with Mermaid.js diagrams, mind maps, quizzes, and fill-in-the-blank exercises | [Try Demo](https://lumo-mcp-app-39519fdd.alpic.live/try) | [View Code](https://github.com/connorads/lumo-mcp-app)                                    |
+| **Auth — Auth0**          | Full OAuth authentication with Auth0 and personalized coffee shop search                      | —                                                         | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-auth0)         |
+| **Auth — Clerk**          | Full OAuth authentication with Clerk and personalized coffee shop search                      | —                                                         | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-clerk)         |
+| **Auth — Stytch**         | Full OAuth authentication with Stytch and personalized coffee shop search                     | —                                                         | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-stytch)        |
+| **Auth — WorkOS AuthKit** | Full OAuth authentication with WorkOS AuthKit and personalized coffee shop search             | —                                                         | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-workos)        |
+| **Flight Booking**        | Flight booking carousel with dynamic search and booking flow                                  | [Try Demo](https://flight-booking.skybridge.tech/try)     | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/flight-booking)     |
+| **Generative UI**         | Dynamic UI generation using json-render and Skybridge                                         | [Try Demo](https://generative-ui.skybridge.tech/try)      | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/generative-ui)      |
+| **Manifest Starter**      | Starter app with Manifest UI agentic components out-of-the-box                                | [Try Demo](https://manifest-ui.skybridge.tech/try)        | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/manifest-ui)        |
 
 See all examples in the [Showcase](https://docs.skybridge.tech/showcase) or browse the [examples/](examples/) directory.
 

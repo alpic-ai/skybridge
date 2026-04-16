@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
   id-token: write
 
 jobs:
@@ -23,7 +24,7 @@ jobs:
           node-version-file: ".nvmrc"
           registry-url: "https://registry.npmjs.org"
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
 
       - run: pnpm install --frozen-lockfile
 
@@ -82,3 +83,45 @@ jobs:
       - name: Deploy docs to Mintlify
         if: github.event_name == 'release'
         run: git push origin HEAD:mintlify --force
+
+      - name: Bump versions
+        if: github.event_name == 'release'
+        run: node scripts/bump.js ${{ steps.version.outputs.version }} && pnpm install --no-frozen-lockfile
+
+      # The prepublishOnly script in packages/core copies the root README into
+      # the package for npm. Clean it up so it doesn't leak into the bump PR.
+      - name: Clean up copied README
+        if: github.event_name == 'release'
+        run: rm -f packages/core/README.md
+
+      - name: Open bump PR
+        if: github.event_name == 'release'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: "chore: bump skybridge versions to ${{ steps.version.outputs.version }}"
+          title: "chore: bump skybridge versions to ${{ steps.version.outputs.version }}"
+          body: "Automated version bump of skybridge dependencies in templates and examples."
+          branch: chore/bump-versions
+          base: main
+          delete-branch: true
+
+  notify-discord:
+    if: github.event_name == 'release'
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RELEASE_VERSION: ${{ github.event.release.tag_name }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+        run: |
+          BODY=$(echo "$RELEASE_BODY" | cut -c 1-1500)
+          PAYLOAD=$(jq -n \
+            --arg title "Skybridge $RELEASE_VERSION released" \
+            --arg url "$RELEASE_URL" \
+            --arg description "$BODY" \
+            --argjson color 5814783 \
+            '{embeds: [{title: $title, url: $url, description: $description, color: $color}]}')
+          curl -f -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK_URL"

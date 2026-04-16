@@ -67,8 +67,8 @@ export async function init(args: string[] = process.argv.slice(2)) {
         message: "Project name:",
         defaultValue: defaultProjectName,
         placeholder: defaultProjectName,
-        validate: (value: string) => {
-          return value.length === 0 || sanitizeTargetDir(value).length > 0
+        validate: (value) => {
+          return !value || sanitizeTargetDir(value).length > 0
             ? undefined
             : "Invalid project name";
         },
@@ -118,8 +118,8 @@ export async function init(args: string[] = process.argv.slice(2)) {
         emptyDir(targetDir);
         break;
       case "no":
-        cancel();
-        return;
+        prompts.log.error("Target directory is not empty.");
+        process.exit(1);
     }
   }
 
@@ -139,7 +139,8 @@ export async function init(args: string[] = process.argv.slice(2)) {
       // Copy template to target directory
       fs.cpSync(templateDir, root, {
         recursive: true,
-        filter: (src) => [".npmrc"].every((file) => !src.endsWith(file)),
+        filter: (src: string) =>
+          [".npmrc"].every((file) => !src.endsWith(file)),
       });
       // Rename _gitignore to .gitignore
       fs.renameSync(
@@ -173,7 +174,39 @@ export async function init(args: string[] = process.argv.slice(2)) {
   const userAgent = process.env.npm_config_user_agent;
   const pkgManager = userAgent?.split(" ")[0]?.split("/")[0] || "npm";
 
-  // 4. Ask about immediate installation
+  // 4. Ask about skills installation (installed by default)
+  let skill = true;
+  if (interactive) {
+    const skillsResult = await prompts.confirm({
+      message: "Install the coding agents skills? (recommended)",
+      initialValue: true,
+    });
+    if (prompts.isCancel(skillsResult)) {
+      return cancel();
+    }
+    skill = skillsResult;
+  }
+
+  if (skill) {
+    run(
+      [
+        ...getPkgExecCmd(pkgManager, "skills"),
+        "add",
+        "alpic-ai/skybridge",
+        "-s",
+        "chatgpt-app-builder",
+        ...(interactive
+          ? []
+          : ["--yes", "-a", "universal", "-a", "claude-code"]),
+      ],
+      {
+        stdio: "inherit",
+        cwd: targetDir,
+      },
+    );
+  }
+
+  // 5. Ask about immediate installation
   let immediate = argImmediate;
   if (immediate === undefined) {
     if (interactive) {
@@ -257,19 +290,42 @@ function sanitizeTargetDir(targetDir: string) {
   );
 }
 
-function isEmpty(path: string) {
-  const files = fs.readdirSync(path);
-  return files.length === 0 || (files.length === 1 && files[0] === ".git");
+// Skip user's SPEC.md and IDE/agent preferences (.idea, .claude, etc.)
+function isSkippedEntry(entry: fs.Dirent) {
+  return (
+    (entry.name.startsWith(".") && entry.isDirectory()) ||
+    entry.name === "SPEC.md"
+  );
+}
+
+function isEmpty(dirPath: string) {
+  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+  return entries.every(isSkippedEntry);
 }
 
 function emptyDir(dir: string) {
   if (!fs.existsSync(dir)) {
     return;
   }
-  for (const file of fs.readdirSync(dir)) {
-    if (file === ".git") {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (isSkippedEntry(entry)) {
       continue;
     }
-    fs.rmSync(path.resolve(dir, file), { recursive: true, force: true });
+    fs.rmSync(path.join(dir, entry.name), { recursive: true, force: true });
+  }
+}
+
+function getPkgExecCmd(pkgManager: string, cmd: string): string[] {
+  switch (pkgManager) {
+    case "yarn":
+      return ["yarn", "dlx", cmd];
+    case "pnpm":
+      return ["pnpm", "dlx", cmd];
+    case "bun":
+      return ["bunx", cmd];
+    case "deno":
+      return ["deno", "run", "-A", `npm:${cmd}`];
+    default:
+      return ["npx", "--yes", cmd];
   }
 }

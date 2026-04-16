@@ -1,0 +1,6 @@
+# Packages listed here must NEVER have pnpm overrides.
+# One package name per line.
+# The audit skill skips these in Phase 3, and check-overrides.sh force-removes them.
+
+# mintlify needs tar v6; overriding to v7 breaks it
+tar

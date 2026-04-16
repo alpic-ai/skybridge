@@ -1,79 +1,78 @@
 import { Command, Flags } from "@oclif/core";
 import { Box, render, Text } from "ink";
+import { useMemo } from "react";
+import { resolvePort } from "../cli/detect-port.js";
 import { Header } from "../cli/header.js";
 import { useNodemon } from "../cli/use-nodemon.js";
+import { useTunnel } from "../cli/use-tunnel.js";
 import { useTypeScriptCheck } from "../cli/use-typescript-check.js";
 
 export default class Dev extends Command {
   static override description = "Start development server";
   static override examples = ["skybridge"];
   static override flags = {
-    "use-forwarded-host": Flags.boolean({
-      description:
-        "Uses the forwarded host header to construct widget URLs instead of localhost, useful when accessing the dev server through a tunnel (e.g., ngrok)",
+    port: Flags.integer({
+      char: "p",
+      description: "Port to run the server on",
+      min: 1,
+    }),
+    tunnel: Flags.boolean({
+      description: "Open an Alpic tunnel for remote testing",
+      default: false,
     }),
   };
 
   public async run(): Promise<void> {
     const { flags } = await this.parse(Dev);
 
+    const { port, fallback, envWarning } = await resolvePort(flags.port);
+    if (envWarning) {
+      this.warn(envWarning);
+    }
+
     const env = {
       ...process.env,
-      ...(flags["use-forwarded-host"]
-        ? { SKYBRIDGE_USE_FORWARDED_HOST: "true" }
-        : {}),
+      __PORT: String(port),
     };
 
     const App = () => {
       const tsErrors = useTypeScriptCheck();
-      const messages = useNodemon(env);
+      const nodemonMessages = useNodemon(env);
+      const tunnelState = useTunnel(flags.tunnel ? port : null);
+
+      const messages = useMemo(
+        () =>
+          [...nodemonMessages, ...tunnelState.logs]
+            .sort((a, b) => a.ts - b.ts)
+            .slice(-10),
+        [nodemonMessages, tunnelState.logs],
+      );
 
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>
           <Header version={this.config.version} />
-          <Box>
+          {fallback && (
+            <Box marginBottom={1}>
+              <Text color="yellow">
+                Port 3000 is in use, falling back to port {port}
+              </Text>
+            </Box>
+          )}
+          <Box marginBottom={1}>
             <Text color="green">→{"  "}</Text>
             <Text color="white" bold>
               Open DevTools to test your app locally:{" "}
             </Text>
-            <Text color="green">http://localhost:3000/</Text>
+            <Text color="green">{`http://localhost:${port}/`}</Text>
           </Box>
           <Box marginBottom={1}>
             <Text color="#20a832">→{"  "}</Text>
             <Text>MCP server running at:{"  "}</Text>
             <Text color="white" bold>
-              http://localhost:3000/mcp
-            </Text>
-          </Box>
-          <Text color="white" underline>
-            To test on ChatGPT:
-          </Text>
-          <Box>
-            <Text color="#20a832">→{"  "}</Text>
-            <Text color="grey">Make your local server accessible with </Text>
-            <Text color="white" bold>
-              ngrok http 3000
+              {`http://localhost:${port}/mcp`}
             </Text>
           </Box>
           <Box marginBottom={1}>
-            <Text>
-              <Text color="#20a832">→{"  "}</Text>
-              <Text color="grey">Connect to ChatGPT with URL </Text>
-              <Text color="white" bold>
-                https://xxxxxx.ngrok-free.app/mcp
-              </Text>
-            </Text>
-          </Box>
-          <Box>
-            <Text>
-              <Text color="#20a832">→{"  "}</Text>
-              <Text>Documentation: </Text>
-              <Text color="white" bold>
-                https://docs.skybridge.tech/
-              </Text>
-            </Text>
-          </Box>
-          <Box marginTop={1}>
             <Text>
               <Text color="#20a832">→{"  "}</Text>
               <Text>If you like Skybridge, please </Text>
@@ -87,6 +86,36 @@ export default class Dev extends Command {
               <Text color="grey"> 🙏</Text>
             </Text>
           </Box>
+          {flags.tunnel ? (
+            <Box marginBottom={1}>
+              <Text color="#20a832">{"→  "}</Text>
+              <Text color={tunnelState.labelColor}>
+                Tunnel: {tunnelState.label}
+              </Text>
+            </Box>
+          ) : (
+            <>
+              <Box>
+                <Text>
+                  <Text color="#20a832">{"→  "}</Text>
+                  <Text>
+                    Get a public URL to test on ChatGPT or Claude with the{" "}
+                  </Text>
+                  <Text color="cyan" bold>
+                    --tunnel
+                  </Text>
+                  <Text> flag.</Text>
+                </Text>
+              </Box>
+              <Box>
+                <Text color={"grey"}>
+                  {"   "}
+                  More info:
+                  https://docs.skybridge.tech/quickstart/test-your-app
+                </Text>
+              </Box>
+            </>
+          )}
           {tsErrors.length > 0 && (
             <Box marginTop={1} flexDirection="column">
               <Text color="red" bold>
@@ -116,11 +145,8 @@ export default class Dev extends Command {
               <Text color="white" bold>
                 Logs:
               </Text>
-              {messages.map((message, index) => (
-                <Box
-                  key={`${message.type}-${index}-${message.text.slice(0, 20)}`}
-                  marginLeft={2}
-                >
+              {messages.map((message) => (
+                <Box key={message.id} marginLeft={2}>
                   {message.type === "restart" ? (
                     <>
                       <Text color="green">✓{"  "}</Text>

@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import {
   afterEach,
   beforeEach,
@@ -8,6 +8,12 @@ import {
   type Mock,
   vi,
 } from "vitest";
+import { McpAppAdaptor, McpAppBridge } from "../bridges/mcp-app/index.js";
+import {
+  fireToolResultNotification,
+  getMcpAppHostPostMessageMock,
+  MockResizeObserver,
+} from "./test/utils.js";
 import { useWidgetState } from "./use-widget-state.js";
 
 describe("useWidgetState", () => {
@@ -38,7 +44,7 @@ describe("useWidgetState", () => {
   });
 
   it("should initialize with window.openai.widgetState when available", () => {
-    OpenaiMock.widgetState = windowState;
+    OpenaiMock.widgetState = { modelContent: windowState };
     const { result } = renderHook(() => useWidgetState(defaultState));
 
     expect(result.current[0]).toEqual(windowState);
@@ -52,7 +58,10 @@ describe("useWidgetState", () => {
       result.current[1](newState);
     });
 
-    expect(OpenaiMock.setWidgetState).toHaveBeenCalledWith(newState);
+    expect(OpenaiMock.setWidgetState).toHaveBeenCalledWith({
+      modelContent: newState,
+      privateContent: {},
+    });
     expect(result.current[0]).toEqual(newState);
   });
 
@@ -64,23 +73,167 @@ describe("useWidgetState", () => {
     });
 
     expect(OpenaiMock.setWidgetState).toHaveBeenCalledWith({
-      count: 1,
-      name: "test",
+      modelContent: { count: 1, name: "test" },
+      privateContent: {},
     });
     expect(result.current[0]).toEqual({ count: 1, name: "test" });
   });
 
   it("should update state when window.openai.widgetState changes", () => {
-    OpenaiMock.widgetState = defaultState;
+    OpenaiMock.widgetState = { modelContent: defaultState };
     const { result, rerender } = renderHook(() => useWidgetState(defaultState));
 
     expect(result.current[0]).toEqual(defaultState);
 
     // Simulate window.openai.widgetState changing
-    OpenaiMock.widgetState = windowState;
+    OpenaiMock.widgetState = { modelContent: windowState };
     // Trigger re-render to simulate the useEffect running
     rerender();
 
     expect(result.current[0]).toEqual(windowState);
+  });
+});
+
+describe("useWidgetState (mcp-app host — localStorage persistence)", () => {
+  beforeEach(() => {
+    vi.stubGlobal("parent", { postMessage: getMcpAppHostPostMessageMock() });
+    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    vi.stubGlobal("ResizeObserver", MockResizeObserver);
+    localStorage.clear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.resetAllMocks();
+    McpAppBridge.resetInstance();
+    McpAppAdaptor.resetInstance();
+    localStorage.clear();
+  });
+
+  it("should persist state to localStorage when viewUUID is available", async () => {
+    const viewUUID = "test-uuid-123";
+    const { result } = renderHook(() => useWidgetState({ page: 1, zoom: 100 }));
+
+    await act(async () => {
+      fireToolResultNotification({
+        content: [{ type: "text", text: "result" }],
+        structuredContent: {},
+        _meta: { viewUUID },
+      });
+    });
+
+    act(() => {
+      result.current[1]({ page: 3, zoom: 150 });
+    });
+
+    expect(result.current[0]).toEqual({ page: 3, zoom: 150 });
+    expect(localStorage.length).toBe(1);
+  });
+
+  it("should restore state from localStorage when viewUUID arrives", async () => {
+    const viewUUID = "test-uuid-456";
+    // Pre-seed with the sb:{timestamp}:{viewUUID} format
+    localStorage.setItem(
+      `sb:1700000000000:${viewUUID}`,
+      JSON.stringify({ page: 5, zoom: 200 }),
+    );
+
+    const { result } = renderHook(() => useWidgetState({ page: 1, zoom: 100 }));
+
+    act(() => {
+      fireToolResultNotification({
+        content: [{ type: "text", text: "result" }],
+        structuredContent: {},
+        _meta: { viewUUID },
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current[0]).toEqual({ page: 5, zoom: 200 });
+    });
+  });
+
+  it("should not persist when no viewUUID is available", () => {
+    const { result } = renderHook(() => useWidgetState({ page: 1 }));
+
+    act(() => {
+      result.current[1]({ page: 2 });
+    });
+
+    expect(result.current[0]).toEqual({ page: 2 });
+    expect(localStorage.length).toBe(0);
+  });
+
+  it("should handle corrupted localStorage data gracefully", async () => {
+    const viewUUID = "test-uuid-corrupt";
+    localStorage.setItem(`sb:1700000000000:${viewUUID}`, "not valid json{{{");
+
+    const { result } = renderHook(() => useWidgetState({ page: 1 }));
+
+    act(() => {
+      fireToolResultNotification({
+        content: [{ type: "text", text: "result" }],
+        structuredContent: {},
+        _meta: { viewUUID },
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current[0]).toEqual({ page: 1 });
+    });
+  });
+
+  it("should refresh localStorage timestamp on each persist (LRU)", async () => {
+    const viewUUID = "lru-test-uuid";
+    const oldKey = `sb:1000000000000:${viewUUID}`;
+    localStorage.setItem(oldKey, JSON.stringify({ page: 1 }));
+
+    const { result } = renderHook(() => useWidgetState({ page: 1 }));
+
+    await act(async () => {
+      fireToolResultNotification({
+        content: [{ type: "text", text: "result" }],
+        structuredContent: {},
+        _meta: { viewUUID },
+      });
+    });
+
+    act(() => {
+      result.current[1]({ page: 2 });
+    });
+
+    // Old key removed, replaced with a new one (still just 1 entry)
+    expect(localStorage.getItem(oldKey)).toBeNull();
+    expect(localStorage.length).toBe(1);
+  });
+
+  it("should evict oldest entries when exceeding max storage entries", async () => {
+    // Fill localStorage with 200 entries (the max)
+    for (let i = 0; i < 200; i++) {
+      localStorage.setItem(
+        `sb:${String(1000000000000 + i)}:old-uuid-${String(i).padStart(4, "0")}`,
+        JSON.stringify({ i }),
+      );
+    }
+    expect(localStorage.length).toBe(200);
+
+    const viewUUID = "eviction-test-uuid";
+    const { result } = renderHook(() => useWidgetState({ page: 1 }));
+
+    await act(async () => {
+      fireToolResultNotification({
+        content: [{ type: "text", text: "result" }],
+        structuredContent: {},
+        _meta: { viewUUID },
+      });
+    });
+
+    act(() => {
+      result.current[1]({ page: 99 });
+    });
+
+    // Should have evicted the oldest entry to stay at 200
+    expect(localStorage.length).toBe(200);
+    expect(localStorage.getItem("sb:1000000000000:old-uuid-0000")).toBeNull();
   });
 });

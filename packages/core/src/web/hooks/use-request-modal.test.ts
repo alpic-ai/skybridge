@@ -62,7 +62,11 @@ describe("useRequestModal", () => {
     const { result } = renderHook(() => useRequestModal());
     const { open } = result.current;
 
-    const options = { title: "Test Modal" };
+    const options = {
+      title: "Test Modal",
+      params: { foo: "bar" },
+      template: "ui://widget/modal-template.html",
+    };
     open(options);
 
     expect(requestModalMock).toHaveBeenCalledTimes(1);

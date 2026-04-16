@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCallTool } from "../../helpers";
+import { useCallTool } from "../../helpers.js";
 
 export function UseCallToolTab() {
   const [name, setName] = useState("");

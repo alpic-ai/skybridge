@@ -1,0 +1,14 @@
+[
+  {
+    "query": "In fullscreen mode there's an 'Open in App' button. I want it to link to the current article on my website.",
+    "expected_behavior": "Uses useSetOpenInAppUrl from skybridge/web. Calls setOpenInAppUrl with article URL in useEffect. Must have same origin as widget server."
+  },
+  {
+    "query": "I need a button that opens Stripe checkout in a new tab.",
+    "expected_behavior": "Uses useOpenExternal from skybridge/web. Calls openExternal(stripeUrl) on button click. Shows confirmation dialog by default."
+  },
+  {
+    "query": "When users click 'Book Now' it should redirect to our booking site without any confirmation popup.",
+    "expected_behavior": "Uses useOpenExternal for the redirect. Whitelist domain in server widget definition using _meta.ui.csp.redirectDomains array to skip confirmation."
+  }
+]

@@ -16,8 +16,7 @@ export const products = [
     description:
       "Slim-fitting style, contrast raglan long sleeve, three-button henley placket, light weight & soft fabric for breathable and comfortable wearing. And Solid stitched shirts with round neck made for durability and a great fit for casual fashion wear and diehard baseball fans. The Henley style round neckline includes a three-button placket.",
     category: "men's clothing",
-    image:
-      "https://fakestoreapi.com/img/71-3HjGNDUL._AC_SY879._SX._UX._SY._UY_t.png",
+    image: "https://fakestoreapi.com/img/71YXzeOuslL._AC_UY879_t.png",
     rating: { rate: 4.1, count: 259 },
   },
   {
@@ -162,7 +161,7 @@ export const products = [
     description:
       "100% POLYURETHANE(shell) 100% POLYESTER(lining) 75% POLYESTER 25% COTTON (SWEATER), Faux leather material for style and comfort / 2 pockets of front, 2-For-One Hooded denim style faux leather jacket, Button detail on waist / Detail stitching at sides, HAND WASH ONLY / DO NOT BLEACH / LINE DRY / DO NOT IRON",
     category: "women's clothing",
-    image: "https://fakestoreapi.com/img/81XH0e8fefL._AC_UY879_t.png",
+    image: "https://fakestoreapi.com/img/51Y5NI-I5jL._AC_UX679_t.png",
     rating: { rate: 2.9, count: 340 },
   },
   {
@@ -172,7 +171,7 @@ export const products = [
     description:
       "Lightweight perfet for trip or casual wear---Long sleeve with hooded, adjustable drawstring waist design. Button and zipper front closure raincoat, fully stripes Lined and The Raincoat has 2 side pockets are a good size to hold all kinds of things, it covers the hips, and the hood is generous but doesn't overdo it.Attached Cotton Lined Hood with Adjustable Drawstrings give it a real styled look.",
     category: "women's clothing",
-    image: "https://fakestoreapi.com/img/71HblAHs5xL._AC_UY879_-2t.png",
+    image: "https://fakestoreapi.com/img/71z3kpMAYsL._AC_UY879_t.png",
     rating: { rate: 3.8, count: 679 },
   },
   {

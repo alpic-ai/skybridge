@@ -60,6 +60,27 @@ describe("useUser", () => {
 
       expect(result.current.locale).toBe("es-ES");
     });
+
+    it("should normalize underscore locale to BCP 47 hyphen format", () => {
+      OpenaiMock.locale = "fr_FR";
+      const { result } = renderHook(() => useUser());
+
+      expect(result.current.locale).toBe("fr-FR");
+    });
+
+    it("should canonicalize locale casing", () => {
+      OpenaiMock.locale = "en-us";
+      const { result } = renderHook(() => useUser());
+
+      expect(result.current.locale).toBe("en-US");
+    });
+
+    it("should fall back to en-US for invalid locale", () => {
+      OpenaiMock.locale = "not-a-locale-!!";
+      const { result } = renderHook(() => useUser());
+
+      expect(result.current.locale).toBe("en-US");
+    });
   });
 
   describe("mcp-app host type", () => {
@@ -68,7 +89,7 @@ describe("useUser", () => {
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
-    afterEach(() => {
+    afterEach(async () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();
@@ -91,6 +112,21 @@ describe("useUser", () => {
           device: { type: "desktop" },
           capabilities: { hover: true, touch: false },
         });
+      });
+    });
+
+    it("should normalize underscore locale to BCP 47 hyphen format", async () => {
+      vi.stubGlobal("parent", {
+        postMessage: getMcpAppHostPostMessageMock({
+          locale: "fr_FR",
+          platform: "web",
+          deviceCapabilities: { hover: true, touch: false },
+        }),
+      });
+      const { result } = renderHook(() => useUser());
+
+      await waitFor(() => {
+        expect(result.current.locale).toBe("fr-FR");
       });
     });
 

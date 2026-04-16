@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Activity, Output } from "../helpers";
+import type { Activity, Output } from "../helpers.js";
 
 const COLORS: Record<string, string> = {
   meetings: "var(--color-primary)",

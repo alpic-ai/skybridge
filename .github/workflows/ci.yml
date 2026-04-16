@@ -6,35 +6,8 @@ on:
     branches: [main]
 
 jobs:
-  install:
-    name: Install
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: ".nvmrc"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - uses: actions/cache/save@v5
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-            docs/node_modules
-          key: build-${{ github.sha }}
-
   test:
     name: ${{ matrix.name }}
-    needs: install
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -51,26 +24,21 @@ jobs:
           - name: Build
             command: pnpm run build
           - name: Docs Build
-            command: pnpm run --filter @skybridge/docs build
+            command: pnpm run --if-present --filter @skybridge/docs build
           - name: Docs Lint
-            command: pnpm run --filter @skybridge/docs lint
+            command: pnpm run --if-present --filter @skybridge/docs lint
     steps:
       - uses: actions/checkout@v6
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
 
       - uses: actions/setup-node@v6
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
 
-      - uses: actions/cache/restore@v5
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-            docs/node_modules
-          key: build-${{ github.sha }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Run ${{ matrix.name }}
         run: ${{ matrix.command }}
@@ -83,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
 
       - uses: actions/setup-node@v6
         with:
@@ -93,10 +61,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install template dependencies with workspace:*
-        run: |
-          cd packages/create-skybridge/template
-          pnpm add skybridge@workspace:* @skybridge/devtools@workspace:*
+      - name: Install template dependencies with workspace package versions
+        run: pnpm add "skybridge@workspace:0.0.0" "@skybridge/devtools@workspace:0.0.0" --filter apps-sdk-template
 
       - name: Build core and devtools
         run: |
@@ -104,9 +70,7 @@ jobs:
           pnpm --filter @skybridge/devtools build
 
       - name: Build template
-        run: |
-          cd packages/create-skybridge/template
-          pnpm run build
+        run: pnpm --filter apps-sdk-template run build
 
   windows:
     name: Windows build
@@ -116,7 +80,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
 
       - uses: actions/setup-node@v6
         with:
@@ -128,3 +92,14 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+  draft-release:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: release-drafter/release-drafter@v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

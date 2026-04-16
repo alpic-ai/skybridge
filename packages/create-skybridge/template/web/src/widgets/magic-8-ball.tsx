@@ -1,19 +1,22 @@
 import "@/index.css";
 
 import { mountWidget } from "skybridge/web";
-import { useToolInfo } from "../helpers";
+import { useToolInfo } from "../helpers.js";
 
 function Magic8Ball() {
   const { input, output } = useToolInfo<"magic-8-ball">();
-  if (!output) {
-    return <div>Shaking...</div>;
-  }
 
   return (
     <div className="container">
       <div className="ball">
-        <div className="question">{input.question}</div>
-        <div className="answer">{output.answer}</div>
+        {output ? (
+          <>
+            <div className="question">{input.question}</div>
+            <div className="answer">{output.answer}</div>
+          </>
+        ) : (
+          <div className="question">Shaking...</div>
+        )}
       </div>
     </div>
   );

@@ -2,15 +2,18 @@ import { assign, cloneDeep } from "lodash-es";
 import type {
   AppsSdkContext,
   AppsSdkMethods,
+  AppsSdkWidgetState,
   CallToolArgs,
   CallToolResponse,
   DisplayMode,
+  RequestDisplayMode,
   UnknownObject,
 } from "skybridge/web";
+
 import { SET_GLOBALS_EVENT_TYPE, SetGlobalsEvent } from "skybridge/web";
 
 function createOpenaiMethods(
-  openai: AppsSdkContext & AppsSdkMethods<UnknownObject>,
+  openai: AppsSdkContext & AppsSdkMethods,
   log: (
     command: string,
     args: UnknownObject,
@@ -37,10 +40,10 @@ function createOpenaiMethods(
     sendFollowUpMessage: async (args: { prompt: string }) => {
       log("sendFollowUpMessage", args);
     },
-    openExternal: (args: { href: string }) => {
+    openExternal: (args: { href: string; redirectUrl?: false }) => {
       log("openExternal", args);
     },
-    requestDisplayMode: async (args: { mode: DisplayMode }) => {
+    requestDisplayMode: async (args: { mode: RequestDisplayMode }) => {
       log("requestDisplayMode", args);
       openai.displayMode = args.mode;
       setValue("displayMode", args.mode);
@@ -48,7 +51,7 @@ function createOpenaiMethods(
         mode: args.mode,
       };
     },
-    setWidgetState: async (state: UnknownObject) => {
+    setWidgetState: async (state: AppsSdkWidgetState) => {
       log("setWidgetState", state);
       openai.widgetState = state;
       setValue("widgetState", state);
@@ -75,7 +78,7 @@ function createOpenaiMethods(
       log("setOpenInAppUrl", args);
       setOpenInAppUrlFn(args.href);
     },
-  } satisfies AppsSdkMethods<UnknownObject>;
+  } satisfies AppsSdkMethods;
 
   return functions;
 }
@@ -129,7 +132,7 @@ export function createAndInjectOpenAi(
   const openaiObject = cloneDeep(initialValues);
   const openai = createOpenaiObject(openaiObject, iframeWindow);
   const functions = createOpenaiMethods(
-    openai as AppsSdkContext & AppsSdkMethods<UnknownObject>,
+    openai as AppsSdkContext & AppsSdkMethods,
     log,
     setValue,
     callToolFn,

@@ -1,42 +1,62 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import cors from "cors";
-import express, { type Express } from "express";
-import { widgetsDevServer } from "skybridge/server";
-import type { ViteDevServer } from "vite";
-import { mcp } from "./middleware.js";
-import server from "./server.js";
+import { McpServer } from "skybridge/server";
+import { z } from "zod";
 
-const app = express() as Express & { vite: ViteDevServer };
+const Answers = [
+  "As I see it, yes",
+  "Don't count on it",
+  "It is certain",
+  "It is decidedly so",
+  "Most likely",
+  "My reply is no",
+  "My sources say no",
+  "Outlook good",
+  "Outlook not so good",
+  "Signs point to yes",
+  "Very doubtful",
+  "Without a doubt",
+  "Yes definitely",
+  "Yes",
+  "You may rely on it",
+];
 
-app.use(express.json());
+const server = new McpServer(
+  {
+    name: "alpic-openai-app",
+    version: "0.0.1",
+  },
+  { capabilities: {} },
+).registerWidget(
+  "magic-8-ball",
+  {
+    description: "Magic 8 Ball",
+  },
+  {
+    description: "For fortune-telling or seeking advice.",
+    inputSchema: {
+      question: z.string().describe("The user question."),
+    },
+  },
+  async ({ question }) => {
+    try {
+      // deterministic answer
+      const hash = question
+        .split("")
+        .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const answer = Answers[hash % Answers.length];
+      return {
+        structuredContent: { answer },
+        content: [],
+        isError: false,
+      };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Error: ${error}` }],
+        isError: true,
+      };
+    }
+  },
+);
 
-app.use(mcp(server));
+server.run();
 
-const env = process.env.NODE_ENV || "development";
-
-if (env !== "production") {
-  const { devtoolsStaticServer } = await import("@skybridge/devtools");
-  app.use(await devtoolsStaticServer());
-  app.use(await widgetsDevServer());
-}
-
-if (env === "production") {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-
-  app.use("/assets", cors());
-  app.use("/assets", express.static(path.join(__dirname, "assets")));
-}
-
-app.listen(3000, (error) => {
-  if (error) {
-    console.error("Failed to start server:", error);
-    process.exit(1);
-  }
-});
-
-process.on("SIGINT", async () => {
-  console.log("Server shutdown complete");
-  process.exit(0);
-});
+export type AppType = typeof server;

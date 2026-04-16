@@ -1,13 +1,15 @@
 import type {
   Adaptor,
   CallToolResponse,
-  DisplayMode,
   HostContext,
   HostContextStore,
+  OpenExternalOptions,
+  RequestDisplayMode,
   RequestModalOptions,
   SetWidgetStateAction,
 } from "../types.js";
 import { AppsSdkBridge } from "./bridge.js";
+import type { AppsSdkWidgetState } from "./types.js";
 
 export class AppsSdkAdaptor implements Adaptor {
   private static instance: AppsSdkAdaptor | null = null;
@@ -27,6 +29,15 @@ export class AppsSdkAdaptor implements Adaptor {
     key: K,
   ): HostContextStore<K> {
     const bridge = AppsSdkBridge.getInstance();
+
+    if (key === "widgetState") {
+      return {
+        subscribe: bridge.subscribe("widgetState"),
+        getSnapshot: () =>
+          bridge.getSnapshot("widgetState")?.modelContent ?? null,
+      } as HostContextStore<K>;
+    }
+
     return {
       subscribe: bridge.subscribe(key),
       getSnapshot: () => bridge.getSnapshot(key),
@@ -44,8 +55,8 @@ export class AppsSdkAdaptor implements Adaptor {
   };
 
   public requestDisplayMode = (
-    mode: DisplayMode,
-  ): Promise<{ mode: DisplayMode }> => {
+    mode: RequestDisplayMode,
+  ): Promise<{ mode: RequestDisplayMode }> => {
     return window.openai.requestDisplayMode({ mode });
   };
 
@@ -53,23 +64,37 @@ export class AppsSdkAdaptor implements Adaptor {
     return window.openai.sendFollowUpMessage({ prompt });
   };
 
-  public openExternal(href: string): void {
-    window.openai.openExternal({ href });
+  public openExternal(href: string, options: OpenExternalOptions = {}): void {
+    window.openai.openExternal({ href, ...options });
   }
 
   public setWidgetState = (
     stateOrUpdater: SetWidgetStateAction,
   ): Promise<void> => {
-    const newState =
+    const modelContent =
       typeof stateOrUpdater === "function"
-        ? stateOrUpdater(window.openai.widgetState)
+        ? stateOrUpdater(window.openai.widgetState?.modelContent ?? null)
         : stateOrUpdater;
 
-    return window.openai.setWidgetState(newState);
+    return window.openai.setWidgetState({
+      privateContent: {},
+      ...window.openai.widgetState,
+      modelContent,
+    });
   };
 
   public uploadFile = (file: File) => {
-    return window.openai.uploadFile(file);
+    return window.openai.uploadFile(file).then(async (metadata) => {
+      const state: AppsSdkWidgetState = window.openai.widgetState
+        ? { ...window.openai.widgetState }
+        : { modelContent: {}, privateContent: {} };
+      if (!state.imageIds) {
+        state.imageIds = [];
+      }
+      state.imageIds.push(metadata.fileId);
+      await window.openai.setWidgetState(state);
+      return metadata;
+    });
   };
 
   public getFileDownloadUrl = (file: { fileId: string }) => {
@@ -85,22 +110,6 @@ export class AppsSdkAdaptor implements Adaptor {
 
     if (!href) {
       throw new Error("The href parameter is required.");
-    }
-
-    const serverUrl = window.skybridge.serverUrl;
-    if (!serverUrl) {
-      throw new Error(
-        "The widgetDomain property has not been set on the widget resource meta object.",
-      );
-    }
-
-    const domainUrl = new URL(serverUrl);
-    const hrefUrl = new URL(href, serverUrl);
-
-    if (domainUrl.origin !== hrefUrl.origin) {
-      throw new Error(
-        "Provided href is not compatible with widget domain: origin differs",
-      );
     }
 
     return window.openai.setOpenInAppUrl({ href });

@@ -4,8 +4,12 @@ import { useFiles } from "./use-files.js";
 
 describe("useFiles", () => {
   const OpenaiMock = {
-    uploadFile: vi.fn(),
+    uploadFile: vi.fn().mockResolvedValue({
+      fileId: `sediment://file_abc123`,
+    }),
     getFileDownloadUrl: vi.fn(),
+    widgetState: null,
+    setWidgetState: vi.fn(),
   };
 
   beforeEach(() => {

@@ -1,23 +1,11 @@
-import type {
-  McpUiMessageRequest,
-  McpUiMessageResult,
-  McpUiOpenLinkRequest,
-  McpUiOpenLinkResult,
-  McpUiRequestDisplayModeRequest,
-  McpUiRequestDisplayModeResult,
-  McpUiUpdateModelContextRequest,
-} from "@modelcontextprotocol/ext-apps";
-import type {
-  CallToolRequest,
-  CallToolResult,
-} from "@modelcontextprotocol/sdk/types.js";
 import { dequal } from "dequal/lite";
 import type {
   Adaptor,
   CallToolResponse,
-  DisplayMode,
   HostContext,
   HostContextStore,
+  OpenExternalOptions,
+  RequestDisplayMode,
   RequestModalOptions,
   SetWidgetStateAction,
 } from "../types.js";
@@ -28,6 +16,20 @@ type PickContext<K extends readonly McpAppContextKey[]> = {
   [P in K[number]]: McpAppContext[P];
 };
 
+const STORAGE_PREFIX = "sb:";
+const MAX_STORAGE_ENTRIES = 200;
+
+function findStorageKey(viewUUID: string): string | undefined {
+  const suffix = `:${viewUUID}`;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key?.startsWith(STORAGE_PREFIX) && key.endsWith(suffix)) {
+      return key;
+    }
+  }
+  return undefined;
+}
+
 export class McpAppAdaptor implements Adaptor {
   private static instance: McpAppAdaptor | null = null;
   private stores: {
@@ -35,6 +37,7 @@ export class McpAppAdaptor implements Adaptor {
   };
   private _widgetState: HostContext["widgetState"] = null;
   private widgetStateListeners = new Set<() => void>();
+  private _viewUUID: string | null = null;
 
   private _viewState: HostContext["view"] = {
     mode: "inline",
@@ -43,6 +46,7 @@ export class McpAppAdaptor implements Adaptor {
 
   private constructor() {
     this.stores = this.initializeStores();
+    this.subscribeToViewUUID();
   }
 
   public static getInstance(): McpAppAdaptor {
@@ -69,13 +73,10 @@ export class McpAppAdaptor implements Adaptor {
     name: string,
     args: ToolArgs,
   ): Promise<ToolResponse> => {
-    const bridge = McpAppBridge.getInstance();
-    const response = await bridge.request<CallToolRequest, CallToolResult>({
-      method: "tools/call",
-      params: {
-        name,
-        arguments: args ?? undefined,
-      },
+    const app = await McpAppBridge.getInstance().getApp();
+    const response = await app.callServerTool({
+      name,
+      arguments: args ?? undefined,
     });
 
     const result = response.content
@@ -95,43 +96,37 @@ export class McpAppAdaptor implements Adaptor {
     } as ToolResponse;
   };
 
-  public requestDisplayMode = (mode: DisplayMode) => {
-    const bridge = McpAppBridge.getInstance();
-    if (mode !== "modal") {
-      return bridge.request<
-        McpUiRequestDisplayModeRequest,
-        McpUiRequestDisplayModeResult
-      >({
-        method: "ui/request-display-mode",
-        params: { mode },
-      });
-    }
-
-    throw new Error("Modal display mode is not accessible in MCP App.");
+  public requestDisplayMode = async (mode: RequestDisplayMode) => {
+    const app = await McpAppBridge.getInstance().getApp();
+    return app.requestDisplayMode({ mode });
   };
 
   public sendFollowUpMessage = async (prompt: string) => {
-    const bridge = McpAppBridge.getInstance();
-    await bridge.request<McpUiMessageRequest, McpUiMessageResult>({
-      method: "ui/message",
-      params: {
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text: prompt,
-          },
-        ],
-      },
+    const app = await McpAppBridge.getInstance().getApp();
+    await app.sendMessage({
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: prompt,
+        },
+      ],
     });
   };
 
-  public openExternal(href: string): void {
-    const bridge = McpAppBridge.getInstance();
-    bridge.request<McpUiOpenLinkRequest, McpUiOpenLinkResult>({
-      method: "ui/open-link",
-      params: { url: href },
-    });
+  public openExternal(href: string, options?: OpenExternalOptions): void {
+    if (options?.redirectUrl === false) {
+      console.warn(
+        "[skybridge] redirectUrl option is not supported by the MCP ui/open-link protocol and will be ignored.",
+      );
+    }
+
+    McpAppBridge.getInstance()
+      .getApp()
+      .then((app) => app.openLink({ url: href }))
+      .catch((err) => {
+        console.error("Failed to open external link:", err);
+      });
   }
 
   private initializeStores(): {
@@ -220,15 +215,24 @@ export class McpAppAdaptor implements Adaptor {
         ? stateOrUpdater(this._widgetState)
         : stateOrUpdater;
 
-    const bridge = McpAppBridge.getInstance();
-    await bridge.request<McpUiUpdateModelContextRequest, unknown>({
-      method: "ui/update-model-context",
-      params: { structuredContent: newState },
-    });
+    // must happen before the async bridge call to ensure the state is updated immediately for the UI,
+    // otherwise successive calls to setWidgetState may have stale state
     this._widgetState = newState;
     this.widgetStateListeners.forEach((listener) => {
       listener();
     });
+
+    this.persistToLocalStorage(newState);
+
+    try {
+      const app = await McpAppBridge.getInstance().getApp();
+      await app.updateModelContext({
+        structuredContent: newState,
+        content: [{ type: "text", text: JSON.stringify(newState) }],
+      });
+    } catch (error) {
+      console.error("Failed to update widget state in MCP App.", error);
+    }
   };
 
   /**
@@ -261,6 +265,74 @@ export class McpAppAdaptor implements Adaptor {
 
   public setOpenInAppUrl(_href: string): Promise<void> {
     throw new Error("setOpenInAppUrl is not implemented in MCP App.");
+  }
+
+  private subscribeToViewUUID(): void {
+    const bridge = McpAppBridge.getInstance();
+    bridge.subscribe("toolResult")(() => {
+      const toolResult = bridge.getSnapshot("toolResult");
+      const viewUUID = (
+        toolResult?._meta as Record<string, unknown> | undefined
+      )?.viewUUID as string | undefined;
+
+      if (viewUUID && viewUUID !== this._viewUUID) {
+        this._viewUUID = viewUUID;
+        this.restoreFromLocalStorage(viewUUID);
+      }
+    });
+  }
+
+  // localStorage keys: sb:{unix_ms}:{viewUUID}
+  // Timestamp is updated on every write (LRU); eviction drops the least recently used entries.
+  private restoreFromLocalStorage(viewUUID: string): void {
+    try {
+      const existingKey = findStorageKey(viewUUID);
+      if (existingKey) {
+        const stored = localStorage.getItem(existingKey);
+        if (stored !== null) {
+          this._widgetState = JSON.parse(stored);
+          this.widgetStateListeners.forEach((listener) => {
+            listener();
+          });
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  private persistToLocalStorage(state: Record<string, unknown> | null): void {
+    if (!this._viewUUID || state === null) {
+      return;
+    }
+    try {
+      // Remove old key for this view, write with fresh timestamp (LRU)
+      const oldKey = findStorageKey(this._viewUUID);
+      if (oldKey) {
+        localStorage.removeItem(oldKey);
+      }
+      const newKey = `${STORAGE_PREFIX}${Date.now()}:${this._viewUUID}`;
+      localStorage.setItem(newKey, JSON.stringify(state));
+
+      // lru cleanup
+      const keys: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith(STORAGE_PREFIX)) {
+          keys.push(key);
+        }
+      }
+      if (keys.length <= MAX_STORAGE_ENTRIES) {
+        return;
+      }
+      keys.sort();
+      const toRemove = keys.slice(0, keys.length - MAX_STORAGE_ENTRIES);
+      for (const key of toRemove) {
+        localStorage.removeItem(key);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   private createHostContextStore<

@@ -1,0 +1,21 @@
+{
+  "name": "infrastructure",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "cdk": "cdk",
+    "format": "biome check --write --error-on-warnings",
+    "test": "pnpm run test:format",
+    "test:format": "biome ci"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.245.0",
+    "constructs": "^10.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "aws-cdk": "^2.1115.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
+  }
+}

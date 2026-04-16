@@ -13,7 +13,7 @@ export const commandSteps: CommandStep[] = [
   {
     label: "Compiling server",
     run: () => rmSync("dist", { recursive: true, force: true }),
-    command: "tsc -p tsconfig.server.json",
+    command: "tsc -b",
   },
   {
     label: "Copying static assets",
