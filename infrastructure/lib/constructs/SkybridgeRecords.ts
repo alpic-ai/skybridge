@@ -1,4 +1,8 @@
-import { CnameRecord, PublicHostedZone } from "aws-cdk-lib/aws-route53";
+import {
+  CnameRecord,
+  PublicHostedZone,
+  TxtRecord,
+} from "aws-cdk-lib/aws-route53";
 import { HttpsRedirect } from "aws-cdk-lib/aws-route53-patterns";
 import { Construct } from "constructs";
 
@@ -55,6 +59,14 @@ export class SkybridgeRecords extends Construct {
       zone: hostedZone,
       recordName: "docs-staging",
       domainName: "cname.mintlify-dns.com",
+    });
+
+    new TxtRecord(this, "GoogleSiteVerification", {
+      zone: hostedZone,
+      recordName: `${domain}.`,
+      values: [
+        "google-site-verification=myFnQc1sSrPYoaWsq6XYxYKJlklRVgs93j3EejPDfe8",
+      ],
     });
   }
 }
