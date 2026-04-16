@@ -1,15 +1,16 @@
 import { spawn } from "node:child_process";
-import { randomUUID } from "node:crypto";
 import { useEffect, useState } from "react";
-import type { Message } from "./types.js";
+import type { PushMessage } from "./use-messages.js";
 
 type TunnelState = {
   label: string;
   labelColor: "yellow" | "white" | "red";
-  logs: Message[];
 };
 
-export function useTunnel(port: number | null): TunnelState {
+export function useTunnel(
+  port: number | null,
+  pushMessage: PushMessage,
+): TunnelState {
   const [label, setLabel] = useState<{
     text: string;
     color: "yellow" | "white" | "red";
@@ -17,7 +18,6 @@ export function useTunnel(port: number | null): TunnelState {
     text: "Starting...",
     color: "yellow",
   });
-  const [logs, setLogs] = useState<Message[]>([]);
 
   useEffect(() => {
     if (port === null) {
@@ -52,17 +52,7 @@ export function useTunnel(port: number | null): TunnelState {
         second: "2-digit",
         hour12: true,
       });
-      setLogs((prev) =>
-        [
-          ...prev,
-          {
-            id: randomUUID(),
-            text: `${time} [tunnel] ${text}`,
-            type,
-            ts: Date.now(),
-          },
-        ].slice(-10),
-      );
+      pushMessage(`${time} [tunnel] ${text}`, type);
     };
 
     const handleStdout = (data: Buffer) => {
@@ -124,7 +114,7 @@ export function useTunnel(port: number | null): TunnelState {
       clearTimeout(timeout);
       tunnelProcess.kill();
     };
-  }, [port]);
+  }, [port, pushMessage]);
 
-  return { label: label.text, labelColor: label.color, logs };
+  return { label: label.text, labelColor: label.color };
 }

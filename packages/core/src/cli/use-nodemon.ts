@@ -1,16 +1,16 @@
-import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import nodemonOriginal from "nodemon";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import type { ExtendedNodemon } from "./nodemon.d.ts";
-import type { Message } from "./types.js";
+import type { PushMessage } from "./use-messages.js";
 
 const nodemon = nodemonOriginal as ExtendedNodemon;
 
-export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
-  const [messages, setMessages] = useState<Array<Message>>([]);
-
+export function useNodemon(
+  env: NodeJS.ProcessEnv,
+  pushMessage: PushMessage,
+): void {
   useEffect(() => {
     const configFile = resolve(process.cwd(), "nodemon.json");
 
@@ -29,34 +29,14 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
     const handleStdoutData = (chunk: Buffer) => {
       const message = chunk.toString().trim();
       if (message) {
-        setMessages((prev) =>
-          [
-            ...prev,
-            {
-              id: randomUUID(),
-              text: message,
-              type: "log",
-              ts: Date.now(),
-            } satisfies Message,
-          ].slice(-10),
-        );
+        pushMessage(message, "log");
       }
     };
 
     const handleStderrData = (chunk: Buffer) => {
       const message = chunk.toString().trim();
       if (message) {
-        setMessages((prev) =>
-          [
-            ...prev,
-            {
-              id: randomUUID(),
-              text: message,
-              type: "error",
-              ts: Date.now(),
-            } satisfies Message,
-          ].slice(-10),
-        );
+        pushMessage(message, "error");
       }
     };
 
@@ -81,15 +61,7 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
 
     nodemon.on("restart", (files: string[]) => {
       const restartMessage = `Server restarted due to file changes: ${files.join(", ")}`;
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: randomUUID(),
-          text: restartMessage,
-          type: "restart",
-          ts: Date.now(),
-        },
-      ]);
+      pushMessage(restartMessage, "restart");
       setupStdoutListener();
       setupStderrListener();
     });
@@ -103,7 +75,5 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
       }
       nodemon.emit("quit");
     };
-  }, [env]);
-
-  return messages;
+  }, [env, pushMessage]);
 }
