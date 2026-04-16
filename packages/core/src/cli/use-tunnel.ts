@@ -59,6 +59,7 @@ export function useTunnel(port: number | null): TunnelState {
             id: randomUUID(),
             text: `${time} [tunnel] ${text}`,
             type,
+            ts: Date.now(),
           },
         ].slice(-10),
       );
