@@ -32,7 +32,12 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
         setMessages((prev) =>
           [
             ...prev,
-            { id: randomUUID(), text: message, type: "log" } satisfies Message,
+            {
+              id: randomUUID(),
+              text: message,
+              type: "log",
+              ts: Date.now(),
+            } satisfies Message,
           ].slice(-10),
         );
       }
@@ -48,6 +53,7 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
               id: randomUUID(),
               text: message,
               type: "error",
+              ts: Date.now(),
             } satisfies Message,
           ].slice(-10),
         );
@@ -77,7 +83,12 @@ export function useNodemon(env: NodeJS.ProcessEnv): Array<Message> {
       const restartMessage = `Server restarted due to file changes: ${files.join(", ")}`;
       setMessages((prev) => [
         ...prev,
-        { id: randomUUID(), text: restartMessage, type: "restart" },
+        {
+          id: randomUUID(),
+          text: restartMessage,
+          type: "restart",
+          ts: Date.now(),
+        },
       ]);
       setupStdoutListener();
       setupStderrListener();

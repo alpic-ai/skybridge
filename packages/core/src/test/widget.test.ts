@@ -455,6 +455,82 @@ describe("McpServer.registerWidget", () => {
     expect(toolConfig._meta?.["openai/outputTemplate"]).to.be.undefined;
   });
 
+  it("should inject viewUUID into _meta of tool callback results", async () => {
+    const mockToolCallback = vi.fn().mockResolvedValue({
+      content: [{ type: "text", text: "result" }],
+      structuredContent: { data: "test" },
+    });
+
+    server.registerWidget(
+      "my-widget",
+      { description: "Test widget" },
+      { description: "Test tool" },
+      mockToolCallback,
+    );
+
+    // The registerTool should have been called with a wrapped callback
+    const wrappedCallback = mockRegisterTool.mock.calls[0]?.[2] as (
+      ...args: unknown[]
+    ) => Promise<{ _meta?: Record<string, unknown> }>;
+    expect(wrappedCallback).toBeDefined();
+
+    const result = await wrappedCallback({}, {});
+
+    expect(result._meta).toBeDefined();
+    expect(result._meta?.viewUUID).toBeDefined();
+    expect(typeof result._meta?.viewUUID).toBe("string");
+    // UUID v4 format
+    expect(result._meta?.viewUUID).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+    );
+  });
+
+  it("should preserve existing _meta when injecting viewUUID", async () => {
+    const mockToolCallback = vi.fn().mockResolvedValue({
+      content: [{ type: "text", text: "result" }],
+      structuredContent: { data: "test" },
+      _meta: { requestId: "req-123", cached: true },
+    });
+
+    server.registerWidget(
+      "my-widget",
+      { description: "Test widget" },
+      { description: "Test tool" },
+      mockToolCallback,
+    );
+
+    const wrappedCallback = mockRegisterTool.mock.calls[0]?.[2] as (
+      ...args: unknown[]
+    ) => Promise<{ _meta?: Record<string, unknown> }>;
+    const result = await wrappedCallback({}, {});
+
+    expect(result._meta?.requestId).toBe("req-123");
+    expect(result._meta?.cached).toBe(true);
+    expect(result._meta?.viewUUID).toBeDefined();
+  });
+
+  it("should generate unique viewUUIDs across calls", async () => {
+    const mockToolCallback = vi.fn().mockResolvedValue({
+      content: [{ type: "text", text: "result" }],
+      structuredContent: {},
+    });
+
+    server.registerWidget(
+      "my-widget",
+      { description: "Test widget" },
+      { description: "Test tool" },
+      mockToolCallback,
+    );
+
+    const wrappedCallback = mockRegisterTool.mock.calls[0]?.[2] as (
+      ...args: unknown[]
+    ) => Promise<{ _meta?: Record<string, unknown> }>;
+    const result1 = await wrappedCallback({}, {});
+    const result2 = await wrappedCallback({}, {});
+
+    expect(result1._meta?.viewUUID).not.toBe(result2._meta?.viewUUID);
+  });
+
   it("should register tool with uopenai/outputTemplate metadata only", async () => {
     const mockToolCallback = vi.fn();
     server.registerWidget(

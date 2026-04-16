@@ -1,7 +1,7 @@
 import http from "node:http";
 import type { ErrorRequestHandler, RequestHandler } from "express";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { McpServer } from "./server";
+import type { McpServer } from "./server.js";
 
 vi.mock("@skybridge/devtools", () => ({
   devtoolsStaticServer: () =>

@@ -1,6 +1,6 @@
 {
   "name": "@skybridge/devtools",
-  "version": "0.35.10",
+  "version": "0.35.13",
   "type": "module",
   "repository": {
     "type": "git",
@@ -21,6 +21,7 @@
     "build:server": "tsc -p tsconfig.server.json",
     "test": "pnpm run test:type && pnpm run test:format",
     "test:type": "tsc --noEmit",
+    "format": "biome check --write --error-on-warnings",
     "test:format": "biome ci",
     "preview": "vite preview"
   },
@@ -31,12 +32,12 @@
   "devDependencies": {
     "@base-ui/react": "^1.3.0",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
-    "@microlink/react-json-view": "^1.31.14",
-    "@modelcontextprotocol/sdk": "^1.27.1",
-    "@rjsf/core": "^6.4.1",
-    "@rjsf/shadcn": "^6.4.1",
-    "@rjsf/utils": "^6.4.1",
-    "@rjsf/validator-ajv8": "^6.4.1",
+    "@microlink/react-json-view": "^1.31.15",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@rjsf/core": "^6.4.2",
+    "@rjsf/shadcn": "^6.4.2",
+    "@rjsf/utils": "^6.4.2",
+    "@rjsf/validator-ajv8": "^6.4.2",
     "@tailwindcss/vite": "^4.2.2",
     "@tanstack/react-query": "^5.95.2",
     "@total-typescript/tsconfig": "^1.0.4",
@@ -53,14 +54,14 @@
     "cmdk": "^1.1.1",
     "framer-motion": "^12.38.0",
     "lodash-es": "^4.17.23",
-    "lucide-react": "^1.0.1",
+    "lucide-react": "^1.7.0",
     "motion": "^12.38.0",
     "nuqs": "^2.8.9",
     "postcss": "^8.5.8",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-resizable-panels": "^4.7.5",
-    "shadcn": "^4.1.0",
+    "react-resizable-panels": "^4.8.0",
+    "shadcn": "^4.1.1",
     "shiki": "^4.0.2",
     "skybridge": "workspace:*",
     "tailwind-merge": "^3.5.0",
@@ -68,7 +69,7 @@
     "tailwindcss-animate": "^1.0.7",
     "tw-animate-css": "^1.4.0",
     "typescript": "~6.0.2",
-    "vite": "^8.0.2",
+    "vite": "^8.0.3",
     "zustand": "^5.0.12"
   }
 }
