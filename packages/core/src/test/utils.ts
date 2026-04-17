@@ -315,10 +315,17 @@ export function createInterfaceTestServer() {
 /**
  * Mock extra parameter for resource callback
  */
-export function createMockExtra(host: string) {
+export function createMockExtra(
+  host: string,
+  options?: {
+    headers?: Record<string, string | string[]>;
+    url?: URL | string;
+  },
+) {
   return {
     requestInfo: {
-      headers: { host },
+      headers: { host, ...(options?.headers ?? {}) },
+      ...(options?.url ? { url: options.url } : {}),
     },
   };
 }

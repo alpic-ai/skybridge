@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
   ServerNotification,
@@ -195,6 +196,61 @@ describe("McpServer.registerWidget", () => {
       `${serverUrl}/assets/my-widget.js`,
     );
     expect(result.contents[0]?.text).toContain(`${serverUrl}/assets/style.css`);
+  });
+
+  it("should prefer x-alpic-forwarded-url when hashing Claude widget domains", async () => {
+    setTestEnv({ NODE_ENV: "production" });
+
+    const mockToolCallback = vi.fn();
+    server.registerWidget(
+      "my-widget",
+      { description: "Test widget" },
+      { description: "Test tool" },
+      mockToolCallback,
+    );
+
+    const extAppsResourceCallback = mockRegisterResource.mock
+      .calls[1]?.[3] as unknown as (
+      uri: URL,
+      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+    ) => Promise<{
+      contents: Array<{
+        uri: URL | string;
+        mimeType: string;
+        text?: string;
+        _meta?: Record<string, unknown>;
+      }>;
+    }>;
+    expect(extAppsResourceCallback).toBeDefined();
+
+    const forwardedUrl =
+      "https://everything-3a2c1264.staging.alpic.live/mcp?foo=bar";
+    const expectedDomain = `${crypto
+      .createHash("sha256")
+      .update(forwardedUrl)
+      .digest("hex")
+      .slice(0, 32)}.claudemcpcontent.com`;
+
+    const result = await extAppsResourceCallback(
+      new URL("ui://widgets/ext-apps/my-widget.html"),
+      createMockExtra("localhost:3000", {
+        headers: {
+          "user-agent": "Claude-User",
+          "x-alpic-forwarded-url": forwardedUrl,
+        },
+        url: "http://localhost:3000/mcp",
+      }) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>,
+    );
+
+    expect(result.contents[0]?._meta).toEqual({
+      ui: {
+        csp: {
+          resourceDomains: ["http://localhost:3000"],
+          connectDomains: ["http://localhost:3000"],
+        },
+        domain: expectedDomain,
+      },
+    });
   });
 
   it("should resolve folder-based widgets (barrel files) in production mode", async () => {

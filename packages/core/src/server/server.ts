@@ -706,7 +706,7 @@ export class McpServer<
         let contentMetaOverrides: { domain?: string } = {};
         if (isClaude) {
           const pathname = extra?.requestInfo?.url?.pathname ?? "";
-          const url = `${serverUrl}${pathname}`;
+          const url = header("x-alpic-forwarded-url") ?? `${serverUrl}${pathname}`;
           const hash = crypto
             .createHash("sha256")
             .update(url)
