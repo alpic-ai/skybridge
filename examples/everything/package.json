@@ -12,6 +12,7 @@
     "test:type": "tsc --noEmit"
   },
   "dependencies": {
+    "@alpic-ai/insights": "0.0.0-dev.f8c409f",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
