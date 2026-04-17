@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@auth0/auth0-api-js": "^1.4.0",
-    "@modelcontextprotocol/sdk": "^1.26.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "cors": "^2.8.6",
     "dotenv": "^16.5.0",
     "jose": "^6.2.1",

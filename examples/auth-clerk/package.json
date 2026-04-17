@@ -14,7 +14,7 @@
   "dependencies": {
     "@clerk/express": "^2.0.7",
     "@clerk/mcp-tools": "^0.3.1",
-    "@modelcontextprotocol/sdk": "^1.26.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "dotenv": "^16.5.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

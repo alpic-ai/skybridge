@@ -43,7 +43,7 @@
   "author": "Frédéric Barthelet",
   "license": "ISC",
   "peerDependencies": {
-    "@modelcontextprotocol/sdk": ">=1.0.0",
+    "@modelcontextprotocol/sdk": ">=1.27.0",
     "@skybridge/devtools": ">=0.35.14 <1.0.0",
     "nodemon": ">=3.0.0",
     "react": ">=18.0.0",

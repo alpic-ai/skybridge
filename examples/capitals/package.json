@@ -12,7 +12,7 @@
     "test:type": "tsc --noEmit"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.26.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@t3-oss/env-core": "^0.13.8",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
