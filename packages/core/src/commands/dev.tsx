@@ -20,6 +20,11 @@ export default class Dev extends Command {
       description: "Open an Alpic tunnel for remote testing",
       default: false,
     }),
+    verbose: Flags.boolean({
+      char: "v",
+      description: "Show tunnel logs",
+      default: false,
+    }),
   };
 
   public async run(): Promise<void> {
@@ -39,7 +44,11 @@ export default class Dev extends Command {
       const tsErrors = useTypeScriptCheck();
       const [messages, pushMessage] = useMessages();
       useNodemon(env, pushMessage);
-      const tunnelState = useTunnel(flags.tunnel ? port : null, pushMessage);
+      const tunnelState = useTunnel(
+        flags.tunnel ? port : null,
+        pushMessage,
+        flags.verbose,
+      );
 
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>
