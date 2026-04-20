@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "skybridge dev",
+    "dev:tunnel": "skybridge dev --tunnel",
     "build": "skybridge build",
     "start": "skybridge start",
     "deploy": "alpic deploy"
