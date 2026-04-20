@@ -10,7 +10,7 @@ export const Header = ({
   return (
     <Box marginBottom={1}>
       <Text color="cyan" bold>
-        ⛰{"  "}Welcome to Skybridge
+        ⛰{"  "}Skybridge
       </Text>
       <Text color="cyan"> v{version}</Text>
       {children}

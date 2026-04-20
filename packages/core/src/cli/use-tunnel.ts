@@ -2,23 +2,22 @@ import { spawn } from "node:child_process";
 import { useEffect, useState } from "react";
 import type { PushMessage } from "./use-messages.js";
 
-type TunnelState = {
-  label: string;
-  labelColor: "yellow" | "white" | "red";
-};
+export type TunnelState =
+  | { status: "idle" }
+  | { status: "starting"; message: string }
+  | { status: "connected"; url: string }
+  | { status: "error"; message: string };
 
 export function useTunnel(
   port: number | null,
   pushMessage: PushMessage,
   verbose: boolean,
 ): TunnelState {
-  const [label, setLabel] = useState<{
-    text: string;
-    color: "yellow" | "white" | "red";
-  }>({
-    text: "Starting...",
-    color: "yellow",
-  });
+  const [state, setState] = useState<TunnelState>(
+    port === null
+      ? { status: "idle" }
+      : { status: "starting", message: "Starting tunnel…" },
+  );
 
   useEffect(() => {
     if (port === null) {
@@ -38,9 +37,9 @@ export function useTunnel(
 
     const timeout = setTimeout(() => {
       if (!connected) {
-        setLabel({
-          text: "Tunnel connection timed out after one minute",
-          color: "red",
+        setState({
+          status: "error",
+          message: "Tunnel connection timed out after one minute",
         });
         tunnelProcess.kill();
       }
@@ -63,31 +62,30 @@ export function useTunnel(
           if (verbose) {
             pushLog(line, "log");
           }
+          continue;
+        }
+        const match = line.match(/Forwarding:\s+(https:\/\/\S+)\s*->\s*(\S+)/);
+        if (match?.[1]) {
+          connected = true;
+          clearTimeout(timeout);
+          const url = match[1].replace(/\/$/, "");
+          setState({ status: "connected", url });
         } else {
-          const match = line.match(
-            /Forwarding:\s+(https:\/\/\S+)\s*->\s*(\S+)/,
-          );
-          if (match?.[1]) {
-            connected = true;
-            clearTimeout(timeout);
-            setLabel({ text: line, color: "white" });
-          } else {
-            setLabel({ text: line, color: "yellow" });
-          }
+          setState({ status: "starting", message: line });
         }
       }
     };
 
     const handleStderr = (data: Buffer) => {
       const text = data.toString().trim();
-      if (text) {
-        stderrBuffer = (stderrBuffer + text).slice(-1024);
-        if (verbose) {
-          for (const line of text.split("\n").filter(Boolean)) {
-            if (connected) {
-              pushLog(line, "error");
-            }
-          }
+      if (!text) {
+        return;
+      }
+
+      stderrBuffer = (stderrBuffer + text).slice(-1024);
+      if (verbose && connected) {
+        for (const line of text.split("\n").filter(Boolean)) {
+          pushLog(line, "error");
         }
       }
     };
@@ -101,7 +99,7 @@ export function useTunnel(
 
     tunnelProcess.on("error", (err) => {
       clearTimeout(timeout);
-      setLabel({ text: err.message, color: "red" });
+      setState({ status: "error", message: err.message });
     });
 
     tunnelProcess.on("close", (code) => {
@@ -111,9 +109,9 @@ export function useTunnel(
         const hint = verbose
           ? `Try manually: npx alpic tunnel --port ${port}`
           : "Re-run with --verbose to see full tunnel logs";
-        setLabel({
-          text: `${detail}. ${hint}`,
-          color: "red",
+        setState({
+          status: "error",
+          message: `${detail}. ${hint}`,
         });
       }
     });
@@ -124,5 +122,5 @@ export function useTunnel(
     };
   }, [port, pushMessage, verbose]);
 
-  return { label: label.text, labelColor: label.color };
+  return state;
 }
