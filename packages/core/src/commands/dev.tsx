@@ -53,71 +53,79 @@ export default class Dev extends Command {
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>
           <Header version={this.config.version} />
-          {fallback && (
-            <Box marginBottom={1}>
-              <Text color="yellow">
-                Port 3000 is in use, falling back to port {port}
-              </Text>
-            </Box>
-          )}
-          <Box marginBottom={1}>
-            <Text color="green">→{"  "}</Text>
-            <Text color="white" bold>
-              Open DevTools to test your app locally:{" "}
-            </Text>
-            <Text color="green">{`http://localhost:${port}/`}</Text>
+
+          <Box>
+            <Text>🏠{"  "}</Text>
+            {fallback ? (
+              <Text color="yellow">3000 in use, running on </Text>
+            ) : (
+              <Text>Running on </Text>
+            )}
+            <Text color="green">{`http://localhost:${port}/mcp`}</Text>
           </Box>
           <Box marginBottom={1}>
             <Text color="#20a832">→{"  "}</Text>
-            <Text>MCP server running at:{"  "}</Text>
             <Text color="white" bold>
-              {`http://localhost:${port}/mcp`}
+              Test locally with DevTools:{" "}
             </Text>
+            <Text color="green">{`http://localhost:${port}/`}</Text>
           </Box>
-          <Box marginBottom={1}>
-            <Text>
-              <Text color="#20a832">→{"  "}</Text>
-              <Text>If you like Skybridge, please </Text>
-              <Text color="white" bold>
-                give it a star{" "}
+
+          {tunnelState.status === "idle" && (
+            <Box>
+              <Text>🌍{"  "}</Text>
+              <Text>Get a public URL and LLM Playground access with </Text>
+              <Text color="cyan" bold>
+                --tunnel
               </Text>
-              <Text>on GitHub: </Text>
-              <Text color="white" underline>
-                https://github.com/alpic-ai/skybridge
-              </Text>
-              <Text color="grey"> 🙏</Text>
-            </Text>
-          </Box>
-          {flags.tunnel ? (
-            <Box marginBottom={1}>
-              <Text color="#20a832">{"→  "}</Text>
-              <Text color={tunnelState.labelColor}>
-                Tunnel: {tunnelState.label}
-              </Text>
+              <Text>.</Text>
             </Box>
-          ) : (
-            <>
-              <Box>
-                <Text>
-                  <Text color="#20a832">{"→  "}</Text>
-                  <Text>
-                    Get a public URL to test on ChatGPT or Claude with the{" "}
-                  </Text>
-                  <Text color="cyan" bold>
-                    --tunnel
-                  </Text>
-                  <Text> flag.</Text>
-                </Text>
-              </Box>
-              <Box>
-                <Text color={"grey"}>
-                  {"   "}
-                  More info:
-                  https://docs.skybridge.tech/quickstart/test-your-app
-                </Text>
-              </Box>
-            </>
           )}
+          {tunnelState.status === "starting" && (
+            <Box>
+              <Text>🌍{"  "}</Text>
+              <Text color="yellow">{tunnelState.message}</Text>
+            </Box>
+          )}
+          {tunnelState.status === "connected" && (
+            <Box flexDirection="column" marginBottom={1}>
+              <Box>
+                <Text>🌍{"  "}</Text>
+                <Text>Exposed on </Text>
+                <Text color="green">{`${tunnelState.url}/mcp`}</Text>
+              </Box>
+              <Box>
+                <Text color="#20a832">→{"  "}</Text>
+                <Text color="white" bold>
+                  Test with an LLM on Playground:{" "}
+                </Text>
+                <Text color="green">{`${tunnelState.url}/try`}</Text>
+              </Box>
+            </Box>
+          )}
+          {tunnelState.status === "error" && (
+            <Box flexDirection="column" marginBottom={1}>
+              <Box>
+                <Text>🌍{"  "}</Text>
+                <Text color="red">
+                  Cannot open tunnel: {tunnelState.message}
+                </Text>
+              </Box>
+              <Box>
+                <Text color="#20a832">→{"  "}</Text>
+                <Text color="red">{`Try manually: npx alpic tunnel --port ${port}`}</Text>
+              </Box>
+            </Box>
+          )}
+
+          <Box>
+            <Text>🛟{"  "}</Text>
+            <Text>Need help? Reach us on </Text>
+            <Text color="white" underline>
+              https://discord.alpic.ai
+            </Text>
+          </Box>
+
           {tsErrors.length > 0 && (
             <Box marginTop={1} flexDirection="column">
               <Text color="red" bold>

@@ -42,16 +42,15 @@ export default class Start extends Command {
     }
 
     console.log(
-      `\x1b[36m\x1b[1m⛰  Welcome to Skybridge\x1b[0m \x1b[36mv${this.config.version}\x1b[0m`,
+      `\x1b[36m\x1b[1m⛰ Skybridge\x1b[0m \x1b[36mv${this.config.version}\x1b[0m`,
     );
     if (fallback) {
       console.log(
-        `\x1b[33mPort 3000 is in use, falling back to port ${port}\x1b[0m`,
+        `\x1b[33m3000 in use, running on\x1b[0m \x1b[32mhttp://localhost:${port}/mcp\x1b[0m`,
       );
+    } else {
+      console.log(`Running on \x1b[32mhttp://localhost:${port}/mcp\x1b[0m`);
     }
-    console.log(
-      `Server running at: \x1b[32m\x1b[1mhttp://localhost:${port}/mcp\x1b[0m`,
-    );
 
     await runCommand(`node ${indexPath}`, {
       stdio: ["ignore", "inherit", "inherit"],
