@@ -10,6 +10,7 @@ type TunnelState = {
 export function useTunnel(
   port: number | null,
   pushMessage: PushMessage,
+  verbose: boolean,
 ): TunnelState {
   const [label, setLabel] = useState<{
     text: string;
@@ -59,7 +60,9 @@ export function useTunnel(
       const lines = data.toString().trim().split("\n").filter(Boolean);
       for (const line of lines) {
         if (connected) {
-          pushLog(line, "log");
+          if (verbose) {
+            pushLog(line, "log");
+          }
         } else {
           const match = line.match(
             /Forwarding:\s+(https:\/\/\S+)\s*->\s*(\S+)/,
@@ -79,9 +82,11 @@ export function useTunnel(
       const text = data.toString().trim();
       if (text) {
         stderrBuffer = (stderrBuffer + text).slice(-1024);
-        for (const line of text.split("\n").filter(Boolean)) {
-          if (connected) {
-            pushLog(line, "error");
+        if (verbose) {
+          for (const line of text.split("\n").filter(Boolean)) {
+            if (connected) {
+              pushLog(line, "error");
+            }
           }
         }
       }
@@ -103,8 +108,11 @@ export function useTunnel(
       clearTimeout(timeout);
       if (code !== 0 && code !== null) {
         const detail = stderrBuffer.trim() || `exited with code ${code}`;
+        const hint = verbose
+          ? `Try manually: npx alpic tunnel --port ${port}`
+          : "Re-run with --verbose to see full tunnel logs";
         setLabel({
-          text: `${detail}. Try manually: npx alpic tunnel --port ${port}`,
+          text: `${detail}. ${hint}`,
           color: "red",
         });
       }
@@ -114,7 +122,7 @@ export function useTunnel(
       clearTimeout(timeout);
       tunnelProcess.kill();
     };
-  }, [port, pushMessage]);
+  }, [port, pushMessage, verbose]);
 
   return { label: label.text, labelColor: label.color };
 }
