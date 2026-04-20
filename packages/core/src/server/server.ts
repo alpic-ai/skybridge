@@ -706,8 +706,11 @@ export class McpServer<
         let contentMetaOverrides: { domain?: string } = {};
         if (isClaude) {
           const pathname = extra?.requestInfo?.url?.pathname ?? "";
-          const url =
+          const rawUrl =
             header("x-alpic-forwarded-url") ?? `${serverUrl}${pathname}`;
+          // Strip a lone trailing slash so the hash matches the connector URL
+          // as registered with Claude (which has no trailing slash on bare origins).
+          const url = rawUrl.endsWith("/") ? rawUrl.slice(0, -1) : rawUrl;
           const hash = crypto
             .createHash("sha256")
             .update(url)
