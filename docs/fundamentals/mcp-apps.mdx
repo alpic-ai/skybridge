@@ -8,7 +8,7 @@ description: "Deep dive into the MCP ext-apps specification: MCP protocol, Skybr
 
 MCP Apps are the portable baseline across hosts (e.g. Claude, Goose, VSCode, and ChatGPT compatibility mode). Skybridge implements the protocol via the `McpAppAdaptor` so you use the same hooks regardless of runtime.
 
-## Widget Rendering Flow
+## Widget rendering flow
 
 Here's what happens when an MCP Apps client renders a widget:
 
@@ -49,7 +49,7 @@ Widgets run inside an iframe and talk to the host via the **same [MCP protocol](
 | `ui/notifications/tool-cancelled` | Tool call was cancelled |
 | `ui/notifications/tool-input-partial` | Streaming partial tool arguments (e.g. while the model is still sending) |
 
-## Skybridge Hook Mapping
+## Skybridge hook mapping
 
 Skybridge wraps the MCP ext-apps protocol with the **same React hooks** as the Apps SDK. The `McpAppAdaptor` translates hook usage into the protocol under the hood:
 
@@ -86,18 +86,15 @@ Not all Skybridge features exist in the ext-apps spec. When using Skybridge in M
 | [useRequestModal](/api-reference/use-request-modal) | Portaled to host | ⚠️ Polyfilled (renders in-iframe) |
 | [useWidgetState](/api-reference/use-widget-state), [data-llm](/api-reference/data-llm) | Persisted by host | ⚠️ Polyfilled (state doesn't persist across widget renders) |
 
-
 **Graceful degradation**: Unsupported features throw; polyfilled ones work with limitations. See the [compatibility matrix](/api-reference#runtime-compatibility) for details.
-
 
 <Warning>
 Always check the [compatibility matrix](/api-reference#runtime-compatibility) before using platform-specific features.
 </Warning>
 
-
 ## Testing MCP Apps
 
-Please see the [Test Your App](/quickstart/test-your-app#testing-in-claude) guide for more information.
+See the [Test Your App](/quickstart/test-your-app#testing-in-claude) guide for more information.
 
 <Tip>
 DevTools uses the Apps SDK runtime. Use DevTools for fast iteration, then validate in an MCP Apps client (e.g. Goose) for final testing.

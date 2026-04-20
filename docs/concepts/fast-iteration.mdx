@@ -3,12 +3,11 @@ title: Fast Iteration
 description: "Develop Apps locally with Skybridge's DevTools and Vite HMR for instant feedback without tunneling."
 ---
 
-
 **Problem:** Testing widgets in remote MCP Clients (e.g. ChatGPT, Claude, etc.) is slow. It requires HTTP tunneling, manual refreshes, and provides limited debugging feedback.
 
 **Solution:** Skybridge includes DevTools and a Vite HMR plugin that let you develop widgets entirely on your machine with instant feedback.
 
-## The Challenge
+## The challenge
 
 When building Apps the traditional way, your development loop looks like:
 
@@ -23,7 +22,7 @@ When building Apps the traditional way, your development loop looks like:
 
 This can take 30-60 seconds per iteration. With complex widgets, that adds up fast.
 
-## The Skybridge Approach
+## The Skybridge approach
 
 With Skybridge, the loop becomes:
 
@@ -57,7 +56,7 @@ For comprehensive documentation on all DevTools features, including widget inspe
 
 <img src="/images/devtools-landing.png" alt="Skybridge DevTools" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
 
-## HMR with Vite Plugin
+## HMR with Vite plugin
 
 Skybridge includes a Vite plugin that enables Hot Module Replacement for widgets:
 
@@ -86,7 +85,7 @@ These features require the Skybridge starter template structure (`pnpm create sk
 
 When you save a file, only the changed component re-renders. Form inputs, scroll position, and local state are preserved.
 
-## Automatic Environment Detection
+## Automatic environment detection
 
 Your widget code works identically in ChatGPT, MCP Apps clients like Claude, and local DevTools. Skybridge detects the environment and uses the appropriate communication layer:
 
@@ -97,7 +96,7 @@ Your widget code works identically in ChatGPT, MCP Apps clients like Claude, and
 | DevTools | Mocked Apps SDK (postMessage) |
 You don't need to know which is active—just use the hooks.
 
-## When to Use What
+## When to use what
 
 **DevTools (90% of development time)**
 - Rapid UI iteration
@@ -119,21 +118,20 @@ Build locally → validate in [ChatGPT](/quickstart/test-your-app#testing-in-cha
 See [Test Your App](/quickstart/test-your-app) for detailed testing setup instructions.
 </Tip>
 
-## DevTools Features
+## DevTools features
 
 The DevTools UI includes:
 
-### Tool Inspector
+### Tool inspector
 See all registered tools and their schemas. Click to fill input forms automatically.
 
-### Widget Preview
+### Widget preview
 Renders your widget in an iframe with mocked `window.openai`. Supports:
 - Theme switching (light/dark)
 - Display mode switching (pip/inline/fullscreen)
 - Locale changing
 
-
-### Response Inspector
+### Response inspector
 View the full tool response including `content`, `structuredContent`, and `_meta`.
 
 ## Related

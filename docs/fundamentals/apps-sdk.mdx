@@ -6,7 +6,7 @@ description: "Deep dive into ChatGPT's runtime: MCP Apps compatibility, the wind
 
 The [OpenAI Apps SDK](https://developers.openai.com/apps-sdk/) is the ChatGPT runtime layer for ChatGPT Apps, [announced in October 2025](https://alpic.ai/blog/inside-openai-s-apps-sdk-how-to-build-interactive-chatgpt-apps-with-mcp). ChatGPT supports the MCP Apps UI model, and also provides `window.openai` for compatibility and ChatGPT-specific extensions.
 
-## Widget Rendering Flow
+## Widget rendering flow
 
 Here's what happens when ChatGPT renders a widget:
 
@@ -17,8 +17,6 @@ Here's what happens when ChatGPT renders a widget:
 5. The widget is hydrated with your tool's `structuredContent` and `_meta` properties
 
 <img src="/images/fundamentals-chatgpt-apps.png" alt="ChatGPT Apps Rendering Flow" style={{ width: "100%", maxWidth: "800px", display: "block", margin: "0 auto" }} />
-
-
 
 ## The `window.openai` API
 
@@ -41,7 +39,7 @@ Widgets run inside an iframe and have access to a special [`window.openai`](http
 
 This API is powerful but low-level and imperative—which is where Skybridge comes in.
 
-## Skybridge Hook Mapping
+## Skybridge hook mapping
 
 Skybridge wraps the raw `window.openai` API with React hooks:
 
@@ -71,11 +69,11 @@ The following [Apps SDK widget APIs](https://developers.openai.com/apps-sdk/refe
 
 You can call these directly on `window.openai` when running in ChatGPT, if needed. Support may be added in a future release.
 
-## Skybridge Apps SDK Exclusive Features
+## Skybridge Apps SDK exclusive features
 
 These features are **only available in ChatGPT** and not supported in MCP Apps:
 
-### File Operations
+### File operations
 
 Upload and download files with host-managed storage:
 
@@ -115,7 +113,7 @@ function Widget() {
 
 ## Testing in ChatGPT
 
-Please see the [Test Your App](/quickstart/test-your-app#testing-in-chatgpt) guide for more information.
+See the [Test Your App](/quickstart/test-your-app#testing-in-chatgpt) guide for details.
 
 <Warning>
 ChatGPT has aggressive caching. Use [DevTools](/devtools) for fast iteration, then test in ChatGPT for final validation. See [Fast Iteration](/concepts/fast-iteration).

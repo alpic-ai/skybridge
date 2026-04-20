@@ -31,7 +31,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { McpServer } from "skybridge/server";
 ```
 
-Keep your existing dependency to @modelcontextprotocol/sdk in your project, skybridge does not replaces it, but depends on it.
+Keep your existing dependency on `@modelcontextprotocol/sdk` in your project — Skybridge doesn't replace it, but depends on it.
 
 Your existing tools, resources, and prompts will continue to work as before. With `skybridge/server`, you will also be able to register **widgets**, a new class encompassing a Tool and a corresponding UI Resource.
 
@@ -159,7 +159,7 @@ app.listen(3000, () => {
 });
 ```
 
-## Type Safety
+## Type safety
 
 For full type inference and autocomplete, use method chaining and `generateHelpers`. See [Type Safety](/concepts/type-safety) for the complete setup.
 
@@ -168,3 +168,9 @@ Quick summary:
 2. Export `type AppType = typeof server`
 3. Create a `skybridge.ts` file with `generateHelpers<AppType>()`
 4. Import typed hooks from your helper file
+
+## Related
+
+- [Type Safety](/concepts/type-safety) - Full type inference setup guide
+- [registerWidget](/api-reference/register-widget) - Widget registration API
+- [Quickstart](/quickstart/create-new-app) - Create a new project from scratch

@@ -3,10 +3,9 @@ title: Host Environment Context
 description: "Adapt your widget to the host's theme, locale, display mode, and device with environment hooks."
 ---
 
-
 How to make your widget adapt to the host's theme, locale, display mode, and device.
 
-## Available Hooks
+## Available hooks
 
 | Hook | What it provides |
 |------|------------------|
@@ -20,7 +19,7 @@ How to make your widget adapt to the host's theme, locale, display mode, and dev
 **MCP Apps Runtime**: `useRequestModal` is polyfilled in MCP Apps. Modals render inside the widget iframe rather than being portaled to the host. See [useRequestModal API](/api-reference/use-request-modal) for details.
 </Warning>
 
-## Theme Adaptation with useLayout
+## Theme adaptation with useLayout
 
 Match the host's light/dark theme:
 
@@ -43,7 +42,7 @@ function ThemedWidget() {
 }
 ```
 
-### With CSS Variables
+### With CSS variables
 
 ```tsx
 function ThemedWidget() {
@@ -71,7 +70,7 @@ function ThemedWidget() {
 }
 ```
 
-### Safe Areas
+### Safe areas
 
 Handle device notches and navigation bars:
 
@@ -88,7 +87,7 @@ const { safeArea } = useLayout();
 </div>
 ```
 
-### Max Height
+### Max height
 
 Respect the container's max height:
 
@@ -103,7 +102,7 @@ const { maxHeight } = useLayout();
 </div>
 ```
 
-## User Info with useUser
+## User info with useUser
 
 Access locale and device capabilities:
 
@@ -144,7 +143,7 @@ function LocalizedWidget() {
 }
 ```
 
-### Available User Agent Properties
+### Available user agent properties
 
 ```typescript
 const { userAgent } = useUser();
@@ -154,7 +153,7 @@ userAgent.capabilities.hover; // true if device has hover capability
 userAgent.capabilities.touch; // true if device has touch capability
 ```
 
-## Display Mode with useDisplayMode
+## Display mode with useDisplayMode
 
 Widgets can render in different display modes:
 
@@ -187,7 +186,7 @@ function AdaptiveWidget() {
 }
 ```
 
-### Requesting Mode Change
+### Requesting mode change
 
 ```tsx
 const { setDisplayMode } = useDisplayMode();
@@ -203,7 +202,7 @@ const { setDisplayMode } = useDisplayMode();
 </button>
 ```
 
-## Modal Requests with useRequestModal
+## Modal requests with useRequestModal
 
 Modal Display Mode is not accessible via useDisplayMode, it can only be opened via useRequestModal.
 
@@ -235,7 +234,7 @@ function ProductCard({ product }) {
 **MCP Apps Runtime**: `useRequestModal` is polyfilled in MCP Apps. Modals render inside the widget iframe rather than being portaled to the host. See [useRequestModal API](/api-reference/use-request-modal) for details.
 </Warning>
 
-## External Links with useOpenExternal
+## External links with useOpenExternal
 
 Open URLs outside the widget:
 
@@ -267,7 +266,7 @@ function LinkWidget() {
 External links open in a new tab/window. Some URLs may be blocked by the iframe's CSP policy.
 </Note>
 
-## Responsive Design Pattern
+## Responsive design pattern
 
 Combine hooks for a fully adaptive widget:
 
