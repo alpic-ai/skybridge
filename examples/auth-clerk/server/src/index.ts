@@ -27,7 +27,10 @@ const server = new McpServer(
   { capabilities: {} },
 )
   .use(clerkMiddleware())
-  .use("/.well-known/oauth-protected-resource", protectedResourceHandlerClerk())
+  .use(
+    "/.well-known/oauth-protected-resource",
+    protectedResourceHandlerClerk({ scopes_supported: ["profile", "email"] }),
+  )
   .use("/mcp", mcpAuthClerk)
   .registerWidget(
     "search-coffee-paris",
