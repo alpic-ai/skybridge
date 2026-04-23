@@ -44,7 +44,6 @@ deno init --npm skybridge my-app
 
 Make sure you have:
 - **Node.js 24+**
-- **[Alpic tunnel](https://docs.alpic.ai/cli/tunnel)** for exposing your local server
 - Basic knowledge of **React** and **TypeScript**
 - Familiarity with **Zod** for schema validation (we'll use it for type-safe tool definitions)
 </Info>
@@ -95,6 +94,30 @@ When you run `skybridge`:
 3. The **MCP server** is available at `http://localhost:3000/mcp`
 4. **File watching** is enabled - changes to server code will automatically restart the server
 5. **Hot Module Reload (HMR)** is active for Widgets components - changes appear instantly in the host without reconnecting
+
+### Exposing a public URL
+
+When you need to connect a remote client like ChatGPT or Claude, pass the `--tunnel` flag:
+
+<CodeGroup>
+```bash npm
+npm run dev -- --tunnel
+```
+```bash pnpm
+pnpm dev --tunnel
+```
+```bash yarn
+yarn dev --tunnel
+```
+```bash bun
+bun dev --tunnel
+```
+```bash deno
+deno task dev --tunnel
+```
+</CodeGroup>
+
+Skybridge downloads and runs [Alpic tunnel](https://docs.alpic.ai/cli/tunnel) automatically, then prints a public `/mcp` URL and an LLM Playground `/try` URL. Add `--verbose` to stream tunnel logs.
 
 ## Next steps
 
