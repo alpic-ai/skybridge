@@ -1,0 +1,373 @@
+---
+title: registerTool
+description: "Register an MCP tool — with or without a React widget — in a single unified call."
+---
+
+
+Register an MCP tool on the server. Provide a `view` to bind the tool to a React widget; omit `view` for a plain tool with no UI.
+
+## Signature
+
+```typescript
+server.registerTool(
+  config: UnifiedToolConfig,
+  handler: ToolHandler,
+): McpServer
+```
+
+A single call replaces the previous `registerTool(name, config, handler)` + `registerWidget(name, resourceConfig, toolConfig, handler)` pair.
+
+## Config
+
+```typescript
+type UnifiedToolConfig = {
+  name: string;              // Tool name, exposed to the model
+  title?: string;            // Human-readable title
+  description?: string;      // Shown to the model
+  inputSchema?: ZodRawShape; // Input validation (Zod)
+  outputSchema?: ZodRawShape;// Output type hints (Zod)
+  annotations?: ToolAnnotations;
+  view?: ViewConfig;         // ← present = widget-tool, absent = plain tool
+  _meta?: ToolMeta;
+};
+
+type ToolMeta = {
+  // Enable widget-initiated tool calls (see useCallTool)
+  "openai/widgetAccessible"?: boolean;
+  // Custom status messages
+  "openai/toolInvocation/invoking"?: string; // While running
+  "openai/toolInvocation/invoked"?: string;  // After completion
+  [key: string]: unknown;
+};
+```
+
+### `view`
+
+Binds the tool to a React widget.
+
+```typescript
+type ViewConfig = {
+  component: WidgetName;                   // File name in src/views/ (typed — see below)
+  description?: string;                    // Shown during widget discovery
+  hosts?: ("apps-sdk" | "mcp-app")[];      // Defaults to both
+  prefersBorder?: boolean;                 // Removes the default iframe border when false
+  domain?: string;                         // Custom widget domain
+  csp?: {
+    resourceDomains?: string[];   // Static assets (images, fonts, scripts)
+    connectDomains?: string[];    // Fetch / XHR targets
+    frameDomains?: string[];      // Iframe embed origins
+    redirectDomains?: string[];   // Allowed external redirects (skips safe-link modal)
+    baseUriDomains?: string[];    // `<base href>` origins (mcp-apps only)
+  };
+  _meta?: Record<string, unknown>;
+};
+```
+
+See [CSP & Domains](#csp--domains) below.
+
+## Handler
+
+```typescript
+type ToolHandler = (
+  input: Input,
+  extra: RequestHandlerExtra,
+) => Promise<{
+  content?: string | ContentBlock | ContentBlock[]; // Text(s) for the model
+  structuredContent?: StructuredData;               // Data for the widget
+  _meta?: Record<string, unknown>;                  // Response metadata
+}>;
+```
+
+`content` can be a plain string, a single `ContentBlock`, or an array — Skybridge normalizes it to an array internally. Use the [content helpers](#content-helpers) to build blocks ergonomically.
+
+The `extra` parameter exposes:
+- `extra.authInfo` — populated by auth middleware (e.g. `authInfo.clientId`, `authInfo.extra.email`)
+- `extra.requestInfo` — HTTP request details (headers, URL)
+- `extra.signal` — abort signal for cancellation
+
+## Return Value
+
+Returns the server instance, so calls chain:
+
+```typescript
+const server = new McpServer(config, {})
+  .registerTool({ name: "a", /* … */ }, handlerA)
+  .registerTool({ name: "b", /* … */ }, handlerB)
+  .registerTool({ name: "c", /* … */ }, handlerC);
+```
+
+<Note>
+Method chaining is **required** for type inference. See [Type Safety](/concepts/type-safety#method-chaining-requirement).
+</Note>
+
+## Response Fields
+
+Three fields, three audiences:
+
+| Field | Purpose | Consumed by |
+|-------|---------|-------------|
+| `content` | Text description | The host (shown in conversation) |
+| `structuredContent` | Typed data | Host and widget (`useToolInfo`, `useCallTool`) |
+| `_meta` | Response metadata | Widget only (hidden from the model) |
+
+See [Data Flow: Response Fields](/concepts/data-flow#response-fields-explained).
+
+<Info>
+**viewUUID**: Skybridge automatically injects a unique `viewUUID` into `_meta` for every widget tool call. This enables `useWidgetState` and `createStore` to persist state across re-renders in MCP Apps via `localStorage`. Any `_meta` you return is preserved alongside the injected `viewUUID`.
+</Info>
+
+## Examples
+
+### Widget tool
+
+File `src/views/greeting.tsx` exports the React component. `view.component` matches its file name.
+
+```typescript
+import { McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({ name: "my-app", version: "0.0.1" }, {})
+  .registerTool(
+    {
+      name: "greet",
+      description: "Greet someone by name.",
+      inputSchema: { name: z.string() },
+      view: { component: "greeting", description: "A greeting card" },
+    },
+    async ({ name }) => {
+      return {
+        content: `Greeting ${name}`,
+        structuredContent: { message: `Hello, ${name}!` },
+      };
+    },
+  );
+```
+
+### Plain tool (no UI)
+
+Omit `view` to register a tool that returns only content to the model:
+
+```typescript
+server.registerTool(
+  {
+    name: "calculate",
+    description: "Evaluate an arithmetic expression.",
+    inputSchema: { expression: z.string() },
+  },
+  async ({ expression }) => {
+    const value = evaluate(expression);
+    return { content: `Result: ${value}` };
+  },
+);
+```
+
+### With external API and CSP
+
+```typescript
+server.registerTool(
+  {
+    name: "weather",
+    description: "Show weather for a location.",
+    inputSchema: {
+      city: z.string(),
+      units: z.enum(["metric", "imperial"]).optional().default("metric"),
+    },
+    outputSchema: {
+      temperature: z.number(),
+      conditions: z.string(),
+      humidity: z.number(),
+    },
+    view: {
+      component: "weather",
+      csp: {
+        // Widget fetches from this API
+        connectDomains: ["https://api.weather.com"],
+      },
+    },
+  },
+  async ({ city, units }) => {
+    const weather = await fetchWeather(city, units);
+    return {
+      content: `Current weather in ${city}: ${weather.temperature}°, ${weather.conditions}`,
+      structuredContent: weather,
+    };
+  },
+);
+```
+
+<Tip>
+If your widget makes client-side API calls, add those domains to `connectDomains`. Server-side calls from the handler do not require CSP configuration.
+</Tip>
+
+### With auth context
+
+Pull authentication info from `extra` (requires auth middleware via [`.use()`](/api-reference/mcp-server#use)):
+
+```typescript
+server.registerTool(
+  {
+    name: "user-profile",
+    description: "Show user profile.",
+    inputSchema: { userId: z.string() },
+    view: { component: "user-profile" },
+  },
+  async ({ userId }, extra) => {
+    const email = extra.authInfo?.extra?.email as string | undefined;
+    const user = await getUser(userId);
+    if (!user) {
+      return {
+        content: `User ${userId} not found`,
+        structuredContent: { error: "not_found", userId },
+      };
+    }
+    return {
+      content: `Showing profile for ${user.name}`,
+      structuredContent: { ...user, viewedBy: email },
+    };
+  },
+);
+```
+
+## Content helpers
+
+`skybridge/server` exports helpers for building `ContentBlock`s:
+
+```typescript
+import { audio, embeddedResource, image, resourceLink, text } from "skybridge/server";
+
+return {
+  content: [
+    text("Here's your chart:"),
+    image(pngBuffer, "image/png"),
+  ],
+  structuredContent: { /* … */ },
+};
+```
+
+| Helper | Block type |
+|--------|------------|
+| `text(value, annotations?)` | `TextContent` |
+| `image(data, mimeType, annotations?)` | `ImageContent` (base64-encoded) |
+| `audio(data, mimeType, annotations?)` | `AudioContent` (base64-encoded) |
+| `embeddedResource(resource, annotations?)` | `EmbeddedResource` |
+| `resourceLink(link, annotations?)` | `ResourceLink` |
+
+You can still return plain `ContentBlock` objects — helpers are opt-in.
+
+## Typed widget names
+
+The Vite plugin generates `.skybridge/widgets.d.ts` at dev/build time, augmenting the internal `WidgetNameRegistry` interface. This narrows `WidgetName` from `string` to the union of actual widget file names in `src/views/`.
+
+Upshot: `view.component` autocompletes, and typos become compile-time errors.
+
+```typescript
+view: {
+  component: "greting", // ← Type error: not a valid WidgetName
+}
+```
+
+Make sure your `tsconfig.json` includes the generated file:
+
+```json
+{
+  "include": ["src", ".skybridge/**/*.d.ts"]
+}
+```
+
+## Input Schema
+
+Define expected inputs with Zod:
+
+```typescript
+inputSchema: {
+  query: z.string().describe("Search query"),
+  limit: z.number().optional().default(10),
+  sortBy: z.enum(["price", "rating", "distance"]),
+  filters: z.object({
+    minPrice: z.number().optional(),
+    maxPrice: z.number().optional(),
+  }).optional(),
+  amenities: z.array(z.string()).optional(),
+}
+```
+
+## Output Schema
+
+Optional type hints:
+
+```typescript
+outputSchema: {
+  results: z.array(z.object({
+    id: z.string(),
+    name: z.string(),
+    price: z.number(),
+  })),
+  totalCount: z.number(),
+}
+```
+
+<Note>
+Output schema is primarily for documentation and type inference. Runtime validation is not enforced.
+</Note>
+
+## CSP & Domains
+
+Widgets run in a sandboxed iframe with strict Content Security Policy. If your widget needs to:
+- **Fetch data from external APIs** → add to `connectDomains`
+- **Load images, fonts, or scripts from CDNs** → add to `resourceDomains`
+- **Embed external iframes** → add to `frameDomains`
+- **Redirect to external sites** → add to `redirectDomains`
+
+<Note>
+Skybridge automatically includes your server's domain in the CSP. You only need to configure additional external domains.
+</Note>
+
+### Configuration
+
+```typescript
+server.registerTool(
+  {
+    name: "flight-search",
+    description: "Search for flights",
+    inputSchema: { /* … */ },
+    view: {
+      component: "flight-search",
+      prefersBorder: false,
+      csp: {
+        connectDomains: ["https://api.flights.com"],
+        resourceDomains: ["https://cdn.flights.com", "https://fonts.googleapis.com"],
+        frameDomains: ["https://maps.google.com"],
+        redirectDomains: ["https://booking.flights.com"],
+      },
+    },
+  },
+  async (input) => { /* … */ },
+);
+```
+
+### CSP Fields
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `connectDomains` | Fetch/XHR targets | `["https://api.example.com"]` |
+| `resourceDomains` | Static assets (images, fonts, scripts, styles) | `["https://cdn.example.com"]` |
+| `frameDomains` | Iframe embed origins | `["https://youtube.com"]` |
+| `redirectDomains` | External redirect destinations | `["https://checkout.example.com"]` |
+| `baseUriDomains` | `<base href>` origins (mcp-apps only) | `["https://app.example.com"]` |
+
+### Priority & Merging
+
+CSP arrays are **merged** (not overridden). Your domains are added to defaults:
+
+```typescript
+// Skybridge auto-includes: ["https://your-server.com"]
+// You add: ["https://api.example.com"]
+// Result:  ["https://your-server.com", "https://api.example.com"]
+```
+
+## Related
+
+- [McpServer](/api-reference/mcp-server) - Server class
+- [useToolInfo](/api-reference/use-tool-info) - Access widget data
+- [Data Flow](/concepts/data-flow) - The communication loop
+- [Type Safety](/concepts/type-safety) - End-to-end inference

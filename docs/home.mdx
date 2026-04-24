@@ -8,17 +8,17 @@ icon: "house"
 **Skybridge is a fullstack TypeScript framework for building MCP and ChatGPT Apps: interactive widgets that render inside AI conversations. Define tools, write React components, and let Skybridge do the rest:**
 
 <CodeGroup>
-```ts server/src/index.ts
+```ts src/server.ts
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
-const server = new McpServer({ name: "my-app", version: "0.0.1" })
-  .registerWidget(
-    "greeting",
-    { description: "A greeting card" },
+const server = new McpServer({ name: "my-app", version: "0.0.1" }, {})
+  .registerTool(
     {
+      name: "greeting",
       description: "Greet someone by name.",
       inputSchema: { name: z.string() },
+      view: { component: "greeting", description: "A greeting card" },
     },
     async ({ name }) => {
       return { structuredContent: { message: `Hello, ${name}!` } };
@@ -26,16 +26,13 @@ const server = new McpServer({ name: "my-app", version: "0.0.1" })
   );
 ```
 
-```tsx web/src/widgets/greeting.tsx
-import { mountWidget } from "skybridge/web";
+```tsx src/views/greeting.tsx
 import { useToolInfo } from "../helpers.js"; // auto-generated from server schema
 
-function Greeting() {
+export default function Greeting() {
   const { output } = useToolInfo<"greeting">();
   return <h1>{output.message}</h1>;
 }
-
-mountWidget(<Greeting />);
 ```
 </CodeGroup>
 

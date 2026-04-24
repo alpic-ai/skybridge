@@ -85,7 +85,7 @@ Never assume the reader is already an expert in Skybridge or MCP Apps. When you 
    - **CLI**: Skybridge CLI commands such as create, build, and dev, plus their options.
    - **Server**: server-side APIs for defining the MCP server and registering UI.
      - **McpServer**: the server class, tools, resources, and type export.
-     - **registerWidget**: registers a widget, including name, handler, config, and CSP.
+     - **registerTool**: registers a tool — optionally with a `view` config that binds the tool to a React widget (component name, CSP, description).
    - **Hooks**: React hooks for widget UIs, including data, layout, and actions.
      - **useToolInfo, useCallTool**: initial tool data and calling tools from the widget.
      - **useLayout, useUser, useDisplayMode**: host layout, user or session, and display mode.

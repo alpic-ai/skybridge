@@ -43,28 +43,38 @@ Tool responses contain three fields:
 
 ## Tools vs Widgets
 
-Before diving into the data flow, understand the difference between tools and widgets in Skybridge:
+Before diving into the data flow, understand the difference between plain tools and widget tools. Both use `registerTool`, differentiated by the optional `view` field:
 
-| | `registerTool()` | `registerWidget()` |
+| | `registerTool` (no `view`) | `registerTool` (with `view`) |
 |---|---|---|
 | **Has UI?** | No | Yes |
-| **Returns** | `content` and/or `structuredContent` | `structuredContent` and optional `content`/`_meta`
-| **Renders** | Nothing | A React component |
+| **Returns** | `content` and/or `structuredContent` | `structuredContent` and optional `content`/`_meta` |
+| **Renders** | Nothing | A React component from `src/views/` |
 | **Use case** | Background operations, calculations | Interactive UI |
 
 ```typescript
-// Tool: No UI, returns text
-server.registerTool("calculate", { /* ... */ }, async (args) => {
-  return { content: [{ type: "text", text: "Result: 42" }] };
-});
+// Plain tool: no UI, returns text
+server.registerTool(
+  { name: "calculate", inputSchema: { /* ... */ } },
+  async (args) => {
+    return { content: "Result: 42" };
+  },
+);
 
-// Widget: Has UI, returns structured data
-server.registerWidget("chart", { /* ... */ }, { /* ... */ }, async (args) => {
-  return {
-    content: [{ type: "text", text: "Displaying chart" }],
-    structuredContent: { data: [1, 2, 3], labels: ["A", "B", "C"] }
-  };
-});
+// Widget tool: has UI, returns structured data
+server.registerTool(
+  {
+    name: "chart",
+    inputSchema: { /* ... */ },
+    view: { component: "chart" },
+  },
+  async (args) => {
+    return {
+      content: "Displaying chart",
+      structuredContent: { data: [1, 2, 3], labels: ["A", "B", "C"] },
+    };
+  },
+);
 ```
 
 ## Data Flow Patterns
@@ -75,16 +85,21 @@ When the host calls one of your widgets, it returns `structuredContent` to hydra
 
 **Server:**
 ```typescript
-server.registerWidget("show_flights", {}, {
-  inputSchema: { destination: z.string() },
-}, async ({ destination }) => {
-  const flights = await searchFlights(destination);
+server.registerTool(
+  {
+    name: "show_flights",
+    inputSchema: { destination: z.string() },
+    view: { component: "show_flights" },
+  },
+  async ({ destination }) => {
+    const flights = await searchFlights(destination);
 
-  return {
-    content: [{ type: "text", text: `Found ${flights.length} flights` }],
-    structuredContent: { flights } // This goes to the widget
-  };
-});
+    return {
+      content: `Found ${flights.length} flights`,
+      structuredContent: { flights }, // This goes to the widget
+    };
+  },
+);
 ```
 
 **Widget:**
@@ -229,7 +244,7 @@ Direct API calls don't add to context. Use them only for data the model doesn't 
 <Warning>
 **Direct fetch requires CSP configuration**
 
-If you use `fetch()` directly from widgets, you need to configure Content Security Policy (CSP) headers. The host blocks requests to domains not explicitly allowed. Add allowed domains to `connectDomains` in your widget configuration. See [registerWidget](/api-reference/register-widget).
+If you use `fetch()` directly from widgets, you need to configure Content Security Policy (CSP) headers. The host blocks requests to domains not explicitly allowed. Add allowed domains to `view.csp.connectDomains` in your `registerTool` call. See [registerTool](/api-reference/register-tool).
 </Warning>
 
 ## The Communication Loop

@@ -39,21 +39,28 @@ const { callTool } = useCallTool("search-voyage");
 Your MCP server **must** use method chaining for type inference to work. See [Type Safety: Method Chaining](/concepts/type-safety#method-chaining) for details.
 
 ```ts
-// ✅ Works — chain registerWidget/registerTool calls
+// ✅ Works — chain registerTool calls
 const server = new McpServer({ name: "my-app", version: "1.0" }, {})
-  .registerWidget("search-voyage", {}, { inputSchema: { destination: z.string() } }, async ({ destination }) => {
-    return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
-  });
+  .registerTool(
+    {
+      name: "search-voyage",
+      inputSchema: { destination: z.string() },
+      view: { component: "search-voyage" },
+    },
+    async ({ destination }) => {
+      return { content: `Found trips to ${destination}` };
+    },
+  );
 
 export type AppType = typeof server;
 ```
 
 ### Export Server Type
 
-Export your server type so it can be imported in your web code:
+Export your server type so it can be imported in your widget code:
 
 ```ts
-// server/src/index.ts
+// src/server.ts
 export type AppType = typeof server;
 ```
 
@@ -64,8 +71,8 @@ export type AppType = typeof server;
 Create a bridge file that connects your server types to your widgets:
 
 ```ts
-// web/src/helpers.ts
-import type { AppType } from "../server"; // type-only import
+// src/helpers.ts
+import type { AppType } from "./server"; // type-only import
 import { generateHelpers } from "skybridge/web";
 
 export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
@@ -76,12 +83,12 @@ export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
 Import and use the typed hooks throughout your app:
 
 ```tsx
-// web/src/widgets/search.tsx
-import { useCallTool, useToolInfo } from "../skybridge";
+// src/views/search-voyage.tsx
+import { useCallTool, useToolInfo } from "../helpers";
 
-export function SearchWidget() {
-  const { callTool, data, isPending } = useCallTool("search-voyage");
-  //                                      ^ autocomplete for tool names
+export default function SearchVoyage() {
+  const { callTool, isPending } = useCallTool("search-voyage");
+  //                                            ^ autocomplete for tool names
 
   const toolInfo = useToolInfo<"search-voyage">();
   //                              ^ autocomplete for widget names

@@ -24,7 +24,7 @@ Extract the full tool registry from a server type:
 
 ```typescript
 import type { InferTools } from "skybridge/server";
-import type { AppType } from "../../server/src/index";
+import type { AppType } from "./server";
 
 type Tools = InferTools<AppType>;
 // { "search-hotels": ToolDef<...>, "hotel-details": ToolDef<...> }
@@ -36,7 +36,7 @@ Get a union of all tool names:
 
 ```typescript
 import type { ToolNames } from "skybridge/server";
-import type { AppType } from "../../server/src/index";
+import type { AppType } from "./server";
 
 type Names = ToolNames<AppType>;
 // "search-hotels" | "hotel-details"
@@ -59,7 +59,7 @@ Get the input type for a specific tool:
 
 ```typescript
 import type { ToolInput } from "skybridge/server";
-import type { AppType } from "../../server/src/index";
+import type { AppType } from "./server";
 
 type SearchInput = ToolInput<AppType, "search-hotels">;
 // { city: string; checkIn: string; checkOut: string; guests?: number }
@@ -71,7 +71,7 @@ Get the output type for a specific tool:
 
 ```typescript
 import type { ToolOutput } from "skybridge/server";
-import type { AppType } from "../../server/src/index";
+import type { AppType } from "./server";
 
 type SearchOutput = ToolOutput<AppType, "search-hotels">;
 // { hotels: Array<{ id: string; name: string; price: number }> }
@@ -83,7 +83,7 @@ Get the response metadata type for a specific tool:
 
 ```typescript
 import type { ToolResponseMetadata } from "skybridge/server";
-import type { AppType } from "../../server/src/index";
+import type { AppType } from "./server";
 
 type SearchMeta = ToolResponseMetadata<AppType, "search-hotels">;
 // { searchId: string; cached: boolean } | undefined
@@ -95,7 +95,7 @@ type SearchMeta = ToolResponseMetadata<AppType, "search-hotels">;
 
 ```typescript
 import type { ToolOutput } from "skybridge/server";
-import type { AppType } from "../../server/src/index";
+import type { AppType } from "./server";
 
 type HotelData = ToolOutput<AppType, "search-hotels">;
 
@@ -114,7 +114,7 @@ function HotelList({ hotels }: { hotels: HotelData["hotels"] }) {
 
 ```typescript
 import type { ToolInput, ToolOutput, ToolNames } from "skybridge/server";
-import type { AppType } from "../../server/src/index";
+import type { AppType } from "./server";
 
 async function callServerTool<T extends ToolNames<AppType>>(
   name: T,
@@ -136,7 +136,7 @@ const result = await callServerTool("search-hotels", {
 
 ```typescript
 import type { ToolNames, ToolOutput } from "skybridge/server";
-import type { AppType } from "../../server/src/index";
+import type { AppType } from "./server";
 
 function renderToolResult<T extends ToolNames<AppType>>(
   toolName: T,
@@ -168,7 +168,7 @@ type InferTools<ServerType> = ServerType extends {
 class McpServer<Registry = {}> {
   $types!: McpServerTypes<Registry>;
 
-  registerWidget<Name, Input, Output>(...): McpServer<
+  registerTool<Name, Input, Output>(...): McpServer<
     Registry & { [K in Name]: ToolDef<Input, Output> }
   > {
     // Each call returns a new type with the tool added

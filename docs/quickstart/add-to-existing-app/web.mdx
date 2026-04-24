@@ -49,12 +49,13 @@ Each hook is documented in the API Reference section in the sidebar.
 
 ## Basic example
 
-Here's a simple widget using Skybridge hooks:
+Here's a simple widget using Skybridge hooks. Widgets live in `src/views/` and `export default` a React component — the Vite plugin auto-mounts them.
 
 ```tsx
-import { mountWidget, useToolInfo } from "skybridge/web";
+// src/views/my-widget.tsx
+import { useToolInfo } from "skybridge/web";
 
-const MyWidget: React.FC = () => {
+export default function MyWidget() {
   const toolInfo = useToolInfo();
 
   if (toolInfo.isPending) {
@@ -71,9 +72,7 @@ const MyWidget: React.FC = () => {
   }
 
   return <div>No results</div>;
-};
-
-mountWidget(<MyWidget />);
+}
 ```
 
 ## Type safety without server
@@ -88,14 +87,14 @@ interface MyToolInput {
   limit?: number;
 }
 
-const MyWidget: React.FC = () => {
+export default function MyWidget() {
   const toolInfo = useToolInfo<MyToolInput>();
 
   // toolInfo.input is now typed as MyToolInput
   console.log(toolInfo.input.query);
 
   return <div>Widget content</div>;
-};
+}
 ```
 
 ## Learn more
