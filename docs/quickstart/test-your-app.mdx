@@ -47,18 +47,32 @@ ChatGPT uses the Apps SDK runtime and requires a public URL to connect to your a
 
 #### 1. Expose your server
 
-ChatGPT needs a public URL to access your AI App. Use the [Alpic tunnel](https://docs.alpic.ai/cli/tunnel) to expose your local server:
+ChatGPT needs a public URL to access your AI App. Start the dev server with the `--tunnel` flag:
 
-```bash
-alpic tunnel --port 3000
+<CodeGroup>
+```bash npm
+npm run dev -- --tunnel
 ```
+```bash pnpm
+pnpm dev --tunnel
+```
+```bash yarn
+yarn dev --tunnel
+```
+```bash bun
+bun dev --tunnel
+```
+```bash deno
+deno task dev --tunnel
+```
+</CodeGroup>
 
-Copy the forwarding URL (e.g., `https://cool-marmot-fondue-420.alpic.dev`).
+Skybridge downloads and runs [Alpic tunnel](https://docs.alpic.ai/cli/tunnel) automatically, then prints a public URL (e.g., `https://cool-marmot-fondue-420.alpic.dev/mcp`).
 
 #### 2. Connect to ChatGPT
 
 1. In ChatGPT, go to **Profile → Apps → Create app**
-2. Enter your tunnel URL with `/mcp` at the end:
+2. Enter the printed `/mcp` URL:
    ```
    https://cool-marmot-fondue-420.alpic.dev/mcp
    ```
@@ -82,18 +96,32 @@ Claude uses the MCP Apps runtime and requires a public URL to connect to your ap
 
 #### 1. Expose your server
 
-Claude needs a public URL to access your AI App. Use [Alpic tunnel](https://docs.alpic.ai/cli/tunnel) to expose your local server:
+Claude needs a public URL to access your AI App. Start the dev server with the `--tunnel` flag:
 
-```bash
-alpic tunnel --port 3000
+<CodeGroup>
+```bash npm
+npm run dev -- --tunnel
 ```
+```bash pnpm
+pnpm dev --tunnel
+```
+```bash yarn
+yarn dev --tunnel
+```
+```bash bun
+bun dev --tunnel
+```
+```bash deno
+deno task dev --tunnel
+```
+</CodeGroup>
 
-Copy the forwarding URL (e.g., `https://cool-marmot-fondue-420.alpic.dev`).
+Skybridge downloads and runs [Alpic tunnel](https://docs.alpic.ai/cli/tunnel) automatically, then prints a public URL (e.g., `https://cool-marmot-fondue-420.alpic.dev/mcp`).
 
 #### 2. Connect to Claude
 
 1. In Claude, go to **Settings → Connectors → Add Custom Connector** and configure your MCP server connection
-2. Enter your App name and Alpic tunnel URL with `/mcp` at the end:
+2. Enter your App name and the printed `/mcp` URL:
    ```
    https://cool-marmot-fondue-420.alpic.dev/mcp
    ```
