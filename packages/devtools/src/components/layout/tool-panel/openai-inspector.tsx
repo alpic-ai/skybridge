@@ -21,6 +21,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs.js";
 import {
+  defaultInspectorPreferences,
   type InspectorPreferences,
   useInspectorPreferencesStore,
 } from "@/lib/inspector-preferences-store.js";
@@ -28,15 +29,6 @@ import { useSelectedTool } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { LocaleSelector } from "./locale-selector.js";
 import { ResourceTabContent } from "./resource-tab.js";
-
-const PERSISTED_KEYS = new Set<keyof InspectorPreferences>([
-  "theme",
-  "locale",
-  "displayMode",
-  "maxHeight",
-  "safeArea",
-  "userAgent",
-]);
 
 export const OpenAiInspector = () => {
   const tool = useSelectedTool();
@@ -59,7 +51,7 @@ export const OpenAiInspector = () => {
           [key]: value,
         },
       });
-      if (PERSISTED_KEYS.has(key as keyof InspectorPreferences)) {
+      if (key in defaultInspectorPreferences) {
         setPreference(
           key as keyof InspectorPreferences,
           value as InspectorPreferences[keyof InspectorPreferences],
