@@ -19,9 +19,9 @@ export function useNodemon(
           configFile,
         }
       : {
-          watch: ["server/src"],
+          watch: ["src"],
           ext: "ts,json",
-          exec: "tsx server/src/index.ts",
+          exec: "tsx src/server.ts",
         };
 
     nodemon({ ...config, env, stdout: false });

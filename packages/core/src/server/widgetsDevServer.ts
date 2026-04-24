@@ -1,4 +1,3 @@
-import { existsSync } from "node:fs";
 import type http from "node:http";
 import path from "node:path";
 import cors from "cors";
@@ -6,39 +5,30 @@ import express, { type Router } from "express";
 import { assetBaseUrlTransformPlugin } from "./asset-base-url-transform-plugin.js";
 
 /**
- * Install Vite dev server
- * This router MUST be installed at the application root, like so:
+ * Vite dev-server middleware for widget assets.
  *
- *  const app = express();
+ * MUST be mounted at the Express app root so Vite can intercept
+ * `/@vite/client`, `/@react-refresh`, and `/_skybridge/widget/...` imports:
  *
- * if (env.NODE_ENV !== "production") {
- *   app.use(await widgetsRouter());
- * }
+ *   const app = express();
+ *   if (env.NODE_ENV !== "production") {
+ *     app.use(await widgetsDevServer(httpServer));
+ *   }
  */
 export const widgetsDevServer = async (
   httpServer: http.Server,
 ): Promise<Router> => {
   const router = express.Router();
 
-  const { createServer, searchForWorkspaceRoot, loadConfigFromFile } =
-    await import("vite");
+  const { createServer, loadConfigFromFile } = await import("vite");
 
-  // Since 0.16.0, the template is a single package that does not rely on workspace.
-  // It means that, when starting the server, the working dir is the template root
-  // hence we don't need to walk up the tree to find the workspace, which does not exist anymore.
-  let webAppRoot = path.join(process.cwd(), "web");
-
-  // fallback to the old behavior for backward compatibility
-  const hasWebAppRoot = existsSync(webAppRoot);
-  if (!hasWebAppRoot) {
-    const workspaceRoot = searchForWorkspaceRoot(process.cwd());
-    webAppRoot = path.join(workspaceRoot, "web");
-  }
+  const root = process.cwd();
+  const configFile = path.join(root, "vite.config.ts");
 
   const configResult = await loadConfigFromFile(
     { command: "serve", mode: "development" },
-    path.join(webAppRoot, "vite.config.ts"),
-    webAppRoot,
+    configFile,
+    root,
   );
 
   const {
@@ -50,7 +40,9 @@ export const widgetsDevServer = async (
 
   const vite = await createServer({
     ...devConfig,
-    configFile: false, // Keep this to prevent vite from trying to resolve path in the target config file
+    // Pass `false` so Vite skips re-resolving a config file — we already
+    // loaded and spread the user's config above.
+    configFile: false,
     appType: "custom",
     server: {
       allowedHosts: true,
@@ -59,10 +51,9 @@ export const widgetsDevServer = async (
         server: httpServer,
       },
     },
-    root: webAppRoot,
-    optimizeDeps: {
-      include: ["react", "react-dom/client"],
-    },
+    root,
+    // optimizeDeps is set by the skybridge Vite plugin (entries + include)
+    // so it can derive the widget glob from `widgetsDir`.
     plugins: [...userPlugins, assetBaseUrlTransformPlugin()],
   });
 

@@ -44,11 +44,13 @@ type TypedToolInfoReturn<TInput, TOutput, TResponseMetadata> = ToolState<
  *
  * @example
  * ```typescript
- * // server/src/index.ts
+ * // src/server.ts
  * const server = new McpServer({ name: "my-app", version: "1.0" }, {})
- *   .widget("search-voyage", {}, {
+ *   .registerTool({
+ *     name: "search-voyage",
  *     inputSchema: { destination: z.string() },
  *     outputSchema: { results: z.array(z.string()) },
+ *     view: { component: "search-voyage", description: "Search voyages" },
  *   }, async ({ destination }) => {
  *     return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
  *   });
@@ -58,8 +60,8 @@ type TypedToolInfoReturn<TInput, TOutput, TResponseMetadata> = ToolState<
  *
  * @example
  * ```typescript
- * // web/src/helpers.ts (one-time setup)
- * import type { AppType } from "../server";
+ * // src/helpers.ts (one-time setup)
+ * import type { AppType } from "./server";
  * import { generateHelpers } from "skybridge/web";
  *
  * export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
@@ -67,8 +69,8 @@ type TypedToolInfoReturn<TInput, TOutput, TResponseMetadata> = ToolState<
  *
  * @example
  * ```typescript
- * // web/src/widgets/search.tsx (usage)
- * import { useCallTool, useToolInfo } from "../skybridge";
+ * // src/views/search.tsx (usage)
+ * import { useCallTool, useToolInfo } from "../helpers";
  *
  * export function SearchWidget() {
  *   const { callTool, data } = useCallTool("search-voyage");

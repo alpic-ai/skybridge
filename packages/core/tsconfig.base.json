@@ -6,6 +6,8 @@
     "verbatimModuleSyntax": true,
 
     // Output options
+    "rootDir": "${configDir}/src",
+    "outDir": "${configDir}/dist",
     "noEmit": false,
     "incremental": true,
     "sourceMap": true,

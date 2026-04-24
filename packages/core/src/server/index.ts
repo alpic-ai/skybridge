@@ -1,3 +1,10 @@
+export {
+  audio,
+  embeddedResource,
+  image,
+  resourceLink,
+  text,
+} from "./content-helpers.js";
 export type {
   AnyToolRegistry,
   InferTools,
@@ -15,6 +22,20 @@ export type {
   McpTypedMiddlewareFn,
   McpWildcard,
 } from "./middleware.js";
-export type { McpServerTypes, ToolDef, WidgetHostType } from "./server.js";
-export { McpServer } from "./server.js";
+export type {
+  HandlerContent,
+  KnownToolMeta,
+  McpServerTypes,
+  ToolDef,
+  ToolMeta,
+  ViewConfig,
+  ViewCsp,
+  WidgetHostType,
+  WidgetName,
+  WidgetNameRegistry,
+} from "./server.js";
+export {
+  McpServer,
+  normalizeContent,
+} from "./server.js";
 export { widgetsDevServer } from "./widgetsDevServer.js";

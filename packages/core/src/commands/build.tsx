@@ -1,14 +1,44 @@
-import { cpSync, rmSync } from "node:fs";
+import { rmSync } from "node:fs";
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { useEffect } from "react";
 import { Header } from "../cli/header.js";
 import { type CommandStep, useExecuteSteps } from "../cli/use-execute-steps.js";
+import { scanAndWriteWidgetsDts } from "../web/plugin/scan-widgets.js";
+
+/**
+ * `tsc -b` runs before `vite build`, so the pre-scan can't read the plugin's
+ * runtime `widgetsDir`. Loading `vite.config.ts` here keeps `WidgetName`
+ * narrowing correct for users with a custom widget dir.
+ */
+async function resolveWidgetsDir(root: string): Promise<string | undefined> {
+  const { loadConfigFromFile } = await import("vite");
+  const loaded = await loadConfigFromFile(
+    { command: "build", mode: "production" },
+    undefined,
+    root,
+  );
+  const raw = (loaded?.config.plugins ?? []) as unknown as unknown[];
+  const plugins: Array<{ name?: string; api?: { widgetsDir?: string } }> = [];
+  const walk = (value: unknown) => {
+    if (Array.isArray(value)) {
+      value.forEach(walk);
+    } else if (value && typeof value === "object") {
+      plugins.push(value as never);
+    }
+  };
+  walk(raw);
+  return plugins.find((p) => p?.name === "skybridge")?.api?.widgetsDir;
+}
 
 export const commandSteps: CommandStep[] = [
   {
-    label: "Building widgets",
-    command: "vite build -c web/vite.config.ts",
+    label: "Scanning widgets",
+    run: async () => {
+      const root = process.cwd();
+      const widgetsDir = await resolveWidgetsDir(root);
+      scanAndWriteWidgetsDts(root, widgetsDir);
+    },
   },
   {
     label: "Compiling server",
@@ -16,8 +46,8 @@ export const commandSteps: CommandStep[] = [
     command: "tsc -b",
   },
   {
-    label: "Copying static assets",
-    run: () => cpSync("web/dist", "dist/assets", { recursive: true }),
+    label: "Building widgets",
+    command: "vite build",
   },
 ];
 
