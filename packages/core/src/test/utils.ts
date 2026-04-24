@@ -1,16 +1,13 @@
+import { McpServer as McpServerBase } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { type MockInstance, vi } from "vitest";
 import * as z from "zod";
 import { McpServer } from "../server/server.js";
 
-/**
- * Creates a real McpServer instance for testing
- */
 export function createMockMcpServer(): {
   server: McpServer;
   mockRegisterResource: MockInstance<McpServer["registerResource"]>;
-  mockRegisterTool: MockInstance<McpServer["registerTool"]>;
+  mockRegisterTool: MockInstance;
 } {
-  // Create a real McpServer instance
   const server = new McpServer(
     {
       name: "alpic-openai-app",
@@ -19,9 +16,8 @@ export function createMockMcpServer(): {
     { capabilities: {} },
   );
 
-  // Mock the underlying methods to track calls
   const mockRegisterResource = vi.spyOn(server, "registerResource");
-  const mockRegisterTool = vi.spyOn(server, "registerTool");
+  const mockRegisterTool = vi.spyOn(McpServerBase.prototype, "registerTool");
 
   return {
     server,
@@ -32,10 +28,9 @@ export function createMockMcpServer(): {
 
 export function createTestServer() {
   return new McpServer({ name: "test-app", version: "1.0.0" }, {})
-    .registerWidget(
-      "search-voyage",
-      {},
+    .registerTool(
       {
+        name: "search-voyage",
         description: "Search for voyages",
         inputSchema: {
           destination: z.string(),
@@ -52,6 +47,7 @@ export function createTestServer() {
           ),
           totalCount: z.number(),
         },
+        view: { component: "search-voyage" },
       },
       async ({ destination }) => {
         return {
@@ -63,10 +59,9 @@ export function createTestServer() {
         };
       },
     )
-    .registerWidget(
-      "get-trip-details",
-      {},
+    .registerTool(
       {
+        name: "get-trip-details",
         description: "Get trip details",
         inputSchema: {
           tripId: z.string(),
@@ -76,6 +71,7 @@ export function createTestServer() {
           description: z.string(),
           images: z.array(z.string()),
         },
+        view: { component: "get-trip-details" },
       },
       async ({ tripId }) => {
         return {
@@ -88,13 +84,13 @@ export function createTestServer() {
         };
       },
     )
-    .registerWidget(
-      "no-input-widget",
-      {},
+    .registerTool(
       {
+        name: "no-input-widget",
         description: "Widget with no input",
         inputSchema: {},
         outputSchema: {},
+        view: { component: "no-input-widget" },
       },
       async () => {
         return {
@@ -103,14 +99,14 @@ export function createTestServer() {
         };
       },
     )
-    .registerWidget(
-      "inferred-output-widget",
-      {},
+    .registerTool(
       {
+        name: "inferred-output-widget",
         description: "Widget with output inferred from callback",
         inputSchema: {
           query: z.string(),
         },
+        view: { component: "inferred-output-widget" },
       },
       async ({ query }) => {
         return {
@@ -123,8 +119,8 @@ export function createTestServer() {
       },
     )
     .registerTool(
-      "calculate-price",
       {
+        name: "calculate-price",
         description: "Calculate trip price",
         inputSchema: {
           tripId: z.string(),
@@ -146,8 +142,8 @@ export function createTestServer() {
       },
     )
     .registerTool(
-      "inferred-tool",
       {
+        name: "inferred-tool",
         description: "Tool with output inferred from callback",
         inputSchema: {
           itemId: z.string(),
@@ -163,14 +159,14 @@ export function createTestServer() {
         };
       },
     )
-    .registerWidget(
-      "widget-with-metadata",
-      {},
+    .registerTool(
       {
+        name: "widget-with-metadata",
         description: "Widget that returns response metadata",
         inputSchema: {
           resourceId: z.string(),
         },
+        view: { component: "widget-with-metadata" },
       },
       async ({ resourceId }) => {
         return {
@@ -187,8 +183,8 @@ export function createTestServer() {
       },
     )
     .registerTool(
-      "tool-with-metadata",
       {
+        name: "tool-with-metadata",
         description: "Tool that returns response metadata",
         inputSchema: {
           query: z.string(),
@@ -207,25 +203,23 @@ export function createTestServer() {
         };
       },
     )
-    .registerWidget(
-      "widget-with-mixed-returns",
-      {},
+    .registerTool(
       {
+        name: "widget-with-mixed-returns",
         description:
           "Widget with mixed return paths (some with _meta, some without)",
         inputSchema: {
           shouldSucceed: z.boolean(),
         },
+        view: { component: "widget-with-mixed-returns" },
       },
       async ({ shouldSucceed }) => {
         if (!shouldSucceed) {
-          // Error path - no _meta
           return {
             content: [{ type: "text", text: "Error occurred" }],
             structuredContent: { error: "Something went wrong" },
           };
         }
-        // Success path - has _meta
         return {
           content: [{ type: "text", text: "Success" }],
           structuredContent: { data: "result" },
@@ -239,13 +233,9 @@ export function createTestServer() {
 }
 
 export function createMinimalTestServer() {
-  return new McpServer(
-    { name: "test-app", version: "1.0.0" },
-    {},
-  ).registerWidget(
-    "search-voyage",
-    {},
+  return new McpServer({ name: "test-app", version: "1.0.0" }, {}).registerTool(
     {
+      name: "search-voyage",
       description: "Search for voyages",
       inputSchema: {
         destination: z.string(),
@@ -253,6 +243,7 @@ export function createMinimalTestServer() {
       outputSchema: {
         results: z.array(z.object({ id: z.string() })),
       },
+      view: { component: "search-voyage" },
     },
     async ({ destination }) => {
       return {
@@ -283,18 +274,14 @@ export function createInterfaceTestServer() {
   return new McpServer(
     { name: "interface-test-app", version: "1.0.0" },
     {},
-  ).registerWidget<
-    "interface-widget",
-    { id: z.ZodString },
-    InterfaceReturnType
-  >(
-    "interface-widget",
-    {},
+  ).registerTool(
     {
+      name: "interface-widget" as const,
       description: "Widget with interface-typed output",
       inputSchema: {
         id: z.string(),
       },
+      view: { component: "interface-widget" },
     },
     async ({ id }): Promise<InterfaceReturnType> => {
       return {
@@ -312,9 +299,6 @@ export function createInterfaceTestServer() {
   );
 }
 
-/**
- * Mock extra parameter for resource callback
- */
 export function createMockExtra(
   host: string,
   options?: {
@@ -330,16 +314,10 @@ export function createMockExtra(
   };
 }
 
-/**
- * Sets up environment variables for testing
- */
 export function setTestEnv(env: Record<string, string>) {
   Object.assign(process.env, env);
 }
 
-/**
- * Resets environment variables
- */
 export function resetTestEnv() {
   delete process.env.NODE_ENV;
 }

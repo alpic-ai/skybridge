@@ -296,8 +296,8 @@ describe("McpServer.mcpMiddleware()", () => {
     const server = new McpServer({ name: "test", version: "1.0.0" });
 
     server.registerTool(
-      "greet",
       {
+        name: "greet",
         description: "greet",
         inputSchema: { name: z.string() },
       },
@@ -338,7 +338,7 @@ describe("McpServer.mcpMiddleware()", () => {
 
     const server = new McpServer({ name: "test", version: "1.0.0" });
 
-    server.registerTool("t1", { description: "t1" }, () => ({
+    server.registerTool({ name: "t1", description: "t1" }, () => ({
       content: [{ type: "text" as const, text: "ok" }],
     }));
 
@@ -392,7 +392,7 @@ describe("McpServer.mcpMiddleware()", () => {
 
     const server = new McpServer({ name: "test", version: "1.0.0" });
 
-    server.registerTool("t1", { description: "t1" }, () => ({
+    server.registerTool({ name: "t1", description: "t1" }, () => ({
       content: [{ type: "text" as const, text: "ok" }],
     }));
 
@@ -434,7 +434,7 @@ describe("McpServer.mcpMiddleware()", () => {
 
     const server = new McpServer({ name: "test", version: "1.0.0" });
 
-    server.registerTool("t1", { description: "t1" }, () => ({
+    server.registerTool({ name: "t1", description: "t1" }, () => ({
       content: [{ type: "text" as const, text: "ok" }],
     }));
 
@@ -462,7 +462,7 @@ describe("McpServer.mcpMiddleware()", () => {
 
     const server = new McpServer({ name: "test", version: "1.0.0" });
 
-    server.registerTool("t1", { description: "t1" }, () => ({
+    server.registerTool({ name: "t1", description: "t1" }, () => ({
       content: [{ type: "text" as const, text: "ok" }],
     }));
 
@@ -494,8 +494,8 @@ describe("McpServer.mcpMiddleware()", () => {
     const server = new McpServer({ name: "test", version: "1.0.0" });
 
     server.registerTool(
-      "greet",
       {
+        name: "greet",
         description: "greet",
         inputSchema: { name: z.string() },
       },
@@ -541,7 +541,7 @@ describe("McpServer.mcpMiddleware()", () => {
 
     const server = new McpServer({ name: "test", version: "1.0.0" });
 
-    server.registerTool("t1", { description: "t1" }, () => {
+    server.registerTool({ name: "t1", description: "t1" }, () => {
       handlerCalled();
       return {
         content: [{ type: "text" as const, text: "original" }],
@@ -572,8 +572,8 @@ describe("McpServer.mcpMiddleware()", () => {
     const server = new McpServer({ name: "test", version: "1.0.0" });
 
     server.registerTool(
-      "greet",
       {
+        name: "greet",
         description: "greet",
         inputSchema: { name: z.string() },
       },
@@ -611,7 +611,7 @@ describe("McpServer.mcpMiddleware()", () => {
 
     const server = new McpServer({ name: "test", version: "1.0.0" });
 
-    server.registerTool("t1", { description: "t1" }, () => ({
+    server.registerTool({ name: "t1", description: "t1" }, () => ({
       content: [{ type: "text" as const, text: "ok" }],
     }));
 

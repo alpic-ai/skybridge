@@ -22,8 +22,16 @@ import {
 } from "./utils.js";
 
 const mockManifest = {
-  "src/widgets/my-widget.tsx": { file: "my-widget.js" },
-  "src/widgets/folder-widget/index.tsx": { file: "folder-widget.js" },
+  "skybridge:widget:my-widget": {
+    file: "assets/my-widget-abc123.js",
+    name: "my-widget",
+    isEntry: true,
+  },
+  "skybridge:widget:folder-widget": {
+    file: "assets/folder-widget-def456.js",
+    name: "folder-widget",
+    isEntry: true,
+  },
   "style.css": { file: "style.css" },
 };
 
@@ -51,10 +59,10 @@ vi.mock("node:fs", () => {
   };
 });
 
-describe("McpServer.registerWidget", () => {
+describe("McpServer.registerTool (unified API)", () => {
   let server: McpServer;
   let mockRegisterResource: MockInstance<McpServer["registerResource"]>;
-  let mockRegisterTool: MockInstance<McpServer["registerTool"]>;
+  let mockRegisterTool: MockInstance;
 
   beforeEach(() => {
     ({ server, mockRegisterResource, mockRegisterTool } =
@@ -69,18 +77,18 @@ describe("McpServer.registerWidget", () => {
   it("should generate correct HTML for development mode", async () => {
     setTestEnv({ NODE_ENV: "development" });
 
-    const mockToolCallback = vi.fn();
-    const mockRegisterResourceConfig = { description: "Test widget" };
-    const mockToolConfig = { description: "Test tool" };
-
-    server.registerWidget(
-      "my-widget",
-      mockRegisterResourceConfig,
-      mockToolConfig,
-      mockToolCallback,
+    server.registerTool(
+      {
+        name: "my-widget",
+        description: "Test tool",
+        view: {
+          component: "my-widget",
+          description: "Test widget",
+        },
+      },
+      vi.fn(),
     );
 
-    // Get the resource callback function
     const appsSdkResourceCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
@@ -121,34 +129,30 @@ describe("McpServer.registerWidget", () => {
       ],
     });
 
-    // Check development-specific content
     expect(result.contents[0]?.text).toContain(
       `${serverUrl}/assets/@react-refresh`,
     );
     expect(result.contents[0]?.text).toContain(`${serverUrl}/@vite/client`);
     expect(result.contents[0]?.text).toContain(
-      `${serverUrl}/src/widgets/my-widget`,
-    );
-    expect(result.contents[0]?.text).not.toContain(
-      `${serverUrl}/src/widgets/my-widget.tsx`,
+      `${serverUrl}/_skybridge/widget/my-widget`,
     );
   });
 
   it("should generate correct HTML for production mode", async () => {
     setTestEnv({ NODE_ENV: "production" });
 
-    const mockToolCallback = vi.fn();
-    const mockRegisterResourceConfig = { description: "Test widget" };
-    const mockToolConfig = { description: "Test tool" };
-
-    server.registerWidget(
-      "my-widget",
-      mockRegisterResourceConfig,
-      mockToolConfig,
-      mockToolCallback,
+    server.registerTool(
+      {
+        name: "my-widget",
+        description: "Test tool",
+        view: {
+          component: "my-widget",
+          description: "Test widget",
+        },
+      },
+      vi.fn(),
     );
 
-    // Get the resource callback function
     const appsSdkResourceCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
@@ -187,13 +191,12 @@ describe("McpServer.registerWidget", () => {
       ],
     });
 
-    // Check production-specific content
     expect(result.contents[0]?.text).not.toContain(
       `${serverUrl}/assets/@react-refresh`,
     );
     expect(result.contents[0]?.text).not.toContain(`${serverUrl}@vite/client`);
     expect(result.contents[0]?.text).toContain(
-      `${serverUrl}/assets/my-widget.js`,
+      `${serverUrl}/assets/assets/my-widget-abc123.js`,
     );
     expect(result.contents[0]?.text).toContain(`${serverUrl}/assets/style.css`);
   });
@@ -201,12 +204,13 @@ describe("McpServer.registerWidget", () => {
   it("should prefer x-alpic-forwarded-url when hashing Claude widget domains", async () => {
     setTestEnv({ NODE_ENV: "production" });
 
-    const mockToolCallback = vi.fn();
-    server.registerWidget(
-      "my-widget",
-      { description: "Test widget" },
-      { description: "Test tool" },
-      mockToolCallback,
+    server.registerTool(
+      {
+        name: "my-widget",
+        description: "Test tool",
+        view: { component: "my-widget", description: "Test widget" },
+      },
+      vi.fn(),
     );
 
     const extAppsResourceCallback = mockRegisterResource.mock
@@ -247,65 +251,26 @@ describe("McpServer.registerWidget", () => {
         csp: {
           resourceDomains: ["http://localhost:3000"],
           connectDomains: ["http://localhost:3000"],
+          baseUriDomains: ["http://localhost:3000"],
         },
+        description: "Test widget",
         domain: expectedDomain,
       },
     });
   });
 
-  it("should resolve folder-based widgets (barrel files) in production mode", async () => {
-    setTestEnv({ NODE_ENV: "production" });
-
-    const mockToolCallback = vi.fn();
-    const mockRegisterResourceConfig = { description: "Folder widget" };
-    const mockToolConfig = { description: "Folder tool" };
-
-    server.registerWidget(
-      "folder-widget",
-      mockRegisterResourceConfig,
-      mockToolConfig,
-      mockToolCallback,
-    );
-
-    const appsSdkResourceCallback = mockRegisterResource.mock
-      .calls[0]?.[3] as unknown as (
-      uri: URL,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
-    ) => Promise<{
-      contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
-    }>;
-    expect(appsSdkResourceCallback).toBeDefined();
-
-    const host = "myapp.com";
-    const serverUrl = `https://${host}`;
-    const mockExtra = createMockExtra(host) as unknown as RequestHandlerExtra<
-      ServerRequest,
-      ServerNotification
-    >;
-    const result = await appsSdkResourceCallback(
-      new URL("ui://widgets/apps-sdk/folder-widget.html"),
-      mockExtra,
-    );
-
-    // Should resolve to folder-widget.js from the manifest entry "src/widgets/folder-widget/index.tsx"
-    expect(result.contents[0]?.text).toContain(
-      `${serverUrl}/assets/folder-widget.js`,
-    );
-  });
-
-  it("should register resources with correct hostType for both apps-sdk and ext-apps formats", async () => {
-    const mockToolCallback = vi.fn();
-    const mockRegisterResourceConfig = {
-      description: "Test widget",
-      _meta: { "openai/widgetPrefersBorder": true },
-    };
-    const mockToolConfig = { description: "Test tool" };
-
-    server.registerWidget(
-      "my-widget",
-      mockRegisterResourceConfig,
-      mockToolConfig,
-      mockToolCallback,
+  it("should register resources with correct hostType for both apps-sdk and ext-apps", async () => {
+    server.registerTool(
+      {
+        name: "my-widget",
+        description: "Test tool",
+        view: {
+          component: "my-widget",
+          description: "Test widget",
+          prefersBorder: true,
+        },
+      },
+      vi.fn(),
     );
 
     expect(mockRegisterResource).toHaveBeenCalledTimes(2);
@@ -317,16 +282,17 @@ describe("McpServer.registerWidget", () => {
     ) => Promise<{
       contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
     }>;
+    const host = "localhost:3000";
+    const serverUrl = `http://${host}`;
+    const hmrUrl = `ws://${host}`;
+
     const appsSdkResult = await appsSdkCallback(
       new URL("ui://widgets/apps-sdk/my-widget.html"),
-      createMockExtra("localhost:3000") as unknown as RequestHandlerExtra<
+      createMockExtra(host) as unknown as RequestHandlerExtra<
         ServerRequest,
         ServerNotification
       >,
     );
-    const host = "localhost:3000";
-    const serverUrl = `http://${host}`;
-    const hmrUrl = `ws://${host}`;
 
     expect(appsSdkResult).toEqual({
       contents: [
@@ -383,8 +349,11 @@ describe("McpServer.registerWidget", () => {
               csp: {
                 resourceDomains: [serverUrl],
                 connectDomains: [serverUrl, hmrUrl],
+                baseUriDomains: [serverUrl],
               },
               domain: serverUrl,
+              description: "Test widget",
+              prefersBorder: true,
             },
           },
         },
@@ -395,108 +364,14 @@ describe("McpServer.registerWidget", () => {
     );
   });
 
-  it("should register tool with ui.resourceUri metadata (not deprecated ui/resourceUri)", async () => {
-    const mockToolCallback = vi.fn();
-    const mockRegisterResourceConfig = { description: "Test widget" };
-    const mockToolConfig = { description: "Test tool" };
-
-    server.registerWidget(
-      "my-widget",
-      mockRegisterResourceConfig,
-      mockToolConfig,
-      mockToolCallback,
-    );
-
-    expect(mockRegisterTool).toHaveBeenCalledTimes(1);
-
-    const toolCallArgs = mockRegisterTool.mock.calls[0];
-    const toolConfig = toolCallArgs?.[1] as { _meta?: Record<string, unknown> };
-
-    expect(toolConfig._meta).toHaveProperty("ui");
-    expect(toolConfig._meta?.ui).toEqual({
-      resourceUri: "ui://widgets/ext-apps/my-widget.html",
-    });
-  });
-
-  it("should apply meta overrides in correct priority: defaults < ui.* < direct openai/* keys", async () => {
-    const mockToolCallback = vi.fn();
-    const mockRegisterResourceConfig = {
-      description: "Test widget",
-      _meta: {
-        // ui.csp overrides (middle priority)
-        ui: {
-          csp: {
-            resourceDomains: ["https://from-ui-csp.com"],
-            connectDomains: ["https://from-ui-csp.com"],
-          },
-          domain: "https://from-ui-domain.com",
-          prefersBorder: false,
-        },
-        // Direct openai/* keys (highest priority) - should override ui.*
-        "openai/widgetDomain": "https://direct-override.com",
-        "openai/widgetPrefersBorder": true,
+  it("should register tool with ui.resourceUri metadata", async () => {
+    server.registerTool(
+      {
+        name: "my-widget",
+        description: "Test tool",
+        view: { component: "my-widget", description: "Test widget" },
       },
-    };
-    const mockToolConfig = { description: "Test tool" };
-
-    server.registerWidget(
-      "override-test",
-      mockRegisterResourceConfig,
-      mockToolConfig,
-      mockToolCallback,
-    );
-
-    const appsSdkCallback = mockRegisterResource.mock
-      .calls[0]?.[3] as unknown as (
-      uri: URL,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
-    ) => Promise<{
-      contents: Array<{
-        uri: URL | string;
-        mimeType: string;
-        text?: string;
-        _meta?: Record<string, unknown>;
-      }>;
-    }>;
-    const host = `localhost:3000`;
-    const serverUrl = `http://${host}`;
-    const hmrUrl = `ws://${host}`;
-
-    const result = await appsSdkCallback(
-      new URL("ui://widgets/apps-sdk/override-test.html"),
-      createMockExtra(host) as unknown as RequestHandlerExtra<
-        ServerRequest,
-        ServerNotification
-      >,
-    );
-
-    const meta = result.contents[0]?._meta as Record<string, unknown>;
-
-    // CSP arrays are merged with union - all unique domains from defaults and user config are preserved
-    expect(meta["openai/widgetCSP"]).toEqual({
-      resource_domains: [serverUrl, "https://from-ui-csp.com"],
-      connect_domains: [serverUrl, hmrUrl, "https://from-ui-csp.com"],
-      frame_domains: undefined,
-      redirect_domains: undefined,
-    });
-
-    // Domain should be overridden by direct openai/* key (highest priority)
-    expect(meta["openai/widgetDomain"]).toBe("https://direct-override.com");
-
-    // PrefersBorder should be overridden by direct openai/* key (highest priority)
-    expect(meta["openai/widgetPrefersBorder"]).toBe(true);
-
-    // Description should be from defaults (toolConfig.description)
-    expect(meta["openai/widgetDescription"]).toBe("Test widget");
-  });
-
-  it("should register tool with ui.resourceUri metadata only", async () => {
-    const mockToolCallback = vi.fn();
-    server.registerWidget(
-      "my-widget",
-      { description: "Test widget", hosts: ["mcp-app"] },
-      { description: "Test tool" },
-      mockToolCallback,
+      vi.fn(),
     );
 
     expect(mockRegisterTool).toHaveBeenCalledTimes(1);
@@ -508,7 +383,57 @@ describe("McpServer.registerWidget", () => {
     expect(toolConfig._meta?.ui).toEqual({
       resourceUri: "ui://widgets/ext-apps/my-widget.html",
     });
-    expect(toolConfig._meta?.["openai/outputTemplate"]).to.be.undefined;
+  });
+
+  it("should register tool with openai/outputTemplate when apps-sdk only", async () => {
+    server.registerTool(
+      {
+        name: "my-widget",
+        description: "Test tool",
+        view: {
+          component: "my-widget",
+          description: "Test widget",
+          hosts: ["apps-sdk"],
+        },
+      },
+      vi.fn(),
+    );
+
+    expect(mockRegisterTool).toHaveBeenCalledTimes(1);
+
+    const toolCallArgs = mockRegisterTool.mock.calls[0];
+    const toolConfig = toolCallArgs?.[1] as { _meta?: Record<string, unknown> };
+
+    expect(toolConfig._meta).not.toHaveProperty("ui");
+    expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(
+      "ui://widgets/apps-sdk/my-widget.html",
+    );
+  });
+
+  it("should register tool with ui.resourceUri only when mcp-app only", async () => {
+    server.registerTool(
+      {
+        name: "my-widget",
+        description: "Test tool",
+        view: {
+          component: "my-widget",
+          description: "Test widget",
+          hosts: ["mcp-app"],
+        },
+      },
+      vi.fn(),
+    );
+
+    expect(mockRegisterTool).toHaveBeenCalledTimes(1);
+
+    const toolCallArgs = mockRegisterTool.mock.calls[0];
+    const toolConfig = toolCallArgs?.[1] as { _meta?: Record<string, unknown> };
+
+    expect(toolConfig._meta).toHaveProperty("ui");
+    expect(toolConfig._meta?.ui).toEqual({
+      resourceUri: "ui://widgets/ext-apps/my-widget.html",
+    });
+    expect(toolConfig._meta?.["openai/outputTemplate"]).toBeUndefined();
   });
 
   it("should inject viewUUID into _meta of tool callback results", async () => {
@@ -517,14 +442,15 @@ describe("McpServer.registerWidget", () => {
       structuredContent: { data: "test" },
     });
 
-    server.registerWidget(
-      "my-widget",
-      { description: "Test widget" },
-      { description: "Test tool" },
+    server.registerTool(
+      {
+        name: "my-widget",
+        description: "Test tool",
+        view: { component: "my-widget", description: "Test widget" },
+      },
       mockToolCallback,
     );
 
-    // The registerTool should have been called with a wrapped callback
     const wrappedCallback = mockRegisterTool.mock.calls[0]?.[2] as (
       ...args: unknown[]
     ) => Promise<{ _meta?: Record<string, unknown> }>;
@@ -535,7 +461,6 @@ describe("McpServer.registerWidget", () => {
     expect(result._meta).toBeDefined();
     expect(result._meta?.viewUUID).toBeDefined();
     expect(typeof result._meta?.viewUUID).toBe("string");
-    // UUID v4 format
     expect(result._meta?.viewUUID).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
     );
@@ -548,10 +473,12 @@ describe("McpServer.registerWidget", () => {
       _meta: { requestId: "req-123", cached: true },
     });
 
-    server.registerWidget(
-      "my-widget",
-      { description: "Test widget" },
-      { description: "Test tool" },
+    server.registerTool(
+      {
+        name: "my-widget",
+        description: "Test tool",
+        view: { component: "my-widget", description: "Test widget" },
+      },
       mockToolCallback,
     );
 
@@ -571,10 +498,12 @@ describe("McpServer.registerWidget", () => {
       structuredContent: {},
     });
 
-    server.registerWidget(
-      "my-widget",
-      { description: "Test widget" },
-      { description: "Test tool" },
+    server.registerTool(
+      {
+        name: "my-widget",
+        description: "Test tool",
+        view: { component: "my-widget", description: "Test widget" },
+      },
       mockToolCallback,
     );
 
@@ -587,23 +516,229 @@ describe("McpServer.registerWidget", () => {
     expect(result1._meta?.viewUUID).not.toBe(result2._meta?.viewUUID);
   });
 
-  it("should register tool with uopenai/outputTemplate metadata only", async () => {
-    const mockToolCallback = vi.fn();
-    server.registerWidget(
-      "my-widget",
-      { description: "Test widget", hosts: ["apps-sdk"] },
-      { description: "Test tool" },
+  it("should enforce one-tool-per-widget constraint", () => {
+    server.registerTool(
+      {
+        name: "shake",
+        description: "First tool",
+        view: { component: "magic-8-ball" },
+      },
+      vi.fn(),
+    );
+
+    expect(() => {
+      server.registerTool(
+        {
+          name: "shake-v2",
+          description: "Second tool",
+          view: { component: "magic-8-ball" },
+        },
+        vi.fn(),
+      );
+    }).toThrow(
+      'skybridge: widget "magic-8-ball" is already used by tool "shake"',
+    );
+  });
+
+  it("should normalize string content to ContentBlock array", async () => {
+    const mockToolCallback = vi.fn().mockResolvedValue({
+      content: "Hello world",
+      structuredContent: {},
+    });
+
+    server.registerTool(
+      {
+        name: "string-content",
+        description: "Test tool",
+        view: { component: "string-content" },
+      },
       mockToolCallback,
     );
 
+    const wrappedCallback = mockRegisterTool.mock.calls[0]?.[2] as (
+      ...args: unknown[]
+    ) => Promise<{ content: unknown[] }>;
+    const result = await wrappedCallback({}, {});
+
+    expect(result.content).toEqual([{ type: "text", text: "Hello world" }]);
+  });
+
+  it("should normalize single ContentBlock to array", async () => {
+    const mockToolCallback = vi.fn().mockResolvedValue({
+      content: { type: "text", text: "Single block" },
+      structuredContent: {},
+    });
+
+    server.registerTool(
+      {
+        name: "single-block",
+        description: "Test tool",
+        view: { component: "single-block" },
+      },
+      mockToolCallback,
+    );
+
+    const wrappedCallback = mockRegisterTool.mock.calls[0]?.[2] as (
+      ...args: unknown[]
+    ) => Promise<{ content: unknown[] }>;
+    const result = await wrappedCallback({}, {});
+
+    expect(result.content).toEqual([{ type: "text", text: "Single block" }]);
+  });
+
+  it("should pass through ContentBlock array unchanged", async () => {
+    const blocks = [
+      { type: "text", text: "A" },
+      { type: "text", text: "B" },
+    ];
+    const mockToolCallback = vi.fn().mockResolvedValue({
+      content: blocks,
+      structuredContent: {},
+    });
+
+    server.registerTool(
+      {
+        name: "array-content",
+        description: "Test tool",
+        view: { component: "array-content" },
+      },
+      mockToolCallback,
+    );
+
+    const wrappedCallback = mockRegisterTool.mock.calls[0]?.[2] as (
+      ...args: unknown[]
+    ) => Promise<{ content: unknown[] }>;
+    const result = await wrappedCallback({}, {});
+
+    expect(result.content).toEqual(blocks);
+  });
+
+  it("should register tool without view (no resource registration)", () => {
+    server.registerTool(
+      {
+        name: "plain-tool",
+        description: "No widget",
+      },
+      vi.fn(),
+    );
+
+    expect(mockRegisterResource).not.toHaveBeenCalled();
     expect(mockRegisterTool).toHaveBeenCalledTimes(1);
+  });
+
+  it("should apply view.csp fields to resource _meta", async () => {
+    server.registerTool(
+      {
+        name: "csp-tool",
+        description: "Test tool",
+        view: {
+          component: "csp-tool",
+          description: "Test widget",
+          csp: {
+            connectDomains: ["https://api.example.com"],
+            resourceDomains: ["https://cdn.example.com"],
+          },
+        },
+      },
+      vi.fn(),
+    );
+
+    const appsSdkCallback = mockRegisterResource.mock
+      .calls[0]?.[3] as unknown as (
+      uri: URL,
+      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+    ) => Promise<{
+      contents: Array<{
+        uri: URL | string;
+        mimeType: string;
+        _meta?: Record<string, unknown>;
+      }>;
+    }>;
+
+    const host = "localhost:3000";
+    const serverUrl = `http://${host}`;
+    const hmrUrl = `ws://${host}`;
+    const result = await appsSdkCallback(
+      new URL("ui://widgets/apps-sdk/csp-tool.html"),
+      createMockExtra(host) as unknown as RequestHandlerExtra<
+        ServerRequest,
+        ServerNotification
+      >,
+    );
+
+    const meta = result.contents[0]?._meta as Record<string, unknown>;
+    expect(meta["openai/widgetCSP"]).toEqual({
+      resource_domains: [serverUrl, "https://cdn.example.com"],
+      connect_domains: [serverUrl, hmrUrl, "https://api.example.com"],
+    });
+  });
+
+  it("should let view._meta override framework-computed keys", async () => {
+    server.registerTool(
+      {
+        name: "override-tool",
+        description: "Test tool",
+        view: {
+          component: "override-tool",
+          description: "Test widget",
+          csp: { connectDomains: ["https://api.x.com"] },
+          _meta: {
+            "openai/widgetCSP": {
+              connect_domains: ["https://api.y.com"],
+            },
+          },
+        },
+      },
+      vi.fn(),
+    );
+
+    const appsSdkCallback = mockRegisterResource.mock
+      .calls[0]?.[3] as unknown as (
+      uri: URL,
+      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+    ) => Promise<{
+      contents: Array<{
+        uri: URL | string;
+        mimeType: string;
+        _meta?: Record<string, unknown>;
+      }>;
+    }>;
+
+    const result = await appsSdkCallback(
+      new URL("ui://widgets/apps-sdk/override-tool.html"),
+      createMockExtra("localhost:3000") as unknown as RequestHandlerExtra<
+        ServerRequest,
+        ServerNotification
+      >,
+    );
+
+    const meta = result.contents[0]?._meta as Record<string, unknown>;
+    expect(meta["openai/widgetCSP"]).toEqual({
+      connect_domains: ["https://api.y.com"],
+    });
+  });
+
+  it("should pass user _meta keys through to tool config", () => {
+    server.registerTool(
+      {
+        name: "meta-tool",
+        description: "Test tool",
+        _meta: {
+          "openai/widgetAccessible": true,
+          "openai/toolInvocation/invoking": "Loading...",
+          "acme.com/category": "utility",
+        },
+      },
+      vi.fn(),
+    );
 
     const toolCallArgs = mockRegisterTool.mock.calls[0];
     const toolConfig = toolCallArgs?.[1] as { _meta?: Record<string, unknown> };
 
-    expect(toolConfig._meta).not.toHaveProperty("ui");
-    expect(toolConfig._meta?.["openai/outputTemplate"]).to.eq(
-      "ui://widgets/apps-sdk/my-widget.html",
+    expect(toolConfig._meta?.["openai/widgetAccessible"]).toBe(true);
+    expect(toolConfig._meta?.["openai/toolInvocation/invoking"]).toBe(
+      "Loading...",
     );
+    expect(toolConfig._meta?.["acme.com/category"]).toBe("utility");
   });
 });
