@@ -20,10 +20,23 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs.js";
+import {
+  type InspectorPreferences,
+  useInspectorPreferencesStore,
+} from "@/lib/inspector-preferences-store.js";
 import { useSelectedTool } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { LocaleSelector } from "./locale-selector.js";
 import { ResourceTabContent } from "./resource-tab.js";
+
+const PERSISTED_KEYS = new Set<keyof InspectorPreferences>([
+  "theme",
+  "locale",
+  "displayMode",
+  "maxHeight",
+  "safeArea",
+  "userAgent",
+]);
 
 export const OpenAiInspector = () => {
   const tool = useSelectedTool();
@@ -31,6 +44,7 @@ export const OpenAiInspector = () => {
     tool.name,
   );
   const { setToolData } = useStore();
+  const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
   const resourceUri = tool._meta?.["openai/outputTemplate"] as
     | string
     | undefined;
@@ -45,6 +59,12 @@ export const OpenAiInspector = () => {
           [key]: value,
         },
       });
+      if (PERSISTED_KEYS.has(key as keyof InspectorPreferences)) {
+        setPreference(
+          key as keyof InspectorPreferences,
+          value as InspectorPreferences[keyof InspectorPreferences],
+        );
+      }
     }
   };
 
