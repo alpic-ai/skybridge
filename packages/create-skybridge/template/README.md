@@ -44,17 +44,14 @@ This command starts:
 #### 3. Project structure
 
 ```
-├── server/
-│   └── src/
-│       └── index.ts      # Server entry point
-├── web/
-│   ├── src/
-│   │   ├── widgets/      # React components (one per widget)
-│   │   ├── helpers.ts    # Shared utilities
-│   │   └── index.css     # Global styles
-│   └── vite.config.ts
+├── src/
+│   ├── server.ts         # Server entry point
+│   ├── views/            # React components (one per widget)
+│   ├── components/       # Shared UI components
+│   ├── helpers.ts        # Shared utilities
+│   └── index.css         # Global styles
+├── vite.config.ts
 ├── alpic.json            # Deployment config
-├── nodemon.json          # Dev server config
 └── package.json
 ```
 
@@ -62,16 +59,16 @@ This command starts:
 
 #### 1. Add a new widget
 
-- Register a widget in `server/src/server.ts` with a unique name (e.g., `my-widget`) using [`registerWidget`](https://docs.skybridge.tech/api-reference/register-widget)
-- Create a matching React component at `web/src/widgets/my-widget.tsx`. **The file name must match the widget name exactly**.
+- Register a tool in `src/server.ts` with a unique name (e.g., `my-widget`) using [`registerTool`](https://docs.skybridge.tech/api-reference/register-tool) and a `view` config.
+- Create a matching React component at `src/views/my-widget.tsx`. **The file name must match the widget name exactly**.
 
 #### 2. Edit widgets with Hot Module Replacement (HMR)
 
-Edit and save components in `web/src/widgets/` — changes will appear instantly inside your App.
+Edit and save components in `src/views/` — changes will appear instantly inside your App.
 
 #### 3. Edit server code
 
-Modify files in `server/` and refresh the connection with your testing MCP Client to see the changes.
+Modify files in `src/` and refresh the connection with your testing MCP Client to see the changes.
 
 ### Testing your App
 

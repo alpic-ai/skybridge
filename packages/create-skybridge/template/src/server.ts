@@ -25,27 +25,26 @@ const server = new McpServer(
     version: "0.0.1",
   },
   { capabilities: {} },
-).registerWidget(
-  "magic-8-ball",
+).registerTool(
   {
-    description: "Magic 8 Ball",
-  },
-  {
+    name: "magic-8-ball",
     description: "For fortune-telling or seeking advice.",
     inputSchema: {
       question: z.string().describe("The user question."),
     },
+    view: {
+      component: "magic-8-ball",
+      description: "Magic 8 Ball",
+    },
   },
   async ({ question }) => {
     try {
-      // deterministic answer
       const hash = question
         .split("")
         .reduce((acc, char) => acc + char.charCodeAt(0), 0);
       const answer = Answers[hash % Answers.length];
       return {
         structuredContent: { answer },
-        content: [],
         isError: false,
       };
     } catch (error) {
