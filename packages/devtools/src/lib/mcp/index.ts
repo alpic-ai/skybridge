@@ -7,6 +7,7 @@ import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { AppsSdkContext, CallToolArgs } from "skybridge/web";
 import { useAuthStore } from "@/lib/auth-store.js";
+import { env } from "@/lib/env.js";
 import { getInspectorPreferences } from "@/lib/inspector-preferences-store.js";
 import { useStore } from "@/lib/store.js";
 import { useSelectedToolName } from "../nuqs.js";
@@ -18,7 +19,7 @@ const client = new McpClient();
 let currentAuthProvider: BrowserOAuthProvider | null = null;
 
 const getServerUrl = () => {
-  return `${window.location.origin}/mcp`;
+  return env.VITE_MCP_SERVER_URL;
 };
 
 export async function connectToServer(): Promise<void> {
