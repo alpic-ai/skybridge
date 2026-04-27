@@ -1,51 +1,34 @@
+import { Button } from "@alpic-ai/ui/components/button";
 import { PlugZap } from "lucide-react";
-import {
-  Group,
-  Panel,
-  Separator,
-  useDefaultLayout,
-} from "react-resizable-panels";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { connectToServer, useSelectedToolOrNull } from "@/lib/mcp/index.js";
-import { Button } from "../ui/button.js";
 import { Header } from "./header.js";
-import { Intro } from "./intro.js";
 import { ToolPanel } from "./tool-panel/tool-panel.js";
-import ToolsList from "./tools-list.js";
+import ToolsList from "./tools-list/index.js";
 
 function AppLayout() {
   const selectedTool = useSelectedToolOrNull();
   const { status, requiresAuth } = useAuthStore();
-  const { defaultLayout, onLayoutChange } = useDefaultLayout({
-    id: "skybridge-devtools-tools-list",
-    storage: localStorage,
-  });
 
   const isConnected = status === "authenticated";
 
+  if (!selectedTool) {
+    return <div>No tool screen - Todo</div>;
+  }
+
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-background">
+    <div className="grid h-screen grid-rows-[auto_1fr] gap-3 overflow-hidden bg-background p-3">
       <Header />
       {isConnected ? (
-        <Group
-          orientation="horizontal"
-          className="flex-1 overflow-hidden"
-          defaultLayout={defaultLayout}
-          onLayoutChange={onLayoutChange}
-        >
-          <Panel id="tools-list" minSize="15" maxSize="40">
-            <ToolsList />
-          </Panel>
-          <Separator className="w-px bg-border" />
-          <Panel id="main-content" minSize="30">
-            <div className="flex flex-1 flex-col overflow-hidden relative h-full">
-              {selectedTool ? <ToolPanel /> : <Intro />}
-            </div>
-          </Panel>
-        </Group>
+        <div className="grid min-h-0 grid-cols-[280px_1fr] gap-3">
+          <ToolsList />
+          <main className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <ToolPanel />
+          </main>
+        </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-4">
+        <div className="flex items-center justify-center rounded-2xl border border-border bg-card shadow-sm">
+          <div className="space-y-4 text-center">
             <p className="text-sm text-muted-foreground">
               {status === "connecting"
                 ? "Connecting to server..."
@@ -54,8 +37,8 @@ function AppLayout() {
                   : "Not connected to a server."}
             </p>
             {status !== "connecting" && (
-              <Button variant="outline" size="sm" onClick={connectToServer}>
-                <PlugZap className="h-3.5 w-3.5" />
+              <Button variant="secondary" onClick={connectToServer}>
+                <PlugZap className="size-3.5" />
                 Connect
               </Button>
             )}

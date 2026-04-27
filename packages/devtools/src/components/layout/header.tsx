@@ -1,9 +1,16 @@
-import { ExternalLink, LogOut, PlugZap } from "lucide-react";
+import { Button } from "@alpic-ai/ui/components/button";
+import { cn } from "@alpic-ai/ui/lib/cn";
+import { LogOut } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store.js";
-import { connectToServer, logout, useServerInfo } from "@/lib/mcp/index.js";
+import { logout, useServerInfo } from "@/lib/mcp/index.js";
 import { useSelectedToolName } from "@/lib/nuqs.js";
-import { Button } from "../ui/button.js";
 import { StatusBadge } from "./status-badge.js";
+
+function SkybridgeLogo() {
+  return (
+    <img src="/skybridge.svg" alt="" aria-hidden className={cn("size-5")} />
+  );
+}
 
 export const Header = () => {
   const serverInfo = useServerInfo();
@@ -13,75 +20,44 @@ export const Header = () => {
   const { status, requiresAuth, error } = useAuthStore();
 
   return (
-    <div className="flex flex-col border-b border-border bg-background">
-      <div className="flex h-14 items-center justify-between px-4">
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            className="font-semibold cursor-pointer"
-            onClick={() => {
-              setSelectedTool(null);
-            }}
-          >
-            Skybridge
-          </button>
-          <span className="h-4 w-px bg-border" aria-hidden="true" />
+    <header className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-2.5 shadow-sm">
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setSelectedTool(null)}
+          className="flex cursor-pointer items-center gap-2"
+        >
+          <SkybridgeLogo />
+          <span className="font-semibold">Skybridge</span>
+        </button>
 
-          {name && (
-            <div className="flex items-center gap-4 rounded-md border border-border bg-muted px-2 py-1">
-              <span className="text-xs font-medium text-muted-foreground">
-                {name}
+        {name && (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-0.5 font-mono text-xs text-muted-foreground">
+            {name}
+            {version && (
+              <span className="border-l border-border pl-1.5 text-subtle-foreground">
+                v{version}
               </span>
-              {version && (
-                <span className="text-xs text-muted-foreground">
-                  v{version}
-                </span>
-              )}
-            </div>
-          )}
+            )}
+          </span>
+        )}
 
-          {error && (
-            <span className="text-xs text-red-600 max-w-48 truncate">
-              {error}
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          {requiresAuth && <StatusBadge status={status} />}
-
-          {requiresAuth &&
-            (status === "authenticated" ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  logout();
-                }}
-              >
-                <LogOut className="h-3.5 w-3.5" />
-                Sign out
-              </Button>
-            ) : (
-              <Button variant="outline" size="sm" onClick={connectToServer}>
-                <PlugZap className="h-3.5 w-3.5" />
-                Connect
-              </Button>
-            ))}
-
-          <Button variant="ghost" size="sm" className="h-8 gap-2">
-            <a
-              href="https://docs.skybridge.tech/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2"
-            >
-              Learn more about Skybridge
-              <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-          </Button>
-        </div>
+        {error && (
+          <span className="max-w-48 truncate text-xs text-destructive">
+            {error}
+          </span>
+        )}
       </div>
-    </div>
+
+      <div className="flex items-center gap-2">
+        {requiresAuth && <StatusBadge status={status} />}
+        {requiresAuth && status === "authenticated" && (
+          <Button variant="secondary" onClick={() => logout()}>
+            <LogOut className="size-3.5" />
+            Sign out
+          </Button>
+        )}
+      </div>
+    </header>
   );
 };
