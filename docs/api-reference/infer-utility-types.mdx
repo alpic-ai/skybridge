@@ -89,9 +89,9 @@ type SearchMeta = ToolResponseMetadata<AppType, "search-hotels">;
 // { searchId: string; cached: boolean } | undefined
 ```
 
-## Usage Examples
+## Usage examples
 
-### Type-safe Component Props
+### Type-safe component props
 
 ```typescript
 import type { ToolOutput } from "skybridge/server";
@@ -110,7 +110,7 @@ function HotelList({ hotels }: { hotels: HotelData["hotels"] }) {
 }
 ```
 
-### Type-safe API Wrapper
+### Type-safe API wrapper
 
 ```typescript
 import type { ToolInput, ToolOutput, ToolNames } from "skybridge/server";
@@ -132,7 +132,7 @@ const result = await callServerTool("search-hotels", {
 // result is typed as SearchOutput
 ```
 
-### Conditional Types Based on Tool
+### Conditional types based on tool
 
 ```typescript
 import type { ToolNames, ToolOutput } from "skybridge/server";
@@ -152,7 +152,7 @@ function renderToolResult<T extends ToolNames<AppType>>(
 }
 ```
 
-## How It Works
+## How it works
 
 The type system uses TypeScript's conditional types and mapped types:
 

@@ -1,5 +1,5 @@
 ---
-title: Type Safety
+title: Type safety
 description: "Get end-to-end TypeScript type inference from server to widget with generateHelpers."
 ---
 
@@ -8,7 +8,7 @@ description: "Get end-to-end TypeScript type inference from server to widget wit
 
 **Solution:** `generateHelpers` creates typed hooks from your server type, giving you autocomplete and type checking across the stack. 
 
-## The Challenge
+## The challenge
 
 Without type inference, you duplicate types:
 
@@ -29,7 +29,7 @@ const { callTool } = useCallTool<SearchInput, SearchOutput>("search");
 
 If the server schema changes, the widget types are now wrong.
 
-## The Solution: generateHelpers
+## The solution: generateHelpers
 
 Export your server's type and use `generateHelpers`:
 
@@ -94,7 +94,7 @@ export function SearchWidget() {
 }
 ```
 
-## Method Chaining Requirement
+## Method chaining requirement
 
 <Warning>
 **Required for type inference**
@@ -114,7 +114,7 @@ server.registerWidget("a", {}, {}, async () => ({ structuredContent: {} }));
 server.registerWidget("b", {}, {}, async () => ({ structuredContent: {} }));
 ```
 
-## How It Works
+## How it works
 
 The `$types` property pattern enables cross-package type inference:
 
@@ -146,7 +146,7 @@ function generateHelpers<ServerType>() {
 }
 ```
 
-## Type Utilities
+## Type utilities
 
 Skybridge exports utilities for extracting types:
 
@@ -172,7 +172,7 @@ type SearchOutput = ToolOutput<AppType, "search-hotels">;
 // { hotels: { id: string; name: string }[] }
 ```
 
-## Zod Schema Connection
+## Zod schema connection
 
 The magic comes from Zod schemas. When you define:
 

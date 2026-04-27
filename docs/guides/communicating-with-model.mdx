@@ -1,12 +1,12 @@
 ---
-title: Communicating with the Model
+title: Communicating with the model
 description: "Use data-llm for passive context sync and useSendFollowUpMessage for active communication with the LLM."
 ---
 
 
 To communicate with the model, you can use two channels: passive context sync via `data-llm` and active messages via `useSendFollowUpMessage`.
 
-## Context Sync with data-llm
+## Context sync with data-llm
 
 Describe what the user is seeing so the model understands questions like "Is this one available?":
 
@@ -21,7 +21,7 @@ Describe what the user is seeing so the model understands questions like "Is thi
 
 See [LLM Context Sync](/concepts/llm-context-sync) for details on nesting, best practices, and limitations.
 
-## Sending Messages with useSendFollowUpMessage
+## Sending messages with useSendFollowUpMessage
 
 Let the user ask questions through the widget:
 
@@ -62,7 +62,7 @@ function FlightWidget() {
 
 The message appears in the conversation as if the user typed it, and the model responds naturally.
 
-### Use Cases
+### Use cases
 
 **Quick questions:**
 ```tsx

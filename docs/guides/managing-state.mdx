@@ -1,12 +1,12 @@
 ---
-title: Managing State
+title: Managing state
 description: "Persist widget state across renders with useWidgetState and createStore for local and global state management."
 ---
 
 
 How to persist widget state across renders and re-mounts.
 
-## Decision Tree
+## Decision tree
 
 ```
 What kind of state do you need?
@@ -155,14 +155,14 @@ function CartWidget() {
 }
 ```
 
-### Automatic Persistence
+### Automatic persistence
 
 `createStore` automatically:
 - Syncs state to the host's persistent storage
 - Restores state from the host on load
 - Filters out functions (actions) during serialization
 
-## Comparison Table
+## Comparison table
 
 | Feature | `useWidgetState` | `createStore` |
 |---------|------------------|---------------|
@@ -206,7 +206,7 @@ function ProductListWidget() {
 - `useWidgetState` persists the selection
 - `data-llm` tells the model what the user sees
 
-## When State Persists
+## When state persists
 
 Widget state persists across re-renders, re-mounts, and display mode changes. Skybridge handles the storage mechanism automatically.
 
