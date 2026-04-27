@@ -7,6 +7,7 @@ import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { AppsSdkContext, CallToolArgs } from "skybridge/web";
 import { useAuthStore } from "@/lib/auth-store.js";
+import { getInspectorPreferences } from "@/lib/inspector-preferences-store.js";
 import { useStore } from "@/lib/store.js";
 import { useSelectedToolName } from "../nuqs.js";
 import { queryClient } from "../query-client.js";
@@ -80,28 +81,16 @@ export async function logout(): Promise<void> {
   queryClient.invalidateQueries({ queryKey: ["list-tools"] });
 }
 
-const defaultOpenaiObject: AppsSdkContext = {
-  theme: "light",
-  userAgent: {
-    device: { type: "desktop" },
-    capabilities: { hover: true, touch: false },
-  },
-  locale: "en-US",
-  maxHeight: undefined,
-  displayMode: "inline",
-  safeArea: {
-    insets: {
-      top: 0,
-      bottom: 0,
-      left: 0,
-      right: 0,
-    },
-  },
-  toolInput: {},
-  toolOutput: null,
-  toolResponseMetadata: null,
-  view: { mode: "inline" },
-  widgetState: null,
+const buildInitialOpenaiObject = (): AppsSdkContext => {
+  const preferences = getInspectorPreferences();
+  return {
+    ...preferences,
+    view: { mode: preferences.displayMode },
+    toolInput: {},
+    toolOutput: null,
+    toolResponseMetadata: null,
+    widgetState: null,
+  };
 };
 
 export const useSuspenseTools = () => {
@@ -146,7 +135,7 @@ export const useCallTool = () => {
         openaiRef: null,
         openaiLogs: [],
         openaiObject: {
-          ...defaultOpenaiObject,
+          ...buildInitialOpenaiObject(),
           toolInput: args ?? {},
           toolOutput: response.structuredContent,
           toolResponseMetadata: response.meta ?? null,

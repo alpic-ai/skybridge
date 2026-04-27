@@ -20,6 +20,11 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs.js";
+import {
+  defaultInspectorPreferences,
+  type InspectorPreferences,
+  useInspectorPreferencesStore,
+} from "@/lib/inspector-preferences-store.js";
 import { useSelectedTool } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { LocaleSelector } from "./locale-selector.js";
@@ -31,6 +36,7 @@ export const OpenAiInspector = () => {
     tool.name,
   );
   const { setToolData } = useStore();
+  const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
   const resourceUri = tool._meta?.["openai/outputTemplate"] as
     | string
     | undefined;
@@ -45,6 +51,12 @@ export const OpenAiInspector = () => {
           [key]: value,
         },
       });
+      if (key in defaultInspectorPreferences) {
+        setPreference(
+          key as keyof InspectorPreferences,
+          value as InspectorPreferences[keyof InspectorPreferences],
+        );
+      }
     }
   };
 
