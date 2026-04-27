@@ -57,9 +57,9 @@ Export your server type so it can be imported in your web code:
 export type AppType = typeof server;
 ```
 
-## Quick Start
+## Quick start
 
-### 1. One-Time Setup
+### 1. One-time setup
 
 Create a bridge file that connects your server types to your widgets:
 
@@ -71,7 +71,7 @@ import { generateHelpers } from "skybridge/web";
 export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
 ```
 
-### 2. Use Typed Hooks in Widgets
+### 2. Use typed hooks in widgets
 
 Import and use the typed hooks throughout your app:
 
@@ -111,7 +111,7 @@ export function SearchWidget() {
 const { useCallTool, useToolInfo } = generateHelpers<T>();
 ```
 
-## Type Parameters
+## Type parameters
 
 ### `T`
 

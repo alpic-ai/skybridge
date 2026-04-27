@@ -1,12 +1,12 @@
 ---
-title: Write Once, Run Everywhere
+title: Write once, run everywhere
 sidebarTitle: Write Once, Run Everywhere
 description: "How Skybridge abstracts runtime differences so your apps work across all ChatGPT and MCP Apps hosts."
 ---
 
 Skybridge is designed to be **runtime-agnostic**. Your widget code works the same whether it runs in MCP Apps compatible clients (like Claude, Goose, VSCode) via the MCP ext-apps specification, or in ChatGPT via the Apps SDK.
 
-## The Problem
+## The problem
 
 Different AI runtimes use different APIs to communicate with embedded widgets:
 
@@ -15,7 +15,7 @@ Different AI runtimes use different APIs to communicate with embedded widgets:
 
 Without abstraction, you'd need to write different code for each platform — or lock yourself into one ecosystem.
 
-## Skybridge's Solution
+## Skybridge's solution
 
 Skybridge introduces an **adaptor layer** that normalizes these differences:
 
@@ -63,21 +63,21 @@ These include [useToolInfo](/api-reference/use-tool-info), [useCallTool](/api-re
 ## Benefits
 
 <CardGroup cols={2}>
-  <Card title="Future-Proof" icon="shield">
+  <Card title="Future-proof" icon="shield">
     As new AI platforms adopt MCP, your widgets will work without code changes
   </Card>
-  <Card title="No Vendor Lock-in" icon="unlock">
+  <Card title="No vendor lock-in" icon="unlock">
     Build once, deploy to multiple AI clients: ChatGPT, Claude, Goose, VSCode, and more
   </Card>
-  <Card title="Single Codebase" icon="code">
+  <Card title="Single codebase" icon="code">
     One set of hooks, one mental model, multiple platforms
   </Card>
-  <Card title="Graceful Degradation" icon="stairs">
+  <Card title="Graceful degradation" icon="stairs">
     Platform-specific features degrade gracefully with clear warnings
   </Card>
 </CardGroup>
 
-## Runtime Compatibility
+## Runtime compatibility
 
 Not all features are available on all platforms. See the [API Reference](/api-reference#runtime-compatibility) for a full compatibility matrix.
 

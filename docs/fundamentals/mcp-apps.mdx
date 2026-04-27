@@ -8,7 +8,7 @@ description: "Deep dive into the MCP ext-apps specification: MCP protocol, Skybr
 
 MCP Apps are the portable baseline across hosts (e.g. Claude, Goose, VSCode, and ChatGPT compatibility mode). Skybridge implements the protocol via the `McpAppAdaptor` so you use the same hooks regardless of runtime.
 
-## Widget Rendering Flow
+## Widget rendering flow
 
 Here's what happens when an MCP Apps client renders a widget:
 
@@ -22,7 +22,7 @@ The widget–host connection looks like this:
 
 <img src="/images/mcp-apps-explainer.avif" alt="MCP Apps architecture: MCP Server, MCP Host (ChatGPT, Claude), Host UI with Sandbox and Guest App iframe" style={{ width: "100%", maxWidth: "600px", display: "block", margin: "0 auto" }} />
 
-The Host UI in this diagram designates the MCP Client (Claude, Goose, VSCode, etc.), and the Guest App is your App running in an iframe.
+The Host UI in this diagram designates the MCP client (Claude, Goose, VSCode, etc.), and the Guest App is your App running in an iframe.
 
 ## The MCP ext-apps protocol
 
@@ -49,11 +49,11 @@ Widgets run inside an iframe and talk to the host via the **same [MCP protocol](
 | `ui/notifications/tool-cancelled` | Tool call was cancelled |
 | `ui/notifications/tool-input-partial` | Streaming partial tool arguments (e.g. while the model is still sending) |
 
-## Skybridge Hook Mapping
+## Skybridge hook mapping
 
 Skybridge wraps the MCP ext-apps protocol with the **same React hooks** as the Apps SDK. The `McpAppAdaptor` translates hook usage into the protocol under the hood:
 
-| Protocol | Skybridge Hook | Purpose |
+| Protocol | Skybridge hook | Purpose |
 |----------|----------------|---------|
 | `ui/notifications/tool-input`, `tool-result`, `metadata` | [`useToolInfo()`](/api-reference/use-tool-info) | Access tool input, output, and `_meta` |
 | `ui/update-model-context` | [`useWidgetState()`](/api-reference/use-widget-state), [`data-llm`](/api-reference/data-llm) | Persistent widget state / model context |
@@ -69,7 +69,7 @@ Skybridge wraps the MCP ext-apps protocol with the **same React hooks** as the A
 
 The following [MCP ext-apps protocol methods](https://github.com/modelcontextprotocol/ext-apps) are not yet wrapped by Skybridge hooks:
 
-| Protocol Method | Purpose |
+| Protocol method | Purpose |
 |-----------------|---------|
 | `ui/notifications/tool-input-partial` | Streaming partial tool arguments (e.g. while the model is still sending) |
 | `ui/notifications/tool-cancelled` | Tool call was cancelled |

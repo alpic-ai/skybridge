@@ -207,7 +207,7 @@ const server = new McpServer({ name: "my-app", version: "1.0" }, {})
 // Logs: outer: before → inner: before → handler → outer: after
 ```
 
-## Type Export Pattern
+## Type export pattern
 
 Export the server type for client-side type inference:
 
@@ -221,9 +221,9 @@ const server = new McpServer({ name: "my-app", version: "1.0" }, {})
 export type AppType = typeof server;
 ```
 
-## Method Chaining
+## Method chaining
 
-You **must** use method chaining for type inference to work. See [Type Safety: Method Chaining](/concepts/type-safety#method-chaining-requirement) for details.
+You **must** use method chaining for type inference to work. See [Type safety: method chaining](/concepts/type-safety#method-chaining-requirement) for details.
 
 ## Example
 
@@ -279,7 +279,7 @@ export type AppType = typeof server;
 export default server;
 ```
 
-## Exported Types
+## Exported types
 
 The following middleware types are available from `skybridge/server`:
 

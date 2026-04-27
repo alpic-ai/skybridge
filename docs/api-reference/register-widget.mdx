@@ -101,7 +101,7 @@ The `extra` parameter provides access to:
 - `extra.requestInfo` — HTTP request details (headers, URL)
 - `extra.signal` — Abort signal for cancellation
 
-## Return Value
+## Return value
 
 Returns the server instance for method chaining:
 
@@ -112,9 +112,9 @@ const server = new McpServer(config, {})
   .registerWidget("c", ...); // Chained
 ```
 
-## Response Fields
+## Response fields
 
-The handler returns three fields: `content` (text for the model), `structuredContent` (data for the widget), and `_meta` (optional metadata). See [Data Flow: Response Fields](/concepts/data-flow#response-fields-explained) for details.
+The handler returns three fields: `content` (text for the model), `structuredContent` (data for the widget), and `_meta` (optional metadata). See [Data flow: response fields](/concepts/data-flow#response-fields-explained) for details.
 
 ```typescript
 return {
@@ -128,7 +128,7 @@ return {
 **viewUUID**: Skybridge automatically injects a unique `viewUUID` into `_meta` for every widget tool call. This enables `useWidgetState` and `createStore` to persist state across re-renders in MCP Apps via `localStorage`. You don't need to generate it yourself — any `_meta` you return is preserved alongside the injected `viewUUID`.
 </Info>
 
-## Input Schema
+## Input schema
 
 Define expected inputs with Zod:
 
@@ -156,7 +156,7 @@ Define expected inputs with Zod:
 }
 ```
 
-## Output Schema
+## Output schema
 
 Optional type hints for the output:
 
