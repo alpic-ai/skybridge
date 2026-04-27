@@ -102,6 +102,7 @@ export const Widget = () => {
         }}
         sandbox="allow-scripts allow-same-origin allow-forms"
         title="html-preview"
+        data-testid="tool-widget-iframe"
       />
     </div>
   );

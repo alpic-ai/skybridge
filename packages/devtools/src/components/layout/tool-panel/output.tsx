@@ -25,7 +25,7 @@ export const Output = () => {
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-card">
-      <div className="p-4 overflow-auto">
+      <div className="p-4 overflow-auto" data-testid="tool-response">
         {result.response ? (
           result.response.isError ? (
             <Alert variant="error">

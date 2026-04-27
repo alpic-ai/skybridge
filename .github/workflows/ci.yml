@@ -43,6 +43,58 @@ jobs:
       - name: Run ${{ matrix.name }}
         run: ${{ matrix.command }}
 
+  devtools-e2e:
+    name: Devtools E2E
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build skybridge
+        run: pnpm --filter skybridge build
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+        working-directory: packages/devtools
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm --filter @skybridge/devtools test:e2e:install
+
+      - name: Install Playwright system deps
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm --filter @skybridge/devtools exec playwright install-deps chromium
+
+      - name: Run E2E tests
+        run: pnpm --filter @skybridge/devtools test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: packages/devtools/playwright-report/
+          retention-days: 7
+
   create-skybridge-template:
     name: create-skybridge template
     runs-on: ubuntu-latest
