@@ -26,6 +26,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@alpic-ai/ui": "^1.116.0",
     "@t3-oss/env-core": "^0.13.11",
     "cors": "^2.8.6",
     "express": "^5.2.1",
@@ -62,7 +63,6 @@
     "postcss": "^8.5.8",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-resizable-panels": "^4.8.0",
     "shadcn": "^4.1.1",
     "shiki": "^4.0.2",
     "skybridge": "workspace:*",
