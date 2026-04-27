@@ -278,7 +278,6 @@ export function normalizeContent(
   return [content];
 }
 
-
 // We Omit `registerTool` from the base class at the type level so our
 // unified 2-arg signature can replace the SDK's 3-arg one without an
 // incompatible override.  The runtime prototype chain is unaffected.

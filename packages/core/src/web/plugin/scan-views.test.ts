@@ -31,15 +31,16 @@ describe("discoverViewsSync", () => {
     rmSync(root, { recursive: true, force: true });
   });
 
-   it("picks up flat and dir-index views", () => {
+  it("picks up flat and dir-index views", () => {
     writeFileSync(join(viewsDir, "a.tsx"), DEFAULT_EXPORT);
     mkdirSync(join(viewsDir, "my-view"));
     writeFileSync(join(viewsDir, "my-view/index.tsx"), DEFAULT_EXPORT);
 
-    expect(discoverViewsSync(viewsDir).map((v) => v.name).sort()).toEqual([
-      "a",
-      "my-view",
-    ]);
+    expect(
+      discoverViewsSync(viewsDir)
+        .map((v) => v.name)
+        .sort(),
+    ).toEqual(["a", "my-view"]);
   });
 
   it("throws on duplicate view names (flat + dir-index collision)", () => {
