@@ -22,12 +22,12 @@ import {
 } from "./utils.js";
 
 const mockManifest = {
-  "skybridge:widget:my-widget": {
+  "skybridge:view:my-widget": {
     file: "assets/my-widget-abc123.js",
     name: "my-widget",
     isEntry: true,
   },
-  "skybridge:widget:folder-widget": {
+  "skybridge:view:folder-widget": {
     file: "assets/folder-widget-def456.js",
     name: "folder-widget",
     isEntry: true,
@@ -83,7 +83,7 @@ describe("McpServer.registerTool (unified API)", () => {
         description: "Test tool",
         view: {
           component: "my-widget",
-          description: "Test widget",
+          description: "Test view",
         },
       },
       vi.fn(),
@@ -123,7 +123,7 @@ describe("McpServer.registerTool (unified API)", () => {
               connect_domains: [serverUrl, hmrUrl],
             },
             "openai/widgetDomain": serverUrl,
-            "openai/widgetDescription": "Test widget",
+            "openai/widgetDescription": "Test view",
           },
         },
       ],
@@ -134,7 +134,7 @@ describe("McpServer.registerTool (unified API)", () => {
     );
     expect(result.contents[0]?.text).toContain(`${serverUrl}/@vite/client`);
     expect(result.contents[0]?.text).toContain(
-      `${serverUrl}/_skybridge/widget/my-widget`,
+      `${serverUrl}/_skybridge/view/my-widget`,
     );
   });
 
@@ -147,7 +147,7 @@ describe("McpServer.registerTool (unified API)", () => {
         description: "Test tool",
         view: {
           component: "my-widget",
-          description: "Test widget",
+          description: "Test view",
         },
       },
       vi.fn(),
@@ -185,7 +185,7 @@ describe("McpServer.registerTool (unified API)", () => {
               connect_domains: [serverUrl],
             },
             "openai/widgetDomain": serverUrl,
-            "openai/widgetDescription": "Test widget",
+            "openai/widgetDescription": "Test view",
           },
         },
       ],
@@ -201,14 +201,14 @@ describe("McpServer.registerTool (unified API)", () => {
     expect(result.contents[0]?.text).toContain(`${serverUrl}/assets/style.css`);
   });
 
-  it("should prefer x-alpic-forwarded-url when hashing Claude widget domains", async () => {
+  it("should prefer x-alpic-forwarded-url when hashing Claude view domains", async () => {
     setTestEnv({ NODE_ENV: "production" });
 
     server.registerTool(
       {
         name: "my-widget",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test widget" },
+        view: { component: "my-widget", description: "Test view" },
       },
       vi.fn(),
     );
@@ -253,7 +253,7 @@ describe("McpServer.registerTool (unified API)", () => {
           connectDomains: ["http://localhost:3000"],
           baseUriDomains: ["http://localhost:3000"],
         },
-        description: "Test widget",
+        description: "Test view",
         domain: expectedDomain,
       },
     });
@@ -266,7 +266,7 @@ describe("McpServer.registerTool (unified API)", () => {
         description: "Test tool",
         view: {
           component: "my-widget",
-          description: "Test widget",
+          description: "Test view",
           prefersBorder: true,
         },
       },
@@ -306,7 +306,7 @@ describe("McpServer.registerTool (unified API)", () => {
               connect_domains: [serverUrl, hmrUrl],
             },
             "openai/widgetDomain": serverUrl,
-            "openai/widgetDescription": "Test widget",
+            "openai/widgetDescription": "Test view",
             "openai/widgetPrefersBorder": true,
           },
         },
@@ -352,7 +352,7 @@ describe("McpServer.registerTool (unified API)", () => {
                 baseUriDomains: [serverUrl],
               },
               domain: serverUrl,
-              description: "Test widget",
+              description: "Test view",
               prefersBorder: true,
             },
           },
@@ -369,7 +369,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "my-widget",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test widget" },
+        view: { component: "my-widget", description: "Test view" },
       },
       vi.fn(),
     );
@@ -392,7 +392,7 @@ describe("McpServer.registerTool (unified API)", () => {
         description: "Test tool",
         view: {
           component: "my-widget",
-          description: "Test widget",
+          description: "Test view",
           hosts: ["apps-sdk"],
         },
       },
@@ -417,7 +417,7 @@ describe("McpServer.registerTool (unified API)", () => {
         description: "Test tool",
         view: {
           component: "my-widget",
-          description: "Test widget",
+          description: "Test view",
           hosts: ["mcp-app"],
         },
       },
@@ -446,7 +446,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "my-widget",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test widget" },
+        view: { component: "my-widget", description: "Test view" },
       },
       mockToolCallback,
     );
@@ -477,7 +477,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "my-widget",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test widget" },
+        view: { component: "my-widget", description: "Test view" },
       },
       mockToolCallback,
     );
@@ -502,7 +502,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "my-widget",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test widget" },
+        view: { component: "my-widget", description: "Test view" },
       },
       mockToolCallback,
     );
@@ -516,7 +516,7 @@ describe("McpServer.registerTool (unified API)", () => {
     expect(result1._meta?.viewUUID).not.toBe(result2._meta?.viewUUID);
   });
 
-  it("should enforce one-tool-per-widget constraint", () => {
+  it("should enforce one-tool-per-view constraint", () => {
     server.registerTool(
       {
         name: "shake",
@@ -536,7 +536,7 @@ describe("McpServer.registerTool (unified API)", () => {
         vi.fn(),
       );
     }).toThrow(
-      'skybridge: widget "magic-8-ball" is already used by tool "shake"',
+      'skybridge: view "magic-8-ball" is already used by tool "shake"',
     );
   });
 
@@ -617,7 +617,7 @@ describe("McpServer.registerTool (unified API)", () => {
     server.registerTool(
       {
         name: "plain-tool",
-        description: "No widget",
+        description: "No view",
       },
       vi.fn(),
     );
@@ -633,7 +633,7 @@ describe("McpServer.registerTool (unified API)", () => {
         description: "Test tool",
         view: {
           component: "csp-tool",
-          description: "Test widget",
+          description: "Test view",
           csp: {
             connectDomains: ["https://api.example.com"],
             resourceDomains: ["https://cdn.example.com"],
@@ -680,7 +680,7 @@ describe("McpServer.registerTool (unified API)", () => {
         description: "Test tool",
         view: {
           component: "override-tool",
-          description: "Test widget",
+          description: "Test view",
           csp: { connectDomains: ["https://api.x.com"] },
           _meta: {
             "openai/widgetCSP": {

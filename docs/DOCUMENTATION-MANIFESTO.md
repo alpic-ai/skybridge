@@ -85,14 +85,14 @@ Never assume the reader is already an expert in Skybridge or MCP Apps. When you 
    - **CLI**: Skybridge CLI commands such as create, build, and dev, plus their options.
    - **Server**: server-side APIs for defining the MCP server and registering UI.
      - **McpServer**: the server class, tools, resources, and type export.
-     - **registerTool**: registers a tool — optionally with a `view` config that binds the tool to a React widget (component name, CSP, description).
-   - **Hooks**: React hooks for widget UIs, including data, layout, and actions.
-     - **useToolInfo, useCallTool**: initial tool data and calling tools from the widget.
+     - **registerTool**: registers a tool — optionally with a `view` config that binds the tool to a React view (component name, CSP, description).
+   - **Hooks**: React hooks for view UIs, including data, layout, and actions.
+     - **useToolInfo, useCallTool**: initial tool data and calling tools from the view.
      - **useLayout, useUser, useDisplayMode**: host layout, user or session, and display mode.
      - **useOpenExternal, useSetOpenInAppUrl**: opening URLs and in-app links.
      - **useSendFollowUpMessage**: sending follow-up messages to the conversation.
-     - **useWidgetState**: persistent widget state across renders.
-     - **useRequestModal**: opening the widget in a modal.
+     - **useWidgetState**: persistent view state across renders.
+     - **useRequestModal**: opening the view in a modal.
      - **useFiles**: file upload and download.
    - **Utilities**: helpers and attributes.
      - **createStore**: Zustand-based store creation for shared state.

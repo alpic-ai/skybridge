@@ -1,10 +1,10 @@
 ---
 title: Type Safety
-description: "Get end-to-end TypeScript type inference from server to widget with generateHelpers."
+description: "Get end-to-end TypeScript type inference from server to view with generateHelpers."
 ---
 
 
-**Problem:** Your server defines tool schemas, but your widget has no idea what types to expect. You end up duplicating type definitions or using `any`.
+**Problem:** Your server defines tool schemas, but your view has no idea what types to expect. You end up duplicating type definitions or using `any`.
 
 **Solution:** `generateHelpers` creates typed hooks from your server type, giving you autocomplete and type checking across the stack. 
 
@@ -32,7 +32,7 @@ type SearchOutput = { results: Result[] }; // Duplicated!
 const { callTool } = useCallTool<SearchInput, SearchOutput>("search");
 ```
 
-If the server schema changes, the widget types are now wrong.
+If the server schema changes, the view types are now wrong.
 
 ## The Solution: generateHelpers
 
@@ -163,7 +163,7 @@ function generateHelpers<ServerType>() {
 
 ## Typed `view.component`
 
-The Vite plugin scans `src/views/` and generates `.skybridge/widgets.d.ts`. That file augments an internal `WidgetNameRegistry` interface, narrowing `WidgetName` from `string` to the union of your actual widget file names.
+The Vite plugin scans `src/views/` and generates `.skybridge/views.d.ts`. That file augments an internal `ViewNameRegistry` interface, narrowing `ViewName` from `string` to the union of your actual view file names.
 
 Result: `view.component` autocompletes and typos become compile errors.
 

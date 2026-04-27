@@ -63,12 +63,12 @@ export type ToolDef<
   responseMetadata: TResponseMetadata;
 };
 
-export type WidgetHostType = "apps-sdk" | "mcp-app";
+export type ViewHostType = "apps-sdk" | "mcp-app";
 
 export interface ViewCsp {
   /** Origins for static assets (images, fonts, scripts, styles). */
   resourceDomains?: string[];
-  /** Origins the widget may contact via fetch/XHR. */
+  /** Origins the view may contact via fetch/XHR. */
   connectDomains?: string[];
   /** Origins allowed for iframe embeds (opts into stricter app review). */
   frameDomains?: string[];
@@ -79,19 +79,19 @@ export interface ViewCsp {
 }
 
 // Must be exported: TS module augmentation only merges with exported
-// declarations. Without `export`, `.skybridge/widgets.d.ts` augmentation
-// would create a separate interface and `WidgetName` would stay `string`.
-// biome-ignore lint/suspicious/noEmptyInterface: register pattern — augmented by `.skybridge/widgets.d.ts` to narrow WidgetName
-export interface WidgetNameRegistry {}
+// declarations. Without `export`, `.skybridge/views.d.ts` augmentation
+// would create a separate interface and `ViewName` would stay `string`.
+// biome-ignore lint/suspicious/noEmptyInterface: register pattern — augmented by `.skybridge/views.d.ts` to narrow ViewName
+export interface ViewNameRegistry {}
 
-export type WidgetName = keyof WidgetNameRegistry extends never
+export type ViewName = keyof ViewNameRegistry extends never
   ? string
-  : keyof WidgetNameRegistry & string;
+  : keyof ViewNameRegistry & string;
 
 export interface ViewConfig {
-  component: WidgetName;
+  component: ViewName;
   description?: string;
-  hosts?: WidgetHostType[];
+  hosts?: ViewHostType[];
   prefersBorder?: boolean;
   domain?: string;
   csp?: ViewCsp;
@@ -177,8 +177,8 @@ type McpAppsResourceMeta = {
 
 type ResourceMeta = OpenaiResourceMeta | McpAppsResourceMeta;
 
-type WidgetResourceConfig<T extends ResourceMeta = ResourceMeta> = {
-  hostType: WidgetHostType;
+type ViewResourceConfig<T extends ResourceMeta = ResourceMeta> = {
+  hostType: ViewHostType;
   uri: string;
   mimeType: string;
   buildContentMeta: (
@@ -313,7 +313,7 @@ export class McpServer<
   private customErrorMiddleware: ErrorMiddlewareConfig[] = [];
   private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private mcpMiddlewareApplied = false;
-  private claimedWidgets = new Map<string, string>();
+  private claimedViews = new Map<string, string>();
 
   use(...handlers: RequestHandler[]): this;
   use(path: string, ...handlers: RequestHandler[]): this;
@@ -507,17 +507,17 @@ export class McpServer<
   }
 
   // -------------------------------------------------------------------------
-  // View (widget) resource registration
+  // View resource registration
   // -------------------------------------------------------------------------
 
-  private enforceOneToolPerWidget(component: string, toolName: string): void {
-    const existingTool = this.claimedWidgets.get(component);
+  private enforceOneToolPerView(component: string, toolName: string): void {
+    const existingTool = this.claimedViews.get(component);
     if (existingTool) {
       throw new Error(
-        `skybridge: widget "${component}" is already used by tool "${existingTool}". Tool "${toolName}" cannot also reference it — each widget backs exactly one tool.`,
+        `skybridge: view "${component}" is already used by tool "${existingTool}". Tool "${toolName}" cannot also reference it — each view backs exactly one tool.`,
       );
     }
-    this.claimedWidgets.set(component, toolName);
+    this.claimedViews.set(component, toolName);
   }
 
   private registerViewResources(
@@ -528,7 +528,7 @@ export class McpServer<
     const hosts = view.hosts ?? (["apps-sdk", "mcp-app"] as const);
 
     if (hosts.includes("apps-sdk")) {
-      const widgetConfig: WidgetResourceConfig<OpenaiResourceMeta> = {
+      const viewResource: ViewResourceConfig<OpenaiResourceMeta> = {
         hostType: "apps-sdk",
         uri: `ui://widgets/apps-sdk/${view.component}.html`,
         mimeType: "text/html+skybridge",
@@ -573,16 +573,16 @@ export class McpServer<
           return base;
         },
       };
-      this.registerWidgetResource({
+      this.registerViewResource({
         name: toolName,
-        widgetConfig,
+        viewResource,
         view,
       });
-      toolMeta["openai/outputTemplate"] = widgetConfig.uri;
+      toolMeta["openai/outputTemplate"] = viewResource.uri;
     }
 
     if (hosts.includes("mcp-app")) {
-      const widgetConfig: WidgetResourceConfig<McpAppsResourceMeta> = {
+      const viewResource: ViewResourceConfig<McpAppsResourceMeta> = {
         hostType: "mcp-app",
         uri: `ui://widgets/ext-apps/${view.component}.html`,
         mimeType: "text/html;profile=mcp-app",
@@ -638,36 +638,31 @@ export class McpServer<
           return base;
         },
       };
-      this.registerWidgetResource({
+      this.registerViewResource({
         name: toolName,
-        widgetConfig,
+        viewResource,
         view,
       });
       // @ts-expect-error - For backwards compatibility with Claude current implementation of the specs
-      toolMeta["ui/resourceUri"] = widgetConfig.uri;
-      toolMeta.ui = { resourceUri: widgetConfig.uri };
+      toolMeta["ui/resourceUri"] = viewResource.uri;
+      toolMeta.ui = { resourceUri: viewResource.uri };
     }
   }
 
-  private registerWidgetResource({
+  private registerViewResource({
     name,
-    widgetConfig,
+    viewResource,
     view,
   }: {
     name: string;
-    widgetConfig: WidgetResourceConfig;
+    viewResource: ViewResourceConfig;
     view: ViewConfig;
   }): void {
-    const {
-      hostType,
-      uri: widgetUri,
-      mimeType,
-      buildContentMeta,
-    } = widgetConfig;
+    const { hostType, uri: viewUri, mimeType, buildContentMeta } = viewResource;
 
     this.registerResource(
       name,
-      widgetUri,
+      viewUri,
       { description: view.description },
       async (uri, extra) => {
         const isProduction = process.env.NODE_ENV === "production";
@@ -707,13 +702,13 @@ export class McpServer<
           ? templateHelper.renderProduction({
               hostType,
               serverUrl,
-              widgetFile: this.lookupWidgetFile(view.component),
+              viewFile: this.lookupViewFile(view.component),
               styleFile: this.lookupDistFile("style.css") ?? "",
             })
           : templateHelper.renderDevelopment({
               hostType,
               serverUrl,
-              widgetName: view.component,
+              viewName: view.component,
             });
 
         const connectDomains = [serverUrl];
@@ -785,15 +780,15 @@ export class McpServer<
   // Manifest helpers
   // -------------------------------------------------------------------------
 
-  private lookupWidgetFile(widgetName: string) {
+  private lookupViewFile(viewName: string) {
     const manifest = this.readManifest();
     for (const entry of Object.values(manifest)) {
-      if (entry?.isEntry && entry.name === widgetName && entry.file) {
+      if (entry?.isEntry && entry.name === viewName && entry.file) {
         return entry.file;
       }
     }
     throw new Error(
-      `Widget "${widgetName}" not found in Vite manifest. Did the build complete successfully? Look for an entry with name "${widgetName}" in dist/assets/.vite/manifest.json.`,
+      `View "${viewName}" not found in Vite manifest. Did the build complete successfully? Look for an entry with name "${viewName}" in dist/assets/.vite/manifest.json.`,
     );
   }
 
@@ -856,7 +851,7 @@ export class McpServer<
     const toolMeta: InternalToolMeta = { ...userToolMeta };
 
     if (view) {
-      this.enforceOneToolPerWidget(view.component, name);
+      this.enforceOneToolPerView(view.component, name);
       this.registerViewResources(name, view, toolMeta);
     }
 

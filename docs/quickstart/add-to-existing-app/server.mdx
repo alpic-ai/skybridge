@@ -1,11 +1,11 @@
 ---
 title: Use skybridge/server
-description: "Add widget registration and TypeScript type inference to your existing MCP server with skybridge/server."
+description: "Add view registration and TypeScript type inference to your existing MCP server with skybridge/server."
 ---
 
 # Use skybridge/server
 
-This guide shows you how to add `skybridge/server` to an existing MCP server to enable widget support with full TypeScript type inference.
+This guide shows you how to add `skybridge/server` to an existing MCP server to enable view support with full TypeScript type inference.
 
 ## Prerequisites
 
@@ -33,27 +33,27 @@ import { McpServer } from "skybridge/server";
 
 Keep your existing dependency to @modelcontextprotocol/sdk in your project, skybridge does not replaces it, but depends on it.
 
-Your existing tools, resources, and prompts will continue to work as before. With `skybridge/server`, `registerTool` gains an optional `view` field so you can bind a tool to a React widget in a single call.
+Your existing tools, resources, and prompts will continue to work as before. With `skybridge/server`, `registerTool` gains an optional `view` field so you can bind a tool to a React view in a single call.
 
 ## Project structure
 
-Skybridge uses a flat `src/` layout with widgets in `src/views/`:
+Skybridge uses a flat `src/` layout with views in `src/views/`:
 
 ```
 your-project/
 ├── src/
 │   ├── server.ts             # MCP server entry
 │   └── views/
-│       ├── my-widget.tsx     # Widget component
-│       └── other-widget.tsx
+│       ├── my-view.tsx     # View component
+│       └── other-view.tsx
 ├── vite.config.ts            # Vite + Skybridge plugin
 ├── tsconfig.json
 └── package.json
 ```
 
-### Widget naming convention
+### View naming convention
 
-A widget's file name must match `view.component` in `registerTool` (e.g., `component: "my-widget"` → `src/views/my-widget.tsx`). See [registerTool](/api-reference/register-tool).
+A view's file name must match `view.component` in `registerTool` (e.g., `component: "my-view"` → `src/views/my-view.tsx`). See [registerTool](/api-reference/register-tool).
 
 ## Set up Vite
 
@@ -74,7 +74,7 @@ export default defineConfig({
 });
 ```
 
-The plugin auto-mounts every file in `src/views/` — no `mountWidget` call needed.
+The plugin auto-mounts every file in `src/views/` — no `mountView` call needed.
 
 Make sure `tsconfig.json` picks up the generated types:
 
@@ -84,24 +84,24 @@ Make sure `tsconfig.json` picks up the generated types:
 }
 ```
 
-## Create your first widget
+## Create your first view
 
-Create `src/views/my-widget.tsx` and `export default` a React component:
+Create `src/views/my-view.tsx` and `export default` a React component:
 
 ```tsx
-export default function MyWidget() {
+export default function MyView() {
   return (
     <div>
       <h2>Hello from Skybridge!</h2>
-      <p>Your widget is working!</p>
+      <p>Your view is working!</p>
     </div>
   );
 }
 ```
 
-## Register the widget
+## Register the view
 
-In your server code, register the widget with `registerTool` + `view`:
+In your server code, register the view with `registerTool` + `view`:
 
 ```typescript
 import { McpServer } from "skybridge/server";
@@ -110,10 +110,10 @@ import { z } from "zod";
 const server = new McpServer({ name: "my-app", version: "1.0" }, {})
   .registerTool(
     {
-      name: "my-widget",
-      description: "My first widget",
+      name: "my-view",
+      description: "My first view",
       inputSchema: { message: z.string() },
-      view: { component: "my-widget" }, // must match src/views/my-widget.tsx
+      view: { component: "my-view" }, // must match src/views/my-view.tsx
     },
     async ({ message }) => {
       return { content: message || "Hello World" };
@@ -134,9 +134,9 @@ const app = express();
 const server = new McpServer({ name: "my-app", version: "1.0" }, {})
   .registerTool(
     {
-      name: "my-widget",
+      name: "my-view",
       inputSchema: { message: z.string() },
-      view: { component: "my-widget" },
+      view: { component: "my-view" },
     },
     async ({ message }) => {
       return { content: message };

@@ -1,15 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { hasDefaultExport } from "./validate-widget.js";
+import { hasDefaultExport } from "./validate-view.js";
 
 describe("hasDefaultExport", () => {
   it("detects export default declaration", () => {
-    expect(hasDefaultExport("export default MyWidget;")).toBe(true);
+    expect(hasDefaultExport("export default MyView;")).toBe(true);
   });
 
   it("detects export default function", () => {
-    expect(hasDefaultExport("export default function MyWidget() {}")).toBe(
-      true,
-    );
+    expect(hasDefaultExport("export default function MyView() {}")).toBe(true);
   });
 
   it("detects re-export as default", () => {
@@ -22,8 +20,8 @@ describe("hasDefaultExport", () => {
 
   it("ignores commented-out default exports", () => {
     const code = `
-      // export default MyWidget;
-      /* export default MyWidget; */
+      // export default MyView;
+      /* export default MyView; */
     `;
     expect(hasDefaultExport(code)).toBe(false);
   });

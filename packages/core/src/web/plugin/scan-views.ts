@@ -1,15 +1,15 @@
 import { globSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, isAbsolute, join, parse, resolve } from "node:path";
-import { hasDefaultExport } from "./validate-widget.js";
+import { hasDefaultExport } from "./validate-view.js";
 
-export interface DiscoveredWidget {
+export interface DiscoveredView {
   name: string;
   filePath: string;
 }
 
-export function discoverWidgetsSync(widgetsDir: string): DiscoveredWidget[] {
-  const flatPattern = resolve(widgetsDir, "*.{tsx,jsx}");
-  const dirPattern = resolve(widgetsDir, "*/index.{tsx,jsx}");
+export function discoverViewsSync(viewsDir: string): DiscoveredView[] {
+  const flatPattern = resolve(viewsDir, "*.{tsx,jsx}");
+  const dirPattern = resolve(viewsDir, "*/index.{tsx,jsx}");
 
   const flatFiles = globSync(flatPattern).map((file) => ({
     name: parse(file).name,
@@ -23,38 +23,38 @@ export function discoverWidgetsSync(widgetsDir: string): DiscoveredWidget[] {
 
   // Filter first, then check duplicates — so a barrel file like
   // `views/foo/index.tsx` (no default export) doesn't falsely collide with
-  // a sibling widget at `views/foo.tsx`.
-  const widgets = [...flatFiles, ...dirFiles]
-    .filter((w) => w.name !== "index")
-    .filter((w) =>
-      hasDefaultExport(readFileSync(w.filePath, "utf-8"), w.filePath),
+  // a sibling view at `views/foo.tsx`.
+  const views = [...flatFiles, ...dirFiles]
+    .filter((v) => v.name !== "index")
+    .filter((v) =>
+      hasDefaultExport(readFileSync(v.filePath, "utf-8"), v.filePath),
     );
 
   const nameMap = new Map<string, string[]>();
-  for (const widget of widgets) {
-    const paths = nameMap.get(widget.name) ?? [];
-    paths.push(widget.filePath);
-    nameMap.set(widget.name, paths);
+  for (const view of views) {
+    const paths = nameMap.get(view.name) ?? [];
+    paths.push(view.filePath);
+    nameMap.set(view.name, paths);
   }
 
   for (const [name, paths] of nameMap) {
     if (paths.length > 1) {
       throw new Error(
-        `skybridge: duplicate widget name "${name}" resolved from:\n  - ${paths.join("\n  - ")}\nRename one of the files to avoid the conflict.`,
+        `skybridge: duplicate view name "${name}" resolved from:\n  - ${paths.join("\n  - ")}\nRename one of the files to avoid the conflict.`,
       );
     }
   }
 
-  return widgets;
+  return views;
 }
 
-export function generateWidgetsDts(widgets: DiscoveredWidget[]): string {
-  const entries = widgets.map((w) => `    "${w.name}": true;`).join("\n");
+export function generateViewsDts(views: DiscoveredView[]): string {
+  const entries = views.map((v) => `    "${v.name}": true;`).join("\n");
   return [
     "export {};",
     "",
     'declare module "skybridge/server" {',
-    "  interface WidgetNameRegistry {",
+    "  interface ViewNameRegistry {",
     entries,
     "  }",
     "}",
@@ -62,15 +62,15 @@ export function generateWidgetsDts(widgets: DiscoveredWidget[]): string {
   ].join("\n");
 }
 
-export function writeWidgetsDts(
+export function writeViewsDts(
   projectRoot: string,
-  widgets: DiscoveredWidget[],
+  views: DiscoveredView[],
 ): void {
   const dir = join(projectRoot, ".skybridge");
   mkdirSync(dir, { recursive: true });
 
-  const filePath = join(dir, "widgets.d.ts");
-  const content = generateWidgetsDts(widgets);
+  const filePath = join(dir, "views.d.ts");
+  const content = generateViewsDts(views);
 
   try {
     const existing = readFileSync(filePath, "utf-8");
@@ -84,14 +84,14 @@ export function writeWidgetsDts(
   writeFileSync(filePath, content, "utf-8");
 }
 
-export function scanAndWriteWidgetsDts(
+export function scanAndWriteViewsDts(
   projectRoot?: string,
-  widgetsDir?: string,
+  viewsDir?: string,
 ): void {
   const root = projectRoot ?? process.cwd();
-  const rawDir = widgetsDir ?? "src/views";
+  const rawDir = viewsDir ?? "src/views";
   const resolvedDir = isAbsolute(rawDir) ? rawDir : resolve(root, rawDir);
 
-  const widgets = discoverWidgetsSync(resolvedDir);
-  writeWidgetsDts(root, widgets);
+  const views = discoverViewsSync(resolvedDir);
+  writeViewsDts(root, views);
 }

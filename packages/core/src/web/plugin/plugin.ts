@@ -1,22 +1,22 @@
 import { isAbsolute, resolve } from "node:path";
 import type { Plugin, ViteDevServer } from "vite";
 import {
-  type DiscoveredWidget,
-  discoverWidgetsSync,
-  writeWidgetsDts,
-} from "./scan-widgets.js";
+  type DiscoveredView,
+  discoverViewsSync,
+  writeViewsDts,
+} from "./scan-views.js";
 import { transform as dataLlmTransform } from "./transform-data-llm.js";
-import { hasDefaultExport } from "./validate-widget.js";
+import { hasDefaultExport } from "./validate-view.js";
 
-const VIRTUAL_PREFIX = "/_skybridge/widget/";
-const VIRTUAL_MODULE_PREFIX = "\0skybridge:widget:";
+const VIRTUAL_PREFIX = "/_skybridge/view/";
+const VIRTUAL_MODULE_PREFIX = "\0skybridge:view:";
 
 export interface SkybridgePluginOptions {
-  widgetsDir?: string;
+  viewsDir?: string;
 }
 
-function buildVirtualEntry(widgetFilePath: string): string {
-  const normalized = widgetFilePath.replace(/\\/g, "/");
+function buildVirtualEntry(viewFilePath: string): string {
+  const normalized = viewFilePath.replace(/\\/g, "/");
   return [
     `import { mountWidget } from "skybridge/web";`,
     `import Component from "${normalized}";`,
@@ -25,40 +25,40 @@ function buildVirtualEntry(widgetFilePath: string): string {
   ].join("\n");
 }
 
-function buildWidgetEntryRe(widgetsDir: string): RegExp {
-  const escaped = widgetsDir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function buildViewEntryRe(viewsDir: string): RegExp {
+  const escaped = viewsDir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp(
     `${escaped}\\/(?:[^/]+\\.(?:jsx|tsx)|[^/]+\\/index\\.(?:tsx|jsx))(?:\\?.*)?$`,
   );
 }
 
 export function skybridge(options?: SkybridgePluginOptions): Plugin {
-  const rawWidgetsDir = options?.widgetsDir ?? "src/views";
-  let resolvedWidgetsDir: string;
+  const rawViewsDir = options?.viewsDir ?? "src/views";
+  let resolvedViewsDir: string;
   let projectRoot: string;
-  let widgetMap = new Map<string, DiscoveredWidget>();
-  let widgetEntryRe: RegExp;
+  let viewMap = new Map<string, DiscoveredView>();
+  let viewEntryRe: RegExp;
 
   return {
     name: "skybridge",
     enforce: "pre",
-    // Read by `skybridge build` to resolve widgetsDir before `tsc -b` runs.
-    api: { widgetsDir: rawWidgetsDir },
+    // Read by `skybridge build` to resolve viewsDir before `tsc -b` runs.
+    api: { viewsDir: rawViewsDir },
 
     config(config) {
       projectRoot = config.root || process.cwd();
-      resolvedWidgetsDir = isAbsolute(rawWidgetsDir)
-        ? rawWidgetsDir
-        : resolve(projectRoot, rawWidgetsDir);
-      widgetEntryRe = buildWidgetEntryRe(resolvedWidgetsDir);
+      resolvedViewsDir = isAbsolute(rawViewsDir)
+        ? rawViewsDir
+        : resolve(projectRoot, rawViewsDir);
+      viewEntryRe = buildViewEntryRe(resolvedViewsDir);
 
-      const widgets = discoverWidgetsSync(resolvedWidgetsDir);
-      widgetMap = new Map(widgets.map((w) => [w.name, w]));
-      writeWidgetsDts(projectRoot, widgets);
+      const views = discoverViewsSync(resolvedViewsDir);
+      viewMap = new Map(views.map((v) => [v.name, v]));
+      writeViewsDts(projectRoot, views);
 
       const input: Record<string, string> = {};
-      for (const widget of widgets) {
-        input[widget.name] = `${VIRTUAL_PREFIX}${widget.name}`;
+      for (const view of views) {
+        input[view.name] = `${VIRTUAL_PREFIX}${view.name}`;
       }
 
       return {
@@ -73,16 +73,16 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
             input,
           },
         },
-        // Pre-bundle widget deps at startup so the first tool invocation
+        // Pre-bundle view deps at startup so the first tool invocation
         // doesn't hit Vite's on-demand re-optimization path (which sends
         // `full-reload` over HMR — in our iframe flow the parent host
-        // can't honour a reload, and the widget silently never mounts).
+        // can't honour a reload, and the view silently never mounts).
         optimizeDeps: {
-          // Scan widget files so transitive user deps (zod, tailwind, etc.)
+          // Scan view files so transitive user deps (zod, tailwind, etc.)
           // get pre-bundled at startup.
           entries: [
-            `${resolvedWidgetsDir}/*.{tsx,jsx}`,
-            `${resolvedWidgetsDir}/*/index.{tsx,jsx}`,
+            `${resolvedViewsDir}/*.{tsx,jsx}`,
+            `${resolvedViewsDir}/*/index.{tsx,jsx}`,
           ],
           // Framework deps imported by the synthesized virtual entry.
           // The scanner can't see the virtual module source, so we must
@@ -107,7 +107,7 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
     resolveId(id) {
       if (id.startsWith(VIRTUAL_PREFIX)) {
         const name = id.slice(VIRTUAL_PREFIX.length);
-        if (widgetMap.has(name)) {
+        if (viewMap.has(name)) {
           return `${VIRTUAL_MODULE_PREFIX}${name}`;
         }
       }
@@ -117,38 +117,38 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
     load(id) {
       if (id.startsWith(VIRTUAL_MODULE_PREFIX)) {
         const name = id.slice(VIRTUAL_MODULE_PREFIX.length);
-        const widget = widgetMap.get(name);
-        if (widget) {
-          return buildVirtualEntry(widget.filePath);
+        const view = viewMap.get(name);
+        if (view) {
+          return buildVirtualEntry(view.filePath);
         }
       }
       return null;
     },
 
     configureServer(server: ViteDevServer) {
-      if (!resolvedWidgetsDir) {
+      if (!resolvedViewsDir) {
         const root = server.config.root || process.cwd();
-        resolvedWidgetsDir = isAbsolute(rawWidgetsDir)
-          ? rawWidgetsDir
-          : resolve(root, rawWidgetsDir);
+        resolvedViewsDir = isAbsolute(rawViewsDir)
+          ? rawViewsDir
+          : resolve(root, rawViewsDir);
         projectRoot = root;
-        widgetEntryRe = buildWidgetEntryRe(resolvedWidgetsDir);
+        viewEntryRe = buildViewEntryRe(resolvedViewsDir);
       }
 
-      server.watcher.add(resolvedWidgetsDir);
+      server.watcher.add(resolvedViewsDir);
       const rescan = () => {
         try {
-          const widgets = discoverWidgetsSync(resolvedWidgetsDir);
-          widgetMap = new Map(widgets.map((w) => [w.name, w]));
-          writeWidgetsDts(projectRoot, widgets);
+          const views = discoverViewsSync(resolvedViewsDir);
+          viewMap = new Map(views.map((v) => [v.name, v]));
+          writeViewsDts(projectRoot, views);
         } catch (err) {
-          // discoverWidgetsSync throws on duplicate widget names. Catch so
+          // discoverViewsSync throws on duplicate view names. Catch so
           // chokidar's listener chain doesn't surface it as unhandled and
-          // crash the dev server — previous widgetMap stays active until
+          // crash the dev server — previous viewMap stays active until
           // the user fixes the conflict.
           const message = err instanceof Error ? err.message : String(err);
           server.config.logger.error(
-            `[skybridge] widget rescan failed: ${message}`,
+            `[skybridge] view rescan failed: ${message}`,
           );
         }
       };
@@ -158,12 +158,10 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
     },
 
     async transform(code, id) {
-      if (widgetEntryRe?.test(id)) {
-        if (!hasDefaultExport(code, id)) {
-          this.warn(
-            `Widget file "${id.split("/").pop()}" is missing a default export.`,
-          );
-        }
+      if (viewEntryRe?.test(id) && !hasDefaultExport(code, id)) {
+        this.warn(
+          `View file "${id.split("/").pop()}" is missing a default export.`,
+        );
       }
 
       return await dataLlmTransform(code, id);

@@ -46,7 +46,7 @@ This command starts:
 ```
 ├── src/
 │   ├── server.ts         # Server entry point
-│   ├── views/            # React components (one per widget)
+│   ├── views/            # React components (one per view)
 │   ├── components/       # Shared UI components
 │   ├── helpers.ts        # Shared utilities
 │   └── index.css         # Global styles
@@ -55,14 +55,14 @@ This command starts:
 └── package.json
 ```
 
-### Create your first widget
+### Create your first view
 
-#### 1. Add a new widget
+#### 1. Add a new view
 
-- Register a tool in `src/server.ts` with a unique name (e.g., `my-widget`) using [`registerTool`](https://docs.skybridge.tech/api-reference/register-tool) and a `view` config.
-- Create a matching React component at `src/views/my-widget.tsx`. **The file name must match the widget name exactly**.
+- Register a tool in `src/server.ts` with a unique name (e.g., `my-view`) using [`registerTool`](https://docs.skybridge.tech/api-reference/register-tool) and a `view` config.
+- Create a matching React component at `src/views/my-view.tsx`. **The file name must match the view name exactly**.
 
-#### 2. Edit widgets with Hot Module Replacement (HMR)
+#### 2. Edit views with Hot Module Replacement (HMR)
 
 Edit and save components in `src/views/` — changes will appear instantly inside your App.
 

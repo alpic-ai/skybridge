@@ -4,40 +4,45 @@ import { Box, render, Text } from "ink";
 import { useEffect } from "react";
 import { Header } from "../cli/header.js";
 import { type CommandStep, useExecuteSteps } from "../cli/use-execute-steps.js";
-import { scanAndWriteWidgetsDts } from "../web/plugin/scan-widgets.js";
+import { scanAndWriteViewsDts } from "../web/plugin/scan-views.js";
 
 /**
  * `tsc -b` runs before `vite build`, so the pre-scan can't read the plugin's
- * runtime `widgetsDir`. Loading `vite.config.ts` here keeps `WidgetName`
- * narrowing correct for users with a custom widget dir.
+ * runtime `viewsDir`. Loading `vite.config.ts` here keeps `ViewName`
+ * narrowing correct for users with a custom views dir.
  */
-async function resolveWidgetsDir(root: string): Promise<string | undefined> {
+async function resolveViewsDir(root: string): Promise<string | undefined> {
   const { loadConfigFromFile } = await import("vite");
   const loaded = await loadConfigFromFile(
     { command: "build", mode: "production" },
     undefined,
     root,
   );
-  const raw = (loaded?.config.plugins ?? []) as unknown as unknown[];
-  const plugins: Array<{ name?: string; api?: { widgetsDir?: string } }> = [];
+
+  const isPluginCandidate = (
+    value: unknown,
+  ): value is { name?: string; api?: { viewsDir?: string } } =>
+    typeof value === "object" && value !== null;
+
+  const plugins: Array<{ name?: string; api?: { viewsDir?: string } }> = [];
   const walk = (value: unknown) => {
     if (Array.isArray(value)) {
       value.forEach(walk);
-    } else if (value && typeof value === "object") {
-      plugins.push(value as never);
+    } else if (isPluginCandidate(value)) {
+      plugins.push(value);
     }
   };
-  walk(raw);
-  return plugins.find((p) => p?.name === "skybridge")?.api?.widgetsDir;
+  walk(loaded?.config.plugins ?? []);
+  return plugins.find((p) => p.name === "skybridge")?.api?.viewsDir;
 }
 
 export const commandSteps: CommandStep[] = [
   {
-    label: "Scanning widgets",
+    label: "Scanning views",
     run: async () => {
       const root = process.cwd();
-      const widgetsDir = await resolveWidgetsDir(root);
-      scanAndWriteWidgetsDts(root, widgetsDir);
+      const viewsDir = await resolveViewsDir(root);
+      scanAndWriteViewsDts(root, viewsDir);
     },
   },
   {
@@ -46,13 +51,13 @@ export const commandSteps: CommandStep[] = [
     command: "tsc -b",
   },
   {
-    label: "Building widgets",
+    label: "Building views",
     command: "vite build",
   },
 ];
 
 export default class Build extends Command {
-  static override description = "Build the widgets and MCP server";
+  static override description = "Build the views and MCP server";
   static override examples = ["skybridge build"];
   static override flags = {};
 

@@ -9,8 +9,8 @@ vi.mock("@skybridge/devtools", () => ({
       next()) as RequestHandler,
 }));
 
-vi.mock("./widgetsDevServer.js", () => ({
-  widgetsDevServer: (_httpServer: unknown) =>
+vi.mock("./viewsDevServer.js", () => ({
+  viewsDevServer: (_httpServer: unknown) =>
     ((_req: unknown, _res: unknown, next: () => void) =>
       next()) as RequestHandler,
 }));

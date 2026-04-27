@@ -1,9 +1,9 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { useSyncExternalStore } from "react";
-import type { WidgetHostType } from "../../server/index.js";
+import type { ViewHostType } from "../../server/index.js";
 
 export type SkybridgeProperties = {
-  hostType: WidgetHostType;
+  hostType: ViewHostType;
   serverUrl: string;
 };
 

@@ -1,10 +1,10 @@
 ---
 title: registerTool
-description: "Register an MCP tool — with or without a React widget — in a single unified call."
+description: "Register an MCP tool — with or without a React view — in a single unified call."
 ---
 
 
-Register an MCP tool on the server. Provide a `view` to bind the tool to a React widget; omit `view` for a plain tool with no UI.
+Register an MCP tool on the server. Provide a `view` to bind the tool to a React view; omit `view` for a plain tool with no UI.
 
 ## Signature
 
@@ -15,7 +15,7 @@ server.registerTool(
 ): McpServer
 ```
 
-A single call replaces the previous `registerTool(name, config, handler)` + `registerWidget(name, resourceConfig, toolConfig, handler)` pair.
+A single call replaces the previous `registerTool(name, config, handler)` + `registerView(name, resourceConfig, toolConfig, handler)` pair.
 
 ## Config
 
@@ -27,12 +27,12 @@ type UnifiedToolConfig = {
   inputSchema?: ZodRawShape; // Input validation (Zod)
   outputSchema?: ZodRawShape;// Output type hints (Zod)
   annotations?: ToolAnnotations;
-  view?: ViewConfig;         // ← present = widget-tool, absent = plain tool
+  view?: ViewConfig;         // ← present = view-tool, absent = plain tool
   _meta?: ToolMeta;
 };
 
 type ToolMeta = {
-  // Enable widget-initiated tool calls (see useCallTool)
+  // Enable view-initiated tool calls (see useCallTool)
   "openai/widgetAccessible"?: boolean;
   // Custom status messages
   "openai/toolInvocation/invoking"?: string; // While running
@@ -43,15 +43,15 @@ type ToolMeta = {
 
 ### `view`
 
-Binds the tool to a React widget.
+Binds the tool to a React view.
 
 ```typescript
 type ViewConfig = {
-  component: WidgetName;                   // File name in src/views/ (typed — see below)
-  description?: string;                    // Shown during widget discovery
+  component: ViewName;                   // File name in src/views/ (typed — see below)
+  description?: string;                    // Shown during view discovery
   hosts?: ("apps-sdk" | "mcp-app")[];      // Defaults to both
   prefersBorder?: boolean;                 // Removes the default iframe border when false
-  domain?: string;                         // Custom widget domain
+  domain?: string;                         // Custom view domain
   csp?: {
     resourceDomains?: string[];   // Static assets (images, fonts, scripts)
     connectDomains?: string[];    // Fetch / XHR targets
@@ -73,7 +73,7 @@ type ToolHandler = (
   extra: RequestHandlerExtra,
 ) => Promise<{
   content?: string | ContentBlock | ContentBlock[]; // Text(s) for the model
-  structuredContent?: StructuredData;               // Data for the widget
+  structuredContent?: StructuredData;               // Data for the view
   _meta?: Record<string, unknown>;                  // Response metadata
 }>;
 ```
@@ -107,18 +107,18 @@ Three fields, three audiences:
 | Field | Purpose | Consumed by |
 |-------|---------|-------------|
 | `content` | Text description | The host (shown in conversation) |
-| `structuredContent` | Typed data | Host and widget (`useToolInfo`, `useCallTool`) |
-| `_meta` | Response metadata | Widget only (hidden from the model) |
+| `structuredContent` | Typed data | Host and view (`useToolInfo`, `useCallTool`) |
+| `_meta` | Response metadata | View only (hidden from the model) |
 
 See [Data Flow: Response Fields](/concepts/data-flow#response-fields-explained).
 
 <Info>
-**viewUUID**: Skybridge automatically injects a unique `viewUUID` into `_meta` for every widget tool call. This enables `useWidgetState` and `createStore` to persist state across re-renders in MCP Apps via `localStorage`. Any `_meta` you return is preserved alongside the injected `viewUUID`.
+**viewUUID**: Skybridge automatically injects a unique `viewUUID` into `_meta` for every view tool call. This enables `useWidgetState` and `createStore` to persist state across re-renders in MCP Apps via `localStorage`. Any `_meta` you return is preserved alongside the injected `viewUUID`.
 </Info>
 
 ## Examples
 
-### Widget tool
+### View tool
 
 File `src/views/greeting.tsx` exports the React component. `view.component` matches its file name.
 
@@ -180,7 +180,7 @@ server.registerTool(
     view: {
       component: "weather",
       csp: {
-        // Widget fetches from this API
+        // View fetches from this API
         connectDomains: ["https://api.weather.com"],
       },
     },
@@ -196,7 +196,7 @@ server.registerTool(
 ```
 
 <Tip>
-If your widget makes client-side API calls, add those domains to `connectDomains`. Server-side calls from the handler do not require CSP configuration.
+If your view makes client-side API calls, add those domains to `connectDomains`. Server-side calls from the handler do not require CSP configuration.
 </Tip>
 
 ### With auth context
@@ -254,15 +254,15 @@ return {
 
 You can still return plain `ContentBlock` objects — helpers are opt-in.
 
-## Typed widget names
+## Typed view names
 
-The Vite plugin generates `.skybridge/widgets.d.ts` at dev/build time, augmenting the internal `WidgetNameRegistry` interface. This narrows `WidgetName` from `string` to the union of actual widget file names in `src/views/`.
+The Vite plugin generates `.skybridge/views.d.ts` at dev/build time, augmenting the internal `ViewNameRegistry` interface. This narrows `ViewName` from `string` to the union of actual view file names in `src/views/`.
 
 Upshot: `view.component` autocompletes, and typos become compile-time errors.
 
 ```typescript
 view: {
-  component: "greting", // ← Type error: not a valid WidgetName
+  component: "greting", // ← Type error: not a valid ViewName
 }
 ```
 
@@ -312,7 +312,7 @@ Output schema is primarily for documentation and type inference. Runtime validat
 
 ## CSP & Domains
 
-Widgets run in a sandboxed iframe with strict Content Security Policy. If your widget needs to:
+Views run in a sandboxed iframe with strict Content Security Policy. If your view needs to:
 - **Fetch data from external APIs** → add to `connectDomains`
 - **Load images, fonts, or scripts from CDNs** → add to `resourceDomains`
 - **Embed external iframes** → add to `frameDomains`
@@ -368,6 +368,6 @@ CSP arrays are **merged** (not overridden). Your domains are added to defaults:
 ## Related
 
 - [McpServer](/api-reference/mcp-server) - Server class
-- [useToolInfo](/api-reference/use-tool-info) - Access widget data
+- [useToolInfo](/api-reference/use-tool-info) - Access view data
 - [Data Flow](/concepts/data-flow) - The communication loop
 - [Type Safety](/concepts/type-safety) - End-to-end inference

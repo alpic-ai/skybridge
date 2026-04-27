@@ -12,21 +12,21 @@ Skybridge exports hooks and utilities from `skybridge/web` that work across mult
     Get initial tool input, output and metadata
   </Card>
   <Card title="useWidgetState" icon="floppy-disk" href="/api-reference/use-widget-state">
-    Persist state across widget renders
+    Persist state across view renders
   </Card>
 </CardGroup>
 
 ## Context Sync
 
 <Card title="data-llm" icon="brain" href="/api-reference/data-llm">
-  Sync widget UI state with the model for contextual responses
+  Sync view UI state with the model for contextual responses
 </Card>
 
 ## Utilities
 
 <CardGroup cols={2}>
   <Card title="createStore" icon="box" href="/api-reference/create-store">
-    Create a Zustand store that automatically syncs with widget state
+    Create a Zustand store that automatically syncs with view state
   </Card>
   <Card title="generateHelpers" icon="wand-magic-sparkles" href="/api-reference/generate-helpers">
     Generate fully typed hooks from your MCP server
@@ -43,10 +43,10 @@ Skybridge exports hooks and utilities from `skybridge/web` that work across mult
     Get user information (locale, device type)
   </Card>
   <Card title="useDisplayMode" icon="expand" href="/api-reference/use-display-mode">
-    Get and request widget display mode changes
+    Get and request view display mode changes
   </Card>
   <Card title="useRequestModal" icon="window-maximize" href="/api-reference/use-request-modal">
-    Open a modal portaled outside of the widget iframe
+    Open a modal portaled outside of the view iframe
   </Card>
 </CardGroup>
 
@@ -54,7 +54,7 @@ Skybridge exports hooks and utilities from `skybridge/web` that work across mult
 
 <CardGroup cols={2}>
   <Card title="useCallTool" icon="screwdriver-wrench" href="/api-reference/use-call-tool">
-    Call tools from within a widget
+    Call tools from within a view
   </Card>
   <Card title="useOpenExternal" icon="arrow-up-right-from-square" href="/api-reference/use-open-external">
     Open external links
@@ -111,7 +111,7 @@ Skybridge supports two runtime environments: **Apps SDK** (ChatGPT) and **MCP Ap
 | Hook / Feature | Apps SDK | MCP Apps | Notes |
 |----------------|:--------:|:--------:|-------|
 | [useToolInfo](/api-reference/use-tool-info) | ✅ | ✅ | |
-| [useWidgetState](/api-reference/use-widget-state) | ✅ | ⚠️ | MCP Apps: polyfilled; state doesn't persist across widget renders |
+| [useWidgetState](/api-reference/use-widget-state) | ✅ | ⚠️ | MCP Apps: polyfilled; state doesn't persist across view renders |
 | [data-llm](/api-reference/data-llm) | ✅ | ⚠️ | MCP Apps: polyfilled (same limitation as useWidgetState) |
 | [useCallTool](/api-reference/use-call-tool) | ✅ | ✅ | |
 | [useSendFollowUpMessage](/api-reference/use-send-follow-up-message) | ✅ | ✅ | |

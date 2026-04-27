@@ -30,12 +30,12 @@ export type {
   ToolMeta,
   ViewConfig,
   ViewCsp,
-  WidgetHostType,
-  WidgetName,
-  WidgetNameRegistry,
+  ViewHostType,
+  ViewName,
+  ViewNameRegistry,
 } from "./server.js";
 export {
   McpServer,
   normalizeContent,
 } from "./server.js";
-export { widgetsDevServer } from "./widgetsDevServer.js";
+export { viewsDevServer } from "./viewsDevServer.js";

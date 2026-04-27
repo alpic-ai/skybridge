@@ -60,8 +60,8 @@ export async function createApp({
   if (env !== "production") {
     const { devtoolsStaticServer } = await import("@skybridge/devtools");
     app.use(await devtoolsStaticServer());
-    const { widgetsDevServer } = await import("./widgetsDevServer.js");
-    app.use(await widgetsDevServer(httpServer));
+    const { viewsDevServer } = await import("./viewsDevServer.js");
+    app.use(await viewsDevServer(httpServer));
   }
 
   if (env === "production") {

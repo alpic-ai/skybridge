@@ -30,8 +30,8 @@ export function createTestServer() {
   return new McpServer({ name: "test-app", version: "1.0.0" }, {})
     .registerTool(
       {
-        name: "search-voyage",
-        description: "Search for voyages",
+        name: "search-trip",
+        description: "Search for trips",
         inputSchema: {
           destination: z.string(),
           departureDate: z.string().optional(),
@@ -47,7 +47,7 @@ export function createTestServer() {
           ),
           totalCount: z.number(),
         },
-        view: { component: "search-voyage" },
+        view: { component: "search-trip" },
       },
       async ({ destination }) => {
         return {
@@ -86,11 +86,11 @@ export function createTestServer() {
     )
     .registerTool(
       {
-        name: "no-input-widget",
-        description: "Widget with no input",
+        name: "no-input-view",
+        description: "View with no input",
         inputSchema: {},
         outputSchema: {},
-        view: { component: "no-input-widget" },
+        view: { component: "no-input-view" },
       },
       async () => {
         return {
@@ -101,12 +101,12 @@ export function createTestServer() {
     )
     .registerTool(
       {
-        name: "inferred-output-widget",
-        description: "Widget with output inferred from callback",
+        name: "inferred-output-view",
+        description: "View with output inferred from callback",
         inputSchema: {
           query: z.string(),
         },
-        view: { component: "inferred-output-widget" },
+        view: { component: "inferred-output-view" },
       },
       async ({ query }) => {
         return {
@@ -161,12 +161,12 @@ export function createTestServer() {
     )
     .registerTool(
       {
-        name: "widget-with-metadata",
-        description: "Widget that returns response metadata",
+        name: "view-with-metadata",
+        description: "View that returns response metadata",
         inputSchema: {
           resourceId: z.string(),
         },
-        view: { component: "widget-with-metadata" },
+        view: { component: "view-with-metadata" },
       },
       async ({ resourceId }) => {
         return {
@@ -205,13 +205,13 @@ export function createTestServer() {
     )
     .registerTool(
       {
-        name: "widget-with-mixed-returns",
+        name: "view-with-mixed-returns",
         description:
-          "Widget with mixed return paths (some with _meta, some without)",
+          "View with mixed return paths (some with _meta, some without)",
         inputSchema: {
           shouldSucceed: z.boolean(),
         },
-        view: { component: "widget-with-mixed-returns" },
+        view: { component: "view-with-mixed-returns" },
       },
       async ({ shouldSucceed }) => {
         if (!shouldSucceed) {
@@ -235,15 +235,15 @@ export function createTestServer() {
 export function createMinimalTestServer() {
   return new McpServer({ name: "test-app", version: "1.0.0" }, {}).registerTool(
     {
-      name: "search-voyage",
-      description: "Search for voyages",
+      name: "search-trip",
+      description: "Search for trips",
       inputSchema: {
         destination: z.string(),
       },
       outputSchema: {
         results: z.array(z.object({ id: z.string() })),
       },
-      view: { component: "search-voyage" },
+      view: { component: "search-trip" },
     },
     async ({ destination }) => {
       return {
@@ -276,12 +276,12 @@ export function createInterfaceTestServer() {
     {},
   ).registerTool(
     {
-      name: "interface-widget" as const,
-      description: "Widget with interface-typed output",
+      name: "interface-view" as const,
+      description: "View with interface-typed output",
       inputSchema: {
         id: z.string(),
       },
-      view: { component: "interface-widget" },
+      view: { component: "interface-view" },
     },
     async ({ id }): Promise<InterfaceReturnType> => {
       return {
