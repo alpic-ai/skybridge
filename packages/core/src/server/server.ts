@@ -49,10 +49,6 @@ const mergeWithUnion = <T extends object, S extends object>(
   });
 };
 
-// ---------------------------------------------------------------------------
-// Public types
-// ---------------------------------------------------------------------------
-
 export type ToolDef<
   TInput = unknown,
   TOutput = unknown,
@@ -107,10 +103,6 @@ export interface KnownToolMeta {
 export type ToolMeta = KnownToolMeta & Record<string, unknown>;
 
 export type HandlerContent = string | ContentBlock | ContentBlock[];
-
-// ---------------------------------------------------------------------------
-// Internal types
-// ---------------------------------------------------------------------------
 
 /** @see https://developers.openai.com/apps-sdk/reference#tool-descriptor-parameters */
 type ViteManifestEntry = {
@@ -271,10 +263,6 @@ type ErrorMiddlewareConfig = {
   handlers: ErrorRequestHandler[];
 };
 
-// ---------------------------------------------------------------------------
-// Content normalization
-// ---------------------------------------------------------------------------
-
 export function normalizeContent(
   content: HandlerContent | undefined,
 ): ContentBlock[] {
@@ -290,14 +278,10 @@ export function normalizeContent(
   return [content];
 }
 
-// ---------------------------------------------------------------------------
-// McpServer
-//
+
 // We Omit `registerTool` from the base class at the type level so our
 // unified 2-arg signature can replace the SDK's 3-arg one without an
 // incompatible override.  The runtime prototype chain is unaffected.
-// ---------------------------------------------------------------------------
-
 interface McpServerBaseOmitted
   extends Omit<McpServerBase, "registerTool" | "connect"> {}
 const McpServerBaseOmitted = McpServerBase as unknown as new (
@@ -505,10 +489,6 @@ export class McpServer<
       });
     });
   }
-
-  // -------------------------------------------------------------------------
-  // View resource registration
-  // -------------------------------------------------------------------------
 
   private enforceOneToolPerView(component: string, toolName: string): void {
     const existingTool = this.claimedViews.get(component);
@@ -753,10 +733,6 @@ export class McpServer<
     );
   }
 
-  // -------------------------------------------------------------------------
-  // Handler wrapping
-  // -------------------------------------------------------------------------
-
   private wrapHandler<InputArgs extends ZodRawShapeCompat>(
     cb: ToolHandler<InputArgs>,
     { attachViewUUID }: { attachViewUUID: boolean },
@@ -775,10 +751,6 @@ export class McpServer<
       };
     };
   }
-
-  // -------------------------------------------------------------------------
-  // Manifest helpers
-  // -------------------------------------------------------------------------
 
   private lookupViewFile(viewName: string) {
     const manifest = this.readManifest();
@@ -805,15 +777,6 @@ export class McpServer<
       ),
     );
   }
-
-  // -------------------------------------------------------------------------
-  // registerTool — unified API
-  //
-  // The base class's `registerTool` is omitted from `McpServerBaseOmitted` at
-  // the type level, so these overloads replace the SDK's 3-arg signature
-  // without an incompatible override. The runtime prototype still inherits
-  // the base implementation, which we invoke via `McpServerBase.prototype`.
-  // -------------------------------------------------------------------------
 
   registerTool<
     TName extends string,

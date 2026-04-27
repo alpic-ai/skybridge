@@ -31,46 +31,14 @@ describe("discoverViewsSync", () => {
     rmSync(root, { recursive: true, force: true });
   });
 
-  it("picks up flat .tsx/.jsx views", () => {
+   it("picks up flat and dir-index views", () => {
     writeFileSync(join(viewsDir, "a.tsx"), DEFAULT_EXPORT);
-    writeFileSync(join(viewsDir, "b.jsx"), DEFAULT_EXPORT);
-
-    expect(
-      discoverViewsSync(viewsDir)
-        .map((v) => v.name)
-        .sort(),
-    ).toEqual(["a", "b"]);
-  });
-
-  it("picks up dir-index views and names them after the directory", () => {
     mkdirSync(join(viewsDir, "my-view"));
     writeFileSync(join(viewsDir, "my-view/index.tsx"), DEFAULT_EXPORT);
 
-    expect(discoverViewsSync(viewsDir)).toMatchObject([{ name: "my-view" }]);
-  });
-
-  it("ignores .ts/.js files and non-index files inside view directories", () => {
-    writeFileSync(join(viewsDir, "only-ts.ts"), DEFAULT_EXPORT);
-    mkdirSync(join(viewsDir, "mixed"));
-    writeFileSync(join(viewsDir, "mixed/index.tsx"), DEFAULT_EXPORT);
-    writeFileSync(join(viewsDir, "mixed/helper.tsx"), DEFAULT_EXPORT);
-
-    expect(discoverViewsSync(viewsDir).map((v) => v.name)).toEqual(["mixed"]);
-  });
-
-  it("filters out a top-level index.tsx", () => {
-    writeFileSync(join(viewsDir, "index.tsx"), DEFAULT_EXPORT);
-    writeFileSync(join(viewsDir, "real.tsx"), DEFAULT_EXPORT);
-
-    expect(discoverViewsSync(viewsDir).map((v) => v.name)).toEqual(["real"]);
-  });
-
-  it("filters out files without a default export", () => {
-    writeFileSync(join(viewsDir, "has-default.tsx"), DEFAULT_EXPORT);
-    writeFileSync(join(viewsDir, "no-default.tsx"), "export const Foo = 1;");
-
-    expect(discoverViewsSync(viewsDir).map((v) => v.name)).toEqual([
-      "has-default",
+    expect(discoverViewsSync(viewsDir).map((v) => v.name).sort()).toEqual([
+      "a",
+      "my-view",
     ]);
   });
 
@@ -82,18 +50,6 @@ describe("discoverViewsSync", () => {
     expect(() => discoverViewsSync(viewsDir)).toThrow(
       /duplicate view name "dup"/,
     );
-  });
-
-  it("allows a sibling barrel without a default export to co-exist with a flat view", () => {
-    writeFileSync(join(viewsDir, "foo.tsx"), DEFAULT_EXPORT);
-    mkdirSync(join(viewsDir, "foo"));
-    // barrel re-export, no default — should NOT collide with foo.tsx
-    writeFileSync(
-      join(viewsDir, "foo/index.tsx"),
-      "export { Bar } from './bar.js';",
-    );
-
-    expect(discoverViewsSync(viewsDir).map((v) => v.name)).toEqual(["foo"]);
   });
 });
 

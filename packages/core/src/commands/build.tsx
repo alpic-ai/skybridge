@@ -6,11 +6,6 @@ import { Header } from "../cli/header.js";
 import { type CommandStep, useExecuteSteps } from "../cli/use-execute-steps.js";
 import { scanAndWriteViewsDts } from "../web/plugin/scan-views.js";
 
-/**
- * `tsc -b` runs before `vite build`, so the pre-scan can't read the plugin's
- * runtime `viewsDir`. Loading `vite.config.ts` here keeps `ViewName`
- * narrowing correct for users with a custom views dir.
- */
 async function resolveViewsDir(root: string): Promise<string | undefined> {
   const { loadConfigFromFile } = await import("vite");
   const loaded = await loadConfigFromFile(

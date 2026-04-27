@@ -25,7 +25,7 @@ function buildVirtualEntry(viewFilePath: string): string {
   ].join("\n");
 }
 
-function buildViewEntryRe(viewsDir: string): RegExp {
+function getViewEntryPattern(viewsDir: string): RegExp {
   const escaped = viewsDir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp(
     `${escaped}\\/(?:[^/]+\\.(?:jsx|tsx)|[^/]+\\/index\\.(?:tsx|jsx))(?:\\?.*)?$`,
@@ -37,7 +37,7 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
   let resolvedViewsDir: string;
   let projectRoot: string;
   let viewMap = new Map<string, DiscoveredView>();
-  let viewEntryRe: RegExp;
+  let viewEntryPattern: RegExp;
 
   return {
     name: "skybridge",
@@ -50,7 +50,7 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
       resolvedViewsDir = isAbsolute(rawViewsDir)
         ? rawViewsDir
         : resolve(projectRoot, rawViewsDir);
-      viewEntryRe = buildViewEntryRe(resolvedViewsDir);
+      viewEntryPattern = getViewEntryPattern(resolvedViewsDir);
 
       const views = discoverViewsSync(resolvedViewsDir);
       viewMap = new Map(views.map((v) => [v.name, v]));
@@ -132,7 +132,7 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
           ? rawViewsDir
           : resolve(root, rawViewsDir);
         projectRoot = root;
-        viewEntryRe = buildViewEntryRe(resolvedViewsDir);
+        viewEntryPattern = getViewEntryPattern(resolvedViewsDir);
       }
 
       server.watcher.add(resolvedViewsDir);
@@ -158,7 +158,7 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
     },
 
     async transform(code, id) {
-      if (viewEntryRe?.test(id) && !hasDefaultExport(code, id)) {
+      if (viewEntryPattern?.test(id) && !hasDefaultExport(code, id)) {
         this.warn(
           `View file "${id.split("/").pop()}" is missing a default export.`,
         );

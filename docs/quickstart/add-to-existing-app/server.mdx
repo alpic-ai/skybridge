@@ -33,7 +33,7 @@ import { McpServer } from "skybridge/server";
 
 Keep your existing dependency to @modelcontextprotocol/sdk in your project, skybridge does not replaces it, but depends on it.
 
-Your existing tools, resources, and prompts will continue to work as before. With `skybridge/server`, `registerTool` gains an optional `view` field so you can bind a tool to a React view in a single call.
+Your existing tools, resources, and prompts will continue to work as before. With `skybridge/server`, `registerTool` provides an optional `view` field so you can bind a tool to a React view in a single call.
 
 ## Project structure
 
@@ -53,7 +53,7 @@ your-project/
 
 ### View naming convention
 
-A view's file name must match `view.component` in `registerTool` (e.g., `component: "my-view"` → `src/views/my-view.tsx`). See [registerTool](/api-reference/register-tool).
+A view's file name must match `view.component` in `registerTool`. See [registerTool](/api-reference/register-tool).
 
 ## Set up Vite
 
@@ -74,9 +74,9 @@ export default defineConfig({
 });
 ```
 
-The plugin auto-mounts every file in `src/views/` — no `mountView` call needed.
+The plugin auto-mounts every file in `src/views/`.
 
-Make sure `tsconfig.json` picks up the generated types:
+Make sure `tsconfig.json` includes the generated types:
 
 ```json
 {
@@ -101,7 +101,7 @@ export default function MyView() {
 
 ## Register the view
 
-In your server code, register the view with `registerTool` + `view`:
+In your server code, register the view with `registerTool` and `view`:
 
 ```typescript
 import { McpServer } from "skybridge/server";
