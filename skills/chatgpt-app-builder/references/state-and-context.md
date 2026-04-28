@@ -93,12 +93,30 @@ const [selected, setSelected] = useState(null);
 const [{ selected }, setState] = useWidgetState({ selected: null });
 ```
 
+Rule of thumb:
+- useWidgetState for data that needs to persist
+- useState for data that is ephemeral (e.g. ui state, animation)
+
 ```tsx
 // DON'T: Complex object in data-llm
 <div data-llm={JSON.stringify(cart)}>
 
 // DO: Human-readable summary
 <div data-llm={`Cart: ${cart.length} items, $${total}`}>
+```
+
+```tsx
+// DON'T: data-llm on every item in a list
+{products.map(product => (
+  <div key={product.id} data-llm={`Product: ${product.name}`}>
+    <ProductCard product={product} />
+  </div>
+))}
+
+// DO: One data-llm on the parent summarising the list
+<div data-llm={`Browsing ${products.length} products`}>
+  {products.map(product => <ProductCard key={product.id} product={product} />)}
+</div>
 ```
 
 ## Combined example
