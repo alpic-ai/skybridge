@@ -446,13 +446,17 @@ export class McpServer<
     });
 
     const shutdown = () => {
+      // Drop both handlers so a second signal falls through to Node's default
+      // (force-quit on a second Ctrl+C while drain is hanging).
+      process.off("SIGTERM", shutdown);
+      process.off("SIGINT", shutdown);
       httpServer.close(() => process.exit(0));
       // Force exit if connections don't drain in time so the port is still
       // released promptly (e.g. for nodemon restarts).
-      setTimeout(() => process.exit(1), 3000).unref();
+      setTimeout(() => process.exit(0), 3000).unref();
     };
-    process.once("SIGTERM", shutdown);
-    process.once("SIGINT", shutdown);
+    process.on("SIGTERM", shutdown);
+    process.on("SIGINT", shutdown);
   }
 
   registerWidget<
