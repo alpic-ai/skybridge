@@ -37,8 +37,6 @@ Your existing tools, resources, and prompts will continue to work as before. Wit
 
 ## Project structure
 
-Skybridge uses a flat `src/` layout with views in `src/views/`:
-
 ```
 your-project/
 ├── src/
@@ -50,6 +48,8 @@ your-project/
 ├── tsconfig.json
 └── package.json
 ```
+
+By default views are located in `src/views/`. This is configurable via the `viewsDir` option in the provided Vite plugin.
 
 ### View naming convention
 
@@ -73,8 +73,6 @@ export default defineConfig({
   plugins: [skybridge()],
 });
 ```
-
-The plugin auto-mounts every file in `src/views/`.
 
 Make sure `tsconfig.json` includes the generated types:
 

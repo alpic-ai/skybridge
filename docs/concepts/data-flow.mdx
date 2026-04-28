@@ -41,9 +41,9 @@ Tool responses contain three fields:
 - **`structuredContent`**: Typed JSON data surfaced to your view and the host
 - **`_meta`**: Delivered only to the view and hidden from the model
 
-## Tools vs Views
+## Tools and views
 
-Before diving into the data flow, understand the difference between plain tools and view tools. Both use `registerTool`, differentiated by the optional `view` field:
+Before diving into the data flow, understand the difference between plain tools and tools returning a view. Both use `registerTool`, differentiated by the optional `view` field:
 
 | | `registerTool` (no `view`) | `registerTool` (with `view`) |
 |---|---|---|
@@ -81,7 +81,7 @@ server.registerTool(
 
 ### 1. Tool → View (Initial Hydration)
 
-When the host calls one of your views, it returns `structuredContent` to hydrate the React component:
+When the host calls a tool returning a view, it returns `structuredContent` to hydrate the React component:
 
 **Server:**
 ```typescript

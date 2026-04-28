@@ -161,30 +161,6 @@ function generateHelpers<ServerType>() {
 }
 ```
 
-## Typed `view.component`
-
-The Vite plugin scans `src/views/` and generates `.skybridge/views.d.ts`. That file augments an internal `ViewNameRegistry` interface, narrowing `ViewName` from `string` to the union of your actual view file names.
-
-Result: `view.component` autocompletes and typos become compile errors.
-
-```typescript
-server.registerTool(
-  {
-    name: "search",
-    view: { component: "searhc" }, // ← Type error: not in "search" | "details" | …
-  },
-  handler,
-);
-```
-
-Make sure your `tsconfig.json` includes the generated file:
-
-```json
-{
-  "include": ["src", ".skybridge/**/*.d.ts"]
-}
-```
-
 ## Type Utilities
 
 Skybridge exports utilities for extracting types:

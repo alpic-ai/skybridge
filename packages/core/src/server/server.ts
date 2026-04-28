@@ -234,7 +234,7 @@ type AddTool<
   }
 >;
 
-interface UnifiedToolConfig<TInput extends ZodRawShapeCompat | AnySchema> {
+interface ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> {
   name: string;
   title?: string;
   description?: string;
@@ -782,7 +782,7 @@ export class McpServer<
     InputArgs extends ZodRawShapeCompat,
     TReturn extends { content?: HandlerContent },
   >(
-    config: UnifiedToolConfig<InputArgs> & { name: TName },
+    config: ToolConfig<InputArgs> & { name: TName },
     cb: ToolHandler<InputArgs, TReturn>,
   ): AddTool<
     TTools,
@@ -792,7 +792,7 @@ export class McpServer<
     ExtractMeta<TReturn>
   >;
   registerTool<InputArgs extends ZodRawShapeCompat>(
-    config: UnifiedToolConfig<InputArgs>,
+    config: ToolConfig<InputArgs>,
     cb: ToolHandler<InputArgs>,
   ): this;
   registerTool(...args: unknown[]): unknown {
@@ -805,7 +805,7 @@ export class McpServer<
       return this;
     }
 
-    const config = args[0] as UnifiedToolConfig<ZodRawShapeCompat>;
+    const config = args[0] as ToolConfig<ZodRawShapeCompat>;
     const cb = args[1] as ToolHandler<ZodRawShapeCompat>;
 
     const { name, view, _meta: userToolMeta, ...toolFields } = config;

@@ -18,7 +18,7 @@ const server = new McpServer({ name: "my-app", version: "0.0.1" }, {})
       name: "greeting",
       description: "Greet someone by name.",
       inputSchema: { name: z.string() },
-      view: { component: "greeting", description: "A greeting card" },
+      view: { component: "greeting" },
     },
     async ({ name }) => {
       return { structuredContent: { message: `Hello, ${name}!` } };

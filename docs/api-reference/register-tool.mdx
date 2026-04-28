@@ -1,6 +1,6 @@
 ---
 title: registerTool
-description: "Register an MCP tool — with or without a React view — in a single unified call."
+description: "Register an MCP tool — with or without a React view"
 ---
 
 
@@ -10,17 +10,15 @@ Register an MCP tool on the server. Provide a `view` to bind the tool to a React
 
 ```typescript
 server.registerTool(
-  config: UnifiedToolConfig,
+  config: ToolConfig,
   handler: ToolHandler,
 ): McpServer
 ```
 
-A single call replaces the previous `registerTool(name, config, handler)` + `registerView(name, resourceConfig, toolConfig, handler)` pair.
-
 ## Config
 
 ```typescript
-type UnifiedToolConfig = {
+type ToolConfig = {
   name: string;              // Tool name, exposed to the model
   title?: string;            // Human-readable title
   description?: string;      // Shown to the model
@@ -78,27 +76,12 @@ type ToolHandler = (
 }>;
 ```
 
-`content` can be a plain string, a single `ContentBlock`, or an array — Skybridge normalizes it to an array internally. Use the [content helpers](#content-helpers) to build blocks ergonomically.
+`content` can be a plain string, a single `ContentBlock`, or an array of `ContentBlock`s. See the different [content helpers](#content-helpers) that Skybridge provides.
 
 The `extra` parameter exposes:
 - `extra.authInfo` — populated by auth middleware (e.g. `authInfo.clientId`, `authInfo.extra.email`)
 - `extra.requestInfo` — HTTP request details (headers, URL)
 - `extra.signal` — abort signal for cancellation
-
-## Return Value
-
-Returns the server instance, so calls chain:
-
-```typescript
-const server = new McpServer(config, {})
-  .registerTool({ name: "a", /* … */ }, handlerA)
-  .registerTool({ name: "b", /* … */ }, handlerB)
-  .registerTool({ name: "c", /* … */ }, handlerC);
-```
-
-<Note>
-Method chaining is **required** for type inference. See [Type Safety](/concepts/type-safety#method-chaining-requirement).
-</Note>
 
 ## Response Fields
 
@@ -118,7 +101,7 @@ See [Data Flow: Response Fields](/concepts/data-flow#response-fields-explained).
 
 ## Examples
 
-### View tool
+### Tool with a view
 
 File `src/views/greeting.tsx` exports the React component. `view.component` matches its file name.
 
@@ -143,9 +126,7 @@ const server = new McpServer({ name: "my-app", version: "0.0.1" }, {})
   );
 ```
 
-### Plain tool (no UI)
-
-Omit `view` to register a tool that returns only content to the model:
+### Tool without view
 
 ```typescript
 server.registerTool(
@@ -170,7 +151,6 @@ server.registerTool(
     description: "Show weather for a location.",
     inputSchema: {
       city: z.string(),
-      units: z.enum(["metric", "imperial"]).optional().default("metric"),
     },
     outputSchema: {
       temperature: z.number(),
@@ -179,14 +159,10 @@ server.registerTool(
     },
     view: {
       component: "weather",
-      csp: {
-        // View fetches from this API
-        connectDomains: ["https://api.weather.com"],
-      },
     },
   },
-  async ({ city, units }) => {
-    const weather = await fetchWeather(city, units);
+  async ({ city }) => {
+    const weather = await fetchWeather(city);
     return {
       content: `Current weather in ${city}: ${weather.temperature}°, ${weather.conditions}`,
       structuredContent: weather,
@@ -194,10 +170,6 @@ server.registerTool(
   },
 );
 ```
-
-<Tip>
-If your view makes client-side API calls, add those domains to `connectDomains`. Server-side calls from the handler do not require CSP configuration.
-</Tip>
 
 ### With auth context
 
@@ -212,14 +184,15 @@ server.registerTool(
     view: { component: "user-profile" },
   },
   async ({ userId }, extra) => {
-    const email = extra.authInfo?.extra?.email as string | undefined;
+    const email = extra.authInfo?.extra?.email;
     const user = await getUser(userId);
     if (!user) {
       return {
-        content: `User ${userId} not found`,
-        structuredContent: { error: "not_found", userId },
+        content: "Error: User not found",
+        isError: true,
       };
     }
+
     return {
       content: `Showing profile for ${user.name}`,
       structuredContent: { ...user, viewedBy: email },
@@ -254,26 +227,6 @@ return {
 
 You can still return plain `ContentBlock` objects — helpers are opt-in.
 
-## Typed view names
-
-The Vite plugin generates `.skybridge/views.d.ts` at dev/build time, augmenting the internal `ViewNameRegistry` interface. This narrows `ViewName` from `string` to the union of actual view file names in `src/views/`.
-
-Upshot: `view.component` autocompletes, and typos become compile-time errors.
-
-```typescript
-view: {
-  component: "greting", // ← Type error: not a valid ViewName
-}
-```
-
-Make sure your `tsconfig.json` includes the generated file:
-
-```json
-{
-  "include": ["src", ".skybridge/**/*.d.ts"]
-}
-```
-
 ## Input Schema
 
 Define expected inputs with Zod:
@@ -305,10 +258,6 @@ outputSchema: {
   totalCount: z.number(),
 }
 ```
-
-<Note>
-Output schema is primarily for documentation and type inference. Runtime validation is not enforced.
-</Note>
 
 ## CSP & Domains
 
@@ -354,16 +303,6 @@ server.registerTool(
 | `frameDomains` | Iframe embed origins | `["https://youtube.com"]` |
 | `redirectDomains` | External redirect destinations | `["https://checkout.example.com"]` |
 | `baseUriDomains` | `<base href>` origins (mcp-apps only) | `["https://app.example.com"]` |
-
-### Priority & Merging
-
-CSP arrays are **merged** (not overridden). Your domains are added to defaults:
-
-```typescript
-// Skybridge auto-includes: ["https://your-server.com"]
-// You add: ["https://api.example.com"]
-// Result:  ["https://your-server.com", "https://api.example.com"]
-```
 
 ## Related
 
