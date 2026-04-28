@@ -477,30 +477,30 @@ export class McpServer<
   }
 
   /**
-   * Connect a per-request transport for stateless HTTP handling.
-   *
-   * The MCP SDK's `Protocol` allows only one active transport per instance,
-   * so sharing this `McpServer` across concurrent requests crashes with
-   * "Already connected to a transport". This builds a fresh underlying
-   * `Server` whose request/notification handler maps are shared by reference
-   * with the main server (so user-registered tools, resources, prompts and
-   * any mcpMiddleware-wrapped handlers are reachable) but which owns its own
-   * transport. Discarded once the request completes.
+   * Per-request stateless connect. The SDK's `Protocol` only allows one
+   * transport per instance, so we can't reuse this `McpServer` across
+   * concurrent requests. The SDK's idiomatic fix is a `() => McpServer`
+   * factory, but that would break Skybridge's singleton API — so instead
+   * we build a fresh underlying `Server` per request and share the main
+   * server's handler maps by reference. The cast is unavoidable: there's
+   * no public API to inject handler maps. `getHandlerMaps` validates the
+   * read side and fails fast on SDK field renames.
    */
   async connectStatelessTransport(
     transport: Parameters<typeof McpServerBase.prototype.connect>[0],
   ): Promise<void> {
     this.applyMcpMiddleware();
 
+    const { requestHandlers, notificationHandlers } = getHandlerMaps(
+      this.server,
+    );
     const fresh = new SdkServer(this.serverInfo, this.serverOptions);
-    type HandlerMaps = {
+    const target = fresh as unknown as {
       _requestHandlers: unknown;
       _notificationHandlers: unknown;
     };
-    const main = this.server as unknown as HandlerMaps;
-    const target = fresh as unknown as HandlerMaps;
-    target._requestHandlers = main._requestHandlers;
-    target._notificationHandlers = main._notificationHandlers;
+    target._requestHandlers = requestHandlers;
+    target._notificationHandlers = notificationHandlers;
 
     await fresh.connect(transport);
   }
