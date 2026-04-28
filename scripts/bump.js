@@ -119,11 +119,18 @@ for (const target of targets) {
 
   const pkg = JSON.parse(readFileSync(file, "utf8"));
 
-  if (pkg.dependencies?.skybridge) {
+  if (
+    pkg.dependencies?.skybridge &&
+    !pkg.dependencies.skybridge.startsWith("workspace:")
+  ) {
     pkg.dependencies.skybridge = skybridgeRange;
   }
 
-  if (devtoolsRange && pkg.devDependencies?.["@skybridge/devtools"]) {
+  if (
+    devtoolsRange &&
+    pkg.devDependencies?.["@skybridge/devtools"] &&
+    !pkg.devDependencies["@skybridge/devtools"].startsWith("workspace:")
+  ) {
     pkg.devDependencies["@skybridge/devtools"] = devtoolsRange;
   }
 
