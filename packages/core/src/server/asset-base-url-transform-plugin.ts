@@ -6,7 +6,7 @@ import type { Plugin } from "vite";
  */
 export function assetBaseUrlTransform(code: string): string {
   const assetStringPattern =
-    /(?<!https?:\/\/)(["'`])(\/[^"'`]+\.(svg|png|jpeg|jpg|gif|webp|mp3|mp4|woff|woff2|ttf|eot))\1/g;
+    /(?<!\bfrom\s)(?<!https?:\/\/)(["'`])(\/[^"'`]+\.(svg|png|jpeg|jpg|gif|webp|mp3|mp4|woff|woff2|ttf|eot))\1/g;
 
   code = code.replace(assetStringPattern, (_match, _quote, assetPath) => {
     return `(window.skybridge?.serverUrl ?? "") + "${assetPath}"`;
