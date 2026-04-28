@@ -43,7 +43,7 @@ Tool responses contain three fields:
 
 ## Tools and views
 
-Before diving into the data flow, understand the difference between plain tools and tools returning a view. Both use `registerTool`, differentiated by the optional `view` field:
+Before diving into the data flow, understand the difference between plain tools and tools with a view. Both use `registerTool`, differentiated by the optional `view` field:
 
 | | `registerTool` (no `view`) | `registerTool` (with `view`) |
 |---|---|---|
@@ -61,7 +61,7 @@ server.registerTool(
   },
 );
 
-// View tool: has UI, returns structured data
+// Tool with view: has UI, returns structured data
 server.registerTool(
   {
     name: "chart",

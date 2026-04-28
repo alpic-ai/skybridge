@@ -20,8 +20,8 @@ export const ViewToolMetaButton = () => {
         variant="ghost"
         size="default"
         onClick={() => setMetaDialogOpen(true)}
-        aria-label="View tool metadata"
-        title="View tool metadata"
+        aria-label="View metadata"
+        title="View metadata"
       >
         <InfoIcon className="h-4 w-4" />
         Metadata

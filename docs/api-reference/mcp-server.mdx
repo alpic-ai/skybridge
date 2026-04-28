@@ -220,68 +220,6 @@ const server = new McpServer({ name: "my-app", version: "1.0" }, {})
 export type AppType = typeof server;
 ```
 
-## Method Chaining
-
-You **must** use method chaining for type inference to work. See [Type Safety: Method Chaining](/concepts/type-safety#method-chaining-requirement) for details.
-
-## Example
-
-```typescript
-import { McpServer } from "skybridge/server";
-import { z } from "zod";
-
-const server = new McpServer(
-  { name: "hotel-booking", version: "1.0.0" },
-  {}
-)
-  .registerTool(
-    {
-      name: "search-hotels",
-      description: "Search for hotels",
-      inputSchema: {
-        city: z.string().describe("City to search"),
-        checkIn: z.string().describe("Check-in date"),
-        checkOut: z.string().describe("Check-out date"),
-        guests: z.number().optional().default(2),
-      },
-      outputSchema: {
-        hotels: z.array(z.object({
-          id: z.string(),
-          name: z.string(),
-          price: z.number(),
-          rating: z.number(),
-        })),
-      },
-      view: { component: "search-hotels" },
-    },
-    async ({ city, checkIn, checkOut, guests }) => {
-      const hotels = await searchHotels({ city, checkIn, checkOut, guests });
-      return {
-        content: `Found ${hotels.length} hotels in ${city}`,
-        structuredContent: { hotels },
-      };
-    },
-  )
-  .registerTool(
-    {
-      name: "hotel-details",
-      description: "Get hotel details",
-      inputSchema: { hotelId: z.string() },
-      view: { component: "hotel-details" },
-    },
-    async ({ hotelId }) => {
-      const hotel = await getHotel(hotelId);
-      return {
-        content: `Showing details for ${hotel.name}`,
-        structuredContent: hotel,
-      };
-    },
-  );
-
-export type AppType = typeof server;
-export default server;
-```
-
 ## Exported Types
 
 The following middleware types are available from `skybridge/server`:
