@@ -434,7 +434,7 @@ export class McpServer<
     }
 
     httpServer.on("request", this.express);
-    return new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       httpServer.on("error", (error: Error) => {
         console.error("Failed to start server:", error);
         reject(error);
@@ -444,6 +444,15 @@ export class McpServer<
         resolve();
       });
     });
+
+    const shutdown = () => {
+      httpServer.close(() => process.exit(0));
+      // Force exit if connections don't drain in time so the port is still
+      // released promptly (e.g. for nodemon restarts).
+      setTimeout(() => process.exit(1), 3000).unref();
+    };
+    process.once("SIGTERM", shutdown);
+    process.once("SIGINT", shutdown);
   }
 
   registerWidget<
