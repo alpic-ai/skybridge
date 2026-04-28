@@ -63,6 +63,7 @@ describe("McpServer.registerWidget", () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+    vi.resetAllMocks();
     resetTestEnv();
   });
 
@@ -588,6 +589,9 @@ describe("McpServer.registerWidget", () => {
   });
 
   it("should register tool with uopenai/outputTemplate metadata only", async () => {
+    const now = Date.now();
+    vi.spyOn(Date, "now").mockReturnValue(now);
+
     const mockToolCallback = vi.fn();
     server.registerWidget(
       "my-widget",
@@ -603,7 +607,7 @@ describe("McpServer.registerWidget", () => {
 
     expect(toolConfig._meta).not.toHaveProperty("ui");
     expect(toolConfig._meta?.["openai/outputTemplate"]).to.eq(
-      "ui://widgets/apps-sdk/my-widget.html",
+      `ui://widgets/apps-sdk/my-widget.html?v=${now}`,
     );
   });
 });
