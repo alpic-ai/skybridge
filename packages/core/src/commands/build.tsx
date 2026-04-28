@@ -43,7 +43,7 @@ export const commandSteps: CommandStep[] = [
   {
     label: "Compiling server",
     run: () => rmSync("dist", { recursive: true, force: true }),
-    command: "tsc -b",
+    command: "tsc -b --force",
   },
   {
     label: "Building views",

@@ -506,10 +506,15 @@ export class McpServer<
   ): void {
     const hosts = view.hosts ?? (["apps-sdk", "mcp-app"] as const);
 
+    // Append a content-derived version param so hosts (e.g. ChatGPT) bust
+    // their cache when the bundle changes, but keep the URI stable across
+    // `tools/list` calls when the bundle hasn't changed.
+    const versionParam = this.computeViewVersionParam(view.component);
+
     if (hosts.includes("apps-sdk")) {
       const viewResource: ViewResourceConfig<OpenaiResourceMeta> = {
         hostType: "apps-sdk",
-        uri: `ui://widgets/apps-sdk/${view.component}.html`,
+        uri: `ui://widgets/apps-sdk/${view.component}.html${versionParam}`,
         mimeType: "text/html+skybridge",
         buildContentMeta: (
           { resourceDomains, connectDomains, domain },
@@ -563,7 +568,7 @@ export class McpServer<
     if (hosts.includes("mcp-app")) {
       const viewResource: ViewResourceConfig<McpAppsResourceMeta> = {
         hostType: "mcp-app",
-        uri: `ui://widgets/ext-apps/${view.component}.html`,
+        uri: `ui://widgets/ext-apps/${view.component}.html${versionParam}`,
         mimeType: "text/html;profile=mcp-app",
         buildContentMeta: (
           { resourceDomains, connectDomains, domain, baseUriDomains },
@@ -749,6 +754,26 @@ export class McpServer<
         }),
       };
     };
+  }
+
+  private computeViewVersionParam(viewName: string): string {
+    if (process.env.NODE_ENV !== "production") {
+      return "";
+    }
+    try {
+      const viewFile = this.lookupViewFile(viewName);
+      const styleFile = this.lookupDistFile("style.css") ?? "";
+      const hash = crypto
+        .createHash("sha256")
+        .update(viewFile)
+        .update("\0")
+        .update(styleFile)
+        .digest("hex")
+        .slice(0, 8);
+      return `?v=${hash}`;
+    } catch {
+      return "";
+    }
   }
 
   private lookupViewFile(viewName: string) {

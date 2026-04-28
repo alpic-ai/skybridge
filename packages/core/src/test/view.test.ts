@@ -35,6 +35,19 @@ const mockManifest = {
   "style.css": { file: "style.css" },
 };
 
+// Mirrors `McpServer.computeViewVersionParam`. Tests recompute the expected
+// hash from the mocked manifest so they don't hardcode digest output.
+function expectedVersionParam(viewFile: string, styleFile: string): string {
+  const hash = crypto
+    .createHash("sha256")
+    .update(viewFile)
+    .update("\0")
+    .update(styleFile)
+    .digest("hex")
+    .slice(0, 8);
+  return `?v=${hash}`;
+}
+
 const actual = vi.hoisted(() => require("node:fs"));
 
 vi.mock("node:fs", () => {
@@ -168,15 +181,16 @@ describe("McpServer.registerTool (unified API)", () => {
       ServerRequest,
       ServerNotification
     >;
+    const versionedUri = `ui://widgets/apps-sdk/my-widget.html${expectedVersionParam("assets/my-widget-abc123.js", "style.css")}`;
     const result = await appsSdkResourceCallback(
-      new URL("ui://widgets/apps-sdk/my-widget.html"),
+      new URL(versionedUri),
       mockExtra,
     );
 
     expect(result).toEqual({
       contents: [
         {
-          uri: "ui://widgets/apps-sdk/my-widget.html",
+          uri: versionedUri,
           mimeType: "text/html+skybridge",
           text: expect.stringContaining('<div id="root"></div>'),
           _meta: {
@@ -236,7 +250,9 @@ describe("McpServer.registerTool (unified API)", () => {
       .slice(0, 32)}.claudemcpcontent.com`;
 
     const result = await extAppsResourceCallback(
-      new URL("ui://widgets/ext-apps/my-widget.html"),
+      new URL(
+        `ui://widgets/ext-apps/my-widget.html${expectedVersionParam("assets/my-widget-abc123.js", "style.css")}`,
+      ),
       createMockExtra("localhost:3000", {
         headers: {
           "user-agent": "Claude-User",
@@ -407,6 +423,122 @@ describe("McpServer.registerTool (unified API)", () => {
     expect(toolConfig._meta).not.toHaveProperty("ui");
     expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(
       "ui://widgets/apps-sdk/my-widget.html",
+    );
+  });
+
+  it("should not version view URIs in development", () => {
+    server.registerTool(
+      {
+        name: "my-widget",
+        description: "Test tool",
+        view: { component: "my-widget", description: "Test view" },
+      },
+      vi.fn(),
+    );
+
+    const toolConfig = mockRegisterTool.mock.calls[0]?.[1] as {
+      _meta?: Record<string, unknown> & { ui?: { resourceUri?: string } };
+    };
+
+    expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(
+      "ui://widgets/apps-sdk/my-widget.html",
+    );
+    expect(toolConfig._meta?.ui?.resourceUri).toBe(
+      "ui://widgets/ext-apps/my-widget.html",
+    );
+    // The URI registered with the resource handler must match the URI in
+    // outputTemplate exactly so the SDK can resolve `resources/read` requests.
+    expect(mockRegisterResource.mock.calls[0]?.[1]).toBe(
+      "ui://widgets/apps-sdk/my-widget.html",
+    );
+    expect(mockRegisterResource.mock.calls[1]?.[1]).toBe(
+      "ui://widgets/ext-apps/my-widget.html",
+    );
+  });
+
+  it("should append a stable content hash to view URIs in production", () => {
+    setTestEnv({ NODE_ENV: "production" });
+
+    server.registerTool(
+      {
+        name: "my-widget",
+        description: "Test tool",
+        view: { component: "my-widget", description: "Test view" },
+      },
+      vi.fn(),
+    );
+
+    const expected = expectedVersionParam(
+      "assets/my-widget-abc123.js",
+      "style.css",
+    );
+    const toolConfig = mockRegisterTool.mock.calls[0]?.[1] as {
+      _meta?: Record<string, unknown> & { ui?: { resourceUri?: string } };
+    };
+
+    expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(
+      `ui://widgets/apps-sdk/my-widget.html${expected}`,
+    );
+    expect(toolConfig._meta?.ui?.resourceUri).toBe(
+      `ui://widgets/ext-apps/my-widget.html${expected}`,
+    );
+    expect(mockRegisterResource.mock.calls[0]?.[1]).toBe(
+      `ui://widgets/apps-sdk/my-widget.html${expected}`,
+    );
+    expect(mockRegisterResource.mock.calls[1]?.[1]).toBe(
+      `ui://widgets/ext-apps/my-widget.html${expected}`,
+    );
+  });
+
+  it("should produce different version params for views with different bundles", () => {
+    setTestEnv({ NODE_ENV: "production" });
+
+    server.registerTool(
+      {
+        name: "my-widget",
+        description: "First tool",
+        view: { component: "my-widget" },
+      },
+      vi.fn(),
+    );
+    server.registerTool(
+      {
+        name: "folder-widget",
+        description: "Second tool",
+        view: { component: "folder-widget" },
+      },
+      vi.fn(),
+    );
+
+    const myWidgetTemplate = (
+      mockRegisterTool.mock.calls[0]?.[1] as { _meta?: Record<string, unknown> }
+    )._meta?.["openai/outputTemplate"];
+    const folderWidgetTemplate = (
+      mockRegisterTool.mock.calls[1]?.[1] as { _meta?: Record<string, unknown> }
+    )._meta?.["openai/outputTemplate"];
+
+    expect(myWidgetTemplate).not.toEqual(folderWidgetTemplate);
+    expect(myWidgetTemplate).toMatch(/\?v=[0-9a-f]{8}$/);
+    expect(folderWidgetTemplate).toMatch(/\?v=[0-9a-f]{8}$/);
+  });
+
+  it("should fall back to bare URI in production when manifest is missing", () => {
+    setTestEnv({ NODE_ENV: "production" });
+
+    server.registerTool(
+      {
+        name: "unknown-widget",
+        description: "Test tool",
+        view: { component: "unknown-widget" },
+      },
+      vi.fn(),
+    );
+
+    const toolConfig = mockRegisterTool.mock.calls[0]?.[1] as {
+      _meta?: Record<string, unknown>;
+    };
+    expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(
+      "ui://widgets/apps-sdk/unknown-widget.html",
     );
   });
 
