@@ -1,10 +1,10 @@
 ---
 title: Type Safety
-description: "Get end-to-end TypeScript type inference from server to widget with generateHelpers."
+description: "Get end-to-end TypeScript type inference from server to view with generateHelpers."
 ---
 
 
-**Problem:** Your server defines tool schemas, but your widget has no idea what types to expect. You end up duplicating type definitions or using `any`.
+**Problem:** Your server defines tool schemas, but your view has no idea what types to expect. You end up duplicating type definitions or using `any`.
 
 **Solution:** `generateHelpers` creates typed hooks from your server type, giving you autocomplete and type checking across the stack. 
 
@@ -13,21 +13,26 @@ description: "Get end-to-end TypeScript type inference from server to widget wit
 Without type inference, you duplicate types:
 
 ```typescript
-// server/src/index.ts
-server.registerWidget("search", {}, {
-  inputSchema: { query: z.string(), limit: z.number() },
-}, async ({ query, limit }) => {
-  // ...
-});
+// src/server.ts
+server.registerTool(
+  {
+    name: "search",
+    inputSchema: { query: z.string(), limit: z.number() },
+    view: { component: "search" },
+  },
+  async ({ query, limit }) => {
+    // ...
+  },
+);
 
-// web/src/widgets/search.tsx
+// src/views/search.tsx
 type SearchInput = { query: string; limit: number }; // Duplicated!
 type SearchOutput = { results: Result[] }; // Duplicated!
 
 const { callTool } = useCallTool<SearchInput, SearchOutput>("search");
 ```
 
-If the server schema changes, the widget types are now wrong.
+If the server schema changes, the view types are now wrong.
 
 ## The Solution: generateHelpers
 
@@ -36,29 +41,39 @@ Export your server's type and use `generateHelpers`:
 **Step 1: Export the server type**
 
 ```typescript
-// server/src/index.ts
+// src/server.ts
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
 const server = new McpServer({ name: "my-app", version: "1.0" }, {})
-  .registerWidget("search-hotels", {}, {
-    inputSchema: {
-      city: z.string(),
-      checkIn: z.string(),
+  .registerTool(
+    {
+      name: "search-hotels",
+      inputSchema: {
+        city: z.string(),
+        checkIn: z.string(),
+      },
+      outputSchema: {
+        hotels: z.array(z.object({ id: z.string(), name: z.string() })),
+      },
+      view: { component: "search-hotels" },
     },
-    outputSchema: {
-      hotels: z.array(z.object({ id: z.string(), name: z.string() })),
+    async ({ city, checkIn }) => {
+      const hotels = await searchHotels(city, checkIn);
+      return { structuredContent: { hotels } };
     },
-  }, async ({ city, checkIn }) => {
-    const hotels = await searchHotels(city, checkIn);
-    return { structuredContent: { hotels } };
-  })
-  .registerWidget("hotel-details", {}, {
-    inputSchema: { hotelId: z.string() },
-  }, async ({ hotelId }) => {
-    const hotel = await getHotel(hotelId);
-    return { structuredContent: hotel };
-  });
+  )
+  .registerTool(
+    {
+      name: "hotel-details",
+      inputSchema: { hotelId: z.string() },
+      view: { component: "hotel-details" },
+    },
+    async ({ hotelId }) => {
+      const hotel = await getHotel(hotelId);
+      return { structuredContent: hotel };
+    },
+  );
 
 // Export the type
 export type AppType = typeof server;
@@ -67,8 +82,8 @@ export type AppType = typeof server;
 **Step 2: Generate typed hooks**
 
 ```typescript
-// web/src/helpers.ts
-import type { AppType } from "../../server/src/index";
+// src/helpers.ts
+import type { AppType } from "./server";
 import { generateHelpers } from "skybridge/web";
 
 export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
@@ -77,10 +92,10 @@ export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
 **Step 3: Use typed hooks**
 
 ```tsx
-// web/src/widgets/search.tsx
-import { useCallTool } from "../skybridge";
+// src/views/search-hotels.tsx
+import { useCallTool } from "../helpers";
 
-export function SearchWidget() {
+export default function SearchHotels() {
   const { callTool, data } = useCallTool("search-hotels");
   //                                       ^ autocomplete shows available tools
 
@@ -105,13 +120,13 @@ You **must use method chaining** when registering tools. TypeScript captures typ
 ```typescript
 // Works — types accumulate through the chain
 const server = new McpServer({ name: "app", version: "1.0" }, {})
-  .registerWidget("a", {}, {}, async () => ({ structuredContent: {} }))
-  .registerWidget("b", {}, {}, async () => ({ structuredContent: {} }));
+  .registerTool({ name: "a", view: { component: "a" } }, async () => ({ structuredContent: {} }))
+  .registerTool({ name: "b", view: { component: "b" } }, async () => ({ structuredContent: {} }));
 
 // Doesn't work — typeof server = McpServer<{}> (empty!)
 const server = new McpServer({ name: "app", version: "1.0" }, {});
-server.registerWidget("a", {}, {}, async () => ({ structuredContent: {} }));
-server.registerWidget("b", {}, {}, async () => ({ structuredContent: {} }));
+server.registerTool({ name: "a", view: { component: "a" } }, async () => ({ structuredContent: {} }));
+server.registerTool({ name: "b", view: { component: "b" } }, async () => ({ structuredContent: {} }));
 ```
 
 ## How It Works
@@ -123,8 +138,8 @@ The `$types` property pattern enables cross-package type inference:
 class McpServer<ToolRegistry = {}> {
   $types!: McpServerTypes<ToolRegistry>;
 
-  registerWidget<Name, Input, Output>(
-    name: Name,
+  registerTool<Name, Input, Output>(
+    config: { name: Name; inputSchema?: Input; view?: ViewConfig; /* ... */ },
     ...
   ): McpServer<ToolRegistry & { [K in Name]: ToolDef<Input, Output> }> {
     // Returns a new type with the tool added
@@ -156,8 +171,8 @@ import type {
   ToolNames,
   ToolInput,
   ToolOutput,
-} from "skybridge/web";
-import type { AppType } from "../../server/src/index";
+} from "skybridge/server";
+import type { AppType } from "./server";
 
 // Get all tool names as a union
 type MyToolNames = ToolNames<AppType>;
@@ -227,14 +242,14 @@ Make sure you're importing from your generated helpers file, not directly from `
 import { useCallTool } from "skybridge/web";
 
 // Right
-import { useCallTool } from "../skybridge";
+import { useCallTool } from "../helpers";
 ```
 
 ### No autocomplete for tool names
 
 Check that:
 1. Your server exports `type AppType = typeof server`
-2. Your `skybridge.ts` imports this type correctly
+2. Your `helpers.ts` imports this type correctly
 3. You're using method chaining
 
 ## Related

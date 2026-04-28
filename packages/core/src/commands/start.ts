@@ -24,21 +24,15 @@ export default class Start extends Command {
 
     console.clear();
 
-    const candidates = [
-      resolve(process.cwd(), "dist/server/src/index.js"),
-      resolve(process.cwd(), "dist/index.js"),
-    ];
+    const indexPath = resolve(process.cwd(), "dist/server.js");
 
-    const indexPath = candidates.find(existsSync);
-
-    if (!indexPath) {
+    if (!existsSync(indexPath)) {
       console.error("❌ Error: No build output found");
       console.error("");
       console.error("Please build your project first:");
       console.error("  skybridge build");
       console.error("");
       process.exit(1);
-      return;
     }
 
     console.log(

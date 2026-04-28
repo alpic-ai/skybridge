@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Handlebars from "handlebars";
-import type { WidgetHostType } from "./server.js";
+import type { ViewHostType } from "./server.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -25,9 +25,9 @@ class TemplateHelper {
   }
 
   renderProduction(data: {
-    hostType: WidgetHostType;
+    hostType: ViewHostType;
     serverUrl: string;
-    widgetFile: string;
+    viewFile: string;
     styleFile: string;
   }): string {
     const template = this.loadTemplate("production");
@@ -35,9 +35,9 @@ class TemplateHelper {
   }
 
   renderDevelopment(data: {
-    hostType: WidgetHostType;
+    hostType: ViewHostType;
     serverUrl: string;
-    widgetName: string;
+    viewName: string;
   }): string {
     const template = this.loadTemplate("development");
     return template(data);

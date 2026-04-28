@@ -5,20 +5,20 @@ sidebarTitle: "Introduction"
 icon: "house"
 ---
 
-**Skybridge is a fullstack TypeScript framework for building MCP and ChatGPT Apps: interactive widgets that render inside AI conversations. Define tools, write React components, and let Skybridge do the rest:**
+**Skybridge is a fullstack TypeScript framework for building MCP and ChatGPT Apps: interactive views that render inside AI conversations. Define tools, write React components, and let Skybridge do the rest:**
 
 <CodeGroup>
-```ts server/src/index.ts
+```ts src/server.ts
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
-const server = new McpServer({ name: "my-app", version: "0.0.1" })
-  .registerWidget(
-    "greeting",
-    { description: "A greeting card" },
+const server = new McpServer({ name: "my-app", version: "0.0.1" }, {})
+  .registerTool(
     {
+      name: "greeting",
       description: "Greet someone by name.",
       inputSchema: { name: z.string() },
+      view: { component: "greeting" },
     },
     async ({ name }) => {
       return { structuredContent: { message: `Hello, ${name}!` } };
@@ -26,16 +26,13 @@ const server = new McpServer({ name: "my-app", version: "0.0.1" })
   );
 ```
 
-```tsx web/src/widgets/greeting.tsx
-import { mountWidget } from "skybridge/web";
+```tsx src/views/greeting.tsx
 import { useToolInfo } from "../helpers.js"; // auto-generated from server schema
 
-function Greeting() {
+export default function Greeting() {
   const { output } = useToolInfo<"greeting">();
   return <h1>{output.message}</h1>;
 }
-
-mountWidget(<Greeting />);
 ```
 </CodeGroup>
 
@@ -52,7 +49,7 @@ mountWidget(<Greeting />);
 
 ## Solving the Three Body Problem
 
-MCP Apps and ChatGPT Apps are a new kind of software built for a new surface: the conversation itself. Under the hood, an MCP server exposes tools. Some are bound to UI templates, and when the model calls one, the host can render the corresponding widget inline with the tool's output.
+MCP Apps and ChatGPT Apps are a new kind of software built for a new surface: the conversation itself. Under the hood, an MCP server exposes tools. Some are bound to UI templates, and when the model calls one, the host can render the corresponding view inline with the tool's output.
 
 This looks simple, but it introduces a fundamental shift. Traditional apps have two actors: the user and the interface. These apps have three: the **user**, the **UI**, and the **model**. This creates **context asymmetry**: each actor holds a partial view of the system. The model is blind to the UI: it can't see visuals or user interactions unless you explicitly sync them back. The user can't see the structured data flowing underneath. Building well means understanding these blind spots and designing the information flow between all three.
 
@@ -119,7 +116,7 @@ Skybridge gives you a fast local loop, then smooth paths to production.
 
 <Steps>
   <Step title="Develop locally">
-    Run `npm run dev` and open `http://localhost:3000/` to access [DevTools](/devtools/devtools): test tools, preview widgets, switch themes and locales, all without leaving your browser. Widget changes hot-reload instantly.
+    Run `npm run dev` and open `http://localhost:3000/` to access [DevTools](/devtools/devtools): test tools, preview views, switch themes and locales, all without leaving your browser. View changes hot-reload instantly.
   </Step>
   <Step title="Test in ChatGPT, Claude, and more">
     Run `npm run dev --tunnel` to get a live LLM playground and a public URL for ChatGPT, Claude, or any MCP client to connect to. Validate real model interactions before shipping.

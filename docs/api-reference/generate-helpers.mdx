@@ -1,6 +1,6 @@
 ---
 title: generateHelpers
-description: "Create fully typed hooks with end-to-end inference from your MCP server, like tRPC for widgets."
+description: "Create fully typed hooks with end-to-end inference from your MCP server, like tRPC for views."
 ---
 
 
@@ -21,14 +21,14 @@ Instead of manually typing each hook call:
 const { callTool } = useCallTool<
   { destination: string },
   { structuredContent: { results: string[] } }
->("search-voyage");
+>("search-trip");
 ```
 
 You get automatic type inference:
 
 ```tsx
 // ✅ With generateHelpers - fully typed, zero annotations needed
-const { callTool } = useCallTool("search-voyage");
+const { callTool } = useCallTool("search-trip");
 // TypeScript knows everything: tool name, input shape, output shape
 ```
 
@@ -39,21 +39,28 @@ const { callTool } = useCallTool("search-voyage");
 Your MCP server **must** use method chaining for type inference to work. See [Type Safety: Method Chaining](/concepts/type-safety#method-chaining) for details.
 
 ```ts
-// ✅ Works — chain registerWidget/registerTool calls
+// ✅ Works — chain registerTool calls
 const server = new McpServer({ name: "my-app", version: "1.0" }, {})
-  .registerWidget("search-voyage", {}, { inputSchema: { destination: z.string() } }, async ({ destination }) => {
-    return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
-  });
+  .registerTool(
+    {
+      name: "search-trip",
+      inputSchema: { destination: z.string() },
+      view: { component: "search-trip" },
+    },
+    async ({ destination }) => {
+      return { content: `Found trips to ${destination}` };
+    },
+  );
 
 export type AppType = typeof server;
 ```
 
 ### Export Server Type
 
-Export your server type so it can be imported in your web code:
+Export your server type so it can be imported in your view code:
 
 ```ts
-// server/src/index.ts
+// src/server.ts
 export type AppType = typeof server;
 ```
 
@@ -61,30 +68,30 @@ export type AppType = typeof server;
 
 ### 1. One-Time Setup
 
-Create a bridge file that connects your server types to your widgets:
+Create a bridge file that connects your server types to your views:
 
 ```ts
-// web/src/helpers.ts
-import type { AppType } from "../server"; // type-only import
+// src/helpers.ts
+import type { AppType } from "./server"; // type-only import
 import { generateHelpers } from "skybridge/web";
 
 export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
 ```
 
-### 2. Use Typed Hooks in Widgets
+### 2. Use Typed Hooks in Views
 
 Import and use the typed hooks throughout your app:
 
 ```tsx
-// web/src/widgets/search.tsx
-import { useCallTool, useToolInfo } from "../skybridge";
+// src/views/search-trip.tsx
+import { useCallTool, useToolInfo } from "../helpers";
 
-export function SearchWidget() {
-  const { callTool, data, isPending } = useCallTool("search-voyage");
-  //                                      ^ autocomplete for tool names
+export default function SearchTrip() {
+  const { callTool, isPending } = useCallTool("search-trip");
+  //                                            ^ autocomplete for tool names
 
-  const toolInfo = useToolInfo<"search-voyage">();
-  //                              ^ autocomplete for widget names
+  const toolInfo = useToolInfo<"search-trip">();
+  //                              ^ autocomplete for view names
 
   const handleSearch = () => {
     callTool({ destination: "Spain" });
@@ -155,7 +162,7 @@ name: K extends Names
 
 **Required**
 
-The name of the tool to call. This must match a tool name from your server's registry. TypeScript will provide autocomplete suggestions based on all registered tools and widgets.
+The name of the tool to call. This must match a tool name from your server's registry. TypeScript will provide autocomplete suggestions based on all registered tools and views.
 
 #### Return Value
 
@@ -177,7 +184,7 @@ K extends Names
 
 **Required**
 
-The name of the tool/widget. This must match a tool name from your server's registry. TypeScript will provide autocomplete suggestions based on all registered tools and widgets.
+The name of the tool/view. This must match a tool name from your server's registry. TypeScript will provide autocomplete suggestions based on all registered tools and views.
 
 ## Limitations
 

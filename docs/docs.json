@@ -105,7 +105,7 @@
             "icon": "server",
             "pages": [
               "api-reference/mcp-server",
-              "api-reference/register-widget"
+              "api-reference/register-tool"
             ]
           },
           {
@@ -130,7 +130,6 @@
             "icon": "toolbox",
             "pages": [
               "api-reference/create-store",
-              "api-reference/mount-widget",
               "api-reference/generate-helpers",
               "api-reference/data-llm"
             ]

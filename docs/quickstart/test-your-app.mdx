@@ -10,12 +10,12 @@ Skybridge provides two ways to test your app: **local DevTools** for rapid itera
 
 Open `http://localhost:3000/` in your browser to access DevTools. This is the fastest way to develop:
 
-- **Tool listing** - See all registered tools and widgets
+- **Tool listing** - See all registered tools and views
 - **Input forms** - Test tools with custom inputs
-- **Widget preview** - Render widgets in a mocked Apps SDK environment
+- **View preview** - Render views in a mocked Apps SDK environment
 - **Theme/locale switching** - Test different display modes
 
-The DevTools mock the Apps SDK and the MCP apps runtimes, so your widget code works identically in both environments.
+The DevTools mock the Apps SDK and the MCP apps runtimes, so your view code works identically in both environments.
 
 <Tip>
 **Fast Iteration**
@@ -86,9 +86,9 @@ Skybridge downloads and runs [Alpic tunnel](https://docs.alpic.ai/cli/tunnel) au
 
 #### Hot Module Reload
 
-Widget changes in `web/src/widgets/` appear instantly without reconnecting.
+View changes in `src/views/` appear instantly without reconnecting.
 
-Server changes in `server/src/` require starting a new conversation to take effect.
+Server changes in `src/server.ts` require starting a new conversation to take effect.
 
 ### Testing in Claude
 
@@ -131,7 +131,7 @@ Skybridge downloads and runs [Alpic tunnel](https://docs.alpic.ai/cli/tunnel) au
 
 1. Start a new conversation in Claude
 2. Make sure your Connector is selected in the Connectors dropdown
-3. Test widget interactions and tool responses
+3. Test view interactions and tool responses
 
 ### Testing in other MCP Clients
 
@@ -156,7 +156,7 @@ Connect your server to any desktop MCP client that supports the [ext-apps specif
 
 1. Configure your MCP client to connect to `http://localhost:3000/mcp`
 2. Start a conversation in your MCP client
-3. Test your app by invoking tools and interacting with the widgets
+3. Test your app by invoking tools and interacting with the views
 
 
 ## What's Next?

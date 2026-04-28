@@ -1,11 +1,11 @@
 ---
 title: Use skybridge/web
-description: "Add React hooks and utilities to your App widgets with skybridge/web standalone package."
+description: "Add React hooks and utilities to your App views with skybridge/web standalone package."
 ---
 
 # Use skybridge/web
 
-This guide shows you how to use `skybridge/web` without `skybridge/server` to add React hooks and utilities to your widgets.
+This guide shows you how to use `skybridge/web` without `skybridge/server` to add React hooks and utilities to your views.
 
 ## Prerequisites
 
@@ -27,34 +27,35 @@ pnpm add skybridge
 
 ### State Management
 - **[`useToolInfo`](/api-reference/use-tool-info)**: Get initial tool input, output and metadata
-- **[`useWidgetState`](/api-reference/use-widget-state)**: Persist state across widget renders
+- **[`useWidgetState`](/api-reference/use-widget-state)**: Persist state across view renders
 
 ### User Interface
 - **[`useLayout`](/api-reference/use-layout)**: Get the current user layout and visual environment information
-- **[`useDisplayMode`](/api-reference/use-display-mode)**: Get and request widget display mode changes
-- **[`useRequestModal`](/api-reference/use-request-modal)**: Open a modal portaled outside of the widget iframe
+- **[`useDisplayMode`](/api-reference/use-display-mode)**: Get and request view display mode changes
+- **[`useRequestModal`](/api-reference/use-request-modal)**: Open a modal portaled outside of the view iframe
 - **[`useUser`](/api-reference/use-user)**: Get the session-stable user information (locale and userAgent)
 
 ### Actions
-- **[`useCallTool`](/api-reference/use-call-tool)**: Call tools from within a widget
+- **[`useCallTool`](/api-reference/use-call-tool)**: Call tools from within a view
 - **[`useOpenExternal`](/api-reference/use-open-external)**: Open external links
 - **[`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message)**: Send a follow-up message in the conversation
 - **[`useFiles`](/api-reference/use-files)**: Upload and download files
 
 ### Others
 - **[`useAppsSdkContext`](/api-reference/use-apps-sdk-context)**: Low-level hook to subscribe to `window.openai` state values
-- **[`generateHelpers`](/api-reference/generate-helpers)**: Generate typed helpers for your widgets (requires `skybridge/server`)
+- **[`generateHelpers`](/api-reference/generate-helpers)**: Generate typed helpers for your views (requires `skybridge/server`)
 
 Each hook is documented in the API Reference section in the sidebar.
 
 ## Basic example
 
-Here's a simple widget using Skybridge hooks:
+Here's a simple view using Skybridge hooks:
 
 ```tsx
-import { mountWidget, useToolInfo } from "skybridge/web";
+// src/views/my-view.tsx
+import { useToolInfo } from "skybridge/web";
 
-const MyWidget: React.FC = () => {
+export default function MyView() {
   const toolInfo = useToolInfo();
 
   if (toolInfo.isPending) {
@@ -71,9 +72,7 @@ const MyWidget: React.FC = () => {
   }
 
   return <div>No results</div>;
-};
-
-mountWidget(<MyWidget />);
+}
 ```
 
 ## Type safety without server
@@ -88,14 +87,14 @@ interface MyToolInput {
   limit?: number;
 }
 
-const MyWidget: React.FC = () => {
+export default function MyView() {
   const toolInfo = useToolInfo<MyToolInput>();
 
   // toolInfo.input is now typed as MyToolInput
   console.log(toolInfo.input.query);
 
-  return <div>Widget content</div>;
-};
+  return <div>View content</div>;
+}
 ```
 
 ## Learn more
@@ -107,9 +106,9 @@ To learn more about how to build an App, please read the Core Concepts and Inter
     Learn the fundamentals of MCP servers and Apps
   </Card>
   <Card title="Data Flow" icon="arrows-rotate" href="/concepts/data-flow">
-    Understand how tools, widgets, and the model communicate
+    Understand how tools, views, and the model communicate
   </Card>
   <Card title="Type Safety" icon="shield-check" href="/concepts/type-safety">
-    End-to-end type inference from server to widget
+    End-to-end type inference from server to view
   </Card>
 </CardGroup>

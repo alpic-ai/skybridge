@@ -6,11 +6,7 @@ import type {
   McpUiResourceMeta,
   McpUiToolMeta,
 } from "@modelcontextprotocol/ext-apps";
-import {
-  McpServer as McpServerBase,
-  type RegisteredTool,
-  type ToolCallback,
-} from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer as McpServerBase } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type {
   AnySchema,
   SchemaOutput,
@@ -18,8 +14,7 @@ import type {
 } from "@modelcontextprotocol/sdk/server/zod-compat.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
-  CallToolResult,
-  Resource,
+  ContentBlock,
   ServerNotification,
   ServerRequest,
   ServerResult,
@@ -64,7 +59,64 @@ export type ToolDef<
   responseMetadata: TResponseMetadata;
 };
 
+export type ViewHostType = "apps-sdk" | "mcp-app";
+
+export interface ViewCsp {
+  /** Origins for static assets (images, fonts, scripts, styles). */
+  resourceDomains?: string[];
+  /** Origins the view may contact via fetch/XHR. */
+  connectDomains?: string[];
+  /** Origins allowed for iframe embeds (opts into stricter app review). */
+  frameDomains?: string[];
+  /** Origins that can receive openExternal redirects without the safe-link modal. */
+  redirectDomains?: string[];
+  /** Origins allowed in `<base href>` tags (mcp-apps only). */
+  baseUriDomains?: string[];
+}
+
+// Must be exported: TS module augmentation only merges with exported
+// declarations. Without `export`, `.skybridge/views.d.ts` augmentation
+// would create a separate interface and `ViewName` would stay `string`.
+// biome-ignore lint/suspicious/noEmptyInterface: register pattern — augmented by `.skybridge/views.d.ts` to narrow ViewName
+export interface ViewNameRegistry {}
+
+export type ViewName = keyof ViewNameRegistry extends never
+  ? string
+  : keyof ViewNameRegistry & string;
+
+export interface ViewConfig {
+  component: ViewName;
+  description?: string;
+  hosts?: ViewHostType[];
+  prefersBorder?: boolean;
+  domain?: string;
+  csp?: ViewCsp;
+  _meta?: Record<string, unknown>;
+}
+
+export interface KnownToolMeta {
+  "openai/widgetAccessible"?: boolean;
+  "openai/toolInvocation/invoking"?: string;
+  "openai/toolInvocation/invoked"?: string;
+}
+
+export type ToolMeta = KnownToolMeta & Record<string, unknown>;
+
+export type HandlerContent = string | ContentBlock | ContentBlock[];
+
 /** @see https://developers.openai.com/apps-sdk/reference#tool-descriptor-parameters */
+type ViteManifestEntry = {
+  file: string;
+  name?: string;
+  src?: string;
+  isEntry?: boolean;
+  isDynamicEntry?: boolean;
+  css?: string[];
+  assets?: string[];
+  imports?: string[];
+  dynamicImports?: string[];
+};
+
 type OpenaiToolMeta = {
   "openai/outputTemplate": string;
   "openai/widgetAccessible"?: boolean;
@@ -77,17 +129,13 @@ type McpAppsToolMeta = {
   ui: McpUiToolMeta;
 };
 
-type ToolMeta = Partial<OpenaiToolMeta & McpAppsToolMeta>;
+type InternalToolMeta = Partial<OpenaiToolMeta & McpAppsToolMeta>;
 
 /** @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields */
 type OpenaiWidgetCSP = {
-  /** Domains the widget may contact via fetch/XHR */
   connect_domains: string[];
-  /** Domains for static assets (images, fonts, scripts, styles) */
   resource_domains: string[];
-  /** Origins allowed for iframe embeds (opts into stricter app review) */
   frame_domains?: string[];
-  /** Origins that can receive openExternal redirects without safe-link modal */
   redirect_domains?: string[];
 };
 
@@ -99,42 +147,32 @@ type OpenaiResourceMeta = {
 };
 
 /**
- * Extended MCP Apps CSP with upcoming fields from ext-apps PR #158
- * and Skybridge-specific fields for OpenAI compatibility
+ * MCP Apps CSP extended with upcoming / Skybridge-specific fields.
  * @see https://github.com/modelcontextprotocol/ext-apps/pull/158
  */
 type ExtendedMcpUiResourceCsp = McpUiResourceMeta["csp"] & {
   /**
-   * Origins that can receive openExternal redirects without safe-link modal (OpenAI-specific)
+   * Origins that can receive openExternal redirects without the safe-link modal.
+   * OpenAI-specific; mirrored into the mcp-apps CSP for cross-host parity.
    * @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields
    */
   redirectDomains?: string[];
 };
 
-/** Extended MCP Apps resource metadata with upcoming CSP fields */
 type ExtendedMcpUiResourceMeta = Omit<McpUiResourceMeta, "csp"> & {
   csp?: ExtendedMcpUiResourceCsp;
 };
 
-/** MCP Apps resource metadata */
 type McpAppsResourceMeta = {
   ui?: ExtendedMcpUiResourceMeta;
 };
 
 type ResourceMeta = OpenaiResourceMeta | McpAppsResourceMeta;
 
-/** User-provided resource configuration with optional CSP override */
-export type WidgetResourceMeta = {
-  ui?: ExtendedMcpUiResourceMeta;
-} & Resource["_meta"];
-
-export type WidgetHostType = "apps-sdk" | "mcp-app";
-
-type WidgetResourceConfig<T extends ResourceMeta = ResourceMeta> = {
-  hostType: WidgetHostType;
+type ViewResourceConfig<T extends ResourceMeta = ResourceMeta> = {
+  hostType: ViewHostType;
   uri: string;
   mimeType: string;
-  /** Function to build _meta for this resource content given computed defaults */
   buildContentMeta: (
     defaults: {
       resourceDomains: string[];
@@ -146,49 +184,22 @@ type WidgetResourceConfig<T extends ResourceMeta = ResourceMeta> = {
   ) => T;
 };
 
-type McpServerOriginalResourceConfig = Omit<
-  Resource,
-  "uri" | "name" | "mimeType" | "_meta"
-> & {
-  _meta?: WidgetResourceMeta;
-  /** Restrict host types to a specific subset */
-  hosts?: WidgetHostType[];
-};
-
-type McpServerOriginalToolConfig = Omit<
-  Parameters<
-    typeof McpServerBase.prototype.registerTool<
-      ZodRawShapeCompat,
-      ZodRawShapeCompat
-    >
-  >[1],
-  "inputSchema" | "outputSchema"
->;
-
-type Simplify<T> = { [K in keyof T]: T[K] };
-
-type ExtractStructuredContent<T> = T extends { structuredContent: infer SC }
-  ? Simplify<SC>
-  : never;
-
-type ExtractMeta<T> = [Extract<T, { _meta: unknown }>] extends [never]
-  ? unknown
-  : Extract<T, { _meta: unknown }> extends { _meta: infer M }
-    ? Simplify<M>
-    : unknown;
-
 /**
  * Type-level marker interface for cross-package type inference.
- * This enables TypeScript to infer tool types across package boundaries
- * using structural typing on the $types property, rather than relying on
- * class generic inference which fails when McpServer comes from different
- * package installations.
  *
- * Inspired by tRPC's _def pattern and Hono's type markers.
+ * Consumers infer tool types via the structural `$types` property rather than
+ * the `McpServer` class generic, because class-generic inference breaks when
+ * `McpServer` comes from different package installations (e.g. a consumer
+ * with its own `skybridge` dep vs. the in-tree workspace version).
+ *
+ * Inspired by tRPC's `_def` pattern and Hono's type markers.
  */
 export interface McpServerTypes<TTools extends Record<string, ToolDef>> {
   readonly tools: TTools;
 }
+
+type Simplify<T> = { [K in keyof T]: T[K] };
+
 type ShapeOutput<Shape extends ZodRawShapeCompat> = Simplify<
   {
     [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
@@ -200,6 +211,17 @@ type ShapeOutput<Shape extends ZodRawShapeCompat> = Simplify<
       : never]?: SchemaOutput<Shape[K]>;
   }
 >;
+
+type ExtractStructuredContent<T> = T extends { structuredContent: infer SC }
+  ? Simplify<SC>
+  : never;
+
+type ExtractMeta<T> = [Extract<T, { _meta: unknown }>] extends [never]
+  ? unknown
+  : Extract<T, { _meta: unknown }> extends { _meta: infer M }
+    ? Simplify<M>
+    : unknown;
+
 type AddTool<
   TTools,
   TName extends string,
@@ -211,18 +233,21 @@ type AddTool<
     [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput, TResponseMetadata>;
   }
 >;
-type ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> = {
+
+interface ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> {
+  name: string;
   title?: string;
   description?: string;
   inputSchema?: TInput;
   outputSchema?: ZodRawShapeCompat | AnySchema;
   annotations?: ToolAnnotations;
-  _meta?: Record<string, unknown>;
-};
+  view?: ViewConfig;
+  _meta?: ToolMeta;
+}
 
 type ToolHandler<
   TInput extends ZodRawShapeCompat,
-  TReturn extends { content: CallToolResult["content"] } = CallToolResult,
+  TReturn extends { content?: HandlerContent } = { content?: HandlerContent },
 > = (
   args: ShapeOutput<TInput>,
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
@@ -238,15 +263,40 @@ type ErrorMiddlewareConfig = {
   handlers: ErrorRequestHandler[];
 };
 
+export function normalizeContent(
+  content: HandlerContent | undefined,
+): ContentBlock[] {
+  if (content === undefined) {
+    return [];
+  }
+  if (typeof content === "string") {
+    return [{ type: "text", text: content }];
+  }
+  if (Array.isArray(content)) {
+    return content;
+  }
+  return [content];
+}
+
+// We Omit `registerTool` from the base class at the type level so our
+// unified 2-arg signature can replace the SDK's 3-arg one without an
+// incompatible override.  The runtime prototype chain is unaffected.
+interface McpServerBaseOmitted
+  extends Omit<McpServerBase, "registerTool" | "connect"> {}
+const McpServerBaseOmitted = McpServerBase as unknown as new (
+  ...args: ConstructorParameters<typeof McpServerBase>
+) => McpServerBaseOmitted;
+
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
-> extends McpServerBase {
+> extends McpServerBaseOmitted {
   declare readonly $types: McpServerTypes<TTools>;
   private express?: Express;
   private customMiddleware: MiddlewareConfig[] = [];
   private customErrorMiddleware: ErrorMiddlewareConfig[] = [];
   private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private mcpMiddlewareApplied = false;
+  private claimedViews = new Map<string, string>();
 
   use(...handlers: RequestHandler[]): this;
   use(path: string, ...handlers: RequestHandler[]): this;
@@ -284,13 +334,9 @@ export class McpServer<
     return this;
   }
 
-  /**
-   * Register MCP protocol-level middleware (catch-all).
-   */
+  /** Register MCP protocol-level middleware (catch-all). */
   mcpMiddleware(handler: McpMiddlewareFn): this;
-  /**
-   * Register MCP protocol-level middleware for all requests (`extra` is `McpExtra`).
-   */
+  /** Register MCP protocol-level middleware for all requests (`extra` is `McpExtra`). */
   mcpMiddleware(
     filter: "request",
     handler: (
@@ -299,9 +345,7 @@ export class McpServer<
       next: () => Promise<ServerResult>,
     ) => Promise<unknown> | unknown,
   ): this;
-  /**
-   * Register MCP protocol-level middleware for all notifications (`extra` is `undefined`).
-   */
+  /** Register MCP protocol-level middleware for all notifications (`extra` is `undefined`). */
   mcpMiddleware(
     filter: "notification",
     handler: (
@@ -387,7 +431,6 @@ export class McpServer<
       this.server,
     );
 
-    // Wrap existing handlers and proxy future .set() for lazy SDK registration
     const instrumentMap = (
       map: Map<string, (...args: unknown[]) => Promise<unknown>>,
       isNotification: boolean,
@@ -413,11 +456,11 @@ export class McpServer<
     instrumentMap(notificationHandlers, true);
   }
 
-  override async connect(
+  async connect(
     transport: Parameters<typeof McpServerBase.prototype.connect>[0],
   ): Promise<void> {
     this.applyMcpMiddleware();
-    return super.connect(transport);
+    return McpServerBase.prototype.connect.call(this, transport);
   }
 
   async run(): Promise<void> {
@@ -446,53 +489,42 @@ export class McpServer<
     });
   }
 
-  registerWidget<
-    TName extends string,
-    TInput extends ZodRawShapeCompat,
-    TReturn extends { content: CallToolResult["content"] },
-  >(
-    name: TName,
-    resourceConfig: McpServerOriginalResourceConfig,
-    toolConfig: McpServerOriginalToolConfig & {
-      inputSchema?: TInput;
-      outputSchema?: ZodRawShapeCompat | AnySchema;
-    },
-    toolCallback: ToolHandler<TInput, TReturn>,
-  ): AddTool<
-    TTools,
-    TName,
-    TInput,
-    ExtractStructuredContent<TReturn>,
-    ExtractMeta<TReturn>
-  > {
-    const userMeta = resourceConfig._meta;
+  private enforceOneToolPerView(component: string, toolName: string): void {
+    const existingTool = this.claimedViews.get(component);
+    if (existingTool) {
+      throw new Error(
+        `skybridge: view "${component}" is already used by tool "${existingTool}". Tool "${toolName}" cannot also reference it — each view backs exactly one tool.`,
+      );
+    }
+    this.claimedViews.set(component, toolName);
+  }
 
-    const toolMeta: ToolMeta = {
-      ...toolConfig._meta,
-    };
+  private registerViewResources(
+    toolName: string,
+    view: ViewConfig,
+    toolMeta: InternalToolMeta,
+  ): void {
+    const hosts = view.hosts ?? (["apps-sdk", "mcp-app"] as const);
 
-    if (!resourceConfig.hosts || resourceConfig.hosts.includes("apps-sdk")) {
-      const widgetConfig: WidgetResourceConfig<OpenaiResourceMeta> = {
+    if (hosts.includes("apps-sdk")) {
+      const viewResource: ViewResourceConfig<OpenaiResourceMeta> = {
         hostType: "apps-sdk",
-        uri: `ui://widgets/apps-sdk/${name}.html`,
+        uri: `ui://widgets/apps-sdk/${view.component}.html`,
         mimeType: "text/html+skybridge",
         buildContentMeta: (
           { resourceDomains, connectDomains, domain },
           overrides,
         ) => {
-          const userUi = userMeta?.ui;
-          const userCsp = userUi?.csp;
-
           const defaults: OpenaiResourceMeta = {
             "openai/widgetCSP": {
               resource_domains: resourceDomains,
               connect_domains: connectDomains,
             },
             "openai/widgetDomain": domain,
-            "openai/widgetDescription": resourceConfig.description,
+            "openai/widgetDescription": view.description,
           };
 
-          const fromUi: Partial<
+          const fromView: Partial<
             Omit<
               OpenaiResourceMeta,
               "openai/widgetCSP" | "openai/widgetDescription"
@@ -501,42 +533,40 @@ export class McpServer<
             }
           > = {
             "openai/widgetCSP": {
-              resource_domains: userCsp?.resourceDomains,
-              connect_domains: userCsp?.connectDomains,
-              frame_domains: userCsp?.frameDomains,
-              redirect_domains: userCsp?.redirectDomains,
+              resource_domains: view.csp?.resourceDomains,
+              connect_domains: view.csp?.connectDomains,
+              frame_domains: view.csp?.frameDomains,
+              redirect_domains: view.csp?.redirectDomains,
             },
-            "openai/widgetDomain": userUi?.domain,
-            "openai/widgetPrefersBorder": userUi?.prefersBorder,
+            "openai/widgetDomain": view.domain,
+            "openai/widgetPrefersBorder": view.prefersBorder,
           };
 
-          const directOpenaiKeys = Object.fromEntries(
-            Object.entries(userMeta ?? {}).filter(([key]) =>
-              key.startsWith("openai/"),
-            ),
-          );
+          const base = mergeWithUnion(mergeWithUnion(defaults, fromView), {
+            "openai/widgetDomain": overrides.domain,
+          });
 
-          return mergeWithUnion(
-            mergeWithUnion(mergeWithUnion(defaults, fromUi), directOpenaiKeys),
-            { "openai/widgetDomain": overrides.domain },
-          );
+          if (view._meta) {
+            return { ...base, ...view._meta } as OpenaiResourceMeta;
+          }
+          return base;
         },
       };
-      this.registerWidgetResource({
-        name,
-        widgetConfig,
-        resourceConfig,
+      this.registerViewResource({
+        name: toolName,
+        viewResource,
+        view,
       });
-      toolMeta["openai/outputTemplate"] = widgetConfig.uri;
+      toolMeta["openai/outputTemplate"] = viewResource.uri;
     }
 
-    if (!resourceConfig.hosts || resourceConfig.hosts.includes("mcp-app")) {
-      const widgetConfig: WidgetResourceConfig<McpAppsResourceMeta> = {
+    if (hosts.includes("mcp-app")) {
+      const viewResource: ViewResourceConfig<McpAppsResourceMeta> = {
         hostType: "mcp-app",
-        uri: `ui://widgets/ext-apps/${name}.html`,
+        uri: `ui://widgets/ext-apps/${view.component}.html`,
         mimeType: "text/html;profile=mcp-app",
         buildContentMeta: (
-          { resourceDomains, connectDomains, domain },
+          { resourceDomains, connectDomains, domain, baseUriDomains },
           overrides,
         ) => {
           const defaults: McpAppsResourceMeta = {
@@ -544,109 +574,75 @@ export class McpServer<
               csp: {
                 resourceDomains,
                 connectDomains,
+                baseUriDomains,
               },
               domain,
             },
           };
 
-          return mergeWithUnion(defaults, {
-            ui: { ...userMeta?.ui, ...overrides },
+          const fromView: McpAppsResourceMeta = {
+            ui: {
+              ...(view.description && { description: view.description }),
+              ...(view.prefersBorder !== undefined && {
+                prefersBorder: view.prefersBorder,
+              }),
+              ...(view.domain && { domain: view.domain }),
+              csp: {
+                ...(view.csp?.resourceDomains && {
+                  resourceDomains: view.csp.resourceDomains,
+                }),
+                ...(view.csp?.connectDomains && {
+                  connectDomains: view.csp.connectDomains,
+                }),
+                ...(view.csp?.frameDomains && {
+                  frameDomains: view.csp.frameDomains,
+                }),
+                ...(view.csp?.baseUriDomains && {
+                  baseUriDomains: view.csp.baseUriDomains,
+                }),
+                ...(view.csp?.redirectDomains && {
+                  redirectDomains: view.csp.redirectDomains,
+                }),
+              },
+            },
+          };
+
+          const base = mergeWithUnion(mergeWithUnion(defaults, fromView), {
+            ui: overrides,
           });
+
+          if (view._meta) {
+            return { ...base, ...view._meta } as McpAppsResourceMeta;
+          }
+          return base;
         },
       };
-      this.registerWidgetResource({
-        name,
-        widgetConfig,
-        resourceConfig,
+      this.registerViewResource({
+        name: toolName,
+        viewResource,
+        view,
       });
       // @ts-expect-error - For backwards compatibility with Claude current implementation of the specs
-      toolMeta["ui/resourceUri"] = widgetConfig.uri;
-      toolMeta.ui = { resourceUri: widgetConfig.uri };
+      toolMeta["ui/resourceUri"] = viewResource.uri;
+      toolMeta.ui = { resourceUri: viewResource.uri };
     }
-
-    const wrappedToolCallback: ToolHandler<TInput, TReturn> = async (
-      args,
-      extra,
-    ) => {
-      const result = await toolCallback(args, extra);
-      return {
-        ...result,
-        _meta: {
-          ...(result as { _meta?: Record<string, unknown> })._meta,
-          viewUUID: crypto.randomUUID(),
-        },
-      };
-    };
-
-    this.registerTool(
-      name,
-      {
-        ...toolConfig,
-        _meta: toolMeta,
-      },
-      wrappedToolCallback,
-    );
-
-    return this as AddTool<
-      TTools,
-      TName,
-      TInput,
-      ExtractStructuredContent<TReturn>,
-      ExtractMeta<TReturn>
-    >;
   }
 
-  override registerTool<
-    TName extends string,
-    InputArgs extends ZodRawShapeCompat,
-    TReturn extends { content: CallToolResult["content"] },
-  >(
-    name: TName,
-    config: ToolConfig<InputArgs>,
-    cb: ToolHandler<InputArgs, TReturn>,
-  ): AddTool<
-    TTools,
-    TName,
-    InputArgs,
-    ExtractStructuredContent<TReturn>,
-    ExtractMeta<TReturn>
-  >;
-
-  override registerTool<InputArgs extends ZodRawShapeCompat>(
-    name: string,
-    config: ToolConfig<InputArgs>,
-    cb: ToolHandler<InputArgs>,
-  ): RegisteredTool;
-
-  override registerTool<InputArgs extends ZodRawShapeCompat>(
-    name: string,
-    config: ToolConfig<InputArgs>,
-    cb: ToolCallback<InputArgs>,
-  ): RegisteredTool | McpServer<Record<string, ToolDef>> {
-    super.registerTool(name, config, cb);
-    return this;
-  }
-
-  private registerWidgetResource({
+  private registerViewResource({
     name,
-    widgetConfig,
-    resourceConfig,
+    viewResource,
+    view,
   }: {
     name: string;
-    widgetConfig: WidgetResourceConfig;
-    resourceConfig: McpServerOriginalResourceConfig;
+    viewResource: ViewResourceConfig;
+    view: ViewConfig;
   }): void {
-    const {
-      hostType,
-      uri: widgetUri,
-      mimeType,
-      buildContentMeta,
-    } = widgetConfig;
+    const { hostType, uri: viewUri, mimeType, buildContentMeta } = viewResource;
 
     this.registerResource(
       name,
-      widgetUri,
-      { ...resourceConfig, _meta: resourceConfig._meta },
+      viewUri,
+      { description: view.description },
       async (uri, extra) => {
         const isProduction = process.env.NODE_ENV === "production";
         const isClaude =
@@ -685,15 +681,13 @@ export class McpServer<
           ? templateHelper.renderProduction({
               hostType,
               serverUrl,
-              widgetFile: this.lookupDistFileWithIndexFallback(
-                `src/widgets/${name}`,
-              ),
-              styleFile: this.lookupDistFile("style.css"),
+              viewFile: this.lookupViewFile(view.component),
+              styleFile: this.lookupDistFile("style.css") ?? "",
             })
           : templateHelper.renderDevelopment({
               hostType,
               serverUrl,
-              widgetName: name,
+              viewName: view.component,
             });
 
         const connectDomains = [serverUrl];
@@ -738,25 +732,95 @@ export class McpServer<
     );
   }
 
-  private lookupDistFile(key: string): string {
+  private wrapHandler<InputArgs extends ZodRawShapeCompat>(
+    cb: ToolHandler<InputArgs>,
+    { attachViewUUID }: { attachViewUUID: boolean },
+  ): ToolHandler<InputArgs> {
+    return async (args, extra) => {
+      const result = await cb(args, extra);
+      return {
+        ...result,
+        content: normalizeContent(result.content),
+        ...(attachViewUUID && {
+          _meta: {
+            ...(result as { _meta?: Record<string, unknown> })._meta,
+            viewUUID: crypto.randomUUID(),
+          },
+        }),
+      };
+    };
+  }
+
+  private lookupViewFile(viewName: string) {
+    const manifest = this.readManifest();
+    for (const entry of Object.values(manifest)) {
+      if (entry?.isEntry && entry.name === viewName && entry.file) {
+        return entry.file;
+      }
+    }
+    throw new Error(
+      `View "${viewName}" not found in Vite manifest. Did the build complete successfully? Look for an entry with name "${viewName}" in dist/assets/.vite/manifest.json.`,
+    );
+  }
+
+  private lookupDistFile(key: string) {
     const manifest = this.readManifest();
     return manifest[key]?.file;
   }
 
-  private lookupDistFileWithIndexFallback(basePath: string): string {
-    const manifest = this.readManifest();
-
-    const flatFileKey = `${basePath}.tsx`;
-    const indexFileKey = `${basePath}/index.tsx`;
-    return manifest[flatFileKey]?.file ?? manifest[indexFileKey]?.file;
-  }
-
-  private readManifest() {
+  private readManifest(): Record<string, ViteManifestEntry> {
     return JSON.parse(
       readFileSync(
         path.join(process.cwd(), "dist", "assets", ".vite", "manifest.json"),
         "utf-8",
       ),
     );
+  }
+
+  registerTool<
+    TName extends string,
+    InputArgs extends ZodRawShapeCompat,
+    TReturn extends { content?: HandlerContent },
+  >(
+    config: ToolConfig<InputArgs> & { name: TName },
+    cb: ToolHandler<InputArgs, TReturn>,
+  ): AddTool<
+    TTools,
+    TName,
+    InputArgs,
+    ExtractStructuredContent<TReturn>,
+    ExtractMeta<TReturn>
+  >;
+  registerTool<InputArgs extends ZodRawShapeCompat>(
+    config: ToolConfig<InputArgs>,
+    cb: ToolHandler<InputArgs>,
+  ): this;
+  registerTool(...args: unknown[]): unknown {
+    const baseFn = McpServerBase.prototype.registerTool as (
+      ...args: unknown[]
+    ) => unknown;
+
+    if (typeof args[0] === "string") {
+      baseFn.call(this, args[0], args[1], args[2]);
+      return this;
+    }
+
+    const config = args[0] as ToolConfig<ZodRawShapeCompat>;
+    const cb = args[1] as ToolHandler<ZodRawShapeCompat>;
+
+    const { name, view, _meta: userToolMeta, ...toolFields } = config;
+
+    const toolMeta: InternalToolMeta = { ...userToolMeta };
+
+    if (view) {
+      this.enforceOneToolPerView(view.component, name);
+      this.registerViewResources(name, view, toolMeta);
+    }
+
+    const wrappedCb = this.wrapHandler(cb, { attachViewUUID: Boolean(view) });
+
+    baseFn.call(this, name, { ...toolFields, _meta: toolMeta }, wrappedCb);
+
+    return this;
   }
 }

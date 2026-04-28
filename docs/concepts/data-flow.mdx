@@ -1,10 +1,10 @@
 ---
 title: Data Flow
-description: "Learn how data moves between the host, your MCP server, and widgets in Skybridge applications."
+description: "Learn how data moves between the host, your MCP server, and views in Skybridge applications."
 ---
 
 
-**Problem:** Apps involve three actors (the host, your server, your widget) communicating in complex patterns. Understanding this flow is essential.
+**Problem:** Apps involve three actors (the host, your server, your view) communicating in complex patterns. Understanding this flow is essential.
 
 **Solution:** Skybridge provides clear abstractions for each communication pattern.
 
@@ -15,83 +15,98 @@ description: "Learn how data moves between the host, your MCP server, and widget
 flowchart LR
     User["User"]
     Model["Model"]
-    Widget["Widget"]
+    View["View"]
     Server["MCP Server"]
 
     User <-->|"Converse"| Model
-    User <-->|"Interact"| Widget
+    User <-->|"Interact"| View
     Model -->|"Features exposed<br/>as MCP tools"| Server
-    Widget -->|"UI pages exposed<br/>as MCP resources"| Server
+    View -->|"UI pages exposed<br/>as MCP resources"| Server
 
     style User fill:#f1f5f9,stroke:#64748b,color:#334155
     style Model fill:#2563EB,stroke:#1e40af,color:#fff
-    style Widget fill:#2563EB,stroke:#1e40af,color:#fff
+    style View fill:#2563EB,stroke:#1e40af,color:#fff
     style Server fill:#dbeafe,stroke:#93c5fd,color:#1e40af
 ```
 
 1. **The MCP Host**: The conversational interface where users type messages and the model responds (ChatGPT, Claude, Goose, VSCode, etc.)
 2. **Your MCP Server**: The backend that exposes tools and business logic
-3. **Your Widget (Guest)**: The React component rendered in an iframe inside the host
+3. **Your View (Guest)**: The React component rendered in an iframe inside the host
 
 ## Key Terms
 
 Tool responses contain three fields:
 
 - **`content`**: Text array shown to the model in the conversation
-- **`structuredContent`**: Typed JSON data surfaced to your widget and the host
-- **`_meta`**: Delivered only to the widget and hidden from the model
+- **`structuredContent`**: Typed JSON data surfaced to your view and the host
+- **`_meta`**: Delivered only to the view and hidden from the model
 
-## Tools vs Widgets
+## Tools and views
 
-Before diving into the data flow, understand the difference between tools and widgets in Skybridge:
+Before diving into the data flow, understand the difference between plain tools and tools with a view. Both use `registerTool`, differentiated by the optional `view` field:
 
-| | `registerTool()` | `registerWidget()` |
+| | `registerTool` (no `view`) | `registerTool` (with `view`) |
 |---|---|---|
 | **Has UI?** | No | Yes |
-| **Returns** | `content` and/or `structuredContent` | `structuredContent` and optional `content`/`_meta`
-| **Renders** | Nothing | A React component |
+| **Returns** | `content` and/or `structuredContent` | `structuredContent` and optional `content`/`_meta` |
+| **Renders** | Nothing | A React component from `src/views/` |
 | **Use case** | Background operations, calculations | Interactive UI |
 
 ```typescript
-// Tool: No UI, returns text
-server.registerTool("calculate", { /* ... */ }, async (args) => {
-  return { content: [{ type: "text", text: "Result: 42" }] };
-});
+// Plain tool: no UI, returns text
+server.registerTool(
+  { name: "calculate", inputSchema: { /* ... */ } },
+  async (args) => {
+    return { content: "Result: 42" };
+  },
+);
 
-// Widget: Has UI, returns structured data
-server.registerWidget("chart", { /* ... */ }, { /* ... */ }, async (args) => {
-  return {
-    content: [{ type: "text", text: "Displaying chart" }],
-    structuredContent: { data: [1, 2, 3], labels: ["A", "B", "C"] }
-  };
-});
+// Tool with view: has UI, returns structured data
+server.registerTool(
+  {
+    name: "chart",
+    inputSchema: { /* ... */ },
+    view: { component: "chart" },
+  },
+  async (args) => {
+    return {
+      content: "Displaying chart",
+      structuredContent: { data: [1, 2, 3], labels: ["A", "B", "C"] },
+    };
+  },
+);
 ```
 
 ## Data Flow Patterns
 
-### 1. Tool → Widget (Initial Hydration)
+### 1. Tool → View (Initial Hydration)
 
-When the host calls one of your widgets, it returns `structuredContent` to hydrate the React component:
+When the host calls a tool returning a view, it returns `structuredContent` to hydrate the React component:
 
 **Server:**
 ```typescript
-server.registerWidget("show_flights", {}, {
-  inputSchema: { destination: z.string() },
-}, async ({ destination }) => {
-  const flights = await searchFlights(destination);
+server.registerTool(
+  {
+    name: "show_flights",
+    inputSchema: { destination: z.string() },
+    view: { component: "show_flights" },
+  },
+  async ({ destination }) => {
+    const flights = await searchFlights(destination);
 
-  return {
-    content: [{ type: "text", text: `Found ${flights.length} flights` }],
-    structuredContent: { flights } // This goes to the widget
-  };
-});
+    return {
+      content: `Found ${flights.length} flights`,
+      structuredContent: { flights }, // This goes to the view
+    };
+  },
+);
 ```
 
-**Widget:**
+**View:**
 ```tsx
 import { useToolInfo } from "skybridge/web";
 
-export function FlightWidget() {
+export function FlightView() {
   const toolInfo = useToolInfo<{ flights: Flight[] }>();
 
   if (toolInfo.isSuccess) {
@@ -108,22 +123,22 @@ export function FlightWidget() {
 }
 ```
 
-**Use [`useToolInfo`](/api-reference/use-tool-info) for the initial data** that renders your widget. This data is set once when the widget loads.
+**Use [`useToolInfo`](/api-reference/use-tool-info) for the initial data** that renders your view. This data is set once when the view loads.
 
 <Note>
 **useToolInfo is read-only**
 
-`useToolInfo` provides the initial hydration data and should not be used as a mutable data store. For persistent widget state that survives re-renders, use [`useWidgetState`](/api-reference/use-widget-state).
+`useToolInfo` provides the initial hydration data and should not be used as a mutable data store. For persistent view state that survives re-renders, use [`useWidgetState`](/api-reference/use-widget-state).
 </Note>
 
-### 2. Widget → Server (Tool Calls)
+### 2. View → Server (Tool Calls)
 
-Widgets can trigger additional tool calls in response to user actions:
+Views can trigger additional tool calls in response to user actions:
 
 ```tsx
 import { useCallTool } from "skybridge/web";
 
-export function FlightWidget() {
+export function FlightView() {
   const { callTool, isPending, data } = useCallTool("get_flight_details");
 
   const handleViewDetails = (flightId: string) => {
@@ -148,18 +163,18 @@ Never wrap `callTool` in a `useEffect` to fetch data on mount. Pass initial data
 **Why?** Tool calls add latency and model round-trips. You control what initially comes from `structuredContent`, leverage it.
 </Warning>
 
-### 3. Widget → Model (Context Sync)
+### 3. View → Model (Context Sync)
 
-Your widget needs to communicate its state back to the model. Use the **`data-llm` attribute** to declaratively describe what the user sees. See [LLM Context Sync](/concepts/llm-context-sync).
+Your view needs to communicate its state back to the model. Use the **`data-llm` attribute** to declaratively describe what the user sees. See [LLM Context Sync](/concepts/llm-context-sync).
 
-### 4. Widget → Chat (Follow-up Messages)
+### 4. View → Chat (Follow-up Messages)
 
-Widgets can send messages back into the conversation:
+Views can send messages back into the conversation:
 
 ```tsx
 import { useSendFollowUpMessage } from "skybridge/web";
 
-export function FlightWidget() {
+export function FlightView() {
   const sendMessage = useSendFollowUpMessage();
 
   const handleBookFlight = (flight: Flight) => {
@@ -172,7 +187,7 @@ export function FlightWidget() {
 }
 ```
 
-This creates a continuous loop: the widget can ask the model for help, and the model responds naturally in the conversation.
+This creates a continuous loop: the view can ask the model for help, and the model responds naturally in the conversation.
 
 <Tip>
 **When to use useSendFollowUpMessage vs data-llm**
@@ -180,7 +195,7 @@ This creates a continuous loop: the widget can ask the model for help, and the m
 - **`data-llm`**: For passive context—the model reads it when the user asks a question
 - **`useSendFollowUpMessage`**: For active prompts—triggers a new model response immediately
 
-If the model's response triggers another widget, the host renders a new widget instance (not nested inside the current one).
+If the model's response triggers another view, the host renders a new view instance (not nested inside the current one).
 </Tip>
 
 ## Response Fields Explained
@@ -190,8 +205,8 @@ Tool responses have three fields:
 | Field | Purpose | Consumed by |
 |-------|---------|-------------|
 | `content` | Text description | The host (shown in conversation) |
-| `structuredContent` | Typed data | Host and widget (`useToolInfo`, `useCallTool`) |
-| `_meta` | Response metadata | Widget|
+| `structuredContent` | Typed data | Host and view (`useToolInfo`, `useCallTool`) |
+| `_meta` | Response metadata | View|
 
 ```typescript
 return {
@@ -209,12 +224,12 @@ return {
 
 | Need | Use | Why |
 |------|-----|-----|
-| Initial widget data | `useToolInfo` | Data passed at hydration, no extra calls |
+| Initial view data | `useToolInfo` | Data passed at hydration, no extra calls |
 | User-triggered fetch | `useCallTool` | Model sees the result, can answer questions |
 | Silent background fetch | Direct API call | Model doesn't need to know |
 | Describe current UI state | `data-llm` | Passive context for user questions |
 | Trigger model response | `useSendFollowUpMessage` | Active prompt, immediate reply |
-| Persist widget state | `useWidgetState` | Survives re-renders |
+| Persist view state | `useWidgetState` | Survives re-renders |
 
 <Tip>
 **Why useCallTool instead of a direct API call?**
@@ -229,23 +244,23 @@ Direct API calls don't add to context. Use them only for data the model doesn't 
 <Warning>
 **Direct fetch requires CSP configuration**
 
-If you use `fetch()` directly from widgets, you need to configure Content Security Policy (CSP) headers. The host blocks requests to domains not explicitly allowed. Add allowed domains to `connectDomains` in your widget configuration. See [registerWidget](/api-reference/register-widget).
+If you use `fetch()` directly from views, you need to configure Content Security Policy (CSP) headers. The host blocks requests to domains not explicitly allowed. Add allowed domains to `view.csp.connectDomains` in your `registerTool` call. See [registerTool](/api-reference/register-tool).
 </Warning>
 
 ## The Communication Loop
 
 1. **Host calls your tool** → Server responds with `structuredContent`
-2. **Widget hydrates** with [`useToolInfo`](/api-reference/use-tool-info)
-3. **User interacts** → Widget updates `data-llm` → Model sees the context
-4. **User triggers action** → Widget calls [`useCallTool`](/api-reference/use-call-tool) → Server responds
-5. **Widget sends follow-up** → [`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message) → Model replies
+2. **View hydrates** with [`useToolInfo`](/api-reference/use-tool-info)
+3. **User interacts** → View updates `data-llm` → Model sees the context
+4. **User triggers action** → View calls [`useCallTool`](/api-reference/use-call-tool) → Server responds
+5. **View sends follow-up** → [`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message) → Model replies
 
 This loop creates a seamless experience where the conversation, the UI, and your backend work together.
 
 ## Related
 
-- [LLM Context Sync](/concepts/llm-context-sync) - Keep the model informed of widget state (read this next)
+- [LLM Context Sync](/concepts/llm-context-sync) - Keep the model informed of view state (read this next)
 - [Fetching Data Guide](/guides/fetching-data) - Patterns for useToolInfo and useCallTool
 - [useToolInfo API](/api-reference/use-tool-info) - Initial data access
 - [useCallTool API](/api-reference/use-call-tool) - User-triggered data fetching
-- [useWidgetState API](/api-reference/use-widget-state) - Persistent widget state
+- [useWidgetState API](/api-reference/use-widget-state) - Persistent view state

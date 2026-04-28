@@ -1,14 +1,44 @@
-import { cpSync, rmSync } from "node:fs";
+import { rmSync } from "node:fs";
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { useEffect } from "react";
 import { Header } from "../cli/header.js";
 import { type CommandStep, useExecuteSteps } from "../cli/use-execute-steps.js";
+import { scanAndWriteViewsDts } from "../web/plugin/scan-views.js";
+
+async function resolveViewsDir(root: string): Promise<string | undefined> {
+  const { loadConfigFromFile } = await import("vite");
+  const loaded = await loadConfigFromFile(
+    { command: "build", mode: "production" },
+    undefined,
+    root,
+  );
+
+  const isPluginCandidate = (
+    value: unknown,
+  ): value is { name?: string; api?: { viewsDir?: string } } =>
+    typeof value === "object" && value !== null;
+
+  const plugins: Array<{ name?: string; api?: { viewsDir?: string } }> = [];
+  const walk = (value: unknown) => {
+    if (Array.isArray(value)) {
+      value.forEach(walk);
+    } else if (isPluginCandidate(value)) {
+      plugins.push(value);
+    }
+  };
+  walk(loaded?.config.plugins ?? []);
+  return plugins.find((p) => p.name === "skybridge")?.api?.viewsDir;
+}
 
 export const commandSteps: CommandStep[] = [
   {
-    label: "Building widgets",
-    command: "vite build -c web/vite.config.ts",
+    label: "Scanning views",
+    run: async () => {
+      const root = process.cwd();
+      const viewsDir = await resolveViewsDir(root);
+      scanAndWriteViewsDts(root, viewsDir);
+    },
   },
   {
     label: "Compiling server",
@@ -16,13 +46,13 @@ export const commandSteps: CommandStep[] = [
     command: "tsc -b",
   },
   {
-    label: "Copying static assets",
-    run: () => cpSync("web/dist", "dist/assets", { recursive: true }),
+    label: "Building views",
+    command: "vite build",
   },
 ];
 
 export default class Build extends Command {
-  static override description = "Build the widgets and MCP server";
+  static override description = "Build the views and MCP server";
   static override examples = ["skybridge build"];
   static override flags = {};
 

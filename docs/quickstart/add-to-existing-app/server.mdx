@@ -1,11 +1,11 @@
 ---
 title: Use skybridge/server
-description: "Add widget registration and TypeScript type inference to your existing MCP server with skybridge/server."
+description: "Add view registration and TypeScript type inference to your existing MCP server with skybridge/server."
 ---
 
 # Use skybridge/server
 
-This guide shows you how to add `skybridge/server` to an existing MCP server to enable widget support with full TypeScript type inference.
+This guide shows you how to add `skybridge/server` to an existing MCP server to enable view support with full TypeScript type inference.
 
 ## Prerequisites
 
@@ -33,44 +33,38 @@ import { McpServer } from "skybridge/server";
 
 Keep your existing dependency to @modelcontextprotocol/sdk in your project, skybridge does not replaces it, but depends on it.
 
-Your existing tools, resources, and prompts will continue to work as before. With `skybridge/server`, you will also be able to register **widgets**, a new class encompassing a Tool and a corresponding UI Resource.
+Your existing tools, resources, and prompts will continue to work as before. With `skybridge/server`, `registerTool` provides an optional `view` field so you can bind a tool to a React view in a single call.
 
-## Widget structure
-
-Skybridge follows a file-based convention for organizing widgets. Here's the recommended project structure:
+## Project structure
 
 ```
 your-project/
-├── server/
-│   └── src/
-│       └── index.ts          # Your MCP server with widget registration
-└── web/
-    └── src/
-        └── widgets/
-            ├── my-widget.tsx  # Widget component
-            └── other-widget.tsx
+├── src/
+│   ├── server.ts             # MCP server entry
+│   └── views/
+│       └── my-view.tsx     # View component
+├── vite.config.ts            # Vite + Skybridge plugin
+├── tsconfig.json
+└── package.json
 ```
 
-### Widget naming convention
+By default views are located in `src/views/`. This is configurable via the `viewsDir` option in the provided Vite plugin.
 
-Widget file name must match the registration name (e.g., `"my-widget"` → `my-widget.tsx`). See [registerWidget](/api-reference/register-widget#name).
+### View naming convention
 
-## Set up the web project
+A view's file name must match `view.component` in `registerTool`. See [registerTool](/api-reference/register-tool).
 
-Create a `web` folder for your UI widgets:
+## Set up Vite
+
+Install the web dependencies and create `vite.config.ts` at the project root:
 
 ```bash
-mkdir web && cd web
-pnpm init
-pnpm add react react-dom skybridge
+pnpm add react react-dom
 pnpm add -D vite typescript @types/react @types/react-dom
 ```
 
-### Configure Vite
-
-Create `vite.config.ts` in the `web` folder:
-
 ```typescript
+// vite.config.ts
 import { defineConfig } from "vite";
 import { skybridge } from "skybridge/web";
 
@@ -79,54 +73,49 @@ export default defineConfig({
 });
 ```
 
-## Create your first widget
+Make sure `tsconfig.json` includes the generated types:
 
-Create a widget file in `web/src/widgets/my-widget.tsx`:
+```json
+{
+  "include": ["src", ".skybridge/**/*.d.ts"]
+}
+```
+
+## Create your first view
+
+Create `src/views/my-view.tsx` and `export default` a React component:
 
 ```tsx
-import { mountWidget } from "skybridge/web";
-
-const MyWidget: React.FC = () => {
+export default function MyView() {
   return (
     <div>
       <h2>Hello from Skybridge!</h2>
-      <p>Your widget is working!</p>
+      <p>Your view is working!</p>
     </div>
   );
-};
-
-mountWidget(<MyWidget />);
+}
 ```
 
-## Register the widget
+## Register the view
 
-In your server code, register the widget using `server.registerWidget()`:
+In your server code, register the view with `registerTool` and `view`:
 
 ```typescript
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
-const server = new McpServer({ name: "my-app", version: "1.0" }, {});
-
-server.registerWidget(
-  "my-widget",  // Must match the filename: my-widget.tsx
-  {},
-  {
-    description: "My first widget",
-    inputSchema: {
-      message: z.string(),
+const server = new McpServer({ name: "my-app", version: "1.0" }, {})
+  .registerTool(
+    {
+      name: "my-view",
+      description: "My first view",
+      inputSchema: { message: z.string() },
+      view: { component: "my-view" }, // must match src/views/my-view.tsx
     },
-  },
-  async ({ message }) => {
-    // Your widget logic here
-    return {
-      content: [{
-        type: "text",
-        text: message || "Hello World"
-      }]
-    };
-  }
-);
+    async ({ message }) => {
+      return { content: message || "Hello World" };
+    },
+  );
 ```
 
 ## Configure your dev server
@@ -139,16 +128,17 @@ import { z } from "zod";
 import express from "express";
 
 const app = express();
-const server = new McpServer({ name: "my-app", version: "1.0" }, {});
-
-// Register your widgets
-server.registerWidget("my-widget", {}, {
-  inputSchema: { message: z.string() },
-}, async ({ message }) => {
-  return {
-    content: [{ type: "text", text: message }]
-  };
-});
+const server = new McpServer({ name: "my-app", version: "1.0" }, {})
+  .registerTool(
+    {
+      name: "my-view",
+      inputSchema: { message: z.string() },
+      view: { component: "my-view" },
+    },
+    async ({ message }) => {
+      return { content: message };
+    },
+  );
 
 // Serve the MCP endpoint
 app.use("/mcp", server.handler());
@@ -164,7 +154,7 @@ app.listen(3000, () => {
 For full type inference and autocomplete, use method chaining and `generateHelpers`. See [Type Safety](/concepts/type-safety) for the complete setup.
 
 Quick summary:
-1. Use method chaining when registering widgets
+1. Use method chaining when registering tools
 2. Export `type AppType = typeof server`
-3. Create a `skybridge.ts` file with `generateHelpers<AppType>()`
+3. Create a `helpers.ts` file with `generateHelpers<AppType>()`
 4. Import typed hooks from your helper file

@@ -4,3 +4,4 @@ dist
 .env
 cdk.out
 .claude/skills/
+.skybridge/

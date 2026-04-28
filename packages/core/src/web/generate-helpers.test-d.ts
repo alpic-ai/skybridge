@@ -18,35 +18,35 @@ type InterfaceTestServer = typeof interfaceServer;
 test("InferTools extracts the tool registry type (widgets + registerTool)", () => {
   type Tools = InferTools<TestServer>;
 
-  expectTypeOf<Tools>().toHaveProperty("search-voyage");
+  expectTypeOf<Tools>().toHaveProperty("search-trip");
   expectTypeOf<Tools>().toHaveProperty("get-trip-details");
-  expectTypeOf<Tools>().toHaveProperty("no-input-widget");
+  expectTypeOf<Tools>().toHaveProperty("no-input-view");
   expectTypeOf<Tools>().toHaveProperty("calculate-price");
-  expectTypeOf<Tools>().toHaveProperty("inferred-output-widget");
+  expectTypeOf<Tools>().toHaveProperty("inferred-output-view");
   expectTypeOf<Tools>().toHaveProperty("inferred-tool");
-  expectTypeOf<Tools>().toHaveProperty("widget-with-metadata");
+  expectTypeOf<Tools>().toHaveProperty("view-with-metadata");
   expectTypeOf<Tools>().toHaveProperty("tool-with-metadata");
-  expectTypeOf<Tools>().toHaveProperty("widget-with-mixed-returns");
+  expectTypeOf<Tools>().toHaveProperty("view-with-mixed-returns");
 });
 
 test("ToolNames returns a union of tool name literals (widgets + registerTool)", () => {
   type Names = ToolNames<TestServer>;
 
   expectTypeOf<Names>().toEqualTypeOf<
-    | "search-voyage"
+    | "search-trip"
     | "get-trip-details"
-    | "no-input-widget"
+    | "no-input-view"
     | "calculate-price"
-    | "inferred-output-widget"
+    | "inferred-output-view"
     | "inferred-tool"
-    | "widget-with-metadata"
+    | "view-with-metadata"
     | "tool-with-metadata"
-    | "widget-with-mixed-returns"
+    | "view-with-mixed-returns"
   >();
 });
 
 test("ToolInput extracts the correct input type from Zod schema", () => {
-  type SearchInput = ToolInput<TestServer, "search-voyage">;
+  type SearchInput = ToolInput<TestServer, "search-trip">;
 
   expectTypeOf<SearchInput>().toEqualTypeOf<{
     destination: string;
@@ -69,7 +69,7 @@ test("ToolInput extracts the correct input type from Zod schema", () => {
 });
 
 test("ToolOutput extracts the correct output type from callback's structuredContent", () => {
-  type SearchOutput = ToolOutput<TestServer, "search-voyage">;
+  type SearchOutput = ToolOutput<TestServer, "search-trip">;
 
   expectTypeOf<SearchOutput>().toEqualTypeOf<{
     results: Array<{
@@ -97,12 +97,12 @@ test("ToolOutput extracts the correct output type from callback's structuredCont
     currency: string;
   }>();
 
-  type NoInputOutput = ToolOutput<TestServer, "no-input-widget">;
+  type NoInputOutput = ToolOutput<TestServer, "no-input-view">;
   expectTypeOf<NoInputOutput>().toEqualTypeOf<Record<never, unknown>>();
 });
 
 test("ToolOutput extracts the correct output type from callback (inferred)", () => {
-  type InferredWidgetOutput = ToolOutput<TestServer, "inferred-output-widget">;
+  type InferredWidgetOutput = ToolOutput<TestServer, "inferred-output-view">;
 
   expectTypeOf<InferredWidgetOutput>().toEqualTypeOf<{
     inferredResults: { id: string; score: number }[];
@@ -120,15 +120,15 @@ test("ToolOutput extracts the correct output type from callback (inferred)", () 
 test("generateHelpers provides autocomplete for tool names (widgets + registerTool)", () => {
   const { useCallTool } = generateHelpers<TestServer>();
 
-  useCallTool("search-voyage");
+  useCallTool("search-trip");
   useCallTool("get-trip-details");
-  useCallTool("no-input-widget");
+  useCallTool("no-input-view");
   useCallTool("calculate-price");
-  useCallTool("inferred-output-widget");
+  useCallTool("inferred-output-view");
   useCallTool("inferred-tool");
-  useCallTool("widget-with-metadata");
+  useCallTool("view-with-metadata");
   useCallTool("tool-with-metadata");
-  useCallTool("widget-with-mixed-returns");
+  useCallTool("view-with-mixed-returns");
 
   // @ts-expect-error - "invalid-name" is not a valid tool name
   useCallTool("invalid-name");
@@ -136,7 +136,7 @@ test("generateHelpers provides autocomplete for tool names (widgets + registerTo
 
 test("useCallTool returns correctly typed callTool function", () => {
   const { useCallTool } = generateHelpers<TestServer>();
-  const { callTool } = useCallTool("search-voyage");
+  const { callTool } = useCallTool("search-trip");
 
   callTool({ destination: "Spain" });
   callTool({ destination: "France", departureDate: "2024-06-01" });
@@ -148,7 +148,7 @@ test("useCallTool returns correctly typed callTool function", () => {
 
 test("callTool can be called without args for tools with no required inputs", () => {
   const { useCallTool } = generateHelpers<TestServer>();
-  const { callTool, callToolAsync } = useCallTool("no-input-widget");
+  const { callTool, callToolAsync } = useCallTool("no-input-view");
 
   callTool();
 
@@ -160,7 +160,7 @@ test("callTool can be called without args for tools with no required inputs", ()
 
 test("callTool requires args for tools with required inputs", () => {
   const { useCallTool } = generateHelpers<TestServer>();
-  const { callTool } = useCallTool("search-voyage");
+  const { callTool } = useCallTool("search-trip");
 
   // @ts-expect-error - "destination" is required
   callTool();
@@ -174,7 +174,7 @@ test("callTool requires args for tools with required inputs", () => {
 
 test("callTool supports sideEffects for tools with required inputs", () => {
   const { useCallTool } = generateHelpers<TestServer>();
-  const { callTool } = useCallTool("search-voyage");
+  const { callTool } = useCallTool("search-trip");
 
   callTool(
     { destination: "Spain" },
@@ -200,7 +200,7 @@ test("callTool supports sideEffects for tools with required inputs", () => {
 
 test("callTool supports sideEffects for tools with no required inputs", () => {
   const { useCallTool } = generateHelpers<TestServer>();
-  const { callTool } = useCallTool("no-input-widget");
+  const { callTool } = useCallTool("no-input-view");
 
   callTool({
     onSuccess: (response) => {
@@ -221,18 +221,18 @@ test("callTool supports sideEffects for tools with no required inputs", () => {
 test("callToolAsync returns correctly typed promise", () => {
   const { useCallTool } = generateHelpers<TestServer>();
 
-  const { callToolAsync: searchAsync } = useCallTool("search-voyage");
+  const { callToolAsync: searchAsync } = useCallTool("search-trip");
   const searchPromise = searchAsync({ destination: "Spain" });
   expectTypeOf(searchPromise).resolves.toHaveProperty("structuredContent");
 
-  const { callToolAsync: noInputAsync } = useCallTool("no-input-widget");
+  const { callToolAsync: noInputAsync } = useCallTool("no-input-view");
   const noInputPromise = noInputAsync();
   expectTypeOf(noInputPromise).resolves.toHaveProperty("structuredContent");
 });
 
 test("useCallTool returns correctly typed data", () => {
   const { useCallTool } = generateHelpers<TestServer>();
-  const { data } = useCallTool("search-voyage");
+  const { data } = useCallTool("search-trip");
 
   if (data) {
     expectTypeOf(data.structuredContent).toExtend<{
@@ -252,7 +252,7 @@ test("useCallTool returns correctly typed data", () => {
 test("useCallTool returns correctly typed data for callback-inferred outputs", () => {
   const { useCallTool } = generateHelpers<TestServer>();
 
-  const { data: widgetData } = useCallTool("inferred-output-widget");
+  const { data: widgetData } = useCallTool("inferred-output-view");
   if (widgetData) {
     expectTypeOf(widgetData.structuredContent).toExtend<{
       inferredResults: { id: string; score: number }[];
@@ -272,15 +272,15 @@ test("useCallTool returns correctly typed data for callback-inferred outputs", (
 test("generateHelpers provides autocomplete for tool names in useToolInfo (widgets + registerTool)", () => {
   const { useToolInfo } = generateHelpers<TestServer>();
 
-  useToolInfo<"search-voyage">();
+  useToolInfo<"search-trip">();
   useToolInfo<"get-trip-details">();
-  useToolInfo<"no-input-widget">();
+  useToolInfo<"no-input-view">();
   useToolInfo<"calculate-price">();
-  useToolInfo<"inferred-output-widget">();
+  useToolInfo<"inferred-output-view">();
   useToolInfo<"inferred-tool">();
-  useToolInfo<"widget-with-metadata">();
+  useToolInfo<"view-with-metadata">();
   useToolInfo<"tool-with-metadata">();
-  useToolInfo<"widget-with-mixed-returns">();
+  useToolInfo<"view-with-mixed-returns">();
 
   // @ts-expect-error - "invalid-name" is not a valid tool name
   useToolInfo<"invalid-name">();
@@ -288,18 +288,18 @@ test("generateHelpers provides autocomplete for tool names in useToolInfo (widge
 
 test("useToolInfo infers input and output types", () => {
   const { useToolInfo } = generateHelpers<TestServer>();
-  const toolInfo = useToolInfo<"search-voyage">();
+  const toolInfo = useToolInfo<"search-trip">();
 
   // Input is only available when not in idle state
   if (!(toolInfo.status === "idle")) {
     expectTypeOf(toolInfo.input).toExtend<
-      ToolInput<TestServer, "search-voyage">
+      ToolInput<TestServer, "search-trip">
     >();
   }
 
   if (toolInfo.status === "success") {
     expectTypeOf(toolInfo.output).toExtend<
-      ToolOutput<TestServer, "search-voyage">
+      ToolOutput<TestServer, "search-trip">
     >();
     expectTypeOf(toolInfo.output.results).toBeArray();
     expectTypeOf(toolInfo.output.totalCount).toBeNumber();
@@ -307,7 +307,7 @@ test("useToolInfo infers input and output types", () => {
 });
 
 test("ToolResponseMetadata extracts _meta type from callback", () => {
-  type WidgetMeta = ToolResponseMetadata<TestServer, "widget-with-metadata">;
+  type WidgetMeta = ToolResponseMetadata<TestServer, "view-with-metadata">;
   expectTypeOf<WidgetMeta>().toEqualTypeOf<{
     requestId: string;
     timestamp: number;
@@ -320,13 +320,13 @@ test("ToolResponseMetadata extracts _meta type from callback", () => {
     source: string;
   }>();
 
-  type SearchMeta = ToolResponseMetadata<TestServer, "search-voyage">;
+  type SearchMeta = ToolResponseMetadata<TestServer, "search-trip">;
   expectTypeOf<SearchMeta>().toBeUnknown();
 });
 
 test("useToolInfo infers responseMetadata type from generateHelpers", () => {
   const { useToolInfo } = generateHelpers<TestServer>();
-  const toolInfo = useToolInfo<"widget-with-metadata">();
+  const toolInfo = useToolInfo<"view-with-metadata">();
 
   if (toolInfo.isSuccess) {
     expectTypeOf(toolInfo.responseMetadata.requestId).toBeString();
@@ -338,10 +338,7 @@ test("useToolInfo infers responseMetadata type from generateHelpers", () => {
 test("ToolResponseMetadata extracts _meta from mixed return paths", () => {
   // Widget has multiple return paths: some with _meta, some without
   // ExtractMeta should still infer the _meta type from branches that have it
-  type MixedMeta = ToolResponseMetadata<
-    TestServer,
-    "widget-with-mixed-returns"
-  >;
+  type MixedMeta = ToolResponseMetadata<TestServer, "view-with-mixed-returns">;
   expectTypeOf<MixedMeta>().toEqualTypeOf<{
     processedAt: number;
     region: string;
@@ -351,7 +348,7 @@ test("ToolResponseMetadata extracts _meta from mixed return paths", () => {
 test("ToolOutput extracts correct type when using interface declaration", () => {
   type InterfaceWidgetOutput = ToolOutput<
     InterfaceTestServer,
-    "interface-widget"
+    "interface-view"
   >;
 
   expectTypeOf<InterfaceWidgetOutput>().toHaveProperty("itemName");
@@ -362,7 +359,7 @@ test("ToolOutput extracts correct type when using interface declaration", () => 
 test("ToolResponseMetadata extracts correct type when using interface declaration", () => {
   type InterfaceWidgetMeta = ToolResponseMetadata<
     InterfaceTestServer,
-    "interface-widget"
+    "interface-view"
   >;
 
   expectTypeOf<InterfaceWidgetMeta>().toHaveProperty("processedBy");
@@ -373,13 +370,13 @@ test("ToolResponseMetadata extracts correct type when using interface declaratio
 test("generateHelpers works with interface-typed server", () => {
   const { useCallTool, useToolInfo } = generateHelpers<InterfaceTestServer>();
 
-  const { data } = useCallTool("interface-widget");
+  const { data } = useCallTool("interface-view");
   if (data) {
     expectTypeOf(data.structuredContent.itemName).toBeString();
     expectTypeOf(data.structuredContent.quantity).toBeNumber();
   }
 
-  const toolInfo = useToolInfo<"interface-widget">();
+  const toolInfo = useToolInfo<"interface-view">();
   if (toolInfo.isSuccess) {
     expectTypeOf(toolInfo.output.itemName).toBeString();
     expectTypeOf(toolInfo.output.quantity).toBeNumber();
