@@ -328,7 +328,7 @@ describe("createApp", () => {
     });
     // Slow tool: keeps the underlying transport bound long enough to overlap
     // with concurrent requests, exposing the shared-McpServer race.
-    mcpServer.registerTool("slow", { description: "slow" }, async () => {
+    mcpServer.registerTool({ name: "slow", description: "slow" }, async () => {
       await new Promise((r) => setTimeout(r, 50));
       return { content: [{ type: "text" as const, text: "done" }] };
     });
