@@ -78,7 +78,7 @@ jobs:
       # publishing create-skybridge.
       - name: Pin template skybridge dep for publish
         working-directory: ./packages/create-skybridge/template
-        run: pnpm pkg set 'dependencies.skybridge=>=${{ steps.version.outputs.version }} <1.0.0'
+        run: pnpm pkg set 'dependencies.skybridge=>=${{ steps.version.outputs.version }}'
 
       - name: Publish create-skybridge to npm
         working-directory: ./packages/create-skybridge
