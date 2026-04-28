@@ -6,6 +6,10 @@ import type {
   McpUiResourceMeta,
   McpUiToolMeta,
 } from "@modelcontextprotocol/ext-apps";
+import {
+  Server as SdkServer,
+  type ServerOptions,
+} from "@modelcontextprotocol/sdk/server/index.js";
 import { McpServer as McpServerBase } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type {
   AnySchema,
@@ -15,6 +19,7 @@ import type {
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
   ContentBlock,
+  Implementation,
   ServerNotification,
   ServerRequest,
   ServerResult,
@@ -297,6 +302,14 @@ export class McpServer<
   private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private mcpMiddlewareApplied = false;
   private claimedViews = new Map<string, string>();
+  private readonly serverInfo: Implementation;
+  private readonly serverOptions?: ServerOptions;
+
+  constructor(serverInfo: Implementation, options?: ServerOptions) {
+    super(serverInfo, options);
+    this.serverInfo = serverInfo;
+    this.serverOptions = options;
+  }
 
   use(...handlers: RequestHandler[]): this;
   use(path: string, ...handlers: RequestHandler[]): this;
@@ -461,6 +474,35 @@ export class McpServer<
   ): Promise<void> {
     this.applyMcpMiddleware();
     return McpServerBase.prototype.connect.call(this, transport);
+  }
+
+  /**
+   * Connect a per-request transport for stateless HTTP handling.
+   *
+   * The MCP SDK's `Protocol` allows only one active transport per instance,
+   * so sharing this `McpServer` across concurrent requests crashes with
+   * "Already connected to a transport". This builds a fresh underlying
+   * `Server` whose request/notification handler maps are shared by reference
+   * with the main server (so user-registered tools, resources, prompts and
+   * any mcpMiddleware-wrapped handlers are reachable) but which owns its own
+   * transport. Discarded once the request completes.
+   */
+  async connectStatelessTransport(
+    transport: Parameters<typeof McpServerBase.prototype.connect>[0],
+  ): Promise<void> {
+    this.applyMcpMiddleware();
+
+    const fresh = new SdkServer(this.serverInfo, this.serverOptions);
+    type HandlerMaps = {
+      _requestHandlers: unknown;
+      _notificationHandlers: unknown;
+    };
+    const main = this.server as unknown as HandlerMaps;
+    const target = fresh as unknown as HandlerMaps;
+    target._requestHandlers = main._requestHandlers;
+    target._notificationHandlers = main._notificationHandlers;
+
+    await fresh.connect(transport);
   }
 
   async run(): Promise<void> {
