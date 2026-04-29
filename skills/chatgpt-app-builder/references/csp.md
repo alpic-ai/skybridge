@@ -1,6 +1,6 @@
 # Content Security Policy
 
-Views run in sandboxed iframes with strict CSP. Whitelist external domains in view definition `_meta.ui.csp`:
+Views run in sandboxed iframes with strict CSP. Whitelist external domains on the tool's `view.csp`:
 
 | Property | Purpose |
 |----------|---------|
@@ -10,23 +10,22 @@ Views run in sandboxed iframes with strict CSP. Whitelist external domains in vi
 | `frameDomains` | (optional) Iframe embeds — triggers stricter review |
 
 ```typescript
-server.registerView(
-  "search-flights",
+server.registerTool(
   {
+    name: "search-flights",
     description: "Search flights",
-    _meta: {
-      ui: {
-        csp: {
-          connectDomains: ["https://api.example.com"],
-          resourceDomains: ["https://cdn.example.com"],
-          frameDomains: ["https://maps.example.com"],
-          redirectDomains: ["https://checkout.example.com"],
-        },
+    inputSchema: { ... },
+    view: {
+      component: "search-flights",
+      csp: {
+        connectDomains: ["https://api.example.com"],
+        resourceDomains: ["https://cdn.example.com"],
+        frameDomains: ["https://maps.example.com"],
+        redirectDomains: ["https://checkout.example.com"],
       },
     },
   },
-  { inputSchema: { ... } },
-  async (input) => ({ ... })
+  async (input) => ({ ... }),
 );
 ```
 

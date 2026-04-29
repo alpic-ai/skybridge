@@ -103,8 +103,11 @@ export async function getAuth(extra: Extra): Promise<{ userId: string } | null> 
 
 ```typescript
 server.registerTool(
-  "get-orders",
-  { description: "Get user orders", inputSchema: {} },
+  {
+    name: "get-orders",
+    description: "Get user orders",
+    inputSchema: {},
+  },
   async (input, extra) => {
     const auth = await getAuth(extra);
 

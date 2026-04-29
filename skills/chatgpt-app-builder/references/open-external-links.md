@@ -53,19 +53,18 @@ Shows confirmation dialog unless domain is whitelisted:
 
 ```typescript
 // server/src/index.ts
-server.registerView(
-  "search-flights",
+server.registerTool(
   {
+    name: "search-flights",
     description: "Search for flights",
-    _meta: {
-      ui: {
-        csp: {
-          redirectDomains: ["https://airline.example.com"],
-        },
+    inputSchema: { destination: z.string(), dates: z.string() },
+    view: {
+      component: "search-flights",
+      csp: {
+        redirectDomains: ["https://airline.example.com"],
       },
     },
   },
-  { inputSchema: { destination: z.string(), dates: z.string() } },
-  async ({ destination, dates }) => { /* ... */ }
+  async ({ destination, dates }) => { /* ... */ },
 );
 ```

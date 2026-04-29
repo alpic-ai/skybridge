@@ -45,12 +45,13 @@ const server = new McpServer(
   { name: "my-app", version: "0.0.1" },
   { capabilities: {} },
 )
-  .registerView(
-    "search-flights",
-    { description: "Search for flights" },
+  .registerTool(
     {
+      name: "search-flights",
+      description: "Search for flights",
       inputSchema: { destination: z.string(), dates: z.string() },
       annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
+      view: { component: "search-flights" },
     },
     async ({ destination, dates }) => {
       const flights = await fetchFlights(destination, dates);
@@ -65,11 +66,11 @@ const server = new McpServer(
         content: [{ type: "text", text: `Found ${flights.length} flights.` }],
         _meta // mind the underscore prefix
       };
-    }
+    },
   )
   .registerTool(
-    "book-flight",
     {
+      name: "book-flight",
       description: "Book a flight",
       inputSchema: { flightId: z.string() },
       annotations: { readOnlyHint: false, openWorldHint: false, destructiveHint: false },
@@ -80,12 +81,14 @@ const server = new McpServer(
         structuredContent: { confirmationId },
         content: [{ type: "text", text: `Flight booked. Confirmation: ${confirmationId}` }],
       };
-    }
+    },
   );
 
 export default server;
 export type AppType = typeof server;
 ```
+
+A tool becomes a view by adding the `view` field to its config (with `component` matching the registered name). Without `view`, it's a plain tool with no UI.
 
 ## UI Components
 

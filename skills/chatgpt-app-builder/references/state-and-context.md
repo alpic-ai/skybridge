@@ -93,6 +93,10 @@ const [selected, setSelected] = useState(null);
 const [{ selected }, setState] = useViewState({ selected: null });
 ```
 
+Rule of thumb:
+- `useViewState` for data that needs to persist
+- `useState` for data that is ephemeral (e.g. ui state, animation)
+
 ```tsx
 // DON'T: Complex object in data-llm
 <div data-llm={JSON.stringify(cart)}>
