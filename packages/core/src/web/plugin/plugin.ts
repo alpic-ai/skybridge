@@ -1,8 +1,9 @@
-import { isAbsolute, resolve } from "node:path";
+import { isAbsolute, relative, resolve } from "node:path";
 import type { Plugin, ViteDevServer } from "vite";
 import {
   type DiscoveredView,
   discoverViewsSync,
+  scanViewsSync,
   writeViewsDts,
 } from "./scan-views.js";
 import { transform as dataLlmTransform } from "./transform-data-llm.js";
@@ -136,8 +137,33 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
       }
 
       server.watcher.add(resolvedViewsDir);
+      // Track which view files we've already warned about so a rescan
+      // triggered by an unrelated edit doesn't re-emit the same warning.
+      let knownInvalid = new Set<string>();
       const rescan = () => {
         try {
+          // Surface broken view files. Without this, files lacking a
+          // default export are silently dropped from the input and the
+          // user has no idea why their widget never mounts.
+          const { invalid } = scanViewsSync(resolvedViewsDir);
+          const nextInvalid = new Set(invalid.map((v) => v.filePath));
+
+          for (const filePath of nextInvalid) {
+            if (!knownInvalid.has(filePath)) {
+              server.config.logger.warn(
+                `[skybridge] view file "${relative(projectRoot, filePath)}" is missing a default export — it won't be served until fixed.`,
+              );
+            }
+          }
+          for (const filePath of knownInvalid) {
+            if (!nextInvalid.has(filePath)) {
+              server.config.logger.info(
+                `[skybridge] view file "${relative(projectRoot, filePath)}" resolved.`,
+              );
+            }
+          }
+          knownInvalid = nextInvalid;
+
           const views = discoverViewsSync(resolvedViewsDir);
           viewMap = new Map(views.map((v) => [v.name, v]));
           writeViewsDts(projectRoot, views);
@@ -153,7 +179,10 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
         }
       };
 
+      // Initial scan emits warnings for broken files that exist at startup.
+      rescan();
       server.watcher.on("add", rescan);
+      server.watcher.on("change", rescan);
       server.watcher.on("unlink", rescan);
     },
 

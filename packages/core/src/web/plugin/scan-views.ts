@@ -7,7 +7,14 @@ export interface DiscoveredView {
   filePath: string;
 }
 
-export function discoverViewsSync(viewsDir: string): DiscoveredView[] {
+export interface InvalidView {
+  filePath: string;
+}
+
+export function scanViewsSync(viewsDir: string): {
+  valid: DiscoveredView[];
+  invalid: InvalidView[];
+} {
   const flatPattern = resolve(viewsDir, "*.{tsx,jsx}");
   const dirPattern = resolve(viewsDir, "*/index.{tsx,jsx}");
 
@@ -21,17 +28,34 @@ export function discoverViewsSync(viewsDir: string): DiscoveredView[] {
     filePath: file,
   }));
 
-  // Filter first, then check duplicates — so a barrel file like
-  // `views/foo/index.tsx` (no default export) doesn't falsely collide with
-  // a sibling view at `views/foo.tsx`.
-  const views = [...flatFiles, ...dirFiles]
-    .filter((v) => v.name !== "index")
-    .filter((v) =>
-      hasDefaultExport(readFileSync(v.filePath, "utf-8"), v.filePath),
-    );
+  // A barrel file like `views/foo/index.tsx` (no default export) must not
+  // falsely collide with a sibling `views/foo.tsx`. Drop top-level `index`
+  // before splitting valid vs invalid.
+  const candidates = [...flatFiles, ...dirFiles].filter(
+    (v) => v.name !== "index",
+  );
+
+  const valid: DiscoveredView[] = [];
+  const invalid: InvalidView[] = [];
+  for (const candidate of candidates) {
+    const code = readFileSync(candidate.filePath, "utf-8");
+    if (hasDefaultExport(code, candidate.filePath)) {
+      valid.push(candidate);
+    } else {
+      invalid.push({
+        filePath: candidate.filePath,
+      });
+    }
+  }
+
+  return { valid, invalid };
+}
+
+export function discoverViewsSync(viewsDir: string): DiscoveredView[] {
+  const { valid } = scanViewsSync(viewsDir);
 
   const nameMap = new Map<string, string[]>();
-  for (const view of views) {
+  for (const view of valid) {
     const paths = nameMap.get(view.name) ?? [];
     paths.push(view.filePath);
     nameMap.set(view.name, paths);
@@ -45,7 +69,7 @@ export function discoverViewsSync(viewsDir: string): DiscoveredView[] {
     }
   }
 
-  return views;
+  return valid;
 }
 
 export function generateViewsDts(views: DiscoveredView[]): string {
