@@ -79,12 +79,7 @@ describe("scanViewsSync", () => {
     const { valid, invalid } = scanViewsSync(viewsDir);
 
     expect(valid.map((v) => v.name).sort()).toEqual(["ok"]);
-    expect(invalid).toEqual([
-      {
-        filePath: join(viewsDir, "broken.tsx"),
-        reason: "missing-default-export",
-      },
-    ]);
+    expect(invalid).toEqual([{ filePath: join(viewsDir, "broken.tsx") }]);
   });
 
   it("flags an index file in a view dir that lacks a default export", () => {
@@ -97,12 +92,7 @@ describe("scanViewsSync", () => {
     const { valid, invalid } = scanViewsSync(viewsDir);
 
     expect(valid).toEqual([]);
-    expect(invalid).toEqual([
-      {
-        filePath: join(viewsDir, "broken/index.tsx"),
-        reason: "missing-default-export",
-      },
-    ]);
+    expect(invalid).toEqual([{ filePath: join(viewsDir, "broken/index.tsx") }]);
   });
 
   it("ignores top-level index.tsx (treated as a barrel, not a view)", () => {
