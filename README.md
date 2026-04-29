@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/alpic-ai-skybridge-badge.png)](https://mseep.ai/app/alpic-ai-skybridge)
+
 <div align="center">
 
 <img alt="Skybridge" src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/github-banner.png" width="100%">
