@@ -11,7 +11,7 @@ import { InputForm } from "./input-form.js";
 import { OpenAiInspector } from "./openai-inspector.js";
 import { OpenAiLogs } from "./openai-logs.js";
 import { Output } from "./output.js";
-import { Widget } from "./widget/widget.js";
+import { View } from "./view/view.js";
 
 export const ToolPanel = () => {
   const tool = useSelectedTool();
@@ -20,9 +20,9 @@ export const ToolPanel = () => {
     id: "skybridge-devtools-input-column",
     storage: localStorage,
   });
-  const { defaultLayout: widgetLayout, onLayoutChange: onWidgetLayoutChange } =
+  const { defaultLayout: viewLayout, onLayoutChange: onViewLayoutChange } =
     useDefaultLayout({
-      id: "skybridge-devtools-widget-section",
+      id: "skybridge-devtools-view-section",
       storage: localStorage,
     });
   const {
@@ -38,7 +38,7 @@ export const ToolPanel = () => {
       storage: localStorage,
     });
 
-  const shouldDisplayWidgetSection = Boolean(
+  const shouldDisplayViewSection = Boolean(
     tool._meta?.["openai/outputTemplate"] &&
       toolResult?.response &&
       !toolResult.response.isError,
@@ -72,28 +72,28 @@ export const ToolPanel = () => {
             </Panel>
           </Group>
         </Panel>
-        {shouldDisplayWidgetSection && (
+        {shouldDisplayViewSection && (
           <>
             <Separator className="h-px bg-border" />
-            <Panel id="widget-section" minSize="20">
+            <Panel id="view-section" minSize="20">
               <Group
                 orientation="horizontal"
                 className="flex-1 overflow-hidden bg-card"
                 defaultLayout={inspectorLayout}
                 onLayoutChange={onInspectorLayoutChange}
               >
-                <Panel id="widget-logs-panel" minSize="30">
+                <Panel id="view-logs-panel" minSize="30">
                   <div className="flex flex-col h-full overflow-hidden">
                     <Group
                       orientation="vertical"
                       className="flex-1 overflow-hidden"
-                      defaultLayout={widgetLayout}
-                      onLayoutChange={onWidgetLayoutChange}
+                      defaultLayout={viewLayout}
+                      onLayoutChange={onViewLayoutChange}
                     >
-                      <Panel id="widget-panel" minSize="20" maxSize="80">
+                      <Panel id="view-panel" minSize="20" maxSize="80">
                         <div className="h-full overflow-hidden">
                           <Suspense>
-                            <Widget />
+                            <View />
                           </Suspense>
                         </div>
                       </Panel>

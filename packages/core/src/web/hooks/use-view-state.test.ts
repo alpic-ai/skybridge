@@ -14,9 +14,9 @@ import {
   getMcpAppHostPostMessageMock,
   MockResizeObserver,
 } from "./test/utils.js";
-import { useWidgetState } from "./use-widget-state.js";
+import { useViewState } from "./use-view-state.js";
 
-describe("useWidgetState", () => {
+describe("useViewState", () => {
   let OpenaiMock: { widgetState: unknown; setWidgetState: Mock };
 
   beforeEach(() => {
@@ -38,20 +38,20 @@ describe("useWidgetState", () => {
 
   it("should initialize with default state when window.openai.widgetState is null", () => {
     OpenaiMock.widgetState = null;
-    const { result } = renderHook(() => useWidgetState(defaultState));
+    const { result } = renderHook(() => useViewState(defaultState));
 
     expect(result.current[0]).toEqual(defaultState);
   });
 
   it("should initialize with window.openai.widgetState when available", () => {
     OpenaiMock.widgetState = { modelContent: windowState };
-    const { result } = renderHook(() => useWidgetState(defaultState));
+    const { result } = renderHook(() => useViewState(defaultState));
 
     expect(result.current[0]).toEqual(windowState);
   });
 
-  it("should call window.openai.setWidgetState when setWidgetState is called with a new state", async () => {
-    const { result } = renderHook(() => useWidgetState(defaultState));
+  it("should call window.openai.setWidgetState when setViewState is called with a new state", async () => {
+    const { result } = renderHook(() => useViewState(defaultState));
     const newState = { count: 10, name: "updated" };
 
     act(() => {
@@ -65,8 +65,8 @@ describe("useWidgetState", () => {
     expect(result.current[0]).toEqual(newState);
   });
 
-  it("should call window.openai.setWidgetState when setWidgetState is called with a function updater", async () => {
-    const { result } = renderHook(() => useWidgetState(defaultState));
+  it("should call window.openai.setWidgetState when setViewState is called with a function updater", async () => {
+    const { result } = renderHook(() => useViewState(defaultState));
 
     act(() => {
       result.current[1]((prev) => ({ ...prev, count: prev.count + 1 }));
@@ -81,7 +81,7 @@ describe("useWidgetState", () => {
 
   it("should update state when window.openai.widgetState changes", () => {
     OpenaiMock.widgetState = { modelContent: defaultState };
-    const { result, rerender } = renderHook(() => useWidgetState(defaultState));
+    const { result, rerender } = renderHook(() => useViewState(defaultState));
 
     expect(result.current[0]).toEqual(defaultState);
 
@@ -94,7 +94,7 @@ describe("useWidgetState", () => {
   });
 });
 
-describe("useWidgetState (mcp-app host — localStorage persistence)", () => {
+describe("useViewState (mcp-app host — localStorage persistence)", () => {
   beforeEach(() => {
     vi.stubGlobal("parent", { postMessage: getMcpAppHostPostMessageMock() });
     vi.stubGlobal("skybridge", { hostType: "mcp-app" });
@@ -112,7 +112,7 @@ describe("useWidgetState (mcp-app host — localStorage persistence)", () => {
 
   it("should persist state to localStorage when viewUUID is available", async () => {
     const viewUUID = "test-uuid-123";
-    const { result } = renderHook(() => useWidgetState({ page: 1, zoom: 100 }));
+    const { result } = renderHook(() => useViewState({ page: 1, zoom: 100 }));
 
     await act(async () => {
       fireToolResultNotification({
@@ -138,7 +138,7 @@ describe("useWidgetState (mcp-app host — localStorage persistence)", () => {
       JSON.stringify({ page: 5, zoom: 200 }),
     );
 
-    const { result } = renderHook(() => useWidgetState({ page: 1, zoom: 100 }));
+    const { result } = renderHook(() => useViewState({ page: 1, zoom: 100 }));
 
     act(() => {
       fireToolResultNotification({
@@ -154,7 +154,7 @@ describe("useWidgetState (mcp-app host — localStorage persistence)", () => {
   });
 
   it("should not persist when no viewUUID is available", () => {
-    const { result } = renderHook(() => useWidgetState({ page: 1 }));
+    const { result } = renderHook(() => useViewState({ page: 1 }));
 
     act(() => {
       result.current[1]({ page: 2 });
@@ -168,7 +168,7 @@ describe("useWidgetState (mcp-app host — localStorage persistence)", () => {
     const viewUUID = "test-uuid-corrupt";
     localStorage.setItem(`sb:1700000000000:${viewUUID}`, "not valid json{{{");
 
-    const { result } = renderHook(() => useWidgetState({ page: 1 }));
+    const { result } = renderHook(() => useViewState({ page: 1 }));
 
     act(() => {
       fireToolResultNotification({
@@ -188,7 +188,7 @@ describe("useWidgetState (mcp-app host — localStorage persistence)", () => {
     const oldKey = `sb:1000000000000:${viewUUID}`;
     localStorage.setItem(oldKey, JSON.stringify({ page: 1 }));
 
-    const { result } = renderHook(() => useWidgetState({ page: 1 }));
+    const { result } = renderHook(() => useViewState({ page: 1 }));
 
     await act(async () => {
       fireToolResultNotification({
@@ -218,7 +218,7 @@ describe("useWidgetState (mcp-app host — localStorage persistence)", () => {
     expect(localStorage.length).toBe(200);
 
     const viewUUID = "eviction-test-uuid";
-    const { result } = renderHook(() => useWidgetState({ page: 1 }));
+    const { result } = renderHook(() => useViewState({ page: 1 }));
 
     await act(async () => {
       fireToolResultNotification({

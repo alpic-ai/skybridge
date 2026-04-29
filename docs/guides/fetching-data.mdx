@@ -1,21 +1,21 @@
 ---
 title: Fetching Data
-description: "Learn two patterns for getting data into widgets: initial hydration with useToolInfo and user-triggered fetching with useCallTool."
+description: "Learn two patterns for getting data into views: initial hydration with useToolInfo and user-triggered fetching with useCallTool."
 ---
 
 
-How to get data into your widget and fetch more when the user interacts.
+How to get data into your view and fetch more when the user interacts.
 
 ## Two Patterns
 
 | Pattern | Hook | When to use |
 |---------|------|-------------|
-| Initial hydration | `useToolInfo` | Data passed when widget loads |
+| Initial hydration | `useToolInfo` | Data passed when view loads |
 | User-triggered | `useCallTool` | User clicks button, needs more data |
 
 ## Initial Hydration with useToolInfo
 
-When the host calls your widget's tool, the server returns `structuredContent`. Access it with `useToolInfo`:
+When the host calls your view's tool, the server returns `structuredContent`. Access it with `useToolInfo`:
 
 ```tsx
 import { useToolInfo } from "skybridge/web";
@@ -24,7 +24,7 @@ type FlightData = {
   flights: Array<{ id: string; name: string; price: number }>;
 };
 
-export function FlightWidget() {
+export function FlightView() {
   const { isSuccess, output } = useToolInfo<FlightData>();
 
   if (!isSuccess) {
@@ -51,7 +51,7 @@ const { isIdle, isPending, isSuccess, isError, output, error } = useToolInfo();
 
 | Flag | Meaning |
 |------|---------|
-| `isIdle` | Widget hasn't received data yet |
+| `isIdle` | View hasn't received data yet |
 | `isPending` | Tool is still executing |
 | `isSuccess` | Data is available in `output` |
 | `isError` | Tool failed, check `error` |
@@ -61,13 +61,13 @@ const { isIdle, isPending, isSuccess, isError, output, error } = useToolInfo();
 When the user clicks something and you need more data:
 
 <Note>
-**Tool Accessibility**: In Apps SDK (ChatGPT), tools must have `_meta["openai/widgetAccessible"]` set to `true` to be callable from widgets. In MCP Apps, all tools are accessible by default. See [useCallTool API](/api-reference/use-call-tool) for details.
+**Tool Accessibility**: In Apps SDK (ChatGPT), tools must have `_meta["openai/widgetAccessible"]` set to `true` to be callable from views. In MCP Apps, all tools are accessible by default. See [useCallTool API](/api-reference/use-call-tool) for details.
 </Note>
 
 ```tsx
 import { useCallTool } from "skybridge/web";
 
-export function FlightWidget() {
+export function FlightView() {
   const { callTool, isPending, data, isError, error } = useCallTool("get_flight_details");
 
   const handleViewDetails = (flightId: string) => {
@@ -151,7 +151,7 @@ callTool({ city: "Paris", checkIn: "2025-12-15" });
 ### Loading State
 
 ```tsx
-function ProductWidget() {
+function ProductView() {
   const { isPending, data } = useCallTool("get_product");
 
   if (isPending) {
@@ -169,7 +169,7 @@ function ProductWidget() {
 ### Refetching
 
 ```tsx
-function StockWidget() {
+function StockView() {
   const { callTool, data, isPending } = useCallTool("get_stock_price");
   const [lastFetch, setLastFetch] = useState<Date | null>(null);
 
@@ -194,7 +194,7 @@ function StockWidget() {
 ### Chained Calls
 
 ```tsx
-function BookingWidget() {
+function BookingView() {
   const { callToolAsync: checkAvailability } = useCallTool("check_availability");
   const { callToolAsync: createBooking } = useCallTool("create_booking");
 
@@ -223,7 +223,7 @@ function BookingWidget() {
 
 ```tsx
 // Bad: Fetches data on every mount
-function BadWidget() {
+function BadView() {
   const { callTool } = useCallTool("get_data");
 
   useEffect(() => {
@@ -232,7 +232,7 @@ function BadWidget() {
 }
 
 // Good: Use initial data from structuredContent
-function GoodWidget() {
+function GoodView() {
   const { output } = useToolInfo();
   // Data is already here from the tool call
 }
@@ -242,13 +242,13 @@ function GoodWidget() {
 
 ```tsx
 // Bad: Assumes data is always present
-function BadWidget() {
+function BadView() {
   const { data } = useCallTool("search");
   return <div>{data.structuredContent.results.length}</div>; // Crashes!
 }
 
 // Good: Handle all states
-function GoodWidget() {
+function GoodView() {
   const { data, isPending, isError } = useCallTool("search");
 
   if (isPending) return <Loading />;

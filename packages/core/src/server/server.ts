@@ -137,7 +137,7 @@ type McpAppsToolMeta = {
 type InternalToolMeta = Partial<OpenaiToolMeta & McpAppsToolMeta>;
 
 /** @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields */
-type OpenaiWidgetCSP = {
+type OpenaiViewCSP = {
   connect_domains: string[];
   resource_domains: string[];
   frame_domains?: string[];
@@ -147,7 +147,7 @@ type OpenaiWidgetCSP = {
 type OpenaiResourceMeta = {
   "openai/widgetDescription"?: string;
   "openai/widgetPrefersBorder"?: boolean;
-  "openai/widgetCSP"?: OpenaiWidgetCSP;
+  "openai/widgetCSP"?: OpenaiViewCSP;
   "openai/widgetDomain"?: string;
 };
 
@@ -556,7 +556,7 @@ export class McpServer<
     if (hosts.includes("apps-sdk")) {
       const viewResource: ViewResourceConfig<OpenaiResourceMeta> = {
         hostType: "apps-sdk",
-        uri: `ui://widgets/apps-sdk/${view.component}.html${versionParam}`,
+        uri: `ui://views/apps-sdk/${view.component}.html${versionParam}`,
         mimeType: "text/html+skybridge",
         buildContentMeta: (
           { resourceDomains, connectDomains, domain },
@@ -576,7 +576,7 @@ export class McpServer<
               OpenaiResourceMeta,
               "openai/widgetCSP" | "openai/widgetDescription"
             > & {
-              "openai/widgetCSP": Partial<OpenaiWidgetCSP>;
+              "openai/widgetCSP": Partial<OpenaiViewCSP>;
             }
           > = {
             "openai/widgetCSP": {
@@ -610,7 +610,7 @@ export class McpServer<
     if (hosts.includes("mcp-app")) {
       const viewResource: ViewResourceConfig<McpAppsResourceMeta> = {
         hostType: "mcp-app",
-        uri: `ui://widgets/ext-apps/${view.component}.html${versionParam}`,
+        uri: `ui://views/ext-apps/${view.component}.html${versionParam}`,
         mimeType: "text/html;profile=mcp-app",
         buildContentMeta: (
           { resourceDomains, connectDomains, domain, baseUriDomains },

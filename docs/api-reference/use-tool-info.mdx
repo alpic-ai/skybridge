@@ -1,6 +1,6 @@
 ---
 title: useToolInfo
-description: "React hook for accessing tool input, output, metadata, and execution status in Skybridge widgets."
+description: "React hook for accessing tool input, output, metadata, and execution status in Skybridge views."
 ---
 
 The `useToolInfo` hook provides access to the tool's input arguments, output, and response metadata. It also tracks whether the tool execution is still pending or has completed successfully.
@@ -10,7 +10,7 @@ The `useToolInfo` hook provides access to the tool's input arguments, output, an
 ```tsx
 import { useToolInfo } from "skybridge/web";
 
-function WeatherWidget() {
+function WeatherView() {
   const { input, output, isPending, isSuccess } = useToolInfo<{
     input: { city: string };
     output: { temperature: number; conditions: string };
@@ -128,7 +128,7 @@ Additional metadata from the tool response. Only available when `status` is `"su
 ```tsx
 import { useToolInfo } from "skybridge/web";
 
-function DataWidget() {
+function DataView() {
   const { input, isPending, isSuccess, output } = useToolInfo<{
     input: { query: string };
     output: { results: string[] };
@@ -160,7 +160,7 @@ function DataWidget() {
 ```tsx
 import { useToolInfo } from "skybridge/web";
 
-function ApiResultWidget() {
+function ApiResultView() {
   const { input, output, responseMetadata, isSuccess } = useToolInfo<{
     input: { endpoint: string };
     output: { data: unknown };
@@ -195,7 +195,7 @@ import { useToolInfo } from "skybridge/web";
 
 type ChartType = "bar" | "line" | "pie";
 
-function ChartWidget() {
+function ChartView() {
   const { input, output, isSuccess } = useToolInfo<{
     input: { type: ChartType; data: number[] };
     output: { processedData: { label: string; value: number }[] };
@@ -223,7 +223,7 @@ function ChartWidget() {
 ```tsx
 import { useToolInfo } from "skybridge/web";
 
-function ProductWidget() {
+function ProductView() {
   const { input, output, isPending, isSuccess } = useToolInfo<{
     input: { productId: string; name: string };
     output: {
@@ -269,7 +269,7 @@ function ProductWidget() {
 ```tsx
 import { useToolInfo } from "skybridge/web";
 
-function SafeWidget() {
+function SafeView() {
   const { input, output, isSuccess } = useToolInfo<{
     input: { id: string };
     output: { success: boolean; data?: unknown; error?: string };

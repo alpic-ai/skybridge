@@ -1,9 +1,9 @@
 ---
 title: useSendFollowUpMessage
-description: "Programmatically trigger AI conversation turns based on user actions in your widget."
+description: "Programmatically trigger AI conversation turns based on user actions in your view."
 ---
 
-The `useSendFollowUpMessage` hook returns a function to programmatically trigger a follow-up turn in the AI conversation. This allows your widget to prompt the model to continue the conversation based on user actions.
+The `useSendFollowUpMessage` hook returns a function to programmatically trigger a follow-up turn in the AI conversation. This allows your view to prompt the model to continue the conversation based on user actions.
 
 ## Basic usage
 
@@ -151,13 +151,13 @@ function Tutorial() {
 }
 ```
 
-### Feedback Widget
+### Feedback View
 
 ```tsx
 import { useSendFollowUpMessage } from "skybridge/web";
 import { useState } from "react";
 
-function FeedbackWidget() {
+function FeedbackView() {
   const sendFollowUpMessage = useSendFollowUpMessage();
   const [submitted, setSubmitted] = useState(false);
 

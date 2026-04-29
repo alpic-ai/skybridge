@@ -1,10 +1,10 @@
 ---
 title: createStore
-description: "Create Zustand stores with automatic widget state persistence, actions, and middleware support."
+description: "Create Zustand stores with automatic view state persistence, actions, and middleware support."
 ---
 
 
-The `createStore` function creates a [Zustand](https://github.com/pmndrs/zustand) store that automatically syncs with the widget's persistent state. Unlike `useWidgetState`, this provides a full Zustand store with actions and middleware support, making it ideal for complex state management scenarios.
+The `createStore` function creates a [Zustand](https://github.com/pmndrs/zustand) store that automatically syncs with the view's persistent state. Unlike `useViewState`, this provides a full Zustand store with actions and middleware support, making it ideal for complex state management scenarios.
 
 ## Basic usage
 
@@ -24,7 +24,7 @@ const useCounterStore = createStore<CounterState>((set) => ({
   decrement: () => set((state) => ({ count: state.count - 1 })),
 }));
 
-function CounterWidget() {
+function CounterView() {
   const count = useCounterStore((state) => state.count);
   const increment = useCounterStore((state) => state.increment);
   const decrement = useCounterStore((state) => state.decrement);
@@ -136,7 +136,7 @@ const useTodoStore = createStore<TodoState>((set) => ({
     })),
 }));
 
-function TodoWidget() {
+function TodoView() {
   const todos = useTodoStore((state) => state.todos);
   const addTodo = useTodoStore((state) => state.addTodo);
   const toggleTodo = useTodoStore((state) => state.toggleTodo);
@@ -153,7 +153,7 @@ function TodoWidget() {
   };
 
   return (
-    <div className="todo-widget">
+    <div className="todo-view">
       <h3>Todo List</h3>
       <form onSubmit={handleSubmit}>
         <input
@@ -188,9 +188,9 @@ function TodoWidget() {
 }
 ```
 
-## Comparison with `useWidgetState`
+## Comparison with `useViewState`
 
-| Feature         | `createStore`                 | `useWidgetState`            |
+| Feature         | `createStore`                 | `useViewState`            |
 | --------------- | ----------------------------- | --------------------------- |
 | **Type**        | Zustand store                 | React hook                  |
 | **Use Case**    | Complex state with actions    | Simple state updates        |
@@ -207,7 +207,7 @@ Use `createStore` when you need:
 - Fine-grained subscriptions
 - Zustand middleware support
 
-Use `useWidgetState` when you need:
+Use `useViewState` when you need:
 
 - Simple state management
 - React `useState`-like API

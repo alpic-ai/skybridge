@@ -7,7 +7,7 @@ import type {
   OpenExternalOptions,
   RequestDisplayMode,
   RequestModalOptions,
-  SetWidgetStateAction,
+  SetViewStateAction,
   UploadFileOptions,
 } from "../types.js";
 import { AppsSdkBridge } from "./bridge.js";
@@ -32,7 +32,7 @@ export class AppsSdkAdaptor implements Adaptor {
   ): HostContextStore<K> {
     const bridge = AppsSdkBridge.getInstance();
 
-    if (key === "widgetState") {
+    if (key === "viewState") {
       return {
         subscribe: bridge.subscribe("widgetState"),
         getSnapshot: () =>
@@ -40,10 +40,17 @@ export class AppsSdkAdaptor implements Adaptor {
       } as HostContextStore<K>;
     }
 
+    if (key === "display") {
+      return {
+        subscribe: bridge.subscribe("view"),
+        getSnapshot: () => bridge.getSnapshot("view"),
+      } as HostContextStore<K>;
+    }
+
     return {
       subscribe: bridge.subscribe(key),
       getSnapshot: () => bridge.getSnapshot(key),
-    };
+    } as HostContextStore<K>;
   }
 
   public callTool = async <
@@ -70,9 +77,7 @@ export class AppsSdkAdaptor implements Adaptor {
     window.openai.openExternal({ href, ...options });
   }
 
-  public setWidgetState = (
-    stateOrUpdater: SetWidgetStateAction,
-  ): Promise<void> => {
+  public setViewState = (stateOrUpdater: SetViewStateAction): Promise<void> => {
     const modelContent =
       typeof stateOrUpdater === "function"
         ? stateOrUpdater(window.openai.widgetState?.modelContent ?? null)

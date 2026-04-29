@@ -1,10 +1,10 @@
 ---
 title: Host Environment Context
-description: "Adapt your widget to the host's theme, locale, display mode, and device with environment hooks."
+description: "Adapt your view to the host's theme, locale, display mode, and device with environment hooks."
 ---
 
 
-How to make your widget adapt to the host's theme, locale, display mode, and device.
+How to make your view adapt to the host's theme, locale, display mode, and device.
 
 ## Available Hooks
 
@@ -13,11 +13,11 @@ How to make your widget adapt to the host's theme, locale, display mode, and dev
 | [`useLayout`](/api-reference/use-layout) | Theme, safe areas, max height |
 | [`useUser`](/api-reference/use-user) | Locale, user agent, device capabilities |
 | [`useDisplayMode`](/api-reference/use-display-mode) | Current display mode, mode switching |
-| [`useRequestModal`](/api-reference/use-request-modal) | Open widget in modal |
+| [`useRequestModal`](/api-reference/use-request-modal) | Open view in modal |
 | [`useOpenExternal`](/api-reference/use-open-external) | Open external URLs |
 
 <Warning>
-**MCP Apps Runtime**: `useRequestModal` is polyfilled in MCP Apps. Modals render inside the widget iframe rather than being portaled to the host. See [useRequestModal API](/api-reference/use-request-modal) for details.
+**MCP Apps Runtime**: `useRequestModal` is polyfilled in MCP Apps. Modals render inside the view iframe rather than being portaled to the host. See [useRequestModal API](/api-reference/use-request-modal) for details.
 </Warning>
 
 ## Theme Adaptation with useLayout
@@ -27,7 +27,7 @@ Match the host's light/dark theme:
 ```tsx
 import { useLayout } from "skybridge/web";
 
-function ThemedWidget() {
+function ThemedView() {
   const { theme } = useLayout();
   const isDark = theme === "dark";
 
@@ -46,12 +46,12 @@ function ThemedWidget() {
 ### With CSS Variables
 
 ```tsx
-function ThemedWidget() {
+function ThemedView() {
   const { theme } = useLayout();
 
   return (
     <div
-      className="widget"
+      className="view"
       data-theme={theme}
       style={{
         "--bg": theme === "dark" ? "#1a1a1a" : "#ffffff",
@@ -65,7 +65,7 @@ function ThemedWidget() {
 ```
 
 ```css
-.widget {
+.view {
   background: var(--bg);
   color: var(--text);
 }
@@ -116,7 +116,7 @@ The locale value comes from OpenAI's host environment, not directly from the use
 ```tsx
 import { useUser } from "skybridge/web";
 
-function LocalizedWidget() {
+function LocalizedView() {
   const { locale, userAgent } = useUser();
 
   // Format currency based on locale
@@ -156,7 +156,7 @@ userAgent.capabilities.touch; // true if device has touch capability
 
 ## Display Mode with useDisplayMode
 
-Widgets can render in different display modes:
+Views can render in different display modes:
 
 | Mode | Description |
 |------|-------------|
@@ -168,7 +168,7 @@ Widgets can render in different display modes:
 ```tsx
 import { useDisplayMode } from "skybridge/web";
 
-function AdaptiveWidget() {
+function AdaptiveView() {
   const { displayMode, setDisplayMode } = useDisplayMode();
 
   // Render differently based on mode
@@ -232,17 +232,17 @@ function ProductCard({ product }) {
 ```
 
 <Warning>
-**MCP Apps Runtime**: `useRequestModal` is polyfilled in MCP Apps. Modals render inside the widget iframe rather than being portaled to the host. See [useRequestModal API](/api-reference/use-request-modal) for details.
+**MCP Apps Runtime**: `useRequestModal` is polyfilled in MCP Apps. Modals render inside the view iframe rather than being portaled to the host. See [useRequestModal API](/api-reference/use-request-modal) for details.
 </Warning>
 
 ## External Links with useOpenExternal
 
-Open URLs outside the widget:
+Open URLs outside the view:
 
 ```tsx
 import { useOpenExternal } from "skybridge/web";
 
-function LinkWidget() {
+function LinkView() {
   const openExternal = useOpenExternal();
 
   const openDocs = () => {
@@ -269,10 +269,10 @@ External links open in a new tab/window. Some URLs may be blocked by the iframe'
 
 ## Responsive Design Pattern
 
-Combine hooks for a fully adaptive widget:
+Combine hooks for a fully adaptive view:
 
 ```tsx
-function ResponsiveWidget() {
+function ResponsiveView() {
   const { theme, safeArea, maxHeight } = useLayout();
   const { locale, userAgent } = useUser();
   const { displayMode, setDisplayMode } = useDisplayMode();

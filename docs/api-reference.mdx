@@ -11,7 +11,7 @@ Skybridge exports hooks and utilities from `skybridge/web` that work across mult
   <Card title="useToolInfo" icon="database" href="/api-reference/use-tool-info">
     Get initial tool input, output and metadata
   </Card>
-  <Card title="useWidgetState" icon="floppy-disk" href="/api-reference/use-widget-state">
+  <Card title="useViewState" icon="floppy-disk" href="/api-reference/use-view-state">
     Persist state across view renders
   </Card>
 </CardGroup>
@@ -100,7 +100,7 @@ import {
   useSendFollowUpMessage,
   useToolInfo,
   useUser,
-  useWidgetState,
+  useViewState,
 } from "skybridge/web";
 ```
 
@@ -111,8 +111,8 @@ Skybridge supports two runtime environments: **Apps SDK** (ChatGPT) and **MCP Ap
 | Hook / Feature | Apps SDK | MCP Apps | Notes |
 |----------------|:--------:|:--------:|-------|
 | [useToolInfo](/api-reference/use-tool-info) | ✅ | ✅ | |
-| [useWidgetState](/api-reference/use-widget-state) | ✅ | ⚠️ | MCP Apps: polyfilled; state doesn't persist across view renders |
-| [data-llm](/api-reference/data-llm) | ✅ | ⚠️ | MCP Apps: polyfilled (same limitation as useWidgetState) |
+| [useViewState](/api-reference/use-view-state) | ✅ | ⚠️ | MCP Apps: polyfilled; state doesn't persist across view renders |
+| [data-llm](/api-reference/data-llm) | ✅ | ⚠️ | MCP Apps: polyfilled (same limitation as useViewState) |
 | [useCallTool](/api-reference/use-call-tool) | ✅ | ✅ | |
 | [useSendFollowUpMessage](/api-reference/use-send-follow-up-message) | ✅ | ✅ | |
 | [useOpenExternal](/api-reference/use-open-external) | ✅ | ✅ | |

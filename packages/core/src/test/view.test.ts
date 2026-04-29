@@ -22,14 +22,14 @@ import {
 } from "./utils.js";
 
 const mockManifest = {
-  "skybridge:view:my-widget": {
-    file: "assets/my-widget-abc123.js",
-    name: "my-widget",
+  "skybridge:view:my-view": {
+    file: "assets/my-view-abc123.js",
+    name: "my-view",
     isEntry: true,
   },
-  "skybridge:view:folder-widget": {
-    file: "assets/folder-widget-def456.js",
-    name: "folder-widget",
+  "skybridge:view:folder-view": {
+    file: "assets/folder-view-def456.js",
+    name: "folder-view",
     isEntry: true,
   },
   "style.css": { file: "style.css" },
@@ -92,10 +92,10 @@ describe("McpServer.registerTool (unified API)", () => {
 
     server.registerTool(
       {
-        name: "my-widget",
+        name: "my-view",
         description: "Test tool",
         view: {
-          component: "my-widget",
+          component: "my-view",
           description: "Test view",
         },
       },
@@ -119,7 +119,7 @@ describe("McpServer.registerTool (unified API)", () => {
       ServerNotification
     >;
     const result = await appsSdkResourceCallback(
-      new URL("ui://widgets/apps-sdk/my-widget.html"),
+      new URL("ui://views/apps-sdk/my-view.html"),
       mockExtra,
     );
 
@@ -127,7 +127,7 @@ describe("McpServer.registerTool (unified API)", () => {
     expect(result).toEqual({
       contents: [
         {
-          uri: "ui://widgets/apps-sdk/my-widget.html",
+          uri: "ui://views/apps-sdk/my-view.html",
           mimeType: "text/html+skybridge",
           text: expect.stringContaining('<div id="root"></div>'),
           _meta: {
@@ -147,7 +147,7 @@ describe("McpServer.registerTool (unified API)", () => {
     );
     expect(result.contents[0]?.text).toContain(`${serverUrl}/@vite/client`);
     expect(result.contents[0]?.text).toContain(
-      `${serverUrl}/_skybridge/view/my-widget`,
+      `${serverUrl}/_skybridge/view/my-view`,
     );
   });
 
@@ -156,10 +156,10 @@ describe("McpServer.registerTool (unified API)", () => {
 
     server.registerTool(
       {
-        name: "my-widget",
+        name: "my-view",
         description: "Test tool",
         view: {
-          component: "my-widget",
+          component: "my-view",
           description: "Test view",
         },
       },
@@ -181,7 +181,7 @@ describe("McpServer.registerTool (unified API)", () => {
       ServerRequest,
       ServerNotification
     >;
-    const versionedUri = `ui://widgets/apps-sdk/my-widget.html${expectedVersionParam("assets/my-widget-abc123.js", "style.css")}`;
+    const versionedUri = `ui://views/apps-sdk/my-view.html${expectedVersionParam("assets/my-view-abc123.js", "style.css")}`;
     const result = await appsSdkResourceCallback(
       new URL(versionedUri),
       mockExtra,
@@ -210,7 +210,7 @@ describe("McpServer.registerTool (unified API)", () => {
     );
     expect(result.contents[0]?.text).not.toContain(`${serverUrl}@vite/client`);
     expect(result.contents[0]?.text).toContain(
-      `${serverUrl}/assets/assets/my-widget-abc123.js`,
+      `${serverUrl}/assets/assets/my-view-abc123.js`,
     );
     expect(result.contents[0]?.text).toContain(`${serverUrl}/assets/style.css`);
   });
@@ -220,9 +220,9 @@ describe("McpServer.registerTool (unified API)", () => {
 
     server.registerTool(
       {
-        name: "my-widget",
+        name: "my-view",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test view" },
+        view: { component: "my-view", description: "Test view" },
       },
       vi.fn(),
     );
@@ -251,7 +251,7 @@ describe("McpServer.registerTool (unified API)", () => {
 
     const result = await extAppsResourceCallback(
       new URL(
-        `ui://widgets/ext-apps/my-widget.html${expectedVersionParam("assets/my-widget-abc123.js", "style.css")}`,
+        `ui://views/ext-apps/my-view.html${expectedVersionParam("assets/my-view-abc123.js", "style.css")}`,
       ),
       createMockExtra("localhost:3000", {
         headers: {
@@ -278,10 +278,10 @@ describe("McpServer.registerTool (unified API)", () => {
   it("should register resources with correct hostType for both apps-sdk and ext-apps", async () => {
     server.registerTool(
       {
-        name: "my-widget",
+        name: "my-view",
         description: "Test tool",
         view: {
-          component: "my-widget",
+          component: "my-view",
           description: "Test view",
           prefersBorder: true,
         },
@@ -303,7 +303,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const hmrUrl = `ws://${host}`;
 
     const appsSdkResult = await appsSdkCallback(
-      new URL("ui://widgets/apps-sdk/my-widget.html"),
+      new URL("ui://views/apps-sdk/my-view.html"),
       createMockExtra(host) as unknown as RequestHandlerExtra<
         ServerRequest,
         ServerNotification
@@ -313,7 +313,7 @@ describe("McpServer.registerTool (unified API)", () => {
     expect(appsSdkResult).toEqual({
       contents: [
         {
-          uri: "ui://widgets/apps-sdk/my-widget.html",
+          uri: "ui://views/apps-sdk/my-view.html",
           mimeType: "text/html+skybridge",
           text: expect.stringContaining('<div id="root"></div>'),
           _meta: {
@@ -347,7 +347,7 @@ describe("McpServer.registerTool (unified API)", () => {
     expect(extAppsResourceCallback).toBeDefined();
 
     const extAppsResult = await extAppsResourceCallback(
-      new URL("ui://widgets/ext-apps/my-widget.html"),
+      new URL("ui://views/ext-apps/my-view.html"),
       createMockExtra(host) as unknown as RequestHandlerExtra<
         ServerRequest,
         ServerNotification
@@ -357,7 +357,7 @@ describe("McpServer.registerTool (unified API)", () => {
     expect(extAppsResult).toEqual({
       contents: [
         {
-          uri: "ui://widgets/ext-apps/my-widget.html",
+          uri: "ui://views/ext-apps/my-view.html",
           mimeType: "text/html;profile=mcp-app",
           text: expect.stringContaining('<div id="root"></div>'),
           _meta: {
@@ -383,9 +383,9 @@ describe("McpServer.registerTool (unified API)", () => {
   it("should register tool with ui.resourceUri metadata", async () => {
     server.registerTool(
       {
-        name: "my-widget",
+        name: "my-view",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test view" },
+        view: { component: "my-view", description: "Test view" },
       },
       vi.fn(),
     );
@@ -397,17 +397,17 @@ describe("McpServer.registerTool (unified API)", () => {
 
     expect(toolConfig._meta).toHaveProperty("ui");
     expect(toolConfig._meta?.ui).toEqual({
-      resourceUri: "ui://widgets/ext-apps/my-widget.html",
+      resourceUri: "ui://views/ext-apps/my-view.html",
     });
   });
 
   it("should register tool with openai/outputTemplate when apps-sdk only", async () => {
     server.registerTool(
       {
-        name: "my-widget",
+        name: "my-view",
         description: "Test tool",
         view: {
-          component: "my-widget",
+          component: "my-view",
           description: "Test view",
           hosts: ["apps-sdk"],
         },
@@ -422,16 +422,16 @@ describe("McpServer.registerTool (unified API)", () => {
 
     expect(toolConfig._meta).not.toHaveProperty("ui");
     expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(
-      "ui://widgets/apps-sdk/my-widget.html",
+      "ui://views/apps-sdk/my-view.html",
     );
   });
 
   it("should not version view URIs in development", () => {
     server.registerTool(
       {
-        name: "my-widget",
+        name: "my-view",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test view" },
+        view: { component: "my-view", description: "Test view" },
       },
       vi.fn(),
     );
@@ -441,18 +441,18 @@ describe("McpServer.registerTool (unified API)", () => {
     };
 
     expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(
-      "ui://widgets/apps-sdk/my-widget.html",
+      "ui://views/apps-sdk/my-view.html",
     );
     expect(toolConfig._meta?.ui?.resourceUri).toBe(
-      "ui://widgets/ext-apps/my-widget.html",
+      "ui://views/ext-apps/my-view.html",
     );
     // The URI registered with the resource handler must match the URI in
     // outputTemplate exactly so the SDK can resolve `resources/read` requests.
     expect(mockRegisterResource.mock.calls[0]?.[1]).toBe(
-      "ui://widgets/apps-sdk/my-widget.html",
+      "ui://views/apps-sdk/my-view.html",
     );
     expect(mockRegisterResource.mock.calls[1]?.[1]).toBe(
-      "ui://widgets/ext-apps/my-widget.html",
+      "ui://views/ext-apps/my-view.html",
     );
   });
 
@@ -461,15 +461,15 @@ describe("McpServer.registerTool (unified API)", () => {
 
     server.registerTool(
       {
-        name: "my-widget",
+        name: "my-view",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test view" },
+        view: { component: "my-view", description: "Test view" },
       },
       vi.fn(),
     );
 
     const expected = expectedVersionParam(
-      "assets/my-widget-abc123.js",
+      "assets/my-view-abc123.js",
       "style.css",
     );
     const toolConfig = mockRegisterTool.mock.calls[0]?.[1] as {
@@ -477,16 +477,16 @@ describe("McpServer.registerTool (unified API)", () => {
     };
 
     expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(
-      `ui://widgets/apps-sdk/my-widget.html${expected}`,
+      `ui://views/apps-sdk/my-view.html${expected}`,
     );
     expect(toolConfig._meta?.ui?.resourceUri).toBe(
-      `ui://widgets/ext-apps/my-widget.html${expected}`,
+      `ui://views/ext-apps/my-view.html${expected}`,
     );
     expect(mockRegisterResource.mock.calls[0]?.[1]).toBe(
-      `ui://widgets/apps-sdk/my-widget.html${expected}`,
+      `ui://views/apps-sdk/my-view.html${expected}`,
     );
     expect(mockRegisterResource.mock.calls[1]?.[1]).toBe(
-      `ui://widgets/ext-apps/my-widget.html${expected}`,
+      `ui://views/ext-apps/my-view.html${expected}`,
     );
   });
 
@@ -495,31 +495,31 @@ describe("McpServer.registerTool (unified API)", () => {
 
     server.registerTool(
       {
-        name: "my-widget",
+        name: "my-view",
         description: "First tool",
-        view: { component: "my-widget" },
+        view: { component: "my-view" },
       },
       vi.fn(),
     );
     server.registerTool(
       {
-        name: "folder-widget",
+        name: "folder-view",
         description: "Second tool",
-        view: { component: "folder-widget" },
+        view: { component: "folder-view" },
       },
       vi.fn(),
     );
 
-    const myWidgetTemplate = (
+    const myviewTemplate = (
       mockRegisterTool.mock.calls[0]?.[1] as { _meta?: Record<string, unknown> }
     )._meta?.["openai/outputTemplate"];
-    const folderWidgetTemplate = (
+    const folderviewTemplate = (
       mockRegisterTool.mock.calls[1]?.[1] as { _meta?: Record<string, unknown> }
     )._meta?.["openai/outputTemplate"];
 
-    expect(myWidgetTemplate).not.toEqual(folderWidgetTemplate);
-    expect(myWidgetTemplate).toMatch(/\?v=[0-9a-f]{8}$/);
-    expect(folderWidgetTemplate).toMatch(/\?v=[0-9a-f]{8}$/);
+    expect(myviewTemplate).not.toEqual(folderviewTemplate);
+    expect(myviewTemplate).toMatch(/\?v=[0-9a-f]{8}$/);
+    expect(folderviewTemplate).toMatch(/\?v=[0-9a-f]{8}$/);
   });
 
   it("should fall back to bare URI in production when manifest is missing", () => {
@@ -527,9 +527,9 @@ describe("McpServer.registerTool (unified API)", () => {
 
     server.registerTool(
       {
-        name: "unknown-widget",
+        name: "unknown-view",
         description: "Test tool",
-        view: { component: "unknown-widget" },
+        view: { component: "unknown-view" },
       },
       vi.fn(),
     );
@@ -538,17 +538,17 @@ describe("McpServer.registerTool (unified API)", () => {
       _meta?: Record<string, unknown>;
     };
     expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(
-      "ui://widgets/apps-sdk/unknown-widget.html",
+      "ui://views/apps-sdk/unknown-view.html",
     );
   });
 
   it("should register tool with ui.resourceUri only when mcp-app only", async () => {
     server.registerTool(
       {
-        name: "my-widget",
+        name: "my-view",
         description: "Test tool",
         view: {
-          component: "my-widget",
+          component: "my-view",
           description: "Test view",
           hosts: ["mcp-app"],
         },
@@ -563,7 +563,7 @@ describe("McpServer.registerTool (unified API)", () => {
 
     expect(toolConfig._meta).toHaveProperty("ui");
     expect(toolConfig._meta?.ui).toEqual({
-      resourceUri: "ui://widgets/ext-apps/my-widget.html",
+      resourceUri: "ui://views/ext-apps/my-view.html",
     });
     expect(toolConfig._meta?.["openai/outputTemplate"]).toBeUndefined();
   });
@@ -576,9 +576,9 @@ describe("McpServer.registerTool (unified API)", () => {
 
     server.registerTool(
       {
-        name: "my-widget",
+        name: "my-view",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test view" },
+        view: { component: "my-view", description: "Test view" },
       },
       mockToolCallback,
     );
@@ -607,9 +607,9 @@ describe("McpServer.registerTool (unified API)", () => {
 
     server.registerTool(
       {
-        name: "my-widget",
+        name: "my-view",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test view" },
+        view: { component: "my-view", description: "Test view" },
       },
       mockToolCallback,
     );
@@ -632,9 +632,9 @@ describe("McpServer.registerTool (unified API)", () => {
 
     server.registerTool(
       {
-        name: "my-widget",
+        name: "my-view",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test view" },
+        view: { component: "my-view", description: "Test view" },
       },
       mockToolCallback,
     );
@@ -791,7 +791,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const serverUrl = `http://${host}`;
     const hmrUrl = `ws://${host}`;
     const result = await appsSdkCallback(
-      new URL("ui://widgets/apps-sdk/csp-tool.html"),
+      new URL("ui://views/apps-sdk/csp-tool.html"),
       createMockExtra(host) as unknown as RequestHandlerExtra<
         ServerRequest,
         ServerNotification
@@ -837,7 +837,7 @@ describe("McpServer.registerTool (unified API)", () => {
     }>;
 
     const result = await appsSdkCallback(
-      new URL("ui://widgets/apps-sdk/override-tool.html"),
+      new URL("ui://views/apps-sdk/override-tool.html"),
       createMockExtra("localhost:3000") as unknown as RequestHandlerExtra<
         ServerRequest,
         ServerNotification

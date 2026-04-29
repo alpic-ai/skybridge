@@ -1,6 +1,6 @@
 # Content Security Policy
 
-Widgets run in sandboxed iframes with strict CSP. Whitelist external domains in widget definition `_meta.ui.csp`:
+Views run in sandboxed iframes with strict CSP. Whitelist external domains in view definition `_meta.ui.csp`:
 
 | Property | Purpose |
 |----------|---------|
@@ -10,7 +10,7 @@ Widgets run in sandboxed iframes with strict CSP. Whitelist external domains in 
 | `frameDomains` | (optional) Iframe embeds — triggers stricter review |
 
 ```typescript
-server.registerWidget(
+server.registerView(
   "search-flights",
   {
     description: "Search flights",

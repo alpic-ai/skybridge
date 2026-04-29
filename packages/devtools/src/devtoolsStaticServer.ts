@@ -13,8 +13,8 @@ import express, { type Router } from "express";
  *
  * if (env.NODE_ENV !== "production") {
  *   app.use(await devtoolsStaticServer(server));
- *   app.use(await widgetsDevServer());
- *                     ^^^^^^^^ Make sure to install the devtoolsStaticServer before the widgetsDevServer
+ *   app.use(await viewsDevServer());
+ *                     ^^^^^^^^ Make sure to install the devtoolsStaticServer before the viewsDevServer
  * }
  */
 export const devtoolsStaticServer = async (): Promise<Router> => {

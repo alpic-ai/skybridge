@@ -6,18 +6,18 @@ import {
 } from "../bridges/index.js";
 
 /**
- * Triggers a modal containing the widget rendered in display mode "modal"
+ * Triggers a modal containing the view rendered in display mode "modal"
  */
 export function useRequestModal() {
   const adaptor = getAdaptor();
-  const view = useHostContext("view");
+  const display = useHostContext("display");
   const open = useCallback(
     (opts: RequestModalOptions) => adaptor.openModal(opts),
     [adaptor],
   );
   return {
-    isOpen: view.mode === "modal",
-    params: view.params,
+    isOpen: display.mode === "modal",
+    params: display.params,
     open,
   };
 }

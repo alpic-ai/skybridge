@@ -1,14 +1,14 @@
 import type { McpServerTypes, ToolDef } from "./server.js";
 
 /**
- * Any tool registry shape (includes both widgets and regular tools).
+ * Any tool registry shape (includes both views and regular tools).
  * Used as a constraint for type parameters that accept tool registries.
  */
 export type AnyToolRegistry = Record<string, ToolDef>;
 
 /**
  * Extract the tool registry type from an McpServer instance.
- * This includes both widgets (registered via widget()) and regular tools (registered via registerTool()).
+ * This includes both views (registered via view()) and regular tools (registered via registerTool()).
  *
  * Uses the `$types` property pattern for cross-package type inference.
  * This works across package boundaries because TypeScript uses structural typing
@@ -32,7 +32,7 @@ type ExtractTool<
 
 /**
  * Get a union of all tool names from an McpServer instance.
- * This includes both widgets and regular tools.
+ * This includes both views and regular tools.
  *
  * @example
  * ```ts
@@ -43,7 +43,7 @@ type ExtractTool<
 export type ToolNames<ServerType> = keyof InferTools<ServerType> & string;
 
 /**
- * Get the input type for a specific tool (widget or regular tool).
+ * Get the input type for a specific tool (view or regular tool).
  *
  * @example
  * ```ts
@@ -56,7 +56,7 @@ export type ToolInput<
 > = ExtractTool<ServerType, ToolName>["input"];
 
 /**
- * Get the output type for a specific tool (widget or regular tool).
+ * Get the output type for a specific tool (view or regular tool).
  *
  * @example
  * ```ts
@@ -69,7 +69,7 @@ export type ToolOutput<
 > = ExtractTool<ServerType, ToolName>["output"];
 
 /**
- * Get the responseMetadata type for a specific tool (widget or regular tool).
+ * Get the responseMetadata type for a specific tool (view or regular tool).
  * This is inferred from the `_meta` property of the tool callback's return value.
  *
  * @example

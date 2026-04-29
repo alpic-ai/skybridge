@@ -3,11 +3,11 @@ title: Fundamentals
 description: "Understanding Model Context Protocol (MCP), the MCP Apps portable baseline, and ChatGPT-specific extensions."
 ---
 
-Skybridge enables you to build **ChatGPT Apps** and **MCP Apps** - interactive UI widgets that render inside AI conversations. Before diving into Skybridge's APIs, understand the underlying protocols and runtimes it builds upon.
+Skybridge enables you to build **ChatGPT Apps** and **MCP Apps** - interactive UI views that render inside AI conversations. Before diving into Skybridge's APIs, understand the underlying protocols and runtimes it builds upon.
 
-## How widgets appear in MCP Apps Clients
+## How views appear in MCP Apps Clients
 
-In MCP Apps clients, the model triggers your tool, and the client then renders both the assistant response and your widget from the tool result.
+In MCP Apps clients, the model triggers your tool, and the client then renders both the assistant response and your view from the tool result.
 
 <img
   src="/images/fundamentals-chatgpt-apps.png"
@@ -38,7 +38,7 @@ When you ask an AI assistant a question, it can invoke tools on your MCP server 
 
 ### MCP Apps and ChatGPT Apps: The Same Foundation
 
-**MCP Apps** is the open UI extension for MCP. It defines the portable contract for interactive widgets in AI clients, including the `ui/*` bridge, `tools/call`, and `_meta.ui.resourceUri`.
+**MCP Apps** is the open UI extension for MCP. It defines the portable contract for interactive views in AI clients, including the `ui/*` bridge, `tools/call`, and `_meta.ui.resourceUri`.
 
 **ChatGPT Apps** use that same MCP Apps contract in ChatGPT, and the OpenAI Apps SDK adds `window.openai` APIs for ChatGPT-specific capabilities.
 
@@ -47,13 +47,13 @@ To avoid repetition, we will now refer to both ChatGPT Apps and MCP Apps as **AI
 An **AI App** consists of two components working together:
 
 1. **MCP Server**: Your backend that handles business logic and exposes tools via the MCP protocol
-2. **UI Widgets**: HTML components that render in the AI Client's interface as interactive UIs
+2. **UI Views**: HTML components that render in the AI Client's interface as interactive UIs
 
 When a tool is called, it can return both:
 - **Text content**: What the model sees and responds with
-- **Widget content**: A visual UI that renders for the user
+- **View content**: A visual UI that renders for the user
 
-This creates a **dual-surface interaction model**: users interact with both the conversational interface (the AI) and your custom UI (the widget).
+This creates a **dual-surface interaction model**: users interact with both the conversational interface (the AI) and your custom UI (the view).
 
 <Note>
 Read our [in-depth blog article](https://alpic.ai/blog/inside-openai-s-apps-sdk-how-to-build-interactive-chatgpt-apps-with-mcp) for a detailed technical breakdown of how AI Apps work under the hood.
@@ -65,7 +65,7 @@ Both ChatGPT Apps and MCP Apps use the same MCP server architecture and the same
 
 Think of it this way: your app logic and portable bridge stay the same, and ChatGPT can optionally provide extra capabilities.
 
-Skybridge supports the two main runtime environments for rendering widgets:
+Skybridge supports the two main runtime environments for rendering views:
 
 <CardGroup cols={2}>
   <Card title="Apps SDK (ChatGPT)" icon="message" href="/fundamentals/apps-sdk">
@@ -77,7 +77,7 @@ Skybridge supports the two main runtime environments for rendering widgets:
 </CardGroup>
 
 
-Skybridge abstracts away the differences between these runtime environments so you can write your widgets once and run them anywhere. Learn more in our <a href="/concepts/write-once-run-everywhere">Write Once, Run Everywhere</a> guide.
+Skybridge abstracts away the differences between these runtime environments so you can write your views once and run them anywhere. Learn more in our <a href="/concepts/write-once-run-everywhere">Write Once, Run Everywhere</a> guide.
 
 
 ## Runtimes Comparison at a Glance

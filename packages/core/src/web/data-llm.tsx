@@ -15,7 +15,7 @@ export interface DataLLMNode {
   content: string | null;
 }
 
-export const WIDGET_CONTEXT_KEY = "__widget_context" as const;
+export const VIEW_CONTEXT_KEY = "__view_context" as const;
 
 const nodes = new Map<string, DataLLMNode>();
 
@@ -32,9 +32,9 @@ function removeNode(id: string) {
 function onChange() {
   const description = getLLMDescriptionString();
   const adaptor = getAdaptor();
-  adaptor.setWidgetState((prevState) => ({
+  adaptor.setViewState((prevState) => ({
     ...prevState,
-    [WIDGET_CONTEXT_KEY]: description,
+    [VIEW_CONTEXT_KEY]: description,
   }));
 }
 

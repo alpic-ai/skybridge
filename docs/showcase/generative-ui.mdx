@@ -3,7 +3,7 @@ title: Generative UI
 description: LLM-generated dynamic UIs with json-render and shadcn/ui components.
 ---
 
-Generative UI lets the LLM compose rich interfaces on the fly using [json-render](https://json-render.dev) and 36 pre-built shadcn/ui components. The AI generates a json-render spec, the server validates it against the component catalog, and the widget renders it instantly.
+Generative UI lets the LLM compose rich interfaces on the fly using [json-render](https://json-render.dev) and 36 pre-built shadcn/ui components. The AI generates a json-render spec, the server validates it against the component catalog, and the view renders it instantly.
 
 <img
   src="/images/showcase-generative-ui.png"
@@ -19,7 +19,7 @@ Generative UI lets the LLM compose rich interfaces on the fly using [json-render
     icon="play"
     href="https://generative-ui.skybridge.tech/try"
   >
-    Launch the live widget experience.
+    Launch the live view experience.
   </Card>
   <Card
     title="View source on GitHub"
@@ -32,9 +32,9 @@ Generative UI lets the LLM compose rich interfaces on the fly using [json-render
 
 ## How it works
 
-The MCP server builds a json-render catalog from `@json-render/shadcn` and embeds the auto-generated component documentation in the `render` tool description. When the LLM calls the tool, it passes a `{ root, elements }` spec as input. The server validates the spec against the catalog, auto-fixes common mistakes, and returns it to the widget as structured content.
+The MCP server builds a json-render catalog from `@json-render/shadcn` and embeds the auto-generated component documentation in the `render` tool description. When the LLM calls the tool, it passes a `{ root, elements }` spec as input. The server validates the spec against the catalog, auto-fixes common mistakes, and returns it to the view as structured content.
 
-The widget renders the spec with `@json-render/react`'s `Renderer` and `JSONUIProvider`, using the pre-built shadcn component registry.
+The view renders the spec with `@json-render/react`'s `Renderer` and `JSONUIProvider`, using the pre-built shadcn component registry.
 
 ## Skybridge APIs used
 

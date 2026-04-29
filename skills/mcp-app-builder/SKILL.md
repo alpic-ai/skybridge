@@ -2,15 +2,15 @@
 name: mcp-app-builder
 description: |
   Guide developers through creating and updating MCP apps.
-  Covers the full lifecycle: brainstorming ideas against UX guidelines, bootstrapping projects, implementing tools/widgets, debugging, running dev servers, deploying and connecting apps to ChatGPT.
+  Covers the full lifecycle: brainstorming ideas against UX guidelines, bootstrapping projects, implementing tools/views, debugging, running dev servers, deploying and connecting apps to ChatGPT.
   Use when a user wants to create or update a MCP app, MCP server or use the Skybridge framework.
 ---
 
 # Creating MCP Apps
 
-Those are conversational experiences that extend AI assistants through tools and custom UI widgets. They're built as MCP servers invoked during conversations.
+Those are conversational experiences that extend AI assistants through tools and custom UI views. They're built as MCP servers invoked during conversations.
 
-⚠️ The app is consumed by two users at once: the **human** and the **AI Assistant LLM**. They collaborate through the widget—the human interacts with it, the LLM sees its state. Internalize this before writing code: the widget is your shared surface.
+⚠️ The app is consumed by two users at once: the **human** and the **AI Assistant LLM**. They collaborate through the view—the human interacts with it, the LLM sees its state. Internalize this before writing code: the view is your shared surface.
 
 SPEC.md keeps track of the app's requirements and design decisions. Keep it up to date as you work on the app.
 
@@ -29,9 +29,9 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 
 ## Implementation
 
-- **Fetch and render data** → [fetch-and-render-data.md](references/fetch-and-render-data.md): when implementing server handlers and widget data fetching
-- **State and context** → [state-and-context.md](references/state-and-context.md): when persisting widget UI state and updating LLM context
-- **Prompt LLM** → [prompt-llm.md](references/prompt-llm.md): when widget needs to trigger LLM response
+- **Fetch and render data** → [fetch-and-render-data.md](references/fetch-and-render-data.md): when implementing server handlers and view data fetching
+- **State and context** → [state-and-context.md](references/state-and-context.md): when persisting view UI state and updating LLM context
+- **Prompt LLM** → [prompt-llm.md](references/prompt-llm.md): when view needs to trigger LLM response
 - **UI guidelines** → [ui-guidelines.md](references/ui-guidelines.md): display modes, layout constraints, theme, device, and locale
 - **External links** → [open-external-links.md](references/open-external-links.md): when redirecting to external URLs or setting "open in app" target
 - **OAuth** → [oauth.md](references/oauth.md): when tools need user authentication to access user-specific data
