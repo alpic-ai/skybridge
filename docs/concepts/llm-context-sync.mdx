@@ -1,12 +1,12 @@
 ---
 title: LLM Context Sync
-description: "Keep the LLM informed about widget state with data-llm attributes for better conversational context."
+description: "Keep the LLM informed about view state with data-llm attributes for better conversational context."
 ---
 
 
-**Problem:** Your widget shows interactive UI, but the LLM doesn't know what the user is seeing. When the user asks "What's the price of this one?", the model has no idea which item "this one" refers to.
+**Problem:** Your view shows interactive UI, but the LLM doesn't know what the user is seeing. When the user asks "What's the price of this one?", the model has no idea which item "this one" refers to.
 
-**Solution:** The `data-llm` attribute creates a live description of your widget's state that the model can read.
+**Solution:** The `data-llm` attribute creates a live description of your view's state that the model can read.
 
 ## The Dual Interaction Surface
 
@@ -20,7 +20,7 @@ flowchart TB
         A1["Assistant: Here are available flights:"]
     end
 
-    subgraph widget["Your Widget"]
+    subgraph view["Your View"]
         F1["Flight AF123 - $450 ✓ selected"]
         F2["Flight BA456 - $520"]
         F3["Flight LH789 - $480"]
@@ -28,11 +28,11 @@ flowchart TB
 
     U2["User: What's the baggage policy for this one?"]
 
-    chat --> widget
-    widget --> U2
+    chat --> view
+    view --> U2
 
     style chat fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px
-    style widget fill:#dbeafe,stroke:#93c5fd,stroke-width:2px
+    style view fill:#dbeafe,stroke:#93c5fd,stroke-width:2px
     style F1 fill:#2563EB,stroke:#1e40af,color:#fff
     style F2 fill:#eff6ff,stroke:#93c5fd,color:#1e40af
     style F3 fill:#eff6ff,stroke:#93c5fd,color:#1e40af
@@ -45,7 +45,7 @@ The user clicked Flight AF123, but the model only sees the conversation—it doe
 Add `data-llm` attributes to describe what the user is seeing:
 
 ```tsx
-export function FlightWidget() {
+export function FlightView() {
   const [selectedFlight, setSelectedFlight] = useState(null);
 
   return (
@@ -70,7 +70,7 @@ export function FlightWidget() {
 Now when the user asks about "this one", the host appends this context to the conversation:
 
 ```
-Widget context:
+View context:
 - User is viewing details for flight AF123: Air France 123
   - Flight option: AF123 Air France for $450 (selected)
   - Flight option: BA456 British Airways for $520
@@ -84,7 +84,7 @@ The model can now understand "this one" = Flight AF123.
 1. **Build time**: The Vite plugin transforms `data-llm` attributes into `DataLLM` React components
 2. **Runtime**: `DataLLM` components register their content in a global tree
 3. **State sync**: When content changes, the tree generates a hierarchical string
-4. **Model context**: This string is stored in widget state under the reserved key `__widget_context` (Apps SDK: `window.openai.widgetState`; MCP Apps: equivalent store via the polyfilled `useWidgetState`)
+4. **Model context**: This string is stored in view state under the reserved key `__view_context` (Apps SDK: `window.openai.widgetState`; MCP Apps: equivalent store via the polyfilled `useViewState`)
 5. **LLM reads**: The host (ChatGPT, Claude, etc.) includes this context when generating responses
 
 ```tsx
@@ -184,9 +184,9 @@ const selectedNames = items.filter(item => item.selected).map(item => item.name)
 <div data-llm={`Selected: ${selectedNames}`}>
 ```
 
-## __widget_context Reserved Key
+## __view_context Reserved Key
 
-Skybridge uses a reserved key `__widget_context` in widget state. In **Apps SDK (ChatGPT)**, widget state lives in `window.openai.widgetState`; in **MCP Apps**, the same key is used in the polyfilled `useWidgetState` store.
+Skybridge uses a reserved key `__view_context` in view state. In **Apps SDK (ChatGPT)**, view state lives in `window.openai.widgetState`; in **MCP Apps**, the same key is used in the polyfilled `useViewState` store.
 
 ```typescript
 // Apps SDK example
@@ -196,13 +196,13 @@ window.openai.widgetState = {
   filters: { ... },
 
   // Skybridge's context (auto-managed)
-  __widget_context: "User viewing item 123\n  Price: $50\n  In stock"
+  __view_context: "User viewing item 123\n  Price: $50\n  In stock"
 }
 ```
 
 This key is:
 - Automatically managed by `DataLLM` components
-- Filtered out when you use `useWidgetState` (you only see your own state)
+- Filtered out when you use `useViewState` (you only see your own state)
 - Read by the host when the user sends a message (passive context)—whether running in ChatGPT or MCP Apps clients (Claude, Goose, etc.)
 
 ## Example: Multi-step Wizard
@@ -249,7 +249,7 @@ Now when the user says "go back" or "what did I select?", the model knows exactl
 **What the model receives when user completes step 1:**
 
 ```
-Widget context:
+View context:
 - Checkout wizard - Step 1 of 3
   - Reviewing cart items
     - T-Shirt x2
@@ -259,7 +259,7 @@ Widget context:
 **What the model receives when user is on step 2:**
 
 ```
-Widget context:
+View context:
 - Checkout wizard - Step 2 of 3
   - Selected shipping: Express - $15
 ```

@@ -12,7 +12,7 @@ For Deno projects, use `deno task dev` instead.
 
 When started, output the local MCP server and devtools URL.
 
-Hot reload enabled (nodemon for server, HMR for widgets).
+Hot reload enabled (nodemon for server, HMR for views).
 
 ## 2. Connect to AI Assistants (Optional)
 

@@ -1,24 +1,24 @@
-# Manage Widget State and LLM Context
+# Manage View State and LLM Context
 
-- Widget state (`useWidgetState`/`createStore`) persists and is visible to LLM as structured data.
+- View state (`useViewState`/`createStore`) persists and is visible to LLM as structured data.
 - `data-llm` gives LLM context for referential language ("this one").
 - React `useState` is ephemeral and invisible to LLM.
 
 **Decision guide:**
 | Need | Use |
 |------|-----|
-| Persist data, single component | `useWidgetState` |
+| Persist data, single component | `useViewState` |
 | Persist data, shared across components, complex mutations | `createStore` |
 | Help LLM understand "this one" | `data-llm` |
 | Ephemeral UI only (hover, animation) | `useState` |
 
-## useWidgetState
+## useViewState
 
 Single component, simple access patterns.
 
 ```tsx
 function SeatPicker({ seats }) {
-  const [{ selectedSeat }, setState] = useWidgetState({ selectedSeat: null });
+  const [{ selectedSeat }, setState] = useViewState({ selectedSeat: null });
 
   return (
     <div className="seat-grid">
@@ -36,7 +36,7 @@ function SeatPicker({ seats }) {
 }
 ```
 
-**Why useWidgetState:** Single component reads `selectedSeat` to highlight button. Widget or LLM reads when booking.
+**Why useViewState:** Single component reads `selectedSeat` to highlight button. View or LLM reads when booking.
 
 ## createStore
 
@@ -64,11 +64,11 @@ function CartSummary() {
 }
 ```
 
-**Why createStore:** Cart accessed by multiple components. Widget or LLM reads items at checkout.
+**Why createStore:** Cart accessed by multiple components. View or LLM reads items at checkout.
 
 ## data-llm
 
-Tell the LLM what user is viewing/doing. One-way—widget doesn't read it back. These are annotations—don't put complex objects here.
+Tell the LLM what user is viewing/doing. One-way—view doesn't read it back. These are annotations—don't put complex objects here.
 
 ```tsx
 function ProductDetail({ product }) {
@@ -89,8 +89,8 @@ function ProductDetail({ product }) {
 // DON'T: useState is not persisted, LLM can't see it
 const [selected, setSelected] = useState(null);
 
-// DO: useWidgetState persists and LLM sees it
-const [{ selected }, setState] = useWidgetState({ selected: null });
+// DO: useViewState persists and LLM sees it
+const [{ selected }, setState] = useViewState({ selected: null });
 ```
 
 ```tsx
@@ -108,7 +108,7 @@ Todo list. User checks off tasks, asks "what should I prioritize?"
 ```tsx
 function TaskList() {
   // PERSIST: All tasks with completed status
-  const [{ tasks }, setState] = useWidgetState({
+  const [{ tasks }, setState] = useViewState({
     tasks: [
       { id: 1, title: "Buy groceries", completed: false },
       { id: 2, title: "Call mom", completed: true },
@@ -146,6 +146,6 @@ function TaskList() {
 
 | What | API | Why |
 |------|-----|-----|
-| `tasks` | `useWidgetState` | Persists. Tasks and progress survive reopen. |
+| `tasks` | `useViewState` | Persists. Tasks and progress survive reopen. |
 | `viewing` | `useState` | Ephemeral. Current focus resets on reopen. |
 | `"Viewing: Buy groceries"` | `data-llm` | LLM context. Understands "this task" in conversation. |

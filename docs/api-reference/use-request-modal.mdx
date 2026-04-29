@@ -1,13 +1,13 @@
 ---
 title: useRequestModal
-description: "Trigger modals portaled outside the widget iframe for better overlay display."
+description: "Trigger modals portaled outside the view iframe for better overlay display."
 ---
 
 <Warning>
-**Runtime Support**: In MCP Apps, `useRequestModal` is polyfilled. Modals render inside the widget iframe rather than being portaled to the host.
+**Runtime Support**: In MCP Apps, `useRequestModal` is polyfilled. Modals render inside the view iframe rather than being portaled to the host.
 </Warning>
 
-The `useRequestModal` hook returns a function to trigger a modal that is portaled outside of the widget iframe. This ensures the modal is correctly displayed and not limited to the widget's area, allowing for a better user experience when displaying detailed content or forms.
+The `useRequestModal` hook returns a function to trigger a modal that is portaled outside of the view iframe. This ensures the modal is correctly displayed and not limited to the view's area, allowing for a better user experience when displaying detailed content or forms.
 
 ## Basic usage
 
@@ -48,7 +48,7 @@ function ModalTrigger() {
 - `anchor?: { top?: number; left?: number; width?: number; height?: number }` - Positioning anchor for the modal
 
 <Info>
-When the modal is opened, your widget will be re-rendered and the `isOpen` property will be `true`. Use this to detect when you're in modal mode and render different content accordingly.
+When the modal is opened, your view will be re-rendered and the `isOpen` property will be `true`. Use this to detect when you're in modal mode and render different content accordingly.
 </Info>
 
 ## Examples
@@ -58,7 +58,7 @@ When the modal is opened, your widget will be re-rendered and the `isOpen` prope
 ```tsx
 import { useRequestModal } from "skybridge/web";
 
-function ProductWidget() {
+function ProductView() {
   const { open, isOpen } = useRequestModal();
 
   // When in modal mode, show detailed view
@@ -96,7 +96,7 @@ function ProductWidget() {
 import { useRequestModal } from "skybridge/web";
 import { useState } from "react";
 
-function SettingsWidget() {
+function SettingsView() {
   const { open, isOpen } = useRequestModal();
   const [settings, setSettings] = useState({
     notifications: true,
@@ -222,7 +222,7 @@ function ImageGallery({ images }: { images: Image[] }) {
 ### Form Modal
 
 ```tsx
-import { useRequestModal, useWidgetState } from "skybridge/web";
+import { useRequestModal, useViewState } from "skybridge/web";
 
 type FormData = {
   name: string;
@@ -232,7 +232,7 @@ type FormData = {
 
 function ContactForm() {
   const { open, isOpen } = useRequestModal();
-  const [formData, setFormData] = useWidgetState<FormData>({
+  const [formData, setFormData] = useViewState<FormData>({
     name: "",
     email: "",
     submitted: false,

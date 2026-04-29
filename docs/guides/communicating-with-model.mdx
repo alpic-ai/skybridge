@@ -23,12 +23,12 @@ See [LLM Context Sync](/concepts/llm-context-sync) for details on nesting, best 
 
 ## Sending Messages with useSendFollowUpMessage
 
-Let the user ask questions through the widget:
+Let the user ask questions through the view:
 
 ```tsx
 import { useSendFollowUpMessage } from "skybridge/web";
 
-function FlightWidget() {
+function FlightView() {
   const sendMessage = useSendFollowUpMessage();
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
 

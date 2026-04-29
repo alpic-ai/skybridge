@@ -1,6 +1,6 @@
 ---
 title: useDisplayMode
-description: "Read and control widget display modes: inline, fullscreen, or picture-in-picture."
+description: "Read and control view display modes: inline, fullscreen, or picture-in-picture."
 ---
 
 <Info>
@@ -9,14 +9,14 @@ description: "Read and control widget display modes: inline, fullscreen, or pict
 Note: MCP Apps do not support the "modal" display mode. Requesting modal mode in MCP Apps will throw an error.
 </Info>
 
-The `useDisplayMode` hook allows you to read and control the display mode of your widget. Widgets can be displayed in three modes: `inline`, `fullscreen`, or `pip` (picture-in-picture).
+The `useDisplayMode` hook allows you to read and control the display mode of your view. Views can be displayed in three modes: `inline`, `fullscreen`, or `pip` (picture-in-picture).
 
 ## Basic usage
 
 ```tsx
 import { useDisplayMode } from "skybridge/web";
 
-function ExpandableWidget() {
+function ExpandableView() {
   const [displayMode, setDisplayMode] = useDisplayMode();
 
   return (
@@ -43,11 +43,11 @@ The hook returns a tuple with two elements:
 displayMode: "inline" | "fullscreen" | "pip"
 ```
 
-The current display mode of the widget:
+The current display mode of the view:
 
-- `inline` - The widget is displayed inline within the chat
-- `fullscreen` - The widget takes up the full screen
-- `pip` - The widget is displayed in picture-in-picture mode (on mobile, this is coerced to fullscreen)
+- `inline` - The view is displayed inline within the chat
+- `fullscreen` - The view takes up the full screen
+- `pip` - The view is displayed in picture-in-picture mode (on mobile, this is coerced to fullscreen)
 
 ### `setDisplayMode`
 
@@ -84,7 +84,7 @@ function MediaPlayer() {
 ```tsx
 import { useDisplayMode } from "skybridge/web";
 
-function AdaptiveWidget() {
+function AdaptiveView() {
   const [displayMode] = useDisplayMode();
 
   if (displayMode === "fullscreen") {
@@ -110,7 +110,7 @@ function AdaptiveWidget() {
 ```tsx
 import { useDisplayMode, useUser } from "skybridge/web";
 
-function FloatingWidget() {
+function FloatingView() {
   const [displayMode, setDisplayMode] = useDisplayMode();
   const { userAgent } = useUser();
   const isMobile = userAgent.device.type === "mobile";

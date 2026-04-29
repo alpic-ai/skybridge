@@ -39,14 +39,14 @@ The key of the global value to subscribe to. Available keys include:
 |-----|------|-------------|
 | `theme` | `"light" \| "dark"` | The current color theme |
 | `locale` | `string` | The user's locale (e.g., `"en-US"`) |
-| `displayMode` | `"inline" \| "fullscreen" \| "pip"` | The widget's display mode |
+| `displayMode` | `"inline" \| "fullscreen" \| "pip"` | The view's display mode |
 | `userAgent` | `UserAgent` | Device and capability information |
-| `maxHeight` | `number \| undefined` | Maximum height available for the widget (if provided by host) |
-| `safeArea` | `SafeArea` | Safe area insets for the widget |
+| `maxHeight` | `number \| undefined` | Maximum height available for the view (if provided by host) |
+| `safeArea` | `SafeArea` | Safe area insets for the view |
 | `toolInput` | `object` | The input arguments passed to the tool |
 | `toolOutput` | `object \| null` | The tool's output (when available) |
 | `toolResponseMetadata` | `object \| null` | Additional metadata from the tool response |
-| `widgetState` | `object \| null` | The persisted widget state |
+| `viewState` | `object \| null` | The persisted view state |
 | `view` | `{ mode: "inline" \| "fullscreen" \| "pip"; params?: Record<string, unknown> }` | Current view state, including modal params |
 
 ## Returns
@@ -64,7 +64,7 @@ The current value of the specified global, or `undefined` if not available.
 ```tsx
 import { useAppsSdkContext } from "skybridge/web";
 
-function SafeAreaAwareWidget() {
+function SafeAreaAwareView() {
   const safeArea = useAppsSdkContext("safeArea");
 
   if (!safeArea) {

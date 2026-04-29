@@ -1,24 +1,24 @@
 ---
 title: MCP Apps
 sidebarTitle: MCP Apps
-description: "Deep dive into the MCP ext-apps specification: MCP protocol, Skybridge hooks, and how MCP Apps clients render widgets."
+description: "Deep dive into the MCP ext-apps specification: MCP protocol, Skybridge hooks, and how MCP Apps clients render views."
 ---
 
-[MCP Apps](https://github.com/modelcontextprotocol/ext-apps) are based on the **MCP ext-apps specification** — an open standard for rendering interactive UI widgets inside AI conversations. 
+[MCP Apps](https://github.com/modelcontextprotocol/ext-apps) are based on the **MCP ext-apps specification** — an open standard for rendering interactive UI views inside AI conversations. 
 
 MCP Apps are the portable baseline across hosts (e.g. Claude, Goose, VSCode, and ChatGPT compatibility mode). Skybridge implements the protocol via the `McpAppAdaptor` so you use the same hooks regardless of runtime.
 
-## Widget Rendering Flow
+## View Rendering Flow
 
-Here's what happens when an MCP Apps client renders a widget:
+Here's what happens when an MCP Apps client renders a view:
 
 1. User asks the AI to perform an action (e.g., "Show me flight options to Paris")
 2. The client calls your MCP tool (e.g., `search_flights`)
 3. Your tool returns a result with data and a reference to a UI resource
 4. The client fetches the resource (your compiled React component) and renders it in an iframe
-5. The widget communicates with the host via the **MCP protocol** and is hydrated with your tool's `structuredContent` and `_meta` properties
+5. The view communicates with the host via the **MCP protocol** and is hydrated with your tool's `structuredContent` and `_meta` properties
 
-The widget–host connection looks like this:
+The view–host connection looks like this:
 
 <img src="/images/mcp-apps-explainer.avif" alt="MCP Apps architecture: MCP Server, MCP Host (ChatGPT, Claude), Host UI with Sandbox and Guest App iframe" style={{ width: "100%", maxWidth: "600px", display: "block", margin: "0 auto" }} />
 
@@ -26,7 +26,7 @@ The Host UI in this diagram designates the MCP Client (Claude, Goose, VSCode, et
 
 ## The MCP ext-apps protocol
 
-Widgets run inside an iframe and talk to the host via the **same [MCP protocol](https://modelcontextprotocol.io/)** used by your server. The [ext-apps](https://github.com/modelcontextprotocol/ext-apps) spec defines **guest-to-host** requests and **host-to-guest** notifications for the widget:
+Views run inside an iframe and talk to the host via the **same [MCP protocol](https://modelcontextprotocol.io/)** used by your server. The [ext-apps](https://github.com/modelcontextprotocol/ext-apps) spec defines **guest-to-host** requests and **host-to-guest** notifications for the view:
 
 ### Guest-to-host requests
 
@@ -36,7 +36,7 @@ Widgets run inside an iframe and talk to the host via the **same [MCP protocol](
 | `ui/open-link` | Open external URLs |
 | `ui/message` | Send follow-up messages to the conversation |
 | `ui/request-display-mode` | Request display mode change |
-| `ui/update-model-context` | Update widget state for the model |
+| `ui/update-model-context` | Update view state for the model |
 | `tools/call` | Invoke MCP tools |
 
 ### Host-to-guest notifications
@@ -56,7 +56,7 @@ Skybridge wraps the MCP ext-apps protocol with the **same React hooks** as the A
 | Protocol | Skybridge Hook | Purpose |
 |----------|----------------|---------|
 | `ui/notifications/tool-input`, `tool-result`, `metadata` | [`useToolInfo()`](/api-reference/use-tool-info) | Access tool input, output, and `_meta` |
-| `ui/update-model-context` | [`useWidgetState()`](/api-reference/use-widget-state), [`data-llm`](/api-reference/data-llm) | Persistent widget state / model context |
+| `ui/update-model-context` | [`useViewState()`](/api-reference/use-view-state), [`data-llm`](/api-reference/data-llm) | Persistent view state / model context |
 | `tools/call` | [`useCallTool()`](/api-reference/use-call-tool) | Make additional tool calls |
 | `ui/message` | [`useSendFollowUpMessage()`](/api-reference/use-send-follow-up-message) | Send follow-up messages |
 | `ui/open-link` | [`useOpenExternal()`](/api-reference/use-open-external) | Open external URLs |
@@ -84,7 +84,7 @@ Not all Skybridge features exist in the ext-apps spec. When using Skybridge in M
 |---------|----------|----------|
 | [useFiles](/api-reference/use-files), [useSetOpenInAppUrl](/api-reference/use-set-open-in-app-url) | ✅ | ❌ Not supported |
 | [useRequestModal](/api-reference/use-request-modal) | Portaled to host | ⚠️ Polyfilled (renders in-iframe) |
-| [useWidgetState](/api-reference/use-widget-state), [data-llm](/api-reference/data-llm) | Persisted by host | ⚠️ Polyfilled (state doesn't persist across widget renders) |
+| [useViewState](/api-reference/use-view-state), [data-llm](/api-reference/data-llm) | Persisted by host | ⚠️ Polyfilled (state doesn't persist across view renders) |
 
 
 **Graceful degradation**: Unsupported features throw; polyfilled ones work with limitations. See the [compatibility matrix](/api-reference#runtime-compatibility) for details.

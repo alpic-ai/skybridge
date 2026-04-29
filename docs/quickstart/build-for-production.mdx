@@ -29,7 +29,7 @@ deno task build
 ```
 </CodeGroup>
 
-This runs the `skybridge build` command, which compiles your widgets and server code for production.
+This runs the `skybridge build` command, which compiles your views and server code for production.
 
 ## Start Production Server
 
@@ -59,14 +59,14 @@ This runs the `skybridge start` command, which starts your production server.
 
 The production server runs your compiled application from the `dist/` directory with `NODE_ENV=production`. Unlike the development server, it:
 
-- **Serves pre-built assets** - Widgets and styles are served as static files from `/assets` (compiled during `skybridge build`)
+- **Serves pre-built assets** - Views and styles are served as static files from `/assets` (compiled during `skybridge build`)
 - **MCP endpoint** - Exposes your MCP server at `/mcp` for MCP Clients to connect to
 - **No dev tools** - DevTools and Vite dev server are excluded in production for better performance
 - **Optimized rendering** - Uses production templates that load pre-bundled JavaScript and CSS files
 
 The server listens on port 3000 by default. 
 
-When deployed remotely, the MCP Client (ChatGPT, Claude, etc.) connects to your MCP endpoint (e.g., `https://your-domain.com/mcp`) to access your tools and widgets.
+When deployed remotely, the MCP Client (ChatGPT, Claude, etc.) connects to your MCP endpoint (e.g., `https://your-domain.com/mcp`) to access your tools and views.
 
 To deploy your app to Alpic's infrastructure, see [Deploy](/quickstart/deploy).
 

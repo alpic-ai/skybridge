@@ -7,7 +7,7 @@ import { useCallToolResult, useStore } from "@/lib/store.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
 import { injectWaitForOpenai } from "./utils.js";
 
-export const Widget = () => {
+export const View = () => {
   const tool = useSelectedTool();
   const toolResult = useCallToolResult(tool.name);
   const { openaiObject } = toolResult ?? {};
@@ -34,9 +34,9 @@ export const Widget = () => {
 
     hasLoadedRef.current = true;
 
-    const widgetDomain = resource.contents[0]._meta?.["openai/widgetDomain"];
-    if (widgetDomain && typeof widgetDomain === "string") {
-      setOpenInAppUrl(tool.name, widgetDomain);
+    const viewDomain = resource.contents[0]._meta?.["openai/widgetDomain"];
+    if (viewDomain && typeof viewDomain === "string") {
+      setOpenInAppUrl(tool.name, viewDomain);
     }
 
     createAndInjectOpenAi(

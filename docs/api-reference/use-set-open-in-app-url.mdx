@@ -10,7 +10,7 @@ tag: "ChatGPT"
 This hook is not available in MCP Apps. Calling it in an MCP Apps environment will throw an error.
 </Warning>
 
-The `useSetOpenInAppUrl` hook returns a function to set the URL that will be opened when the user clicks the "open in app" button. This button appears in the top right corner when the widget is displayed in fullscreen mode.
+The `useSetOpenInAppUrl` hook returns a function to set the URL that will be opened when the user clicks the "open in app" button. This button appears in the top right corner when the view is displayed in fullscreen mode.
 
 ## Basic usage
 
@@ -49,8 +49,8 @@ An async function that sets the URL to be opened when the user clicks the "open 
 - `href: string`
   - **Required**
   - The URL to set.
-  - If the origin matches the widget's server URL, ChatGPT navigates to the full `href`.
-  - If the origin differs from the widget's server URL, ChatGPT ignores the `href` and falls back to the widget's server URL.
+  - If the origin matches the view's server URL, ChatGPT navigates to the full `href`.
+  - If the origin differs from the view's server URL, ChatGPT ignores the `href` and falls back to the view's server URL.
 
 ### Errors
 

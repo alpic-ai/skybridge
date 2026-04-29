@@ -22,7 +22,7 @@ skybridge dev
 - Opens DevTools for local testing at `http://localhost:3000/`
 - Exposes MCP server at `http://localhost:3000/mcp`
 - Enables file watching with automatic server restart
-- Enables Hot Module Reloading (HMR) for widgets
+- Enables Hot Module Reloading (HMR) for views
 
 #### Flags
 
@@ -40,7 +40,7 @@ PORT=8080 skybridge dev
 
 ### skybridge build
 
-Build your widgets and MCP server for production deployment.
+Build your views and MCP server for production deployment.
 
 ```bash
 skybridge build
@@ -48,7 +48,7 @@ skybridge build
 
 **What it does:**
 
-1. **Building widgets** - Compiles your React widgets using Vite
+1. **Building views** - Compiles your React views using Vite
 2. **Compiling server** - Transpiles TypeScript server code
 3. **Copying static assets** - Moves built assets to the `dist/` directory
 
@@ -72,7 +72,7 @@ skybridge start
 - Runs the compiled server from `dist/index.js`
 - Sets `NODE_ENV=production`
 - Serves the MCP endpoint at `http://localhost:3000/mcp`
-- Serves pre-built widget assets from `/assets`
+- Serves pre-built view assets from `/assets`
 
 ---
 
@@ -140,10 +140,10 @@ npm create skybridge@latest . --overwrite --immediate
 The scaffolder copies a starter template that includes:
 
 - `server/index.ts` - MCP server with example tools
-- `web/` - React widgets with example components
+- `web/` - React views with example components
 - `package.json` - Pre-configured with all dependencies
 - `tsconfig.json` files - TypeScript configuration
-- `vite.config.ts` - Vite configuration for widget bundling
+- `vite.config.ts` - Vite configuration for view bundling
 - `nodemon.json` - File watching configuration for development
 
 ---

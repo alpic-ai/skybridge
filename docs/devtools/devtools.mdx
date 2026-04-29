@@ -1,12 +1,12 @@
 ---
 title: DevTools
-description: "Test your app widgets locally with Skybridge's browser-based DevTools and debugging tools."
+description: "Test your app views locally with Skybridge's browser-based DevTools and debugging tools."
 ---
 
-DevTools is designed to help you test your apps locally in a short feedback loop fashion. It lets you develop and debug widgets without needing to deploy or use external services.
+DevTools is designed to help you test your apps locally in a short feedback loop fashion. It lets you develop and debug views without needing to deploy or use external services.
 
 <Note>
-DevTools currently renders widgets using the **Apps SDK runtime** (mocked `window.openai`). MCP Apps rendering is not yet supported in DevTools. 
+DevTools currently renders views using the **Apps SDK runtime** (mocked `window.openai`). MCP Apps rendering is not yet supported in DevTools. 
 </Note>
 
 ## Quick Start
@@ -25,9 +25,9 @@ DevTools generates a form based on each tool's input schema, making it easy to t
 
 <img src="/images/devtools-toolcall.png" alt="DevTools Tool Input Form" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
 
-## Widget Inspection
+## View Inspection
 
-When a tool renders a widget, DevTools provides comprehensive inspection capabilities:
+When a tool renders a view, DevTools provides comprehensive inspection capabilities:
 
 ### Apps SDK Environment Inspector
 
@@ -37,33 +37,33 @@ Inspect and edit the Apps SDK environment properties in real-time (mocked `windo
 - **Locale**: Change the locale settings
 - **User Agent**: Modify device type (mobile/desktop) and capabilities (hover/touch)
 - **Safe Area**: Adjust safe area insets
-- **Max Height**: Set widget height constraints
+- **Max Height**: Set view height constraints
 
-Changes are immediately reflected in the widget preview, allowing you to test how your widget behaves under different conditions.
+Changes are immediately reflected in the view preview, allowing you to test how your view behaves under different conditions.
 
 <Note>
 This inspector mocks the **Apps SDK runtime** (`window.openai`). For testing MCP Apps-specific behavior, use a MCP Apps Client like Goose or MCPJam.
 </Note>
 
-### Inspectable Widget State
+### Inspectable View State
 
-View and monitor the widget's state as it changes. The widget state inspector shows the current state object in a JSON tree view, making it easy to debug state management and track state updates.
+View and monitor the view's state as it changes. The view state inspector shows the current state object in a JSON tree view, making it easy to debug state management and track state updates.
 
 ### MCP client logs
 
-See all Apps SDK API calls made by your widget in real-time. The logs panel displays:
+See all Apps SDK API calls made by your view in real-time. The logs panel displays:
 - Timestamp of each API call
-- Command name (e.g., `setWidgetState`, `callTool`, `requestDisplayMode`)
+- Command name (e.g., `setViewState`, `callTool`, `requestDisplayMode`)
 - Arguments passed to each method
 - Response data (when applicable)
 
-This helps you understand how your widget interacts with the MCP client and debug any issues.
+This helps you understand how your view interacts with the MCP client and debug any issues.
 
 <Note>
-These logs show **Apps SDK** (`window.openai`) calls. In MCP Apps, widgets use the MCP ext-apps protocol instead. The Skybridge hooks abstract these differences, so your widget code works in both runtimes.
+These logs show **Apps SDK** (`window.openai`) calls. In MCP Apps, views use the MCP ext-apps protocol instead. The Skybridge hooks abstract these differences, so your view code works in both runtimes.
 </Note>
 
-<img src="/images/devtools-widget.png" alt="DevTools Widget Inspection Panel" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
+<img src="/images/devtools-view.png" alt="DevTools View Inspection Panel" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
 
 ## Limitations
 
@@ -71,18 +71,18 @@ DevTools uses the **Apps SDK runtime** (mocked `window.openai`) but has some dif
 
 - **CSP policies**: Some external resources may be blocked in production but allowed locally
 - **LLM responses**: Follow-up messages don't trigger actual LLM responses—test these in ChatGPT dev mode or MCP Apps clients
-- **MCP Apps runtime**: DevTools does not support MCP Apps widget rendering—test MCP Apps widgets in real clients like Goose or Claude
+- **MCP Apps runtime**: DevTools does not support MCP Apps view rendering—test MCP Apps views in real clients like Goose or Claude
 
 ## Custom Integration
 
 If you're not using the Skybridge starter template, add DevTools to your server:
 
 ```typescript
-import { devtoolsStaticServer, widgetsDevServer } from "skybridge/server";
+import { devtoolsStaticServer, viewsDevServer } from "skybridge/server";
 
 if (process.env.NODE_ENV !== "production") {
   app.use(await devtoolsStaticServer());
-  app.use(await widgetsDevServer());
+  app.use(await viewsDevServer());
 }
 ```
 

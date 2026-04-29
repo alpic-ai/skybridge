@@ -61,11 +61,11 @@ export interface HostContext {
   toolInput: Record<string, unknown> | null;
   toolOutput: Record<string, unknown> | null;
   toolResponseMetadata: Record<string, unknown> | null;
-  view: {
+  display: {
     mode: DisplayMode;
     params?: Record<string, unknown>;
   };
-  widgetState: Record<string, unknown> | null;
+  viewState: Record<string, unknown> | null;
 }
 
 export type Subscribe = Parameters<typeof useSyncExternalStore>[0];
@@ -81,11 +81,11 @@ export type HostContextStore<K extends keyof HostContext> = {
   getSnapshot: () => HostContext[K];
 };
 
-export type WidgetState = Record<string, unknown>;
+export type ViewState = Record<string, unknown>;
 
-export type SetWidgetStateAction =
-  | WidgetState
-  | ((prevState: WidgetState | null) => WidgetState);
+export type SetViewStateAction =
+  | ViewState
+  | ((prevState: ViewState | null) => ViewState);
 
 export type FileMetadata = {
   fileId: string;
@@ -117,7 +117,7 @@ export interface Adaptor {
   }>;
   sendFollowUpMessage(prompt: string): Promise<void>;
   openExternal(href: string, options?: OpenExternalOptions): void;
-  setWidgetState(stateOrUpdater: SetWidgetStateAction): Promise<void>;
+  setViewState(stateOrUpdater: SetViewStateAction): Promise<void>;
   uploadFile(file: File, options?: UploadFileOptions): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
   selectFiles(): Promise<FileMetadata[]>;
