@@ -9,6 +9,6 @@
   },
   {
     "query": "When users click 'Book Now' it should redirect to our booking site without any confirmation popup.",
-    "expected_behavior": "Uses useOpenExternal for the redirect. Whitelist domain in server view definition using _meta.ui.csp.redirectDomains array to skip confirmation."
+    "expected_behavior": "Uses useOpenExternal for the redirect. Whitelist domain in server view definition using view.csp.redirectDomains array to skip confirmation."
   }
 ]
