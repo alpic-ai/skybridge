@@ -15,11 +15,15 @@ function extractBestMessage(
   message: string,
   continuationLines: Array<string>,
 ): string {
-  if (!continuationLines.length) return message;
+  if (!continuationLines.length) {
+    return message;
+  }
   let maxIndent = 0;
   for (const line of continuationLines) {
     const indent = line.length - line.trimStart().length;
-    if (indent > maxIndent) maxIndent = indent;
+    if (indent > maxIndent) {
+      maxIndent = indent;
+    }
   }
   const deepest = continuationLines
     .filter((l) => l.length - l.trimStart().length === maxIndent)
@@ -50,7 +54,9 @@ export function useTypeScriptCheck(): Array<TsError> {
     let continuationLines: Array<string> = [];
 
     const flushPending = () => {
-      if (!pendingError) return;
+      if (!pendingError) {
+        return;
+      }
       pendingError.message = extractBestMessage(
         pendingError.message,
         continuationLines,
