@@ -51,11 +51,9 @@ export function scanViewsSync(viewsDir: string): {
   return { valid, invalid };
 }
 
-export function discoverViewsSync(viewsDir: string): DiscoveredView[] {
-  const { valid } = scanViewsSync(viewsDir);
-
+export function assertUniqueViewNames(views: DiscoveredView[]): void {
   const nameMap = new Map<string, string[]>();
-  for (const view of valid) {
+  for (const view of views) {
     const paths = nameMap.get(view.name) ?? [];
     paths.push(view.filePath);
     nameMap.set(view.name, paths);
@@ -68,7 +66,11 @@ export function discoverViewsSync(viewsDir: string): DiscoveredView[] {
       );
     }
   }
+}
 
+export function discoverViewsSync(viewsDir: string): DiscoveredView[] {
+  const { valid } = scanViewsSync(viewsDir);
+  assertUniqueViewNames(valid);
   return valid;
 }
 

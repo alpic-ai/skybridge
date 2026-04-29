@@ -1,6 +1,7 @@
 import { isAbsolute, relative, resolve } from "node:path";
 import type { Plugin, ViteDevServer } from "vite";
 import {
+  assertUniqueViewNames,
   type DiscoveredView,
   discoverViewsSync,
   scanViewsSync,
@@ -145,7 +146,7 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
           // Surface broken view files. Without this, files lacking a
           // default export are silently dropped from the input and the
           // user has no idea why their widget never mounts.
-          const { invalid } = scanViewsSync(resolvedViewsDir);
+          const { valid, invalid } = scanViewsSync(resolvedViewsDir);
           const nextInvalid = new Set(invalid.map((v) => v.filePath));
 
           for (const filePath of nextInvalid) {
@@ -164,11 +165,11 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
           }
           knownInvalid = nextInvalid;
 
-          const views = discoverViewsSync(resolvedViewsDir);
-          viewMap = new Map(views.map((v) => [v.name, v]));
-          writeViewsDts(projectRoot, views);
+          assertUniqueViewNames(valid);
+          viewMap = new Map(valid.map((v) => [v.name, v]));
+          writeViewsDts(projectRoot, valid);
         } catch (err) {
-          // discoverViewsSync throws on duplicate view names. Catch so
+          // assertUniqueViewNames throws on duplicate view names. Catch so
           // chokidar's listener chain doesn't surface it as unhandled and
           // crash the dev server — previous viewMap stays active until
           // the user fixes the conflict.
