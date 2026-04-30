@@ -4,9 +4,9 @@ description: "Develop Apps locally with Skybridge's DevTools and Vite HMR for in
 ---
 
 
-**Problem:** Testing widgets in remote MCP Clients (e.g. ChatGPT, Claude, etc.) is slow. It requires HTTP tunneling, manual refreshes, and provides limited debugging feedback.
+**Problem:** Testing views in remote MCP Clients (e.g. ChatGPT, Claude, etc.) is slow. It requires HTTP tunneling, manual refreshes, and provides limited debugging feedback.
 
-**Solution:** Skybridge includes DevTools and a Vite HMR plugin that let you develop widgets entirely on your machine with instant feedback.
+**Solution:** Skybridge includes DevTools and a Vite HMR plugin that let you develop views entirely on your machine with instant feedback.
 
 ## The Challenge
 
@@ -17,11 +17,11 @@ When building Apps the traditional way, your development loop looks like:
 3. Start the tunnel
 4. Go to Claude or ChatGPT dev mode
 5. Trigger the tool manually by chatting
-6. Wait for the widget to load
+6. Wait for the view to load
 7. See if your change worked
 8. Repeat
 
-This can take 30-60 seconds per iteration. With complex widgets, that adds up fast.
+This can take 30-60 seconds per iteration. With complex views, that adds up fast.
 
 ## The Skybridge Approach
 
@@ -30,7 +30,7 @@ With Skybridge, the loop becomes:
 1. Make a code change
 2. See it instantly in your browser
 
-That's it. DevTools mocks the Apps SDK (ChatGPT) environment, and Vite's HMR updates your widget without a full reload.
+That's it. DevTools mocks the Apps SDK (ChatGPT) environment, and Vite's HMR updates your view without a full reload.
 
 ## DevTools
 
@@ -39,31 +39,31 @@ When you run `pnpm dev`, Skybridge starts:
 - DevTools UI at `http://localhost:3000/`
 
 The DevTools UI provides:
-- **Tool listing** - See all registered tools and widgets
+- **Tool listing** - See all registered tools and views
 - **Input forms** - Test tools with custom inputs
-- **Widget preview** - Render widgets in a mocked Apps SDK (ChatGPT) environment
+- **View preview** - Render views in a mocked Apps SDK (ChatGPT) environment
 
 <Note>
 **MCP Apps and DevTools**
 
-DevTools uses the **Apps SDK runtime** (mocked `window.openai`). MCP Apps widget rendering is not yet supported in DevTools. For MCP Apps, use DevTools for tool development and UI logic; validate widgets in a real client (e.g. [Goose](https://goose.ai/), Claude) before shipping. See [DevTools Guide](/devtools) and [Test Your App](/quickstart/test-your-app#testing-in-claude).
+DevTools uses the **Apps SDK runtime** (mocked `window.openai`). MCP Apps view rendering is not yet supported in DevTools. For MCP Apps, use DevTools for tool development and UI logic; validate views in a real client (e.g. [Goose](https://goose.ai/), Claude) before shipping. See [DevTools Guide](/devtools) and [Test Your App](/quickstart/test-your-app#testing-in-claude).
 </Note>
 
 <Info>
 **Full DevTools Guide**
 
-For comprehensive documentation on all DevTools features, including widget inspection, MCP client logs, and custom integration, see the [DevTools Guide](/devtools).
+For comprehensive documentation on all DevTools features, including view inspection, MCP client logs, and custom integration, see the [DevTools Guide](/devtools).
 </Info>
 
 <img src="/images/devtools-landing.png" alt="Skybridge DevTools" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
 
 ## HMR with Vite Plugin
 
-Skybridge includes a Vite plugin that enables Hot Module Replacement for widgets:
+Skybridge includes a Vite plugin that enables Hot Module Replacement for views:
 
 ```typescript
 // vite.config.ts
-import { skybridge } from "skybridge/web";
+import { skybridge } from "skybridge/vite";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -73,7 +73,7 @@ export default defineConfig({
 ```
 
 The plugin:
-- **Auto-discovers widgets** in `src/widgets/` (both flat files and directories)
+- **Auto-discovers views** in `src/views/` (both flat files and directories)
 - **Enables HMR** so changes appear instantly without page reload
 - **Transforms `data-llm`** attributes at build time
 - **Configures build output** with proper asset paths
@@ -88,7 +88,7 @@ When you save a file, only the changed component re-renders. Form inputs, scroll
 
 ## Automatic Environment Detection
 
-Your widget code works identically in ChatGPT, MCP Apps clients like Claude, and local DevTools. Skybridge detects the environment and uses the appropriate communication layer:
+Your view code works identically in ChatGPT, MCP Apps clients like Claude, and local DevTools. Skybridge detects the environment and uses the appropriate communication layer:
 
 | Environment | Communication |
 |-------------|---------------|
@@ -126,8 +126,8 @@ The DevTools UI includes:
 ### Tool Inspector
 See all registered tools and their schemas. Click to fill input forms automatically.
 
-### Widget Preview
-Renders your widget in an iframe with mocked `window.openai`. Supports:
+### View Preview
+Renders your view in an iframe with mocked `window.openai`. Supports:
 - Theme switching (light/dark)
 - Display mode switching (pip/inline/fullscreen)
 - Locale changing
@@ -141,4 +141,4 @@ View the full tool response including `content`, `structuredContent`, and `_meta
 - [DevTools Guide](/devtools) - Complete DevTools documentation and features
 - [Test Your App](/quickstart/test-your-app) - Full testing workflow including ChatGPT and MCP Apps clients
 - [useLayout API](/api-reference/use-layout) - Access theme and layout info
-- [useCallTool API](/api-reference/use-call-tool) - Make tool calls from widgets
+- [useCallTool API](/api-reference/use-call-tool) - Make tool calls from views

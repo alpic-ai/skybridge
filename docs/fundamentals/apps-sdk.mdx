@@ -6,15 +6,15 @@ description: "Deep dive into ChatGPT's runtime: MCP Apps compatibility, the wind
 
 The [OpenAI Apps SDK](https://developers.openai.com/apps-sdk/) is the ChatGPT runtime layer for ChatGPT Apps, [announced in October 2025](https://alpic.ai/blog/inside-openai-s-apps-sdk-how-to-build-interactive-chatgpt-apps-with-mcp). ChatGPT supports the MCP Apps UI model, and also provides `window.openai` for compatibility and ChatGPT-specific extensions.
 
-## Widget Rendering Flow
+## View Rendering Flow
 
-Here's what happens when ChatGPT renders a widget:
+Here's what happens when ChatGPT renders a view:
 
 1. User asks ChatGPT to perform an action (e.g., "Show me flight options to Paris")
 2. ChatGPT calls your MCP tool (e.g., `search_flights`)
 3. Your tool returns a result with data and a reference to a UI resource
 4. ChatGPT fetches the resource (your compiled React component) and renders it in an iframe
-5. The widget is hydrated with your tool's `structuredContent` and `_meta` properties
+5. The view is hydrated with your tool's `structuredContent` and `_meta` properties
 
 <img src="/images/fundamentals-chatgpt-apps.png" alt="ChatGPT Apps Rendering Flow" style={{ width: "100%", maxWidth: "800px", display: "block", margin: "0 auto" }} />
 
@@ -22,14 +22,14 @@ Here's what happens when ChatGPT renders a widget:
 
 ## The `window.openai` API
 
-Widgets run inside an iframe and have access to a special [`window.openai`](https://developers.openai.com/apps-sdk/build/chatgpt-ui#understand-the-windowopenai-api) global. In ChatGPT, this acts as a compatibility layer plus an extension surface for host-specific features:
+Views run inside an iframe and have access to a special [`window.openai`](https://developers.openai.com/apps-sdk/build/chatgpt-ui#understand-the-windowopenai-api) global. In ChatGPT, this acts as a compatibility layer plus an extension surface for host-specific features:
 
 | API | Description |
 |-----|-------------|
 | `toolInput` | Arguments supplied when the tool was invoked |
 | `toolOutput` | Your `structuredContent` — initial data passed from your tool |
-| `toolResponseMetadata` | The `_meta` payload; only the widget sees it, never the model |
-| `widgetState` / `setWidgetState()` | Persist UI state across interactions |
+| `toolResponseMetadata` | The `_meta` payload; only the view sees it, never the model |
+| `viewState` / `setViewState()` | Persist UI state across interactions |
 | `callTool()` | Trigger additional tool calls from the UI |
 | `sendFollowUpMessage()` | Send messages back into the chat |
 | `requestDisplayMode()` | Request inline, PiP, or fullscreen display |
@@ -48,7 +48,7 @@ Skybridge wraps the raw `window.openai` API with React hooks:
 | Raw API | Skybridge Hook | Purpose |
 |---------|----------------|---------|
 | `window.openai.toolInput`, `toolOutput`, `toolResponseMetadata` | [`useToolInfo()`](/api-reference/use-tool-info) | Access tool input, output, and `_meta` |
-| `window.openai.widgetState` and `window.openai.setWidgetState` | [`useWidgetState()`](/api-reference/use-widget-state) | Persistent widget state |
+| `window.openai.widgetState` and `window.openai.setWidgetState` | [`useViewState()`](/api-reference/use-view-state) | Persistent view state |
 | `window.openai.callTool()` | [`useCallTool()`](/api-reference/use-call-tool) | Make additional tool calls |
 | `window.openai.sendFollowUpMessage()` | [`useSendFollowUpMessage()`](/api-reference/use-send-follow-up-message) | Send follow-up messages |
 | `window.openai.openExternal()` | [`useOpenExternal()`](/api-reference/use-open-external) | Open external URLs |
@@ -61,12 +61,12 @@ Skybridge wraps the raw `window.openai` API with React hooks:
 
 ## Apps SDK APIs not yet supported in Skybridge
 
-The following [Apps SDK widget APIs](https://developers.openai.com/apps-sdk/reference) are not yet wrapped by Skybridge hooks:
+The following [Apps SDK view APIs](https://developers.openai.com/apps-sdk/reference) are not yet wrapped by Skybridge hooks:
 
 | Raw API | Purpose |
 |---------|---------|
-| `window.openai.notifyIntrinsicHeight(...)` | Report dynamic widget heights to the host to avoid scroll clipping |
-| `window.openai.requestClose()` | Close the widget from the UI (e.g. user dismisses) |
+| `window.openai.notifyIntrinsicHeight(...)` | Report dynamic view heights to the host to avoid scroll clipping |
+| `window.openai.requestClose()` | Close the view from the UI (e.g. user dismisses) |
 | `window.openai.requestCheckout(...)` | Open ChatGPT Instant Checkout UI (monetization) |
 
 You can call these directly on `window.openai` when running in ChatGPT, if needed. Support may be added in a future release.
@@ -82,7 +82,7 @@ Upload and download files with host-managed storage:
 ```tsx
 import { useFiles } from "skybridge/web";
 
-function Widget() {
+function View() {
   const { upload, getDownloadUrl } = useFiles();
 
   const handleUpload = async (file: File) => {
@@ -102,14 +102,14 @@ Set a URL for the "Open in App" button that appears in fullscreen mode:
 ```tsx
 import { useSetOpenInAppUrl } from "skybridge/web";
 
-function Widget() {
+function View() {
   const { setOpenInAppUrl } = useSetOpenInAppUrl();
 
   useEffect(() => {
     setOpenInAppUrl("https://myapp.com/view/123");
   }, []);
 
-  return <div>Widget content</div>;
+  return <div>View content</div>;
 }
 ```
 

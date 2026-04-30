@@ -20,10 +20,10 @@ export interface SkybridgePluginOptions {
 function buildVirtualEntry(viewFilePath: string): string {
   const normalized = viewFilePath.replace(/\\/g, "/");
   return [
-    `import { mountWidget } from "skybridge/web";`,
+    `import { mountView } from "skybridge/web";`,
     `import Component from "${normalized}";`,
     `import { createElement } from "react";`,
-    `mountWidget(createElement(Component));`,
+    `mountView(createElement(Component));`,
   ].join("\n");
 }
 

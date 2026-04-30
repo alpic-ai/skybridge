@@ -1,23 +1,23 @@
 import superjson, { type SuperJSONResult } from "superjson";
 import { getAdaptor } from "../bridges/index.js";
-import { WIDGET_CONTEXT_KEY } from "../data-llm.js";
+import { VIEW_CONTEXT_KEY } from "../data-llm.js";
 import type { UnknownObject } from "../types.js";
 
-export function filterWidgetContext<T extends UnknownObject>(
+export function filterViewContext<T extends UnknownObject>(
   state?: T | null,
 ): T | null {
   if (state === null || state === undefined) {
     return null;
   }
 
-  const { [WIDGET_CONTEXT_KEY]: _, ...filteredState } = state as T & {
-    [WIDGET_CONTEXT_KEY]?: unknown;
+  const { [VIEW_CONTEXT_KEY]: _, ...filteredState } = state as T & {
+    [VIEW_CONTEXT_KEY]?: unknown;
   };
 
   return filteredState as T;
 }
 
-export function injectWidgetContext<T extends UnknownObject>(
+export function injectViewContext<T extends UnknownObject>(
   newState: T | null,
 ): T | null {
   if (newState === null) {
@@ -25,17 +25,17 @@ export function injectWidgetContext<T extends UnknownObject>(
   }
 
   const currentState = getAdaptor()
-    .getHostContextStore("widgetState")
-    .getSnapshot() as (T & { [WIDGET_CONTEXT_KEY]?: unknown }) | null;
+    .getHostContextStore("viewState")
+    .getSnapshot() as (T & { [VIEW_CONTEXT_KEY]?: unknown }) | null;
 
   if (
     currentState !== null &&
     currentState !== undefined &&
-    WIDGET_CONTEXT_KEY in currentState
+    VIEW_CONTEXT_KEY in currentState
   ) {
     return {
       ...newState,
-      [WIDGET_CONTEXT_KEY]: currentState[WIDGET_CONTEXT_KEY],
+      [VIEW_CONTEXT_KEY]: currentState[VIEW_CONTEXT_KEY],
     } as T;
   }
 
@@ -53,12 +53,12 @@ export function deserializeState(value: SuperJSONResult): unknown {
 export function getInitialState<State extends UnknownObject>(
   defaultState?: State | (() => State),
 ): State | null {
-  const widgetState = getAdaptor()
-    .getHostContextStore("widgetState")
+  const viewState = getAdaptor()
+    .getHostContextStore("viewState")
     .getSnapshot() as State | null;
 
-  if (widgetState !== null && widgetState !== undefined) {
-    return filterWidgetContext(widgetState);
+  if (viewState !== null && viewState !== undefined) {
+    return filterViewContext(viewState);
   }
 
   return typeof defaultState === "function"

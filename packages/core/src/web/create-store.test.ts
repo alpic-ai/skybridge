@@ -12,7 +12,7 @@ import type { StateCreator } from "zustand";
 import { McpAppAdaptor } from "./bridges/mcp-app/adaptor.js";
 import { McpAppBridge } from "./bridges/mcp-app/bridge.js";
 import { createStore } from "./create-store.js";
-import { WIDGET_CONTEXT_KEY } from "./data-llm.js";
+import { VIEW_CONTEXT_KEY } from "./data-llm.js";
 import {
   getMcpAppHostPostMessageMock,
   MockResizeObserver,
@@ -100,14 +100,14 @@ describe("createStore", () => {
       });
     });
 
-    it("should filter widget context from initial state", () => {
+    it("should filter view context from initial state", () => {
       type TestState = { count: number };
       const storeCreator: StateCreator<TestState, [], [], TestState> = () => ({
         count: 0,
       });
       const windowState = {
         count: 5,
-        [WIDGET_CONTEXT_KEY]: "context-value",
+        [VIEW_CONTEXT_KEY]: "context-value",
       };
       OpenaiMock.widgetState = { modelContent: windowState };
 
@@ -115,7 +115,7 @@ describe("createStore", () => {
 
       expect(store.getState()).toEqual({ count: 5 });
       expect(
-        (store.getState() as Record<string, unknown>)[WIDGET_CONTEXT_KEY],
+        (store.getState() as Record<string, unknown>)[VIEW_CONTEXT_KEY],
       ).toBeUndefined();
     });
   });
@@ -132,13 +132,11 @@ describe("createStore", () => {
       McpAppAdaptor.resetInstance();
     });
 
-    it("should initialize with null widgetState", () => {
+    it("should initialize with null viewState", () => {
       const adaptor = McpAppAdaptor.getInstance();
-      const widgetState = adaptor
-        .getHostContextStore("widgetState")
-        .getSnapshot();
+      const viewState = adaptor.getHostContextStore("viewState").getSnapshot();
 
-      expect(widgetState).toBeNull();
+      expect(viewState).toBeNull();
     });
 
     it("should create a store with default state when no persisted state exists", () => {
@@ -152,9 +150,9 @@ describe("createStore", () => {
       expect(store.getState()).toEqual({ count: 0 });
     });
 
-    it("should update in-memory state via setWidgetState", async () => {
+    it("should update in-memory state via setViewState", async () => {
       const adaptor = McpAppAdaptor.getInstance();
-      vi.spyOn(adaptor, "setWidgetState").mockResolvedValue(undefined);
+      vi.spyOn(adaptor, "setViewState").mockResolvedValue(undefined);
 
       type TestState = { count: number; increment: () => void };
       const storeCreator: StateCreator<TestState, [], [], TestState> = (
@@ -168,26 +166,26 @@ describe("createStore", () => {
       store.getState().increment();
 
       await vi.waitFor(() => {
-        expect(adaptor.setWidgetState).toHaveBeenCalledWith({ count: 1 });
+        expect(adaptor.setViewState).toHaveBeenCalledWith({ count: 1 });
       });
     });
 
-    it("should notify listeners when widget state changes", async () => {
+    it("should notify listeners when view state changes", async () => {
       const postMessageMock = getMcpAppHostPostMessageMock();
       vi.stubGlobal("parent", { postMessage: postMessageMock });
 
       const adaptor = McpAppAdaptor.getInstance();
       const listener = vi.fn();
 
-      adaptor.getHostContextStore("widgetState").subscribe(listener);
-      await adaptor.setWidgetState({ count: 42 });
+      adaptor.getHostContextStore("viewState").subscribe(listener);
+      await adaptor.setViewState({ count: 42 });
 
       expect(postMessageMock).toHaveBeenCalledWith(
         expect.objectContaining({ method: "ui/update-model-context" }),
         "*",
       );
       expect(listener).toHaveBeenCalled();
-      expect(adaptor.getHostContextStore("widgetState").getSnapshot()).toEqual({
+      expect(adaptor.getHostContextStore("viewState").getSnapshot()).toEqual({
         count: 42,
       });
     });

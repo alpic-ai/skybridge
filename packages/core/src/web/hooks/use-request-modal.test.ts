@@ -65,7 +65,7 @@ describe("useRequestModal", () => {
     const options = {
       title: "Test Modal",
       params: { foo: "bar" },
-      template: "ui://widget/modal-template.html",
+      template: "ui://view/modal-template.html",
     };
     open(options);
 

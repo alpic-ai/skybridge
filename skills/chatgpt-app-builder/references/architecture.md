@@ -4,10 +4,10 @@
 
 A **tool** is a backend action with no UI. It takes input and returns structured output. It can CRUD data and perform operations (checkout, submit, etc.).
 
-A **widget** is a tool with a UI. It renders the tool output visually. The UI is a React app that can:
+A **view** is a tool with a UI. It renders the tool output visually. The UI is a React app that can:
 - navigate multiple views (search → detail → confirmation)
 - manage its own state
-- call other tools to fetch data absent from the widget output schema or trigger actions.
+- call other tools to fetch data absent from the view output schema or trigger actions.
 
 ## Step 1: Identify the UX Flows
 
@@ -63,31 +63,31 @@ Based on the UX flow:
 
 ### Best Practices
 
-**Naming:** Both widgets and tools start with a verb: `search_flights`, `get_details`, `create_checkout`.
+**Naming:** Both views and tools start with a verb: `search_flights`, `get_details`, `create_checkout`.
 
-**One widget per flow/intent:** Different flows can have separate widgets
-❌ `search_flights` widget + `view_flight` widget (same flow → merge into one widget)
-✅ `search_flights` widget + `manage_bookings` widget (different flows)
+**One view per flow/intent:** Different flows can have separate views
+❌ `search_flights` view + `view_flight` view (same flow → merge into one view)
+✅ `search_flights` view + `manage_bookings` view (different flows)
 
-**Don't duplicate:** Widget output is returned to the LLM for conversation. Widget can be re-invoked. Don't create a tool that duplicates what the widget fetches.
-❌ `search_flights` widget + `get_flights` tool (same data → widget already fetches this)
-✅ unique `search_flights` widget that can be re-invoked by LLM or user
+**Don't duplicate:** View output is returned to the LLM for conversation. View can be re-invoked. Don't create a tool that duplicates what the view fetches.
+❌ `search_flights` view + `get_flights` tool (same data → view already fetches this)
+✅ unique `search_flights` view that can be re-invoked by LLM or user
 
-**Widget UI handles its own state:** Cart, selections, and form inputs live in the widget - not as tools.
-❌ `add_to_cart` tool (cart is widget state)
-❌ `select_seat` tool (selection is widget state)
-❌ `update_quantity` tool (form input is widget state)
+**View UI handles its own state:** Cart, selections, and form inputs live in the view - not as tools.
+❌ `add_to_cart` tool (cart is view state)
+❌ `select_seat` tool (selection is view state)
+❌ `update_quantity` tool (form input is view state)
 ✅ Tools are for backend operations only: `create_checkout`, `submit_order`, `make_reservation`
 
 **Don't lazy-load:** Tool calls are expensive. Return all needed data upfront.
-❌ `search_flights` widget + `get_flight_details` tool (lazy-loading details)
-✅ `search_flights` widget returns full flight data including details
+❌ `search_flights` view + `get_flight_details` tool (lazy-loading details)
+✅ `search_flights` view returns full flight data including details
 
 --- 
 
 For each identified flow:
 
-### If NEEDS UI → Widget + Optional Tool(s)
+### If NEEDS UI → View + Optional Tool(s)
 
 **Example: Flight Booking**
 
@@ -99,7 +99,7 @@ UX Flow:
 
 API:
 
-**Widget: search_flights**
+**View: search_flights**
 - Input: `{ dates, destination }`
 - Output: `{ flights }` → rendered as list
 - Views: search results, flight detail + passenger form
@@ -107,7 +107,7 @@ API:
 
 **Tool: create_checkout**
 - Input: `{ flightId, passengers[] }`
-- Output: `{ checkoutUrl }` → widget redirects to Stripe
+- Output: `{ checkoutUrl }` → view redirects to Stripe
 
 ### If DOES NOT NEED UI → Tool(s) Only
 
@@ -153,9 +153,9 @@ Cancel booking:
 1. Provide email
 2. Select booking to cancel
 
-## Tools and Widgets
+## Tools and Views
 
-**Widget: search_flights**
+**View: search_flights**
 - **Input**: `{ destination, dates }`
 - **Output**: `{ flights[] }`
 - **Views**: results list, flight detail, passenger form

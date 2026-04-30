@@ -66,10 +66,10 @@ export const OpenAiInspector = () => {
 
   return (
     <div className="overflow-auto max-h-full min-h-0">
-      <Tabs defaultValue="widget-state" className="gap-0">
+      <Tabs defaultValue="view-state" className="gap-0">
         <TabsList className="border-b border-border w-full">
           <TabsTrigger value="properties">Properties</TabsTrigger>
-          <TabsTrigger value="widget-state">Widget State</TabsTrigger>
+          <TabsTrigger value="view-state">View State</TabsTrigger>
           {resourceUri && <TabsTrigger value="resource">Resource</TabsTrigger>}
         </TabsList>
         <TabsContent value="properties" className="p-4">
@@ -282,7 +282,7 @@ export const OpenAiInspector = () => {
             </Field>
           </FieldSet>
         </TabsContent>
-        <TabsContent value="widget-state" className="p-4">
+        <TabsContent value="view-state" className="p-4">
           <ReactJsonView
             src={openaiObject.widgetState ?? {}}
             name={null}

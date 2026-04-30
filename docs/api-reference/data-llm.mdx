@@ -1,12 +1,12 @@
 ---
 title: data-llm Attribute
-description: "Create a feedback loop between your widget UI state and the model for contextual responses."
+description: "Create a feedback loop between your view UI state and the model for contextual responses."
 ---
 
-The `data-llm` attribute allows your widget to communicate its current UI state back to the model. This creates a feedback loop where the model can understand what the user is seeing and respond contextually to their questions.
+The `data-llm` attribute allows your view to communicate its current UI state back to the model. This creates a feedback loop where the model can understand what the user is seeing and respond contextually to their questions.
 
 <Warning>
-**Runtime Support**: In MCP Apps, `data-llm` is polyfilled with the same limitation as [useWidgetState](/api-reference/use-widget-state): state does not persist across widget renders.
+**Runtime Support**: In MCP Apps, `data-llm` is polyfilled with the same limitation as [useViewState](/api-reference/use-view-state): state does not persist across view renders.
 </Warning>
 
 ## Basic usage
@@ -14,7 +14,7 @@ The `data-llm` attribute allows your widget to communicate its current UI state 
 ### Static string
 
 ```tsx
-export function StatusWidget() {
+export function StatusView() {
   return (
     <div data-llm="User is on the home page">
       <h1>Welcome Home</h1>
@@ -26,7 +26,7 @@ export function StatusWidget() {
 ### Dynamic expression
 
 ```tsx
-export function FlightWidget() {
+export function FlightView() {
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
 
   return (
@@ -47,15 +47,15 @@ export function FlightWidget() {
 
 ## Why it exists
 
-Apps introduce a unique challenge: the model needs to understand both the conversation history **and** what the user is currently viewing in your widget. Without `data-llm`, the model only knows about the initial tool call that rendered your widget. As users interact with your UI, the model remains unaware of state changes unless you explicitly sync them.
+Apps introduce a unique challenge: the model needs to understand both the conversation history **and** what the user is currently viewing in your view. Without `data-llm`, the model only knows about the initial tool call that rendered your view. As users interact with your UI, the model remains unaware of state changes unless you explicitly sync them.
 
 **Example scenario:**
 1. User asks "Show me flights to Paris"
-2. Your widget displays 10 flights
+2. Your view displays 10 flights
 3. User clicks on "Flight AF123" to view details
 4. User asks "What's the baggage policy?"
 
-Without `data-llm`, the model doesn't know which flight the user selected. With `data-llm`, your widget can sync this context, allowing the model to answer accurately.
+Without `data-llm`, the model doesn't know which flight the user selected. With `data-llm`, your view can sync this context, allowing the model to answer accurately.
 
 ## How it works
 
@@ -99,7 +99,7 @@ type Product = {
   category: string;
 };
 
-export function ProductCatalogWidget() {
+export function ProductCatalogView() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [cart, setCart] = useState<Product[]>([]);
 
@@ -164,7 +164,7 @@ The model now understands which step the user is on and can provide contextual g
 ### Interactive data visualization
 
 ```tsx
-export function AnalyticsWidget() {
+export function AnalyticsView() {
   const [selectedMetric, setSelectedMetric] = useState<string>("revenue");
   const [dateRange, setDateRange] = useState<string>("last-7-days");
   const [hoveredDataPoint, setHoveredDataPoint] = useState<string | null>(null);
@@ -192,7 +192,7 @@ Now when the user asks "Why did it spike?", the model knows exactly which data p
 ### Search and filter interfaces
 
 ```tsx
-export function SearchWidget() {
+export function SearchView() {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState({ category: "all", priceRange: "any" });
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -221,7 +221,7 @@ The model can now help refine searches based on current query and filters.
 You can nest `data-llm` attributes to create hierarchical context:
 
 ```tsx
-export function DashboardWidget() {
+export function DashboardView() {
   const [activeSection, setActiveSection] = useState<"overview" | "details">("overview");
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
@@ -254,7 +254,7 @@ The model receives a hierarchical description:
 Only render `data-llm` when there's meaningful state to share:
 
 ```tsx
-export function NotificationWidget() {
+export function NotificationView() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
 
@@ -277,7 +277,7 @@ export function NotificationWidget() {
 Provide rich context that helps the model understand user intent:
 
 ```tsx
-export function FormWidget() {
+export function FormView() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -373,7 +373,7 @@ export function FormWidget() {
 Use `data-llm` when:
 
 - User interactions change what's displayed (navigation, selections, filters)
-- The widget shows different views or states (wizard steps, tabs, modals)
+- The view shows different views or states (wizard steps, tabs, modals)
 - Context about the current view helps answer user questions
 - You want the model to understand progressive actions (multi-step flows)
 
@@ -381,7 +381,7 @@ Use `data-llm` when:
 
 Avoid `data-llm` when:
 
-- The widget is purely static and never changes
+- The view is purely static and never changes
 - State changes are too frequent (animations, hover effects)
 - The information is already in the conversation history
 - The state is purely cosmetic (theme, collapsed panels)
@@ -393,7 +393,7 @@ Avoid `data-llm` when:
 1. Each `data-llm` attribute creates a `DataLLM` component
 2. Each component gets a unique ID and registers itself in a global map
 3. When content changes, the entire tree is traversed and formatted
-4. The formatted string is stored in `window.openai.widgetState.__widget_context`
+4. The formatted string is stored in `window.openai.widgetState.__view_context`
 5. The host reads this value and includes it in the model's context
 
 ### Component lifecycle
@@ -403,14 +403,14 @@ Avoid `data-llm` when:
 setNode({ id, parentId, content });
 window.openai.setWidgetState({
   ...window.openai.widgetState,
-  __widget_context: formatTree()
+  __view_context: formatTree()
 });
 
 // On unmount
 removeNode(id);
 window.openai.setWidgetState({
   ...window.openai.widgetState,
-  __widget_context: formatTree()
+  __view_context: formatTree()
 });
 ```
 

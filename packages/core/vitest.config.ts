@@ -12,6 +12,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
+    setupFiles: ["./vitest.setup.ts"],
     exclude: ["**/node_modules/**", "**/dist/**"],
     onConsoleLog: (log) => {
       return !MCP_APP_NOISE.some((prefix) => log.includes(prefix));

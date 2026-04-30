@@ -1,10 +1,10 @@
 ---
 title: Managing State
-description: "Persist widget state across renders with useWidgetState and createStore for local and global state management."
+description: "Persist view state across renders with useViewState and createStore for local and global state management."
 ---
 
 
-How to persist widget state across renders and re-mounts.
+How to persist view state across renders and re-mounts.
 
 ## Decision Tree
 
@@ -14,22 +14,22 @@ What kind of state do you need?
 ├── Need to sync with LLM? → data-llm attribute
 │   (The model needs to know what user is viewing)
 │
-├── Simple key/value state? → useWidgetState
+├── Simple key/value state? → useViewState
 │   (Form inputs, selected items, flags — persisted by the host)
 │
 └── Complex state with actions? → createStore
     (Multiple related values, computed state, async actions)
 ```
 
-## useWidgetState
+## useViewState
 
-Persistent state that survives re-renders and display mode changes. Unlike React's `useState`, this state is stored by the host and restored when your widget remounts.
+Persistent state that survives re-renders and display mode changes. Unlike React's `useState`, this state is stored by the host and restored when your view remounts.
 
 ```tsx
-import { useWidgetState } from "skybridge/web";
+import { useViewState } from "skybridge/web";
 
-function CounterWidget() {
-  const [state, setState] = useWidgetState({ count: 0 });
+function CounterView() {
+  const [state, setState] = useViewState({ count: 0 });
 
   if (!state) return null;
 
@@ -47,7 +47,7 @@ function CounterWidget() {
 ### API
 
 ```tsx
-const [state, setState] = useWidgetState<T>(defaultState);
+const [state, setState] = useViewState<T>(defaultState);
 ```
 
 - `state`: Current state (or `null` if not yet initialized)
@@ -58,7 +58,7 @@ const [state, setState] = useWidgetState<T>(defaultState);
 
 **Form state:**
 ```tsx
-const [formData, setFormData] = useWidgetState({
+const [formData, setFormData] = useViewState({
   name: "",
   email: "",
   message: "",
@@ -71,7 +71,7 @@ const updateField = (field: string, value: string) => {
 
 **Selection state:**
 ```tsx
-const [selected, setSelected] = useWidgetState<Set<string>>(new Set());
+const [selected, setSelected] = useViewState<Set<string>>(new Set());
 
 const toggleItem = (id: string) => {
   setSelected(prev => {
@@ -85,7 +85,7 @@ const toggleItem = (id: string) => {
 
 ## createStore
 
-A Zustand store that automatically syncs with the host's persistent state. Unlike `useWidgetState`, this provides actions, computed values, and middleware support for complex state management.
+A Zustand store that automatically syncs with the host's persistent state. Unlike `useViewState`, this provides actions, computed values, and middleware support for complex state management.
 
 ```tsx
 import { createStore } from "skybridge/web";
@@ -137,7 +137,7 @@ const useCartStore = createStore<CartState>((set, get) => ({
 
 Usage:
 ```tsx
-function CartWidget() {
+function CartView() {
   const items = useCartStore(state => state.items);
   const addItem = useCartStore(state => state.addItem);
   const total = useCartStore(state => state.total());
@@ -164,7 +164,7 @@ function CartWidget() {
 
 ## Comparison Table
 
-| Feature | `useWidgetState` | `createStore` |
+| Feature | `useViewState` | `createStore` |
 |---------|------------------|---------------|
 | Setup complexity | Simple | Moderate |
 | State shape | Any object | Object with actions |
@@ -178,8 +178,8 @@ function CartWidget() {
 State management is separate from LLM context. Use both when needed:
 
 ```tsx
-function ProductListWidget() {
-  const [selected, setSelected] = useWidgetState<string | null>(null);
+function ProductListView() {
+  const [selected, setSelected] = useViewState<string | null>(null);
   const products = useToolInfo<Product[]>().output?.structuredContent.products;
 
   const selectedProduct = products?.find(product => product.id === selected);
@@ -203,14 +203,14 @@ function ProductListWidget() {
 }
 ```
 
-- `useWidgetState` persists the selection
+- `useViewState` persists the selection
 - `data-llm` tells the model what the user sees
 
 ## When State Persists
 
-Widget state persists across re-renders, re-mounts, and display mode changes. Skybridge handles the storage mechanism automatically.
+View state persists across re-renders, re-mounts, and display mode changes. Skybridge handles the storage mechanism automatically.
 
-Widget state **resets** when:
+View state **resets** when:
 - A new conversation starts
 - The tool is called again with new input
 - The user explicitly clears it
@@ -224,14 +224,14 @@ If you're using React `useState` and losing state on re-renders:
 const [selected, setSelected] = useState<string | null>(null);
 
 // After: State persists
-const [selected, setSelected] = useWidgetState<string | null>(null);
+const [selected, setSelected] = useViewState<string | null>(null);
 ```
 
 The API is intentionally similar to `useState` for easy migration.
 
 ## Related
 
-- [useWidgetState API](/api-reference/use-widget-state)
+- [useViewState API](/api-reference/use-view-state)
 - [createStore API](/api-reference/create-store)
 - [LLM Context Sync](/concepts/llm-context-sync)
 - [MCP Apps](/fundamentals/mcp-apps) - MCP Apps limitations

@@ -1,6 +1,6 @@
 ---
 title: useLayout
-description: "Access dynamic layout info like viewport dimensions, theme, and visual environment in widgets."
+description: "Access dynamic layout info like viewport dimensions, theme, and visual environment in views."
 ---
 
 The `useLayout` hook returns layout and visual environment information. These values may change dynamically during the session (e.g., on resize or theme toggle).
@@ -10,7 +10,7 @@ The `useLayout` hook returns layout and visual environment information. These va
 ```tsx
 import { useLayout } from "skybridge/web";
 
-function ThemedWidget() {
+function ThemedView() {
   const { theme, maxHeight, safeArea } = useLayout();
 
   return (
@@ -43,7 +43,7 @@ The current color theme of the host application (`"light"` or `"dark"`).
 
 ### `maxHeight`
 
-The maximum height available for the widget in pixels.
+The maximum height available for the view in pixels.
 
 ### `safeArea`
 
@@ -93,15 +93,15 @@ function ThemedCard() {
 ```tsx
 import { useLayout } from "skybridge/web";
 
-function Widget() {
+function View() {
   const { theme } = useLayout();
 
   return (
-    <div className={`widget ${theme === "dark" ? "dark" : "light"}`}>
-      <header className="widget-header">
-        <h2>My Widget</h2>
+    <div className={`view ${theme === "dark" ? "dark" : "light"}`}>
+      <header className="view-header">
+        <h2>My View</h2>
       </header>
-      <main className="widget-content">
+      <main className="view-content">
         <p>Content goes here</p>
       </main>
     </div>
@@ -110,26 +110,26 @@ function Widget() {
 ```
 
 ```css
-.widget {
+.view {
   padding: 16px;
   border-radius: 8px;
 }
 
-.widget.light {
+.view.light {
   background-color: #ffffff;
   color: #1a1a1a;
 }
 
-.widget.dark {
+.view.dark {
   background-color: #1a1a1a;
   color: #f5f5f5;
 }
 
-.widget.light .widget-header {
+.view.light .view-header {
   border-bottom: 1px solid #e0e0e0;
 }
 
-.widget.dark .widget-header {
+.view.dark .view-header {
   border-bottom: 1px solid #333;
 }
 ```
@@ -220,7 +220,7 @@ function BarChart({ data }: { data: DataPoint[] }) {
 ```tsx
 import { useLayout } from "skybridge/web";
 
-function FullScreenWidget({ children }: { children: React.ReactNode }) {
+function FullScreenView({ children }: { children: React.ReactNode }) {
   const { safeArea, maxHeight } = useLayout();
 
   return (

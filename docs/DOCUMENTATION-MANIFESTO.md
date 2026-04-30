@@ -91,7 +91,7 @@ Never assume the reader is already an expert in Skybridge or MCP Apps. When you 
      - **useLayout, useUser, useDisplayMode**: host layout, user or session, and display mode.
      - **useOpenExternal, useSetOpenInAppUrl**: opening URLs and in-app links.
      - **useSendFollowUpMessage**: sending follow-up messages to the conversation.
-     - **useWidgetState**: persistent view state across renders.
+     - **useViewState**: persistent view state across renders.
      - **useRequestModal**: opening the view in a modal.
      - **useFiles**: file upload and download.
    - **Utilities**: helpers and attributes.

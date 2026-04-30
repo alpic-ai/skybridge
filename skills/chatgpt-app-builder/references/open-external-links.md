@@ -5,7 +5,7 @@
 
 ## "Open in App" button
 
-Top right corner in fullscreen mode. Set programmatically. If the origin matches the widget server URL, ChatGPT navigates to the full href (any path). If the origin differs, ChatGPT falls back to the widget server URL.
+Top right corner in fullscreen mode. Set programmatically. If the origin matches the view server URL, ChatGPT navigates to the full href (any path). If the origin differs, ChatGPT falls back to the view server URL.
 
 **Example**:
 ```tsx
@@ -53,7 +53,7 @@ Shows confirmation dialog unless domain is whitelisted:
 
 ```typescript
 // server/src/index.ts
-server.registerWidget(
+server.registerView(
   "search-flights",
   {
     description: "Search for flights",

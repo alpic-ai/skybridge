@@ -2,15 +2,15 @@
 
 ## What is Skybridge
 
-Skybridge is a **fullstack TypeScript framework** for building ChatGPT Apps and MCP Apps — interactive React widgets that render inside AI conversations.
+Skybridge is a **fullstack TypeScript framework** for building ChatGPT Apps and MCP Apps — interactive React views that render inside AI conversations.
 
-The core loop: an MCP server exposes tools. When the host (ChatGPT, Claude, VSCode…) calls a tool, the server returns structured data **and** a reference to a React widget. The host renders that widget in an iframe. The widget can read tool output, call other tools, send follow-up messages, and sync UI state back to the model.
+The core loop: an MCP server exposes tools. When the host (ChatGPT, Claude, VSCode…) calls a tool, the server returns structured data **and** a reference to a React view. The host renders that view in an iframe. The view can read tool output, call other tools, send follow-up messages, and sync UI state back to the model.
 
 Skybridge wraps two host runtimes behind one API:
 - **Apps SDK** — ChatGPT's proprietary `window.openai` runtime
 - **MCP Apps** — the open `ext-apps` spec (JSON-RPC postMessage)
 
-Developers write one server (backend) and widget(s) (frontend). Skybridge detects the runtime at load time.
+Developers write one server (backend) and view(s) (frontend). Skybridge detects the runtime at load time.
 
 For deep understanding, read `docs/home.mdx`, `docs/fundamentals/`, and `docs/concepts/`.
 
@@ -19,7 +19,7 @@ For deep understanding, read `docs/home.mdx`, `docs/fundamentals/`, and `docs/co
 ```
 packages/
   core/             # npm: `skybridge` — the framework
-    src/server/     #   MCP server (extends @modelcontextprotocol/sdk), widget registration, Express
+    src/server/     #   MCP server (extends @modelcontextprotocol/sdk), view registration, Express
     src/web/        #   React hooks, runtime adaptors, data-llm, Vite plugin, createStore
     src/cli/        #   CLI entry (oclif)
     src/commands/   #   dev / build / start commands
