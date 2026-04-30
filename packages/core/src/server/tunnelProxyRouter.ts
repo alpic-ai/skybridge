@@ -83,7 +83,22 @@ export function createTunnelProxyRouter(controlPort: number): Router {
           break;
         }
         if (!res.write(value)) {
-          await new Promise<void>((resolve) => res.once("drain", resolve));
+          // Race "drain" against "close": Node does not emit "drain" on a
+          // destroyed socket, so without the close listener this hangs
+          // forever when the client disconnects under backpressure, leaking
+          // the upstream fetch and TunnelManager listeners.
+          await new Promise<void>((resolve) => {
+            const onDrain = () => {
+              res.off("close", onClose);
+              resolve();
+            };
+            const onClose = () => {
+              res.off("drain", onDrain);
+              resolve();
+            };
+            res.once("drain", onDrain);
+            res.once("close", onClose);
+          });
         }
       }
     } catch {
