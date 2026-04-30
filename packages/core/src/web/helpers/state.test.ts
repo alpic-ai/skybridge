@@ -1,25 +1,25 @@
 import { describe, expect, it } from "vitest";
-import { WIDGET_CONTEXT_KEY } from "../data-llm.js";
-import { filterWidgetContext, serializeState } from "./state.js";
+import { VIEW_CONTEXT_KEY } from "../data-llm.js";
+import { filterViewContext, serializeState } from "./state.js";
 
 describe("state helpers", () => {
-  describe("filterWidgetContext", () => {
+  describe("filterViewContext", () => {
     it("should return null when state is null", () => {
-      expect(filterWidgetContext(null)).toBe(null);
+      expect(filterViewContext(null)).toBe(null);
     });
 
     it("should return null when state is undefined", () => {
-      expect(filterWidgetContext(undefined)).toBe(null);
+      expect(filterViewContext(undefined)).toBe(null);
     });
 
-    it("should correctly filter WIDGET_CONTEXT_KEY and preserve other properties", () => {
+    it("should correctly filter VIEW_CONTEXT_KEY and preserve other properties", () => {
       const stateWithContextAndOthers = {
         a: 1,
         b: "two",
         c: { nested: true },
-        [WIDGET_CONTEXT_KEY]: "context",
+        [VIEW_CONTEXT_KEY]: "context",
       };
-      const filteredWithContextAndOthers = filterWidgetContext(
+      const filteredWithContextAndOthers = filterViewContext(
         stateWithContextAndOthers,
       );
       expect(filteredWithContextAndOthers).toEqual({
@@ -29,7 +29,7 @@ describe("state helpers", () => {
       });
 
       const stateNoContext = { count: 5, name: "test" };
-      const filteredNoContext = filterWidgetContext(stateNoContext);
+      const filteredNoContext = filterViewContext(stateNoContext);
       expect(filteredNoContext).toEqual(stateNoContext);
     });
   });

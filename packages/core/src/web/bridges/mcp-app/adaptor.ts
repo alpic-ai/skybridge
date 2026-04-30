@@ -7,7 +7,7 @@ import type {
   OpenExternalOptions,
   RequestDisplayMode,
   RequestModalOptions,
-  SetWidgetStateAction,
+  SetViewStateAction,
 } from "../types.js";
 import { McpAppBridge } from "./bridge.js";
 import type { McpAppContext, McpAppContextKey } from "./types.js";
@@ -35,14 +35,14 @@ export class McpAppAdaptor implements Adaptor {
   private stores: {
     [K in keyof HostContext]: HostContextStore<K>;
   };
-  private _widgetState: HostContext["widgetState"] = null;
-  private widgetStateListeners = new Set<() => void>();
+  private _viewState: HostContext["viewState"] = null;
+  private viewStateListeners = new Set<() => void>();
   private _viewUUID: string | null = null;
 
-  private _viewState: HostContext["view"] = {
+  private _displayState: HostContext["display"] = {
     mode: "inline",
   };
-  private viewListeners = new Set<() => void>();
+  private displayListeners = new Set<() => void>();
 
   private constructor() {
     this.stores = this.initializeStores();
@@ -186,39 +186,39 @@ export class McpAppAdaptor implements Adaptor {
         ["toolResult"],
         ({ toolResult }) => toolResult?._meta ?? null,
       ),
-      view: {
+      display: {
         subscribe: (onChange: () => void) => {
-          this.viewListeners.add(onChange);
+          this.displayListeners.add(onChange);
           return () => {
-            this.viewListeners.delete(onChange);
+            this.displayListeners.delete(onChange);
+          };
+        },
+        getSnapshot: () => this._displayState,
+      },
+      viewState: {
+        subscribe: (onChange: () => void) => {
+          this.viewStateListeners.add(onChange);
+          return () => {
+            this.viewStateListeners.delete(onChange);
           };
         },
         getSnapshot: () => this._viewState,
       },
-      widgetState: {
-        subscribe: (onChange: () => void) => {
-          this.widgetStateListeners.add(onChange);
-          return () => {
-            this.widgetStateListeners.delete(onChange);
-          };
-        },
-        getSnapshot: () => this._widgetState,
-      },
     };
   }
 
-  public setWidgetState = async (
-    stateOrUpdater: SetWidgetStateAction,
+  public setViewState = async (
+    stateOrUpdater: SetViewStateAction,
   ): Promise<void> => {
     const newState =
       typeof stateOrUpdater === "function"
-        ? stateOrUpdater(this._widgetState)
+        ? stateOrUpdater(this._viewState)
         : stateOrUpdater;
 
     // must happen before the async bridge call to ensure the state is updated immediately for the UI,
-    // otherwise successive calls to setWidgetState may have stale state
-    this._widgetState = newState;
-    this.widgetStateListeners.forEach((listener) => {
+    // otherwise successive calls to setViewState may have stale state
+    this._viewState = newState;
+    this.viewStateListeners.forEach((listener) => {
       listener();
     });
 
@@ -231,7 +231,7 @@ export class McpAppAdaptor implements Adaptor {
         content: [{ type: "text", text: JSON.stringify(newState) }],
       });
     } catch (error) {
-      console.error("Failed to update widget state in MCP App.", error);
+      console.error("Failed to update view state in MCP App.", error);
     }
   };
 
@@ -257,15 +257,15 @@ export class McpAppAdaptor implements Adaptor {
   }
 
   public openModal(options: RequestModalOptions) {
-    this._viewState = { mode: "modal", params: options.params };
-    this.viewListeners.forEach((listener) => {
+    this._displayState = { mode: "modal", params: options.params };
+    this.displayListeners.forEach((listener) => {
       listener();
     });
   }
 
   public closeModal() {
-    this._viewState = { mode: "inline" };
-    this.viewListeners.forEach((listener) => {
+    this._displayState = { mode: "inline" };
+    this.displayListeners.forEach((listener) => {
       listener();
     });
   }
@@ -297,8 +297,8 @@ export class McpAppAdaptor implements Adaptor {
       if (existingKey) {
         const stored = localStorage.getItem(existingKey);
         if (stored !== null) {
-          this._widgetState = JSON.parse(stored);
-          this.widgetStateListeners.forEach((listener) => {
+          this._viewState = JSON.parse(stored);
+          this.viewStateListeners.forEach((listener) => {
             listener();
           });
         }

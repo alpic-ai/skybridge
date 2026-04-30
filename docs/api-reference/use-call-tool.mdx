@@ -1,11 +1,11 @@
 ---
 title: useCallTool
-description: "React hook for calling MCP tools from widgets with typed API and state management."
+description: "React hook for calling MCP tools from views with typed API and state management."
 ---
 
-The `useCallTool` function allows you to call additional MCP tools from your widget. It wraps the [`window.openai.callTool`](https://developers.openai.com/apps-sdk/build/chatgpt-ui#trigger-server-actions) function while providing a more convenient state management and typed API.
+The `useCallTool` function allows you to call additional MCP tools from your view. It wraps the [`window.openai.callTool`](https://developers.openai.com/apps-sdk/build/chatgpt-ui#trigger-server-actions) function while providing a more convenient state management and typed API.
 
-Make sure your tool `_meta["openai/widgetAccessible"]` property is set to `true` to make it accessible from widgets - more info on [component-initiated tool calls](https://developers.openai.com/apps-sdk/build/mcp-server#component-initiated-tool-calls).
+Make sure your tool `_meta["openai/widgetAccessible"]` property is set to `true` to make it accessible from views - more info on [component-initiated tool calls](https://developers.openai.com/apps-sdk/build/mcp-server#component-initiated-tool-calls).
 
 ## Basic usage
 
@@ -13,7 +13,7 @@ Make sure your tool `_meta["openai/widgetAccessible"]` property is set to `true`
 import { useCallTool } from "skybridge/web";
 import { useState } from "react";
 
-function BookTableWidget() {
+function BookTableView() {
   const { callTool, isPending, isSuccess, data } = useCallTool<
     { time: string; people: number },
     { structuredContent: { tableNumber: string } }
@@ -296,7 +296,7 @@ type WeatherResponse = {
   };
 };
 
-function WeatherWidget() {
+function WeatherView() {
   const { callTool, data, isPending, isSuccess } = useCallTool<
     WeatherArgs,
     WeatherResponse

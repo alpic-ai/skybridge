@@ -24,8 +24,8 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   const adaptor = McpAppAdaptor.getInstance();
 
   const { mode } = useSyncExternalStore(
-    adaptor.getHostContextStore("view").subscribe,
-    adaptor.getHostContextStore("view").getSnapshot,
+    adaptor.getHostContextStore("display").subscribe,
+    adaptor.getHostContextStore("display").getSnapshot,
   );
   const isOpen = mode === "modal";
 

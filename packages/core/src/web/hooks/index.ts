@@ -14,4 +14,4 @@ export { useSendFollowUpMessage } from "./use-send-follow-up-message.js";
 export { useSetOpenInAppUrl } from "./use-set-open-in-app-url.js";
 export { useToolInfo } from "./use-tool-info.js";
 export { type UserState, useUser } from "./use-user.js";
-export { useWidgetState } from "./use-widget-state.js";
+export { useViewState } from "./use-view-state.js";

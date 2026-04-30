@@ -1,7 +1,7 @@
 import http from "node:http";
 import type { ErrorRequestHandler, RequestHandler } from "express";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { McpServer } from "./server.js";
+import { McpServer } from "./server.js";
 
 vi.mock("@skybridge/devtools", () => ({
   devtoolsStaticServer: () =>
@@ -316,6 +316,57 @@ describe("createApp", () => {
     const apiRes = await postApi(port);
     expect(calls).toEqual(["mcp-error-handler"]);
     expect(apiRes.status).toBe(500);
+    consoleSpy.mockRestore();
+  });
+
+  it("handles concurrent /mcp requests without 'Already connected to a transport'", async () => {
+    const { createApp } = await import("./express.js");
+
+    const mcpServer = new McpServer({
+      name: "concurrent-test",
+      version: "0.0.0",
+    });
+    // Slow tool: keeps the underlying transport bound long enough to overlap
+    // with concurrent requests, exposing the shared-McpServer race.
+    mcpServer.registerTool({ name: "slow", description: "slow" }, async () => {
+      await new Promise((r) => setTimeout(r, 50));
+      return { content: [{ type: "text" as const, text: "done" }] };
+    });
+
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const httpServer = http.createServer();
+    const app = await createApp({ mcpServer, httpServer });
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    const callBody = (id: number) =>
+      JSON.stringify({
+        jsonrpc: "2.0",
+        method: "tools/call",
+        id,
+        params: { name: "slow", arguments: {} },
+      });
+
+    const N = 10;
+    const responses = await Promise.all(
+      Array.from({ length: N }, (_, i) =>
+        fetch(`http://localhost:${port}/mcp`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json, text/event-stream",
+          },
+          body: callBody(i + 1),
+        }),
+      ),
+    );
+
+    expect(responses.map((r) => r.status)).toEqual(Array(N).fill(200));
+    expect(consoleSpy).not.toHaveBeenCalledWith(
+      "Error handling MCP request:",
+      expect.any(Error),
+    );
     consoleSpy.mockRestore();
   });
 });

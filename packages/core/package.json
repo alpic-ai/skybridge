@@ -25,6 +25,10 @@
     "./web": {
       "types": "./dist/web/index.d.ts",
       "default": "./dist/web/index.js"
+    },
+    "./vite": {
+      "types": "./dist/web/plugin/plugin.d.ts",
+      "default": "./dist/web/plugin/plugin.js"
     }
   },
   "scripts": {

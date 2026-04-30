@@ -6,7 +6,7 @@
 
 **Build ChatGPT & MCP Apps. The Modern TypeScript Way.**
 
-The fullstack TypeScript framework for AI-embedded widgets.<br />
+The fullstack TypeScript framework for AI-embedded views.<br />
 **Type-safe. React-powered. Platform-agnostic.**
 
 <br />
@@ -31,8 +31,8 @@ ChatGPT Apps and MCP Apps let you embed **rich, interactive UIs** directly in AI
 
 | | |
 |:--|:--|
-| 🌐 **Write once, run everywhere** — Skybridge works seamlessly with ChatGPT (Apps SDK) and MCP-compatible clients. | ✅ **End-to-End Type Safety** — tRPC-style inference from server to widget. Autocomplete everywhere. |
-| 🔄 **Widget-to-Model Sync** — Keep the model aware of UI state with `data-llm`. Dual surfaces, one source of truth. | ⚒️ **React Query-style Hooks** — `isPending`, `isError`, callbacks. State management you already know. |
+| 🌐 **Write once, run everywhere** — Skybridge works seamlessly with ChatGPT (Apps SDK) and MCP-compatible clients. | ✅ **End-to-End Type Safety** — tRPC-style inference from server to view. Autocomplete everywhere. |
+| 🔄 **View-to-Model Sync** — Keep the model aware of UI state with `data-llm`. Dual surfaces, one source of truth. | ⚒️ **React Query-style Hooks** — `isPending`, `isError`, callbacks. State management you already know. |
 | 👨‍💻 **Full dev environment** — HMR, debug traces, and local devtools. | 📦 **Showcase Examples** — Production-ready examples to learn from and build upon. |
 
 <br />
@@ -67,7 +67,7 @@ deno add skybridge
 
 Skybridge is a fullstack framework with unified server and client modules:
 
-- **`skybridge/server`** — Define tools and widgets with full type inference. Extends the MCP SDK.
+- **`skybridge/server`** — Define tools and views with full type inference. Extends the MCP SDK.
 - **`skybridge/web`** — React hooks that consume your server types. Works with Apps SDK (ChatGPT) and MCP Apps.
 - **Dev Environment** — Vite plugin with HMR, DevTools emulator, and optimized builds.
 
@@ -76,7 +76,7 @@ Skybridge is a fullstack framework with unified server and client modules:
 ```ts
 import { McpServer } from "skybridge/server";
 
-server.registerWidget("flights", {}, {
+server.registerView("flights", {}, {
   inputSchema: { destination: z.string() },
 }, async ({ destination }) => {
   const flights = await searchFlights(destination);
@@ -84,12 +84,12 @@ server.registerWidget("flights", {}, {
 });
 ```
 
-### Widget
+### View
 
 ```tsx
 import { useToolInfo } from "skybridge/web";
 
-function FlightsWidget() {
+function FlightsView() {
   const { output } = useToolInfo();
 
   return output.structuredContent.flights.map(flight =>
@@ -104,7 +104,7 @@ function FlightsWidget() {
 
 - **Live Reload** — Vite HMR. See changes instantly without reinstalling.
 - **Typed Hooks** — Full autocomplete for tools, inputs, outputs.
-- **Widget → Tool Calls** — Trigger server actions from UI.
+- **View → Tool Calls** — Trigger server actions from UI.
 - **Dual Surface Sync** — Keep model aware of what users see with `data-llm`.
 - **React Query-style API** — `isPending`, `isError`, callbacks.
 - **Platform Agnostic** — Works with ChatGPT (Apps SDK) and MCP Apps clients (Goose, VSCode, etc.).

@@ -1,17 +1,17 @@
 ---
-title: useWidgetState
-description: "React hook for persistent widget state that survives re-renders and display mode changes."
+title: useViewState
+description: "React hook for persistent view state that survives re-renders and display mode changes."
 ---
 
-The `useWidgetState` hook provides persistent state management for your widget. Unlike React's `useState`, this state is persisted by the host and survives across widget re-renders and display mode changes.
+The `useViewState` hook provides persistent state management for your view. Unlike React's `useState`, this state is persisted by the host and survives across view re-renders and display mode changes.
 
 ## Basic usage
 
 ```tsx
-import { useWidgetState } from "skybridge/web";
+import { useViewState } from "skybridge/web";
 
-function CounterWidget() {
-  const [state, setState] = useWidgetState({ count: 0 });
+function CounterView() {
+  const [state, setState] = useViewState({ count: 0 });
 
   return (
     <div>
@@ -46,7 +46,7 @@ The default state to use if no persisted state exists. Can be:
 T extends Record<string, unknown>
 ```
 
-The type of your widget state. Must be a plain object.
+The type of your view state. Must be a plain object.
 
 ## Returns
 
@@ -58,7 +58,7 @@ A tuple containing:
 
 ### `state`
 
-The current widget state, or `null` if no state is set.
+The current view state, or `null` if no state is set.
 
 ### `setState`
 
@@ -72,7 +72,7 @@ A function to update the state. Accepts either:
 ### Form State Persistence
 
 ```tsx
-import { useWidgetState } from "skybridge/web";
+import { useViewState } from "skybridge/web";
 
 type FormState = {
   name: string;
@@ -81,7 +81,7 @@ type FormState = {
 };
 
 function MultiStepForm() {
-  const [form, setForm] = useWidgetState<FormState>({
+  const [form, setForm] = useViewState<FormState>({
     name: "",
     email: "",
     step: 1,
@@ -143,7 +143,7 @@ function MultiStepForm() {
 ### Shopping Cart
 
 ```tsx
-import { useWidgetState } from "skybridge/web";
+import { useViewState } from "skybridge/web";
 
 type CartItem = {
   id: string;
@@ -157,7 +157,7 @@ type CartState = {
 };
 
 function ShoppingCart() {
-  const [cart, setCart] = useWidgetState<CartState>({ items: [] });
+  const [cart, setCart] = useViewState<CartState>({ items: [] });
 
   const addItem = (item: Omit<CartItem, "quantity">) => {
     setCart((prev) => {
@@ -210,7 +210,7 @@ function ShoppingCart() {
 ### User Preferences
 
 ```tsx
-import { useWidgetState } from "skybridge/web";
+import { useViewState } from "skybridge/web";
 
 type Preferences = {
   fontSize: "small" | "medium" | "large";
@@ -218,8 +218,8 @@ type Preferences = {
   sortBy: "date" | "name" | "relevance";
 };
 
-function PreferencesWidget() {
-  const [prefs, setPrefs] = useWidgetState<Preferences>({
+function PreferencesView() {
+  const [prefs, setPrefs] = useViewState<Preferences>({
     fontSize: "medium",
     showImages: true,
     sortBy: "date",
@@ -281,7 +281,7 @@ function PreferencesWidget() {
 ### Lazy Initialization
 
 ```tsx
-import { useWidgetState } from "skybridge/web";
+import { useViewState } from "skybridge/web";
 
 type GameState = {
   board: string[][];
@@ -290,7 +290,7 @@ type GameState = {
 };
 
 function TicTacToe() {
-  const [game, setGame] = useWidgetState<GameState>(() => ({
+  const [game, setGame] = useViewState<GameState>(() => ({
     board: [
       ["", "", ""],
       ["", "", ""],
@@ -356,7 +356,7 @@ function TicTacToe() {
 ### Nullable State
 
 ```tsx
-import { useWidgetState } from "skybridge/web";
+import { useViewState } from "skybridge/web";
 
 type UserProfile = {
   id: string;
@@ -364,9 +364,9 @@ type UserProfile = {
   avatar: string;
 };
 
-function ProfileWidget() {
+function ProfileView() {
   // State can be null - useful for optional data
-  const [profile, setProfile] = useWidgetState<UserProfile>(null);
+  const [profile, setProfile] = useViewState<UserProfile>(null);
 
   if (!profile) {
     return (

@@ -57,7 +57,7 @@ describe("DataLLM", () => {
       }
     });
 
-    it("should register a node with content and call setWidgetState", () => {
+    it("should register a node with content and call setViewState", () => {
       render(
         <DataLLM content="Test content">
           <div>Child</div>
@@ -67,10 +67,10 @@ describe("DataLLM", () => {
       expect(OpenaiMock.setWidgetState).toHaveBeenCalled();
       const callArgs =
         OpenaiMock.setWidgetState.mock.calls[0]?.[0]?.modelContent;
-      expect(callArgs).toHaveProperty("__widget_context");
-      expect(callArgs?.__widget_context).toContain("- Test content");
+      expect(callArgs).toHaveProperty("__view_context");
+      expect(callArgs?.__view_context).toContain("- Test content");
     });
-    it("should preserve existing widgetState when updating context", () => {
+    it("should preserve existing viewState when updating context", () => {
       OpenaiMock.widgetState = {
         modelContent: { existingKey: "existingValue" },
       };
@@ -84,7 +84,7 @@ describe("DataLLM", () => {
       const callArgs =
         OpenaiMock.setWidgetState.mock.calls[0]?.[0]?.modelContent;
       expect(callArgs).toHaveProperty("existingKey", "existingValue");
-      expect(callArgs).toHaveProperty("__widget_context");
+      expect(callArgs).toHaveProperty("__view_context");
     });
 
     it("should handle deeply nested DataLLM components", () => {
@@ -103,7 +103,7 @@ describe("DataLLM", () => {
         OpenaiMock.setWidgetState.mock.calls[
           OpenaiMock.setWidgetState.mock.calls.length - 1
         ]?.[0]?.modelContent;
-      const context = callArgs?.__widget_context as string;
+      const context = callArgs?.__view_context as string;
       expect(context).toContain("- Level 1");
       expect(context).toContain("  - Level 2A");
       expect(context).toContain("  - Level 2B");
@@ -132,7 +132,7 @@ describe("DataLLM", () => {
         OpenaiMock.setWidgetState.mock.calls[
           OpenaiMock.setWidgetState.mock.calls.length - 1
         ]?.[0]?.modelContent;
-      expect(lastCallArgs?.__widget_context).toContain("- Updated content");
+      expect(lastCallArgs?.__view_context).toContain("- Updated content");
     });
 
     it("should remove node and update context when component unmounts", () => {
@@ -153,7 +153,7 @@ describe("DataLLM", () => {
         OpenaiMock.setWidgetState.mock.calls[
           OpenaiMock.setWidgetState.mock.calls.length - 1
         ]?.[0]?.modelContent;
-      expect(lastCallArgs?.__widget_context).not.toContain("Content to remove");
+      expect(lastCallArgs?.__view_context).not.toContain("Content to remove");
     });
   });
 
@@ -173,7 +173,7 @@ describe("DataLLM", () => {
       McpAppAdaptor.resetInstance();
     });
 
-    it("should register a node and update widget state via adaptor", async () => {
+    it("should register a node and update view state via adaptor", async () => {
       const adaptor = McpAppAdaptor.getInstance();
 
       render(
@@ -183,16 +183,16 @@ describe("DataLLM", () => {
       );
 
       await vi.waitFor(() => {
-        const widgetState = adaptor
-          .getHostContextStore("widgetState")
+        const viewState = adaptor
+          .getHostContextStore("viewState")
           .getSnapshot();
-        expect(widgetState?.__widget_context).toContain("- Test content");
+        expect(viewState?.__view_context).toContain("- Test content");
       });
     });
 
-    it("should preserve existing widget state when updating context", async () => {
+    it("should preserve existing view state when updating context", async () => {
       const adaptor = McpAppAdaptor.getInstance();
-      await adaptor.setWidgetState({ existingKey: "existingValue" });
+      await adaptor.setViewState({ existingKey: "existingValue" });
 
       render(
         <DataLLM content="Test content">
@@ -201,11 +201,11 @@ describe("DataLLM", () => {
       );
 
       await vi.waitFor(() => {
-        const widgetState = adaptor
-          .getHostContextStore("widgetState")
+        const viewState = adaptor
+          .getHostContextStore("viewState")
           .getSnapshot();
-        expect(widgetState?.existingKey).toBe("existingValue");
-        expect(widgetState?.__widget_context).toContain("- Test content");
+        expect(viewState?.existingKey).toBe("existingValue");
+        expect(viewState?.__view_context).toContain("- Test content");
       });
     });
 
@@ -224,16 +224,16 @@ describe("DataLLM", () => {
       );
 
       await vi.waitFor(() => {
-        const widgetState = adaptor
-          .getHostContextStore("widgetState")
+        const viewState = adaptor
+          .getHostContextStore("viewState")
           .getSnapshot();
-        const context = widgetState?.__widget_context as string;
+        const context = viewState?.__view_context as string;
         expect(context).toContain("- First component");
         expect(context).toContain("- Second component");
       });
     });
 
-    it("should call ui/update-model-context when widget state changes", async () => {
+    it("should call ui/update-model-context when view state changes", async () => {
       render(
         <DataLLM content="Test content">
           <div>Child</div>

@@ -1,8 +1,10 @@
-import { isAbsolute, resolve } from "node:path";
+import { isAbsolute, relative, resolve } from "node:path";
 import type { Plugin, ViteDevServer } from "vite";
 import {
+  assertUniqueViewNames,
   type DiscoveredView,
   discoverViewsSync,
+  scanViewsSync,
   writeViewsDts,
 } from "./scan-views.js";
 import { transform as dataLlmTransform } from "./transform-data-llm.js";
@@ -18,10 +20,10 @@ export interface SkybridgePluginOptions {
 function buildVirtualEntry(viewFilePath: string): string {
   const normalized = viewFilePath.replace(/\\/g, "/");
   return [
-    `import { mountWidget } from "skybridge/web";`,
+    `import { mountView } from "skybridge/web";`,
     `import Component from "${normalized}";`,
     `import { createElement } from "react";`,
-    `mountWidget(createElement(Component));`,
+    `mountView(createElement(Component));`,
   ].join("\n");
 }
 
@@ -136,13 +138,38 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
       }
 
       server.watcher.add(resolvedViewsDir);
+      // Track which view files we've already warned about so a rescan
+      // triggered by an unrelated edit doesn't re-emit the same warning.
+      let knownInvalid = new Set<string>();
       const rescan = () => {
         try {
-          const views = discoverViewsSync(resolvedViewsDir);
-          viewMap = new Map(views.map((v) => [v.name, v]));
-          writeViewsDts(projectRoot, views);
+          // Surface broken view files. Without this, files lacking a
+          // default export are silently dropped from the input and the
+          // user has no idea why their widget never mounts.
+          const { valid, invalid } = scanViewsSync(resolvedViewsDir);
+          const nextInvalid = new Set(invalid.map((v) => v.filePath));
+
+          for (const filePath of nextInvalid) {
+            if (!knownInvalid.has(filePath)) {
+              server.config.logger.warn(
+                `[skybridge] view file "${relative(projectRoot, filePath)}" is missing a default export — it won't be served until fixed.`,
+              );
+            }
+          }
+          for (const filePath of knownInvalid) {
+            if (!nextInvalid.has(filePath)) {
+              server.config.logger.info(
+                `[skybridge] view file "${relative(projectRoot, filePath)}" resolved.`,
+              );
+            }
+          }
+          knownInvalid = nextInvalid;
+
+          assertUniqueViewNames(valid);
+          viewMap = new Map(valid.map((v) => [v.name, v]));
+          writeViewsDts(projectRoot, valid);
         } catch (err) {
-          // discoverViewsSync throws on duplicate view names. Catch so
+          // assertUniqueViewNames throws on duplicate view names. Catch so
           // chokidar's listener chain doesn't surface it as unhandled and
           // crash the dev server — previous viewMap stays active until
           // the user fixes the conflict.
@@ -153,7 +180,10 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
         }
       };
 
+      // Initial scan emits warnings for broken files that exist at startup.
+      rescan();
       server.watcher.on("add", rescan);
+      server.watcher.on("change", rescan);
       server.watcher.on("unlink", rescan);
     },
 

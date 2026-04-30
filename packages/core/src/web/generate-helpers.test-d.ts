@@ -15,7 +15,7 @@ type TestServer = typeof server;
 const interfaceServer = createInterfaceTestServer();
 type InterfaceTestServer = typeof interfaceServer;
 
-test("InferTools extracts the tool registry type (widgets + registerTool)", () => {
+test("InferTools extracts the tool registry type (views + registerTool)", () => {
   type Tools = InferTools<TestServer>;
 
   expectTypeOf<Tools>().toHaveProperty("search-trip");
@@ -29,7 +29,7 @@ test("InferTools extracts the tool registry type (widgets + registerTool)", () =
   expectTypeOf<Tools>().toHaveProperty("view-with-mixed-returns");
 });
 
-test("ToolNames returns a union of tool name literals (widgets + registerTool)", () => {
+test("ToolNames returns a union of tool name literals (views + registerTool)", () => {
   type Names = ToolNames<TestServer>;
 
   expectTypeOf<Names>().toEqualTypeOf<
@@ -102,9 +102,9 @@ test("ToolOutput extracts the correct output type from callback's structuredCont
 });
 
 test("ToolOutput extracts the correct output type from callback (inferred)", () => {
-  type InferredWidgetOutput = ToolOutput<TestServer, "inferred-output-view">;
+  type InferredViewOutput = ToolOutput<TestServer, "inferred-output-view">;
 
-  expectTypeOf<InferredWidgetOutput>().toEqualTypeOf<{
+  expectTypeOf<InferredViewOutput>().toEqualTypeOf<{
     inferredResults: { id: string; score: number }[];
     inferredCount: number;
   }>();
@@ -117,7 +117,7 @@ test("ToolOutput extracts the correct output type from callback (inferred)", () 
   }>();
 });
 
-test("generateHelpers provides autocomplete for tool names (widgets + registerTool)", () => {
+test("generateHelpers provides autocomplete for tool names (views + registerTool)", () => {
   const { useCallTool } = generateHelpers<TestServer>();
 
   useCallTool("search-trip");
@@ -252,9 +252,9 @@ test("useCallTool returns correctly typed data", () => {
 test("useCallTool returns correctly typed data for callback-inferred outputs", () => {
   const { useCallTool } = generateHelpers<TestServer>();
 
-  const { data: widgetData } = useCallTool("inferred-output-view");
-  if (widgetData) {
-    expectTypeOf(widgetData.structuredContent).toExtend<{
+  const { data: viewData } = useCallTool("inferred-output-view");
+  if (viewData) {
+    expectTypeOf(viewData.structuredContent).toExtend<{
       inferredResults: { id: string; score: number }[];
       inferredCount: number;
     }>();
@@ -269,7 +269,7 @@ test("useCallTool returns correctly typed data for callback-inferred outputs", (
   }
 });
 
-test("generateHelpers provides autocomplete for tool names in useToolInfo (widgets + registerTool)", () => {
+test("generateHelpers provides autocomplete for tool names in useToolInfo (views + registerTool)", () => {
   const { useToolInfo } = generateHelpers<TestServer>();
 
   useToolInfo<"search-trip">();
@@ -307,8 +307,8 @@ test("useToolInfo infers input and output types", () => {
 });
 
 test("ToolResponseMetadata extracts _meta type from callback", () => {
-  type WidgetMeta = ToolResponseMetadata<TestServer, "view-with-metadata">;
-  expectTypeOf<WidgetMeta>().toEqualTypeOf<{
+  type ViewMeta = ToolResponseMetadata<TestServer, "view-with-metadata">;
+  expectTypeOf<ViewMeta>().toEqualTypeOf<{
     requestId: string;
     timestamp: number;
     cached: boolean;
@@ -336,7 +336,7 @@ test("useToolInfo infers responseMetadata type from generateHelpers", () => {
 });
 
 test("ToolResponseMetadata extracts _meta from mixed return paths", () => {
-  // Widget has multiple return paths: some with _meta, some without
+  // View has multiple return paths: some with _meta, some without
   // ExtractMeta should still infer the _meta type from branches that have it
   type MixedMeta = ToolResponseMetadata<TestServer, "view-with-mixed-returns">;
   expectTypeOf<MixedMeta>().toEqualTypeOf<{
@@ -346,25 +346,22 @@ test("ToolResponseMetadata extracts _meta from mixed return paths", () => {
 });
 
 test("ToolOutput extracts correct type when using interface declaration", () => {
-  type InterfaceWidgetOutput = ToolOutput<
-    InterfaceTestServer,
-    "interface-view"
-  >;
+  type InterfaceViewOutput = ToolOutput<InterfaceTestServer, "interface-view">;
 
-  expectTypeOf<InterfaceWidgetOutput>().toHaveProperty("itemName");
-  expectTypeOf<InterfaceWidgetOutput["itemName"]>().toBeString();
-  expectTypeOf<InterfaceWidgetOutput["quantity"]>().toBeNumber();
+  expectTypeOf<InterfaceViewOutput>().toHaveProperty("itemName");
+  expectTypeOf<InterfaceViewOutput["itemName"]>().toBeString();
+  expectTypeOf<InterfaceViewOutput["quantity"]>().toBeNumber();
 });
 
 test("ToolResponseMetadata extracts correct type when using interface declaration", () => {
-  type InterfaceWidgetMeta = ToolResponseMetadata<
+  type InterfaceViewMeta = ToolResponseMetadata<
     InterfaceTestServer,
     "interface-view"
   >;
 
-  expectTypeOf<InterfaceWidgetMeta>().toHaveProperty("processedBy");
-  expectTypeOf<InterfaceWidgetMeta["processedBy"]>().toBeString();
-  expectTypeOf<InterfaceWidgetMeta["version"]>().toBeNumber();
+  expectTypeOf<InterfaceViewMeta>().toHaveProperty("processedBy");
+  expectTypeOf<InterfaceViewMeta["processedBy"]>().toBeString();
+  expectTypeOf<InterfaceViewMeta["version"]>().toBeNumber();
 });
 
 test("generateHelpers works with interface-typed server", () => {

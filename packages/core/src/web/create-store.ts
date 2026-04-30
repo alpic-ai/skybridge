@@ -2,9 +2,9 @@ import { dequal } from "dequal/lite";
 import { create, type StateCreator } from "zustand";
 import { getAdaptor } from "./bridges/index.js";
 import {
-  filterWidgetContext,
+  filterViewContext,
   getInitialState,
-  injectWidgetContext,
+  injectViewContext,
   serializeState,
 } from "./helpers/state.js";
 import type { UnknownObject } from "./types.js";
@@ -27,23 +27,23 @@ export function createStore<State extends UnknownObject>(
     },
   );
 
-  // Bidirectional sync between the Zustand store and the adaptor's widgetState.
-  // Store changes persist to the host; external widgetState changes rehydrate the store.
+  // Bidirectional sync between the Zustand store and the adaptor's viewState.
+  // Store changes persist to the host; external viewState changes rehydrate the store.
   store.subscribe((state: State) => {
     const serializedState = serializeState(state);
     if (serializedState !== null && serializedState !== undefined) {
-      const stateToPersist = injectWidgetContext(serializedState as State);
+      const stateToPersist = injectViewContext(serializedState as State);
       if (stateToPersist !== null) {
-        getAdaptor().setWidgetState(stateToPersist);
+        getAdaptor().setViewState(stateToPersist);
       }
     }
   });
 
-  const widgetStateStore = getAdaptor().getHostContextStore("widgetState");
-  widgetStateStore.subscribe(() => {
-    const externalState = widgetStateStore.getSnapshot();
+  const viewStateStore = getAdaptor().getHostContextStore("viewState");
+  viewStateStore.subscribe(() => {
+    const externalState = viewStateStore.getSnapshot();
     if (externalState !== null) {
-      const filtered = filterWidgetContext(externalState) as State;
+      const filtered = filterViewContext(externalState) as State;
       const current = serializeState(store.getState()) as State;
       if (!dequal(filtered, current)) {
         store.setState(filtered);

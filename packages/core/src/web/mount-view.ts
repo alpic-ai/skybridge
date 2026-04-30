@@ -6,7 +6,7 @@ import { installOpenAILoggingProxy } from "./proxy.js";
 
 let rootInstance: Root | null = null;
 
-export const mountWidget = (component: React.ReactNode) => {
+export const mountView = (component: React.ReactNode) => {
   const rootElement = document.getElementById("root");
   if (!rootElement) {
     throw new Error("Root element not found");

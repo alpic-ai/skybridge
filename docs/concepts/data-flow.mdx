@@ -128,7 +128,7 @@ export function FlightView() {
 <Note>
 **useToolInfo is read-only**
 
-`useToolInfo` provides the initial hydration data and should not be used as a mutable data store. For persistent view state that survives re-renders, use [`useWidgetState`](/api-reference/use-widget-state).
+`useToolInfo` provides the initial hydration data and should not be used as a mutable data store. For persistent view state that survives re-renders, use [`useViewState`](/api-reference/use-view-state).
 </Note>
 
 ### 2. View → Server (Tool Calls)
@@ -229,7 +229,7 @@ return {
 | Silent background fetch | Direct API call | Model doesn't need to know |
 | Describe current UI state | `data-llm` | Passive context for user questions |
 | Trigger model response | `useSendFollowUpMessage` | Active prompt, immediate reply |
-| Persist view state | `useWidgetState` | Survives re-renders |
+| Persist view state | `useViewState` | Survives re-renders |
 
 <Tip>
 **Why useCallTool instead of a direct API call?**
@@ -263,4 +263,4 @@ This loop creates a seamless experience where the conversation, the UI, and your
 - [Fetching Data Guide](/guides/fetching-data) - Patterns for useToolInfo and useCallTool
 - [useToolInfo API](/api-reference/use-tool-info) - Initial data access
 - [useCallTool API](/api-reference/use-call-tool) - User-triggered data fetching
-- [useWidgetState API](/api-reference/use-widget-state) - Persistent view state
+- [useViewState API](/api-reference/use-view-state) - Persistent view state

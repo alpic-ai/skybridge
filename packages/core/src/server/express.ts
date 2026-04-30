@@ -109,7 +109,7 @@ const mcpMiddleware = (server: McpServer): express.RequestHandler => {
         transport.close();
       });
 
-      await server.connect(transport);
+      await server.connectStatelessTransport(transport);
       // Express strips the mount path from req.url (e.g. "/mcp" becomes "/").
       // Restore it so the SDK builds the correct requestInfo.url.
       req.url = req.originalUrl;

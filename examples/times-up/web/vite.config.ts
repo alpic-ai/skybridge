@@ -1,7 +1,7 @@
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { skybridge } from "skybridge/web";
+import { skybridge } from "skybridge/vite";
 import { defineConfig, type PluginOption } from "vite";
 
 // https://vite.dev/config/

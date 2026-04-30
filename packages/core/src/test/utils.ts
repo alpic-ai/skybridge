@@ -1,7 +1,7 @@
 import { McpServer as McpServerBase } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { type MockInstance, vi } from "vitest";
 import * as z from "zod";
-import { McpServer } from "../server/server.js";
+import { McpServer, type ViewName } from "../server/server.js";
 
 export function createMockMcpServer(): {
   server: McpServer;
@@ -47,7 +47,7 @@ export function createTestServer() {
           ),
           totalCount: z.number(),
         },
-        view: { component: "search-trip" },
+        view: { component: "search-trip" as ViewName },
       },
       async ({ destination }) => {
         return {
@@ -71,7 +71,7 @@ export function createTestServer() {
           description: z.string(),
           images: z.array(z.string()),
         },
-        view: { component: "get-trip-details" },
+        view: { component: "get-trip-details" as ViewName },
       },
       async ({ tripId }) => {
         return {
@@ -90,7 +90,7 @@ export function createTestServer() {
         description: "View with no input",
         inputSchema: {},
         outputSchema: {},
-        view: { component: "no-input-view" },
+        view: { component: "no-input-view" as ViewName },
       },
       async () => {
         return {
@@ -106,7 +106,7 @@ export function createTestServer() {
         inputSchema: {
           query: z.string(),
         },
-        view: { component: "inferred-output-view" },
+        view: { component: "inferred-output-view" as ViewName },
       },
       async ({ query }) => {
         return {
@@ -166,7 +166,7 @@ export function createTestServer() {
         inputSchema: {
           resourceId: z.string(),
         },
-        view: { component: "view-with-metadata" },
+        view: { component: "view-with-metadata" as ViewName },
       },
       async ({ resourceId }) => {
         return {
@@ -211,7 +211,7 @@ export function createTestServer() {
         inputSchema: {
           shouldSucceed: z.boolean(),
         },
-        view: { component: "view-with-mixed-returns" },
+        view: { component: "view-with-mixed-returns" as ViewName },
       },
       async ({ shouldSucceed }) => {
         if (!shouldSucceed) {
@@ -243,7 +243,7 @@ export function createMinimalTestServer() {
       outputSchema: {
         results: z.array(z.object({ id: z.string() })),
       },
-      view: { component: "search-trip" },
+      view: { component: "search-trip" as ViewName },
     },
     async ({ destination }) => {
       return {
@@ -281,7 +281,7 @@ export function createInterfaceTestServer() {
       inputSchema: {
         id: z.string(),
       },
-      view: { component: "interface-view" },
+      view: { component: "interface-view" as ViewName },
     },
     async ({ id }): Promise<InterfaceReturnType> => {
       return {

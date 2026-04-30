@@ -8,11 +8,11 @@
 
 ## Display Modes
 
-Widgets render **inline by default**. Add fullscreen and/or PiP when the use case benefits from it—implement triggers (button, gesture) to let users switch.
+Views render **inline by default**. Add fullscreen and/or PiP when the use case benefits from it—implement triggers (button, gesture) to let users switch.
 
 ### Inline (default)
 
-Widget appears embedded in conversation above the model response.
+View appears embedded in conversation above the model response.
 
 **Use for:** Single result display, quick actions, browsing items.
 
@@ -22,7 +22,7 @@ Widget appears embedded in conversation above the model response.
 - No tabs or deep navigation
 
 **Patterns:**
-- **Card** — Single-purpose widget (order confirmation, weather, status)
+- **Card** — Single-purpose view (order confirmation, weather, status)
 - **Carousel** — 3-8 browsable items with image + title + max 3 lines metadata
 
 ### Fullscreen
@@ -57,7 +57,7 @@ Use `useDisplayMode` to read current mode and request changes.
 ```tsx
 import { useDisplayMode } from "skybridge/web";
 
-function ExpandableWidget() {
+function ExpandableView() {
   const [displayMode, setDisplayMode] = useDisplayMode();
   const isFullscreen = displayMode === "fullscreen";
 
@@ -81,7 +81,7 @@ function ExpandableWidget() {
 
 ## Modal
 
-Overlay rendered outside the widget iframe, on top of the current display mode.
+Overlay rendered outside the view iframe, on top of the current display mode.
 
 **Use for:** Confirmations, additional input before an action.
 
@@ -92,7 +92,7 @@ Overlay rendered outside the widget iframe, on top of the current display mode.
 ```tsx
 import { useRequestModal } from "skybridge/web";
 
-function SettingsWidget() {
+function SettingsView() {
   const { isOpen, open, params } = useRequestModal();
 
   if (isOpen) {
@@ -120,7 +120,7 @@ Use `useLayout` to read host environment constraints.
 
 ### Layout Constraints
 
-- `maxHeight`: Maximum height available for the widget in pixels
+- `maxHeight`: Maximum height available for the view in pixels
 - `safeArea.insets`: Padding to avoid device notches, composer overlay, and navigation bars
 
 ```tsx

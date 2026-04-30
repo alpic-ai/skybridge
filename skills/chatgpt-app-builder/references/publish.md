@@ -2,11 +2,11 @@
 
 ## 1. Audit Annotations
 
-**Common cause of rejection.** Ensure all tools and widgets have correct annotations. See [fetch-and-render-data.md](fetch-and-render-data.md).
+**Common cause of rejection.** Ensure all tools and views have correct annotations. See [fetch-and-render-data.md](fetch-and-render-data.md).
 
 ## 2. Audit CSP
 
-Ensure all external domains are declared in widgets `_meta.ui.csp`. See [csp.md](csp.md).
+Ensure all external domains are declared in views `_meta.ui.csp`. See [csp.md](csp.md).
 
 ## 3. Submit
 

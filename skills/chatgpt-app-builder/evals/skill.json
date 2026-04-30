@@ -25,18 +25,18 @@
   },
   {
     "query": "How do I set the 'Open in App' button URL in fullscreen mode?",
-    "expected_behavior": "Must read open-external-links.md. Answer: useSetOpenInAppUrl hook. Must have same origin as widget server by default."
+    "expected_behavior": "Must read open-external-links.md. Answer: useSetOpenInAppUrl hook. Must have same origin as view server by default."
   },
   {
     "query": "What happens to PiP mode on mobile devices?",
     "expected_behavior": "Must read ui-guidelines.md. Answer: PiP coerces to fullscreen on mobile."
   },
   {
-    "query": "How do I pass large data like images to the widget without the LLM seeing it?",
-    "expected_behavior": "Must read fetch-and-render-data.md. Answer: Use _meta in the return object. _meta never reaches the model, only the widget sees it via responseMetadata."
+    "query": "How do I pass large data like images to the view without the LLM seeing it?",
+    "expected_behavior": "Must read fetch-and-render-data.md. Answer: Use _meta in the return object. _meta never reaches the model, only the view sees it via responseMetadata."
   },
   {
-    "query": "What's the difference between data-llm and useWidgetState?",
-    "expected_behavior": "Must read state-and-context.md. Answer: useWidgetState persists data and LLM can read it. data-llm is one-way context annotation for LLM to understand 'this one' references—widget doesn't read it back."
+    "query": "What's the difference between data-llm and useViewState?",
+    "expected_behavior": "Must read state-and-context.md. Answer: useViewState persists data and LLM can read it. data-llm is one-way context annotation for LLM to understand 'this one' references—view doesn't read it back."
   }
 ]

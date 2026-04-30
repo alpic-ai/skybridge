@@ -6,6 +6,10 @@ import type {
   McpUiResourceMeta,
   McpUiToolMeta,
 } from "@modelcontextprotocol/ext-apps";
+import {
+  Server as SdkServer,
+  type ServerOptions,
+} from "@modelcontextprotocol/sdk/server/index.js";
 import { McpServer as McpServerBase } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type {
   AnySchema,
@@ -15,6 +19,7 @@ import type {
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
   ContentBlock,
+  Implementation,
   ServerNotification,
   ServerRequest,
   ServerResult,
@@ -80,9 +85,7 @@ export interface ViewCsp {
 // biome-ignore lint/suspicious/noEmptyInterface: register pattern — augmented by `.skybridge/views.d.ts` to narrow ViewName
 export interface ViewNameRegistry {}
 
-export type ViewName = keyof ViewNameRegistry extends never
-  ? string
-  : keyof ViewNameRegistry & string;
+export type ViewName = keyof ViewNameRegistry & string;
 
 export interface ViewConfig {
   component: ViewName;
@@ -132,7 +135,7 @@ type McpAppsToolMeta = {
 type InternalToolMeta = Partial<OpenaiToolMeta & McpAppsToolMeta>;
 
 /** @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields */
-type OpenaiWidgetCSP = {
+type OpenaiViewCSP = {
   connect_domains: string[];
   resource_domains: string[];
   frame_domains?: string[];
@@ -142,7 +145,7 @@ type OpenaiWidgetCSP = {
 type OpenaiResourceMeta = {
   "openai/widgetDescription"?: string;
   "openai/widgetPrefersBorder"?: boolean;
-  "openai/widgetCSP"?: OpenaiWidgetCSP;
+  "openai/widgetCSP"?: OpenaiViewCSP;
   "openai/widgetDomain"?: string;
 };
 
@@ -297,6 +300,14 @@ export class McpServer<
   private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private mcpMiddlewareApplied = false;
   private claimedViews = new Map<string, string>();
+  private readonly serverInfo: Implementation;
+  private readonly serverOptions?: ServerOptions;
+
+  constructor(serverInfo: Implementation, options?: ServerOptions) {
+    super(serverInfo, options);
+    this.serverInfo = serverInfo;
+    this.serverOptions = options;
+  }
 
   use(...handlers: RequestHandler[]): this;
   use(path: string, ...handlers: RequestHandler[]): this;
@@ -463,6 +474,35 @@ export class McpServer<
     return McpServerBase.prototype.connect.call(this, transport);
   }
 
+  /**
+   * Per-request stateless connect. The SDK's `Protocol` only allows one
+   * transport per instance, so we can't reuse this `McpServer` across
+   * concurrent requests. The SDK's idiomatic fix is a `() => McpServer`
+   * factory, but that would break Skybridge's singleton API — so instead
+   * we build a fresh underlying `Server` per request and share the main
+   * server's handler maps by reference. The cast is unavoidable: there's
+   * no public API to inject handler maps. `getHandlerMaps` validates the
+   * read side and fails fast on SDK field renames.
+   */
+  async connectStatelessTransport(
+    transport: Parameters<typeof McpServerBase.prototype.connect>[0],
+  ): Promise<void> {
+    this.applyMcpMiddleware();
+
+    const { requestHandlers, notificationHandlers } = getHandlerMaps(
+      this.server,
+    );
+    const fresh = new SdkServer(this.serverInfo, this.serverOptions);
+    const target = fresh as unknown as {
+      _requestHandlers: unknown;
+      _notificationHandlers: unknown;
+    };
+    target._requestHandlers = requestHandlers;
+    target._notificationHandlers = notificationHandlers;
+
+    await fresh.connect(transport);
+  }
+
   async run(): Promise<void> {
     this.applyMcpMiddleware();
     const httpServer = http.createServer();
@@ -477,7 +517,7 @@ export class McpServer<
     }
 
     httpServer.on("request", this.express);
-    return new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       httpServer.on("error", (error: Error) => {
         console.error("Failed to start server:", error);
         reject(error);
@@ -487,6 +527,19 @@ export class McpServer<
         resolve();
       });
     });
+
+    const shutdown = () => {
+      // Drop both handlers so a second signal falls through to Node's default
+      // (force-quit on a second Ctrl+C while drain is hanging).
+      process.off("SIGTERM", shutdown);
+      process.off("SIGINT", shutdown);
+      httpServer.close(() => process.exit(0));
+      // Force exit if connections don't drain in time so the port is still
+      // released promptly (e.g. for nodemon restarts).
+      setTimeout(() => process.exit(0), 3000).unref();
+    };
+    process.on("SIGTERM", shutdown);
+    process.on("SIGINT", shutdown);
   }
 
   private enforceOneToolPerView(component: string, toolName: string): void {
@@ -506,10 +559,15 @@ export class McpServer<
   ): void {
     const hosts = view.hosts ?? (["apps-sdk", "mcp-app"] as const);
 
+    // Append a content-derived version param so hosts (e.g. ChatGPT) bust
+    // their cache when the bundle changes, but keep the URI stable across
+    // `tools/list` calls when the bundle hasn't changed.
+    const versionParam = this.computeViewVersionParam(view.component);
+
     if (hosts.includes("apps-sdk")) {
       const viewResource: ViewResourceConfig<OpenaiResourceMeta> = {
         hostType: "apps-sdk",
-        uri: `ui://widgets/apps-sdk/${view.component}.html`,
+        uri: `ui://views/apps-sdk/${view.component}.html${versionParam}`,
         mimeType: "text/html+skybridge",
         buildContentMeta: (
           { resourceDomains, connectDomains, domain },
@@ -529,7 +587,7 @@ export class McpServer<
               OpenaiResourceMeta,
               "openai/widgetCSP" | "openai/widgetDescription"
             > & {
-              "openai/widgetCSP": Partial<OpenaiWidgetCSP>;
+              "openai/widgetCSP": Partial<OpenaiViewCSP>;
             }
           > = {
             "openai/widgetCSP": {
@@ -563,7 +621,7 @@ export class McpServer<
     if (hosts.includes("mcp-app")) {
       const viewResource: ViewResourceConfig<McpAppsResourceMeta> = {
         hostType: "mcp-app",
-        uri: `ui://widgets/ext-apps/${view.component}.html`,
+        uri: `ui://views/ext-apps/${view.component}.html${versionParam}`,
         mimeType: "text/html;profile=mcp-app",
         buildContentMeta: (
           { resourceDomains, connectDomains, domain, baseUriDomains },
@@ -749,6 +807,26 @@ export class McpServer<
         }),
       };
     };
+  }
+
+  private computeViewVersionParam(viewName: string): string {
+    if (process.env.NODE_ENV !== "production") {
+      return "";
+    }
+    try {
+      const viewFile = this.lookupViewFile(viewName);
+      const styleFile = this.lookupDistFile("style.css") ?? "";
+      const hash = crypto
+        .createHash("sha256")
+        .update(viewFile)
+        .update("\0")
+        .update(styleFile)
+        .digest("hex")
+        .slice(0, 8);
+      return `?v=${hash}`;
+    } catch {
+      return "";
+    }
   }
 
   private lookupViewFile(viewName: string) {

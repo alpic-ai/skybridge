@@ -1,8 +1,8 @@
 # Fetch and render data
 
-- Fetch structured data and render with custom UI → `widget`
+- Fetch structured data and render with custom UI → `view`
 - Fetch textual data or trigger actions → `tool`
-- Tool can be triggered by user interaction within a widget UI
+- Tool can be triggered by user interaction within a view UI
 
 ## Project Structure
 
@@ -10,24 +10,24 @@
 my-app/
 ├── server/src/
 │   ├── index.ts          # HTTP server with middlewares
-│   └── server.ts         # McpServer with tool and widget registration
+│   └── server.ts         # McpServer with tool and view registration
 ├── web/src/
-│   ├── widgets/          # React components (filename = widget name)
+│   ├── views/          # React components (filename = view name)
 │   │   └── search-flights.tsx
-│   ├── index.css         # Global CSS, must be imported in every widget
+│   ├── index.css         # Global CSS, must be imported in every view
 │   └── helpers.ts        # Type-safe hooks via generateHelpers
 └── package.json
 ```
 
-**Naming convention**: Widget filename must match registered name using kebab-case.
+**Naming convention**: View filename must match registered name using kebab-case.
 `search_flights` → register as `search-flights` → file `search-flights.tsx`
 
 ## Server Handlers
 
 Output:
-- **`structuredContent`**: concise JSON the widget uses and the model reads. Include only what the model should see.
+- **`structuredContent`**: concise JSON the view uses and the model reads. Include only what the model should see.
 - **`content`** (optional): narration (Markdown or plaintext) shown to LLM
-- **`_meta`** (optional): large or sensitive data exclusively for the widget. _meta never reaches the model.
+- **`_meta`** (optional): large or sensitive data exclusively for the view. _meta never reaches the model.
 
 Annotations (set `true` when):
 - **`readOnlyHint`**: only reads data, no side effects
@@ -45,7 +45,7 @@ const server = new McpServer(
   { name: "my-app", version: "0.0.1" },
   { capabilities: {} },
 )
-  .registerWidget(
+  .registerView(
     "search-flights",
     { description: "Search for flights" },
     {
@@ -90,7 +90,7 @@ export type AppType = typeof server;
 ## UI Components
 
 - generate type-safe hooks with `generateHelpers`
-- `useToolInfo`: access widget input/output
+- `useToolInfo`: access view input/output
 - `useCallTool`: trigger tool from UI
 
 **Example**:
@@ -103,10 +103,10 @@ import type { AppType } from "../../server/src/server";
 export const { useToolInfo, useCallTool } = generateHelpers<AppType>();
 ```
 
-- web/src/widgets/search-flights.tsx
+- web/src/views/search-flights.tsx
 ```tsx
 import "@/index.css";
-import { mountWidget } from "skybridge/web";
+import { mountView } from "skybridge/web";
 import { useToolInfo, useCallTool } from "../helpers";
 
 function SearchFlights() {
@@ -149,5 +149,5 @@ function SearchFlights() {
 
 export default SearchFlights;
 
-mountWidget(<SearchFlights />);
+mountView(<SearchFlights />);
 ```
