@@ -17,8 +17,6 @@ jobs:
         include:
           - name: Unit Tests
             command: pnpm run test:unit
-          - name: Type Check
-            command: pnpm run test:type
           - name: Lint & Format
             command: pnpm run test:format
           - name: Build

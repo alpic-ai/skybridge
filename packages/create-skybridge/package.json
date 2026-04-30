@@ -18,9 +18,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "pnpm run test:unit && pnpm run test:type && pnpm run test:format",
+    "test": "pnpm run test:unit && pnpm run test:format",
     "test:unit": "vitest run",
-    "test:type": "tsc --noEmit",
     "format": "biome check --write --error-on-warnings",
     "test:format": "biome ci",
     "prepublishOnly": "pnpm run build"

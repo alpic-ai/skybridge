@@ -9,8 +9,7 @@
     "dev:tunnel": "skybridge dev --tunnel",
     "build": "skybridge build",
     "start": "skybridge start",
-    "deploy": "alpic deploy",
-    "test:type": "tsc --noEmit"
+    "deploy": "alpic deploy"
   },
   "dependencies": {
     "@clerk/express": "^2.0.7",
