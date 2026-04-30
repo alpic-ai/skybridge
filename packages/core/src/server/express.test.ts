@@ -2,6 +2,7 @@ import http from "node:http";
 import type { ErrorRequestHandler, RequestHandler } from "express";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { McpServer } from "./server.js";
+import type { TunnelChildProcess } from "./tunnel.js";
 
 vi.mock("@skybridge/devtools", () => ({
   devtoolsStaticServer: () =>
@@ -14,6 +15,24 @@ vi.mock("./viewsDevServer.js", () => ({
     ((_req: unknown, _res: unknown, next: () => void) =>
       next()) as RequestHandler,
 }));
+
+vi.mock("./tunnel.js", async (importActual) => {
+  const actual = await importActual<typeof import("./tunnel.js")>();
+  const noopChild: TunnelChildProcess = {
+    stdout: { on: (() => noopChild.stdout) as never },
+    stderr: { on: (() => noopChild.stderr) as never },
+    kill: () => true,
+    on: (() => noopChild) as never,
+  };
+  return {
+    ...actual,
+    TunnelManager: class extends actual.TunnelManager {
+      constructor(opts: { getPort: () => number }) {
+        super({ ...opts, spawn: () => noopChild });
+      }
+    },
+  };
+});
 
 const fakeServer = {} as McpServer;
 
@@ -368,5 +387,43 @@ describe("createApp", () => {
       expect.any(Error),
     );
     consoleSpy.mockRestore();
+  });
+});
+
+describe("createApp tunnel routes", () => {
+  it("exposes POST /tunnel in dev mode", async () => {
+    const { createApp } = await import("./express.js");
+    const httpServer = http.createServer();
+    const app = await createApp({ mcpServer: fakeServer, httpServer });
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    const res = await fetch(`http://localhost:${port}/tunnel`, {
+      method: "POST",
+    });
+    // The actual subprocess won't run in tests (npx alpic missing/heavy),
+    // so we only assert the route exists.
+    expect(res.status).not.toBe(404);
+  });
+
+  it("does not expose /tunnel in production mode", async () => {
+    const prevEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    try {
+      vi.resetModules();
+      const { createApp } = await import("./express.js");
+      const httpServer = http.createServer();
+      const app = await createApp({ mcpServer: fakeServer, httpServer });
+      const { port, server } = await listen(app);
+      openServer = server;
+
+      const res = await fetch(`http://localhost:${port}/tunnel`, {
+        method: "POST",
+      });
+      expect(res.status).toBe(404);
+    } finally {
+      process.env.NODE_ENV = prevEnv;
+      vi.resetModules();
+    }
   });
 });
