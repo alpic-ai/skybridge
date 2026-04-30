@@ -47,7 +47,7 @@ This example uses Mapbox for the interactive map. Provide your own Mapbox public
 
 1. Sign up at [Mapbox](https://www.mapbox.com/) if needed.
 2. Get your public access token from the [Mapbox account page](https://account.mapbox.com/access-tokens/).
-3. Create a `.env` file in the `web` directory with your token. See `web/.env.example` for the format.
+3. Create a `.env` file in the project root with your token. See `.env.example` for the format.
 
 #### 3. Start your local server
 
@@ -71,12 +71,9 @@ This command starts:
 #### 4. Project structure
 
 ```
-├── server/
-│   └── src/
-│       ├── index.ts      # Server entry point
-│       ├── capitals.ts   # Capitals data & logic
-│       └── env.ts        # Env validation
-├── web/
+│   ├── server.ts      # Server entry point
+│   ├── capitals.ts   # Capitals data & logic
+│   └── env.ts        # Env validation
 │   ├── .env.example     # Mapbox token template
 │   ├── src/
 │   │   ├── components/   # Shared UI (e.g. spinner)
@@ -85,7 +82,7 @@ This command starts:
 │   │   │           └── spinner/
 │   │   ├── data/
 │   │   │   └── country-to-capital.ts
-│   │   ├── widgets/
+│   │   ├── views/
 │   │   │   ├── explore-capitals.tsx
 │   │   │   └── components/
 │   │   │       ├── CapitalDetail.tsx
@@ -104,12 +101,12 @@ This command starts:
 
 #### 1. Add a new widget
 
-- Register a widget in `server/src/server.ts` with a unique name (e.g., `my-widget`) using [`registerWidget`](https://docs.skybridge.tech/api-reference/register-widget)
-- Create a matching React component at `web/src/widgets/my-widget.tsx`. **The file name must match the widget name exactly**.
+- Register a widget in `src/server.ts` with a unique name (e.g., `my-widget`) using [`registerTool`](https://docs.skybridge.tech/api-reference/register-tool)
+- Create a matching React component at `src/views/my-widget.tsx`. **The file name must match the widget name exactly**.
 
 #### 2. Edit widgets with Hot Module Replacement (HMR)
 
-Edit and save components in `web/src/widgets/` — changes will appear instantly inside your App.
+Edit and save components in `src/views/` — changes will appear instantly inside your App.
 
 #### 3. Edit server code
 

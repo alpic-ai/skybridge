@@ -67,13 +67,10 @@ This command starts:
 #### 4. Project structure
 
 ```
-├── server/
-│   └── src/
-│       ├── index.ts      # Server entry point
-│       └── products.ts   # Product data
-├── web/
+│   ├── server.ts      # Server entry point
+│   └── products.ts   # Product data
 │   ├── src/
-│   │   ├── widgets/      # React components (one per widget)
+│   │   ├── views/      # React components (one per widget)
 │   │   ├── helpers.ts    # Shared utilities
 │   │   └── index.css    # Global styles
 │   └── vite.config.ts
@@ -86,12 +83,12 @@ This command starts:
 
 #### 1. Add a new widget
 
-- Register a widget in `server/src/server.ts` with a unique name (e.g., `my-widget`) using [`registerWidget`](https://docs.skybridge.tech/api-reference/register-widget)
-- Create a matching React component at `web/src/widgets/my-widget.tsx`. **The file name must match the widget name exactly**.
+- Register a widget in `src/server.ts` with a unique name (e.g., `my-widget`) using [`registerTool`](https://docs.skybridge.tech/api-reference/register-tool)
+- Create a matching React component at `src/views/my-widget.tsx`. **The file name must match the widget name exactly**.
 
 #### 2. Edit widgets with Hot Module Replacement (HMR)
 
-Edit and save components in `web/src/widgets/` — changes will appear instantly inside your App.
+Edit and save components in `src/views/` — changes will appear instantly inside your App.
 
 #### 3. Edit server code
 

@@ -36,9 +36,8 @@
     "build": "shx rm -rf dist && tsc && pnpm run build:templates",
     "build:templates": "cp -r src/server/templates dist/server/",
     "format": "biome check --write --error-on-warnings",
-    "test": "pnpm run test:unit && pnpm run test:type && pnpm run test:format",
+    "test": "pnpm run test:unit && pnpm run test:format",
     "test:unit": "vitest run",
-    "test:type": "tsc --noEmit",
     "test:format": "biome ci"
   },
   "keywords": [

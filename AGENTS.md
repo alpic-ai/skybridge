@@ -44,7 +44,7 @@ pnpm install        # setup
 ### Validation
 
 ```bash
-pnpm test           # unit tests (vitest) + typecheck (tsc --noEmit) + lint (biome ci)
+pnpm test           # unit tests (vitest) + lint (biome ci)
 pnpm build          # compile all packages
 ```
 
@@ -52,8 +52,8 @@ Per-package:
 
 ```bash
 pnpm --filter skybridge test:unit
-pnpm --filter skybridge test:type
 pnpm --filter skybridge test:format
+pnpm --filter skybridge build
 ```
 
 Always run `pnpm test && pnpm build` from root before pushing.

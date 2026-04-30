@@ -77,19 +77,16 @@ This starts:
 
 ```
 ├── assets/                         # Static HTML OAuth pages (served by MCP server)
+├── src/
 │   ├── authorize.html              # OAuth consent screen
 │   ├── login.html                  # Stytch login UI
 │   └── authenticate.html           # OAuth callback handler
-├── server/
-│   └── src/
-│       ├── index.ts                # McpServer + auth middleware + widget + run()
-│       ├── auth.ts                 # verifyAccessToken — JWKS verification via jose
-│       ├── env.ts                  # Env validation
-│       └── coffee-data.ts          # Mock coffee shop data & search
-├── web/
-│   └── src/
-│       └── widgets/
-│           └── search-coffee-paris.tsx  # Coffee shop widget
+│   ├── server.ts                # McpServer + auth middleware + widget + run()
+│   ├── auth.ts                 # verifyAccessToken — JWKS verification via jose
+│   ├── env.ts                  # Env validation
+│   └── coffee-data.ts          # Mock coffee shop data & search
+│   └── views/
+│   └── search-coffee-paris.tsx  # Coffee shop widget
 └── package.json
 ```
 

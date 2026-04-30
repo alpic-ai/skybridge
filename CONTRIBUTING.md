@@ -22,12 +22,12 @@ pnpm install
 
 ## Development Workflow
 
-| Command          | Description                          |
-| ---------------- | ------------------------------------ |
-| `pnpm test`      | Run all tests (unit + type checking) |
-| `pnpm test:unit` | Run unit tests only                  |
-| `pnpm test:type` | Run TypeScript type checking         |
-| `pnpm docs:dev`  | Start docs dev server                |
+| Command          | Description                                |
+| ---------------- | ------------------------------------------ |
+| `pnpm test`      | Run all tests (unit + lint)                |
+| `pnpm test:unit` | Run unit tests only                        |
+| `pnpm build`     | Compile packages                           |
+| `pnpm docs:dev`  | Start docs dev server                      |
 
 ## How to Contribute
 
