@@ -1,4 +1,6 @@
-export async function resolveViewsDir(root: string): Promise<string | undefined> {
+export async function resolveViewsDir(
+  root: string,
+): Promise<string | undefined> {
   const { loadConfigFromFile } = await import("vite");
   const loaded = await loadConfigFromFile(
     { command: "build", mode: "production" },
