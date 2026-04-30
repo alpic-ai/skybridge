@@ -13,7 +13,6 @@ type TunnelActivity = {
   level: "log" | "error";
 };
 
-const POST_RETRY_BUDGET_MS = 5_000;
 const POST_RETRY_DELAY_MS = 250;
 
 export function useTunnel(
@@ -105,9 +104,12 @@ export function useTunnel(
       }
     };
 
-    const postWithRetry = async () => {
-      const deadline = Date.now() + POST_RETRY_BUDGET_MS;
-      while (!cancelled && Date.now() < deadline) {
+    const postUntilStarted = async () => {
+      // Retry indefinitely until POST lands once. Bounded by the effect
+      // lifetime via controller.abort() on unmount. Once the manager has
+      // been started, this returns and never POSTs again — a user-driven
+      // DELETE /tunnel won't be auto-undone.
+      while (!cancelled) {
         try {
           const res = await fetch(`${baseUrl}/tunnel`, {
             method: "POST",
@@ -117,8 +119,7 @@ export function useTunnel(
             return;
           }
         } catch {
-          // dev server not up yet — observe() will retry; we just keep
-          // trying to start within our budget. State is owned by observe().
+          // dev server not up yet (or restarting under nodemon) — wait, retry
         }
         await new Promise((r) => setTimeout(r, POST_RETRY_DELAY_MS));
       }
@@ -144,9 +145,10 @@ export function useTunnel(
     };
 
     // observe() always runs — it owns the cli's view of tunnel state. POST is
-    // a fire-and-forget side-effect that just nudges the manager into starting.
+    // a fire-and-forget side-effect that nudges the manager into starting and
+    // retries until it lands at least once.
     if (autoStart) {
-      void postWithRetry();
+      void postUntilStarted();
     }
     void observe();
 
