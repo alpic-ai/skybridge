@@ -2,7 +2,6 @@ import http from "node:http";
 import type { ErrorRequestHandler, RequestHandler } from "express";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { McpServer } from "./server.js";
-import type { TunnelChildProcess } from "./tunnel.js";
 
 vi.mock("@skybridge/devtools", () => ({
   devtoolsStaticServer: () =>
@@ -15,24 +14,6 @@ vi.mock("./viewsDevServer.js", () => ({
     ((_req: unknown, _res: unknown, next: () => void) =>
       next()) as RequestHandler,
 }));
-
-vi.mock("./tunnel.js", async (importActual) => {
-  const actual = await importActual<typeof import("./tunnel.js")>();
-  const noopChild: TunnelChildProcess = {
-    stdout: { on: (() => noopChild.stdout) as never },
-    stderr: { on: (() => noopChild.stderr) as never },
-    kill: () => true,
-    on: (() => noopChild) as never,
-  };
-  return {
-    ...actual,
-    TunnelManager: class extends actual.TunnelManager {
-      constructor(opts: { getPort: () => number }) {
-        super({ ...opts, spawn: () => noopChild });
-      }
-    },
-  };
-});
 
 const fakeServer = {} as McpServer;
 
@@ -391,19 +372,44 @@ describe("createApp", () => {
 });
 
 describe("createApp tunnel routes", () => {
-  it("exposes POST /tunnel in dev mode", async () => {
-    const { createApp } = await import("./express.js");
-    const httpServer = http.createServer();
-    const app = await createApp({ mcpServer: fakeServer, httpServer });
-    const { port, server } = await listen(app);
-    openServer = server;
-
-    const res = await fetch(`http://localhost:${port}/tunnel`, {
-      method: "POST",
+  it("proxies POST /tunnel to the cli control server in dev mode", async () => {
+    // Stand up a fake control listener that returns a known JSON body.
+    const control = http.createServer((_req, res) => {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end('{"status":"idle"}');
     });
-    // The actual subprocess won't run in tests (npx alpic missing/heavy),
-    // so we only assert the route exists.
-    expect(res.status).not.toBe(404);
+    await new Promise<void>((resolve) =>
+      control.listen(0, "127.0.0.1", resolve),
+    );
+    const controlAddr = control.address();
+    if (typeof controlAddr === "string" || controlAddr === null) {
+      control.close();
+      throw new Error("control server has no address");
+    }
+    const controlPort = controlAddr.port;
+
+    const prev = process.env.__TUNNEL_CONTROL_PORT;
+    process.env.__TUNNEL_CONTROL_PORT = String(controlPort);
+    try {
+      const { createApp } = await import("./express.js");
+      const httpServer = http.createServer();
+      const app = await createApp({ mcpServer: fakeServer, httpServer });
+      const { port, server } = await listen(app);
+      openServer = server;
+
+      const res = await fetch(`http://localhost:${port}/tunnel`, {
+        method: "POST",
+      });
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ status: "idle" });
+    } finally {
+      if (prev === undefined) {
+        delete process.env.__TUNNEL_CONTROL_PORT;
+      } else {
+        process.env.__TUNNEL_CONTROL_PORT = prev;
+      }
+      await new Promise<void>((resolve) => control.close(() => resolve()));
+    }
   });
 
   it("does not expose /tunnel in production mode", async () => {

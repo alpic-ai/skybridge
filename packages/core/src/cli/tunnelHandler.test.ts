@@ -3,7 +3,7 @@ import http from "node:http";
 import { Readable } from "node:stream";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { TunnelManager } from "./tunnel.js";
-import { createTunnelRouter } from "./tunnelRouter.js";
+import { createTunnelHandler } from "./tunnelHandler.js";
 
 let openServer: http.Server | undefined;
 afterEach(() => openServer?.close());
@@ -29,24 +29,20 @@ async function listen(handler: http.RequestListener) {
   return { port, server };
 }
 
-async function listenWithRouter() {
+async function listenWithHandler() {
   const child = makeFakeChild();
   const manager = new TunnelManager({
     getPort: () => 3000,
     spawn: () => child,
   });
-  const { default: express } = await import("express");
-  const app = express();
-  app.use(express.json());
-  app.use(createTunnelRouter(manager));
-  const { port, server } = await listen(app);
+  const { port, server } = await listen(createTunnelHandler(manager));
   openServer = server;
   return { port, child, manager };
 }
 
-describe("createTunnelRouter", () => {
+describe("createTunnelHandler", () => {
   it("POST /tunnel starts the tunnel and returns the current state", async () => {
-    const { port, child } = await listenWithRouter();
+    const { port, child } = await listenWithHandler();
 
     const res = await fetch(`http://localhost:${port}/tunnel`, {
       method: "POST",
@@ -60,7 +56,7 @@ describe("createTunnelRouter", () => {
   });
 
   it("POST /tunnel is idempotent — second call does not respawn", async () => {
-    const { port, manager } = await listenWithRouter();
+    const { port, manager } = await listenWithHandler();
     const startSpy = vi.spyOn(manager, "start");
 
     await fetch(`http://localhost:${port}/tunnel`, { method: "POST" });
@@ -71,7 +67,7 @@ describe("createTunnelRouter", () => {
   });
 
   it("DELETE /tunnel stops the tunnel", async () => {
-    const { port, child } = await listenWithRouter();
+    const { port, child } = await listenWithHandler();
     await fetch(`http://localhost:${port}/tunnel`, { method: "POST" });
 
     const res = await fetch(`http://localhost:${port}/tunnel`, {
@@ -83,7 +79,7 @@ describe("createTunnelRouter", () => {
   });
 
   it("GET /tunnel/events streams the current state on connect", async () => {
-    const { port, child } = await listenWithRouter();
+    const { port, child } = await listenWithHandler();
     await fetch(`http://localhost:${port}/tunnel`, { method: "POST" });
     child.stdout.emit(
       "data",
@@ -103,6 +99,27 @@ describe("createTunnelRouter", () => {
     expect(chunk).toContain("event: state");
     expect(chunk).toContain('"status":"connected"');
     expect(chunk).toContain('"url":"https://abc.tunnel.example"');
+
+    await reader.cancel();
+  });
+
+  it("GET /tunnel/events sends the current error state on connect", async () => {
+    const { port, child } = await listenWithHandler();
+    await fetch(`http://localhost:${port}/tunnel`, { method: "POST" });
+    child.stderr.emit("data", Buffer.from("boom: tunnel auth failed\n"));
+    child.emit("close", 1);
+
+    const res = await fetch(`http://localhost:${port}/tunnel/events`);
+    expect(res.headers.get("content-type")).toMatch(/text\/event-stream/);
+    expect(res.body).toBeTruthy();
+
+    const reader = (res.body as ReadableStream<Uint8Array>).getReader();
+    const { value } = await reader.read();
+    const chunk = new TextDecoder().decode(value);
+
+    expect(chunk).toContain("event: state");
+    expect(chunk).toContain('"status":"error"');
+    expect(chunk).toContain("boom: tunnel auth failed");
 
     await reader.cancel();
   });

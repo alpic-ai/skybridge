@@ -5,30 +5,15 @@ import cors from "cors";
 import express from "express";
 import type { McpServer } from "./server.js";
 
-// Global registry of active shutdown callbacks. We register the SIGINT/SIGTERM
-// handlers exactly once per process so repeated `createApp` calls (notably in
-// tests) do not accumulate listeners and trip the MaxListenersExceeded warning.
-//
-// After running shutdowns we remove ourselves and re-raise the signal so
-// Node's default termination behavior kicks in — without this the process
-// would keep running because our listener replaces the default exit-on-signal.
-const tunnelShutdowns = new Set<() => void>();
-let signalHandlersRegistered = false;
-function ensureSignalHandlers(): void {
-  if (signalHandlersRegistered) {
-    return;
+function parseControlPort(raw: string | undefined): number | null {
+  if (raw === undefined) {
+    return null;
   }
-  signalHandlersRegistered = true;
-  const fire = (signal: NodeJS.Signals) => {
-    for (const cb of tunnelShutdowns) {
-      cb();
-    }
-    process.off("SIGINT", fire);
-    process.off("SIGTERM", fire);
-    process.kill(process.pid, signal);
-  };
-  process.on("SIGINT", fire);
-  process.on("SIGTERM", fire);
+  const n = Number.parseInt(raw, 10);
+  if (!Number.isFinite(n) || n <= 0 || n >= 65536) {
+    return null;
+  }
+  return n;
 }
 
 function applyMiddlewares(
@@ -89,26 +74,17 @@ export async function createApp({
     const { viewsDevServer } = await import("./viewsDevServer.js");
     app.use(await viewsDevServer(httpServer));
 
-    const { TunnelManager } = await import("./tunnel.js");
-    const { createTunnelRouter } = await import("./tunnelRouter.js");
-    const tunnelManager = new TunnelManager({
-      getPort: () => {
-        const addr = httpServer.address();
-        if (typeof addr === "string" || addr === null) {
-          throw new Error("Cannot resolve dev server port");
-        }
-        return addr.port;
-      },
-    });
-    app.use(createTunnelRouter(tunnelManager));
-
-    const shutdown = () => tunnelManager.stop();
-    tunnelShutdowns.add(shutdown);
-    httpServer.once("close", () => {
-      shutdown();
-      tunnelShutdowns.delete(shutdown);
-    });
-    ensureSignalHandlers();
+    const controlPort = parseControlPort(process.env.__TUNNEL_CONTROL_PORT);
+    if (controlPort !== null) {
+      const { createTunnelProxyRouter } = await import(
+        "./tunnelProxyRouter.js"
+      );
+      app.use(createTunnelProxyRouter(controlPort));
+    } else if (process.env.__TUNNEL_CONTROL_PORT !== undefined) {
+      console.warn(
+        `Ignoring invalid __TUNNEL_CONTROL_PORT=${process.env.__TUNNEL_CONTROL_PORT}`,
+      );
+    }
   }
 
   if (env === "production") {

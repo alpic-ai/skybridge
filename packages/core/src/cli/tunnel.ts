@@ -44,7 +44,7 @@ export type TunnelChildProcess = {
   on(event: "close", listener: (code: number | null) => void): unknown;
 };
 
-type SpawnFn = (port: number) => TunnelChildProcess;
+export type SpawnFn = (port: number) => TunnelChildProcess;
 
 const defaultSpawn: SpawnFn = (port) =>
   nodeSpawn(

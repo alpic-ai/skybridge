@@ -20,11 +20,12 @@ export function useTunnel(
   port: number | null,
   pushMessage: PushMessage,
   verbose: boolean,
+  autoStart: boolean,
 ): TunnelState {
   const [state, setState] = useState<TunnelState>(
-    port === null
-      ? { status: "idle" }
-      : { status: "starting", message: "Starting tunnel…" },
+    port !== null && autoStart
+      ? { status: "starting", message: "Starting tunnel…" }
+      : { status: "idle" },
   );
 
   useEffect(() => {
@@ -130,21 +131,41 @@ export function useTunnel(
       return false;
     };
 
-    void postWithRetry().then((ok) => {
-      if (!ok || cancelled) {
-        return;
+    // Always observe the tunnel state so external triggers (curl, future
+    // devtools UI) update the cli UI. `autoStart` only decides whether we
+    // also POST /tunnel on mount. Reconnects indefinitely so we survive
+    // dev-server boot delay and nodemon restarts; the cli owns the actual
+    // subprocess so a temporarily-unreachable dev server is fine.
+    const observe = async () => {
+      while (!cancelled) {
+        try {
+          await consumeSse();
+        } catch {
+          // network error or stream ended abnormally — fall through to retry
+        }
+        if (cancelled) {
+          return;
+        }
+        await new Promise((r) => setTimeout(r, POST_RETRY_DELAY_MS));
       }
-      consumeSse().catch(() => {
-        // Aborted on unmount or transient stream error; the dev server owns
-        // the subprocess lifecycle, so we don't surface this as fatal.
+    };
+
+    if (autoStart) {
+      void postWithRetry().then((ok) => {
+        if (!ok || cancelled) {
+          return;
+        }
+        void observe();
       });
-    });
+    } else {
+      void observe();
+    }
 
     return () => {
       cancelled = true;
       controller.abort();
     };
-  }, [port, pushMessage, verbose]);
+  }, [port, pushMessage, verbose, autoStart]);
 
   return state;
 }
