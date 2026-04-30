@@ -13,7 +13,7 @@ import {
   type MockInstance,
   vi,
 } from "vitest";
-import type { McpServer } from "../server/server.js";
+import type { McpServer, ViewName } from "../server/server.js";
 import {
   createMockExtra,
   createMockMcpServer,
@@ -95,7 +95,7 @@ describe("McpServer.registerTool (unified API)", () => {
         name: "my-widget",
         description: "Test tool",
         view: {
-          component: "my-widget",
+          component: "my-widget" as ViewName,
           description: "Test view",
         },
       },
@@ -159,7 +159,7 @@ describe("McpServer.registerTool (unified API)", () => {
         name: "my-widget",
         description: "Test tool",
         view: {
-          component: "my-widget",
+          component: "my-widget" as ViewName,
           description: "Test view",
         },
       },
@@ -222,7 +222,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "my-widget",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test view" },
+        view: { component: "my-widget" as ViewName, description: "Test view" },
       },
       vi.fn(),
     );
@@ -281,7 +281,7 @@ describe("McpServer.registerTool (unified API)", () => {
         name: "my-widget",
         description: "Test tool",
         view: {
-          component: "my-widget",
+          component: "my-widget" as ViewName,
           description: "Test view",
           prefersBorder: true,
         },
@@ -385,7 +385,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "my-widget",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test view" },
+        view: { component: "my-widget" as ViewName, description: "Test view" },
       },
       vi.fn(),
     );
@@ -407,7 +407,7 @@ describe("McpServer.registerTool (unified API)", () => {
         name: "my-widget",
         description: "Test tool",
         view: {
-          component: "my-widget",
+          component: "my-widget" as ViewName,
           description: "Test view",
           hosts: ["apps-sdk"],
         },
@@ -431,7 +431,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "my-widget",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test view" },
+        view: { component: "my-widget" as ViewName, description: "Test view" },
       },
       vi.fn(),
     );
@@ -463,7 +463,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "my-widget",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test view" },
+        view: { component: "my-widget" as ViewName, description: "Test view" },
       },
       vi.fn(),
     );
@@ -497,7 +497,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "my-widget",
         description: "First tool",
-        view: { component: "my-widget" },
+        view: { component: "my-widget" as ViewName },
       },
       vi.fn(),
     );
@@ -505,7 +505,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "folder-widget",
         description: "Second tool",
-        view: { component: "folder-widget" },
+        view: { component: "folder-widget" as ViewName },
       },
       vi.fn(),
     );
@@ -529,7 +529,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "unknown-widget",
         description: "Test tool",
-        view: { component: "unknown-widget" },
+        view: { component: "unknown-widget" as ViewName },
       },
       vi.fn(),
     );
@@ -548,7 +548,7 @@ describe("McpServer.registerTool (unified API)", () => {
         name: "my-widget",
         description: "Test tool",
         view: {
-          component: "my-widget",
+          component: "my-widget" as ViewName,
           description: "Test view",
           hosts: ["mcp-app"],
         },
@@ -578,7 +578,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "my-widget",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test view" },
+        view: { component: "my-widget" as ViewName, description: "Test view" },
       },
       mockToolCallback,
     );
@@ -609,7 +609,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "my-widget",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test view" },
+        view: { component: "my-widget" as ViewName, description: "Test view" },
       },
       mockToolCallback,
     );
@@ -634,7 +634,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "my-widget",
         description: "Test tool",
-        view: { component: "my-widget", description: "Test view" },
+        view: { component: "my-widget" as ViewName, description: "Test view" },
       },
       mockToolCallback,
     );
@@ -653,7 +653,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "shake",
         description: "First tool",
-        view: { component: "magic-8-ball" },
+        view: { component: "magic-8-ball" as ViewName },
       },
       vi.fn(),
     );
@@ -663,7 +663,7 @@ describe("McpServer.registerTool (unified API)", () => {
         {
           name: "shake-v2",
           description: "Second tool",
-          view: { component: "magic-8-ball" },
+          view: { component: "magic-8-ball" as ViewName },
         },
         vi.fn(),
       );
@@ -682,7 +682,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "string-content",
         description: "Test tool",
-        view: { component: "string-content" },
+        view: { component: "string-content" as ViewName },
       },
       mockToolCallback,
     );
@@ -705,7 +705,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "single-block",
         description: "Test tool",
-        view: { component: "single-block" },
+        view: { component: "single-block" as ViewName },
       },
       mockToolCallback,
     );
@@ -732,7 +732,7 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "array-content",
         description: "Test tool",
-        view: { component: "array-content" },
+        view: { component: "array-content" as ViewName },
       },
       mockToolCallback,
     );
@@ -764,7 +764,7 @@ describe("McpServer.registerTool (unified API)", () => {
         name: "csp-tool",
         description: "Test tool",
         view: {
-          component: "csp-tool",
+          component: "csp-tool" as ViewName,
           description: "Test view",
           csp: {
             connectDomains: ["https://api.example.com"],
@@ -811,7 +811,7 @@ describe("McpServer.registerTool (unified API)", () => {
         name: "override-tool",
         description: "Test tool",
         view: {
-          component: "override-tool",
+          component: "override-tool" as ViewName,
           description: "Test view",
           csp: { connectDomains: ["https://api.x.com"] },
           _meta: {

@@ -85,9 +85,7 @@ export interface ViewCsp {
 // biome-ignore lint/suspicious/noEmptyInterface: register pattern — augmented by `.skybridge/views.d.ts` to narrow ViewName
 export interface ViewNameRegistry {}
 
-export type ViewName = keyof ViewNameRegistry extends never
-  ? string
-  : keyof ViewNameRegistry & string;
+export type ViewName = keyof ViewNameRegistry & string;
 
 export interface ViewConfig {
   component: ViewName;
