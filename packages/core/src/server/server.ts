@@ -519,7 +519,7 @@ export class McpServer<
     }
 
     httpServer.on("request", this.express);
-    return new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       httpServer.on("error", (error: Error) => {
         console.error("Failed to start server:", error);
         reject(error);
@@ -529,6 +529,19 @@ export class McpServer<
         resolve();
       });
     });
+
+    const shutdown = () => {
+      // Drop both handlers so a second signal falls through to Node's default
+      // (force-quit on a second Ctrl+C while drain is hanging).
+      process.off("SIGTERM", shutdown);
+      process.off("SIGINT", shutdown);
+      httpServer.close(() => process.exit(0));
+      // Force exit if connections don't drain in time so the port is still
+      // released promptly (e.g. for nodemon restarts).
+      setTimeout(() => process.exit(0), 3000).unref();
+    };
+    process.on("SIGTERM", shutdown);
+    process.on("SIGINT", shutdown);
   }
 
   private enforceOneToolPerView(component: string, toolName: string): void {
