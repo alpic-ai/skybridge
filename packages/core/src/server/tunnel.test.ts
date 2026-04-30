@@ -141,6 +141,24 @@ describe("TunnelManager", () => {
     expect(child.kill).toHaveBeenCalled();
   });
 
+  it("preserves the timeout error message when the killed child later emits close", () => {
+    const child = makeFakeChild();
+    const manager = new TunnelManager({
+      getPort: () => 3000,
+      spawn: () => child,
+    });
+    manager.start();
+
+    vi.advanceTimersByTime(60_000);
+    // The killed child emits a non-zero close after the timeout fired.
+    child.emit("close", 1);
+
+    expect(manager.getState()).toEqual({
+      status: "error",
+      message: "Tunnel connection timed out after one minute",
+    });
+  });
+
   it("stop() kills the subprocess and goes idle", () => {
     const child = makeFakeChild();
     const manager = new TunnelManager({

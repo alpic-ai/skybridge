@@ -103,6 +103,9 @@ export class TunnelManager extends EventEmitter {
           status: "error",
           message: "Tunnel connection timed out after one minute",
         });
+        // Detach before killing so the imminent `close` event is treated as
+        // stale and does not overwrite the timeout error message.
+        this.child = null;
         child.kill();
       }
     }, CONNECT_TIMEOUT_MS);
