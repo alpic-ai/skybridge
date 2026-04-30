@@ -63,9 +63,8 @@ export class SkybridgeRecords extends Construct {
 
     new TxtRecord(this, "GoogleSiteVerification", {
       zone: hostedZone,
-      recordName: `${domain}.`,
       values: [
-        "google-site-verification=myFnQc1sSrPYoaWsq6XYxYKJlklRVgs93j3EejPDfe8",
+        "google-site-verification=0w7sA9_Qh5zLQ6XmUYMGaxiyBoZRXs_pRir0Hm5va1I",
       ],
     });
   }
