@@ -71,8 +71,8 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -81,8 +81,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
@@ -102,8 +102,8 @@ importers:
         specifier: ^5.1.4
         version: 5.1.4(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.120.1
+        version: 1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.11
         version: 3.1.11
@@ -135,8 +135,8 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^8.0.0
         version: 8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -145,8 +145,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -163,8 +163,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.120.1
+        version: 1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.11
         version: 3.1.11
@@ -196,8 +196,8 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^8.0.0
         version: 8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -206,8 +206,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
@@ -227,8 +227,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.120.1
+        version: 1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.11
         version: 3.1.11
@@ -260,8 +260,8 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^8.0.0
         version: 8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -270,8 +270,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -288,8 +288,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.120.1
+        version: 1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.11
         version: 3.1.11
@@ -336,8 +336,8 @@ importers:
         specifier: ^7.12.0
         version: 7.13.1(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.0))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.0))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.4.0
@@ -349,8 +349,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       '@tailwindcss/vite':
         specifier: ^4.1.14
         version: 4.1.18(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -373,8 +373,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.120.1
+        version: 1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.19.4
         version: 4.21.0
@@ -406,8 +406,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(@skybridge/devtools@0.35.14)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(@skybridge/devtools@0.36.1)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
       stripe:
         specifier: ^18.5.0
         version: 18.5.0(@types/node@22.19.3)
@@ -419,8 +419,8 @@ importers:
         version: 4.3.5
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       '@types/node':
         specifier: ^22.19.3
         version: 22.19.3
@@ -434,8 +434,8 @@ importers:
         specifier: ^5.1.2
         version: 5.1.2(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.120.1
+        version: 1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -455,8 +455,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(@skybridge/devtools@0.35.14)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(@skybridge/devtools@0.36.1)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
       vite:
         specifier: ^7.3.0
         version: 7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -465,8 +465,8 @@ importers:
         version: 4.3.5
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       '@types/node':
         specifier: ^24.0.0
         version: 24.12.0
@@ -480,8 +480,8 @@ importers:
         specifier: ^5.1.2
         version: 5.1.2(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.120.1
+        version: 1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -501,8 +501,8 @@ importers:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.2(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.2(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       vite:
         specifier: ^8.0.2
         version: 8.0.2(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -511,8 +511,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       '@types/node':
         specifier: ^22.19.3
         version: 22.19.3
@@ -526,8 +526,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.2(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.120.1
+        version: 1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -559,8 +559,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       tailwindcss:
         specifier: ^4.1.18
         version: 4.2.2
@@ -572,8 +572,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       '@types/node':
         specifier: ^25.0.10
         version: 25.2.3
@@ -587,8 +587,8 @@ importers:
         specifier: ^5.1.2
         version: 5.1.4(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.120.1
+        version: 1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -611,8 +611,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.4.0
@@ -630,8 +630,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       '@tailwindcss/vite':
         specifier: ^4.1.14
         version: 4.1.18(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -648,8 +648,8 @@ importers:
         specifier: ^5.1.2
         version: 5.1.4(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.120.1
+        version: 1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -687,8 +687,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.4(react@19.2.4)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
@@ -706,8 +706,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       '@types/node':
         specifier: ^25.0.10
         version: 25.2.3
@@ -721,8 +721,8 @@ importers:
         specifier: ^5.1.2
         version: 5.1.4(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.120.1
+        version: 1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -742,8 +742,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(@skybridge/devtools@0.35.14)(@types/react@19.2.8)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(@skybridge/devtools@0.36.1)(@types/react@19.2.8)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5)
       vite:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -752,8 +752,8 @@ importers:
         version: 4.3.5
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       '@types/node':
         specifier: ^25.2.3
         version: 25.2.3
@@ -767,8 +767,8 @@ importers:
         specifier: ^5.1.2
         version: 5.1.2(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.120.1
+        version: 1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -794,8 +794,8 @@ importers:
         specifier: ^8.1.3
         version: 8.1.3(@types/react@19.2.14)(react@19.2.4)(typescript@5.9.3)
       skybridge:
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6)
       tailwindcss:
         specifier: ^4.1.8
         version: 4.2.0
@@ -807,8 +807,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       '@tailwindcss/vite':
         specifier: ^4.1.8
         version: 4.2.0(vite@8.0.0(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -825,8 +825,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.0(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.120.1
+        version: 1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -868,8 +868,8 @@ importers:
         specifier: ^4.10.3
         version: 4.10.3
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       ci-info:
         specifier: ^4.4.0
         version: 4.4.0
@@ -1009,8 +1009,8 @@ importers:
         version: 4.3.6
     devDependencies:
       '@skybridge/devtools':
-        specifier: '>=0.35.14 <1.0.0'
-        version: 0.35.14
+        specifier: '>=0.36.1 <1.0.0'
+        version: 0.36.1
       '@types/node':
         specifier: ^24.12.0
         version: 24.12.0
@@ -1024,8 +1024,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.1(vite@8.0.3(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
-        specifier: ^1.104.1
-        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.2)
+        specifier: ^1.120.1
+        version: 1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.2)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -1053,7 +1053,7 @@ importers:
         version: 1.31.15(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
-        version: 1.29.0(zod@4.3.6)
+        version: 1.29.0(zod@4.4.1)
       '@rjsf/core':
         specifier: ^6.4.2
         version: 6.4.2(@rjsf/utils@6.4.2(react@19.2.4))(react@19.2.4)
@@ -1180,8 +1180,8 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@alpic-ai/api@1.104.1':
-    resolution: {integrity: sha512-HNN+CblD+cefHelMk5NZMAOAJ1V0B3/ubDC6T+xxAQrrd3NeQj3U1q4XijynmIamgWYYDEVXUld8LgriqwdeMw==}
+  '@alpic-ai/api@1.120.1':
+    resolution: {integrity: sha512-e05YwIHL07szzHdIb1cqoEQMyOBSPl5BrLB+9UNRzgex0zd9xyrY6JCSl0m1VK8mWvBFZglaqXyy+icuaEpwQA==}
 
   '@ark/schema@0.55.0':
     resolution: {integrity: sha512-IlSIc0FmLKTDGr4I/FzNHauMn0MADA6bCjT1wauu4k6MyxhC1R9gz0olNpIRvK7lGGDwtc/VO0RUDNvVQW5WFg==}
@@ -1516,8 +1516,16 @@ packages:
   '@clack/core@1.1.0':
     resolution: {integrity: sha512-SVcm4Dqm2ukn64/8Gub2wnlA5nS2iWJyCkdNHcvNHPIeBTGojpdJ+9cZKwLfmqy7irD4N5qLteSilJlE0WLAtA==}
 
+  '@clack/core@1.3.0':
+    resolution: {integrity: sha512-xJPHpAmEQUBrXSLx0gF+q5K/IyihXpsHZcha+jB+tyahsKRK3Dxo4D0coZDewHo12NhiuzC3dTtMPbm53GEAAA==}
+    engines: {node: '>= 20.12.0'}
+
   '@clack/prompts@1.1.0':
     resolution: {integrity: sha512-pkqbPGtohJAvm4Dphs2M8xE29ggupihHdy1x84HNojZuMtFsHiUlRvqD24tM2+XmI+61LlfNceM3Wr7U5QES5g==}
+
+  '@clack/prompts@1.3.0':
+    resolution: {integrity: sha512-GgcWwRCs/xPtaqlMy8qRhPnZf9vlWcWZNHAitnVQ3yk7JmSralSiq5q07yaffYE8SogtDm7zFeKccx1QNVARpw==}
+    engines: {node: '>= 20.12.0'}
 
   '@clerk/backend@3.2.3':
     resolution: {integrity: sha512-I3YLnSioYFG+EVFBYm0ilN28+FC8H+hkqMgB5Pdl7AcotQOn3JhiZMqLel2H0P390p8FEJKQNnrvXk3BemeKKQ==}
@@ -2316,6 +2324,10 @@ packages:
     resolution: {integrity: sha512-0mD8vcrrX5uRsxzvI8tbWmSVGngvZA/Qo6O0ZGvLPAWEauSf5GFniwgirhY0SkszuHwu0S1J1ivj/jHmqtIDuA==}
     engines: {node: '>=18.0.0'}
 
+  '@oclif/core@4.10.6':
+    resolution: {integrity: sha512-ySCOYnPKZE3KACT1V9It99hWG9b8E5MpagbRdWxPNRO3beMqmbr4SLUQoFtZ9XRtW++kks1ZVwZOdpnR8rpb9A==}
+    engines: {node: '>=18.0.0'}
+
   '@open-draft/deferred-promise@2.2.0':
     resolution: {integrity: sha512-CecwLWx3rhxVQF6V4bAgPS5t+So2sTbPgAzafKkVizyi7tlwpcFpdFqq+wqF2OwNBmqFuu6tOyouTuxgpMfzmA==}
 
@@ -2338,31 +2350,31 @@ packages:
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
 
-  '@orpc/client@1.13.13':
-    resolution: {integrity: sha512-jagx/Sa+9K4HEC5lBrUlMSrmR/06hvZctWh93/sKZc8GBk4zM0+71oT1kXQVw1oRYFV2XAq3xy3m6NdM6gfKYA==}
+  '@orpc/client@1.14.0':
+    resolution: {integrity: sha512-TYVcj1s5bN9adggeqIXFdIdoBBUAMUxQwMNv6YagjiaZkGtqWUYd1Y1vU0Rn/9xHWF2+0hBZNUKUmP5qrQhIAw==}
 
-  '@orpc/contract@1.13.13':
-    resolution: {integrity: sha512-md6iyrYkePBSJNs1VnVEEnAUORMDPHIf3JGRSHxyssIcNakev/iOjP0HvpH0Sx0MlTBhihAJo6uFL8Vpth58Nw==}
+  '@orpc/contract@1.14.0':
+    resolution: {integrity: sha512-FUxBNqWr6mOjI+w1JPzO/iHmR3M+GA53ivaxp+eOnQu7g3ZGKB0RS5gJ/oz3cGF1gvuIcCw9FVYKK/5tkB8I1Q==}
 
-  '@orpc/openapi-client@1.13.13':
-    resolution: {integrity: sha512-k8od+bD7MqysKPPybAkxgfaNIaNseFPXtbidWkZAdCZ5w34SnDc7QPZJ0PQbyt9n9B+jOXSADNwQSTWSuGpjyA==}
+  '@orpc/openapi-client@1.14.0':
+    resolution: {integrity: sha512-joeVdSX2YYFQM+bY4SdNHmnoiw7aYfc7NDEWDncnjpho6bj3DhnDNsINgFnFX7A9by7mVYaLw45yqjDhNSMprg==}
 
-  '@orpc/shared@1.13.13':
-    resolution: {integrity: sha512-kNpYOBjHvmgKHla6munWOaEeA0utEfAvoiZpXjiRjjt1RxTibdwQvVHgxRIBNMXfQsb+ON3Q/wDkoaUhvvSnIw==}
+  '@orpc/shared@1.14.0':
+    resolution: {integrity: sha512-WNzofimsE3sKbkyAAwVKMwG4P7sL0fzDLUhXqEXuJ9Yjll+phy/jSRK9TupNMtsPyz9ViKHKCQcwmsdgIgn9Sg==}
     peerDependencies:
       '@opentelemetry/api': '>=1.9.0'
     peerDependenciesMeta:
       '@opentelemetry/api':
         optional: true
 
-  '@orpc/standard-server-fetch@1.13.13':
-    resolution: {integrity: sha512-Lffy26+WtCQkwOUacsrdyeJF1GNzrhm75O3LXKVFXqmSdyVVdyI6zuqLn/YKGODU2L9IqGxZ2CwsV2tE298SSA==}
+  '@orpc/standard-server-fetch@1.14.0':
+    resolution: {integrity: sha512-qg315ZVbQ+02WnLzep7YvCsXb8BdefZ7Zjt+/emu6+Ypgw4fS0O78jtMHy3r39YvdvC9U2hWt8hff1yKiVlvQA==}
 
-  '@orpc/standard-server-peer@1.13.13':
-    resolution: {integrity: sha512-FeWAbXfnZDPYQRajM0hD6GJvHeC3DZILngAjdcLHy5zt3riu6nL2lLPSWDv5yNWWscmYU+CfKmXWd0Z01BOeWA==}
+  '@orpc/standard-server-peer@1.14.0':
+    resolution: {integrity: sha512-Phk8D04uxNJMLvl7JfJlWvfzDXwzfGweh4jmQI69zSV+flihp57dkZuk8gpTE7rfDClFiKCDauVsB/pQxwM09Q==}
 
-  '@orpc/standard-server@1.13.13':
-    resolution: {integrity: sha512-9pgS8XvauuRQElkyuD8F3om+nN0KBEnTkhblDHCBzkZERjWkmfirJmshQrWHoFaDTk+nnXHIaY6d7TBTxXdPRw==}
+  '@orpc/standard-server@1.14.0':
+    resolution: {integrity: sha512-zN3Q+ajsoLoxLYmONc1RkDyhIg1wENolrTly8HfodcR3gYrfFRcGhUzShqa/KdG47mK49Nps8rdeeMj6NT8EYw==}
 
   '@oxc-project/runtime@0.115.0':
     resolution: {integrity: sha512-Rg8Wlt5dCbXhQnsXPrkOjL1DTSvXLgb2R/KYfnf1/K+R0k6UMLEmbQXPM+kwrWqSmWA2t0B1EtHy2/3zikQpvQ==}
@@ -2390,6 +2402,12 @@ packages:
 
   '@posthog/core@1.24.4':
     resolution: {integrity: sha512-S+TolwBHSSJz7WWtgaELQWQqXviSm3uf1e+qorWUts0bZcgPwWzhnmhCUZAhvn0NVpTQHDJ3epv+hHbPLl5dHg==}
+
+  '@posthog/core@1.27.9':
+    resolution: {integrity: sha512-7FFWWYWvRFxQqDXYzv8klCjk0Pox1IpuPr61eeOCBsKkmt6xvvHwH0jc3ObvwDXZj2NSAWg+V9N2E2F1ul2CRQ==}
+
+  '@posthog/types@1.372.5':
+    resolution: {integrity: sha512-6sYOISiHjfr50FNlFcd8Zw/zCDJzxRCdC7aZzwTCvJABEOLWf41kcsiozi2c3q1cNXYL018X7DAGkUukrNLVIw==}
 
   '@puppeteer/browsers@2.3.0':
     resolution: {integrity: sha512-ioXoq9gPxkss4MYhD+SFaU9p1IHFUX0ILAWFPyjGaBdjLsYAlZw6j1iLA0N/m12uVHLFDfSYNF7EQccjinIMDA==}
@@ -3694,8 +3712,8 @@ packages:
     resolution: {integrity: sha512-doH1gimEu3A46VX6aVxpHTeHrytJAG6HgdxntYnCFiIFHEM/ZGpG8KiZGBChchjQmG0XFIBL552kBTjVcMZXwQ==}
     engines: {node: '>=12'}
 
-  '@skybridge/devtools@0.35.14':
-    resolution: {integrity: sha512-CC7/M8C6nQc8Hs0evvJ32T6YJnMHCZZQSBn42Kxc+2Bjc24lBDumxH/vJ9RMBCoqQoJwbhKvgIjm9yeKehTDJg==}
+  '@skybridge/devtools@0.36.1':
+    resolution: {integrity: sha512-qkAIGEuKSwghDrhGKz4XSf04LHvzF3l1FZQfj1DSv0IU/MHY4/4yNHIQrR5E7SAYOjPgBxqrDS6pOZENpuPz7Q==}
 
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
@@ -4383,6 +4401,10 @@ packages:
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
 
+  '@vercel/detect-agent@1.2.3':
+    resolution: {integrity: sha512-VYNCgUc0nOmC4WJmWw9GkrKdfr8Zl4/rxhC5SvgacBgxiW9W/9NRttUoHHXV8xdII3MaRgkZZVX8Ikzc/Jmjag==}
+    engines: {node: '>=14'}
+
   '@vitejs/plugin-react@5.1.2':
     resolution: {integrity: sha512-EcA07pHJouywpzsoTUqNh5NwGayl2PPVEJKUSinGGSxFGYn+shYbqMGBg6FXDqgXum9Ou/ecb+411ssw8HImJQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -4539,8 +4561,8 @@ packages:
   ajv@8.18.0:
     resolution: {integrity: sha512-PlXPeEWMXMZ7sPYOHqmDyCJzcfNrUr3fGNKtezX14ykXOEIvyK81d+qydx89KY5O71FKMPaQ2vBfBFI5NHR63A==}
 
-  alpic@1.104.1:
-    resolution: {integrity: sha512-l6CVtV/+wgC/4UH+Kyb2pv0yN/pePSWbQWBRUdKjD2Y0BNEQx43tHGM2pabRnsvjt59WVWR7f7gENSbdTa5Lbg==}
+  alpic@1.120.1:
+    resolution: {integrity: sha512-PzRiLl4L5Hjktg4GlYDx9cm6ZS7dD5r1RplgZ7G5xVr3Gvh887xq9qPepXWaNS3ataPgMfIGsTrTiibiptBx9g==}
     engines: {node: '>= 18.20.8'}
     hasBin: true
 
@@ -4807,6 +4829,10 @@ packages:
     resolution: {integrity: sha512-h+DEnpVvxmfVefa4jFbCf5HdH5YMDXRsmKflpf1pILZWRFlTbJpxeU55nJl4Smt5HQaGzg1o6RHFPJaOqnmBDg==}
     engines: {node: 18 || 20 || >=22}
 
+  brace-expansion@5.0.5:
+    resolution: {integrity: sha512-VZznLgtwhn+Mact9tfiwx64fA9erHH/MCXEUfB/0bX/6Fz6ny5EGTXYltMocqg4xFAQZtnO3DHWWXi8RiuN7cQ==}
+    engines: {node: 18 || 20 || >=22}
+
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
@@ -4970,10 +4996,6 @@ packages:
     resolution: {integrity: sha512-nPdaFdQ0h/GEigbPClz11D0v/ZJEwxmeVZGeMo3Z5StPtUTkA9o1lD6QwoirYiSDzbcwn2XcjwmCp68W1IS4TA==}
     engines: {node: '>=18'}
 
-  cli-truncate@5.1.1:
-    resolution: {integrity: sha512-SroPvNHxUnk+vIW/dOSfNqdy1sPEFkrTk6TUtqLCnBlo3N7TNYYkzzN7uSD6+jVjrdO4+p8nH7JzH6cIvUem6A==}
-    engines: {node: '>=20'}
-
   cli-truncate@6.0.0:
     resolution: {integrity: sha512-3+YKIUFsohD9MIoOFPFBldjAlnfCmCDcqe6aYGFqlDTRKg80p4wg35L+j83QQ63iOlKRccEkbn8IuM++HsgEjA==}
     engines: {node: '>=22'}
@@ -4985,10 +5007,6 @@ packages:
   cliui@8.0.1:
     resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
     engines: {node: '>=12'}
-
-  cliui@9.0.1:
-    resolution: {integrity: sha512-k7ndgKhwoQveBL+/1tqGJYNz097I7WOvwbmmU2AR5+magtbjPWQTS1C5vzGkBC8Ym8UWRzfKUzUUqFLypY4Q+w==}
-    engines: {node: '>=20'}
 
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
@@ -5619,8 +5637,17 @@ packages:
   fast-sha256@1.3.0:
     resolution: {integrity: sha512-n11RGP/lrWEFI/bWdygLxhI+pVeo1ZYIVwvvPkW7azl/rOy+F3HYRZ2K5zeE9mmkhQppyv9sQFx0JM9UabnpPQ==}
 
+  fast-string-truncated-width@3.0.3:
+    resolution: {integrity: sha512-0jjjIEL6+0jag3l2XWWizO64/aZVtpiGE3t0Zgqxv0DPuxiMjvB3M24fCyhZUO4KomJQPj3LTSUnDP3GpdwC0g==}
+
+  fast-string-width@3.0.2:
+    resolution: {integrity: sha512-gX8LrtNEI5hq8DVUfRQMbr5lpaS4nMIWV+7XEbXk2b8kiQIizgnlr12B4dA3ZEx3308ze0O4Q1R+cHts8kyUJg==}
+
   fast-uri@3.1.0:
     resolution: {integrity: sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==}
+
+  fast-wrap-ansi@0.2.0:
+    resolution: {integrity: sha512-rLV8JHxTyhVmFYhBJuMujcrHqOT2cnO5Zxj37qROj23CP39GXubJRBUFF0z8KFK77Uc0SukZUf7JZhsVEQ6n8w==}
 
   fastq@1.19.1:
     resolution: {integrity: sha512-GwLTyxkCXjXbxqIhTsMI2Nui8huMPtnxg7krajPJAjnEG/iiOS7i+zCtWGZR9G0NBKbXKh6X9m9UIsYX/N6vvQ==}
@@ -6049,9 +6076,6 @@ packages:
     resolution: {integrity: sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==}
     engines: {node: '>= 14'}
 
-  human-readable-ids@1.0.4:
-    resolution: {integrity: sha512-h1zwThTims8A/SpqFGWyTx+jG1+WRMJaEeZgbtPGrIpj2AZjsOgy8Y+iNzJ0yAyN669Q6F02EK66WMWcst+2FA==}
-
   human-signals@2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
@@ -6121,19 +6145,6 @@ packages:
       '@types/react': '>=19.0.0'
       react: '>=19.0.0'
       react-devtools-core: ^4.19.1
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      react-devtools-core:
-        optional: true
-
-  ink@6.8.0:
-    resolution: {integrity: sha512-sbl1RdLOgkO9isK42WCZlJCFN9hb++sX9dsklOvfd1YQ3bQ2AiFu12Q6tFlr0HvEUvzraJntQCCpfEoUe9DSzA==}
-    engines: {node: '>=20'}
-    peerDependencies:
-      '@types/react': '>=19.0.0'
-      react: '>=19.0.0'
-      react-devtools-core: '>=6.1.2'
     peerDependenciesMeta:
       '@types/react':
         optional: true
@@ -6482,6 +6493,9 @@ packages:
   jose@6.2.1:
     resolution: {integrity: sha512-jUaKr1yrbfaImV7R2TN/b3IcZzsw38/chqMpo2XJ7i2F8AfM/lA4G1goC3JVEwg0H7UldTmSt3P68nt31W7/mw==}
 
+  jose@6.2.3:
+    resolution: {integrity: sha512-YYVDInQKFJfR/xa3ojUTl8c2KoTwiL1R5Wg9YCydwH0x0B9grbzlg5HC7mMjCtUJjbQ/YnGEZIhI5tCgfTb4Hw==}
+
   js-cookie@3.0.5:
     resolution: {integrity: sha512-cEiJEAEoIbWfCZYKWhVwFuvPX1gETRYPw6LlaTKoxD3s2AkXzkCjnp6h0V77ozyqj0jakteJ4YqDJT830+lVGw==}
     engines: {node: '>=14'}
@@ -6576,16 +6590,8 @@ packages:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
 
-  knuth-shuffle@1.0.8:
-    resolution: {integrity: sha512-IdC4Hpp+mx53zTt6VAGsAtbGM0g4BV9fP8tTcviCosSwocHcRDw9uG5Rnv6wLWckF4r72qeXFoK9NkvV1gUJCQ==}
-
   koa-compose@4.1.0:
     resolution: {integrity: sha512-8ODW8TrDuMYvXRwra/Kh7/rJo9BtOfPc6qO8eAfC80CnCvSjSl0bkRM24X6/XBBEyj0v1nRUQ1LyOy3dbqOWXw==}
-
-  koa-router@14.0.0:
-    resolution: {integrity: sha512-Ue8f/PRsLLNm6b7y+eS6xkqvsG2xH11d2VB1HPcfdfW6p5736kCHf2pXaq8q9XPQ01x0Dk7V/P5Il9pe+tGTxA==}
-    engines: {node: '>= 20'}
-    deprecated: 'Please use @koa/router instead, starting from v9! '
 
   koa@3.1.2:
     resolution: {integrity: sha512-2LOQnFKu3m0VxpE+5sb5+BRTSKrXmNxGgxVRiKwD9s5KQB1zID/FRXhtzeV7RT1L2GVpdEEAfVuclFOMGl1ikA==}
@@ -7201,6 +7207,10 @@ packages:
     resolution: {integrity: sha512-oRjTw/97aTBN0RHbYCdtF1MQfvusSIBQM0IZEgzl6426+8jSC0nF1a/GmnVLpfB9yyr6g6FTqWqiZVbxrtaCIg==}
     engines: {node: 18 || 20 || >=22}
 
+  minimatch@10.2.5:
+    resolution: {integrity: sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==}
+    engines: {node: 18 || 20 || >=22}
+
   minimatch@3.1.5:
     resolution: {integrity: sha512-VgjWUsnnT6n+NUk6eZq77zeFdpW2LWDzP6zFGrCbHXiYNul5Dzqk2HHQ5uFH2DNW5Xbp8+jVzaeNt94ssEEl4w==}
 
@@ -7480,6 +7490,9 @@ packages:
   openid-client@6.8.2:
     resolution: {integrity: sha512-uOvTCndr4udZsKihJ68H9bUICrriHdUVJ6Az+4Ns6cW55rwM5h0bjVIzDz2SxgOI84LKjFyjOFvERLzdTUROGA==}
 
+  openid-client@6.8.4:
+    resolution: {integrity: sha512-QSw0BA08piujetEwfZsHoTrDpMEha7GDZDicQqVwX4u0ChCjefvjDB++TZ8BTg76UpwhzIQgdvvfgfl3HpCSAw==}
+
   ora@8.2.0:
     resolution: {integrity: sha512-weP+BZ8MVNnlCm8c0Qdc1WSWq4Qn7I+9CJGm7Qali6g44e/PUzbjNqJX5NJ9ljlNMosfJvg1fKEGILklK9cwnw==}
     engines: {node: '>=18'}
@@ -7607,11 +7620,6 @@ packages:
     resolution: {integrity: sha512-udgsAY+fTnvv7kI7aaxbqwWNb0AHiB0qBO89PZKPkoTmGOgdbrHDKD+0B2X4uTfJ/FT1R09r9gTsjUjNJotuog==}
     engines: {node: '>=0.10.0'}
 
-  pipenet@1.4.0:
-    resolution: {integrity: sha512-Uc3EH2i8hnJUD0Eupj9z2jaZPjjAbooaiHGh0iFdExbE8/BDt6Lf0919Dtwx5VM83elHNWFzCOsvzsViTD5YZg==}
-    engines: {node: '>=22.0.0'}
-    hasBin: true
-
   pirates@4.0.7:
     resolution: {integrity: sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==}
     engines: {node: '>= 6'}
@@ -7679,6 +7687,15 @@ packages:
 
   posthog-node@5.28.9:
     resolution: {integrity: sha512-iZWyAYkIAq5QqcYz4q2nXOX+Ivn04Yh8AuKqfFVw0SvBpfli49bNAjyE97qbRTLr+irrzRUELgGIkDC14NgugA==}
+    engines: {node: ^20.20.0 || >=22.22.0}
+    peerDependencies:
+      rxjs: ^7.0.0
+    peerDependenciesMeta:
+      rxjs:
+        optional: true
+
+  posthog-node@5.32.0:
+    resolution: {integrity: sha512-kEsQFrpQrrrXQlVzXF5yTyHfnKAP/37W6ta9cFHh8ISlKtyYEKuLGTc5ssfpn4RrRS6r0xsJSK94ScFTQTSEOg==}
     engines: {node: ^20.20.0 || >=22.22.0}
     peerDependencies:
       rxjs: ^7.0.0
@@ -8385,12 +8402,13 @@ packages:
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
 
-  skybridge@0.35.14:
-    resolution: {integrity: sha512-ueXutUx8+48qjf2WnvYixwdMv4pd3mm0qBIpb8NWubrnwGtcWG39XhtEONmnFp8ZAROIDfNIxCTskMIkFCUu/w==}
+  skybridge@0.36.1:
+    resolution: {integrity: sha512-dvl4rI2Ynb4mmqitSYiFuFBavmFlg5u6o3ChFLgLbJ/kY+t68ucROFI3kU6t8tD0h/27S/aMlpAJsbo+H/rsfg==}
+    engines: {node: '>=22.0.0'}
     hasBin: true
     peerDependencies:
-      '@modelcontextprotocol/sdk': '>=1.0.0'
-      '@skybridge/devtools': '>=0.35.13 <1.0.0'
+      '@modelcontextprotocol/sdk': '>=1.27.0'
+      '@skybridge/devtools': '>=0.35.14 <1.0.0'
       nodemon: '>=3.0.0'
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
@@ -8403,10 +8421,6 @@ packages:
   slice-ansi@7.1.2:
     resolution: {integrity: sha512-iOBWFgUX7caIZiuutICxVgX1SdxwAVFFKwt1EvMYYec/NWO5meOJ6K5uQxhrYBdQJne4KxiqZc+KptFOWFSI9w==}
     engines: {node: '>=18'}
-
-  slice-ansi@8.0.0:
-    resolution: {integrity: sha512-stxByr12oeeOyY2BlviTNQlYV5xOj47GirPr4yA1hE9JCtxfQN0+tVbkxwCtYDQWhEKWFHsEK48ORg5jrouCAg==}
-    engines: {node: '>=20'}
 
   slice-ansi@9.0.0:
     resolution: {integrity: sha512-SO/3iYL5S3W57LLEniscOGPZgOqZUPCx6d3dB+52B80yJ0XstzsC/eV8gnA4tM3MHDrKz+OCFSLNjswdSC+/bA==}
@@ -8716,10 +8730,6 @@ packages:
     resolution: {integrity: sha512-Bf+ILmBgretUrdJxzXM0SgXLZ3XfiaUuOj/IKQHuTXip+05Xn+uyEYdVg0kYDipTBcLrCVyUzAPz7QmArb0mmw==}
     engines: {node: '>=14.0.0'}
 
-  tldjs@2.3.2:
-    resolution: {integrity: sha512-EORDwFMSZKrHPUVDhejCMDeAovRS5d8jZKiqALFiPp3cjKjEldPkxBY39ZSx3c45awz3RpKwJD1cCgGxEfy8/A==}
-    engines: {node: '>= 20'}
-
   tldts-core@7.0.19:
     resolution: {integrity: sha512-lJX2dEWx0SGH4O6p+7FPwYmJ/bu1JbcGJ8RLaG9b7liIgZ85itUVEPbMtWRVrde/0fnDPEPHW10ZsKW3kVsE9A==}
 
@@ -8903,9 +8913,9 @@ packages:
     resolution: {integrity: sha512-3IWdCpjgxp15CbJnsi/Y9TCDE7HWVN19j1hmzVhoAkY/+CJx449tVxT5wZc1Gwg8J+P0LWvzlBzxYRnHJ+1i7Q==}
     engines: {node: '>=20.18.1'}
 
-  undici@7.24.6:
-    resolution: {integrity: sha512-Xi4agocCbRzt0yYMZGMA6ApD7gvtUFaxm4ZmeacWI4cZxaF6C+8I8QfofC20NAePiB/IcvZmzkJ7XPa471AEtA==}
-    engines: {node: '>=20.18.1'}
+  undici@8.1.0:
+    resolution: {integrity: sha512-E9MkTS4xXLnRPYqxH2e6Hr2/49e7WFDKczKcCaFH4VaZs2iNvHMqeIkyUAD9vM8kujy9TjVrRlQ5KkdEJxB2pw==}
+    engines: {node: '>=22.19.0'}
 
   unicorn-magic@0.3.0:
     resolution: {integrity: sha512-+QBBXBCvifc56fsbuxZQ6Sic3wqqc3WWaqxs58gvJrcOuN83HGTCwz3oS5phzU9LthRNE9VrJCFCLUgHeeFnfA==}
@@ -9492,10 +9502,6 @@ packages:
     resolution: {integrity: sha512-tVpsJW7DdjecAiFpbIB1e3qxIQsE6NoPc5/eTdrbbIC4h0LVsWhnoa3g+m2HclBIujHzsxZ4VJVA+GUuc2/LBw==}
     engines: {node: '>=12'}
 
-  yargs-parser@22.0.0:
-    resolution: {integrity: sha512-rwu/ClNdSMpkSrUb+d6BRsSkLUq1fmfsY6TOpYzTwvwkg1/NRG85KBy3kq++A8LKQwX6lsu+aWad+2khvuXrqw==}
-    engines: {node: ^20.19.0 || ^22.12.0 || >=23}
-
   yargs@17.7.1:
     resolution: {integrity: sha512-cwiTb08Xuv5fqF4AovYacTFNxk62th7LKJ6BL9IGUpTJrWoU7/7WdQGTP2SjKf1dUNBGzDd28p/Yfs/GI6JrLw==}
     engines: {node: '>=12'}
@@ -9503,10 +9509,6 @@ packages:
   yargs@17.7.2:
     resolution: {integrity: sha512-7dSzzRQ++CKnNI/krKnYRV7JKKPUXMEh61soaHKg9mrWEhzFWhFnxPxGl+69cD1Ou63C13NUPCnmIcrvqCuM6w==}
     engines: {node: '>=12'}
-
-  yargs@18.0.0:
-    resolution: {integrity: sha512-4UEqdc2RYGHZc7Doyqkrqiln3p9X2DZVxaGbwhn2pi7MrRagKaOcIKe8L3OxYcbhXLgLFUS3zAYuQjKBQgmuNg==}
-    engines: {node: ^20.19.0 || ^22.12.0 || >=23}
 
   yauzl@2.10.0:
     resolution: {integrity: sha512-p4a9I6X6nu6IhoGmBqAcbJy1mlC4j27vEPZX9F4L4/vZT3Lyq1VkFHw/V/PUcB9Buo+DG3iHkT0x3Qya58zc3g==}
@@ -9551,6 +9553,9 @@ packages:
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
+  zod@4.4.1:
+    resolution: {integrity: sha512-a6ENMBBGZBsnlSebQ/eKCguSBeGKSf4O7BPnqVPmYGtpBYI7VSqoVqw+QcB7kPRjbqPwhYTpFbVj/RqNz/CT0Q==}
+
   zustand@5.0.12:
     resolution: {integrity: sha512-i77ae3aZq4dhMlRhJVCYgMLKuSiZAaUPAct2AksxQ+gOtimhGMdXljRT21P5BNpeT4kXlLIckvkPM029OljD7g==}
     engines: {node: '>=12.20.0'}
@@ -9586,11 +9591,11 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@alpic-ai/api@1.104.1(@opentelemetry/api@1.9.0)':
+  '@alpic-ai/api@1.120.1(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.14.0(@opentelemetry/api@1.9.0)
       ms: 2.1.3
-      zod: 4.3.6
+      zod: 4.4.1
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
@@ -9696,7 +9701,7 @@ snapshots:
       '@babel/types': 7.28.5
       '@jridgewell/remapping': 2.3.5
       convert-source-map: 2.0.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -9716,7 +9721,7 @@ snapshots:
       '@babel/types': 7.29.0
       '@jridgewell/remapping': 2.3.5
       convert-source-map: 2.0.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -9943,7 +9948,7 @@ snapshots:
       '@babel/parser': 7.29.0
       '@babel/template': 7.27.2
       '@babel/types': 7.29.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -9955,7 +9960,7 @@ snapshots:
       '@babel/parser': 7.29.0
       '@babel/template': 7.28.6
       '@babel/types': 7.29.0
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -10038,9 +10043,21 @@ snapshots:
     dependencies:
       sisteransi: 1.0.5
 
+  '@clack/core@1.3.0':
+    dependencies:
+      fast-wrap-ansi: 0.2.0
+      sisteransi: 1.0.5
+
   '@clack/prompts@1.1.0':
     dependencies:
       '@clack/core': 1.1.0
+      sisteransi: 1.0.5
+
+  '@clack/prompts@1.3.0':
+    dependencies:
+      '@clack/core': 1.3.0
+      fast-string-width: 3.0.2
+      fast-wrap-ansi: 0.2.0
       sisteransi: 1.0.5
 
   '@clerk/backend@3.2.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
@@ -10902,14 +10919,14 @@ snapshots:
 
   '@mintlify/models@0.0.255':
     dependencies:
-      axios: 1.13.6(debug@4.4.3)
+      axios: 1.13.6
       openapi-types: 12.1.3
     transitivePeerDependencies:
       - debug
 
   '@mintlify/models@0.0.287':
     dependencies:
-      axios: 1.13.6(debug@4.4.3)
+      axios: 1.13.6
       openapi-types: 12.1.3
     transitivePeerDependencies:
       - debug
@@ -11199,6 +11216,28 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@modelcontextprotocol/sdk@1.29.0(zod@4.4.1)':
+    dependencies:
+      '@hono/node-server': 1.19.11(hono@4.12.8)
+      ajv: 8.18.0
+      ajv-formats: 3.0.1(ajv@8.18.0)
+      content-type: 1.0.5
+      cors: 2.8.6
+      cross-spawn: 7.0.6
+      eventsource: 3.0.7
+      eventsource-parser: 3.0.6
+      express: 5.2.1
+      express-rate-limit: 8.3.1(express@5.2.1)
+      hono: 4.12.8
+      jose: 6.2.1
+      json-schema-typed: 8.0.2
+      pkce-challenge: 5.0.1
+      raw-body: 3.0.2
+      zod: 4.4.1
+      zod-to-json-schema: 3.25.1(zod@4.4.1)
+    transitivePeerDependencies:
+      - supports-color
+
   '@mswjs/interceptors@0.40.0':
     dependencies:
       '@open-draft/deferred-promise': 2.2.0
@@ -11256,6 +11295,27 @@ snapshots:
       wordwrap: 1.0.0
       wrap-ansi: 7.0.0
 
+  '@oclif/core@4.10.6':
+    dependencies:
+      ansi-escapes: 4.3.2
+      ansis: 3.17.0
+      clean-stack: 3.0.1
+      cli-spinners: 2.9.2
+      debug: 4.4.3(supports-color@8.1.1)
+      ejs: 3.1.10
+      get-package-type: 0.1.0
+      indent-string: 4.0.0
+      is-wsl: 2.2.0
+      lilconfig: 3.1.3
+      minimatch: 10.2.5
+      semver: 7.7.4
+      string-width: 4.2.3
+      supports-color: 8.1.1
+      tinyglobby: 0.2.15
+      widest-line: 3.1.0
+      wordwrap: 1.0.0
+      wrap-ansi: 7.0.0
+
   '@open-draft/deferred-promise@2.2.0': {}
 
   '@open-draft/logger@0.3.0':
@@ -11296,57 +11356,57 @@ snapshots:
   '@opentelemetry/api@1.9.0':
     optional: true
 
-  '@orpc/client@1.13.13(@opentelemetry/api@1.9.0)':
+  '@orpc/client@1.14.0(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@orpc/shared': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server-fetch': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server-peer': 1.13.13(@opentelemetry/api@1.9.0)
+      '@orpc/shared': 1.14.0(@opentelemetry/api@1.9.0)
+      '@orpc/standard-server': 1.14.0(@opentelemetry/api@1.9.0)
+      '@orpc/standard-server-fetch': 1.14.0(@opentelemetry/api@1.9.0)
+      '@orpc/standard-server-peer': 1.14.0(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/contract@1.13.13(@opentelemetry/api@1.9.0)':
+  '@orpc/contract@1.14.0(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@orpc/client': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/shared': 1.13.13(@opentelemetry/api@1.9.0)
+      '@orpc/client': 1.14.0(@opentelemetry/api@1.9.0)
+      '@orpc/shared': 1.14.0(@opentelemetry/api@1.9.0)
       '@standard-schema/spec': 1.1.0
       openapi-types: 12.1.3
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/openapi-client@1.13.13(@opentelemetry/api@1.9.0)':
+  '@orpc/openapi-client@1.14.0(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@orpc/client': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/shared': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server': 1.13.13(@opentelemetry/api@1.9.0)
+      '@orpc/client': 1.14.0(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.14.0(@opentelemetry/api@1.9.0)
+      '@orpc/shared': 1.14.0(@opentelemetry/api@1.9.0)
+      '@orpc/standard-server': 1.14.0(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/shared@1.13.13(@opentelemetry/api@1.9.0)':
+  '@orpc/shared@1.14.0(@opentelemetry/api@1.9.0)':
     dependencies:
       radash: 12.1.1
-      type-fest: 5.4.4
+      type-fest: 5.5.0
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
 
-  '@orpc/standard-server-fetch@1.13.13(@opentelemetry/api@1.9.0)':
+  '@orpc/standard-server-fetch@1.14.0(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@orpc/shared': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server': 1.13.13(@opentelemetry/api@1.9.0)
+      '@orpc/shared': 1.14.0(@opentelemetry/api@1.9.0)
+      '@orpc/standard-server': 1.14.0(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/standard-server-peer@1.13.13(@opentelemetry/api@1.9.0)':
+  '@orpc/standard-server-peer@1.14.0(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@orpc/shared': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/standard-server': 1.13.13(@opentelemetry/api@1.9.0)
+      '@orpc/shared': 1.14.0(@opentelemetry/api@1.9.0)
+      '@orpc/standard-server': 1.14.0(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/standard-server@1.13.13(@opentelemetry/api@1.9.0)':
+  '@orpc/standard-server@1.14.0(@opentelemetry/api@1.9.0)':
     dependencies:
-      '@orpc/shared': 1.13.13(@opentelemetry/api@1.9.0)
+      '@orpc/shared': 1.14.0(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
@@ -11380,9 +11440,15 @@ snapshots:
     dependencies:
       cross-spawn: 7.0.6
 
+  '@posthog/core@1.27.9':
+    dependencies:
+      '@posthog/types': 1.372.5
+
+  '@posthog/types@1.372.5': {}
+
   '@puppeteer/browsers@2.3.0':
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       extract-zip: 2.0.1
       progress: 2.0.3
       proxy-agent: 6.5.0
@@ -13514,7 +13580,7 @@ snapshots:
     dependencies:
       escape-string-regexp: 5.0.0
 
-  '@skybridge/devtools@0.35.14':
+  '@skybridge/devtools@0.36.1':
     dependencies:
       cors: 2.8.6
       express: 5.2.1
@@ -13688,17 +13754,17 @@ snapshots:
       typescript: 5.9.3
       zod: 4.3.5
 
-  '@t3-oss/env-core@0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.3.6)':
+  '@t3-oss/env-core@0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.4.1)':
     optionalDependencies:
       arktype: 2.1.27
       typescript: 5.9.3
-      zod: 4.3.6
+      zod: 4.4.1
 
-  '@t3-oss/env-core@0.13.11(arktype@2.1.27)(typescript@6.0.2)(zod@4.3.6)':
+  '@t3-oss/env-core@0.13.11(arktype@2.1.27)(typescript@6.0.2)(zod@4.4.1)':
     optionalDependencies:
       arktype: 2.1.27
       typescript: 6.0.2
-      zod: 4.3.6
+      zod: 4.4.1
 
   '@tailwindcss/node@4.1.18':
     dependencies:
@@ -14261,12 +14327,14 @@ snapshots:
 
   '@typescript/vfs@1.6.2(typescript@6.0.2)':
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       typescript: 6.0.2
     transitivePeerDependencies:
       - supports-color
 
   '@ungap/structured-clone@1.3.0': {}
+
+  '@vercel/detect-agent@1.2.3': {}
 
   '@vitejs/plugin-react@5.1.2(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
@@ -14524,63 +14592,61 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  alpic@1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3):
+  alpic@1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3):
     dependencies:
-      '@alpic-ai/api': 1.104.1(@opentelemetry/api@1.9.0)
-      '@clack/prompts': 1.1.0
-      '@oclif/core': 4.10.3
-      '@orpc/client': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/openapi-client': 1.13.13(@opentelemetry/api@1.9.0)
-      '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.3.6)
+      '@alpic-ai/api': 1.120.1(@opentelemetry/api@1.9.0)
+      '@clack/prompts': 1.3.0
+      '@oclif/core': 4.10.6
+      '@orpc/client': 1.14.0(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.14.0(@opentelemetry/api@1.9.0)
+      '@orpc/openapi-client': 1.14.0(@opentelemetry/api@1.9.0)
+      '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.4.1)
+      '@vercel/detect-agent': 1.2.3
       chalk: 5.6.2
       ci-info: 4.4.0
       env-paths: 4.0.0
       envfile: 7.1.0
       jwt-decode: 4.0.0
       open: 11.0.0
-      openid-client: 6.8.2
-      pipenet: 1.4.0
-      posthog-node: 5.28.9(rxjs@7.8.2)
+      openid-client: 6.8.4
+      posthog-node: 5.32.0(rxjs@7.8.2)
       semver: 7.7.4
       tar: 7.5.13
-      undici: 7.24.6
-      zod: 4.3.6
+      undici: 8.1.0
+      zod: 4.4.1
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - arktype
       - rxjs
-      - supports-color
       - typescript
       - valibot
 
-  alpic@1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.2):
+  alpic@1.120.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.2):
     dependencies:
-      '@alpic-ai/api': 1.104.1(@opentelemetry/api@1.9.0)
-      '@clack/prompts': 1.1.0
-      '@oclif/core': 4.10.3
-      '@orpc/client': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/contract': 1.13.13(@opentelemetry/api@1.9.0)
-      '@orpc/openapi-client': 1.13.13(@opentelemetry/api@1.9.0)
-      '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@6.0.2)(zod@4.3.6)
+      '@alpic-ai/api': 1.120.1(@opentelemetry/api@1.9.0)
+      '@clack/prompts': 1.3.0
+      '@oclif/core': 4.10.6
+      '@orpc/client': 1.14.0(@opentelemetry/api@1.9.0)
+      '@orpc/contract': 1.14.0(@opentelemetry/api@1.9.0)
+      '@orpc/openapi-client': 1.14.0(@opentelemetry/api@1.9.0)
+      '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@6.0.2)(zod@4.4.1)
+      '@vercel/detect-agent': 1.2.3
       chalk: 5.6.2
       ci-info: 4.4.0
       env-paths: 4.0.0
       envfile: 7.1.0
       jwt-decode: 4.0.0
       open: 11.0.0
-      openid-client: 6.8.2
-      pipenet: 1.4.0
-      posthog-node: 5.28.9(rxjs@7.8.2)
+      openid-client: 6.8.4
+      posthog-node: 5.32.0(rxjs@7.8.2)
       semver: 7.7.4
       tar: 7.5.13
-      undici: 7.24.6
-      zod: 4.3.6
+      undici: 8.1.0
+      zod: 4.4.1
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - arktype
       - rxjs
-      - supports-color
       - typescript
       - valibot
 
@@ -14714,9 +14780,9 @@ snapshots:
 
   aws-cdk@2.1115.0: {}
 
-  axios@1.13.6(debug@4.4.3):
+  axios@1.13.6:
     dependencies:
-      follow-redirects: 1.15.11(debug@4.4.3)
+      follow-redirects: 1.15.11
       form-data: 4.0.5
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -14806,7 +14872,7 @@ snapshots:
     dependencies:
       bytes: 3.1.2
       content-type: 1.0.5
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       http-errors: 2.0.0
       iconv-lite: 0.7.0
       on-finished: 2.4.1
@@ -14826,6 +14892,10 @@ snapshots:
       balanced-match: 1.0.2
 
   brace-expansion@5.0.4:
+    dependencies:
+      balanced-match: 4.0.4
+
+  brace-expansion@5.0.5:
     dependencies:
       balanced-match: 4.0.4
 
@@ -14996,11 +15066,6 @@ snapshots:
       slice-ansi: 5.0.0
       string-width: 7.2.0
 
-  cli-truncate@5.1.1:
-    dependencies:
-      slice-ansi: 7.1.2
-      string-width: 8.2.0
-
   cli-truncate@6.0.0:
     dependencies:
       slice-ansi: 9.0.0
@@ -15013,12 +15078,6 @@ snapshots:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
-
-  cliui@9.0.1:
-    dependencies:
-      string-width: 7.2.0
-      strip-ansi: 7.1.2
-      wrap-ansi: 9.0.2
 
   clsx@2.1.1: {}
 
@@ -15088,7 +15147,8 @@ snapshots:
     dependencies:
       safe-buffer: 5.2.1
 
-  content-disposition@1.0.1: {}
+  content-disposition@1.0.1:
+    optional: true
 
   content-type@1.0.5: {}
 
@@ -15108,6 +15168,7 @@ snapshots:
     dependencies:
       depd: 2.0.0
       keygrip: 1.1.0
+    optional: true
 
   copy-anything@4.0.5:
     dependencies:
@@ -15195,6 +15256,10 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
+  debug@4.4.3:
+    dependencies:
+      ms: 2.1.3
+
   debug@4.4.3(supports-color@5.5.0):
     dependencies:
       ms: 2.1.3
@@ -15230,7 +15295,8 @@ snapshots:
 
   dedent@1.7.1: {}
 
-  deep-equal@1.0.1: {}
+  deep-equal@1.0.1:
+    optional: true
 
   deepmerge@4.3.1: {}
 
@@ -15267,9 +15333,11 @@ snapshots:
 
   delayed-stream@1.0.0: {}
 
-  delegates@1.0.0: {}
+  delegates@1.0.0:
+    optional: true
 
-  depd@1.1.2: {}
+  depd@1.1.2:
+    optional: true
 
   depd@2.0.0: {}
 
@@ -15286,7 +15354,7 @@ snapshots:
   detect-port@1.5.1:
     dependencies:
       address: 1.2.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -15707,7 +15775,7 @@ snapshots:
       content-type: 1.0.5
       cookie: 0.7.2
       cookie-signature: 1.2.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       depd: 2.0.0
       encodeurl: 2.0.0
       escape-html: 1.0.3
@@ -15745,7 +15813,7 @@ snapshots:
 
   extract-zip@2.0.1:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       get-stream: 5.2.0
       yauzl: 2.10.0
     optionalDependencies:
@@ -15769,7 +15837,17 @@ snapshots:
 
   fast-sha256@1.3.0: {}
 
+  fast-string-truncated-width@3.0.3: {}
+
+  fast-string-width@3.0.2:
+    dependencies:
+      fast-string-truncated-width: 3.0.3
+
   fast-uri@3.1.0: {}
+
+  fast-wrap-ansi@0.2.0:
+    dependencies:
+      fast-string-width: 3.0.2
 
   fastq@1.19.1:
     dependencies:
@@ -15830,7 +15908,7 @@ snapshots:
 
   finalhandler@2.1.0:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       encodeurl: 2.0.0
       escape-html: 1.0.3
       on-finished: 2.4.1
@@ -15841,9 +15919,7 @@ snapshots:
 
   flatted@3.4.2: {}
 
-  follow-redirects@1.15.11(debug@4.4.3):
-    optionalDependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+  follow-redirects@1.15.11: {}
 
   for-each@0.3.5:
     dependencies:
@@ -15997,7 +16073,7 @@ snapshots:
     dependencies:
       basic-ftp: 5.2.0
       data-uri-to-buffer: 6.0.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -16298,6 +16374,7 @@ snapshots:
     dependencies:
       deep-equal: 1.0.1
       http-errors: 1.8.1
+    optional: true
 
   http-cache-semantics@4.2.0: {}
 
@@ -16308,6 +16385,7 @@ snapshots:
       setprototypeof: 1.2.0
       statuses: 1.5.0
       toidentifier: 1.0.1
+    optional: true
 
   http-errors@2.0.0:
     dependencies:
@@ -16328,7 +16406,7 @@ snapshots:
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -16340,13 +16418,9 @@ snapshots:
   https-proxy-agent@7.0.6:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
-
-  human-readable-ids@1.0.4:
-    dependencies:
-      knuth-shuffle: 1.0.8
 
   human-signals@2.1.0: {}
 
@@ -16425,16 +16499,16 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  ink@6.8.0(@types/react@19.2.13)(react@19.2.4):
+  ink@7.0.0(@types/react@19.2.13)(react@19.2.4):
     dependencies:
-      '@alcalzone/ansi-tokenize': 0.2.5
+      '@alcalzone/ansi-tokenize': 0.3.0
       ansi-escapes: 7.3.0
       ansi-styles: 6.2.3
       auto-bind: 5.0.1
       chalk: 5.6.2
-      cli-boxes: 3.0.0
+      cli-boxes: 4.0.1
       cli-cursor: 4.0.0
-      cli-truncate: 5.1.1
+      cli-truncate: 6.0.0
       code-excerpt: 4.0.0
       es-toolkit: 1.45.1
       indent-string: 5.0.0
@@ -16444,153 +16518,17 @@ snapshots:
       react-reconciler: 0.33.0(react@19.2.4)
       scheduler: 0.27.0
       signal-exit: 3.0.7
-      slice-ansi: 8.0.0
+      slice-ansi: 9.0.0
       stack-utils: 2.0.6
       string-width: 8.2.0
       terminal-size: 4.0.1
       type-fest: 5.5.0
       widest-line: 6.0.0
-      wrap-ansi: 9.0.2
+      wrap-ansi: 10.0.0
       ws: 8.20.0
       yoga-layout: 3.2.1
     optionalDependencies:
       '@types/react': 19.2.13
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
-  ink@6.8.0(@types/react@19.2.14)(react@19.2.4):
-    dependencies:
-      '@alcalzone/ansi-tokenize': 0.2.5
-      ansi-escapes: 7.3.0
-      ansi-styles: 6.2.3
-      auto-bind: 5.0.1
-      chalk: 5.6.2
-      cli-boxes: 3.0.0
-      cli-cursor: 4.0.0
-      cli-truncate: 5.1.1
-      code-excerpt: 4.0.0
-      es-toolkit: 1.45.1
-      indent-string: 5.0.0
-      is-in-ci: 2.0.0
-      patch-console: 2.0.0
-      react: 19.2.4
-      react-reconciler: 0.33.0(react@19.2.4)
-      scheduler: 0.27.0
-      signal-exit: 3.0.7
-      slice-ansi: 8.0.0
-      stack-utils: 2.0.6
-      string-width: 8.2.0
-      terminal-size: 4.0.1
-      type-fest: 5.5.0
-      widest-line: 6.0.0
-      wrap-ansi: 9.0.2
-      ws: 8.20.0
-      yoga-layout: 3.2.1
-    optionalDependencies:
-      '@types/react': 19.2.14
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
-  ink@6.8.0(@types/react@19.2.7)(react@19.2.0):
-    dependencies:
-      '@alcalzone/ansi-tokenize': 0.2.5
-      ansi-escapes: 7.3.0
-      ansi-styles: 6.2.3
-      auto-bind: 5.0.1
-      chalk: 5.6.2
-      cli-boxes: 3.0.0
-      cli-cursor: 4.0.0
-      cli-truncate: 5.1.1
-      code-excerpt: 4.0.0
-      es-toolkit: 1.45.1
-      indent-string: 5.0.0
-      is-in-ci: 2.0.0
-      patch-console: 2.0.0
-      react: 19.2.0
-      react-reconciler: 0.33.0(react@19.2.0)
-      scheduler: 0.27.0
-      signal-exit: 3.0.7
-      slice-ansi: 8.0.0
-      stack-utils: 2.0.6
-      string-width: 8.2.0
-      terminal-size: 4.0.1
-      type-fest: 5.5.0
-      widest-line: 6.0.0
-      wrap-ansi: 9.0.2
-      ws: 8.20.0
-      yoga-layout: 3.2.1
-    optionalDependencies:
-      '@types/react': 19.2.7
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
-  ink@6.8.0(@types/react@19.2.7)(react@19.2.3):
-    dependencies:
-      '@alcalzone/ansi-tokenize': 0.2.5
-      ansi-escapes: 7.3.0
-      ansi-styles: 6.2.3
-      auto-bind: 5.0.1
-      chalk: 5.6.2
-      cli-boxes: 3.0.0
-      cli-cursor: 4.0.0
-      cli-truncate: 5.1.1
-      code-excerpt: 4.0.0
-      es-toolkit: 1.45.1
-      indent-string: 5.0.0
-      is-in-ci: 2.0.0
-      patch-console: 2.0.0
-      react: 19.2.3
-      react-reconciler: 0.33.0(react@19.2.3)
-      scheduler: 0.27.0
-      signal-exit: 3.0.7
-      slice-ansi: 8.0.0
-      stack-utils: 2.0.6
-      string-width: 8.2.0
-      terminal-size: 4.0.1
-      type-fest: 5.5.0
-      widest-line: 6.0.0
-      wrap-ansi: 9.0.2
-      ws: 8.20.0
-      yoga-layout: 3.2.1
-    optionalDependencies:
-      '@types/react': 19.2.7
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
-  ink@6.8.0(@types/react@19.2.8)(react@19.2.3):
-    dependencies:
-      '@alcalzone/ansi-tokenize': 0.2.5
-      ansi-escapes: 7.3.0
-      ansi-styles: 6.2.3
-      auto-bind: 5.0.1
-      chalk: 5.6.2
-      cli-boxes: 3.0.0
-      cli-cursor: 4.0.0
-      cli-truncate: 5.1.1
-      code-excerpt: 4.0.0
-      es-toolkit: 1.45.1
-      indent-string: 5.0.0
-      is-in-ci: 2.0.0
-      patch-console: 2.0.0
-      react: 19.2.3
-      react-reconciler: 0.33.0(react@19.2.3)
-      scheduler: 0.27.0
-      signal-exit: 3.0.7
-      slice-ansi: 8.0.0
-      stack-utils: 2.0.6
-      string-width: 8.2.0
-      terminal-size: 4.0.1
-      type-fest: 5.5.0
-      widest-line: 6.0.0
-      wrap-ansi: 9.0.2
-      ws: 8.20.0
-      yoga-layout: 3.2.1
-    optionalDependencies:
-      '@types/react': 19.2.8
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -16625,6 +16563,108 @@ snapshots:
       yoga-layout: 3.2.1
     optionalDependencies:
       '@types/react': 19.2.14
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  ink@7.0.0(@types/react@19.2.7)(react@19.2.0):
+    dependencies:
+      '@alcalzone/ansi-tokenize': 0.3.0
+      ansi-escapes: 7.3.0
+      ansi-styles: 6.2.3
+      auto-bind: 5.0.1
+      chalk: 5.6.2
+      cli-boxes: 4.0.1
+      cli-cursor: 4.0.0
+      cli-truncate: 6.0.0
+      code-excerpt: 4.0.0
+      es-toolkit: 1.45.1
+      indent-string: 5.0.0
+      is-in-ci: 2.0.0
+      patch-console: 2.0.0
+      react: 19.2.0
+      react-reconciler: 0.33.0(react@19.2.0)
+      scheduler: 0.27.0
+      signal-exit: 3.0.7
+      slice-ansi: 9.0.0
+      stack-utils: 2.0.6
+      string-width: 8.2.0
+      terminal-size: 4.0.1
+      type-fest: 5.5.0
+      widest-line: 6.0.0
+      wrap-ansi: 10.0.0
+      ws: 8.20.0
+      yoga-layout: 3.2.1
+    optionalDependencies:
+      '@types/react': 19.2.7
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  ink@7.0.0(@types/react@19.2.7)(react@19.2.3):
+    dependencies:
+      '@alcalzone/ansi-tokenize': 0.3.0
+      ansi-escapes: 7.3.0
+      ansi-styles: 6.2.3
+      auto-bind: 5.0.1
+      chalk: 5.6.2
+      cli-boxes: 4.0.1
+      cli-cursor: 4.0.0
+      cli-truncate: 6.0.0
+      code-excerpt: 4.0.0
+      es-toolkit: 1.45.1
+      indent-string: 5.0.0
+      is-in-ci: 2.0.0
+      patch-console: 2.0.0
+      react: 19.2.3
+      react-reconciler: 0.33.0(react@19.2.3)
+      scheduler: 0.27.0
+      signal-exit: 3.0.7
+      slice-ansi: 9.0.0
+      stack-utils: 2.0.6
+      string-width: 8.2.0
+      terminal-size: 4.0.1
+      type-fest: 5.5.0
+      widest-line: 6.0.0
+      wrap-ansi: 10.0.0
+      ws: 8.20.0
+      yoga-layout: 3.2.1
+    optionalDependencies:
+      '@types/react': 19.2.7
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  ink@7.0.0(@types/react@19.2.8)(react@19.2.3):
+    dependencies:
+      '@alcalzone/ansi-tokenize': 0.3.0
+      ansi-escapes: 7.3.0
+      ansi-styles: 6.2.3
+      auto-bind: 5.0.1
+      chalk: 5.6.2
+      cli-boxes: 4.0.1
+      cli-cursor: 4.0.0
+      cli-truncate: 6.0.0
+      code-excerpt: 4.0.0
+      es-toolkit: 1.45.1
+      indent-string: 5.0.0
+      is-in-ci: 2.0.0
+      patch-console: 2.0.0
+      react: 19.2.3
+      react-reconciler: 0.33.0(react@19.2.3)
+      scheduler: 0.27.0
+      signal-exit: 3.0.7
+      slice-ansi: 9.0.0
+      stack-utils: 2.0.6
+      string-width: 8.2.0
+      terminal-size: 4.0.1
+      type-fest: 5.5.0
+      widest-line: 6.0.0
+      wrap-ansi: 10.0.0
+      ws: 8.20.0
+      yoga-layout: 3.2.1
+    optionalDependencies:
+      '@types/react': 19.2.8
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -16910,6 +16950,8 @@ snapshots:
 
   jose@6.2.1: {}
 
+  jose@6.2.3: {}
+
   js-cookie@3.0.5: {}
 
   js-tokens@4.0.0: {}
@@ -16992,6 +17034,7 @@ snapshots:
   keygrip@1.1.0:
     dependencies:
       tsscmp: 1.0.6
+    optional: true
 
   keyv@4.5.4:
     dependencies:
@@ -17001,18 +17044,8 @@ snapshots:
 
   kleur@4.1.5: {}
 
-  knuth-shuffle@1.0.8: {}
-
-  koa-compose@4.1.0: {}
-
-  koa-router@14.0.0:
-    dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
-      http-errors: 2.0.1
-      koa-compose: 4.1.0
-      path-to-regexp: 8.3.0
-    transitivePeerDependencies:
-      - supports-color
+  koa-compose@4.1.0:
+    optional: true
 
   koa@3.1.2:
     dependencies:
@@ -17034,6 +17067,7 @@ snapshots:
       statuses: 2.0.2
       type-is: 2.0.1
       vary: 1.1.2
+    optional: true
 
   lcm@0.0.3:
     dependencies:
@@ -17843,7 +17877,7 @@ snapshots:
   micromark@4.0.2:
     dependencies:
       '@types/debug': 4.1.12
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       decode-named-character-reference: 1.2.0
       devlop: 1.1.0
       micromark-core-commonmark: 2.0.3
@@ -17892,6 +17926,10 @@ snapshots:
   minimatch@10.2.4:
     dependencies:
       brace-expansion: 5.0.4
+
+  minimatch@10.2.5:
+    dependencies:
+      brace-expansion: 5.0.5
 
   minimatch@3.1.5:
     dependencies:
@@ -18196,6 +18234,11 @@ snapshots:
       jose: 6.2.1
       oauth4webapi: 3.8.5
 
+  openid-client@6.8.4:
+    dependencies:
+      jose: 6.2.3
+      oauth4webapi: 3.8.5
+
   ora@8.2.0:
     dependencies:
       chalk: 5.6.2
@@ -18236,7 +18279,7 @@ snapshots:
     dependencies:
       '@tootallnate/quickjs-emscripten': 0.23.0
       agent-base: 7.1.4
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       get-uri: 6.0.5
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.6
@@ -18328,19 +18371,6 @@ snapshots:
 
   pify@2.3.0: {}
 
-  pipenet@1.4.0:
-    dependencies:
-      axios: 1.13.6(debug@4.4.3)
-      debug: 4.4.3(supports-color@8.1.1)
-      human-readable-ids: 1.0.4
-      koa: 3.1.2
-      koa-router: 14.0.0
-      pump: 3.0.3
-      tldjs: 2.3.2
-      yargs: 18.0.0
-    transitivePeerDependencies:
-      - supports-color
-
   pirates@4.0.7: {}
 
   pkce-challenge@5.0.1: {}
@@ -18404,6 +18434,12 @@ snapshots:
     optionalDependencies:
       rxjs: 7.8.2
 
+  posthog-node@5.32.0(rxjs@7.8.2):
+    dependencies:
+      '@posthog/core': 1.27.9
+    optionalDependencies:
+      rxjs: 7.8.2
+
   potpack@2.1.0: {}
 
   powershell-utils@0.1.0: {}
@@ -18447,7 +18483,7 @@ snapshots:
   proxy-agent@6.5.0:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.6
       lru-cache: 7.18.3
@@ -18478,7 +18514,7 @@ snapshots:
     dependencies:
       '@puppeteer/browsers': 2.3.0
       chromium-bidi: 0.6.2(devtools-protocol@0.0.1312386)
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       devtools-protocol: 0.0.1312386
       ws: 8.20.0
     transitivePeerDependencies:
@@ -19329,7 +19365,7 @@ snapshots:
 
   router@2.2.0:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       depd: 2.0.0
       is-promise: 4.0.0
       parseurl: 1.3.3
@@ -19418,7 +19454,7 @@ snapshots:
 
   send@1.2.0:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       encodeurl: 2.0.0
       escape-html: 1.0.3
       etag: 1.8.1
@@ -19662,20 +19698,20 @@ snapshots:
 
   sisteransi@1.0.5: {}
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(@skybridge/devtools@0.35.14)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
+  skybridge@0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(@skybridge/devtools@0.36.1)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.5)
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.5)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.36.1
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
       es-toolkit: 1.45.1
       express: 5.2.1
       handlebars: 4.7.9
-      ink: 6.8.0(@types/react@19.2.7)(react@19.2.3)
+      ink: 7.0.0(@types/react@19.2.7)(react@19.2.3)
       nodemon: 3.1.11
       posthog-node: 5.28.9(rxjs@7.8.2)
       react: 19.2.3
@@ -19694,20 +19730,20 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(@skybridge/devtools@0.35.14)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
+  skybridge@0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(@skybridge/devtools@0.36.1)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.5)
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.5)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.36.1
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
       es-toolkit: 1.45.1
       express: 5.2.1
       handlebars: 4.7.9
-      ink: 6.8.0(@types/react@19.2.7)(react@19.2.3)
+      ink: 7.0.0(@types/react@19.2.7)(react@19.2.3)
       nodemon: 3.1.11
       posthog-node: 5.28.9(rxjs@7.8.2)
       react: 19.2.3
@@ -19726,20 +19762,20 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(@skybridge/devtools@0.35.14)(@types/react@19.2.8)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
+  skybridge@0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(@skybridge/devtools@0.36.1)(@types/react@19.2.8)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.5):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.3.5)
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.5)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.36.1
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
       es-toolkit: 1.45.1
       express: 5.2.1
       handlebars: 4.7.9
-      ink: 6.8.0(@types/react@19.2.8)(react@19.2.3)
+      ink: 7.0.0(@types/react@19.2.8)(react@19.2.3)
       nodemon: 3.1.11
       posthog-node: 5.28.9(rxjs@7.8.2)
       react: 19.2.3
@@ -19758,20 +19794,20 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.36.1
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
       es-toolkit: 1.45.1
       express: 5.2.1
       handlebars: 4.7.9
-      ink: 6.8.0(@types/react@19.2.13)(react@19.2.4)
+      ink: 7.0.0(@types/react@19.2.13)(react@19.2.4)
       nodemon: 3.1.11
       posthog-node: 5.28.9(rxjs@7.8.2)
       react: 19.2.4
@@ -19790,20 +19826,20 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.13)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.36.1
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
       es-toolkit: 1.45.1
       express: 5.2.1
       handlebars: 4.7.9
-      ink: 6.8.0(@types/react@19.2.13)(react@19.2.4)
+      ink: 7.0.0(@types/react@19.2.13)(react@19.2.4)
       nodemon: 3.1.11
       posthog-node: 5.28.9(rxjs@7.8.2)
       react: 19.2.4
@@ -19822,20 +19858,20 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.36.1
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
       es-toolkit: 1.45.1
       express: 5.2.1
       handlebars: 4.7.9
-      ink: 6.8.0(@types/react@19.2.14)(react@19.2.4)
+      ink: 7.0.0(@types/react@19.2.14)(react@19.2.4)
       nodemon: 3.1.11
       posthog-node: 5.28.9(rxjs@7.8.2)
       react: 19.2.4
@@ -19854,20 +19890,20 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@7.3.1(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.36.1
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
       es-toolkit: 1.45.1
       express: 5.2.1
       handlebars: 4.7.9
-      ink: 6.8.0(@types/react@19.2.14)(react@19.2.4)
+      ink: 7.0.0(@types/react@19.2.14)(react@19.2.4)
       nodemon: 3.1.11
       posthog-node: 5.28.9(rxjs@7.8.2)
       react: 19.2.4
@@ -19886,20 +19922,20 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.36.1
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
       es-toolkit: 1.45.1
       express: 5.2.1
       handlebars: 4.7.9
-      ink: 6.8.0(@types/react@19.2.14)(react@19.2.4)
+      ink: 7.0.0(@types/react@19.2.14)(react@19.2.4)
       nodemon: 3.1.11
       posthog-node: 5.28.9(rxjs@7.8.2)
       react: 19.2.4
@@ -19918,20 +19954,20 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.0(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.36.1
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
       es-toolkit: 1.45.1
       express: 5.2.1
       handlebars: 4.7.9
-      ink: 6.8.0(@types/react@19.2.14)(react@19.2.4)
+      ink: 7.0.0(@types/react@19.2.14)(react@19.2.4)
       nodemon: 3.1.11
       posthog-node: 5.28.9(rxjs@7.8.2)
       react: 19.2.4
@@ -19950,20 +19986,20 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.2(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.14)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.4))(vite@8.0.2(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.36.1
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
       es-toolkit: 1.45.1
       express: 5.2.1
       handlebars: 4.7.9
-      ink: 6.8.0(@types/react@19.2.14)(react@19.2.4)
+      ink: 7.0.0(@types/react@19.2.14)(react@19.2.4)
       nodemon: 3.1.11
       posthog-node: 5.28.9(rxjs@7.8.2)
       react: 19.2.4
@@ -19982,20 +20018,20 @@ snapshots:
       - utf-8-validate
       - zod
 
-  skybridge@0.35.14(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.35.14)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.0))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
+  skybridge@0.36.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(@skybridge/devtools@0.36.1)(@types/react@19.2.7)(immer@9.0.21)(nodemon@3.1.11)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(rxjs@7.8.2)(use-sync-external-store@1.6.0(react@19.2.0))(vite@8.0.0(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))(zod@4.3.6):
     dependencies:
       '@babel/core': 7.29.0
       '@modelcontextprotocol/ext-apps': 1.3.2(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(zod@4.3.6)
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
       '@oclif/core': 4.10.3
-      '@skybridge/devtools': 0.35.14
+      '@skybridge/devtools': 0.36.1
       ci-info: 4.4.0
       cors: 2.8.6
       dequal: 2.0.3
       es-toolkit: 1.45.1
       express: 5.2.1
       handlebars: 4.7.9
-      ink: 6.8.0(@types/react@19.2.7)(react@19.2.0)
+      ink: 7.0.0(@types/react@19.2.7)(react@19.2.0)
       nodemon: 3.1.11
       posthog-node: 5.28.9(rxjs@7.8.2)
       react: 19.2.0
@@ -20024,11 +20060,6 @@ snapshots:
       ansi-styles: 6.2.3
       is-fullwidth-code-point: 5.1.0
 
-  slice-ansi@8.0.0:
-    dependencies:
-      ansi-styles: 6.2.3
-      is-fullwidth-code-point: 5.1.0
-
   slice-ansi@9.0.0:
     dependencies:
       ansi-styles: 6.2.3
@@ -20038,7 +20069,7 @@ snapshots:
 
   socket.io-adapter@2.5.6:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       ws: 8.18.3
     transitivePeerDependencies:
       - bufferutil
@@ -20048,7 +20079,7 @@ snapshots:
   socket.io-parser@4.2.6:
     dependencies:
       '@socket.io/component-emitter': 3.1.2
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -20069,7 +20100,7 @@ snapshots:
   socks-proxy-agent@8.0.5:
     dependencies:
       agent-base: 7.1.4
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.3
       socks: 2.8.7
     transitivePeerDependencies:
       - supports-color
@@ -20125,7 +20156,8 @@ snapshots:
       '@stablelib/base64': 1.0.1
       fast-sha256: 1.3.0
 
-  statuses@1.5.0: {}
+  statuses@1.5.0:
+    optional: true
 
   statuses@2.0.1: {}
 
@@ -20419,10 +20451,6 @@ snapshots:
 
   tinyrainbow@3.1.0: {}
 
-  tldjs@2.3.2:
-    dependencies:
-      punycode: 2.3.1
-
   tldts-core@7.0.19: {}
 
   tldts@7.0.19:
@@ -20510,7 +20538,8 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsscmp@1.0.6: {}
+  tsscmp@1.0.6:
+    optional: true
 
   tsx@4.21.0:
     dependencies:
@@ -20624,7 +20653,7 @@ snapshots:
 
   undici@7.24.5: {}
 
-  undici@7.24.6: {}
+  undici@8.1.0: {}
 
   unicorn-magic@0.3.0: {}
 
@@ -21234,8 +21263,6 @@ snapshots:
 
   yargs-parser@21.1.1: {}
 
-  yargs-parser@22.0.0: {}
-
   yargs@17.7.1:
     dependencies:
       cliui: 8.0.1
@@ -21255,15 +21282,6 @@ snapshots:
       string-width: 4.2.3
       y18n: 5.0.8
       yargs-parser: 21.1.1
-
-  yargs@18.0.0:
-    dependencies:
-      cliui: 9.0.1
-      escalade: 3.2.0
-      get-caller-file: 2.0.5
-      string-width: 7.2.0
-      y18n: 5.0.8
-      yargs-parser: 22.0.0
 
   yauzl@2.10.0:
     dependencies:
@@ -21294,6 +21312,10 @@ snapshots:
     dependencies:
       zod: 4.3.6
 
+  zod-to-json-schema@3.25.1(zod@4.4.1):
+    dependencies:
+      zod: 4.4.1
+
   zod@3.23.8: {}
 
   zod@3.24.0: {}
@@ -21303,6 +21325,8 @@ snapshots:
   zod@4.3.5: {}
 
   zod@4.3.6: {}
+
+  zod@4.4.1: {}
 
   zustand@5.0.12(@types/react@19.2.13)(immer@9.0.21)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4)):
     optionalDependencies:
