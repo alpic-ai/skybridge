@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   discoverViewsSync,
   scanAndWriteViewsDts,
+  scanViewsSync,
   writeViewsDts,
 } from "./scan-views.js";
 
@@ -51,6 +52,59 @@ describe("discoverViewsSync", () => {
     expect(() => discoverViewsSync(viewsDir)).toThrow(
       /duplicate view name "dup"/,
     );
+  });
+});
+
+describe("scanViewsSync", () => {
+  let root: string;
+  let viewsDir: string;
+
+  beforeEach(() => {
+    root = mkdtempSync(join(tmpdir(), "skybridge-scan-views-"));
+    viewsDir = join(root, "views");
+    mkdirSync(viewsDir, { recursive: true });
+  });
+
+  afterEach(() => {
+    rmSync(root, { recursive: true, force: true });
+  });
+
+  it("returns valid and invalid views from a flat layout", () => {
+    writeFileSync(join(viewsDir, "ok.tsx"), DEFAULT_EXPORT);
+    writeFileSync(
+      join(viewsDir, "broken.tsx"),
+      "export const Foo = () => null;",
+    );
+
+    const { valid, invalid } = scanViewsSync(viewsDir);
+
+    expect(valid.map((v) => v.name).sort()).toEqual(["ok"]);
+    expect(invalid).toEqual([{ filePath: join(viewsDir, "broken.tsx") }]);
+  });
+
+  it("flags an index file in a view dir that lacks a default export", () => {
+    mkdirSync(join(viewsDir, "broken"));
+    writeFileSync(
+      join(viewsDir, "broken/index.tsx"),
+      "export const Foo = () => null;",
+    );
+
+    const { valid, invalid } = scanViewsSync(viewsDir);
+
+    expect(valid).toEqual([]);
+    expect(invalid).toEqual([{ filePath: join(viewsDir, "broken/index.tsx") }]);
+  });
+
+  it("ignores top-level index.tsx (treated as a barrel, not a view)", () => {
+    writeFileSync(
+      join(viewsDir, "index.tsx"),
+      "export const Foo = () => null;",
+    );
+
+    const { valid, invalid } = scanViewsSync(viewsDir);
+
+    expect(valid).toEqual([]);
+    expect(invalid).toEqual([]);
   });
 });
 
