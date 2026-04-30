@@ -3,33 +3,9 @@ import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { useEffect } from "react";
 import { Header } from "../cli/header.js";
+import { resolveViewsDir } from "../cli/resolve-views-dir.js";
 import { type CommandStep, useExecuteSteps } from "../cli/use-execute-steps.js";
 import { scanAndWriteViewsDts } from "../web/plugin/scan-views.js";
-
-async function resolveViewsDir(root: string): Promise<string | undefined> {
-  const { loadConfigFromFile } = await import("vite");
-  const loaded = await loadConfigFromFile(
-    { command: "build", mode: "production" },
-    undefined,
-    root,
-  );
-
-  const isPluginCandidate = (
-    value: unknown,
-  ): value is { name?: string; api?: { viewsDir?: string } } =>
-    typeof value === "object" && value !== null;
-
-  const plugins: Array<{ name?: string; api?: { viewsDir?: string } }> = [];
-  const walk = (value: unknown) => {
-    if (Array.isArray(value)) {
-      value.forEach(walk);
-    } else if (isPluginCandidate(value)) {
-      plugins.push(value);
-    }
-  };
-  walk(loaded?.config.plugins ?? []);
-  return plugins.find((p) => p.name === "skybridge")?.api?.viewsDir;
-}
 
 export const commandSteps: CommandStep[] = [
   {
