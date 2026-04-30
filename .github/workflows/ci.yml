@@ -59,12 +59,18 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Build core and devtools
         run: |
           pnpm --filter skybridge build
           pnpm --filter @skybridge/devtools build
+
+      - name: Generate template view types
+        run: pnpm --filter apps-sdk-template exec skybridge typegen
+
+      - name: Type check template
+        run: pnpm --filter apps-sdk-template exec tsc -b
 
       - name: Build template
         run: pnpm --filter apps-sdk-template run build

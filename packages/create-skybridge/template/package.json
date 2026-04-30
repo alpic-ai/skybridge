@@ -9,7 +9,8 @@
     "dev:tunnel": "skybridge dev --tunnel",
     "build": "skybridge build",
     "start": "skybridge start",
-    "deploy": "alpic deploy"
+    "deploy": "alpic deploy",
+    "postinstall": "skybridge typegen"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
