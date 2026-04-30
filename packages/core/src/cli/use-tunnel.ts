@@ -107,28 +107,21 @@ export function useTunnel(
 
     const postWithRetry = async () => {
       const deadline = Date.now() + POST_RETRY_BUDGET_MS;
-      while (!cancelled) {
+      while (!cancelled && Date.now() < deadline) {
         try {
           const res = await fetch(`${baseUrl}/tunnel`, {
             method: "POST",
             signal: controller.signal,
           });
           if (res.ok) {
-            return true;
+            return;
           }
         } catch {
-          // dev server not up yet
-        }
-        if (Date.now() >= deadline) {
-          setState({
-            status: "error",
-            message: "Could not reach dev server to start tunnel",
-          });
-          return false;
+          // dev server not up yet — observe() will retry; we just keep
+          // trying to start within our budget. State is owned by observe().
         }
         await new Promise((r) => setTimeout(r, POST_RETRY_DELAY_MS));
       }
-      return false;
     };
 
     // Always observe the tunnel state so external triggers (curl, future
@@ -150,16 +143,12 @@ export function useTunnel(
       }
     };
 
+    // observe() always runs — it owns the cli's view of tunnel state. POST is
+    // a fire-and-forget side-effect that just nudges the manager into starting.
     if (autoStart) {
-      void postWithRetry().then((ok) => {
-        if (!ok || cancelled) {
-          return;
-        }
-        void observe();
-      });
-    } else {
-      void observe();
+      void postWithRetry();
     }
+    void observe();
 
     return () => {
       cancelled = true;
