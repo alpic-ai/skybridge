@@ -97,27 +97,24 @@ This command starts:
 ### 5. Project structure
 
 ```
-├── server/
-│   └── src/
-│       ├── index.ts        # Server entry: McpServer + Auth0 auth + widget + run()
-│       ├── auth.ts         # verifyAccessToken — JWT verification via Auth0 JWKS
-│       ├── env.ts          # Env validation
-│       └── coffee-data.ts  # Mock coffee shop data & search
-├── web/
-│   └── src/
-│       ├── widgets/
-│       │   └── search-coffee-paris.tsx  # Coffee shop widget
-│       ├── helpers.ts      # Type-safe Skybridge hooks
-│       └── index.css       # Parisian theme styles
+├── src/
+│   ├── server.ts        # Server entry: McpServer + Auth0 auth + widget + run()
+│   ├── auth.ts         # verifyAccessToken — JWT verification via Auth0 JWKS
+│   ├── env.ts          # Env validation
+│   └── coffee-data.ts  # Mock coffee shop data & search
+│   ├── views/
+│   │   └── search-coffee-paris.tsx  # Coffee shop widget
+│   ├── helpers.ts      # Type-safe Skybridge hooks
+│   └── index.css       # Parisian theme styles
 ├── nodemon.json            # Dev server config
 └── package.json
 ```
 
 ### Create your first widget
 
-- Register a widget in `server/src/index.ts` with a unique name (e.g., `my-widget`) using [`registerWidget`](https://docs.skybridge.tech/api-reference/register-widget)
-- Create a matching React component at `web/src/widgets/my-widget.tsx`. **The file name must match the widget name exactly**.
-- Edit components in `web/src/widgets/` — changes appear instantly via Hot Module Replacement.
+- Register a widget in `src/server.ts` with a unique name (e.g., `my-widget`) using [`registerTool`](https://docs.skybridge.tech/api-reference/register-tool)
+- Create a matching React component at `src/views/my-widget.tsx`. **The file name must match the widget name exactly**.
+- Edit components in `src/views/` — changes appear instantly via Hot Module Replacement.
 
 ### Testing your App
 

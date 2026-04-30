@@ -66,18 +66,15 @@ This command starts:
 #### 4. Project structure
 
 ```
-├── server/
-│   └── src/
-│       ├── index.ts        # Server entry: McpServer + WorkOS auth + widget + run()
-│       ├── auth.ts         # verifyAccessToken — JWT verification + WorkOS user lookup
-│       ├── env.ts          # Env validation
-│       └── coffee-data.ts  # Mock coffee shop data & search
-├── web/
-│   └── src/
-│       ├── widgets/
-│       │   └── search-coffee-paris.tsx  # Coffee shop widget
-│       ├── helpers.ts      # Type-safe Skybridge hooks
-│       └── index.css       # Parisian theme styles
+├── src/
+│   ├── server.ts        # Server entry: McpServer + WorkOS auth + widget + run()
+│   ├── auth.ts         # verifyAccessToken — JWT verification + WorkOS user lookup
+│   ├── env.ts          # Env validation
+│   └── coffee-data.ts  # Mock coffee shop data & search
+│   ├── views/
+│   │   └── search-coffee-paris.tsx  # Coffee shop widget
+│   ├── helpers.ts      # Type-safe Skybridge hooks
+│   └── index.css       # Parisian theme styles
 ├── nodemon.json            # Dev server config
 └── package.json
 ```
@@ -86,12 +83,12 @@ This command starts:
 
 #### 1. Add a new widget
 
-- Register a widget in `server/src/index.ts` with a unique name (e.g., `my-widget`) using [`registerWidget`](https://docs.skybridge.tech/api-reference/register-widget)
-- Create a matching React component at `web/src/widgets/my-widget.tsx`. **The file name must match the widget name exactly**.
+- Register a widget in `src/server.ts` with a unique name (e.g., `my-widget`) using [`registerTool`](https://docs.skybridge.tech/api-reference/register-tool)
+- Create a matching React component at `src/views/my-widget.tsx`. **The file name must match the widget name exactly**.
 
 #### 2. Edit widgets with Hot Module Replacement (HMR)
 
-Edit and save components in `web/src/widgets/` — changes will appear instantly inside your App.
+Edit and save components in `src/views/` — changes will appear instantly inside your App.
 
 #### 3. Edit server code
 
