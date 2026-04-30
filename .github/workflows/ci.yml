@@ -38,7 +38,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Run ${{ matrix.name }}
         run: ${{ matrix.command }}
@@ -91,7 +91,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Build
         run: pnpm run build

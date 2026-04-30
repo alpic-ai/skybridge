@@ -26,7 +26,7 @@ jobs:
 
       - uses: pnpm/action-setup@v5
 
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --ignore-scripts
 
       - run: pnpm build
 
