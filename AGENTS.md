@@ -45,7 +45,7 @@ pnpm install        # setup
 
 ```bash
 pnpm test           # unit tests (vitest) + lint (biome ci)
-pnpm build          # compile all packagesc)
+pnpm build          # compile all packages
 ```
 
 Per-package:

@@ -26,7 +26,7 @@ pnpm install
 | ---------------- | ------------------------------------------ |
 | `pnpm test`      | Run all tests (unit + lint)                |
 | `pnpm test:unit` | Run unit tests only                        |
-| `pnpm build`     | Compile packages (also typechecks via tsc) |
+| `pnpm build`     | Compile packages                           |
 | `pnpm docs:dev`  | Start docs dev server                      |
 
 ## How to Contribute
