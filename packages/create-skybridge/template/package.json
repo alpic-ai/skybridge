@@ -20,12 +20,12 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@skybridge/devtools": ">=0.35.14 <1.0.0",
+    "@skybridge/devtools": ">=0.36.1 <1.0.0",
     "@types/react": "^19.2.14",
     "@types/node": "^24.12.0",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
-    "alpic": "^1.104.1",
+    "alpic": "^1.120.1",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"
   },
