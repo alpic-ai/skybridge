@@ -370,3 +370,66 @@ describe("createApp", () => {
     consoleSpy.mockRestore();
   });
 });
+
+describe("createApp tunnel routes", () => {
+  it("proxies POST /tunnel to the cli control server in dev mode", async () => {
+    // Stand up a fake control listener that returns a known JSON body.
+    const control = http.createServer((_req, res) => {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end('{"status":"idle"}');
+    });
+    await new Promise<void>((resolve) =>
+      control.listen(0, "127.0.0.1", resolve),
+    );
+    const controlAddr = control.address();
+    if (typeof controlAddr === "string" || controlAddr === null) {
+      control.close();
+      throw new Error("control server has no address");
+    }
+    const controlPort = controlAddr.port;
+
+    const prev = process.env.__TUNNEL_CONTROL_PORT;
+    process.env.__TUNNEL_CONTROL_PORT = String(controlPort);
+    try {
+      const { createApp } = await import("./express.js");
+      const httpServer = http.createServer();
+      const app = await createApp({ mcpServer: fakeServer, httpServer });
+      const { port, server } = await listen(app);
+      openServer = server;
+
+      const res = await fetch(`http://localhost:${port}/tunnel`, {
+        method: "POST",
+      });
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ status: "idle" });
+    } finally {
+      if (prev === undefined) {
+        delete process.env.__TUNNEL_CONTROL_PORT;
+      } else {
+        process.env.__TUNNEL_CONTROL_PORT = prev;
+      }
+      await new Promise<void>((resolve) => control.close(() => resolve()));
+    }
+  });
+
+  it("does not expose /tunnel in production mode", async () => {
+    const prevEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    try {
+      vi.resetModules();
+      const { createApp } = await import("./express.js");
+      const httpServer = http.createServer();
+      const app = await createApp({ mcpServer: fakeServer, httpServer });
+      const { port, server } = await listen(app);
+      openServer = server;
+
+      const res = await fetch(`http://localhost:${port}/tunnel`, {
+        method: "POST",
+      });
+      expect(res.status).toBe(404);
+    } finally {
+      process.env.NODE_ENV = prevEnv;
+      vi.resetModules();
+    }
+  });
+});

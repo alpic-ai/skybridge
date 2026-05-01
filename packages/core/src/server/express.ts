@@ -5,6 +5,17 @@ import cors from "cors";
 import express from "express";
 import type { McpServer } from "./server.js";
 
+function parseControlPort(raw: string | undefined): number | null {
+  if (raw === undefined) {
+    return null;
+  }
+  const n = Number.parseInt(raw, 10);
+  if (!Number.isFinite(n) || n <= 0 || n >= 65536) {
+    return null;
+  }
+  return n;
+}
+
 function applyMiddlewares(
   app: express.Express,
   middlewares: Array<{
@@ -62,6 +73,18 @@ export async function createApp({
     app.use(await devtoolsStaticServer());
     const { viewsDevServer } = await import("./viewsDevServer.js");
     app.use(await viewsDevServer(httpServer));
+
+    const controlPort = parseControlPort(process.env.__TUNNEL_CONTROL_PORT);
+    if (controlPort !== null) {
+      const { createTunnelProxyRouter } = await import(
+        "./tunnelProxyRouter.js"
+      );
+      app.use(createTunnelProxyRouter(controlPort));
+    } else if (process.env.__TUNNEL_CONTROL_PORT !== undefined) {
+      console.warn(
+        `Ignoring invalid __TUNNEL_CONTROL_PORT=${process.env.__TUNNEL_CONTROL_PORT}`,
+      );
+    }
   }
 
   if (env === "production") {
