@@ -9,13 +9,13 @@
     "test:format": "biome ci"
   },
   "dependencies": {
-    "aws-cdk-lib": "^2.245.0",
+    "aws-cdk-lib": "^2.252.0",
     "constructs": "^10.6.0"
   },
   "devDependencies": {
-    "@types/node": "^25.5.0",
-    "aws-cdk": "^2.1115.0",
+    "@types/node": "^25.6.0",
+    "aws-cdk": "^2.1120.0",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.3"
   }
 }

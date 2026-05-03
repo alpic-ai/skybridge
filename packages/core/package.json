@@ -8,7 +8,7 @@
   },
   "type": "module",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.22.2"
   },
   "files": [
     "dist",
@@ -58,16 +58,16 @@
   },
   "dependencies": {
     "@babel/core": "^7.29.0",
-    "@modelcontextprotocol/ext-apps": "^1.3.2",
-    "@oclif/core": "^4.10.3",
+    "@modelcontextprotocol/ext-apps": "^1.7.1",
+    "@oclif/core": "^4.11.0",
     "ci-info": "^4.4.0",
     "cors": "^2.8.6",
     "dequal": "^2.0.3",
-    "es-toolkit": "^1.45.1",
+    "es-toolkit": "^1.46.1",
     "express": "^5.2.1",
     "handlebars": "^4.7.9",
-    "ink": "^7.0.0",
-    "posthog-node": "^5.28.9",
+    "ink": "^7.0.1",
+    "posthog-node": "^5.33.0",
     "superjson": "^2.2.6",
     "zustand": "^5.0.12"
   },
@@ -80,19 +80,19 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsdom": "^28.0.1",
-    "@types/node": "^24.12.0",
+    "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitest/ui": "^4.1.4",
-    "jsdom": "^29.0.1",
+    "@vitest/ui": "^4.1.5",
+    "jsdom": "^29.1.1",
     "shx": "^0.4.0",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.2",
+    "typescript": "^6.0.3",
     "vite": "^8.0.0",
-    "vitest": "^4.1.4",
-    "zod": "^4.3.6"
+    "vitest": "^4.1.5",
+    "zod": "^4.4.2"
   },
-  "packageManager": "pnpm@10.33.0",
+  "packageManager": "pnpm@10.33.2",
   "bin": {
     "sb": "./bin/run.js",
     "skybridge": "./bin/run.js"
