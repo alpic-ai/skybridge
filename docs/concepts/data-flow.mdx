@@ -8,7 +8,7 @@ description: "Learn how data moves between the host, your MCP server, and views 
 
 **Solution:** Skybridge provides clear abstractions for each communication pattern.
 
-## The Three Actors
+## The three actors
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'lineColor': '#64748b' }}}%%
@@ -33,7 +33,7 @@ flowchart LR
 2. **Your MCP Server**: The backend that exposes tools and business logic
 3. **Your View (Guest)**: The React component rendered in an iframe inside the host
 
-## Key Terms
+## Key terms
 
 Tool responses contain three fields:
 
@@ -77,7 +77,7 @@ server.registerTool(
 );
 ```
 
-## Data Flow Patterns
+## Data flow patterns
 
 ### 1. Tool → View (Initial Hydration)
 
@@ -198,7 +198,7 @@ This creates a continuous loop: the view can ask the model for help, and the mod
 If the model's response triggers another view, the host renders a new view instance (not nested inside the current one).
 </Tip>
 
-## Response Fields Explained
+## Response fields explained
 
 Tool responses have three fields:
 
@@ -247,7 +247,7 @@ Direct API calls don't add to context. Use them only for data the model doesn't 
 If you use `fetch()` directly from views, you need to configure Content Security Policy (CSP) headers. The host blocks requests to domains not explicitly allowed. Add allowed domains to `view.csp.connectDomains` in your `registerTool` call. See [registerTool](/api-reference/register-tool).
 </Warning>
 
-## The Communication Loop
+## The communication loop
 
 1. **Host calls your tool** → Server responds with `structuredContent`
 2. **View hydrates** with [`useToolInfo`](/api-reference/use-tool-info)

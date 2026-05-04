@@ -8,7 +8,7 @@ description: "Develop Apps locally with Skybridge's DevTools and Vite HMR for in
 
 **Solution:** Skybridge includes DevTools and a Vite HMR plugin that let you develop views entirely on your machine with instant feedback.
 
-## The Challenge
+## The challenge
 
 When building Apps the traditional way, your development loop looks like:
 
@@ -23,7 +23,7 @@ When building Apps the traditional way, your development loop looks like:
 
 This can take 30-60 seconds per iteration. With complex views, that adds up fast.
 
-## The Skybridge Approach
+## The Skybridge approach
 
 With Skybridge, the loop becomes:
 
@@ -86,7 +86,7 @@ These features require the Skybridge starter template structure (`pnpm create sk
 
 When you save a file, only the changed component re-renders. Form inputs, scroll position, and local state are preserved.
 
-## Automatic Environment Detection
+## Automatic environment detection
 
 Your view code works identically in ChatGPT, MCP Apps clients like Claude, and local DevTools. Skybridge detects the environment and uses the appropriate communication layer:
 
@@ -119,21 +119,21 @@ Build locally → validate in [ChatGPT](/quickstart/test-your-app#testing-in-cha
 See [Test Your App](/quickstart/test-your-app) for detailed testing setup instructions.
 </Tip>
 
-## DevTools Features
+## DevTools features
 
 The DevTools UI includes:
 
-### Tool Inspector
+### Tool inspector
 See all registered tools and their schemas. Click to fill input forms automatically.
 
-### View Preview
+### View preview
 Renders your view in an iframe with mocked `window.openai`. Supports:
 - Theme switching (light/dark)
 - Display mode switching (pip/inline/fullscreen)
 - Locale changing
 
 
-### Response Inspector
+### Response inspector
 View the full tool response including `content`, `structuredContent`, and `_meta`.
 
 ## Related

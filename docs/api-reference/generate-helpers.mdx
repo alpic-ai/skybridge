@@ -34,7 +34,7 @@ const { callTool } = useCallTool("search-trip");
 
 ## Prerequisites
 
-### Server Must Use Method Chaining
+### Server must use method chaining
 
 Your MCP server **must** use method chaining for type inference to work. See [Type Safety: Method Chaining](/concepts/type-safety#method-chaining) for details.
 
@@ -55,7 +55,7 @@ const server = new McpServer({ name: "my-app", version: "1.0" }, {})
 export type AppType = typeof server;
 ```
 
-### Export Server Type
+### Export server type
 
 Export your server type so it can be imported in your view code:
 
@@ -64,9 +64,9 @@ Export your server type so it can be imported in your view code:
 export type AppType = typeof server;
 ```
 
-## Quick Start
+## Quick start
 
-### 1. One-Time Setup
+### 1. One-time setup
 
 Create a bridge file that connects your server types to your views:
 
@@ -78,7 +78,7 @@ import { generateHelpers } from "skybridge/web";
 export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
 ```
 
-### 2. Use Typed Hooks in Views
+### 2. Use typed hooks in views
 
 Import and use the typed hooks throughout your app:
 
@@ -118,7 +118,7 @@ export default function SearchTrip() {
 const { useCallTool, useToolInfo } = generateHelpers<T>();
 ```
 
-## Type Parameters
+## Type parameters
 
 ### `T`
 
