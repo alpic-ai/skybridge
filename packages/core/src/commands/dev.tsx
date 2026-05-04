@@ -2,6 +2,7 @@ import { Command, Flags } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { resolvePort } from "../cli/detect-port.js";
 import { Header } from "../cli/header.js";
+import { startTunnelControlServer } from "../cli/tunnel-control-server.js";
 import { useMessages } from "../cli/use-messages.js";
 import { useNodemon } from "../cli/use-nodemon.js";
 import { useTunnel } from "../cli/use-tunnel.js";
@@ -35,9 +36,16 @@ export default class Dev extends Command {
       this.warn(envWarning);
     }
 
+    const {
+      port: controlPort,
+      manager: tunnelManager,
+      close: closeTunnelControl,
+    } = await startTunnelControlServer(() => port);
+
     const env = {
       ...process.env,
       __PORT: String(port),
+      __TUNNEL_CONTROL_PORT: String(controlPort),
     };
 
     const App = () => {
@@ -45,9 +53,10 @@ export default class Dev extends Command {
       const [messages, pushMessage] = useMessages();
       useNodemon(env, pushMessage);
       const tunnelState = useTunnel(
-        flags.tunnel ? port : null,
+        port,
         pushMessage,
         flags.verbose,
+        flags.tunnel,
       );
 
       return (
@@ -175,6 +184,28 @@ export default class Dev extends Command {
       );
     };
 
-    render(<App />, { exitOnCtrlC: true, patchConsole: true });
+    // Note: `exitOnCtrlC: false` because we own SIGINT below to guarantee
+    // alpic gets killed before we exit. If anything ever calls `useInput` or
+    // puts stdin into raw mode, also wire an explicit `\x03` keypress to the
+    // shutdown function — Ink will otherwise swallow Ctrl-C without ever
+    // delivering SIGINT.
+    const ink = render(<App />, { exitOnCtrlC: false, patchConsole: true });
+
+    // Synchronous-first shutdown: kill the alpic subprocess up front so we
+    // can't leave it orphaned even if another SIGINT listener (e.g. nodemon's)
+    // exits the process before our async cleanup completes.
+    const shutdown = (code: number) => () => {
+      tunnelManager.stop();
+      void closeTunnelControl()
+        .catch((err) => {
+          console.error("Failed to close tunnel control server", err);
+        })
+        .finally(() => {
+          ink.unmount();
+          process.exit(code);
+        });
+    };
+    process.once("SIGINT", shutdown(130));
+    process.once("SIGTERM", shutdown(143));
   }
 }
