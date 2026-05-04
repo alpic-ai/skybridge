@@ -147,6 +147,11 @@ export async function init(args: string[] = process.argv.slice(2)) {
         path.join(root, "_gitignore"),
         path.join(root, ".gitignore"),
       );
+      // Rename _dockerignore to .dockerignore
+      fs.renameSync(
+        path.join(root, "_dockerignore"),
+        path.join(root, ".dockerignore"),
+      );
       prompts.log.success(`Project created in ${root}`);
     }
   } catch (error) {

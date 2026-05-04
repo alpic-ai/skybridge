@@ -48,6 +48,26 @@ Alpic also provides its own [MCP App](https://docs.alpic.ai/features/mcp-server)
 https://mcp.alpic.ai/mcp
 ``` 
 
+## Docker
+
+The `create-skybridge` template ships with a multi-stage `Dockerfile` so you can self-host on any container platform (Cloud Run, Fly.io, ECS, Kubernetes, etc.).
+
+```bash
+# Generate a lockfile first — the Dockerfile uses `npm ci`
+npm install
+
+docker build -t my-app .
+docker run -p 3000:3000 my-app
+```
+
+The image runs the production server on port 3000. Override the port with the `PORT` env var:
+
+```bash
+docker run -e PORT=8080 -p 8080:8080 my-app
+```
+
+The Dockerfile defaults to `npm`. If you scaffolded with `pnpm`, `yarn`, or `bun`, swap the install / build / prune commands and the lockfile in the `COPY` line.
+
 ## What's Next?
 
 <CardGroup cols={2}>
