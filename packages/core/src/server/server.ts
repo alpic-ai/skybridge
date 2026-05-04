@@ -531,12 +531,15 @@ export class McpServer<
 
     // On workerd, bridge the Node http server to a Workers fetch handler.
     // The specifier is held in a variable to sidestep tsc's module resolution
-    // (`cloudflare:node` only exists under wrangler/workerd)
-    try {
+    // (`cloudflare:node` only exists under wrangler/workerd).
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.userAgent === "Cloudflare-Workers"
+    ) {
       const cloudflareNode = "cloudflare:node";
       const { httpServerHandler } = await import(cloudflareNode);
       return httpServerHandler({ port });
-    } catch {}
+    }
 
     const shutdown = () => {
       // Drop both handlers so a second signal falls through to Node's default
