@@ -6,7 +6,7 @@ description: "Persist view state across renders with useViewState and createStor
 
 How to persist view state across renders and re-mounts.
 
-## Decision Tree
+## Decision tree
 
 ```
 What kind of state do you need?
@@ -162,7 +162,7 @@ function CartView() {
 - Restores state from the host on load
 - Filters out functions (actions) during serialization
 
-## Comparison Table
+## Comparison table
 
 | Feature | `useViewState` | `createStore` |
 |---------|------------------|---------------|
@@ -206,7 +206,7 @@ function ProductListView() {
 - `useViewState` persists the selection
 - `data-llm` tells the model what the user sees
 
-## When State Persists
+## When state persists
 
 View state persists across re-renders, re-mounts, and display mode changes. Skybridge handles the storage mechanism automatically.
 
