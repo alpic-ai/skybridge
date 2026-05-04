@@ -125,6 +125,13 @@ const mcpMiddleware = (server: McpServer): express.RequestHandler => {
     try {
       const transport = new StreamableHTTPServerTransport({
         sessionIdGenerator: undefined,
+        // Respond with a single JSON body instead of SSE. Skybridge's stateless
+        // transport never streams server-initiated messages, so SSE adds no
+        // capability — and on workerd specifically, `cloudflare:node`'s http
+        // bridge silently drops chunked writes that happen after the request
+        // handler awaits, which manifests as a 200 with empty body for any
+        // async tools/call.
+        enableJsonResponse: true,
       });
 
       res.on("close", () => {
