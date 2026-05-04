@@ -1,3 +1,4 @@
+import { userPromptMiddleware } from "@alpic-ai/insights";
 import { type Request, type Response, Router } from "express";
 import { McpServer } from "skybridge/server";
 import * as z from "zod";
@@ -26,74 +27,77 @@ const server = new McpServer(
     version: "0.0.1",
   },
   { capabilities: {} },
-).registerTool(
-  {
-    name: "explore-capitals",
-    description:
-      "Use this tool to explore world capitals. Displays an interactive map with detailed information about capital cities including population, currencies, and beautiful photos. Always use it when users ask about capitals, countries, or want to explore geography.",
-    inputSchema: {
-      name: z
-        .string()
-        .describe(
-          "Capital city name in English (e.g., 'Paris', 'Tokyo', 'Washington, D.C.', 'London', 'New Delhi')",
-        ),
-    },
-    annotations: {
-      readOnlyHint: true,
-      openWorldHint: true,
-      destructiveHint: false,
-    },
-    view: {
-      component: "explore-capitals",
-      description: "Interactive world capitals explorer with map visualization",
-      csp: {
-        resourceDomains: [
-          "https://upload.wikimedia.org",
-          "https://flagcdn.com",
-          "blob:",
-        ],
-        connectDomains: ["https://*.mapbox.com"],
+)
+  .mcpMiddleware(userPromptMiddleware())
+  .registerTool(
+    {
+      name: "explore-capitals",
+      description:
+        "Use this tool to explore world capitals. Displays an interactive map with detailed information about capital cities including population, currencies, and beautiful photos. Always use it when users ask about capitals, countries, or want to explore geography.",
+      inputSchema: {
+        name: z
+          .string()
+          .describe(
+            "Capital city name in English (e.g., 'Paris', 'Tokyo', 'Washington, D.C.', 'London', 'New Delhi')",
+          ),
+      },
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: true,
+        destructiveHint: false,
+      },
+      view: {
+        component: "explore-capitals",
+        description:
+          "Interactive world capitals explorer with map visualization",
+        csp: {
+          resourceDomains: [
+            "https://upload.wikimedia.org",
+            "https://flagcdn.com",
+            "blob:",
+          ],
+          connectDomains: ["https://*.mapbox.com"],
+        },
+      },
+      _meta: {
+        "openai/widgetAccessible": true,
       },
     },
-    _meta: {
-      "openai/widgetAccessible": true,
-    },
-  },
-  async ({ name }) => {
-    try {
-      // Fetch list first (minimal data), then details for requested capital
-      const allCapitals = await getCachedAllCapitals();
-      const capital = await getCapitalByName(name);
+    async ({ name }) => {
+      try {
+        // Fetch list first (minimal data), then details for requested capital
+        const allCapitals = await getCachedAllCapitals();
+        const capital = await getCapitalByName(name);
 
-      return {
-        _meta: {
-          slug: getCapitalSlug(capital.name),
-          allCapitals, // In meta to avoid flooding the model
-        },
-        structuredContent: {
-          capital, // Initial capital details
-        },
-        content: [
-          {
-            type: "text",
-            text: formatCapitalForModel(capital),
+        return {
+          _meta: {
+            slug: getCapitalSlug(capital.name),
+            allCapitals, // In meta to avoid flooding the model
           },
-        ],
-        isError: false,
-      };
-    } catch (error) {
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+          structuredContent: {
+            capital, // Initial capital details
           },
-        ],
-        isError: true,
-      };
-    }
-  },
-);
+          content: [
+            {
+              type: "text",
+              text: formatCapitalForModel(capital),
+            },
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  );
 
 function formatCapitalForModel(capital: Capital): string {
   const parts = [`${capital.name} is the capital of ${capital.country.name}.`];

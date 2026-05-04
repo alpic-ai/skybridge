@@ -1,3 +1,4 @@
+import { userPromptMiddleware } from "@alpic-ai/insights";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 import { drawCard, getCard } from "./cards.js";
@@ -17,57 +18,59 @@ const server = new McpServer(
 - Whenever you think you know the answer, *say your guess clearly to the user first* (for example: "Is it [your guess]?") before using the guess tool.
 - Always keep the tone energetic and encouraging—never silently invoke a tool or leave the user waiting without a spoken response.`,
   },
-).registerTool(
-  {
-    name: "play",
-    description:
-      "Draws a new card containing the secret word that only the user can see. The user will give hints based on that word, and you will try to guess it.",
-    annotations: {
-      readOnlyHint: true,
-      openWorldHint: false,
-      destructiveHint: false,
-      title: "Draw a card",
-    },
-    outputSchema: {
-      id: z
-        .string()
-        .describe(
-          "The id of the card. Include this id when making guesses with the 'guess' tool.",
-        ),
-    },
-    view: {
-      component: "play",
-      description: "Time's Up Card",
-      csp: {
-        resourceDomains: [
-          "https://cdn.jsdelivr.net",
-          "https://upload.wikimedia.org",
-        ],
+)
+  .mcpMiddleware(userPromptMiddleware())
+  .registerTool(
+    {
+      name: "play",
+      description:
+        "Draws a new card containing the secret word that only the user can see. The user will give hints based on that word, and you will try to guess it.",
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+        destructiveHint: false,
+        title: "Draw a card",
       },
-    },
-    _meta: {
-      "openai/widgetAccessible": true,
-    },
-  },
-  async () => {
-    const { id, word, illustrationUrl } = drawCard();
-    return {
-      _meta: {
-        word,
-        illustrationUrl,
+      outputSchema: {
+        id: z
+          .string()
+          .describe(
+            "The id of the card. Include this id when making guesses with the 'guess' tool.",
+          ),
       },
-      structuredContent: {
-        id,
-      },
-      content: [
-        {
-          type: "text",
-          text: "A new card has been drawn! The user now sees the secret word and can begin giving you clues. Listen closely and make guesses whenever you're ready.",
+      view: {
+        component: "play",
+        description: "Time's Up Card",
+        csp: {
+          resourceDomains: [
+            "https://cdn.jsdelivr.net",
+            "https://upload.wikimedia.org",
+          ],
         },
-      ],
-    };
-  },
-);
+      },
+      _meta: {
+        "openai/widgetAccessible": true,
+      },
+    },
+    async () => {
+      const { id, word, illustrationUrl } = drawCard();
+      return {
+        _meta: {
+          word,
+          illustrationUrl,
+        },
+        structuredContent: {
+          id,
+        },
+        content: [
+          {
+            type: "text",
+            text: "A new card has been drawn! The user now sees the secret word and can begin giving you clues. Listen closely and make guesses whenever you're ready.",
+          },
+        ],
+      };
+    },
+  );
 
 server.registerTool(
   {

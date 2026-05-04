@@ -1,3 +1,4 @@
+import { userPromptMiddleware } from "@alpic-ai/insights";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 import { generateFlights } from "./flights.js";
@@ -15,82 +16,84 @@ const server = new McpServer(
     version: "0.0.1",
   },
   { capabilities: {} },
-).registerTool(
-  {
-    name: "flight-booking",
-    description:
-      "Search and display available flights between two airports with pricing and schedule details.",
-    inputSchema: {
-      origin: AIRPORT_CODE,
-      destination: AIRPORT_CODE,
-      departureDate: z
-        .string()
-        .describe("Departure date in YYYY-MM-DD format (e.g. 2026-08-16)"),
-      returnDate: z
-        .string()
-        .describe("Return date in YYYY-MM-DD format (e.g. 2026-08-29)"),
-      maxPrice: z
-        .number()
-        .optional()
-        .describe("Maximum price per adult in EUR"),
-      directOnly: z
-        .boolean()
-        .optional()
-        .default(false)
-        .describe("Only show direct flights (no layovers)"),
-    },
-    view: {
-      component: "flight-booking",
-      description: "Flight Booking Carousel",
-      csp: {
-        redirectDomains: ["https://docs.skybridge.tech"],
+)
+  .mcpMiddleware(userPromptMiddleware())
+  .registerTool(
+    {
+      name: "flight-booking",
+      description:
+        "Search and display available flights between two airports with pricing and schedule details.",
+      inputSchema: {
+        origin: AIRPORT_CODE,
+        destination: AIRPORT_CODE,
+        departureDate: z
+          .string()
+          .describe("Departure date in YYYY-MM-DD format (e.g. 2026-08-16)"),
+        returnDate: z
+          .string()
+          .describe("Return date in YYYY-MM-DD format (e.g. 2026-08-29)"),
+        maxPrice: z
+          .number()
+          .optional()
+          .describe("Maximum price per adult in EUR"),
+        directOnly: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe("Only show direct flights (no layovers)"),
+      },
+      view: {
+        component: "flight-booking",
+        description: "Flight Booking Carousel",
+        csp: {
+          redirectDomains: ["https://docs.skybridge.tech"],
+        },
       },
     },
-  },
-  ({
-    origin,
-    destination,
-    departureDate,
-    returnDate,
-    maxPrice,
-    directOnly,
-  }) => {
-    try {
-      let flights = generateFlights(
-        origin,
-        destination,
-        departureDate,
-        returnDate,
-        directOnly ?? false,
-      );
+    ({
+      origin,
+      destination,
+      departureDate,
+      returnDate,
+      maxPrice,
+      directOnly,
+    }) => {
+      try {
+        let flights = generateFlights(
+          origin,
+          destination,
+          departureDate,
+          returnDate,
+          directOnly ?? false,
+        );
 
-      if (maxPrice !== undefined) {
-        flights = flights.filter((f) => f.price <= maxPrice);
+        if (maxPrice !== undefined) {
+          flights = flights.filter((f) => f.price <= maxPrice);
+        }
+
+        const result = {
+          origin,
+          originCity: IATA_AIRPORTS.get(origin) ?? origin,
+          destination,
+          destinationCity: IATA_AIRPORTS.get(destination) ?? destination,
+          departureDate,
+          returnDate,
+          flights,
+        };
+
+        return {
+          structuredContent: result,
+          content: [{ type: "text" as const, text: JSON.stringify(result) }],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text" as const, text: `Error: ${error}` }],
+          isError: true,
+        };
       }
-
-      const result = {
-        origin,
-        originCity: IATA_AIRPORTS.get(origin) ?? origin,
-        destination,
-        destinationCity: IATA_AIRPORTS.get(destination) ?? destination,
-        departureDate,
-        returnDate,
-        flights,
-      };
-
-      return {
-        structuredContent: result,
-        content: [{ type: "text" as const, text: JSON.stringify(result) }],
-        isError: false,
-      };
-    } catch (error) {
-      return {
-        content: [{ type: "text" as const, text: `Error: ${error}` }],
-        isError: true,
-      };
-    }
-  },
-);
+    },
+  );
 
 server.run();
 

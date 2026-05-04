@@ -12,6 +12,7 @@
     "deploy": "alpic deploy"
   },
   "dependencies": {
+    "@alpic-ai/insights": "^1.120.1",
     "@json-render/core": "^0.14.1",
     "@json-render/react": "^0.14.1",
     "@json-render/shadcn": "^0.14.1",

@@ -1,3 +1,4 @@
+import { userPromptMiddleware } from "@alpic-ai/insights";
 import { McpServer } from "skybridge/server";
 
 const server = new McpServer(
@@ -6,39 +7,41 @@ const server = new McpServer(
     version: "0.0.1",
   },
   { capabilities: {} },
-).registerTool(
-  {
-    name: "murder-in-the-valley",
-    description: "Use this tool to start a game of murder in the valley.",
-    inputSchema: {},
-    annotations: {
-      readOnlyHint: true,
-      destructiveHint: false,
-      openWorldHint: false,
-    },
-    view: {
-      component: "murder-in-the-valley",
-      description: "The murder in the valley game",
-      domain: "https://alpic.ai",
-      csp: {
-        redirectDomains: ["https://alpic.ai", "https://github.com"],
+)
+  .mcpMiddleware(userPromptMiddleware())
+  .registerTool(
+    {
+      name: "murder-in-the-valley",
+      description: "Use this tool to start a game of murder in the valley.",
+      inputSchema: {},
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
+      },
+      view: {
+        component: "murder-in-the-valley",
+        description: "The murder in the valley game",
+        domain: "https://alpic.ai",
+        csp: {
+          redirectDomains: ["https://alpic.ai", "https://github.com"],
+        },
+      },
+      _meta: {
+        "openai/widgetAccessible": true,
+        "openai/toolInvocation/invoking":
+          "Starting a game of murder in the valley...",
+        "openai/toolInvocation/invoked": "Game of murder in the valley ready.",
       },
     },
-    _meta: {
-      "openai/widgetAccessible": true,
-      "openai/toolInvocation/invoking":
-        "Starting a game of murder in the valley...",
-      "openai/toolInvocation/invoked": "Game of murder in the valley ready.",
-    },
-  },
-  async () => {
-    try {
-      return {
-        structuredContent: {},
-        content: [
-          {
-            type: "text",
-            text: `A game of murder in the valley has started. Here is the backstory for you to know:
+    async () => {
+      try {
+        return {
+          structuredContent: {},
+          content: [
+            {
+              type: "text",
+              text: `A game of murder in the valley has started. Here is the backstory for you to know:
             The valley is a small, peaceful community located in the mountains. The community is known for its beautiful scenery and its passion for AI.
             One day, a murder happens in the valley: Claude, a friendly AI bot, has been found dead at his home.
             3 suspects have been identified:
@@ -81,22 +84,22 @@ const server = new McpServer(
             - Elon things Sam is stupid and doesn't know how to run a company.
             - If Elon is asked about Claude's secret codes (and only then), he will let slip that "Stupid Sam thought he knew the codes but they were wrong." and they quickly coorect himself saying "Well i mean, i couldn't know that because he never gave me the codes."
             `,
-          },
-          {
-            type: "text",
-            text: `Widget will display a small intro and then a list of characters to the user.`,
-          },
-        ],
-        isError: false,
-      };
-    } catch (error) {
-      return {
-        content: [{ type: "text", text: `Error: ${error}` }],
-        isError: true,
-      };
-    }
-  },
-);
+            },
+            {
+              type: "text",
+              text: `Widget will display a small intro and then a list of characters to the user.`,
+            },
+          ],
+          isError: false,
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true,
+        };
+      }
+    },
+  );
 
 server.run();
 
