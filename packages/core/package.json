@@ -33,11 +33,11 @@
   },
   "scripts": {
     "prepublishOnly": "shx cp ../../README.md ./README.md",
-    "build": "shx rm -rf dist && tsc && pnpm run build:templates",
-    "build:templates": "cp -r src/server/templates dist/server/",
+    "build": "shx rm -rf dist && pnpm run build:templates && tsc",
+    "build:templates": "node scripts/precompile-templates.mjs",
     "format": "biome check --write --error-on-warnings",
     "test": "pnpm run test:unit && pnpm run test:format",
-    "test:unit": "vitest run",
+    "test:unit": "pnpm run build:templates && vitest run",
     "test:format": "biome ci"
   },
   "keywords": [
