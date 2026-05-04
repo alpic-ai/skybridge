@@ -300,6 +300,7 @@ export class McpServer<
   private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private mcpMiddlewareApplied = false;
   private claimedViews = new Map<string, string>();
+  private viteManifest: Record<string, ViteManifestEntry> | null = null;
   private readonly serverInfo: Implementation;
   private readonly serverOptions?: ServerOptions;
 
@@ -856,7 +857,21 @@ export class McpServer<
     return manifest[key]?.file;
   }
 
+  /**
+   * Inject the Vite manifest as a value rather than letting `readManifest()`
+   * load it from disk. Required for runtimes without a usable filesystem
+   * (Cloudflare Workers, etc.) — the user's `skybridge build` emits the
+   * manifest as a JS module which the entry imports and passes here.
+   */
+  setViteManifest(manifest: Record<string, { file: string }>): this {
+    this.viteManifest = manifest as Record<string, ViteManifestEntry>;
+    return this;
+  }
+
   private readManifest(): Record<string, ViteManifestEntry> {
+    if (this.viteManifest) {
+      return this.viteManifest;
+    }
     return JSON.parse(
       readFileSync(
         path.join(process.cwd(), "dist", "assets", ".vite", "manifest.json"),

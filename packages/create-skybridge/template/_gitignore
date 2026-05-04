@@ -4,3 +4,4 @@ dist/
 .DS_store
 *.tsbuildinfo
 .skybridge/
+src/vite-manifest.js
