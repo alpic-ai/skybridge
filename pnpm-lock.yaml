@@ -1058,9 +1058,6 @@ importers:
       '@fontsource-variable/jetbrains-mono':
         specifier: ^5.2.8
         version: 5.2.8
-      '@microlink/react-json-view':
-        specifier: ^1.31.15
-        version: 1.31.15(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.6)
@@ -2222,13 +2219,6 @@ packages:
     peerDependencies:
       '@types/react': '>=16'
       react: '>=16'
-
-  '@microlink/react-json-view@1.31.15':
-    resolution: {integrity: sha512-HSgO8uzwPICgQuU5C9/pV8hhKa4EeQCOlSOWnICR9t1WlJpFXvOiJfWZljbZQvWsTYZdhbHbnkRySMNLXuT0Lg==}
-    engines: {node: '>=17'}
-    peerDependencies:
-      react: '>= 15'
-      react-dom: '>= 15'
 
   '@mintlify/cli@4.0.1062':
     resolution: {integrity: sha512-ZwL+4Ss4sBLVVZw0vMNUT+JsvppdYs5s4q3r8Ug2MY3AulDDwX4oAL9wL4rHvzDHlKT+UOqEbskyEOFy4Sqj0w==}
@@ -7852,9 +7842,6 @@ packages:
     resolution: {integrity: sha512-K5zQjDllxWkf7Z5xJdV0/B0WTNqx6vxG70zJE4N0kBs4LovmEYWJzQGxC9bS9RAKu3bgM40lrd5zoLJ12MQ5BA==}
     engines: {node: '>= 0.10'}
 
-  react-base16-styling@0.10.0:
-    resolution: {integrity: sha512-H1k2eFB6M45OaiRru3PBXkuCcn2qNmx+gzLb4a9IPMR7tMH8oBRXU5jGbPDYG1Hz+82d88ED0vjR8BmqU3pQdg==}
-
   react-dom@19.2.0:
     resolution: {integrity: sha512-UlbRu4cAiGaIewkPyiRGJk0imDN2T3JjieT6spoL2UeSf5od4n5LB/mQ4ejmxhCFT1tYe8IvaFulzynWovsEFQ==}
     peerDependencies:
@@ -7897,9 +7884,6 @@ packages:
 
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
-
-  react-lifecycles-compat@3.0.4:
-    resolution: {integrity: sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==}
 
   react-map-gl@7.1.9:
     resolution: {integrity: sha512-KsCc8Gyn05wVGlHZoopaiiCr0RCAQ6LDISo5sEy1/pV/d7RlozkF946tiX7IgyijJQMRujHol5QdwUPESjh73w==}
@@ -8003,12 +7987,6 @@ packages:
     engines: {node: '>= 16.20.2'}
     peerDependencies:
       react: '>= 0.14.0'
-
-  react-textarea-autosize@8.5.9:
-    resolution: {integrity: sha512-U1DGlIQN5AwgjTyOEnI1oCcMuEr1pv1qOtklB2l4nyMGbHzWrI0eFsYK0zos2YWqAolJyG0IWJaqWmWj5ETh0A==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   react@19.2.0:
     resolution: {integrity: sha512-tmbWg6W31tQLeB5cdIBOicJDJRR2KzXsV7uSK9iNfLWQ5bIZfxuPEHp7M8wiHyHnn0DD1i7w3Zmin0FtkrwoCQ==}
@@ -9039,33 +9017,6 @@ packages:
     peerDependencies:
       '@types/react': '*'
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-
-  use-composed-ref@1.4.0:
-    resolution: {integrity: sha512-djviaxuOOh7wkj0paeO1Q/4wMZ8Zrnag5H6yBvzN7AKKe8beOaED9SF5/ByLqsku8NP4zQqsvM2u3ew/tJK8/w==}
-    peerDependencies:
-      '@types/react': '*'
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-
-  use-isomorphic-layout-effect@1.2.1:
-    resolution: {integrity: sha512-tpZZ+EX0gaghDAiFR37hj5MgY6ZN55kLiPkJsKxBMZ6GZdOSPJXiOzPM984oPYZ5AnehYx5WQp1+ME8I/P/pRA==}
-    peerDependencies:
-      '@types/react': '*'
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-
-  use-latest@1.3.0:
-    resolution: {integrity: sha512-mhg3xdm9NaM8q+gLT8KryJPnRFOz1/5XPBhmDEVZK1webPzDjrPk7f/mbpeLqTgB9msytYWANxgALOCJKnLvcQ==}
-    peerDependencies:
-      '@types/react': '*'
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     peerDependenciesMeta:
       '@types/react':
         optional: true
@@ -10748,16 +10699,6 @@ snapshots:
       '@types/mdx': 2.0.13
       '@types/react': 19.2.14
       react: 19.2.3
-
-  '@microlink/react-json-view@1.31.15(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
-    dependencies:
-      react: 19.2.4
-      react-base16-styling: 0.10.0
-      react-dom: 19.2.4(react@19.2.4)
-      react-lifecycles-compat: 3.0.4
-      react-textarea-autosize: 8.5.9(@types/react@19.2.14)(react@19.2.4)
-    transitivePeerDependencies:
-      - '@types/react'
 
   '@mintlify/cli@4.0.1062(@radix-ui/react-popover@1.1.15(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.3))(react@19.2.3))(@types/node@25.5.0)(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.3))(ts-node@10.9.2(@types/node@25.5.0)(typescript@6.0.2))(typescript@6.0.2)':
     dependencies:
@@ -18575,13 +18516,6 @@ snapshots:
       iconv-lite: 0.7.1
       unpipe: 1.0.0
 
-  react-base16-styling@0.10.0:
-    dependencies:
-      '@types/lodash': 4.17.21
-      color: 4.2.3
-      csstype: 3.2.3
-      lodash-es: 4.18.1
-
   react-dom@19.2.0(react@19.2.0):
     dependencies:
       react: 19.2.0
@@ -18627,8 +18561,6 @@ snapshots:
   react-is@17.0.2: {}
 
   react-is@18.3.1: {}
-
-  react-lifecycles-compat@3.0.4: {}
 
   react-map-gl@7.1.9(mapbox-gl@3.17.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
     dependencies:
@@ -18806,15 +18738,6 @@ snapshots:
       prismjs: 1.30.0
       react: 19.2.4
       refractor: 5.0.0
-
-  react-textarea-autosize@8.5.9(@types/react@19.2.14)(react@19.2.4):
-    dependencies:
-      '@babel/runtime': 7.28.6
-      react: 19.2.4
-      use-composed-ref: 1.4.0(@types/react@19.2.14)(react@19.2.4)
-      use-latest: 1.3.0(@types/react@19.2.14)(react@19.2.4)
-    transitivePeerDependencies:
-      - '@types/react'
 
   react@19.2.0: {}
 
@@ -20318,25 +20241,6 @@ snapshots:
     dependencies:
       react: 19.2.4
       tslib: 2.8.1
-    optionalDependencies:
-      '@types/react': 19.2.14
-
-  use-composed-ref@1.4.0(@types/react@19.2.14)(react@19.2.4):
-    dependencies:
-      react: 19.2.4
-    optionalDependencies:
-      '@types/react': 19.2.14
-
-  use-isomorphic-layout-effect@1.2.1(@types/react@19.2.14)(react@19.2.4):
-    dependencies:
-      react: 19.2.4
-    optionalDependencies:
-      '@types/react': 19.2.14
-
-  use-latest@1.3.0(@types/react@19.2.14)(react@19.2.4):
-    dependencies:
-      react: 19.2.4
-      use-isomorphic-layout-effect: 1.2.1(@types/react@19.2.14)(react@19.2.4)
     optionalDependencies:
       '@types/react': 19.2.14
 

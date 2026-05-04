@@ -124,15 +124,19 @@ export const useCallTool = () => {
       setToolData(toolName, {
         input: args ?? {},
         response: undefined,
+        durationMs: null,
         openaiRef: null,
         openaiLogs: [],
         openaiObject: null,
         openInAppUrl: null,
       });
+      const startedAt = performance.now();
       const response = await client.callTool(toolName, args);
+      const durationMs = Math.round(performance.now() - startedAt);
       setToolData(toolName, {
         input: args ?? {},
         response,
+        durationMs,
         openaiRef: null,
         openaiLogs: [],
         openaiObject: {

@@ -1,67 +1,87 @@
+import { Button } from "@alpic-ai/ui/components/button";
 import { PlugZap } from "lucide-react";
-import {
-  Group,
-  Panel,
-  Separator,
-  useDefaultLayout,
-} from "react-resizable-panels";
+import { Suspense } from "react";
+import { Group, Panel, useDefaultLayout } from "react-resizable-panels";
 import { useAuthStore } from "@/lib/auth-store.js";
-import { connectToServer, useSelectedToolOrNull } from "@/lib/mcp/index.js";
-import { Button } from "../ui/button.js";
+import { connectToServer } from "@/lib/mcp/index.js";
 import { Header } from "./header.js";
-import { Intro } from "./intro.js";
-import { ToolPanel } from "./tool-panel/tool-panel.js";
-import ToolsList from "./tools-list.js";
+import { ToolPanel } from "./tool-panel/index.js";
+import ToolsList from "./tools-list/index.js";
+
+const TOOLS_SPLIT_GROUP_ID = "devtools-tools-split";
+const TOOLS_LIST_PANEL_ID = "tools-list";
+const TOOL_PANEL_ID = "tool-panel";
 
 function AppLayout() {
-  const selectedTool = useSelectedToolOrNull();
   const { status, requiresAuth } = useAuthStore();
-  const { defaultLayout, onLayoutChange } = useDefaultLayout({
-    id: "skybridge-devtools-tools-list",
-    storage: localStorage,
-  });
 
   const isConnected = status === "authenticated";
 
+  const { defaultLayout, onLayoutChanged } = useDefaultLayout({
+    id: TOOLS_SPLIT_GROUP_ID,
+    panelIds: [TOOLS_LIST_PANEL_ID, TOOL_PANEL_ID],
+    storage: localStorage,
+  });
+
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-background">
-      <Header />
-      {isConnected ? (
-        <Group
-          orientation="horizontal"
-          className="flex-1 overflow-hidden"
-          defaultLayout={defaultLayout}
-          onLayoutChange={onLayoutChange}
-        >
-          <Panel id="tools-list" minSize="15" maxSize="40">
-            <ToolsList />
-          </Panel>
-          <Separator className="w-px bg-border" />
-          <Panel id="main-content" minSize="30">
-            <div className="flex flex-1 flex-col overflow-hidden relative h-full">
-              {selectedTool ? <ToolPanel /> : <Intro />}
-            </div>
-          </Panel>
-        </Group>
-      ) : (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <p className="text-sm text-muted-foreground">
-              {status === "connecting"
-                ? "Connecting to server..."
-                : requiresAuth
-                  ? "Authentication required to access this server."
-                  : "Not connected to a server."}
-            </p>
-            {status !== "connecting" && (
-              <Button variant="outline" size="sm" onClick={connectToServer}>
-                <PlugZap className="h-3.5 w-3.5" />
-                Connect
-              </Button>
-            )}
+    <div className="grid h-screen grid-rows-1 overflow-hidden bg-muted p-3 text-foreground">
+      <div className="grid min-h-0 grid-rows-[auto_1fr] overflow-hidden rounded-2xl border border-border bg-background shadow-sm">
+        <Header />
+        {isConnected ? (
+          <div className="flex min-h-0 min-w-0 flex-1">
+            <Group
+              orientation="horizontal"
+              id={TOOLS_SPLIT_GROUP_ID}
+              className="flex min-h-0 min-w-0 flex-1"
+              defaultLayout={defaultLayout}
+              onLayoutChanged={onLayoutChanged}
+            >
+              <Panel
+                id={TOOLS_LIST_PANEL_ID}
+                defaultSize={380}
+                minSize={250}
+                maxSize={510}
+                className="min-h-0 min-w-0"
+              >
+                <aside className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-r border-border">
+                  <Suspense fallback={null}>
+                    <ToolsList />
+                  </Suspense>
+                </aside>
+              </Panel>
+              <Panel
+                id={TOOL_PANEL_ID}
+                minSize={320}
+                className="min-h-0 min-w-0"
+              >
+                <main className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+                  <Suspense fallback={null}>
+                    <ToolPanel />
+                  </Suspense>
+                </main>
+              </Panel>
+            </Group>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="flex items-center justify-center">
+            <div className="space-y-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                {status === "connecting"
+                  ? "Connecting to server..."
+                  : requiresAuth
+                    ? "Authentication required to access this server."
+                    : "Not connected to a server."}
+              </p>
+              {status !== "connecting" && (
+                <Button variant="secondary" onClick={connectToServer}>
+                  <PlugZap className="size-3.5" />
+                  Connect
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

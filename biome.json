@@ -55,7 +55,7 @@
   },
   "overrides": [
     {
-      "includes": ["packages/core/**"],
+      "includes": ["packages/**"],
       "linter": {
         "domains": {
           "project": "all"
