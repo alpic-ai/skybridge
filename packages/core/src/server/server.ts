@@ -503,7 +503,7 @@ export class McpServer<
     await fresh.connect(transport);
   }
 
-  async run(): Promise<void> {
+  async run(): Promise<{ fetch: (...args: unknown[]) => unknown } | undefined> {
     this.applyMcpMiddleware();
     const httpServer = http.createServer();
 
@@ -517,16 +517,25 @@ export class McpServer<
     }
 
     httpServer.on("request", this.express);
+    const port = parseInt(process.env.__PORT ?? "3000", 10);
     await new Promise<void>((resolve, reject) => {
       httpServer.on("error", (error: Error) => {
         console.error("Failed to start server:", error);
         reject(error);
       });
-      const port = parseInt(process.env.__PORT ?? "3000", 10);
       httpServer.listen(port, () => {
         resolve();
       });
     });
+
+    // On workerd, bridge the Node http server to a Workers fetch handler.
+    // The specifier is held in a variable to sidestep tsc's module resolution
+    // (`cloudflare:node` only exists under wrangler/workerd)
+    try {
+      const cloudflareNode = "cloudflare:node";
+      const { httpServerHandler } = await import(cloudflareNode);
+      return httpServerHandler({ port });
+    } catch {}
 
     const shutdown = () => {
       // Drop both handlers so a second signal falls through to Node's default
@@ -540,6 +549,7 @@ export class McpServer<
     };
     process.on("SIGTERM", shutdown);
     process.on("SIGINT", shutdown);
+    return undefined;
   }
 
   private enforceOneToolPerView(component: string, toolName: string): void {
