@@ -1,6 +1,6 @@
 import http from "node:http";
 import { type SpawnFn, TunnelManager } from "./tunnel.js";
-import { createTunnelHandler } from "./tunnelHandler.js";
+import { createTunnelHandler } from "./tunnel-handler.js";
 
 export type TunnelControlServer = {
   port: number;

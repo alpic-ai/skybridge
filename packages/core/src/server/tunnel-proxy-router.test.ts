@@ -4,7 +4,7 @@ import { Readable } from "node:stream";
 import express from "express";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { startTunnelControlServer } from "../cli/tunnel-control-server.js";
-import { createTunnelProxyRouter } from "./tunnelProxyRouter.js";
+import { createTunnelProxyRouter } from "./tunnel-proxy-router.js";
 
 type FakeChild = EventEmitter & {
   stdout: Readable;
@@ -63,12 +63,12 @@ async function startControl() {
 }
 
 describe("createTunnelProxyRouter", () => {
-  describe("POST /tunnel", () => {
+  describe("POST /__skybridge/tunnel", () => {
     it("forwards to upstream and returns the upstream JSON", async () => {
       const { control } = await startControl();
       const { port } = await startProxy(control.port);
 
-      const res = await fetch(`http://127.0.0.1:${port}/tunnel`, {
+      const res = await fetch(`http://127.0.0.1:${port}/__skybridge/tunnel`, {
         method: "POST",
       });
 
@@ -92,7 +92,7 @@ describe("createTunnelProxyRouter", () => {
 
       const { port } = await startProxy(deadPort);
 
-      const res = await fetch(`http://127.0.0.1:${port}/tunnel`, {
+      const res = await fetch(`http://127.0.0.1:${port}/__skybridge/tunnel`, {
         method: "POST",
       });
       expect(res.status).toBe(502);
@@ -102,15 +102,17 @@ describe("createTunnelProxyRouter", () => {
     });
   });
 
-  describe("DELETE /tunnel", () => {
+  describe("DELETE /__skybridge/tunnel", () => {
     it("forwards to upstream and returns the upstream JSON", async () => {
       const { control, child } = await startControl();
       const { port } = await startProxy(control.port);
 
       // First start the tunnel so DELETE has something to stop.
-      await fetch(`http://127.0.0.1:${port}/tunnel`, { method: "POST" });
+      await fetch(`http://127.0.0.1:${port}/__skybridge/tunnel`, {
+        method: "POST",
+      });
 
-      const res = await fetch(`http://127.0.0.1:${port}/tunnel`, {
+      const res = await fetch(`http://127.0.0.1:${port}/__skybridge/tunnel`, {
         method: "DELETE",
       });
 
@@ -129,21 +131,23 @@ describe("createTunnelProxyRouter", () => {
 
       const { port } = await startProxy(deadPort);
 
-      const res = await fetch(`http://127.0.0.1:${port}/tunnel`, {
+      const res = await fetch(`http://127.0.0.1:${port}/__skybridge/tunnel`, {
         method: "DELETE",
       });
       expect(res.status).toBe(502);
     });
   });
 
-  describe("GET /tunnel/events", () => {
+  describe("GET /__skybridge/tunnel/events", () => {
     it("pipes the upstream SSE stream through to the client", async () => {
       const { control, child } = await startControl();
       const { port } = await startProxy(control.port);
 
       // Get the manager into a known state so the initial SSE frame is
       // deterministic.
-      await fetch(`http://127.0.0.1:${port}/tunnel`, { method: "POST" });
+      await fetch(`http://127.0.0.1:${port}/__skybridge/tunnel`, {
+        method: "POST",
+      });
       child.stdout.emit(
         "data",
         Buffer.from(
@@ -151,7 +155,9 @@ describe("createTunnelProxyRouter", () => {
         ),
       );
 
-      const res = await fetch(`http://127.0.0.1:${port}/tunnel/events`);
+      const res = await fetch(
+        `http://127.0.0.1:${port}/__skybridge/tunnel/events`,
+      );
 
       expect(res.status).toBe(200);
       expect(res.headers.get("content-type")).toMatch(/text\/event-stream/);
@@ -176,9 +182,13 @@ describe("createTunnelProxyRouter", () => {
       const { control, child } = await startControl();
       const { port } = await startProxy(control.port);
 
-      await fetch(`http://127.0.0.1:${port}/tunnel`, { method: "POST" });
+      await fetch(`http://127.0.0.1:${port}/__skybridge/tunnel`, {
+        method: "POST",
+      });
 
-      const res = await fetch(`http://127.0.0.1:${port}/tunnel/events`);
+      const res = await fetch(
+        `http://127.0.0.1:${port}/__skybridge/tunnel/events`,
+      );
       const body = res.body;
       if (!body) {
         throw new Error("expected response body");
@@ -227,7 +237,9 @@ describe("createTunnelProxyRouter", () => {
 
       const { port } = await startProxy(deadPort);
 
-      const res = await fetch(`http://127.0.0.1:${port}/tunnel/events`);
+      const res = await fetch(
+        `http://127.0.0.1:${port}/__skybridge/tunnel/events`,
+      );
       expect(res.status).toBe(502);
       const body = (await res.json()) as { status: string };
       expect(body.status).toBe("error");
@@ -237,14 +249,18 @@ describe("createTunnelProxyRouter", () => {
       const { control } = await startControl();
       const { port, server } = await startProxy(control.port);
 
-      await fetch(`http://127.0.0.1:${port}/tunnel`, { method: "POST" });
+      await fetch(`http://127.0.0.1:${port}/__skybridge/tunnel`, {
+        method: "POST",
+      });
 
       // Snapshot the manager's listener counts before the SSE subscription so
       // we can verify the proxy disconnected from upstream after shutdown.
       const baseStateListeners = control.manager.listenerCount("state");
       const baseActivityListeners = control.manager.listenerCount("activity");
 
-      const res = await fetch(`http://127.0.0.1:${port}/tunnel/events`);
+      const res = await fetch(
+        `http://127.0.0.1:${port}/__skybridge/tunnel/events`,
+      );
       const body = res.body;
       if (!body) {
         throw new Error("expected response body");

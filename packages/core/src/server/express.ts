@@ -77,7 +77,7 @@ export async function createApp({
     const controlPort = parseControlPort(process.env.__TUNNEL_CONTROL_PORT);
     if (controlPort !== null) {
       const { createTunnelProxyRouter } = await import(
-        "./tunnelProxyRouter.js"
+        "./tunnel-proxy-router.js"
       );
       app.use(createTunnelProxyRouter(controlPort));
     } else if (process.env.__TUNNEL_CONTROL_PORT !== undefined) {

@@ -1,19 +1,20 @@
 import express, { type Router } from "express";
 
 /**
- * Builds an Express router that forwards `/tunnel` (POST/DELETE) and
- * `/tunnel/events` (GET, SSE) to the cli's loopback control server.
+ * Builds an Express router that forwards `/__skybridge/tunnel` (POST/DELETE)
+ * and `/__skybridge/tunnel/events` (GET, SSE) to the cli's loopback control
+ * server. The `/__skybridge/` prefix avoids colliding with user-defined routes.
  */
 export function createTunnelProxyRouter(controlPort: number): Router {
   const router = express.Router();
-  const upstream = `http://127.0.0.1:${controlPort}`;
+  const upstream = `http://127.0.0.1:${controlPort}/__skybridge/tunnel`;
 
   const forwardJson = async (
     method: "POST" | "DELETE",
     res: express.Response,
   ): Promise<void> => {
     try {
-      const upstreamRes = await fetch(`${upstream}/tunnel`, { method });
+      const upstreamRes = await fetch(upstream, { method });
       const body = await upstreamRes.text();
       res
         .status(upstreamRes.status)
@@ -28,15 +29,15 @@ export function createTunnelProxyRouter(controlPort: number): Router {
     }
   };
 
-  router.post("/tunnel", (_req, res) => {
+  router.post("/__skybridge/tunnel", (_req, res) => {
     void forwardJson("POST", res);
   });
 
-  router.delete("/tunnel", (_req, res) => {
+  router.delete("/__skybridge/tunnel", (_req, res) => {
     void forwardJson("DELETE", res);
   });
 
-  router.get("/tunnel/events", async (req, res) => {
+  router.get("/__skybridge/tunnel/events", async (req, res) => {
     // Abort the upstream fetch when the client disconnects (or when the dev
     // server shuts down and destroys the response).
     const controller = new AbortController();
@@ -45,7 +46,7 @@ export function createTunnelProxyRouter(controlPort: number): Router {
 
     let upstreamRes: Response;
     try {
-      upstreamRes = await fetch(`${upstream}/tunnel/events`, {
+      upstreamRes = await fetch(`${upstream}/events`, {
         signal: controller.signal,
       });
     } catch (err) {

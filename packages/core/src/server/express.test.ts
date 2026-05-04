@@ -372,7 +372,7 @@ describe("createApp", () => {
 });
 
 describe("createApp tunnel routes", () => {
-  it("proxies POST /tunnel to the cli control server in dev mode", async () => {
+  it("proxies POST /__skybridge/tunnel to the cli control server in dev mode", async () => {
     // Stand up a fake control listener that returns a known JSON body.
     const control = http.createServer((_req, res) => {
       res.writeHead(200, { "Content-Type": "application/json" });
@@ -397,7 +397,7 @@ describe("createApp tunnel routes", () => {
       const { port, server } = await listen(app);
       openServer = server;
 
-      const res = await fetch(`http://localhost:${port}/tunnel`, {
+      const res = await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
         method: "POST",
       });
       expect(res.status).toBe(200);
@@ -412,7 +412,7 @@ describe("createApp tunnel routes", () => {
     }
   });
 
-  it("does not expose /tunnel in production mode", async () => {
+  it("does not expose /__skybridge/tunnel in production mode", async () => {
     const prevEnv = process.env.NODE_ENV;
     process.env.NODE_ENV = "production";
     try {
@@ -423,7 +423,7 @@ describe("createApp tunnel routes", () => {
       const { port, server } = await listen(app);
       openServer = server;
 
-      const res = await fetch(`http://localhost:${port}/tunnel`, {
+      const res = await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
         method: "POST",
       });
       expect(res.status).toBe(404);

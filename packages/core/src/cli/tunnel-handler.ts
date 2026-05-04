@@ -3,17 +3,17 @@ import type { TunnelActivity, TunnelManager, TunnelState } from "./tunnel.js";
 
 export function createTunnelHandler(manager: TunnelManager) {
   return (req: IncomingMessage, res: ServerResponse): void => {
-    if (req.url === "/tunnel" && req.method === "POST") {
+    if (req.url === "/__skybridge/tunnel" && req.method === "POST") {
       manager.start();
       sendJson(res, 200, manager.getState());
       return;
     }
-    if (req.url === "/tunnel" && req.method === "DELETE") {
+    if (req.url === "/__skybridge/tunnel" && req.method === "DELETE") {
       manager.stop();
       sendJson(res, 200, manager.getState());
       return;
     }
-    if (req.url === "/tunnel/events" && req.method === "GET") {
+    if (req.url === "/__skybridge/tunnel/events" && req.method === "GET") {
       writeSseHead(res);
       writeSse(res, "state", manager.getState());
       const onState = (s: TunnelState) => {

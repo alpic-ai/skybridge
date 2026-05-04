@@ -3,7 +3,7 @@ import http from "node:http";
 import { Readable } from "node:stream";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { TunnelManager } from "./tunnel.js";
-import { createTunnelHandler } from "./tunnelHandler.js";
+import { createTunnelHandler } from "./tunnel-handler.js";
 
 let openServer: http.Server | undefined;
 afterEach(() => openServer?.close());
@@ -41,10 +41,10 @@ async function listenWithHandler() {
 }
 
 describe("createTunnelHandler", () => {
-  it("POST /tunnel starts the tunnel and returns the current state", async () => {
+  it("POST /__skybridge/tunnel starts the tunnel and returns the current state", async () => {
     const { port, child } = await listenWithHandler();
 
-    const res = await fetch(`http://localhost:${port}/tunnel`, {
+    const res = await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
       method: "POST",
     });
     expect(res.status).toBe(200);
@@ -55,22 +55,28 @@ describe("createTunnelHandler", () => {
     expect(child.kill).not.toHaveBeenCalled();
   });
 
-  it("POST /tunnel is idempotent — second call does not respawn", async () => {
+  it("POST /__skybridge/tunnel is idempotent — second call does not respawn", async () => {
     const { port, manager } = await listenWithHandler();
     const startSpy = vi.spyOn(manager, "start");
 
-    await fetch(`http://localhost:${port}/tunnel`, { method: "POST" });
-    await fetch(`http://localhost:${port}/tunnel`, { method: "POST" });
+    await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
+      method: "POST",
+    });
+    await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
+      method: "POST",
+    });
 
     expect(startSpy).toHaveBeenCalledTimes(2);
     // Manager.start() is internally idempotent (verified in tunnel.test.ts).
   });
 
-  it("DELETE /tunnel stops the tunnel", async () => {
+  it("DELETE /__skybridge/tunnel stops the tunnel", async () => {
     const { port, child } = await listenWithHandler();
-    await fetch(`http://localhost:${port}/tunnel`, { method: "POST" });
+    await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
+      method: "POST",
+    });
 
-    const res = await fetch(`http://localhost:${port}/tunnel`, {
+    const res = await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
       method: "DELETE",
     });
     expect(res.status).toBe(200);
@@ -78,9 +84,11 @@ describe("createTunnelHandler", () => {
     expect(child.kill).toHaveBeenCalled();
   });
 
-  it("GET /tunnel/events streams the current state on connect", async () => {
+  it("GET /__skybridge/tunnel/events streams the current state on connect", async () => {
     const { port, child } = await listenWithHandler();
-    await fetch(`http://localhost:${port}/tunnel`, { method: "POST" });
+    await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
+      method: "POST",
+    });
     child.stdout.emit(
       "data",
       Buffer.from(
@@ -88,7 +96,9 @@ describe("createTunnelHandler", () => {
       ),
     );
 
-    const res = await fetch(`http://localhost:${port}/tunnel/events`);
+    const res = await fetch(
+      `http://localhost:${port}/__skybridge/tunnel/events`,
+    );
     expect(res.headers.get("content-type")).toMatch(/text\/event-stream/);
     expect(res.body).toBeTruthy();
 
@@ -103,13 +113,17 @@ describe("createTunnelHandler", () => {
     await reader.cancel();
   });
 
-  it("GET /tunnel/events sends the current error state on connect", async () => {
+  it("GET /__skybridge/tunnel/events sends the current error state on connect", async () => {
     const { port, child } = await listenWithHandler();
-    await fetch(`http://localhost:${port}/tunnel`, { method: "POST" });
+    await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
+      method: "POST",
+    });
     child.stderr.emit("data", Buffer.from("boom: tunnel auth failed\n"));
     child.emit("close", 1);
 
-    const res = await fetch(`http://localhost:${port}/tunnel/events`);
+    const res = await fetch(
+      `http://localhost:${port}/__skybridge/tunnel/events`,
+    );
     expect(res.headers.get("content-type")).toMatch(/text\/event-stream/);
     expect(res.body).toBeTruthy();
 
