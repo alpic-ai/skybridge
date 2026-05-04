@@ -20,7 +20,6 @@ RUN npm prune --omit=dev
 FROM node:24-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=3000
 
 USER node
 

@@ -60,10 +60,10 @@ docker build -t my-app .
 docker run -p 3000:3000 my-app
 ```
 
-The image runs the production server on port 3000. Override the port with the `PORT` env var:
+The container always listens on port 3000 internally — map it to whichever host port you want:
 
 ```bash
-docker run -e PORT=8080 -p 8080:8080 my-app
+docker run -p 8080:3000 my-app
 ```
 
 The Dockerfile defaults to `npm`. If you scaffolded with `pnpm`, `yarn`, or `bun`, swap the install / build / prune commands and the lockfile in the `COPY` line.
