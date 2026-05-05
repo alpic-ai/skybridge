@@ -24,6 +24,12 @@ describe("create-skybridge", () => {
     await fs.access(
       path.join(process.cwd(), tempDirName, "project", ".gitignore"),
     );
+    await fs.access(
+      path.join(process.cwd(), tempDirName, "project", ".dockerignore"),
+    );
+    await fs.access(
+      path.join(process.cwd(), tempDirName, "project", "Dockerfile"),
+    );
     expect(
       fs.access(path.join(process.cwd(), tempDirName, "project", ".npmrc")),
     ).rejects.toThrowError();
