@@ -20,7 +20,7 @@ function applyMiddlewares(
   app: express.Express,
   middlewares: Array<{
     path?: string;
-    handlers: Array<express.RequestHandler | express.ErrorRequestHandler>;
+    handlers: express.ErrorRequestHandler[];
   }>,
 ): void {
   for (const middleware of middlewares) {
@@ -51,21 +51,16 @@ function defaultErrorHandler(
 export async function createApp({
   mcpServer,
   httpServer,
-  customMiddleware = [],
   errorMiddleware = [],
 }: {
   mcpServer: McpServer;
   httpServer: http.Server;
-  customMiddleware?: { path?: string; handlers: express.RequestHandler[] }[];
   errorMiddleware?: {
     path?: string;
     handlers: express.ErrorRequestHandler[];
   }[];
 }): Promise<express.Express> {
-  const app = express();
-  app.use(express.json());
-
-  applyMiddlewares(app, customMiddleware);
+  const app = mcpServer.express;
 
   // Read `process.env.NODE_ENV` inline: wrangler/esbuild only substitute the literal expression,
   // so a local const would defeat dead-code elimination of the dev-only imports below.
