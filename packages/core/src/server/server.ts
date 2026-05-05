@@ -296,7 +296,7 @@ export class McpServer<
   /**
    * The underlying Express app. Use this to extend the HTTP server with
    * custom routes, middleware, or settings — e.g.
-   * `server.app.get("/health", ...)`.
+   * `server.express.get("/health", ...)`.
    *
    * `express.json()` is pre-applied. Register your handlers before `run()`;
    * after `run()`, dev-mode middleware, the `/mcp` route, and the default
