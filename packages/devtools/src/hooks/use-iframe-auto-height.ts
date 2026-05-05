@@ -6,14 +6,16 @@ export const useIframeAutoHeight = ({
   containerRef,
   enabled,
   onHeightChange,
+  documentKey,
 }: {
   iframeRef: React.RefObject<HTMLIFrameElement | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
   enabled: boolean;
   onHeightChange: (height: number) => void;
+  documentKey: string;
 }) => {
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || !documentKey) {
       return;
     }
 
@@ -43,5 +45,5 @@ export const useIframeAutoHeight = ({
     return () => {
       observer.disconnect();
     };
-  }, [containerRef, enabled, iframeRef, onHeightChange]);
+  }, [containerRef, enabled, iframeRef, onHeightChange, documentKey]);
 };

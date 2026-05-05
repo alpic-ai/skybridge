@@ -82,6 +82,7 @@ export const View = () => {
     containerRef,
     enabled: Boolean(html),
     onHeightChange: setContentHeight,
+    documentKey: html,
   });
 
   return (
