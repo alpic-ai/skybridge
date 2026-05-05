@@ -16,10 +16,6 @@
 </p>
 
 <p align="center">
-  <img alt="Skybridge app preview" src="docs/images/skybridge-readme-preview.png" width="520" />
-</p>
-
-<p align="center">
   <a href="https://www.npmjs.com/package/skybridge">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/npm/v/skybridge?color=77F5EE&amp;labelColor=161B22&amp;style=for-the-badge">
@@ -99,6 +95,10 @@ Skybridge is the answer to all the problems we ran into while building hundreds 
 - **Type-safe end-to-end**: tRPC-style inference from MCP server tool definition to React view for type-safety end-to-end from server to frontend.
 - **React-first**: Intuitive React Query-style hooks, with advanced state management. 
 - **Examples library**: Get started quickly with production-ready app examples for e-commerce, travel, SaaS, and others.
+
+<p align="center">
+  <img alt="Skybridge app preview" src="docs/images/skybridge-readme-preview.png" width="520" />
+</p>
 
 ## Get started
 
