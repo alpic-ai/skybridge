@@ -300,6 +300,7 @@ export class McpServer<
   private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private mcpMiddlewareApplied = false;
   private claimedViews = new Map<string, string>();
+  private viteManifest: Record<string, ViteManifestEntry> | null = null;
   private readonly serverInfo: Implementation;
   private readonly serverOptions?: ServerOptions;
 
@@ -503,7 +504,7 @@ export class McpServer<
     await fresh.connect(transport);
   }
 
-  async run(): Promise<void> {
+  async run(): Promise<{ fetch: (...args: unknown[]) => unknown } | undefined> {
     this.applyMcpMiddleware();
     const httpServer = http.createServer();
 
@@ -517,16 +518,28 @@ export class McpServer<
     }
 
     httpServer.on("request", this.express);
+    const port = parseInt(process.env.__PORT ?? "3000", 10);
     await new Promise<void>((resolve, reject) => {
       httpServer.on("error", (error: Error) => {
         console.error("Failed to start server:", error);
         reject(error);
       });
-      const port = parseInt(process.env.__PORT ?? "3000", 10);
       httpServer.listen(port, () => {
         resolve();
       });
     });
+
+    // On workerd, bridge the Node http server to a Workers fetch handler.
+    // The specifier is held in a variable to sidestep tsc's module resolution
+    // (`cloudflare:node` only exists under wrangler/workerd).
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.userAgent === "Cloudflare-Workers"
+    ) {
+      const cloudflareNode = "cloudflare:node";
+      const { httpServerHandler } = await import(cloudflareNode);
+      return httpServerHandler({ port });
+    }
 
     const shutdown = () => {
       // Drop both handlers so a second signal falls through to Node's default
@@ -540,6 +553,7 @@ export class McpServer<
     };
     process.on("SIGTERM", shutdown);
     process.on("SIGINT", shutdown);
+    return undefined;
   }
 
   private enforceOneToolPerView(component: string, toolName: string): void {
@@ -846,7 +860,21 @@ export class McpServer<
     return manifest[key]?.file;
   }
 
+  /**
+   * Inject the Vite manifest as a value rather than letting `readManifest()`
+   * load it from disk. Required for runtimes without a usable filesystem
+   * (Cloudflare Workers, etc.) — the user's `skybridge build` emits the
+   * manifest as a JS module which the entry imports and passes here.
+   */
+  setViteManifest(manifest: Record<string, { file: string }>): this {
+    this.viteManifest = manifest as Record<string, ViteManifestEntry>;
+    return this;
+  }
+
   private readManifest(): Record<string, ViteManifestEntry> {
+    if (this.viteManifest) {
+      return this.viteManifest;
+    }
     return JSON.parse(
       readFileSync(
         path.join(process.cwd(), "dist", "assets", ".vite", "manifest.json"),

@@ -5,3 +5,4 @@ dist
 cdk.out
 .claude/skills/
 .skybridge/
+packages/core/src/server/templates.generated.js
