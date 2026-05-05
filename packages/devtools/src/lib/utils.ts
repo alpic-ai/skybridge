@@ -7,10 +7,10 @@ export function cn(...inputs: ClassValue[]) {
 
 export function injectWaitForOpenai(html: string) {
   const doc = new DOMParser().parseFromString(html, "text/html");
-  const target = doc.querySelector('script[type="module"]#dev-widget-entry');
+  const target = doc.querySelector('script[type="module"]#dev-view-entry');
 
   if (!target) {
-    throw new Error("dev-widget-entry script not found");
+    throw new Error("dev-view-entry script not found");
   }
 
   const waitForOpenAIText = `
