@@ -1,22 +1,40 @@
 # syntax=docker/dockerfile:1
 
-# Multi-stage Dockerfile for a Skybridge MCP server.
+# Dockerfile for a Skybridge MCP server.
 #
-# Defaults to npm. If you scaffolded with yarn, pnpm, or bun, swap the
-# install/build/prune commands and the lockfile in the COPY line below.
+# Detects npm, yarn, or pnpm from the lockfile in your project.
+# (For bun or deno, adapt the install/build/prune commands below.)
 
-# ---- Build stage ----
+# Build stage: install deps, compile the app, then prune dev deps.
 FROM node:24-slim AS build
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
+RUN --mount=type=cache,target=/root/.npm \
+    --mount=type=cache,target=/usr/local/share/.cache/yarn \
+    --mount=type=cache,target=/root/.local/share/pnpm/store \
+    if [ -f package-lock.json ]; then \
+      npm ci; \
+    elif [ -f yarn.lock ]; then \
+      corepack enable yarn && yarn install --frozen-lockfile; \
+    elif [ -f pnpm-lock.yaml ]; then \
+      corepack enable pnpm && pnpm install --frozen-lockfile; \
+    else \
+      echo "No lockfile found." && exit 1; \
+    fi
+
+ENV NODE_ENV=production
 
 COPY . .
-RUN npm run build
-RUN npm prune --omit=dev
+RUN if [ -f package-lock.json ]; then \
+      npm run build && npm prune --omit=dev; \
+    elif [ -f yarn.lock ]; then \
+      corepack enable yarn && yarn build && yarn install --frozen-lockfile --production=true; \
+    elif [ -f pnpm-lock.yaml ]; then \
+      corepack enable pnpm && pnpm build && pnpm prune --prod; \
+    fi
 
-# ---- Runtime stage ----
+# Runtime stage: copy built artifacts and prod deps, run as non-root.
 FROM node:24-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
