@@ -186,7 +186,7 @@ Debug mode applies to CLI telemetry only. The runtime tool-call counter has no p
 - We retain aggregated data for product analytics purposes
 - Individual events are anonymized and cannot be linked to specific users
 
-### Server tool-call counters
+### Tools/call events
 
 - The Skybridge runtime emits a [DogStatsD](https://docs.datadoghq.com/developers/dogstatsd/) counter over UDP for every `tools/call`
 - Packets are sent fire-and-forget; failures never block or delay tool execution
