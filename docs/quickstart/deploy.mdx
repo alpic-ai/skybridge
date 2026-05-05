@@ -125,23 +125,29 @@ Skybridge's local dev server (`skybridge dev`) and the Cloudflare path are indep
 
 ## Docker
 
-The `create-skybridge` template ships with a multi-stage `Dockerfile` so you can self-host on any container platform (Cloud Run, Fly.io, ECS, Kubernetes, etc.).
+Projects created with the [Skybridge scaffolder](/quickstart/create-new-app#scaffold-your-project) include a multi-stage `Dockerfile` so you can self-host on any container platform:
 
-```bash
-# Generate a lockfile first — the Dockerfile uses `npm ci`
+<CodeGroup>
+```bash npm
 npm install
-
 docker build -t my-app .
 docker run -p 3000:3000 my-app
 ```
-
-The container always listens on port 3000 internally — map it to whichever host port you want:
-
-```bash
-docker run -p 8080:3000 my-app
+```bash pnpm
+pnpm install
+docker build -t my-app .
+docker run -p 3000:3000 my-app
 ```
+```bash yarn
+yarn install
+docker build -t my-app .
+docker run -p 3000:3000 my-app
+```
+</CodeGroup>
 
-The Dockerfile defaults to `npm`. If you scaffolded with `pnpm`, `yarn`, or `bun`, swap the install / build / prune commands and the lockfile in the `COPY` line.
+<Note>
+The package manager is detected from the lockfile (`package-lock.json`, `yarn.lock`, or `pnpm-lock.yaml`). Bun and Deno are not supported yet: you'll need to adapt the build stage inside the Dockerfile.
+</Note>
 
 ## What's Next?
 
