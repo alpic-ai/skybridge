@@ -178,13 +178,6 @@ function FormBody({
   setFormData: (data: Record<string, unknown> | null) => void;
   formRef: React.RefObject<Form<unknown, RJSFSchema> | null>;
 }) {
-  // const hasNoInput =
-  //   !schema?.properties || Object.keys(schema.properties).length === 0;
-
-  // if (hasNoInput) {
-  //   return null;
-  // }
-
   return (
     <FormComponent
       ref={formRef as React.RefObject<Form<unknown, RJSFSchema>>}
