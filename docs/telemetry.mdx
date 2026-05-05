@@ -5,15 +5,22 @@ description: "Learn what data Skybridge collects, why we collect it, and how to 
 
 # Telemetry
 
-Skybridge collects anonymous usage telemetry to help us understand how the CLI is being used and improve the developer experience. **Telemetry is completely optional** and you can opt out at any time.
+Skybridge collects anonymous usage telemetry to help us understand how the framework is being used and improve the developer experience. Telemetry is collected from two places:
+
+1. **CLI commands** — when you run `skybridge dev`, `build`, `start`, etc.
+2. **Skybridge server runtime** — when a Skybridge-powered MCP server handles a `tools/call` request.
+
+**Telemetry is completely optional** and you can opt out at any time. The same opt-out controls apply to both telemetry collectors.
 
 <Info>
 **Your Privacy Matters**
 
-We only collect aggregate usage data. We never collect personal information, project code, file contents, or any sensitive data.
+We only collect aggregate usage data. We never collect personal information, project code, file contents, tool names, tool arguments, tool results, or any sensitive data.
 </Info>
 
 ## What We Collect
+
+### CLI commands
 
 When you run a Skybridge CLI command, we collect the following anonymous information:
 
@@ -29,10 +36,22 @@ When you run a Skybridge CLI command, we collect the following anonymous informa
 | **Node Version** | Your Node.js version | `v24.0.0` |
 | **Is CI** | Whether running in a CI environment | `true` or `false` |
 
+### Skybridge server tool calls
+
+When your deployed Skybridge server handles an MCP `tools/call` request, it emits a single anonymous counter so we can measure aggregate usage of Skybridge in production. We collect **only**:
+
+| Data | Description | Example |
+|------|-------------|---------|
+| **Version** | The Skybridge runtime version (major.minor only) | `1.2` |
+
+That's the entire payload. There is no machine ID, no session ID, no tool name, no arguments, no result, no IP-derived identity, and no user metadata attached to these events.
+
 ### What We Don't Collect
 
 - ❌ Project names or file paths
 - ❌ Source code or file contents
+- ❌ Tool names, tool arguments, or tool results
+- ❌ End-user prompts, conversations, or model output
 - ❌ Environment variables or secrets
 - ❌ IP addresses or location data
 - ❌ Personal identifiable information
@@ -44,11 +63,11 @@ Telemetry helps us:
 - **Understand usage patterns** — Which commands are most used? Where do developers spend time?
 - **Identify common errors** — What problems do developers encounter most frequently?
 - **Prioritize improvements** — Which platforms and Node versions should we support?
-- **Measure adoption** — How is Skybridge being adopted over time?
+- **Measure adoption** — How is Skybridge being adopted in production over time, and which versions are still in active use?
 
 ## How to Opt Out
 
-Telemetry configuration is **machine-wide**, not project-specific. Your preference is stored in `~/.skybridge/config.json` and applies to all Skybridge projects on the same machine.
+Telemetry configuration is **machine-wide**, not project-specific. Your preference is stored in `~/.skybridge/config.json` and applies to both the CLI and the Skybridge server runtime on the same machine. The runtime checks the same setting on every tool call, so toggling it takes effect immediately without restarting your server.
 
 You have multiple ways to disable telemetry:
 
@@ -118,7 +137,7 @@ env:
 
 ## Debug Mode
 
-To see what telemetry data would be sent without actually sending it, enable debug mode:
+To see what CLI telemetry data would be sent without actually sending it, enable debug mode:
 
 ```bash
 SKYBRIDGE_TELEMETRY_DEBUG=1 skybridge dev
@@ -126,9 +145,22 @@ SKYBRIDGE_TELEMETRY_DEBUG=1 skybridge dev
 
 This will print the telemetry event to stderr instead of sending it, useful for understanding exactly what data is collected.
 
+<Note>
+Debug mode applies to CLI telemetry only. The runtime tool-call counter has no payload beyond the version tag, so there is nothing to inspect — disabling telemetry is the only relevant control.
+</Note>
+
 ## Data Handling
 
-- Telemetry data is sent to [PostHog](https://posthog.com/), a privacy-focused analytics platform
+### CLI events
+
+- CLI telemetry is sent to [PostHog](https://posthog.com/), a privacy-focused analytics platform
 - Data is stored on PostHog's US servers
 - We retain aggregated data for product analytics purposes
 - Individual events are anonymized and cannot be linked to specific users
+
+### Server tool-call counters
+
+- The Skybridge runtime emits a [DogStatsD](https://docs.datadoghq.com/developers/dogstatsd/) counter over UDP for every `tools/call`
+- Packets are sent fire-and-forget; failures never block or delay tool execution
+- They are received by a Skybridge-operated [Vector](https://vector.dev/) instance
+- Only aggregate per-version counters are stored — there is no per-event record retained, and individual calls cannot be linked to a server, project, or user
