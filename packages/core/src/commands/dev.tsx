@@ -5,6 +5,7 @@ import { Header } from "../cli/header.js";
 import { startTunnelControlServer } from "../cli/tunnel-control-server.js";
 import { useMessages } from "../cli/use-messages.js";
 import { useNodemon } from "../cli/use-nodemon.js";
+import { useOpenBrowser } from "../cli/use-open-browser.js";
 import { useTunnel } from "../cli/use-tunnel.js";
 import { useTypeScriptCheck } from "../cli/use-typescript-check.js";
 
@@ -20,6 +21,11 @@ export default class Dev extends Command {
     tunnel: Flags.boolean({
       description: "Open an Alpic tunnel for remote testing",
       default: false,
+    }),
+    open: Flags.boolean({
+      description: "Open DevTools in the browser when the server is ready",
+      default: true,
+      allowNo: true,
     }),
     verbose: Flags.boolean({
       char: "v",
@@ -52,6 +58,7 @@ export default class Dev extends Command {
       const tsErrors = useTypeScriptCheck();
       const [messages, pushMessage] = useMessages();
       useNodemon(env, pushMessage);
+      useOpenBrowser(port, flags.open);
       const tunnelState = useTunnel(
         port,
         pushMessage,
