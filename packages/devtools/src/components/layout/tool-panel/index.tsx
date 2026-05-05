@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { useCallToolResult } from "@/lib/store.js";
 import { ToolPanelHeader } from "./tool-panel-header.js";
-import { Widget } from "./widget/index.js";
+import { View } from "./view/index.js";
 
 const Placeholder = ({ text }: { text: string }) => (
   <div className="flex h-full items-center justify-center">
@@ -22,19 +22,21 @@ export const ToolPanel = () => {
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden preview-region">
-      {hasResult ? (
-        hasView ? (
-          <>
-            <ToolPanelHeader />
-            <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto py-3">
-              <Suspense fallback={<Placeholder text="Loading widget…" />}>
-                <Widget />
-              </Suspense>
-            </div>
-          </>
-        ) : (
-          <Placeholder text="No view template" />
-        )
+      {tool ? (
+        hasResult ? (
+          hasView ? (
+            <>
+              <ToolPanelHeader />
+              <div className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto py-3 mx-3">
+                <Suspense fallback={<Placeholder text="Loading widget…" />}>
+                  <View />
+                </Suspense>
+              </div>
+            </>
+          ) : (
+            <Placeholder text="No view template" />
+          )
+        ) : null
       ) : (
         <Placeholder text="Choose a tool from the sidebar to begin" />
       )}

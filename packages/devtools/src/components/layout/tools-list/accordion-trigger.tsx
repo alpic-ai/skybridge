@@ -6,12 +6,11 @@ import { cn } from "@/lib/utils.js";
 export type AccordionTriggerProps = ComponentProps<
   typeof AccordionPrimitive.Trigger
 > & {
-  /** Rendered beside the trigger (e.g. Alpic `Button`) so it is not nested inside the trigger `button`. */
   action?: ReactNode;
 };
 
 // AccordionTrigger diverges from alpic-ai/ui implementation
-// Chevron is placed on the left side and is pointing to the right
+// Chevron icon is placed on the left side and is pointing to the right
 export function AccordionTrigger({
   className,
   children,

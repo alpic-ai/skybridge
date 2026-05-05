@@ -4,8 +4,9 @@ import mcpClient, {
   useSuspenseResource,
 } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
+import { asString, injectWaitForOpenai } from "@/lib/utils.js";
+import { useIframeAutoHeight } from "../../../../hooks/use-iframe-auto-height.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
-import { injectWaitForOpenai } from "./utils.js";
 
 export const View = () => {
   const tool = useSelectedTool();
@@ -27,9 +28,7 @@ export const View = () => {
     _meta?: Record<string, unknown>;
   };
   const html = resourceEntry.text;
-  const widgetDomainMeta = resourceEntry._meta?.["openai/widgetDomain"];
-  const widgetDomain =
-    typeof widgetDomainMeta === "string" ? widgetDomainMeta : undefined;
+  const viewDomain = asString(resourceEntry._meta?.["openai/widgetDomain"]);
 
   useEffect(() => {
     const iframe = iframeRef.current;
@@ -37,8 +36,8 @@ export const View = () => {
       return;
     }
 
-    if (widgetDomain) {
-      setOpenInAppUrl(tool.name, widgetDomain);
+    if (viewDomain) {
+      setOpenInAppUrl(tool.name, viewDomain);
     }
 
     createAndInjectOpenAi(
@@ -68,49 +67,22 @@ export const View = () => {
     setToolData(tool.name, {
       openaiRef: iframeRef as React.RefObject<HTMLIFrameElement>,
     });
-
-    let lastMeasured = 0;
-    const measure = () => {
-      const doc = iframe.contentDocument;
-      if (!doc?.body) {
-        return;
-      }
-      const parentEl = containerRef.current?.parentElement;
-      const parentH = parentEl?.clientHeight ?? 0;
-      // Before layout, the scroll parent can report 0 — do not clamp to 0 or we never commit height.
-      const maxH = parentH > 0 ? parentH : Number.POSITIVE_INFINITY;
-      const innerScroll = Math.max(
-        doc.body.scrollHeight,
-        doc.documentElement.scrollHeight,
-      );
-      const measured = Math.min(innerScroll, maxH);
-      if (measured > 0 && measured !== lastMeasured) {
-        lastMeasured = measured;
-        setContentHeight(measured);
-      }
-    };
-
-    const observer = new ResizeObserver(() => measure());
-    observer.observe(iframe.contentDocument.body);
-    observer.observe(iframe.contentDocument.documentElement);
-    if (containerRef.current?.parentElement) {
-      observer.observe(containerRef.current.parentElement);
-    }
-    measure();
-
-    return () => {
-      observer.disconnect();
-    };
-    // Store actions are stable Zustand refs; only primitives drive re-runs.
   }, [
     html,
-    widgetDomain,
+    viewDomain,
     tool.name,
     pushOpenAiLog,
     setToolData,
     updateOpenaiObject,
     setOpenInAppUrl,
   ]);
+
+  useIframeAutoHeight({
+    iframeRef,
+    containerRef,
+    enabled: Boolean(html),
+    onHeightChange: setContentHeight,
+  });
 
   return (
     <div

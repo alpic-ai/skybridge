@@ -1,8 +1,8 @@
 import { Button } from "@alpic-ai/ui/components/button";
+import { Separator } from "@alpic-ai/ui/components/separator";
 import { LogOut } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { logout, useServerInfo } from "@/lib/mcp/index.js";
-import { Separator } from "../ui/separator.js";
 import { StatusBadge } from "./status-badge.js";
 
 const EXTERNAL_LINKS: ReadonlyArray<{ label: string; href: string }> = [

@@ -1,47 +1,33 @@
 import { useLocalStorageState } from "ahooks";
 import { AnimatePresence, motion } from "framer-motion";
-import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
+import { PrismLight } from "react-syntax-highlighter";
 import json from "react-syntax-highlighter/dist/esm/languages/prism/json";
 
 import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { useCallToolResult } from "@/lib/store.js";
-import { cn } from "@/lib/utils.js";
+import { cn, formatBytes } from "@/lib/utils.js";
 import { devtoolsJsonPrismTheme } from "./json-syntax-theme.js";
 
-SyntaxHighlighter.registerLanguage("json", json);
-
-const syntaxCustomStyle = {
-  margin: 0,
-  padding: 0,
-  background: "transparent",
-  fontSize: "0.75rem",
-} as const;
+PrismLight.registerLanguage("json", json);
 
 function JsonSyntaxBlock({ code }: { code: string }) {
   return (
-    <SyntaxHighlighter
+    <PrismLight
       language="json"
       style={devtoolsJsonPrismTheme}
-      customStyle={syntaxCustomStyle}
+      customStyle={{
+        margin: 0,
+        padding: 0,
+        background: "transparent",
+        fontSize: "0.75rem",
+      }}
       codeTagProps={{ className: "font-mono whitespace-pre" }}
       showLineNumbers={false}
       wrapLongLines
     >
       {code}
-    </SyntaxHighlighter>
+    </PrismLight>
   );
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) {
-    return `${bytes}b`;
-  }
-  const kb = bytes / 1024;
-  if (kb < 1024) {
-    return `${kb < 10 ? kb.toFixed(1) : Math.round(kb)}kb`;
-  }
-  const mb = kb / 1024;
-  return `${mb < 10 ? mb.toFixed(1) : Math.round(mb)}mb`;
 }
 
 export const ToolPanelHeader = () => {
@@ -118,15 +104,15 @@ export const ToolPanelHeader = () => {
               duration: 0.15,
               ease: [0.4, 0, 0.2, 1],
             }}
-            style={{ minHeight: "10%", maxHeight: "40%" }}
+            style={{ maxHeight: "40%" }}
             className="flex w-full shrink-0 flex-row overflow-hidden border-b-2 border-border bg-light-gray"
           >
-            <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-auto p-3">
+            <section className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-auto p-3">
               <JsonSyntaxBlock code={responseJson} />
-            </div>
-            <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-auto border-l border-border p-3">
+            </section>
+            <section className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-auto border-l border-border p-3">
               <JsonSyntaxBlock code={widgetStateJson} />
-            </div>
+            </section>
           </motion.div>
         ) : null}
       </AnimatePresence>

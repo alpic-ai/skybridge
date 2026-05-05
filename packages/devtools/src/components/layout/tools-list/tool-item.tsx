@@ -3,6 +3,12 @@ import {
   AccordionItem,
 } from "@alpic-ai/ui/components/accordion";
 import { Button } from "@alpic-ai/ui/components/button";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@alpic-ai/ui/components/tabs";
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import type Form from "@rjsf/core";
 import { Form as FormComponent } from "@rjsf/shadcn";
@@ -10,26 +16,15 @@ import type {
   FieldErrorProps,
   FieldTemplateProps,
   RJSFSchema,
-  UiSchema,
 } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
 import { Loader2, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs.js";
 import { useCallTool } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
-
-const uiSchema: UiSchema = {
-  "ui:submitButtonOptions": { norender: true },
-};
 
 type TabValue = "form" | "json";
 
@@ -103,7 +98,7 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
               )
             }
           >
-            run
+            Run
           </Button>
         }
       >
@@ -138,30 +133,36 @@ function ToolBody({
   tab: TabValue;
   setTab: (tab: TabValue) => void;
 }) {
+  const hasInput =
+    tool.inputSchema &&
+    Object.keys(tool.inputSchema.properties ?? {}).length > 0;
+
   return (
     <div className="space-y-3">
       <div className="text-xs text-light-gray-foreground bg-light-gray p-2 rounded-md">
         {tool.description}
       </div>
-      <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)}>
-        <div className="flex items-center justify-between gap-2">
-          <TabsList variant="line">
-            <TabsTrigger value="form">form</TabsTrigger>
-            <TabsTrigger value="json">json</TabsTrigger>
-          </TabsList>
-        </div>
-        <TabsContent value="form">
-          <FormBody
-            schema={tool.inputSchema as RJSFSchema}
-            formData={formData}
-            setFormData={setFormData}
-            formRef={formRef}
-          />
-        </TabsContent>
-        <TabsContent value="json">
-          <JsonBody formData={formData} setFormData={setFormData} />
-        </TabsContent>
-      </Tabs>
+      {hasInput && (
+        <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)}>
+          <div className="flex items-center justify-between gap-2">
+            <TabsList variant="line">
+              <TabsTrigger value="form">form</TabsTrigger>
+              <TabsTrigger value="json">json</TabsTrigger>
+            </TabsList>
+          </div>
+          <TabsContent value="form">
+            <FormBody
+              schema={tool.inputSchema as RJSFSchema}
+              formData={formData}
+              setFormData={setFormData}
+              formRef={formRef}
+            />
+          </TabsContent>
+          <TabsContent value="json">
+            <JsonBody formData={formData} setFormData={setFormData} />
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 }
@@ -177,23 +178,21 @@ function FormBody({
   setFormData: (data: Record<string, unknown> | null) => void;
   formRef: React.RefObject<Form<unknown, RJSFSchema> | null>;
 }) {
-  const hasNoInput =
-    !schema?.properties || Object.keys(schema.properties).length === 0;
+  // const hasNoInput =
+  //   !schema?.properties || Object.keys(schema.properties).length === 0;
 
-  if (hasNoInput) {
-    return (
-      <p className="text-xs italic text-muted-foreground">
-        This tool requires no input.
-      </p>
-    );
-  }
+  // if (hasNoInput) {
+  //   return null;
+  // }
 
   return (
     <FormComponent
       ref={formRef as React.RefObject<Form<unknown, RJSFSchema>>}
       schema={schema}
       validator={validator}
-      uiSchema={uiSchema}
+      uiSchema={{
+        "ui:submitButtonOptions": { norender: true },
+      }}
       formData={formData}
       onChange={(data) => setFormData(data.formData)}
       showErrorList={false}
