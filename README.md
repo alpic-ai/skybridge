@@ -46,9 +46,20 @@
   </a>
 </p>
 
-## Used at scale in production
+## Why Skybridge?
 
-Skybridge powers more than 10% of apps published in the ChatGPT and Claude stores. Discover featured apps in our [showcase](https://skybridge.tech/showcase).
+MCP Apps is an extension of the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) adding **rich, interactive UI views** to MCP servers. Building conversational Apps requires new UX design concepts, developer tooling and abstractions to build apps that make interactions between the user, the UI and the model seamless.
+
+Skybridge is the answer to all the problems we ran into while building hundreds of production MCP Apps. Features include:
+
+- **Delightful dev environment**: It provides a dev server with a local emulator, Hot Module Reload, and a permanent tunnel to connect your local app to Claude and ChatGPT.
+- **Write once, run everywhere**: Skybridge abstracts implementation differences between MCP Clients, so your app runs seamlessly in Claude, ChatGPT, VSCode, and any other compatible MCP Apps client.
+- **Agent-ready**: Powerful Skills, CLI, and programmatic DevTools APIs: it provides everything your coding agent needs to build MCP Apps end-to-end.
+- **Type-safe end-to-end**: tRPC-style inference from MCP server tool definition to React view for type-safety end-to-end from server to frontend.
+- **React-first**: Intuitive React Query-style hooks, with advanced state management. 
+- **Examples library**: Get started quickly with production-ready app examples for e-commerce, travel, SaaS, and others.
+
+These companies chose Skybridge to deploy their apps on ChatGPT and Claude stores: 
 
 <p align="center">
   <a href="https://www.datadoghq.com">
@@ -86,19 +97,6 @@ Skybridge powers more than 10% of apps published in the ChatGPT and Claude store
     </picture>
   </a>
 </p>
-
-## Why Skybridge?
-
-MCP Apps is an extension of the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) adding **rich, interactive UI views** to MCP servers. Building conversational Apps requires new UX design concepts, developer tooling and abstractions to build apps that make interactions between the user, the UI and the model seamless.
-
-Skybridge is the answer to all the problems we ran into while building hundreds of production MCP Apps. Features include:
-
-- **Delightful dev environment**: It provides a dev server with a local emulator, Hot Module Reload, and a permanent tunnel to connect your local app to Claude and ChatGPT.
-- **Write once, run everywhere**: Skybridge abstracts implementation differences between MCP Clients, so your app runs seamlessly in Claude, ChatGPT, VSCode, and any other compatible MCP Apps client.
-- **Agent-ready**: Powerful Skills, CLI, and programmatic DevTools APIs: it provides everything your coding agent needs to build MCP Apps end-to-end.
-- **Type-safe end-to-end**: tRPC-style inference from MCP server tool definition to React view for type-safety end-to-end from server to frontend.
-- **React-first**: Intuitive React Query-style hooks, with advanced state management. 
-- **Examples library**: Get started quickly with production-ready app examples for e-commerce, travel, SaaS, and others.
 
 ## Get started
 
