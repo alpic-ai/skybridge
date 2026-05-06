@@ -11,46 +11,21 @@
 <p align="center">
   <a href="https://docs.skybridge.tech">Documentation</a> ·
   <a href="https://docs.skybridge.tech/quickstart/create-new-app">Quickstart</a> ·
-  <a href="https://github.com/alpic-ai/skybridge/tree/main/examples">Examples</a> ·
-  <a href="https://docs.skybridge.tech/showcase">Showcase</a>
+  <a href="https://github.com/alpic-ai/skybridge/tree/main/examples">Examples</a>
 </p>
 
 <p align="center">
-  <img alt="Skybridge app preview" src="docs/images/skybridge-readme-preview.png" width="520" />
+  <a href="https://www.npmjs.com/package/skybridge"><picture><source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/npm/v/skybridge?color=77F5EE&amp;labelColor=161B22&amp;style=for-the-badge"><img alt="npm version" src="https://img.shields.io/npm/v/skybridge?color=E3FAF7&amp;labelColor=F6F8FA&amp;style=for-the-badge"></picture></a>
+  <a href="https://www.npmjs.com/package/skybridge"><picture><source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/npm/dm/skybridge?color=D7FFC8&amp;labelColor=161B22&amp;style=for-the-badge"><img alt="npm downloads" src="https://img.shields.io/npm/dm/skybridge?color=E8FBD9&amp;labelColor=F6F8FA&amp;style=for-the-badge"></picture></a>
+  <a href="https://discord.com/invite/gNAazGueab"><picture><source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/Discord-community-77F5EE?style=for-the-badge&amp;logo=discord&amp;logoColor=77F5EE&amp;labelColor=161B22"><img alt="Discord community" src="https://img.shields.io/badge/Discord-community-E3FAF7?style=for-the-badge&amp;logo=discord&amp;logoColor=5865F2&amp;labelColor=F6F8FA"></picture></a>
+  <a href="https://github.com/alpic-ai/skybridge/blob/main/LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/github/license/alpic-ai/skybridge?color=D7FFC8&amp;labelColor=161B22&amp;style=for-the-badge"><img alt="License: MIT" src="https://img.shields.io/github/license/alpic-ai/skybridge?color=E8FBD9&amp;labelColor=F6F8FA&amp;style=for-the-badge"></picture></a>
 </p>
 
-<p align="center">
-  <a href="https://www.npmjs.com/package/skybridge">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/npm/v/skybridge?color=77F5EE&amp;labelColor=161B22&amp;style=for-the-badge">
-      <img alt="npm version" src="https://img.shields.io/npm/v/skybridge?color=E3FAF7&amp;labelColor=F6F8FA&amp;style=for-the-badge">
-    </picture>
-  </a>
-  <a href="https://www.npmjs.com/package/skybridge">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/npm/dm/skybridge?color=D7FFC8&amp;labelColor=161B22&amp;style=for-the-badge">
-      <img alt="npm downloads" src="https://img.shields.io/npm/dm/skybridge?color=E8FBD9&amp;labelColor=F6F8FA&amp;style=for-the-badge">
-    </picture>
-  </a>
-  <a href="https://discord.com/invite/gNAazGueab">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/Discord-community-77F5EE?style=for-the-badge&amp;logo=discord&amp;logoColor=77F5EE&amp;labelColor=161B22">
-      <img alt="Discord community" src="https://img.shields.io/badge/Discord-community-E3FAF7?style=for-the-badge&amp;logo=discord&amp;logoColor=5865F2&amp;labelColor=F6F8FA">
-    </picture>
-  </a>
-  <a href="https://github.com/alpic-ai/skybridge/blob/main/LICENSE">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/github/license/alpic-ai/skybridge?color=D7FFC8&amp;labelColor=161B22&amp;style=for-the-badge">
-      <img alt="License: MIT" src="https://img.shields.io/github/license/alpic-ai/skybridge?color=E8FBD9&amp;labelColor=F6F8FA&amp;style=for-the-badge">
-    </picture>
-  </a>
-</p>
+## About Skybridge
 
-## Why Skybridge?
+MCP Apps is an extension of the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) adding **rich, interactive UI views** to MCP servers. Conversational Apps need seamless interaction between the user, the UI, and the model. This means new UX patterns, developer tooling, and abstractions. This is why we built Skybridge. 
 
-MCP Apps is an extension of the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) adding **rich, interactive UI views** to MCP servers. Building conversational Apps requires new UX design concepts, developer tooling and abstractions to build apps that make interactions between the user, the UI and the model seamless.
-
-Skybridge is the answer to all the problems we ran into while building hundreds of production MCP Apps. Features include:
+Features include:
 
 - **Delightful dev environment**: It provides a dev server with a local emulator, Hot Module Reload, and a permanent tunnel to connect your local app to Claude and ChatGPT.
 - **Write once, run everywhere**: Skybridge abstracts implementation differences between MCP Clients, so your app runs seamlessly in Claude, ChatGPT, VSCode, and any other compatible MCP Apps client.
@@ -135,28 +110,6 @@ Deploy Skybridge apps instantly on [Alpic](https://alpic.ai) to get scalable hos
 
 Read the [deployment guide](https://docs.skybridge.tech/quickstart/deploy) for the full production path.
 
-## Example templates
-
-Explore all our example templates in the [Examples](https://docs.skybridge.tech/examples) section of the documentation.
-
-| Preview | App | Description | Demo | Code |
-| --- | --- | --- | --- | --- |
-| <img src="docs/images/showcase-capitals.png" alt="Capitals Explorer" width="160" /> | Capitals Explorer | Interactive world map with geolocation, country information, and dynamic capital exploration. | [Try Demo](https://capitals.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/capitals) |
-| <img src="docs/images/showcase-flight-booking.png" alt="Flight Booking" width="160" /> | Flight Booking | Flight search carousel with route details, pricing comparison, and external booking. | [Try Demo](https://flight-booking.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/flight-booking) |
-| <img src="docs/images/showcase-ecommerce.png" alt="Ecommerce Carousel" width="160" /> | Ecommerce Carousel | Product carousel with persistent cart, localization, theme switching, and modal dialogs. | [Try Demo](https://ecommerce.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/ecom-carousel) |
-| <img src="docs/images/showcase-example.png" alt="Everything" width="160" /> | Everything | Comprehensive playground showcasing all Skybridge hooks and features. | [Try Demo](https://everything.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/everything) |
-| <img src="docs/images/showcase-investigation-game.png" alt="Investigation Game" width="160" /> | Investigation Game | Multi-screen mystery game with fullscreen mode and dynamic story progression. | [Try Demo](https://investigation-game.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/investigation-game) |
-| <img src="docs/images/showcase-productivity.png" alt="Productivity" width="160" /> | Productivity | Data visualization dashboard demonstrating Skybridge capabilities for MCP Apps. | [Try Demo](https://productivity.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/productivity) |
-| <img src="docs/images/showcase-times-up.png" alt="Time's Up" width="160" /> | Time's Up | Word-guessing party game where the user gives hints and the AI tries to guess. | [Try Demo](https://times-up.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/times-up) |
-| <img src="docs/images/showcase-manifest-ui.png" alt="Manifest UI" width="160" /> | Manifest UI | Agentic component library example for rich AI-powered experiences. | [Try Demo](https://manifest-ui.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/manifest-ui) |
-| <img src="docs/images/showcase-generative-ui.png" alt="Generative UI" width="160" /> | Generative UI | LLM-generated dynamic UIs with json-render and 36 pre-built shadcn/ui components. | [Try Demo](https://generative-ui.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/generative-ui) |
-| <img src="docs/images/showcase-magic-8-ball.png" alt="Magic 8-Ball" width="160" /> | Magic 8-Ball | Default starter app for the core Skybridge loop: input, server logic, and view rendering. | [Try Demo](https://magic-8-ball.skybridge.tech/try) | [View code](https://github.com/alpic-ai/apps-sdk-template) |
-| <img src="docs/images/showcase-clerk.png" alt="Auth Clerk" width="160" /> | Auth — Clerk | Full OAuth authentication with Clerk and personalized coffee shop search. | — | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-clerk) |
-| <img src="docs/images/showcase-workos.png" alt="Auth WorkOS AuthKit" width="160" /> | Auth — WorkOS AuthKit | Full OAuth authentication with WorkOS AuthKit and personalized coffee shop search. | — | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-workos) |
-| <img src="docs/images/showcase-stytch.png" alt="Auth Stytch" width="160" /> | Auth — Stytch | Full OAuth authentication with Stytch and personalized coffee shop search. | — | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-stytch) |
-| <img src="docs/images/showcase-auth0.png" alt="Auth Auth0" width="160" /> | Auth — Auth0 | Full OAuth authentication with Auth0 and personalized coffee shop search. | — | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-auth0) |
-| <img src="docs/images/showcase-lumo.png" alt="Lumo Interactive AI Tutor" width="160" /> | Lumo — Interactive AI Tutor | Adaptive tutor with Mermaid diagrams, mind maps, quizzes, and fill-in-the-blank exercises. | [Try Demo](https://lumo-mcp-app-39519fdd.alpic.live/try) | [View code](https://github.com/connorads/lumo-mcp-app) |
-
 ## Community & Contributing
 
 We invite you to contribute and help improve Skybridge.
@@ -176,3 +129,29 @@ Built and maintained by [Harijoe](https://github.com/harijoe), [Fred Barthelet](
 <a href="https://github.com/alpic-ai/skybridge/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=alpic-ai/skybridge" alt="Skybridge contributors">
 </a>
+
+## Example templates
+
+Explore all our example templates in the [Examples](https://docs.skybridge.tech/examples) section of the documentation.
+
+| Preview | App | Description | Demo | Code |
+| --- | --- | --- | --- | --- |
+| <img src="docs/images/showcase-capitals.png" alt="Capitals Explorer" width="160" /> | Capitals Explorer | Interactive world map with geolocation, country information, and dynamic capital exploration. | [Try Demo](https://capitals.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/capitals) |
+| <img src="docs/images/showcase-flight-booking.png" alt="Flight Booking" width="160" /> | Flight Booking | Flight search carousel with route details, pricing comparison, and external booking. | [Try Demo](https://flight-booking.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/flight-booking) |
+| <img src="docs/images/showcase-ecommerce.png" alt="Ecommerce Carousel" width="160" /> | Ecommerce Carousel | Product carousel with persistent cart, localization, theme switching, and modal dialogs. | [Try Demo](https://ecommerce.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/ecom-carousel) |
+| <img src="docs/images/showcase-example.png" alt="Everything" width="160" /> | Everything | Comprehensive playground showcasing all Skybridge hooks and features. | [Try Demo](https://everything.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/everything) |
+| <img src="docs/images/showcase-investigation-game.png" alt="Investigation Game" width="160" /> | Investigation Game | Multi-screen mystery game with fullscreen mode and dynamic story progression. | [Try Demo](https://investigation-game.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/investigation-game) |
+| <img src="docs/images/showcase-productivity.png" alt="Productivity" width="160" /> | Productivity | Data visualization dashboard demonstrating Skybridge capabilities for MCP Apps. | [Try Demo](https://productivity.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/productivity) |
+| <img src="docs/images/showcase-times-up.png" alt="Time's Up" width="160" /> | Time's Up | Word-guessing party game where the user gives hints and the AI tries to guess. | [Try Demo](https://times-up.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/times-up) |
+| <img src="docs/images/showcase-manifest-ui.png" alt="Manifest UI" width="160" /> | Manifest UI | Agentic component library example for rich AI-powered experiences. | [Try Demo](https://manifest-ui.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/manifest-ui) |
+| <img src="docs/images/showcase-generative-ui.png" alt="Generative UI" width="160" /> | Generative UI | LLM-generated dynamic UIs with json-render and 36 pre-built shadcn/ui components. | [Try Demo](https://generative-ui.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/generative-ui) |
+| <img src="docs/images/showcase-lumo.png" alt="Lumo Interactive AI Tutor" width="160" /> | Lumo — Interactive AI Tutor | Adaptive tutor with Mermaid diagrams, mind maps, quizzes, and fill-in-the-blank exercises. | [Try Demo](https://lumo-mcp-app-39519fdd.alpic.live/try) | [View code](https://github.com/connorads/lumo-mcp-app) |
+
+### OAuth providers
+
+| Preview | Provider | Description | Code |
+| --- | --- | --- | --- |
+| <img src="docs/images/showcase-clerk.png" alt="Auth Clerk" width="160" /> | Clerk | Full OAuth authentication with Clerk and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-clerk) |
+| <img src="docs/images/showcase-workos.png" alt="Auth WorkOS AuthKit" width="160" /> | WorkOS AuthKit | Full OAuth authentication with WorkOS AuthKit and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-workos) |
+| <img src="docs/images/showcase-stytch.png" alt="Auth Stytch" width="160" /> | Stytch | Full OAuth authentication with Stytch and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-stytch) |
+| <img src="docs/images/showcase-auth0.png" alt="Auth Auth0" width="160" /> | Auth0 | Full OAuth authentication with Auth0 and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-auth0) |
