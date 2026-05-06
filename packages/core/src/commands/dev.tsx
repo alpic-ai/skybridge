@@ -24,7 +24,7 @@ export default class Dev extends Command {
     }),
     open: Flags.boolean({
       description: "Open DevTools in the browser when the server is ready",
-      default: true,
+      default: process.env.SKYBRIDGE_OPEN !== "false",
       allowNo: true,
     }),
     verbose: Flags.boolean({
