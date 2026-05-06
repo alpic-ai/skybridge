@@ -86,15 +86,8 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
             `${resolvedViewsDir}/*.{tsx,jsx}`,
             `${resolvedViewsDir}/*/index.{tsx,jsx}`,
           ],
-          // Framework deps imported by the synthesized virtual entry.
-          // The scanner can't see the virtual module source, so we must
-          // list these explicitly.
-          include: [
-            "react",
-            "react-dom/client",
-            "react/jsx-runtime",
-            "skybridge/web",
-          ],
+          include: ["react", "react-dom/client", "react/jsx-runtime"],
+          exclude: ["skybridge/web"],
         },
         experimental: {
           renderBuiltUrl: (filename) => {
