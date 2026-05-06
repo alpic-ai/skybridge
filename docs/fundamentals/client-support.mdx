@@ -1,0 +1,111 @@
+---
+title: Client Support
+sidebarTitle: Client Support
+description: "Support status and feature availability for Skybridge apps across ChatGPT, Claude, Goose, VSCode, and other MCP clients."
+---
+
+Skybridge apps run on two runtimes — **Apps SDK** (ChatGPT) and **MCP Apps** (open spec). This page maps each AI client to its runtime, shows which Skybridge features are available per client, and documents known client-specific behavior.
+
+## Client Overview
+
+| Client | Type | Runtime | Connection |
+|--------|------|---------|------------|
+| **ChatGPT** | General-purpose AI | Apps SDK (`window.openai`) | Public URL required |
+| **Claude** | General-purpose AI | MCP Apps (ext-apps) | Public URL required |
+| **Goose** | Desktop agent | MCP Apps (ext-apps) | Localhost OK |
+| **VSCode** | IDE | MCP Apps (ext-apps) | Localhost OK |
+| **Postman** | API tool | MCP Apps (ext-apps) | Localhost OK |
+| **MCPJam** | MCP inspector | MCP Apps (ext-apps) | Localhost OK |
+
+<Note>
+Coding agents (Claude Code, Codex CLI, Gemini CLI, Cursor, Amp) implement MCP for tool calling but are headless — they do not render iframes and cannot display views.
+</Note>
+
+All MCP Apps clients (Claude, Goose, VSCode, and others) share the same feature set because they all implement the same [ext-apps specification](https://github.com/modelcontextprotocol/ext-apps).
+
+## Feature Availability by Client
+
+| Hook / Feature | ChatGPT | Claude | Goose | VSCode |
+|----------------|:-------:|:------:|:-----:|:------:|
+| [useToolInfo](/api-reference/use-tool-info) | ✅ | ✅ | ✅ | ✅ |
+| [useCallTool](/api-reference/use-call-tool) | ✅ | ✅ | ✅ | ✅ |
+| [useSendFollowUpMessage](/api-reference/use-send-follow-up-message) | ✅ | ✅ | ✅ | ✅ |
+| [useOpenExternal](/api-reference/use-open-external) | ✅ | ✅ | ✅ | ✅ |
+| [useLayout](/api-reference/use-layout) | ✅ | ✅ | ✅ | ✅ |
+| [useUser](/api-reference/use-user) | ✅ | ✅ | ✅ | ✅ |
+| [useDisplayMode](/api-reference/use-display-mode) | ✅ | ✅ | ✅ | ✅ |
+| [useViewState](/api-reference/use-view-state) | ✅ | ⚠️ | ⚠️ | ⚠️ |
+| [data-llm](/api-reference/data-llm) | ✅ | ⚠️ | ⚠️ | ⚠️ |
+| [useRequestModal](/api-reference/use-request-modal) | ✅ | ⚠️ | ⚠️ | ⚠️ |
+| [useFiles](/api-reference/use-files) | ✅ | ❌ | ❌ | ❌ |
+| [useSetOpenInAppUrl](/api-reference/use-set-open-in-app-url) | ✅ | ❌ | ❌ | ❌ |
+| [useAppsSdkContext](/api-reference/use-apps-sdk-context) | ✅ | ❌ | ❌ | ❌ |
+| [useMcpAppContext](/api-reference/use-mcp-app-context) | ❌ | ✅ | ✅ | ✅ |
+
+## Client-Specific Notes
+
+### ChatGPT
+
+- **Runtime**: Apps SDK (`window.openai`) with MCP Apps compatibility layer
+- **Exclusive features**: `useFiles`, `useSetOpenInAppUrl`, and raw `window.openai` APIs not yet wrapped by Skybridge (`requestCheckout`, `requestClose`, `notifyIntrinsicHeight`)
+- **Tool accessibility**: Tools invoked from a view must set `_meta["openai/widgetAccessible"]: true`
+- **Caching**: ChatGPT aggressively caches views — use [DevTools](/devtools) for iteration and test in ChatGPT only for final validation
+- **Connection**: Requires a public URL. Run `npm run dev --tunnel` during development
+
+<Note>
+ChatGPT: tools must declare `_meta["openai/widgetAccessible"]: true`; MCP Apps: all tools accessible by default
+</Note>
+
+### Claude
+
+- **Runtime**: MCP Apps (ext-apps spec)
+- **Connection**: Requires a public URL. Run `npm run dev --tunnel` during development
+- **Setup**: **Settings → Connectors → Add Custom Connector**, then enter your `/mcp` URL
+
+<Note>
+`useViewState` and `data-llm` are polyfilled — state does not persist across view renders. `useRequestModal` is polyfilled — renders in-iframe instead of a host modal. All tools are accessible via `useCallTool` by default.
+</Note>
+
+### Goose
+
+- **Runtime**: MCP Apps (ext-apps spec)
+- **Connection**: Connects directly to `localhost` — no tunnel or public URL needed
+- **Setup**: Point Goose to `http://localhost:3000/mcp`
+- **Note**: Preferred for validating MCP Apps views during development because DevTools only mocks the Apps SDK (ChatGPT) runtime
+
+<Note>
+`useViewState` and `data-llm` are polyfilled — state does not persist across view renders. `useRequestModal` is polyfilled — renders in-iframe instead of a host modal. All tools are accessible via `useCallTool` by default.
+</Note>
+
+### VSCode
+
+- **Runtime**: MCP Apps (ext-apps spec)
+- **Connection**: Connects directly to `localhost` — no tunnel or public URL needed
+- **Setup**: Point your VSCode MCP config to `http://localhost:3000/mcp`
+
+<Note>
+`useViewState` and `data-llm` are polyfilled — state does not persist across view renders. `useRequestModal` is polyfilled — renders in-iframe instead of a host modal. All tools are accessible via `useCallTool` by default.
+</Note>
+
+## DevTools Runtime Coverage
+
+DevTools mocks the **Apps SDK runtime only** (mocked `window.openai`). MCP Apps view rendering is not supported in DevTools.
+
+| Environment | Runtime |
+|-------------|---------|
+| DevTools (localhost) | Apps SDK (ChatGPT) — mocked |
+| ChatGPT | Apps SDK |
+| Claude | MCP Apps |
+| Goose | MCP Apps |
+| VSCode | MCP Apps |
+
+<Warning>
+Always validate MCP Apps-specific behavior in a real client such as Goose or Claude before shipping. See [Fast Iteration](/concepts/fast-iteration) for the recommended development workflow.
+</Warning>
+
+## Related
+
+- [Apps SDK (ChatGPT)](/fundamentals/apps-sdk) — ChatGPT runtime deep dive
+- [MCP Apps](/fundamentals/mcp-apps) — MCP Apps specification, protocol, and limitations
+- [Test Your App](/quickstart/test-your-app) — Step-by-step setup for each client
+- [API Reference](/api-reference#runtime-compatibility) — Complete hook compatibility matrix
