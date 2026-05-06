@@ -39,19 +39,16 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
   };
 
   const [tab, setTab] = useState<TabValue>("form");
-  const [pendingHighlight, setPendingHighlight] = useState(false);
-
-  useEffect(() => {
-    if (pendingHighlight && tab === "form") {
-      formRef.current?.validateForm();
-      setPendingHighlight(false);
-    }
-  }, [pendingHighlight, tab]);
+  const [jsonError, setJsonError] = useState(false);
 
   const handleRun = async () => {
     const schema = tool.inputSchema as RJSFSchema;
     const hasNoInput =
       !schema?.properties || Object.keys(schema.properties).length === 0;
+
+    if (tab === "json" && jsonError) {
+      return;
+    }
 
     if (!hasNoInput) {
       const { errors } = validator.validateFormData(formData, schema);
@@ -59,8 +56,7 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
         if (tab === "form") {
           formRef.current?.validateForm();
         } else {
-          setTab("form");
-          setPendingHighlight(true);
+          setJsonError(true);
         }
         return;
       }
@@ -85,24 +81,26 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
           "font-mono text-xs font-normal text-foreground",
           "no-underline hover:bg-muted/40",
         )}
-        action={
-          <Button
-            disabled={isPending || !open}
-            variant={open ? "primary" : "secondary"}
-            onClick={handleRun}
-            icon={
-              isPending ? (
-                <Loader2 className="size-3 animate-spin" />
-              ) : (
-                <Play className="size-3" />
-              )
-            }
-          >
-            Run
-          </Button>
-        }
       >
         <div className="min-w-0 flex-1 text-left">{tool.name}</div>
+        {open && (
+          <div className="flex shrink-0 items-center">
+            <Button
+              disabled={isPending}
+              variant={open ? "primary" : "secondary"}
+              onClick={handleRun}
+              icon={
+                isPending ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <Play className="size-3" />
+                )
+              }
+            >
+              Run
+            </Button>
+          </div>
+        )}
       </AccordionTrigger>
       <AccordionContent className="px-3 pt-1 pb-3 text-foreground">
         <ToolBody
@@ -112,6 +110,8 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
           formRef={formRef}
           tab={tab}
           setTab={setTab}
+          jsonError={jsonError}
+          setJsonError={setJsonError}
         />
       </AccordionContent>
     </AccordionItem>
@@ -125,6 +125,8 @@ function ToolBody({
   formRef,
   tab,
   setTab,
+  jsonError,
+  setJsonError,
 }: {
   tool: Tool;
   formData: Record<string, unknown>;
@@ -132,6 +134,8 @@ function ToolBody({
   formRef: React.RefObject<Form<unknown, RJSFSchema> | null>;
   tab: TabValue;
   setTab: (tab: TabValue) => void;
+  jsonError: boolean;
+  setJsonError: (value: boolean) => void;
 }) {
   const hasInput =
     tool.inputSchema &&
@@ -139,9 +143,6 @@ function ToolBody({
 
   return (
     <div className="space-y-3">
-      <div className="text-xs text-light-gray-foreground bg-light-gray p-2 rounded-md">
-        {tool.description}
-      </div>
       {hasInput && (
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)}>
           <div className="flex items-center justify-between gap-2">
@@ -159,7 +160,12 @@ function ToolBody({
             />
           </TabsContent>
           <TabsContent value="json">
-            <JsonBody formData={formData} setFormData={setFormData} />
+            <JsonBody
+              formData={formData}
+              setFormData={setFormData}
+              error={jsonError}
+              setError={setJsonError}
+            />
           </TabsContent>
         </Tabs>
       )}
@@ -226,9 +232,13 @@ function FormBody({
 function JsonBody({
   formData,
   setFormData,
+  error,
+  setError,
 }: {
   formData: Record<string, unknown>;
   setFormData: (data: Record<string, unknown> | null) => void;
+  error: boolean;
+  setError: (value: boolean) => void;
 }) {
   const [json, setJson] = useState(JSON.stringify(formData, null, 2));
 
@@ -240,17 +250,28 @@ function JsonBody({
     setJson(value);
     try {
       setFormData(JSON.parse(value));
+      setError(false);
     } catch {
-      // ignore parse errors while typing
+      setError(true);
     }
   };
 
   return (
-    <textarea
-      className="h-40 w-full rounded-md border border-border p-2 font-mono text-xs"
-      spellCheck={false}
-      value={json}
-      onChange={(e) => handleChange(e.target.value)}
-    />
+    <div className="space-y-1.5">
+      <textarea
+        className={cn(
+          "h-40 w-full rounded-md border p-2 font-mono text-xs",
+          error ? "border-destructive" : "border-border",
+        )}
+        spellCheck={false}
+        value={json}
+        onChange={(e) => handleChange(e.target.value)}
+      />
+      {error && (
+        <div className="text-xs text-destructive">
+          The provided JSON is invalid
+        </div>
+      )}
+    </div>
   );
 }

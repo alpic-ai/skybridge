@@ -6,9 +6,9 @@ import { logout, useServerInfo } from "@/lib/mcp/index.js";
 import { StatusBadge } from "./status-badge.js";
 
 const EXTERNAL_LINKS: ReadonlyArray<{ label: string; href: string }> = [
-  { label: "discord", href: "#" },
-  { label: "docs", href: "#" },
-  { label: "github", href: "#" },
+  { label: "discord", href: "https://discord.gg/awV4gu74wK" },
+  { label: "docs", href: "https://docs.skybridge.tech/" },
+  { label: "github", href: "https://github.com/alpic-ai/skybridge" },
 ];
 
 function Chip({ children }: { children: React.ReactNode }) {

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { useIframeAutoHeight } from "@/hooks/use-iframe-auto-height.js";
+import { useIframeMounted } from "@/hooks/use-iframe-mounted.js";
 import mcpClient, {
   useSelectedTool,
   useSuspenseResource,
 } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { asString, injectWaitForOpenai } from "@/lib/utils.js";
-import { useIframeAutoHeight } from "../../../../hooks/use-iframe-auto-height.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
 
 export const View = () => {
@@ -85,6 +86,8 @@ export const View = () => {
     documentKey: html,
   });
 
+  const mounted = useIframeMounted({ iframeRef, documentKey: html });
+
   return (
     <div
       ref={containerRef}
@@ -92,6 +95,7 @@ export const View = () => {
       style={{
         width: "770px",
         height: contentHeight != null ? `${contentHeight}px` : "auto",
+        opacity: mounted ? 1 : 0,
       }}
     >
       <iframe
