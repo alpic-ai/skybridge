@@ -241,15 +241,22 @@ function JsonBody({
   setError: (value: boolean) => void;
 }) {
   const [json, setJson] = useState(JSON.stringify(formData, null, 2));
+  const isInternalUpdate = useRef(false);
 
   useEffect(() => {
+    if (isInternalUpdate.current) {
+      isInternalUpdate.current = false;
+      return;
+    }
     setJson(JSON.stringify(formData, null, 2));
   }, [formData]);
 
   const handleChange = (value: string) => {
     setJson(value);
     try {
-      setFormData(JSON.parse(value));
+      const parsed = JSON.parse(value);
+      isInternalUpdate.current = true;
+      setFormData(parsed);
       setError(false);
     } catch {
       setError(true);

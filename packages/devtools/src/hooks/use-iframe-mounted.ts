@@ -11,6 +11,9 @@ export const useIframeMounted = ({
 
   useEffect(() => {
     setMounted(false);
+    if (!documentKey) {
+      return;
+    }
     const doc = iframeRef.current?.contentDocument;
     if (!doc) {
       return;
