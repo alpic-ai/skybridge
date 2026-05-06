@@ -29,11 +29,24 @@ skybridge dev
 | Flag | Description |
 |------|-------------|
 | `-p, --port <number>` | Port to run the server on. Defaults to `3000`, or the next available port if `3000` is in use. |
+| `--tunnel` | Open an Alpic tunnel for remote testing. |
+| `--no-open` | Don't open DevTools in the browser when the server is ready. |
+| `-v, --verbose` | Show tunnel logs. |
 
 You can also set the port via the `PORT` environment variable:
 
 ```bash
 PORT=8080 skybridge dev
+```
+
+If you'd rather never have DevTools opened automatically, export `SKYBRIDGE_OPEN=false` at the shell level (e.g. in your `~/.zshrc`, `~/.bashrc`, or shell profile). It's equivalent to passing `--no-open` on every run, but lets you opt out once globally instead of per-invocation:
+
+```bash
+# one-off
+SKYBRIDGE_OPEN=false skybridge dev
+
+# persistent (add to your shell profile)
+export SKYBRIDGE_OPEN=false
 ```
 
 ---
