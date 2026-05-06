@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useIframeAutoHeight } from "@/hooks/use-iframe-auto-height.js";
+import { useIframeMounted } from "@/hooks/use-iframe-mounted.js";
 import mcpClient, {
   useSelectedTool,
   useSuspenseResource,
 } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
+import { asString, injectWaitForOpenai } from "@/lib/utils.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
-import { injectWaitForOpenai } from "./utils.js";
 
 export const View = () => {
   const tool = useSelectedTool();
@@ -18,30 +20,30 @@ export const View = () => {
     useStore();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const hasLoadedRef = useRef(false);
+  const openaiObjectRef = useRef(openaiObject);
+  openaiObjectRef.current = openaiObject;
+  const [contentHeight, setContentHeight] = useState<number | null>(null);
 
-  const html = (resource.contents[0] as { text: string }).text;
+  const resourceEntry = resource.contents[0] as {
+    text: string;
+    _meta?: Record<string, unknown>;
+  };
+  const html = resourceEntry.text;
+  const viewDomain = asString(resourceEntry._meta?.["openai/widgetDomain"]);
 
-  const handleLoad = useCallback(() => {
-    if (hasLoadedRef.current) {
-      return;
-    }
-
+  useEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe?.contentWindow || !iframe.contentDocument) {
       return;
     }
 
-    hasLoadedRef.current = true;
-
-    const viewDomain = resource.contents[0]._meta?.["openai/widgetDomain"];
-    if (viewDomain && typeof viewDomain === "string") {
+    if (viewDomain) {
       setOpenInAppUrl(tool.name, viewDomain);
     }
 
     createAndInjectOpenAi(
       iframe.contentWindow,
-      openaiObject,
+      openaiObjectRef.current,
       (command, args, type = "default") => {
         pushOpenAiLog(tool.name, {
           timestamp: Date.now(),
@@ -67,36 +69,41 @@ export const View = () => {
       openaiRef: iframeRef as React.RefObject<HTMLIFrameElement>,
     });
   }, [
-    openaiObject,
+    html,
+    viewDomain,
+    tool.name,
     pushOpenAiLog,
     setToolData,
     updateOpenaiObject,
     setOpenInAppUrl,
-    tool.name,
-    html,
-    resource,
   ]);
 
-  useEffect(() => {
-    handleLoad();
-  }, [handleLoad]);
+  useIframeAutoHeight({
+    iframeRef,
+    containerRef,
+    enabled: Boolean(html),
+    onHeightChange: setContentHeight,
+    documentKey: html,
+  });
+
+  const mounted = useIframeMounted({ iframeRef, documentKey: html });
 
   return (
     <div
       ref={containerRef}
-      className="relative overflow-auto"
+      className="relative mx-auto overflow-hidden rounded-2xl border border-border bg-background shadow-md"
       style={{
-        width: "100%",
-        height: "100%",
+        width: "770px",
+        height: contentHeight != null ? `${contentHeight}px` : "auto",
+        opacity: mounted ? 1 : 0,
       }}
     >
       <iframe
         ref={iframeRef}
         src="about:blank"
-        onLoad={handleLoad}
         style={{
           width: "100%",
-          height: "100%",
+          height: contentHeight != null ? `${contentHeight}px` : "100%",
           border: "none",
           display: "block",
         }}

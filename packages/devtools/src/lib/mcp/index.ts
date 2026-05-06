@@ -7,6 +7,7 @@ import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { AppsSdkContext, CallToolArgs } from "skybridge/web";
 import { useAuthStore } from "@/lib/auth-store.js";
+import { env } from "@/lib/env.js";
 import { getInspectorPreferences } from "@/lib/inspector-preferences-store.js";
 import { useStore } from "@/lib/store.js";
 import { useSelectedToolName } from "../nuqs.js";
@@ -18,7 +19,7 @@ const client = new McpClient();
 let currentAuthProvider: BrowserOAuthProvider | null = null;
 
 const getServerUrl = () => {
-  return `${window.location.origin}/mcp`;
+  return env.VITE_MCP_SERVER_URL;
 };
 
 export async function connectToServer(): Promise<void> {
@@ -123,15 +124,19 @@ export const useCallTool = () => {
       setToolData(toolName, {
         input: args ?? {},
         response: undefined,
+        durationMs: null,
         openaiRef: null,
         openaiLogs: [],
         openaiObject: null,
         openInAppUrl: null,
       });
+      const startedAt = performance.now();
       const response = await client.callTool(toolName, args);
+      const durationMs = Math.round(performance.now() - startedAt);
       setToolData(toolName, {
         input: args ?? {},
         response,
+        durationMs,
         openaiRef: null,
         openaiLogs: [],
         openaiObject: {

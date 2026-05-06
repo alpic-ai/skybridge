@@ -17,6 +17,7 @@ export type OpenAiLog = {
 type ToolData = {
   input: Record<string, unknown>;
   response: CallToolResponse;
+  durationMs: number | null;
   openaiRef: React.RefObject<HTMLIFrameElement> | null;
   openaiLogs: OpenAiLog[];
   openaiObject: AppsSdkContext | null;
@@ -40,12 +41,25 @@ export type Store = {
 export const useStore = create<Store>()((setState) => ({
   tools: {},
   setToolData: (tool: string, data: Partial<ToolData>) =>
-    setState((state) =>
-      updateNestedState(state, `tools.${tool}`, {
-        ...state.tools[tool],
+    setState((state) => {
+      const prev = state.tools[tool];
+      if (prev) {
+        let unchanged = true;
+        for (const key of Object.keys(data) as (keyof ToolData)[]) {
+          if (prev[key] !== data[key]) {
+            unchanged = false;
+            break;
+          }
+        }
+        if (unchanged) {
+          return state;
+        }
+      }
+      return updateNestedState(state, `tools.${tool}`, {
+        ...(prev ?? {}),
         ...data,
-      }),
-    ),
+      });
+    }),
   updateOpenaiObject: (
     tool: string,
     key: keyof AppsSdkContext,
@@ -70,9 +84,12 @@ export const useStore = create<Store>()((setState) => ({
       ]);
     }),
   setOpenInAppUrl: (tool: string, href: string) =>
-    setState((state) =>
-      updateNestedState(state, `tools.${tool}.openInAppUrl`, href),
-    ),
+    setState((state) => {
+      if (state.tools[tool]?.openInAppUrl === href) {
+        return state;
+      }
+      return updateNestedState(state, `tools.${tool}.openInAppUrl`, href);
+    }),
 }));
 
 export const useCallToolResult = (toolName: string) => {

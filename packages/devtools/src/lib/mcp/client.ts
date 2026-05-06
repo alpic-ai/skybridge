@@ -15,6 +15,12 @@ export class McpClient {
 
     this.transport = new StreamableHTTPClientTransport(url, {
       authProvider,
+      requestInit: {
+        headers: {
+          "x-forwarded-host": url.host,
+          "x-forwarded-proto": url.protocol.replace(/:$/, ""),
+        },
+      },
     });
 
     this.client = new Client(
