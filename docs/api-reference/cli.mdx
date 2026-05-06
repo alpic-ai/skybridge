@@ -39,10 +39,14 @@ You can also set the port via the `PORT` environment variable:
 PORT=8080 skybridge dev
 ```
 
-Set `SKYBRIDGE_OPEN=false` to disable auto-opening DevTools by default (equivalent to passing `--no-open` on every run):
+If you'd rather never have DevTools opened automatically, export `SKYBRIDGE_OPEN=false` at the shell level (e.g. in your `~/.zshrc`, `~/.bashrc`, or shell profile). It's equivalent to passing `--no-open` on every run, but lets you opt out once globally instead of per-invocation:
 
 ```bash
+# one-off
 SKYBRIDGE_OPEN=false skybridge dev
+
+# persistent (add to your shell profile)
+export SKYBRIDGE_OPEN=false
 ```
 
 ---
