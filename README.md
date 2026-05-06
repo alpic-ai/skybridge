@@ -1,6 +1,8 @@
+# Skybridge
+
 <p align="center">
   <a href="https://skybridge.tech">
-    <img alt="Skybridge" src="docs/images/skybridge-readme-banner-new.png" width="100%" />
+    <img alt="Skybridge - React framework for ChatGPT Apps and MCP Apps" src="docs/images/skybridge-readme-banner-new.png" width="100%" />
   </a>
 </p>
 
@@ -23,7 +25,9 @@
 
 ## About Skybridge
 
-MCP Apps is an extension of the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) adding **rich, interactive UI views** to MCP servers. Conversational Apps need seamless interaction between the user, the UI, and the model. This means new UX patterns, developer tooling, and abstractions. This is why we built Skybridge. 
+Skybridge helps developers build type-safe ChatGPT Apps and MCP Apps with React views, MCP servers, local devtools, and one API across the ChatGPT Apps SDK and MCP Apps runtimes.
+
+MCP Apps extend the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) with **rich, interactive UI views** rendered from MCP servers. Conversational apps need seamless interaction between the user, the UI, and the model. This means new UX patterns, developer tooling, and abstractions. This is why we built Skybridge.
 
 Features include:
 
