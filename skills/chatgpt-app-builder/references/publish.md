@@ -6,7 +6,7 @@
 
 ## 2. Audit CSP
 
-Ensure all external domains are declared in views `_meta.ui.csp`. See [csp.md](csp.md).
+Ensure all external domains are declared in `view.csp`. See [csp.md](csp.md).
 
 ## 3. Submit
 
