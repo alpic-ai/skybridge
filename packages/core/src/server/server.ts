@@ -26,7 +26,11 @@ import type {
   ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
 import { mergeWith, union } from "es-toolkit";
-import type { ErrorRequestHandler, Express, RequestHandler } from "express";
+import express, {
+  type ErrorRequestHandler,
+  type Express,
+  type RequestHandler,
+} from "express";
 import { createApp } from "./express.js";
 import { createMiddlewareEntry } from "./metric.js";
 import type {
@@ -256,11 +260,6 @@ type ToolHandler<
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
 ) => TReturn | Promise<TReturn>;
 
-type MiddlewareConfig = {
-  path?: string;
-  handlers: RequestHandler[];
-};
-
 type ErrorMiddlewareConfig = {
   path?: string;
   handlers: ErrorRequestHandler[];
@@ -294,8 +293,19 @@ export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
 > extends McpServerBaseOmitted {
   declare readonly $types: McpServerTypes<TTools>;
-  private express?: Express;
-  private customMiddleware: MiddlewareConfig[] = [];
+  /**
+   * The underlying Express app. Use this to extend the HTTP server with
+   * custom routes, middleware, or settings — e.g.
+   * `server.express.get("/health", ...)`.
+   *
+   * `express.json()` is pre-applied. Register your handlers before `run()`;
+   * after `run()`, dev-mode middleware, the `/mcp` route, and the default
+   * error handler are appended in that order.
+   *
+   * Note: Alpic Cloud only routes traffic to `/mcp` — custom routes work
+   * locally and on self-hosted deployments.
+   */
+  readonly express: Express;
   private customErrorMiddleware: ErrorMiddlewareConfig[] = [];
   private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private mcpMiddlewareApplied = false;
@@ -308,6 +318,8 @@ export class McpServer<
     super(serverInfo, options);
     this.serverInfo = serverInfo;
     this.serverOptions = options;
+    this.express = express();
+    this.express.use(express.json());
   }
 
   use(...handlers: RequestHandler[]): this;
@@ -316,17 +328,13 @@ export class McpServer<
     pathOrHandler: string | RequestHandler,
     ...handlers: RequestHandler[]
   ): this {
+    // Branching is load-bearing: Express's `app.use` overloads can't be
+    // resolved against a `string | RequestHandler` union, so we narrow.
     if (typeof pathOrHandler === "string") {
-      this.customMiddleware.push({
-        path: pathOrHandler,
-        handlers,
-      });
+      this.express.use(pathOrHandler, ...handlers);
     } else {
-      this.customMiddleware.push({
-        handlers: [pathOrHandler, ...handlers],
-      });
+      this.express.use(pathOrHandler, ...handlers);
     }
-
     return this;
   }
 
@@ -508,14 +516,11 @@ export class McpServer<
     this.applyMcpMiddleware();
     const httpServer = http.createServer();
 
-    if (!this.express) {
-      this.express = await createApp({
-        mcpServer: this,
-        httpServer,
-        customMiddleware: this.customMiddleware,
-        errorMiddleware: this.customErrorMiddleware,
-      });
-    }
+    await createApp({
+      mcpServer: this,
+      httpServer,
+      errorMiddleware: this.customErrorMiddleware,
+    });
 
     httpServer.on("request", this.express);
     const port = parseInt(process.env.__PORT ?? "3000", 10);

@@ -15,8 +15,6 @@ vi.mock("./viewsDevServer.js", () => ({
       next()) as RequestHandler,
 }));
 
-const fakeServer = {} as McpServer;
-
 async function listen(app: Parameters<typeof http.createServer>[1]) {
   const server = http.createServer(app);
   await new Promise<void>((resolve) => server.listen(0, resolve));
@@ -39,6 +37,111 @@ async function postApi(port: number) {
   return fetch(`http://localhost:${port}/api/test`, { method: "POST" });
 }
 
+describe("McpServer.express", () => {
+  it("exposes a ready Express app immediately after construction", () => {
+    const server = new McpServer({ name: "t", version: "0.0.0" });
+    expect(server.express).toBeDefined();
+    expect(typeof server.express.use).toBe("function");
+    expect(typeof server.express.get).toBe("function");
+  });
+
+  it("server.express.get registers a route reachable alongside /mcp", async () => {
+    const { createApp } = await import("./express.js");
+    const server = new McpServer({ name: "t", version: "0.0.0" });
+    server.express.get("/health", (_req, res) => {
+      res.json({ status: "ok" });
+    });
+
+    const httpServer = http.createServer();
+    await createApp({ mcpServer: server, httpServer });
+    const { port, server: listening } = await listen(server.express);
+    openServer = listening;
+
+    const health = await fetch(`http://localhost:${port}/health`);
+    expect(health.status).toBe(200);
+    expect(await health.json()).toEqual({ status: "ok" });
+
+    // /mcp still works (POST returns 200/4xx, not 404)
+    const mcp = await postMcp(port);
+    expect(mcp.status).not.toBe(404);
+  });
+
+  it("server.use and server.express.use produce the same registration order", async () => {
+    const { createApp } = await import("./express.js");
+    const callsA: string[] = [];
+    const callsB: string[] = [];
+
+    const buildServer = () => new McpServer({ name: "t", version: "0.0.0" });
+
+    const sA = buildServer();
+    sA.use((_req, _res, next) => {
+      callsA.push("first");
+      next();
+    });
+    sA.express.use((_req, _res, next) => {
+      callsA.push("second");
+      next();
+    });
+
+    const sB = buildServer();
+    sB.express.use((_req, _res, next) => {
+      callsB.push("first");
+      next();
+    });
+    sB.use((_req, _res, next) => {
+      callsB.push("second");
+      next();
+    });
+
+    for (const s of [sA, sB]) {
+      s.express.get("/probe", (_req, res) => res.json({ ok: true }));
+      const httpServer = http.createServer();
+      await createApp({ mcpServer: s, httpServer });
+      const { port, server: listening } = await listen(s.express);
+      openServer = listening;
+      await fetch(`http://localhost:${port}/probe`);
+      listening.close();
+    }
+
+    expect(callsA).toEqual(["first", "second"]);
+    expect(callsB).toEqual(["first", "second"]);
+  });
+
+  it("useOnError still wraps thrown /mcp errors after the route is mounted", async () => {
+    const { createApp } = await import("./express.js");
+    const server = new McpServer({ name: "t", version: "0.0.0" });
+    // Register the error handler BEFORE createApp — useOnError should still
+    // apply it after /mcp, so /mcp errors hit it.
+    const seen: string[] = [];
+    server.useOnError((_err, _req, res, _next) => {
+      seen.push("useOnError");
+      res.status(503).json({ from: "useOnError" });
+    });
+
+    // Force the /mcp handler to throw so the error pipeline runs.
+    vi.spyOn(server, "connectStatelessTransport").mockRejectedValue(
+      new Error("boom"),
+    );
+
+    const httpServer = http.createServer();
+    await createApp({
+      mcpServer: server,
+      httpServer,
+      // Mirror what run() does: forward the McpServer's useOnError handlers
+      // to createApp so they get applied after /mcp.
+      // biome-ignore lint/complexity/useLiteralKeys: test mirrors run() internals to verify useOnError ordering
+      errorMiddleware: server["customErrorMiddleware"],
+    });
+    const { port, server: listening } = await listen(server.express);
+    openServer = listening;
+
+    const res = await postMcp(port);
+    expect(seen).toEqual(["useOnError"]);
+    expect(res.status).toBe(503);
+    expect(await res.json()).toEqual({ from: "useOnError" });
+  });
+});
+
 describe("createApp", () => {
   it("runs global custom middleware before the /mcp handler", async () => {
     const { createApp } = await import("./express.js");
@@ -49,15 +152,14 @@ describe("createApp", () => {
       next();
     };
 
-    const httpServer = http.createServer();
-    const app = await createApp({
-      mcpServer: fakeServer,
-      httpServer,
-      customMiddleware: [{ handlers: [mw] }],
-    });
+    const server = new McpServer({ name: "t", version: "0.0.0" });
+    server.use(mw);
 
-    const { port, server } = await listen(app);
-    openServer = server;
+    const httpServer = http.createServer();
+    const app = await createApp({ mcpServer: server, httpServer });
+
+    const { port, server: httpListening } = await listen(app);
+    openServer = httpListening;
 
     await postMcp(port);
     expect(calls).toEqual(["custom"]);
@@ -72,15 +174,14 @@ describe("createApp", () => {
       next();
     };
 
-    const httpServer = http.createServer();
-    const app = await createApp({
-      mcpServer: fakeServer,
-      httpServer,
-      customMiddleware: [{ path: "/mcp", handlers: [mw] }],
-    });
+    const server = new McpServer({ name: "t", version: "0.0.0" });
+    server.use("/mcp", mw);
 
-    const { port, server } = await listen(app);
-    openServer = server;
+    const httpServer = http.createServer();
+    const app = await createApp({ mcpServer: server, httpServer });
+
+    const { port, server: httpListening } = await listen(app);
+    openServer = httpListening;
 
     await postMcp(port);
     expect(calls).toEqual(["auth"]);
@@ -95,15 +196,14 @@ describe("createApp", () => {
       res.status(401).json({ error: "Unauthorized" });
     };
 
-    const httpServer = http.createServer();
-    const app = await createApp({
-      mcpServer: fakeServer,
-      httpServer,
-      customMiddleware: [{ path: "/mcp", handlers: [reject] }],
-    });
+    const server = new McpServer({ name: "t", version: "0.0.0" });
+    server.use("/mcp", reject);
 
-    const { port, server } = await listen(app);
-    openServer = server;
+    const httpServer = http.createServer();
+    const app = await createApp({ mcpServer: server, httpServer });
+
+    const { port, server: httpListening } = await listen(app);
+    openServer = httpListening;
 
     const res = await postMcp(port);
     expect(calls).toEqual(["reject"]);
@@ -124,15 +224,15 @@ describe("createApp", () => {
       next();
     };
 
-    const httpServer = http.createServer();
-    const app = await createApp({
-      mcpServer: fakeServer,
-      httpServer,
-      customMiddleware: [{ handlers: [mwA] }, { handlers: [mwB] }],
-    });
+    const server = new McpServer({ name: "t", version: "0.0.0" });
+    server.use(mwA);
+    server.use(mwB);
 
-    const { port, server } = await listen(app);
-    openServer = server;
+    const httpServer = http.createServer();
+    const app = await createApp({ mcpServer: server, httpServer });
+
+    const { port, server: httpListening } = await listen(app);
+    openServer = httpListening;
 
     await postMcp(port);
     expect(calls).toEqual(["A", "B"]);
@@ -147,15 +247,14 @@ describe("createApp", () => {
       next();
     };
 
-    const httpServer = http.createServer();
-    const app = await createApp({
-      mcpServer: fakeServer,
-      httpServer,
-      customMiddleware: [{ path: "/api", handlers: [apiMw] }],
-    });
+    const server = new McpServer({ name: "t", version: "0.0.0" });
+    server.use("/api", apiMw);
 
-    const { port, server } = await listen(app);
-    openServer = server;
+    const httpServer = http.createServer();
+    const app = await createApp({ mcpServer: server, httpServer });
+
+    const { port, server: httpListening } = await listen(app);
+    openServer = httpListening;
 
     // Hit /mcp — the /api middleware should NOT fire
     await postMcp(port);
@@ -171,15 +270,14 @@ describe("createApp", () => {
       res.json({ status: "ok" });
     });
 
-    const httpServer = http.createServer();
-    const app = await createApp({
-      mcpServer: fakeServer,
-      httpServer,
-      customMiddleware: [{ handlers: [router as RequestHandler] }],
-    });
+    const server = new McpServer({ name: "t", version: "0.0.0" });
+    server.use(router as RequestHandler);
 
-    const { port, server } = await listen(app);
-    openServer = server;
+    const httpServer = http.createServer();
+    const app = await createApp({ mcpServer: server, httpServer });
+
+    const { port, server: httpListening } = await listen(app);
+    openServer = httpListening;
 
     const res = await fetch(`http://localhost:${port}/health`);
     expect(res.status).toBe(200);
@@ -195,17 +293,14 @@ describe("createApp", () => {
       res.json({ value: 42 });
     });
 
-    const httpServer = http.createServer();
-    const app = await createApp({
-      mcpServer: fakeServer,
-      httpServer,
-      customMiddleware: [
-        { path: "/api", handlers: [router as RequestHandler] },
-      ],
-    });
+    const server = new McpServer({ name: "t", version: "0.0.0" });
+    server.use("/api", router as RequestHandler);
 
-    const { port, server } = await listen(app);
-    openServer = server;
+    const httpServer = http.createServer();
+    const app = await createApp({ mcpServer: server, httpServer });
+
+    const { port, server: httpListening } = await listen(app);
+    openServer = httpListening;
 
     const res = await fetch(`http://localhost:${port}/api/data`);
     expect(res.status).toBe(200);
@@ -219,15 +314,14 @@ describe("createApp", () => {
       throw new Error("boom");
     };
 
-    const httpServer = http.createServer();
-    const app = await createApp({
-      mcpServer: fakeServer,
-      httpServer,
-      customMiddleware: [{ path: "/explode", handlers: [throwing] }],
-    });
+    const server = new McpServer({ name: "t", version: "0.0.0" });
+    server.use("/explode", throwing);
 
-    const { port, server } = await listen(app);
-    openServer = server;
+    const httpServer = http.createServer();
+    const app = await createApp({ mcpServer: server, httpServer });
+
+    const { port, server: httpListening } = await listen(app);
+    openServer = httpListening;
 
     const res = await fetch(`http://localhost:${port}/explode`);
     expect(res.status).toBe(500);
@@ -241,10 +335,18 @@ describe("createApp", () => {
     const { createApp } = await import("./express.js");
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
+    const mcpServer = new McpServer({ name: "t", version: "0.0.0" });
+    // Force the express-level error path: make connectStatelessTransport
+    // reject so the request handler hits its try/catch and calls next(error),
+    // which lands in the default /mcp error handler.
+    vi.spyOn(mcpServer, "connectStatelessTransport").mockRejectedValue(
+      new Error("boom"),
+    );
+
     const httpServer = http.createServer();
-    const app = await createApp({ mcpServer: fakeServer, httpServer });
-    const { port, server } = await listen(app);
-    openServer = server;
+    const app = await createApp({ mcpServer, httpServer });
+    const { port, server: httpListening } = await listen(app);
+    openServer = httpListening;
 
     const res = await postMcp(port);
     expect(res.status).toBe(500);
@@ -269,14 +371,19 @@ describe("createApp", () => {
       res.status(503).json({ custom: true });
     };
 
+    const mcpServer = new McpServer({ name: "t", version: "0.0.0" });
+    vi.spyOn(mcpServer, "connectStatelessTransport").mockRejectedValue(
+      new Error("boom"),
+    );
+
     const httpServer = http.createServer();
     const app = await createApp({
-      mcpServer: fakeServer,
+      mcpServer,
       httpServer,
       errorMiddleware: [{ handlers: [errorHandler] }],
     });
-    const { port, server } = await listen(app);
-    openServer = server;
+    const { port, server: httpListening } = await listen(app);
+    openServer = httpListening;
 
     const res = await postMcp(port);
     expect(calls).toEqual(["error-handler"]);
@@ -297,15 +404,20 @@ describe("createApp", () => {
       next(new Error("api error"));
     };
 
+    const mcpServer = new McpServer({ name: "t", version: "0.0.0" });
+    vi.spyOn(mcpServer, "connectStatelessTransport").mockRejectedValue(
+      new Error("boom"),
+    );
+    mcpServer.use("/api/test", throwingApiRoute);
+
     const httpServer = http.createServer();
     const app = await createApp({
-      mcpServer: fakeServer,
+      mcpServer,
       httpServer,
-      customMiddleware: [{ path: "/api/test", handlers: [throwingApiRoute] }],
       errorMiddleware: [{ path: "/mcp", handlers: [mcpErrorHandler] }],
     });
-    const { port, server } = await listen(app);
-    openServer = server;
+    const { port, server: httpListening } = await listen(app);
+    openServer = httpListening;
 
     const mcpRes = await postMcp(port);
     expect(calls).toEqual(["mcp-error-handler"]);
@@ -392,8 +504,9 @@ describe("createApp tunnel routes", () => {
     process.env.__TUNNEL_CONTROL_PORT = String(controlPort);
     try {
       const { createApp } = await import("./express.js");
+      const mcpServer = new McpServer({ name: "t", version: "0.0.0" });
       const httpServer = http.createServer();
-      const app = await createApp({ mcpServer: fakeServer, httpServer });
+      const app = await createApp({ mcpServer, httpServer });
       const { port, server } = await listen(app);
       openServer = server;
 
@@ -418,8 +531,10 @@ describe("createApp tunnel routes", () => {
     try {
       vi.resetModules();
       const { createApp } = await import("./express.js");
+      const { McpServer: ReloadedMcpServer } = await import("./server.js");
+      const mcpServer = new ReloadedMcpServer({ name: "t", version: "0.0.0" });
       const httpServer = http.createServer();
-      const app = await createApp({ mcpServer: fakeServer, httpServer });
+      const app = await createApp({ mcpServer, httpServer });
       const { port, server } = await listen(app);
       openServer = server;
 
