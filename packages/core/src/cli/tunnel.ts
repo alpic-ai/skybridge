@@ -1,6 +1,6 @@
-import { spawn as nodeSpawn } from "node:child_process";
 import { EventEmitter } from "node:events";
 import type { Readable } from "node:stream";
+import spawn from "cross-spawn";
 
 export type TunnelState =
   | { status: "idle" }
@@ -47,7 +47,7 @@ export type TunnelChildProcess = {
 export type SpawnFn = (port: number) => TunnelChildProcess;
 
 const defaultSpawn: SpawnFn = (port) =>
-  nodeSpawn(
+  spawn(
     "npx",
     ["--yes", "alpic", "tunnel", "--port", String(port), "--plain"],
     {
