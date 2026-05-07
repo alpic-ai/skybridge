@@ -42,7 +42,10 @@ export const ToolPanel = () => {
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
   const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
   const isFullscreen = displayMode === "fullscreen";
-  useKeyPress("esc", () => {
+  useKeyPress("esc", (e) => {
+    if (e.defaultPrevented) {
+      return;
+    }
     if (isFullscreen) {
       setPreference("displayMode", "inline");
     }
