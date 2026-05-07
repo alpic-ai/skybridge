@@ -14,7 +14,7 @@ import { createAndInjectOpenAi } from "./create-openai-mock.js";
 const MOBILE_WIDTH_PX = 345;
 const DESKTOP_WIDTH_PX = 770;
 const PIP_MAX_HEIGHT_PX = 420;
-const WIDGET_DARK_BG = "#212121";
+const VIEW_DARK_BG = "#212121";
 
 export const View = () => {
   const tool = useSelectedTool();
@@ -145,7 +145,7 @@ export const View = () => {
             ? `${isPip ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`
             : "auto",
         opacity: mounted ? 1 : 0,
-        backgroundColor: theme === "dark" ? WIDGET_DARK_BG : undefined,
+        backgroundColor: theme === "dark" ? VIEW_DARK_BG : undefined,
       }}
     >
       <iframe
