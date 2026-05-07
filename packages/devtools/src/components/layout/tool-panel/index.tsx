@@ -75,12 +75,6 @@ export const ToolPanel = () => {
                   minSize={320}
                   className="min-h-0 min-w-0"
                 >
-                  {/*
-                    Wrapper hosts toolbar + View. When fullscreen it switches
-                    to position:absolute and overlays #devtools-card-body —
-                    View stays in the same tree slot so the iframe is never
-                    torn down on display-mode toggles.
-                  */}
                   <div
                     className={cn(
                       "flex flex-col overflow-hidden",

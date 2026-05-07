@@ -193,7 +193,7 @@ export const ToolPanelToolbar = ({
         />
       )}
 
-      {!logsOpen && (
+      {!logsOpen && displayMode !== "fullscreen" && (
         <ToolbarButton
           icon={Logs}
           label="logs"
