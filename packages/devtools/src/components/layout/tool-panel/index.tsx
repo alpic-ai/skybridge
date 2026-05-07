@@ -101,9 +101,7 @@ export const ToolPanel = () => {
                           : "mx-3 overflow-y-auto py-3",
                       )}
                     >
-                      <Suspense
-                        fallback={<Placeholder text="Loading view…" />}
-                      >
+                      <Suspense fallback={<Placeholder text="Loading view…" />}>
                         <View />
                       </Suspense>
                     </div>
