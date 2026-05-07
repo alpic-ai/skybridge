@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import type { AppsSdkContext } from "skybridge/web";
 import { useIframeAutoHeight } from "@/hooks/use-iframe-auto-height.js";
 import { useIframeMounted } from "@/hooks/use-iframe-mounted.js";
 import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
@@ -10,6 +9,7 @@ import mcpClient, {
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { asString, cn, injectWaitForOpenai } from "@/lib/utils.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
+import { useSyncOpenaiTheme } from "./use-sync-openai-theme.js";
 
 const MOBILE_WIDTH_PX = 345;
 const DESKTOP_WIDTH_PX = 770;
@@ -117,16 +117,12 @@ export const View = () => {
 
   const mounted = useIframeMounted({ iframeRef, documentKey: html });
 
-  useEffect(() => {
-    const win = iframeRef.current?.contentWindow as
-      | (Window & { openai?: AppsSdkContext })
-      | null;
-    if (!win?.openai) {
-      return;
-    }
-    win.openai.theme = theme;
-    updateOpenaiObject(tool.name, "theme", theme);
-  }, [theme, tool.name, updateOpenaiObject]);
+  useSyncOpenaiTheme({
+    iframeRef,
+    toolName: tool.name,
+    theme,
+    updateOpenaiObject,
+  });
 
   return (
     <div
