@@ -1,60 +1,71 @@
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
-const Answers = [
-  "As I see it, yes",
-  "Don't count on it",
-  "It is certain",
-  "It is decidedly so",
-  "Most likely",
-  "My reply is no",
-  "My sources say no",
-  "Outlook good",
-  "Outlook not so good",
-  "Signs point to yes",
-  "Very doubtful",
-  "Without a doubt",
-  "Yes definitely",
-  "Yes",
-  "You may rely on it",
-];
-
 const server = new McpServer(
   {
     name: "alpic-openai-app",
     version: "0.0.1",
   },
   { capabilities: {} },
-).registerTool(
-  {
-    name: "magic-8-ball",
-    description: "For fortune-telling or seeking advice.",
-    inputSchema: {
-      question: z.string().describe("The user question."),
+)
+  .registerTool(
+    {
+      name: "start",
+      description: "Onboard Skybridge",
+      inputSchema: {
+        name: z.string().describe("The user name."),
+      },
+      view: {
+        component: "onboarding",
+        description: "Onboarding deck",
+        csp: {
+          resourceDomains: [
+            "https://fonts.googleapis.com",
+            "https://fonts.gstatic.com",
+          ],
+          redirectDomains: ["https://docs.skybridge.tech"],
+        },
+      },
     },
-    view: {
-      component: "magic-8-ball",
-      description: "Magic 8 Ball",
-    },
-  },
-  async ({ question }) => {
-    try {
-      const hash = question
-        .split("")
-        .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const answer = Answers[hash % Answers.length];
+    async ({ name }) => {
       return {
-        structuredContent: { answer },
+        structuredContent: { name },
+        content: [{ type: "text", text: `User name: ${name}` }],
         isError: false,
       };
-    } catch (error) {
+    },
+  )
+  .registerTool(
+    {
+      name: "get-fortune-cookie",
+      description: "Get fortune cookie",
+    },
+    async () => {
+      const predictions = [
+        "A pleasant surprise is waiting for you.",
+        "Your hard work will soon pay off.",
+        "An unexpected friendship will brighten your week.",
+        "The best is yet to come.",
+        "A small step today leads to a giant leap tomorrow.",
+        "Trust your instincts: they are sharper than you think.",
+        "Adventure awaits just around the corner.",
+        "A long-forgotten idea will return with great success.",
+        "Kindness given today will be returned threefold.",
+        "Something you lost will soon be found.",
+      ];
+      const prediction =
+        predictions[Math.floor(Math.random() * predictions.length)];
+
+      // simulate backend work
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       return {
-        content: [{ type: "text", text: `Error: ${error}` }],
-        isError: true,
+        structuredContent: { prediction },
+        content: [{ type: "text", text: prediction }],
+        isError: false,
       };
-    }
-  },
-);
+    },
+  );
 
 if (process.env.NODE_ENV === "production") {
   const { default: manifest } = await import("./vite-manifest.js");
