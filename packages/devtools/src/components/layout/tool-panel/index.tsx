@@ -83,9 +83,9 @@ export const ToolPanel = () => {
                   */}
                   <div
                     className={cn(
-                      "flex flex-col overflow-hidden bg-background",
+                      "flex flex-col overflow-hidden",
                       isFullscreen
-                        ? "absolute inset-0 z-50"
+                        ? "absolute inset-0 z-50 bg-background"
                         : "relative h-full min-h-0",
                     )}
                   >
