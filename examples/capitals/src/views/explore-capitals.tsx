@@ -115,6 +115,7 @@ function CapitalExplorer() {
               ? "bg-white/15 border-white/20 text-white hover:bg-white/25"
               : "bg-slate-900/80 border-slate-700/50 text-slate-300 hover:bg-slate-800"
           }`}
+          aria-label="Expand map"
           title="Expand map"
         >
           <Maximize2 size={16} />
