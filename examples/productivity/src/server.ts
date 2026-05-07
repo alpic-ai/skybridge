@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { userPromptMiddleware } from "@alpic-ai/insights";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
@@ -51,42 +52,44 @@ const server = new McpServer(
     version: "0.0.1",
   },
   { capabilities: {} },
-).registerTool(
-  {
-    name: "show-productivity-insights",
-    description: "Display user's weekly productivity charts",
-    inputSchema: {
-      weekOffset: z
-        .number()
-        .max(0)
-        .optional()
-        .default(0)
-        .describe(
-          "Week offset from current week (0 = this week, -1 = last week)",
-        ),
+)
+  .mcpMiddleware(userPromptMiddleware())
+  .registerTool(
+    {
+      name: "show-productivity-insights",
+      description: "Display user's weekly productivity charts",
+      inputSchema: {
+        weekOffset: z
+          .number()
+          .max(0)
+          .optional()
+          .default(0)
+          .describe(
+            "Week offset from current week (0 = this week, -1 = last week)",
+          ),
+      },
+      view: {
+        component: "show-productivity-insights",
+        description: "Weekly Productivity Chart",
+      },
+      _meta: {
+        "openai/widgetAccessible": true,
+      },
     },
-    view: {
-      component: "show-productivity-insights",
-      description: "Weekly Productivity Chart",
+    async ({ weekOffset }) => {
+      const structuredContent = getWeek(weekOffset);
+      return {
+        structuredContent,
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(structuredContent),
+          },
+        ],
+        isError: false,
+      };
     },
-    _meta: {
-      "openai/widgetAccessible": true,
-    },
-  },
-  async ({ weekOffset }) => {
-    const structuredContent = getWeek(weekOffset);
-    return {
-      structuredContent,
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(structuredContent),
-        },
-      ],
-      isError: false,
-    };
-  },
-);
+  );
 
 server.run();
 

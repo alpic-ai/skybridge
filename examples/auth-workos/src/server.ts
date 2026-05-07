@@ -1,3 +1,4 @@
+import { userPromptMiddleware } from "@alpic-ai/insights";
 import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
 import { mcpAuthMetadataRouter } from "@modelcontextprotocol/sdk/server/auth/router.js";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
@@ -48,6 +49,7 @@ const server = new McpServer(
     }),
   )
   .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
+  .mcpMiddleware(userPromptMiddleware())
   .registerTool(
     {
       name: "search-coffee-paris",

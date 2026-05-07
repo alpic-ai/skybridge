@@ -1,3 +1,4 @@
+import { userPromptMiddleware } from "@alpic-ai/insights";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 import { products } from "./products.js";
@@ -23,6 +24,7 @@ const server = new McpServer(
   },
   { capabilities: {} },
 )
+  .mcpMiddleware(userPromptMiddleware())
   .registerTool(
     {
       name: "browse-catalog",

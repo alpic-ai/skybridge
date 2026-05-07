@@ -12,6 +12,7 @@
     "deploy": "alpic deploy"
   },
   "dependencies": {
+    "@alpic-ai/insights": "^1.120.1",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "clsx": "^2.1.1",
     "react": "^19.2.3",
