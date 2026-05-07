@@ -18,13 +18,10 @@ const formatTimestamp = (timestamp: number) =>
 type Category = "req" | "res" | "view";
 
 const getCategory = (log: OpenAiLog): Category => {
-  if (log.type === "response") {
-    return "res";
+  if (log.source === "view") {
+    return "view";
   }
-  if (log.command === "callTool") {
-    return "req";
-  }
-  return "view";
+  return log.type === "response" ? "res" : "req";
 };
 
 const LOG_ACCORDION_TRANSITION = {

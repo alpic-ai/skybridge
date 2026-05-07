@@ -25,127 +25,23 @@ import {
   Sun,
 } from "lucide-react";
 import { useState } from "react";
+import type { RequestDisplayMode } from "skybridge/web";
 
 import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
 import { cn } from "@/lib/utils.js";
+import { locales } from "./locales.js";
 
-type DisplayMode = "fullscreen" | "pip" | "inline";
-
-const displayModeIcons: Record<DisplayMode, LucideIcon> = {
-  fullscreen: Maximize2,
-  pip: PictureInPicture2,
-  inline: SquareSplitVertical,
-};
-
-const displayModeLabels: Record<DisplayMode, string> = {
-  fullscreen: "fullscreen",
-  pip: "pip",
-  inline: "inline",
-};
-
-const locales = [
-  { code: "am", englishName: "Amharic", localeName: "አማርኛ" },
-  { code: "ar", englishName: "Arabic", localeName: "العربية" },
-  { code: "bg", englishName: "Bulgarian", localeName: "български" },
-  { code: "bn", englishName: "Bengali", localeName: "বাংলা" },
-  { code: "bs", englishName: "Bosnian", localeName: "bosanski" },
-  { code: "ca", englishName: "Catalan", localeName: "català" },
-  { code: "cs", englishName: "Czech", localeName: "čeština" },
-  { code: "da", englishName: "Danish", localeName: "dansk" },
-  { code: "de", englishName: "German", localeName: "Deutsch" },
-  { code: "el", englishName: "Greek", localeName: "Ελληνικά" },
-  { code: "en-US", englishName: "English (US)", localeName: "English (US)" },
-  {
-    code: "es-419",
-    englishName: "Spanish (Latin America)",
-    localeName: "español (Latinoamérica)",
-  },
-  {
-    code: "es-ES",
-    englishName: "Spanish (Spain)",
-    localeName: "español (España)",
-  },
-  { code: "et", englishName: "Estonian", localeName: "eesti" },
-  { code: "fa", englishName: "Persian", localeName: "فارسی" },
-  { code: "fi", englishName: "Finnish", localeName: "suomi" },
-  {
-    code: "fr-CA",
-    englishName: "French (Canada)",
-    localeName: "français (Canada)",
-  },
-  {
-    code: "fr-FR",
-    englishName: "French (France)",
-    localeName: "français (France)",
-  },
-  { code: "gu", englishName: "Gujarati", localeName: "ગુજરાતી" },
-  { code: "hi", englishName: "Hindi", localeName: "हिन्दी" },
-  { code: "hr", englishName: "Croatian", localeName: "hrvatski" },
-  { code: "hu", englishName: "Hungarian", localeName: "magyar" },
-  { code: "hy", englishName: "Armenian", localeName: "հայերեն" },
-  { code: "id", englishName: "Indonesian", localeName: "Indonesia" },
-  { code: "is", englishName: "Icelandic", localeName: "íslenska" },
-  { code: "it", englishName: "Italian", localeName: "italiano" },
-  { code: "ja", englishName: "Japanese", localeName: "日本語" },
-  { code: "ka", englishName: "Georgian", localeName: "ქართული" },
-  { code: "kk", englishName: "Kazakh", localeName: "қазақ тілі" },
-  { code: "kn", englishName: "Kannada", localeName: "ಕನ್ನಡ" },
-  { code: "ko", englishName: "Korean", localeName: "한국어" },
-  { code: "lt", englishName: "Lithuanian", localeName: "lietuvių" },
-  { code: "lv", englishName: "Latvian", localeName: "latviešu" },
-  { code: "mk", englishName: "Macedonian", localeName: "македонски" },
-  { code: "ml", englishName: "Malayalam", localeName: "മലയാളം" },
-  { code: "mn", englishName: "Mongolian", localeName: "монгол" },
-  { code: "mr", englishName: "Marathi", localeName: "मराठी" },
-  { code: "ms", englishName: "Malay", localeName: "Bahasa Melayu" },
-  { code: "my", englishName: "Burmese", localeName: "မြန်မာ" },
-  { code: "nb", englishName: "Norwegian Bokmål", localeName: "norsk bokmål" },
-  { code: "nl", englishName: "Dutch", localeName: "Nederlands" },
-  { code: "pa", englishName: "Punjabi", localeName: "ਪੰਜਾਬੀ" },
-  { code: "pl", englishName: "Polish", localeName: "polski" },
-  {
-    code: "pt-BR",
-    englishName: "Portuguese (Brazil)",
-    localeName: "português (Brasil)",
-  },
-  {
-    code: "pt-PT",
-    englishName: "Portuguese (Portugal)",
-    localeName: "português (Portugal)",
-  },
-  { code: "ro", englishName: "Romanian", localeName: "română" },
-  { code: "ru", englishName: "Russian", localeName: "русский" },
-  { code: "sk", englishName: "Slovak", localeName: "slovenčina" },
-  { code: "sl", englishName: "Slovenian", localeName: "slovenščina" },
-  { code: "so", englishName: "Somali", localeName: "Soomaali" },
-  { code: "sq", englishName: "Albanian", localeName: "shqip" },
-  { code: "sr", englishName: "Serbian", localeName: "српски" },
-  { code: "sv", englishName: "Swedish", localeName: "svenska" },
-  { code: "sw", englishName: "Swahili", localeName: "Kiswahili" },
-  { code: "ta", englishName: "Tamil", localeName: "தமிழ்" },
-  { code: "te", englishName: "Telugu", localeName: "తెలుగు" },
-  { code: "th", englishName: "Thai", localeName: "ไทย" },
-  { code: "tl", englishName: "Tagalog", localeName: "Tagalog" },
-  { code: "tr", englishName: "Turkish", localeName: "Türkçe" },
-  { code: "uk", englishName: "Ukrainian", localeName: "українська" },
-  { code: "ur", englishName: "Urdu", localeName: "اردو" },
-  { code: "vi", englishName: "Vietnamese", localeName: "Tiếng Việt" },
-  {
-    code: "zh-CN",
-    englishName: "Chinese (Simplified)",
-    localeName: "简体中文",
-  },
-  {
-    code: "zh-HK",
-    englishName: "Chinese (Traditional, Hong Kong)",
-    localeName: "繁體中文（香港）",
-  },
-  {
-    code: "zh-TW",
-    englishName: "Chinese (Traditional, Taiwan)",
-    localeName: "繁體中文（台灣）",
-  },
+const displayModes: { mode: RequestDisplayMode; icon: LucideIcon }[] = [
+  { mode: "fullscreen", icon: Maximize2 },
+  { mode: "pip", icon: PictureInPicture2 },
+  { mode: "inline", icon: SquareSplitVertical },
 ];
+
+const buttonBaseClass =
+  "inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+const buttonIdleClass =
+  "text-light-gray-foreground hover:bg-light-gray hover:text-foreground";
+const buttonSelectedClass = "bg-muted text-foreground";
 
 function ToolbarButton({
   icon: Icon,
@@ -153,28 +49,24 @@ function ToolbarButton({
   selected,
   onClick,
   className,
-  ...rest
 }: {
   icon: LucideIcon;
   label: string;
   selected?: boolean;
   onClick?: () => void;
   className?: string;
-} & Omit<
-  React.ButtonHTMLAttributes<HTMLButtonElement>,
-  "onClick" | "className"
->) {
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={selected}
       className={cn(
-        "inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-md border border-border bg-background px-2.5 text-xs font-medium transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-        selected ? "bg-muted text-foreground" : "text-light-gray-foreground",
+        buttonBaseClass,
+        "border border-border bg-background",
+        selected ? buttonSelectedClass : buttonIdleClass,
         className,
       )}
-      {...rest}
     >
       <Icon className="size-3.5" />
       <span>{label}</span>
@@ -191,9 +83,7 @@ export const ToolPanelToolbar = ({
   logsOpen,
   onOpenLogs,
 }: ToolPanelToolbarProps) => {
-  const displayMode = useInspectorPreferencesStore(
-    (s) => s.displayMode,
-  ) as DisplayMode;
+  const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
   const theme = useInspectorPreferencesStore((s) => s.theme);
   const locale = useInspectorPreferencesStore((s) => s.locale);
   const userAgent = useInspectorPreferencesStore((s) => s.userAgent);
@@ -202,14 +92,12 @@ export const ToolPanelToolbar = ({
   const [localeOpen, setLocaleOpen] = useState(false);
 
   const isDark = theme === "dark";
-  const deviceType = userAgent?.device?.type ?? "desktop";
-  const isMobile = deviceType === "mobile";
+  const isMobile = (userAgent?.device?.type ?? "desktop") === "mobile";
 
   return (
     <div className="mt-3 flex w-full shrink-0 items-center gap-1.5 px-3">
       <div className="inline-flex h-7 items-center rounded-md border border-border bg-background p-0.5">
-        {(Object.keys(displayModeIcons) as DisplayMode[]).map((mode) => {
-          const Icon = displayModeIcons[mode];
+        {displayModes.map(({ mode, icon: Icon }) => {
           const selected = displayMode === mode;
           return (
             <button
@@ -219,13 +107,11 @@ export const ToolPanelToolbar = ({
               onClick={() => setPreference("displayMode", mode)}
               className={cn(
                 "inline-flex h-full cursor-pointer items-center gap-1.5 rounded px-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                selected
-                  ? "bg-muted text-foreground"
-                  : "text-light-gray-foreground hover:bg-light-gray hover:text-foreground",
+                selected ? buttonSelectedClass : buttonIdleClass,
               )}
             >
               <Icon className="size-3.5" />
-              <span>{displayModeLabels[mode]}</span>
+              <span>{mode}</span>
             </button>
           );
         })}
@@ -241,11 +127,13 @@ export const ToolPanelToolbar = ({
         <PopoverTrigger asChild>
           <button
             type="button"
+            aria-label="Locale"
             className={cn(
-              "inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-md border border-border bg-background px-2.5 text-xs font-medium text-light-gray-foreground transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+              buttonBaseClass,
+              "border border-border bg-background",
+              buttonIdleClass,
               "aria-expanded:bg-muted aria-expanded:text-foreground",
             )}
-            aria-label="Locale"
           >
             <Languages className="size-3.5" />
             <span>{locale}</span>
@@ -267,7 +155,14 @@ export const ToolPanelToolbar = ({
                       setLocaleOpen(false);
                     }}
                   >
-                    <span>{l.englishName} </span>
+                    <span className="truncate">
+                      {l.englishName}
+                      {l.localeName !== l.englishName ? (
+                        <span className="ml-1.5 text-muted-foreground">
+                          {l.localeName}
+                        </span>
+                      ) : null}
+                    </span>
                     <Check
                       className={cn(
                         "ml-auto h-4 w-4",

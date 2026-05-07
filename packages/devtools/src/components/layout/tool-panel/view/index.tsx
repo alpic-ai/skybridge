@@ -11,6 +11,11 @@ import { useCallToolResult, useStore } from "@/lib/store.js";
 import { asString, cn, injectWaitForOpenai } from "@/lib/utils.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
 
+const MOBILE_WIDTH_PX = 345;
+const DESKTOP_WIDTH_PX = 770;
+const PIP_MAX_HEIGHT_PX = 420;
+const WIDGET_DARK_BG = "#212121";
+
 export const View = () => {
   const tool = useSelectedTool();
   const toolResult = useCallToolResult(tool.name);
@@ -42,7 +47,9 @@ export const View = () => {
   const isFullscreen = displayMode === "fullscreen";
   const isPip = displayMode === "pip";
   const width =
-    isFullscreen && !isMobile ? "100%" : `${isMobile ? 345 : 770}px`;
+    isFullscreen && !isMobile
+      ? "100%"
+      : `${isMobile ? MOBILE_WIDTH_PX : DESKTOP_WIDTH_PX}px`;
   const theme = useInspectorPreferencesStore((s) => s.theme);
 
   const resourceEntry = resource.contents[0] as {
@@ -135,10 +142,10 @@ export const View = () => {
         height: isFullscreen
           ? "100%"
           : contentHeight != null
-            ? `${isPip ? Math.min(contentHeight, 420) : contentHeight}px`
+            ? `${isPip ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`
             : "auto",
         opacity: mounted ? 1 : 0,
-        backgroundColor: theme === "dark" ? "#212121" : undefined,
+        backgroundColor: theme === "dark" ? WIDGET_DARK_BG : undefined,
       }}
     >
       <iframe
@@ -149,7 +156,7 @@ export const View = () => {
           height: isFullscreen
             ? "100%"
             : contentHeight != null
-              ? `${isPip ? Math.min(contentHeight, 420) : contentHeight}px`
+              ? `${isPip ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`
               : "100%",
           border: "none",
           display: "block",

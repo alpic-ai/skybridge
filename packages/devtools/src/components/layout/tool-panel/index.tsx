@@ -1,11 +1,10 @@
 import { useKeyPress, useLocalStorageState } from "ahooks";
 import { X } from "lucide-react";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   Group,
   Panel,
-  type PanelImperativeHandle,
   Separator,
   useDefaultLayout,
 } from "react-resizable-panels";
@@ -40,18 +39,6 @@ export const ToolPanel = () => {
     panelIds: [VIEW_PANEL_ID, LOGS_PANEL_ID],
     storage: localStorage,
   });
-  const logsPanelRef = useRef<PanelImperativeHandle>(null);
-  useEffect(() => {
-    const panel = logsPanelRef.current;
-    if (!panel) {
-      return;
-    }
-    if (logsOpen) {
-      panel.expand();
-    } else {
-      panel.collapse();
-    }
-  }, [logsOpen]);
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
   const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
   const isFullscreen = displayMode === "fullscreen";
@@ -72,6 +59,18 @@ export const ToolPanel = () => {
   const hasResult = Boolean(tool && data?.response);
   const hasView = Boolean(templateUri);
 
+  const toolbar = (
+    <ToolPanelToolbar
+      logsOpen={logsOpen ?? false}
+      onOpenLogs={() => setLogsOpen(true)}
+    />
+  );
+  const viewSuspense = (
+    <Suspense fallback={<Placeholder text="Loading widget…" />}>
+      <View />
+    </Suspense>
+  );
+
   return (
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden preview-region">
       {tool ? (
@@ -79,66 +78,12 @@ export const ToolPanel = () => {
           hasView ? (
             <>
               <ToolPanelHeader />
-              <Group
-                orientation="horizontal"
-                id={VIEW_LOGS_GROUP_ID}
-                className="flex min-h-0 min-w-0 flex-1 overflow-hidden"
-                defaultLayout={defaultLayout}
-                onLayoutChanged={onLayoutChanged}
-              >
-                <Panel
-                  id={VIEW_PANEL_ID}
-                  minSize={320}
-                  className="min-h-0 min-w-0"
-                >
-                  {!isFullscreen && (
-                    <div className="relative flex h-full min-h-0 flex-col overflow-hidden">
-                      <ToolPanelToolbar
-                        logsOpen={logsOpen}
-                        onOpenLogs={() => setLogsOpen(true)}
-                      />
-                      <div className="mx-3 flex min-h-0 flex-1 items-center justify-center overflow-y-auto py-3">
-                        <Suspense
-                          fallback={<Placeholder text="Loading widget…" />}
-                        >
-                          <View />
-                        </Suspense>
-                      </div>
-                    </div>
-                  )}
-                </Panel>
-                {logsOpen && (
-                  <>
-                    <Separator className="w-px shrink-0 bg-border transition-colors hover:bg-ring data-separator-active:bg-ring" />
-                    <Panel
-                      id={LOGS_PANEL_ID}
-                      defaultSize={360}
-                      minSize={240}
-                      maxSize={640}
-                      className="min-h-0"
-                    >
-                      <LogsDrawer
-                        key={tool?.name ?? "none"}
-                        onClose={() => setLogsOpen(false)}
-                      />
-                    </Panel>
-                  </>
-                )}
-              </Group>
-              {isFullscreen &&
-                fullscreenAnchor &&
+              {isFullscreen && fullscreenAnchor ? (
                 createPortal(
                   <div className="absolute inset-0 z-50 flex flex-col bg-background">
-                    <ToolPanelToolbar
-                      logsOpen={logsOpen}
-                      onOpenLogs={() => setLogsOpen(true)}
-                    />
+                    {toolbar}
                     <div className="flex min-h-0 flex-1 overflow-hidden pt-3">
-                      <Suspense
-                        fallback={<Placeholder text="Loading widget…" />}
-                      >
-                        <View />
-                      </Suspense>
+                      {viewSuspense}
                     </div>
                     <button
                       type="button"
@@ -150,7 +95,46 @@ export const ToolPanel = () => {
                     </button>
                   </div>,
                   fullscreenAnchor,
-                )}
+                )
+              ) : (
+                <Group
+                  orientation="horizontal"
+                  id={VIEW_LOGS_GROUP_ID}
+                  className="flex min-h-0 min-w-0 flex-1 overflow-hidden"
+                  defaultLayout={defaultLayout}
+                  onLayoutChanged={onLayoutChanged}
+                >
+                  <Panel
+                    id={VIEW_PANEL_ID}
+                    minSize={320}
+                    className="min-h-0 min-w-0"
+                  >
+                    <div className="relative flex h-full min-h-0 flex-col overflow-hidden">
+                      {toolbar}
+                      <div className="mx-3 flex min-h-0 flex-1 items-center justify-center overflow-y-auto py-3">
+                        {viewSuspense}
+                      </div>
+                    </div>
+                  </Panel>
+                  {logsOpen && (
+                    <>
+                      <Separator className="w-px shrink-0 bg-border transition-colors hover:bg-ring data-separator-active:bg-ring" />
+                      <Panel
+                        id={LOGS_PANEL_ID}
+                        defaultSize={360}
+                        minSize={240}
+                        maxSize={640}
+                        className="min-h-0"
+                      >
+                        <LogsDrawer
+                          key={tool?.name ?? "none"}
+                          onClose={() => setLogsOpen(false)}
+                        />
+                      </Panel>
+                    </>
+                  )}
+                </Group>
+              )}
             </>
           ) : (
             <Placeholder text="No view template" />
