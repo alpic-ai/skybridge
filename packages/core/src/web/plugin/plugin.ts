@@ -1,4 +1,5 @@
-import { isAbsolute, relative, resolve } from "node:path";
+import { createRequire } from "node:module";
+import { dirname, isAbsolute, relative, resolve } from "node:path";
 import type { Plugin, ViteDevServer } from "vite";
 import {
   assertUniqueViewNames,

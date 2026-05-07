@@ -28,7 +28,10 @@ function AppLayout() {
       <div className="grid min-h-0 grid-rows-[auto_1fr] overflow-hidden rounded-2xl border border-border bg-background shadow-sm">
         <Header />
         {isConnected ? (
-          <div className="flex min-h-0 min-w-0 flex-1">
+          <div
+            id="devtools-card-body"
+            className="relative flex min-h-0 min-w-0 flex-1"
+          >
             <Group
               orientation="horizontal"
               id={TOOLS_SPLIT_GROUP_ID}

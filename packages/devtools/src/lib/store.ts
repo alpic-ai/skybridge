@@ -9,6 +9,7 @@ import { create } from "zustand";
 export type OpenAiLog = {
   id: string;
   timestamp: number;
+  source: "view" | "server";
   command: string;
   args: UnknownObject;
   type: "default" | "response";
@@ -30,6 +31,7 @@ export type Store = {
   };
   setToolData: (tool: string, data: Partial<ToolData>) => void;
   pushOpenAiLog: (tool: string, log: Omit<OpenAiLog, "id">) => void;
+  clearOpenAiLogs: (tool: string) => void;
   updateOpenaiObject: (
     tool: string,
     key: keyof AppsSdkContext,
@@ -82,6 +84,13 @@ export const useStore = create<Store>()((setState) => ({
         ...currentLogs,
         { ...log, id: crypto.randomUUID() },
       ]);
+    }),
+  clearOpenAiLogs: (tool: string) =>
+    setState((state) => {
+      if (!state.tools[tool]?.openaiLogs?.length) {
+        return state;
+      }
+      return updateNestedState(state, `tools.${tool}.openaiLogs`, []);
     }),
   setOpenInAppUrl: (tool: string, href: string) =>
     setState((state) => {

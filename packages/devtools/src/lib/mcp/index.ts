@@ -133,12 +133,30 @@ export const useCallTool = () => {
       const startedAt = performance.now();
       const response = await client.callTool(toolName, args);
       const durationMs = Math.round(performance.now() - startedAt);
+      const completedAt = Date.now();
       setToolData(toolName, {
         input: args ?? {},
         response,
         durationMs,
         openaiRef: null,
-        openaiLogs: [],
+        openaiLogs: [
+          {
+            id: crypto.randomUUID(),
+            timestamp: completedAt - durationMs,
+            source: "server",
+            command: "callTool",
+            args: { name: toolName, args: args ?? {} },
+            type: "default",
+          },
+          {
+            id: crypto.randomUUID(),
+            timestamp: completedAt,
+            source: "server",
+            command: "callTool response",
+            args: response as unknown as Record<string, unknown>,
+            type: "response",
+          },
+        ],
         openaiObject: {
           ...buildInitialOpenaiObject(),
           toolInput: args ?? {},
