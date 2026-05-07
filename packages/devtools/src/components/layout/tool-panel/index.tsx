@@ -102,7 +102,7 @@ export const ToolPanel = () => {
                       )}
                     >
                       <Suspense
-                        fallback={<Placeholder text="Loading widget…" />}
+                        fallback={<Placeholder text="Loading view…" />}
                       >
                         <View />
                       </Suspense>
