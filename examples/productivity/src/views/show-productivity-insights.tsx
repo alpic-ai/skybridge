@@ -95,6 +95,7 @@ function ShowProductivityInsights() {
         </span>
 
         <div className="header-controls">
+          <select
             className="duration-select"
             value={widgetState.duration}
             onChange={(e) =>
