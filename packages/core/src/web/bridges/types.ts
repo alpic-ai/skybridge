@@ -19,7 +19,6 @@ export type CallToolResponse = {
   content: CallToolResult["content"];
   structuredContent: NonNullable<CallToolResult["structuredContent"]>;
   isError: NonNullable<CallToolResult["isError"]>;
-  result: string;
   meta?: CallToolResult["_meta"];
 };
 
