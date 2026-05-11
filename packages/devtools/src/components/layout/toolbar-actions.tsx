@@ -247,7 +247,7 @@ export function AuditButton() {
       label="Audit"
       icon={<ClipboardCheck className="size-3.5" />}
       buildUrl={(tunnelUrl) =>
-        `https://app.alpic.ai/beacon?url=${encodeURIComponent(tunnelUrl)}`
+        `https://app.alpic.ai/beacon?url=${encodeURIComponent(tunnelUrl)}/mcp`
       }
       description="Audit your MCP server's tools, prompts, and resources"
     />
