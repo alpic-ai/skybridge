@@ -5,19 +5,24 @@ Enable user authentication so tools can access user-specific data.
 ## How it works
 
 1. MCP server exposes OAuth discovery endpoints
-2. Host reads them, handles OAuth flow with user and token refresh
-3. Host sends access token in `Authorization: Bearer <token>` header
-4. Tool handlers validate token and get user info
+2. Host reads them, walks the user through OAuth, refreshes tokens
+3. Host calls `/mcp` with `Authorization: Bearer <token>`
+4. `requireBearerAuth` middleware verifies the token and rejects with HTTP 401 if invalid — tool handlers never run unauthenticated
+5. Tool handlers read user identity from `extra.authInfo`
 
-## 1. Discovery Endpoints
+## 1. Discovery endpoints
 
-Serve two JSON endpoints so the LLM host knows where to authenticate users:
+Mount OAuth metadata so MCP clients can discover the authorization server:
 
 ```typescript
-// index.ts
+// src/server.ts
 import { mcpAuthMetadataRouter } from "@modelcontextprotocol/sdk/server/auth/router.js";
+import { McpServer } from "skybridge/server";
 
-app.use(
+const server = new McpServer(
+  { name: "my-app", version: "0.0.1" },
+  { capabilities: {} },
+).use(
   mcpAuthMetadataRouter({
     oauthMetadata: {
       issuer: "https://your-oauth-provider.com",
@@ -27,104 +32,110 @@ app.use(
       grant_types_supported: ["authorization_code", "refresh_token"],
       code_challenge_methods_supported: ["S256"],
     },
-    // MCP_SERVER_URL: the server's public URL (localhost:3000, Alpic tunnel, or prod)
-    resourceServerUrl: new URL(process.env.MCP_SERVER_URL),
+    // SERVER_URL: this server's public URL (localhost:3000, Alpic tunnel, or prod)
+    resourceServerUrl: new URL(process.env.SERVER_URL),
   }),
 );
 ```
 
-This creates:
-- `/.well-known/oauth-authorization-server` — where to send users to login
-- `/.well-known/oauth-protected-resource` — declares this server requires auth
+This serves `/.well-known/oauth-authorization-server` and `/.well-known/oauth-protected-resource`.
 
-## 2. Validate Token in Handlers
+## 2. Write a token verifier
 
-Access token via `extra.requestInfo.headers.authorization`. Most providers use one of these patterns.
+`requireBearerAuth` takes a `verifier` with `verifyAccessToken(token): Promise<AuthInfo>`. Pick the strategy that matches your provider — both produce the same `AuthInfo` shape.
 
-⚠️ **Fetch provider's docs for exact URLs — JWKS paths and issuer formats vary**.
+⚠️ Fetch your provider's docs for exact URLs — JWKS paths and issuer formats vary.
 
-**Pattern A: JWT + JWKS**
+**JWT + JWKS** (provider issues signed JWTs):
+
 ```typescript
-// auth.ts
+// src/auth.ts
+import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
+import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import * as jose from "jose";
-import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
-
-type Extra = RequestHandlerExtra<any, any>;
 
 const jwks = jose.createRemoteJWKSet(
-  new URL("https://your-oauth-provider.com/oauth2/jwks")
+  new URL("https://your-oauth-provider.com/oauth2/jwks"),
 );
 
-export async function getAuth(extra: Extra): Promise<{ userId: string } | null> {
-  const authHeader = extra.requestInfo?.headers?.authorization;
-  if (!authHeader?.toLowerCase().startsWith("bearer ")) {
-    return null;
+export async function verifyAccessToken(token: string): Promise<AuthInfo> {
+  const { payload } = await jose.jwtVerify(token, jwks, {
+    issuer: "https://your-oauth-provider.com",
+  });
+
+  if (!payload.sub || typeof payload.sub !== "string") {
+    throw new InvalidTokenError("missing sub claim");
   }
 
-  const token = authHeader.slice(7).trim();
-
-  try {
-    const { payload } = await jose.jwtVerify(token, jwks, {
-      issuer: "https://your-oauth-provider.com",
-    });
-    return { userId: payload.sub as string };
-  } catch {
-    return null;
-  }
+  return {
+    token,
+    clientId: (payload.client_id ?? payload.azp) as string,
+    scopes: typeof payload.scope === "string" ? payload.scope.split(" ") : [],
+    expiresAt: payload.exp,
+    extra: { sub: payload.sub },
+  };
 }
 ```
 
-**Pattern B: Userinfo endpoint (opaque tokens)**
+**Userinfo endpoint** (provider issues opaque tokens):
+
 ```typescript
-// auth.ts
-import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
+// src/auth.ts
+import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
+import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 
-type Extra = RequestHandlerExtra<any, any>;
-
-export async function getAuth(extra: Extra): Promise<{ userId: string } | null> {
-  const authHeader = extra.requestInfo?.headers?.authorization;
-  if (!authHeader?.toLowerCase().startsWith("bearer ")) {
-    return null;
-  }
-
-  const token = authHeader.slice(7).trim();
-
+export async function verifyAccessToken(token: string): Promise<AuthInfo> {
   const res = await fetch("https://your-oauth-provider.com/oauth2/userinfo", {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!res.ok) return null;
-
-  const user = await res.json();
-  return { userId: user.sub };
+  if (!res.ok) {
+    throw new InvalidTokenError(`userinfo failed: ${res.status}`);
+  }
+  const user = (await res.json()) as { sub: string };
+  return {
+    token,
+    clientId: user.sub,
+    scopes: [],
+    extra: { sub: user.sub },
+  };
 }
 ```
 
-## 3. Use in Tool Handlers
+## 3. Enforce auth on /mcp
 
 ```typescript
+// src/server.ts (continued)
+import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
+import { verifyAccessToken } from "./auth.js";
+
+server.use(
+  "/mcp",
+  requireBearerAuth({
+    verifier: { verifyAccessToken },
+    requiredScopes: ["openid", "email", "profile"], // optional
+  }),
+);
+```
+
+Unauthenticated requests get HTTP 401 before any tool handler runs.
+
+## 4. Read auth in handlers
+
+```typescript
+import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
+
 server.registerTool(
-  "get-orders",
-  { description: "Get user orders", inputSchema: {} },
-  async (input, extra) => {
-    const auth = await getAuth(extra);
-
-    if (!auth) {
-      return {
-        content: [{ type: "text", text: "Please sign in to view orders." }],
-        isError: true,
-        _meta: {
-          "mcp/www_authenticate": [
-            `Bearer resource_metadata="${process.env.MCP_SERVER_URL}/.well-known/oauth-protected-resource"`,
-          ],
-        },
-      };
-    }
-
-    const orders = await fetchOrders(auth.userId);
+  {
+    name: "get-orders",
+    description: "Get user orders",
+  },
+  async (_input, extra) => {
+    const auth = extra.authInfo as AuthInfo;
+    const orders = await fetchOrders(auth.extra?.sub as string);
     return {
       structuredContent: { orders },
       content: [{ type: "text", text: `Found ${orders.length} orders` }],
     };
-  }
+  },
 );
 ```
