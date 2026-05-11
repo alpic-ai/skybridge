@@ -13,6 +13,7 @@
   --color-primary-foreground: var(--color-foreground);
   --color-primary-hover: #6be4e1;
   --color-ring: #6be4e1;
+  --color-cta-accent: #e90060;
 }
 
 .dark {
