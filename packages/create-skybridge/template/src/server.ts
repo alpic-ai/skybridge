@@ -13,7 +13,7 @@ const server = new McpServer(
       name: "start",
       description: "Onboard Skybridge",
       inputSchema: {
-        name: z.string().describe("The user name."),
+        name: z.string().optional().describe("The user name."),
       },
       view: {
         component: "onboarding",

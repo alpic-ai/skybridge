@@ -1,22 +1,32 @@
 import { useToolInfo } from "@/helpers.js";
-import Doc from "../doc.js";
-import DocLink from "../doc-link.js";
+import Doc from "@/views/components/doc.js";
+import DocLink from "@/views/components/doc-link.js";
 
 export default function ToolOutput() {
   // useToolInfo: read the input, output and metadata of the tool that opened this view.
-  const { input } = useToolInfo<"start">();
+  const { output } = useToolInfo<"start">();
+  const name = output?.name;
 
   return (
     <>
       <div className="flex flex-1 flex-col justify-center gap-3">
         <h1 className="type-display-xs font-mozilla font-semibold">
-          Greetings, <span className="text-primary">{input?.name} !</span>
+          Greetings,{" "}
+          <span className="text-primary">{name ?? "stranger"} !</span>
         </h1>
-        <p>
-          You're wondering how do I know your name, don't you? Well, it's
-          because the view reads the <strong>tool output</strong>. The LLM knows
-          about it too.
-        </p>
+        {name ? (
+          <p>
+            You're wondering how do I know your name, don't you? Well, it's
+            because the view reads the <strong>tool output</strong>. The LLM
+            knows about it too.
+          </p>
+        ) : (
+          <p>
+            The view reads the <strong>tool output</strong>, but no{" "}
+            <code>name</code> was passed this time. Try again with you surname
+            to see with this view personalize.
+          </p>
+        )}
       </div>
       <Doc>
         Use{" "}

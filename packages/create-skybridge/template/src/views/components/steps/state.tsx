@@ -1,8 +1,8 @@
 import { Button } from "@alpic-ai/ui/components/button";
 import { HatGlasses } from "lucide-react";
-import { useMascot } from "../../use-mascot.js";
-import Doc from "../doc.js";
-import DocLink from "../doc-link.js";
+import Doc from "@/views/components/doc.js";
+import DocLink from "@/views/components/doc-link.js";
+import { useMascot } from "@/views/use-mascot.js";
 
 export default function State() {
   const { hat, changeHat } = useMascot();
@@ -22,7 +22,7 @@ export default function State() {
         <p className={`mt-2 ${hat ? "" : "invisible"}`} aria-hidden={!hat}>
           Now, the LLM also knows I'm wearing a glorious{" "}
           <span
-            // data-llm: describe UI to the model.
+            // data-llm: describe what the user views to the model so they can collaborate
             data-llm={`Mascot is wearing ${hat}`}
             className="text-primary font-mozilla"
           >

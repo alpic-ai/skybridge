@@ -45,7 +45,7 @@ export default function Outro() {
           now from this very template or:
         </p>
       </div>
-      <div className="grid gap-3 md:grid-cols-2 mt-auto">
+      <div className="grid grid-cols-2 gap-3 mt-auto">
         {LINKS.map(({ icon: Icon, title, description, href }) => (
           <Card
             key={title}
