@@ -1,5 +1,5 @@
 import { Button } from "@alpic-ai/ui/components/button";
-import { CheckCheck } from "lucide-react";
+import { Check } from "lucide-react";
 
 export default function Nav({
   current,
@@ -23,7 +23,7 @@ export default function Nav({
         disabled={current === total - 1}
         onClick={() => onChange(Math.min(current + 1, total - 1))}
       >
-        <CheckCheck />
+        <Check />
         Next
       </Button>
     </div>
