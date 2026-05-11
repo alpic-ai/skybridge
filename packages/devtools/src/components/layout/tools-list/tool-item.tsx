@@ -144,7 +144,9 @@ function ToolBody({
   return (
     <div className="space-y-3">
       {tool.description && (
-        <p className="text-xs text-muted-foreground">{tool.description}</p>
+        <div className="rounded-md border border-border bg-muted/40 px-2.5 py-2 text-xs text-muted-foreground">
+          {tool.description}
+        </div>
       )}
       {hasInput && (
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)}>
