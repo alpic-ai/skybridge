@@ -261,7 +261,11 @@ export function DeployButton() {
     <HoverPopover
       className="w-60"
       trigger={
-        <Button variant="cta" icon={<RocketIcon className="size-3.5" />}>
+        <Button
+          variant="cta"
+          className="h-8 px-2"
+          icon={<RocketIcon className="size-3.5" />}
+        >
           Deploy
         </Button>
       }
