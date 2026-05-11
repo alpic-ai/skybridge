@@ -19,7 +19,7 @@ const EXTERNAL_LINKS: ReadonlyArray<{ label: string; href: string }> = [
 
 function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <div className="inline-flex h-8 cursor-pointer items-center gap-2 rounded-md px-2.5 text-sm  bg-light-gray border">
+    <div className="inline-flex h-8 items-center gap-2 rounded-md px-2.5 text-sm  bg-light-gray border">
       {children}
     </div>
   );

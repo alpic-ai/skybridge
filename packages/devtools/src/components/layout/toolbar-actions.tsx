@@ -7,12 +7,11 @@ import {
 import { Separator } from "@alpic-ai/ui/components/separator";
 import {
   Check,
+  ClipboardCheck,
   Copy,
   ExternalLinkIcon,
   Loader2Icon,
   MessagesSquareIcon,
-  PlugIcon,
-  RadarIcon,
   RocketIcon,
   UnplugIcon,
 } from "lucide-react";
@@ -165,13 +164,33 @@ function TunnelLinkButton({
   ctaLabel: string;
 }) {
   const state = useTunnelStore((s) => s.state);
+  const start = useTunnelStore((s) => s.start);
+  const [pendingOpen, setPendingOpen] = useState(false);
   const url = state.status === "connected" ? buildUrl(state.url) : null;
 
-  const go = () => {
+  useEffect(() => {
+    if (pendingOpen && state.status === "connected") {
+      window.open(buildUrl(state.url), "_blank", "noreferrer,noopener");
+      setPendingOpen(false);
+    } else if (
+      pendingOpen &&
+      (state.status === "error" || state.status === "idle")
+    ) {
+      setPendingOpen(false);
+    }
+  }, [pendingOpen, state, buildUrl]);
+
+  const onClick = () => {
     if (url) {
       window.open(url, "_blank", "noreferrer,noopener");
+      return;
     }
+    setPendingOpen(true);
+    start();
   };
+
+  const isLaunching = pendingOpen;
+  const isDisabled = !url && state.status === "starting";
 
   return (
     <HoverPopover
@@ -179,10 +198,16 @@ function TunnelLinkButton({
       trigger={
         <Button
           variant="secondary"
-          aria-disabled={!url}
-          className={cn(!url && "opacity-50 cursor-not-allowed")}
-          icon={icon}
-          onClick={url ? go : undefined}
+          aria-disabled={isDisabled}
+          className={cn(isDisabled && "opacity-50 cursor-not-allowed")}
+          icon={
+            isLaunching ? (
+              <Loader2Icon className="size-3.5 animate-spin" />
+            ) : (
+              icon
+            )
+          }
+          onClick={isDisabled ? undefined : onClick}
         >
           {label}
         </Button>
@@ -201,7 +226,7 @@ function TunnelLinkButton({
           <Button
             variant="secondary"
             className="w-full"
-            onClick={go}
+            onClick={onClick}
             iconTrailing={<ExternalLinkIcon className="size-3.5" />}
           >
             {ctaLabel}
@@ -209,7 +234,9 @@ function TunnelLinkButton({
         </div>
       ) : (
         <p className="text-sm text-muted-foreground text-center">
-          Start the tunnel first to use {label}.
+          {isLaunching
+            ? `Starting the tunnel, ${label} will open shortly…`
+            : `Click to start the tunnel and open ${label}.`}
         </p>
       )}
     </HoverPopover>
@@ -232,7 +259,7 @@ export function AuditButton() {
   return (
     <TunnelLinkButton
       label="Audit"
-      icon={<RadarIcon className="size-3.5" />}
+      icon={<ClipboardCheck className="size-3.5" />}
       buildUrl={(tunnelUrl) =>
         `https://app.alpic.ai/beacon?url=${encodeURIComponent(tunnelUrl)}`
       }
@@ -277,7 +304,11 @@ export function TunnelButton() {
   const { copied, copy } = useCopyToClipboard();
 
   const isConnected = state.status === "connected";
-  const onClick = isConnected ? () => copy(state.url) : start;
+  const onClick = isConnected
+    ? () => copy(state.url)
+    : state.status === "starting"
+      ? stop
+      : start;
 
   return (
     <HoverPopover
