@@ -37,7 +37,9 @@ export function useNodemon(
 
     const handleStderrData = (chunk: Buffer) => {
       const message = chunk.toString().trim();
-      if (!message) return;
+      if (!message) {
+        return;
+      }
       // Node's source-map warnings for third-party deps (superjson, @mcp/sdk, …) — not actionable.
       const filtered = message
         .split("\n")
