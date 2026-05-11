@@ -139,7 +139,7 @@ export const View = () => {
         "relative overflow-hidden bg-background transition-[width] duration-150 ease-out",
         isFullscreen
           ? "h-full w-full"
-          : "mx-auto rounded-2xl border border-border shadow-md",
+          : "mx-auto border border-border shadow-md",
       )}
       style={{
         width: isFullscreen ? undefined : width,
