@@ -7,6 +7,8 @@ import type { PushMessage } from "./use-messages.js";
 
 const nodemon = nodemonOriginal as ExtendedNodemon;
 
+const SOURCEMAP_WARNING = /^Sourcemap for ".*" points to missing source files$/;
+
 export function useNodemon(
   env: NodeJS.ProcessEnv,
   pushMessage: PushMessage,
@@ -35,8 +37,14 @@ export function useNodemon(
 
     const handleStderrData = (chunk: Buffer) => {
       const message = chunk.toString().trim();
-      if (message) {
-        pushMessage(message, "error");
+      if (!message) return;
+      // Node's source-map warnings for third-party deps (superjson, @mcp/sdk, …) — not actionable.
+      const filtered = message
+        .split("\n")
+        .filter((line) => !SOURCEMAP_WARNING.test(line))
+        .join("\n");
+      if (filtered) {
+        pushMessage(filtered, "error");
       }
     };
 
