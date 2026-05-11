@@ -125,7 +125,7 @@ export const LogsDrawer = ({ onClose }: { onClose: () => void }) => {
   const data = useCallToolResult(tool?.name ?? "");
   const logs = data?.openaiLogs ?? [];
   const clearOpenAiLogs = useStore((s) => s.clearOpenAiLogs);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden border-l-2 border-border bg-background">
@@ -156,9 +156,17 @@ export const LogsDrawer = ({ onClose }: { onClose: () => void }) => {
           <LogEntry
             key={log.id}
             log={log}
-            expanded={expandedId === log.id}
+            expanded={expandedIds.has(log.id)}
             onToggle={() =>
-              setExpandedId((id) => (id === log.id ? null : log.id))
+              setExpandedIds((ids) => {
+                const next = new Set(ids);
+                if (next.has(log.id)) {
+                  next.delete(log.id);
+                } else {
+                  next.add(log.id);
+                }
+                return next;
+              })
             }
           />
         ))}
