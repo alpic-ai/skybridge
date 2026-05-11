@@ -51,8 +51,8 @@ export function useMascot() {
     hat,
     changeHat: () => {
       setState((prev) => {
-        const others = LABELS.filter((l) => l !== prev.hat);
-        const next = others[Math.floor(Math.random() * others.length)];
+        const currentIndex = prev.hat ? LABELS.indexOf(prev.hat) : -1;
+        const next = LABELS[(currentIndex + 1) % LABELS.length];
         return { ...prev, hat: next };
       });
     },
