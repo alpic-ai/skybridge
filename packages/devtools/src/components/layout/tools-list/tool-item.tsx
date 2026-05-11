@@ -64,7 +64,7 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     await callTool({ toolName: tool.name, args: formData });
   };
 
-  useKeyPress("shift.enter", () => {
+  useKeyPress("meta.enter", () => {
     if (!open) {
       return;
     }
@@ -81,13 +81,11 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
           "font-mono text-xs font-normal text-foreground",
           "no-underline hover:bg-muted/40",
         )}
-      >
-        <div className="min-w-0 flex-1 text-left">{tool.name}</div>
-        {open && (
-          <div className="flex shrink-0 items-center">
+        action={
+          open ? (
             <Button
               disabled={isPending}
-              variant={open ? "primary" : "secondary"}
+              variant="primary"
               onClick={handleRun}
               icon={
                 isPending ? (
@@ -99,8 +97,10 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
             >
               Run
             </Button>
-          </div>
-        )}
+          ) : null
+        }
+      >
+        <div className="min-w-0 flex-1 text-left">{tool.name}</div>
       </AccordionTrigger>
       <AccordionContent className="px-3 pt-1 pb-3 text-foreground">
         <ToolBody

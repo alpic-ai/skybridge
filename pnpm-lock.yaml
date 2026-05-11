@@ -500,7 +500,7 @@ importers:
         version: 19.2.3(@types/react@19.2.7)
       '@vitejs/plugin-react':
         specifier: ^5.1.2
-        version: 5.1.2(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: 5.1.4(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       alpic:
         specifier: ^1.104.1
         version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
@@ -916,6 +916,9 @@ importers:
       cors:
         specifier: ^2.8.6
         version: 2.8.6
+      cross-spawn:
+        specifier: ^7.0.6
+        version: 7.0.6
       dequal:
         specifier: ^2.0.3
         version: 2.0.3
@@ -971,6 +974,9 @@ importers:
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
+      '@types/cross-spawn':
+        specifier: ^6.0.6
+        version: 6.0.6
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -1032,9 +1038,15 @@ importers:
 
   packages/create-skybridge/template:
     dependencies:
+      '@alpic-ai/ui':
+        specifier: ^1.122.0
+        version: 1.123.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react-hook-form@7.75.0(react@19.2.4))(react@19.2.4)(sonner@2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.4)(tw-animate-css@1.4.0)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.6)
+      lucide-react:
+        specifier: ^1.14.0
+        version: 1.14.0(react@19.2.4)
       react:
         specifier: ^19.2.4
         version: 19.2.4
@@ -1044,6 +1056,12 @@ importers:
       skybridge:
         specifier: workspace:*
         version: link:../../core
+      sonner:
+        specifier: ^2.0.7
+        version: 2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      tw-animate-css:
+        specifier: ^1.4.0
+        version: 1.4.0
       vite:
         specifier: ^8.0.3
         version: 8.0.3(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
@@ -1054,6 +1072,9 @@ importers:
       '@skybridge/devtools':
         specifier: '>=0.35.14 <1.0.0'
         version: 0.36.0
+      '@tailwindcss/vite':
+        specifier: ^4.2.4
+        version: 4.2.4(vite@8.0.3(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       '@types/node':
         specifier: ^24.12.0
         version: 24.12.0
@@ -1069,6 +1090,9 @@ importers:
       alpic:
         specifier: ^1.104.1
         version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.2)
+      tailwindcss:
+        specifier: ^4.2.4
+        version: 4.2.4
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -1093,7 +1117,7 @@ importers:
     devDependencies:
       '@alpic-ai/ui':
         specifier: ^1.116.0
-        version: 1.116.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(lucide-react@1.7.0(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react-hook-form@7.74.0(react@19.2.4))(react@19.2.4)(sonner@2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.2)(tw-animate-css@1.4.0)
+        version: 1.116.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(lucide-react@1.7.0(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react-hook-form@7.75.0(react@19.2.4))(react@19.2.4)(sonner@2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.2)(tw-animate-css@1.4.0)
       '@base-ui/react':
         specifier: ^1.3.0
         version: 1.3.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1259,6 +1283,17 @@ packages:
       react-hook-form: ^7.73.1
       sonner: ^2.0.7
       tailwindcss: ^4.2.3
+      tw-animate-css: ^1.4.0
+
+  '@alpic-ai/ui@1.123.0':
+    resolution: {integrity: sha512-oK11KZNyWUAdB6MLaI7z49mIQhKVORy0n1/uY+KiBVz6L2n7kKPqzObVQ9aM25QuQTm+LV5gR1+rYPbyqGvhFA==}
+    peerDependencies:
+      lucide-react: ^1.14.0
+      react: ^19.2.5
+      react-dom: ^19.2.5
+      react-hook-form: ^7.74.0
+      sonner: ^2.0.7
+      tailwindcss: ^4.2.4
       tw-animate-css: ^1.4.0
 
   '@ark/schema@0.55.0':
@@ -3918,6 +3953,9 @@ packages:
   '@tailwindcss/node@4.2.2':
     resolution: {integrity: sha512-pXS+wJ2gZpVXqFaUEjojq7jzMpTGf8rU6ipJz5ovJV6PUGmlJ+jvIwGrzdHdQ80Sg+wmQxUFuoW1UAAwHNEdFA==}
 
+  '@tailwindcss/node@4.2.4':
+    resolution: {integrity: sha512-Ai7+yQPxz3ddrDQzFfBKdHEVBg0w3Zl83jnjuwxnZOsnH9pGn93QHQtpU0p/8rYWxvbFZHneni6p1BSLK4DkGA==}
+
   '@tailwindcss/oxide-android-arm64@4.1.18':
     resolution: {integrity: sha512-dJHz7+Ugr9U/diKJA0W6N/6/cjI+ZTAoxPf9Iz9BFRF2GzEX8IvXxFIi/dZBloVJX/MZGvRuFA9rqwdiIEZQ0Q==}
     engines: {node: '>= 10'}
@@ -3932,6 +3970,12 @@ packages:
 
   '@tailwindcss/oxide-android-arm64@4.2.2':
     resolution: {integrity: sha512-dXGR1n+P3B6748jZO/SvHZq7qBOqqzQ+yFrXpoOWWALWndF9MoSKAT3Q0fYgAzYzGhxNYOoysRvYlpixRBBoDg==}
+    engines: {node: '>= 20'}
+    cpu: [arm64]
+    os: [android]
+
+  '@tailwindcss/oxide-android-arm64@4.2.4':
+    resolution: {integrity: sha512-e7MOr1SAn9U8KlZzPi1ZXGZHeC5anY36qjNwmZv9pOJ8E4Q6jmD1vyEHkQFmNOIN7twGPEMXRHmitN4zCMN03g==}
     engines: {node: '>= 20'}
     cpu: [arm64]
     os: [android]
@@ -3954,6 +3998,12 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
+  '@tailwindcss/oxide-darwin-arm64@4.2.4':
+    resolution: {integrity: sha512-tSC/Kbqpz/5/o/C2sG7QvOxAKqyd10bq+ypZNf+9Fi2TvbVbv1zNpcEptcsU7DPROaSbVgUXmrzKhurFvo5eDg==}
+    engines: {node: '>= 20'}
+    cpu: [arm64]
+    os: [darwin]
+
   '@tailwindcss/oxide-darwin-x64@4.1.18':
     resolution: {integrity: sha512-FL5oxr2xQsFrc3X9o1fjHKBYBMD1QZNyc1Xzw/h5Qu4XnEBi3dZn96HcHm41c/euGV+GRiXFfh2hUCyKi/e+yw==}
     engines: {node: '>= 10'}
@@ -3968,6 +4018,12 @@ packages:
 
   '@tailwindcss/oxide-darwin-x64@4.2.2':
     resolution: {integrity: sha512-BlR+2c3nzc8f2G639LpL89YY4bdcIdUmiOOkv2GQv4/4M0vJlpXEa0JXNHhCHU7VWOKWT/CjqHdTP8aUuDJkuw==}
+    engines: {node: '>= 20'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@tailwindcss/oxide-darwin-x64@4.2.4':
+    resolution: {integrity: sha512-yPyUXn3yO/ufR6+Kzv0t4fCg2qNr90jxXc5QqBpjlPNd0NqyDXcmQb/6weunH/MEDXW5dhyEi+agTDiqa3WsGg==}
     engines: {node: '>= 20'}
     cpu: [x64]
     os: [darwin]
@@ -3990,6 +4046,12 @@ packages:
     cpu: [x64]
     os: [freebsd]
 
+  '@tailwindcss/oxide-freebsd-x64@4.2.4':
+    resolution: {integrity: sha512-BoMIB4vMQtZsXdGLVc2z+P9DbETkiopogfWZKbWwM8b/1Vinbs4YcUwo+kM/KeLkX3Ygrf4/PsRndKaYhS8Eiw==}
+    engines: {node: '>= 20'}
+    cpu: [x64]
+    os: [freebsd]
+
   '@tailwindcss/oxide-linux-arm-gnueabihf@4.1.18':
     resolution: {integrity: sha512-Fp+Wzk/Ws4dZn+LV2Nqx3IilnhH51YZoRaYHQsVq3RQvEl+71VGKFpkfHrLM/Li+kt5c0DJe/bHXK1eHgDmdiA==}
     engines: {node: '>= 10'}
@@ -4004,6 +4066,12 @@ packages:
 
   '@tailwindcss/oxide-linux-arm-gnueabihf@4.2.2':
     resolution: {integrity: sha512-FPdhvsW6g06T9BWT0qTwiVZYE2WIFo2dY5aCSpjG/S/u1tby+wXoslXS0kl3/KXnULlLr1E3NPRRw0g7t2kgaQ==}
+    engines: {node: '>= 20'}
+    cpu: [arm]
+    os: [linux]
+
+  '@tailwindcss/oxide-linux-arm-gnueabihf@4.2.4':
+    resolution: {integrity: sha512-7pIHBLTHYRAlS7V22JNuTh33yLH4VElwKtB3bwchK/UaKUPpQ0lPQiOWcbm4V3WP2I6fNIJ23vABIvoy2izdwA==}
     engines: {node: '>= 20'}
     cpu: [arm]
     os: [linux]
@@ -4024,6 +4092,13 @@ packages:
 
   '@tailwindcss/oxide-linux-arm64-gnu@4.2.2':
     resolution: {integrity: sha512-4og1V+ftEPXGttOO7eCmW7VICmzzJWgMx+QXAJRAhjrSjumCwWqMfkDrNu1LXEQzNAwz28NCUpucgQPrR4S2yw==}
+    engines: {node: '>= 20'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@tailwindcss/oxide-linux-arm64-gnu@4.2.4':
+    resolution: {integrity: sha512-+E4wxJ0ZGOzSH325reXTWB48l42i93kQqMvDyz5gqfRzRZ7faNhnmvlV4EPGJU3QJM/3Ab5jhJ5pCRUsKn6OQw==}
     engines: {node: '>= 20'}
     cpu: [arm64]
     os: [linux]
@@ -4050,6 +4125,13 @@ packages:
     os: [linux]
     libc: [musl]
 
+  '@tailwindcss/oxide-linux-arm64-musl@4.2.4':
+    resolution: {integrity: sha512-bBADEGAbo4ASnppIziaQJelekCxdMaxisrk+fB7Thit72IBnALp9K6ffA2G4ruj90G9XRS2VQ6q2bCKbfFV82g==}
+    engines: {node: '>= 20'}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
   '@tailwindcss/oxide-linux-x64-gnu@4.1.18':
     resolution: {integrity: sha512-v3gyT0ivkfBLoZGF9LyHmts0Isc8jHZyVcbzio6Wpzifg/+5ZJpDiRiUhDLkcr7f/r38SWNe7ucxmGW3j3Kb/g==}
     engines: {node: '>= 10'}
@@ -4071,6 +4153,13 @@ packages:
     os: [linux]
     libc: [glibc]
 
+  '@tailwindcss/oxide-linux-x64-gnu@4.2.4':
+    resolution: {integrity: sha512-7Mx25E4WTfnht0TVRTyC00j3i0M+EeFe7wguMDTlX4mRxafznw0CA8WJkFjWYH5BlgELd1kSjuU2JiPnNZbJDA==}
+    engines: {node: '>= 20'}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
   '@tailwindcss/oxide-linux-x64-musl@4.1.18':
     resolution: {integrity: sha512-bhJ2y2OQNlcRwwgOAGMY0xTFStt4/wyU6pvI6LSuZpRgKQwxTec0/3Scu91O8ir7qCR3AuepQKLU/kX99FouqQ==}
     engines: {node: '>= 10'}
@@ -4087,6 +4176,13 @@ packages:
 
   '@tailwindcss/oxide-linux-x64-musl@4.2.2':
     resolution: {integrity: sha512-XW3t3qwbIwiSyRCggeO2zxe3KWaEbM0/kW9e8+0XpBgyKU4ATYzcVSMKteZJ1iukJ3HgHBjbg9P5YPRCVUxlnQ==}
+    engines: {node: '>= 20'}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@tailwindcss/oxide-linux-x64-musl@4.2.4':
+    resolution: {integrity: sha512-2wwJRF7nyhOR0hhHoChc04xngV3iS+akccHTGtz965FwF0up4b2lOdo6kI1EbDaEXKgvcrFBYcYQQ/rrnWFVfA==}
     engines: {node: '>= 20'}
     cpu: [x64]
     os: [linux]
@@ -4128,6 +4224,18 @@ packages:
       - '@emnapi/wasi-threads'
       - tslib
 
+  '@tailwindcss/oxide-wasm32-wasi@4.2.4':
+    resolution: {integrity: sha512-FQsqApeor8Fo6gUEklzmaa9994orJZZDBAlQpK2Mq+DslRKFJeD6AjHpBQ0kZFQohVr8o85PPh8eOy86VlSCmw==}
+    engines: {node: '>=14.0.0'}
+    cpu: [wasm32]
+    bundledDependencies:
+      - '@napi-rs/wasm-runtime'
+      - '@emnapi/core'
+      - '@emnapi/runtime'
+      - '@tybys/wasm-util'
+      - '@emnapi/wasi-threads'
+      - tslib
+
   '@tailwindcss/oxide-win32-arm64-msvc@4.1.18':
     resolution: {integrity: sha512-HjSA7mr9HmC8fu6bdsZvZ+dhjyGCLdotjVOgLA2vEqxEBZaQo9YTX4kwgEvPCpRh8o4uWc4J/wEoFzhEmjvPbA==}
     engines: {node: '>= 10'}
@@ -4142,6 +4250,12 @@ packages:
 
   '@tailwindcss/oxide-win32-arm64-msvc@4.2.2':
     resolution: {integrity: sha512-qPmaQM4iKu5mxpsrWZMOZRgZv1tOZpUm+zdhhQP0VhJfyGGO3aUKdbh3gDZc/dPLQwW4eSqWGrrcWNBZWUWaXQ==}
+    engines: {node: '>= 20'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@tailwindcss/oxide-win32-arm64-msvc@4.2.4':
+    resolution: {integrity: sha512-L9BXqxC4ToVgwMFqj3pmZRqyHEztulpUJzCxUtLjobMCzTPsGt1Fa9enKbOpY2iIyVtaHNeNvAK8ERP/64sqGQ==}
     engines: {node: '>= 20'}
     cpu: [arm64]
     os: [win32]
@@ -4164,6 +4278,12 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@tailwindcss/oxide-win32-x64-msvc@4.2.4':
+    resolution: {integrity: sha512-ESlKG0EpVJQwRjXDDa9rLvhEAh0mhP1sF7sap9dNZT0yyl9SAG6T7gdP09EH0vIv0UNTlo6jPWyujD6559fZvw==}
+    engines: {node: '>= 20'}
+    cpu: [x64]
+    os: [win32]
+
   '@tailwindcss/oxide@4.1.18':
     resolution: {integrity: sha512-EgCR5tTS5bUSKQgzeMClT6iCY3ToqE1y+ZB0AKldj809QXk1Y+3jB0upOYZrn9aGIzPtUsP7sX4QQ4XtjBB95A==}
     engines: {node: '>= 10'}
@@ -4174,6 +4294,10 @@ packages:
 
   '@tailwindcss/oxide@4.2.2':
     resolution: {integrity: sha512-qEUA07+E5kehxYp9BVMpq9E8vnJuBHfJEC0vPC5e7iL/hw7HR61aDKoVoKzrG+QKp56vhNZe4qwkRmMC0zDLvg==}
+    engines: {node: '>= 20'}
+
+  '@tailwindcss/oxide@4.2.4':
+    resolution: {integrity: sha512-9El/iI069DKDSXwTvB9J4BwdO5JhRrOweGaK25taBAvBXyXqJAX+Jqdvs8r8gKpsI/1m0LeJLyQYTf/WLrBT1Q==}
     engines: {node: '>= 20'}
 
   '@tailwindcss/vite@4.1.18':
@@ -4188,6 +4312,11 @@ packages:
 
   '@tailwindcss/vite@4.2.2':
     resolution: {integrity: sha512-mEiF5HO1QqCLXoNEfXVA1Tzo+cYsrqV7w9Juj2wdUFyW07JRenqMG225MvPwr3ZD9N1bFQj46X7r33iHxLUW0w==}
+    peerDependencies:
+      vite: ^5.2.0 || ^6 || ^7 || ^8
+
+  '@tailwindcss/vite@4.2.4':
+    resolution: {integrity: sha512-pCvohwOCspk3ZFn6eJzrrX3g4n2JY73H6MmYC87XfGPyTty4YsCjYTMArRZm/zOI8dIt3+EcrLHAFPe5A4bgtw==}
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
@@ -4289,6 +4418,9 @@ packages:
 
   '@types/cors@2.8.19':
     resolution: {integrity: sha512-mFNylyeyqN93lfe/9CSxOGREz8cpzAhH+E93xJ4xWQf62V8sQ/24reV2nyzUWM6H6Xji+GGHpkbLe7pVoUEskg==}
+
+  '@types/cross-spawn@6.0.6':
+    resolution: {integrity: sha512-fXRhhUkG4H3TQk5dBhQ7m/JDdSNHKwR2BBia62lhwEIq9xGiQKLxd6LymNhn47SjXhsUEPmxi+PKw2OkW4LLjA==}
 
   '@types/debug@4.1.12':
     resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
@@ -6978,6 +7110,11 @@ packages:
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
+  lucide-react@1.14.0:
+    resolution: {integrity: sha512-+1mdWcfSJVUsaTIjN9zoezmUhfXo5l0vP7ekBMPo3jcS/aIkxHnXqAPsByszMZx/Y8oQBRJxJx5xg+RH3urzxA==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
   lucide-react@1.7.0:
     resolution: {integrity: sha512-yI7BeItCLZJTXikmK4KNUGCKoGzSvbKlfCvw44bU4fXAL6v3gYS4uHD1jzsLkfwODYwI6Drw5Tu9Z5ulDe0TSg==}
     peerDependencies:
@@ -7911,8 +8048,8 @@ packages:
   react-fast-compare@3.2.2:
     resolution: {integrity: sha512-nsO+KSNgo1SbJqJEYRE9ERzo7YtYbou/OqjSQKxV7jcKox7+usiUVZOAC+XnDOABXggQTno0Y1CpVnuWEc1boQ==}
 
-  react-hook-form@7.74.0:
-    resolution: {integrity: sha512-yR6wHr99p9wFv686jhRWVSFhUvDvNbdUf2dKlbno8/VKOCuoNobDGC6S+M2dua9A9Yo8vpcrp8assIYbsZCQ9g==}
+  react-hook-form@7.75.0:
+    resolution: {integrity: sha512-Ovv94H+0p3sJ7B9B5QxPuCP1u8V/cHuVGyH55cSwodYDtoJwK+fqk3vjfIgSX59I2U/bU4z0nRJ9HMLpNiWEmw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
@@ -8720,6 +8857,9 @@ packages:
 
   tailwindcss@4.2.2:
     resolution: {integrity: sha512-KWBIxs1Xb6NoLdMVqhbhgwZf2PGBpPEiwOqgI4pFIYbNTfBXiKYyWoTsXgBQ9WFg/OlhnvHaY+AEpW7wSmFo2Q==}
+
+  tailwindcss@4.2.4:
+    resolution: {integrity: sha512-HhKppgO81FQof5m6TEnuBWCZGgfRAWbaeOaGT00KOy/Pf/j6oUihdvBpA7ltCeAvZpFhW3j0PTclkxsd4IXYDA==}
 
   tapable@2.3.0:
     resolution: {integrity: sha512-g9ljZiwki/LfxmQADO3dEY1CbpmXT5Hm2fJ+QaGKwSXUylMybePR7/67YW7jOrrvjEgL1Fmz5kzyAjWVWLlucg==}
@@ -9649,7 +9789,7 @@ snapshots:
     optionalDependencies:
       skybridge: link:packages/core
 
-  '@alpic-ai/ui@1.116.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(lucide-react@1.7.0(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react-hook-form@7.74.0(react@19.2.4))(react@19.2.4)(sonner@2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.2)(tw-animate-css@1.4.0)':
+  '@alpic-ai/ui@1.116.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(lucide-react@1.7.0(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react-hook-form@7.75.0(react@19.2.4))(react@19.2.4)(sonner@2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.2)(tw-animate-css@1.4.0)':
     dependencies:
       '@radix-ui/react-accordion': 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@radix-ui/react-avatar': 1.1.11(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -9674,10 +9814,44 @@ snapshots:
       lucide-react: 1.7.0(react@19.2.4)
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
-      react-hook-form: 7.74.0(react@19.2.4)
+      react-hook-form: 7.75.0(react@19.2.4)
       sonner: 2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       tailwind-merge: 3.5.0
       tailwindcss: 4.2.2
+      tw-animate-css: 1.4.0
+    transitivePeerDependencies:
+      - '@types/react'
+      - '@types/react-dom'
+
+  '@alpic-ai/ui@1.123.0(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(lucide-react@1.14.0(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react-hook-form@7.75.0(react@19.2.4))(react@19.2.4)(sonner@2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(tailwindcss@4.2.4)(tw-animate-css@1.4.0)':
+    dependencies:
+      '@radix-ui/react-accordion': 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-avatar': 1.1.11(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-checkbox': 1.3.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-collapsible': 1.1.12(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-dialog': 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-dropdown-menu': 2.1.16(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-label': 2.1.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-popover': 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-radio-group': 1.3.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-scroll-area': 1.2.10(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-select': 2.2.6(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-separator': 1.1.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-slot': 1.2.4(@types/react@19.2.14)(react@19.2.4)
+      '@radix-ui/react-switch': 1.2.6(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-tabs': 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-toggle-group': 1.1.11(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@radix-ui/react-tooltip': 1.2.8(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      class-variance-authority: 0.7.1
+      clsx: 2.1.1
+      cmdk: 1.1.1(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      lucide-react: 1.14.0(react@19.2.4)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+      react-hook-form: 7.75.0(react@19.2.4)
+      sonner: 2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      tailwind-merge: 3.5.0
+      tailwindcss: 4.2.4
       tw-animate-css: 1.4.0
     transitivePeerDependencies:
       - '@types/react'
@@ -13812,6 +13986,16 @@ snapshots:
       source-map-js: 1.2.1
       tailwindcss: 4.2.2
 
+  '@tailwindcss/node@4.2.4':
+    dependencies:
+      '@jridgewell/remapping': 2.3.5
+      enhanced-resolve: 5.19.0
+      jiti: 2.6.1
+      lightningcss: 1.32.0
+      magic-string: 0.30.21
+      source-map-js: 1.2.1
+      tailwindcss: 4.2.4
+
   '@tailwindcss/oxide-android-arm64@4.1.18':
     optional: true
 
@@ -13819,6 +14003,9 @@ snapshots:
     optional: true
 
   '@tailwindcss/oxide-android-arm64@4.2.2':
+    optional: true
+
+  '@tailwindcss/oxide-android-arm64@4.2.4':
     optional: true
 
   '@tailwindcss/oxide-darwin-arm64@4.1.18':
@@ -13830,6 +14017,9 @@ snapshots:
   '@tailwindcss/oxide-darwin-arm64@4.2.2':
     optional: true
 
+  '@tailwindcss/oxide-darwin-arm64@4.2.4':
+    optional: true
+
   '@tailwindcss/oxide-darwin-x64@4.1.18':
     optional: true
 
@@ -13837,6 +14027,9 @@ snapshots:
     optional: true
 
   '@tailwindcss/oxide-darwin-x64@4.2.2':
+    optional: true
+
+  '@tailwindcss/oxide-darwin-x64@4.2.4':
     optional: true
 
   '@tailwindcss/oxide-freebsd-x64@4.1.18':
@@ -13848,6 +14041,9 @@ snapshots:
   '@tailwindcss/oxide-freebsd-x64@4.2.2':
     optional: true
 
+  '@tailwindcss/oxide-freebsd-x64@4.2.4':
+    optional: true
+
   '@tailwindcss/oxide-linux-arm-gnueabihf@4.1.18':
     optional: true
 
@@ -13855,6 +14051,9 @@ snapshots:
     optional: true
 
   '@tailwindcss/oxide-linux-arm-gnueabihf@4.2.2':
+    optional: true
+
+  '@tailwindcss/oxide-linux-arm-gnueabihf@4.2.4':
     optional: true
 
   '@tailwindcss/oxide-linux-arm64-gnu@4.1.18':
@@ -13866,6 +14065,9 @@ snapshots:
   '@tailwindcss/oxide-linux-arm64-gnu@4.2.2':
     optional: true
 
+  '@tailwindcss/oxide-linux-arm64-gnu@4.2.4':
+    optional: true
+
   '@tailwindcss/oxide-linux-arm64-musl@4.1.18':
     optional: true
 
@@ -13873,6 +14075,9 @@ snapshots:
     optional: true
 
   '@tailwindcss/oxide-linux-arm64-musl@4.2.2':
+    optional: true
+
+  '@tailwindcss/oxide-linux-arm64-musl@4.2.4':
     optional: true
 
   '@tailwindcss/oxide-linux-x64-gnu@4.1.18':
@@ -13884,6 +14089,9 @@ snapshots:
   '@tailwindcss/oxide-linux-x64-gnu@4.2.2':
     optional: true
 
+  '@tailwindcss/oxide-linux-x64-gnu@4.2.4':
+    optional: true
+
   '@tailwindcss/oxide-linux-x64-musl@4.1.18':
     optional: true
 
@@ -13891,6 +14099,9 @@ snapshots:
     optional: true
 
   '@tailwindcss/oxide-linux-x64-musl@4.2.2':
+    optional: true
+
+  '@tailwindcss/oxide-linux-x64-musl@4.2.4':
     optional: true
 
   '@tailwindcss/oxide-wasm32-wasi@4.1.18':
@@ -13902,6 +14113,9 @@ snapshots:
   '@tailwindcss/oxide-wasm32-wasi@4.2.2':
     optional: true
 
+  '@tailwindcss/oxide-wasm32-wasi@4.2.4':
+    optional: true
+
   '@tailwindcss/oxide-win32-arm64-msvc@4.1.18':
     optional: true
 
@@ -13911,6 +14125,9 @@ snapshots:
   '@tailwindcss/oxide-win32-arm64-msvc@4.2.2':
     optional: true
 
+  '@tailwindcss/oxide-win32-arm64-msvc@4.2.4':
+    optional: true
+
   '@tailwindcss/oxide-win32-x64-msvc@4.1.18':
     optional: true
 
@@ -13918,6 +14135,9 @@ snapshots:
     optional: true
 
   '@tailwindcss/oxide-win32-x64-msvc@4.2.2':
+    optional: true
+
+  '@tailwindcss/oxide-win32-x64-msvc@4.2.4':
     optional: true
 
   '@tailwindcss/oxide@4.1.18':
@@ -13965,6 +14185,21 @@ snapshots:
       '@tailwindcss/oxide-win32-arm64-msvc': 4.2.2
       '@tailwindcss/oxide-win32-x64-msvc': 4.2.2
 
+  '@tailwindcss/oxide@4.2.4':
+    optionalDependencies:
+      '@tailwindcss/oxide-android-arm64': 4.2.4
+      '@tailwindcss/oxide-darwin-arm64': 4.2.4
+      '@tailwindcss/oxide-darwin-x64': 4.2.4
+      '@tailwindcss/oxide-freebsd-x64': 4.2.4
+      '@tailwindcss/oxide-linux-arm-gnueabihf': 4.2.4
+      '@tailwindcss/oxide-linux-arm64-gnu': 4.2.4
+      '@tailwindcss/oxide-linux-arm64-musl': 4.2.4
+      '@tailwindcss/oxide-linux-x64-gnu': 4.2.4
+      '@tailwindcss/oxide-linux-x64-musl': 4.2.4
+      '@tailwindcss/oxide-wasm32-wasi': 4.2.4
+      '@tailwindcss/oxide-win32-arm64-msvc': 4.2.4
+      '@tailwindcss/oxide-win32-x64-msvc': 4.2.4
+
   '@tailwindcss/vite@4.1.18(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@tailwindcss/node': 4.1.18
@@ -14006,6 +14241,13 @@ snapshots:
       '@tailwindcss/oxide': 4.2.2
       tailwindcss: 4.2.2
       vite: 8.0.3(@types/node@25.5.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+
+  '@tailwindcss/vite@4.2.4(vite@8.0.3(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
+    dependencies:
+      '@tailwindcss/node': 4.2.4
+      '@tailwindcss/oxide': 4.2.4
+      tailwindcss: 4.2.4
+      vite: 8.0.3(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   '@tanstack/query-core@5.90.16': {}
 
@@ -14121,6 +14363,10 @@ snapshots:
   '@types/cors@2.8.19':
     dependencies:
       '@types/node': 25.2.3
+
+  '@types/cross-spawn@6.0.6':
+    dependencies:
+      '@types/node': 25.5.0
 
   '@types/debug@4.1.12':
     dependencies:
@@ -14363,18 +14609,6 @@ snapshots:
       '@types/babel__core': 7.20.5
       react-refresh: 0.18.0
       vite: 7.3.1(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@vitejs/plugin-react@5.1.2(vite@7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
-    dependencies:
-      '@babel/core': 7.28.5
-      '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.28.5)
-      '@babel/plugin-transform-react-jsx-source': 7.27.1(@babel/core@7.28.5)
-      '@rolldown/pluginutils': 1.0.0-beta.53
-      '@types/babel__core': 7.20.5
-      react-refresh: 0.18.0
-      vite: 7.3.1(@types/node@24.12.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -17159,6 +17393,10 @@ snapshots:
     dependencies:
       react: 19.2.4
 
+  lucide-react@1.14.0(react@19.2.4):
+    dependencies:
+      react: 19.2.4
+
   lucide-react@1.7.0(react@19.2.4):
     dependencies:
       react: 19.2.4
@@ -18601,7 +18839,7 @@ snapshots:
 
   react-fast-compare@3.2.2: {}
 
-  react-hook-form@7.74.0(react@19.2.4):
+  react-hook-form@7.75.0(react@19.2.4):
     dependencies:
       react: 19.2.4
 
@@ -19880,6 +20118,8 @@ snapshots:
   tailwindcss@4.2.0: {}
 
   tailwindcss@4.2.2: {}
+
+  tailwindcss@4.2.4: {}
 
   tapable@2.3.0: {}
 

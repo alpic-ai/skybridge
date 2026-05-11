@@ -27,20 +27,30 @@
 
 .preview-region {
   /* Figma “bg-secondary-subtle” / “border-tertiary” → @alpic-ai/ui @theme color tokens */
-  background-color: var(--color-light-gray);
-  /* major grid — full-strength border color */
+  --preview-region-bg: var(--color-light-gray);
+  --preview-region-grid: var(--color-border);
+  background-color: var(--preview-region-bg);
+  /* major grid — full-strength grid color */
   background-image:
-    linear-gradient(to right, var(--color-border) 0 1px, transparent 1px 100%),
-    linear-gradient(to bottom, var(--color-border) 0 1px, transparent 1px 100%),
-    /* minor grid — 55% opacity via color-mix */
     linear-gradient(
       to right,
-      color-mix(in oklab, var(--color-border) 55%, transparent) 0 1px,
+      var(--preview-region-grid) 0 1px,
       transparent 1px 100%
     ),
     linear-gradient(
       to bottom,
-      color-mix(in oklab, var(--color-border) 55%, transparent) 0 1px,
+      var(--preview-region-grid) 0 1px,
+      transparent 1px 100%
+    ),
+    /* minor grid — 55% opacity via color-mix */
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--preview-region-grid) 55%, transparent) 0 1px,
+      transparent 1px 100%
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--preview-region-grid) 55%, transparent) 0 1px,
       transparent 1px 100%
     );
   background-size:
@@ -49,4 +59,9 @@
     16px 16px,
     16px 16px;
   background-position: 0 0;
+}
+
+.preview-region[data-theme="dark"] {
+  --preview-region-bg: #071718;
+  --preview-region-grid: color-mix(in oklab, #ffffff 14%, transparent);
 }
