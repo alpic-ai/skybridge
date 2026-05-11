@@ -32,6 +32,10 @@ export const useIframeAutoHeight = ({
     };
 
     const observer = new ResizeObserver(measure);
+    const root = iframe.contentDocument.getElementById("root");
+    if (root) {
+      observer.observe(root);
+    }
     observer.observe(iframe.contentDocument.body);
     observer.observe(iframe.contentDocument.documentElement);
     const parentEl = containerRef.current?.parentElement;

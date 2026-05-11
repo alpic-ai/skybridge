@@ -9,6 +9,7 @@ import mcpClient, {
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { asString, cn, injectWaitForOpenai } from "@/lib/utils.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
+import { useSyncOpenaiLocale } from "./use-sync-openai-locale.js";
 import { useSyncOpenaiTheme } from "./use-sync-openai-theme.js";
 
 const MOBILE_WIDTH_PX = 345;
@@ -50,6 +51,7 @@ export const View = () => {
       ? "100%"
       : `${isMobile ? MOBILE_WIDTH_PX : DESKTOP_WIDTH_PX}px`;
   const theme = useInspectorPreferencesStore((s) => s.theme);
+  const locale = useInspectorPreferencesStore((s) => s.locale);
 
   const resourceEntry = resource.contents[0] as {
     text: string;
@@ -123,14 +125,19 @@ export const View = () => {
     updateOpenaiObject,
   });
 
+  useSyncOpenaiLocale({
+    iframeRef,
+    toolName: tool.name,
+    locale,
+    updateOpenaiObject,
+  });
+
   return (
     <div
       ref={containerRef}
       className={cn(
-        "relative overflow-hidden bg-background transition-[width] duration-150 ease-out",
-        isFullscreen
-          ? "h-full w-full"
-          : "mx-auto rounded-2xl border border-border shadow-md",
+        "relative transition-[width] duration-150 ease-out",
+        isFullscreen ? "h-full w-full bg-background" : "mx-auto",
       )}
       style={{
         width: isFullscreen ? undefined : width,

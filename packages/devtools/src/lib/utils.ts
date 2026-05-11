@@ -59,10 +59,12 @@ export const measureIframeHeight = (
   const parentH = parentEl?.clientHeight ?? 0;
   // Before layout, the scroll parent can report 0 — do not clamp to 0 or we never commit height.
   const maxH = parentH > 0 ? parentH : Number.POSITIVE_INFINITY;
-  const innerScroll = Math.max(
-    doc.body.scrollHeight,
-    doc.documentElement.scrollHeight,
-  );
+
+  // Prefer the mount node so body/html stretching (e.g. min-h-screen) doesn't pin us tall.
+  const root = doc.getElementById("root");
+  const innerScroll = root
+    ? root.getBoundingClientRect().height
+    : Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight);
 
   return Math.min(innerScroll, maxH);
 };
