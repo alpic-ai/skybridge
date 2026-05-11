@@ -35,7 +35,6 @@ describe("useCallTool - onSuccess callback", () => {
     content: [{ type: "text" as const, text: "test result" }],
     structuredContent: { result: "test" },
     isError: false,
-    result: "test result",
   };
   const error = new Error("test error");
 
@@ -201,7 +200,6 @@ describe("useCallTool - TypeScript typing", () => {
       content: [{ type: "text" as const, text: "test" }],
       structuredContent: { result: "test" },
       isError: false,
-      result: "test",
       meta: { id: 123 },
     };
 
@@ -230,7 +228,6 @@ describe("useCallTool - TypeScript typing", () => {
       content: [{ type: "text" as const, text: "answer" }],
       structuredContent: { answer: "test answer" },
       isError: false,
-      result: "answer",
       meta: {},
     };
 
@@ -256,7 +253,6 @@ describe("useCallTool - TypeScript typing", () => {
       content: [{ type: "text" as const, text: "data" }],
       structuredContent: { data: "test data" },
       isError: false,
-      result: "data",
       meta: {},
     };
 

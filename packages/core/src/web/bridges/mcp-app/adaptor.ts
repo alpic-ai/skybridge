@@ -80,19 +80,10 @@ export class McpAppAdaptor implements Adaptor {
       arguments: args ?? undefined,
     });
 
-    const result = response.content
-      .filter(
-        (content): content is { type: "text"; text: string } =>
-          content.type === "text",
-      )
-      .map(({ text }) => text)
-      .join("\n");
-
     return {
       content: response.content,
       structuredContent: response.structuredContent ?? {},
       isError: response.isError ?? false,
-      result,
       meta: response._meta ?? {},
     } as ToolResponse;
   };
