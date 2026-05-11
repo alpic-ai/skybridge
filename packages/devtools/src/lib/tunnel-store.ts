@@ -1,11 +1,15 @@
 import { useEffect } from "react";
+import { z } from "zod";
 import { create } from "zustand";
 
-export type TunnelState =
-  | { status: "idle" }
-  | { status: "starting"; message: string }
-  | { status: "connected"; url: string }
-  | { status: "error"; message: string };
+const tunnelStateSchema = z.discriminatedUnion("status", [
+  z.object({ status: z.literal("idle") }),
+  z.object({ status: z.literal("starting"), message: z.string() }),
+  z.object({ status: z.literal("connected"), url: z.string() }),
+  z.object({ status: z.literal("error"), message: z.string() }),
+]);
+
+export type TunnelState = z.infer<typeof tunnelStateSchema>;
 
 type TunnelStore = {
   state: TunnelState;
@@ -61,7 +65,10 @@ export const useTunnelStore = create<TunnelStore>()((set, get) => ({
         return;
       }
       try {
-        set({ state: JSON.parse(event.data) });
+        const parsed = tunnelStateSchema.safeParse(JSON.parse(event.data));
+        if (parsed.success) {
+          set({ state: parsed.data });
+        }
       } catch {
         // ignore malformed frame
       }

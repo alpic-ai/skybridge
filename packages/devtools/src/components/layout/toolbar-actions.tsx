@@ -4,6 +4,7 @@ import {
   PopoverAnchor,
   PopoverContent,
 } from "@alpic-ai/ui/components/popover";
+import { Separator } from "@alpic-ai/ui/components/separator";
 import {
   Check,
   Copy,
@@ -72,12 +73,25 @@ function useHoverOpen() {
 
 function useCopyToClipboard() {
   const [copied, setCopied] = useState(false);
+  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (resetTimer.current) {
+        clearTimeout(resetTimer.current);
+      }
+    },
+    [],
+  );
 
   const copy = useCallback(async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
-      setTimeout(() => setCopied(false), COPIED_RESET_MS);
+      if (resetTimer.current) {
+        clearTimeout(resetTimer.current);
+      }
+      resetTimer.current = setTimeout(() => setCopied(false), COPIED_RESET_MS);
     } catch (err) {
       console.error("Clipboard write failed", err);
     }
@@ -260,58 +274,63 @@ export function DeployButton() {
 
 export function TunnelButton() {
   const { state, start, stop } = useTunnelStore();
+  const { copied, copy } = useCopyToClipboard();
+
+  const isConnected = state.status === "connected";
+  const onClick = isConnected ? () => copy(state.url) : start;
 
   return (
     <HoverPopover
       className={cn(
-        "w-80 text-center",
+        "w-60 text-center",
         state.status === "starting" && "animate-pulse w-60",
       )}
       trigger={
-        <Button variant="secondary" onClick={start}>
-          {state.status !== "starting" && (
-            <span
-              className={`h-2 w-2 rounded-full ${DOT_BY_STATUS[state.status]}`}
-              aria-hidden
-            />
+        <Button variant="secondary" onClick={onClick}>
+          <span
+            className={`h-2 w-2 rounded-full ${DOT_BY_STATUS[state.status]}`}
+            aria-hidden
+          />
+          {isConnected ? (
+            <>
+              <span className="mx-2 font-mono text-xs">
+                {state.url.replace(/^https?:\/\//, "")}
+              </span>
+              {copied ? (
+                <Check className="size-3.5" />
+              ) : (
+                <Copy className="size-3.5" />
+              )}
+            </>
+          ) : (
+            "Tunnel"
           )}
-          Tunnel
         </Button>
       }
     >
-      {state.status === "idle" && <IdleContent onStart={start} />}
+      {state.status === "idle" && <IdleContent />}
       {state.status === "error" && (
         <ErrorContent message={state.message} onRetry={start} />
       )}
       {state.status === "starting" && (
         <StartingContent message={state.message} />
       )}
-      {state.status === "connected" && (
-        <ConnectedContent url={state.url} onStop={stop} />
-      )}
+      {state.status === "connected" && <ConnectedContent onStop={stop} />}
     </HoverPopover>
   );
 }
 
-function IdleContent({ onStart }: { onStart: () => void }) {
+function IdleContent() {
   return (
     <div className="space-y-3">
       <p
         className={cn(
-          "text-sm text-muted-foreground py-4 mx-auto",
+          "text-sm text-muted-foreground mx-auto",
           DESCRIPTION_MAX_W,
         )}
       >
         Get a public URL that you can use in Claude or ChatGPT.
       </p>
-      <Button
-        variant="cta"
-        className="w-full"
-        onClick={onStart}
-        icon={<PlugIcon className="size-3.5" />}
-      >
-        Start tunnel
-      </Button>
     </div>
   );
 }
@@ -350,20 +369,15 @@ function StartingContent({ message }: { message: string }) {
   );
 }
 
-function ConnectedContent({
-  url,
-  onStop,
-}: {
-  url: string;
-  onStop: () => void;
-}) {
+function ConnectedContent({ onStop }: { onStop: () => void }) {
   return (
     <div className="space-y-3 text-left">
-      <p className="text-xs font-medium text-muted-foreground">Tunnel URL</p>
-      <div className="flex items-center gap-2 rounded-md border bg-light-gray px-2 py-1.5">
-        <span className="flex-1 truncate font-mono text-xs">{url}</span>
-        <CopyButton value={url} label="Copy URL" />
+      <div className="flex items-center gap-2">
+        <p className="text-sm text-muted-foreground">
+          Click to copy the tunnel URL to use in Claude or ChatGPT
+        </p>
       </div>
+      <Separator />
       <Button
         variant="tertiary"
         className="w-full"
