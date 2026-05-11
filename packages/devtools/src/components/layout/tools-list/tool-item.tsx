@@ -143,6 +143,9 @@ function ToolBody({
 
   return (
     <div className="space-y-3">
+      {tool.description && (
+        <p className="text-xs text-muted-foreground">{tool.description}</p>
+      )}
       {hasInput && (
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)}>
           <div className="flex items-center justify-between gap-2">
