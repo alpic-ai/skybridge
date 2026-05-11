@@ -40,6 +40,7 @@ export const ToolPanel = () => {
     storage: localStorage,
   });
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
+  const theme = useInspectorPreferencesStore((s) => s.theme);
   const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
   const isFullscreen = displayMode === "fullscreen";
   useKeyPress("esc", (e) => {
@@ -57,7 +58,10 @@ export const ToolPanel = () => {
   const hasView = Boolean(templateUri);
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-col overflow-hidden preview-region">
+    <div
+      className="flex h-full min-h-0 w-full flex-col overflow-hidden preview-region transition-colors duration-150 ease-out"
+      data-theme={theme}
+    >
       {tool ? (
         hasResult ? (
           hasView ? (

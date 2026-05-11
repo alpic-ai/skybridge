@@ -14,7 +14,6 @@ import { useSyncOpenaiTheme } from "./use-sync-openai-theme.js";
 const MOBILE_WIDTH_PX = 345;
 const DESKTOP_WIDTH_PX = 770;
 const PIP_MAX_HEIGHT_PX = 420;
-const VIEW_DARK_BG = "#212121";
 
 export const View = () => {
   const tool = useSelectedTool();
@@ -128,7 +127,7 @@ export const View = () => {
     <div
       ref={containerRef}
       className={cn(
-        "relative overflow-hidden bg-background transition-[width,background-color] duration-150 ease-out",
+        "relative overflow-hidden bg-background transition-[width] duration-150 ease-out",
         isFullscreen
           ? "h-full w-full"
           : "mx-auto rounded-2xl border border-border shadow-md",
@@ -141,7 +140,6 @@ export const View = () => {
             ? `${isPip ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`
             : "auto",
         opacity: mounted ? 1 : 0,
-        backgroundColor: theme === "dark" ? VIEW_DARK_BG : undefined,
       }}
     >
       <iframe
