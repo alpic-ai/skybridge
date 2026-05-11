@@ -19,7 +19,6 @@ export type CallToolResponse = {
   content: CallToolResult["content"];
   structuredContent: NonNullable<CallToolResult["structuredContent"]>;
   isError: NonNullable<CallToolResult["isError"]>;
-  result: string;
   meta?: CallToolResult["_meta"];
 };
 
@@ -106,6 +105,8 @@ export type OpenExternalOptions = {
   redirectUrl?: false;
 };
 
+export type SendFollowUpMessageOptions = { scrollToBottom?: boolean };
+
 export interface Adaptor {
   getHostContextStore<K extends keyof HostContext>(key: K): HostContextStore<K>;
   callTool<
@@ -115,7 +116,10 @@ export interface Adaptor {
   requestDisplayMode(mode: RequestDisplayMode): Promise<{
     mode: RequestDisplayMode;
   }>;
-  sendFollowUpMessage(prompt: string): Promise<void>;
+  sendFollowUpMessage(
+    prompt: string,
+    options?: SendFollowUpMessageOptions,
+  ): Promise<void>;
   openExternal(href: string, options?: OpenExternalOptions): void;
   setViewState(stateOrUpdater: SetViewStateAction): Promise<void>;
   uploadFile(file: File, options?: UploadFileOptions): Promise<FileMetadata>;
