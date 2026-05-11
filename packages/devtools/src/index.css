@@ -61,7 +61,3 @@
   background-position: 0 0;
 }
 
-.preview-region[data-theme="dark"] {
-  --preview-region-bg: #071718;
-  --preview-region-grid: color-mix(in oklab, #ffffff 14%, transparent);
-}
