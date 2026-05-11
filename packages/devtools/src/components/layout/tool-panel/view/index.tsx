@@ -136,10 +136,8 @@ export const View = () => {
     <div
       ref={containerRef}
       className={cn(
-        "relative overflow-hidden bg-background transition-[width] duration-150 ease-out",
-        isFullscreen
-          ? "h-full w-full"
-          : "mx-auto border border-border shadow-md",
+        "relative transition-[width] duration-150 ease-out",
+        isFullscreen ? "h-full w-full bg-background" : "mx-auto",
       )}
       style={{
         width: isFullscreen ? undefined : width,
