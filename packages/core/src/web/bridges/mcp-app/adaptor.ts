@@ -7,6 +7,7 @@ import type {
   OpenExternalOptions,
   RequestDisplayMode,
   RequestModalOptions,
+  SendFollowUpMessageOptions,
   SetViewStateAction,
 } from "../types.js";
 import { McpAppBridge } from "./bridge.js";
@@ -101,7 +102,10 @@ export class McpAppAdaptor implements Adaptor {
     return app.requestDisplayMode({ mode });
   };
 
-  public sendFollowUpMessage = async (prompt: string) => {
+  public sendFollowUpMessage = async (
+    prompt: string,
+    _options?: SendFollowUpMessageOptions,
+  ) => {
     const app = await McpAppBridge.getInstance().getApp();
     await app.sendMessage({
       role: "user",

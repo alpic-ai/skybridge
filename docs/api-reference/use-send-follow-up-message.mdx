@@ -24,7 +24,10 @@ function FollowUpButton() {
 ## Returns
 
 ```tsx
-sendFollowUpMessage: (prompt: string) => Promise<void>
+sendFollowUpMessage: (
+  prompt: string,
+  options?: SendFollowUpMessageOptions,
+) => Promise<void>
 ```
 
 An async function that sends a follow-up message to continue the conversation.
@@ -34,6 +37,10 @@ An async function that sends a follow-up message to continue the conversation.
 - `prompt: string`
   - **Required**
   - The message to send as a follow-up prompt
+- `options.scrollToBottom?: boolean`
+  - Defaults to true
+  - Set to `false`to prevent auto-scroll
+  - Supported by ChatGPT only
 
 ## Examples
 
