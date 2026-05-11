@@ -79,7 +79,7 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
       <AccordionTrigger
         className={cn(
           "font-mono text-xs font-normal text-foreground",
-          "no-underline hover:bg-muted/40",
+          "no-underline data-[state=closed]:hover:bg-muted/40",
         )}
         action={
           open ? (
