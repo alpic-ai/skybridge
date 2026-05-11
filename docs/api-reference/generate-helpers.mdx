@@ -34,9 +34,9 @@ const { callTool } = useCallTool("search-trip");
 
 ## Prerequisites
 
-### Server Must Use Method Chaining
+### Server must use method chaining
 
-Your MCP server **must** use method chaining for type inference to work. See [Type Safety: Method Chaining](/concepts/type-safety#method-chaining) for details.
+Your MCP server **must** use method chaining for type inference to work. See [Type Safety: method chaining](/concepts/type-safety#method-chaining-requirement) for details.
 
 ```ts
 // ✅ Works — chain registerTool calls
@@ -55,7 +55,7 @@ const server = new McpServer({ name: "my-app", version: "1.0" }, {})
 export type AppType = typeof server;
 ```
 
-### Export Server Type
+### Export the server type
 
 Export your server type so it can be imported in your view code:
 
@@ -64,9 +64,9 @@ Export your server type so it can be imported in your view code:
 export type AppType = typeof server;
 ```
 
-## Quick Start
+## Quick start
 
-### 1. One-Time Setup
+### 1. One-time setup
 
 Create a bridge file that connects your server types to your views:
 
@@ -78,7 +78,7 @@ import { generateHelpers } from "skybridge/web";
 export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
 ```
 
-### 2. Use Typed Hooks in Views
+### 2. Use typed hooks in views
 
 Import and use the typed hooks throughout your app:
 
@@ -112,13 +112,13 @@ export default function SearchTrip() {
 }
 ```
 
-## API Reference
+## API reference
 
 ```tsx
 const { useCallTool, useToolInfo } = generateHelpers<T>();
 ```
 
-## Type Parameters
+## Type parameters
 
 ### `T`
 
@@ -164,7 +164,7 @@ name: K extends Names
 
 The name of the tool to call. This must match a tool name from your server's registry. TypeScript will provide autocomplete suggestions based on all registered tools and views.
 
-#### Return Value
+#### Return value
 
 The typed `useCallTool` returns the same structure as the untyped version, but with automatically inferred types. See the [`useCallTool` API reference](/api-reference/use-call-tool) for detailed documentation on all return properties.
 
@@ -176,7 +176,7 @@ A typed version of the `useToolInfo` hook that provides autocomplete for tool na
 const toolInfo = useToolInfo<K extends Names>();
 ```
 
-#### Type Parameter `K`
+#### Type parameter `K`
 
 ```tsx
 K extends Names
@@ -188,6 +188,12 @@ The name of the tool/view. This must match a tool name from your server's regist
 
 ## Limitations
 
-- **Chaining Required**: Server must use method chaining for type inference to work
-- **Runtime Types**: Types are inferred at compile time; runtime validation still uses Zod schemas
-- **Callback Return Type**: Output types are inferred from the callback's return value, not `outputSchema`
+- **Chaining required**: Server must use method chaining for type inference to work
+- **Runtime types**: Types are inferred at compile time; runtime validation still uses Zod schemas
+- **Callback return type**: Output types are inferred from the callback's return value, not `outputSchema`
+
+## Related
+
+- [Type Safety](/concepts/type-safety)
+- [useCallTool](/api-reference/use-call-tool)
+- [useToolInfo](/api-reference/use-tool-info)

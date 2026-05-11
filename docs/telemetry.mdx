@@ -3,8 +3,6 @@ title: Telemetry
 description: "Learn what data Skybridge collects, why we collect it, and how to opt out."
 ---
 
-# Telemetry
-
 Skybridge collects anonymous usage telemetry to help us understand how the framework is being used and improve the developer experience. Telemetry is collected from two places:
 
 1. **CLI commands** — when you run `skybridge dev`, `build`, `start`, etc.
@@ -13,12 +11,12 @@ Skybridge collects anonymous usage telemetry to help us understand how the frame
 **Telemetry is completely optional** and you can opt out at any time. The same opt-out controls apply to both telemetry collectors.
 
 <Info>
-**Your Privacy Matters**
+**Your privacy matters**
 
 We only collect aggregate usage data. We never collect personal information, project code, file contents, tool names, tool arguments, tool results, or any sensitive data.
 </Info>
 
-## What We Collect
+## What we collect
 
 ### CLI commands
 
@@ -46,7 +44,7 @@ When your deployed Skybridge server handles an MCP `tools/call` request, it emit
 
 That's the entire payload. There is no machine ID, no session ID, no tool name, no arguments, no result, no IP-derived identity, and no user metadata attached to these events.
 
-### What We Don't Collect
+### What we don't collect
 
 - ❌ Project names or file paths
 - ❌ Source code or file contents
@@ -56,7 +54,7 @@ That's the entire payload. There is no machine ID, no session ID, no tool name, 
 - ❌ IP addresses or location data stored or used as identifiers
 - ❌ Personal identifiable information
 
-## Why We Collect Telemetry
+## Why we collect telemetry
 
 Telemetry helps us:
 
@@ -65,7 +63,7 @@ Telemetry helps us:
 - **Prioritize improvements** — Which platforms and Node versions should we support?
 - **Measure adoption** — How is Skybridge being adopted in production over time, and which versions are still in active use?
 
-## How to Opt Out
+## How to opt out
 
 Telemetry preferences are stored per-machine. You can opt-out of telemetry using any of the following methods:
 - updating the `telemetry.enabled` property in `~/.skybridge/config.json` configuration file
@@ -77,7 +75,7 @@ The right opt-out method depends on **where** the telemetry is being emitted fro
 - **Your local development machine**: Prefer the use of `skybridge telemetry disable` that will update your local `~/.skybridge/config.json` config file
 - **CI runners** & **Deployed Skybridge servers**: Prefer the use of `SKYBRIDGE_TELEMETRY_DISABLED=1` or `DO_NOT_TRACK=1` environment variable. It's much simpler than packaging a local `~/.skybridge/config.json`
 
-### Using the Configuration File
+### Using the configuration file
 
 Telemetry settings are stored per-machine in `~/.skybridge/config.json`:
 
@@ -120,7 +118,7 @@ skybridge telemetry status
 
 All the above commands write and read from the `~/.skybridge/config.json` configuration file.
 
-### Using Environment Variables
+### Using environment variables
 
 Set `SKYBRIDGE_TELEMETRY_DISABLED=1` to disable telemetry:
 
@@ -139,7 +137,7 @@ export DO_NOT_TRACK=1
 Environment variables always take precedence over the configuration file. If `SKYBRIDGE_TELEMETRY_DISABLED=1` or `DO_NOT_TRACK=1` is set, telemetry is disabled regardless of any config file setting, and regardless of whether a config file exists at all.
 </Note>
 
-## Debug Mode
+## Debug mode
 
 To see what CLI telemetry data would be sent without actually sending it, enable debug mode:
 
@@ -153,7 +151,7 @@ This will print the telemetry event to stderr instead of sending it, useful for 
 Debug mode applies to CLI telemetry only. The runtime tool-call counter has no payload beyond the version tag, so there is nothing to inspect — disabling telemetry is the only relevant control.
 </Note>
 
-## Data Handling
+## Data handling
 
 ### CLI events
 
@@ -168,3 +166,8 @@ Debug mode applies to CLI telemetry only. The runtime tool-call counter has no p
 - Packets are sent fire-and-forget; failures never block or delay tool execution
 - They are received by a Skybridge-operated [Vector](https://vector.dev/) instance
 - Only aggregate per-version counters are stored — there is no per-event record retained, and individual calls cannot be linked to a server, project, or user
+
+## Related
+
+- [CLI](/api-reference/cli)
+- [Deploy](/quickstart/deploy)

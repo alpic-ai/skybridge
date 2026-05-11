@@ -8,7 +8,7 @@ description: "Get end-to-end TypeScript type inference from server to view with 
 
 **Solution:** `generateHelpers` creates typed hooks from your server type, giving you autocomplete and type checking across the stack. 
 
-## The Challenge
+## The challenge
 
 Without type inference, you duplicate types:
 
@@ -34,7 +34,7 @@ const { callTool } = useCallTool<SearchInput, SearchOutput>("search");
 
 If the server schema changes, the view types are now wrong.
 
-## The Solution: generateHelpers
+## The solution: generateHelpers
 
 Export your server's type and use `generateHelpers`:
 
@@ -109,7 +109,7 @@ export default function SearchHotels() {
 }
 ```
 
-## Method Chaining Requirement
+## Method chaining requirement
 
 <Warning>
 **Required for type inference**
@@ -129,7 +129,7 @@ server.registerTool({ name: "a", view: { component: "a" } }, async () => ({ stru
 server.registerTool({ name: "b", view: { component: "b" } }, async () => ({ structuredContent: {} }));
 ```
 
-## How It Works
+## How it works
 
 The `$types` property pattern enables cross-package type inference:
 
@@ -161,7 +161,7 @@ function generateHelpers<ServerType>() {
 }
 ```
 
-## Type Utilities
+## Type utilities
 
 Skybridge exports utilities for extracting types:
 
@@ -187,7 +187,7 @@ type SearchOutput = ToolOutput<AppType, "search-hotels">;
 // { hotels: { id: string; name: string }[] }
 ```
 
-## Zod Schema Connection
+## Zod schema connection
 
 The magic comes from Zod schemas. When you define:
 
