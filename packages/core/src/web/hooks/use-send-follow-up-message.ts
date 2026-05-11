@@ -1,10 +1,14 @@
 import { useCallback } from "react";
-import { getAdaptor } from "../bridges/index.js";
+import {
+  getAdaptor,
+  type SendFollowUpMessageOptions,
+} from "../bridges/index.js";
 
 export function useSendFollowUpMessage() {
   const adaptor = getAdaptor();
   const sendFollowUpMessage = useCallback(
-    (prompt: string) => adaptor.sendFollowUpMessage(prompt),
+    (prompt: string, options?: SendFollowUpMessageOptions) =>
+      adaptor.sendFollowUpMessage(prompt, options),
     [adaptor],
   );
 
