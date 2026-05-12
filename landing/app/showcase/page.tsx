@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { InstallRow, SBNav } from "../components/hero";
+import { Icon } from "../components/icons";
 import { ChatGPTFrame } from "../components/showcase/chatgpt-frame";
 import { hostAccent, SHOWCASE } from "../components/showcase/data";
 import { SBFooter } from "../components/trust-final";
@@ -27,13 +28,6 @@ export const metadata: Metadata = {
 
 export default function ShowcaseListPage() {
   const apps = SHOWCASE.filter((a) => a.category === "3rd Party");
-  const groups = [
-    {
-      t: "3rd Party Apps",
-      sub: "Built by customers and the community",
-      items: apps,
-    },
-  ];
 
   return (
     <div className="sb-root" data-theme="dark">
@@ -50,61 +44,48 @@ export default function ShowcaseListPage() {
           </p>
         </div>
 
-        {groups.map((s, si) => (
-          <div key={si} style={{ marginBottom: 56 }}>
-            <div className="sxA-grid">
-              {s.items.map((app) => (
-                <Link
-                  key={app.id}
-                  href={`/showcase/${app.slug}`}
-                  className="sxA-card"
-                  style={
-                    {
-                      "--card-accent": hostAccent(app.host),
-                    } as React.CSSProperties
-                  }
-                >
-                  <div className="sxA-thumb">
-                    <ChatGPTFrame app={app} compact />
+        <div style={{ marginBottom: 56 }}>
+          <div className="sxA-grid">
+            {apps.map((app) => (
+              <Link
+                key={app.id}
+                href={`/showcase/${app.slug}`}
+                className="sxA-card"
+                style={
+                  {
+                    "--card-accent": hostAccent(app.host),
+                  } as React.CSSProperties
+                }
+              >
+                <div className="sxA-thumb">
+                  <ChatGPTFrame app={app} compact />
+                </div>
+                <div className="sxA-meta">
+                  <div className="sxA-row">
+                    <span className="sxA-cat-dot"></span>
+                    <span>{app.host}</span>
                   </div>
-                  <div className="sxA-meta">
-                    <div className="sxA-row">
-                      <span className="sxA-cat-dot"></span>
-                      <span>{app.host}</span>
+                  <h3 className="sxA-name">{app.name}</h3>
+                  <p className="sxA-tagline">{app.tagline}</p>
+                  <p className="sxA-blurb">{app.blurb}</p>
+                  <div className="sxA-foot">
+                    <div className="sxA-tags">
+                      {app.tags.map((t) => (
+                        <span key={t} className="sxA-tag">
+                          {t}
+                        </span>
+                      ))}
                     </div>
-                    <h3 className="sxA-name">{app.name}</h3>
-                    <p className="sxA-tagline">{app.tagline}</p>
-                    <p className="sxA-blurb">{app.blurb}</p>
-                    <div className="sxA-foot">
-                      <div className="sxA-tags">
-                        {app.tags.map((t) => (
-                          <span key={t} className="sxA-tag">
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                      <span className="sxA-arrow">
-                        View
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M5 12h14M13 6l6 6-6 6" />
-                        </svg>
-                      </span>
-                    </div>
+                    <span className="sxA-arrow">
+                      View
+                      <Icon name="arrow" size={14} />
+                    </span>
                   </div>
-                </Link>
-              ))}
-            </div>
+                </div>
+              </Link>
+            ))}
           </div>
-        ))}
+        </div>
 
         {/* Submit + Start side-by-side */}
         <div className="sx-submit">
@@ -124,18 +105,7 @@ export default function ShowcaseListPage() {
                   href="https://github.com/alpic-ai/skybridge/issues/new?title=Showcase%20submission"
                 >
                   Submit your app
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M5 12h14M13 6l6 6-6 6" />
-                  </svg>
+                  <Icon name="arrow" size={14} />
                 </a>
               </div>
             </div>

@@ -4,25 +4,25 @@ import { hostAccent, type ShowcaseApp } from "./data";
 
 export { hostAccent };
 
+const CLAUDE_STAR_LINES = Array.from({ length: 12 }, (_, i) => {
+  const a = (i / 12) * Math.PI * 2;
+  const inner = 2.6;
+  const outer = 11.2;
+  const cx = 12;
+  const cy = 12;
+  return {
+    x1: cx + Math.cos(a) * inner,
+    y1: cy + Math.sin(a) * inner,
+    x2: cx + Math.cos(a) * outer,
+    y2: cy + Math.sin(a) * outer,
+  };
+});
+
 export const ClaudeStarSVG = ({
   size = 14,
 }: {
   size?: number;
 }): ReactElement => {
-  const rays: ReactElement[] = [];
-  const N = 12;
-  for (let i = 0; i < N; i++) {
-    const a = (i / N) * Math.PI * 2;
-    const inner = 2.6;
-    const outer = 11.2;
-    const cx = 12,
-      cy = 12;
-    const x1 = cx + Math.cos(a) * inner;
-    const y1 = cy + Math.sin(a) * inner;
-    const x2 = cx + Math.cos(a) * outer;
-    const y2 = cy + Math.sin(a) * outer;
-    rays.push(<line key={i} x1={x1} y1={y1} x2={x2} y2={y2} />);
-  }
   return (
     <svg
       viewBox="0 0 24 24"
@@ -34,10 +34,21 @@ export const ClaudeStarSVG = ({
       strokeLinecap="round"
       aria-hidden="true"
     >
-      {rays}
+      {CLAUDE_STAR_LINES.map((l, i) => (
+        <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} />
+      ))}
     </svg>
   );
 };
+
+const HostLogo = ({ isClaude }: { isClaude: boolean }): ReactElement =>
+  isClaude ? (
+    <ClaudeStarSVG size={14} />
+  ) : (
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+      <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073z" />
+    </svg>
+  );
 
 type ChatGPTFrameProps = {
   app: ShowcaseApp;
@@ -55,24 +66,14 @@ export function ChatGPTFrame({
   const isClaude =
     hostLower.includes("claude") && !hostLower.includes("chatgpt");
   const modelLabel = isClaude ? "Claude Sonnet 4.5" : "ChatGPT 5";
+  const widgetSrc = imageOverride || app.img;
   return (
     <div className={`cg-frame ${compact ? "is-compact" : ""}`}>
       {/* Sidebar */}
       <div className="cg-sidebar">
         <div className="cg-side-top">
           <div className="cg-logo">
-            {isClaude ? (
-              <ClaudeStarSVG size={14} />
-            ) : (
-              <svg
-                viewBox="0 0 24 24"
-                width="14"
-                height="14"
-                fill="currentColor"
-              >
-                <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073z" />
-              </svg>
-            )}
+            <HostLogo isClaude={isClaude} />
           </div>
           <div className="cg-side-icons">
             <div className="cg-side-ic">
@@ -146,18 +147,7 @@ export function ChatGPTFrame({
 
           <div className="cg-asst-row">
             <div className="cg-asst-icon">
-              {isClaude ? (
-                <ClaudeStarSVG size={14} />
-              ) : (
-                <svg
-                  viewBox="0 0 24 24"
-                  width="14"
-                  height="14"
-                  fill="currentColor"
-                >
-                  <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073z" />
-                </svg>
-              )}
+              <HostLogo isClaude={isClaude} />
             </div>
             <div className="cg-asst-body">
               <div className="cg-toolcall">
@@ -206,22 +196,19 @@ export function ChatGPTFrame({
                   )}
                 </div>
               ) : (
-                (() => {
-                  const src = imageOverride || app.img;
-                  return src ? (
-                    <div className="cg-widget-wrap">
-                      <Image
-                        src={src}
-                        alt={`${app.name} widget`}
-                        className="cg-widget-img"
-                        width={1200}
-                        height={800}
-                        sizes="(max-width: 768px) 90vw, 600px"
-                        loading="lazy"
-                      />
-                    </div>
-                  ) : null;
-                })()
+                widgetSrc && (
+                  <div className="cg-widget-wrap">
+                    <Image
+                      src={widgetSrc}
+                      alt={`${app.name} widget`}
+                      className="cg-widget-img"
+                      width={1200}
+                      height={800}
+                      sizes="(max-width: 768px) 90vw, 600px"
+                      loading="lazy"
+                    />
+                  </div>
+                )
               )}
             </div>
           </div>

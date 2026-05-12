@@ -14,9 +14,9 @@ export default function Home() {
       <SBDemo />
       <SBCode />
       <SBSocial />
-      <SBQuotes quotesVariant="social" />
-      <SBTrust trustVariant="inline" communityVariant="segmented" />
-      <SBFinal finalBg="aurora" />
+      <SBQuotes />
+      <SBTrust />
+      <SBFinal />
       <SBFooter />
     </div>
   );

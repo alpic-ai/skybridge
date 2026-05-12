@@ -5,21 +5,14 @@ export type IconName =
   | "arrow"
   | "copy"
   | "check"
-  | "zap"
   | "type"
   | "globe"
   | "sparkle"
   | "react"
-  | "shield"
   | "terminal"
-  | "sun"
-  | "moon"
   | "discord"
-  | "play"
-  | "refresh"
   | "book"
-  | "wand"
-  | "puzzle";
+  | "wand";
 
 export function Icon({
   name,
@@ -67,12 +60,6 @@ export function Icon({
           <path d="M5 12l5 5L20 7" />
         </svg>
       );
-    case "zap":
-      return (
-        <svg {...s}>
-          <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z" />
-        </svg>
-      );
     case "type":
       return (
         <svg {...s}>
@@ -114,12 +101,6 @@ export function Icon({
           />
         </svg>
       );
-    case "shield":
-      return (
-        <svg {...s}>
-          <path d="M12 2l8 3v7c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V5l8-3z" />
-        </svg>
-      );
     case "terminal":
       return (
         <svg {...s} style={oneStroke}>
@@ -127,35 +108,10 @@ export function Icon({
           <path d="M7 9l3 3-3 3M13 15h4" />
         </svg>
       );
-    case "sun":
-      return (
-        <svg {...s}>
-          <circle cx="12" cy="12" r="4" />
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-        </svg>
-      );
-    case "moon":
-      return (
-        <svg {...s}>
-          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
-        </svg>
-      );
     case "discord":
       return (
         <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor">
           <path d="M19.54 5.34A17.5 17.5 0 0 0 15 4l-.2.4a14.6 14.6 0 0 1 4 1.86c-3.7-2-8.6-2-12.4 0A14.6 14.6 0 0 1 10.3 4.4L10 4c-1.6.2-3.1.6-4.6 1.3A19 19 0 0 0 2 17c1.7 1.2 3.4 2 5 2.5l.8-1.1c-.8-.3-1.6-.7-2.3-1.2l.5-.4c3.5 1.6 7.3 1.6 10.8 0l.5.4c-.7.5-1.5.9-2.3 1.2l.8 1.1c1.6-.5 3.3-1.3 5-2.5a19 19 0 0 0-3.4-11.7zM9.1 14.8c-.9 0-1.7-.9-1.7-2s.7-2 1.7-2 1.7.9 1.7 2-.7 2-1.7 2zm5.8 0c-.9 0-1.7-.9-1.7-2s.7-2 1.7-2 1.7.9 1.7 2-.7 2-1.7 2z" />
-        </svg>
-      );
-    case "play":
-      return (
-        <svg {...s}>
-          <path d="M8 5v14l11-7z" fill="currentColor" />
-        </svg>
-      );
-    case "refresh":
-      return (
-        <svg {...s}>
-          <path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5" />
         </svg>
       );
     case "book":
@@ -168,12 +124,6 @@ export function Icon({
       return (
         <svg {...s} style={oneStroke}>
           <path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8L19 13M17.8 6.2L19 5M3 21l9-9M12.2 6.2L11 5" />
-        </svg>
-      );
-    case "puzzle":
-      return (
-        <svg {...s}>
-          <path d="M9 4a2 2 0 0 1 4 0v2h4v4a2 2 0 1 1 0 4v4H9v-4a2 2 0 1 0 0-4h0V6h0z" />
         </svg>
       );
     default:

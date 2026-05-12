@@ -11,6 +11,56 @@ type ValueItem = {
   cta?: { label: string; href: string };
 };
 
+type AuditRow = {
+  icon: string;
+  title: string;
+  list: { code: string; text: string }[];
+};
+
+type AuditSectionProps = {
+  tone: "warn" | "err" | "ok";
+  label: string;
+  count: number;
+  host?: string;
+  row: AuditRow;
+};
+
+const AuditSection = ({ tone, label, count, host, row }: AuditSectionProps) => (
+  <div className="sb-dp-aud-section">
+    <div className="sb-dp-aud-section-h">
+      <span className="sb-dp-aud-section-label">{label}</span>
+      <span className={`sb-dp-aud-dot ${tone}`} aria-hidden></span>
+      <span className="sb-dp-aud-count">{count}</span>
+      {host && <span className="sb-dp-aud-host">{host}</span>}
+    </div>
+    <div className={`sb-dp-aud-row ${tone}`}>
+      <span className="sb-dp-aud-icon" aria-hidden>
+        {row.icon}
+      </span>
+      <div className="sb-dp-aud-row-body">
+        <div className="sb-dp-aud-row-title">{row.title}</div>
+        <div className="sb-dp-aud-row-bar">
+          <div className="sb-dp-aud-row-list">
+            {row.list.map((item) => (
+              <div key={item.code}>
+                <code>{item.code}</code> <span>{item.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const TerminalDots = () => (
+  <>
+    <span className="sb-devtools-dot" style={{ background: "#ff6159" }} />
+    <span className="sb-devtools-dot" style={{ background: "#ffbd2e" }} />
+    <span className="sb-devtools-dot" style={{ background: "#27c93f" }} />
+  </>
+);
+
 export function SBValues() {
   const values: ValueItem[] = [
     {
@@ -268,91 +318,48 @@ function SBDevPanel({ hover }: { hover: string | null }) {
           </div>
         </div>
 
-        <div className="sb-dp-aud-section">
-          <div className="sb-dp-aud-section-h">
-            <span className="sb-dp-aud-section-label">MCP tool checks</span>
-            <span className="sb-dp-aud-dot warn" aria-hidden></span>
-            <span className="sb-dp-aud-count">1</span>
-            <span className="sb-dp-aud-host">ChatGPT</span>
-          </div>
-          <div className="sb-dp-aud-row warn">
-            <span className="sb-dp-aud-icon" aria-hidden>
-              !
-            </span>
-            <div className="sb-dp-aud-row-body">
-              <div className="sb-dp-aud-row-title">
-                2 tools missing invocation metadata
-              </div>
-              <div className="sb-dp-aud-row-bar">
-                <div className="sb-dp-aud-row-list">
-                  <div>
-                    <code>play</code> <span>— missing invoking, invoked</span>
-                  </div>
-                  <div>
-                    <code>guess</code> <span>— missing invoking, invoked</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <AuditSection
+          tone="warn"
+          label="MCP tool checks"
+          count={1}
+          host="ChatGPT"
+          row={{
+            icon: "!",
+            title: "2 tools missing invocation metadata",
+            list: [
+              { code: "play", text: "— missing invoking, invoked" },
+              { code: "guess", text: "— missing invoking, invoked" },
+            ],
+          }}
+        />
 
-        <div className="sb-dp-aud-section">
-          <div className="sb-dp-aud-section-h">
-            <span className="sb-dp-aud-section-label">Failed</span>
-            <span className="sb-dp-aud-dot err" aria-hidden></span>
-            <span className="sb-dp-aud-count">1</span>
-          </div>
-          <div className="sb-dp-aud-row err">
-            <span className="sb-dp-aud-icon" aria-hidden>
-              ×
-            </span>
-            <div className="sb-dp-aud-row-body">
-              <div className="sb-dp-aud-row-title">
-                No authentication scheme configured
-              </div>
-              <div className="sb-dp-aud-row-bar">
-                <div className="sb-dp-aud-row-list">
-                  <div>
-                    <code>authType</code> <span>— none detected</span>
-                  </div>
-                  <div>
-                    <code>required</code>{" "}
-                    <span>— OAuth 2.0 or API key scheme</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <AuditSection
+          tone="err"
+          label="Failed"
+          count={1}
+          row={{
+            icon: "×",
+            title: "No authentication scheme configured",
+            list: [
+              { code: "authType", text: "— none detected" },
+              { code: "required", text: "— OAuth 2.0 or API key scheme" },
+            ],
+          }}
+        />
 
-        <div className="sb-dp-aud-section">
-          <div className="sb-dp-aud-section-h">
-            <span className="sb-dp-aud-section-label">Passed</span>
-            <span className="sb-dp-aud-dot ok" aria-hidden></span>
-            <span className="sb-dp-aud-count">19</span>
-          </div>
-          <div className="sb-dp-aud-row ok">
-            <span className="sb-dp-aud-icon" aria-hidden>
-              ✓
-            </span>
-            <div className="sb-dp-aud-row-body">
-              <div className="sb-dp-aud-row-title">
-                Server responded in 191ms
-              </div>
-              <div className="sb-dp-aud-row-bar">
-                <div className="sb-dp-aud-row-list">
-                  <div>
-                    <code>Response time</code> <span>— 91ms</span>
-                  </div>
-                  <div>
-                    <code>Server</code> <span>— times-up 0.0.1</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <AuditSection
+          tone="ok"
+          label="Passed"
+          count={19}
+          row={{
+            icon: "✓",
+            title: "Server responded in 191ms",
+            list: [
+              { code: "Response time", text: "— 91ms" },
+              { code: "Server", text: "— times-up 0.0.1" },
+            ],
+          }}
+        />
       </div>
     </div>
   );
@@ -405,18 +412,7 @@ export function SBCode() {
             <SBDevPanel hover={hover} />
             <div className="sb-devtools-window sb-devtools-window-base">
               <div className="sb-devtools-chrome">
-                <span
-                  className="sb-devtools-dot"
-                  style={{ background: "#ff6159" }}
-                />
-                <span
-                  className="sb-devtools-dot"
-                  style={{ background: "#ffbd2e" }}
-                />
-                <span
-                  className="sb-devtools-dot"
-                  style={{ background: "#27c93f" }}
-                />
+                <TerminalDots />
                 <div className="sb-devtools-url">
                   <Icon name="globe" size={11} /> localhost:3000 ·{" "}
                   <span style={{ color: "var(--sb-accent)" }}>
@@ -427,17 +423,33 @@ export function SBCode() {
               <div className="sb-devtools-body">
                 <div className="sb-devtools-side">
                   <div className="sb-devtools-side-h">Tools</div>
-                  <div className="sb-devtools-side-item active">
-                    ◆ search_flights
-                  </div>
-                  <div className="sb-devtools-side-item">◆ book_flight</div>
-                  <div className="sb-devtools-side-item">◆ cancel_booking</div>
+                  {[
+                    { label: "◆ search_flights", active: true },
+                    { label: "◆ book_flight", active: false },
+                    { label: "◆ cancel_booking", active: false },
+                  ].map((it) => (
+                    <div
+                      key={it.label}
+                      className={`sb-devtools-side-item${it.active ? " active" : ""}`}
+                    >
+                      {it.label}
+                    </div>
+                  ))}
                   <div className="sb-devtools-side-h" style={{ marginTop: 14 }}>
                     Hosts
                   </div>
-                  <div className="sb-devtools-side-item">⌘ ChatGPT</div>
-                  <div className="sb-devtools-side-item active">⌘ Claude</div>
-                  <div className="sb-devtools-side-item">⌘ Mobile tunnel</div>
+                  {[
+                    { label: "⌘ ChatGPT", active: false },
+                    { label: "⌘ Claude", active: true },
+                    { label: "⌘ Mobile tunnel", active: false },
+                  ].map((it) => (
+                    <div
+                      key={it.label}
+                      className={`sb-devtools-side-item${it.active ? " active" : ""}`}
+                    >
+                      {it.label}
+                    </div>
+                  ))}
                 </div>
                 <div className="sb-devtools-main">
                   <div className="sb-devtools-tabs">

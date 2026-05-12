@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { Icon } from "./icons";
 
+const HOSTS = ["Claude", "ChatGPT", "VSCode", "Cursor", "Goose", "your AI app"];
+const LONGEST_HOST = HOSTS.reduce((a, b) => (a.length >= b.length ? a : b));
+
 export function SBNav() {
   return (
     <nav className="sb-nav">
@@ -47,7 +50,6 @@ export function SBNav() {
 type InstallRowProps = {
   cmd: string;
   label?: string;
-  id?: string;
 };
 
 export function InstallRow({ cmd, label }: InstallRowProps) {
@@ -84,15 +86,7 @@ export function InstallRow({ cmd, label }: InstallRowProps) {
   );
 }
 
-export function SBHero({}: { showInstallVariant?: boolean }) {
-  const HOSTS = [
-    "Claude",
-    "ChatGPT",
-    "VSCode",
-    "Cursor",
-    "Goose",
-    "your AI app",
-  ];
+export function SBHero() {
   const [hostIdx, setHostIdx] = useState(0);
   useEffect(() => {
     const id = setInterval(
@@ -100,18 +94,9 @@ export function SBHero({}: { showInstallVariant?: boolean }) {
       2400,
     );
     return () => clearInterval(id);
-  }, [HOSTS.length]);
+  }, []);
   return (
     <section className="sb-hero">
-      <a
-        className="sb-team-note"
-        href="https://docs.google.com/document/d/1C5L3cSbxkWQ8nGbslILtc0GwBkHN9kshAQ21CU0Ndko/edit?tab=t.0"
-        target="_blank"
-        rel="noopener noreferrer"
-        title="Team members only — content source doc"
-      >
-        content doc ↗
-      </a>
       <div className="sb-wrap">
         <a
           className="sb-featured"
@@ -161,7 +146,7 @@ export function SBHero({}: { showInstallVariant?: boolean }) {
               </span>
             ))}
             <span className="sb-h1-host-ghost" aria-hidden="true">
-              {HOSTS.reduce((a, b) => (a.length >= b.length ? a : b))}
+              {LONGEST_HOST}
             </span>
           </span>
         </h1>

@@ -1,18 +1,12 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Icon } from "./icons";
 
-export type TrustVariant = "cards" | "inline" | "editorial" | "meter";
-export type CommunityVariant = "cards" | "inline" | "segmented" | "hero";
-
 type CommunityLink = {
-  key: string;
   href: string;
   label: string;
   sub: string;
-  handle: string;
-  badge: string;
   icon: ReactNode;
-  iconStyle: CSSProperties | null;
+  iconStyle?: CSSProperties;
 };
 
 const XIcon = ({ size = 20 }: { size?: number }) => (
@@ -29,22 +23,15 @@ const XIcon = ({ size = 20 }: { size?: number }) => (
 
 const COMMUNITY_LINKS: CommunityLink[] = [
   {
-    key: "github",
     href: "https://github.com/alpic-ai/skybridge/blob/main/CONTRIBUTING.md",
     label: "Contribute on GitHub",
     sub: "Open a PR, file an issue",
-    handle: "@alpic-ai/skybridge",
-    badge: "1K+ stars",
     icon: <Icon name="github" size={22} />,
-    iconStyle: null,
   },
   {
-    key: "discord",
     href: "#",
     label: "Discord",
     sub: "Chat with the team",
-    handle: "discord.gg/skybridge",
-    badge: "420 online",
     icon: <Icon name="discord" size={22} />,
     iconStyle: {
       background: "#5865f2",
@@ -53,12 +40,9 @@ const COMMUNITY_LINKS: CommunityLink[] = [
     },
   },
   {
-    key: "x",
     href: "#",
     label: "X / Twitter",
     sub: "Follow for updates",
-    handle: "@skybridgedev",
-    badge: "Follow",
     icon: <XIcon size={20} />,
     iconStyle: {
       background: "#000",
@@ -68,26 +52,10 @@ const COMMUNITY_LINKS: CommunityLink[] = [
   },
 ];
 
-export function SBFinal({
-  finalBg = "glow",
-}: {
-  finalBg?: "glow" | "aurora" | "mountain" | "grid" | "panel";
-}) {
+export function SBFinal() {
   return (
-    <section
-      className={`sb-final sb-final--${finalBg}`}
-      data-final-bg={finalBg}
-    >
-      {finalBg === "aurora" && (
-        <div className="sb-final-aurora" aria-hidden></div>
-      )}
-      {finalBg === "mountain" && (
-        <div className="sb-final-mountain" aria-hidden></div>
-      )}
-      {finalBg === "grid" && <div className="sb-final-grid" aria-hidden></div>}
-      {finalBg === "panel" && (
-        <div className="sb-final-panel-shape" aria-hidden></div>
-      )}
+    <section className="sb-final sb-final--aurora" data-final-bg="aurora">
+      <div className="sb-final-aurora" aria-hidden></div>
       <div className="sb-wrap">
         <h2 style={{ fontWeight: "400" }}>
           Ship your first
@@ -171,16 +139,9 @@ export function SBFooter() {
   );
 }
 
-export function SBTrust({
-  trustVariant = "cards",
-  communityVariant = "cards",
-}: {
-  trustVariant?: TrustVariant;
-  communityVariant?: CommunityVariant;
-}) {
+export function SBTrust() {
   return (
     <>
-      {/* === Part 1: Expertise / Trusted at scale — 2 big cards === */}
       <section
         className="sb-section"
         id="trust"
@@ -221,11 +182,25 @@ export function SBTrust({
               the framework.
             </p>
           </div>
-          <SBTrustStats variant={trustVariant} />
+          <div className="sb-trust-inline">
+            <div className="sb-trust-inline-row">
+              <span className="sb-trust-inline-num">100K</span>
+              <span className="sb-trust-inline-lbl">monthly npm downloads</span>
+              <span className="sb-trust-inline-sep" aria-hidden>
+                •
+              </span>
+              <span className="sb-trust-inline-num">1K+</span>
+              <span className="sb-trust-inline-lbl">GitHub stars</span>
+              <span className="sb-trust-inline-sep" aria-hidden>
+                •
+              </span>
+              <span className="sb-trust-inline-num">MIT</span>
+              <span className="sb-trust-inline-lbl">licensed</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* === Part 2: Open source & community — 2 big cards === */}
       <section
         className="sb-section"
         id="community"
@@ -246,271 +221,27 @@ export function SBTrust({
               community.
             </p>
           </div>
-          <SBCommunityLinks variant={communityVariant} />
+          <div className="sb-community-segmented">
+            {COMMUNITY_LINKS.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="sb-community-seg"
+              >
+                <span className="sb-community-seg-icon" style={l.iconStyle}>
+                  {l.icon}
+                </span>
+                <span className="sb-community-seg-text">
+                  <span className="sb-community-seg-label">{l.label}</span>
+                  <span className="sb-community-seg-sub">{l.sub}</span>
+                </span>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
     </>
-  );
-}
-
-export function SBTrustStats({
-  variant = "cards",
-}: {
-  variant?: TrustVariant;
-}) {
-  if (variant === "inline") {
-    return (
-      <div className="sb-trust-inline">
-        <div className="sb-trust-inline-row">
-          <span className="sb-trust-inline-num">100K</span>
-          <span className="sb-trust-inline-lbl">monthly npm downloads</span>
-          <span className="sb-trust-inline-sep" aria-hidden>
-            •
-          </span>
-          <span className="sb-trust-inline-num">1K+</span>
-          <span className="sb-trust-inline-lbl">GitHub stars</span>
-          <span className="sb-trust-inline-sep" aria-hidden>
-            •
-          </span>
-          <span className="sb-trust-inline-num">MIT</span>
-          <span className="sb-trust-inline-lbl">licensed</span>
-        </div>
-      </div>
-    );
-  }
-  if (variant === "editorial") {
-    return (
-      <div className="sb-trust-editorial">
-        <div className="sb-trust-editorial-num">
-          <span className="sb-trust-editorial-big">100K</span>
-          <span className="sb-trust-editorial-cap">monthly npm downloads</span>
-        </div>
-        <div className="sb-trust-editorial-side">
-          <div className="sb-trust-editorial-row">
-            <span className="sb-trust-editorial-rownum">1K+</span>
-            <span className="sb-trust-editorial-rowlbl">GitHub stars</span>
-          </div>
-          <div className="sb-trust-editorial-divider" aria-hidden></div>
-          <div className="sb-trust-editorial-row">
-            <span className="sb-trust-editorial-rownum">MIT</span>
-            <span className="sb-trust-editorial-rowlbl">
-              Open source license
-            </span>
-          </div>
-          <div className="sb-trust-editorial-divider" aria-hidden></div>
-          <div className="sb-trust-editorial-row">
-            <span className="sb-trust-editorial-rownum">v1.0</span>
-            <span className="sb-trust-editorial-rowlbl">Production ready</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  if (variant === "meter") {
-    return (
-      <div className="sb-trust-meter">
-        <div className="sb-trust-meter-card">
-          <div className="sb-trust-meter-head">
-            <span className="sb-trust-meter-num">100K</span>
-            <span className="sb-trust-meter-lbl">monthly npm downloads</span>
-          </div>
-          <svg
-            className="sb-trust-meter-graph"
-            viewBox="0 0 200 60"
-            preserveAspectRatio="none"
-            aria-hidden
-          >
-            <defs>
-              <linearGradient id="sbtmGrad1" x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0%" stopColor="var(--sb-ice)" stopOpacity="0.0" />
-                <stop
-                  offset="100%"
-                  stopColor="var(--sb-ice)"
-                  stopOpacity="0.55"
-                />
-              </linearGradient>
-            </defs>
-            <path
-              d="M0,52 L14,49 L28,46 L42,44 L56,40 L70,38 L84,33 L98,28 L112,22 L126,18 L140,14 L154,11 L168,8 L182,6 L200,4 L200,60 L0,60 Z"
-              fill="url(#sbtmGrad1)"
-            />
-            <path
-              d="M0,52 L14,49 L28,46 L42,44 L56,40 L70,38 L84,33 L98,28 L112,22 L126,18 L140,14 L154,11 L168,8 L182,6 L200,4"
-              fill="none"
-              stroke="var(--sb-ice)"
-              strokeWidth="1.5"
-            />
-          </svg>
-          <div className="sb-trust-meter-foot">Last 12 months</div>
-        </div>
-        <div className="sb-trust-meter-card">
-          <div className="sb-trust-meter-head">
-            <span className="sb-trust-meter-num">1K+</span>
-            <span className="sb-trust-meter-lbl">GitHub stars</span>
-          </div>
-          <div className="sb-trust-meter-bars" aria-hidden>
-            {[24, 32, 28, 40, 36, 48, 44, 56, 60, 68, 72, 84].map((h, i) => (
-              <span key={i} style={{ height: `${h}%` }} />
-            ))}
-          </div>
-          <div className="sb-trust-meter-foot">
-            github.com/alpic-ai/skybridge
-          </div>
-        </div>
-      </div>
-    );
-  }
-  // default: original cards
-  return (
-    <div className="sb-trust-stats">
-      <div className="sb-trust-stat">
-        <div className="sb-trust-stat-num">100K</div>
-        <div className="sb-trust-stat-lbl">Monthly npm downloads</div>
-      </div>
-      <div className="sb-trust-stat">
-        <div className="sb-trust-stat-num">1K+</div>
-        <div className="sb-trust-stat-lbl">GitHub stars</div>
-      </div>
-    </div>
-  );
-}
-
-export function SBCommunityLinks({
-  variant = "cards",
-}: {
-  variant?: CommunityVariant;
-}) {
-  if (variant === "inline") {
-    return (
-      <div className="sb-community-inline">
-        {COMMUNITY_LINKS.map((l) => (
-          <a
-            key={l.key}
-            href={l.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="sb-community-inline-link"
-          >
-            <span
-              className="sb-community-inline-icon"
-              style={l.iconStyle || undefined}
-            >
-              {l.icon}
-            </span>
-            <span className="sb-community-inline-text">
-              <span className="sb-community-inline-label">{l.label}</span>
-              <span className="sb-community-inline-handle">{l.handle}</span>
-            </span>
-            <Icon name="arrow" size={16} />
-          </a>
-        ))}
-      </div>
-    );
-  }
-  if (variant === "segmented") {
-    return (
-      <div className="sb-community-segmented">
-        {COMMUNITY_LINKS.map((l) => (
-          <a
-            key={l.key}
-            href={l.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="sb-community-seg"
-          >
-            <span
-              className="sb-community-seg-icon"
-              style={l.iconStyle || undefined}
-            >
-              {l.icon}
-            </span>
-            <span className="sb-community-seg-text">
-              <span className="sb-community-seg-label">{l.label}</span>
-              <span className="sb-community-seg-sub">{l.sub}</span>
-            </span>
-          </a>
-        ))}
-      </div>
-    );
-  }
-  if (variant === "hero") {
-    const [primary, ...rest] = COMMUNITY_LINKS;
-    return (
-      <div className="sb-community-hero">
-        <a
-          href={primary.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="sb-community-hero-card"
-        >
-          <div
-            className="sb-community-hero-icon"
-            style={primary.iconStyle || undefined}
-          >
-            {primary.icon}
-          </div>
-          <div className="sb-community-hero-text">
-            <div className="sb-community-hero-eyebrow">
-              Skybridge is open source
-            </div>
-            <div className="sb-community-hero-label">Contribute on GitHub</div>
-            <div className="sb-community-hero-sub">
-              Open a PR, file an issue, or just star the repo to follow along.
-            </div>
-          </div>
-          <div className="sb-community-hero-cta">
-            <span className="sb-community-hero-stars">★ 1K+</span>
-            <span className="sb-community-hero-arrow">
-              <Icon name="arrow" size={16} />
-            </span>
-          </div>
-        </a>
-        <div className="sb-community-hero-row">
-          {rest.map((l) => (
-            <a
-              key={l.key}
-              href={l.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="sb-community-hero-chip"
-            >
-              <span
-                className="sb-community-hero-chip-icon"
-                style={l.iconStyle || undefined}
-              >
-                {l.icon}
-              </span>
-              <span className="sb-community-hero-chip-text">
-                <span className="sb-community-hero-chip-label">{l.label}</span>
-                <span className="sb-community-hero-chip-handle">
-                  {l.handle}
-                </span>
-              </span>
-              <Icon name="arrow" size={14} />
-            </a>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  // default: original cards
-  return (
-    <div className="sb-community-grid">
-      {COMMUNITY_LINKS.map((l) => (
-        <a
-          key={l.key}
-          className="sb-community-card"
-          href={l.href}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <div className="sb-community-icon" style={l.iconStyle || undefined}>
-            {l.icon}
-          </div>
-          <div className="sb-community-label">{l.label}</div>
-          <div className="sb-community-sub">{l.sub}</div>
-        </a>
-      ))}
-    </div>
   );
 }
