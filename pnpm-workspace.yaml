@@ -4,3 +4,6 @@ packages:
   - "packages/*"
   - "packages/create-skybridge/template"
   - "examples/*"
+
+allowBuilds:
+  esbuild: true
