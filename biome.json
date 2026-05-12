@@ -10,7 +10,9 @@
       "**",
       "!!**/node_modules",
       "!!**/dist",
-      "!!docs"
+      "!!docs",
+      "!!**/nextImageExportOptimizer/**",
+      "!!landing/public/assets/next-image-export-optimizer-hashes.json"
     ]
   },
   "formatter": {
