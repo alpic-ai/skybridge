@@ -93,6 +93,8 @@ export const ToolPanelToolbar = ({
 
   const isDark = theme === "dark";
   const isMobile = (userAgent?.device?.type ?? "desktop") === "mobile";
+  const localeLabel =
+    locales.find((l) => l.code === locale)?.englishName ?? locale;
 
   return (
     <div className="mt-3 flex w-full shrink-0 items-center gap-1.5 px-3">
@@ -136,7 +138,7 @@ export const ToolPanelToolbar = ({
             )}
           >
             <Languages className="size-3.5" />
-            <span>{locale}</span>
+            <span>{localeLabel}</span>
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-[260px] p-0" align="start">

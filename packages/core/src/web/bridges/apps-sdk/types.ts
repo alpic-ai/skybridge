@@ -67,8 +67,15 @@ export type AppsSdkMethods<WS extends AppsSdkWidgetState = AppsSdkWidgetState> =
       args: ToolArgs,
     ) => Promise<ToolResponse>;
 
-    /** Triggers a followup turn in the ChatGPT conversation */
-    sendFollowUpMessage: (args: { prompt: string }) => Promise<void>;
+    /**
+     * Triggers a followup turn in the ChatGPT conversation
+     * scrollToBottom is optional, defaults to true, and can be
+     * set to false to prevent auto-scroll.
+     */
+    sendFollowUpMessage: (args: {
+      prompt: string;
+      scrollToBottom?: boolean;
+    }) => Promise<void>;
 
     /** Opens an external link, redirects web page or mobile app */
     openExternal(args: { href: string; redirectUrl?: false }): void;
