@@ -1,0 +1,19 @@
+@import "./alpic-tokens.css";
+@import "./skybridge.css";
+@import "./sb-showcase.css";
+
+:root {
+  --font-display:
+    var(--font-mozilla-text), "Inter", system-ui, -apple-system, Segoe UI,
+    sans-serif;
+  --font-body:
+    var(--font-mozilla-text), "Inter", system-ui, -apple-system, Segoe UI,
+    sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html,
+body {
+  background: var(--sb-bg);
+  color: var(--sb-ink);
+}
