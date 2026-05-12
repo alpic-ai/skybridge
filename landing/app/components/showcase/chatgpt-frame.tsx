@@ -1,20 +1,20 @@
-import Image from "next/image";
+import Image from "next-image-export-optimizer";
 import type { ReactElement } from "react";
 import { hostAccent, type ShowcaseApp } from "./data";
 
 export { hostAccent };
 
-const CLAUDE_STAR_LINES = Array.from({ length: 12 }, (_, i) => {
-  const a = (i / 12) * Math.PI * 2;
+const CLAUDE_STAR_LINES = Array.from({ length: 12 }, (_, index) => {
+  const angle = (index / 12) * Math.PI * 2;
   const inner = 2.6;
   const outer = 11.2;
   const cx = 12;
   const cy = 12;
   return {
-    x1: cx + Math.cos(a) * inner,
-    y1: cy + Math.sin(a) * inner,
-    x2: cx + Math.cos(a) * outer,
-    y2: cy + Math.sin(a) * outer,
+    x1: cx + Math.cos(angle) * inner,
+    y1: cy + Math.sin(angle) * inner,
+    x2: cx + Math.cos(angle) * outer,
+    y2: cy + Math.sin(angle) * outer,
   };
 });
 
@@ -34,8 +34,8 @@ export const ClaudeStarSVG = ({
       strokeLinecap="round"
       aria-hidden="true"
     >
-      {CLAUDE_STAR_LINES.map((l, i) => (
-        <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} />
+      {CLAUDE_STAR_LINES.map((line, index) => (
+        <line key={index} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
       ))}
     </svg>
   );
@@ -54,12 +54,14 @@ type ChatGPTFrameProps = {
   app: ShowcaseApp;
   compact?: boolean;
   imageOverride?: string;
+  priority?: boolean;
 };
 
 export function ChatGPTFrame({
   app,
   compact = false,
   imageOverride,
+  priority = false,
 }: ChatGPTFrameProps) {
   const accent = hostAccent(app.host);
   const hostLower = (app.host || "").toLowerCase();
@@ -179,16 +181,16 @@ export function ChatGPTFrame({
                   </div>
                   {app.toolResult?.items && (
                     <div className="cg-tool-result-rows">
-                      {app.toolResult.items.map((it, i) => (
-                        <div key={i} className="cg-tool-result-row">
-                          <span className="cg-tr-route">{it.route}</span>
-                          <span className="cg-tr-carrier">{it.carrier}</span>
-                          <span className="cg-tr-time">{it.time}</span>
+                      {app.toolResult.items.map((item, index) => (
+                        <div key={index} className="cg-tool-result-row">
+                          <span className="cg-tr-route">{item.route}</span>
+                          <span className="cg-tr-carrier">{item.carrier}</span>
+                          <span className="cg-tr-time">{item.time}</span>
                           <span
                             className="cg-tr-price"
                             style={{ color: accent }}
                           >
-                            {it.price}
+                            {item.price}
                           </span>
                         </div>
                       ))}
@@ -205,7 +207,9 @@ export function ChatGPTFrame({
                       width={1200}
                       height={800}
                       sizes="(max-width: 768px) 90vw, 600px"
-                      loading="lazy"
+                      preload={priority}
+                      fetchPriority={priority ? "high" : undefined}
+                      loading={priority ? "eager" : "lazy"}
                     />
                   </div>
                 )

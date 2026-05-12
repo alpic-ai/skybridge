@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { Icon } from "./icons";
 
 const HOSTS = ["Claude", "ChatGPT", "VSCode", "Cursor", "Goose", "your AI app"];
-const LONGEST_HOST = HOSTS.reduce((a, b) => (a.length >= b.length ? a : b));
+const LONGEST_HOST = HOSTS.reduce((longest, host) =>
+  longest.length >= host.length ? longest : host,
+);
 
-export function SBNav() {
+export function SiteNav() {
   return (
     <nav className="sb-nav">
       <div className="sb-nav-inner" style={{ height: "74px" }}>
@@ -19,7 +21,7 @@ export function SBNav() {
           <span className="sb-brand-ver">v0.8</span>
         </a>
         <div className="sb-nav-links">
-          <a href="#">Docs</a>
+          <a href="https://docs.skybridge.tech">Docs</a>
           <a href="/showcase">Showcase</a>
         </div>
         <div className="sb-nav-right">
@@ -54,8 +56,8 @@ type InstallRowProps = {
 
 export function InstallRow({ cmd, label }: InstallRowProps) {
   const [copied, setCopied] = useState(false);
-  const onCopy = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const onCopy = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
     navigator.clipboard?.writeText(cmd);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
@@ -86,11 +88,11 @@ export function InstallRow({ cmd, label }: InstallRowProps) {
   );
 }
 
-export function SBHero() {
-  const [hostIdx, setHostIdx] = useState(0);
+export function Hero() {
+  const [hostIndex, setHostIndex] = useState(0);
   useEffect(() => {
     const id = setInterval(
-      () => setHostIdx((i) => (i + 1) % HOSTS.length),
+      () => setHostIndex((current) => (current + 1) % HOSTS.length),
       2400,
     );
     return () => clearInterval(id);
@@ -136,13 +138,13 @@ export function SBHero() {
           <br />
           inside{" "}
           <span className="sb-h1-host" style={{ color: "rgb(255, 255, 255)" }}>
-            {HOSTS.map((h, i) => (
+            {HOSTS.map((host, index) => (
               <span
-                key={h}
-                className={`sb-h1-host-slot ${i === hostIdx ? "is-active" : "is-hidden"}`}
-                aria-hidden={i !== hostIdx}
+                key={host}
+                className={`sb-h1-host-slot ${index === hostIndex ? "is-active" : "is-hidden"}`}
+                aria-hidden={index !== hostIndex}
               >
-                <span className="sb-accent">{h}</span>
+                <span className="sb-accent">{host}</span>
               </span>
             ))}
             <span className="sb-h1-host-ghost" aria-hidden="true">
@@ -166,7 +168,7 @@ export function SBHero() {
               <div className="sb-cta-row" style={{ marginTop: 10, gap: 10 }}>
                 <a
                   className="sb-btn sb-btn-primary sb-btn-lg"
-                  href="https://skybridge.tech/home"
+                  href="https://docs.skybridge.tech"
                   style={{ borderColor: "rgb(166, 244, 241)" }}
                 >
                   Read the docs

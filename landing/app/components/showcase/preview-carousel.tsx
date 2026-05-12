@@ -7,18 +7,19 @@ import type { ShowcaseApp } from "./data";
 export function PreviewCarousel({ app }: { app: ShowcaseApp }) {
   const explicit = app.screenshots || [];
   const slides = app.img ? [app.img, ...explicit] : explicit;
-  const [i, setI] = useState(0);
+  const [index, setIndex] = useState(0);
   const total = slides.length;
   const single = total <= 1;
-  const go = (n: number) => total && setI(((n % total) + total) % total);
-  const next = () => go(i + 1);
-  const prev = () => go(i - 1);
+  const go = (target: number) =>
+    total && setIndex(((target % total) + total) % total);
+  const next = () => go(index + 1);
+  const prev = () => go(index - 1);
 
   if (app.noWidget || total === 0) {
     return (
       <div className="sxD-carousel is-single">
         <div className="sxD-carousel-stage">
-          <ChatGPTFrame app={app} />
+          <ChatGPTFrame app={app} priority />
         </div>
       </div>
     );
@@ -27,7 +28,11 @@ export function PreviewCarousel({ app }: { app: ShowcaseApp }) {
   return (
     <div className={`sxD-carousel ${single ? "is-single" : ""}`}>
       <div className="sxD-carousel-stage">
-        <ChatGPTFrame app={app} imageOverride={slides[i]} />
+        <ChatGPTFrame
+          app={app}
+          imageOverride={slides[index]}
+          priority={index === 0}
+        />
       </div>
       {!single && (
         <>
@@ -68,12 +73,12 @@ export function PreviewCarousel({ app }: { app: ShowcaseApp }) {
             </svg>
           </button>
           <div className="sxD-carousel-dots">
-            {slides.map((_, n) => (
+            {slides.map((_, slideIndex) => (
               <button
-                key={n}
-                className={`sxD-carousel-dot ${n === i ? "is-active" : ""}`}
-                onClick={() => go(n)}
-                aria-label={`Go to slide ${n + 1}`}
+                key={slideIndex}
+                className={`sxD-carousel-dot ${slideIndex === index ? "is-active" : ""}`}
+                onClick={() => go(slideIndex)}
+                aria-label={`Go to slide ${slideIndex + 1}`}
               />
             ))}
           </div>

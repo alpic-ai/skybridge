@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { InstallRow, SBNav } from "../../components/hero";
+import Image from "next-image-export-optimizer";
+import { InstallRow, SiteNav } from "../../components/hero";
 import { Icon } from "../../components/icons";
 import { ClaudeStarSVG } from "../../components/showcase/chatgpt-frame";
 import { hostAccent, SHOWCASE } from "../../components/showcase/data";
 import { PreviewCarousel } from "../../components/showcase/preview-carousel";
-import { SBFooter } from "../../components/trust-final";
+import { SiteFooter } from "../../components/trust-final";
 
 export async function generateStaticParams() {
-  return SHOWCASE.map((a) => ({ slug: a.slug }));
+  return SHOWCASE.map((app) => ({ slug: app.slug }));
 }
 
 export async function generateMetadata({
@@ -19,7 +19,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const app = SHOWCASE.find((x) => x.slug === slug);
+  const app = SHOWCASE.find((entry) => entry.slug === slug);
   if (!app) {
     return {};
   }
@@ -37,7 +37,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description: app.blurb,
-      images: images?.map((i) => i.url),
+      images: images?.map((image) => image.url),
     },
   };
 }
@@ -48,12 +48,12 @@ export default async function ShowcaseDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const app = SHOWCASE.find((x) => x.slug === slug);
+  const app = SHOWCASE.find((entry) => entry.slug === slug);
   if (!app) {
     notFound();
   }
 
-  const related = SHOWCASE.filter((x) => x.id !== app.id).slice(0, 3);
+  const related = SHOWCASE.filter((entry) => entry.id !== app.id).slice(0, 3);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -78,7 +78,7 @@ export default async function ShowcaseDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <SBNav />
+      <SiteNav />
       <div className="sx-page">
         <div style={{ maxWidth: 1100, margin: "0 auto 24px" }}>
           <Link href="/showcase" className="sxD-back">
@@ -230,9 +230,9 @@ export default async function ShowcaseDetailPage({
                   <span className="l">Tags</span>
                   <span className="r">
                     <span className="sxD-side-tags">
-                      {app.tags.map((t) => (
-                        <span key={t} className="sxD-side-tag">
-                          {t}
+                      {app.tags.map((tag) => (
+                        <span key={tag} className="sxD-side-tag">
+                          {tag}
                         </span>
                       ))}
                     </span>
@@ -274,15 +274,15 @@ export default async function ShowcaseDetailPage({
               Explore the showcase
             </h2>
             <div className="sxD-related-grid">
-              {related.map((r) => (
+              {related.map((relatedApp) => (
                 <Link
-                  key={r.id}
-                  href={`/showcase/${r.slug}`}
+                  key={relatedApp.id}
+                  href={`/showcase/${relatedApp.slug}`}
                   className="sxD-related-card"
                 >
-                  {r.img && (
+                  {relatedApp.img && (
                     <Image
-                      src={r.img}
+                      src={relatedApp.img}
                       alt=""
                       className="sxD-related-img"
                       width={500}
@@ -290,9 +290,9 @@ export default async function ShowcaseDetailPage({
                       sizes="(max-width: 768px) 50vw, 280px"
                     />
                   )}
-                  <div className="sxD-related-name">{r.name}</div>
+                  <div className="sxD-related-name">{relatedApp.name}</div>
                   <div className="sxD-related-tag">
-                    {r.category} · {r.tagline}
+                    {relatedApp.category} · {relatedApp.tagline}
                   </div>
                 </Link>
               ))}
@@ -300,7 +300,7 @@ export default async function ShowcaseDetailPage({
           </div>
         </div>
       </div>
-      <SBFooter />
+      <SiteFooter />
     </div>
   );
 }

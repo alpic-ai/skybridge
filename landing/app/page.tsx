@@ -1,23 +1,28 @@
-import { SBDemo } from "./components/demo";
-import { SBHero, SBNav } from "./components/hero";
-import { SBQuotes } from "./components/quotes";
-import { SBCode, SBValues } from "./components/sections-top";
-import { SBSocial } from "./components/social";
-import { SBFinal, SBFooter, SBTrust } from "./components/trust-final";
+import { CodeDemoSection } from "./components/demo";
+import { DevToolsSection } from "./components/devtools";
+import { Hero, SiteNav } from "./components/hero";
+import { QuotesSection } from "./components/quotes";
+import { SocialProofSection } from "./components/social";
+import {
+  FinalCtaSection,
+  SiteFooter,
+  TrustSection,
+} from "./components/trust-final";
+import { ValuesSection } from "./components/values";
 
 export default function Home() {
   return (
     <div className="sb-root" data-theme="dark">
-      <SBNav />
-      <SBHero />
-      <SBValues />
-      <SBDemo />
-      <SBCode />
-      <SBSocial />
-      <SBQuotes />
-      <SBTrust />
-      <SBFinal />
-      <SBFooter />
+      <SiteNav />
+      <Hero />
+      <ValuesSection />
+      <CodeDemoSection />
+      <DevToolsSection />
+      <SocialProofSection />
+      <QuotesSection />
+      <TrustSection />
+      <FinalCtaSection />
+      <SiteFooter />
     </div>
   );
 }

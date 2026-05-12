@@ -4,34 +4,22 @@ import { Icon } from "./icons";
 type CommunityLink = {
   href: string;
   label: string;
-  sub: string;
+  subtitle: string;
   icon: ReactNode;
   iconStyle?: CSSProperties;
 };
-
-const XIcon = ({ size = 20 }: { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    aria-hidden="true"
-  >
-    <path d="M18.9 2H22l-7.5 8.6L23 22h-6.9l-5.4-7-6.2 7H1.5l8-9.1L1 2h7l4.9 6.4L18.9 2zm-1.2 18h1.9L7.5 4H5.4l12.3 16z" />
-  </svg>
-);
 
 const COMMUNITY_LINKS: CommunityLink[] = [
   {
     href: "https://github.com/alpic-ai/skybridge/blob/main/CONTRIBUTING.md",
     label: "Contribute on GitHub",
-    sub: "Open a PR, file an issue",
+    subtitle: "Open a PR, file an issue",
     icon: <Icon name="github" size={22} />,
   },
   {
-    href: "#",
+    href: "https://discord.gg/awV4gu74wK",
     label: "Discord",
-    sub: "Chat with the team",
+    subtitle: "Chat with the team",
     icon: <Icon name="discord" size={22} />,
     iconStyle: {
       background: "#5865f2",
@@ -39,20 +27,9 @@ const COMMUNITY_LINKS: CommunityLink[] = [
       color: "#fff",
     },
   },
-  {
-    href: "#",
-    label: "X / Twitter",
-    sub: "Follow for updates",
-    icon: <XIcon size={20} />,
-    iconStyle: {
-      background: "#000",
-      borderColor: "transparent",
-      color: "#fff",
-    },
-  },
 ];
 
-export function SBFinal() {
+export function FinalCtaSection() {
   return (
     <section className="sb-final sb-final--aurora" data-final-bg="aurora">
       <div className="sb-final-aurora" aria-hidden></div>
@@ -76,14 +53,16 @@ export function SBFinal() {
         <div className="sb-final-cta">
           <a
             className="sb-btn sb-btn-primary sb-btn-lg"
-            href="https://skybridge.tech/home"
+            href="https://docs.skybridge.tech"
           >
             Read the docs
             <Icon name="arrow" size={15} stroke={2} />
           </a>
           <a
             className="sb-btn sb-btn-ghost sb-btn-lg"
-            href="#"
+            href="https://github.com/alpic-ai/skybridge"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{ borderRadius: "10px", borderColor: "rgb(106, 177, 177)" }}
           >
             <Icon name="github" size={14} />
@@ -95,7 +74,7 @@ export function SBFinal() {
   );
 }
 
-export function SBFooter() {
+export function SiteFooter() {
   return (
     <footer className="sb-footer">
       <div className="sb-wrap">
@@ -108,26 +87,29 @@ export function SBFooter() {
             />
             <p>
               The full-stack React framework for MCP Apps. An open-source
-              project by made Alpic, in Paris.
+              project made by Alpic, in Paris.
             </p>
           </div>
           <div>
             <h4>FRAMEWORK</h4>
-            <a href="#">Docs</a>
+            <a href="https://docs.skybridge.tech">Docs</a>
             <a href="/showcase">Showcase</a>
-            <a href="#">Examples</a>
+            <a href="https://github.com/alpic-ai/skybridge/tree/main/examples">
+              Examples
+            </a>
           </div>
           <div>
             <h4>Resources</h4>
-            <a href="#">MCP spec</a>
-            <a href="#">Alpic blog</a>
+            <a href="https://modelcontextprotocol.io">MCP spec</a>
+            <a href="https://alpic.ai/blog">Alpic blog</a>
           </div>
           <div>
             <h4>Community</h4>
-            <a href="#">GitHub</a>
-            <a href="#">Discord</a>
-            <a href="#">X / Twitter</a>
-            <a href="#">Contribute</a>
+            <a href="https://github.com/alpic-ai/skybridge">GitHub</a>
+            <a href="https://discord.gg/awV4gu74wK">Discord</a>
+            <a href="https://github.com/alpic-ai/skybridge/blob/main/CONTRIBUTING.md">
+              Contribute
+            </a>
           </div>
         </div>
         <div className="sb-footer-bot">
@@ -139,7 +121,7 @@ export function SBFooter() {
   );
 }
 
-export function SBTrust() {
+export function TrustSection() {
   return (
     <>
       <section
@@ -222,20 +204,20 @@ export function SBTrust() {
             </p>
           </div>
           <div className="sb-community-segmented">
-            {COMMUNITY_LINKS.map((l) => (
+            {COMMUNITY_LINKS.map((link) => (
               <a
-                key={l.href}
-                href={l.href}
+                key={link.href}
+                href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="sb-community-seg"
               >
-                <span className="sb-community-seg-icon" style={l.iconStyle}>
-                  {l.icon}
+                <span className="sb-community-seg-icon" style={link.iconStyle}>
+                  {link.icon}
                 </span>
                 <span className="sb-community-seg-text">
-                  <span className="sb-community-seg-label">{l.label}</span>
-                  <span className="sb-community-seg-sub">{l.sub}</span>
+                  <span className="sb-community-seg-label">{link.label}</span>
+                  <span className="sb-community-seg-sub">{link.subtitle}</span>
                 </span>
               </a>
             ))}

@@ -2,12 +2,12 @@ import { Icon } from "./icons";
 
 function AirlineMark({
   code,
-  bg,
-  fg,
+  background,
+  foreground,
 }: {
   code: string;
-  bg: string;
-  fg: string;
+  background: string;
+  foreground: string;
 }) {
   return (
     <span
@@ -18,8 +18,8 @@ function AirlineMark({
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        background: bg,
-        color: fg,
+        background,
+        color: foreground,
         font: "700 10.5px/1 var(--font-display)",
         letterSpacing: "0.5px",
         flexShrink: 0,
@@ -124,25 +124,25 @@ function FlightWidget() {
           {[
             {
               airline: "Air France",
-              num: "AF 276",
+              flightNumber: "AF 276",
               time: "10:25 → 06:40+1",
               stops: "Nonstop · 11h 15m",
               code: "AF",
-              bg: "#002157",
-              fg: "#ffffff",
+              background: "#002157",
+              foreground: "#ffffff",
             },
             {
               airline: "ANA",
-              num: "NH 216",
+              flightNumber: "NH 216",
               time: "13:10 → 08:55+1",
               stops: "Nonstop · 11h 45m",
               code: "NH",
-              bg: "#0d2d6c",
-              fg: "#ffffff",
+              background: "#0d2d6c",
+              foreground: "#ffffff",
             },
-          ].map((f) => (
+          ].map((flight) => (
             <div
-              key={f.num}
+              key={flight.flightNumber}
               style={{
                 padding: 12,
                 border: "1px solid var(--sb-border)",
@@ -151,10 +151,14 @@ function FlightWidget() {
               }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <AirlineMark code={f.code} bg={f.bg} fg={f.fg} />
+                <AirlineMark
+                  code={flight.code}
+                  background={flight.background}
+                  foreground={flight.foreground}
+                />
                 <div style={{ minWidth: 0 }}>
                   <div style={{ font: "600 13px/1.3 var(--font-body)" }}>
-                    {f.airline}
+                    {flight.airline}
                   </div>
                   <div
                     style={{
@@ -163,7 +167,7 @@ function FlightWidget() {
                       marginTop: 2,
                     }}
                   >
-                    {f.num}
+                    {flight.flightNumber}
                   </div>
                 </div>
               </div>
@@ -174,7 +178,7 @@ function FlightWidget() {
                   color: "var(--sb-ink)",
                 }}
               >
-                {f.time}
+                {flight.time}
               </div>
               <div
                 style={{
@@ -183,7 +187,7 @@ function FlightWidget() {
                   marginTop: 4,
                 }}
               >
-                {f.stops}
+                {flight.stops}
               </div>
             </div>
           ))}
@@ -204,7 +208,7 @@ function FlightWidget() {
   );
 }
 
-export function SBDemo() {
+export function CodeDemoSection() {
   return (
     <section className="sb-section" id="demo">
       <div className="sb-wrap">

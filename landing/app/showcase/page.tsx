@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { InstallRow, SBNav } from "../components/hero";
+import { InstallRow, SiteNav } from "../components/hero";
 import { Icon } from "../components/icons";
 import { ChatGPTFrame } from "../components/showcase/chatgpt-frame";
 import { hostAccent, SHOWCASE } from "../components/showcase/data";
-import { SBFooter } from "../components/trust-final";
+import { SiteFooter } from "../components/trust-final";
 
 const description =
   "Real MCP Apps built with Skybridge — shipping in ChatGPT and Claude. Browse community and customer projects for inspiration.";
@@ -27,11 +27,11 @@ export const metadata: Metadata = {
 };
 
 export default function ShowcaseListPage() {
-  const apps = SHOWCASE.filter((a) => a.category === "3rd Party");
+  const apps = SHOWCASE.filter((app) => app.category === "3rd Party");
 
   return (
     <div className="sb-root" data-theme="dark">
-      <SBNav />
+      <SiteNav />
       <div className="sx-page">
         <div className="sx-page-head">
           <div className="sx-page-eyebrow"></div>
@@ -46,7 +46,7 @@ export default function ShowcaseListPage() {
 
         <div style={{ marginBottom: 56 }}>
           <div className="sxA-grid">
-            {apps.map((app) => (
+            {apps.map((app, index) => (
               <Link
                 key={app.id}
                 href={`/showcase/${app.slug}`}
@@ -58,7 +58,7 @@ export default function ShowcaseListPage() {
                 }
               >
                 <div className="sxA-thumb">
-                  <ChatGPTFrame app={app} compact />
+                  <ChatGPTFrame app={app} compact priority={index === 0} />
                 </div>
                 <div className="sxA-meta">
                   <div className="sxA-row">
@@ -70,9 +70,9 @@ export default function ShowcaseListPage() {
                   <p className="sxA-blurb">{app.blurb}</p>
                   <div className="sxA-foot">
                     <div className="sxA-tags">
-                      {app.tags.map((t) => (
-                        <span key={t} className="sxA-tag">
-                          {t}
+                      {app.tags.map((tag) => (
+                        <span key={tag} className="sxA-tag">
+                          {tag}
                         </span>
                       ))}
                     </div>
@@ -122,7 +122,7 @@ export default function ShowcaseListPage() {
           </div>
         </div>
       </div>
-      <SBFooter />
+      <SiteFooter />
     </div>
   );
 }

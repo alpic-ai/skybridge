@@ -21,23 +21,23 @@ export function CopyOption({
   style,
   children,
 }: Props) {
-  const [idx, setIdx] = useState(0);
+  const [index, setIndex] = useState(0);
   const list: ReactNode[] = options?.length ? options : [children];
-  const next = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIdx((i) => (i + 1) % list.length);
+  const next = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIndex((current) => (current + 1) % list.length);
   };
   const hasMulti = list.length > 1;
   return (
     <Tag className={`sb-copt ${className}`.trim()} style={style}>
-      <span className="sb-copt-body">{list[idx]}</span>
+      <span className="sb-copt-body">{list[index]}</span>
       {hasMulti && (
         <button
           type="button"
           className="sb-copt-toggle"
           onClick={next}
-          title={`Cycle option (${idx + 1}/${list.length})`}
+          title={`Cycle option (${index + 1}/${list.length})`}
           aria-label="Cycle copy option"
         >
           <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
@@ -50,7 +50,7 @@ export function CopyOption({
             />
           </svg>
           <span className="sb-copt-index">
-            {idx + 1}/{list.length}
+            {index + 1}/{list.length}
           </span>
         </button>
       )}

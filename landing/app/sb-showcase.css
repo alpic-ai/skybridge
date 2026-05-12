@@ -37,60 +37,10 @@
   font: 400 19px / 1.55 var(--font-body);
   color: var(--sb-ink-soft);
 }
-.sx-section-h {
-  max-width: 1280px;
-  margin: 0 auto 24px;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding: 0 4px;
-}
-.sx-section-h h2 {
-  font: 400 22px / 1 var(--font-display);
-  margin: 0;
-  letter-spacing: -0.4px;
-}
-.sx-section-h .lbl {
-  font: 500 12px / 1 var(--font-mono);
-  color: var(--sb-ink-mute);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-/* Filter chips */
-.sx-filters {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 32px;
-}
-.sx-chip {
-  height: 34px;
-  padding: 0 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid var(--sb-border);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.02);
-  color: var(--sb-ink-soft);
-  font: 500 13px / 1 var(--font-body);
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.sx-chip:hover {
-  color: var(--sb-ink);
-  border-color: #2d4545;
-}
 .sx-chip.is-active {
   background: var(--sb-accent);
   color: var(--sb-ice-ink);
   border-color: var(--sb-accent);
-}
-.sx-chip-count {
-  color: var(--sb-ink-mute);
-  font-variant-numeric: tabular-nums;
 }
 .sx-chip.is-active .sx-chip-count {
   color: rgba(6, 17, 15, 0.55);
@@ -549,11 +499,6 @@
   );
   pointer-events: none;
 }
-.sx-submit-inner {
-  position: relative;
-  max-width: 640px;
-  margin: 0 auto;
-}
 .sx-submit-eyebrow {
   font: 600 12px / 1 var(--font-body);
   color: var(--sb-accent);
@@ -613,13 +558,6 @@
   grid-template-columns: 1fr 1.1fr;
   gap: 56px;
   align-items: center;
-}
-.sxD-cat {
-  font: 600 11px / 1 var(--font-body);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--sb-accent);
-  margin-bottom: 16px;
 }
 .sxD-title {
   font: 400 56px / 1 var(--font-display);
@@ -800,55 +738,6 @@
   color: var(--sb-ink-mute);
 }
 
-/* "Build your own" row under the lede */
-.sx-page-getstarted {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin: 28px auto 0;
-  padding: 6px 6px 6px 18px;
-  border: 1px solid var(--sb-border);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.02);
-}
-.sx-page-getstarted-l {
-  font: 500 12px / 1 var(--font-mono);
-  color: var(--sb-ink-mute);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.sx-page-getstarted-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  height: 30px;
-  padding: 0 14px;
-  border-radius: 999px;
-  border: 1px solid var(--sb-border);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--sb-ink);
-  font: 500 13px / 1 var(--font-body);
-  text-decoration: none;
-  transition:
-    background 0.15s,
-    border-color 0.15s,
-    color 0.15s;
-}
-.sx-page-getstarted-pill:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: var(--sb-ink-mute);
-  color: var(--sb-ink);
-}
-.sx-page-getstarted-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--sb-accent);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.04);
-}
-
 /* Tool-only MCP result block (no widget) */
 .cg-tool-result {
   margin-top: 10px;
@@ -921,22 +810,6 @@
   gap: 8px;
   padding: 5px 0;
 }
-
-/* Wrapper for the "Build your own" pill row when shown below the Submit CTA */
-.sx-page-getstarted-wrap {
-  display: flex;
-  justify-content: center;
-  margin: 40px auto 0;
-}
-.sx-page-getstarted-wrap .sx-page-getstarted {
-  margin: 0;
-}
-
-/* Showcase CTA: widen so the head fits on one line */
-.sx-cta-installs {
-  width: 100%;
-  max-width: 920px;
-}
 .sx-cta-installs .sb-cta-installs-head {
   white-space: nowrap;
 }
@@ -987,15 +860,6 @@
 }
 .sxD-carousel-stage .cg-frame {
   height: 100%;
-}
-.sxD-carousel-img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: var(--sb-radius-card, 16px);
-  border: 1px solid var(--sb-border);
-  background: var(--sb-surface);
 }
 .sxD-carousel-arrow {
   position: absolute;
@@ -1066,13 +930,6 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-.sx-submit-installs-head {
-  font: 600 11px / 1 var(--font-body);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--sb-ink-mute, #748484);
-  margin-bottom: 6px;
 }
 .sx-submit-installs .sb-install {
   min-width: 0;

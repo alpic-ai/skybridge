@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "next-image-export-optimizer";
 import { Icon } from "./icons";
 
 type Logo =
@@ -6,86 +6,92 @@ type Logo =
       kind: "img";
       name: string;
       src: string;
-      h: number;
-      w: number;
+      height: number;
+      width: number;
       white?: boolean;
     }
-  | { kind: "icon"; name: string; src: string; h: number; w: number }
+  | {
+      kind: "icon";
+      name: string;
+      src: string;
+      height: number;
+      width: number;
+    }
   | { kind: "text"; name: string };
 
-export function SBSocial() {
-  const PNG_H = 40;
+export function SocialProofSection() {
+  const PNG_HEIGHT = 40;
   const logos: Logo[] = [
     {
       kind: "img",
       name: "Bitmovin",
       src: "/assets/customer-logos/bitmovin.svg",
-      h: 26,
-      w: 120,
+      height: 26,
+      width: 120,
     },
     {
       kind: "img",
       name: "Evaneos",
       src: "/assets/customer-logos/evaneos.svg",
-      h: 22,
-      w: 110,
+      height: 22,
+      width: 110,
     },
     {
       kind: "img",
       name: "Datadog",
       src: "/assets/customer-logos/datadog.svg",
-      h: 32,
-      w: 160,
+      height: 32,
+      width: 160,
       white: true,
     },
     {
       kind: "img",
       name: "Touchstream",
       src: "/assets/customer-logos/touchstream.webp",
-      h: PNG_H,
-      w: 230,
+      height: PNG_HEIGHT,
+      width: 230,
     },
     {
       kind: "img",
       name: "Awaze",
       src: "/assets/customer-logos/awaze.webp",
-      h: PNG_H,
-      w: 114,
+      height: PNG_HEIGHT,
+      width: 114,
     },
     {
       kind: "img",
       name: "Listo",
       src: "/assets/customer-logos/listo.webp",
-      h: PNG_H,
-      w: 99,
+      height: PNG_HEIGHT,
+      width: 99,
     },
     {
       kind: "img",
       name: "Alpic",
       src: "/assets/customer-logos/alpic.webp",
-      h: PNG_H,
-      w: 158,
+      height: PNG_HEIGHT,
+      width: 158,
     },
     {
       kind: "img",
       name: "Cottages.com",
       src: "/assets/customer-logos/cottages.webp",
-      h: PNG_H,
-      w: 168,
+      height: PNG_HEIGHT,
+      width: 168,
     },
     {
       kind: "img",
       name: "Drio",
       src: "/assets/customer-logos/drio.webp",
-      h: PNG_H,
-      w: 127,
+      height: PNG_HEIGHT,
+      width: 127,
     },
     {
       kind: "icon",
       name: "OTseek",
       src: "/assets/customer-logos/otseek.webp",
-      h: 30,
-      w: 30,
+      height: 30,
+      width: 30,
     },
     { kind: "text", name: "OLX" },
     { kind: "text", name: "Any PDF" },
@@ -108,55 +114,69 @@ export function SBSocial() {
               Skybridge.
             </p>
           </div>
-          <a className="sb-btn sb-btn-primary sb-btn-lg" href="#">
+          <a className="sb-btn sb-btn-primary sb-btn-lg" href="/showcase">
             See the showcase
             <Icon name="arrow" size={14} stroke={2} />
           </a>
         </div>
         <div className="sb-marquee">
           <div className="sb-marquee-track">
-            {[...logos, ...logos].map((l, i) => {
-              if (l.kind === "img") {
+            {[...logos, ...logos].map((logo, index) => {
+              if (logo.kind === "img") {
+                const isSvg = logo.src.endsWith(".svg");
                 return (
                   <span
-                    key={i}
+                    key={index}
                     className={
                       "sb-logo-chip sb-logo-chip-img" +
-                      (l.white ? " sb-logo-chip-white" : "")
+                      (logo.white ? " sb-logo-chip-white" : "")
                     }
-                    title={l.name}
+                    title={logo.name}
                   >
-                    <Image
-                      src={l.src}
-                      alt={l.name}
-                      width={l.w}
-                      height={l.h}
-                      style={{ height: l.h, width: "auto" }}
-                    />
+                    {isSvg ? (
+                      // SVGs render at their intrinsic ratio; next/image's aspect-ratio
+                      // check misfires on them, so use a plain <img>.
+                      // biome-ignore lint/performance/noImgElement: SVG, no raster optimization needed
+                      <img
+                        src={logo.src}
+                        alt={logo.name}
+                        width={logo.width}
+                        height={logo.height}
+                        style={{ height: logo.height, width: "auto" }}
+                      />
+                    ) : (
+                      <Image
+                        src={logo.src}
+                        alt={logo.name}
+                        width={logo.width}
+                        height={logo.height}
+                        style={{ height: logo.height, width: "auto" }}
+                      />
+                    )}
                   </span>
                 );
               }
-              if (l.kind === "icon") {
+              if (logo.kind === "icon") {
                 return (
                   <span
-                    key={i}
+                    key={index}
                     className="sb-logo-chip sb-logo-chip-icon"
-                    title={l.name}
+                    title={logo.name}
                   >
                     <Image
-                      src={l.src}
+                      src={logo.src}
                       alt=""
-                      width={l.w}
-                      height={l.h}
-                      style={{ height: l.h, width: l.h }}
+                      width={logo.width}
+                      height={logo.height}
+                      style={{ height: logo.height, width: logo.height }}
                     />
-                    <span>{l.name}</span>
+                    <span>{logo.name}</span>
                   </span>
                 );
               }
               return (
-                <span key={i} className="sb-logo-chip">
-                  {l.name.toUpperCase()}
+                <span key={index} className="sb-logo-chip">
+                  {logo.name.toUpperCase()}
                 </span>
               );
             })}
