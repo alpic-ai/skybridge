@@ -42,11 +42,9 @@ This serves `/.well-known/oauth-authorization-server` and `/.well-known/oauth-pr
 
 ## 2. Write a token verifier
 
-`requireBearerAuth` takes a `verifier` with `verifyAccessToken(token): Promise<AuthInfo>`. Pick the strategy that matches your provider — both produce the same `AuthInfo` shape.
+x`requireBearerAuth` takes a `verifier` with `verifyAccessToken(token): Promise<AuthInfo>`. Verify the provider's JWT against its JWKS:
 
-⚠️ Fetch your provider's docs for exact URLs — JWKS paths and issuer formats vary.
-
-**JWT + JWKS** (provider issues signed JWTs):
+⚠️ Fetch your provider's docs for the exact JWKS URL and issuer.
 
 ```typescript
 // src/auth.ts
@@ -69,34 +67,10 @@ export async function verifyAccessToken(token: string): Promise<AuthInfo> {
 
   return {
     token,
-    clientId: (payload.client_id ?? payload.azp) as string,
+    clientId: (payload.client_id ?? payload.azp ?? "") as string,
     scopes: typeof payload.scope === "string" ? payload.scope.split(" ") : [],
     expiresAt: payload.exp,
     extra: { sub: payload.sub },
-  };
-}
-```
-
-**Userinfo endpoint** (provider issues opaque tokens):
-
-```typescript
-// src/auth.ts
-import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
-
-export async function verifyAccessToken(token: string): Promise<AuthInfo> {
-  const res = await fetch("https://your-oauth-provider.com/oauth2/userinfo", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) {
-    throw new InvalidTokenError(`userinfo failed: ${res.status}`);
-  }
-  const user = (await res.json()) as { sub: string };
-  return {
-    token,
-    clientId: user.sub,
-    scopes: [],
-    extra: { sub: user.sub },
   };
 }
 ```
