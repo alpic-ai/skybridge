@@ -1,8 +1,16 @@
+import Image from "next/image";
 import { Icon } from "./icons";
 
 type Logo =
-  | { kind: "img"; name: string; src: string; h: number; white?: boolean }
-  | { kind: "icon"; name: string; src: string; h: number }
+  | {
+      kind: "img";
+      name: string;
+      src: string;
+      h: number;
+      w: number;
+      white?: boolean;
+    }
+  | { kind: "icon"; name: string; src: string; h: number; w: number }
   | { kind: "text"; name: string };
 
 export function SBSocial() {
@@ -13,18 +21,21 @@ export function SBSocial() {
       name: "Bitmovin",
       src: "/assets/customer-logos/bitmovin.svg",
       h: 26,
+      w: 120,
     },
     {
       kind: "img",
       name: "Evaneos",
       src: "/assets/customer-logos/evaneos.svg",
       h: 22,
+      w: 110,
     },
     {
       kind: "img",
       name: "Datadog",
       src: "/assets/customer-logos/datadog.svg",
       h: 32,
+      w: 160,
       white: true,
     },
     {
@@ -32,42 +43,49 @@ export function SBSocial() {
       name: "Touchstream",
       src: "/assets/customer-logos/touchstream.webp",
       h: PNG_H,
+      w: 230,
     },
     {
       kind: "img",
       name: "Awaze",
       src: "/assets/customer-logos/awaze.webp",
       h: PNG_H,
+      w: 114,
     },
     {
       kind: "img",
       name: "Listo",
       src: "/assets/customer-logos/listo.webp",
       h: PNG_H,
+      w: 99,
     },
     {
       kind: "img",
       name: "Alpic",
       src: "/assets/customer-logos/alpic.webp",
       h: PNG_H,
+      w: 158,
     },
     {
       kind: "img",
       name: "Cottages.com",
       src: "/assets/customer-logos/cottages.webp",
       h: PNG_H,
+      w: 168,
     },
     {
       kind: "img",
       name: "Drio",
       src: "/assets/customer-logos/drio.webp",
       h: PNG_H,
+      w: 127,
     },
     {
       kind: "icon",
       name: "OTseek",
       src: "/assets/customer-logos/otseek.webp",
       h: 30,
+      w: 30,
     },
     { kind: "text", name: "OLX" },
     { kind: "text", name: "Any PDF" },
@@ -108,7 +126,13 @@ export function SBSocial() {
                     }
                     title={l.name}
                   >
-                    <img src={l.src} alt={l.name} style={{ height: l.h }} />
+                    <Image
+                      src={l.src}
+                      alt={l.name}
+                      width={l.w}
+                      height={l.h}
+                      style={{ height: l.h, width: "auto" }}
+                    />
                   </span>
                 );
               }
@@ -119,9 +143,11 @@ export function SBSocial() {
                     className="sb-logo-chip sb-logo-chip-icon"
                     title={l.name}
                   >
-                    <img
+                    <Image
                       src={l.src}
                       alt=""
+                      width={l.w}
+                      height={l.h}
                       style={{ height: l.h, width: l.h }}
                     />
                     <span>{l.name}</span>

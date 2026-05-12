@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { InstallRow, SBNav } from "../../components/hero";
@@ -291,7 +292,16 @@ export default async function ShowcaseDetailPage({
                   href={`/showcase/${r.slug}`}
                   className="sxD-related-card"
                 >
-                  <img src={r.img} alt="" className="sxD-related-img" />
+                  {r.img && (
+                    <Image
+                      src={r.img}
+                      alt=""
+                      className="sxD-related-img"
+                      width={500}
+                      height={300}
+                      sizes="(max-width: 768px) 50vw, 280px"
+                    />
+                  )}
                   <div className="sxD-related-name">{r.name}</div>
                   <div className="sxD-related-tag">
                     {r.category} · {r.tagline}

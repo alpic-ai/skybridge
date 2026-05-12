@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 type Quote = { q: string; who: string; where: string; photo?: string };
 
 type QuotesVariant =
@@ -105,7 +107,13 @@ export function SBQuotesBody({
                 aria-hidden
               >
                 {q.photo ? (
-                  <img src={q.photo} alt="" loading="lazy" />
+                  <Image
+                    src={q.photo}
+                    alt=""
+                    width={88}
+                    height={88}
+                    loading="lazy"
+                  />
                 ) : (
                   <span>
                     {q.who

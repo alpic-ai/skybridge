@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ReactElement } from "react";
 import { hostAccent, type ShowcaseApp } from "./data";
 
@@ -205,15 +206,22 @@ export function ChatGPTFrame({
                   )}
                 </div>
               ) : (
-                <div className="cg-widget-wrap">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={imageOverride || app.img}
-                    alt={`${app.name} widget`}
-                    className="cg-widget-img"
-                    loading="lazy"
-                  />
-                </div>
+                (() => {
+                  const src = imageOverride || app.img;
+                  return src ? (
+                    <div className="cg-widget-wrap">
+                      <Image
+                        src={src}
+                        alt={`${app.name} widget`}
+                        className="cg-widget-img"
+                        width={1200}
+                        height={800}
+                        sizes="(max-width: 768px) 90vw, 600px"
+                        loading="lazy"
+                      />
+                    </div>
+                  ) : null;
+                })()
               )}
             </div>
           </div>
