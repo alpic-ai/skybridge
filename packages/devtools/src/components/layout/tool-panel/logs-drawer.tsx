@@ -120,7 +120,7 @@ const LogEntry = ({
   );
 };
 
-export const LogsDrawer = ({ onClose }: { onClose: () => void }) => {
+export const LogsDrawer = ({ onClose }: { onClose?: () => void }) => {
   const tool = useSelectedToolOrNull();
   const data = useCallToolResult(tool?.name ?? "");
   const logs = data?.openaiLogs ?? [];
@@ -142,14 +142,16 @@ export const LogsDrawer = ({ onClose }: { onClose: () => void }) => {
             <Trash2 className="size-3.5" />
           </button>
         </div>
-        <button
-          type="button"
-          aria-label="Close logs"
-          onClick={onClose}
-          className="inline-flex size-6 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <X className="size-3.5" />
-        </button>
+        {onClose ? (
+          <button
+            type="button"
+            aria-label="Close logs"
+            onClick={onClose}
+            className="inline-flex size-6 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <X className="size-3.5" />
+          </button>
+        ) : null}
       </div>
       <div className="min-h-0 flex-1 overflow-auto bg-light-gray">
         {logs.map((log) => (

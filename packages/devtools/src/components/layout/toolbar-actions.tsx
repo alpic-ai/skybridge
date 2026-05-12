@@ -9,7 +9,6 @@ import {
   Check,
   ClipboardCheck,
   Copy,
-  ExternalLinkIcon,
   Loader2Icon,
   MessagesSquareIcon,
   RocketIcon,
@@ -155,13 +154,11 @@ function TunnelLinkButton({
   icon,
   buildUrl,
   description,
-  ctaLabel,
 }: {
   label: string;
   icon: ReactNode;
   buildUrl: (tunnelUrl: string) => string;
   description: string;
-  ctaLabel: string;
 }) {
   const state = useTunnelStore((s) => s.state);
   const start = useTunnelStore((s) => s.start);
@@ -214,24 +211,14 @@ function TunnelLinkButton({
       }
     >
       {url ? (
-        <div className="space-y-3 text-center">
-          <p
-            className={cn(
-              "text-sm text-muted-foreground py-2 mx-auto",
-              DESCRIPTION_MAX_W,
-            )}
-          >
-            {description}
-          </p>
-          <Button
-            variant="secondary"
-            className="w-full"
-            onClick={onClick}
-            iconTrailing={<ExternalLinkIcon className="size-3.5" />}
-          >
-            {ctaLabel}
-          </Button>
-        </div>
+        <p
+          className={cn(
+            "text-sm text-muted-foreground text-center mx-auto",
+            DESCRIPTION_MAX_W,
+          )}
+        >
+          {description}
+        </p>
       ) : (
         <p className="text-sm text-muted-foreground text-center">
           {isLaunching
@@ -250,7 +237,6 @@ export function PlaygroundButton() {
       icon={<MessagesSquareIcon className="size-3.5" />}
       buildUrl={(tunnelUrl) => `${tunnelUrl}/try`}
       description="Chat with your MCP server with a real LLM and share it"
-      ctaLabel="Go to Playground"
     />
   );
 }
@@ -261,10 +247,9 @@ export function AuditButton() {
       label="Audit"
       icon={<ClipboardCheck className="size-3.5" />}
       buildUrl={(tunnelUrl) =>
-        `https://app.alpic.ai/beacon?url=${encodeURIComponent(tunnelUrl)}`
+        `https://app.alpic.ai/beacon?url=${encodeURIComponent(tunnelUrl)}/mcp`
       }
       description="Audit your MCP server's tools, prompts, and resources"
-      ctaLabel="Audit my server"
     />
   );
 }
@@ -276,7 +261,11 @@ export function DeployButton() {
     <HoverPopover
       className="w-60"
       trigger={
-        <Button variant="cta" icon={<RocketIcon className="size-3.5" />}>
+        <Button
+          variant="cta"
+          className="h-8 px-2"
+          icon={<RocketIcon className="size-3.5" />}
+        >
           Deploy
         </Button>
       }

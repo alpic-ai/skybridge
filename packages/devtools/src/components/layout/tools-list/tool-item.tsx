@@ -79,7 +79,7 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
       <AccordionTrigger
         className={cn(
           "font-mono text-xs font-normal text-foreground",
-          "no-underline hover:bg-muted/40",
+          "no-underline data-[state=closed]:hover:bg-muted/40",
         )}
         action={
           open ? (
@@ -143,6 +143,11 @@ function ToolBody({
 
   return (
     <div className="space-y-3">
+      {tool.description && (
+        <div className="rounded-md border border-border bg-muted/40 px-2.5 py-2 text-xs text-muted-foreground/70">
+          {tool.description}
+        </div>
+      )}
       {hasInput && (
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)}>
           <div className="flex items-center justify-between gap-2">
