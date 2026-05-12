@@ -116,6 +116,7 @@ export interface Adaptor {
   requestDisplayMode(mode: RequestDisplayMode): Promise<{
     mode: RequestDisplayMode;
   }>;
+  requestClose(): Promise<void>;
   sendFollowUpMessage(
     prompt: string,
     options?: SendFollowUpMessageOptions,

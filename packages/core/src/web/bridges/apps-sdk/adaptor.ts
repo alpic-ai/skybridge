@@ -70,6 +70,10 @@ export class AppsSdkAdaptor implements Adaptor {
     return window.openai.requestDisplayMode({ mode });
   };
 
+  public requestClose = (): Promise<void> => {
+    return window.openai.requestClose();
+  };
+
   public sendFollowUpMessage = (
     prompt: string,
     options?: SendFollowUpMessageOptions,
