@@ -34,8 +34,6 @@ export class SkybridgeRecords extends Construct {
       zoneName: domain,
     });
 
-    // Apex → GitHub Pages (alpic-ai/skybridge). The repo's CNAME file must contain
-    // `skybridge.tech` so GitHub serves the project site at the apex.
     new ARecord(this, "ApexGitHubPagesA", {
       zone: hostedZone,
       target: RecordTarget.fromIpAddresses(...GITHUB_PAGES_IPV4),
