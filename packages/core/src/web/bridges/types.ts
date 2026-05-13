@@ -107,6 +107,11 @@ export type OpenExternalOptions = {
 
 export type SendFollowUpMessageOptions = { scrollToBottom?: boolean };
 
+export type RequestSizeOptions = {
+  width?: number;
+  height?: number;
+};
+
 export interface Adaptor {
   getHostContextStore<K extends keyof HostContext>(key: K): HostContextStore<K>;
   callTool<
@@ -117,6 +122,7 @@ export interface Adaptor {
     mode: RequestDisplayMode;
   }>;
   requestClose(): Promise<void>;
+  requestSize(size: RequestSizeOptions): Promise<void>;
   sendFollowUpMessage(
     prompt: string,
     options?: SendFollowUpMessageOptions,

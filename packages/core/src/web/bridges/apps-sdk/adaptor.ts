@@ -7,6 +7,7 @@ import type {
   OpenExternalOptions,
   RequestDisplayMode,
   RequestModalOptions,
+  RequestSizeOptions,
   SendFollowUpMessageOptions,
   SetViewStateAction,
   UploadFileOptions,
@@ -72,6 +73,10 @@ export class AppsSdkAdaptor implements Adaptor {
 
   public requestClose = (): Promise<void> => {
     return window.openai.requestClose();
+  };
+
+  public requestSize = async (_size: RequestSizeOptions): Promise<void> => {
+    console.warn("[skybridge] requestSize: not supported on Apps SDK");
   };
 
   public sendFollowUpMessage = (
