@@ -82,11 +82,7 @@ type ChatGPTFrameProps = {
   preview?: ShowcasePreview;
 };
 
-function FrameTopbar({
-  modelLabel,
-}: {
-  modelLabel: string;
-}): ReactElement {
+function FrameTopbar({ modelLabel }: { modelLabel: string }): ReactElement {
   return (
     <div className="cg-topbar">
       <div className="cg-model">
@@ -277,10 +273,7 @@ export function ChatGPTFrame({
                         <span className="cg-tr-route">{item.route}</span>
                         <span className="cg-tr-carrier">{item.carrier}</span>
                         <span className="cg-tr-time">{item.time}</span>
-                        <span
-                          className="cg-tr-price"
-                          style={{ color: accent }}
-                        >
+                        <span className="cg-tr-price" style={{ color: accent }}>
                           {item.price}
                         </span>
                       </div>
