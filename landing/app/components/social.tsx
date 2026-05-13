@@ -136,7 +136,6 @@ export function SocialProofSection() {
                     {isSvg ? (
                       // SVGs render at their intrinsic ratio; next/image's aspect-ratio
                       // check misfires on them, so use a plain <img>.
-                      // biome-ignore lint/performance/noImgElement: SVG, no raster optimization needed
                       <img
                         src={logo.src}
                         alt={logo.name}

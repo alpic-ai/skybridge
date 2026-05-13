@@ -10,9 +10,9 @@ const mozillaText = localFont({
 });
 
 const OG_IMAGE = {
-  url: "/assets/skybridge-readme-banner.webp",
-  width: 924,
-  height: 347,
+  url: "/assets/banner.jpg",
+  width: 1200,
+  height: 630,
   alt: "Skybridge — the full-stack React framework for MCP Apps",
 };
 

@@ -294,6 +294,33 @@ body {
   font-size: 14.5px;
   border-radius: 10px;
 }
+/* Static preview inside the demo widget — neutralize interactive states. */
+.sb-widget .sb-btn,
+.sb-widget .sb-btn:hover,
+.sb-widget .sb-btn:focus,
+.sb-widget .sb-btn:active {
+  cursor: default;
+  transform: none;
+}
+.sb-widget .sb-btn-primary,
+.sb-widget .sb-btn-primary:hover,
+.sb-widget .sb-btn-primary:focus,
+.sb-widget .sb-btn-primary:active {
+  background: var(--sb-ice);
+  color: var(--sb-ice-ink);
+  border-color: transparent;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 10px 28px -10px rgba(137, 240, 236, 0.45);
+}
+.sb-widget .sb-btn-ghost,
+.sb-widget .sb-btn-ghost:hover,
+.sb-widget .sb-btn-ghost:focus,
+.sb-widget .sb-btn-ghost:active {
+  background: transparent;
+  color: var(--sb-ink-soft);
+  border-color: var(--sb-border);
+}
 .sb-star-count {
   font-variant-numeric: tabular-nums;
   color: var(--sb-ink);
@@ -473,8 +500,6 @@ body {
 /* ===== Copy-option cycler (temporary content A/B toggle) ===== */
 .sb-copt {
   position: relative;
-}
-.sb-copt-body {
 }
 .sb-copt-toggle {
   display: inline-flex;
