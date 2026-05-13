@@ -86,14 +86,14 @@ const server = new McpServer(
           isError: false,
         };
       } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Unknown error";
+        const allCapitals = await getCachedAllCapitals().catch(() => []);
         return {
-          content: [
-            {
-              type: "text",
-              text: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
-            },
-          ],
-          isError: true,
+          _meta: { allCapitals },
+          structuredContent: { error: message },
+          content: [{ type: "text", text: message }],
+          isError: false,
         };
       }
     },
