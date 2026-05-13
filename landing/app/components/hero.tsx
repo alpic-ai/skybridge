@@ -8,47 +8,6 @@ const LONGEST_HOST = HOSTS.reduce((longest, host) =>
   longest.length >= host.length ? longest : host,
 );
 
-export function SiteNav() {
-  return (
-    <nav className="sb-nav">
-      <div className="sb-nav-inner" style={{ height: "74px" }}>
-        <a className="sb-brand" href="/" aria-label="Skybridge">
-          <img
-            src="/assets/skybridge-logo-light.svg"
-            alt="Skybridge"
-            className="sb-brand-logo"
-          />
-          <span className="sb-brand-ver">v0.8</span>
-        </a>
-        <div className="sb-nav-links">
-          <a href="https://docs.skybridge.tech">Docs</a>
-          <a href="/showcase">Showcase</a>
-        </div>
-        <div className="sb-nav-right">
-          <a
-            className="sb-btn sb-btn-ghost sb-nav-stars"
-            href="https://github.com/alpic-ai/skybridge"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Icon name="github" size={13} />
-            <span className="sb-star-count">1k</span>
-          </a>
-          <a
-            className="sb-btn sb-btn-primary"
-            href="https://docs.skybridge.tech"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Get started
-            <Icon name="arrow" size={12} stroke={2} />
-          </a>
-        </div>
-      </div>
-    </nav>
-  );
-}
-
 type InstallRowProps = {
   cmd: string;
   label?: string;

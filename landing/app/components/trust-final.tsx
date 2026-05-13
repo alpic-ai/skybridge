@@ -27,6 +27,17 @@ const COMMUNITY_LINKS: CommunityLink[] = [
       color: "#fff",
     },
   },
+  {
+    href: "https://x.com/skybridgedev",
+    label: "X",
+    subtitle: "Follow updates",
+    icon: <Icon name="x" size={18} />,
+    iconStyle: {
+      background: "#000",
+      borderColor: "transparent",
+      color: "#fff",
+    },
+  },
 ];
 
 export function FinalCtaSection() {
@@ -94,9 +105,7 @@ export function SiteFooter() {
             <h4>FRAMEWORK</h4>
             <a href="https://docs.skybridge.tech">Docs</a>
             <a href="/showcase">Showcase</a>
-            <a href="https://github.com/alpic-ai/skybridge/tree/main/examples">
-              Examples
-            </a>
+            <a href="https://docs.skybridge.tech/showcase">Examples</a>
           </div>
           <div>
             <h4>Resources</h4>
@@ -114,7 +123,6 @@ export function SiteFooter() {
         </div>
         <div className="sb-footer-bot">
           <span>© 2026 Alpic · Skybridge is open source (MIT)</span>
-          <span>Made in Paris · with Taste</span>
         </div>
       </div>
     </footer>

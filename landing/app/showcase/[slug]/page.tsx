@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Image from "next-image-export-optimizer";
-import { InstallRow, SiteNav } from "../../components/hero";
+import { InstallRow } from "../../components/hero";
 import { Icon } from "../../components/icons";
 import { ClaudeStarSVG } from "../../components/showcase/chatgpt-frame";
 import { hostAccent, SHOWCASE } from "../../components/showcase/data";
 import { PreviewCarousel } from "../../components/showcase/preview-carousel";
+import { SiteNav } from "../../components/site-nav";
 import { SiteFooter } from "../../components/trust-final";
 
 export async function generateStaticParams() {

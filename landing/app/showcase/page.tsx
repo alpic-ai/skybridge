@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { InstallRow, SiteNav } from "../components/hero";
+import { InstallRow } from "../components/hero";
 import { Icon } from "../components/icons";
 import { ChatGPTFrame } from "../components/showcase/chatgpt-frame";
 import { hostAccent, SHOWCASE } from "../components/showcase/data";
+import { SiteNav } from "../components/site-nav";
 import { SiteFooter } from "../components/trust-final";
 
 const description =

@@ -126,9 +126,8 @@ body {
   max-width: 1100px;
   height: 68px;
   padding: 8px 10px 8px 18px;
-  background: rgba(7, 21, 22, 0.85);
-  backdrop-filter: blur(18px) saturate(180%);
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  background: rgba(7, 21, 22, 0.55);
+  backdrop-filter: blur(6px) saturate(120%);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 14px;
   box-shadow:
@@ -295,6 +294,33 @@ body {
   font-size: 14.5px;
   border-radius: 10px;
 }
+/* Static preview inside the demo widget — neutralize interactive states. */
+.sb-widget .sb-btn,
+.sb-widget .sb-btn:hover,
+.sb-widget .sb-btn:focus,
+.sb-widget .sb-btn:active {
+  cursor: default;
+  transform: none;
+}
+.sb-widget .sb-btn-primary,
+.sb-widget .sb-btn-primary:hover,
+.sb-widget .sb-btn-primary:focus,
+.sb-widget .sb-btn-primary:active {
+  background: var(--sb-ice);
+  color: var(--sb-ice-ink);
+  border-color: transparent;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 10px 28px -10px rgba(137, 240, 236, 0.45);
+}
+.sb-widget .sb-btn-ghost,
+.sb-widget .sb-btn-ghost:hover,
+.sb-widget .sb-btn-ghost:focus,
+.sb-widget .sb-btn-ghost:active {
+  background: transparent;
+  color: var(--sb-ink-soft);
+  border-color: var(--sb-border);
+}
 .sb-star-count {
   font-variant-numeric: tabular-nums;
   color: var(--sb-ink);
@@ -375,7 +401,7 @@ body {
 .sb-inline-link {
   color: var(--sb-ink);
   text-decoration: underline;
-  text-decoration-color: rgba(242, 43, 121, 0.45);
+  text-decoration-color: rgba(137, 240, 236, 0.45);
   text-underline-offset: 3px;
   text-decoration-thickness: 1.5px;
   transition:
@@ -474,8 +500,6 @@ body {
 /* ===== Copy-option cycler (temporary content A/B toggle) ===== */
 .sb-copt {
   position: relative;
-}
-.sb-copt-body {
 }
 .sb-copt-toggle {
   display: inline-flex;
@@ -873,11 +897,23 @@ body {
   gap: 8px;
   height: 100%;
   padding: 0 14px;
-  margin: 0 -14px 0 -14px;
   position: relative;
+  color: var(--sb-ink-mute);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+.sb-demo-code-tab:first-child {
+  margin-left: -14px;
+}
+.sb-demo-code-tab:hover {
   color: var(--sb-ink);
 }
-.sb-demo-code-tab::after {
+.sb-demo-code-tab.is-active {
+  color: var(--sb-ink);
+}
+.sb-demo-code-tab.is-active::after {
   content: "";
   position: absolute;
   left: 0;
@@ -1605,8 +1641,8 @@ body {
     ),
     var(--sb-bg);
 }
-.sb-root[data-theme="light"] .sb-nav {
-  background: rgba(251, 250, 250, 0.75);
+.sb-root[data-theme="light"] .sb-nav-inner {
+  background: rgba(251, 250, 250, 0.55);
 }
 .sb-root[data-theme="light"] .sb-brand-logo {
   content: url("/assets/skybridge-midnight.svg");

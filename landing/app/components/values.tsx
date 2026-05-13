@@ -1,10 +1,9 @@
-import { CopyOption } from "./copy-option";
 import { Icon, type IconName } from "./icons";
 
 type ValueItem = {
   icon: IconName;
   title: string;
-  descriptions: string[];
+  description: string;
   cta?: { label: string; href: string };
 };
 
@@ -12,48 +11,38 @@ const VALUES: ValueItem[] = [
   {
     icon: "globe",
     title: "Write once, run everywhere",
-    descriptions: [
+    description:
       "Skybridge abstracts implementation differences, so your app runs seamlessly in Claude, ChatGPT, VSCode and any client compatible with MCP apps.",
-      "Your app runs seamlessly in Claude, ChatGPT, Cursor and any other MCP-Apps compatible client, with Skybridge abstracting all the implementation differences.",
-    ],
   },
   {
     icon: "terminal",
     title: "Delightful dev environment",
-    descriptions: [
+    description:
       "Get a complete local emulator, Hot Module Reload and instant tunnel to connect your local app to Claude & ChatGPT.",
-      "Local DevTools playground, hot reload, tunnels to real hosts. Iterate at the speed of thought.",
-    ],
   },
   {
     icon: "wand",
     title: "Agent-ready",
-    descriptions: [
+    description:
       "Powerful Skills, CLI and programmatic devtools APIs: everything your coding agent needs to build MCP apps end-to-end.",
-      "Built to be used by agents, not just humans. First-class Skills, a powerful CLI, and programmatic DevTools APIs to give your coding agent full autonomy.",
-    ],
   },
   {
     icon: "type",
     title: "Type-safe end-to-end",
-    descriptions: [
+    description:
       "tRPC-style inference from MCP server tool definition to React view.",
-      "Zod schemas on tools, full TS inference into your widget props. No stringly-typed APIs.",
-    ],
   },
   {
     icon: "react",
     title: "React friendly",
-    descriptions: [
+    description:
       "Intuitive react-query style hooks, with advanced state management. If you know React, you’ve got Skybridge.",
-    ],
   },
   {
     icon: "book",
     title: "Examples library",
-    descriptions: [
+    description:
       "Get started quickly with production-ready app examples for e-commerce, travel, SaaS, and others.",
-    ],
     cta: { label: "See examples", href: "/showcase" },
   },
 ];
@@ -78,7 +67,9 @@ export function ValuesSection() {
                   <Icon name={value.icon} size={28} stroke={2.2} />
                 </span>
                 <h3>{value.title}</h3>
-                <CopyOption as="p" options={value.descriptions} />
+                <p className="sb-copt">
+                  <span className="sb-copt-body">{value.description}</span>
+                </p>
                 {value.cta && (
                   <a className="sb-value-cta" href={value.cta.href}>
                     {value.cta.label}
