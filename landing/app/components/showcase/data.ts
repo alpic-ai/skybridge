@@ -26,6 +26,27 @@ export type ShowcaseChat = {
 
 export type ShowcaseCategory = "3rd Party" | "Example";
 
+export type ShowcasePreviewMode =
+  | "chatgpt-inline"
+  | "chatgpt-fullscreen"
+  | "claude-inline"
+  | "claude-fullscreen";
+
+/** Inline host chrome: thread + widget inset (screenshot empty when `app.noWidget`). */
+export type ShowcasePreviewInline = {
+  mode: "chatgpt-inline" | "claude-inline";
+  chat: ShowcaseChat;
+  screenshot: string;
+};
+
+/** Full viewport-style chrome: top bar + large inset (no fake thread copy). */
+export type ShowcasePreviewFullscreen = {
+  mode: "chatgpt-fullscreen" | "claude-fullscreen";
+  screenshot: string;
+};
+
+export type ShowcasePreview = ShowcasePreviewInline | ShowcasePreviewFullscreen;
+
 export type ShowcaseApp = {
   id: string;
   slug: string;
@@ -35,14 +56,65 @@ export type ShowcaseApp = {
   category: ShowcaseCategory;
   host: string;
   accent: string;
+  /** App icon displayed in the tool-call header (circular, ~18px). */
+  icon?: string;
   img?: string;
+  /** @deprecated Prefer `previews`. Used when `previews` is absent. */
   screenshots?: string[];
+  /** Ordered showcase slides (host mode + screenshot + optional thread copy). */
+  previews?: ShowcasePreview[];
   noWidget?: boolean;
   chat: ShowcaseChat;
   tags: string[];
   toolResult?: ShowcaseToolResult;
   links: ShowcaseLinks;
+  /** Per-app "What's interesting" bullet points shown on the detail page. */
+  highlights?: string[];
 };
+
+function inferDefaultInlineMode(
+  host: string,
+): "chatgpt-inline" | "claude-inline" {
+  const h = host.toLowerCase();
+  if (h.includes("claude") && !h.includes("chatgpt")) {
+    return "claude-inline";
+  }
+  return "chatgpt-inline";
+}
+
+/** Resolve carousel frames: explicit `previews`, or legacy `img` / `screenshots`, or `noWidget` placeholder. */
+export function getShowcasePreviews(app: ShowcaseApp): ShowcasePreview[] {
+  if (app.previews && app.previews.length > 0) {
+    return app.previews;
+  }
+  if (app.noWidget) {
+    return [
+      {
+        mode: inferDefaultInlineMode(app.host),
+        chat: app.chat,
+        screenshot: "",
+      },
+    ];
+  }
+  const slides = app.img
+    ? [app.img, ...(app.screenshots ?? [])]
+    : [...(app.screenshots ?? [])];
+  if (slides.length === 0) {
+    return [];
+  }
+  const mode = inferDefaultInlineMode(app.host);
+  return slides.map((screenshot) => ({ mode, chat: app.chat, screenshot }));
+}
+
+/** OpenGraph / thumbnails: first preview with a screenshot, else legacy `img`. */
+export function getShowcaseHeroImage(app: ShowcaseApp): string | undefined {
+  for (const preview of getShowcasePreviews(app)) {
+    if (preview.screenshot.length > 0) {
+      return preview.screenshot;
+    }
+  }
+  return app.img;
+}
 
 export const SHOWCASE: ShowcaseApp[] = [
   {
