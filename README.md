@@ -1,4 +1,4 @@
-# Skybridge
+# Skybridge - the MCP Apps framework
 
 <p align="center">
   <a href="https://docs.skybridge.tech">
@@ -41,15 +41,15 @@ Features include:
 These companies chose Skybridge to deploy their apps on ChatGPT and Claude stores: 
 
 <p align="center">
-  <a href="https://www.datadoghq.com"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/datadog-dark.svg"><img src="docs/images/user-logos/datadog-light.svg" alt="Datadog" height="24"></picture></a>
+  <a href="https://www.datadoghq.com"><img src="docs/images/user-logos/datadog-light.svg#gh-light-mode-only" alt="Datadog" height="24"><img src="docs/images/user-logos/datadog-dark.svg#gh-dark-mode-only" alt="Datadog" height="24"></a>
   &nbsp;&nbsp;
-  <a href="https://bitmovin.com"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/bitmovin-dark.svg"><img src="docs/images/user-logos/bitmovin-light.svg" alt="Bitmovin" height="22"></picture></a>
+  <a href="https://bitmovin.com"><img src="docs/images/user-logos/bitmovin-light.svg#gh-light-mode-only" alt="Bitmovin" height="22"><img src="docs/images/user-logos/bitmovin-dark.svg#gh-dark-mode-only" alt="Bitmovin" height="22"></a>
   &nbsp;&nbsp;
-  <a href="https://www.evaneos.com"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/evaneos-dark.svg"><img src="docs/images/user-logos/evaneos-light.svg" alt="Evaneos" height="18"></picture></a>
+  <a href="https://www.evaneos.com"><img src="docs/images/user-logos/evaneos-light.svg#gh-light-mode-only" alt="Evaneos" height="18"><img src="docs/images/user-logos/evaneos-dark.svg#gh-dark-mode-only" alt="Evaneos" height="18"></a>
   &nbsp;&nbsp;
-  <a href="https://www.touchstream.media"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/touchstream-dark.svg"><img src="docs/images/user-logos/touchstream-light.svg" alt="Touchstream" height="24"></picture></a>
+  <a href="https://www.touchstream.media"><img src="docs/images/user-logos/touchstream-light.svg#gh-light-mode-only" alt="Touchstream" height="24"><img src="docs/images/user-logos/touchstream-dark.svg#gh-dark-mode-only" alt="Touchstream" height="24"></a>
   &nbsp;&nbsp;
-  <a href="https://www.cottages.com"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/cottages-dark.svg"><img src="docs/images/user-logos/cottages-light.svg" alt="Cottages.com" height="24"></picture></a>
+  <a href="https://www.cottages.com"><img src="docs/images/user-logos/cottages-light.svg#gh-light-mode-only" alt="Cottages.com" height="24"><img src="docs/images/user-logos/cottages-dark.svg#gh-dark-mode-only" alt="Cottages.com" height="24"></a>
 </p>
 
 ## Get started
