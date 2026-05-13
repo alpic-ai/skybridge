@@ -3,7 +3,7 @@ title: useCallTool
 description: "Call MCP tools from React views with useCallTool, including typed inputs, async state, user-triggered fetching, and tool results in Skybridge."
 ---
 
-The `useCallTool` function allows you to call additional MCP tools from your view. It wraps the [`window.openai.callTool`](https://developers.openai.com/apps-sdk/build/chatgpt-ui#trigger-server-actions) function while providing a more convenient state management and typed API.
+The `useCallTool` function allows you to call additional MCP tools from your view. It wraps the [`window.openai.callTool`](https://developers.openai.com/apps-sdk/build/chatgpt-ui#trigger-server-actions) function while providing a more convenient typed API with state management.
 
 Make sure your tool `_meta["openai/widgetAccessible"]` property is set to `true` to make it accessible from views - more info on [component-initiated tool calls](https://developers.openai.com/apps-sdk/build/mcp-server#component-initiated-tool-calls).
 
@@ -122,7 +122,7 @@ The mutation function you can call to trigger the tool. Optionally pass side-eff
 callToolAsync: (toolArgs?: ToolArgs) => Promise<ToolResponse>;
 ```
 
-Similar to `callTool` but returns a promise which can be awaited.
+Similar to `callTool`, but returns a promise that can be awaited.
 
 ### `status`
 

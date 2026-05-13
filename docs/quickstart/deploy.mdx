@@ -15,10 +15,10 @@ Below are some easy options closely integrated with Skybridge.
 
 **[Alpic](https://alpic.ai)** is a developer-friendly cloud platform for deploying and hosting MCP Apps. It is also the company behind Skybridge :) 
 
-To deploy your App on Alpic you can:
+To deploy your App on Alpic, you can:
 1. Create a free account on [app.alpic.ai](https://app.alpic.ai)
 2. Deploy your App either by:
-   - Pushing your App to GitHub, and connecting it to Alpic for automatic deployment at each commit.
+   - Pushing your App to GitHub and connecting it to Alpic for automatic deployment at each commit.
    - Using the [Alpic CLI](https://docs.alpic.ai/cli/overview):
 
 <CodeGroup>
@@ -36,14 +36,14 @@ bun run deploy
 ```
 </CodeGroup>
 
-Once your App is deployed, you will be able to access specific MCP analytics, logs, and test your app remotely in the Alpic Playground.
+Once your App is deployed, you can access MCP-specific analytics and logs, and test your app remotely in the Alpic Playground.
 
 Learn more about deploying to Alpic in the [Alpic documentation](https://docs.alpic.ai/).
 
 
 ### Alpic MCP App
 
-Alpic also provides its own [MCP App](https://docs.alpic.ai/features/mcp-server) that lets you manage your apps directly from your favorite MCP Client. Connect to the Alpic MCP Server using:
+Alpic also provides its own [MCP App](https://docs.alpic.ai/features/mcp-server) that lets you manage your apps directly from your favorite MCP client. Connect to the Alpic MCP server using:
 ```
 https://mcp.alpic.ai/mcp
 ```
@@ -149,7 +149,7 @@ docker run -p 3000:3000 my-app
 The package manager is detected from the lockfile (`package-lock.json`, `yarn.lock`, or `pnpm-lock.yaml`). Bun and Deno are not supported yet: you'll need to adapt the build stage inside the Dockerfile.
 </Note>
 
-## What's Next?
+## What's next?
 
 <CardGroup cols={2}>
   <Card title="Core Concepts" icon="lightbulb" href="/concepts">
