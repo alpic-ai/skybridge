@@ -42,7 +42,7 @@ This serves `/.well-known/oauth-authorization-server` and `/.well-known/oauth-pr
 
 ## 2. Write a token verifier
 
-x`requireBearerAuth` takes a `verifier` with `verifyAccessToken(token): Promise<AuthInfo>`. Verify the provider's JWT against its JWKS:
+`requireBearerAuth` takes a `verifier` with `verifyAccessToken(token): Promise<AuthInfo>`. Verify the provider's JWT against its JWKS:
 
 ⚠️ Fetch your provider's docs for the exact JWKS URL and issuer.
 
