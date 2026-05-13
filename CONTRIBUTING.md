@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to Skybridge! Every contribution helps make this framework better for everyone building ChatGPT and MCP Apps.
 
-New here? Please drop by our [Discord](https://discord.com/invite/gNAazGueab) and introduce yourself before opening your first PR — it helps us know who you are and lets us point you toward good first issues.
+New here? Please drop by our [Discord](https://discord.com/invite/gNAazGueab) and introduce yourself before opening your first PR. It helps us know who you are and lets us point you toward good first issues.
 
 ## Getting Started
 
@@ -66,13 +66,13 @@ Every PR is reviewed by Greptile. If the check does not return 5/5, address each
 When your PR changes the public API of `packages/core` (exports from `src/server/index.ts`, `src/web/index.ts`, or the CLI commands in `src/commands/`), it must also update:
 
 1. `skills/` references (notably `chatgpt-app-builder`)
-2. `docs/` — especially `api-reference/` and `guides/`
+2. `docs/`, especially `api-reference/` and `guides/`
 
 Reviewers will block PRs that touch the public API without these updates.
 
 #### On AI-generated contributions
 
-Using AI tools to help write code is fine — using them to flood the repo with unreviewed output is not. AI-slop PRs (low-effort, untested, hallucinated APIs, generated boilerplate with no human judgment behind it) will be closed. If you used an AI assistant, you are still responsible for understanding every line, running the tests, and standing behind the change.
+AI tools are welcome to help you write code. What we ask is that you own what you submit: if you use an AI assistant, please make sure you understand every line, run the tests, and feel confident standing behind the change. PRs that look like unreviewed AI output (untested code, hallucinated APIs, boilerplate without clear intent) will be sent back for rework.
 
 ### Documentation
 
