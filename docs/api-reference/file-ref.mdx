@@ -17,7 +17,7 @@ const server = new McpServer({ name: "my-app", version: "0.0.1" })
     {
       name: "process-file",
       inputSchema: {
-        fileToProcess: FileRef,
+        file: FileRef,
       },
       outputSchema: {
         file_uri: FileRef,
@@ -27,11 +27,10 @@ const server = new McpServer({ name: "my-app", version: "0.0.1" })
         "openai/fileParams": ["file"],
       },
     },
-    async ({ prompt, file }) => {
-      if (file) {
-        const res = await fetch(file.download_url);
-        // ...do something with the file content
-      }
+    async ({ file }) => {
+      const res = await fetch(file.download_url);
+      // ...do something with the file content
+
       return {
         // Tell ChatGPT where to find files
         structuredContent: { file_uri: processedFile },
