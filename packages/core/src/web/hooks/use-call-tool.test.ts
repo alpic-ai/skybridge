@@ -167,8 +167,14 @@ describe("useCallTool - onSuccess callback", () => {
       useCallTool<typeof args, typeof data>(toolName),
     );
 
-    const firstCallData = { ...data, structuredContent: { result: "first call result" } };
-    const secondCallData = { ...data, structuredContent: { result: "second call result" } };
+    const firstCallData = {
+      ...data,
+      structuredContent: { result: "first call result" },
+    };
+    const secondCallData = {
+      ...data,
+      structuredContent: { result: "second call result" },
+    };
     const { promise: firstCallToolPromise, resolve: resolveFirstCallTool } =
       Promise.withResolvers();
     const { promise: secondCallToolPromise, resolve: resolveSecondCallTool } =
