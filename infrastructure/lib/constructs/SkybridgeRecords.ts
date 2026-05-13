@@ -1,6 +1,9 @@
 import {
+  AaaaRecord,
+  ARecord,
   CnameRecord,
   PublicHostedZone,
+  RecordTarget,
   TxtRecord,
 } from "aws-cdk-lib/aws-route53";
 import { Construct } from "constructs";
@@ -8,6 +11,20 @@ import { Construct } from "constructs";
 type SkybridgeRecordsProps = {
   domain: string;
 };
+
+// GitHub Pages anycast IPs — https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site
+const GITHUB_PAGES_IPV4 = [
+  "185.199.108.153",
+  "185.199.109.153",
+  "185.199.110.153",
+  "185.199.111.153",
+];
+const GITHUB_PAGES_IPV6 = [
+  "2606:50c0:8000::153",
+  "2606:50c0:8001::153",
+  "2606:50c0:8002::153",
+  "2606:50c0:8003::153",
+];
 
 export class SkybridgeRecords extends Construct {
   constructor(scope: Construct, id: string, { domain }: SkybridgeRecordsProps) {
@@ -17,11 +34,19 @@ export class SkybridgeRecords extends Construct {
       zoneName: domain,
     });
 
-    // Apex + www: intentionally empty during the GitHub Pages migration.
-    // CloudFormation creates before deleting, so coexisting old (HttpsRedirect)
-    // and new (GitHub Pages) records on the same name would conflict at Route 53.
-    // Step 1 (this commit): remove the HttpsRedirect.
-    // Step 2 (follow-up commit): add the GitHub Pages A/AAAA + www CNAME.
+    new ARecord(this, "ApexGitHubPagesA", {
+      zone: hostedZone,
+      target: RecordTarget.fromIpAddresses(...GITHUB_PAGES_IPV4),
+    });
+    new AaaaRecord(this, "ApexGitHubPagesAAAA", {
+      zone: hostedZone,
+      target: RecordTarget.fromIpAddresses(...GITHUB_PAGES_IPV6),
+    });
+    new CnameRecord(this, "WwwGitHubPages", {
+      zone: hostedZone,
+      recordName: "www",
+      domainName: "alpic-ai.github.io",
+    });
 
     // Showcase apps pointing to alpic.ai
     for (const subdomain of [
