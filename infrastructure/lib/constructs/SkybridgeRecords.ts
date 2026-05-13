@@ -3,7 +3,6 @@ import {
   PublicHostedZone,
   TxtRecord,
 } from "aws-cdk-lib/aws-route53";
-import { HttpsRedirect } from "aws-cdk-lib/aws-route53-patterns";
 import { Construct } from "constructs";
 
 type SkybridgeRecordsProps = {
@@ -18,12 +17,11 @@ export class SkybridgeRecords extends Construct {
       zoneName: domain,
     });
 
-    // Redirect apex and www to docs
-    new HttpsRedirect(this, "ApexRedirect", {
-      zone: hostedZone,
-      recordNames: [domain, `www.${domain}`],
-      targetDomain: `docs.${domain}`,
-    });
+    // Apex + www: intentionally empty during the GitHub Pages migration.
+    // CloudFormation creates before deleting, so coexisting old (HttpsRedirect)
+    // and new (GitHub Pages) records on the same name would conflict at Route 53.
+    // Step 1 (this commit): remove the HttpsRedirect.
+    // Step 2 (follow-up commit): add the GitHub Pages A/AAAA + www CNAME.
 
     // Showcase apps pointing to alpic.ai
     for (const subdomain of [
