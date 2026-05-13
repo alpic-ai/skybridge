@@ -47,7 +47,9 @@ describe("useCallTool - onSuccess callback", () => {
       _meta: { secret: "only visible to widget" },
     };
     OpenaiMock.callTool.mockResolvedValueOnce(rawSdkResponse);
-    const { result } = renderHook(() => useCallTool(toolName));
+    const { result } = renderHook(() =>
+      useCallTool<typeof args, typeof data>(toolName),
+    );
 
     await act(async () => {
       result.current.callTool(args);
