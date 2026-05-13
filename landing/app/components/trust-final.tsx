@@ -97,8 +97,7 @@ export function SiteFooter() {
               className="sb-footer-logo"
             />
             <p>
-              The full-stack React framework for MCP Apps. An open-source
-              project made by Alpic, in Paris.
+              An open-source project made with taste in Paris. © Alpic 2026.
             </p>
           </div>
           <div>
@@ -120,9 +119,6 @@ export function SiteFooter() {
               Contribute
             </a>
           </div>
-        </div>
-        <div className="sb-footer-bot">
-          <span>© 2026 Alpic · Skybridge is open source (MIT)</span>
         </div>
       </div>
     </footer>

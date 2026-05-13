@@ -53,34 +53,52 @@ const TerminalDots = () => (
   </>
 );
 
-function DevPanel({ hover }: { hover: string | null }) {
+function DevPanel({ hover, auditKey }: { hover: string | null; auditKey: number }) {
   return (
     <div className="sb-devpanel" aria-hidden="true">
       {/* HMR */}
       <div
         className={`sb-devpanel-card sb-dp-hmr ${hover === "hmr" ? "is-on" : ""}`}
       >
-        <div className="sb-dp-toast">
-          <span className="sb-dp-toast-dot" />
-          <div>
-            <div className="sb-dp-toast-t">HMR · 12ms</div>
-            <div className="sb-dp-toast-s">flights.tsx · widget reloaded</div>
+        <div className="sb-dp-diff">
+          <div className="sb-dp-diff-header">
+            <span className="sb-dp-diff-file">flights.tsx</span>
+            <span className="sb-dp-toast-dot" />
+            <span className="sb-dp-toast-t">HMR · 12ms</span>
+          </div>
+          <div className="sb-dp-diff-body">
+            <div className="sb-dp-diff-line sb-dp-diff-del">
+              <span className="sb-dp-diff-sign">−</span>
+              <span className="sb-c-tag">&lt;Badge</span>{" "}
+              <span className="sb-c-var">variant</span>
+              <span className="sb-c-punc">=</span>
+              <span className="sb-c-str">"default"</span>
+              <span className="sb-c-tag">&gt;</span>
+              <span className="sb-c-punc">Economy</span>
+            </div>
+            <div className="sb-dp-diff-line sb-dp-diff-add">
+              <span className="sb-dp-diff-sign">+</span>
+              <span className="sb-c-tag">&lt;Badge</span>{" "}
+              <span className="sb-c-var">variant</span>
+              <span className="sb-c-punc">=</span>
+              <span className="sb-c-str">"highlight"</span>
+              <span className="sb-c-tag">&gt;</span>
+              <span className="sb-c-punc">Best deal</span>
+            </div>
+            <div className="sb-dp-diff-line sb-dp-diff-ctx">
+              <span className="sb-dp-diff-sign"> </span>
+              <span className="sb-c-tag">&lt;Price</span>{" "}
+              <span className="sb-c-var">value</span>
+              <span className="sb-c-punc">=</span>
+              <span className="sb-c-str">"$891"</span>{" "}
+              <span className="sb-c-tag">/&gt;</span>
+            </div>
           </div>
         </div>
-        <div className="sb-dp-code">
-          <div>
-            <span className="sb-c-com">// edit & save</span>
-          </div>
-          <div>
-            <span className="sb-c-kw">const</span>{" "}
-            <span className="sb-c-var">price</span> ={" "}
-            <span className="sb-c-str">"$891"</span>
-            <span className="sb-dp-caret">|</span>
-          </div>
-        </div>
+        <div className="sb-dp-diff-arrow">↓</div>
         <div className="sb-dp-widget">
           <div className="sb-dp-widget-row">
-            <span>Paris → Tokyo</span>
+            <span className="sb-dp-diff-updated">Best deal</span>
             <strong>$891</strong>
           </div>
           <div className="sb-dp-widget-row sub">
@@ -94,41 +112,93 @@ function DevPanel({ hover }: { hover: string | null }) {
       <div
         className={`sb-devpanel-card sb-dp-emu ${hover === "emulator" ? "is-on" : ""}`}
       >
-        <div className="sb-dp-emu-row">
-          <div className="sb-dp-surface">
-            <div className="sb-dp-surface-h">ChatGPT</div>
-            <div className="sb-dp-surface-body">
-              <div className="sb-dp-msg">search_flights Paris → Tokyo</div>
-              <div className="sb-dp-card">
-                <div className="sb-dp-card-r">
-                  <span>AF 276</span>
-                  <strong>$891</strong>
+        {/* URL bar */}
+        <div className="sb-dp-dt-urlbar">
+          <Icon name="globe" size={9} />
+          <span>localhost:3000</span>
+          <span className="sb-dp-dt-urlbar-sep">·</span>
+          <span className="sb-dp-dt-urlbar-title">Skybridge DevTools</span>
+        </div>
+
+        {/* DevTools chrome */}
+        <div className="sb-dp-dt-chrome">
+          <div className="sb-dp-dt-brand">
+            <span className="sb-dp-dt-logo">▲</span>
+            <span className="sb-dp-dt-name">my-app</span>
+            <span className="sb-dp-dt-ver">0.0.1</span>
+          </div>
+          <div className="sb-dp-dt-tabs">
+            <span className="sb-dp-dt-tab">Tunnel</span>
+            <span className="sb-dp-dt-tab">Playground</span>
+            <span className="sb-dp-dt-tab">Audit</span>
+          </div>
+        </div>
+
+        {/* Body: sidebar + output */}
+        <div className="sb-dp-dt-body">
+          <div className="sb-dp-dt-side">
+            <div className="sb-dp-dt-side-h">Tools</div>
+            <div className="sb-dp-dt-tool">
+              <span className="sb-dp-dt-run">▶</span> search_flights
+            </div>
+            <button className="sb-dp-dt-run-btn">Run</button>
+          </div>
+          <div className="sb-dp-dt-output">
+            <div className="sb-dp-dt-output-h">Tool output</div>
+            <div className="sb-dp-dt-json">
+              <span className="sb-c-punc">{"{"}</span>
+              {[
+                ["flight",   <span className="sb-c-str">"AF 276"</span>,   true],
+                ["from",     <span className="sb-c-str">"CDG"</span>,       true],
+                ["to",       <span className="sb-c-str">"HND"</span>,       true],
+                ["dep",      <span className="sb-c-str">"10:25"</span>,     true],
+                ["arr",      <span className="sb-c-str">"06:40+1"</span>,   true],
+                ["stops",    <span className="sb-c-num">0</span>,           true],
+                ["price",    <span className="sb-c-str">"$891"</span>,      false],
+              ].map(([key, val, comma]) => (
+                <div className="sb-dp-dt-json-line" key={key as string}>
+                  <span className="sb-c-var">"{key as string}"</span>
+                  <span className="sb-c-punc">: </span>
+                  {val as React.ReactNode}
+                  {comma && <span className="sb-c-punc">,</span>}
                 </div>
-                <div className="sb-dp-card-r sub">
-                  <span>Nonstop</span>
-                  <span>11h 15m</span>
-                </div>
-              </div>
+              ))}
+              <span className="sb-c-punc">{"}"}</span>
             </div>
           </div>
-          <div className="sb-dp-surface dark">
-            <div className="sb-dp-surface-h">Claude</div>
-            <div className="sb-dp-surface-body">
-              <div className="sb-dp-msg">search_flights Paris → Tokyo</div>
-              <div className="sb-dp-card">
-                <div className="sb-dp-card-r">
-                  <span>AF 276</span>
+        </div>
+
+        {/* Preview area — cycles through inline / pip / mobile */}
+        <div className="sb-dp-dt-preview">
+          <div className="sb-dp-dt-controls">
+            <span className="sb-dp-dt-ctrl sb-dp-dt-mode sb-dp-dt-mode-inline">inline</span>
+            <span className="sb-dp-dt-ctrl sb-dp-dt-mode sb-dp-dt-mode-pip">pip</span>
+            <span className="sb-dp-dt-ctrl sb-dp-dt-mode sb-dp-dt-mode-mobile">mobile</span>
+            <span className="sb-dp-dt-ctrl-sep" aria-hidden>·</span>
+            <span className="sb-dp-dt-theme-ind sb-dp-dt-theme-dark">☾ dark</span>
+            <span className="sb-dp-dt-theme-ind sb-dp-dt-theme-light">☼ light</span>
+          </div>
+          <div className="sb-dp-dt-stage">
+            <div className="sb-dp-dt-widget-wrap">
+              {/* Full widget — inline & mobile */}
+              <div className="sb-dp-dt-flight">
+                <div className="sb-dp-dt-flight-route">
+                  Paris <span className="sb-c-punc">→</span> Tokyo
+                </div>
+                <div className="sb-dp-dt-flight-row">
+                  <span>AF 276 · Nonstop · 11h 15m</span>
                   <strong>$891</strong>
                 </div>
-                <div className="sb-dp-card-r sub">
-                  <span>Nonstop</span>
-                  <span>11h 15m</span>
-                </div>
+                <button className="sb-dp-dt-flight-book">Book AF 276</button>
+              </div>
+              {/* Compact widget — pip */}
+              <div className="sb-dp-dt-flight-pip">
+                <span>AF 276</span>
+                <strong>$891</strong>
               </div>
             </div>
           </div>
         </div>
-        <div className="sb-dp-emu-foot">Same source · two hosts · live</div>
       </div>
 
       {/* Tunnel */}
@@ -174,13 +244,15 @@ function DevPanel({ hover }: { hover: string | null }) {
       <div
         className={`sb-devpanel-card sb-dp-aud ${hover === "audit" ? "is-on" : ""}`}
       >
+        {/* key forces remount → CSS animation restarts from 0 on every new hover */}
+        <div key={auditKey} style={{ display: "contents" }}>
         <div className="sb-dp-aud-summary">
           <div className="sb-dp-aud-ring" aria-hidden>
             <svg viewBox="0 0 44 44" width="68" height="68">
               <defs>
                 <linearGradient id="sbAuditRing" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#f22b79" />
-                  <stop offset="100%" stopColor="#89F0EC" />
+                  <stop offset="0%" stopColor="var(--sb-lime)" />
+                  <stop offset="100%" stopColor="var(--sb-accent)" />
                 </linearGradient>
               </defs>
               <circle
@@ -192,14 +264,13 @@ function DevPanel({ hover }: { hover: string | null }) {
                 strokeWidth="3"
               />
               <circle
+                className="sb-dp-aud-ring-arc"
                 cx="22"
                 cy="22"
                 r="19"
                 fill="none"
                 stroke="url(#sbAuditRing)"
                 strokeWidth="3"
-                strokeDasharray={`${(19 / 21) * 2 * Math.PI * 19} ${2 * Math.PI * 19}`}
-                strokeDashoffset={`${0.25 * 2 * Math.PI * 19}`}
                 strokeLinecap="round"
                 transform="rotate(-90 22 22)"
               />
@@ -263,6 +334,7 @@ function DevPanel({ hover }: { hover: string | null }) {
             ],
           }}
         />
+        </div>{/* end keyed remount wrapper */}
       </div>
     </div>
   );
@@ -275,7 +347,7 @@ const VALUES: CodeValue[] = [
     key: "hmr",
     title: "Hot module reload",
     description:
-      "Edit a tool or widget and see the change in your MCP Client instantly. Works with Claude, ChatGPT and the local emulator — no restarts, no redeploys.",
+      "Edit a tool or widget and see the change in your MCP client instantly. Works with Claude, ChatGPT and the local emulator with no restarts and no redeploys needed.",
   },
   {
     key: "emulator",
@@ -287,11 +359,11 @@ const VALUES: CodeValue[] = [
     key: "tunnel",
     title: "Public tunnel",
     description:
-      "One command exposes your dev server with a stable HTTPS URL — test on Claude, ChatGPT and any MCP Client, from any device including mobile.",
+      "One command exposes your dev server with a stable HTTPS URL. Test on Claude, ChatGPT and any MCP Client, from any device, including mobile.",
   },
   {
     key: "audit",
-    title: "Audit your server",
+    title: "Server audit",
     description:
       "Test your MCP App against Claude and ChatGPT guidelines to see if it’s ready to submit, and hand findings straight to your coding agent to fix.",
   },
@@ -299,10 +371,11 @@ const VALUES: CodeValue[] = [
 
 export function DevToolsSection() {
   const [hover, setHover] = useState<string | null>(null);
+  const [auditKey, setAuditKey] = useState(0);
   return (
     <section className="sb-section" id="integration">
       <div className="sb-wrap">
-        <div className="sb-section-header" style={{ width: "700px" }}>
+        <div className="sb-section-header" style={{ maxWidth: "700px" }}>
           <div className="sb-section-eyebrow">DevTools</div>
           <h2 className="sb-section-title">
             A local dev environment you will{" "}
@@ -316,7 +389,7 @@ export function DevToolsSection() {
         </div>
         <div className="sb-devtools-grid" data-hover={hover || ""}>
           <div className="sb-devtools-shot">
-            <DevPanel hover={hover} />
+            <DevPanel hover={hover} auditKey={auditKey} />
             <div className="sb-devtools-window sb-devtools-window-base">
               <div className="sb-devtools-chrome">
                 <TerminalDots />
@@ -414,7 +487,10 @@ export function DevToolsSection() {
               <div
                 className={`sb-devtools-value ${hover === value.key ? "is-hover" : ""}`}
                 key={value.title}
-                onMouseEnter={() => setHover(value.key)}
+                onMouseEnter={() => {
+                  setHover(value.key);
+                  if (value.key === "audit") setAuditKey((k) => k + 1);
+                }}
                 onMouseLeave={() =>
                   setHover((cur) => (cur === value.key ? null : cur))
                 }
