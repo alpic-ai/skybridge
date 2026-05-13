@@ -93,6 +93,11 @@ export class McpAppAdaptor implements Adaptor {
     return app.requestDisplayMode({ mode });
   };
 
+  public requestClose = async (): Promise<void> => {
+    const app = await McpAppBridge.getInstance().getApp();
+    await app.requestTeardown();
+  };
+
   public sendFollowUpMessage = async (
     prompt: string,
     _options?: SendFollowUpMessageOptions,

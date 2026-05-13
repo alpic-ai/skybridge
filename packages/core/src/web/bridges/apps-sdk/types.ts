@@ -89,6 +89,9 @@ export type AppsSdkMethods<WS extends AppsSdkWidgetState = AppsSdkWidgetState> =
       mode: RequestDisplayMode;
     }>;
 
+    /** Requests the host to close (dismiss) the widget. */
+    requestClose: () => Promise<void>;
+
     /**
      * Sets the widget state.
      * This state is persisted across widget renders.

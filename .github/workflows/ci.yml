@@ -27,6 +27,8 @@ jobs:
             command: pnpm run --if-present --filter @skybridge/docs build
           - name: Docs Lint
             command: pnpm run --if-present --filter @skybridge/docs lint
+          - name: Landing Build
+            command: pnpm run --if-present --filter @skybridge/landing build
     steps:
       - uses: actions/checkout@v6
 

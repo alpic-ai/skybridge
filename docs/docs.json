@@ -122,6 +122,7 @@
               "api-reference/use-send-follow-up-message",
               "api-reference/use-view-state",
               "api-reference/use-request-modal",
+              "api-reference/use-request-close",
               "api-reference/use-files"
             ]
           },

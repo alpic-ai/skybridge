@@ -1,9 +1,14 @@
 packages:
   - "docs"
   - "infrastructure"
+  - "landing"
   - "packages/*"
   - "packages/create-skybridge/template"
   - "examples/*"
 
 allowBuilds:
   esbuild: true
+
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
