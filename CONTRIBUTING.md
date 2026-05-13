@@ -2,6 +2,8 @@
 
 Thank you for your interest in contributing to Skybridge! Every contribution helps make this framework better for everyone building ChatGPT and MCP Apps.
 
+New here? Please drop by our [Discord](https://discord.com/invite/gNAazGueab) and introduce yourself before opening your first PR — it helps us know who you are and lets us point you toward good first issues.
+
 ## Getting Started
 
 ### Prerequisites
@@ -54,6 +56,23 @@ Start a [discussion](https://github.com/alpic-ai/skybridge/discussions) to share
 6. Push and open a PR
 
 Keep PRs focused on a single change. For larger features, consider opening an issue first to discuss the approach.
+
+#### Greptile review
+
+Every PR is reviewed by Greptile. If the check does not return 5/5, address each comment: either fix the issue or reply on the comment explaining why you disagree. Unanswered Greptile feedback will block merge.
+
+#### Cross-cutting concerns
+
+When your PR changes the public API of `packages/core` (exports from `src/server/index.ts`, `src/web/index.ts`, or the CLI commands in `src/commands/`), it must also update:
+
+1. `skills/` references (notably `chatgpt-app-builder`)
+2. `docs/` — especially `api-reference/` and `guides/`
+
+Reviewers will block PRs that touch the public API without these updates.
+
+#### On AI-generated contributions
+
+Using AI tools to help write code is fine — using them to flood the repo with unreviewed output is not. AI-slop PRs (low-effort, untested, hallucinated APIs, generated boilerplate with no human judgment behind it) will be closed. If you used an AI assistant, you are still responsible for understanding every line, running the tests, and standing behind the change.
 
 ### Documentation
 
