@@ -1,8 +1,8 @@
 # Skybridge
 
 <p align="center">
-  <a href="https://skybridge.tech">
-    <img alt="Skybridge - React framework for ChatGPT Apps and MCP Apps" src="docs/images/skybridge-readme-banner-new.png" width="100%" />
+  <a href="https://docs.skybridge.tech">
+    <img alt="Skybridge - The full-stack React framework for MCP Apps and MCP Servers" src="docs/images/skybridge-readme-banner.png" width="100%" />
   </a>
 </p>
 
@@ -25,7 +25,7 @@
 
 ## About Skybridge
 
-Skybridge helps developers build type-safe ChatGPT Apps and MCP Apps with React views, MCP servers, local devtools, and one API across the ChatGPT Apps SDK and MCP Apps runtimes.
+Skybridge helps developers build type-safe MCP Apps for Claude, ChatGPT, Gemini and other UI enabled MCP Clients, with a complete set of devtools designed for both humans and agents.
 
 MCP Apps extend the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) with **rich, interactive UI views** rendered from MCP servers. Conversational apps need seamless interaction between the user, the UI, and the model. This means new UX patterns, developer tooling, and abstractions. This is why we built Skybridge.
 
@@ -41,40 +41,15 @@ Features include:
 These companies chose Skybridge to deploy their apps on ChatGPT and Claude stores: 
 
 <p align="center">
-  <a href="https://www.datadoghq.com">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/datadog-dark.svg">
-      <img src="docs/images/user-logos/datadog-light.svg" alt="Datadog" height="24">
-    </picture>
-  </a>
+  <a href="https://www.datadoghq.com"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/datadog-dark.svg"><img src="docs/images/user-logos/datadog-light.svg" alt="Datadog" height="24"></picture></a>
   &nbsp;&nbsp;
-  <a href="https://bitmovin.com">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/bitmovin-dark.svg">
-      <img src="docs/images/user-logos/bitmovin-light.svg" alt="Bitmovin" height="22">
-    </picture>
-  </a>
+  <a href="https://bitmovin.com"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/bitmovin-dark.svg"><img src="docs/images/user-logos/bitmovin-light.svg" alt="Bitmovin" height="22"></picture></a>
   &nbsp;&nbsp;
-  <a href="https://www.evaneos.com">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/evaneos-dark.svg">
-      <img src="docs/images/user-logos/evaneos-light.svg" alt="Evaneos" height="18">
-    </picture>
-  </a>
+  <a href="https://www.evaneos.com"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/evaneos-dark.svg"><img src="docs/images/user-logos/evaneos-light.svg" alt="Evaneos" height="18"></picture></a>
   &nbsp;&nbsp;
-  <a href="https://www.touchstream.media">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/touchstream-dark.svg">
-      <img src="docs/images/user-logos/touchstream-light.svg" alt="Touchstream" height="24">
-    </picture>
-  </a>
+  <a href="https://www.touchstream.media"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/touchstream-dark.svg"><img src="docs/images/user-logos/touchstream-light.svg" alt="Touchstream" height="24"></picture></a>
   &nbsp;&nbsp;
-  <a href="https://www.cottages.com">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/cottages-dark.svg">
-      <img src="docs/images/user-logos/cottages-light.svg" alt="Cottages.com" height="24">
-    </picture>
-  </a>
+  <a href="https://www.cottages.com"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/cottages-dark.svg"><img src="docs/images/user-logos/cottages-light.svg" alt="Cottages.com" height="24"></picture></a>
 </p>
 
 ## Get started
@@ -88,7 +63,7 @@ npx skills add alpic-ai/skybridge -s skybridge
 Once installed, if you ask your agent "_what skills do you have?_", it should mention the skybridge skill. Then, you can ask it to:
 
 - _Create a new MCP App_
-- _Migrate my MCP Server to Skybridge framework_
+- _Migrate my MCP Server to the Skybridge framework_
 - _Add a new view to my MCP App_ 
 
 **For humans**
@@ -104,13 +79,13 @@ For full install instructions, read the [**Quickstart section**](https://docs.sk
 The [Skybridge documentation](https://docs.skybridge.tech) covers the full lifecycle of building MCP Apps:
 
 - [Fundamentals](https://docs.skybridge.tech/fundamentals): understand MCP Apps, ChatGPT Apps, and how Skybridge bridges both runtimes.
-- [Core concepts](https://docs.skybridge.tech/concepts): learn data flow, LLM context sync, type safety, and fast local iteration.
+- [Core concepts](https://docs.skybridge.tech/concepts): learn about server <> model <> UI data flow, LLM context sync, type safety, and instant local iteration with our devtools.
 - [Guides](https://docs.skybridge.tech/guides/fetching-data): build real app behavior with tools, views, state, and model communication.
-- [API Reference](https://docs.skybridge.tech/api-reference): browse server APIs, React hooks, CLI commands, and runtime compatibility.
+- [API Reference](https://docs.skybridge.tech/api-reference): browse our MCP server APIs, React hooks, CLI commands, and runtime compatibility.
 
 ## Deploy
 
-Deploy Skybridge apps instantly on [Alpic](https://alpic.ai) to get scalable hosting, MCP Analytics, permanent tunnel, MCP auditing and app stores submission help, or self-host on any Node.js-compatible platform.
+Deploy Skybridge apps instantly on [Alpic](https://alpic.ai) to get scalable hosting, MCP analytics, permanent tunnelling, MCP auditing and app stores submission help, or self-host on any Node.js-compatible platform.
 
 Read the [deployment guide](https://docs.skybridge.tech/quickstart/deploy) for the full production path.
 
