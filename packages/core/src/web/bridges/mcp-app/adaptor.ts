@@ -7,6 +7,7 @@ import type {
   OpenExternalOptions,
   RequestDisplayMode,
   RequestModalOptions,
+  RequestSizeOptions,
   SendFollowUpMessageOptions,
   SetViewStateAction,
 } from "../types.js";
@@ -96,6 +97,11 @@ export class McpAppAdaptor implements Adaptor {
   public requestClose = async (): Promise<void> => {
     const app = await McpAppBridge.getInstance().getApp();
     await app.requestTeardown();
+  };
+
+  public requestSize = async (size: RequestSizeOptions): Promise<void> => {
+    const app = await McpAppBridge.getInstance().getApp();
+    await app.sendSizeChanged(size);
   };
 
   public sendFollowUpMessage = async (
