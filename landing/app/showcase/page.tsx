@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { InstallRow } from "../components/hero";
 import { Icon } from "../components/icons";
-import { ChatGPTFrame } from "../components/showcase/chatgpt-frame";
-import { hostAccent, SHOWCASE } from "../components/showcase/data";
+import { SHOWCASE } from "../components/showcase/data";
+import { ShowcaseCard } from "../components/showcase/showcase-card";
 import { SiteNav } from "../components/site-nav";
 import { SiteFooter } from "../components/trust-final";
 
@@ -48,19 +47,7 @@ export default function ShowcaseListPage() {
         <div style={{ marginBottom: 56 }}>
           <div className="sxA-grid">
             {apps.map((app, index) => (
-              <Link
-                key={app.id}
-                href={`/showcase/${app.slug}`}
-                className="sxA-card"
-                style={
-                  {
-                    "--card-accent": hostAccent(app.host),
-                  } as React.CSSProperties
-                }
-              >
-                <div className="sxA-thumb">
-                  <ChatGPTFrame app={app} compact priority={index === 0} />
-                </div>
+              <ShowcaseCard key={app.id} app={app} index={index}>
                 <div className="sxA-meta">
                   <div className="sxA-row">
                     <span className="sxA-cat-dot"></span>
@@ -83,7 +70,7 @@ export default function ShowcaseListPage() {
                     </span>
                   </div>
                 </div>
-              </Link>
+              </ShowcaseCard>
             ))}
           </div>
         </div>
