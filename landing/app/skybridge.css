@@ -987,24 +987,138 @@ body {
   }
 }
 
-/* Chat window — wraps the conversation in browser-like chrome so it pairs
-   visually with the code-pane on the left. Subtle surface tint, matching
-   border-radius / border, with a faux URL pill. */
+/* Chat window — ChatGPT-style with sidebar */
 .sb-chat-window {
   position: relative;
   border: 1px solid var(--sb-border);
   border-radius: 14px;
-  background:
-    radial-gradient(
-      ellipse 80% 40% at 50% 0%,
-      rgba(137, 240, 236, 0.06),
-      transparent 70%
-    ),
-    var(--sb-surface);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   overflow: hidden;
   min-height: 560px;
+}
+
+/* Sidebar */
+.sb-gpt-sidebar {
+  width: 52px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 0 12px;
+  gap: 10px;
+  background: var(--sb-bg);
+  border-right: 1px solid var(--sb-border);
+}
+.sb-gpt-logo {
+  color: var(--sb-ink);
+  margin-bottom: 4px;
+}
+.sb-gpt-sidebar-icons {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sb-gpt-icon-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: var(--sb-ink-mute);
+}
+.sb-gpt-sidebar-hist {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 8px 10px 0;
+  width: 100%;
+  margin-top: auto;
+}
+.sb-gpt-hist-line {
+  display: block;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.06);
+}
+.sb-gpt-hist-active {
+  background: rgba(255,255,255,0.14);
+}
+
+/* Main area */
+.sb-gpt-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(137,240,236,0.05), transparent 70%),
+    var(--sb-surface);
+}
+
+/* Top bar */
+.sb-gpt-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 44px;
+  border-bottom: 1px solid var(--sb-border);
+  flex: none;
+}
+.sb-gpt-model-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--sb-ink);
+  font: 600 15px / 1 var(--font-body);
+  letter-spacing: 0;
+  cursor: default;
+  padding: 0;
+}
+.sb-gpt-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sb-gpt-share-btn {
+  font: 500 12px / 1 var(--font-body);
+  color: var(--sb-ink-soft);
+  border: 1px solid var(--sb-border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  letter-spacing: 0;
+}
+.sb-gpt-user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #0e9f8e;
+  color: #fff;
+  font: 600 12px / 28px var(--font-body);
+  text-align: center;
+  flex: none;
+  letter-spacing: 0;
+}
+
+/* Input bar */
+.sb-gpt-inputbar {
+  flex: none;
+  padding: 10px 16px 14px;
+  border-top: 1px solid var(--sb-border);
+}
+.sb-gpt-input-placeholder {
+  display: block;
+  padding: 10px 16px;
+  border-radius: 24px;
+  border: 1px solid var(--sb-border);
+  background: rgba(255,255,255,0.03);
+  font: 400 14px / 1 var(--font-body);
+  color: var(--sb-ink-faint);
+  letter-spacing: 0;
 }
 .sb-chat-chrome {
   display: flex;
@@ -1072,8 +1186,8 @@ body {
   border-radius: 1px;
   background: var(--sb-ink-mute);
 }
-.sb-chat-window .sb-chat {
-  padding: 28px 24px 32px;
+.sb-gpt-main .sb-chat {
+  padding: 20px 20px 24px;
   margin: 0;
   flex: 1;
   overflow: auto;
@@ -1992,8 +2106,7 @@ body {
   display: grid;
   grid-template-columns: 112px 1fr;
   border-bottom: 1px solid var(--sb-border);
-  flex: 1;
-  min-height: 0;
+  flex: none;
 }
 .sb-dp-dt-side {
   border-right: 1px solid var(--sb-border);
@@ -2055,8 +2168,10 @@ body {
 
 /* Preview area */
 .sb-dp-dt-preview {
-  flex: none;
-  padding: 8px 12px 10px;
+  flex: 1;
+  padding: 8px 12px 12px;
+  display: flex;
+  flex-direction: column;
 }
 .sb-dp-dt-controls {
   display: flex;
@@ -2076,11 +2191,11 @@ body {
   border-color: rgba(255,255,255,0.15);
 }
 
-/* Preview stage — widget resizes to show inline / pip / mobile */
+/* Preview stage — widget resizes to show inline / mobile */
 .sb-dp-dt-stage {
   display: flex;
   align-items: flex-start;
-  min-height: 48px;
+  flex: 1;
 }
 .sb-dp-dt-widget-wrap {
   position: relative;
@@ -2132,6 +2247,13 @@ body {
   margin: 0 1px;
   align-self: center;
 }
+.sb-dp-dt-theme-stack {
+  display: grid;
+  place-items: start;
+}
+.sb-dp-dt-theme-stack .sb-dp-dt-theme-ind {
+  grid-area: 1 / 1;
+}
 .sb-dp-dt-theme-ind {
   font: 500 10px / 1 var(--font-body);
   color: var(--sb-ink-mute);
@@ -2158,120 +2280,95 @@ body {
   color: var(--sb-accent);
 }
 
-/* Cycle 8s: inline dark → pip dark → mobile dark → inline light → mobile light */
+/* Cycle 10s: inline dark → mobile dark → inline light → mobile light */
 @keyframes sb-emu-width {
-  0%,  18% { width: 100%; }
-  24%, 36% { width: 38%;  }
-  42%, 56% { width: 58%;  }
-  62%, 75% { width: 100%; }
-  79%, 88% { width: 58%;  }
-  92%, 100%{ width: 100%; }
-}
-@keyframes sb-emu-full-opacity {
-  0%,  20% { opacity: 1; }
-  26%, 38% { opacity: 0; }
-  44%, 88% { opacity: 1; }
-  92%, 100%{ opacity: 1; }
-}
-@keyframes sb-emu-pip-opacity {
-  0%,  22% { opacity: 0; }
-  28%, 38% { opacity: 1; }
-  44%, 100%{ opacity: 0; }
+  0%,  22% { width: 100%; }
+  28%, 44% { width: 58%;  }
+  50%, 66% { width: 100%; }
+  72%, 84% { width: 58%;  }
+  90%, 100%{ width: 100%; }
 }
 
 /* Active mode pill highlight */
 @keyframes sb-emu-mode-inline {
-  0%,  18% { color: var(--sb-ink); border-color: rgba(255,255,255,0.2); }
-  24%, 58% { color: var(--sb-ink-mute); border-color: var(--sb-border); }
-  62%, 75% { color: var(--sb-ink); border-color: rgba(255,255,255,0.2); }
-  80%, 100%{ color: var(--sb-ink-mute); border-color: var(--sb-border); }
-}
-@keyframes sb-emu-mode-pip {
-  0%,  22% { color: var(--sb-ink-mute); border-color: var(--sb-border); }
-  28%, 38% { color: var(--sb-ink); border-color: rgba(255,255,255,0.2); }
-  44%, 100%{ color: var(--sb-ink-mute); border-color: var(--sb-border); }
+  0%,  22% { color: var(--sb-ink); border-color: rgba(255,255,255,0.2); }
+  28%, 44% { color: var(--sb-ink-mute); border-color: var(--sb-border); }
+  50%, 66% { color: var(--sb-ink); border-color: rgba(255,255,255,0.2); }
+  72%, 84% { color: var(--sb-ink-mute); border-color: var(--sb-border); }
+  90%, 100%{ color: var(--sb-ink); border-color: rgba(255,255,255,0.2); }
 }
 @keyframes sb-emu-mode-mobile {
-  0%,  40% { color: var(--sb-ink-mute); border-color: var(--sb-border); }
-  44%, 56% { color: var(--sb-ink); border-color: rgba(255,255,255,0.2); }
-  62%, 77% { color: var(--sb-ink-mute); border-color: var(--sb-border); }
-  79%, 88% { color: var(--sb-ink); border-color: rgba(255,255,255,0.2); }
-  92%, 100%{ color: var(--sb-ink-mute); border-color: var(--sb-border); }
+  0%,  22% { color: var(--sb-ink-mute); border-color: var(--sb-border); }
+  28%, 44% { color: var(--sb-ink); border-color: rgba(255,255,255,0.2); }
+  50%, 66% { color: var(--sb-ink-mute); border-color: var(--sb-border); }
+  72%, 84% { color: var(--sb-ink); border-color: rgba(255,255,255,0.2); }
+  90%, 100%{ color: var(--sb-ink-mute); border-color: var(--sb-border); }
 }
 
-/* Theme toggle: dark → light phases */
+/* Theme toggle: dark (0-44%) → light (50-84%) → dark (90-100%) */
 @keyframes sb-emu-widget-theme {
-  0%,  58% { background: var(--sb-surface-2); border-color: var(--sb-border); }
-  62%, 88% { background: #eef6f6; border-color: #c2d8d8; }
-  92%, 100%{ background: var(--sb-surface-2); border-color: var(--sb-border); }
+  0%,  44% { background: var(--sb-surface-2); border-color: var(--sb-border); }
+  50%, 84% { background: #eef6f6; border-color: #c2d8d8; }
+  90%, 100%{ background: var(--sb-surface-2); border-color: var(--sb-border); }
 }
 @keyframes sb-emu-route-color {
-  0%,  58% { color: var(--sb-ink); }
-  62%, 88% { color: #0d1f1f; }
-  92%, 100%{ color: var(--sb-ink); }
+  0%,  44% { color: var(--sb-ink); }
+  50%, 84% { color: #0d1f1f; }
+  90%, 100%{ color: var(--sb-ink); }
 }
 @keyframes sb-emu-subtext-color {
-  0%,  58% { color: var(--sb-ink-soft); }
-  62%, 88% { color: #3d5a5a; }
-  92%, 100%{ color: var(--sb-ink-soft); }
+  0%,  44% { color: var(--sb-ink-soft); }
+  50%, 84% { color: #3d5a5a; }
+  90%, 100%{ color: var(--sb-ink-soft); }
 }
 @keyframes sb-emu-price-color {
-  0%,  58% { color: var(--sb-accent); }
-  62%, 88% { color: #0a7070; }
-  92%, 100%{ color: var(--sb-accent); }
+  0%,  44% { color: var(--sb-accent); }
+  50%, 84% { color: #0a7070; }
+  90%, 100%{ color: var(--sb-accent); }
 }
 @keyframes sb-emu-book-color {
-  0%,  58% { background: var(--sb-accent); color: #061614; }
-  62%, 88% { background: #0a7070; color: #e8f8f8; }
-  92%, 100%{ background: var(--sb-accent); color: #061614; }
+  0%,  44% { background: var(--sb-accent); color: #061614; }
+  50%, 84% { background: #0a7070; color: #e8f8f8; }
+  90%, 100%{ background: var(--sb-accent); color: #061614; }
 }
 @keyframes sb-emu-theme-dark-ind {
-  0%,  58% { opacity: 1; }
-  64%, 88% { opacity: 0; }
-  93%, 100%{ opacity: 1; }
+  0%,  44% { opacity: 1; }
+  50%, 84% { opacity: 0; }
+  90%, 100%{ opacity: 1; }
 }
 @keyframes sb-emu-theme-light-ind {
-  0%,  60% { opacity: 0; }
-  64%, 87% { opacity: 1; }
-  92%, 100%{ opacity: 0; }
+  0%,  44% { opacity: 0; }
+  50%, 84% { opacity: 1; }
+  90%, 100%{ opacity: 0; }
 }
 
 .sb-devpanel-card.sb-dp-emu.is-on .sb-dp-dt-widget-wrap {
-  animation: sb-emu-width 8s ease-in-out infinite,
-             sb-emu-widget-theme 8s ease-in-out infinite;
-}
-.sb-devpanel-card.sb-dp-emu.is-on .sb-dp-dt-flight {
-  animation: sb-emu-full-opacity 8s ease-in-out infinite;
-}
-.sb-devpanel-card.sb-dp-emu.is-on .sb-dp-dt-flight-pip {
-  animation: sb-emu-pip-opacity 8s ease-in-out infinite;
+  animation: sb-emu-width 10s ease-in-out infinite,
+             sb-emu-widget-theme 10s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-emu.is-on .sb-dp-dt-mode-inline {
-  animation: sb-emu-mode-inline 8s ease-in-out infinite;
-}
-.sb-devpanel-card.sb-dp-emu.is-on .sb-dp-dt-mode-pip {
-  animation: sb-emu-mode-pip 8s ease-in-out infinite;
+  animation: sb-emu-mode-inline 10s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-emu.is-on .sb-dp-dt-mode-mobile {
-  animation: sb-emu-mode-mobile 8s ease-in-out infinite;
+  animation: sb-emu-mode-mobile 10s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-emu.is-on .sb-dp-dt-flight-route {
-  animation: sb-emu-route-color 8s ease-in-out infinite;
+  animation: sb-emu-route-color 10s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-emu.is-on .sb-dp-dt-flight-row > span {
-  animation: sb-emu-subtext-color 8s ease-in-out infinite;
+  animation: sb-emu-subtext-color 10s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-emu.is-on .sb-dp-dt-flight-row strong {
-  animation: sb-emu-price-color 8s ease-in-out infinite;
+  animation: sb-emu-price-color 10s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-emu.is-on .sb-dp-dt-flight-book {
-  animation: sb-emu-book-color 8s ease-in-out infinite;
+  animation: sb-emu-book-color 10s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-emu.is-on .sb-dp-dt-theme-dark {
-  animation: sb-emu-theme-dark-ind 8s ease-in-out infinite;
+  animation: sb-emu-theme-dark-ind 10s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-emu.is-on .sb-dp-dt-theme-light {
-  animation: sb-emu-theme-light-ind 8s ease-in-out infinite;
+  animation: sb-emu-theme-light-ind 10s ease-in-out infinite;
 }
 
 /* --- Tunnel --- */
@@ -2571,34 +2668,35 @@ body {
   stroke-dashoffset: 29.85;
 }
 
+/* Ring fills slowly from empty */
 @keyframes sb-aud-ring {
-  0%   { stroke-dasharray: 0 119.38;      stroke-dashoffset: 29.85; }
-  65%  { stroke-dasharray: 108.07 119.38; stroke-dashoffset: 29.85; }
-  100% { stroke-dasharray: 108.07 119.38; stroke-dashoffset: 29.85; }
+  from { stroke-dasharray: 0 119.38;      stroke-dashoffset: 29.85; }
+  to   { stroke-dasharray: 108.07 119.38; stroke-dashoffset: 29.85; }
 }
 
-@keyframes sb-aud-reveal {
-  0%, 42%  { opacity: 0; transform: translateY(4px); }
-  72%, 100% { opacity: 1; transform: translateY(0); }
+/* Elements slide up and fade in */
+@keyframes sb-aud-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
+/* 1. Ring fills over 2.5s */
 .sb-devpanel-card.sb-dp-aud.is-on .sb-dp-aud-ring-arc {
-  animation: sb-aud-ring 3s ease-out forwards;
+  animation: sb-aud-ring 2.5s ease-out forwards;
 }
+/* 2. Summary (ring + score text) appears immediately */
 .sb-devpanel-card.sb-dp-aud.is-on .sb-dp-aud-summary {
-  animation: sb-aud-reveal 3s ease-out forwards;
+  animation: sb-aud-in 0.6s ease-out forwards;
 }
+/* 3–5. Sections appear one after the other, once ring is done */
 .sb-devpanel-card.sb-dp-aud.is-on .sb-dp-aud-section:nth-child(2) {
-  animation: sb-aud-reveal 3s ease-out forwards;
-  animation-delay: 0.2s;
+  animation: sb-aud-in 0.7s ease-out 2.5s both;
 }
 .sb-devpanel-card.sb-dp-aud.is-on .sb-dp-aud-section:nth-child(3) {
-  animation: sb-aud-reveal 3s ease-out forwards;
-  animation-delay: 0.38s;
+  animation: sb-aud-in 0.7s ease-out 3.3s both;
 }
 .sb-devpanel-card.sb-dp-aud.is-on .sb-dp-aud-section:nth-child(4) {
-  animation: sb-aud-reveal 3s ease-out forwards;
-  animation-delay: 0.55s;
+  animation: sb-aud-in 0.7s ease-out 4.1s both;
 }
 
 /* ===== DevTools: value list padding + hover ===== */

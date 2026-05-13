@@ -97,7 +97,7 @@ export function SiteFooter() {
               className="sb-footer-logo"
             />
             <p>
-              An open-source project made with taste in Paris. © Alpic 2026.
+              An open-source project made with taste in Paris. © Alpic 2026
             </p>
           </div>
           <div>

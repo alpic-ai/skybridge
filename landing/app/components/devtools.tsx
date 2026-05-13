@@ -168,15 +168,16 @@ function DevPanel({ hover, auditKey }: { hover: string | null; auditKey: number 
           </div>
         </div>
 
-        {/* Preview area — cycles through inline / pip / mobile */}
+        {/* Preview area — cycles through inline / mobile */}
         <div className="sb-dp-dt-preview">
           <div className="sb-dp-dt-controls">
             <span className="sb-dp-dt-ctrl sb-dp-dt-mode sb-dp-dt-mode-inline">inline</span>
-            <span className="sb-dp-dt-ctrl sb-dp-dt-mode sb-dp-dt-mode-pip">pip</span>
             <span className="sb-dp-dt-ctrl sb-dp-dt-mode sb-dp-dt-mode-mobile">mobile</span>
             <span className="sb-dp-dt-ctrl-sep" aria-hidden>·</span>
-            <span className="sb-dp-dt-theme-ind sb-dp-dt-theme-dark">☾ dark</span>
-            <span className="sb-dp-dt-theme-ind sb-dp-dt-theme-light">☼ light</span>
+            <span className="sb-dp-dt-theme-stack">
+              <span className="sb-dp-dt-theme-ind sb-dp-dt-theme-dark">☾ dark</span>
+              <span className="sb-dp-dt-theme-ind sb-dp-dt-theme-light">☼ light</span>
+            </span>
           </div>
           <div className="sb-dp-dt-stage">
             <div className="sb-dp-dt-widget-wrap">
@@ -190,11 +191,6 @@ function DevPanel({ hover, auditKey }: { hover: string | null; auditKey: number 
                   <strong>$891</strong>
                 </div>
                 <button className="sb-dp-dt-flight-book">Book AF 276</button>
-              </div>
-              {/* Compact widget — pip */}
-              <div className="sb-dp-dt-flight-pip">
-                <span>AF 276</span>
-                <strong>$891</strong>
               </div>
             </div>
           </div>

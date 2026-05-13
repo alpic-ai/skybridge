@@ -19,7 +19,7 @@ const QUOTES: Quote[] = [
   },
   {
     quote:
-      "Skybridge gave us a single typed runtime for both server tools and React widgets — same TS types, hot-reload, and one deploy step into Claude and ChatGPT. It's the first MCP framework that actually feels production-grade.",
+      "Skybridge offered us a full environment to develop MCP apps quickly and easily. The dev tools saved us hours of iteration time and direct deploy to the Alpic platform was exactly what we needed.",
     author: "Stefan Lederer",
     role: "CEO · Bitmovin",
     photo: "/assets/people/stefan.webp",
