@@ -128,7 +128,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     host: "Claude",
     accent: "#008C79",
     icon: "/assets/showcase/icons/kiwi.webp",
-    img: "/assets/showcase/kiwiinline.png",
+    img: "/assets/showcase/kiwiinline.webp",
     previews: [
       {
         mode: "claude-inline",
@@ -136,11 +136,11 @@ export const SHOWCASE: ShowcaseApp[] = [
           user: "Find me a round-trip from Lisbon to Paris, Dec 3 to 10, two adults",
           assistant: "Searching Kiwi.com for the best options.",
         },
-        screenshot: "/assets/showcase/kiwiinline.png",
+        screenshot: "/assets/showcase/kiwiinline.webp",
       },
       {
         mode: "claude-fullscreen",
-        screenshot: "/assets/showcase/kiwifullscree.png",
+        screenshot: "/assets/showcase/kiwifullscree.webp",
       },
     ],
     chat: {

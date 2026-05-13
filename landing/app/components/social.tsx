@@ -49,7 +49,7 @@ export function SocialProofSection() {
       name: "Touchstream",
       src: "/assets/customer-logos/touchstream.webp",
       height: PNG_HEIGHT,
-      width: 230,
+      width: 229,
     },
     {
       kind: "img",
