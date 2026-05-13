@@ -150,40 +150,69 @@
         ]
       },
       {
-        "tab": "Showcase",
+        "tab": "Examples",
         "pages": [
-          "showcase",
+          "examples",
           {
-            "group": "Examples",
+            "group": "Basic",
             "pages": [
-              "showcase/generative-ui",
-              "showcase/capitals",
-              "showcase/flight-booking",
-              "showcase/ecommerce-carousel",
-              "showcase/everything",
-              "showcase/investigation-game",
-              "showcase/manifest-ui",
-              "showcase/productivity",
-              "showcase/times-up",
-              "showcase/magic-8-ball",
-              "showcase/auth-clerk",
-              "showcase/auth-workos",
-              "showcase/auth-stytch",
-              "showcase/auth-auth0"
+              "examples/magic-8-ball",
+              "examples/everything"
             ]
           },
           {
-            "group": "3rd Party Apps",
+            "group": "Use cases",
             "pages": [
-              "showcase/awaze",
-              "showcase/evaneos",
-              "showcase/lumo"
+              "examples/capitals",
+              "examples/flight-booking",
+              "examples/ecommerce-carousel",
+              "examples/investigation-game",
+              "examples/productivity",
+              "examples/times-up"
+            ]
+          },
+          {
+            "group": "Auth",
+            "pages": [
+              "examples/auth-clerk",
+              "examples/auth-workos",
+              "examples/auth-stytch",
+              "examples/auth-auth0"
+            ]
+          },
+          {
+            "group": "UI and Component libraries",
+            "pages": [
+              "examples/manifest-ui",
+              "examples/generative-ui"
             ]
           }
         ]
       }
     ]
   },
+  "redirects": [
+    {
+      "source": "/showcase",
+      "destination": "/examples"
+    },
+    {
+      "source": "/showcase/:slug*",
+      "destination": "/examples/:slug*"
+    },
+    {
+      "source": "/examples/awaze",
+      "destination": "https://skybridge.tech/showcase"
+    },
+    {
+      "source": "/examples/evaneos",
+      "destination": "https://skybridge.tech/showcase"
+    },
+    {
+      "source": "/examples/lumo",
+      "destination": "https://skybridge.tech/showcase"
+    }
+  ],
   "navbar": {
     "links": [
       {
