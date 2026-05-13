@@ -61,7 +61,17 @@ export class AppsSdkAdaptor implements Adaptor {
     name: string,
     args: ToolArgs,
   ): Promise<ToolResponse> => {
-    return window.openai.callTool<ToolArgs, ToolResponse>(name, args);
+    const response = await (
+      window.openai.callTool(name, args) as Promise<
+        CallToolResponse & { _meta?: CallToolResponse["meta"] }
+      >
+    );
+    return {
+      content: response.content,
+      structuredContent: response.structuredContent ?? {},
+      isError: response.isError ?? false,
+      meta: response._meta ?? response.meta ?? {},
+    } as ToolResponse;
   };
 
   public requestDisplayMode = (
