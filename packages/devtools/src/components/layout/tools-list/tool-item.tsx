@@ -64,7 +64,7 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     await callTool({ toolName: tool.name, args: formData });
   };
 
-  useKeyPress("shift.enter", () => {
+  useKeyPress("meta.enter", () => {
     if (!open) {
       return;
     }
@@ -79,15 +79,13 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
       <AccordionTrigger
         className={cn(
           "font-mono text-xs font-normal text-foreground",
-          "no-underline hover:bg-muted/40",
+          "no-underline data-[state=closed]:hover:bg-muted/40",
         )}
-      >
-        <div className="min-w-0 flex-1 text-left">{tool.name}</div>
-        {open && (
-          <div className="flex shrink-0 items-center">
+        action={
+          open ? (
             <Button
               disabled={isPending}
-              variant={open ? "primary" : "secondary"}
+              variant="primary"
               onClick={handleRun}
               icon={
                 isPending ? (
@@ -99,8 +97,10 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
             >
               Run
             </Button>
-          </div>
-        )}
+          ) : null
+        }
+      >
+        <div className="min-w-0 flex-1 text-left">{tool.name}</div>
       </AccordionTrigger>
       <AccordionContent className="px-3 pt-1 pb-3 text-foreground">
         <ToolBody
@@ -143,6 +143,11 @@ function ToolBody({
 
   return (
     <div className="space-y-3">
+      {tool.description && (
+        <div className="rounded-md border border-border bg-muted/40 px-2.5 py-2 text-xs text-muted-foreground/70">
+          {tool.description}
+        </div>
+      )}
       {hasInput && (
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)}>
           <div className="flex items-center justify-between gap-2">

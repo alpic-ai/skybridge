@@ -8,19 +8,17 @@
 
 ```
 my-app/
-├── server/src/
-│   ├── index.ts          # HTTP server with middlewares
-│   └── server.ts         # McpServer with tool and view registration
-├── web/src/
-│   ├── views/          # React components (filename = view name)
-│   │   └── search-flights.tsx
+├── src/
+│   ├── server.ts         # McpServer with tool + view registration
+│   ├── helpers.ts        # Type-safe hooks via generateHelpers
 │   ├── index.css         # Global CSS, must be imported in every view
-│   └── helpers.ts        # Type-safe hooks via generateHelpers
+│   └── views/            # React components (filename = view component name)
+│       └── search-flights.tsx
 └── package.json
 ```
 
-**Naming convention**: View filename must match registered name using kebab-case.
-`search_flights` → register as `search-flights` → file `search-flights.tsx`
+**Naming convention**: View filename must match the `view.component` name using kebab-case.
+`search_flights` → register with `view.component: "search-flights"` → file `views/search-flights.tsx`
 
 ## Server Handlers
 
@@ -36,7 +34,7 @@ Annotations (set `true` when):
 
 **Example**:
 
-- server/src/index.ts
+- src/server.ts
 ```typescript
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
@@ -45,12 +43,16 @@ const server = new McpServer(
   { name: "my-app", version: "0.0.1" },
   { capabilities: {} },
 )
-  .registerView(
-    "search-flights",
-    { description: "Search for flights" },
+  .registerTool(
     {
+      name: "search-flights",
+      description: "Search for flights",
       inputSchema: { destination: z.string(), dates: z.string() },
       annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
+      view: {
+        component: "search-flights",
+        description: "Flight results",
+      },
     },
     async ({ destination, dates }) => {
       const flights = await fetchFlights(destination, dates);
@@ -68,8 +70,8 @@ const server = new McpServer(
     }
   )
   .registerTool(
-    "book-flight",
     {
+      name: "book-flight",
       description: "Book a flight",
       inputSchema: { flightId: z.string() },
       annotations: { readOnlyHint: false, openWorldHint: false, destructiveHint: false },
@@ -83,7 +85,8 @@ const server = new McpServer(
     }
   );
 
-export default server;
+server.run();
+
 export type AppType = typeof server;
 ```
 
@@ -95,21 +98,20 @@ export type AppType = typeof server;
 
 **Example**:
 
-- web/src/helpers.ts
+- src/helpers.ts
 ```typescript
 import { generateHelpers } from "skybridge/web";
-import type { AppType } from "../../server/src/server";
+import type { AppType } from "./server.js";
 
 export const { useToolInfo, useCallTool } = generateHelpers<AppType>();
 ```
 
-- web/src/views/search-flights.tsx
+- src/views/search-flights.tsx
 ```tsx
 import "@/index.css";
-import { mountView } from "skybridge/web";
-import { useToolInfo, useCallTool } from "../helpers";
+import { useToolInfo, useCallTool } from "../helpers.js";
 
-function SearchFlights() {
+export default function SearchFlights() {
   const { input, output, isPending, responseMetadata } = useToolInfo<"search-flights">();
   const {
     callTool, // returns void, use `data` to get the actual output
@@ -146,8 +148,4 @@ function SearchFlights() {
     </div>
   );
 }
-
-export default SearchFlights;
-
-mountView(<SearchFlights />);
 ```

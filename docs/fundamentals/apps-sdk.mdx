@@ -58,6 +58,7 @@ Skybridge wraps the raw `window.openai` API with React hooks:
 | `window.openai.displayMode` and `window.openai.requestDisplayMode` | [`useDisplayMode()`](/api-reference/use-display-mode) | Access/change display mode |
 | `window.openai.uploadFile()`, `getFileDownloadUrl()` | [`useFiles()`](/api-reference/use-files) | Upload and download files |
 | `window.openai.setOpenInAppUrl()` | [`useSetOpenInAppUrl()`](/api-reference/use-set-open-in-app-url) | "Open in App" button URL in fullscreen |
+| `window.openai.requestClose()` | [`useRequestClose()`](/api-reference/use-request-close) | Close the view from the UI (e.g. user dismisses) |
 
 ## Apps SDK APIs not yet supported in Skybridge
 
@@ -66,7 +67,6 @@ The following [Apps SDK view APIs](https://developers.openai.com/apps-sdk/refere
 | Raw API | Purpose |
 |---------|---------|
 | `window.openai.notifyIntrinsicHeight(...)` | Report dynamic view heights to the host to avoid scroll clipping |
-| `window.openai.requestClose()` | Close the view from the UI (e.g. user dismisses) |
 | `window.openai.requestCheckout(...)` | Open ChatGPT Instant Checkout UI (monetization) |
 
 You can call these directly on `window.openai` when running in ChatGPT, if needed. Support may be added in a future release.

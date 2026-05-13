@@ -1,6 +1,11 @@
 packages:
   - "docs"
   - "infrastructure"
+  - "landing"
   - "packages/*"
   - "packages/create-skybridge/template"
   - "examples/*"
+
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
