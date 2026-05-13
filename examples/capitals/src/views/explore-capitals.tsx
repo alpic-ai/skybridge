@@ -69,7 +69,6 @@ function CapitalExplorer() {
           onCapitalClick={handleCapitalClick}
         />
       </div>
-      {/* Left Panel - Nearby Capitals */}
       <div
         className={`
           absolute left-0 top-0 bottom-0 w-72 transition-transform duration-500
