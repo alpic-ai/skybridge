@@ -118,106 +118,41 @@ export function getShowcaseHeroImage(app: ShowcaseApp): string | undefined {
 
 export const SHOWCASE: ShowcaseApp[] = [
   {
-    id: "awaze",
-    slug: "awaze",
-    name: "Cottages.com",
-    tagline: "Cottage search & booking",
-    blurb:
-      "Holiday cottage search and booking experience — browse properties, filter by location, and explore availability.",
-    category: "3rd Party",
-    host: "ChatGPT",
-    accent: "#1f5d3a",
-    img: "/assets/showcase/awaze.webp",
-    chat: {
-      user: "Find me a cottage in Cornwall for next April, sleeps 4, pets welcome",
-      assistant: "I'll search Cottages.com.",
-    },
-    tags: ["Travel", "Booking"],
-    links: {
-      demo: "https://mcp.cottages.com/try",
-      chatgpt:
-        "https://chatgpt.com/apps/cottages/asdk_app_6945254ad31c81919d07ba1c357a1a57",
-    },
-  },
-  {
-    id: "evaneos",
-    slug: "evaneos",
-    name: "Evaneos",
-    tagline: "Travel destinations",
-    blurb:
-      "Personalized destination discovery with tailored itinerary ideas, travel period guidance, and sustainable alternatives curated by Evaneos experts.",
-    category: "3rd Party",
-    host: "ChatGPT",
-    accent: "#FFB86B",
-    img: "/assets/showcase/evaneos.webp",
-    chat: {
-      user: "I want to travel somewhere sustainable in October, off the beaten path",
-      assistant: "Let me ask Evaneos's local experts.",
-    },
-    tags: ["Travel", "Itinerary"],
-    links: {
-      chatgpt:
-        "https://chatgpt.com/apps/evaneos/asdk_app_69612510d5288191b6a4174252337e93",
-    },
-  },
-  {
-    id: "recommerce",
-    slug: "recommerce",
-    name: "Recommerce",
-    tagline: "Refurbished device shopping",
-    blurb:
-      "Conversational shopping across 7,000+ refurbished devices. Describe what you need and the agent surfaces matching offers from the Recommerce catalog and guides you to checkout.",
-    category: "3rd Party",
-    host: "ChatGPT",
-    accent: "#1FAE6E",
-    img: "/assets/showcase/ecommerce.webp",
-    chat: {
-      user: "I want a refurbished iPhone under €400, good battery health",
-      assistant: "Let me check the Recommerce catalog.",
-    },
-    tags: ["Commerce", "Circular"],
-    links: {
-      chatgpt:
-        "https://chatgpt.com/apps/recommerce/asdk_app_6943b26226c4819189e6b19249055265",
-    },
-  },
-  {
-    id: "recommerce-trade-in",
-    slug: "recommerce-trade-in",
-    name: "Recommerce Trade-In",
-    tagline: "Instant device buyback",
-    blurb:
-      "Sell your old smartphone in a single conversation. Describe the condition and the agent returns a fixed buyback offer based on Recommerce’s real-time pricing matrix.",
-    category: "3rd Party",
-    host: "ChatGPT",
-    accent: "#3D8B6E",
-    img: "/assets/showcase/ecommerce.webp",
-    chat: {
-      user: "How much can I get for my iPhone 13, 128GB, screen has a small scratch?",
-      assistant: "Let me get you a quote from Recommerce.",
-    },
-    tags: ["Trade-in", "Circular"],
-    links: {
-      chatgpt:
-        "https://chatgpt.com/apps/recommerce-trade-in/asdk_app_69c5423d7e408191bec964b57cce719e",
-    },
-  },
-  {
     id: "kiwi",
     slug: "kiwi",
     name: "Kiwi.com",
     tagline: "Flight search, agent-native",
     blurb:
-      "The official Kiwi.com MCP server. Search across global flight inventory in natural language and get a direct booking link back — no widget, just a single search-flight tool exposed to the model.",
+      "The official Kiwi.com MCP app. Search across global flight inventory in natural language and get a direct booking link back.",
     category: "3rd Party",
     host: "Claude",
-    accent: "#E8503F",
-    noWidget: true,
+    accent: "#008C79",
+    icon: "/assets/showcase/icons/kiwi.webp",
+    img: "/assets/showcase/kiwiinline.png",
+    previews: [
+      {
+        mode: "claude-inline",
+        chat: {
+          user: "Find me a round-trip from Lisbon to Paris, Dec 3 to 10, two adults",
+          assistant: "Searching Kiwi.com for the best options.",
+        },
+        screenshot: "/assets/showcase/kiwiinline.png",
+      },
+      {
+        mode: "claude-fullscreen",
+        screenshot: "/assets/showcase/kiwifullscree.png",
+      },
+    ],
     chat: {
-      user: "Find me a round-trip from Vienna to Barcelona, August 3 to 10, two adults",
+      user: "Find me a round-trip from Lisbon to Paris, Dec 3 to 10, two adults",
       assistant: "Searching Kiwi.com for the best options.",
     },
     tags: ["Travel", "Flights"],
+    highlights: [
+      "Global flight inventory searched via a single search-flight tool call.",
+      "Direct booking links returned in Widget UI, no redirect friction.",
+      "Fullscreen view with detailed itinerary details.",
+    ],
     toolResult: {
       tool: "search-flight",
       summary: "Returned 12 itineraries · cheapest €87 · fastest 2h 25m",
@@ -250,6 +185,226 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
   },
   {
+    id: "cottages",
+    slug: "cottages",
+    name: "Cottages.com",
+    tagline: "Discover UK holiday cottages",
+    blurb:
+      "Explore 18,000 quality-checked cottages across the UK. Need more information or want to check other options? Ask away!",
+    category: "3rd Party",
+    host: "ChatGPT",
+    accent: "#50A00D",
+    icon: "/assets/showcase/icons/cottages.webp",
+    img: "/assets/showcase/cottages.webp",
+    previews: [
+      {
+        mode: "chatgpt-inline",
+        chat: {
+          user: "Find me a cottage in Cornwall for first week of April. 2 adults, 1 child and a dog. We want it near the coast.",
+          assistant: "I'll search through Cottages.com for you.",
+        },
+        screenshot: "/assets/showcase/cottages.webp",
+      },
+      {
+        mode: "chatgpt-fullscreen",
+        screenshot: "/assets/showcase/cottages-fullscreen.webp",
+      },
+    ],
+    chat: {
+      user: "Find me a cottage in Cornwall for first week of April. 2 adults, 1 child and a dog. We want it near the coast.",
+      assistant: "I'll search through Cottages.com for you.",
+    },
+    tags: ["Travel", "Booking"],
+    highlights: [
+      "Natural language search with advanced filtering (pets, near a beach, near a pub, dates, group size, amneties...) resolved via a single tool call.",
+      "Fullscreen map view, re-centers on follow up destination search from the user.",
+      "Detailed property context shared with the model via data-llm, keeping the UI simple and focused on images & key details.",
+      "Mobile & Desktop responsive design, providing a great experience on all devices.",
+    ],
+    links: {
+      demo: "https://mcp.cottages.com/try",
+      chatgpt:
+        "https://chatgpt.com/apps/cottages/asdk_app_6945254ad31c81919d07ba1c357a1a57",
+    },
+  },
+  {
+    id: "recommerce",
+    slug: "recommerce",
+    name: "Recommerce",
+    tagline: "Refurbished device shopping",
+    blurb:
+      "This app helps you find and purchase refurbished smartphones, MacBooks, tablets, and gaming consoles with ease. Instead of navigating multiple sites or guessing product quality, you can browse a curated selection of refurbished devices in one place and choose the option that fits your needs and budget.",
+    category: "3rd Party",
+    host: "ChatGPT",
+    accent: "#1FAE6E",
+    icon: "/assets/showcase/icons/recommerce.webp",
+    img: "/assets/showcase/recommerce-inline-1.webp",
+    previews: [
+      {
+        mode: "chatgpt-inline",
+        chat: {
+          user: "I want a refurbished iPhone under €500, good battery health",
+          assistant: "Let me check the Recommerce catalog.",
+        },
+        screenshot: "/assets/showcase/recommerce-inline-1.webp",
+      },
+      {
+        mode: "chatgpt-fullscreen",
+        screenshot: "/assets/showcase/recommerce-fullscreen.webp",
+      },
+    ],
+    chat: {
+      user: "I want a refurbished iPhone under €400, good battery health",
+      assistant: "Let me check the Recommerce catalog.",
+    },
+    tags: ["Commerce", "Circular"],
+    highlights: [
+      "Refurbished devices searchable through natural language: condition grades, OS, screen size, storage size, model, price range, etc.",
+      "Fill your cart directly from the app, one click checkout to the Recommerce website.",
+      "Ability to leverage chatGPT knowledge to help user benchmarks various devices, based on their own criteria.",
+    ],
+    links: {
+      chatgpt:
+        "https://chatgpt.com/apps/recommerce/asdk_app_6943b26226c4819189e6b19249055265",
+    },
+  },
+  {
+    id: "evaneos",
+    slug: "evaneos",
+    name: "Evaneos",
+    tagline: "Travel destinations",
+    blurb:
+      "Personalized destination discovery with tailored itinerary ideas, travel period guidance, and sustainable alternatives curated by Evaneos experts.",
+    category: "3rd Party",
+    host: "ChatGPT",
+    accent: "#FFE54E",
+    icon: "/assets/showcase/icons/evaneos.webp",
+    img: "/assets/showcase/evaneos.webp",
+    previews: [
+      {
+        mode: "chatgpt-inline",
+        chat: {
+          user: "I want to travel somewhere sustainable in October, off the beaten track.",
+          assistant: "Let me ask Evaneos's local experts.",
+        },
+        screenshot: "/assets/showcase/evaneos.webp",
+      },
+      {
+        mode: "chatgpt-fullscreen",
+        screenshot: "/assets/showcase/evaneos-fullscreen.webp",
+      },
+    ],
+    chat: {
+      user: "I want to travel somewhere sustainable in October, off the beaten track.",
+      assistant: "Let me ask Evaneos's local experts.",
+    },
+    tags: ["Travel", "Itinerary"],
+    highlights: [
+      "Curated itineraries surfaced from local expert knowledge, not generic search.",
+      "UI & Model sync via data-llm, allowing user to ask advanced question when looking at a destination.",
+      "Inline carousel & fullscreen details view for each destination.",
+    ],
+    links: {
+      chatgpt:
+        "https://chatgpt.com/apps/evaneos/asdk_app_69612510d5288191b6a4174252337e93",
+    },
+  },
+  {
+    id: "recommerce-trade-in",
+    slug: "recommerce-trade-in",
+    name: "Recommerce Trade-In",
+    tagline: "Instant device buyback",
+    blurb:
+      "Sell your old smartphone in a single conversation. Describe the condition and the agent returns a fixed buyback offer based on Recommerce’s real-time pricing matrix.",
+    category: "3rd Party",
+    host: "ChatGPT",
+    accent: "#3D8B6E",
+    icon: "/assets/showcase/icons/recommerce-tradein.webp",
+    img: "/assets/showcase/recommerce-tradein-inline-1.webp",
+    previews: [
+      {
+        mode: "chatgpt-inline",
+        chat: {
+          user: "How much can I get for my Google Pixel, screen has a small scratch?",
+          assistant: "Let me get you a quote from Recommerce.",
+        },
+        screenshot: "/assets/showcase/recommerce-tradein-inline-1.webp",
+      },
+      {
+        mode: "chatgpt-inline",
+        chat: {
+          user: "How much can I get for my Google Pixel, screen has a small scratch?",
+          assistant: "Let me get you a quote from Recommerce.",
+        },
+        screenshot: "/assets/showcase/recommerce-tradein-inline-2.webp",
+      },
+      {
+        mode: "chatgpt-inline",
+        chat: {
+          user: "How much can I get for my Google Pixel, screen has a small scratch?",
+          assistant: "Let me get you a quote from Recommerce.",
+        },
+        screenshot: "/assets/showcase/recommerce-tradein-inline-3.webp",
+      },
+    ],
+    chat: {
+      user: "How much can I get for my iPhone 13, 128GB, screen has a small scratch?",
+      assistant: "Let me get you a quote from Recommerce.",
+    },
+    tags: ["Trade-in", "Circular"],
+    highlights: [
+      "Details on condition grades are shared with the model. The user can upload photos of the device and let chatGPT evaluate the condition.",
+      "Questionnaires can be filled via the UI or by chatting with the model, letting the model fill the form for the user.",
+      "Multi country, multi language support, including UI & API data.",
+    ],
+    links: {
+      chatgpt:
+        "https://chatgpt.com/apps/recommerce-trade-in/asdk_app_69c5423d7e408191bec964b57cce719e",
+    },
+  },
+  {
+    id: "voyage-prive",
+    slug: "voyage-prive",
+    name: "Voyage Privé",
+    tagline: "Luxury travel flash sales",
+    blurb:
+      "Discover exclusive luxury hotel and travel deals from Voyage Privé. Search by destination, dates, and group size to find premium stays at members-only prices. With map view, detailed property info, and direct booking.",
+    category: "3rd Party",
+    host: "ChatGPT",
+    accent: "#BD1241",
+    icon: "/assets/showcase/icons/voyage-prive.webp",
+    img: "/assets/showcase/vpinline.webp",
+    previews: [
+      {
+        mode: "chatgpt-inline",
+        chat: {
+          user: "Find me a luxury hotel in New York for the first week of June, 2 adults",
+          assistant: "Let me search Voyage Privé's exclusive offers.",
+        },
+        screenshot: "/assets/showcase/vpinline.webp",
+      },
+      {
+        mode: "chatgpt-fullscreen",
+        screenshot: "/assets/showcase/vpfullscreen.webp",
+      },
+    ],
+    chat: {
+      user: "Find me a luxury hotel in New York for the first week of June, 2 adults",
+      assistant: "Let me search Voyage Privé's exclusive offers.",
+    },
+    tags: ["Travel", "Luxury", "Hotels"],
+    highlights: [
+      "Natural language search with advanced filtering (dates, group size, amenities, price range...).",
+      "Fullscreen map view with property cards and detailed offer panels: overview, editorial picks, and negotiated perks.",
+      "Full model sync via data-llm, allowing user to ask advanced questions when looking at an offer.",
+    ],
+    links: {
+      demo: "https://mcp.voyage-prive.com/try",
+      chatgpt:
+        "https://chatgpt.com/apps/voyage-priv/asdk_app_6943c73f6c8481919dc2b9ac42af0064",
+    },
+  },
+  {
     id: "generative-ui",
     slug: "generative-ui",
     name: "Generative UI",
@@ -265,6 +420,11 @@ export const SHOWCASE: ShowcaseApp[] = [
       assistant: "Composing the UI now…",
     },
     tags: ["shadcn/ui", "Dynamic"],
+    highlights: [
+      "The AI composes the UI on the fly from 36 pre-built shadcn/ui primitives.",
+      "json-render interprets a JSON layout tree — no client-side code generation.",
+      "Fully interactive: buttons, inputs, and state all work inside the widget.",
+    ],
     links: {
       demo: "https://generative-ui.skybridge.tech/try",
       github:
@@ -287,6 +447,11 @@ export const SHOWCASE: ShowcaseApp[] = [
       assistant: "Plotting them on the map.",
     },
     tags: ["Maps", "Geo"],
+    highlights: [
+      "Live interactive map rendered inline — pan, zoom, and click markers.",
+      "Wikipedia-sourced country info displayed alongside the map.",
+      "Geolocation and region-based queries resolved to map pins in one tool call.",
+    ],
     links: {
       demo: "https://capitals.skybridge.tech/try",
       github:
@@ -309,6 +474,11 @@ export const SHOWCASE: ShowcaseApp[] = [
       assistant: "Searching across Skybridge Airlines…",
     },
     tags: ["Travel", "Carousel"],
+    highlights: [
+      "Swipeable flight carousel with route details, times, and pricing.",
+      "Side-by-side comparison mode for shortlisted itineraries.",
+      "External booking links open directly from the widget.",
+    ],
     links: {
       demo: "https://flight-booking.skybridge.tech/try",
       github:
@@ -331,6 +501,11 @@ export const SHOWCASE: ShowcaseApp[] = [
       assistant: "Here are 4 picks.",
     },
     tags: ["Commerce", "Cart"],
+    highlights: [
+      "Persistent cart that survives across multiple tool calls in the same thread.",
+      "Full localization (currency, language) driven by user context.",
+      "Modal dialogs for size guides and product details — no page navigation.",
+    ],
     links: {
       demo: "https://ecommerce.skybridge.tech/try",
       github:
@@ -353,6 +528,11 @@ export const SHOWCASE: ShowcaseApp[] = [
       assistant: "Loading the playground.",
     },
     tags: ["Reference", "All hooks"],
+    highlights: [
+      "Every Skybridge hook exercised in a single interactive playground.",
+      "Live state inspector shows bridge traffic between widget and host.",
+      "Copy-pasteable code snippets for each hook alongside the demo.",
+    ],
     links: {
       demo: "https://everything.skybridge.tech/try",
       github:
@@ -375,6 +555,11 @@ export const SHOWCASE: ShowcaseApp[] = [
       assistant: "The case of the gaslit lantern. Begin.",
     },
     tags: ["Game", "Multi-screen"],
+    highlights: [
+      "Multi-screen gameplay — evidence board, interrogation room, and map.",
+      "Fullscreen display mode for immersive story moments.",
+      "Dynamic story progression where the AI adapts the mystery to your choices.",
+    ],
     links: {
       demo: "https://investigation-game.skybridge.tech/try",
       github:
@@ -397,6 +582,11 @@ export const SHOWCASE: ShowcaseApp[] = [
       assistant: "Here's the dashboard.",
     },
     tags: ["Charts", "Dashboard"],
+    highlights: [
+      "Interactive charts (bar, line, pie) rendered inline with live data.",
+      "Dashboard layout adapts between inline and fullscreen display modes.",
+      "Demonstrates how Skybridge widgets can replace traditional BI embeds.",
+    ],
     links: {
       demo: "https://productivity.skybridge.tech/try",
       github:
@@ -419,6 +609,11 @@ export const SHOWCASE: ShowcaseApp[] = [
       assistant: "Apple? Pineapple?",
     },
     tags: ["Game", "Party"],
+    highlights: [
+      "Secret word displayed only in the widget — the AI never sees it.",
+      "Turn-based flow using useSendMessage to pass hints back to the model.",
+      "Timer and scoring managed client-side via createStore.",
+    ],
     links: {
       demo: "https://times-up.skybridge.tech/try",
       github:
@@ -441,6 +636,11 @@ export const SHOWCASE: ShowcaseApp[] = [
       assistant: "Let me consult the 8-ball…",
     },
     tags: ["Starter", "Toy"],
+    highlights: [
+      "The default create-skybridge template — up and running in under a minute.",
+      "Shake animation and answer reveal driven entirely by widget state.",
+      "Minimal code: shows the smallest possible Skybridge app structure.",
+    ],
     links: {
       demo: "https://magic-8-ball.skybridge.tech/try",
       github: "https://github.com/alpic-ai/apps-sdk-template",
@@ -462,6 +662,11 @@ export const SHOWCASE: ShowcaseApp[] = [
       assistant: "Sign in with Clerk to personalize…",
     },
     tags: ["Auth", "OAuth"],
+    highlights: [
+      "Full OAuth flow via Clerk — sign-in UI rendered inside the widget.",
+      "Personalized results after auth (favourite neighbourhoods, past orders).",
+      "Token refresh and session management handled transparently by Skybridge.",
+    ],
     links: {
       github:
         "https://github.com/alpic-ai/skybridge/tree/main/examples/auth-clerk",
@@ -483,6 +688,11 @@ export const SHOWCASE: ShowcaseApp[] = [
       assistant: "Sign in with WorkOS…",
     },
     tags: ["Auth", "OAuth"],
+    highlights: [
+      "WorkOS AuthKit integration — enterprise SSO and MFA out of the box.",
+      "Organization-scoped results based on the authenticated user's team.",
+      "Shows how Skybridge's auth helpers abstract provider differences.",
+    ],
     links: {
       github:
         "https://github.com/alpic-ai/skybridge/tree/main/examples/auth-workos",
@@ -504,6 +714,11 @@ export const SHOWCASE: ShowcaseApp[] = [
       assistant: "Sign in with Stytch…",
     },
     tags: ["Auth", "OAuth"],
+    highlights: [
+      "Stytch passwordless auth — magic links and OTPs inside the chat widget.",
+      "Session tokens forwarded to tool calls for authenticated data fetching.",
+      "Drop-in example for any Stytch project migrating to agent-native UX.",
+    ],
     links: {
       github:
         "https://github.com/alpic-ai/skybridge/tree/main/examples/auth-stytch",
@@ -525,13 +740,14 @@ export const SHOWCASE: ShowcaseApp[] = [
       assistant: "Sign in with Auth0…",
     },
     tags: ["Auth", "OAuth"],
+    highlights: [
+      "Auth0 Universal Login triggered from within the chat widget.",
+      "Role-based access control applied to tool results post-authentication.",
+      "Demonstrates Skybridge's provider-agnostic auth pattern with Auth0.",
+    ],
     links: {
       github:
         "https://github.com/alpic-ai/skybridge/tree/main/examples/auth-auth0",
     },
   },
 ];
-
-export function hostAccent(_host: string): string {
-  return "#89F0EC";
-}

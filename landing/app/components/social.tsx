@@ -53,14 +53,7 @@ export function SocialProofSection() {
     },
     {
       kind: "img",
-      name: "Awaze",
-      src: "/assets/customer-logos/awaze.webp",
-      height: PNG_HEIGHT,
-      width: 114,
-    },
-    {
-      kind: "img",
-      name: "Listo",
+      name: "Datadog",
       src: "/assets/customer-logos/listo.webp",
       height: PNG_HEIGHT,
       width: 99,
