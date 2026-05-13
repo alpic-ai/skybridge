@@ -11,6 +11,7 @@ import type {
 } from "skybridge/web";
 
 import { SET_GLOBALS_EVENT_TYPE, SetGlobalsEvent } from "skybridge/web";
+import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
 
 function createOpenaiMethods(
   openai: AppsSdkContext & AppsSdkMethods,
@@ -40,13 +41,20 @@ function createOpenaiMethods(
     sendFollowUpMessage: async (args: { prompt: string }) => {
       log("sendFollowUpMessage", args);
     },
+    requestClose: async () => {
+      log("requestClose", {});
+    },
     openExternal: (args: { href: string; redirectUrl?: false }) => {
+      window.open(args.href, "_blank", "noopener,noreferrer");
       log("openExternal", args);
     },
     requestDisplayMode: async (args: { mode: RequestDisplayMode }) => {
       log("requestDisplayMode", args);
       openai.displayMode = args.mode;
       setValue("displayMode", args.mode);
+      useInspectorPreferencesStore
+        .getState()
+        .setPreference("displayMode", args.mode);
       return {
         mode: args.mode,
       };

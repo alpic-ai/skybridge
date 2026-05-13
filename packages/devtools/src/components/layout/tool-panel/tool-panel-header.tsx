@@ -1,34 +1,9 @@
 import { useLocalStorageState } from "ahooks";
-import { AnimatePresence, motion } from "framer-motion";
-import { PrismLight } from "react-syntax-highlighter";
-import json from "react-syntax-highlighter/dist/esm/languages/prism/json";
-
+import { motion } from "framer-motion";
 import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { useCallToolResult } from "@/lib/store.js";
 import { cn, formatBytes } from "@/lib/utils.js";
-import { devtoolsJsonPrismTheme } from "./json-syntax-theme.js";
-
-PrismLight.registerLanguage("json", json);
-
-function JsonSyntaxBlock({ code }: { code: string }) {
-  return (
-    <PrismLight
-      language="json"
-      style={devtoolsJsonPrismTheme}
-      customStyle={{
-        margin: 0,
-        padding: 0,
-        background: "transparent",
-        fontSize: "0.75rem",
-      }}
-      codeTagProps={{ className: "font-mono whitespace-pre" }}
-      showLineNumbers={false}
-      wrapLongLines
-    >
-      {code}
-    </PrismLight>
-  );
-}
+import { JsonSyntaxBlock } from "./json-syntax-block.js";
 
 export const ToolPanelHeader = () => {
   const [expanded, setExpanded] = useLocalStorageState(
@@ -93,29 +68,27 @@ export const ToolPanelHeader = () => {
           </div>
         </div>
       </button>
-      <AnimatePresence initial={false}>
-        {expanded ? (
-          <motion.div
-            key="tool-panel-expanded"
-            initial={{ height: 0 }}
-            animate={{ height: "auto" }}
-            exit={{ height: 0 }}
-            transition={{
-              duration: 0.15,
-              ease: [0.4, 0, 0.2, 1],
-            }}
-            style={{ maxHeight: "40%" }}
-            className="flex w-full shrink-0 flex-row overflow-hidden border-b-2 border-border bg-light-gray"
-          >
-            <section className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-auto p-3">
-              <JsonSyntaxBlock code={responseJson} />
-            </section>
-            <section className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-auto border-l border-border p-3">
-              <JsonSyntaxBlock code={widgetStateJson} />
-            </section>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      <motion.div
+        initial={false}
+        animate={{ height: expanded ? "auto" : 0 }}
+        transition={{
+          duration: 0.15,
+          ease: [0.4, 0, 0.2, 1],
+        }}
+        style={{ maxHeight: "40%" }}
+        className={cn(
+          "flex w-full shrink-0 flex-row overflow-hidden bg-light-gray",
+          expanded && "border-b-2 border-border",
+        )}
+        aria-hidden={!expanded}
+      >
+        <section className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-auto p-3">
+          <JsonSyntaxBlock code={responseJson} />
+        </section>
+        <section className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-auto border-l border-border p-3">
+          <JsonSyntaxBlock code={widgetStateJson} />
+        </section>
+      </motion.div>
     </>
   );
 };

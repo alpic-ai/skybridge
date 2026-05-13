@@ -41,7 +41,7 @@ function CapitalExplorer() {
     }
   }, [isFullscreen, pendingCapital, travelTo]);
 
-  const isLoadingCapital = isPending || isTraveling;
+  const isLoadingCapital = isPending || isTraveling || !!pendingCapital;
   const capitalLight = allCapitals.find(
     (capital) => capital.name === selectedCapital,
   );

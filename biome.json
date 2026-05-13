@@ -10,7 +10,9 @@
       "**",
       "!!**/node_modules",
       "!!**/dist",
-      "!!docs"
+      "!!docs",
+      "!!**/nextImageExportOptimizer/**",
+      "!!landing/public/assets/next-image-export-optimizer-hashes.json"
     ]
   },
   "formatter": {
@@ -69,6 +71,40 @@
                 "forceJsExtensions": true
               }
             }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["landing/**"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noSvgWithoutTitle": "off",
+            "useValidAnchor": "off",
+            "useButtonType": "off",
+            "useAriaPropsSupportedByRole": "off",
+            "noStaticElementInteractions": "off",
+            "useSemanticElements": "off"
+          },
+          "security": {
+            "noDangerouslySetInnerHtml": "off"
+          },
+          "suspicious": {
+            "noArrayIndexKey": "off",
+            "noCommentText": "off"
+          },
+          "performance": {
+            "noImgElement": "off"
+          },
+          "correctness": {
+            "noEmptyPattern": "off"
+          },
+          "style": {
+            "noDescendingSpecificity": "off"
+          },
+          "complexity": {
+            "noImportantStyles": "off"
           }
         }
       }

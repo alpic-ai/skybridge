@@ -7,6 +7,8 @@ import type {
   OpenExternalOptions,
   RequestDisplayMode,
   RequestModalOptions,
+  RequestSizeOptions,
+  SendFollowUpMessageOptions,
   SetViewStateAction,
 } from "../types.js";
 import { McpAppBridge } from "./bridge.js";
@@ -79,19 +81,10 @@ export class McpAppAdaptor implements Adaptor {
       arguments: args ?? undefined,
     });
 
-    const result = response.content
-      .filter(
-        (content): content is { type: "text"; text: string } =>
-          content.type === "text",
-      )
-      .map(({ text }) => text)
-      .join("\n");
-
     return {
       content: response.content,
       structuredContent: response.structuredContent ?? {},
       isError: response.isError ?? false,
-      result,
       meta: response._meta ?? {},
     } as ToolResponse;
   };
@@ -101,7 +94,20 @@ export class McpAppAdaptor implements Adaptor {
     return app.requestDisplayMode({ mode });
   };
 
-  public sendFollowUpMessage = async (prompt: string) => {
+  public requestClose = async (): Promise<void> => {
+    const app = await McpAppBridge.getInstance().getApp();
+    await app.requestTeardown();
+  };
+
+  public requestSize = async (size: RequestSizeOptions): Promise<void> => {
+    const app = await McpAppBridge.getInstance().getApp();
+    await app.sendSizeChanged(size);
+  };
+
+  public sendFollowUpMessage = async (
+    prompt: string,
+    _options?: SendFollowUpMessageOptions,
+  ) => {
     const app = await McpAppBridge.getInstance().getApp();
     await app.sendMessage({
       role: "user",
