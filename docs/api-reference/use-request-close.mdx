@@ -1,0 +1,20 @@
+---
+title: useRequestClose
+description: "Request the host to close (dismiss) the view from inside your app."
+---
+
+The `useRequestClose` hook returns a function that asks the host to dismiss the view. Use it when the user has finished a flow and you want to return them to the conversation.
+
+```tsx
+import { useRequestClose } from "skybridge/web";
+
+function DoneButton() {
+  const requestClose = useRequestClose();
+
+  return (
+    <button onClick={() => requestClose()}>
+      Done
+    </button>
+  );
+}
+```

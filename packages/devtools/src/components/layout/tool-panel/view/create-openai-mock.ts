@@ -41,6 +41,9 @@ function createOpenaiMethods(
     sendFollowUpMessage: async (args: { prompt: string }) => {
       log("sendFollowUpMessage", args);
     },
+    requestClose: async () => {
+      log("requestClose", {});
+    },
     openExternal: (args: { href: string; redirectUrl?: false }) => {
       window.open(args.href, "_blank", "noopener,noreferrer");
       log("openExternal", args);
