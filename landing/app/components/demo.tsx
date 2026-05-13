@@ -1,4 +1,245 @@
+"use client";
+
+import { useState } from "react";
 import { Icon } from "./icons";
+
+type CodeTab = "server" | "view";
+
+function FileIcon() {
+  return (
+    <svg
+      className="sb-demo-code-icon"
+      viewBox="0 0 16 16"
+      width="13"
+      height="13"
+      aria-hidden
+    >
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+        d="M3.5 1.5h6L12.5 4.5v10h-9z"
+      />
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+        d="M9.5 1.5v3h3"
+      />
+    </svg>
+  );
+}
+
+function ServerCode() {
+  return (
+    <pre className="sb-demo-code-body">
+      <div>
+        <span className="c-kw">import</span> {"{ "}
+        <span className="c-id">McpServer</span>
+        {" }"} <span className="c-kw">from</span>{" "}
+        <span className="c-str">"skybridge/server"</span>;
+      </div>
+      <div>
+        <span className="c-kw">import</span> {"{ "}
+        <span className="c-id">z</span>
+        {" }"} <span className="c-kw">from</span>{" "}
+        <span className="c-str">"zod"</span>;
+      </div>
+      <div>&nbsp;</div>
+      <div>
+        <span className="c-kw">const</span>{" "}
+        <span className="c-id">server</span> ={" "}
+        <span className="c-kw">new</span>{" "}
+        <span className="c-fn">McpServer</span>({"{ "}
+        <span className="c-id">name</span>:{" "}
+        <span className="c-str">"travel"</span>
+        {" }"});
+      </div>
+      <div>&nbsp;</div>
+      <div>
+        <span className="c-id">server</span>.
+        <span className="c-fn">registerTool</span>(
+      </div>
+      <div>{"  {"}</div>
+      <div>
+        {"    "}
+        <span className="c-id">name</span>:{" "}
+        <span className="c-str">"findFlights"</span>,
+      </div>
+      <div>
+        {"    "}
+        <span className="c-id">description</span>:{" "}
+        <span className="c-str">"Search flights"</span>,
+      </div>
+      <div>
+        {"    "}
+        <span className="c-id">inputSchema</span>: {"{ "}
+        <span className="c-id">from</span>: z.
+        <span className="c-fn">string</span>(),{" "}
+        <span className="c-id">to</span>: z.
+        <span className="c-fn">string</span>(),{" "}
+        <span className="c-id">when</span>: z.
+        <span className="c-fn">string</span>() {"}"},
+      </div>
+      <div>
+        {"    "}
+        <span className="c-id">view</span>: {"{ "}
+        <span className="c-id">component</span>:{" "}
+        <span className="c-str">"flights"</span> {"}"},
+      </div>
+      <div>{"  }"},</div>
+      <div>
+        {"  "}
+        <span className="c-kw">async</span> ({"{ "}
+        <span className="c-id">from</span>,{" "}
+        <span className="c-id">to</span>,{" "}
+        <span className="c-id">when</span>
+        {" }"}) {"=>"} ({"{"}
+      </div>
+      <div>
+        {"    "}
+        <span className="c-id">structuredContent</span>: {"{"}
+      </div>
+      <div>
+        {"      "}
+        <span className="c-id">destination</span>:{" "}
+        <span className="c-kw">await</span>{" "}
+        <span className="c-fn">getCity</span>(
+        <span className="c-id">to</span>),{" "}
+        <span className="c-com">{"// { name, photo }"}</span>
+      </div>
+      <div>
+        {"      "}
+        <span className="c-id">flights</span>: (
+        <span className="c-kw">await</span>{" "}
+        <span className="c-fn">searchFlights</span>({"{ "}
+        <span className="c-id">from</span>,{" "}
+        <span className="c-id">to</span>,{" "}
+        <span className="c-id">when</span>
+        {" }"})).<span className="c-fn">map</span>((
+        <span className="c-id">f</span>) {"=>"} ({"{"}
+      </div>
+      <div>
+        {"        "}...<span className="c-id">f</span>,
+      </div>
+      <div>
+        {"        "}
+        <span className="c-id">airline</span>: {"{ "}
+        <span className="c-id">name</span>:{" "}
+        <span className="c-id">f</span>.
+        <span className="c-id">carrier</span>,{" "}
+        <span className="c-id">logo</span>:{" "}
+        <span className="c-fn">logoFor</span>(
+        <span className="c-id">f</span>.
+        <span className="c-id">carrier</span>) {"}"},
+      </div>
+      <div>{"      "})),</div>
+      <div>{"    }"},</div>
+      <div>{"  }"}),</div>
+      <div>);</div>
+    </pre>
+  );
+}
+
+function ViewCode() {
+  return (
+    <pre className="sb-demo-code-body">
+      <div>
+        <span className="c-kw">import</span> {"{ "}
+        <span className="c-id">useToolInfo</span>
+        {" }"} <span className="c-kw">from</span>{" "}
+        <span className="c-str">"skybridge/vite"</span>;
+      </div>
+      <div>&nbsp;</div>
+      <div>
+        <span className="c-kw">type</span>{" "}
+        <span className="c-id">Output</span> = {"{"}
+      </div>
+      <div>
+        {"  "}
+        <span className="c-id">destination</span>: {"{ "}
+        <span className="c-id">name</span>:{" "}
+        <span className="c-id">string</span>;{" "}
+        <span className="c-id">photo</span>:{" "}
+        <span className="c-id">string</span> {"}"};
+      </div>
+      <div>
+        {"  "}
+        <span className="c-id">trip</span>:{" "}
+        <span className="c-id">Trip</span>;
+      </div>
+      <div>
+        {"  "}
+        <span className="c-id">flights</span>:{" "}
+        <span className="c-id">Flight</span>[];
+      </div>
+      <div>{"}"};</div>
+      <div>&nbsp;</div>
+      <div>
+        <span className="c-kw">export default function</span>{" "}
+        <span className="c-fn">Flights</span>() {"{"}
+      </div>
+      <div>
+        {"  "}
+        <span className="c-kw">const</span> {"{ "}
+        <span className="c-id">output</span>
+        {" }"} ={" "}
+        <span className="c-fn">useToolInfo</span>&lt;{"{ "}
+        <span className="c-id">output</span>:{" "}
+        <span className="c-id">Output</span> {"}"}&gt;();
+      </div>
+      <div>&nbsp;</div>
+      <div>
+        {"  "}
+        <span className="c-kw">return</span> (
+      </div>
+      <div>
+        {"    "}
+        &lt;<span className="c-fn">Card</span>&gt;
+      </div>
+      <div>
+        {"      "}
+        &lt;<span className="c-fn">DestinationHero</span>{" "}
+        <span className="c-id">destination</span>={"{"}
+        <span className="c-id">output</span>.
+        <span className="c-id">destination</span>
+        {"}"} /&gt;
+      </div>
+      <div>
+        {"      "}
+        &lt;<span className="c-fn">TripSummary</span>{" "}
+        <span className="c-id">trip</span>={"{"}
+        <span className="c-id">output</span>.
+        <span className="c-id">trip</span>
+        {"}"} /&gt;
+      </div>
+      <div>
+        {"      "}
+        &lt;<span className="c-fn">FlightGrid</span>{" "}
+        <span className="c-id">flights</span>={"{"}
+        <span className="c-id">output</span>.
+        <span className="c-id">flights</span>
+        {"}"} /&gt;
+      </div>
+      <div>
+        {"      "}
+        &lt;<span className="c-fn">Actions</span>{" "}
+        <span className="c-id">cheapest</span>={"{"}
+        <span className="c-id">output</span>.
+        <span className="c-id">flights</span>[0]
+        {"}"} /&gt;
+      </div>
+      <div>
+        {"    "}
+        &lt;/<span className="c-fn">Card</span>&gt;
+      </div>
+      <div>{"  "});</div>
+      <div>{"}"}</div>
+    </pre>
+  );
+}
 
 function AirlineMark({
   code,
@@ -209,6 +450,7 @@ function FlightWidget() {
 }
 
 export function CodeDemoSection() {
+  const [tab, setTab] = useState<CodeTab>("server");
   return (
     <section className="sb-section" id="demo">
       <div className="sb-wrap">
@@ -229,142 +471,26 @@ export function CodeDemoSection() {
           <div className="sb-demo-split">
             <div className="sb-demo-code-pane">
               <div className="sb-demo-code-head">
-                <span className="sb-demo-code-tab">
-                  <svg
-                    className="sb-demo-code-icon"
-                    viewBox="0 0 16 16"
-                    width="13"
-                    height="13"
-                    aria-hidden
-                  >
-                    <path
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                      strokeLinejoin="round"
-                      d="M3.5 1.5h6L12.5 4.5v10h-9z"
-                    />
-                    <path
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.2"
-                      strokeLinejoin="round"
-                      d="M9.5 1.5v3h3"
-                    />
-                  </svg>
-                  <span className="sb-demo-code-file">server/flights.ts</span>
-                </span>
+                <button
+                  type="button"
+                  className={`sb-demo-code-tab${tab === "server" ? " is-active" : ""}`}
+                  onClick={() => setTab("server")}
+                >
+                  <FileIcon />
+                  <span className="sb-demo-code-file">src/server.ts</span>
+                </button>
+                <button
+                  type="button"
+                  className={`sb-demo-code-tab${tab === "view" ? " is-active" : ""}`}
+                  onClick={() => setTab("view")}
+                >
+                  <FileIcon />
+                  <span className="sb-demo-code-file">
+                    src/views/flights.tsx
+                  </span>
+                </button>
               </div>
-              <pre className="sb-demo-code-body">
-                <div>
-                  <span className="c-kw">import</span> {"{ "}
-                  <span className="c-id">McpServer</span>
-                  {" }"} <span className="c-kw">from</span>{" "}
-                  <span className="c-str">"skybridge/server"</span>;
-                </div>
-                <div>
-                  <span className="c-kw">import</span> {"{ "}
-                  <span className="c-id">z</span>
-                  {" }"} <span className="c-kw">from</span>{" "}
-                  <span className="c-str">"zod"</span>;
-                </div>
-                <div>
-                  <span className="c-kw">import</span>{" "}
-                  <span className="c-id">Flights</span>{" "}
-                  <span className="c-kw">from</span>{" "}
-                  <span className="c-str">"./widgets/flights"</span>;
-                </div>
-                <div>&nbsp;</div>
-                <div>
-                  <span className="c-kw">const</span>{" "}
-                  <span className="c-id">server</span> ={" "}
-                  <span className="c-kw">new</span>{" "}
-                  <span className="c-fn">McpServer</span>({"{ "}
-                  <span className="c-id">name</span>:{" "}
-                  <span className="c-str">"travel"</span>
-                  {" }"});
-                </div>
-                <div>&nbsp;</div>
-                <div>
-                  <span className="c-id">server</span>.
-                  <span className="c-fn">registerWidget</span>(
-                </div>
-                <div>
-                  {"  "}
-                  <span className="c-str">"findFlights"</span>,
-                </div>
-                <div>{"  {"}</div>
-                <div>
-                  {"    "}
-                  <span className="c-id">description</span>:{" "}
-                  <span className="c-str">"Search flights"</span>,
-                </div>
-                <div>
-                  {"    "}
-                  <span className="c-id">inputSchema</span>: {"{ "}
-                  <span className="c-id">from</span>: z.
-                  <span className="c-fn">string</span>(),{" "}
-                  <span className="c-id">to</span>: z.
-                  <span className="c-fn">string</span>(),{" "}
-                  <span className="c-id">when</span>: z.
-                  <span className="c-fn">string</span>() {"}"},
-                </div>
-                <div>
-                  {"    "}
-                  <span className="c-id">component</span>:{" "}
-                  <span className="c-id">Flights</span>,
-                </div>
-                <div>{"  }"},</div>
-                <div>
-                  {"  "}
-                  <span className="c-kw">async</span> ({"{ "}
-                  <span className="c-id">from</span>,{" "}
-                  <span className="c-id">to</span>,{" "}
-                  <span className="c-id">when</span>
-                  {" }"}) {"=>"} ({"{"}
-                </div>
-                <div>
-                  {"    "}
-                  <span className="c-id">structuredContent</span>: {"{"}
-                </div>
-                <div>
-                  {"      "}
-                  <span className="c-id">destination</span>:{" "}
-                  <span className="c-kw">await</span>{" "}
-                  <span className="c-fn">getCity</span>(
-                  <span className="c-id">to</span>),{" "}
-                  <span className="c-com">{"// { name, photo }"}</span>
-                </div>
-                <div>
-                  {"      "}
-                  <span className="c-id">flights</span>: (
-                  <span className="c-kw">await</span>{" "}
-                  <span className="c-fn">searchFlights</span>({"{ "}
-                  <span className="c-id">from</span>,{" "}
-                  <span className="c-id">to</span>,{" "}
-                  <span className="c-id">when</span>
-                  {" }"})).<span className="c-fn">map</span>((
-                  <span className="c-id">f</span>) {"=>"} ({"{"}
-                </div>
-                <div>
-                  {"        "}...<span className="c-id">f</span>,
-                </div>
-                <div>
-                  {"        "}
-                  <span className="c-id">airline</span>: {"{ "}
-                  <span className="c-id">name</span>:{" "}
-                  <span className="c-id">f</span>.
-                  <span className="c-id">carrier</span>,{" "}
-                  <span className="c-id">logo</span>:{" "}
-                  <span className="c-fn">logoFor</span>(
-                  <span className="c-id">f</span>.
-                  <span className="c-id">carrier</span>) {"}"},
-                </div>
-                <div>{"      "})),</div>
-                <div>{"    }"},</div>
-                <div>{"  }"}),</div>
-                <div>);</div>
-              </pre>
+              {tab === "server" ? <ServerCode /> : <ViewCode />}
             </div>
 
             <div className="sb-chat-window">
@@ -399,7 +525,9 @@ export function CodeDemoSection() {
                   <div className="sb-chat-bubble user">
                     Find me flights from Paris to Tokyo next week
                   </div>
-                  <div className="sb-chat-avatar">JD</div>
+                  <div className="sb-chat-avatar">
+                    <Icon name="user" size={14} stroke={1.8} />
+                  </div>
                 </div>
 
                 {/* AI response */}

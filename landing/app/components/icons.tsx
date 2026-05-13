@@ -12,7 +12,9 @@ export type IconName =
   | "terminal"
   | "discord"
   | "book"
-  | "wand";
+  | "wand"
+  | "x"
+  | "user";
 
 export function Icon({
   name,
@@ -124,6 +126,19 @@ export function Icon({
       return (
         <svg {...s} style={oneStroke}>
           <path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8L19 13M17.8 6.2L19 5M3 21l9-9M12.2 6.2L11 5" />
+        </svg>
+      );
+    case "x":
+      return (
+        <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </svg>
+      );
+    case "user":
+      return (
+        <svg {...s} style={oneStroke}>
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" />
         </svg>
       );
     default:

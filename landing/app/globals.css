@@ -17,3 +17,8 @@ body {
   background: var(--sb-bg);
   color: var(--sb-ink);
 }
+
+a[href],
+button:not(:disabled) {
+  cursor: pointer;
+}

@@ -126,9 +126,8 @@ body {
   max-width: 1100px;
   height: 68px;
   padding: 8px 10px 8px 18px;
-  background: rgba(7, 21, 22, 0.85);
-  backdrop-filter: blur(18px) saturate(180%);
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  background: rgba(7, 21, 22, 0.55);
+  backdrop-filter: blur(6px) saturate(120%);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 14px;
   box-shadow:
@@ -375,7 +374,7 @@ body {
 .sb-inline-link {
   color: var(--sb-ink);
   text-decoration: underline;
-  text-decoration-color: rgba(242, 43, 121, 0.45);
+  text-decoration-color: rgba(137, 240, 236, 0.45);
   text-underline-offset: 3px;
   text-decoration-thickness: 1.5px;
   transition:
@@ -873,11 +872,23 @@ body {
   gap: 8px;
   height: 100%;
   padding: 0 14px;
-  margin: 0 -14px 0 -14px;
   position: relative;
+  color: var(--sb-ink-mute);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+.sb-demo-code-tab:first-child {
+  margin-left: -14px;
+}
+.sb-demo-code-tab:hover {
   color: var(--sb-ink);
 }
-.sb-demo-code-tab::after {
+.sb-demo-code-tab.is-active {
+  color: var(--sb-ink);
+}
+.sb-demo-code-tab.is-active::after {
   content: "";
   position: absolute;
   left: 0;
@@ -1605,8 +1616,8 @@ body {
     ),
     var(--sb-bg);
 }
-.sb-root[data-theme="light"] .sb-nav {
-  background: rgba(251, 250, 250, 0.75);
+.sb-root[data-theme="light"] .sb-nav-inner {
+  background: rgba(251, 250, 250, 0.55);
 }
 .sb-root[data-theme="light"] .sb-brand-logo {
   content: url("/assets/skybridge-midnight.svg");
