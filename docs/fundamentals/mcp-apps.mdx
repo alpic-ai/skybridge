@@ -6,7 +6,7 @@ description: "Learn how MCP Apps extend MCP servers with interactive views, host
 
 [MCP Apps](https://github.com/modelcontextprotocol/ext-apps) are based on the **MCP ext-apps specification** — an open standard for rendering interactive UI views inside AI conversations. 
 
-MCP Apps are the portable baseline across hosts (e.g. Claude, Goose, VSCode, and ChatGPT compatibility mode). Skybridge implements the protocol via the `McpAppAdaptor` so you use the same hooks regardless of runtime.
+MCP Apps are the portable baseline across hosts (e.g. Claude, Goose, VS Code, and ChatGPT compatibility mode). Skybridge implements the protocol via the `McpAppAdaptor` so you use the same hooks regardless of runtime.
 
 ## View rendering flow
 
@@ -22,7 +22,7 @@ The view–host connection looks like this:
 
 <img src="/images/mcp-apps-explainer.avif" alt="MCP Apps architecture: MCP server, MCP host (ChatGPT, Claude), host UI with sandbox and guest app iframe" style={{ width: "100%", maxWidth: "600px", display: "block", margin: "0 auto" }} />
 
-The host UI in this diagram designates the MCP client (Claude, Goose, VSCode, etc.), and the guest app is your app running in an iframe.
+The host UI in this diagram designates the MCP client (Claude, Goose, VS Code, etc.), and the guest app is your app running in an iframe.
 
 ## The MCP ext-apps protocol
 
