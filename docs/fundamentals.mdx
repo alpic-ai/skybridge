@@ -6,7 +6,7 @@ keywords: ["MCP Apps", "Model Context Protocol"]
 
 Skybridge enables you to build **ChatGPT Apps** and **MCP Apps** - interactive UI views that render inside AI conversations. Before diving into Skybridge's APIs, understand the underlying protocols and runtimes it builds upon.
 
-## How views appear in MCP Apps Clients
+## How views appear in MCP Apps clients
 
 In MCP Apps clients, the model triggers your tool, and the client then renders both the assistant response and your view from the tool result.
 
@@ -20,24 +20,24 @@ In MCP Apps clients, the model triggers your tool, and the client then renders b
 
 [MCP](https://modelcontextprotocol.io) is an open standard that allows AI models to connect with external tools, resources, and services. Think of it as an API layer specifically designed for LLMs.
 
-### What is an MCP Client?
+### What is an MCP client?
 
-An **MCP Client** is a frontend application that implements the MCP protocol, and that can consume MCP Servers. Major MCP Clients include:
+An **MCP client** is a frontend application that implements the MCP protocol and can consume MCP servers. Major MCP clients include:
 - General-purpose AI apps: ChatGPT, Claude, Goose, etc
 - IDEs: Cursor, VSCode, Amp, etc
 - Coding agents: Claude Code, Codex CLI, Gemini CLI, etc
 - Any other software that implements the MCP protocol
 
-### What is an MCP Server?
+### What is an MCP server?
 
-An **MCP server** is a backend service that implements the MCP protocol. It exposes capabilities to MCP Clients through:
+An **MCP server** is a backend service that implements the MCP protocol. It exposes capabilities to MCP clients through:
 
 - **Tools**: Functions the model can call (e.g., `search_flights`, `get_weather`, `book_hotel`)
 - **Resources**: Data the model can access (e.g., files, database records, UI components)
 
 When you ask an AI assistant a question, it can invoke tools on your MCP server to fetch data or perform actions on your behalf. The server handles your business logic, database queries, API calls, and any other backend operations.
 
-### MCP Apps and ChatGPT Apps: The Same Foundation
+### MCP Apps and ChatGPT Apps: The same foundation
 
 **MCP Apps** is the open UI extension for MCP. It defines the portable contract for interactive views in AI clients, including the `ui/*` bridge, `tools/call`, and `_meta.ui.resourceUri`.
 
@@ -47,8 +47,8 @@ To avoid repetition, we will now refer to both ChatGPT Apps and MCP Apps as **AI
 
 An **AI App** consists of two components working together:
 
-1. **MCP Server**: Your backend that handles business logic and exposes tools via the MCP protocol
-2. **UI Views**: HTML components that render in the AI Client's interface as interactive UIs
+1. **MCP server**: Your backend that handles business logic and exposes tools via the MCP protocol
+2. **UI views**: HTML components that render in the AI client's interface as interactive UIs
 
 When a tool is called, it can return both:
 - **Text content**: What the model sees and responds with
@@ -92,7 +92,7 @@ Skybridge abstracts away the differences between these runtime environments so y
 
 
 
-## Next Steps
+## Next steps
 
 <CardGroup cols={2}>
   <Card title="Apps SDK Deep Dive" icon="message" href="/fundamentals/apps-sdk">
