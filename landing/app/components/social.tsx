@@ -49,21 +49,7 @@ export function SocialProofSection() {
       name: "Touchstream",
       src: "/assets/customer-logos/touchstream.webp",
       height: PNG_HEIGHT,
-      width: 230,
-    },
-    {
-      kind: "img",
-      name: "Awaze",
-      src: "/assets/customer-logos/awaze.webp",
-      height: PNG_HEIGHT,
-      width: 114,
-    },
-    {
-      kind: "img",
-      name: "Listo",
-      src: "/assets/customer-logos/listo.webp",
-      height: PNG_HEIGHT,
-      width: 99,
+      width: 229,
     },
     {
       kind: "img",
