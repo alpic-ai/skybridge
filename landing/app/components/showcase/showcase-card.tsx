@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChatGPTFrame } from "./chatgpt-frame";
 import { getShowcasePreviews, type ShowcaseApp } from "./data";
 
@@ -47,6 +47,8 @@ export function ShowcaseCard({
       }, CYCLE_INTERVAL_MS);
     }, INITIAL_DELAY_MS);
   }, [canCycle, previews.length, stopCycling]);
+
+  useEffect(() => stopCycling, [stopCycling]);
 
   return (
     <Link

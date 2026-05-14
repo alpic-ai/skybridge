@@ -53,13 +53,6 @@ export function SocialProofSection() {
     },
     {
       kind: "img",
-      name: "Datadog",
-      src: "/assets/customer-logos/listo.webp",
-      height: PNG_HEIGHT,
-      width: 99,
-    },
-    {
-      kind: "img",
       name: "Alpic",
       src: "/assets/customer-logos/alpic.webp",
       height: PNG_HEIGHT,

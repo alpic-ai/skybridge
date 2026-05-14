@@ -66,7 +66,9 @@ export default async function ShowcaseDetailPage({
     applicationCategory: "BusinessApplication",
     operatingSystem: app.host,
     url: `https://skybridge.tech/showcase/${app.slug}`,
-    image: hero ? `https://skybridge.tech${hero}` : undefined,
+    image: hero
+      ? new URL(hero, "https://skybridge.tech").toString()
+      : undefined,
     keywords: app.tags.join(", "),
     isBasedOn: {
       "@type": "SoftwareApplication",

@@ -59,8 +59,6 @@ export type ShowcaseApp = {
   /** App icon displayed in the tool-call header (circular, ~18px). */
   icon?: string;
   img?: string;
-  /** @deprecated Prefer `previews`. Used when `previews` is absent. */
-  screenshots?: string[];
   /** Ordered showcase slides (host mode + screenshot + optional thread copy). */
   previews?: ShowcasePreview[];
   noWidget?: boolean;
@@ -82,28 +80,16 @@ function inferDefaultInlineMode(
   return "chatgpt-inline";
 }
 
-/** Resolve carousel frames: explicit `previews`, or legacy `img` / `screenshots`, or `noWidget` placeholder. */
+/** Resolve carousel frames: explicit `previews`, legacy `img`, or `noWidget` placeholder. */
 export function getShowcasePreviews(app: ShowcaseApp): ShowcasePreview[] {
   if (app.previews && app.previews.length > 0) {
     return app.previews;
   }
-  if (app.noWidget) {
-    return [
-      {
-        mode: inferDefaultInlineMode(app.host),
-        chat: app.chat,
-        screenshot: "",
-      },
-    ];
-  }
-  const slides = app.img
-    ? [app.img, ...(app.screenshots ?? [])]
-    : [...(app.screenshots ?? [])];
-  if (slides.length === 0) {
-    return [];
-  }
   const mode = inferDefaultInlineMode(app.host);
-  return slides.map((screenshot) => ({ mode, chat: app.chat, screenshot }));
+  if (app.noWidget) {
+    return [{ mode, chat: app.chat, screenshot: "" }];
+  }
+  return app.img ? [{ mode, chat: app.chat, screenshot: app.img }] : [];
 }
 
 /** OpenGraph / thumbnails: first preview with a screenshot, else legacy `img`. */
@@ -140,7 +126,7 @@ export const SHOWCASE: ShowcaseApp[] = [
       },
       {
         mode: "claude-fullscreen",
-        screenshot: "/assets/showcase/kiwifullscree.webp",
+        screenshot: "/assets/showcase/kiwifullscreen.webp",
       },
     ],
     chat: {
@@ -254,7 +240,7 @@ export const SHOWCASE: ShowcaseApp[] = [
       },
     ],
     chat: {
-      user: "I want a refurbished iPhone under €400, good battery health",
+      user: "I want a refurbished iPhone under €500, good battery health",
       assistant: "Let me check the Recommerce catalog.",
     },
     tags: ["Commerce", "Circular"],
@@ -264,6 +250,7 @@ export const SHOWCASE: ShowcaseApp[] = [
       "Ability to leverage chatGPT knowledge to help user benchmarks various devices, based on their own criteria.",
     ],
     links: {
+      demo: "https://mcp.recommerce.com/try",
       chatgpt:
         "https://chatgpt.com/apps/recommerce/asdk_app_6943b26226c4819189e6b19249055265",
     },
@@ -358,6 +345,7 @@ export const SHOWCASE: ShowcaseApp[] = [
       "Multi country, multi language support, including UI & API data.",
     ],
     links: {
+      demo: "https://mcp.tradin.recommerce.com/try",
       chatgpt:
         "https://chatgpt.com/apps/recommerce-trade-in/asdk_app_69c5423d7e408191bec964b57cce719e",
     },
