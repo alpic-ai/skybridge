@@ -35,9 +35,17 @@ type ToolMeta = {
   // Custom status messages
   "openai/toolInvocation/invoking"?: string; // While running
   "openai/toolInvocation/invoked"?: string;  // After completion
+  "openai/fileParams": string[] // List of top-level input fields that references files.
+  // Controls whether a tool is available to the model, the UI (app), or both.
+  "visibility": Array<"model" | "app">
   [key: string]: unknown;
 };
 ```
+
+<Note>
+Flag input parameters that ChatGPT can use to reference files by adding the keys to `openai/fileParams`.
+Learn more about files lifecycle with tool calling by reading the [`FileRef`](/api-reference/file-ref) doc.
+</Note>
 
 ### `view`
 
