@@ -1,6 +1,6 @@
 ---
 title: Telemetry
-description: "Learn what data Skybridge collects, why we collect it, and how to opt out."
+description: "Learn what Skybridge telemetry collects, why it helps improve Skybridge development, how privacy works, and how to opt out in projects."
 ---
 
 # Telemetry
@@ -54,7 +54,7 @@ That's the entire payload. There is no machine ID, no session ID, no tool name, 
 - ❌ End-user prompts, conversations, or model output
 - ❌ Environment variables or secrets
 - ❌ IP addresses or location data stored or used as identifiers
-- ❌ Personal identifiable information
+- ❌ Personally identifiable information
 
 ## Why We Collect Telemetry
 
@@ -67,15 +67,15 @@ Telemetry helps us:
 
 ## How to Opt Out
 
-Telemetry preferences are stored per-machine. You can opt-out of telemetry using any of the following methods:
+Telemetry preferences are stored per-machine. You can opt out of telemetry using any of the following methods:
 - updating the `telemetry.enabled` property in `~/.skybridge/config.json` configuration file
-- using CLI `skybridge telemetry disable` command
-- setting environment variables `SKYBRIDGE_TELEMETRY_DISABLED=1` or `DO_NOT_TRACK=1`
+- running `skybridge telemetry disable`
+- setting the `SKYBRIDGE_TELEMETRY_DISABLED=1` or `DO_NOT_TRACK=1` environment variable
 
 The right opt-out method depends on **where** the telemetry is being emitted from:
 
-- **Your local development machine**: Prefer the use of `skybridge telemetry disable` that will update your local `~/.skybridge/config.json` config file
-- **CI runners** & **Deployed Skybridge servers**: Prefer the use of `SKYBRIDGE_TELEMETRY_DISABLED=1` or `DO_NOT_TRACK=1` environment variable. It's much simpler than packaging a local `~/.skybridge/config.json`
+- **Your local development machine**: Prefer `skybridge telemetry disable`, which updates your local `~/.skybridge/config.json` config file
+- **CI runners** & **Deployed Skybridge servers**: Prefer the `SKYBRIDGE_TELEMETRY_DISABLED=1` or `DO_NOT_TRACK=1` environment variable. It's much simpler than packaging a local `~/.skybridge/config.json`
 
 ### Using the Configuration File
 
@@ -90,7 +90,7 @@ Telemetry settings are stored per-machine in `~/.skybridge/config.json`:
 }
 ``` 
 
-This file is generated on first skybridge CLI command run with `telemetry.enabled` set to `true` by default.
+This file is generated the first time you run a Skybridge CLI command, with `telemetry.enabled` set to `true` by default.
 
 Disable telemetry by setting `telemetry.enabled` to `false`.
 
@@ -118,7 +118,7 @@ Check your current telemetry status:
 skybridge telemetry status
 ```
 
-All the above commands write and read from the `~/.skybridge/config.json` configuration file.
+All the above commands read from and write to the `~/.skybridge/config.json` configuration file.
 
 ### Using Environment Variables
 

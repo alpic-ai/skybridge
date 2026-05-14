@@ -1,10 +1,10 @@
 ---
 title: Write Once, Run Everywhere
 sidebarTitle: Write Once, Run Everywhere
-description: "How Skybridge abstracts runtime differences so your apps work across all ChatGPT and MCP Apps hosts."
+description: "Understand how Skybridge lets one React and MCP server codebase run across ChatGPT, Claude, Cursor, MCP App clients, and AI hosts."
 ---
 
-Skybridge is designed to be **runtime-agnostic**. Your view code works the same whether it runs in MCP Apps compatible clients (like Claude, Goose, VSCode) via the MCP ext-apps specification, or in ChatGPT via the Apps SDK.
+Skybridge is designed to be **runtime-agnostic**. Your view code works the same whether it runs in MCP Apps clients (like Claude, Goose, VS Code) via the MCP ext-apps specification, or in ChatGPT via the Apps SDK.
 
 ## The Problem
 
@@ -44,7 +44,7 @@ flowchart TB
     end
 
     AppsSdk --> ChatGPT["ChatGPT"]
-    McpApp --> McpClients["Claude, Goose, VSCode..."]
+    McpApp --> McpClients["Claude, Goose, VS Code..."]
 
     style Code fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#334155
     style Skybridge fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#334155
@@ -67,7 +67,7 @@ These include [useToolInfo](/api-reference/use-tool-info), [useCallTool](/api-re
     As new AI platforms adopt MCP, your views will work without code changes
   </Card>
   <Card title="No Vendor Lock-in" icon="unlock">
-    Build once, deploy to multiple AI clients: ChatGPT, Claude, Goose, VSCode, and more
+    Build once, deploy to multiple AI clients: ChatGPT, Claude, Goose, VS Code, and more
   </Card>
   <Card title="Single Codebase" icon="code">
     One set of hooks, one mental model, multiple platforms

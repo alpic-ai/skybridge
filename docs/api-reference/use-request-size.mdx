@@ -1,6 +1,6 @@
 ---
 title: useRequestSize
-description: "Resize the view to arbitrary dimensions."
+description: "Resize MCP Apps views with useRequestSize by asking the host to update iframe width, height, responsive UI dimensions, and layout."
 ---
 
 The `useRequestSize` hook returns a function that asks the host to update the iframe height and/or width. Use it to deliberately pin a size.
@@ -46,4 +46,3 @@ An async function that asks the host to size your view's container to the given 
 <Tip>
 The host may clamp the requested size or ignore it entirely in display modes that own the viewport.
 </Tip>
-

@@ -1,12 +1,12 @@
 ---
-title: Test Your App
-description: "Test your app locally with DevTools, or in ChatGPT Developer Mode and compatible MCP Clients for integration testing."
+title: Test your app
+description: "Test your app locally with DevTools, with an LLM in the Alpic Playground, and then try it in ChatGPT, Claude, or another MCP client."
 icon: "flask-vial"
 ---
 
-Skybridge provides two ways to test your app: **local DevTools** for rapid iteration, and production testing in ChatGPT and compatible MCP Apps Clients.
+Skybridge provides two ways to test your app: **local DevTools** for rapid iteration, and production testing in ChatGPT and compatible MCP Apps clients.
 
-## Local Development (Recommended)
+## Local development (recommended)
 
 Open `http://localhost:3000/` in your browser to access DevTools. This is the fastest way to develop:
 
@@ -15,7 +15,7 @@ Open `http://localhost:3000/` in your browser to access DevTools. This is the fa
 - **View preview** - Render views in a mocked Apps SDK environment
 - **Theme/locale switching** - Test different display modes
 
-The DevTools mock the Apps SDK and the MCP apps runtimes, so your view code works identically in both environments.
+DevTools mocks the Apps SDK and MCP Apps runtimes, so your view code works identically in both environments.
 
 <Tip>
 **Fast Iteration**
@@ -25,7 +25,7 @@ For full details on DevTools, HMR, and Vite plugin, see [Fast Iteration](/concep
 
 
 
-## Production Testing
+## Production testing
 
 When you're ready to test your AI App with an LLM, you can connect it to ChatGPT, Claude, or other compatible MCP clients.
 
@@ -36,8 +36,8 @@ When you're ready to test your AI App with an LLM, you can connect it to ChatGPT
   <Card title="Testing in Claude" icon="user" href="#testing-in-claude">
     Test with Claude using the MCP Apps runtime
   </Card>
-  <Card title="Testing in Desktop MCP Clients" icon="desktop" href="#testing-in-other-mcp-clients">
-    Test locally with VSCode, Goose, and other desktop clients
+  <Card title="Testing in desktop MCP clients" icon="desktop" href="#testing-in-other-mcp-clients">
+    Test locally with VS Code, Goose, and other desktop clients
   </Card>
 </CardGroup>
 
@@ -84,7 +84,7 @@ Skybridge downloads and runs [Alpic tunnel](https://docs.alpic.ai/cli/tunnel) au
 2. Select your app using the **+** button
 3. Prompt the model to trigger your tools
 
-#### Hot Module Reload
+#### Hot module reload
 
 View changes in `src/views/` appear instantly without reconnecting.
 
@@ -133,9 +133,9 @@ Skybridge downloads and runs [Alpic tunnel](https://docs.alpic.ai/cli/tunnel) au
 2. Make sure your Connector is selected in the Connectors dropdown
 3. Test view interactions and tool responses
 
-### Testing in other MCP Clients
+### Testing in other MCP clients
 
-Desktop MCP clients like VSCode, Goose, and others can connect directly to your local server without needing a HTTP tunnel or a public URL.
+Desktop MCP clients like VS Code, Goose, and others can connect directly to your local server without needing an HTTP tunnel or a public URL.
 
 #### 1. Start your server
 
@@ -149,7 +149,7 @@ Your MCP server will be available at `http://localhost:3000/mcp`.
 
 #### 2. Connect to your MCP client
 
-Connect your server to any desktop MCP client that supports the [ext-apps specification](https://github.com/modelcontextprotocol/ext-apps), such as [VSCode](https://code.visualstudio.com/), [Goose](https://block.github.io/goose), [Postman](https://www.postman.com/), or [MCPJam](https://mcpjam.com/).
+Connect your server to any desktop MCP client that supports the [ext-apps specification](https://github.com/modelcontextprotocol/ext-apps), such as [VS Code](https://code.visualstudio.com/), [Goose](https://block.github.io/goose), [Postman](https://www.postman.com/), or [MCPJam](https://mcpjam.com/).
 
 
 #### 3. Test your app
@@ -159,7 +159,7 @@ Connect your server to any desktop MCP client that supports the [ext-apps specif
 3. Test your app by invoking tools and interacting with the views
 
 
-## What's Next?
+## What's next?
 
 <CardGroup cols={2}>
   <Card title="Core Concepts" icon="lightbulb" href="/concepts">
