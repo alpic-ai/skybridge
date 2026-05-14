@@ -139,7 +139,7 @@
           {
             "group": "Types",
             "icon": "brackets-curly",
-            "pages": ["api-reference/infer-utility-types"]
+            "pages": ["api-reference/infer-utility-types", "api-reference/file-ref"]
           },
           {
             "group": "Advanced",
