@@ -272,7 +272,8 @@ export const SHOWCASE: ShowcaseApp[] = [
         mode: "chatgpt-inline",
         chat: {
           user: "How are my MCP servers doing this week?",
-          assistant: "Let me summarize your servers' performance from Alpic analytics.",
+          assistant:
+            "Let me summarize your servers' performance from Alpic analytics.",
         },
         screenshot: "/assets/showcase/alpic-inline-1.webp",
       },
@@ -280,7 +281,8 @@ export const SHOWCASE: ShowcaseApp[] = [
         mode: "chatgpt-inline",
         chat: {
           user: "How are my MCP servers doing this week?",
-          assistant: "Let me summarize your servers' performance from Alpic analytics.",
+          assistant:
+            "Let me summarize your servers' performance from Alpic analytics.",
         },
         screenshot: "/assets/showcase/alpic-inline-2.webp",
       },

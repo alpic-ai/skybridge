@@ -3,11 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Image from "next-image-export-optimizer";
 import { InstallRow } from "../../components/hero";
-import { SiteNav } from "../../components/site-nav";
 import { Icon } from "../../components/icons";
 import { ClaudeStarSVG } from "../../components/showcase/chatgpt-frame";
 import { getShowcaseHeroImage, SHOWCASE } from "../../components/showcase/data";
 import { PreviewCarousel } from "../../components/showcase/preview-carousel";
+import { SiteNav } from "../../components/site-nav";
 import { SiteFooter } from "../../components/trust-final";
 
 export async function generateStaticParams() {
