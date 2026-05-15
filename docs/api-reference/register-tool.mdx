@@ -35,9 +35,9 @@ type ToolMeta = {
   // Custom status messages
   "openai/toolInvocation/invoking"?: string; // While running
   "openai/toolInvocation/invoked"?: string;  // After completion
-  "openai/fileParams": string[] // List of top-level input fields that references files.
+  "openai/fileParams"?: string[]; // List of top-level input fields that references files.
   // Controls whether a tool is available to the model, the UI (app), or both.
-  "visibility": Array<"model" | "app">
+  ui?: { visibility?: Array<"model" | "app"> };
   [key: string]: unknown;
 };
 ```
