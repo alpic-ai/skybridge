@@ -393,6 +393,52 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
   },
   {
+    id: "facile",
+    slug: "facile",
+    name: "Facile.it Energia",
+    tagline: "Compare energy offers in Italy",
+    blurb:
+      "Facile.it Energia helps you compare gas and electricity offers in Italy. Instead of visiting each provider's website or deciphering confusing rate sheets, you can see the best available offers based on your actual consumption and location, all in one screen.",
+    category: "3rd Party",
+    host: "ChatGPT",
+    accent: "#FF6600",
+    icon: "/assets/showcase/icons/facile.webp",
+    img: "/assets/showcase/facile-inline-1.webp",
+    previews: [
+      {
+        mode: "chatgpt-inline",
+        chat: {
+          user: "Compare electricity and gas offers in Milan",
+          assistant: "Ok let me ask Facile.it comparator",
+        },
+        screenshot: "/assets/showcase/facile-inline-1.webp",
+      },
+      {
+        mode: "chatgpt-inline",
+        chat: {
+          user: "Compare electricity and gas offers in Milan",
+          assistant: "Ok let me ask Facile.it comparator",
+        },
+        screenshot: "/assets/showcase/facile-inline-2.webp",
+      },
+    ],
+    chat: {
+      user: "Compare electricity and gas offers in Milan",
+      assistant: "Ok let me ask Facile.it comparator",
+    },
+    tags: ["Energy", "Comparator"],
+    highlights: [
+      "Fill forms via the UI or by talking to ChatGPT, the LLM can manipulate the form for you if it has the right information.",
+      "Context shared with model to help users select the right consumption category",
+      "Access to all energy providers in Italy.",
+      "Mobile-first design.",
+    ],
+    links: {
+      chatgpt:
+        "https://chatgpt.com/apps/facile-it-energia/asdk_app_69fcc1c31b2081919069e1f5f6f7166d",
+    },
+  },
+  {
     id: "generative-ui",
     slug: "generative-ui",
     name: "Generative UI",
