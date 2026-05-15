@@ -15,6 +15,35 @@ import type {
 import { AppsSdkBridge } from "./bridge.js";
 import type { AppsSdkWidgetState } from "./types.js";
 
+/**
+ * Estimates the token count for a given state object.
+ * Uses a rough approximation: 1 token ≈ 4 characters.
+ * @param state - The widget state to estimate tokens for
+ * @returns Estimated token count
+ */
+function estimateTokenCount(state: unknown): number {
+  const jsonString = JSON.stringify(state);
+  return Math.ceil(jsonString.length / 4);
+}
+
+/**
+ * Warns if the widget state exceeds the 4K token limit.
+ * Per OpenAI Apps SDK documentation, widget state should not exceed 4K tokens.
+ * @param state - The widget state to check
+ */
+function warnIfExceedsTokenLimit(state: AppsSdkWidgetState): void {
+  const TOKEN_LIMIT = 4000;
+  const estimatedTokens = estimateTokenCount(state);
+
+  if (estimatedTokens > TOKEN_LIMIT) {
+    console.warn(
+      `[skybridge] Widget state exceeds ${TOKEN_LIMIT} token limit (estimated: ${estimatedTokens} tokens). ` +
+        `This may cause issues with ChatGPT context. Consider reducing the state size. ` +
+        `See: https://developers.openai.com/apps-sdk/build/chatgpt-ui#persist-component-state-expose-context-to-chatgpt`,
+    );
+  }
+}
+
 export class AppsSdkAdaptor implements Adaptor {
   private static instance: AppsSdkAdaptor | null = null;
 
@@ -99,11 +128,15 @@ export class AppsSdkAdaptor implements Adaptor {
         ? stateOrUpdater(window.openai.widgetState?.modelContent ?? null)
         : stateOrUpdater;
 
-    return window.openai.setWidgetState({
+    const newState: AppsSdkWidgetState = {
       privateContent: {},
       ...window.openai.widgetState,
       modelContent,
-    });
+    };
+
+    warnIfExceedsTokenLimit(newState);
+
+    return window.openai.setWidgetState(newState);
   };
 
   public uploadFile = async (file: File, options?: UploadFileOptions) => {
@@ -137,6 +170,9 @@ export class AppsSdkAdaptor implements Adaptor {
       state.imageIds = [];
     }
     state.imageIds.push(...fileIds);
+
+    warnIfExceedsTokenLimit(state);
+
     await window.openai.setWidgetState(state);
   }
 
