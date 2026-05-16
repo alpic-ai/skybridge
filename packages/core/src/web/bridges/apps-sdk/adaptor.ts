@@ -62,7 +62,20 @@ export class AppsSdkAdaptor implements Adaptor {
     name: string,
     args: ToolArgs,
   ): Promise<ToolResponse> => {
-    return window.openai.callTool<ToolArgs, ToolResponse>(name, args);
+    const response = await window.openai.callTool<ToolArgs, ToolResponse>(
+      name,
+      args,
+    );
+
+    // Normalize _meta to meta for consistency with MCP Apps runtime
+    if ("_meta" in response && !("meta" in response)) {
+      return {
+        ...response,
+        meta: (response as any)._meta,
+      };
+    }
+
+    return response;
   };
 
   public requestDisplayMode = (

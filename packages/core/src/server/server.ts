@@ -58,6 +58,34 @@ const mergeWithUnion = <T extends object, S extends object>(
   });
 };
 
+/**
+ * Extracts the top-level domain (TLD) from a URL.
+ * For example: "https://capitals.skybridge.tech" → "skybridge.tech"
+ * 
+ * @param urlString - The full URL or hostname
+ * @returns The TLD (last two parts of the hostname), or the original hostname if it has fewer than 2 parts
+ */
+function extractTLD(urlString: string): string {
+  try {
+    const url = new URL(urlString);
+    const parts = url.hostname.split(".");
+    
+    // If hostname has at least 2 parts, return the last 2 (e.g., "skybridge.tech")
+    // Otherwise return the whole hostname (e.g., "localhost")
+    if (parts.length >= 2) {
+      return parts.slice(-2).join(".");
+    }
+    return url.hostname;
+  } catch {
+    // If URL parsing fails, try to extract from the string directly
+    const parts = urlString.replace(/^https?:\/\//, "").split("/")[0].split(".");
+    if (parts.length >= 2) {
+      return parts.slice(-2).join(".");
+    }
+    return urlString;
+  }
+}
+
 export type ToolDef<
   TInput = unknown,
   TOutput = unknown,
@@ -794,7 +822,7 @@ export class McpServer<
           {
             resourceDomains: [serverUrl],
             connectDomains,
-            domain: serverUrl,
+            domain: extractTLD(serverUrl),
             baseUriDomains: [serverUrl],
           },
           contentMetaOverrides,
