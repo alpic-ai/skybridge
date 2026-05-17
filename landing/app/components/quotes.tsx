@@ -5,21 +5,21 @@ type Quote = { quote: string; author: string; role: string; photo?: string };
 const QUOTES: Quote[] = [
   {
     quote:
-      "In the past 24 hours I went from the template repo to three production-grade demos for our partners. Three. The way you've structured the Skybridge template is beautiful — extremely easy to leverage with Claude Opus and Codex.",
+      "In the past 24 hours I went from the template repo to three production-grade demos for our partners. The way you've structured the Skybridge template is beautiful, extremely easy to leverage with Claude Opus and Codex.",
     author: "Asad Iqbal",
     role: "CTO · Noodle Seed",
     photo: "/assets/people/asad.webp",
   },
   {
     quote:
-      'Skybridge\'s typed bridge between server tools and React widgets is the killer feature. useToolInfo<"my_tool">() knows exactly what our handler returns — server-side schema changes show up instantly as typecheck errors in the widget. Building MCP apps finally feels like building normal full-stack apps.',
+      'Skybridge\'s typed bridge between server tools and React widgets is the killer feature. useToolInfo<"my_tool">() knows exactly what our handler returns. Server-side schema changes show up instantly as typecheck errors in the widget. Building MCP apps finally feels like building normal full-stack apps.',
     author: "Meir Kadosh",
     role: "AI Engineer · Brightdata",
     photo: "/assets/people/meir.webp",
   },
   {
     quote:
-      "Skybridge gave us a single typed runtime for both server tools and React widgets — same TS types, hot-reload, and one deploy step into Claude and ChatGPT. It's the first MCP framework that actually feels production-grade.",
+      "Skybridge offered us a full environment to develop MCP apps quickly and easily. The dev tools saved us hours of iteration time and direct deploy to the Alpic platform was exactly what we needed.",
     author: "Stefan Lederer",
     role: "CEO · Bitmovin",
     photo: "/assets/people/stefan.webp",

@@ -157,42 +157,42 @@ body {
   font-family: var(--font-display);
   font-size: var(--fs-display-2xl);
   line-height: var(--lh-display-2xl);
-  letter-spacing: var(--tracking-display);
+  letter-spacing: 0;
   font-weight: 600;
 }
 .type-display-xl {
   font-family: var(--font-display);
   font-size: var(--fs-display-xl);
   line-height: var(--lh-display-xl);
-  letter-spacing: var(--tracking-display);
+  letter-spacing: 0;
   font-weight: 600;
 }
 .type-display-lg {
   font-family: var(--font-display);
   font-size: var(--fs-display-lg);
   line-height: var(--lh-display-lg);
-  letter-spacing: var(--tracking-display);
+  letter-spacing: 0;
   font-weight: 600;
 }
 .type-display-md {
   font-family: var(--font-display);
   font-size: var(--fs-display-md);
   line-height: var(--lh-display-md);
-  letter-spacing: var(--tracking-display);
+  letter-spacing: 0;
   font-weight: 600;
 }
 .type-display-sm {
   font-family: var(--font-display);
   font-size: var(--fs-display-sm);
   line-height: var(--lh-display-sm);
-  letter-spacing: var(--tracking-normal);
+  letter-spacing: 0;
   font-weight: 600;
 }
 .type-display-xs {
   font-family: var(--font-display);
   font-size: var(--fs-display-xs);
   line-height: var(--lh-display-xs);
-  letter-spacing: var(--tracking-normal);
+  letter-spacing: 0;
   font-weight: 600;
 }
 
