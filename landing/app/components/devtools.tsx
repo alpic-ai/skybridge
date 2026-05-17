@@ -45,6 +45,20 @@ const AuditSection = ({ tone, label, count, host, row }: AuditSectionProps) => (
   </div>
 );
 
+const JSON_FIELDS: {
+  key: string;
+  val: string | number;
+  kind: "str" | "num";
+}[] = [
+  { key: "flight", val: "AF 276", kind: "str" },
+  { key: "from", val: "CDG", kind: "str" },
+  { key: "to", val: "HND", kind: "str" },
+  { key: "dep", val: "10:25", kind: "str" },
+  { key: "arr", val: "06:40+1", kind: "str" },
+  { key: "stops", val: 0, kind: "num" },
+  { key: "price", val: "$891", kind: "str" },
+];
+
 const TerminalDots = () => (
   <>
     <span className="sb-devtools-dot" style={{ background: "#ff6159" }} />
@@ -150,22 +164,16 @@ function DevPanel({
             <div className="sb-dp-dt-output-h">Tool output</div>
             <div className="sb-dp-dt-json">
               <span className="sb-c-punc">{"{"}</span>
-              {(
-                [
-                  ["flight", <span className="sb-c-str">"AF 276"</span>],
-                  ["from", <span className="sb-c-str">"CDG"</span>],
-                  ["to", <span className="sb-c-str">"HND"</span>],
-                  ["dep", <span className="sb-c-str">"10:25"</span>],
-                  ["arr", <span className="sb-c-str">"06:40+1"</span>],
-                  ["stops", <span className="sb-c-num">0</span>],
-                  ["price", <span className="sb-c-str">"$891"</span>],
-                ] as const
-              ).map(([key, val], i, arr) => (
+              {JSON_FIELDS.map(({ key, val, kind }, i) => (
                 <div className="sb-dp-dt-json-line" key={key}>
                   <span className="sb-c-var">"{key}"</span>
                   <span className="sb-c-punc">: </span>
-                  {val}
-                  {i < arr.length - 1 && <span className="sb-c-punc">,</span>}
+                  <span className={`sb-c-${kind}`}>
+                    {kind === "str" ? `"${val}"` : val}
+                  </span>
+                  {i < JSON_FIELDS.length - 1 && (
+                    <span className="sb-c-punc">,</span>
+                  )}
                 </div>
               ))}
               <span className="sb-c-punc">{"}"}</span>
@@ -499,7 +507,9 @@ export function DevToolsSection() {
                 key={value.title}
                 onMouseEnter={() => {
                   setHover(value.key);
-                  if (value.key === "audit") setAuditKey((k) => k + 1);
+                  if (value.key === "audit") {
+                    setAuditKey((k) => k + 1);
+                  }
                 }}
                 onMouseLeave={() =>
                   setHover((cur) => (cur === value.key ? null : cur))

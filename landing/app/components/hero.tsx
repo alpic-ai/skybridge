@@ -22,18 +22,10 @@ export function InstallRow({ cmd, label }: InstallRowProps) {
     setTimeout(() => setCopied(false), 1500);
   };
   return (
-    <div
-      className="sb-install"
-      role="group"
-      aria-label={label}
-    >
+    <div className="sb-install" role="group" aria-label={label}>
       {label && <span className="sb-install-step">{label}</span>}
       <span className="sb-install-prompt">$</span>
-      <span
-        className="sb-install-cmd"
-      >
-        {cmd}
-      </span>
+      <span className="sb-install-cmd">{cmd}</span>
       <button
         className={`sb-install-copy ${copied ? "copied" : ""}`}
         onClick={onCopy}

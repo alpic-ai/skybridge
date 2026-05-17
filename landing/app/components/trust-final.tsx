@@ -96,9 +96,7 @@ export function SiteFooter() {
               alt="Skybridge"
               className="sb-footer-logo"
             />
-            <p>
-              An open-source project made with taste in Paris. © Alpic 2026
-            </p>
+            <p>An open-source project made with taste in Paris. © Alpic 2026</p>
           </div>
           <div>
             <h4>FRAMEWORK</h4>
