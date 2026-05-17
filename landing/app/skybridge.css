@@ -795,6 +795,9 @@ body {
   color: var(--sb-ink);
   overflow: hidden;
   transition: border-color 0.15s;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
 }
 .sb-install:hover {
   border-color: #2d4545;

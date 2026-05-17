@@ -228,7 +228,7 @@ function DevPanel({
           <div>
             <span className="sb-c-com">→ Stable URL provisioned</span>
           </div>
-          <div className="sb-dp-url">https://bold-mesa-2a.skybridge.app</div>
+          <div className="sb-dp-url">https://bold-mesa-2a.alpic.live</div>
           <div>
             <span className="sb-c-com">→ Ready on Claude, ChatGPT, mobile</span>
           </div>
@@ -511,9 +511,6 @@ export function DevToolsSection() {
                     setAuditKey((k) => k + 1);
                   }
                 }}
-                onMouseLeave={() =>
-                  setHover((cur) => (cur === value.key ? null : cur))
-                }
               >
                 <div>
                   <h4 style={{ fontSize: 18 }}>{value.title}</h4>

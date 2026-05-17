@@ -1,11 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { Mozilla_Text } from "next/font/google";
 import "./globals.css";
 
-const mozillaText = localFont({
-  src: "./fonts/mozilla-text.woff2",
+const mozillaText = Mozilla_Text({
+  subsets: ["latin"],
   variable: "--font-mozilla-text",
-  weight: "400 700",
   display: "swap",
 });
 
