@@ -28,7 +28,7 @@ const COMMUNITY_LINKS: CommunityLink[] = [
     },
   },
   {
-    href: "https://x.com/skybridgedev",
+    href: "https://x.com/alpic_ai",
     label: "X",
     subtitle: "Follow updates",
     icon: <Icon name="x" size={18} />,
