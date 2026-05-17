@@ -53,7 +53,13 @@ const TerminalDots = () => (
   </>
 );
 
-function DevPanel({ hover, auditKey }: { hover: string | null; auditKey: number }) {
+function DevPanel({
+  hover,
+  auditKey,
+}: {
+  hover: string | null;
+  auditKey: number;
+}) {
   return (
     <div className="sb-devpanel" aria-hidden="true">
       {/* HMR */}
@@ -112,7 +118,6 @@ function DevPanel({ hover, auditKey }: { hover: string | null; auditKey: number 
       <div
         className={`sb-devpanel-card sb-dp-emu ${hover === "emulator" ? "is-on" : ""}`}
       >
-        {/* URL bar */}
         <div className="sb-dp-dt-urlbar">
           <Icon name="globe" size={9} />
           <span>localhost:3000</span>
@@ -120,7 +125,6 @@ function DevPanel({ hover, auditKey }: { hover: string | null; auditKey: number 
           <span className="sb-dp-dt-urlbar-title">Skybridge DevTools</span>
         </div>
 
-        {/* DevTools chrome */}
         <div className="sb-dp-dt-chrome">
           <div className="sb-dp-dt-brand">
             <span className="sb-dp-dt-logo">▲</span>
@@ -134,7 +138,6 @@ function DevPanel({ hover, auditKey }: { hover: string | null; auditKey: number 
           </div>
         </div>
 
-        {/* Body: sidebar + output */}
         <div className="sb-dp-dt-body">
           <div className="sb-dp-dt-side">
             <div className="sb-dp-dt-side-h">Tools</div>
@@ -147,20 +150,22 @@ function DevPanel({ hover, auditKey }: { hover: string | null; auditKey: number 
             <div className="sb-dp-dt-output-h">Tool output</div>
             <div className="sb-dp-dt-json">
               <span className="sb-c-punc">{"{"}</span>
-              {[
-                ["flight",   <span className="sb-c-str">"AF 276"</span>,   true],
-                ["from",     <span className="sb-c-str">"CDG"</span>,       true],
-                ["to",       <span className="sb-c-str">"HND"</span>,       true],
-                ["dep",      <span className="sb-c-str">"10:25"</span>,     true],
-                ["arr",      <span className="sb-c-str">"06:40+1"</span>,   true],
-                ["stops",    <span className="sb-c-num">0</span>,           true],
-                ["price",    <span className="sb-c-str">"$891"</span>,      false],
-              ].map(([key, val, comma]) => (
-                <div className="sb-dp-dt-json-line" key={key as string}>
-                  <span className="sb-c-var">"{key as string}"</span>
+              {(
+                [
+                  ["flight", <span className="sb-c-str">"AF 276"</span>],
+                  ["from", <span className="sb-c-str">"CDG"</span>],
+                  ["to", <span className="sb-c-str">"HND"</span>],
+                  ["dep", <span className="sb-c-str">"10:25"</span>],
+                  ["arr", <span className="sb-c-str">"06:40+1"</span>],
+                  ["stops", <span className="sb-c-num">0</span>],
+                  ["price", <span className="sb-c-str">"$891"</span>],
+                ] as const
+              ).map(([key, val], i, arr) => (
+                <div className="sb-dp-dt-json-line" key={key}>
+                  <span className="sb-c-var">"{key}"</span>
                   <span className="sb-c-punc">: </span>
-                  {val as React.ReactNode}
-                  {comma && <span className="sb-c-punc">,</span>}
+                  {val}
+                  {i < arr.length - 1 && <span className="sb-c-punc">,</span>}
                 </div>
               ))}
               <span className="sb-c-punc">{"}"}</span>
@@ -168,20 +173,29 @@ function DevPanel({ hover, auditKey }: { hover: string | null; auditKey: number 
           </div>
         </div>
 
-        {/* Preview area — cycles through inline / mobile */}
+        {/* Preview cycles through inline / mobile via CSS animation */}
         <div className="sb-dp-dt-preview">
           <div className="sb-dp-dt-controls">
-            <span className="sb-dp-dt-ctrl sb-dp-dt-mode sb-dp-dt-mode-inline">inline</span>
-            <span className="sb-dp-dt-ctrl sb-dp-dt-mode sb-dp-dt-mode-mobile">mobile</span>
-            <span className="sb-dp-dt-ctrl-sep" aria-hidden>·</span>
+            <span className="sb-dp-dt-ctrl sb-dp-dt-mode sb-dp-dt-mode-inline">
+              inline
+            </span>
+            <span className="sb-dp-dt-ctrl sb-dp-dt-mode sb-dp-dt-mode-mobile">
+              mobile
+            </span>
+            <span className="sb-dp-dt-ctrl-sep" aria-hidden>
+              ·
+            </span>
             <span className="sb-dp-dt-theme-stack">
-              <span className="sb-dp-dt-theme-ind sb-dp-dt-theme-dark">☾ dark</span>
-              <span className="sb-dp-dt-theme-ind sb-dp-dt-theme-light">☼ light</span>
+              <span className="sb-dp-dt-theme-ind sb-dp-dt-theme-dark">
+                ☾ dark
+              </span>
+              <span className="sb-dp-dt-theme-ind sb-dp-dt-theme-light">
+                ☼ light
+              </span>
             </span>
           </div>
           <div className="sb-dp-dt-stage">
             <div className="sb-dp-dt-widget-wrap">
-              {/* Full widget — inline & mobile */}
               <div className="sb-dp-dt-flight">
                 <div className="sb-dp-dt-flight-route">
                   Paris <span className="sb-c-punc">→</span> Tokyo
@@ -240,97 +254,97 @@ function DevPanel({ hover, auditKey }: { hover: string | null; auditKey: number 
       <div
         className={`sb-devpanel-card sb-dp-aud ${hover === "audit" ? "is-on" : ""}`}
       >
-        {/* key forces remount → CSS animation restarts from 0 on every new hover */}
+        {/* key forces remount so the CSS animation restarts on every hover */}
         <div key={auditKey} style={{ display: "contents" }}>
-        <div className="sb-dp-aud-summary">
-          <div className="sb-dp-aud-ring" aria-hidden>
-            <svg viewBox="0 0 44 44" width="68" height="68">
-              <defs>
-                <linearGradient id="sbAuditRing" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="var(--sb-lime)" />
-                  <stop offset="100%" stopColor="var(--sb-accent)" />
-                </linearGradient>
-              </defs>
-              <circle
-                cx="22"
-                cy="22"
-                r="19"
-                fill="none"
-                stroke="rgba(255,255,255,0.08)"
-                strokeWidth="3"
-              />
-              <circle
-                className="sb-dp-aud-ring-arc"
-                cx="22"
-                cy="22"
-                r="19"
-                fill="none"
-                stroke="url(#sbAuditRing)"
-                strokeWidth="3"
-                strokeLinecap="round"
-                transform="rotate(-90 22 22)"
-              />
-            </svg>
-            <div className="sb-dp-aud-ring-num">
-              <span className="sb-dp-aud-ring-big">19</span>
-              <span className="sb-dp-aud-ring-sm">/21</span>
+          <div className="sb-dp-aud-summary">
+            <div className="sb-dp-aud-ring" aria-hidden>
+              <svg viewBox="0 0 44 44" width="68" height="68">
+                <defs>
+                  <linearGradient id="sbAuditRing" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="var(--sb-lime)" />
+                    <stop offset="100%" stopColor="var(--sb-accent)" />
+                  </linearGradient>
+                </defs>
+                <circle
+                  cx="22"
+                  cy="22"
+                  r="19"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.08)"
+                  strokeWidth="3"
+                />
+                <circle
+                  className="sb-dp-aud-ring-arc"
+                  cx="22"
+                  cy="22"
+                  r="19"
+                  fill="none"
+                  stroke="url(#sbAuditRing)"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  transform="rotate(-90 22 22)"
+                />
+              </svg>
+              <div className="sb-dp-aud-ring-num">
+                <span className="sb-dp-aud-ring-big">19</span>
+                <span className="sb-dp-aud-ring-sm">/21</span>
+              </div>
+            </div>
+            <div className="sb-dp-aud-summary-text">
+              <div className="sb-dp-aud-title">2 issues to fix</div>
+              <div className="sb-dp-aud-meta">
+                <span className="sb-dp-aud-err">1 error</span>
+                <span className="sb-dp-aud-meta-sep">·</span>
+                <span className="sb-dp-aud-warn">1 warning</span>
+                <span className="sb-dp-aud-meta-sep">·</span>
+                <span className="sb-dp-aud-pass-meta">19 checks passed</span>
+              </div>
             </div>
           </div>
-          <div className="sb-dp-aud-summary-text">
-            <div className="sb-dp-aud-title">2 issues to fix</div>
-            <div className="sb-dp-aud-meta">
-              <span className="sb-dp-aud-err">1 error</span>
-              <span className="sb-dp-aud-meta-sep">·</span>
-              <span className="sb-dp-aud-warn">1 warning</span>
-              <span className="sb-dp-aud-meta-sep">·</span>
-              <span className="sb-dp-aud-pass-meta">19 checks passed</span>
-            </div>
-          </div>
+
+          <AuditSection
+            tone="warn"
+            label="MCP tool checks"
+            count={1}
+            host="ChatGPT"
+            row={{
+              icon: "!",
+              title: "2 tools missing invocation metadata",
+              list: [
+                { code: "play", text: "— missing invoking, invoked" },
+                { code: "guess", text: "— missing invoking, invoked" },
+              ],
+            }}
+          />
+
+          <AuditSection
+            tone="err"
+            label="Failed"
+            count={1}
+            row={{
+              icon: "×",
+              title: "No authentication scheme configured",
+              list: [
+                { code: "authType", text: "— none detected" },
+                { code: "required", text: "— OAuth 2.0 or API key scheme" },
+              ],
+            }}
+          />
+
+          <AuditSection
+            tone="ok"
+            label="Passed"
+            count={19}
+            row={{
+              icon: "✓",
+              title: "Server responded in 191ms",
+              list: [
+                { code: "Response time", text: "— 91ms" },
+                { code: "Server", text: "— times-up 0.0.1" },
+              ],
+            }}
+          />
         </div>
-
-        <AuditSection
-          tone="warn"
-          label="MCP tool checks"
-          count={1}
-          host="ChatGPT"
-          row={{
-            icon: "!",
-            title: "2 tools missing invocation metadata",
-            list: [
-              { code: "play", text: "— missing invoking, invoked" },
-              { code: "guess", text: "— missing invoking, invoked" },
-            ],
-          }}
-        />
-
-        <AuditSection
-          tone="err"
-          label="Failed"
-          count={1}
-          row={{
-            icon: "×",
-            title: "No authentication scheme configured",
-            list: [
-              { code: "authType", text: "— none detected" },
-              { code: "required", text: "— OAuth 2.0 or API key scheme" },
-            ],
-          }}
-        />
-
-        <AuditSection
-          tone="ok"
-          label="Passed"
-          count={19}
-          row={{
-            icon: "✓",
-            title: "Server responded in 191ms",
-            list: [
-              { code: "Response time", text: "— 91ms" },
-              { code: "Server", text: "— times-up 0.0.1" },
-            ],
-          }}
-        />
-        </div>{/* end keyed remount wrapper */}
       </div>
     </div>
   );
