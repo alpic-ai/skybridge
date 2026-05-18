@@ -705,9 +705,7 @@ export class McpServer<
       // @ts-expect-error - For backwards compatibility with Claude current implementation of the specs
       toolMeta["ui/resourceUri"] = viewResource.uri;
 
-      const ui = toolMeta.ui || {};
-      ui.resourceUri = viewResource.uri;
-      toolMeta.ui = ui;
+      toolMeta.ui = { ...toolMeta.ui, resourceUri: viewResource.uri };
     }
   }
 
