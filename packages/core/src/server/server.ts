@@ -105,6 +105,8 @@ export interface KnownToolMeta {
   "openai/widgetAccessible"?: boolean;
   "openai/toolInvocation/invoking"?: string;
   "openai/toolInvocation/invoked"?: string;
+  "openai/fileParams"?: string[];
+  ui?: Pick<McpUiToolMeta, "visibility">;
 }
 
 export type ToolMeta = KnownToolMeta & Record<string, unknown>;
@@ -129,6 +131,7 @@ type OpenaiToolMeta = {
   "openai/widgetAccessible"?: boolean;
   "openai/toolInvocation/invoking"?: string;
   "openai/toolInvocation/invoked"?: string;
+  "openai/fileParams"?: string[];
 };
 
 /** @see https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx#resource-discovery */
@@ -701,7 +704,8 @@ export class McpServer<
       });
       // @ts-expect-error - For backwards compatibility with Claude current implementation of the specs
       toolMeta["ui/resourceUri"] = viewResource.uri;
-      toolMeta.ui = { resourceUri: viewResource.uri };
+
+      toolMeta.ui = { ...toolMeta.ui, resourceUri: viewResource.uri };
     }
   }
 
