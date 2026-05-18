@@ -49,21 +49,7 @@ export function SocialProofSection() {
       name: "Touchstream",
       src: "/assets/customer-logos/touchstream.webp",
       height: PNG_HEIGHT,
-      width: 230,
-    },
-    {
-      kind: "img",
-      name: "Awaze",
-      src: "/assets/customer-logos/awaze.webp",
-      height: PNG_HEIGHT,
-      width: 114,
-    },
-    {
-      kind: "img",
-      name: "Listo",
-      src: "/assets/customer-logos/listo.webp",
-      height: PNG_HEIGHT,
-      width: 99,
+      width: 229,
     },
     {
       kind: "img",
@@ -136,7 +122,6 @@ export function SocialProofSection() {
                     {isSvg ? (
                       // SVGs render at their intrinsic ratio; next/image's aspect-ratio
                       // check misfires on them, so use a plain <img>.
-                      // biome-ignore lint/performance/noImgElement: SVG, no raster optimization needed
                       <img
                         src={logo.src}
                         alt={logo.name}

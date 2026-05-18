@@ -28,7 +28,7 @@ export default function Onboarding() {
     <div
       className={`${theme === "dark" ? "dark" : ""} mx-auto w-full max-w-4xl rounded-xl border border-border overflow-hidden bg-background text-foreground`}
     >
-      <div className="min-h-[34rem] md:min-h-95 flex flex-col items-center gap-6 p-6 bg-gradient-to-br from-purple-50 via-white to-cyan-50 dark:from-purple-950/30 dark:via-zinc-950 dark:to-cyan-900/30 bg-[length:200%_200%] animate-aurora md:flex-row md:items-stretch">
+      <div className="min-h-136 md:min-h-95 flex flex-col items-center gap-6 p-6 bg-linear-to-br from-purple-50 via-white to-cyan-50 dark:from-purple-950/30 dark:via-zinc-950 dark:to-cyan-900/30 bg-size-[200%_200%] animate-aurora md:flex-row md:items-stretch">
         <div className="shrink-0 self-center animate-float">
           <img
             src={img}

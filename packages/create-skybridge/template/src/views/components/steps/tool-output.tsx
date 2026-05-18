@@ -33,7 +33,7 @@ export default function ToolOutput() {
         <DocLink href="https://docs.skybridge.tech/api-reference/use-tool-info">
           useToolInfo
         </DocLink>{" "}
-        to hydrates the view with tool input, output and metadata.
+        to hydrate the view with tool input, output and metadata.
       </Doc>
     </>
   );

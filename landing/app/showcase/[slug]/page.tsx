@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Image from "next-image-export-optimizer";
-import { InstallRow, SiteNav } from "../../components/hero";
+import { InstallRow } from "../../components/hero";
 import { Icon } from "../../components/icons";
 import { ClaudeStarSVG } from "../../components/showcase/chatgpt-frame";
-import { hostAccent, SHOWCASE } from "../../components/showcase/data";
+import { getShowcaseHeroImage, SHOWCASE } from "../../components/showcase/data";
 import { PreviewCarousel } from "../../components/showcase/preview-carousel";
+import { SiteNav } from "../../components/site-nav";
 import { SiteFooter } from "../../components/trust-final";
 
 export async function generateStaticParams() {
@@ -25,8 +26,9 @@ export async function generateMetadata({
   }
   const title = `${app.name} — ${app.tagline} | Skybridge Showcase`;
   const url = `/showcase/${app.slug}`;
-  const images = app.img
-    ? [{ url: app.img, alt: `${app.name} — ${app.tagline}` }]
+  const hero = getShowcaseHeroImage(app);
+  const images = hero
+    ? [{ url: hero, alt: `${app.name} — ${app.tagline}` }]
     : undefined;
   return {
     title,
@@ -53,6 +55,7 @@ export default async function ShowcaseDetailPage({
     notFound();
   }
 
+  const hero = getShowcaseHeroImage(app);
   const related = SHOWCASE.filter((entry) => entry.id !== app.id).slice(0, 3);
 
   const jsonLd = {
@@ -63,7 +66,7 @@ export default async function ShowcaseDetailPage({
     applicationCategory: "BusinessApplication",
     operatingSystem: app.host,
     url: `https://skybridge.tech/showcase/${app.slug}`,
-    image: app.img ? `https://skybridge.tech${app.img}` : undefined,
+    image: hero ? `https://skybridge.tech${hero}` : undefined,
     keywords: app.tags.join(", "),
     isBasedOn: {
       "@type": "SoftwareApplication",
@@ -103,10 +106,7 @@ export default async function ShowcaseDetailPage({
             <div className="sxD-hero-grid">
               <div>
                 <h1 className="sxD-title">{app.name}</h1>
-                <p
-                  className="sxD-tagline"
-                  style={{ color: hostAccent(app.host) }}
-                >
+                <p className="sxD-tagline" style={{ color: app.accent }}>
                   {app.tagline}
                 </p>
                 <p className="sxD-summary">{app.blurb}</p>
@@ -136,7 +136,7 @@ export default async function ShowcaseDetailPage({
                         fill="currentColor"
                         aria-hidden="true"
                       >
-                        <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.05 6.05 0 0 0 6.515 2.9A5.98 5.98 0 0 0 13.26 24a6.05 6.05 0 0 0 5.772-4.21 5.99 5.99 0 0 0 3.997-2.9 6.05 6.05 0 0 0-.747-7.07Z" />
+                        <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.677l5.815 3.354-2.02 1.168a.076.076 0 0 1-.071.005l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.872zm16.597 3.855l-5.833-3.387L15.124 7.2a.076.076 0 0 1 .071-.005l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.664zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.681 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.074a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.361l2.602-1.502 2.603 1.502v3.003l-2.603 1.502-2.602-1.502z" />
                       </svg>
                       Add on ChatGPT
                     </a>
@@ -172,38 +172,21 @@ export default async function ShowcaseDetailPage({
 
           <div className="sxD-body">
             <div>
-              <div
-                className="sxD-section-h"
-                style={{ color: hostAccent(app.host) }}
-              >
+              <div className="sxD-section-h" style={{ color: app.accent }}>
                 The app
               </div>
               <h2 className="sxD-h2">{app.tagline}.</h2>
               <p className="sxD-p">{app.blurb}</p>
-              <p className="sxD-p">
-                {app.name} runs as a Skybridge MCP App — write the widget once
-                in TypeScript and React, and it ships to {app.host} with the
-                same tool calls, the same auth, and the same render. No
-                host-specific forks, no separate codebases.
-              </p>
-              <h3 className="sxD-h3">What's interesting</h3>
-              <ul className="sxD-ul">
-                <li>
-                  Native widget rendering inside the chat thread — no popouts,
-                  no modals.
-                </li>
-                <li>
-                  Tool calls and UI state stay in sync via Skybridge's typed
-                  bridge.
-                </li>
-                <li>
-                  Same code path runs in{" "}
-                  {app.host.includes("Claude")
-                    ? "ChatGPT and Claude"
-                    : "ChatGPT today, Claude when ready"}
-                  .
-                </li>
-              </ul>
+              {app.highlights && app.highlights.length > 0 && (
+                <>
+                  <h3 className="sxD-h3">What's interesting</h3>
+                  <ul className="sxD-ul">
+                    {app.highlights.map((point) => (
+                      <li key={point}>{point}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </div>
             <aside className="sxD-side">
               <div className="sxD-side-card">
@@ -274,28 +257,31 @@ export default async function ShowcaseDetailPage({
               Explore the showcase
             </h2>
             <div className="sxD-related-grid">
-              {related.map((relatedApp) => (
-                <Link
-                  key={relatedApp.id}
-                  href={`/showcase/${relatedApp.slug}`}
-                  className="sxD-related-card"
-                >
-                  {relatedApp.img && (
-                    <Image
-                      src={relatedApp.img}
-                      alt=""
-                      className="sxD-related-img"
-                      width={500}
-                      height={300}
-                      sizes="(max-width: 768px) 50vw, 280px"
-                    />
-                  )}
-                  <div className="sxD-related-name">{relatedApp.name}</div>
-                  <div className="sxD-related-tag">
-                    {relatedApp.category} · {relatedApp.tagline}
-                  </div>
-                </Link>
-              ))}
+              {related.map((relatedApp) => {
+                const thumb = getShowcaseHeroImage(relatedApp);
+                return (
+                  <Link
+                    key={relatedApp.id}
+                    href={`/showcase/${relatedApp.slug}`}
+                    className="sxD-related-card"
+                  >
+                    {thumb ? (
+                      <Image
+                        src={thumb}
+                        alt=""
+                        className="sxD-related-img"
+                        width={500}
+                        height={300}
+                        sizes="(max-width: 768px) 50vw, 280px"
+                      />
+                    ) : null}
+                    <div className="sxD-related-name">{relatedApp.name}</div>
+                    <div className="sxD-related-tag">
+                      {relatedApp.category} · {relatedApp.tagline}
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>

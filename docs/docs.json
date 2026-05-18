@@ -122,6 +122,8 @@
               "api-reference/use-send-follow-up-message",
               "api-reference/use-view-state",
               "api-reference/use-request-modal",
+              "api-reference/use-request-close",
+              "api-reference/use-request-size",
               "api-reference/use-files"
             ]
           },
@@ -137,7 +139,7 @@
           {
             "group": "Types",
             "icon": "brackets-curly",
-            "pages": ["api-reference/infer-utility-types"]
+            "pages": ["api-reference/infer-utility-types", "api-reference/file-ref"]
           },
           {
             "group": "Advanced",
@@ -202,6 +204,10 @@
     },
     {
       "source": "/examples/awaze",
+      "destination": "https://skybridge.tech/showcase"
+    },
+    {
+      "source": "/examples/cottages",
       "destination": "https://skybridge.tech/showcase"
     },
     {

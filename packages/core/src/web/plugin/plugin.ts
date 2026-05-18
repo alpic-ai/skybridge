@@ -65,6 +65,13 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
 
       return {
         base: "/assets",
+        // Fixes "Invalid hook call" on createStore by forcing a single
+        // copy of React. Under pnpm's isolated node_modules, zustand
+        // inside `skybridge` resolves React from skybridge's own
+        // dependencies while the host app loads its own copy
+        resolve: {
+          dedupe: ["react", "react-dom"],
+        },
         build: {
           outDir: "dist/assets",
           emptyOutDir: true,
