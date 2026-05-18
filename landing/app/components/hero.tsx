@@ -75,7 +75,11 @@ export function Hero() {
             <Icon name="arrow" size={13} stroke={2.2} />
           </span>
         </a>
-        <h1 className="sb-h1" style={{ fontWeight: 400 }}>
+        <h1 className="sb-sr-only">
+          Skybridge, the React framework for building MCP apps. Runs in Claude,
+          ChatGPT, VSCode, and any MCP client.
+        </h1>
+        <div className="sb-h1" style={{ fontWeight: 400 }} aria-hidden="true">
           Build apps that live
           <br />
           inside{" "}
@@ -84,7 +88,6 @@ export function Hero() {
               <span
                 key={host}
                 className={`sb-h1-host-slot ${index === hostIndex ? "is-active" : "is-hidden"}`}
-                aria-hidden={index !== hostIndex}
               >
                 <span className="sb-accent">{host}</span>
               </span>
@@ -93,7 +96,7 @@ export function Hero() {
               {LONGEST_HOST}
             </span>
           </span>
-        </h1>
+        </div>
         <p className="sb-lede">The React framework for MCP Apps.</p>
 
         <div className="sb-cta-stack">

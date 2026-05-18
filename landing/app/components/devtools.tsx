@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Icon } from "./icons";
+import { ClaudeStarSVG } from "./showcase/chatgpt-frame";
 
 type AuditRow = {
   icon: string;
@@ -82,49 +83,62 @@ function DevPanel({
       >
         <div className="sb-dp-diff">
           <div className="sb-dp-diff-header">
-            <span className="sb-dp-diff-file">flights.tsx</span>
-            <span className="sb-dp-toast-dot" />
-            <span className="sb-dp-toast-t">HMR · 12ms</span>
+            <span className="sb-dp-diff-file">view.tsx</span>
           </div>
           <div className="sb-dp-diff-body">
+            <div className="sb-dp-diff-line sb-dp-diff-ctx">
+              <span className="sb-dp-diff-sign"> </span>
+              <span className="sb-c-kw">const</span>{" "}
+              <span className="sb-c-punc">{"{"}</span>{" "}
+              <span className="sb-c-var">output</span>{" "}
+              <span className="sb-c-punc">{"}"}</span>{" "}
+              <span className="sb-c-punc">=</span>{" "}
+              <span className="sb-c-fn">useToolInfo</span>
+              <span className="sb-c-punc">&lt;</span>
+              <span className="sb-c-str">"searchFlights"</span>
+              <span className="sb-c-punc">&gt;()</span>
+            </div>
             <div className="sb-dp-diff-line sb-dp-diff-del">
               <span className="sb-dp-diff-sign">−</span>
-              <span className="sb-c-tag">&lt;Badge</span>{" "}
-              <span className="sb-c-var">variant</span>
-              <span className="sb-c-punc">=</span>
-              <span className="sb-c-str">"default"</span>
-              <span className="sb-c-tag">&gt;</span>
-              <span className="sb-c-punc">Economy</span>
+              <span className="sb-c-tag">&lt;FlightCard</span>{" "}
+              <span className="sb-c-var">flight</span>
+              <span className="sb-c-punc">
+                ={"{"}output{"}"}
+              </span>{" "}
+              <span className="sb-c-tag">/&gt;</span>
             </div>
             <div className="sb-dp-diff-line sb-dp-diff-add">
               <span className="sb-dp-diff-sign">+</span>
-              <span className="sb-c-tag">&lt;Badge</span>{" "}
-              <span className="sb-c-var">variant</span>
-              <span className="sb-c-punc">=</span>
-              <span className="sb-c-str">"highlight"</span>
-              <span className="sb-c-tag">&gt;</span>
-              <span className="sb-c-punc">Best deal</span>
+              <span className="sb-c-tag">&lt;FlightCard</span>{" "}
+              <span className="sb-c-var">flight</span>
+              <span className="sb-c-punc">
+                ={"{"}output{"}"}
+              </span>{" "}
+              <span className="sb-c-var">highlight</span>{" "}
+              <span className="sb-c-tag">/&gt;</span>
             </div>
             <div className="sb-dp-diff-line sb-dp-diff-ctx">
               <span className="sb-dp-diff-sign"> </span>
-              <span className="sb-c-tag">&lt;Price</span>{" "}
-              <span className="sb-c-var">value</span>
-              <span className="sb-c-punc">=</span>
-              <span className="sb-c-str">"$891"</span>{" "}
+              <span className="sb-c-tag">&lt;BookButton</span>{" "}
+              <span className="sb-c-var">flight</span>
+              <span className="sb-c-punc">
+                ={"{"}output{"}"}
+              </span>{" "}
               <span className="sb-c-tag">/&gt;</span>
             </div>
           </div>
         </div>
         <div className="sb-dp-diff-arrow">↓</div>
         <div className="sb-dp-widget">
-          <div className="sb-dp-widget-row">
-            <span className="sb-dp-diff-updated">Best deal</span>
-            <strong>$891</strong>
+          <div className="sb-dp-widget-highlight-row">
+            <span className="sb-dp-widget-pill">✦ Best fare</span>
+            <strong className="sb-dp-widget-price">$891</strong>
           </div>
-          <div className="sb-dp-widget-row sub">
-            <span>AF 276 · Nonstop</span>
+          <div className="sb-dp-widget-row sub" style={{ marginTop: 6 }}>
+            <span>CDG → HND · AF 276</span>
             <span>11h 15m</span>
           </div>
+          <div className="sb-dp-widget-btn">Book AF 276 →</div>
         </div>
       </div>
 
@@ -235,25 +249,87 @@ function DevPanel({
             <span className="sb-c-com">→ Ready on Claude, ChatGPT, mobile</span>
           </div>
         </div>
-        <div className="sb-dp-devices">
-          <div className="sb-dp-phone">
-            <div className="sb-dp-phone-top" />
-            <div className="sb-dp-phone-card">
-              <div className="sb-dp-card-r">
-                <span>AF 276</span>
-                <strong>$891</strong>
+        <div className="sb-dp-tun-diagram">
+          <div className="sb-dp-tun-btn">
+            <span className="sb-dp-tun-btn-dot" />
+            Tunnel
+          </div>
+          <svg
+            className="sb-dp-tun-arrows"
+            width="180"
+            height="36"
+            viewBox="0 0 180 36"
+            fill="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <marker
+                id="arr-l"
+                markerWidth="6"
+                markerHeight="6"
+                refX="3"
+                refY="3"
+                orient="auto"
+              >
+                <path d="M0,0 L6,3 L0,6 Z" fill="rgba(137,240,236,0.4)" />
+              </marker>
+              <marker
+                id="arr-r"
+                markerWidth="6"
+                markerHeight="6"
+                refX="3"
+                refY="3"
+                orient="auto"
+              >
+                <path d="M0,0 L6,3 L0,6 Z" fill="rgba(137,240,236,0.4)" />
+              </marker>
+            </defs>
+            <line
+              x1="90"
+              y1="2"
+              x2="22"
+              y2="30"
+              stroke="rgba(137,240,236,0.35)"
+              strokeWidth="1"
+              strokeDasharray="3 2"
+              markerEnd="url(#arr-l)"
+            />
+            <line
+              x1="90"
+              y1="2"
+              x2="158"
+              y2="30"
+              stroke="rgba(137,240,236,0.35)"
+              strokeWidth="1"
+              strokeDasharray="3 2"
+              markerEnd="url(#arr-r)"
+            />
+          </svg>
+          <div className="sb-dp-tun-clients">
+            <div className="sb-dp-tun-client sb-dp-tun-client--chatgpt">
+              <div className="sb-dp-tun-client-chrome">
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.677l5.815 3.354-2.02 1.168a.076.076 0 0 1-.071.005L2.34 13.01A4.504 4.504 0 0 1 2.34 7.872zm16.597 3.855l-5.833-3.387L15.124 7.2a.076.076 0 0 1 .071-.005l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.664zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.681 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.074a4.5 4.5 0 0 1 7.375-3.453l-.142.08-4.778 2.758a.795.795 0 0 0-.393.681zm1.097-2.361l2.602-1.502 2.603 1.502v3.003l-2.603 1.502-2.602-1.502z" />
+                </svg>
+                <span>ChatGPT</span>
+              </div>
+              <div className="sb-dp-tun-client-body">
+                <span className="sb-dp-tun-used">Used app</span>
               </div>
             </div>
-          </div>
-          <div className="sb-dp-laptop">
-            <div className="sb-dp-laptop-scr">
-              <div className="sb-dp-card-r">
-                <span>AF 276</span>
-                <strong>$891</strong>
+            <div className="sb-dp-tun-client sb-dp-tun-client--claude">
+              <div className="sb-dp-tun-client-chrome">
+                <ClaudeStarSVG size={10} />
+                <span>Claude</span>
               </div>
-              <div className="sb-dp-card-r sub">
-                <span>Nonstop</span>
-                <span>11h 15m</span>
+              <div className="sb-dp-tun-client-body">
+                <span className="sb-dp-tun-used">Used app</span>
               </div>
             </div>
           </div>
