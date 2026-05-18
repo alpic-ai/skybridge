@@ -228,7 +228,7 @@ function DevPanel({
           <div>
             <span className="sb-c-com">→ Stable URL provisioned</span>
           </div>
-          <div className="sb-dp-url">https://bold-mesa-2a.alpic.live</div>
+          <div className="sb-dp-url">https://cool-marmot-fondue-420.alpic.dev/mcp</div>
           <div>
             <span className="sb-c-com">→ Ready on Claude, ChatGPT, mobile</span>
           </div>
