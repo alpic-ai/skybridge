@@ -649,7 +649,7 @@
 
 .sxD-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-columns: minmax(0, 1fr) 300px;
   gap: 56px;
   padding: 48px 48px 56px;
 }
