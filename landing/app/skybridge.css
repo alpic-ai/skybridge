@@ -1808,7 +1808,8 @@ body {
   }
   .sb-value,
   .sb-value:nth-child(3n),
-  .sb-value:nth-child(2n) {
+  .sb-value:nth-child(2n),
+  .sb-value:nth-last-child(-n + 3) {
     border-right: none;
     border-bottom: 1px solid var(--sb-border);
   }
