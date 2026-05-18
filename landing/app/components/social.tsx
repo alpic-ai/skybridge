@@ -87,7 +87,7 @@ export function SocialProofSection() {
     <section className="sb-section" id="customers" style={{ paddingTop: 72 }}>
       <div className="sb-wrap">
         <div className="sb-stat-row">
-          <div className="sb-stat-lead" style={{ width: "700px" }}>
+          <div className="sb-stat-lead">
             <div
               className="sb-big"
               style={{ fontSize: "52px", fontWeight: "400" }}
