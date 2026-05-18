@@ -1,11 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { Mozilla_Text } from "next/font/google";
 import "./globals.css";
 
-const mozillaText = localFont({
-  src: "./fonts/mozilla-text.woff2",
+const mozillaText = Mozilla_Text({
+  subsets: ["latin"],
   variable: "--font-mozilla-text",
-  weight: "400 700",
   display: "swap",
 });
 
@@ -37,7 +36,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    site: "@skybridgedev",
+    site: "@alpic_ai",
     title: "Skybridge — the full-stack React framework for MCP Apps",
     description:
       "Open-source TypeScript framework for building MCP Apps. Write once, run in Claude, ChatGPT, VSCode, and any MCP client.",
