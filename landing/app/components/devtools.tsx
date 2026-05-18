@@ -88,48 +88,61 @@ function DevPanel({
           <div className="sb-dp-diff-body">
             <div className="sb-dp-diff-line sb-dp-diff-ctx">
               <span className="sb-dp-diff-sign"> </span>
-              <span className="sb-c-kw">const</span>{" "}
-              <span className="sb-c-punc">{"{"}</span>{" "}
-              <span className="sb-c-var">output</span>{" "}
-              <span className="sb-c-punc">{"}"}</span>{" "}
-              <span className="sb-c-punc">=</span>{" "}
-              <span className="sb-c-fn">useToolInfo</span>
-              <span className="sb-c-punc">&lt;</span>
-              <span className="sb-c-str">"searchFlights"</span>
-              <span className="sb-c-punc">&gt;()</span>
+              <span className="sb-dp-diff-line-content">
+                <span className="sb-c-kw">const</span>{" "}
+                <span className="sb-c-punc">{"{"}</span>{" "}
+                <span className="sb-c-var">output</span>{" "}
+                <span className="sb-c-punc">{"}"}</span>{" "}
+                <span className="sb-c-punc">=</span>{" "}
+                <span className="sb-c-fn">useToolInfo</span>
+                <span className="sb-c-punc">&lt;</span>
+                <span className="sb-c-str">"searchFlights"</span>
+                <span className="sb-c-punc">&gt;()</span>
+              </span>
             </div>
             <div className="sb-dp-diff-line sb-dp-diff-del">
               <span className="sb-dp-diff-sign">−</span>
-              <span className="sb-c-tag">&lt;FlightCard</span>{" "}
-              <span className="sb-c-var">flight</span>
-              <span className="sb-c-punc">
-                ={"{"}output{"}"}
-              </span>{" "}
-              <span className="sb-c-tag">/&gt;</span>
+              <span className="sb-dp-diff-line-content">
+                <span className="sb-c-tag">&lt;FlightCard</span>{" "}
+                <span className="sb-c-var">flight</span>
+                <span className="sb-c-punc">
+                  ={"{"}output{"}"}
+                </span>{" "}
+                <span className="sb-c-tag">/&gt;</span>
+              </span>
             </div>
             <div className="sb-dp-diff-line sb-dp-diff-add">
               <span className="sb-dp-diff-sign">+</span>
-              <span className="sb-c-tag">&lt;FlightCard</span>{" "}
-              <span className="sb-c-var">flight</span>
-              <span className="sb-c-punc">
-                ={"{"}output{"}"}
-              </span>{" "}
-              <span className="sb-c-var">highlight</span>{" "}
-              <span className="sb-c-tag">/&gt;</span>
+              <span className="sb-dp-diff-line-content">
+                <span className="sb-c-tag">&lt;FlightCard</span>{" "}
+                <span className="sb-c-var">flight</span>
+                <span className="sb-c-punc">
+                  ={"{"}output{"}"}
+                </span>{" "}
+                <span className="sb-c-var">highlight</span>{" "}
+                <span className="sb-c-tag">/&gt;</span>
+                <span className="sb-dp-diff-caret" aria-hidden />
+              </span>
             </div>
             <div className="sb-dp-diff-line sb-dp-diff-ctx">
               <span className="sb-dp-diff-sign"> </span>
-              <span className="sb-c-tag">&lt;BookButton</span>{" "}
-              <span className="sb-c-var">flight</span>
-              <span className="sb-c-punc">
-                ={"{"}output{"}"}
-              </span>{" "}
-              <span className="sb-c-tag">/&gt;</span>
+              <span className="sb-dp-diff-line-content">
+                <span className="sb-c-tag">&lt;BookButton</span>{" "}
+                <span className="sb-c-var">flight</span>
+                <span className="sb-c-punc">
+                  ={"{"}output{"}"}
+                </span>{" "}
+                <span className="sb-c-tag">/&gt;</span>
+              </span>
             </div>
           </div>
         </div>
-        <div className="sb-dp-diff-arrow">↓</div>
+        <div className="sb-dp-diff-arrow">
+          <span className="sb-dp-diff-arrow-glyph">↓</span>
+          <span className="sb-dp-diff-arrow-beam" aria-hidden />
+        </div>
         <div className="sb-dp-widget">
+          <div className="sb-dp-widget-flash" aria-hidden />
           <div className="sb-dp-widget-highlight-row">
             <span className="sb-dp-widget-pill">✦ Best fare</span>
             <strong className="sb-dp-widget-price">$891</strong>

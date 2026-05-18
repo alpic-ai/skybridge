@@ -1932,6 +1932,22 @@ body {
     box-shadow: 0 0 0 0 rgba(226, 255, 198, 0);
   }
 }
+.sb-dp-diff-line-content {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-wrap: wrap;
+  position: relative;
+}
+.sb-dp-diff-caret {
+  display: inline-block;
+  width: 1px;
+  height: 1em;
+  margin-left: 2px;
+  background: var(--sb-success);
+  vertical-align: -2px;
+  opacity: 0;
+}
 .sb-dp-toast-t {
   font: 600 11px / 1 var(--font-mono);
   color: var(--sb-lime);
@@ -2012,91 +2028,248 @@ body {
   font-size: 16px;
   color: var(--sb-ink-mute);
   line-height: 1;
+  position: relative;
+  height: 18px;
 }
-.sb-dp-diff-updated {
-  color: var(--sb-success);
+.sb-dp-diff-arrow-glyph {
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+}
+.sb-dp-diff-arrow-beam {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2px;
+  height: 0;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(
+    to bottom,
+    rgba(108, 217, 169, 0) 0%,
+    rgba(108, 217, 169, 0.85) 50%,
+    rgba(108, 217, 169, 0) 100%
+  );
+  border-radius: 2px;
+  opacity: 0;
+  pointer-events: none;
 }
 
-/* HMR animation sequence — triggered when card is active */
+/* HMR animation sequence — 5s cycle: 4s of action (idle → edit → save → update) then 1s hold */
 @keyframes sb-hmr-del {
   0%,
-  15% {
-    opacity: 0.25;
-    background: transparent;
-  }
-  25%,
-  45% {
+  16% {
     opacity: 1;
-    background: rgba(242, 43, 121, 0.15);
+    background: rgba(242, 43, 121, 0.16);
+    text-decoration: none;
   }
-  60%,
+  28%,
+  80%,
   100% {
-    opacity: 0.35;
-    background: transparent;
+    opacity: 0.55;
+    background: rgba(242, 43, 121, 0.08);
+    text-decoration: line-through;
+    text-decoration-color: rgba(242, 43, 121, 0.6);
   }
 }
 @keyframes sb-hmr-add {
   0%,
-  35% {
-    opacity: 0.25;
-    background: transparent;
+  18% {
+    clip-path: inset(0 100% 0 0);
+    background: rgba(108, 217, 169, 0);
   }
-  50%,
+  32% {
+    clip-path: inset(0 0 0 0);
+    background: rgba(108, 217, 169, 0.16);
+  }
+  46% {
+    clip-path: inset(0 0 0 0);
+    background: rgba(108, 217, 169, 0.22);
+  }
+  58%,
+  80%,
   100% {
-    opacity: 1;
+    clip-path: inset(0 0 0 0);
     background: rgba(108, 217, 169, 0.12);
   }
 }
 @keyframes sb-hmr-ctx {
   0%,
-  40% {
-    opacity: 0.2;
+  20% {
+    opacity: 0.4;
   }
-  55%,
+  36%,
+  80%,
   100% {
-    opacity: 0.5;
+    opacity: 0.6;
   }
 }
-@keyframes sb-hmr-arrow {
+@keyframes sb-hmr-caret {
   0%,
-  50% {
-    opacity: 0.2;
-    transform: translateY(0);
+  16% {
+    opacity: 0;
   }
-  60% {
+  18%,
+  30% {
     opacity: 1;
-    transform: translateY(3px);
   }
-  70%,
+  31%,
+  33% {
+    opacity: 0;
+  }
+  34%,
+  37% {
+    opacity: 1;
+  }
+  38%,
+  80%,
   100% {
-    opacity: 0.5;
-    transform: translateY(0);
+    opacity: 0;
   }
 }
-@keyframes sb-hmr-label {
+@keyframes sb-hmr-arrow-glyph {
   0%,
-  55% {
+  38% {
+    opacity: 0.35;
     color: var(--sb-ink-mute);
+    transform: translateY(0);
   }
-  70%,
-  100% {
+  44% {
+    opacity: 1;
     color: var(--sb-success);
+    transform: translateY(2px);
+    text-shadow: 0 0 8px rgba(108, 217, 169, 0.7);
+  }
+  56%,
+  80%,
+  100% {
+    opacity: 0.5;
+    color: var(--sb-ink-mute);
+    transform: translateY(0);
+    text-shadow: none;
+  }
+}
+@keyframes sb-hmr-arrow-beam {
+  0%,
+  38% {
+    opacity: 0;
+    height: 0;
+  }
+  42% {
+    opacity: 1;
+    height: 26px;
+  }
+  50% {
+    opacity: 0.6;
+    height: 26px;
+  }
+  58%,
+  80%,
+  100% {
+    opacity: 0;
+    height: 0;
+  }
+}
+@keyframes sb-hmr-toast-flash {
+  0%,
+  40% {
+    transform: scale(1);
+    background: var(--sb-lime);
+    box-shadow: 0 0 0 0 rgba(226, 255, 198, 0.4);
+  }
+  45% {
+    transform: scale(1.55);
+    background: #ffffff;
+    box-shadow: 0 0 0 6px rgba(226, 255, 198, 0.35);
+  }
+  56%,
+  80%,
+  100% {
+    transform: scale(1);
+    background: var(--sb-lime);
+    box-shadow: 0 0 0 0 rgba(226, 255, 198, 0);
+  }
+}
+@keyframes sb-hmr-toast-label {
+  0%,
+  40% {
+    color: var(--sb-lime);
+  }
+  45% {
+    color: #ffffff;
+  }
+  56%,
+  80%,
+  100% {
+    color: var(--sb-lime);
+  }
+}
+@keyframes sb-hmr-badge-old {
+  0%,
+  45% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  54%,
+  80%,
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+    filter: blur(2px);
+  }
+}
+@keyframes sb-hmr-badge-new {
+  0%,
+  48% {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(2px);
+  }
+  58%,
+  80%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
   }
 }
 @keyframes sb-hmr-widget {
   0%,
-  55% {
+  44% {
     border-color: var(--sb-border);
+    box-shadow: none;
   }
-  65%,
-  75% {
-    border-color: rgba(108, 217, 169, 0.4);
-    box-shadow: 0 0 0 2px rgba(108, 217, 169, 0.08);
+  52% {
+    border-color: rgba(108, 217, 169, 0.55);
+    box-shadow:
+      0 0 0 3px rgba(108, 217, 169, 0.12),
+      0 0 28px rgba(108, 217, 169, 0.22);
   }
-  90%,
+  62% {
+    border-color: rgba(108, 217, 169, 0.35);
+    box-shadow:
+      0 0 0 1px rgba(108, 217, 169, 0.18),
+      0 0 14px rgba(108, 217, 169, 0.12);
+  }
+  74%,
+  80%,
   100% {
     border-color: var(--sb-border);
     box-shadow: none;
+  }
+}
+@keyframes sb-hmr-widget-flash {
+  0%,
+  46% {
+    opacity: 0;
+  }
+  51% {
+    opacity: 1;
+  }
+  62%,
+  80%,
+  100% {
+    opacity: 0;
   }
 }
 
@@ -2136,19 +2309,34 @@ body {
 }
 
 .sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-diff-del {
-  animation: sb-hmr-del 3.5s ease-in-out infinite;
+  animation: sb-hmr-del 5s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-diff-add {
-  animation: sb-hmr-add 3.5s ease-in-out infinite;
+  animation: sb-hmr-add 5s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-diff-ctx {
-  animation: sb-hmr-ctx 3.5s ease-in-out infinite;
+  animation: sb-hmr-ctx 5s ease-in-out infinite;
 }
-.sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-diff-arrow {
-  animation: sb-hmr-arrow 3.5s ease-in-out infinite;
+.sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-diff-caret {
+  animation: sb-hmr-caret 5s steps(1, end) infinite;
 }
-.sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-diff-updated {
-  animation: sb-hmr-label 3.5s ease-in-out infinite;
+.sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-diff-arrow-glyph {
+  animation: sb-hmr-arrow-glyph 5s ease-in-out infinite;
+}
+.sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-diff-arrow-beam {
+  animation: sb-hmr-arrow-beam 5s ease-in-out infinite;
+}
+.sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-toast-dot {
+  animation: sb-hmr-toast-flash 5s ease-out infinite;
+}
+.sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-toast-t {
+  animation: sb-hmr-toast-label 5s ease-out infinite;
+}
+.sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-widget-badge-old {
+  animation: sb-hmr-badge-old 5s ease-in-out infinite;
+}
+.sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-widget-badge-new {
+  animation: sb-hmr-badge-new 5s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-widget-pill {
   animation: sb-hmr-pill 3.5s ease-in-out infinite;
@@ -2160,7 +2348,10 @@ body {
   animation: sb-hmr-btn 3.5s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-widget {
-  animation: sb-hmr-widget 3.5s ease-in-out infinite;
+  animation: sb-hmr-widget 5s ease-in-out infinite;
+}
+.sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-widget-flash {
+  animation: sb-hmr-widget-flash 5s ease-out infinite;
 }
 .sb-dp-widget {
   border: 1px solid var(--sb-border);
@@ -2168,6 +2359,40 @@ body {
   padding: 12px 14px;
   background: rgba(255, 255, 255, 0.02);
   align-self: end;
+  position: relative;
+  overflow: hidden;
+}
+.sb-dp-widget-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(108, 217, 169, 0.22) 0%,
+    rgba(108, 217, 169, 0) 70%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+.sb-dp-widget-badge {
+  position: relative;
+  display: inline-block;
+  min-width: 70px;
+  height: 1.3em;
+}
+.sb-dp-widget-badge-old,
+.sb-dp-widget-badge-new {
+  position: absolute;
+  inset: 0;
+  display: inline-block;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.sb-dp-widget-badge-old {
+  color: var(--sb-ink-mute);
+}
+.sb-dp-widget-badge-new {
+  color: var(--sb-success);
+  opacity: 0;
 }
 .sb-dp-widget-row {
   display: flex;
