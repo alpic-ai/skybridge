@@ -2,7 +2,10 @@
 
 <p align="center">
   <a href="https://docs.skybridge.tech">
-    <img alt="Skybridge - The full-stack React framework for MCP Apps and MCP Servers" src="docs/images/skybridge-readme-banner.png" width="100%" />
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/images/skybridge-readme-banner-dark.png" />
+      <img alt="Skybridge, the full-stack React framework for MCP apps and MCP servers" src="docs/images/skybridge-readme-banner-light.png" width="100%" />
+    </picture>
   </a>
 </p>
 
@@ -25,20 +28,23 @@
 
 ## About Skybridge
 
-Skybridge helps developers build type-safe MCP Apps for Claude, ChatGPT, Gemini and other UI enabled MCP Clients, with a complete set of devtools designed for both humans and agents.
+Skybridge helps developers build type-safe MCP apps for Claude, ChatGPT and other UI-enabled MCP clients, with a complete set of tooling designed for both humans and agents.
 
-MCP Apps extend the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) with **rich, interactive UI views** rendered from MCP servers. Conversational apps need seamless interaction between the user, the UI, and the model. This means new UX patterns, developer tooling, and abstractions. This is why we built Skybridge.
+Why? MCP apps extend the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) with **rich, interactive UI views** rendered from MCP servers. Conversational apps need seamless interaction between the user, the UI, and the model. This means new UX patterns, developer tooling, and abstractions. 
+Plus, the raw SDKs are low-level: no hooks, type safety, HMR, etc.
+
+That's why we built *Skybridge*.
 
 Features include:
 
-- **Delightful dev environment**: It provides a dev server with a local emulator, Hot Module Reload, and a permanent tunnel to connect your local app to Claude and ChatGPT.
-- **Write once, run everywhere**: Skybridge abstracts implementation differences between MCP Clients, so your app runs seamlessly in Claude, ChatGPT, VSCode, and any other compatible MCP Apps client.
-- **Agent-ready**: Powerful Skills, CLI, and programmatic DevTools APIs: it provides everything your coding agent needs to build MCP Apps end-to-end.
-- **Type-safe end-to-end**: tRPC-style inference from MCP server tool definition to React view for type-safety end-to-end from server to frontend.
+- **Delightful dev environment**: Skybridge provides a dev server with a local emulator, hot module reload, and a permanent tunnel to connect your local app to Claude and ChatGPT.
+- **Write once, run everywhere**: the framework abstracts implementation differences between MCP clients, so your app runs seamlessly in Claude, ChatGPT, VSCode, and any other MCP apps compatible client.
+- **Agent-ready**: powerful skills, CLI, and programmatic dev tool APIs, everything your coding agent needs to build MCP apps end-to-end.
+- **Type-safe end-to-end**: tRPC-style inference from MCP server tool definition to React view for type safety from server to frontend.
 - **React-first**: Intuitive React Query-style hooks, with advanced state management. 
-- **Examples library**: Get started quickly with production-ready app examples for e-commerce, travel, SaaS, and others.
+- **Example library**: get started quickly with ChatGPT- and Claude-ready app examples for ecommerce, travel, SaaS, and more.
 
-These companies chose Skybridge to deploy their apps on ChatGPT and Claude stores: 
+They chose to build their MCP apps with Skybridge: 
 
 <p align="center">
   <a href="https://www.datadoghq.com"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/datadog-dark.svg"><img src="docs/images/user-logos/datadog-light.svg" alt="Datadog" height="24"></picture></a>
@@ -56,15 +62,15 @@ These companies chose Skybridge to deploy their apps on ChatGPT and Claude store
 
 **For agents**
 
-Install our [Skill](https://docs.skybridge.tech/devtools/skills) for MCP Apps and ChatGPT Apps:
+Install our [skill](https://docs.skybridge.tech/devtools/skills) for building MCP apps and ChatGPT apps:
 ```bash
 npx skills add alpic-ai/skybridge -s skybridge
 ```
-Once installed, if you ask your agent "_what skills do you have?_", it should mention the skybridge skill. Then, you can ask it to:
+Once installed, ask your agent "What skills do you have?" to confirm, then try:
 
-- _Create a new MCP App_
-- _Migrate my MCP Server to the Skybridge framework_
-- _Add a new view to my MCP App_ 
+- _Create a new MCP app_
+- _Migrate my MCP server to the Skybridge framework_
+- _Add a new view to my MCP app_ 
 
 **For humans**
 
@@ -72,38 +78,36 @@ Bootstrap a new project with:
 ```bash
 npm create skybridge my-app
 ```
-For full install instructions, read the [**Quickstart section**](https://docs.skybridge.tech/quickstart/create-new-app) of our documentation.
+For full install instructions, read our [**Quickstart guide**](https://docs.skybridge.tech/quickstart/create-new-app).
 
 ## Documentation
 
 The [Skybridge documentation](https://docs.skybridge.tech) covers the full lifecycle of building MCP Apps:
 
 - [Fundamentals](https://docs.skybridge.tech/fundamentals): understand MCP Apps, ChatGPT Apps, and how Skybridge bridges both runtimes.
-- [Core concepts](https://docs.skybridge.tech/concepts): learn about server <> model <> UI data flow, LLM context sync, type safety, and instant local iteration with our devtools.
+- [Core concepts](https://docs.skybridge.tech/concepts): learn about server <> model <> UI data flows, LLM context sync, type safety, and instant local iteration with our devtools.
 - [Guides](https://docs.skybridge.tech/guides/fetching-data): build real app behavior with tools, views, state, and model communication.
 - [API Reference](https://docs.skybridge.tech/api-reference): browse our MCP server APIs, React hooks, CLI commands, and runtime compatibility.
 
 ## Deploy
 
-Deploy Skybridge apps instantly on [Alpic](https://alpic.ai) to get scalable hosting, MCP analytics, permanent tunnelling, MCP auditing and app stores submission help, or self-host on any Node.js-compatible platform.
+Deploy Skybridge apps instantly on [Alpic](https://alpic.ai) for scalable hosting, MCP-specific analytics, permanent tunneling, app store compliance auditing and submission help. You can also self-host on any Node.js-compatible platform.
 
-Read the [deployment guide](https://docs.skybridge.tech/quickstart/deploy) for the full production path.
+See our [deployment guide](https://docs.skybridge.tech/quickstart/deploy) for the full production path.
 
 ## Community & Contributing
 
-We invite you to contribute and help improve Skybridge.
+We'd love your help improving Skybridge. Here are a few ways to get involved:
 
-Here are a few ways you can get involved:
-
-- **Reporting bugs**: If you run into a bug or unexpected behavior, please open an issue in [GitHub Issues](https://github.com/alpic-ai/skybridge/issues) with a clear reproduction.
-- **Questions and Suggestions**: Need help building with Skybridge or have ideas to improve the framework, docs, examples, or developer experience? [Open an issue](https://github.com/alpic-ai/skybridge/issues) or share them on our [Discord](https://discord.com/invite/gNAazGueab).
-- **Pull requests**: For code or documentation changes, please read the [Contributing Guide](https://github.com/alpic-ai/skybridge/blob/main/CONTRIBUTING.md) before opening a PR.
+- **Bugs**: If you run into a bug or unexpected behavior, open a [GitHub Issue](https://github.com/alpic-ai/skybridge/issues) with a clear reproduction.
+- **Questions and ideas**: Need help building with Skybridge or have ideas to improve the framework, docs, examples, or developer experience? [Open an issue](https://github.com/alpic-ai/skybridge/issues) or share them on our [Discord](https://discord.com/invite/gNAazGueab).
+- **Pull requests**: For code or documentation changes, read the [Contributing Guide](https://github.com/alpic-ai/skybridge/blob/main/CONTRIBUTING.md) before opening a PR.
 
 Skybridge is released under the [MIT License](https://github.com/alpic-ai/skybridge/blob/main/LICENSE).
 
 ### Contributors
 
-Built and maintained by [Harijoe](https://github.com/harijoe), [Fred Barthelet](https://github.com/fredericbarthelet), and the [Alpic](https://alpic.ai) team.
+Built and maintained with ❤️ by [Harijoe](https://github.com/harijoe), [Fred Barthelet](https://github.com/fredericbarthelet), and the [Alpic](https://alpic.ai) team.
 
 <a href="https://github.com/alpic-ai/skybridge/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=alpic-ai/skybridge" alt="Skybridge contributors">
