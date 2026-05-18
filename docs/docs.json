@@ -158,7 +158,7 @@
           {
             "group": "Basic",
             "pages": [
-              "examples/magic-8-ball",
+              "examples/starter",
               "examples/everything"
             ]
           },
@@ -201,6 +201,10 @@
     {
       "source": "/showcase/:slug*",
       "destination": "/examples/:slug*"
+    },
+    {
+      "source": "/examples/magic-8-ball",
+      "destination": "/examples/starter"
     },
     {
       "source": "/examples/awaze",
