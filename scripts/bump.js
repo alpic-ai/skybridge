@@ -66,8 +66,8 @@ const skybridgeVersion = getVersion("skybridge", explicitVersion);
 const devtoolsVersion = getVersion("@skybridge/devtools", explicitVersion);
 const alpicVersion = getVersion("alpic");
 
-const skybridgeRange = `>=${skybridgeVersion} <1.0.0`;
-const devtoolsRange = devtoolsVersion ? `>=${devtoolsVersion} <1.0.0` : null;
+const skybridgeRange = `^${skybridgeVersion}`;
+const devtoolsRange = devtoolsVersion ? `^${devtoolsVersion}` : null;
 const alpicRange = alpicVersion ? `^${alpicVersion}` : null;
 
 console.log(`skybridge:          ${skybridgeRange}`);
