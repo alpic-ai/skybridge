@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    site: "@skybridgedev",
+    site: "@alpic_ai",
     title: "Skybridge — the full-stack React framework for MCP Apps",
     description:
       "Open-source TypeScript framework for building MCP Apps. Write once, run in Claude, ChatGPT, VSCode, and any MCP client.",
