@@ -7,7 +7,14 @@ import { SiteNav } from "../components/site-nav";
 import { SiteFooter } from "../components/trust-final";
 
 const description =
-  "Real MCP Apps built with Skybridge — shipping in ChatGPT and Claude. Browse community and customer projects for inspiration.";
+  "Real MCP Apps built with Skybridge, shipped in ChatGPT and Claude. Browse community and customer projects for inspiration.";
+
+const OG_IMAGE = {
+  url: "/assets/Skybridge-showcase-apps-og.jpg",
+  width: 1200,
+  height: 630,
+  alt: "Showcase — MCP Apps built with Skybridge",
+};
 
 export const metadata: Metadata = {
   title: "Showcase — MCP Apps built with Skybridge",
@@ -18,12 +25,32 @@ export const metadata: Metadata = {
     title: "Showcase — MCP Apps built with Skybridge",
     description,
     url: "/showcase",
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
+    site: "@alpic_ai",
     title: "Showcase — MCP Apps built with Skybridge",
     description,
+    images: [OG_IMAGE.url],
   },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "MCP Apps built with Skybridge",
+  description,
+  url: "https://skybridge.tech/showcase",
+  itemListElement: SHOWCASE.filter((app) => app.category === "3rd Party").map(
+    (app, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: app.name,
+      description: app.blurb,
+      url: `https://skybridge.tech/showcase/${app.slug}`,
+    }),
+  ),
 };
 
 export default function ShowcaseListPage() {
@@ -31,6 +58,10 @@ export default function ShowcaseListPage() {
 
   return (
     <div className="sb-root" data-theme="dark">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <SiteNav />
       <div className="sx-page">
         <div className="sx-page-head">

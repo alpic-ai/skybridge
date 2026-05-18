@@ -68,6 +68,8 @@ export type ShowcaseApp = {
   links: ShowcaseLinks;
   /** Per-app "What's interesting" bullet points shown on the detail page. */
   highlights?: string[];
+  /** ISO date string for sitemap lastModified — falls back to SITE_UPDATED if omitted. */
+  updatedAt?: Date;
 };
 
 function inferDefaultInlineMode(
@@ -505,7 +507,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     tags: ["shadcn/ui", "Dynamic"],
     highlights: [
       "The AI composes the UI on the fly from 36 pre-built shadcn/ui primitives.",
-      "json-render interprets a JSON layout tree — no client-side code generation.",
+      "json-render interprets a JSON layout tree. No client-side code generation.",
       "Fully interactive: buttons, inputs, and state all work inside the widget.",
     ],
     links: {
@@ -531,7 +533,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
     tags: ["Maps", "Geo"],
     highlights: [
-      "Live interactive map rendered inline — pan, zoom, and click markers.",
+      "Live interactive map rendered inline: pan, zoom, and click markers.",
       "Wikipedia-sourced country info displayed alongside the map.",
       "Geolocation and region-based queries resolved to map pins in one tool call.",
     ],
@@ -587,7 +589,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     highlights: [
       "Persistent cart that survives across multiple tool calls in the same thread.",
       "Full localization (currency, language) driven by user context.",
-      "Modal dialogs for size guides and product details — no page navigation.",
+      "Modal dialogs for size guides and product details. No page navigation.",
     ],
     links: {
       demo: "https://ecommerce.skybridge.tech/try",
@@ -639,7 +641,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
     tags: ["Game", "Multi-screen"],
     highlights: [
-      "Multi-screen gameplay — evidence board, interrogation room, and map.",
+      "Multi-screen gameplay: evidence board, interrogation room, and map.",
       "Fullscreen display mode for immersive story moments.",
       "Dynamic story progression where the AI adapts the mystery to your choices.",
     ],
@@ -693,7 +695,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
     tags: ["Game", "Party"],
     highlights: [
-      "Secret word displayed only in the widget — the AI never sees it.",
+      "Secret word displayed only in the widget; the AI never sees it.",
       "Turn-based flow using useSendMessage to pass hints back to the model.",
       "Timer and scoring managed client-side via createStore.",
     ],
@@ -709,7 +711,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     name: "Magic 8-Ball",
     tagline: "The Skybridge starter",
     blurb:
-      "Classic fortune-telling toy — ask a yes-or-no question, shake the ball, and get a mystical answer. The default Skybridge starter app.",
+      "Classic fortune-telling toy: ask a yes-or-no question, shake the ball, and get a mystical answer. The default Skybridge starter app.",
     category: "Example",
     host: "ChatGPT · Claude",
     accent: "#89F0EC",
@@ -720,7 +722,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
     tags: ["Starter", "Toy"],
     highlights: [
-      "The default create-skybridge template — up and running in under a minute.",
+      "The default create-skybridge template, up and running in under a minute.",
       "Shake animation and answer reveal driven entirely by widget state.",
       "Minimal code: shows the smallest possible Skybridge app structure.",
     ],
@@ -746,7 +748,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
     tags: ["Auth", "OAuth"],
     highlights: [
-      "Full OAuth flow via Clerk — sign-in UI rendered inside the widget.",
+      "Full OAuth flow via Clerk, sign-in UI rendered inside the widget.",
       "Personalized results after auth (favourite neighbourhoods, past orders).",
       "Token refresh and session management handled transparently by Skybridge.",
     ],
@@ -798,7 +800,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
     tags: ["Auth", "OAuth"],
     highlights: [
-      "Stytch passwordless auth — magic links and OTPs inside the chat widget.",
+      "Stytch passwordless auth: magic links and OTPs inside the chat widget.",
       "Session tokens forwarded to tool calls for authenticated data fetching.",
       "Drop-in example for any Stytch project migrating to agent-native UX.",
     ],

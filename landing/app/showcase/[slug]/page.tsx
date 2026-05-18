@@ -37,6 +37,7 @@ export async function generateMetadata({
     openGraph: { type: "article", title, description: app.blurb, url, images },
     twitter: {
       card: "summary_large_image",
+      site: "@alpic_ai",
       title,
       description: app.blurb,
       images: images?.map((image) => image.url),
