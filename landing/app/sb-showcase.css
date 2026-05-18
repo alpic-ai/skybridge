@@ -1045,6 +1045,12 @@
   .sx-submit-split .sx-submit-col.sx-submit-secondary {
     padding: 32px 24px;
   }
+  .sx-submit-title {
+    font-size: 32px;
+  }
+  .sx-submit-lede {
+    font-size: 15px;
+  }
   .sx-page {
     padding: 80px 16px 64px;
   }

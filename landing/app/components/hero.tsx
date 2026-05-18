@@ -101,7 +101,7 @@ export function Hero() {
 
         <div className="sb-cta-stack">
           <div className="sb-cta-row sb-cta-row-split">
-            <div className="sb-cta-installs" style={{ width: 720 }}>
+            <div className="sb-cta-installs">
               <div className="sb-cta-installs-head">
                 Get started in 5 seconds
               </div>
