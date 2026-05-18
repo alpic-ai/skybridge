@@ -3,8 +3,8 @@
 <p align="center">
   <a href="https://docs.skybridge.tech">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="docs/images/skybridge-readme-banner-dark.png" />
-      <img alt="Skybridge, the full-stack React framework for MCP apps and MCP servers" src="docs/images/skybridge-readme-banner-light.png" width="100%" />
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/skybridge-readme-banner-dark.png" />
+      <img alt="Skybridge, the full-stack React framework for MCP apps and MCP servers" src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/skybridge-readme-banner-light.png" width="100%" />
     </picture>
   </a>
 </p>
@@ -47,15 +47,15 @@ Features include:
 They chose to build their MCP apps with Skybridge: 
 
 <p align="center">
-  <a href="https://www.datadoghq.com"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/datadog-dark.svg"><img src="docs/images/user-logos/datadog-light.svg" alt="Datadog" height="24"></picture></a>
+  <a href="https://www.datadoghq.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/datadog-dark.svg"><img src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/datadog-light.svg" alt="Datadog" height="24"></picture></a>
   &nbsp;&nbsp;
-  <a href="https://bitmovin.com"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/bitmovin-dark.svg"><img src="docs/images/user-logos/bitmovin-light.svg" alt="Bitmovin" height="22"></picture></a>
+  <a href="https://bitmovin.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/bitmovin-dark.svg"><img src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/bitmovin-light.svg" alt="Bitmovin" height="22"></picture></a>
   &nbsp;&nbsp;
-  <a href="https://www.evaneos.com"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/evaneos-dark.svg"><img src="docs/images/user-logos/evaneos-light.svg" alt="Evaneos" height="18"></picture></a>
+  <a href="https://www.evaneos.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/evaneos-dark.svg"><img src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/evaneos-light.svg" alt="Evaneos" height="18"></picture></a>
   &nbsp;&nbsp;
-  <a href="https://www.touchstream.media"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/touchstream-dark.svg"><img src="docs/images/user-logos/touchstream-light.svg" alt="Touchstream" height="24"></picture></a>
+  <a href="https://www.touchstream.media"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/touchstream-dark.svg"><img src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/touchstream-light.svg" alt="Touchstream" height="24"></picture></a>
   &nbsp;&nbsp;
-  <a href="https://www.cottages.com"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/user-logos/cottages-dark.svg"><img src="docs/images/user-logos/cottages-light.svg" alt="Cottages.com" height="24"></picture></a>
+  <a href="https://www.cottages.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/cottages-dark.svg"><img src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/cottages-light.svg" alt="Cottages.com" height="24"></picture></a>
 </p>
 
 ## Get started
@@ -76,7 +76,7 @@ Once installed, ask your agent "What skills do you have?" to confirm, then try:
 
 Bootstrap a new project with:
 ```bash
-npm create skybridge my-app
+npm create skybridge@latest my-app
 ```
 For full install instructions, read our [**Quickstart guide**](https://docs.skybridge.tech/quickstart/create-new-app).
 
