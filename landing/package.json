@@ -10,16 +10,16 @@
     "format": "biome check --write ."
   },
   "dependencies": {
-    "lucide-react": "^1.14.0",
+    "lucide-react": "^1.16.0",
     "next": "16.2.6",
-    "next-image-export-optimizer": "^1.20.0",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "next-image-export-optimizer": "^1.20.1",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "typescript": "^5"
+    "@types/node": "^20.19.41",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^5.9.3"
   }
 }
