@@ -1,32 +1,54 @@
 ---
-title: All Apps
+title: Examples
 description: Example apps built with Skybridge
 ---
 
 Explore real-world examples built with Skybridge. Each app demonstrates different features and integrations. Click an app to see a full-page walkthrough.
 
-## Examples
+<Callout icon="rocket" color="#08F5F9">
+  Want to see Skybridge in the wild? Explore the <a href="https://skybridge.tech/showcase" target="_blank">Skybridge showcase</a> to discover production MCP Apps shipped by real teams in ChatGPT and Claude.
+</Callout>
 
-Open-source apps with source code available on GitHub.
+## Basic
+
+Starter examples and reference implementations for learning the core Skybridge patterns.
 
 <CardGroup cols={2}>
 
 <Card
-  title="Generative UI"
-  img="/images/showcase-generative-ui.png"
-  href="/showcase/generative-ui"
+  title="Starter"
+  img="/images/showcase-starter.png"
+  href="/examples/starter"
 >
-  LLM-generated dynamic UIs with json-render and 36 pre-built shadcn/ui components. The AI composes the interface, the view renders it.
+  The default app scaffolded by `npm create skybridge`. A guided onboarding tour through Skybridge's core APIs, featuring the Skybridge mascot.
 
-  <a href="https://generative-ui.skybridge.tech/try" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="play" /> Try Demo</a>
-  <br />
-  <a href="https://github.com/alpic-ai/skybridge/tree/main/examples/generative-ui" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="github" iconType="brands" /> View code on GitHub</a>
+  <a href="https://github.com/alpic-ai/apps-sdk-template" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="github" iconType="brands" /> View code on GitHub</a>
 </Card>
+
+<Card
+  title="Everything"
+  img="/images/showcase-example.png"
+  href="/examples/everything"
+>
+  Comprehensive playground showcasing all Skybridge hooks and features. The ultimate reference implementation.
+
+  <a href="https://everything.skybridge.tech/try" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="play" /> Try Demo</a>
+  <br />
+  <a href="https://github.com/alpic-ai/skybridge/tree/main/examples/everything" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="github" iconType="brands" /> View code on GitHub</a>
+</Card>
+
+</CardGroup>
+
+## Use cases
+
+Open-source apps that show how Skybridge supports maps, commerce, travel, games, dashboards, and other rich MCP App workflows.
+
+<CardGroup cols={2}>
 
 <Card
   title="Capitals Explorer"
   img="/images/showcase-capitals.png"
-  href="/showcase/capitals"
+  href="/examples/capitals"
 >
   Interactive world map with geolocation, country information from Wikipedia, and dynamic capital exploration.
 
@@ -38,7 +60,7 @@ Open-source apps with source code available on GitHub.
 <Card
   title="Flight Booking"
   img="/images/showcase-flight-booking.png"
-  href="/showcase/flight-booking"
+  href="/examples/flight-booking"
 >
   Flight search carousel with route details, pricing comparison, and external booking via Skybridge docs.
 
@@ -50,7 +72,7 @@ Open-source apps with source code available on GitHub.
 <Card
   title="Ecommerce Carousel"
   img="/images/showcase-ecommerce.png"
-  href="/showcase/ecommerce-carousel"
+  href="/examples/ecommerce-carousel"
 >
   Product carousel with persistent cart, localization support, theme switching, and modal dialogs.
 
@@ -60,21 +82,9 @@ Open-source apps with source code available on GitHub.
 </Card>
 
 <Card
-  title="Everything"
-  img="/images/showcase-example.png"
-  href="/showcase/everything"
->
-  Comprehensive playground showcasing all Skybridge hooks and features. The ultimate reference implementation.
-
-  <a href="https://everything.skybridge.tech/try" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="play" /> Try Demo</a>
-  <br />
-  <a href="https://github.com/alpic-ai/skybridge/tree/main/examples/everything" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="github" iconType="brands" /> View code on GitHub</a>
-</Card>
-
-<Card
   title="Investigation Game"
   img="/images/showcase-investigation-game.png"
-  href="/showcase/investigation-game"
+  href="/examples/investigation-game"
 >
   Interactive murder mystery game with multi-screen gameplay, fullscreen display mode, and dynamic story progression.
 
@@ -86,9 +96,9 @@ Open-source apps with source code available on GitHub.
 <Card
   title="Productivity"
   img="/images/showcase-productivity.png"
-  href="/showcase/productivity"
+  href="/examples/productivity"
 >
-  Data visualization dashboard demonstrating Skybridge capabilities for MCP Apps
+  Interactive analytics dashboard with charts, theme adaptation, localization, fullscreen mode, and bidirectional tool calls.
 
   <a href="https://productivity.skybridge.tech/try" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="play" /> Try Demo</a>
   <br />
@@ -98,7 +108,7 @@ Open-source apps with source code available on GitHub.
 <Card
   title="Time's Up"
   img="/images/showcase-times-up.png"
-  href="/showcase/times-up"
+  href="/examples/times-up"
 >
   Word-guessing party game where the user sees a secret word and gives hints to the AI, which tries to guess it.
 
@@ -107,22 +117,18 @@ Open-source apps with source code available on GitHub.
   <a href="https://github.com/alpic-ai/skybridge/tree/main/examples/times-up" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="github" iconType="brands" /> View code on GitHub</a>
 </Card>
 
-<Card
-  title="Magic 8-Ball"
-  img="/images/showcase-magic-8-ball.png"
-  href="/showcase/magic-8-ball"
->
-  Classic fortune-telling toy — ask a yes-or-no question, shake the ball, and get a mystical answer. The default Skybridge starter app.
+</CardGroup>
 
-  <a href="https://magic-8-ball.skybridge.tech/try" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="play" /> Try Demo</a>
-  <br />
-  <a href="https://github.com/alpic-ai/apps-sdk-template" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="github" iconType="brands" /> View code on GitHub</a>
-</Card>
+## Auth
+
+OAuth examples showing how to connect common authentication providers to Skybridge apps.
+
+<CardGroup cols={2}>
 
 <Card
-  title="Auth — Clerk"
+  title="Auth - Clerk"
   img="/images/showcase-clerk.png"
-  href="/showcase/auth-clerk"
+  href="/examples/auth-clerk"
 >
   Full OAuth authentication with Clerk and personalized coffee shop search.
 
@@ -130,9 +136,9 @@ Open-source apps with source code available on GitHub.
 </Card>
 
 <Card
-  title="Auth — WorkOS AuthKit"
+  title="Auth - WorkOS AuthKit"
   img="/images/showcase-workos.png"
-  href="/showcase/auth-workos"
+  href="/examples/auth-workos"
 >
   Full OAuth authentication with WorkOS AuthKit and personalized coffee shop search.
 
@@ -140,9 +146,9 @@ Open-source apps with source code available on GitHub.
 </Card>
 
 <Card
-  title="Auth — Stytch"
+  title="Auth - Stytch"
   img="/images/showcase-stytch.png"
-  href="/showcase/auth-stytch"
+  href="/examples/auth-stytch"
 >
   Full OAuth authentication with Stytch and personalized coffee shop search.
 
@@ -150,9 +156,9 @@ Open-source apps with source code available on GitHub.
 </Card>
 
 <Card
-  title="Auth — Auth0"
+  title="Auth - Auth0"
   img="/images/showcase-auth0.png"
-  href="/showcase/auth-auth0"
+  href="/examples/auth-auth0"
 >
   Full OAuth authentication with Auth0 and personalized coffee shop search.
 
@@ -161,42 +167,34 @@ Open-source apps with source code available on GitHub.
 
 </CardGroup>
 
-## 3rd Party Apps
+## UI and component libraries
 
-Apps built by customers and the community using Skybridge.
+Examples for building rich interfaces and reusable components in MCP Apps.
 
 <CardGroup cols={2}>
 
 <Card
-  title="Cottages.com — Cottage Search"
-  img="/images/showcase-cottages.png"
-  href="/showcase/cottages"
+  title="Manifest UI"
+  img="/images/showcase-manifest-ui.png"
+  href="/examples/manifest-ui"
 >
-  Holiday cottage search and booking experience — browse properties, filter by location, and explore availability.
+  Agentic component library example for rich AI-powered experiences.
 
-  <a href="https://mcp.cottages.com/try" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="play" /> Try Demo</a>
-</Card>
-
-<Card
-  title="Evaneos — Travel Destinations"
-  img="/images/showcase-evaneos.png"
-  href="/showcase/evaneos"
->
-  Personalized destination discovery with tailored itinerary ideas, travel period guidance, and sustainable alternatives curated by Evaneos experts.
-
-  <a href="https://chatgpt.com/apps/evaneos/asdk_app_69612510d5288191b6a4174252337e93" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="robot" /> Try on ChatGPT</a>
-</Card>
-
-<Card
-  title="Lumo — Interactive AI Tutor"
-  img="/images/showcase-lumo.png"
-  href="/showcase/lumo"
->
-  Adaptive educational tutor with Mermaid.js diagrams, mind maps, quizzes, and fill-in-the-blank exercises. Built at the Claude Code London Hack Night.
-
-  <a href="https://lumo-mcp-app-39519fdd.alpic.live/try" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="play" /> Try Demo</a>
+  <a href="https://manifest-ui.skybridge.tech/try" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="play" /> Try Demo</a>
   <br />
-  <a href="https://github.com/connorads/lumo-mcp-app" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="github" iconType="brands" /> View code on GitHub</a>
+  <a href="https://github.com/alpic-ai/skybridge/tree/main/examples/manifest-ui" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="github" iconType="brands" /> View code on GitHub</a>
+</Card>
+
+<Card
+  title="Generative UI"
+  img="/images/showcase-generative-ui.png"
+  href="/examples/generative-ui"
+>
+  LLM-generated dynamic UIs with json-render and 36 pre-built shadcn/ui components. The AI composes the interface, the view renders it.
+
+  <a href="https://generative-ui.skybridge.tech/try" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="play" /> Try Demo</a>
+  <br />
+  <a href="https://github.com/alpic-ai/skybridge/tree/main/examples/generative-ui" target="_blank" onClick={(e) => e.stopPropagation()}><Icon icon="github" iconType="brands" /> View code on GitHub</a>
 </Card>
 
 </CardGroup>

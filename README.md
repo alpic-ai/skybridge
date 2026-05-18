@@ -1,153 +1,152 @@
-<div align="center">
+# Skybridge - the MCP Apps framework
 
-<img alt="Skybridge" src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/github-banner.png" width="100%">
+<p align="center">
+  <a href="https://docs.skybridge.tech">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/skybridge-readme-banner-dark.png" />
+      <img alt="Skybridge, the full-stack React framework for MCP apps and MCP servers" src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/skybridge-readme-banner-light.png" width="100%" />
+    </picture>
+  </a>
+</p>
 
-<br />
+<p align="center">
+  <strong>The full-stack React framework for MCP Apps and MCP Servers.</strong>
+</p>
 
-**Build ChatGPT & MCP Apps. The Modern TypeScript Way.**
+<p align="center">
+  <a href="https://docs.skybridge.tech">Documentation</a> ·
+  <a href="https://docs.skybridge.tech/quickstart/create-new-app">Quickstart</a> ·
+  <a href="https://github.com/alpic-ai/skybridge/tree/main/examples">Examples</a>
+</p>
 
-The fullstack TypeScript framework for AI-embedded views.<br />
-**Type-safe. React-powered. Platform-agnostic.**
+<p align="center">
+  <a href="https://www.npmjs.com/package/skybridge"><picture><source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/npm/v/skybridge?color=77F5EE&amp;labelColor=161B22&amp;style=for-the-badge"><img alt="npm version" src="https://img.shields.io/npm/v/skybridge?color=E3FAF7&amp;labelColor=F6F8FA&amp;style=for-the-badge"></picture></a>
+  <a href="https://www.npmjs.com/package/skybridge"><picture><source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/npm/dm/skybridge?color=D7FFC8&amp;labelColor=161B22&amp;style=for-the-badge"><img alt="npm downloads" src="https://img.shields.io/npm/dm/skybridge?color=E8FBD9&amp;labelColor=F6F8FA&amp;style=for-the-badge"></picture></a>
+  <a href="https://discord.com/invite/gNAazGueab"><picture><source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/Discord-community-77F5EE?style=for-the-badge&amp;logo=discord&amp;logoColor=77F5EE&amp;labelColor=161B22"><img alt="Discord community" src="https://img.shields.io/badge/Discord-community-E3FAF7?style=for-the-badge&amp;logo=discord&amp;logoColor=5865F2&amp;labelColor=F6F8FA"></picture></a>
+  <a href="https://github.com/alpic-ai/skybridge/blob/main/LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/github/license/alpic-ai/skybridge?color=D7FFC8&amp;labelColor=161B22&amp;style=for-the-badge"><img alt="License: MIT" src="https://img.shields.io/github/license/alpic-ai/skybridge?color=E8FBD9&amp;labelColor=F6F8FA&amp;style=for-the-badge"></picture></a>
+</p>
 
-<br />
+## About Skybridge
 
-[![NPM Version](https://img.shields.io/npm/v/skybridge?color=e90060&style=for-the-badge)](https://www.npmjs.com/package/skybridge)
-[![NPM Downloads](https://img.shields.io/npm/dm/skybridge?color=e90060&style=for-the-badge)](https://www.npmjs.com/package/skybridge)
-[![GitHub License](https://img.shields.io/github/license/alpic-ai/skybridge?color=e90060&style=for-the-badge)](https://github.com/alpic-ai/skybridge/blob/main/LICENSE)
+Skybridge helps developers build type-safe MCP apps for Claude, ChatGPT and other UI-enabled MCP clients, with a complete set of tooling designed for both humans and agents.
 
-<br />
+Why? MCP apps extend the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) with **rich, interactive UI views** rendered from MCP servers. Conversational apps need seamless interaction between the user, the UI, and the model. This means new UX patterns, developer tooling, and abstractions. 
+Plus, the raw SDKs are low-level: no hooks, type safety, HMR, etc.
 
-[Documentation](https://docs.skybridge.tech) · [Quick Start](https://docs.skybridge.tech/quickstart/create-new-app) · [Showcase](https://docs.skybridge.tech/showcase)
+That's why we built *Skybridge*.
 
-</div>
+Features include:
 
-<br />
+- **Delightful dev environment**: Skybridge provides a dev server with a local emulator, hot module reload, and a permanent tunnel to connect your local app to Claude and ChatGPT.
+- **Write once, run everywhere**: the framework abstracts implementation differences between MCP clients, so your app runs seamlessly in Claude, ChatGPT, VSCode, and any other MCP apps compatible client.
+- **Agent-ready**: powerful skills, CLI, and programmatic dev tool APIs, everything your coding agent needs to build MCP apps end-to-end.
+- **Type-safe end-to-end**: tRPC-style inference from MCP server tool definition to React view for type safety from server to frontend.
+- **React-first**: Intuitive React Query-style hooks, with advanced state management. 
+- **Example library**: get started quickly with ChatGPT- and Claude-ready app examples for ecommerce, travel, SaaS, and more.
 
-## ✨ Why Skybridge?
+They chose to build their MCP apps with Skybridge: 
 
-ChatGPT Apps and MCP Apps let you embed **rich, interactive UIs** directly in AI conversations. But the raw SDKs are low-level—no hooks, no type safety, no dev tools, and no HMR.
+<p align="center">
+  <a href="https://www.datadoghq.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/datadog-dark.svg"><img src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/datadog-light.svg" alt="Datadog" height="24"></picture></a>
+  &nbsp;&nbsp;
+  <a href="https://bitmovin.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/bitmovin-dark.svg"><img src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/bitmovin-light.svg" alt="Bitmovin" height="22"></picture></a>
+  &nbsp;&nbsp;
+  <a href="https://www.evaneos.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/evaneos-dark.svg"><img src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/evaneos-light.svg" alt="Evaneos" height="18"></picture></a>
+  &nbsp;&nbsp;
+  <a href="https://www.touchstream.media"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/touchstream-dark.svg"><img src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/touchstream-light.svg" alt="Touchstream" height="24"></picture></a>
+  &nbsp;&nbsp;
+  <a href="https://www.cottages.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/cottages-dark.svg"><img src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/cottages-light.svg" alt="Cottages.com" height="24"></picture></a>
+</p>
 
-**Skybridge fixes that.**
+## Get started
 
-| | |
-|:--|:--|
-| 🌐 **Write once, run everywhere** — Skybridge works seamlessly with ChatGPT (Apps SDK) and MCP-compatible clients. | ✅ **End-to-End Type Safety** — tRPC-style inference from server to view. Autocomplete everywhere. |
-| 🔄 **View-to-Model Sync** — Keep the model aware of UI state with `data-llm`. Dual surfaces, one source of truth. | ⚒️ **React Query-style Hooks** — `isPending`, `isError`, callbacks. State management you already know. |
-| 👨‍💻 **Full dev environment** — HMR, debug traces, and local devtools. | 📦 **Showcase Examples** — Production-ready examples to learn from and build upon. |
+**For agents**
 
-<br />
-
-## 🚀 Get Started
-
-**Create a new app:**
-
+Install our [skill](https://docs.skybridge.tech/devtools/skills) for building MCP apps and ChatGPT apps:
 ```bash
-npm create skybridge@latest
+npx skills add alpic-ai/skybridge -s skybridge
 ```
+Once installed, ask your agent "What skills do you have?" to confirm, then try:
 
-**Or add to an existing project:**
+- _Create a new MCP app_
+- _Migrate my MCP server to the Skybridge framework_
+- _Add a new view to my MCP app_ 
 
+**For humans**
+
+Bootstrap a new project with:
 ```bash
-npm i skybridge
-yarn add skybridge
-pnpm add skybridge
-bun add skybridge
-deno add skybridge
+npm create skybridge@latest my-app
 ```
+For full install instructions, read our [**Quickstart guide**](https://docs.skybridge.tech/quickstart/create-new-app).
 
-<div align="center">
+## Documentation
 
-**👉 [Read the Docs](https://docs.skybridge.tech) 👈**
+The [Skybridge documentation](https://docs.skybridge.tech) covers the full lifecycle of building MCP Apps:
 
-</div>
+- [Fundamentals](https://docs.skybridge.tech/fundamentals): understand MCP Apps, ChatGPT Apps, and how Skybridge bridges both runtimes.
+- [Core concepts](https://docs.skybridge.tech/concepts): learn about server <> model <> UI data flows, LLM context sync, type safety, and instant local iteration with our devtools.
+- [Guides](https://docs.skybridge.tech/guides/fetching-data): build real app behavior with tools, views, state, and model communication.
+- [API Reference](https://docs.skybridge.tech/api-reference): browse our MCP server APIs, React hooks, CLI commands, and runtime compatibility.
 
-<br />
+## Deploy
 
-## 📦 Architecture
+Deploy Skybridge apps instantly on [Alpic](https://alpic.ai) for scalable hosting, MCP-specific analytics, permanent tunneling, app store compliance auditing and submission help. You can also self-host on any Node.js-compatible platform.
 
-Skybridge is a fullstack framework with unified server and client modules:
+See our [deployment guide](https://docs.skybridge.tech/quickstart/deploy) for the full production path.
 
-- **`skybridge/server`** — Define tools and views with full type inference. Extends the MCP SDK.
-- **`skybridge/web`** — React hooks that consume your server types. Works with Apps SDK (ChatGPT) and MCP Apps.
-- **Dev Environment** — Vite plugin with HMR, DevTools emulator, and optimized builds.
+## Community & Contributing
 
-### Server
+We'd love your help improving Skybridge. Here are a few ways to get involved:
 
-```ts
-import { McpServer } from "skybridge/server";
+- **Bugs**: If you run into a bug or unexpected behavior, open a [GitHub Issue](https://github.com/alpic-ai/skybridge/issues) with a clear reproduction.
+- **Questions and ideas**: Need help building with Skybridge or have ideas to improve the framework, docs, examples, or developer experience? [Open an issue](https://github.com/alpic-ai/skybridge/issues) or share them on our [Discord](https://discord.com/invite/gNAazGueab).
+- **Pull requests**: For code or documentation changes, read the [Contributing Guide](https://github.com/alpic-ai/skybridge/blob/main/CONTRIBUTING.md) before opening a PR.
 
-server.registerView("flights", {}, {
-  inputSchema: { destination: z.string() },
-}, async ({ destination }) => {
-  const flights = await searchFlights(destination);
-  return { structuredContent: { flights } };
-});
-```
+Skybridge is released under the [MIT License](https://github.com/alpic-ai/skybridge/blob/main/LICENSE).
 
-### View
+### Contributors
 
-```tsx
-import { useToolInfo } from "skybridge/web";
+Built and maintained with ❤️ by [Harijoe](https://github.com/harijoe), [Fred Barthelet](https://github.com/fredericbarthelet), and the [Alpic](https://alpic.ai) team.
 
-function FlightsView() {
-  const { output } = useToolInfo();
+<a href="https://github.com/alpic-ai/skybridge/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=alpic-ai/skybridge" alt="Skybridge contributors">
+</a>
 
-  return output.structuredContent.flights.map(flight =>
-    <FlightCard key={flight.id} flight={flight} />
-  );
-}
-```
+## Example templates
 
-<br />
+Explore all our example templates in the [Examples](https://docs.skybridge.tech/examples) section of the documentation.
 
-## 🎯 Features at a Glance
+### Basic
 
-- **Live Reload** — Vite HMR. See changes instantly without reinstalling.
-- **Typed Hooks** — Full autocomplete for tools, inputs, outputs.
-- **View → Tool Calls** — Trigger server actions from UI.
-- **Dual Surface Sync** — Keep model aware of what users see with `data-llm`.
-- **React Query-style API** — `isPending`, `isError`, callbacks.
-- **Platform Agnostic** — Works with ChatGPT (Apps SDK) and MCP Apps clients (Goose, VSCode, etc.).
-- **MCP Compatible** — Extends the official SDK. Works with any MCP client.
+| Preview | App | Description | Demo | Code |
+| --- | --- | --- | --- | --- |
+| <img src="docs/images/showcase-example.png" alt="Everything" width="160" /> | Everything | Comprehensive playground app showcasing all Skybridge hooks and features. | [Try Demo](https://everything.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/everything) |
 
-<br />
+### Use cases
 
-## 📖 Showcase
+| Preview | App | Description | Demo | Code |
+| --- | --- | --- | --- | --- |
+| <img src="docs/images/showcase-capitals.png" alt="Capitals Explorer" width="160" /> | Capitals Explorer | Interactive world map with geolocation, country information, and dynamic capital exploration. | [Try Demo](https://capitals.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/capitals) |
+| <img src="docs/images/showcase-flight-booking.png" alt="Flight Booking" width="160" /> | Flight Booking | Flight search carousel with route details, pricing comparison, and external booking. | [Try Demo](https://flight-booking.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/flight-booking) |
+| <img src="docs/images/showcase-ecommerce.png" alt="Ecommerce Carousel" width="160" /> | Ecommerce Carousel | Product carousel with persistent cart, localization, theme switching, and modal dialogs. | [Try Demo](https://ecommerce.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/ecom-carousel) |
+| <img src="docs/images/showcase-investigation-game.png" alt="Investigation Game" width="160" /> | Investigation Game | Multi-screen mystery game with fullscreen mode, dynamic story progression and context asynchronicity demonstration | [Try Demo](https://investigation-game.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/investigation-game) |
+| <img src="docs/images/showcase-productivity.png" alt="Productivity" width="160" /> | Productivity | Interactive analytics dashboard with charts, theme adaptation, localization, fullscreen mode, and bidirectional tool calls. | [Try Demo](https://productivity.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/productivity) |
+| <img src="docs/images/showcase-times-up.png" alt="Time's Up" width="160" /> | Time's Up | Word-guessing party game where the user gives hints and the AI tries to guess. | [Try Demo](https://times-up.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/times-up) |
+| <img src="docs/images/showcase-lumo.png" alt="Lumo Interactive AI Tutor" width="160" /> | Lumo — Interactive AI Tutor | Adaptive tutor with Mermaid diagrams, mind maps, quizzes, and fill-in-the-blank exercises. | [Try Demo](https://lumo-mcp-app-39519fdd.alpic.live/try) | [View code](https://github.com/connorads/lumo-mcp-app) |
 
-Explore production-ready examples:
+### Auth
 
-| Example                | Description                                                                      | Demo                                                | Code                                                                                |
-|------------------------|----------------------------------------------------------------------------------|-----------------------------------------------------|-------------------------------------------------------------------------------------|
-| **Awaze — Cottage Search** | Holiday cottage search and booking experience — browse properties, filter by location, and explore availability | [Try Demo](https://mcp.cottages.com/try) | —                                                                                                   |
-| **Capitals Explorer**     | Interactive world map with geolocation and Wikipedia integration                              | [Try Demo](https://capitals.skybridge.tech/try)           | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/capitals)           |
-| **Ecommerce Carousel**    | Product carousel with cart, localization, and modals                                          | [Try Demo](https://ecommerce.skybridge.tech/try)          | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/ecom-carousel)      |
-| **Everything**            | Comprehensive playground showcasing all hooks and features                                    | [Try Demo](https://everything.skybridge.tech/try)         | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/everything)         |
-| **Investigation Game**    | Interactive murder mystery game with multi-screen gameplay and dynamic story progression      | [Try Demo](https://investigation-game.skybridge.tech/try) | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/investigation-game) |
-| **Productivity**          | Data visualization dashboard demonstrating Skybridge capabilities for MCP Apps                | [Try Demo](https://productivity.skybridge.tech/try)       | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/productivity)       |
-| **Time's Up**             | Word-guessing party game where the user gives hints and the AI tries to guess the secret word | [Try Demo](https://times-up.skybridge.tech/try)           | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/times-up)           |
-| **Lumo — Interactive AI Tutor** | Adaptive educational tutor with Mermaid.js diagrams, mind maps, quizzes, and fill-in-the-blank exercises | [Try Demo](https://lumo-mcp-app-39519fdd.alpic.live/try) | [View Code](https://github.com/connorads/lumo-mcp-app)                                    |
-| **Auth — Auth0**          | Full OAuth authentication with Auth0 and personalized coffee shop search                      | —                                                         | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-auth0)         |
-| **Auth — Clerk**          | Full OAuth authentication with Clerk and personalized coffee shop search                      | —                                                         | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-clerk)         |
-| **Auth — Stytch**         | Full OAuth authentication with Stytch and personalized coffee shop search                     | —                                                         | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-stytch)        |
-| **Auth — WorkOS AuthKit** | Full OAuth authentication with WorkOS AuthKit and personalized coffee shop search             | —                                                         | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-workos)        |
-| **Flight Booking**        | Flight booking carousel with dynamic search and booking flow                                  | [Try Demo](https://flight-booking.skybridge.tech/try)     | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/flight-booking)     |
-| **Generative UI**         | Dynamic UI generation using json-render and Skybridge                                         | [Try Demo](https://generative-ui.skybridge.tech/try)      | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/generative-ui)      |
-| **Manifest Starter**      | Starter app with Manifest UI agentic components out-of-the-box                                | [Try Demo](https://manifest-ui.skybridge.tech/try)        | [View Code](https://github.com/alpic-ai/skybridge/tree/main/examples/manifest-ui)        |
+| Preview | Provider | Description | Code |
+| --- | --- | --- | --- |
+| <img src="docs/images/showcase-clerk.png" alt="Auth Clerk" width="160" /> | Clerk | Full OAuth authentication with Clerk and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-clerk) |
+| <img src="docs/images/showcase-workos.png" alt="Auth WorkOS AuthKit" width="160" /> | WorkOS AuthKit | Full OAuth authentication with WorkOS AuthKit and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-workos) |
+| <img src="docs/images/showcase-stytch.png" alt="Auth Stytch" width="160" /> | Stytch | Full OAuth authentication with Stytch and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-stytch) |
+| <img src="docs/images/showcase-auth0.png" alt="Auth Auth0" width="160" /> | Auth0 | Full OAuth authentication with Auth0 and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-auth0) |
 
-See all examples in the [Showcase](https://docs.skybridge.tech/showcase) or browse the [examples/](examples/) directory.
+### UI and component libraries
 
-<br />
-
-<div align="center">
-
-[![GitHub Discussions](https://img.shields.io/badge/Discussions-Ask%20Questions-blue?style=flat-square&logo=github)](https://github.com/alpic-ai/skybridge/discussions)
-[![GitHub Issues](https://img.shields.io/badge/Issues-Report%20Bugs-red?style=flat-square&logo=github)](https://github.com/alpic-ai/skybridge/issues)
-[![Discord](https://img.shields.io/badge/Discord-Chat-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.com/invite/gNAazGueab)
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions
-
-<br />
-
-**[MIT License](LICENSE)** · Made with ❤️ by **[Alpic](https://alpic.ai)**
-
-</div>
+| Preview | App | Description | Demo | Code |
+| --- | --- | --- | --- | --- |
+| <img src="docs/images/showcase-manifest-ui.png" alt="Manifest UI" width="160" /> | Manifest UI | Agentic component library example for rich AI-powered experiences. | [Try Demo](https://manifest-ui.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/manifest-ui) |
+| <img src="docs/images/showcase-generative-ui.png" alt="Generative UI" width="160" /> | Generative UI | LLM-generated dynamic UIs with json-render and 36 pre-built shadcn/ui components. | [Try Demo](https://generative-ui.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/generative-ui) |

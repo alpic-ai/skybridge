@@ -1,0 +1,53 @@
+---
+title: Starter
+description: The default app scaffolded by `npm create skybridge`. A guided onboarding tour through Skybridge's core APIs.
+---
+
+The Starter is what `npm create skybridge` scaffolds. It's a short, interactive onboarding deck featuring the Skybridge mascot and a swappable hat. The deck walks new users through Skybridge's core primitives: reading tool output, sharing view state with the model, and triggering tools from the view.
+
+<img
+  src="/images/showcase-starter.png"
+  alt="Skybridge Starter"
+  style={{ width: "100%", maxWidth: "960px", borderRadius: "12px" }}
+/>
+
+## Links
+
+<CardGroup cols={2}>
+  <Card
+    title="View source on GitHub"
+    icon="github"
+    href="https://github.com/alpic-ai/apps-sdk-template"
+  >
+    Browse the full template code.
+  </Card>
+  <Card
+    title="Create your own"
+    icon="terminal"
+    href="/quickstart/create-new-app"
+  >
+    Scaffold the Starter locally with `npm create skybridge`.
+  </Card>
+</CardGroup>
+
+## What it demonstrates
+
+The Starter registers two tools on the server and a single view that walks through four steps:
+
+- **`start`**: opens the onboarding view, with an optional `name` input the view reads back to greet the user.
+- **`get-fortune-cookie`**: a plain tool the view calls on demand to fetch a random prediction.
+
+Each step of the deck highlights one Skybridge API:
+
+1. **Reading tool output**: the view hydrates with the `name` passed to `start`.
+2. **Sharing view state**: clicking "Change my hat" updates persisted view state and surfaces the current hat to the model via `data-llm`.
+3. **Calling tools**: the view invokes `get-fortune-cookie` from a button and renders the result.
+4. **Examples & docs**: outro linking to further reading.
+
+## Skybridge APIs used
+
+- [`useToolInfo`](/api-reference/use-tool-info): read the input and output of the tool that opened the view.
+- [`useViewState`](/api-reference/use-view-state): persist UI state on the host and expose it to the model.
+- [`useCallTool`](/api-reference/use-call-tool): invoke a server tool from within the view.
+- [`useLayout`](/api-reference/use-layout): read host theme, display mode, and locale.
+- [`data-llm`](/api-reference/data-llm): describe what the user sees so the model can collaborate.
