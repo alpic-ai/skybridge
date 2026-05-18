@@ -110,27 +110,13 @@ function ServerCode() {
       </div>
       <div>
         {"      "}
-        <span className="c-id">flights</span>: (
+        <span className="c-id">flights</span>:{" "}
         <span className="c-kw">await</span>{" "}
         <span className="c-fn">searchFlights</span>({"{ "}
         <span className="c-id">from</span>, <span className="c-id">to</span>,{" "}
         <span className="c-id">when</span>
-        {" }"})).<span className="c-fn">map</span>((
-        <span className="c-id">f</span>) {"=>"} ({"{"}
+        {" }"}),
       </div>
-      <div>
-        {"        "}...<span className="c-id">f</span>,
-      </div>
-      <div>
-        {"        "}
-        <span className="c-id">airline</span>: {"{ "}
-        <span className="c-id">name</span>: <span className="c-id">f</span>.
-        <span className="c-id">carrier</span>,{" "}
-        <span className="c-id">logo</span>:{" "}
-        <span className="c-fn">logoFor</span>(<span className="c-id">f</span>.
-        <span className="c-id">carrier</span>) {"}"},
-      </div>
-      <div>{"      "})),</div>
       <div>{"    }"},</div>
       <div>{"  }"}),</div>
       <div>);</div>
@@ -145,33 +131,9 @@ function ViewCode() {
         <span className="c-kw">import</span> {"{ "}
         <span className="c-id">useToolInfo</span>
         {" }"} <span className="c-kw">from</span>{" "}
-        <span className="c-str">"skybridge/vite"</span>
+        <span className="c-str">"../helpers"</span>
         {";"}
       </div>
-      <div>&nbsp;</div>
-      <div>
-        <span className="c-kw">type</span> <span className="c-id">Output</span>{" "}
-        = {"{"}
-      </div>
-      <div>
-        {"  "}
-        <span className="c-id">destination</span>: {"{ "}
-        <span className="c-id">name</span>: <span className="c-id">string</span>
-        {"; "}
-        <span className="c-id">photo</span>:{" "}
-        <span className="c-id">string</span> {"};"}
-      </div>
-      <div>
-        {"  "}
-        <span className="c-id">trip</span>: <span className="c-id">Trip</span>
-        {";"}
-      </div>
-      <div>
-        {"  "}
-        <span className="c-id">flights</span>:{" "}
-        <span className="c-id">Flight</span>[];
-      </div>
-      <div>{"}"};</div>
       <div>&nbsp;</div>
       <div>
         <span className="c-kw">export default function</span>{" "}
@@ -181,9 +143,8 @@ function ViewCode() {
         {"  "}
         <span className="c-kw">const</span> {"{ "}
         <span className="c-id">output</span>
-        {" }"} = <span className="c-fn">useToolInfo</span>&lt;{"{ "}
-        <span className="c-id">output</span>:{" "}
-        <span className="c-id">Output</span> {"}"}&gt;();
+        {" }"} = <span className="c-fn">useToolInfo</span>&lt;
+        <span className="c-str">"findFlights"</span>&gt;();
       </div>
       <div>&nbsp;</div>
       <div>
@@ -200,13 +161,6 @@ function ViewCode() {
         <span className="c-id">destination</span>={"{"}
         <span className="c-id">output</span>.
         <span className="c-id">destination</span>
-        {"}"} /&gt;
-      </div>
-      <div>
-        {"      "}
-        &lt;<span className="c-fn">TripSummary</span>{" "}
-        <span className="c-id">trip</span>={"{"}
-        <span className="c-id">output</span>.<span className="c-id">trip</span>
         {"}"} /&gt;
       </div>
       <div>
