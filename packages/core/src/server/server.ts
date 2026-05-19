@@ -20,6 +20,7 @@ import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/proto
 import type {
   ContentBlock,
   Implementation,
+  RequestMeta,
   ServerNotification,
   ServerRequest,
   ServerResult,
@@ -255,12 +256,49 @@ interface ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> {
   _meta?: ToolMeta;
 }
 
+/**
+ * Optional client-supplied hints attached to `params._meta` on every tool call
+ * by the Apps SDK host. Hints only: never use for authorization, and tolerate
+ * absence.
+ * @see https://developers.openai.com/apps-sdk/reference#_meta-fields-the-client-provides
+ */
+export interface ClientHintsMeta {
+  /** Requested locale (BCP-47, e.g. `"en-US"`). */
+  "openai/locale"?: string;
+  /** Browser user-agent */
+  "openai/userAgent"?: string;
+  /** Coarse user location. May be partially populated. */
+  "openai/userLocation"?: {
+    city?: string;
+    region?: string;
+    country?: string;
+    timezone?: string;
+    longitude?: number;
+    latitude?: number;
+  };
+  /** Anonymized user id. */
+  "openai/subject"?: string;
+  /** Anonymized conversation id, stable within a ChatGPT session. */
+  "openai/session"?: string;
+  /** Anonymized organization id, when the user account is part of an organization. */
+  "openai/organization"?: string;
+  /** Stable id for the currently mounted widget instance. */
+  "openai/widgetSessionId"?: string;
+}
+
+type ToolHandlerExtra = Omit<
+  RequestHandlerExtra<ServerRequest, ServerNotification>,
+  "_meta"
+> & {
+  _meta?: RequestMeta & ClientHintsMeta;
+};
+
 type ToolHandler<
   TInput extends ZodRawShapeCompat,
   TReturn extends { content?: HandlerContent } = { content?: HandlerContent },
 > = (
   args: ShapeOutput<TInput>,
-  extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+  extra: ToolHandlerExtra,
 ) => TReturn | Promise<TReturn>;
 
 type ErrorMiddlewareConfig = {
