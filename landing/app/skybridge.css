@@ -3038,22 +3038,22 @@ body {
 .sb-devpanel-card.sb-dp-tun.is-on .sb-dp-tun-packet {
   animation: sb-tun-packet 1.4s linear infinite;
 }
-.sb-dp-tun-packet-1 {
+.sb-devpanel-card.sb-dp-tun.is-on .sb-dp-tun-packet-1 {
   animation-delay: 0s;
 }
-.sb-dp-tun-packet-2 {
+.sb-devpanel-card.sb-dp-tun.is-on .sb-dp-tun-packet-2 {
   animation-delay: -0.5s;
 }
-.sb-dp-tun-packet-3 {
+.sb-devpanel-card.sb-dp-tun.is-on .sb-dp-tun-packet-3 {
   animation-delay: -0.95s;
 }
-.sb-dp-tun-packet-bot.sb-dp-tun-packet-1 {
+.sb-devpanel-card.sb-dp-tun.is-on .sb-dp-tun-packet-bot.sb-dp-tun-packet-1 {
   animation-delay: -0.2s;
 }
-.sb-dp-tun-packet-bot.sb-dp-tun-packet-2 {
+.sb-devpanel-card.sb-dp-tun.is-on .sb-dp-tun-packet-bot.sb-dp-tun-packet-2 {
   animation-delay: -0.7s;
 }
-.sb-dp-tun-packet-bot.sb-dp-tun-packet-3 {
+.sb-devpanel-card.sb-dp-tun.is-on .sb-dp-tun-packet-bot.sb-dp-tun-packet-3 {
   animation-delay: -1.15s;
 }
 @keyframes sb-tun-packet {
