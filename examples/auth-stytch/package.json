@@ -12,7 +12,7 @@
     "deploy": "alpic deploy"
   },
   "dependencies": {
-    "@alpic-ai/insights": "^1.120.1",
+    "@alpic-ai/insights": "^1.127.1",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "cors": "^2.8.6",
     "dotenv": "^16.5.0",

@@ -51,8 +51,8 @@ importers:
   examples/auth-auth0:
     dependencies:
       '@alpic-ai/insights':
-        specifier: ^1.120.1
-        version: 1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
+        specifier: ^1.127.1
+        version: 1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
       '@auth0/auth0-api-js':
         specifier: ^1.4.0
         version: 1.4.0
@@ -121,8 +121,8 @@ importers:
   examples/auth-clerk:
     dependencies:
       '@alpic-ai/insights':
-        specifier: ^1.120.1
-        version: 1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
+        specifier: ^1.127.1
+        version: 1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
       '@clerk/express':
         specifier: ^2.0.7
         version: 2.0.7(express@5.2.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -185,8 +185,8 @@ importers:
   examples/auth-stytch:
     dependencies:
       '@alpic-ai/insights':
-        specifier: ^1.120.1
-        version: 1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
+        specifier: ^1.127.1
+        version: 1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.6)
@@ -252,8 +252,8 @@ importers:
   examples/auth-workos:
     dependencies:
       '@alpic-ai/insights':
-        specifier: ^1.120.1
-        version: 1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
+        specifier: ^1.127.1
+        version: 1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.6)
@@ -316,8 +316,8 @@ importers:
   examples/capitals:
     dependencies:
       '@alpic-ai/insights':
-        specifier: ^1.120.1
-        version: 1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
+        specifier: ^1.127.1
+        version: 1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.6)
@@ -407,8 +407,8 @@ importers:
   examples/ecom-carousel:
     dependencies:
       '@alpic-ai/insights':
-        specifier: ^1.120.1
-        version: 1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(skybridge@packages+core)
+        specifier: ^1.127.1
+        version: 1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(skybridge@packages+core)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.5)
@@ -465,8 +465,8 @@ importers:
   examples/everything:
     dependencies:
       '@alpic-ai/insights':
-        specifier: ^1.120.1
-        version: 1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(skybridge@packages+core)
+        specifier: ^1.127.1
+        version: 1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(skybridge@packages+core)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.5)
@@ -514,8 +514,8 @@ importers:
   examples/flight-booking:
     dependencies:
       '@alpic-ai/insights':
-        specifier: ^1.120.1
-        version: 1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
+        specifier: ^1.127.1
+        version: 1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.6)
@@ -563,8 +563,8 @@ importers:
   examples/generative-ui:
     dependencies:
       '@alpic-ai/insights':
-        specifier: ^1.120.1
-        version: 1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
+        specifier: ^1.127.1
+        version: 1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
       '@json-render/core':
         specifier: ^0.14.1
         version: 0.14.1(zod@4.3.6)
@@ -627,8 +627,8 @@ importers:
   examples/investigation-game:
     dependencies:
       '@alpic-ai/insights':
-        specifier: ^1.120.1
-        version: 1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
+        specifier: ^1.127.1
+        version: 1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.6)
@@ -691,8 +691,8 @@ importers:
   examples/manifest-ui:
     dependencies:
       '@alpic-ai/insights':
-        specifier: ^1.120.1
-        version: 1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
+        specifier: ^1.127.1
+        version: 1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.6)
@@ -767,8 +767,8 @@ importers:
   examples/productivity:
     dependencies:
       '@alpic-ai/insights':
-        specifier: ^1.120.1
-        version: 1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(skybridge@packages+core)
+        specifier: ^1.127.1
+        version: 1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(skybridge@packages+core)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.5)
@@ -816,8 +816,8 @@ importers:
   examples/times-up:
     dependencies:
       '@alpic-ai/insights':
-        specifier: ^1.120.1
-        version: 1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
+        specifier: ^1.127.1
+        version: 1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.6)
@@ -1296,8 +1296,8 @@ packages:
   '@alpic-ai/api@1.104.1':
     resolution: {integrity: sha512-HNN+CblD+cefHelMk5NZMAOAJ1V0B3/ubDC6T+xxAQrrd3NeQj3U1q4XijynmIamgWYYDEVXUld8LgriqwdeMw==}
 
-  '@alpic-ai/insights@1.122.1':
-    resolution: {integrity: sha512-Mac+UjnpsemaNCioTOkF4NpYc8h2R4gxHO7OKEvM9MtiL1QnbbTSUMmEKIjqfe86xnjur76A0/7+RYuydXoJ6g==}
+  '@alpic-ai/insights@1.127.1':
+    resolution: {integrity: sha512-VLeva10Ft30MeQhZnGTBbyU8rXp2I3Oqpv9gfyEUIbmu6k4lkGcAnpE834rJ7RI0/yT8JHTW5a21MrloUzj5tQ==}
     peerDependencies:
       '@modelcontextprotocol/sdk': '>=1.29.0 <2'
       skybridge: workspace:*
@@ -10080,13 +10080,13 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@alpic-ai/insights@1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(skybridge@packages+core)':
+  '@alpic-ai/insights@1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.5))(skybridge@packages+core)':
     dependencies:
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.5)
     optionalDependencies:
       skybridge: link:packages/core
 
-  '@alpic-ai/insights@1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)':
+  '@alpic-ai/insights@1.127.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)':
     dependencies:
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
     optionalDependencies:
