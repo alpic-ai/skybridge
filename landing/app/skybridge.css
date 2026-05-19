@@ -2203,36 +2203,6 @@ body {
     color: var(--sb-lime);
   }
 }
-@keyframes sb-hmr-badge-old {
-  0%,
-  45% {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
-  54%,
-  80%,
-  100% {
-    opacity: 0;
-    transform: translateY(-6px);
-    filter: blur(2px);
-  }
-}
-@keyframes sb-hmr-badge-new {
-  0%,
-  48% {
-    opacity: 0;
-    transform: translateY(6px);
-    filter: blur(2px);
-  }
-  58%,
-  80%,
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
-}
 @keyframes sb-hmr-widget {
   0%,
   44% {
@@ -2275,11 +2245,12 @@ body {
 
 @keyframes sb-hmr-pill {
   0%,
-  52% {
+  36% {
     opacity: 0;
     transform: scale(0.75);
   }
-  62%,
+  44%,
+  80%,
   100% {
     opacity: 1;
     transform: scale(1);
@@ -2287,21 +2258,23 @@ body {
 }
 @keyframes sb-hmr-price {
   0%,
-  52% {
+  36% {
     color: var(--sb-ink);
   }
-  62%,
+  44%,
+  80%,
   100% {
     color: var(--sb-accent);
   }
 }
 @keyframes sb-hmr-btn {
   0%,
-  52% {
+  36% {
     opacity: 0;
     transform: translateY(5px);
   }
-  62%,
+  44%,
+  80%,
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -2332,20 +2305,14 @@ body {
 .sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-toast-t {
   animation: sb-hmr-toast-label 5s ease-out infinite;
 }
-.sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-widget-badge-old {
-  animation: sb-hmr-badge-old 5s ease-in-out infinite;
-}
-.sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-widget-badge-new {
-  animation: sb-hmr-badge-new 5s ease-in-out infinite;
-}
 .sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-widget-pill {
-  animation: sb-hmr-pill 3.5s ease-in-out infinite;
+  animation: sb-hmr-pill 5s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-widget-price {
-  animation: sb-hmr-price 3.5s ease-in-out infinite;
+  animation: sb-hmr-price 5s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-widget-btn {
-  animation: sb-hmr-btn 3.5s ease-in-out infinite;
+  animation: sb-hmr-btn 5s ease-in-out infinite;
 }
 .sb-devpanel-card.sb-dp-hmr.is-on .sb-dp-widget {
   animation: sb-hmr-widget 5s ease-in-out infinite;
@@ -2372,27 +2339,6 @@ body {
   );
   opacity: 0;
   pointer-events: none;
-}
-.sb-dp-widget-badge {
-  position: relative;
-  display: inline-block;
-  min-width: 70px;
-  height: 1.3em;
-}
-.sb-dp-widget-badge-old,
-.sb-dp-widget-badge-new {
-  position: absolute;
-  inset: 0;
-  display: inline-block;
-  white-space: nowrap;
-  font-weight: 600;
-}
-.sb-dp-widget-badge-old {
-  color: var(--sb-ink-mute);
-}
-.sb-dp-widget-badge-new {
-  color: var(--sb-success);
-  opacity: 0;
 }
 .sb-dp-widget-row {
   display: flex;
