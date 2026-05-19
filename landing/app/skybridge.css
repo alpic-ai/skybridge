@@ -243,6 +243,23 @@ body {
   color: var(--sb-ink);
   text-transform: none;
 }
+@media (max-width: 480px) {
+  .sb-nav {
+    padding: 0 8px;
+  }
+  .sb-nav-inner {
+    padding: 4px 6px 4px 8px;
+    height: 56px;
+  }
+  .sb-brand-logo {
+    height: 26px;
+  }
+  .sb-nav-right .sb-btn {
+    height: 30px;
+    padding: 0 8px;
+    font-size: 10.5px;
+  }
+}
 
 /* buttons */
 .sb-btn {
@@ -754,9 +771,16 @@ body {
     flex-direction: column-reverse;
     align-items: stretch;
     flex-wrap: wrap;
+    min-width: 0;
   }
   .sb-cta-installs {
     min-width: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+  .sb-install {
+    max-width: 100%;
+    width: 100%;
   }
 }
 .sb-lede {
@@ -1833,7 +1857,18 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
   }
+  .sb-nav-links {
+    gap: 0;
+  }
+  .sb-nav-links a,
+  .sb-nav-links button {
+    padding: 6px 6px;
+    font-size: 11px;
+  }
+}
+@media (max-width: 360px) {
   .sb-nav-links {
     display: none;
   }
@@ -3127,10 +3162,10 @@ body {
 
 @media (max-width: 900px) {
   .sb-devtools-shot {
-    display: none;
+    min-height: 320px;
   }
-  .sb-devpanel {
-    display: none;
+  .sb-devtools-window {
+    transform-origin: top left;
   }
 }
 
@@ -3284,9 +3319,53 @@ body {
     font-size: 30px;
   }
   .sb-featured {
+    gap: 10px;
+    padding: 6px 14px 6px 6px;
+    font-size: 12px;
+  }
+  .sb-featured-badge {
+    padding: 6px 10px;
+    font-size: 10px;
+    flex: none;
+  }
+  .sb-featured-text {
+    min-width: 0;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+  .sb-featured-arrow {
+    flex: none;
+  }
+  .sb-demo {
+    padding: 16px;
+    min-height: 0;
+    border-radius: 14px;
+  }
+  .sb-footer {
+    padding: 56px 0 48px;
+  }
+  .sb-footer-inner {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 24px;
+  }
+  .sb-footer-bot {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+    text-align: left;
+  }
+  .sb-final-cta {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .sb-final-cta .sb-btn {
+    justify-content: center;
   }
   .sb-value {
     padding: 36px 28px;
@@ -3297,11 +3376,5 @@ body {
   }
   .sb-final h2 {
     font-size: 34px;
-  }
-  .sb-footer-inner {
-    grid-template-columns: 1fr;
-  }
-  .sb-footer {
-    padding: 60px 0 52px;
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "./icons";
 import { ClaudeStarSVG } from "./showcase/chatgpt-frame";
 
@@ -468,8 +468,72 @@ const VALUES: CodeValue[] = [
 export function DevToolsSection() {
   const [hover, setHover] = useState<string | null>(null);
   const [auditKey, setAuditKey] = useState(0);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const mq = window.matchMedia("(max-width: 900px), (pointer: coarse)");
+    const node = sectionRef.current;
+    if (!node) {
+      return;
+    }
+    let interval: ReturnType<typeof setInterval> | null = null;
+    let index = 0;
+    const cycle = () => {
+      const value = VALUES[index % VALUES.length];
+      setHover(value.key);
+      if (value.key === "audit") {
+        setAuditKey((k) => k + 1);
+      }
+      index += 1;
+    };
+    let io: IntersectionObserver | null = null;
+    const setup = () => {
+      if (!mq.matches || io) {
+        return;
+      }
+      io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting && interval === null) {
+              cycle();
+              interval = setInterval(cycle, 2800);
+            } else if (!entry.isIntersecting && interval !== null) {
+              clearInterval(interval);
+              interval = null;
+            }
+          }
+        },
+        { threshold: 0.2 },
+      );
+      io.observe(node);
+    };
+    const teardown = () => {
+      io?.disconnect();
+      io = null;
+      if (interval !== null) {
+        clearInterval(interval);
+        interval = null;
+      }
+    };
+    const onChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        setup();
+      } else {
+        teardown();
+        setHover(null);
+      }
+    };
+    mq.addEventListener("change", onChange);
+    setup();
+    return () => {
+      mq.removeEventListener("change", onChange);
+      teardown();
+    };
+  }, []);
   return (
-    <section className="sb-section" id="integration">
+    <section className="sb-section" id="integration" ref={sectionRef}>
       <div className="sb-wrap">
         <div className="sb-section-header" style={{ maxWidth: "700px" }}>
           <div className="sb-section-eyebrow">DevTools</div>
