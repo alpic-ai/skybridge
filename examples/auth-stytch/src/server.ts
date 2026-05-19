@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { userPromptMiddleware } from "@alpic-ai/insights";
+import { intentMiddleware } from "@alpic-ai/insights";
 import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import cors from "cors";
@@ -68,7 +68,7 @@ const server = new McpServer(
       resourceMetadataUrl: `${env.SERVER_URL}/.well-known/oauth-protected-resource`,
     }),
   )
-  .mcpMiddleware(userPromptMiddleware())
+  .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
       name: "search-coffee-paris",

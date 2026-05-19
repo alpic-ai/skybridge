@@ -90,6 +90,68 @@ The `extra` parameter exposes:
 - `extra.authInfo` — populated by auth middleware (e.g. `authInfo.clientId`, `authInfo.extra.email`)
 - `extra.requestInfo` — HTTP request details (headers, URL)
 - `extra.signal` — abort signal for cancellation
+- `extra._meta` — client-supplied hints injected by the host (see [Client hints on `_meta`](#client-hints-on-meta))
+
+### Client hints on `_meta`
+
+ChatGPT may inject context about the current conversation in tool calls. Skybridge types these fields on `extra._meta` so you can use them in the handler:
+
+```typescript
+type ClientHintsMeta = {
+  // Requested locale (BCP-47, e.g. "en-US")
+  "openai/locale"?: string;
+  // Browser user-agent string of the ChatGPT client
+  "openai/userAgent"?: string;
+  // Coarse user location
+  "openai/userLocation"?: {
+    city?: string;
+    region?: string;
+    country?: string;
+    timezone?: string;
+    longitude?: number;
+    latitude?: number;
+  };
+  // Anonymized user id (for rate limiting / identification)
+  "openai/subject"?: string;
+  // Anonymized conversation id, stable within a ChatGPT session
+  "openai/session"?: string;
+  // Anonymized organization id, when the user account is part of an organization
+  "openai/organization"?: string;
+  // Stable id for the currently mounted widget instance
+  "openai/widgetSessionId"?: string;
+};
+```
+
+```typescript
+server.registerTool(
+  {
+    name: "weather",
+    description: "Show weather for a location.",
+    inputSchema: { city: z.string().optional() },
+  },
+  async ({ city }, extra) => {
+    // Fall back to the user's current city when they didn't specify one.
+    const target =
+      city ?? extra._meta?.["openai/userLocation"]?.city ?? "Paris";
+    // Imperial for en-US, metric everywhere else.
+    const locale = extra._meta?.["openai/locale"] ?? "en-US";
+    const units = locale === "en-US" ? "imperial" : "metric";
+
+    const weather = await fetchWeather(target, units);
+    return {
+      content: `${target}: ${weather.temperature}° ${weather.conditions}`,
+    };
+  },
+);
+```
+
+<Info>
+**ChatGPT only.** These hints are injected by the OpenAI Apps SDK runtime. MCP Apps hosts do not send them on tool calls. As a fallback, use [`useUser` (/api-reference/use-user) to get session context from the view.
+</Info>
+
+<Warning>
+These are **hints**. Never use them for authorization, and tolerate their absence.
+</Warning>
 
 ## Response Fields
 

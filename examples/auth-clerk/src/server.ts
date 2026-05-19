@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { userPromptMiddleware } from "@alpic-ai/insights";
+import { intentMiddleware } from "@alpic-ai/insights";
 import { clerkMiddleware } from "@clerk/express";
 import {
   mcpAuthClerk,
@@ -33,7 +33,7 @@ const server = new McpServer(
     protectedResourceHandlerClerk({ scopes_supported: ["profile", "email"] }),
   )
   .use("/mcp", mcpAuthClerk)
-  .mcpMiddleware(userPromptMiddleware())
+  .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
       name: "search-coffee-paris",
