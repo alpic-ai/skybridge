@@ -474,9 +474,6 @@ export function DevToolsSection() {
       return;
     }
     const mq = window.matchMedia("(max-width: 900px), (pointer: coarse)");
-    if (!mq.matches) {
-      return;
-    }
     const node = sectionRef.current;
     if (!node) {
       return;
@@ -491,26 +488,48 @@ export function DevToolsSection() {
       }
       index += 1;
     };
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting && interval === null) {
-            cycle();
-            interval = setInterval(cycle, 2800);
-          } else if (!entry.isIntersecting && interval !== null) {
-            clearInterval(interval);
-            interval = null;
+    let io: IntersectionObserver | null = null;
+    const setup = () => {
+      if (!mq.matches || io) {
+        return;
+      }
+      io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting && interval === null) {
+              cycle();
+              interval = setInterval(cycle, 2800);
+            } else if (!entry.isIntersecting && interval !== null) {
+              clearInterval(interval);
+              interval = null;
+            }
           }
-        }
-      },
-      { threshold: 0.2 },
-    );
-    io.observe(node);
-    return () => {
-      io.disconnect();
+        },
+        { threshold: 0.2 },
+      );
+      io.observe(node);
+    };
+    const teardown = () => {
+      io?.disconnect();
+      io = null;
       if (interval !== null) {
         clearInterval(interval);
+        interval = null;
       }
+    };
+    const onChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        setup();
+      } else {
+        teardown();
+        setHover(null);
+      }
+    };
+    mq.addEventListener("change", onChange);
+    setup();
+    return () => {
+      mq.removeEventListener("change", onChange);
+      teardown();
     };
   }, []);
   return (
