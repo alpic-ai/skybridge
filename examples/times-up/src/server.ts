@@ -1,4 +1,4 @@
-import { userPromptMiddleware } from "@alpic-ai/insights";
+import { intentMiddleware } from "@alpic-ai/insights";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 import { drawCard, getCard } from "./cards.js";
@@ -19,7 +19,7 @@ const server = new McpServer(
 - Always keep the tone energetic and encouraging—never silently invoke a tool or leave the user waiting without a spoken response.`,
   },
 )
-  .mcpMiddleware(userPromptMiddleware())
+  .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
       name: "play",
