@@ -134,7 +134,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
     } else {
       prompts.log.step(`Copying template...`);
       const templateDir = fileURLToPath(
-        new URL("../template", import.meta.url),
+        new URL("../templates/demo", import.meta.url),
       );
       // Copy template to target directory
       fs.cpSync(templateDir, root, {

@@ -77,7 +77,7 @@ jobs:
       # into create-skybridge, so pin it to the just-published version before
       # publishing create-skybridge.
       - name: Pin template skybridge dep for publish
-        working-directory: ./packages/create-skybridge/template
+        working-directory: ./packages/create-skybridge/templates/demo
         run: pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
 
       - name: Publish create-skybridge to npm
@@ -90,7 +90,7 @@ jobs:
 
       - name: Restore template workspace dep
         if: github.event_name == 'release'
-        run: git checkout -- packages/create-skybridge/template/package.json
+        run: git checkout -- packages/create-skybridge/templates/demo/package.json
 
       - name: Deploy docs to Mintlify
         if: github.event_name == 'release'
