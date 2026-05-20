@@ -48,6 +48,7 @@ jobs:
   devtools-e2e:
     name: Devtools E2E
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
