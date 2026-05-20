@@ -180,7 +180,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
   }
 
   // 4. Copy template
-  const root = path.join(process.cwd(), targetDir);
+  const root = path.resolve(targetDir);
   Spinner.start(`Copying ${template} template`);
   try {
     const templateDir = fileURLToPath(
@@ -393,18 +393,7 @@ function scriptCommand(pm: PackageManager, script: string): string {
 }
 
 function sanitizeTargetDir(targetDir: string) {
-  return (
-    targetDir
-      .trim()
-      // Only keep alphanumeric, dash, underscore, dot, @, /
-      .replace(/[^a-zA-Z0-9\-_.@/]/g, "")
-      // Prevent path traversal
-      .replace(/\.\./g, "")
-      // Collapse multiple slashes
-      .replace(/\/+/g, "/")
-      // Remove leading/trailing slashes
-      .replace(/^\/+|\/+$/g, "")
-  );
+  return targetDir.trim().replace(/\/+$/g, "");
 }
 
 // Skip user's SPEC.md and IDE/agent preferences (.idea, .claude, etc.)

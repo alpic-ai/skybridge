@@ -29,7 +29,7 @@ describe("create-skybridge", () => {
   });
 
   it("scaffolds the demo template by default", async () => {
-    const name = `../../${tempDirName}//project$`;
+    const name = `${tempDirName}/project`;
     await init([name, "--yes", "--skip-skills"]);
 
     const projectDir = path.join(process.cwd(), tempDirName, "project");
@@ -45,7 +45,7 @@ describe("create-skybridge", () => {
   });
 
   it("scaffolds the blank template with --blank", async () => {
-    const name = `../../${tempDirName}//project$`;
+    const name = `${tempDirName}/project`;
     await init([name, "--yes", "--blank", "--skip-skills"]);
 
     const projectDir = path.join(process.cwd(), tempDirName, "project");
