@@ -121,8 +121,10 @@ type ToolResponseSignature = Pick<
  * in flight, the older response is dropped from the rendered state (but any
  * `onSuccess` / `onError` callbacks attached to it still fire).
  *
- * For end-to-end type safety across tool inputs and outputs, prefer the typed
- * helpers produced by {@link generateHelpers} over calling this hook directly.
+ * Pair with {@link useToolInfo} to read the result of the tool invocation
+ * that produced the current view. For end-to-end type safety across tool
+ * inputs and outputs, prefer the typed helpers produced by {@link generateHelpers}
+ * over calling this hook directly.
  *
  * @typeParam ToolArgs - Shape of the tool's input args (`null` for no-arg tools).
  * @typeParam ToolResponse - Shape of the tool's `structuredContent` / `meta`.

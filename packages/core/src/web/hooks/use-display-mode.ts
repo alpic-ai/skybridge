@@ -10,7 +10,9 @@ import type { RequestDisplayMode } from "../bridges/types.js";
  * may differ from the request. The reported value also updates when the host
  * changes the mode on its own (e.g. user expands the widget).
  *
- * `"modal"` is reachable via {@link useRequestModal}, not this hook.
+ * `"modal"` is reachable via {@link useRequestModal}, not this hook. To react
+ * to layout changes that come with display-mode switches (e.g. `maxHeight`),
+ * pair with {@link useLayout}.
  *
  * @example
  * ```tsx
