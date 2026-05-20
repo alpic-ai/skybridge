@@ -119,7 +119,7 @@ type ToolResponseSignature = Pick<
  * (fire-and-forget, with optional {@link SideEffects}) and `callToolAsync`
  * (promise-returning). If the same instance is invoked again while a call is
  * in flight, the older response is dropped from the rendered state (but any
- * `onSuccess` / `onError` callbacks attached to it still fire).
+ * `onSuccess` / `onError` / `onSettled` callbacks attached to it still fire).
  *
  * Pair with {@link useToolInfo} to read the result of the tool invocation
  * that produced the current view. For end-to-end type safety across tool

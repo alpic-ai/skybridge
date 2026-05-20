@@ -30,7 +30,6 @@ import type { UnknownObject } from "./types.js";
  *     count: 0,
  *     inc: () => set((s) => ({ count: s.count + 1 })),
  *   }),
- *   { count: 0 },
  * );
  * ```
  *
