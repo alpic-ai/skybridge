@@ -47,12 +47,20 @@ type CallToolErrorState = {
   error: unknown;
 };
 
+/**
+ * State of a {@link useCallTool} invocation, discriminated by `status`.
+ * Use `isIdle` / `isPending` / `isSuccess` / `isError` for ergonomic conditional rendering.
+ */
 export type CallToolState<TData extends CallToolResponse = CallToolResponse> =
   | CallToolIdleState
   | CallToolPendingState
   | CallToolSuccessState<TData>
   | CallToolErrorState;
 
+/**
+ * Optional callbacks fired around a {@link useCallTool} call.
+ * `onSettled` runs after success or error.
+ */
 export type SideEffects<ToolArgs, ToolResponse> = {
   onSuccess?: (data: ToolResponse, toolArgs: ToolArgs) => void;
   onError?: (error: unknown, toolArgs: ToolArgs) => void;
@@ -69,6 +77,11 @@ type IsArgsOptional<T> = [T] extends [null]
     ? true
     : false;
 
+/**
+ * Fire-and-forget call function returned by {@link useCallTool}. Tracks state
+ * on the hook and supports optional {@link SideEffects} callbacks. Args are
+ * optional when the tool accepts none.
+ */
 export type CallToolFn<TArgs, TResponse> =
   IsArgsOptional<TArgs> extends true
     ? {
@@ -82,6 +95,10 @@ export type CallToolFn<TArgs, TResponse> =
         (args: TArgs, sideEffects: SideEffects<TArgs, TResponse>): void;
       };
 
+/**
+ * Promise-returning call function returned by {@link useCallTool}. Rejects
+ * if the tool errors; use `try/catch` for error handling.
+ */
 export type CallToolAsyncFn<TArgs, TResponse> =
   IsArgsOptional<TArgs> extends true
     ? {
@@ -95,6 +112,32 @@ type ToolResponseSignature = Pick<
   "structuredContent" | "meta"
 >;
 
+/**
+ * Call a server tool from a view and track its execution state.
+ *
+ * Returns the current {@link CallToolState} plus two callers: `callTool`
+ * (fire-and-forget, with optional {@link SideEffects}) and `callToolAsync`
+ * (promise-returning). If the same instance is invoked again while a call is
+ * in flight, the older response is dropped from the rendered state (but any
+ * `onSuccess` / `onError` callbacks attached to it still fire).
+ *
+ * For end-to-end type safety across tool inputs and outputs, prefer the typed
+ * helpers produced by {@link generateHelpers} over calling this hook directly.
+ *
+ * @typeParam ToolArgs - Shape of the tool's input args (`null` for no-arg tools).
+ * @typeParam ToolResponse - Shape of the tool's `structuredContent` / `meta`.
+ *
+ * @example
+ * ```tsx
+ * const { callTool, isPending, data } = useCallTool<{ query: string }>("search");
+ *
+ * <button onClick={() => callTool({ query: "skybridge" }, {
+ *   onSuccess: (res) => console.log(res.structuredContent),
+ * })} />
+ * ```
+ *
+ * @see https://docs.skybridge.tech/api-reference/use-call-tool
+ */
 export const useCallTool = <
   ToolArgs extends CallToolArgs = null,
   ToolResponse extends Partial<ToolResponseSignature> = Record<string, never>,

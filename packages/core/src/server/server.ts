@@ -59,6 +59,13 @@ const mergeWithUnion = <T extends object, S extends object>(
   });
 };
 
+/**
+ * Type marker for a registered tool — carries its input, output, and response
+ * metadata shapes so views can infer types from `typeof server`.
+ *
+ * You normally never construct this by hand; it is produced by `registerTool`
+ * and consumed by helpers like {@link InferTools} and {@link generateHelpers}.
+ */
 export type ToolDef<
   TInput = unknown,
   TOutput = unknown,
@@ -69,6 +76,7 @@ export type ToolDef<
   responseMetadata: TResponseMetadata;
 };
 
+/** Which host runtime a view targets — `"apps-sdk"` (ChatGPT) or `"mcp-app"` (MCP Apps spec). */
 export type ViewHostType = "apps-sdk" | "mcp-app";
 
 export interface ViewCsp {
@@ -84,12 +92,18 @@ export interface ViewCsp {
   baseUriDomains?: string[];
 }
 
+/**
+ * Registry of view component names. The Skybridge Vite plugin augments this
+ * interface in the generated `.skybridge/views.d.ts` with one key per view
+ * file, which narrows {@link ViewName} from `string` to the concrete union.
+ */
 // Must be exported: TS module augmentation only merges with exported
 // declarations. Without `export`, `.skybridge/views.d.ts` augmentation
 // would create a separate interface and `ViewName` would stay `string`.
 // biome-ignore lint/suspicious/noEmptyInterface: register pattern — augmented by `.skybridge/views.d.ts` to narrow ViewName
 export interface ViewNameRegistry {}
 
+/** Union of valid view component names. Narrowed by {@link ViewNameRegistry}. */
 export type ViewName = keyof ViewNameRegistry & string;
 
 export interface ViewConfig {
@@ -110,8 +124,14 @@ export interface KnownToolMeta {
   ui?: Pick<McpUiToolMeta, "visibility">;
 }
 
+/** {@link KnownToolMeta} merged with arbitrary string-keyed metadata for custom flags. */
 export type ToolMeta = KnownToolMeta & Record<string, unknown>;
 
+/**
+ * Convenient return type for tool handlers — a plain string, a single
+ * {@link ContentBlock}, or an array. Skybridge normalizes it to the MCP
+ * `content: ContentBlock[]` shape before responding.
+ */
 export type HandlerContent = string | ContentBlock | ContentBlock[];
 
 /** @see https://developers.openai.com/apps-sdk/reference#tool-descriptor-parameters */
@@ -363,6 +383,14 @@ export class McpServer<
     this.express.use(express.json());
   }
 
+  /**
+   * Register Express middleware on the underlying app. Mirrors `app.use` —
+   * pass handlers directly or a path-prefixed handler list. Register before
+   * {@link McpServer.run}; ordering matches Express.
+   *
+   * Note: Alpic Cloud only routes traffic to `/mcp`. Custom paths work
+   * locally and on self-hosted deployments.
+   */
   use(...handlers: RequestHandler[]): this;
   use(path: string, ...handlers: RequestHandler[]): this;
   use(
@@ -379,6 +407,19 @@ export class McpServer<
     return this;
   }
 
+  /**
+   * Register Express error-handling middleware to run after the built-in
+   * `/mcp` route (or your custom route). Use this to log or transform errors
+   * thrown by tool handlers before the default error handler responds.
+   *
+   * @example
+   * ```ts
+   * server.useOnError((err, _req, _res, next) => {
+   *   logger.error(err);
+   *   next(err);
+   * });
+   * ```
+   */
   useOnError(...handlers: ErrorRequestHandler[]): this;
   useOnError(path: string, ...handlers: ErrorRequestHandler[]): this;
   useOnError(

@@ -14,6 +14,7 @@ import type {
 import { McpAppBridge } from "./bridge.js";
 import type { McpAppContext, McpAppContextKey } from "./types.js";
 
+/** @internal */
 type PickContext<K extends readonly McpAppContextKey[]> = {
   [P in K[number]]: McpAppContext[P];
 };
@@ -32,6 +33,7 @@ function findStorageKey(viewUUID: string): string | undefined {
   return undefined;
 }
 
+/** @internal MCP Apps implementation of {@link Adaptor}. Resolved via {@link getAdaptor}. */
 export class McpAppAdaptor implements Adaptor {
   private static instance: McpAppAdaptor | null = null;
   private stores: {

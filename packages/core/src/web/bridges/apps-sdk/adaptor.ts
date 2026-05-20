@@ -15,6 +15,7 @@ import type {
 import { AppsSdkBridge } from "./bridge.js";
 import type { AppsSdkWidgetState } from "./types.js";
 
+/** @internal Apps SDK implementation of {@link Adaptor}. Resolved via {@link getAdaptor}. */
 export class AppsSdkAdaptor implements Adaptor {
   private static instance: AppsSdkAdaptor | null = null;
 
