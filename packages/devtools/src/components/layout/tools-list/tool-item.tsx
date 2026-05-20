@@ -77,6 +77,7 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
       className="border-b border-border last:border-b-0"
     >
       <AccordionTrigger
+        data-id={tool.name}
         className={cn(
           "font-mono text-xs font-normal text-foreground",
           "no-underline data-[state=closed]:hover:bg-muted/40",

@@ -13,5 +13,10 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["node"]
   },
-  "include": ["playwright.config.ts", "tests/**/*", "fixtures/**/*"]
+  "include": [
+    "playwright.config.ts",
+    "tests/**/*",
+    "fixtures/**/*",
+    "fixtures/web/.skybridge/**/*.d.ts"
+  ]
 }

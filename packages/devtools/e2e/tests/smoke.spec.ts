@@ -14,7 +14,7 @@ test.describe("devtools smoke", () => {
 
     const token = `ping-${crypto.randomUUID()}`;
     await page.getByLabel("message").fill(token);
-    await page.getByRole("button", { name: /call tool/i }).click();
+    await page.getByRole("button", { name: /^run$/i }).click();
 
     await expect(page.getByTestId("tool-response")).toContainText(token);
   });
@@ -26,9 +26,12 @@ test.describe("devtools smoke", () => {
 
     const token = `card-${crypto.randomUUID()}`;
     await page.getByLabel("message").fill(token);
-    await page.getByRole("button", { name: /call tool/i }).click();
+    await page.getByRole("button", { name: /^run$/i }).click();
 
+    // First-time view compilation by Vite can take a few seconds.
     const widget = page.frameLocator('[data-testid="tool-widget-iframe"]');
-    await expect(widget.getByTestId("echo-card-message")).toContainText(token);
+    await expect(widget.getByTestId("echo-card-message")).toContainText(token, {
+      timeout: 20_000,
+    });
   });
 });
