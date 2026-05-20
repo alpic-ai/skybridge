@@ -5,6 +5,8 @@ import * as prompts from "@clack/prompts";
 import spawn from "cross-spawn";
 import mri from "mri";
 
+const OUTPUT_TAIL_LINES = 10;
+
 const DEFAULT_PROJECT_NAME = "skybridge-project";
 
 const PACKAGE_MANAGERS = ["bun", "deno", "npm", "pnpm", "yarn"] as const;
@@ -210,6 +212,47 @@ export async function init(args: string[] = process.argv.slice(2)) {
     abort("Failed to update project name in package.json.", String(error));
   }
 
+  // Async spawn wrapper so a spinner can keep animating during the subprocess
+  // (cross-spawn.sync would block the event loop). Captures stdout/stderr to
+  // `output` when stdio is "pipe", trimmed to the last OUTPUT_TAIL_LINES lines
+  // — install errors land at the tail, so we keep that and prefix with an
+  // ellipsis when content gets dropped.
+  function spawnAsync(
+    command: string,
+    args: string[],
+  ): Promise<{ status: number | null; output: string }> {
+    return new Promise((resolve) => {
+      let raw = "";
+      const child = spawn(command, args, {
+        stdio: ["ignore", "pipe", "pipe"],
+        cwd: root,
+      });
+      child.stdout?.on("data", (chunk) => {
+        raw += chunk.toString();
+      });
+      child.stderr?.on("data", (chunk) => {
+        raw += chunk.toString();
+      });
+      const done = (status: number | null) => {
+        const tail: string[] = [];
+        for (const part of raw.split("\n").reverse()) {
+          const line = part.trim();
+          if (!line) {
+            continue;
+          }
+          if (tail.length >= OUTPUT_TAIL_LINES) {
+            tail.push(`… (truncated, showing last ${OUTPUT_TAIL_LINES} lines)`);
+            break;
+          }
+          tail.push(line);
+        }
+        resolve({ status, output: tail.reverse().join("\n") });
+      };
+      child.on("close", done);
+      child.on("error", () => done(1));
+    });
+  }
+
   // 6. Skills install (single Y/n prompt)
   let installSkills: boolean;
   if (argv["skip-skills"]) {
@@ -229,29 +272,25 @@ export async function init(args: string[] = process.argv.slice(2)) {
 
   if (installSkills) {
     Spinner.start("Installing coding agent skills");
-    const status = await spawnAsync(
-      "npx",
-      [
-        "--yes",
-        "skills",
-        "add",
-        "alpic-ai/skybridge",
-        "--skill",
-        "chatgpt-app-builder",
-        "--agent",
-        "universal",
-        "claude-code",
-        "--yes",
-      ],
-      { stdio: "ignore", cwd: root },
-    );
-    if (status === 0) {
-      Spinner.stop("Installed coding agent skills");
+    const { status, output } = await spawnAsync("npx", [
+      "--yes",
+      "skills",
+      "add",
+      "alpic-ai/skybridge",
+      "--skill",
+      "chatgpt-app-builder",
+      "--agent",
+      "universal",
+      "claude-code",
+      "--yes",
+    ]);
+    // skills cli always returns 0 so we look for the success message
+    if (status === 0 && output.includes("Done!")) {
+      Spinner.stop(`Installed coding agent skills`);
     } else {
-      Spinner.error("Failed to install coding agent skills");
-      prompts.log.warn(
-        "Install them later with `npx skills add alpic-ai/skybridge`.",
-      );
+      Spinner.error(`Failed to install coding agent skills:
+\x1b[2m${output}\x1b[0m`);
+      prompts.log.error("Try manually: `npx skills add alpic-ai/skybridge`.");
     }
   }
 
@@ -273,14 +312,12 @@ export async function init(args: string[] = process.argv.slice(2)) {
 
   // 8. Always install dependencies
   Spinner.start(`Installing dependencies with ${pm}`);
-  const installStatus = await spawnAsync(pm, ["install"], {
-    stdio: "ignore",
-    cwd: root,
-  });
-  if (installStatus === 0) {
+  const { status, output } = await spawnAsync(pm, ["install"]);
+  if (status === 0) {
     Spinner.stop(`Installed dependencies with ${pm}`);
   } else {
-    Spinner.error("Dependency installation failed");
+    Spinner.error(`Dependency installation failed:
+\x1b[2m${output}\x1b[0m`);
     abort(`Try manually: cd ${targetDir} && ${pm} install`);
   }
 
@@ -333,20 +370,6 @@ function abort(...lines: string[]) {
   }
   prompts.outro("Aborted");
   process.exit(1);
-}
-
-// Async spawn wrapper used when we want a spinner to keep animating during
-// the subprocess (cross-spawn.sync would block the event loop).
-function spawnAsync(
-  command: string,
-  args: string[],
-  options: Parameters<typeof spawn>[2],
-): Promise<number | null> {
-  return new Promise((resolve) => {
-    const child = spawn(command, args, options);
-    child.on("close", (code) => resolve(code));
-    child.on("error", () => resolve(1));
-  });
 }
 
 function parsePackageManager(value: string): PackageManager | undefined {
