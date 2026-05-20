@@ -7,15 +7,27 @@ import { getAdaptor } from "../bridges/index.js";
  *
  * Currently Apps-SDK-only — calling any of these from MCP Apps throws.
  * `selectFiles` additionally requires a ChatGPT host version that exposes the
- * picker; it throws if the capability is unavailable. Uploaded files are
- * returned as metadata you can hand back to a tool (compatible with {@link FileRef}).
+ * picker; it throws if the capability is unavailable.
+ *
+ * `upload` returns `FileMetadata` (`fileId`, optional `fileName`, `mimeType`).
+ * To pass an uploaded file to a tool whose input uses {@link FileRef}, first
+ * call `getDownloadUrl` and then build the ref yourself — field names differ
+ * (camelCase on the client, snake_case in the schema) and `download_url` is
+ * required.
  *
  * @example
  * ```tsx
- * const { upload, selectFiles } = useFiles();
- * const files = await selectFiles();
- * const ref = await upload(files[0]);
- * callTool({ fileId: ref.fileId });
+ * const { upload, getDownloadUrl } = useFiles();
+ * const meta = await upload(file);
+ * const { downloadUrl } = await getDownloadUrl(meta);
+ * callTool({
+ *   document: {
+ *     file_id: meta.fileId,
+ *     download_url: downloadUrl,
+ *     file_name: meta.fileName,
+ *     mime_type: meta.mimeType,
+ *   },
+ * });
  * ```
  *
  * @see https://docs.skybridge.tech/api-reference/use-files
