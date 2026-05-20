@@ -282,6 +282,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
       "--agent",
       "universal",
       "claude-code",
+      "--copy", // something the symlink fails for some reason
       "--yes",
     ]);
     // skills cli always returns 0 so we look for the success message
