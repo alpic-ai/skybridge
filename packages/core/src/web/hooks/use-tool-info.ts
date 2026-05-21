@@ -91,7 +91,7 @@ function deriveStatus(
  *   output: { results: Result[] };
  * }>();
  *
- * if (!isSuccess) return <Skeleton />;
+ * if (!isSuccess || !output) return <Skeleton />;
  * return <Results items={output.results} />;
  * ```
  *
