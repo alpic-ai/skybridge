@@ -83,23 +83,22 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
           "no-underline data-[state=closed]:hover:bg-muted/40",
         )}
         action={
-          <Button
-            disabled={isPending}
-            variant="primary"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleRun();
-            }}
-            icon={
-              isPending ? (
-                <Loader2 className="size-3 animate-spin" />
-              ) : (
-                <Play className="size-3" />
-              )
-            }
-          >
-            Run
-          </Button>
+          open ? (
+            <Button
+              disabled={isPending}
+              variant="primary"
+              onClick={handleRun}
+              icon={
+                isPending ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <Play className="size-3" />
+                )
+              }
+            >
+              Run
+            </Button>
+          ) : null
         }
       >
         <div className="min-w-0 flex-1 text-left">{tool.name}</div>

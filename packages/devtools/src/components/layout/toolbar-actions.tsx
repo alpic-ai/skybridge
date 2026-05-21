@@ -250,11 +250,13 @@ export function TunnelButton() {
   const { copied, copy } = useCopyToClipboard();
 
   const isConnected = state.status === "connected";
-  const onClick = isConnected
-    ? () => copy(state.url)
-    : state.status === "starting"
-      ? stop
-      : start;
+  const mcpUrl = isConnected ? `${state.url}/mcp` : null;
+  const onClick =
+    isConnected && mcpUrl
+      ? () => copy(mcpUrl)
+      : state.status === "starting"
+        ? stop
+        : start;
 
   return (
     <HoverPopover
@@ -268,10 +270,10 @@ export function TunnelButton() {
             className={`h-2 w-2 rounded-full ${DOT_BY_STATUS[state.status]}`}
             aria-hidden
           />
-          {isConnected ? (
+          {isConnected && mcpUrl ? (
             <>
               <span className="mx-2 font-mono text-xs">
-                {state.url.replace(/^https?:\/\//, "")}
+                {mcpUrl.replace(/^https?:\/\//, "")}
               </span>
               {copied ? (
                 <Check className="size-3.5" />

@@ -126,10 +126,14 @@ export const ToolPanel = () => {
                   ) : null}
                   <span>·</span>
                   <span>{formatBytes(sizeBytes)}</span>
-                  <CopyButton value={responseJson} label="Copy tool output" />
                 </div>
               </div>
-              <section className="min-h-0 min-w-0 flex-1 overflow-auto bg-background p-3">
+              <section className="relative min-h-0 min-w-0 flex-1 overflow-auto bg-light-gray p-3">
+                <CopyButton
+                  value={responseJson}
+                  label="Copy tool output"
+                  className="absolute right-2 top-2 z-10"
+                />
                 <JsonSyntaxBlock code={responseJson} />
               </section>
             </div>
