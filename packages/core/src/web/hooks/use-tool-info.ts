@@ -80,7 +80,9 @@ function deriveStatus(
  * returned by {@link generateHelpers} over the generic form.
  *
  * @typeParam TS - Optional partial shape `{ input, output, responseMetadata }`
- * to refine each field's type. Defaults to `UnknownObject` for each.
+ * to refine each field's type. When omitted, each typed field resolves to
+ * `never` — pass an explicit shape or use the typed helper from
+ * {@link generateHelpers} to get usable types.
  *
  * @example
  * ```tsx
