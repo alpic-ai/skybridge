@@ -15,22 +15,35 @@ const server = new McpServer(
       inputSchema: {
         name: z.string().optional().describe("The user name."),
       },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
+      },
+      _meta: {
+        "openai/toolInvocation/invoking": "Starting the Skybridge onboarding…",
+        "openai/toolInvocation/invoked": "Onboarding ready.",
+      },
       view: {
         component: "onboarding",
+        // Replace with the domain your widget will be served from in production.
+        domain: "skybridge.tech",
         description: "Onboarding deck",
         csp: {
           resourceDomains: [
             "https://fonts.googleapis.com",
             "https://fonts.gstatic.com",
           ],
+          connectDomains: [],
           redirectDomains: ["https://docs.skybridge.tech"],
         },
       },
     },
     async ({ name }) => {
+      const displayName = name?.trim() || "friend";
       return {
-        structuredContent: { name },
-        content: [{ type: "text", text: `User name: ${name}` }],
+        structuredContent: { name: displayName },
+        content: [{ type: "text", text: `User name: ${displayName}` }],
         isError: false,
       };
     },
@@ -39,6 +52,15 @@ const server = new McpServer(
     {
       name: "get-fortune-cookie",
       description: "Get fortune cookie",
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        openWorldHint: false,
+      },
+      _meta: {
+        "openai/toolInvocation/invoking": "Cracking open a fortune cookie…",
+        "openai/toolInvocation/invoked": "Fortune revealed.",
+      },
     },
     async () => {
       const predictions = [
