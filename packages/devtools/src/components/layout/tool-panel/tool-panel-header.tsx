@@ -1,5 +1,6 @@
 import { useLocalStorageState } from "ahooks";
 import { motion } from "framer-motion";
+import { CopyButton } from "@/lib/copy.js";
 import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { useCallToolResult } from "@/lib/store.js";
 import { cn, formatBytes } from "@/lib/utils.js";
@@ -82,10 +83,20 @@ export const ToolPanelHeader = () => {
         )}
         aria-hidden={!expanded}
       >
-        <section className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-auto p-3">
+        <section className="relative min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-auto p-3">
+          <CopyButton
+            value={responseJson}
+            label="Copy tool output"
+            className="absolute right-2 top-2 z-10"
+          />
           <JsonSyntaxBlock code={responseJson} />
         </section>
-        <section className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-auto border-l border-border p-3">
+        <section className="relative min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-auto border-l border-border p-3">
+          <CopyButton
+            value={widgetStateJson}
+            label="Copy view state"
+            className="absolute right-2 top-2 z-10"
+          />
           <JsonSyntaxBlock code={widgetStateJson} />
         </section>
       </motion.div>

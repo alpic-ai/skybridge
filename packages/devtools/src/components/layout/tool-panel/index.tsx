@@ -8,6 +8,7 @@ import {
   useDefaultLayout,
 } from "react-resizable-panels";
 
+import { CopyButton } from "@/lib/copy.js";
 import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
 import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { useCallToolResult } from "@/lib/store.js";
@@ -54,7 +55,12 @@ export const ToolPanel = () => {
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
   const theme = useInspectorPreferencesStore((s) => s.theme);
   const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
+  const isMobile =
+    useInspectorPreferencesStore(
+      (s) => s.userAgent?.device?.type ?? "desktop",
+    ) === "mobile";
   const isFullscreen = displayMode === "fullscreen";
+  const isFullscreenDesktop = isFullscreen && !isMobile;
   useKeyPress("esc", (e) => {
     if (e.defaultPrevented) {
       return;
@@ -127,7 +133,12 @@ export const ToolPanel = () => {
                   <span>{formatBytes(sizeBytes)}</span>
                 </div>
               </div>
-              <section className="min-h-0 min-w-0 flex-1 overflow-auto bg-background p-3">
+              <section className="relative min-h-0 min-w-0 flex-1 overflow-auto bg-light-gray p-3">
+                <CopyButton
+                  value={responseJson}
+                  label="Copy tool output"
+                  className="absolute right-2 top-2 z-10"
+                />
                 <JsonSyntaxBlock code={responseJson} />
               </section>
             </div>
@@ -176,9 +187,11 @@ export const ToolPanel = () => {
             <div
               className={cn(
                 "flex min-h-0 flex-1 items-center justify-center",
-                isFullscreen
+                isFullscreenDesktop
                   ? "overflow-hidden pt-3"
-                  : "mx-3 overflow-y-auto py-3",
+                  : isFullscreen
+                    ? "overflow-y-auto pt-3"
+                    : "mx-3 overflow-y-auto py-3",
               )}
             >
               <Suspense fallback={<Placeholder text="Loading view…" />}>

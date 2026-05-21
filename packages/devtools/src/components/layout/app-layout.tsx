@@ -1,7 +1,12 @@
 import { Button } from "@alpic-ai/ui/components/button";
 import { PlugZap } from "lucide-react";
 import { Suspense } from "react";
-import { Group, Panel, useDefaultLayout } from "react-resizable-panels";
+import {
+  Group,
+  Panel,
+  Separator,
+  useDefaultLayout,
+} from "react-resizable-panels";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { connectToServer } from "@/lib/mcp/index.js";
 import { Header } from "./header.js";
@@ -46,12 +51,13 @@ function AppLayout() {
                 maxSize={510}
                 className="min-h-0 min-w-0"
               >
-                <aside className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-r border-border">
+                <aside className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
                   <Suspense fallback={null}>
                     <ToolsList />
                   </Suspense>
                 </aside>
               </Panel>
+              <Separator className="w-px shrink-0 bg-border transition-colors hover:bg-ring data-separator-active:bg-ring" />
               <Panel
                 id={TOOL_PANEL_ID}
                 minSize={320}

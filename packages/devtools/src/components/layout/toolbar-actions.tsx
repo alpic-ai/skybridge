@@ -24,18 +24,18 @@ import {
   useRef,
   useState,
 } from "react";
+import { CopyButton, useCopyToClipboard } from "@/lib/copy.js";
 import { useTunnelStore } from "@/lib/tunnel-store.js";
 import { cn } from "@/lib/utils.js";
 
 const DOT_BY_STATUS = {
-  idle: "bg-red-500",
+  idle: "bg-gray-400",
   starting: "bg-orange-500 animate-pulse",
   connected: "bg-green-500",
   error: "bg-red-500",
 } as const;
 
 const HOVER_CLOSE_DELAY_MS = 120;
-const COPIED_RESET_MS = 1500;
 const DESCRIPTION_MAX_W = "max-w-[200px]";
 
 function useHoverOpen() {
@@ -67,35 +67,6 @@ function useHoverOpen() {
   }, []);
 
   return { open, setOpen, onEnter, onLeave };
-}
-
-function useCopyToClipboard() {
-  const [copied, setCopied] = useState(false);
-  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(
-    () => () => {
-      if (resetTimer.current) {
-        clearTimeout(resetTimer.current);
-      }
-    },
-    [],
-  );
-
-  const copy = useCallback(async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      if (resetTimer.current) {
-        clearTimeout(resetTimer.current);
-      }
-      resetTimer.current = setTimeout(() => setCopied(false), COPIED_RESET_MS);
-    } catch (err) {
-      console.error("Clipboard write failed", err);
-    }
-  }, []);
-
-  return { copied, copy };
 }
 
 type HoverHandlers = {
@@ -132,20 +103,6 @@ function HoverPopover({
         {children}
       </PopoverContent>
     </Popover>
-  );
-}
-
-function CopyButton({ value, label }: { value: string; label: string }) {
-  const { copied, copy } = useCopyToClipboard();
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      onClick={() => copy(value)}
-      className="text-quaternary-foreground hover:text-foreground"
-    >
-      {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-    </button>
   );
 }
 
@@ -247,7 +204,7 @@ export function AuditButton() {
       label="Audit"
       icon={<ClipboardCheck className="size-3.5" />}
       buildUrl={(tunnelUrl) =>
-        `https://app.alpic.ai/beacon?url=${encodeURIComponent(tunnelUrl)}/mcp`
+        `https://app.alpic.ai/beacon?url=${encodeURIComponent(`${tunnelUrl}/mcp`)}`
       }
       description="Audit your MCP server's tools, prompts, and resources"
     />
@@ -263,7 +220,7 @@ export function DeployButton() {
       trigger={
         <Button
           variant="cta"
-          className="h-8 px-2"
+          className="h-8 px-2 gap-1"
           icon={<RocketIcon className="size-3.5" />}
         >
           Deploy
@@ -292,9 +249,9 @@ export function TunnelButton() {
   const { state, start, stop } = useTunnelStore();
   const { copied, copy } = useCopyToClipboard();
 
-  const isConnected = state.status === "connected";
-  const onClick = isConnected
-    ? () => copy(state.url)
+  const mcpUrl = state.status === "connected" ? `${state.url}/mcp` : null;
+  const onClick = mcpUrl
+    ? () => copy(mcpUrl)
     : state.status === "starting"
       ? stop
       : start;
@@ -311,10 +268,10 @@ export function TunnelButton() {
             className={`h-2 w-2 rounded-full ${DOT_BY_STATUS[state.status]}`}
             aria-hidden
           />
-          {isConnected ? (
+          {mcpUrl ? (
             <>
               <span className="mx-2 font-mono text-xs">
-                {state.url.replace(/^https?:\/\//, "")}
+                {mcpUrl.replace(/^https?:\/\//, "")}
               </span>
               {copied ? (
                 <Check className="size-3.5" />

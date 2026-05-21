@@ -21,6 +21,7 @@ import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
 import { Loader2, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { CopyButton } from "@/lib/copy.js";
 import { useCallTool } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
@@ -155,6 +156,10 @@ function ToolBody({
               <TabsTrigger value="form">form</TabsTrigger>
               <TabsTrigger value="json">json</TabsTrigger>
             </TabsList>
+            <CopyButton
+              value={JSON.stringify(formData, null, 2)}
+              label="Copy input"
+            />
           </div>
           <TabsContent value="form">
             <FormBody
