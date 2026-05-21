@@ -8,6 +8,7 @@ import {
   useDefaultLayout,
 } from "react-resizable-panels";
 
+import { CopyButton } from "@/lib/copy.js";
 import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
 import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { useCallToolResult } from "@/lib/store.js";
@@ -125,6 +126,7 @@ export const ToolPanel = () => {
                   ) : null}
                   <span>·</span>
                   <span>{formatBytes(sizeBytes)}</span>
+                  <CopyButton value={responseJson} label="Copy tool output" />
                 </div>
               </div>
               <section className="min-h-0 min-w-0 flex-1 overflow-auto bg-background p-3">

@@ -21,6 +21,7 @@ import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
 import { Loader2, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { CopyButton } from "@/lib/copy.js";
 import { useCallTool } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
@@ -82,22 +83,23 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
           "no-underline data-[state=closed]:hover:bg-muted/40",
         )}
         action={
-          open ? (
-            <Button
-              disabled={isPending}
-              variant="primary"
-              onClick={handleRun}
-              icon={
-                isPending ? (
-                  <Loader2 className="size-3 animate-spin" />
-                ) : (
-                  <Play className="size-3" />
-                )
-              }
-            >
-              Run
-            </Button>
-          ) : null
+          <Button
+            disabled={isPending}
+            variant="primary"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRun();
+            }}
+            icon={
+              isPending ? (
+                <Loader2 className="size-3 animate-spin" />
+              ) : (
+                <Play className="size-3" />
+              )
+            }
+          >
+            Run
+          </Button>
         }
       >
         <div className="min-w-0 flex-1 text-left">{tool.name}</div>
@@ -155,6 +157,10 @@ function ToolBody({
               <TabsTrigger value="form">form</TabsTrigger>
               <TabsTrigger value="json">json</TabsTrigger>
             </TabsList>
+            <CopyButton
+              value={JSON.stringify(formData, null, 2)}
+              label="Copy input"
+            />
           </div>
           <TabsContent value="form">
             <FormBody

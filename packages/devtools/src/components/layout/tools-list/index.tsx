@@ -37,10 +37,9 @@ function ToolsList() {
   };
 
   const handleToolClick = (toolName: string) => {
-    if (toolName === "") {
+    if (!toolName) {
       return;
     }
-
     setOpenTool(toolName);
   };
 
@@ -59,7 +58,6 @@ function ToolsList() {
       </header>
       <Accordion
         type="single"
-        collapsible
         value={openTool ?? ""}
         onValueChange={handleToolClick}
         className="min-h-0 overflow-y-auto"
