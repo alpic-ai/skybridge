@@ -34,16 +34,14 @@ const server = new McpServer(
             "https://fonts.googleapis.com",
             "https://fonts.gstatic.com",
           ],
-          connectDomains: [],
           redirectDomains: ["https://docs.skybridge.tech"],
         },
       },
     },
     async ({ name }) => {
-      const displayName = name?.trim() || "friend";
       return {
-        structuredContent: { name: displayName },
-        content: [{ type: "text", text: `User name: ${displayName}` }],
+        structuredContent: { name },
+        content: [{ type: "text", text: `User name: ${name ?? "friend"}` }],
         isError: false,
       };
     },
