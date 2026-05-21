@@ -26,6 +26,7 @@ type ToolConfig = {
   outputSchema?: ZodRawShape;// Output type hints (Zod)
   annotations?: ToolAnnotations;
   view?: ViewConfig;         // ← present = view-tool, absent = plain tool
+  securitySchemes?: SecurityScheme[]; // Declare per-tool auth requirements
   _meta?: ToolMeta;
 };
 
@@ -38,8 +39,14 @@ type ToolMeta = {
   "openai/fileParams"?: string[]; // List of top-level input fields that references files.
   // Controls whether a tool is available to the model, the UI (app), or both.
   ui?: { visibility?: Array<"model" | "app"> };
+  // Mirror of ToolConfig.securitySchemes
+  securitySchemes?: SecurityScheme[];
   [key: string]: unknown;
 };
+
+type SecurityScheme =
+  | { type: "noauth" }
+  | { type: "oauth2"; scopes?: string[] };
 ```
 
 <Note>
@@ -70,6 +77,92 @@ type ViewConfig = {
 ```
 
 See [CSP & Domains](#csp--domains) below.
+
+### `securitySchemes`
+
+Declare which auth schemes this tool supports so clients can label it as public vs. requires-sign-in *before* invocation, and request the right OAuth scopes during sign-in.
+
+```typescript
+type SecurityScheme =
+  | { type: "noauth" }
+  | { type: "oauth2"; scopes?: string[] };
+```
+
+- **Across the array: match ANY.** Each entry is an alternative. The request is authorized if any one scheme is satisfied.
+- **Within an `oauth2` entry's `scopes`: match ALL.** The validated token must carry every listed scope.
+- **Listing `noauth` + `oauth2`** means "works anonymously, but auth gives more features."
+
+<Warning>
+This field is client-facing metadata. **Servers must still enforce auth on each call** — verify `extra.authInfo` and check `authInfo.scopes` in the handler (or use a tool-call middleware). The declaration is not self-enforcing.
+</Warning>
+
+#### Examples
+
+Protected tool:
+
+```typescript
+const SEARCH_SCOPES = ["search.read"];
+
+server.registerTool(
+  {
+    name: "search-private-docs",
+    description: "Search documents in the user's workspace.",
+    inputSchema: { q: z.string() },
+    securitySchemes: [{ type: "oauth2", scopes: SEARCH_SCOPES }],
+  },
+  async ({ q }, extra) => {
+    if (!extra.authInfo) {
+      return { content: "Sign in required.", isError: true };
+    }
+    const missing = SEARCH_SCOPES.filter(
+      (s) => !extra.authInfo!.scopes.includes(s),
+    );
+    if (missing.length > 0) {
+      return {
+        content: `Missing scope(s): ${missing.join(", ")}.`,
+        isError: true,
+      };
+    }
+    return { content: await search(q) };
+  },
+);
+```
+
+Public tool:
+
+```typescript
+server.registerTool(
+  {
+    name: "search-public-docs",
+    description: "Search public documents — no sign-in required.",
+    inputSchema: { q: z.string() },
+    securitySchemes: [{ type: "noauth" }],
+  },
+  async ({ q }) => ({ content: await search(q) }),
+);
+```
+
+Anonymous OR authenticated (single tool, different behavior):
+
+```typescript
+server.registerTool(
+  {
+    name: "search",
+    description: "Search docs. Authenticated users see their private workspace too.",
+    inputSchema: { q: z.string() },
+    securitySchemes: [
+      { type: "noauth" },
+      { type: "oauth2", scopes: ["search.read"] },
+    ],
+  },
+  async ({ q }, extra) => {
+    const includePrivate = !!extra.authInfo;
+    return { content: await search(q, { includePrivate }) };
+  },
+);
+```
+
+For the transport-level middleware that pairs with mixed-auth tools, see [`optionalBearerAuth`](/api-reference/mcp-server#optionalbearerauth).
 
 ## Handler
 
