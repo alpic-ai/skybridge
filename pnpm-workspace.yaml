@@ -3,7 +3,8 @@ packages:
   - "infrastructure"
   - "landing"
   - "packages/*"
-  - "packages/create-skybridge/template"
+  - "packages/create-skybridge/templates/demo"
+  - "packages/create-skybridge/templates/blank"
   - "examples/*"
 
 allowBuilds:

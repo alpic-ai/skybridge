@@ -72,12 +72,16 @@ jobs:
         working-directory: ./packages/core
         run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance --no-git-checks
 
-      # The template uses `skybridge: workspace:*` so dev/CI build against the
-      # local package. pnpm doesn't rewrite that when bundling the template
+      # Templates use `skybridge: workspace:*` so dev/CI build against the
+      # local package. pnpm doesn't rewrite that when bundling the templates
       # into create-skybridge, so pin it to the just-published version before
       # publishing create-skybridge.
-      - name: Pin template skybridge dep for publish
-        working-directory: ./packages/create-skybridge/template
+      - name: Pin demo template skybridge dep for publish
+        working-directory: ./packages/create-skybridge/templates/demo
+        run: pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
+
+      - name: Pin blank template skybridge dep for publish
+        working-directory: ./packages/create-skybridge/templates/blank
         run: pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
 
       - name: Publish create-skybridge to npm
@@ -88,9 +92,9 @@ jobs:
         working-directory: ./packages/devtools
         run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance --no-git-checks
 
-      - name: Restore template workspace dep
+      - name: Restore templates workspace deps
         if: github.event_name == 'release'
-        run: git checkout -- packages/create-skybridge/template/package.json
+        run: git checkout -- packages/create-skybridge/templates/demo/package.json packages/create-skybridge/templates/blank/package.json
 
       - name: Deploy docs to Mintlify
         if: github.event_name == 'release'
