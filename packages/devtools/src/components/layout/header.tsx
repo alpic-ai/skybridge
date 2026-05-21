@@ -64,17 +64,12 @@ export const Header = () => {
             {error}
           </span>
         )}
-        {requiresAuth && (
-          <div className="flex items-center gap-2">
-            <StatusBadge status={status} />
-            {status === "authenticated" && (
-              <Button variant="tertiary" onClick={() => logout()}>
-                <LogOut className="size-3.5" />
-                Sign out
-              </Button>
-            )}
-            <Separator orientation="vertical" className="h-4 self-center!" />
-          </div>
+        {requiresAuth && <StatusBadge status={status} />}
+        {requiresAuth && status === "authenticated" && (
+          <Button variant="tertiary" onClick={() => logout()}>
+            <LogOut className="size-3.5" />
+            Sign out
+          </Button>
         )}
         <nav className="flex items-center gap-1 text-xs">
           {EXTERNAL_LINKS.map((link, i) => (
