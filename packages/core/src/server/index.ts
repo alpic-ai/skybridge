@@ -1,7 +1,9 @@
 export {
   type AuthInfo,
+  type AuthMetadataOptions,
   type BearerAuthMiddlewareOptions,
   InvalidTokenError,
+  mcpAuthMetadataRouter,
   optionalBearerAuth,
   requireBearerAuth,
 } from "./auth.js";
