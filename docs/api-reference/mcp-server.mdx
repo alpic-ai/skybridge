@@ -244,17 +244,122 @@ const server = new McpServer({ name: "my-app", version: "1.0" }, {})
 export type AppType = typeof server;
 ```
 
+## Auth middlewares
+
+### requireBearerAuth
+
+Middleware that requires a valid Bearer token on every request. Use this when every tool needs sign-in.
+
+```typescript
+import { requireBearerAuth } from "skybridge/server";
+
+server.use(
+  "/mcp",
+  requireBearerAuth({ verifier: { verifyAccessToken } }),
+);
+```
+- **Valid Bearer token**: the request goes through, `authInfo` can be accessed in handler `extra` argument.
+- **Missing / invalid / expired tokens**: returns a 401 (with `WWW-Authenticate`), insufficient scopes get a 403.
+
+### optionalBearerAuth
+
+Middleware that validates a Bearer token when present, and lets requests through unauthenticated when no `Authorization` header is sent. Pair with per-tool [`securitySchemes`](/api-reference/register-tool#securityschemes) for mixed-auth servers.
+
+```typescript
+import { optionalBearerAuth } from "skybridge/server";
+
+server.use(
+  "/mcp",
+  optionalBearerAuth({
+    verifier: { verifyAccessToken },
+  }),
+);
+```
+
+Behavior:
+
+- **No `Authorization` header**: the request goes through and the downstream handler decides whether to reject based on its own `securitySchemes`.
+- **Valid Bearer token**: the request goes through, `authInfo` can be accessed in handler `extra` argument.
+- **Missing / invalid / expired tokens**: returns a 401 (with `WWW-Authenticate`), insufficient scopes get a 403.
+
+Takes the same [Options](#options) as `requireBearerAuth`.
+
+### Options
+
+Both helpers accept the same `BearerAuthMiddlewareOptions`:
+
+```typescript
+type BearerAuthMiddlewareOptions = {
+  verifier: OAuthTokenVerifier;
+  requiredScopes?: string[];
+  resourceMetadataUrl?: string;
+};
+```
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `verifier` | `OAuthTokenVerifier` | Yes | The provider-specific token check. See [Verifier](#verifier) for the contract. |
+| `requiredScopes` | `string[]` | No | Server-wide scope floor: every accepted token must include all listed scopes, or the request is rejected with 403 `InsufficientScopeError`. Per-tool [`securitySchemes`](/api-reference/register-tool#securityschemes) enforcement layers on top of this. For `optionalBearerAuth`, this is only checked when a token is actually sent. |
+| `resourceMetadataUrl` | `string` | No | Absolute URL to your OAuth 2.0 [Protected Resource Metadata](https://datatracker.ietf.org/doc/html/rfc9728) document. When set, it's appended to the `WWW-Authenticate` header on 401 responses so clients can discover the authorization server programmatically. |
+
+### Verifier
+
+Both `requireBearerAuth` and `optionalBearerAuth` accept a `verifier` whose only required method is `verifyAccessToken(token: string): Promise<AuthInfo>`. This is the provider-specific piece you have to write.
+
+Contract:
+
+- **Resolve** with an `AuthInfo` describing the validated token. The middleware sets it so tool handlers receive it in `extra.authInfo`.
+- **Throw** `InvalidTokenError` to reject the token because of malformed, bad signature, expired, or any failed claim check (issuer, audience, etc.). The middleware returns a 401 with the right `WWW-Authenticate` header.
+
+You don't need to check scopes in the verifier: the middleware enforces `requiredScopes` against `authInfo.scopes` automatically and returns 403 if a scope is missing.
+
+Required fields on `AuthInfo`:
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `token` | `string` | The raw bearer token  |
+| `clientId` | `string` | OAuth `client_id` (often the `azp` or `client_id` claim). |
+| `scopes` | `string[]` | Scopes granted to the token. Checked by middleware `requiredScopes` and by per-tool [`securitySchemes`](/api-reference/register-tool#securityschemes) checks. |
+| `expiresAt` | `number` | Unix seconds. **Required**: `requireBearerAuth` rejects tokens with no expiration. |
+| `extra` | `Record<string, unknown>` | Optional: anything else you want available in handlers (e.g. `sub`, `email`). |
+
+```typescript
+import { type AuthInfo, InvalidTokenError } from "skybridge/server";
+
+async function verifyAccessToken(token: string): Promise<AuthInfo> {
+  try {
+    // Validate with your provider (JWT verification, introspection, etc.).
+    const payload = await validateToken(token);
+
+    return {
+      token,
+      clientId: payload.client_id,
+      scopes: payload.scope.split(" "),
+      expiresAt: payload.exp,
+      extra: { sub: payload.sub },
+    };
+  } catch (err) {
+    throw new InvalidTokenError(
+      err instanceof Error ? err.message : "Token validation failed",
+    );
+  }
+}
+```
+
 ## Exported Types
 
 The following middleware types are available from `skybridge/server`:
 
 ```typescript
 import type {
+  AuthInfo,
+  BearerAuthMiddlewareOptions,
   McpExtra,
   McpMiddlewareFn,
   McpMiddlewareFilter,
   McpTypedMiddlewareFn,
   McpMethodString,
+  SecurityScheme,
 } from "skybridge/server";
 ```
 

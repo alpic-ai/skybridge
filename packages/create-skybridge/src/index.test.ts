@@ -1,8 +1,18 @@
 import { randomBytes } from "node:crypto";
+import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { init } from "./index.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("cross-spawn", () => ({
+  default: vi.fn(() => {
+    const child = new EventEmitter();
+    setImmediate(() => child.emit("close", 0));
+    return child;
+  }),
+}));
+
+const { init } = await import("./index.js");
 
 describe("create-skybridge", () => {
   let tempDirName: string;
@@ -18,35 +28,48 @@ describe("create-skybridge", () => {
     });
   });
 
-  it("should copy the template", { timeout: 10_000 }, async () => {
-    const name = `../../${tempDirName}//project$`;
-    await init([name]);
-    await fs.access(
-      path.join(process.cwd(), tempDirName, "project", ".gitignore"),
-    );
-    await fs.access(
-      path.join(process.cwd(), tempDirName, "project", ".dockerignore"),
-    );
-    await fs.access(
-      path.join(process.cwd(), tempDirName, "project", "Dockerfile"),
-    );
-    expect(
-      fs.access(path.join(process.cwd(), tempDirName, "project", ".npmrc")),
-    ).rejects.toThrowError();
+  it("scaffolds the demo template by default", async () => {
+    const name = `${tempDirName}/project`;
+    await init([name, "--yes", "--skip-skills"]);
+
+    const projectDir = path.join(process.cwd(), tempDirName, "project");
+    await fs.access(path.join(projectDir, ".gitignore"));
+    await fs.access(path.join(projectDir, ".dockerignore"));
+    await fs.access(path.join(projectDir, "Dockerfile"));
+    await fs.access(path.join(projectDir, "src", "views"));
+
+    await expect(fs.access(path.join(projectDir, ".npmrc"))).rejects.toThrow();
+    await expect(
+      fs.access(path.join(projectDir, "_gitignore")),
+    ).rejects.toThrow();
   });
 
-  it("should download template from repo", { timeout: 10_000 }, async () => {
-    const name = `../../${tempDirName}//project$`;
-    await init([
-      name,
-      "--repo",
-      "github:alpic-ai/skybridge/examples/ecom-carousel",
-    ]);
-    await fs.access(
-      path.join(process.cwd(), tempDirName, "project", ".gitignore"),
+  it("scaffolds the blank template with --blank", async () => {
+    const name = `${tempDirName}/project`;
+    await init([name, "--yes", "--blank", "--skip-skills"]);
+
+    const projectDir = path.join(process.cwd(), tempDirName, "project");
+    await fs.access(path.join(projectDir, ".gitignore"));
+    await fs.access(path.join(projectDir, "Dockerfile"));
+    await fs.access(path.join(projectDir, "src", "server.ts"));
+
+    // Blank template ships no views directory and no demo styles.
+    await expect(
+      fs.access(path.join(projectDir, "src", "views")),
+    ).rejects.toThrow();
+    await expect(
+      fs.access(path.join(projectDir, "src", "index.css")),
+    ).rejects.toThrow();
+  });
+
+  it("sets package.json name to the project directory basename", async () => {
+    const name = `${tempDirName}/my-app`;
+    await init([name, "--yes", "--skip-skills"]);
+
+    const pkgRaw = await fs.readFile(
+      path.join(process.cwd(), tempDirName, "my-app", "package.json"),
+      "utf-8",
     );
-    expect(
-      fs.access(path.join(process.cwd(), tempDirName, "project", ".npmrc")),
-    ).rejects.toThrowError();
+    expect(JSON.parse(pkgRaw).name).toBe("my-app");
   });
 });
