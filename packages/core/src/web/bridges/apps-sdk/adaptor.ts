@@ -1,6 +1,8 @@
 import type {
   Adaptor,
   CallToolResponse,
+  DownloadParams,
+  DownloadResult,
   FileMetadata,
   HostContext,
   HostContextStore,
@@ -95,6 +97,13 @@ export class AppsSdkAdaptor implements Adaptor {
       prompt,
       scrollToBottom: options?.scrollToBottom,
     });
+  };
+
+  public download = async (
+    _params: DownloadParams,
+  ): Promise<DownloadResult> => {
+    console.error("[skybridge] download: not supported on Apps SDK");
+    return { isError: true };
   };
 
   public openExternal(href: string, options: OpenExternalOptions = {}): void {

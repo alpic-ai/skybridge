@@ -1,0 +1,109 @@
+---
+title: useDownload
+description: "Trigger file downloads from a view."
+tag: "MCP Apps"
+---
+
+Views run in sandboxed iframes where direct downloads (`<a download>`, `URL.createObjectURL`) are blocked. The `useDownload` hook returns a `download` function that asks the host to save one or more files to the user's filesystem. The host shows a confirmation dialog before initiating the download.
+
+<Note>
+    This hook is not available on the Apps SDK. Calling `download` from ChatGPT will return `{ isError: true }`
+</Note>
+
+## Basic usage
+
+```tsx
+import { useDownload } from "skybridge/web";
+
+function ExportButton({ rows }: { rows: Row[] }) {
+  const { download } = useDownload();
+
+  const handleClick = async () => {
+    const csv = rows.map((r) => `${r.id},${r.name}`).join("\n");
+    const { isError } = await download({
+      contents: [
+        {
+          type: "resource",
+          resource: {
+            uri: "file:///orders.csv",
+            mimeType: "text/csv",
+            text: csv,
+          },
+        },
+      ],
+    });
+    if (isError) {
+      // user cancelled, host denied or not supported
+    }
+  };
+
+  return <button onClick={handleClick}>Export CSV</button>;
+}
+```
+
+## Returns
+
+```tsx
+{ download: (params: DownloadParams) => Promise<DownloadResult> }
+```
+
+### `DownloadParams`
+
+- `contents: (EmbeddedResource | ResourceLink)[]`: one or more resources to download.
+
+### `DownloadResult`
+
+- `isError?: boolean` = `true` if the user cancelled or the host denied. Transport errors (timeout, lost connection) throw an exception.
+
+## Resource shapes
+
+### Inline text — `EmbeddedResource`
+
+For content generated in the view (CSV, JSON, markdown):
+
+```tsx
+{
+  type: "resource",
+  resource: {
+    uri: "file:///export.json",      // filename hint (last path segment)
+    mimeType: "application/json",
+    text: JSON.stringify(data, null, 2),
+  },
+}
+```
+
+### Inline binary — `EmbeddedResource`
+
+For binary data, pass base64 in `blob`:
+
+```tsx
+{
+  type: "resource",
+  resource: {
+    uri: "file:///chart.png",
+    mimeType: "image/png",
+    blob: base64EncodedPng,
+  },
+}
+```
+
+### Resource link — `ResourceLink`
+
+When the file already lives on a server, let the host fetch it directly:
+
+```tsx
+{
+  type: "resource_link",
+  uri: "https://api.example.com/reports/q4.pdf",
+  name: "Q4 Report",
+  mimeType: "application/pdf",
+}
+```
+
+<Note>`resource_link` is not supported by Claude.</Note>
+
+## Notes
+
+- **Must be user-initiated** (button click, menu action). Hosts will reject calls fired from effects on mount.
+- The `uri` is a **filename hint**: the host derives the suggested save name from the last path segment.
+- For large binary content (more than a few hundred KB), prefer `resource_link` over inlining base64.

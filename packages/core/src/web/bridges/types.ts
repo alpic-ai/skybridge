@@ -1,4 +1,8 @@
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import type {
+  CallToolResult,
+  EmbeddedResource,
+  ResourceLink,
+} from "@modelcontextprotocol/sdk/types.js";
 import type { useSyncExternalStore } from "react";
 import type { ViewHostType } from "../../server/index.js";
 
@@ -112,6 +116,14 @@ export type RequestSizeOptions = {
   height?: number;
 };
 
+export type DownloadParams = {
+  contents: (EmbeddedResource | ResourceLink)[];
+};
+
+export type DownloadResult = {
+  isError?: boolean;
+};
+
 export interface Adaptor {
   getHostContextStore<K extends keyof HostContext>(key: K): HostContextStore<K>;
   callTool<
@@ -128,6 +140,7 @@ export interface Adaptor {
     options?: SendFollowUpMessageOptions,
   ): Promise<void>;
   openExternal(href: string, options?: OpenExternalOptions): void;
+  download(params: DownloadParams): Promise<DownloadResult>;
   setViewState(stateOrUpdater: SetViewStateAction): Promise<void>;
   uploadFile(file: File, options?: UploadFileOptions): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
