@@ -33,7 +33,7 @@ Arguments:
 Options:
   --blank        scaffold a minimal project without demo tools and views
   --overwrite    remove existing files if target directory is not empty
-  --pm <choice>  package manager to use (choices: ${PACKAGE_MANAGERS.join(", ")}. default: npm)
+  --pm <choice>  package manager to use (choices: ${PACKAGE_MANAGERS.join(", ")}. default to npm when none is provided or infered)
   --skip-skills  skip installing coding agent skills
   --start        start dev server
   --yes          skip prompts and use default values for unprovided options
@@ -138,18 +138,17 @@ export async function init(args: string[] = process.argv.slice(2)) {
         `Target directory "${targetDir}" is not empty. Use --overwrite to remove existing files.`,
       );
       process.exit(1);
-    } else {
-      const ok = await prompts.confirm({
-        message: `Target directory "${targetDir}" is not empty. Remove existing files?`,
-        initialValue: true,
-      });
-      if (prompts.isCancel(ok) || !ok) {
-        return cancel();
-      }
-      Spinner.start(`Cleaning up ${targetDir}`);
-      emptyDir(targetDir);
-      Spinner.stop(`Cleaned up ${targetDir}`);
     }
+    const ok = await prompts.confirm({
+      message: `Target directory "${targetDir}" is not empty. Remove existing files?`,
+      initialValue: true,
+    });
+    if (prompts.isCancel(ok) || !ok) {
+      return cancel();
+    }
+    Spinner.start(`Cleaning up ${targetDir}`);
+    emptyDir(targetDir);
+    Spinner.stop(`Cleaned up ${targetDir}`);
   }
 
   // 3. Template
