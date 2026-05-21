@@ -127,10 +127,7 @@ export const ToolPanel = () => {
                   <span>{formatBytes(sizeBytes)}</span>
                 </div>
               </div>
-              <section
-                className="min-h-0 min-w-0 flex-1 overflow-auto bg-background p-3"
-                data-testid="tool-response"
-              >
+              <section className="min-h-0 min-w-0 flex-1 overflow-auto bg-background p-3">
                 <JsonSyntaxBlock code={responseJson} />
               </section>
             </div>

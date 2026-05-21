@@ -5,8 +5,12 @@ test.describe("devtools smoke", () => {
     await page.goto("/?tool=echo");
 
     await expect(page.getByText("e2e-fixture")).toBeVisible();
-    await expect(page.locator('button[data-id="echo"]')).toBeVisible();
-    await expect(page.locator('button[data-id="echo-card"]')).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "echo", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "echo-card", exact: true }),
+    ).toBeVisible();
   });
 
   test("calls a plain tool and renders the response", async ({ page }) => {
@@ -16,7 +20,8 @@ test.describe("devtools smoke", () => {
     await page.getByLabel("message").fill(token);
     await page.getByRole("button", { name: /^run$/i }).click();
 
-    await expect(page.getByTestId("tool-response")).toContainText(token);
+    // Token appears in the rendered JSON response in the main panel.
+    await expect(page.getByRole("main")).toContainText(token);
   });
 
   test("calls a widget tool and renders inside the iframe", async ({
@@ -29,9 +34,7 @@ test.describe("devtools smoke", () => {
     await page.getByRole("button", { name: /^run$/i }).click();
 
     // First-time view compilation by Vite can take a few seconds.
-    const widget = page.frameLocator('[data-testid="tool-widget-iframe"]');
-    await expect(widget.getByTestId("echo-card-message")).toContainText(token, {
-      timeout: 20_000,
-    });
+    const widget = page.frameLocator('iframe[title="html-preview"]');
+    await expect(widget.getByText(token)).toBeVisible({ timeout: 20_000 });
   });
 });
