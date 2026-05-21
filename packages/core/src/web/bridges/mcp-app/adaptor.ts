@@ -2,6 +2,8 @@ import { dequal } from "dequal/lite";
 import type {
   Adaptor,
   CallToolResponse,
+  DownloadParams,
+  DownloadResult,
   HostContext,
   HostContextStore,
   OpenExternalOptions,
@@ -118,6 +120,17 @@ export class McpAppAdaptor implements Adaptor {
         },
       ],
     });
+  };
+
+  public download = async (params: DownloadParams): Promise<DownloadResult> => {
+    const app = await McpAppBridge.getInstance().getApp();
+    if (!app.getHostCapabilities()?.downloadFile) {
+      console.error(
+        "[skybridge] download: host does not support ui/download-file",
+      );
+      return { isError: true };
+    }
+    return app.downloadFile(params);
   };
 
   public openExternal(href: string, options?: OpenExternalOptions): void {

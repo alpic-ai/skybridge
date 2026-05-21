@@ -103,10 +103,7 @@
           {
             "group": "Server",
             "icon": "server",
-            "pages": [
-              "api-reference/mcp-server",
-              "api-reference/register-tool"
-            ]
+            "pages": ["api-reference/mcp-server", "api-reference/register-tool"]
           },
           {
             "group": "Hooks",
@@ -124,7 +121,8 @@
               "api-reference/use-request-modal",
               "api-reference/use-request-close",
               "api-reference/use-request-size",
-              "api-reference/use-files"
+              "api-reference/use-files",
+              "api-reference/use-download"
             ]
           },
           {
@@ -139,7 +137,10 @@
           {
             "group": "Types",
             "icon": "brackets-curly",
-            "pages": ["api-reference/infer-utility-types", "api-reference/file-ref"]
+            "pages": [
+              "api-reference/infer-utility-types",
+              "api-reference/file-ref"
+            ]
           },
           {
             "group": "Advanced",
@@ -157,10 +158,7 @@
           "examples",
           {
             "group": "Basic",
-            "pages": [
-              "examples/starter",
-              "examples/everything"
-            ]
+            "pages": ["examples/starter", "examples/everything"]
           },
           {
             "group": "Use cases",
@@ -184,10 +182,7 @@
           },
           {
             "group": "UI and Component libraries",
-            "pages": [
-              "examples/manifest-ui",
-              "examples/generative-ui"
-            ]
+            "pages": ["examples/manifest-ui", "examples/generative-ui"]
           }
         ]
       }
