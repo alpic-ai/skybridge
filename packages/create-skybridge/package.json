@@ -14,7 +14,7 @@
   "files": [
     "index.js",
     "dist",
-    "template"
+    "templates"
   ],
   "scripts": {
     "build": "tsc",
@@ -26,10 +26,11 @@
   },
   "dependencies": {
     "@clack/prompts": "^1.1.0",
-    "giget": "^3.2.0",
+    "cross-spawn": "^7.0.6",
     "mri": "^1.2.0"
   },
   "devDependencies": {
+    "@types/cross-spawn": "^6.0.6",
     "typescript": "^6.0.2",
     "vitest": "^4.1.4"
   }
