@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const FIXTURE_PORT = 4101;
+const DEVTOOLS_PORT = 5173;
+
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
@@ -7,7 +10,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
-    baseURL: "http://localhost:5173",
+    baseURL: `http://localhost:${DEVTOOLS_PORT}`,
     trace: "on-first-retry",
   },
   projects: [
@@ -19,18 +22,21 @@ export default defineConfig({
   webServer: [
     {
       command: "pnpm e2e:fixture",
-      port: 4101,
+      port: FIXTURE_PORT,
       reuseExistingServer: !process.env.CI,
+      env: {
+        __PORT: String(FIXTURE_PORT),
+      },
       stdout: "pipe",
       stderr: "pipe",
       timeout: 60_000,
     },
     {
-      command: "pnpm dev -- --port 5173 --strictPort",
-      port: 5173,
+      command: `pnpm dev -- --port ${DEVTOOLS_PORT} --strictPort`,
+      port: DEVTOOLS_PORT,
       reuseExistingServer: !process.env.CI,
       env: {
-        VITE_MCP_SERVER_URL: "http://localhost:4101/mcp",
+        VITE_MCP_SERVER_URL: `http://localhost:${FIXTURE_PORT}/mcp`,
       },
       stdout: "pipe",
       stderr: "pipe",
