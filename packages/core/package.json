@@ -105,6 +105,10 @@
     "commands": "./dist/commands",
     "dirname": "skybridge",
     "topicSeparator": " ",
+    "helpClass": {
+      "target": "./dist/commands/create",
+      "identifier": "SkybridgeHelp"
+    },
     "hooks": {
       "finally": "./dist/cli/telemetry"
     }

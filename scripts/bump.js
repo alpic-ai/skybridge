@@ -90,7 +90,8 @@ for (const dirEntry of readdirSync(join(rootDir, "examples"), {
 }
 
 const targets = [
-  "packages/create-skybridge/template/package.json",
+  "packages/create-skybridge/templates/demo/package.json",
+  "packages/create-skybridge/templates/blank/package.json",
   ...exampleTargets,
 ];
 

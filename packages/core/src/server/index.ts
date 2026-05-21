@@ -1,4 +1,11 @@
 export {
+  type AuthInfo,
+  type BearerAuthMiddlewareOptions,
+  InvalidTokenError,
+  optionalBearerAuth,
+  requireBearerAuth,
+} from "./auth.js";
+export {
   audio,
   embeddedResource,
   image,
@@ -27,6 +34,7 @@ export type {
   HandlerContent,
   KnownToolMeta,
   McpServerTypes,
+  SecurityScheme,
   ToolDef,
   ToolMeta,
   ViewConfig,
