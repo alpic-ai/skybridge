@@ -258,8 +258,8 @@ server.use(
   requireBearerAuth({ verifier: { verifyAccessToken } }),
 );
 ```
-- **Valid Bearer token**: the request goes through, `authInfo` can be access in handler `extra` argument.
-- **Missing / invalid / expired tokens**: returns a 401 (with `WWW-Authenticate`),insufficient scopes get a 403.
+- **Valid Bearer token**: the request goes through, `authInfo` can be accessed in handler `extra` argument.
+- **Missing / invalid / expired tokens**: returns a 401 (with `WWW-Authenticate`), insufficient scopes get a 403.
 
 ### optionalBearerAuth
 
@@ -279,8 +279,8 @@ server.use(
 Behavior:
 
 - **No `Authorization` header**: the request goes through and the downstream handler decides whether to reject based on its own `securitySchemes`.
-- **Valid Bearer token**: the request goes through, `authInfo` can be access in handler `extra` argument.
-- **Missing / invalid / expired tokens**: returns a 401 (with `WWW-Authenticate`),insufficient scopes get a 403.
+- **Valid Bearer token**: the request goes through, `authInfo` can be accessed in handler `extra` argument.
+- **Missing / invalid / expired tokens**: returns a 401 (with `WWW-Authenticate`), insufficient scopes get a 403.
 
 Takes the same [Options](#options) as `requireBearerAuth`.
 
@@ -327,19 +327,22 @@ Required fields on `AuthInfo`:
 import { type AuthInfo, InvalidTokenError } from "skybridge/server";
 
 async function verifyAccessToken(token: string): Promise<AuthInfo> {
-  // 1. Verify signature / introspect / call your provider.
-  // 2. Throw `InvalidTokenError` on failure — never return null/undefined.
-  // 3. Return the AuthInfo shape below.
-  if (!isValid(token)) {
-    throw new InvalidTokenError("Token is not valid");
+  try {
+    // Validate with your provider (JWT verification, introspection, etc.).
+    const payload = await validateToken(token);
+
+    return {
+      token,
+      clientId: payload.client_id,
+      scopes: payload.scope.split(" "),
+      expiresAt: payload.exp,
+      extra: { sub: payload.sub },
+    };
+  } catch (err) {
+    throw new InvalidTokenError(
+      err instanceof Error ? err.message : "Token validation failed",
+    );
   }
-  return {
-    token,
-    clientId: "client_abc",
-    scopes: ["openid", "profile"],
-    expiresAt: 1700000000,
-    extra: { sub: "user_123" },
-  };
 }
 ```
 
