@@ -55,7 +55,12 @@ export const ToolPanel = () => {
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
   const theme = useInspectorPreferencesStore((s) => s.theme);
   const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
+  const isMobile =
+    useInspectorPreferencesStore(
+      (s) => s.userAgent?.device?.type ?? "desktop",
+    ) === "mobile";
   const isFullscreen = displayMode === "fullscreen";
+  const isFullscreenDesktop = isFullscreen && !isMobile;
   useKeyPress("esc", (e) => {
     if (e.defaultPrevented) {
       return;
@@ -182,9 +187,11 @@ export const ToolPanel = () => {
             <div
               className={cn(
                 "flex min-h-0 flex-1 items-center justify-center",
-                isFullscreen
+                isFullscreenDesktop
                   ? "overflow-hidden pt-3"
-                  : "mx-3 overflow-y-auto py-3",
+                  : isFullscreen
+                    ? "overflow-y-auto pt-3"
+                    : "mx-3 overflow-y-auto py-3",
               )}
             >
               <Suspense fallback={<Placeholder text="Loading view…" />}>
