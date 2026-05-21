@@ -7,7 +7,7 @@ tag: "MCP Apps"
 Views run in sandboxed iframes where direct downloads (`<a download>`, `URL.createObjectURL`) are blocked. The `useDownload` hook returns a `download` function that asks the host to save one or more files to the user's filesystem. The host shows a confirmation dialog before initiating the download.
 
 <Note>
-    This hook is not available Apps SDK. Calling `download` from ChatGPT will return `{ isError: true }`
+    This hook is not available on the Apps SDK. Calling `download` from ChatGPT will return `{ isError: true }`
 </Note>
 
 ## Basic usage
@@ -100,7 +100,7 @@ When the file already lives on a server, let the host fetch it directly:
 }
 ```
 
-<Note>`resource_link`is not supported by Claude.</Note>
+<Note>`resource_link` is not supported by Claude.</Note>
 
 ## Notes
 
