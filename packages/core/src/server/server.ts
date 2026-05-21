@@ -132,6 +132,10 @@ export interface ViewConfig {
   _meta?: Record<string, unknown>;
 }
 
+export type SecurityScheme =
+  | { type: "noauth" }
+  | { type: "oauth2"; scopes?: string[] };
+
 /**
  * Well-known keys recognized by host runtimes when set on a tool's `_meta`.
  * Use {@link ToolMeta} to also pass arbitrary custom metadata alongside these.
@@ -149,6 +153,7 @@ export interface KnownToolMeta {
   "openai/fileParams"?: string[];
   /** MCP Apps: control whether the tool is exposed to the model, the app, or both. */
   ui?: Pick<McpUiToolMeta, "visibility">;
+  securitySchemes?: SecurityScheme[];
 }
 
 /** {@link KnownToolMeta} merged with arbitrary string-keyed metadata for custom flags. */
@@ -187,7 +192,13 @@ type McpAppsToolMeta = {
   ui: McpUiToolMeta;
 };
 
-type InternalToolMeta = Partial<OpenaiToolMeta & McpAppsToolMeta>;
+type SecuritySchemesToolMeta = {
+  securitySchemes: SecurityScheme[];
+};
+
+type InternalToolMeta = Partial<
+  OpenaiToolMeta & McpAppsToolMeta & SecuritySchemesToolMeta
+>;
 
 /** @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields */
 type OpenaiViewCSP = {
@@ -300,6 +311,14 @@ interface ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> {
   outputSchema?: ZodRawShapeCompat | AnySchema;
   annotations?: ToolAnnotations;
   view?: ViewConfig;
+  /**
+   * Declares which auth schemes this tool supports (e.g. `noauth`, `oauth2`).
+   * Lets clients label tools that require sign-in before calling, and pass
+   * the right scopes through the OAuth flow. Listing both `noauth` and
+   * `oauth2` signals that the tool works for anonymous callers and gives
+   * enhanced behavior to authenticated ones.
+   */
+  securitySchemes?: SecurityScheme[];
   _meta?: ToolMeta;
 }
 
@@ -1111,9 +1130,24 @@ export class McpServer<
     const config = args[0] as ToolConfig<ZodRawShapeCompat>;
     const cb = args[1] as ToolHandler<ZodRawShapeCompat>;
 
-    const { name, view, _meta: userToolMeta, ...toolFields } = config;
+    const {
+      name,
+      view,
+      securitySchemes,
+      _meta: userToolMeta,
+      ...toolFields
+    } = config;
 
     const toolMeta: InternalToolMeta = { ...userToolMeta };
+
+    if (securitySchemes) {
+      // SEP-1488 puts `securitySchemes` at the top level of the tool
+      // descriptor, but the SDK's `registerTool` drops unknown top-level
+      // fields, so the canonical spot isn't reachable without intercepting
+      // `tools/list`. Use the `_meta` back-compat mirror documented in the
+      // Apps SDK reference until SEP-1488 lands in the spec.
+      toolMeta.securitySchemes = securitySchemes;
+    }
 
     if (view) {
       this.enforceOneToolPerView(view.component, name);
