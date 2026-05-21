@@ -138,17 +138,18 @@ export async function init(args: string[] = process.argv.slice(2)) {
         `Target directory "${targetDir}" is not empty. Use --overwrite to remove existing files.`,
       );
       process.exit(1);
+    } else {
+      const ok = await prompts.confirm({
+        message: `Target directory "${targetDir}" is not empty. Remove existing files?`,
+        initialValue: true,
+      });
+      if (prompts.isCancel(ok) || !ok) {
+        return cancel();
+      }
+      Spinner.start(`Cleaning up ${targetDir}`);
+      emptyDir(targetDir);
+      Spinner.stop(`Cleaned up ${targetDir}`);
     }
-    const ok = await prompts.confirm({
-      message: `Target directory "${targetDir}" is not empty. Remove existing files?`,
-      initialValue: true,
-    });
-    if (prompts.isCancel(ok) || !ok) {
-      return cancel();
-    }
-    Spinner.start(`Cleaning up ${targetDir}`);
-    emptyDir(targetDir);
-    Spinner.stop(`Cleaned up ${targetDir}`);
   }
 
   // 3. Template
