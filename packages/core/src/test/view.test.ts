@@ -1,4 +1,6 @@
 import crypto from "node:crypto";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
   ServerNotification,
@@ -14,6 +16,7 @@ import {
   vi,
 } from "vitest";
 import type { McpServer, ViewName } from "../server/server.js";
+import { McpServer as McpServerClass } from "../server/server.js";
 import {
   createMockExtra,
   createMockMcpServer,
@@ -872,5 +875,77 @@ describe("McpServer.registerTool (unified API)", () => {
       "Loading...",
     );
     expect(toolConfig._meta?.["acme.com/category"]).toBe("utility");
+  });
+});
+
+describe("resources/list view _meta injection", () => {
+  afterEach(() => resetTestEnv());
+
+  it("attaches CSP, domain, and connectDomains _meta to view resources at list time", async () => {
+    setTestEnv({ NODE_ENV: "production" });
+
+    const server = new McpServerClass(
+      { name: "test", version: "1.0.0" },
+      { capabilities: {} },
+    );
+    server.registerTool(
+      {
+        name: "start",
+        description: "Start",
+        view: {
+          component: "my-view" as ViewName,
+          description: "Onboarding deck",
+          domain: "skybridge.tech",
+          csp: {
+            resourceDomains: ["https://fonts.googleapis.com"],
+            redirectDomains: ["https://docs.skybridge.tech"],
+          },
+        },
+      },
+      vi.fn().mockResolvedValue({
+        content: [{ type: "text", text: "ok" }],
+        structuredContent: {},
+      }),
+    );
+
+    const client = new Client({ name: "test-client", version: "1.0.0" });
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    const { resources } = await client.listResources();
+    await client.close();
+    await server.close();
+
+    const appsSdk = resources.find((r) => r.uri.includes("apps-sdk"));
+    const extApps = resources.find((r) => r.uri.includes("ext-apps"));
+    expect(appsSdk?._meta).toBeDefined();
+    expect(extApps?._meta).toBeDefined();
+
+    const appsSdkCsp = (appsSdk?._meta as Record<string, unknown>)?.[
+      "openai/widgetCSP"
+    ] as { resource_domains?: string[]; connect_domains?: string[] };
+    expect(appsSdkCsp.connect_domains?.length).toBeGreaterThan(0);
+    expect(appsSdkCsp.resource_domains).toContain(
+      "https://fonts.googleapis.com",
+    );
+    expect(
+      (appsSdk?._meta as Record<string, unknown>)?.["openai/widgetDomain"],
+    ).toBe("skybridge.tech");
+
+    const extUi = (
+      extApps?._meta as {
+        ui?: {
+          csp?: { connectDomains?: string[]; resourceDomains?: string[] };
+          domain?: string;
+        };
+      }
+    ).ui;
+    expect(extUi?.csp?.connectDomains?.length).toBeGreaterThan(0);
+    expect(extUi?.csp?.resourceDomains).toContain(
+      "https://fonts.googleapis.com",
+    );
+    expect(extUi?.domain).toBe("skybridge.tech");
   });
 });

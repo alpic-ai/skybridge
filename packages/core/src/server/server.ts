@@ -452,6 +452,10 @@ export class McpServer<
   private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private mcpMiddlewareApplied = false;
   private claimedViews = new Map<string, string>();
+  private viewMetaBuilders = new Map<
+    string,
+    (extra: McpExtra | undefined) => ResourceMeta
+  >();
   private viteManifest: Record<string, ViteManifestEntry> | null = null;
   private readonly serverInfo: Implementation;
   private readonly serverOptions?: ServerOptions;
@@ -601,10 +605,35 @@ export class McpServer<
     }
     this.mcpMiddlewareApplied = true;
 
+    // Surface view-resource _meta on `resources/list` (per ext-apps spec:
+    // hosts/checkers read CSP & domain at list time before fetching content).
+    const viewListMetaEntry: McpMiddlewareEntry = {
+      filter: "resources/list",
+      handler: async (_req, extra, next) => {
+        const result = (await next()) as {
+          resources: Array<Record<string, unknown> & { uri: string }>;
+        };
+        for (const resource of result.resources) {
+          const builder = this.viewMetaBuilders.get(resource.uri);
+          if (!builder) {
+            continue;
+          }
+          const meta = builder(extra);
+          resource._meta = {
+            ...((resource._meta as Record<string, unknown>) ?? {}),
+            ...meta,
+          };
+        }
+        return result;
+      },
+    };
+
     const monitoringEntry = createMiddlewareEntry();
-    const entries = monitoringEntry
-      ? [monitoringEntry, ...this.mcpMiddlewareEntries]
-      : this.mcpMiddlewareEntries;
+    const entries = [
+      ...(monitoringEntry ? [monitoringEntry] : []),
+      viewListMetaEntry,
+      ...this.mcpMiddlewareEntries,
+    ];
 
     if (entries.length === 0) {
       return;
@@ -750,6 +779,65 @@ export class McpServer<
       );
     }
     this.claimedViews.set(component, toolName);
+  }
+
+  private resolveViewRequestContext(extra: McpExtra | undefined): {
+    serverUrl: string;
+    connectDomains: string[];
+    contentMetaOverrides: { domain?: string };
+  } {
+    const isProduction = process.env.NODE_ENV === "production";
+    const headers = extra?.requestInfo?.headers || {};
+    const header = (key: string) => {
+      const val = headers[key];
+      return Array.isArray(val) ? val[0] : val;
+    };
+    const isClaude = header("user-agent") === "Claude-User";
+
+    let serverUrl: string;
+    const forwardedHost = header("x-forwarded-host");
+    const origin = header("origin");
+    const host = header("host");
+
+    if (forwardedHost) {
+      const proto = header("x-forwarded-proto") || "https";
+      serverUrl = `${proto}://${forwardedHost}`;
+    } else if (origin) {
+      serverUrl = origin;
+    } else if (host) {
+      const proto = ["127.0.0.1:", "localhost:"].some((p) => host.startsWith(p))
+        ? "http"
+        : "https";
+      serverUrl = `${proto}://${host}`;
+    } else {
+      const devPort = process.env.__PORT || "3000";
+      serverUrl = `http://localhost:${devPort}`;
+    }
+
+    const connectDomains = [serverUrl];
+    if (!isProduction) {
+      const wsUrl = new URL(serverUrl);
+      wsUrl.protocol = wsUrl.protocol === "https:" ? "wss:" : "ws:";
+      connectDomains.push(wsUrl.origin);
+    }
+
+    let contentMetaOverrides: { domain?: string } = {};
+    if (isClaude) {
+      const pathname = extra?.requestInfo?.url?.pathname ?? "";
+      const rawUrl =
+        header("x-alpic-forwarded-url") ?? `${serverUrl}${pathname}`;
+      // Strip a lone trailing slash so the hash matches the connector URL
+      // as registered with Claude (which has no trailing slash on bare origins).
+      const url = rawUrl.endsWith("/") ? rawUrl.slice(0, -1) : rawUrl;
+      const hash = crypto
+        .createHash("sha256")
+        .update(url)
+        .digest("hex")
+        .slice(0, 32);
+      contentMetaOverrides = { domain: `${hash}.claudemcpcontent.com` };
+    }
+
+    return { serverUrl, connectDomains, contentMetaOverrides };
   }
 
   private registerViewResources(
@@ -898,43 +986,28 @@ export class McpServer<
   }): void {
     const { hostType, uri: viewUri, mimeType, buildContentMeta } = viewResource;
 
+    const buildMeta = (extra: McpExtra | undefined): ResourceMeta => {
+      const { serverUrl, connectDomains, contentMetaOverrides } =
+        this.resolveViewRequestContext(extra);
+      return buildContentMeta(
+        {
+          resourceDomains: [serverUrl],
+          connectDomains,
+          domain: serverUrl,
+          baseUriDomains: [serverUrl],
+        },
+        contentMetaOverrides,
+      );
+    };
+    this.viewMetaBuilders.set(viewUri, buildMeta);
+
     this.registerResource(
       name,
       viewUri,
       { description: view.description },
       async (uri, extra) => {
         const isProduction = process.env.NODE_ENV === "production";
-        const isClaude =
-          extra?.requestInfo?.headers?.["user-agent"] === "Claude-User";
-
-        const headers = extra?.requestInfo?.headers || {};
-        const header = (key: string) => {
-          const val = headers[key];
-          return Array.isArray(val) ? val[0] : val;
-        };
-
-        let serverUrl: string;
-
-        const forwardedHost = header("x-forwarded-host");
-        const origin = header("origin");
-        const host = header("host");
-
-        if (forwardedHost) {
-          const proto = header("x-forwarded-proto") || "https";
-          serverUrl = `${proto}://${forwardedHost}`;
-        } else if (origin) {
-          serverUrl = origin;
-        } else if (host) {
-          const proto = ["127.0.0.1:", "localhost:"].some((p) =>
-            host.startsWith(p),
-          )
-            ? "http"
-            : "https";
-          serverUrl = `${proto}://${host}`;
-        } else {
-          const devPort = process.env.__PORT || "3000";
-          serverUrl = `http://localhost:${devPort}`;
-        }
+        const { serverUrl } = this.resolveViewRequestContext(extra);
 
         const html = isProduction
           ? templateHelper.renderProduction({
@@ -949,42 +1022,9 @@ export class McpServer<
               viewName: view.component,
             });
 
-        const connectDomains = [serverUrl];
-        if (!isProduction) {
-          const wsUrl = new URL(serverUrl);
-          wsUrl.protocol = wsUrl.protocol === "https:" ? "wss:" : "ws:";
-          connectDomains.push(wsUrl.origin);
-        }
-
-        let contentMetaOverrides: { domain?: string } = {};
-        if (isClaude) {
-          const pathname = extra?.requestInfo?.url?.pathname ?? "";
-          const rawUrl =
-            header("x-alpic-forwarded-url") ?? `${serverUrl}${pathname}`;
-          // Strip a lone trailing slash so the hash matches the connector URL
-          // as registered with Claude (which has no trailing slash on bare origins).
-          const url = rawUrl.endsWith("/") ? rawUrl.slice(0, -1) : rawUrl;
-          const hash = crypto
-            .createHash("sha256")
-            .update(url)
-            .digest("hex")
-            .slice(0, 32);
-          contentMetaOverrides = { domain: `${hash}.claudemcpcontent.com` };
-        }
-
-        const contentMeta = buildContentMeta(
-          {
-            resourceDomains: [serverUrl],
-            connectDomains,
-            domain: serverUrl,
-            baseUriDomains: [serverUrl],
-          },
-          contentMetaOverrides,
-        );
-
         return {
           contents: [
-            { uri: uri.href, mimeType, text: html, _meta: contentMeta },
+            { uri: uri.href, mimeType, text: html, _meta: buildMeta(extra) },
           ],
         };
       },
