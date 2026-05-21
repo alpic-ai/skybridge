@@ -34,6 +34,7 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 - **Prompt LLM** → [prompt-llm.md](references/prompt-llm.md): when view needs to trigger LLM response
 - **UI guidelines** → [ui-guidelines.md](references/ui-guidelines.md): display modes, layout constraints, theme, device, and locale
 - **External links** → [open-external-links.md](references/open-external-links.md): when redirecting to external URLs or setting "open in app" target
+- **Download file** → [download-file.md](references/download-file.md): when saving content to the user's filesystem
 - **OAuth** → [oauth.md](references/oauth.md): when tools need user authentication to access user-specific data
 - **CSP** → [csp.md](references/csp.md): when declaring allowed domains for fetch, assets, redirects, or iframes
 
