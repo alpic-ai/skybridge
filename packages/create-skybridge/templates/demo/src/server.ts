@@ -16,6 +16,7 @@ const server = new McpServer(
         name: z.string().optional().describe("The user name."),
       },
       annotations: {
+        title: "Start Skybridge onboarding",
         readOnlyHint: true,
         destructiveHint: false,
         openWorldHint: false,
@@ -26,8 +27,8 @@ const server = new McpServer(
       },
       view: {
         component: "onboarding",
-        // Replace with the domain your widget will be served from in production.
-        domain: "skybridge.tech",
+        // Replace with the URL your widget will be served from in production.
+        domain: "https://skybridge.tech",
         description: "Onboarding deck",
         csp: {
           resourceDomains: [
@@ -51,6 +52,7 @@ const server = new McpServer(
       name: "get-fortune-cookie",
       description: "Get fortune cookie",
       annotations: {
+        title: "Get a fortune cookie",
         readOnlyHint: true,
         destructiveHint: false,
         openWorldHint: false,
