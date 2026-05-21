@@ -10,7 +10,8 @@ import {
  * triggers the next assistant turn).
  *
  * Pass `scrollToBottom: false` to keep the chat scroll position when the host
- * posts the message.
+ * posts the message. This option is Apps-SDK-only; it is silently ignored in
+ * the MCP Apps runtime.
  *
  * @example
  * ```tsx
