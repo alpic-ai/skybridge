@@ -37,9 +37,6 @@ function ToolsList() {
   };
 
   const handleToolClick = (toolName: string) => {
-    if (!toolName) {
-      return;
-    }
     setOpenTool(toolName);
   };
 
