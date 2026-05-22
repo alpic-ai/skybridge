@@ -16,7 +16,16 @@ import { McpServer } from "skybridge/server";
 
 ```typescript
 const server = new McpServer(
-  serverInfo: { name: string; version: string },
+  serverInfo: {
+    name: string;
+    title?: string;
+    version: string;
+    icons?: Array<{
+      src: string;
+      mimeType?: string;
+      sizes?: string[];
+    }>;
+  },
   options: McpServerOptions
 );
 ```
@@ -26,8 +35,36 @@ const server = new McpServer(
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `serverInfo.name` | `string` | Name of your MCP server |
+| `serverInfo.title` | `string` | Optional human-readable display name for clients |
 | `serverInfo.version` | `string` | Version of your server |
+| `serverInfo.icons` | `Array<{ src: string; mimeType?: string; sizes?: string[] }>` | Optional icons advertised in the MCP implementation metadata |
 | `options` | `McpServerOptions` | Configuration options |
+
+### Implementation metadata
+
+Skybridge passes the first `McpServer` argument through as MCP implementation metadata. Add `icons` there to advertise a Connector icon to Claude and other MCP clients that support implementation icons:
+
+```typescript
+import { McpServer } from "skybridge/server";
+
+const server = new McpServer(
+  {
+    name: "coffee-finder",
+    title: "Coffee Finder",
+    version: "0.0.1",
+    icons: [
+      {
+        src: "https://example.com/icon.png",
+        mimeType: "image/png",
+        sizes: ["128x128"],
+      },
+    ],
+  },
+  { capabilities: {} },
+);
+```
+
+Use an HTTPS URL when testing through a public tunnel, or a `data:` URI for a self-contained icon. Local file paths are not reachable by remote clients. Host support can vary, so keep the icon metadata in your server even if a client does not display it yet.
 
 ### Options
 

@@ -133,32 +133,6 @@ Skybridge downloads and runs [Alpic tunnel](https://docs.alpic.ai/cli/tunnel) au
 2. Make sure your Connector is selected in the Connectors dropdown
 3. Test view interactions and tool responses
 
-#### Customize the Connector icon
-
-Skybridge passes the first `McpServer` argument through as MCP implementation metadata. Add an `icons` array there to advertise the Connector icon to Claude and other MCP clients that support implementation icons:
-
-```typescript
-import { McpServer } from "skybridge/server";
-
-const server = new McpServer(
-  {
-    name: "coffee-finder",
-    title: "Coffee Finder",
-    version: "0.0.1",
-    icons: [
-      {
-        src: "https://example.com/icon.png",
-        mimeType: "image/png",
-        sizes: ["128x128"],
-      },
-    ],
-  },
-  { capabilities: {} },
-);
-```
-
-Use an HTTPS URL when testing through a public tunnel, or a `data:` URI for a self-contained icon. Local file paths are not reachable by remote clients. Host support can vary, so keep the icon metadata in your server even if a client does not display it yet.
-
 ### Testing in other MCP Clients
 
 Desktop MCP clients like VSCode, Goose, and others can connect directly to your local server without needing a HTTP tunnel or a public URL.
