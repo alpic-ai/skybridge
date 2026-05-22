@@ -1,14 +1,9 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import cors from "cors";
-import {
-  type AuthInfo,
-  InvalidTokenError,
-  McpServer,
-  mcpAuthMetadataRouter,
-  requireBearerAuth,
-} from "skybridge/server";
+import { McpServer, requireBearerAuth } from "skybridge/server";
 import { z } from "zod";
+import { createMockAuthServer } from "./mock-auth-server.js";
 
 // Run from the web/ subdir so viewsDevServer finds vite.config.ts there.
 const fixtureDir = path.dirname(fileURLToPath(import.meta.url));
@@ -21,18 +16,6 @@ const REQUIRES_AUTH = process.argv.includes("--auth");
 export const VALID_TOKEN = "e2e-auth-valid-token";
 export const CLIENT_ID = "e2e-auth-client";
 
-async function verifyAccessToken(token: string): Promise<AuthInfo> {
-  if (token !== VALID_TOKEN) {
-    throw new InvalidTokenError("invalid token");
-  }
-  return {
-    token,
-    clientId: CLIENT_ID,
-    scopes: [],
-    expiresAt: Math.floor(Date.now() / 1000) + 3600,
-  };
-}
-
 const baseServer = new McpServer(
   {
     name: REQUIRES_AUTH ? "e2e-auth-fixture" : "e2e-fixture",
@@ -42,21 +25,20 @@ const baseServer = new McpServer(
 );
 
 if (REQUIRES_AUTH) {
-  const SERVER_URL = `http://localhost:${process.env.__PORT}`;
+  const serverUrl = `http://localhost:${process.env.__PORT}`;
+  const mockAuth = createMockAuthServer({
+    serverUrl,
+    seedTokens: [{ token: VALID_TOKEN, clientId: CLIENT_ID }],
+  });
   baseServer
     .use(cors())
+    .use(mockAuth.router)
     .use(
-      mcpAuthMetadataRouter({
-        oauthMetadata: {
-          issuer: SERVER_URL,
-          authorization_endpoint: `${SERVER_URL}/authorize`,
-          token_endpoint: `${SERVER_URL}/token`,
-          response_types_supported: ["code"],
-        },
-        resourceServerUrl: new URL(`${SERVER_URL}/mcp`),
+      "/mcp",
+      requireBearerAuth({
+        verifier: { verifyAccessToken: mockAuth.verifyAccessToken },
       }),
-    )
-    .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }));
+    );
 }
 
 const server = baseServer
