@@ -47,8 +47,7 @@ const server = new McpServer(
   .registerTool(
     {
       name: "every-input-type",
-      description:
-        "Exercises every common input type the DevTools form renderer has to handle — optional strings (single-line and long multi-line), bounded integers and free-form numbers, booleans, string enums, arrays of strings, and a nested object with its own boolean / bounded integer / enum fields. Use this tool to QA form layout, label truncation, validation messages, default values, and how long descriptions wrap inside the sidebar accordion.",
+      description: "Exercises every common input type the form renderer handles.",
       inputSchema: {
         name: z.string().optional().describe("Free-form string"),
         age: z
