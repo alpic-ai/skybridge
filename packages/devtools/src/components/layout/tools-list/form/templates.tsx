@@ -167,7 +167,8 @@ export function TitleFieldTemplate(props: TitleFieldProps) {
 export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
   const { fieldPathId, properties, description, disabled, title, required } =
     props;
-  const isRoot = fieldPathId?.$id === "root";
+  // rjsf v6 passes `fieldPathId` (renamed from v5's `idSchema`).
+  const isRoot = fieldPathId.$id === "root";
 
   return (
     <div
