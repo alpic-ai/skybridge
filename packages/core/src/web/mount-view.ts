@@ -6,6 +6,25 @@ import { installOpenAILoggingProxy } from "./proxy.js";
 
 let rootInstance: Root | null = null;
 
+/**
+ * Mount a view's root React component into `#root`. Each view file's entry
+ * point should call this exactly once.
+ *
+ * Wraps the component in `StrictMode`, applies host-specific providers
+ * automatically (e.g. modal support for MCP Apps), and installs the dev-mode
+ * logging proxy for `window.openai` calls.
+ *
+ * @param component - Your root React element (already constructed, e.g. `<App />`).
+ *
+ * @example
+ * ```tsx
+ * // src/views/search.tsx
+ * import { mountView } from "skybridge/web";
+ * import { App } from "./App";
+ *
+ * mountView(<App />);
+ * ```
+ */
 export const mountView = (component: React.ReactNode) => {
   const rootElement = document.getElementById("root");
   if (!rootElement) {
