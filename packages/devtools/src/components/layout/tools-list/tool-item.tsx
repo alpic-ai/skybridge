@@ -12,11 +12,7 @@ import {
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import type Form from "@rjsf/core";
 import { Form as FormComponent } from "@rjsf/shadcn";
-import type {
-  FieldErrorProps,
-  FieldTemplateProps,
-  RJSFSchema,
-} from "@rjsf/utils";
+import type { RJSFSchema } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
 import { Loader2, Play } from "lucide-react";
@@ -26,6 +22,7 @@ import { useCallTool } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
+import { buildFormUiSchema, formTemplates, formWidgets } from "./form/index.js";
 
 type TabValue = "form" | "json";
 
@@ -199,42 +196,12 @@ function FormBody({
       ref={formRef as React.RefObject<Form<unknown, RJSFSchema>>}
       schema={schema}
       validator={validator}
-      uiSchema={{
-        "ui:submitButtonOptions": { norender: true },
-      }}
+      uiSchema={buildFormUiSchema(schema)}
       formData={formData}
       onChange={(data) => setFormData(data.formData)}
       showErrorList={false}
-      templates={{
-        FieldTemplate: (props: FieldTemplateProps) => {
-          const { id, classNames, style, label, required, errors, children } =
-            props;
-          return (
-            <div
-              className={cn("flex flex-col gap-1.5", classNames)}
-              style={style}
-            >
-              <label
-                htmlFor={id}
-                className="font-mono text-xs text-muted-foreground"
-              >
-                {label}
-                {required && <span className="ml-1 text-destructive">*</span>}
-              </label>
-              <div className="flex flex-col gap-1">
-                {children}
-                {errors}
-              </div>
-            </div>
-          );
-        },
-        FieldErrorTemplate: (props: FieldErrorProps) =>
-          props.errors && props.errors.length > 0 ? (
-            <div className="mt-1 text-xs text-destructive">
-              {props.errors.join(", ")}
-            </div>
-          ) : null,
-      }}
+      widgets={formWidgets}
+      templates={formTemplates}
     />
   );
 }
@@ -277,7 +244,7 @@ function JsonBody({
     <div className="space-y-1.5">
       <textarea
         className={cn(
-          "h-40 w-full rounded-md border p-2 font-mono text-xs",
+          "h-80 w-full rounded-md border p-2 font-mono text-xs",
           error ? "border-destructive" : "border-border",
         )}
         spellCheck={false}

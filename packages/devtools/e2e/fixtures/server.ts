@@ -43,6 +43,54 @@ const server = new McpServer(
       content: [{ type: "text", text: message }],
       isError: false,
     }),
+  )
+  .registerTool(
+    {
+      name: "every-input-type",
+      description:
+        "Exercises every common input type the DevTools form renderer has to handle — optional strings (single-line and long multi-line), bounded integers and free-form numbers, booleans, string enums, arrays of strings, and a nested object with its own boolean / bounded integer / enum fields. Use this tool to QA form layout, label truncation, validation messages, default values, and how long descriptions wrap inside the sidebar accordion.",
+      inputSchema: {
+        name: z.string().optional().describe("Free-form string"),
+        age: z
+          .number()
+          .int()
+          .min(0)
+          .max(120)
+          .optional()
+          .describe("Integer, 0–120"),
+        favoriteNumber: z.number().optional().describe("Any number"),
+        isDeveloper: z.boolean().optional().describe("Boolean toggle"),
+        experienceLevel: z
+          .enum(["beginner", "intermediate", "advanced"])
+          .optional()
+          .describe("String enum"),
+        interests: z.array(z.string()).optional().describe("Array of strings"),
+        colors: z
+          .array(z.enum(["red", "green", "blue", "yellow", "purple"]))
+          .min(1)
+          .max(3)
+          .optional()
+          .describe("Multi-select (array of enums), pick 1–3"),
+        bio: z
+          .string()
+          .max(500)
+          .optional()
+          .describe("Long text (>= multi-line in the form)"),
+        preferences: z
+          .object({
+            enableNotifications: z.boolean().optional(),
+            maxExamples: z.number().int().min(1).max(10).optional(),
+            theme: z.enum(["system", "light", "dark"]).optional(),
+          })
+          .optional()
+          .describe("Nested object"),
+      },
+    },
+    async (input) => ({
+      structuredContent: input,
+      content: [{ type: "text", text: JSON.stringify(input, null, 2) }],
+      isError: false,
+    }),
   );
 
 export type AppType = typeof server;
