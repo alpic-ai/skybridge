@@ -249,6 +249,7 @@ export function DeployButton() {
           variant="cta"
           className="h-8 px-2 gap-1"
           icon={<RocketIcon className="size-3.5" />}
+          onClick={() => copy("npm run deploy")}
         >
           Deploy
         </Button>
