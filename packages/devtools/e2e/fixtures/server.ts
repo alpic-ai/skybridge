@@ -47,7 +47,8 @@ const server = new McpServer(
   .registerTool(
     {
       name: "every-input-type",
-      description: "Exercises every common input type the form renderer handles.",
+      description:
+        "Exercises every common input type the form renderer handles.",
       inputSchema: {
         name: z.string().optional().describe("Free-form string"),
         age: z
