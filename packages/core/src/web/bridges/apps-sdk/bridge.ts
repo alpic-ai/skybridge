@@ -5,6 +5,7 @@ import {
   type SetGlobalsEvent,
 } from "./types.js";
 
+/** @internal Singleton bridge over `window.openai` events. Used by {@link AppsSdkAdaptor}. */
 export class AppsSdkBridge implements Bridge<AppsSdkContext> {
   private static instance: AppsSdkBridge | null = null;
 

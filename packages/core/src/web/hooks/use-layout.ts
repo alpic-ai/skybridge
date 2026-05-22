@@ -20,6 +20,8 @@ export type LayoutState = {
  * // Respect safe area insets
  * const paddingTop = safeArea.insets.top;
  * ```
+ *
+ * @see https://docs.skybridge.tech/api-reference/use-layout
  */
 export function useLayout(): LayoutState {
   const theme = useHostContext("theme");

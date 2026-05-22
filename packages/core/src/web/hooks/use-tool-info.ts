@@ -1,6 +1,7 @@
 import { useHostContext } from "../bridges/index.js";
 import type { UnknownObject } from "../types.js";
 
+/** {@link useToolInfo} state before the tool has been invoked. */
 export type ToolIdleState = {
   status: "idle";
   isIdle: true;
@@ -11,6 +12,7 @@ export type ToolIdleState = {
   responseMetadata: undefined;
 };
 
+/** {@link useToolInfo} state while the tool is executing — `input` is available, output is not yet. */
 export type ToolPendingState<ToolInput extends UnknownObject> = {
   status: "pending";
   isIdle: false;
@@ -21,6 +23,7 @@ export type ToolPendingState<ToolInput extends UnknownObject> = {
   responseMetadata: undefined;
 };
 
+/** {@link useToolInfo} state once the tool returned — `input`, `output`, and `responseMetadata` are all available. */
 export type ToolSuccessState<
   ToolInput extends UnknownObject,
   ToolOutput extends UnknownObject,
@@ -35,6 +38,10 @@ export type ToolSuccessState<
   responseMetadata: ToolResponseMetadata;
 };
 
+/**
+ * Discriminated union describing the tool invocation that triggered the
+ * current view render. Use `isIdle` / `isPending` / `isSuccess` to narrow.
+ */
 export type ToolState<
   ToolInput extends UnknownObject,
   ToolOutput extends UnknownObject,
@@ -64,6 +71,32 @@ function deriveStatus(
   return "success";
 }
 
+/**
+ * Access the tool invocation that produced the current view: its `input`,
+ * resulting `output`, and `responseMetadata`. The shape evolves as the tool
+ * runs (idle → pending → success), exposed through {@link ToolState}.
+ *
+ * For full input/output typing per tool name, prefer the typed `useToolInfo`
+ * returned by {@link generateHelpers} over the generic form.
+ *
+ * @typeParam TS - Optional partial shape `{ input, output, responseMetadata }`
+ * to refine each field's type. When omitted, each typed field resolves to
+ * `never` — pass an explicit shape or use the typed helper from
+ * {@link generateHelpers} to get usable types.
+ *
+ * @example
+ * ```tsx
+ * const { isSuccess, input, output } = useToolInfo<{
+ *   input: { query: string };
+ *   output: { results: Result[] };
+ * }>();
+ *
+ * if (!isSuccess || !output) return <Skeleton />;
+ * return <Results items={output.results} />;
+ * ```
+ *
+ * @see https://docs.skybridge.tech/api-reference/use-tool-info
+ */
 export function useToolInfo<
   TS extends Partial<ToolSignature> = Record<string, never>,
 >() {

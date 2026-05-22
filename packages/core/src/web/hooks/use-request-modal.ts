@@ -6,7 +6,22 @@ import {
 } from "../bridges/index.js";
 
 /**
- * Triggers a modal containing the view rendered in display mode "modal"
+ * Open the current view in a modal overlay (`displayMode === "modal"`).
+ *
+ * Returns `{ isOpen, params, open }`: `open(opts)` triggers the host to render
+ * the view in a modal, optionally passing `params` that are surfaced back via
+ * `params` here. Useful for confirmation flows, detail panels, or any modal
+ * lifecycle owned by the host.
+ *
+ * Use {@link useDisplayMode} for non-modal display modes.
+ *
+ * @example
+ * ```tsx
+ * const { isOpen, open } = useRequestModal();
+ * <button onClick={() => open({ params: { id: 42 } })}>Show details</button>
+ * ```
+ *
+ * @see https://docs.skybridge.tech/api-reference/use-request-modal
  */
 export function useRequestModal() {
   const adaptor = getAdaptor();
