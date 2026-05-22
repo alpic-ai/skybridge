@@ -1,11 +1,11 @@
 import { useToolInfo } from "../helpers.js";
-import "./echo-card.css";
 
 function EchoCard() {
   const { output } = useToolInfo<"echo-card">();
   const message = output?.message ?? "";
   return (
     <div style={{ padding: 16, fontFamily: "sans-serif" }}>
+      <style>{"html,body{margin:0;padding:0}"}</style>
       <div
         style={{
           background: "#f4f4f5",
