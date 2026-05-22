@@ -67,18 +67,6 @@ const server = new McpServer(
       content: [{ type: "text", text: "ok" }],
       isError: false,
     }),
-  )
-  .registerTool(
-    {
-      name: "dual-visibility-tool",
-      description: "Both the agent and the widget can call this tool",
-      _meta: { ui: { visibility: ["model", "app"] } },
-    },
-    async () => ({
-      structuredContent: { ok: true },
-      content: [{ type: "text", text: "ok" }],
-      isError: false,
-    }),
   );
 
 export type AppType = typeof server;
