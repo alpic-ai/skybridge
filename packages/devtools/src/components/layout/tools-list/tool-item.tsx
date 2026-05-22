@@ -82,8 +82,6 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     handleRun();
   });
 
-  // Plain Enter runs the tool, except in a textarea (JSON tab) where the user
-  // is typing multi-line content and needs Enter for newlines.
   useKeyPress(
     "enter",
     (event) => {
