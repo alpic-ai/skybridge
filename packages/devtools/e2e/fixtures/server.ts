@@ -43,6 +43,42 @@ const server = new McpServer(
       content: [{ type: "text", text: message }],
       isError: false,
     }),
+  )
+  .registerTool(
+    {
+      name: "model-only-tool",
+      description: "Only the agent can call this tool",
+      _meta: { ui: { visibility: ["model"] } },
+    },
+    async () => ({
+      structuredContent: { ok: true },
+      content: [{ type: "text", text: "ok" }],
+      isError: false,
+    }),
+  )
+  .registerTool(
+    {
+      name: "app-only-tool",
+      description: "Only the widget can call this tool",
+      _meta: { ui: { visibility: ["app"] } },
+    },
+    async () => ({
+      structuredContent: { ok: true },
+      content: [{ type: "text", text: "ok" }],
+      isError: false,
+    }),
+  )
+  .registerTool(
+    {
+      name: "dual-visibility-tool",
+      description: "Both the agent and the widget can call this tool",
+      _meta: { ui: { visibility: ["model", "app"] } },
+    },
+    async () => ({
+      structuredContent: { ok: true },
+      content: [{ type: "text", text: "ok" }],
+      isError: false,
+    }),
   );
 
 export type AppType = typeof server;
