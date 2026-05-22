@@ -13,7 +13,9 @@ import { hasDefaultExport } from "./validate-view.js";
 const VIRTUAL_PREFIX = "/_skybridge/view/";
 const VIRTUAL_MODULE_PREFIX = "\0skybridge:view:";
 
+/** Options for the {@link skybridge} Vite plugin. */
 export interface SkybridgePluginOptions {
+  /** Directory scanned for view modules. Defaults to `"src/views"`. */
   viewsDir?: string;
 }
 
@@ -34,6 +36,32 @@ function getViewEntryPattern(viewsDir: string): RegExp {
   );
 }
 
+/**
+ * Vite plugin that wires a Skybridge project's view files into Vite.
+ *
+ * For each `.tsx` / `.jsx` file in `viewsDir` with a default export, the
+ * plugin:
+ * - exposes a virtual entry that calls {@link mountView} with the view's
+ *   default export,
+ * - generates `.skybridge/views.d.ts` to augment {@link ViewNameRegistry} so
+ *   {@link ViewName} narrows to the actual view names,
+ * - rewrites `<DataLLM>` JSX so the host can extract its content,
+ * - warns in dev if a view file is missing a default export.
+ *
+ * Add it to your `vite.config.ts` alongside `@vitejs/plugin-react`.
+ *
+ * @example
+ * ```ts
+ * // vite.config.ts
+ * import { defineConfig } from "vite";
+ * import react from "@vitejs/plugin-react";
+ * import { skybridge } from "skybridge/vite";
+ *
+ * export default defineConfig({
+ *   plugins: [react(), skybridge({ viewsDir: "src/views" })],
+ * });
+ * ```
+ */
 export function skybridge(options?: SkybridgePluginOptions): Plugin {
   const rawViewsDir = options?.viewsDir ?? "src/views";
   let resolvedViewsDir: string;
