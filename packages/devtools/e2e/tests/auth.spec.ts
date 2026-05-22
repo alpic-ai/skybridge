@@ -11,7 +11,7 @@ async function seedAuthInLocalStorage(
   token: string,
 ): Promise<void> {
   await page.addInitScript(
-    ({ token, tokensKey, clientInfoKey }) => {
+    ({ token, clientId, tokensKey, clientInfoKey }) => {
       window.localStorage.setItem(
         tokensKey,
         JSON.stringify({
@@ -23,12 +23,17 @@ async function seedAuthInLocalStorage(
       window.localStorage.setItem(
         clientInfoKey,
         JSON.stringify({
-          client_id: "e2e-test-client",
+          client_id: clientId,
           redirect_uris: [`${window.location.origin}/?oauth_callback=true`],
         }),
       );
     },
-    { token, tokensKey: TOKENS_KEY, clientInfoKey: CLIENT_INFO_KEY },
+    {
+      token,
+      clientId: CLIENT_ID,
+      tokensKey: TOKENS_KEY,
+      clientInfoKey: CLIENT_INFO_KEY,
+    },
   );
 }
 
