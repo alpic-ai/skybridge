@@ -24,6 +24,7 @@ const server = new McpServer(
       src: string;
       mimeType?: string;
       sizes?: string[];
+      theme?: "light" | "dark";
     }>;
   },
   options: McpServerOptions
@@ -37,7 +38,7 @@ const server = new McpServer(
 | `serverInfo.name` | `string` | Name of your MCP server |
 | `serverInfo.title` | `string` | Optional human-readable display name for clients |
 | `serverInfo.version` | `string` | Version of your server |
-| `serverInfo.icons` | `Array<{ src: string; mimeType?: string; sizes?: string[] }>` | Optional icons advertised in the MCP implementation metadata |
+| `serverInfo.icons` | `Array<{ src: string; mimeType?: string; sizes?: string[]; theme?: "light" \| "dark" }>` | Optional icons advertised in the MCP implementation metadata |
 | `options` | `McpServerOptions` | Configuration options |
 
 ### Implementation metadata
@@ -57,6 +58,7 @@ const server = new McpServer(
         src: "https://example.com/icon.png",
         mimeType: "image/png",
         sizes: ["128x128"],
+        theme: "light",
       },
     ],
   },
