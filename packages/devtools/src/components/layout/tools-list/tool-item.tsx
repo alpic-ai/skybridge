@@ -19,7 +19,7 @@ import type {
 } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
-import { Loader2, Play } from "lucide-react";
+import { CornerDownLeft, Loader2, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { CopyButton } from "@/lib/copy.js";
 import { useCallTool } from "@/lib/mcp/index.js";
@@ -72,6 +72,24 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     handleRun();
   });
 
+  // Plain Enter runs the tool, except in a textarea (JSON tab) where the user
+  // is typing multi-line content and needs Enter for newlines.
+  useKeyPress(
+    "enter",
+    (event) => {
+      if (!open) {
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      if (target?.tagName === "TEXTAREA") {
+        return;
+      }
+      event.preventDefault();
+      handleRun();
+    },
+    { exactMatch: true },
+  );
+
   return (
     <AccordionItem
       value={tool.name}
@@ -95,13 +113,28 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
                   <Play className="size-3" />
                 )
               }
+              iconTrailing={
+                <kbd
+                  aria-label="Press Enter to run"
+                  className="inline-flex items-center justify-center rounded border border-primary-foreground/30 px-1 text-[10px] leading-none"
+                >
+                  <CornerDownLeft className="size-2.5" />
+                </kbd>
+              }
             >
               Run
             </Button>
           ) : null
         }
       >
-        <div className="min-w-0 flex-1 text-left">{tool.name}</div>
+        <div className="min-w-0 flex-1 text-left">
+          <div className="truncate">{tool.name}</div>
+          {!open && tool.description ? (
+            <div className="truncate font-sans text-[11px] text-muted-foreground/70">
+              {tool.description}
+            </div>
+          ) : null}
+        </div>
       </AccordionTrigger>
       <AccordionContent className="px-3 pt-1 pb-3 text-foreground">
         <ToolBody
