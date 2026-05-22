@@ -22,6 +22,7 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useId,
   useRef,
   useState,
 } from "react";
@@ -110,13 +111,15 @@ function HoverPopover({
   children: ReactNode;
 }) {
   const { open, setOpen, onEnter, onLeave } = useHoverOpen();
+  const anchorId = useId();
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverAnchor asChild>
         {cloneElement(trigger, {
           onMouseEnter: onEnter,
           onMouseLeave: onLeave,
-        })}
+          "data-popover-anchor": anchorId,
+        } as Partial<HoverHandlers> & { "data-popover-anchor": string })}
       </PopoverAnchor>
       <PopoverContent
         align="end"
@@ -125,6 +128,14 @@ function HoverPopover({
         onMouseEnter={onEnter}
         onMouseLeave={onLeave}
         onOpenAutoFocus={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => {
+          const target = e.target as HTMLElement | null;
+          if (
+            target?.closest?.(`[data-popover-anchor="${CSS.escape(anchorId)}"]`)
+          ) {
+            e.preventDefault();
+          }
+        }}
       >
         {children}
       </PopoverContent>
