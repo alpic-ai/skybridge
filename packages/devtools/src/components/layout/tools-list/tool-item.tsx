@@ -2,7 +2,15 @@ import {
   AccordionContent,
   AccordionItem,
 } from "@alpic-ai/ui/components/accordion";
+import { Badge } from "@alpic-ai/ui/components/badge";
 import { Button } from "@alpic-ai/ui/components/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@alpic-ai/ui/components/dialog";
 import {
   Tabs,
   TabsContent,
@@ -152,6 +160,23 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
   );
 }
 
+type Visibility = "model" | "app";
+
+function getToolVisibility(tool: Tool): Visibility[] | undefined {
+  const meta = tool._meta as Record<string, unknown> | undefined;
+  const ui = meta?.ui as { visibility?: unknown } | undefined;
+  const fromUi = ui?.visibility;
+  const legacy = meta?.["openai/visibility"];
+  const candidate = fromUi ?? legacy;
+  if (!Array.isArray(candidate)) {
+    return undefined;
+  }
+  const values = candidate.filter(
+    (v): v is Visibility => v === "model" || v === "app",
+  );
+  return values.length > 0 ? values : undefined;
+}
+
 function ToolBody({
   tool,
   formData,
@@ -174,12 +199,44 @@ function ToolBody({
   const hasInput =
     tool.inputSchema &&
     Object.keys(tool.inputSchema.properties ?? {}).length > 0;
+  const visibility = getToolVisibility(tool);
+  const [descriptionOpen, setDescriptionOpen] = useState(false);
 
   return (
     <div className="space-y-3">
-      {tool.description && (
-        <div className="rounded-md border border-border bg-muted/40 px-2.5 py-2 text-xs text-muted-foreground/70">
-          {tool.description}
+      {(visibility || tool.description) && (
+        <div className="space-y-2">
+          {visibility && (
+            <div className="flex flex-wrap gap-1">
+              {visibility.map((scope) => (
+                <Badge key={scope} variant="secondary" size="sm">
+                  {scope}
+                </Badge>
+              ))}
+            </div>
+          )}
+          {tool.description && (
+            <>
+              <button
+                type="button"
+                onClick={() => setDescriptionOpen(true)}
+                className="block w-full cursor-pointer rounded-md border border-border bg-muted/40 px-2.5 py-2 text-left text-xs text-muted-foreground/70 hover:bg-muted/60"
+                title="Click to see full description"
+              >
+                <span className="line-clamp-2">{tool.description}</span>
+              </button>
+              <Dialog open={descriptionOpen} onOpenChange={setDescriptionOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="font-mono">{tool.name}</DialogTitle>
+                    <DialogDescription className="whitespace-pre-wrap">
+                      {tool.description}
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+            </>
+          )}
         </div>
       )}
       {hasInput && (
