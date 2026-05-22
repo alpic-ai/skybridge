@@ -27,7 +27,7 @@ import type {
 } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
-import { CornerDownLeft, Loader2, Play } from "lucide-react";
+import { Loader2, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { CopyButton } from "@/lib/copy.js";
 import { useCallTool } from "@/lib/mcp/index.js";
@@ -121,29 +121,22 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
                   <Play className="size-3" />
                 )
               }
-              iconTrailing={
-                <kbd
-                  aria-label="Press Enter to run"
-                  className="inline-flex items-center justify-center rounded border border-primary-foreground/30 px-1 text-[10px] leading-none"
-                >
-                  <CornerDownLeft className="size-2.5" />
-                </kbd>
-              }
             >
               Run
             </Button>
           ) : null
         }
       >
-        <div className="min-w-0 flex-1 text-left">
-          <div className="truncate">{tool.name}</div>
-          {!open && tool.description ? (
-            <div className="truncate font-sans text-[11px] text-muted-foreground/70">
-              {tool.description}
-            </div>
-          ) : null}
-        </div>
+        <div className="min-w-0 flex-1 truncate text-left">{tool.name}</div>
       </AccordionTrigger>
+      {!open && tool.description ? (
+        <div
+          aria-hidden="true"
+          className="truncate px-3 pl-9 pb-2.5 -mt-2 font-sans text-[11px] text-muted-foreground/70"
+        >
+          {tool.description}
+        </div>
+      ) : null}
       <AccordionContent className="px-3 pt-1 pb-3 text-foreground">
         <ToolBody
           tool={tool}
