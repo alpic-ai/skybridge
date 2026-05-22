@@ -191,18 +191,37 @@ function FormBody({
   setFormData: (data: Record<string, unknown> | null) => void;
   formRef: React.RefObject<Form<unknown, RJSFSchema> | null>;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+    const focusable = container.querySelector<
+      HTMLInputElement | HTMLTextAreaElement
+    >(
+      'input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]):not([type="file"]):not([type="button"]):not([type="submit"]), textarea',
+    );
+    if (focusable && !focusable.value) {
+      focusable.focus();
+    }
+  }, []);
+
   return (
-    <FormComponent
-      ref={formRef as React.RefObject<Form<unknown, RJSFSchema>>}
-      schema={schema}
-      validator={validator}
-      uiSchema={buildFormUiSchema(schema)}
-      formData={formData}
-      onChange={(data) => setFormData(data.formData)}
-      showErrorList={false}
-      widgets={formWidgets}
-      templates={formTemplates}
-    />
+    <div ref={containerRef}>
+      <FormComponent
+        ref={formRef as React.RefObject<Form<unknown, RJSFSchema>>}
+        schema={schema}
+        validator={validator}
+        uiSchema={buildFormUiSchema(schema)}
+        formData={formData}
+        onChange={(data) => setFormData(data.formData)}
+        showErrorList={false}
+        widgets={formWidgets}
+        templates={formTemplates}
+      />
+    </div>
   );
 }
 
