@@ -229,7 +229,8 @@ export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
           (empty)
         </p>
       )}
-      {items.map((item) => item)}
+      {/* rjsf v6: items is ReactElement[] (pre-rendered ArrayFieldItemTemplate). */}
+      {items}
       {canAdd && (
         <button
           type="button"
