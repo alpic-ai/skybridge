@@ -17,7 +17,9 @@ import {
   TabsList,
   TabsTrigger,
 } from "@alpic-ai/ui/components/tabs";
+import { Tooltip, TooltipTrigger } from "@alpic-ai/ui/components/tooltip";
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import type Form from "@rjsf/core";
 import { Form as FormComponent } from "@rjsf/shadcn";
 import type {
@@ -130,11 +132,10 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
         <div className="min-w-0 flex-1 truncate text-left">{tool.name}</div>
       </AccordionTrigger>
       {!open && tool.description ? (
-        <div
-          aria-hidden="true"
-          className="truncate px-3 pl-9 pb-2.5 -mt-2 font-sans text-[11px] text-muted-foreground/70"
-        >
-          {tool.description}
+        <div aria-hidden="true" className="px-3 pb-3 -mt-1 font-sans">
+          <div className="rounded-md border border-border bg-muted/40 px-2.5 py-2 text-xs text-muted-foreground/70">
+            <span className="line-clamp-2">{tool.description}</span>
+          </div>
         </div>
       ) : null}
       <AccordionContent className="px-3 pt-1 pb-3 text-foreground">
@@ -154,6 +155,20 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
 }
 
 type Visibility = "model" | "app";
+
+const VISIBILITY_META: Record<
+  Visibility,
+  { badgeClass: string; tooltip: string }
+> = {
+  model: {
+    badgeClass: "border-blue-200 bg-blue-100 text-blue-700",
+    tooltip: "Visible to and callable by the agent.",
+  },
+  app: {
+    badgeClass: "border-purple-200 bg-purple-100 text-purple-700",
+    tooltip: "Callable by the widget on this server only.",
+  },
+};
 
 function getToolVisibility(tool: Tool): Visibility[] | undefined {
   const meta = tool._meta as Record<string, unknown> | undefined;
@@ -200,11 +215,36 @@ function ToolBody({
       {(visibility || tool.description) && (
         <div className="space-y-2">
           {visibility && (
-            <div className="flex flex-wrap gap-1">
+            <div data-testid="tool-visibility" className="flex flex-wrap gap-1">
               {visibility.map((scope) => (
-                <Badge key={scope} variant="secondary" size="sm">
-                  {scope}
-                </Badge>
+                <Tooltip key={scope}>
+                  <TooltipTrigger asChild>
+                    <Badge
+                      size="sm"
+                      className={VISIBILITY_META[scope].badgeClass}
+                    >
+                      {scope}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipPrimitive.Portal>
+                    <TooltipPrimitive.Content
+                      sideOffset={6}
+                      className={cn(
+                        "z-50 w-fit rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-md",
+                        "animate-in fade-in-0 zoom-in-95",
+                        "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
+                        "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+                      )}
+                    >
+                      {VISIBILITY_META[scope].tooltip}
+                      <TooltipPrimitive.Arrow
+                        width={11}
+                        height={5}
+                        className="fill-background drop-shadow-[0_1px_0_var(--color-border)]"
+                      />
+                    </TooltipPrimitive.Content>
+                  </TooltipPrimitive.Portal>
+                </Tooltip>
               ))}
             </div>
           )}

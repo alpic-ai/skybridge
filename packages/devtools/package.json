@@ -41,6 +41,7 @@
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@playwright/test": "^1.49.0",
     "@radix-ui/react-accordion": "^1.2.12",
+    "@radix-ui/react-tooltip": "^1.2.8",
     "@rjsf/core": "^6.4.2",
     "@rjsf/shadcn": "^6.4.2",
     "@rjsf/utils": "^6.4.2",
