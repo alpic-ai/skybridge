@@ -40,6 +40,16 @@ test.describe("devtools smoke", () => {
 });
 
 test.describe("visibility badge", () => {
+  test("renders both scopes when visibility is ['model', 'app']", async ({
+    page,
+  }) => {
+    await page.goto("/?tool=dual-visibility-tool");
+    const badges = page.getByTestId("tool-visibility");
+    await expect(badges).toBeVisible();
+    await expect(badges.getByText("model", { exact: true })).toBeVisible();
+    await expect(badges.getByText("app", { exact: true })).toBeVisible();
+  });
+
   test("renders only the model badge when visibility is ['model']", async ({
     page,
   }) => {
