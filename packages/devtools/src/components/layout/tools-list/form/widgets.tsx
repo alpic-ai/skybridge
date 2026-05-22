@@ -256,7 +256,7 @@ function MultiCombobox({
               <ComboboxItem
                 key={String(opt.value)}
                 itemValue={String(opt.value)}
-                className="mx-1 my-0 px-2 py-1 font-mono type-text-xs"
+                className="mx-1 my-0 px-2 py-1 font-mono text-xs"
               >
                 {opt.label}
               </ComboboxItem>
