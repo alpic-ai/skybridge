@@ -35,8 +35,6 @@ import crypto from "node:crypto";
 import express, { type Router } from "express";
 import { type AuthInfo, InvalidTokenError } from "skybridge/server";
 
-// ─── Public surface ──────────────────────────────────────────────────────
-
 export interface MockAuthServerOptions {
   /** Base URL of the fixture (e.g. `http://localhost:4102`). */
   serverUrl: string;
@@ -82,8 +80,6 @@ export function createMockAuthServer(
     },
   };
 }
-
-// ─── In-memory state ─────────────────────────────────────────────────────
 
 interface ClientInfo {
   client_id: string;
@@ -136,8 +132,6 @@ function createStores(seedTokens: MockAuthServerOptions["seedTokens"]): Stores {
   };
 }
 
-// ─── PKCE ────────────────────────────────────────────────────────────────
-
 function verifyPkceS256(verifier: string, challenge: string): boolean {
   const computed = crypto
     .createHash("sha256")
@@ -148,8 +142,6 @@ function verifyPkceS256(verifier: string, challenge: string): boolean {
   }
   return crypto.timingSafeEqual(Buffer.from(computed), Buffer.from(challenge));
 }
-
-// ─── Helpers ─────────────────────────────────────────────────────────────
 
 function randomToken(): string {
   return crypto.randomBytes(32).toString("hex");
@@ -163,8 +155,6 @@ function oauthError(
 ): void {
   res.status(status).json({ error, error_description: description });
 }
-
-// ─── Router ──────────────────────────────────────────────────────────────
 
 function buildRouter(serverUrl: string, stores: Stores): Router {
   const router = express.Router();
@@ -292,8 +282,6 @@ function buildRouter(serverUrl: string, stores: Stores): Router {
 
   return router;
 }
-
-// ─── Grant handlers ──────────────────────────────────────────────────────
 
 function handleAuthorizationCodeGrant(
   body: Record<string, string | undefined>,
