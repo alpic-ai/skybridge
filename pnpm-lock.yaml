@@ -813,6 +813,67 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  examples/supabase-triplog:
+    dependencies:
+      '@alpic-ai/insights':
+        specifier: ^1.127.1
+        version: 1.128.0(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.29.0
+        version: 1.29.0(zod@4.3.6)
+      '@supabase/supabase-js':
+        specifier: ^2.49.0
+        version: 2.106.1
+      '@t3-oss/env-core':
+        specifier: ^0.13.11
+        version: 0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.3.6)
+      dotenv:
+        specifier: ^17.4.1
+        version: 17.4.2
+      lucide-react:
+        specifier: ^1.16.0
+        version: 1.16.0(react@19.2.4)
+      react:
+        specifier: ^19.2.4
+        version: 19.2.4
+      react-dom:
+        specifier: ^19.2.4
+        version: 19.2.4(react@19.2.4)
+      skybridge:
+        specifier: workspace:*
+        version: link:../../packages/core
+      vite:
+        specifier: ^8.0.2
+        version: 8.0.3(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
+    devDependencies:
+      '@skybridge/devtools':
+        specifier: ^1.0.0
+        version: 1.0.2(arktype@2.1.27)(typescript@5.9.3)
+      '@types/node':
+        specifier: ^22.19.3
+        version: 22.19.3
+      '@types/react':
+        specifier: ^19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      '@vitejs/plugin-react':
+        specifier: ^6.0.1
+        version: 6.0.1(vite@8.0.3(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+      alpic:
+        specifier: ^1.104.1
+        version: 1.104.1(@opentelemetry/api@1.9.0)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   examples/times-up:
     dependencies:
       '@alpic-ai/insights':
@@ -1298,6 +1359,15 @@ packages:
 
   '@alpic-ai/insights@1.122.1':
     resolution: {integrity: sha512-Mac+UjnpsemaNCioTOkF4NpYc8h2R4gxHO7OKEvM9MtiL1QnbbTSUMmEKIjqfe86xnjur76A0/7+RYuydXoJ6g==}
+    peerDependencies:
+      '@modelcontextprotocol/sdk': '>=1.29.0 <2'
+      skybridge: workspace:*
+    peerDependenciesMeta:
+      skybridge:
+        optional: true
+
+  '@alpic-ai/insights@1.128.0':
+    resolution: {integrity: sha512-F8BpPBkQC3qlCTQj/t+tk/SUR6Y1TELLG/lB8D9kAvYcO3pxfW249iNhd1w3VZcbqrLXJpfxQ3cgbzUQLcNwRQ==}
     peerDependencies:
       '@modelcontextprotocol/sdk': '>=1.29.0 <2'
       skybridge: workspace:*
@@ -4064,6 +4134,9 @@ packages:
   '@skybridge/devtools@0.36.0':
     resolution: {integrity: sha512-gikpJy3Krqn6HADeedvfA5eP1gLVniwna2QyfrxTtK3dsMR5I7oK74bogOu4uBRcMmYzoJ8Z/SVuNU1sxJ1wkw==}
 
+  '@skybridge/devtools@1.0.2':
+    resolution: {integrity: sha512-AMZrDBRtj7WhMoHnkFW2cauL46tMEcHwRmUyuD2vLk3Tn7QJQu08+QBCRJO1a6D1S6oOGOVQkqstAhfl3zUS9w==}
+
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
 
@@ -4144,6 +4217,33 @@ packages:
   '@stoplight/yaml@4.3.0':
     resolution: {integrity: sha512-JZlVFE6/dYpP9tQmV0/ADfn32L9uFarHWxfcRhReKUnljz1ZiUM5zpX+PH8h5CJs6lao3TuFqnPm9IJJCEkE2w==}
     engines: {node: '>=10.8'}
+
+  '@supabase/auth-js@2.106.1':
+    resolution: {integrity: sha512-7eyheXfAGwkB9bZewJPs+N3UYt6kra2JG6mIxNEgbkvcO15PLD1e75PTIUEYYl3zrifm3GrpShVl7QZxKrXO/w==}
+    engines: {node: '>=20.0.0'}
+
+  '@supabase/functions-js@2.106.1':
+    resolution: {integrity: sha512-XbOPnR2mW7jp/EcW447xmGwCa+/Wc00Hkw8t4tUIJjRsHQ4xAESsLKcyLRhRJjJoUnJVXUlC+w0wUxUCM7CG2A==}
+    engines: {node: '>=20.0.0'}
+
+  '@supabase/phoenix@0.4.2':
+    resolution: {integrity: sha512-YSAGnmDAfuleFCVt3CeurQZAhxRfXWeZIIkwp7NhYzQ1UwW6ePSnzsFAiUm/mbCkfoCf70QQHKW/K6RKh52a4A==}
+
+  '@supabase/postgrest-js@2.106.1':
+    resolution: {integrity: sha512-Qbn6d2lqiqeaBX1Uko0e/hL90dtQGRN6CG2wMVQtJpRFstlVW45qmUTyTOsiB8dYUWu1fWYo4YzJuDbokGv3tQ==}
+    engines: {node: '>=20.0.0'}
+
+  '@supabase/realtime-js@2.106.1':
+    resolution: {integrity: sha512-eQCYri5E8KsjpDgC7g28cOOS2britjUWdNSJluFMainqrMRepzjOnaxqXc3RoAz7H0dxmBrfLUNF6NGP8C+YaA==}
+    engines: {node: '>=20.0.0'}
+
+  '@supabase/storage-js@2.106.1':
+    resolution: {integrity: sha512-HWcLIhqinhWKpOQ3WzglR2unjW0eh9J7yOu3IZrZNIEkraK4La/HDvTqndljGsNw0itPtyHhuKBxRoPG1VUARw==}
+    engines: {node: '>=20.0.0'}
+
+  '@supabase/supabase-js@2.106.1':
+    resolution: {integrity: sha512-gP4HurGkGu7Z3xoOCjtAI17BKKp7jpsmwY0Ssbsks9XQRzJ7ZhK7LxfLdBSYgUdgZCQgjRK+Mr7+cl4Gxrk0Rw==}
+    engines: {node: '>=20.0.0'}
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
@@ -6537,6 +6637,10 @@ packages:
     resolution: {integrity: sha512-eKCa6bwnJhvxj14kZk5NCPc6Hb6BdsU9DZcOnmQKSnO1VKrfV0zCvtttPZUsBvjmNDn8rpcJfpwSYnHBjc95MQ==}
     engines: {node: '>=18.18.0'}
 
+  iceberg-js@0.8.1:
+    resolution: {integrity: sha512-1dhVQZXhcHje7798IVM+xoo/1ZdVfzOMIc8/rgVSijRK38EDqOJoGula9N/8ZI5RD8QTxNQtK/Gozpr+qUqRRA==}
+    engines: {node: '>=20.0.0'}
+
   ico-endec@0.1.6:
     resolution: {integrity: sha512-ZdLU38ZoED3g1j3iEyzcQj+wAkY2xfWNkymszfJPoxucIUhK7NayQ+/C4Kv0nDFMIsbtbEHldv3V8PU494/ueQ==}
 
@@ -7365,6 +7469,11 @@ packages:
 
   lucide-react@1.14.0:
     resolution: {integrity: sha512-+1mdWcfSJVUsaTIjN9zoezmUhfXo5l0vP7ekBMPo3jcS/aIkxHnXqAPsByszMZx/Y8oQBRJxJx5xg+RH3urzxA==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  lucide-react@1.16.0:
+    resolution: {integrity: sha512-dYwyPzb4MEKpGUmNYk3WKWPnMrHs3FKM+q94kAnJrcDIqqn1hq2xY8scaS2ovsOCM5D51ey2gaRG3PBb1vgoYQ==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -10087,6 +10196,12 @@ snapshots:
       skybridge: link:packages/core
 
   '@alpic-ai/insights@1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)':
+    dependencies:
+      '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
+    optionalDependencies:
+      skybridge: link:packages/core
+
+  '@alpic-ai/insights@1.128.0(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)':
     dependencies:
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
     optionalDependencies:
@@ -14202,6 +14317,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@skybridge/devtools@1.0.2(arktype@2.1.27)(typescript@5.9.3)':
+    dependencies:
+      '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.3.6)
+      cors: 2.8.6
+      express: 5.2.1
+      zod: 4.3.6
+    transitivePeerDependencies:
+      - arktype
+      - supports-color
+      - typescript
+      - valibot
+
   '@socket.io/component-emitter@3.1.2': {}
 
   '@stablelib/base64@1.0.1': {}
@@ -14352,6 +14479,38 @@ snapshots:
       '@stoplight/types': 14.1.1
       '@stoplight/yaml-ast-parser': 0.0.50
       tslib: 2.8.1
+
+  '@supabase/auth-js@2.106.1':
+    dependencies:
+      tslib: 2.8.1
+
+  '@supabase/functions-js@2.106.1':
+    dependencies:
+      tslib: 2.8.1
+
+  '@supabase/phoenix@0.4.2': {}
+
+  '@supabase/postgrest-js@2.106.1':
+    dependencies:
+      tslib: 2.8.1
+
+  '@supabase/realtime-js@2.106.1':
+    dependencies:
+      '@supabase/phoenix': 0.4.2
+      tslib: 2.8.1
+
+  '@supabase/storage-js@2.106.1':
+    dependencies:
+      iceberg-js: 0.8.1
+      tslib: 2.8.1
+
+  '@supabase/supabase-js@2.106.1':
+    dependencies:
+      '@supabase/auth-js': 2.106.1
+      '@supabase/functions-js': 2.106.1
+      '@supabase/postgrest-js': 2.106.1
+      '@supabase/realtime-js': 2.106.1
+      '@supabase/storage-js': 2.106.1
 
   '@swc/helpers@0.5.15':
     dependencies:
@@ -15107,6 +15266,11 @@ snapshots:
     dependencies:
       '@rolldown/pluginutils': 1.0.0-rc.7
       vite: 8.0.2(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+
+  '@vitejs/plugin-react@6.0.1(vite@8.0.3(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
+    dependencies:
+      '@rolldown/pluginutils': 1.0.0-rc.7
+      vite: 8.0.3(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   '@vitejs/plugin-react@6.0.1(vite@8.0.3(@types/node@24.12.0)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
@@ -17107,6 +17271,8 @@ snapshots:
 
   human-signals@8.0.1: {}
 
+  iceberg-js@0.8.1: {}
+
   ico-endec@0.1.6: {}
 
   iconv-lite@0.4.24:
@@ -17835,6 +18001,10 @@ snapshots:
       react: 19.2.4
 
   lucide-react@1.14.0(react@19.2.4):
+    dependencies:
+      react: 19.2.4
+
+  lucide-react@1.16.0(react@19.2.4):
     dependencies:
       react: 19.2.4
 
@@ -21234,6 +21404,22 @@ snapshots:
       picomatch: 4.0.3
       postcss: 8.5.8
       rolldown: 1.0.0-rc.11
+      tinyglobby: 0.2.15
+    optionalDependencies:
+      '@types/node': 22.19.3
+      esbuild: 0.27.2
+      fsevents: 2.3.3
+      jiti: 2.6.1
+      terser: 5.44.1
+      tsx: 4.21.0
+      yaml: 2.8.2
+
+  vite@8.0.3(@types/node@22.19.3)(esbuild@0.27.2)(jiti@2.6.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
+    dependencies:
+      lightningcss: 1.32.0
+      picomatch: 4.0.4
+      postcss: 8.5.8
+      rolldown: 1.0.0-rc.12
       tinyglobby: 0.2.15
     optionalDependencies:
       '@types/node': 22.19.3
