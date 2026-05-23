@@ -21,7 +21,7 @@ const CATEGORY_ICON: Record<Trip["category"], string> = {
 export function TripDetail({ trip }: TripDetailProps) {
   const { label: statusLabel, cls: statusCls } = STATUS_META[trip.status];
 
-  const dateLabel = new Date(trip.date).toLocaleDateString(undefined, {
+  const dateLabel = new Date(`${trip.date}T00:00:00`).toLocaleDateString(undefined, {
     year: "numeric",
     month: "long",
     day: "numeric",
