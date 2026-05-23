@@ -198,12 +198,19 @@ server.registerTool(
         };
       }
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("triplog")
         .update(updates)
-        .eq("id", id);
+        .eq("id", id)
+        .select("id");
 
       if (error) throw error;
+      if (!data || data.length === 0) {
+        return {
+          content: [{ type: "text", text: `No trip found with ID ${id}.` }],
+          isError: true,
+        };
+      }
 
       return {
         content: [{ type: "text", text: `Trip ${id} updated successfully.` }],
@@ -231,12 +238,19 @@ server.registerTool(
   },
   async (input) => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("triplog")
         .delete()
-        .eq("id", input.id);
+        .eq("id", input.id)
+        .select("id");
 
       if (error) throw error;
+      if (!data || data.length === 0) {
+        return {
+          content: [{ type: "text", text: `No trip found with ID ${input.id}.` }],
+          isError: true,
+        };
+      }
 
       return {
         content: [{ type: "text", text: `Trip ${input.id} deleted successfully.` }],
