@@ -3,4 +3,5 @@ dist/
 .env*
 !.env.example
 .DS_store
-tsconfig.tsbuildinfo
+*.tsbuildinfo
+package-lock.json
