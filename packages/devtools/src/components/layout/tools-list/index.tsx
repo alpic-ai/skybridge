@@ -22,9 +22,11 @@ function ToolsList() {
 
   const didInit = useRef(false);
   useEffect(() => {
-    if (!didInit.current && openTool == null && tools[0]) {
+    if (!didInit.current && tools.length > 0) {
       didInit.current = true;
-      setOpenTool(tools[0].name);
+      if (openTool == null) {
+        setOpenTool(tools[0].name);
+      }
     }
   }, [openTool, tools, setOpenTool]);
 
