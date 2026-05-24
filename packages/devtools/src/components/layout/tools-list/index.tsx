@@ -2,7 +2,7 @@ import { Accordion } from "@alpic-ai/ui/components/accordion";
 import { Button } from "@alpic-ai/ui/components/button";
 import { useTimeout } from "ahooks";
 import { RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSuspenseTools } from "@/lib/mcp/index.js";
 import { useSelectedToolName } from "@/lib/nuqs.js";
 import { queryClient } from "@/lib/query-client.js";
@@ -20,8 +20,10 @@ function ToolsList() {
     setTailDelay(undefined);
   }, tailDelay);
 
+  const didInit = useRef(false);
   useEffect(() => {
-    if (openTool == null && tools[0]) {
+    if (!didInit.current && openTool == null && tools[0]) {
+      didInit.current = true;
       setOpenTool(tools[0].name);
     }
   }, [openTool, tools, setOpenTool]);
@@ -37,7 +39,7 @@ function ToolsList() {
   };
 
   const handleToolClick = (toolName: string) => {
-    setOpenTool(toolName);
+    setOpenTool(toolName || null);
   };
 
   return (
@@ -55,6 +57,7 @@ function ToolsList() {
       </header>
       <Accordion
         type="single"
+        collapsible
         value={openTool ?? ""}
         onValueChange={handleToolClick}
         className="min-h-0 overflow-y-auto"

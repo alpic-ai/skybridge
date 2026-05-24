@@ -27,7 +27,6 @@ export function AccordionTrigger({
           "type-text-md font-semibold text-foreground text-left",
           "outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm",
           "disabled:pointer-events-none disabled:opacity-50",
-          "data-[state=open]:cursor-default",
           "[&[data-state=open]>svg]:rotate-90",
           className,
         )}
