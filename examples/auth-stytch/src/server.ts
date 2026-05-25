@@ -1,10 +1,8 @@
 import "dotenv/config";
 import { intentMiddleware } from "@alpic-ai/insights";
-import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import cors from "cors";
 import type { RequestHandler } from "express";
-import { McpServer } from "skybridge/server";
+import { type AuthInfo, McpServer, requireBearerAuth } from "skybridge/server";
 import * as z from "zod";
 import { verifyAccessToken } from "./auth.js";
 import { searchCoffeeShops } from "./coffee-data.js";
