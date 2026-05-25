@@ -3,9 +3,14 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { SiteNav } from "../components/site-nav";
 import { SiteFooter } from "../components/trust-final";
-
-const REPO = "alpic-ai/skybridge";
-const GITHUB_REPO_URL = `https://github.com/${REPO}`;
+import { LazyChanges } from "./LazyChanges";
+import {
+  GITHUB_REPO_URL,
+  getReleases,
+  linkifyReferences,
+  slugifyTag,
+  splitChanges,
+} from "./lib";
 
 const description =
   "Every Skybridge release, sourced directly from GitHub. New features, fixes, and breaking changes — all in one place.";
@@ -20,7 +25,10 @@ const OG_IMAGE = {
 export const metadata: Metadata = {
   title: "Changelog — Skybridge releases",
   description,
-  alternates: { canonical: "/changelog" },
+  alternates: {
+    canonical: "/changelog",
+    types: { "text/markdown": "/changelog.md" },
+  },
   openGraph: {
     type: "website",
     title: "Changelog — Skybridge releases",
@@ -38,78 +46,6 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-static";
-
-type Release = {
-  tag_name: string;
-  name: string | null;
-  body: string | null;
-  published_at: string | null;
-  html_url: string;
-  draft: boolean;
-  prerelease: boolean;
-};
-
-async function getReleases(): Promise<Release[]> {
-  const headers: Record<string, string> = {
-    Accept: "application/vnd.github+json",
-    "X-GitHub-Api-Version": "2022-11-28",
-  };
-  if (process.env.GITHUB_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
-  }
-  try {
-    const res = await fetch(
-      `https://api.github.com/repos/${REPO}/releases?per_page=100`,
-      { headers },
-    );
-    if (!res.ok) {
-      return [];
-    }
-    const data = (await res.json()) as Release[];
-    return data
-      .filter((r) => !r.draft && !r.prerelease)
-      .sort((a, b) => {
-        const aT = a.published_at ? Date.parse(a.published_at) : 0;
-        const bT = b.published_at ? Date.parse(b.published_at) : 0;
-        return bT - aT;
-      });
-  } catch {
-    return [];
-  }
-}
-
-function slugifyTag(tag: string): string {
-  return tag.toLowerCase().replace(/[^a-z0-9.-]+/g, "-");
-}
-
-// GitHub release bodies use bare `#NNN` and `@user` — turn them into links.
-function linkifyReferences(body: string): string {
-  return body
-    .replace(/(^|[\s(])#(\d+)\b/g, `$1[#$2](${GITHUB_REPO_URL}/pull/$2)`)
-    .replace(
-      /(^|[\s(])@([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,38})?)\b/g,
-      "$1[@$2](https://github.com/$2)",
-    );
-}
-
-// Split a release body at a `## Changes` (or any heading depth) heading so
-// the PR list can be rendered inside a collapsible <details>.
-function splitChanges(body: string): {
-  intro: string;
-  changes: string | null;
-  count: number;
-} {
-  const match = body.match(
-    /(^|\r?\n)#{1,6}[ \t]+(Changes|What['’]?s?[ \t]+Changed|Changelog)[ \t]*\r?\n+/i,
-  );
-  if (!match || match.index === undefined) {
-    return { intro: body, changes: null, count: 0 };
-  }
-  const intro = body.slice(0, match.index).trim();
-  const changes = body.slice(match.index + match[0].length).trim();
-  const count = (changes.match(/^[ \t]*[-*][ \t]+/gm) ?? []).length;
-  return { intro, changes, count };
-}
 
 function formatDate(iso: string | null): string {
   if (!iso) {
@@ -187,19 +123,6 @@ export default async function ChangelogPage() {
                   : "";
                 const { intro, changes, count } = splitChanges(linkified);
                 const title = release.name || release.tag_name;
-                const markdownComponents = {
-                  a: ({
-                    href,
-                    children,
-                  }: {
-                    href?: string;
-                    children?: React.ReactNode;
-                  }) => (
-                    <a href={href} target="_blank" rel="noreferrer">
-                      {children}
-                    </a>
-                  ),
-                };
                 return (
                   <li key={release.tag_name} id={id} className="sx-cl-item">
                     <header className="sx-cl-head">
@@ -234,34 +157,23 @@ export default async function ChangelogPage() {
                           <div className="sx-cl-body">
                             <ReactMarkdown
                               remarkPlugins={[remarkGfm]}
-                              components={markdownComponents}
+                              components={{
+                                a: ({ href, children }) => (
+                                  <a
+                                    href={href}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    {children}
+                                  </a>
+                                ),
+                              }}
                             >
                               {intro}
                             </ReactMarkdown>
                           </div>
                         )}
-                        {changes && (
-                          <details className="sx-cl-changes">
-                            <summary className="sx-cl-changes-summary">
-                              <span className="sx-cl-changes-label">
-                                {count > 0
-                                  ? `Show ${count} merged PR${count === 1 ? "" : "s"}`
-                                  : "Show changes"}
-                              </span>
-                              <span className="sx-cl-changes-chev" aria-hidden>
-                                ▾
-                              </span>
-                            </summary>
-                            <div className="sx-cl-body sx-cl-changes-body">
-                              <ReactMarkdown
-                                remarkPlugins={[remarkGfm]}
-                                components={markdownComponents}
-                              >
-                                {changes}
-                              </ReactMarkdown>
-                            </div>
-                          </details>
-                        )}
+                        {changes && <LazyChanges slug={id} count={count} />}
                       </>
                     ) : (
                       <p className="sx-cl-empty-body">No release notes.</p>
@@ -272,6 +184,10 @@ export default async function ChangelogPage() {
             </ol>
           </div>
         )}
+        <div className="sx-cl-foot">
+          Prefer plain text?{" "}
+          <a href="/changelog.md">Read this changelog as markdown</a>.
+        </div>
       </div>
       <SiteFooter />
     </div>
