@@ -2,8 +2,10 @@ import { defineConfig, devices } from "@playwright/test";
 
 const FIXTURE_PORT = 4101;
 const FIXTURE_AUTH_PORT = 4102;
+const FIXTURE_MIXED_AUTH_PORT = 4103;
 const DEVTOOLS_PORT = 5173;
 const DEVTOOLS_AUTH_PORT = 5174;
+const DEVTOOLS_MIXED_AUTH_PORT = 5175;
 
 export default defineConfig({
   testDir: "./tests",
@@ -45,6 +47,17 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
+      command: "pnpm e2e:fixture --auth --optional",
+      port: FIXTURE_MIXED_AUTH_PORT,
+      reuseExistingServer: !process.env.CI,
+      env: {
+        __PORT: String(FIXTURE_MIXED_AUTH_PORT),
+      },
+      stdout: "pipe",
+      stderr: "pipe",
+      timeout: 60_000,
+    },
+    {
       command: `pnpm dev --port ${DEVTOOLS_PORT} --strictPort`,
       port: DEVTOOLS_PORT,
       reuseExistingServer: !process.env.CI,
@@ -61,6 +74,17 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       env: {
         VITE_MCP_SERVER_URL: `http://localhost:${FIXTURE_AUTH_PORT}/mcp`,
+      },
+      stdout: "pipe",
+      stderr: "pipe",
+      timeout: 60_000,
+    },
+    {
+      command: `pnpm dev --port ${DEVTOOLS_MIXED_AUTH_PORT} --strictPort`,
+      port: DEVTOOLS_MIXED_AUTH_PORT,
+      reuseExistingServer: !process.env.CI,
+      env: {
+        VITE_MCP_SERVER_URL: `http://localhost:${FIXTURE_MIXED_AUTH_PORT}/mcp`,
       },
       stdout: "pipe",
       stderr: "pipe",
