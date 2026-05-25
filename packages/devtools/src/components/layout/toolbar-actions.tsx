@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils.js";
 type PackageManager = "pnpm" | "npm" | "yarn" | "bun";
 
 const RUN_PREFIX_BY_PM: Record<PackageManager, string> = {
-  pnpm: "pnpm",
+  pnpm: "pnpm run",
   npm: "npm run",
   yarn: "yarn",
   bun: "bun run",

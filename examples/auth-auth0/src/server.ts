@@ -12,11 +12,13 @@ import { verifyAccessToken } from "./auth.js";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
 
+const AUTH0_BASE_URL = `https://${env.AUTH0_DOMAIN}`;
+
 // Auth0's /oidc/register endpoint does not return CORS headers, so browser-based
 // MCP clients can't call it directly. Proxy it through this server instead.
 const registrationProxy: RequestHandler = async (req, res, next) => {
   try {
-    const response = await fetch(`https://${env.AUTH0_DOMAIN}/oidc/register`, {
+    const response = await fetch(`${AUTH0_BASE_URL}/oidc/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(req.body),
@@ -60,9 +62,9 @@ const server = new McpServer(
     mcpAuthMetadataRouter({
       oauthMetadata: {
         issuer: env.SERVER_URL,
-        authorization_endpoint: `https://${env.AUTH0_DOMAIN}/authorize?audience=${encodeURIComponent(env.AUTH0_AUDIENCE)}`,
-        token_endpoint: `https://${env.AUTH0_DOMAIN}/oauth/token`,
-        registration_endpoint: `${env.SERVER_URL}/oidc/register`,
+        authorization_endpoint: `${AUTH0_BASE_URL}/authorize?audience=${encodeURIComponent(env.AUTH0_AUDIENCE)}`,
+        token_endpoint: `${AUTH0_BASE_URL}/oauth/token`,
+        registration_endpoint: `${env.NODE_ENV === "production" ? AUTH0_BASE_URL : env.SERVER_URL}/oidc/register`,
         response_types_supported: ["code"],
         code_challenge_methods_supported: ["S256"],
         response_modes_supported: ["query"],
@@ -124,10 +126,9 @@ const server = new McpServer(
       const auth = extra.authInfo as AuthInfo;
 
       try {
-        const userInfoResponse = await fetch(
-          `https://${env.AUTH0_DOMAIN}/userinfo`,
-          { headers: { Authorization: `Bearer ${auth.token}` } },
-        );
+        const userInfoResponse = await fetch(`${AUTH0_BASE_URL}/userinfo`, {
+          headers: { Authorization: `Bearer ${auth.token}` },
+        });
 
         const userInfo = userInfoResponse.ok
           ? ((await userInfoResponse.json()) as {
