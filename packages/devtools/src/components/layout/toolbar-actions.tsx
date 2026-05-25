@@ -5,6 +5,7 @@ import {
   PopoverContent,
 } from "@alpic-ai/ui/components/popover";
 import { Separator } from "@alpic-ai/ui/components/separator";
+import { useQuery } from "@tanstack/react-query";
 import {
   Check,
   ClipboardCheck,
@@ -21,12 +22,38 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useId,
   useRef,
   useState,
 } from "react";
-import { CopyButton, useCopyToClipboard } from "@/lib/copy.js";
+import { useCopyToClipboard } from "@/lib/copy.js";
 import { useTunnelStore } from "@/lib/tunnel-store.js";
 import { cn } from "@/lib/utils.js";
+
+type PackageManager = "pnpm" | "npm" | "yarn" | "bun";
+
+const RUN_PREFIX_BY_PM: Record<PackageManager, string> = {
+  pnpm: "pnpm",
+  npm: "npm run",
+  yarn: "yarn",
+  bun: "bun run",
+};
+
+function useDeployCommand(): string {
+  const { data } = useQuery({
+    queryKey: ["devtools-project"],
+    queryFn: async () => {
+      const res = await fetch("/__skybridge/devtools/project");
+      if (!res.ok) {
+        return { packageManager: "npm" as PackageManager };
+      }
+      return (await res.json()) as { packageManager: PackageManager };
+    },
+    staleTime: Infinity,
+  });
+  const pm = data?.packageManager ?? "npm";
+  return `${RUN_PREFIX_BY_PM[pm]} deploy`;
+}
 
 const DOT_BY_STATUS = {
   idle: "bg-gray-400",
@@ -84,13 +111,15 @@ function HoverPopover({
   children: ReactNode;
 }) {
   const { open, setOpen, onEnter, onLeave } = useHoverOpen();
+  const anchorId = useId();
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverAnchor asChild>
         {cloneElement(trigger, {
           onMouseEnter: onEnter,
           onMouseLeave: onLeave,
-        })}
+          "data-popover-anchor": anchorId,
+        } as Partial<HoverHandlers> & { "data-popover-anchor": string })}
       </PopoverAnchor>
       <PopoverContent
         align="end"
@@ -99,6 +128,14 @@ function HoverPopover({
         onMouseEnter={onEnter}
         onMouseLeave={onLeave}
         onOpenAutoFocus={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => {
+          const target = e.target as HTMLElement | null;
+          if (
+            target?.closest?.(`[data-popover-anchor="${CSS.escape(anchorId)}"]`)
+          ) {
+            e.preventDefault();
+          }
+        }}
       >
         {children}
       </PopoverContent>
@@ -212,7 +249,8 @@ export function AuditButton() {
 }
 
 export function DeployButton() {
-  const command = "pnpm deploy";
+  const command = useDeployCommand();
+  const { copied, copy } = useCopyToClipboard();
 
   return (
     <HoverPopover
@@ -222,6 +260,7 @@ export function DeployButton() {
           variant="cta"
           className="h-8 px-2 gap-1"
           icon={<RocketIcon className="size-3.5" />}
+          onClick={() => copy(command)}
         >
           Deploy
         </Button>
@@ -236,10 +275,21 @@ export function DeployButton() {
         >
           Run this command to deploy your project to the Alpic platform
         </p>
-        <div className="flex items-center gap-2 rounded-md border bg-light-gray px-2 py-1.5">
+        <button
+          type="button"
+          aria-label="Copy command"
+          onClick={() => copy(command)}
+          className="flex w-full items-center gap-2 rounded-md border bg-light-gray px-2 py-1.5 text-left hover:bg-background-hover"
+        >
           <span className="flex-1 truncate font-mono text-xs">{command}</span>
-          <CopyButton value={command} label="Copy command" />
-        </div>
+          <span className="text-quaternary-foreground">
+            {copied ? (
+              <Check className="size-3.5" />
+            ) : (
+              <Copy className="size-3.5" />
+            )}
+          </span>
+        </button>
       </div>
     </HoverPopover>
   );

@@ -1,6 +1,6 @@
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import { WorkOS } from "@workos-inc/node";
 import * as jose from "jose";
+import type { AuthInfo } from "skybridge/server";
 import { env } from "./env.js";
 
 // Initialize JWKS client for AuthKit public key verification
