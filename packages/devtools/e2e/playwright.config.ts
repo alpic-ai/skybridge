@@ -1,8 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 import {
   DEVTOOLS_AUTH_PORT,
+  DEVTOOLS_MIXED_AUTH_PORT,
   DEVTOOLS_PORT,
   FIXTURE_AUTH_PORT,
+  FIXTURE_MIXED_AUTH_PORT,
   FIXTURE_PORT,
 } from "./fixtures/ports.js";
 
@@ -45,7 +47,9 @@ export default defineConfig({
   webServer: [
     fixture(FIXTURE_PORT),
     fixture(FIXTURE_AUTH_PORT, "--auth"),
+    fixture(FIXTURE_MIXED_AUTH_PORT, "--auth --optional"),
     devtools(DEVTOOLS_PORT, FIXTURE_PORT),
     devtools(DEVTOOLS_AUTH_PORT, FIXTURE_AUTH_PORT),
+    devtools(DEVTOOLS_MIXED_AUTH_PORT, FIXTURE_MIXED_AUTH_PORT),
   ],
 });

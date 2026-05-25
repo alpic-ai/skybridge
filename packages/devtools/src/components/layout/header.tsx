@@ -1,8 +1,8 @@
 import { Button } from "@alpic-ai/ui/components/button";
 import { Separator } from "@alpic-ai/ui/components/separator";
-import { LogOut } from "lucide-react";
+import { LogIn, LogOut } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store.js";
-import { logout, useServerInfo } from "@/lib/mcp/index.js";
+import { logout, signIn, useServerInfo } from "@/lib/mcp/index.js";
 import { StatusBadge } from "./status-badge.js";
 import {
   AuditButton,
@@ -44,7 +44,15 @@ function BrandChip() {
 }
 
 export const Header = () => {
-  const { status, requiresAuth, error } = useAuthStore();
+  const { status, requiresAuth, hasAuthRequiredTools, isSignedIn, error } =
+    useAuthStore();
+
+  const showSignIn =
+    requiresAuth &&
+    status === "authenticated" &&
+    hasAuthRequiredTools &&
+    !isSignedIn;
+  const showSignOut = requiresAuth && status === "authenticated" && isSignedIn;
 
   return (
     <header className="flex h-13 items-center justify-between gap-3 border-b border-border px-4">
@@ -65,7 +73,13 @@ export const Header = () => {
           </span>
         )}
         {requiresAuth && <StatusBadge status={status} />}
-        {requiresAuth && status === "authenticated" && (
+        {showSignIn && (
+          <Button variant="tertiary" onClick={() => signIn()}>
+            <LogIn className="size-3.5" />
+            Sign in
+          </Button>
+        )}
+        {showSignOut && (
           <Button variant="tertiary" onClick={() => logout()}>
             <LogOut className="size-3.5" />
             Sign out

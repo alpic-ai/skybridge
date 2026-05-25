@@ -1,7 +1,11 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import cors from "cors";
-import { McpServer, requireBearerAuth } from "skybridge/server";
+import {
+  McpServer,
+  optionalBearerAuth,
+  requireBearerAuth,
+} from "skybridge/server";
 import { z } from "zod";
 import { createMockAuthServer } from "./mock-auth-server.js";
 import { SEED_CLIENT_ID, SEED_TOKEN } from "./seed-auth.js";
@@ -12,13 +16,19 @@ process.chdir(path.join(fixtureDir, "web"));
 
 process.env.__PORT = process.env.__PORT ?? "4101";
 
+// --auth          → /mcp wrapped with requireBearerAuth (every request needs a token)
+// --auth --optional → /mcp wrapped with optionalBearerAuth (mixed auth; per-tool gating)
 const REQUIRES_AUTH = process.argv.includes("--auth");
+const OPTIONAL_AUTH = process.argv.includes("--optional");
+
+const serverName = REQUIRES_AUTH
+  ? OPTIONAL_AUTH
+    ? "e2e-mixed-auth-fixture"
+    : "e2e-auth-fixture"
+  : "e2e-fixture";
 
 const baseServer = new McpServer(
-  {
-    name: REQUIRES_AUTH ? "e2e-auth-fixture" : "e2e-fixture",
-    version: "0.0.0",
-  },
+  { name: serverName, version: "0.0.0" },
   { capabilities: {} },
 );
 
@@ -35,12 +45,13 @@ if (REQUIRES_AUTH) {
     seedTokens: [{ token: SEED_TOKEN, clientId: SEED_CLIENT_ID }],
     clientsFile,
   });
+  const bearerAuth = OPTIONAL_AUTH ? optionalBearerAuth : requireBearerAuth;
   baseServer
     .use(cors())
     .use(mockAuth.router)
     .use(
       "/mcp",
-      requireBearerAuth({
+      bearerAuth({
         verifier: { verifyAccessToken: mockAuth.verifyAccessToken },
       }),
     );
@@ -127,15 +138,34 @@ const server = baseServer
     {
       name: "whoami",
       description:
-        "Returns the authenticated client id, or 'anonymous' when called without a bearer token.",
+        "Returns the authenticated client id, or 'anonymous' when called without a bearer token. Works in mixed-auth mode.",
       inputSchema: {},
-      securitySchemes: [{ type: "oauth2" }],
+      securitySchemes: [{ type: "noauth" }, { type: "oauth2" }],
     },
     async (_args, extra) => {
       const clientId = extra.authInfo?.clientId ?? "anonymous";
       return {
         structuredContent: { clientId },
         content: [{ type: "text", text: clientId }],
+        isError: false,
+      };
+    },
+  )
+  .registerTool(
+    {
+      name: "private-whoami",
+      description:
+        "Returns the authenticated client id. Requires a bearer token; rejects unauthenticated calls.",
+      inputSchema: {},
+      securitySchemes: [{ type: "oauth2" }],
+    },
+    async (_args, extra) => {
+      if (!extra.authInfo) {
+        throw new Error("authentication required");
+      }
+      return {
+        structuredContent: { clientId: extra.authInfo.clientId },
+        content: [{ type: "text", text: extra.authInfo.clientId }],
         isError: false,
       };
     },
