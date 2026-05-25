@@ -1,11 +1,10 @@
 import { expect, test } from "@playwright/test";
+import { DEVTOOLS_AUTH_URL } from "../fixtures/ports.js";
 import {
   readStoredTokens,
   SEED_CLIENT_ID,
   seedAuthInLocalStorage,
 } from "../fixtures/seed-auth.js";
-
-const DEVTOOLS_AUTH_URL = "http://localhost:5174";
 
 test.describe("devtools auth", () => {
   test("connects to an authenticated server when a token is pre-seeded", async ({

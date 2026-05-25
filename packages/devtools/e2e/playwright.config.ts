@@ -1,11 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
-
-const FIXTURE_PORT = 4101;
-const FIXTURE_AUTH_PORT = 4102;
-const FIXTURE_MIXED_AUTH_PORT = 4103;
-const DEVTOOLS_PORT = 5173;
-const DEVTOOLS_AUTH_PORT = 5174;
-const DEVTOOLS_MIXED_AUTH_PORT = 5175;
+import {
+  DEVTOOLS_AUTH_PORT,
+  DEVTOOLS_MIXED_AUTH_PORT,
+  DEVTOOLS_PORT,
+  FIXTURE_AUTH_PORT,
+  FIXTURE_MIXED_AUTH_PORT,
+  FIXTURE_PORT,
+} from "./fixtures/ports.js";
 
 const fixture = (port: number, args = "") => ({
   command: `pnpm e2e:fixture${args ? ` ${args}` : ""}`,

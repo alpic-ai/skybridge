@@ -1,10 +1,9 @@
 import { expect, test } from "@playwright/test";
+import { DEVTOOLS_MIXED_AUTH_URL } from "../fixtures/ports.js";
 import {
   SEED_CLIENT_ID,
   seedAuthInLocalStorage,
 } from "../fixtures/seed-auth.js";
-
-const DEVTOOLS_MIXED_AUTH_URL = "http://localhost:5175";
 
 test.describe("devtools mixed auth", () => {
   test("connects anonymously and exposes a sign-in CTA when the server has any auth-required tool", async ({
