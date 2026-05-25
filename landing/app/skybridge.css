@@ -3764,7 +3764,9 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform 0.4s ease, filter 0.2s ease;
+  transition:
+    transform 0.4s ease,
+    filter 0.2s ease;
 }
 .sb-video-poster:hover img,
 .sb-video-poster:focus-visible img {
@@ -3777,7 +3779,9 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
   opacity: 0.95;
 }
 .sb-video-poster:hover .sb-video-play,
