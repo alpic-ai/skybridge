@@ -1,6 +1,5 @@
-import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import * as jose from "jose";
+import { type AuthInfo, InvalidTokenError } from "skybridge/server";
 import { env } from "./env.js";
 
 let jwks: ReturnType<typeof jose.createRemoteJWKSet> | null = null;

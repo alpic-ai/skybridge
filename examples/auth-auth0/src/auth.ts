@@ -3,8 +3,7 @@ import {
   InvalidRequestError,
   VerifyAccessTokenError,
 } from "@auth0/auth0-api-js";
-import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
+import { type AuthInfo, InvalidTokenError } from "skybridge/server";
 import { env } from "./env.js";
 
 const apiClient = new ApiClient({
