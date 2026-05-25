@@ -12,6 +12,8 @@
  */
 
 import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 import express, { type Router } from "express";
 import { type AuthInfo, InvalidTokenError } from "skybridge/server";
 
@@ -23,6 +25,14 @@ export interface MockAuthServerOptions {
    * that pre-seed `localStorage` to bypass the OAuth flow entirely.
    */
   seedTokens?: Array<{ token: string; clientId: string; scopes?: string[] }>;
+  /**
+   * Optional path to persist DCR client registrations across fixture
+   * restarts. Without this, an interactive dev workflow that survives the
+   * fixture process (the browser holds a `client_id` in localStorage) hits
+   * `invalid_client` when the fixture restarts. Auth codes and tokens stay
+   * in-memory — only the client registry is persisted.
+   */
+  clientsFile?: string;
 }
 
 export interface MockAuthServer {
@@ -41,7 +51,7 @@ export interface MockAuthServer {
 export function createMockAuthServer(
   options: MockAuthServerOptions,
 ): MockAuthServer {
-  const stores = createStores(options.seedTokens);
+  const stores = createStores(options.seedTokens, options.clientsFile);
   const router = buildRouter(options.serverUrl, stores);
 
   return {
@@ -85,11 +95,15 @@ interface Stores {
   clients: Map<string, ClientInfo>;
   codes: Map<string, AuthCodeInfo>;
   tokens: Map<string, TokenInfo>;
+  persistClients?: () => void;
 }
 
 const TOKEN_TTL_SECONDS = 3600;
 
-function createStores(seedTokens: MockAuthServerOptions["seedTokens"]): Stores {
+function createStores(
+  seedTokens: MockAuthServerOptions["seedTokens"],
+  clientsFile: string | undefined,
+): Stores {
   const tokens = new Map<string, TokenInfo>();
   const expiresAt = Math.floor(Date.now() / 1000) + TOKEN_TTL_SECONDS;
   for (const seed of seedTokens ?? []) {
@@ -99,11 +113,30 @@ function createStores(seedTokens: MockAuthServerOptions["seedTokens"]): Stores {
       expiresAt,
     });
   }
-  return {
-    clients: new Map(),
-    codes: new Map(),
-    tokens,
-  };
+
+  const clients = new Map<string, ClientInfo>();
+  let persistClients: (() => void) | undefined;
+  if (clientsFile) {
+    if (fs.existsSync(clientsFile)) {
+      try {
+        const raw = fs.readFileSync(clientsFile, "utf8");
+        for (const entry of JSON.parse(raw) as ClientInfo[]) {
+          clients.set(entry.client_id, entry);
+        }
+      } catch {
+        // Malformed file — start fresh; next /register rewrites it.
+      }
+    }
+    persistClients = () => {
+      fs.mkdirSync(path.dirname(clientsFile), { recursive: true });
+      fs.writeFileSync(
+        clientsFile,
+        JSON.stringify(Array.from(clients.values()), null, 2),
+      );
+    };
+  }
+
+  return { clients, codes: new Map(), tokens, persistClients };
 }
 
 function verifyPkceS256(verifier: string, challenge: string): boolean {
@@ -172,6 +205,7 @@ function buildRouter(serverUrl: string, stores: Stores): Router {
       redirect_uris: body.redirect_uris,
     };
     stores.clients.set(client.client_id, client);
+    stores.persistClients?.();
     res
       .status(201)
       .json({ ...client, client_id_issued_at: Math.floor(Date.now() / 1000) });

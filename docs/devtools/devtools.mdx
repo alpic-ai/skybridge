@@ -65,6 +65,12 @@ These logs show **Apps SDK** (`window.openai`) calls. In MCP Apps, views use the
 
 <img src="/images/devtools-view.png" alt="DevTools View Inspection Panel" style={{maxWidth: '100%', borderRadius: '8px', border: '1px solid #e0e0e0'}} />
 
+## Authenticated servers
+
+When your MCP server requires OAuth, DevTools registers itself as an OAuth client via [Dynamic Client Registration](https://datatracker.ietf.org/doc/html/rfc7591) on first connect and walks the full PKCE flow. The resulting `client_id` and access token are cached in browser `localStorage` so subsequent sessions reconnect silently.
+
+If you ever see `invalid_client` or other authorization errors after switching servers, rotating credentials on the auth server, or otherwise leaving DevTools holding stale state, click **Sign out** in the header to clear the cache and trigger a fresh registration on the next connect.
+
 ## Limitations
 
 DevTools uses the **Apps SDK runtime** (mocked `window.openai`) but has some differences from production:

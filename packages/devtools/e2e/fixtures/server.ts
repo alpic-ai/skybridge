@@ -34,9 +34,16 @@ const baseServer = new McpServer(
 
 if (REQUIRES_AUTH) {
   const serverUrl = `http://localhost:${process.env.__PORT}`;
+  // Persist DCR client registrations across fixture restarts in interactive
+  // dev (not CI), so a long-lived browser tab doesn't get stranded with a
+  // stale `client_id` in localStorage. Auth codes and tokens stay ephemeral.
+  const clientsFile = process.env.CI
+    ? undefined
+    : path.join(fixtureDir, `.mock-auth-clients-${process.env.__PORT}.json`);
   const mockAuth = createMockAuthServer({
     serverUrl,
     seedTokens: [{ token: SEED_TOKEN, clientId: SEED_CLIENT_ID }],
+    clientsFile,
   });
   const bearerAuth = OPTIONAL_AUTH ? optionalBearerAuth : requireBearerAuth;
   baseServer
