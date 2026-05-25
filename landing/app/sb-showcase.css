@@ -1212,6 +1212,23 @@
   margin-top: 12px;
 }
 
+.sx-cl-foot {
+  margin: 56px auto 0;
+  text-align: center;
+  font: 400 13.5px / 1.5 var(--font-body);
+  color: var(--sb-ink-mute);
+}
+.sx-cl-foot a {
+  color: var(--sb-ink-soft);
+  text-decoration: underline;
+  text-decoration-color: var(--sb-border);
+  text-underline-offset: 3px;
+}
+.sx-cl-foot a:hover {
+  color: var(--sb-accent);
+  text-decoration-color: var(--sb-accent);
+}
+
 .sx-cl-empty,
 .sx-cl-empty-body {
   text-align: center;
