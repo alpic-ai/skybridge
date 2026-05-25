@@ -112,17 +112,25 @@ export async function connectToServer(): Promise<void> {
     }
   }
 
-  setIsSignedIn(hasToken);
-  setStatus("authenticated");
-  queryClient.invalidateQueries({ queryKey: ["list-tools"] });
-
   // Detect auth-required tools from the live tool list so the UI can gate
-  // them behind sign-in without round-tripping through a 401.
+  // them behind sign-in without round-tripping through a 401. Done before the
+  // authenticated status flips so the header CTA never flashes off.
+  let tools: Tool[] | null = null;
   try {
-    const tools = await client.listTools();
-    setHasAuthRequiredTools(tools.some(toolRequiresAuth));
+    tools = await client.listTools();
   } catch {
-    setHasAuthRequiredTools(false);
+    // listTools failure is non-fatal here; fall back to invalidate so the
+    // consumer's query can surface the error.
+  }
+
+  // Re-read tokens: the retry path may have completed a silent refresh.
+  setIsSignedIn(!!provider?.tokens());
+  setHasAuthRequiredTools((tools ?? []).some(toolRequiresAuth));
+  setStatus("authenticated");
+  if (tools) {
+    queryClient.setQueryData(["list-tools"], tools);
+  } else {
+    queryClient.invalidateQueries({ queryKey: ["list-tools"] });
   }
 }
 

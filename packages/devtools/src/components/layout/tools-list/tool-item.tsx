@@ -47,6 +47,7 @@ type TabValue = "form" | "json";
 export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
   const { mutateAsync: callTool, isPending } = useCallTool();
   const isSignedIn = useAuthStore((s) => s.isSignedIn);
+  const requiresAuth = useAuthStore((s) => s.requiresAuth);
   const formRef = useRef<Form<unknown, RJSFSchema>>(null);
   const result = useCallToolResult(tool.name);
   const { setToolData } = useStore();
@@ -55,7 +56,7 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     setToolData(tool.name, { input: data ?? {} });
   };
 
-  const needsSignIn = toolRequiresAuth(tool) && !isSignedIn;
+  const needsSignIn = requiresAuth && toolRequiresAuth(tool) && !isSignedIn;
 
   const [tab, setTab] = useState<TabValue>("form");
   const [jsonError, setJsonError] = useState(false);
