@@ -22,6 +22,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    {
+      url: `${BASE}/changelog`,
+      lastModified: SITE_UPDATED,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
     ...SHOWCASE.map((app) => ({
       url: `${BASE}/showcase/${app.slug}`,
       lastModified: app.updatedAt ?? SITE_UPDATED,

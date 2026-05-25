@@ -7,6 +7,8 @@ on:
     paths:
       - "landing/**"
       - ".github/workflows/deploy-landing.yml"
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -51,6 +53,7 @@ jobs:
         run: pnpm run build
         env:
           PAGES_BASE_PATH: ${{ steps.setup_pages.outputs.base_path }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

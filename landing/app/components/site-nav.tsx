@@ -65,6 +65,7 @@ export async function SiteNav() {
         <div className="sb-nav-links">
           <a href="https://docs.skybridge.tech">Docs</a>
           <a href="/showcase">Showcase</a>
+          <a href="/changelog">Changelog</a>
         </div>
         <div className="sb-nav-right">
           <a
