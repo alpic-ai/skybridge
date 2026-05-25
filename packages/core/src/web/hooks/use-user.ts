@@ -33,6 +33,8 @@ function normalizeLocale(locale: string): string {
  * // Access device type
  * const isMobile = userAgent.device.type === "mobile";
  * ```
+ *
+ * @see https://docs.skybridge.tech/api-reference/use-user
  */
 export function useUser(): UserState {
   const rawLocale = useHostContext("locale");

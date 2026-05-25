@@ -7,14 +7,24 @@ import {
 } from "react";
 import { getAdaptor } from "./bridges/index.js";
 
+/** Text content surfaced to the model by a {@link DataLLM} component. */
 export type DataLLMContent = string;
 
+/**
+ * A node in the {@link DataLLM} tree. Nested `<DataLLM>` elements form a
+ * hierarchy that is serialized as an indented bullet list for the model.
+ */
 export interface DataLLMNode {
   id: string;
   parentId: string | null;
   content: string | null;
 }
 
+/**
+ * Key under which the serialized {@link DataLLM} tree is persisted on the
+ * host's `viewState`. The host exposes the value to the model on subsequent
+ * turns.
+ */
 export const VIEW_CONTEXT_KEY = "__view_context" as const;
 
 const nodes = new Map<string, DataLLMNode>();
@@ -45,6 +55,29 @@ interface DataLLMProps {
   children?: ReactNode;
 }
 
+/**
+ * Surface in-view content to the LLM so it can reason about what the user is
+ * seeing without an extra tool call.
+ *
+ * Each `<DataLLM>` registers `content` as a node in a tree (parented by any
+ * enclosing `<DataLLM>`). The flattened tree is serialized as an indented
+ * bullet list and persisted on the host's `viewState` under
+ * {@link VIEW_CONTEXT_KEY}; the host then surfaces it to the model as part of
+ * the next turn's context.
+ *
+ * Pass `null`/`undefined` for `content` to register only as a structural
+ * parent (useful for grouping).
+ *
+ * @example
+ * ```tsx
+ * <DataLLM content="Active filters">
+ *   <DataLLM content={`Sort: ${sort}`} />
+ *   <DataLLM content={`Page: ${page}`} />
+ * </DataLLM>
+ * ```
+ *
+ * @see https://docs.skybridge.tech/api-reference/data-llm
+ */
 export function DataLLM({ content, children }: DataLLMProps) {
   const parentId = useContext(ParentIdContext);
   const id = useId();

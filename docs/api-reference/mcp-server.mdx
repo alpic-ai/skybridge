@@ -385,6 +385,31 @@ async function verifyAccessToken(token: string): Promise<AuthInfo> {
 }
 ```
 
+### mcpAuthMetadataRouter
+
+Express router that serves the OAuth 2.0 [Protected Resource Metadata](https://datatracker.ietf.org/doc/html/rfc9728) document at `/.well-known/oauth-protected-resource`, so clients can discover the authorization server programmatically.
+
+**Example:**
+```typescript
+import { mcpAuthMetadataRouter } from "skybridge/server";
+
+server.use(
+  mcpAuthMetadataRouter({
+    oauthMetadata: {
+      issuer: "https://auth.example.com",
+      authorization_endpoint: "https://auth.example.com/authorize",
+      token_endpoint: "https://auth.example.com/token",
+      response_types_supported: ["code"],
+    },
+    resourceServerUrl: new URL("https://api.example.com/mcp"),
+    scopesSupported: ["search.read"],
+  }),
+);
+```
+<Note>
+Values above are illustrative. See [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) and [RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728), and check your auth provider docs for the actual values.
+</Note>
+
 ## Exported Types
 
 The following middleware types are available from `skybridge/server`:
@@ -392,6 +417,7 @@ The following middleware types are available from `skybridge/server`:
 ```typescript
 import type {
   AuthInfo,
+  AuthMetadataOptions,
   BearerAuthMiddlewareOptions,
   McpExtra,
   McpMiddlewareFn,

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronRight, Trash2, X } from "lucide-react";
 import { useState } from "react";
+import { CopyButton } from "@/lib/copy.js";
 import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { type OpenAiLog, useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
@@ -141,6 +142,11 @@ export const LogsDrawer = ({ onClose }: { onClose?: () => void }) => {
           >
             <Trash2 className="size-3.5" />
           </button>
+          <CopyButton
+            value={JSON.stringify(logs, null, 2)}
+            label="Copy logs"
+            className="inline-flex size-6 items-center justify-center rounded-md transition-colors hover:bg-light-gray focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          />
         </div>
         {onClose ? (
           <button

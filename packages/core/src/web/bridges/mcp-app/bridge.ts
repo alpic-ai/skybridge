@@ -3,6 +3,7 @@ import type { Implementation } from "@modelcontextprotocol/sdk/types.js";
 import type { Bridge, Subscribe } from "../types.js";
 import type { McpAppContext, McpAppContextKey } from "./types.js";
 
+/** @internal Singleton bridge over the `ext-apps` JSON-RPC App connection. Used by {@link McpAppAdaptor}. */
 export class McpAppBridge implements Bridge<McpAppContext> {
   private static instance: McpAppBridge | null = null;
   public context: McpAppContext = {

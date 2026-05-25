@@ -23,8 +23,8 @@ export default function ToolOutput() {
         ) : (
           <p>
             The view reads the <strong>tool output</strong>, but no{" "}
-            <code>name</code> was passed this time. Try again with you surname
-            to see with this view personalize.
+            <code>name</code> was passed this time. Try again with your surname
+            to see how this view personalizes.
           </p>
         )}
       </div>

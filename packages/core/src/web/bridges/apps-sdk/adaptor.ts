@@ -1,6 +1,8 @@
 import type {
   Adaptor,
   CallToolResponse,
+  DownloadParams,
+  DownloadResult,
   FileMetadata,
   HostContext,
   HostContextStore,
@@ -15,6 +17,7 @@ import type {
 import { AppsSdkBridge } from "./bridge.js";
 import type { AppsSdkWidgetState } from "./types.js";
 
+/** @internal Apps SDK implementation of {@link Adaptor}. Resolved via {@link getAdaptor}. */
 export class AppsSdkAdaptor implements Adaptor {
   private static instance: AppsSdkAdaptor | null = null;
 
@@ -95,6 +98,13 @@ export class AppsSdkAdaptor implements Adaptor {
       prompt,
       scrollToBottom: options?.scrollToBottom,
     });
+  };
+
+  public download = async (
+    _params: DownloadParams,
+  ): Promise<DownloadResult> => {
+    console.error("[skybridge] download: not supported on Apps SDK");
+    return { isError: true };
   };
 
   public openExternal(href: string, options: OpenExternalOptions = {}): void {

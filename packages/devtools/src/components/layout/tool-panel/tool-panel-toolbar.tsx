@@ -179,21 +179,19 @@ export const ToolPanelToolbar = ({
         </PopoverContent>
       </Popover>
 
-      {displayMode !== "fullscreen" && (
-        <ToolbarButton
-          icon={isMobile ? Smartphone : Monitor}
-          label={isMobile ? "mobile" : "desktop"}
-          onClick={() =>
-            setPreference("userAgent", {
-              ...userAgent,
-              device: {
-                ...userAgent?.device,
-                type: isMobile ? "desktop" : "mobile",
-              },
-            })
-          }
-        />
-      )}
+      <ToolbarButton
+        icon={isMobile ? Smartphone : Monitor}
+        label={isMobile ? "mobile" : "desktop"}
+        onClick={() =>
+          setPreference("userAgent", {
+            ...userAgent,
+            device: {
+              ...userAgent?.device,
+              type: isMobile ? "desktop" : "mobile",
+            },
+          })
+        }
+      />
 
       {!logsOpen && displayMode !== "fullscreen" && (
         <ToolbarButton

@@ -46,7 +46,12 @@ export type McpMethodString =
   | ClientRequest["method"]
   | ClientNotification["method"];
 
-/** Extract params type for a specific MCP method from SDK unions. */
+/**
+ * Resolve the `params` type for a specific MCP method (request or notification)
+ * from the SDK's typed unions. Falls back to `Record<string, unknown>` for
+ * unknown methods. Used by {@link McpTypedMiddlewareFn} to narrow the request
+ * shape in typed middleware.
+ */
 export type McpRequestParams<M extends string> =
   Extract<ClientRequest, { method: M }> extends { params: infer P }
     ? P
@@ -54,7 +59,11 @@ export type McpRequestParams<M extends string> =
       ? P
       : Record<string, unknown>;
 
-/** Resolve extra type: McpExtra for requests, undefined for notifications. */
+/**
+ * Resolve the `extra` arg type for a specific MCP method: {@link McpExtra} for
+ * request methods, `undefined` for notification methods (the SDK does not
+ * pass extra context for notifications).
+ */
 export type McpExtraFor<M extends string> = M extends ClientRequest["method"]
   ? McpExtra
   : M extends ClientNotification["method"]
@@ -101,7 +110,11 @@ export type McpResultFor<M extends string> = M extends keyof McpResultMap
       ? undefined
       : ServerResult;
 
-/** Typed middleware fn for a specific method — narrows params, extra, and next() result. */
+/**
+ * Typed middleware function for a specific method. Narrows `request.params`
+ * via {@link McpRequestParams}, `extra` via {@link McpExtraFor}, and the
+ * resolved value of `next()` via {@link McpResultFor}.
+ */
 export type McpTypedMiddlewareFn<M extends string> = (
   request: { method: M; params: McpRequestParams<M> },
   extra: McpExtraFor<M>,

@@ -46,10 +46,12 @@ export const View = () => {
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
   const isFullscreen = displayMode === "fullscreen";
   const isPip = displayMode === "pip";
-  const width =
-    isFullscreen && !isMobile
-      ? "100%"
-      : `${isMobile ? MOBILE_WIDTH_PX : DESKTOP_WIDTH_PX}px`;
+  // Mobile preview in fullscreen keeps the inline-mobile layout (centered 345px
+  // widget with body-driven height) on top of the fullscreen overlay.
+  const isFullscreenDesktop = isFullscreen && !isMobile;
+  const width = isFullscreenDesktop
+    ? "100%"
+    : `${isMobile ? MOBILE_WIDTH_PX : DESKTOP_WIDTH_PX}px`;
   const theme = useInspectorPreferencesStore((s) => s.theme);
   const locale = useInspectorPreferencesStore((s) => s.locale);
 
@@ -111,7 +113,7 @@ export const View = () => {
   useIframeAutoHeight({
     iframeRef,
     containerRef,
-    enabled: Boolean(html) && !isFullscreen,
+    enabled: Boolean(html) && !isFullscreenDesktop,
     onHeightChange: setContentHeight,
     documentKey: html,
   });
@@ -137,11 +139,11 @@ export const View = () => {
       ref={containerRef}
       className={cn(
         "relative transition-[width] duration-150 ease-out",
-        isFullscreen ? "h-full w-full bg-background" : "mx-auto",
+        isFullscreenDesktop ? "h-full w-full bg-background" : "mx-auto",
       )}
       style={{
-        width: isFullscreen ? undefined : width,
-        height: isFullscreen
+        width: isFullscreenDesktop ? undefined : width,
+        height: isFullscreenDesktop
           ? "100%"
           : contentHeight != null
             ? `${isPip ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`
@@ -154,7 +156,7 @@ export const View = () => {
         src="about:blank"
         style={{
           width: "100%",
-          height: isFullscreen
+          height: isFullscreenDesktop
             ? "100%"
             : contentHeight != null
               ? `${isPip ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`

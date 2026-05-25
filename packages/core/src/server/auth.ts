@@ -10,6 +10,10 @@ export {
   type BearerAuthMiddlewareOptions,
   requireBearerAuth,
 } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
+export {
+  type AuthMetadataOptions,
+  mcpAuthMetadataRouter,
+} from "@modelcontextprotocol/sdk/server/auth/router.js";
 export type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 
 /**
