@@ -1,14 +1,12 @@
 "use client";
 
+import Image from "next-image-export-optimizer";
 import { useState } from "react";
 
 const VIDEO_ID = "9X8GRGcl5oA";
-const POSTER_HI = `https://i.ytimg.com/vi/${VIDEO_ID}/maxresdefault.jpg`;
-const POSTER_FALLBACK = `https://i.ytimg.com/vi/${VIDEO_ID}/hqdefault.jpg`;
 
 export function VideoSection() {
   const [playing, setPlaying] = useState(false);
-  const [posterSrc, setPosterSrc] = useState(POSTER_HI);
 
   return (
     <section className="sb-section" id="video" style={{ paddingTop: 88 }}>
@@ -39,16 +37,12 @@ export function VideoSection() {
                 aria-label="Play Skybridge demo video"
                 onClick={() => setPlaying(true)}
               >
-                <img
-                  src={posterSrc}
+                <Image
+                  src="/assets/video-poster.jpg"
                   alt=""
+                  width={1280}
+                  height={720}
                   loading="lazy"
-                  decoding="async"
-                  onError={() => {
-                    if (posterSrc !== POSTER_FALLBACK) {
-                      setPosterSrc(POSTER_FALLBACK);
-                    }
-                  }}
                 />
                 <span className="sb-video-play" aria-hidden="true">
                   <svg viewBox="0 0 68 48" width="68" height="48">
