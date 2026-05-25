@@ -29,3 +29,4 @@ dist-ssr
 playwright-report
 test-results
 e2e/fixtures/web/dist
+e2e/fixtures/.mock-auth-clients-*.json

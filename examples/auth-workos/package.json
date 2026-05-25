@@ -13,13 +13,12 @@
   },
   "dependencies": {
     "@alpic-ai/insights": "^1.127.1",
-    "@modelcontextprotocol/sdk": "^1.29.0",
     "@workos-inc/node": "^7.72.2",
     "dotenv": "^16.5.0",
     "jose": "^6.0.11",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "skybridge": "^1.0.0",
+    "skybridge": "^1.0.2",
     "vite": "^8.0.0",
     "zod": "^4.3.6"
   },

@@ -5,8 +5,7 @@ import {
   mcpAuthClerk,
   protectedResourceHandlerClerk,
 } from "@clerk/mcp-tools/express";
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
-import { McpServer } from "skybridge/server";
+import { type AuthInfo, McpServer } from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 

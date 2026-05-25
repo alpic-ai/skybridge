@@ -2,14 +2,28 @@ import {
   AccordionContent,
   AccordionItem,
 } from "@alpic-ai/ui/components/accordion";
+import { Badge } from "@alpic-ai/ui/components/badge";
 import { Button } from "@alpic-ai/ui/components/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@alpic-ai/ui/components/dialog";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@alpic-ai/ui/components/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@alpic-ai/ui/components/tooltip";
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import type Form from "@rjsf/core";
 import { Form as FormComponent } from "@rjsf/shadcn";
 import type { RJSFSchema } from "@rjsf/utils";
@@ -17,8 +31,9 @@ import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
 import { Loader2, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useAuthStore } from "@/lib/auth-store.js";
 import { CopyButton } from "@/lib/copy.js";
-import { useCallTool } from "@/lib/mcp/index.js";
+import { toolRequiresAuth, useCallTool } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
@@ -28,6 +43,8 @@ type TabValue = "form" | "json";
 
 export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
   const { mutateAsync: callTool, isPending } = useCallTool();
+  const isSignedIn = useAuthStore((s) => s.isSignedIn);
+  const requiresAuth = useAuthStore((s) => s.requiresAuth);
   const formRef = useRef<Form<unknown, RJSFSchema>>(null);
   const result = useCallToolResult(tool.name);
   const { setToolData } = useStore();
@@ -36,10 +53,15 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     setToolData(tool.name, { input: data ?? {} });
   };
 
+  const needsSignIn = requiresAuth && toolRequiresAuth(tool) && !isSignedIn;
+
   const [tab, setTab] = useState<TabValue>("form");
   const [jsonError, setJsonError] = useState(false);
 
   const handleRun = async () => {
+    if (needsSignIn) {
+      return;
+    }
     const schema = tool.inputSchema as RJSFSchema;
     const hasNoInput =
       !schema?.properties || Object.keys(schema.properties).length === 0;
@@ -69,6 +91,39 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     handleRun();
   });
 
+  useKeyPress(
+    "enter",
+    (event) => {
+      if (!open) {
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      if (target?.tagName === "TEXTAREA") {
+        return;
+      }
+      event.preventDefault();
+      handleRun();
+    },
+    { exactMatch: true },
+  );
+
+  const runButton = (
+    <Button
+      disabled={isPending || needsSignIn}
+      variant="primary"
+      onClick={handleRun}
+      icon={
+        isPending ? (
+          <Loader2 className="size-3 animate-spin" />
+        ) : (
+          <Play className="size-3" />
+        )
+      }
+    >
+      Run
+    </Button>
+  );
+
   return (
     <AccordionItem
       value={tool.name}
@@ -81,25 +136,29 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
         )}
         action={
           open ? (
-            <Button
-              disabled={isPending}
-              variant="primary"
-              onClick={handleRun}
-              icon={
-                isPending ? (
-                  <Loader2 className="size-3 animate-spin" />
-                ) : (
-                  <Play className="size-3" />
-                )
-              }
-            >
-              Run
-            </Button>
+            needsSignIn ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {/* Wrapper so the disabled button still surfaces hover. */}
+                  <span className="inline-flex">{runButton}</span>
+                </TooltipTrigger>
+                <TooltipContent>Sign in to call this tool</TooltipContent>
+              </Tooltip>
+            ) : (
+              runButton
+            )
           ) : null
         }
       >
-        <div className="min-w-0 flex-1 text-left">{tool.name}</div>
+        <div className="min-w-0 flex-1 truncate text-left">{tool.name}</div>
       </AccordionTrigger>
+      {!open && tool.description ? (
+        <div aria-hidden="true" className="px-3 pb-3 -mt-1 font-sans">
+          <div className="rounded-md border border-border bg-muted/40 px-2.5 py-2 text-xs text-muted-foreground/70">
+            <span className="line-clamp-2">{tool.description}</span>
+          </div>
+        </div>
+      ) : null}
       <AccordionContent className="px-3 pt-1 pb-3 text-foreground">
         <ToolBody
           tool={tool}
@@ -114,6 +173,37 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
       </AccordionContent>
     </AccordionItem>
   );
+}
+
+type Visibility = "model" | "app";
+
+const VISIBILITY_META: Record<
+  Visibility,
+  { badgeClass: string; tooltip: string }
+> = {
+  model: {
+    badgeClass: "border-blue-200 bg-blue-100 text-blue-700",
+    tooltip: "Visible to and callable by the agent.",
+  },
+  app: {
+    badgeClass: "border-purple-200 bg-purple-100 text-purple-700",
+    tooltip: "Callable by the widget on this server only.",
+  },
+};
+
+function getToolVisibility(tool: Tool): Visibility[] | undefined {
+  const meta = tool._meta as Record<string, unknown> | undefined;
+  const ui = meta?.ui as { visibility?: unknown } | undefined;
+  const fromUi = ui?.visibility;
+  const legacy = meta?.["openai/visibility"];
+  const candidate = fromUi ?? legacy;
+  if (!Array.isArray(candidate)) {
+    return undefined;
+  }
+  const values = candidate.filter(
+    (v): v is Visibility => v === "model" || v === "app",
+  );
+  return values.length > 0 ? values : undefined;
 }
 
 function ToolBody({
@@ -138,12 +228,69 @@ function ToolBody({
   const hasInput =
     tool.inputSchema &&
     Object.keys(tool.inputSchema.properties ?? {}).length > 0;
+  const visibility = getToolVisibility(tool);
+  const [descriptionOpen, setDescriptionOpen] = useState(false);
 
   return (
     <div className="space-y-3">
-      {tool.description && (
-        <div className="rounded-md border border-border bg-muted/40 px-2.5 py-2 text-xs text-muted-foreground/70">
-          {tool.description}
+      {(visibility || tool.description) && (
+        <div className="space-y-2">
+          {visibility && (
+            <div data-testid="tool-visibility" className="flex flex-wrap gap-1">
+              {visibility.map((scope) => (
+                <Tooltip key={scope}>
+                  <TooltipTrigger asChild>
+                    <Badge
+                      size="sm"
+                      className={VISIBILITY_META[scope].badgeClass}
+                    >
+                      {scope}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipPrimitive.Portal>
+                    <TooltipPrimitive.Content
+                      sideOffset={6}
+                      className={cn(
+                        "z-50 w-fit rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-md",
+                        "animate-in fade-in-0 zoom-in-95",
+                        "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
+                        "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+                      )}
+                    >
+                      {VISIBILITY_META[scope].tooltip}
+                      <TooltipPrimitive.Arrow
+                        width={11}
+                        height={5}
+                        className="fill-background drop-shadow-[0_1px_0_var(--color-border)]"
+                      />
+                    </TooltipPrimitive.Content>
+                  </TooltipPrimitive.Portal>
+                </Tooltip>
+              ))}
+            </div>
+          )}
+          {tool.description && (
+            <>
+              <button
+                type="button"
+                onClick={() => setDescriptionOpen(true)}
+                className="block w-full cursor-pointer rounded-md border border-border bg-muted/40 px-2.5 py-2 text-left text-xs text-muted-foreground/70 hover:bg-muted/60"
+                title="Click to see full description"
+              >
+                <span className="line-clamp-2">{tool.description}</span>
+              </button>
+              <Dialog open={descriptionOpen} onOpenChange={setDescriptionOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="font-mono">{tool.name}</DialogTitle>
+                    <DialogDescription className="whitespace-pre-wrap">
+                      {tool.description}
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+            </>
+          )}
         </div>
       )}
       {hasInput && (
