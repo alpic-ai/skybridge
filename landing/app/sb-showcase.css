@@ -1065,10 +1065,9 @@
   color: var(--sb-accent);
   border-left-color: var(--sb-accent);
 }
-.sx-cl-toc-link:target,
-.sx-cl-item:target ~ .sx-cl-toc .sx-cl-toc-link {
-  color: var(--sb-accent);
-}
+/* Active TOC highlight would need JS (IntersectionObserver) or a
+   data-attribute toggle; pure-CSS :target can't cross the DOM boundary
+   between .sx-cl-item and .sx-cl-toc here. */
 .sx-cl-list {
   list-style: none;
   margin: 0;
