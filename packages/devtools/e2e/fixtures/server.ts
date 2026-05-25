@@ -1,7 +1,10 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { McpServer } from "skybridge/server";
+import cors from "cors";
+import { McpServer, requireBearerAuth } from "skybridge/server";
 import { z } from "zod";
+import { createMockAuthServer } from "./mock-auth-server.js";
+import { SEED_CLIENT_ID, SEED_TOKEN } from "./seed-auth.js";
 
 // Run from the web/ subdir so viewsDevServer finds vite.config.ts there.
 const fixtureDir = path.dirname(fileURLToPath(import.meta.url));
@@ -9,13 +12,34 @@ process.chdir(path.join(fixtureDir, "web"));
 
 process.env.__PORT = process.env.__PORT ?? "4101";
 
-const server = new McpServer(
+const REQUIRES_AUTH = process.argv.includes("--auth");
+
+const baseServer = new McpServer(
   {
-    name: "e2e-fixture",
+    name: REQUIRES_AUTH ? "e2e-auth-fixture" : "e2e-fixture",
     version: "0.0.0",
   },
   { capabilities: {} },
-)
+);
+
+if (REQUIRES_AUTH) {
+  const serverUrl = `http://localhost:${process.env.__PORT}`;
+  const mockAuth = createMockAuthServer({
+    serverUrl,
+    seedTokens: [{ token: SEED_TOKEN, clientId: SEED_CLIENT_ID }],
+  });
+  baseServer
+    .use(cors())
+    .use(mockAuth.router)
+    .use(
+      "/mcp",
+      requireBearerAuth({
+        verifier: { verifyAccessToken: mockAuth.verifyAccessToken },
+      }),
+    );
+}
+
+const server = baseServer
   .registerTool(
     {
       name: "echo",
@@ -91,6 +115,23 @@ const server = new McpServer(
       content: [{ type: "text", text: "ok" }],
       isError: false,
     }),
+  )
+  .registerTool(
+    {
+      name: "whoami",
+      description:
+        "Returns the authenticated client id, or 'anonymous' when called without a bearer token.",
+      inputSchema: {},
+      securitySchemes: [{ type: "oauth2" }],
+    },
+    async (_args, extra) => {
+      const clientId = extra.authInfo?.clientId ?? "anonymous";
+      return {
+        structuredContent: { clientId },
+        content: [{ type: "text", text: clientId }],
+        isError: false,
+      };
+    },
   );
 
 export type AppType = typeof server;
