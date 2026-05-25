@@ -29,10 +29,7 @@ export function toolRequiresAuth(tool: Tool): boolean {
   const schemes = tool._meta?.securitySchemes as
     | Array<{ type?: string }>
     | undefined;
-  if (!schemes || schemes.length === 0) {
-    return false;
-  }
-  return !schemes.some((s) => s?.type === "noauth");
+  return !!schemes?.length && schemes.every((s) => s?.type !== "noauth");
 }
 
 function isUnauthorized(error: unknown): boolean {
