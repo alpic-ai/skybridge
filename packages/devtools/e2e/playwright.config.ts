@@ -1,7 +1,30 @@
 import { defineConfig, devices } from "@playwright/test";
+import {
+  DEVTOOLS_AUTH_PORT,
+  DEVTOOLS_PORT,
+  FIXTURE_AUTH_PORT,
+  FIXTURE_PORT,
+} from "./fixtures/ports.js";
 
-const FIXTURE_PORT = 4101;
-const DEVTOOLS_PORT = 5173;
+const fixture = (port: number, args = "") => ({
+  command: `pnpm e2e:fixture${args ? ` ${args}` : ""}`,
+  port,
+  reuseExistingServer: !process.env.CI,
+  env: { __PORT: String(port) },
+  stdout: "pipe" as const,
+  stderr: "pipe" as const,
+  timeout: 60_000,
+});
+
+const devtools = (port: number, fixturePort: number) => ({
+  command: `pnpm dev -- --port ${port} --strictPort`,
+  port,
+  reuseExistingServer: !process.env.CI,
+  env: { VITE_MCP_SERVER_URL: `http://localhost:${fixturePort}/mcp` },
+  stdout: "pipe" as const,
+  stderr: "pipe" as const,
+  timeout: 60_000,
+});
 
 export default defineConfig({
   testDir: "./tests",
@@ -20,27 +43,9 @@ export default defineConfig({
     },
   ],
   webServer: [
-    {
-      command: "pnpm e2e:fixture",
-      port: FIXTURE_PORT,
-      reuseExistingServer: !process.env.CI,
-      env: {
-        __PORT: String(FIXTURE_PORT),
-      },
-      stdout: "pipe",
-      stderr: "pipe",
-      timeout: 60_000,
-    },
-    {
-      command: `pnpm dev -- --port ${DEVTOOLS_PORT} --strictPort`,
-      port: DEVTOOLS_PORT,
-      reuseExistingServer: !process.env.CI,
-      env: {
-        VITE_MCP_SERVER_URL: `http://localhost:${FIXTURE_PORT}/mcp`,
-      },
-      stdout: "pipe",
-      stderr: "pipe",
-      timeout: 60_000,
-    },
+    fixture(FIXTURE_PORT),
+    fixture(FIXTURE_AUTH_PORT, "--auth"),
+    devtools(DEVTOOLS_PORT, FIXTURE_PORT),
+    devtools(DEVTOOLS_AUTH_PORT, FIXTURE_AUTH_PORT),
   ],
 });
