@@ -38,3 +38,40 @@ test.describe("devtools smoke", () => {
     await expect(widget.getByText(token)).toBeVisible({ timeout: 20_000 });
   });
 });
+
+test.describe("visibility badge", () => {
+  test("renders both scopes when visibility is ['model', 'app']", async ({
+    page,
+  }) => {
+    await page.goto("/?tool=dual-visibility-tool");
+    const badges = page.getByTestId("tool-visibility");
+    await expect(badges).toBeVisible();
+    await expect(badges.getByText("model", { exact: true })).toBeVisible();
+    await expect(badges.getByText("app", { exact: true })).toBeVisible();
+  });
+
+  test("renders only the model badge when visibility is ['model']", async ({
+    page,
+  }) => {
+    await page.goto("/?tool=model-only-tool");
+    const badges = page.getByTestId("tool-visibility");
+    await expect(badges).toBeVisible();
+    await expect(badges.getByText("model", { exact: true })).toBeVisible();
+    await expect(badges.getByText("app", { exact: true })).toHaveCount(0);
+  });
+
+  test("renders only the app badge when visibility is ['app']", async ({
+    page,
+  }) => {
+    await page.goto("/?tool=app-only-tool");
+    const badges = page.getByTestId("tool-visibility");
+    await expect(badges).toBeVisible();
+    await expect(badges.getByText("app", { exact: true })).toBeVisible();
+    await expect(badges.getByText("model", { exact: true })).toHaveCount(0);
+  });
+
+  test("hides the badge area when visibility is not set", async ({ page }) => {
+    await page.goto("/?tool=echo");
+    await expect(page.getByTestId("tool-visibility")).toHaveCount(0);
+  });
+});
