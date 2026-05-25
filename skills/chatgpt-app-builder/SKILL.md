@@ -43,3 +43,5 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 - **Publish to ChatGPT Directory** → [publish.md](references/publish.md): when ready to submit for review
 
 Full API docs: [https://docs.skybridge.tech/api-reference.md](https://docs.skybridge.tech/api-reference.md)
+
+Release notes & changelog: [https://skybridge.tech/changelog.md](https://skybridge.tech/changelog.md)

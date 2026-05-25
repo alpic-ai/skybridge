@@ -13,7 +13,7 @@ export async function GET() {
     const title =
       release.name && release.name !== release.tag_name ? release.name : null;
     const heading = title
-      ? `## ${release.tag_name} — ${title}${date ? ` (${date})` : ""}`
+      ? `## ${release.tag_name}: ${title}${date ? ` (${date})` : ""}`
       : `## ${release.tag_name}${date ? ` (${date})` : ""}`;
     const body = release.body ? cleanBodyForMarkdown(release.body).trim() : "";
     return body ? `${heading}\n\n${body}` : heading;

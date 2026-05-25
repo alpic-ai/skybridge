@@ -14,7 +14,7 @@ import {
 } from "./lib";
 
 const description =
-  "Every Skybridge release, sourced directly from GitHub. New features, fixes, and breaking changes — all in one place.";
+  "Every Skybridge release, sourced directly from GitHub. New features, fixes, and breaking changes.";
 
 const OG_IMAGE = {
   url: "/assets/Skybridge-og.jpg",
@@ -24,7 +24,7 @@ const OG_IMAGE = {
 };
 
 export const metadata: Metadata = {
-  title: "Changelog — Skybridge releases",
+  title: "Skybridge changelog",
   description,
   alternates: {
     canonical: "/changelog",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    title: "Changelog — Skybridge releases",
+    title: "Skybridge changelog",
     description,
     url: "/changelog",
     images: [OG_IMAGE],
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     site: "@alpic_ai",
-    title: "Changelog — Skybridge releases",
+    title: "Skybridge changelog",
     description,
     images: [OG_IMAGE.url],
   },
