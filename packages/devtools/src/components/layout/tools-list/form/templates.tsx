@@ -6,12 +6,10 @@ import type {
   FieldErrorProps,
   FieldTemplateProps,
   IconButtonProps,
-  MultiSchemaFieldTemplateProps,
   ObjectFieldTemplateProps,
   TitleFieldProps,
-  WrapIfAdditionalTemplateProps,
 } from "@rjsf/utils";
-import { ADDITIONAL_PROPERTY_FLAG, getInputProps } from "@rjsf/utils";
+import { getInputProps } from "@rjsf/utils";
 import { Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils.js";
 import { denseInputClass, ghostButtonClass } from "./styles.js";
@@ -266,66 +264,6 @@ export function ArrayFieldItemTemplate(props: ArrayFieldItemTemplateProps) {
           <X className="size-3" />
         </button>
       )}
-    </div>
-  );
-}
-
-export function WrapIfAdditionalTemplate(props: WrapIfAdditionalTemplateProps) {
-  const {
-    id,
-    classNames,
-    style,
-    label,
-    required,
-    schema,
-    children,
-    disabled,
-    readonly,
-    onKeyRenameBlur,
-    onRemoveProperty,
-  } = props;
-
-  const additional = ADDITIONAL_PROPERTY_FLAG in schema;
-
-  if (!additional) {
-    return (
-      <div className={classNames} style={style}>
-        {children}
-      </div>
-    );
-  }
-
-  const keyId = `${id}-key`;
-  return (
-    <div className={cn("flex items-start gap-1.5", classNames)} style={style}>
-      <input
-        id={keyId}
-        className={cn(denseInputClass, "w-28 shrink-0")}
-        defaultValue={label}
-        required={required}
-        disabled={disabled || readonly}
-        onBlur={onKeyRenameBlur}
-        aria-label="Key"
-      />
-      <div className="min-w-0 flex-1">{children}</div>
-      <button
-        type="button"
-        className={cn(ghostButtonClass, "mt-0.5 px-1")}
-        onClick={onRemoveProperty}
-        disabled={disabled || readonly}
-        aria-label="Remove property"
-      >
-        <X className="size-3" />
-      </button>
-    </div>
-  );
-}
-
-export function MultiSchemaFieldTemplate(props: MultiSchemaFieldTemplateProps) {
-  return (
-    <div className="flex flex-col gap-2">
-      <div>{props.selector}</div>
-      <div>{props.optionSchemaField}</div>
     </div>
   );
 }

@@ -7,10 +7,8 @@ import {
   FieldErrorTemplate,
   FieldTemplate,
   formButtonTemplates,
-  MultiSchemaFieldTemplate,
   ObjectFieldTemplate,
   TitleFieldTemplate,
-  WrapIfAdditionalTemplate,
 } from "./templates.js";
 import { formWidgets } from "./widgets.js";
 
@@ -21,10 +19,8 @@ export const formTemplates = {
   DescriptionFieldTemplate,
   FieldErrorTemplate,
   FieldTemplate,
-  MultiSchemaFieldTemplate,
   ObjectFieldTemplate,
   TitleFieldTemplate,
-  WrapIfAdditionalTemplate,
   ButtonTemplates: formButtonTemplates,
 };
 

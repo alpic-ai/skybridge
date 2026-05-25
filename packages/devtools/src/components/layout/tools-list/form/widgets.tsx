@@ -8,10 +8,6 @@ import {
   ComboboxTrigger,
 } from "@alpic-ai/ui/components/combobox";
 import {
-  RadioGroup,
-  RadioGroupItem,
-} from "@alpic-ai/ui/components/radio-group";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -81,25 +77,10 @@ function SelectWidget(props: WidgetProps) {
     placeholder,
     options,
     onChange,
-    multiple,
     rawErrors,
   } = props;
   const enumOptions = (options.enumOptions ?? []) as EnumOptionsType[];
   const hasError = (rawErrors?.length ?? 0) > 0;
-
-  if (multiple) {
-    return (
-      <MultiCombobox
-        id={id}
-        value={value}
-        disabled={disabled || readonly}
-        placeholder={placeholder ?? "Select…"}
-        enumOptions={enumOptions}
-        hasError={hasError}
-        onChange={onChange}
-      />
-    );
-  }
 
   return (
     <Select
@@ -295,91 +276,9 @@ function MultiCombobox({
   );
 }
 
-function RadioWidget(props: WidgetProps) {
-  const { id, value, disabled, readonly, options, onChange } = props;
-  const enumOptions = (options.enumOptions ?? []) as EnumOptionsType[];
-  return (
-    <RadioGroup
-      value={value === undefined || value === null ? "" : String(value)}
-      disabled={disabled || readonly}
-      onValueChange={(v) => {
-        const match = enumOptions.find((opt) => String(opt.value) === v);
-        onChange(match ? match.value : v);
-      }}
-      className="gap-1"
-    >
-      {enumOptions.map((opt) => {
-        const itemId = `${id}-${String(opt.value)}`;
-        return (
-          <label
-            key={String(opt.value)}
-            htmlFor={itemId}
-            className="flex items-center gap-2 font-mono text-xs text-foreground"
-          >
-            <RadioGroupItem
-              id={itemId}
-              value={String(opt.value)}
-              className="size-3.5"
-            />
-            <span>{opt.label}</span>
-          </label>
-        );
-      })}
-    </RadioGroup>
-  );
-}
-
-function RangeWidget(props: WidgetProps) {
-  const {
-    id,
-    value,
-    disabled,
-    readonly,
-    required,
-    schema,
-    options,
-    onChange,
-    onBlur,
-    onFocus,
-  } = props;
-  const min =
-    (schema.minimum as number | undefined) ??
-    (options.min as number | undefined);
-  const max =
-    (schema.maximum as number | undefined) ??
-    (options.max as number | undefined);
-  const step =
-    (schema.multipleOf as number | undefined) ??
-    (options.step as number | undefined) ??
-    1;
-  return (
-    <div className="flex items-center gap-2">
-      <input
-        id={id}
-        type="range"
-        className="h-1 flex-1 accent-primary"
-        value={value ?? ""}
-        min={min}
-        max={max}
-        step={step}
-        required={required}
-        disabled={disabled || readonly}
-        onChange={(event) => onChange(Number(event.target.value))}
-        onBlur={(event) => onBlur(id, Number(event.target.value))}
-        onFocus={(event) => onFocus(id, Number(event.target.value))}
-      />
-      <span className="w-10 text-right font-mono text-xs text-muted-foreground">
-        {value ?? "–"}
-      </span>
-    </div>
-  );
-}
-
 export const formWidgets: RegistryWidgetsType = {
   TextareaWidget,
   SelectWidget,
   CheckboxWidget,
   CheckboxesWidget,
-  RadioWidget,
-  RangeWidget,
 };
