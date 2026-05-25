@@ -3,6 +3,7 @@ import {
   discoverOAuthProtectedResourceMetadata,
   UnauthorizedError,
 } from "@modelcontextprotocol/sdk/client/auth.js";
+import { StreamableHTTPError } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { AppsSdkContext, CallToolArgs } from "skybridge/web";
@@ -22,16 +23,40 @@ const getServerUrl = () => {
   return env.VITE_MCP_SERVER_URL;
 };
 
+// SEP-1488 mirrors per-tool security requirements under `_meta.securitySchemes`.
+// A tool "requires auth" when it declares schemes and none of them is `noauth`.
+export function toolRequiresAuth(tool: Tool): boolean {
+  const schemes = tool._meta?.securitySchemes as
+    | Array<{ type?: string }>
+    | undefined;
+  if (!schemes || schemes.length === 0) {
+    return false;
+  }
+  return !schemes.some((s) => s?.type === "noauth");
+}
+
+function isUnauthorized(error: unknown): boolean {
+  return (
+    error instanceof UnauthorizedError ||
+    (error instanceof StreamableHTTPError && error.code === 401)
+  );
+}
+
 export async function connectToServer(): Promise<void> {
   const serverUrl = getServerUrl();
-  const { setStatus, setRequiresAuth, setError } = useAuthStore.getState();
+  const {
+    setStatus,
+    setRequiresAuth,
+    setHasAuthRequiredTools,
+    setIsSignedIn,
+    setError,
+  } = useAuthStore.getState();
   setStatus("connecting");
   setError(null);
 
   await client.close();
 
   let requiresAuth = false;
-
   try {
     const resourceMetadata =
       await discoverOAuthProtectedResourceMetadata(serverUrl);
@@ -39,29 +64,75 @@ export async function connectToServer(): Promise<void> {
       requiresAuth = true;
     }
   } catch {
-    // 404 or network error means no OAuth required
+    // 404 or network error means no OAuth available
   }
 
   setRequiresAuth(requiresAuth);
 
-  try {
-    if (requiresAuth) {
-      currentAuthProvider = new BrowserOAuthProvider();
-      await client.connect(serverUrl, currentAuthProvider);
-    } else {
-      currentAuthProvider = null;
-      await client.connect(serverUrl);
+  // Attach the provider only when we already hold a token. Otherwise stay
+  // anonymous so the SDK doesn't preemptively redirect to /authorize: in
+  // mixed-auth mode the server happily serves anonymous requests.
+  const provider = requiresAuth ? new BrowserOAuthProvider() : null;
+  const hasToken = !!provider?.tokens();
+  currentAuthProvider = provider;
+
+  const failConnection = (
+    error: unknown,
+    status: "unauthenticated" | "error",
+  ) => {
+    setIsSignedIn(false);
+    setHasAuthRequiredTools(false);
+    setStatus(status);
+    if (status === "error") {
+      setError(error instanceof Error ? error.message : "Connection failed");
     }
-    setStatus("authenticated");
-    queryClient.invalidateQueries({ queryKey: ["list-tools"] });
+  };
+
+  try {
+    await client.connect(
+      serverUrl,
+      hasToken && provider ? provider : undefined,
+    );
   } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      setStatus("unauthenticated");
+    if (!isUnauthorized(error) || !provider) {
+      failConnection(error, "error");
       return;
     }
-    setStatus("error");
-    setError(error instanceof Error ? error.message : "Connection failed");
+    // Server requires auth for the initial handshake. Retry with the provider
+    // so the SDK runs the OAuth flow.
+    try {
+      await client.close();
+      await client.connect(serverUrl, provider);
+    } catch (retryError) {
+      failConnection(
+        retryError,
+        isUnauthorized(retryError) ? "unauthenticated" : "error",
+      );
+      return;
+    }
   }
+
+  setIsSignedIn(hasToken);
+  setStatus("authenticated");
+  queryClient.invalidateQueries({ queryKey: ["list-tools"] });
+
+  // Detect auth-required tools from the live tool list so the UI can gate
+  // them behind sign-in without round-tripping through a 401.
+  try {
+    const tools = await client.listTools();
+    setHasAuthRequiredTools(tools.some(toolRequiresAuth));
+  } catch {
+    setHasAuthRequiredTools(false);
+  }
+}
+
+export async function signIn(): Promise<void> {
+  const serverUrl = getServerUrl();
+  const provider = currentAuthProvider ?? new BrowserOAuthProvider();
+  currentAuthProvider = provider;
+  // Drop any stale client/token state so the SDK runs a fresh DCR + redirect.
+  provider.invalidateCredentials("all");
+  await auth(provider, { serverUrl });
 }
 
 export async function finishOAuthCallback(code: string): Promise<void> {

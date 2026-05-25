@@ -17,7 +17,11 @@ import {
   TabsList,
   TabsTrigger,
 } from "@alpic-ai/ui/components/tabs";
-import { Tooltip, TooltipTrigger } from "@alpic-ai/ui/components/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@alpic-ai/ui/components/tooltip";
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import type Form from "@rjsf/core";
@@ -31,8 +35,9 @@ import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
 import { Loader2, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useAuthStore } from "@/lib/auth-store.js";
 import { CopyButton } from "@/lib/copy.js";
-import { useCallTool } from "@/lib/mcp/index.js";
+import { toolRequiresAuth, useCallTool } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
@@ -41,6 +46,7 @@ type TabValue = "form" | "json";
 
 export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
   const { mutateAsync: callTool, isPending } = useCallTool();
+  const isSignedIn = useAuthStore((s) => s.isSignedIn);
   const formRef = useRef<Form<unknown, RJSFSchema>>(null);
   const result = useCallToolResult(tool.name);
   const { setToolData } = useStore();
@@ -49,10 +55,15 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     setToolData(tool.name, { input: data ?? {} });
   };
 
+  const needsSignIn = toolRequiresAuth(tool) && !isSignedIn;
+
   const [tab, setTab] = useState<TabValue>("form");
   const [jsonError, setJsonError] = useState(false);
 
   const handleRun = async () => {
+    if (needsSignIn) {
+      return;
+    }
     const schema = tool.inputSchema as RJSFSchema;
     const hasNoInput =
       !schema?.properties || Object.keys(schema.properties).length === 0;
@@ -98,6 +109,23 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     { exactMatch: true },
   );
 
+  const runButton = (
+    <Button
+      disabled={isPending || needsSignIn}
+      variant="primary"
+      onClick={handleRun}
+      icon={
+        isPending ? (
+          <Loader2 className="size-3 animate-spin" />
+        ) : (
+          <Play className="size-3" />
+        )
+      }
+    >
+      Run
+    </Button>
+  );
+
   return (
     <AccordionItem
       value={tool.name}
@@ -110,20 +138,17 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
         )}
         action={
           open ? (
-            <Button
-              disabled={isPending}
-              variant="primary"
-              onClick={handleRun}
-              icon={
-                isPending ? (
-                  <Loader2 className="size-3 animate-spin" />
-                ) : (
-                  <Play className="size-3" />
-                )
-              }
-            >
-              Run
-            </Button>
+            needsSignIn ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  {/* Wrapper so the disabled button still surfaces hover. */}
+                  <span className="inline-flex">{runButton}</span>
+                </TooltipTrigger>
+                <TooltipContent>Sign in to call this tool</TooltipContent>
+              </Tooltip>
+            ) : (
+              runButton
+            )
           ) : null
         }
       >
