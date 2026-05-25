@@ -1,17 +1,10 @@
-import { cleanBodyForMarkdown, getReleases } from "../changelog/lib";
+import {
+  cleanBodyForMarkdown,
+  formatDate,
+  getReleases,
+} from "../changelog/lib";
 
 export const dynamic = "force-static";
-
-function formatDate(iso: string | null): string {
-  if (!iso) {
-    return "";
-  }
-  return new Date(iso).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
 
 export async function GET() {
   const releases = await getReleases();

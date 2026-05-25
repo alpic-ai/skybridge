@@ -49,6 +49,17 @@ async function fetchReleases(): Promise<Release[]> {
   }
 }
 
+export function formatDate(iso: string | null): string {
+  if (!iso) {
+    return "";
+  }
+  return new Date(iso).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export function slugifyTag(tag: string): string {
   return tag.toLowerCase().replace(/[^a-z0-9.-]+/g, "-");
 }

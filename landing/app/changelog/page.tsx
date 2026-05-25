@@ -5,6 +5,7 @@ import { SiteNav } from "../components/site-nav";
 import { SiteFooter } from "../components/trust-final";
 import { LazyChanges } from "./LazyChanges";
 import {
+  formatDate,
   GITHUB_REPO_URL,
   getReleases,
   linkifyReferences,
@@ -46,17 +47,6 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-static";
-
-function formatDate(iso: string | null): string {
-  if (!iso) {
-    return "";
-  }
-  return new Date(iso).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
 
 export default async function ChangelogPage() {
   const releases = await getReleases();
