@@ -3,8 +3,10 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { SiteNav } from "../components/site-nav";
 import { SiteFooter } from "../components/trust-final";
+import { ChangelogControls } from "./ChangelogControls";
 import { LazyChanges } from "./LazyChanges";
 import {
+  cleanBodyForMarkdown,
   formatDate,
   GITHUB_REPO_URL,
   getReleases,
@@ -90,10 +92,14 @@ export default async function ChangelogPage() {
           <div className="sx-cl-layout">
             <aside className="sx-cl-toc" aria-label="Releases">
               <div className="sx-cl-toc-h">Releases</div>
+              <ChangelogControls totalCount={releases.length} />
               <nav>
-                <ul className="sx-cl-toc-list">
+                <ul className="sx-cl-toc-list is-collapsed">
                   {releases.map((release) => (
-                    <li key={release.tag_name}>
+                    <li
+                      key={release.tag_name}
+                      data-cl-search={`${release.tag_name} ${release.name ?? ""}`}
+                    >
                       <a
                         href={`#${slugifyTag(release.tag_name)}`}
                         className="sx-cl-toc-link"
@@ -104,6 +110,9 @@ export default async function ChangelogPage() {
                   ))}
                 </ul>
               </nav>
+              <p id="sx-cl-empty" className="sx-cl-empty-search" hidden>
+                No releases match.
+              </p>
             </aside>
             <ol className="sx-cl-list">
               {releases.map((release) => {
@@ -113,8 +122,21 @@ export default async function ChangelogPage() {
                   : "";
                 const { intro, changes, count } = splitChanges(linkified);
                 const title = release.name || release.tag_name;
+                const searchHay = [
+                  release.tag_name,
+                  release.name ?? "",
+                  intro,
+                  changes ? cleanBodyForMarkdown(changes) : "",
+                ]
+                  .join(" ")
+                  .replace(/[#@*`_~>[\]()]/g, " ");
                 return (
-                  <li key={release.tag_name} id={id} className="sx-cl-item">
+                  <li
+                    key={release.tag_name}
+                    id={id}
+                    className="sx-cl-item"
+                    data-cl-search={searchHay}
+                  >
                     <header className="sx-cl-head">
                       <a
                         href={`#${id}`}
