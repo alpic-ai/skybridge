@@ -45,7 +45,13 @@ export default class Dev extends Command {
     // exist at tsc startup, its watcher never picks up the late-created file
     // and the dev UI reports phantom TS errors forever.
     const root = process.cwd();
-    scanAndWriteViewsDts(root, await resolveViewsDir(root));
+    try {
+      scanAndWriteViewsDts(root, await resolveViewsDir(root));
+    } catch {
+      // Best-effort: if the scan fails (e.g. broken vite config, duplicate
+      // view names) tsc may show phantom errors, but the dev server should
+      // still start so the developer can fix the underlying issue.
+    }
 
     const { port, fallback, envWarning } = await resolvePort(flags.port);
     if (envWarning) {
