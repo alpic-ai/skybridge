@@ -12,7 +12,11 @@ import type {
 import { getInputProps } from "@rjsf/utils";
 import { Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils.js";
-import { denseInputClass, ghostButtonClass } from "./styles.js";
+import {
+  denseInputClass,
+  descriptionTextClass,
+  ghostButtonClass,
+} from "./styles.js";
 
 export function BaseInputTemplate(props: BaseInputTemplateProps) {
   const {
@@ -112,11 +116,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
           {required && <span className="ml-1 text-destructive">*</span>}
         </label>
       )}
-      {showHint && (
-        <p className="font-mono text-[11px] leading-snug text-muted-foreground/60">
-          {rawDescription}
-        </p>
-      )}
+      {showHint && <p className={descriptionTextClass}>{rawDescription}</p>}
       {children}
       {errors}
       {help}
@@ -140,10 +140,7 @@ export function DescriptionFieldTemplate(props: DescriptionFieldProps) {
     return null;
   }
   return (
-    <p
-      id={props.id}
-      className="font-mono text-[11px] leading-snug text-muted-foreground/60"
-    >
+    <p id={props.id} className={descriptionTextClass}>
       {props.description}
     </p>
   );
@@ -182,9 +179,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         </div>
       )}
       {!isRoot && description && (
-        <p className="font-mono text-[11px] leading-snug text-muted-foreground/60">
-          {description}
-        </p>
+        <p className={descriptionTextClass}>{description}</p>
       )}
       {properties
         .filter((p) => !p.hidden)
@@ -217,16 +212,7 @@ export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
           {required && <span className="ml-1 text-destructive">*</span>}
         </div>
       )}
-      {description && (
-        <p className="font-mono text-[11px] leading-snug text-muted-foreground/60">
-          {description}
-        </p>
-      )}
-      {items.length === 0 && (
-        <p className="font-mono text-[11px] text-muted-foreground/50">
-          (empty)
-        </p>
-      )}
+      {description && <p className={descriptionTextClass}>{description}</p>}
       {/* rjsf v6: items is ReactElement[] (pre-rendered ArrayFieldItemTemplate). */}
       {items}
       {canAdd && (

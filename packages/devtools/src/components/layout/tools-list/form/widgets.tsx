@@ -23,11 +23,7 @@ import type {
 import { X } from "lucide-react";
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils.js";
-import {
-  denseSelectTriggerClass,
-  denseTextareaClass,
-  ghostButtonClass,
-} from "./styles.js";
+import { denseSelectTriggerClass, denseTextareaClass } from "./styles.js";
 
 function TextareaWidget(props: WidgetProps) {
   const {
@@ -246,26 +242,29 @@ function MultiCombobox({
         </ComboboxContent>
       </Combobox>
       {selected.length > 0 && (
-        <ul className="flex flex-col gap-1">
+        <ul className="flex flex-wrap gap-1">
           {selected.map((v) => {
             const opt = enumOptions.find((o) => String(o.value) === String(v));
             const label = opt?.label ?? String(v);
             return (
-              <li
-                key={String(v)}
-                className="flex items-center justify-between gap-1.5 rounded-md border border-border bg-background px-2 py-1 font-mono text-xs text-foreground"
-              >
-                <span className="truncate">{label}</span>
+              <li key={String(v)}>
                 <button
                   type="button"
-                  className={cn(ghostButtonClass, "h-5 px-1")}
                   onClick={() =>
                     onChange(selected.filter((s) => String(s) !== String(v)))
                   }
-                  aria-label={`Remove ${label}`}
                   disabled={disabled}
+                  aria-label={`Remove ${label}`}
+                  className={cn(
+                    "group inline-flex cursor-pointer items-center gap-1 rounded-md border border-border bg-background px-2 py-0.5",
+                    "font-mono text-xs text-foreground transition-colors",
+                    "hover:bg-muted hover:text-foreground",
+                    "focus-visible:outline-none focus-visible:border-ring focus-visible:border-2",
+                    "disabled:cursor-not-allowed disabled:opacity-50",
+                  )}
                 >
-                  <X className="size-3" />
+                  <span>{label}</span>
+                  <X className="size-3 text-muted-foreground group-hover:text-foreground" />
                 </button>
               </li>
             );
