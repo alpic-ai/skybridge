@@ -1051,47 +1051,8 @@
   letter-spacing: 0.08em;
   margin: 0 0 14px;
 }
-.sx-cl-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-.sx-cl-search {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-.sx-cl-search-icon {
-  position: absolute;
-  left: 10px;
-  font-size: 14px;
-  color: var(--sb-ink-mute);
-  pointer-events: none;
-}
-.sx-cl-search-input {
-  width: 100%;
-  background: var(--sb-surface-2);
-  border: 1px solid var(--sb-border);
-  border-radius: 8px;
-  padding: 8px 10px 8px 30px;
-  color: var(--sb-ink);
-  font: 400 13px / 1.2 var(--font-body);
-  outline: none;
-}
-.sx-cl-search-input::placeholder {
-  color: var(--sb-ink-mute);
-}
-.sx-cl-search-input:focus {
-  border-color: var(--sb-accent);
-}
 .sx-cl-toc-more {
   display: none;
-}
-.sx-cl-empty-search {
-  margin: 16px 0 0;
-  color: var(--sb-ink-mute);
-  font: 400 13px / 1.4 var(--font-body);
 }
 .sx-cl-toc-list {
   list-style: none;
