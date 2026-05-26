@@ -16,6 +16,13 @@ export default class Start extends Command {
   };
 
   public async run(): Promise<void> {
+    if (process.env.VERCEL === "1") {
+      console.error(
+        "skybridge start is not supported in the Vercel environment. The Vercel runtime invokes api/mcp.js directly.",
+      );
+      process.exit(1);
+    }
+
     const { flags } = await this.parse(Start);
     const { port, fallback, envWarning } = await resolvePort(flags.port);
     if (envWarning) {

@@ -4,3 +4,6 @@ dist/
 .DS_store
 *.tsbuildinfo
 .skybridge/
+api/
+public/
+.vercel/

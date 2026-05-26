@@ -720,10 +720,25 @@ export class McpServer<
    *
    * On Cloudflare Workers / workerd, returns an object exposing `fetch` so
    * the runtime can bridge incoming requests to the Node HTTP server. On
+   * Vercel (`VERCEL === "1"`), returns the Express app directly so the
+   * serverless function entry can call it as a `(req, res)` handler. On
    * Node, returns `undefined` once listening.
    */
-  async run(): Promise<{ fetch: (...args: unknown[]) => unknown } | undefined> {
+  async run(): Promise<
+    { fetch: (...args: unknown[]) => unknown } | Express | undefined
+  > {
     this.applyMcpMiddleware();
+
+    if (process.env.VERCEL === "1") {
+      const httpServer = http.createServer();
+      await createApp({
+        mcpServer: this,
+        httpServer,
+        errorMiddleware: this.customErrorMiddleware,
+      });
+      return this.express;
+    }
+
     const httpServer = http.createServer();
 
     await createApp({

@@ -47,6 +47,13 @@ const server = new McpServer(
     },
   );
 
-server.run();
+if (process.env.NODE_ENV === "production") {
+  const { default: manifest } = await import("./vite-manifest.js");
+  server.setViteManifest(manifest);
+}
+
+server.express.get("/health", (_req, res) => res.json({ ok: true }));
 
 export type AppType = typeof server;
+
+export default await server.run();
