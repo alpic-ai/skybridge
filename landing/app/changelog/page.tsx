@@ -70,7 +70,14 @@ export default async function ChangelogPage() {
     <div className="sb-root sb-root-flat" data-theme="dark">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        // JSON.stringify leaves </script> intact; escape <,>,/ to keep
+        // the inline script un-breakable by free-text release fields.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd)
+            .replace(/</g, "\\u003c")
+            .replace(/>/g, "\\u003e")
+            .replace(/\//g, "\\u002f"),
+        }}
       />
       <SiteNav />
       <div className="sx-page">

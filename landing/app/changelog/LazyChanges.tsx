@@ -50,7 +50,7 @@ export function LazyChanges({ slug, count }: { slug: string; count: number }) {
         </span>
       </summary>
       <div className="sx-cl-body sx-cl-changes-body">
-        {html ? (
+        {html !== null ? (
           // biome-ignore lint/security/noDangerouslySetInnerHtml: html is generated at build time from our own repo
           <div dangerouslySetInnerHTML={{ __html: html }} />
         ) : status === "error" ? (
