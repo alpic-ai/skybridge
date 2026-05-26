@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useCallTool } from "../../helpers.js";
 
+type Guess = "heads" | "tails";
+
 export function UseCallToolTab() {
-  const [name, setName] = useState("");
-  const { data, isPending, callTool } = useCallTool("show-everything");
+  const [guess, setGuess] = useState<Guess | null>(null);
+  const { data, isPending, callTool } = useCallTool("flip-coin");
 
   return (
     <div className="tab-content">
@@ -13,35 +15,45 @@ export function UseCallToolTab() {
         <code>openai/widgetAccessible</code> property is set to true.
       </p>
 
-      <form
-        className="button-row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (name.trim()) {
-            callTool({ name });
-            setName("");
-          }
-        }}
-      >
-        <input
-          type="text"
-          className="input"
-          value={name}
-          placeholder="Enter a name"
-          disabled={isPending}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <button
-          type="submit"
-          className="btn"
-          disabled={isPending || name.length === 0}
-        >
-          {isPending ? "Calling..." : "Call"}
-        </button>
-      </form>
+      <div className="coin-box">
+        <p className="coin-title">Choose Heads or Tails?</p>
+        <div className="coin-controls">
+          <div className="segmented">
+            {(["heads", "tails"] as Guess[]).map((side) => (
+              <button
+                key={side}
+                type="button"
+                className={`segmented-btn${guess === side ? " segmented-btn--active" : ""}`}
+                disabled={isPending}
+                onClick={() => setGuess(side)}
+              >
+                {side.charAt(0).toUpperCase() + side.slice(1)}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="btn"
+            disabled={isPending || guess === null}
+            onClick={() => {
+              if (guess) callTool({ guess });
+            }}
+          >
+            {isPending ? "Flipping..." : "Flip"}
+          </button>
+        </div>
+      </div>
 
       {data && (
         <div className="field">
+          {(() => {
+            const won = (data.structuredContent as { won?: boolean }).won === true;
+            return (
+              <p className={`coin-result ${won ? "coin-result--won" : "coin-result--lost"}`}>
+                {won ? "You Won!" : "You Lost!"}
+              </p>
+            );
+          })()}
           <span className="field-label">response</span>
           <pre>{JSON.stringify(data, null, 2)}</pre>
         </div>
