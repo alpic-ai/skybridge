@@ -2,12 +2,14 @@ import { Command, Flags } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { resolvePort } from "../cli/detect-port.js";
 import { Header } from "../cli/header.js";
+import { resolveViewsDir } from "../cli/resolve-views-dir.js";
 import { startTunnelControlServer } from "../cli/tunnel-control-server.js";
 import { useMessages } from "../cli/use-messages.js";
 import { useNodemon } from "../cli/use-nodemon.js";
 import { useOpenBrowser } from "../cli/use-open-browser.js";
 import { useTunnel } from "../cli/use-tunnel.js";
 import { useTypeScriptCheck } from "../cli/use-typescript-check.js";
+import { scanAndWriteViewsDts } from "../web/plugin/scan-views.js";
 
 export default class Dev extends Command {
   static override description = "Start development server";
@@ -36,6 +38,20 @@ export default class Dev extends Command {
 
   public async run(): Promise<void> {
     const { flags } = await this.parse(Dev);
+
+    // Generate .skybridge/views.d.ts before render() spawns `tsc --noEmit
+    // --watch`. Vite's plugin config hook writes the same file when nodemon
+    // boots the server, but tsc starts in parallel — if .skybridge/ doesn't
+    // exist at tsc startup, its watcher never picks up the late-created file
+    // and the dev UI reports phantom TS errors forever.
+    const root = process.cwd();
+    try {
+      scanAndWriteViewsDts(root, await resolveViewsDir(root));
+    } catch {
+      // Best-effort: if the scan fails (e.g. broken vite config, duplicate
+      // view names) tsc may show phantom errors, but the dev server should
+      // still start so the developer can fix the underlying issue.
+    }
 
     const { port, fallback, envWarning } = await resolvePort(flags.port);
     if (envWarning) {
