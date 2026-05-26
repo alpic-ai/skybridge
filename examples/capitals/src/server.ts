@@ -1,4 +1,4 @@
-import { userPromptMiddleware } from "@alpic-ai/insights";
+import { intentMiddleware } from "@alpic-ai/insights";
 import { type Request, type Response, Router } from "express";
 import { McpServer } from "skybridge/server";
 import * as z from "zod";
@@ -28,7 +28,7 @@ const server = new McpServer(
   },
   { capabilities: {} },
 )
-  .mcpMiddleware(userPromptMiddleware())
+  .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
       name: "explore-capitals",

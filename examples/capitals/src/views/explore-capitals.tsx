@@ -1,6 +1,7 @@
+import { Maximize2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { useDisplayMode } from "skybridge/web";
+import { useDisplayMode, useLayout } from "skybridge/web";
 import { Spinner } from "@/components/ui/shadcn-io/spinner/index.js";
 import { useCallTool, useToolInfo } from "../helpers.js";
 import { CapitalDetail } from "./components/CapitalDetail.js";
@@ -12,6 +13,7 @@ import "@/index.css";
 function CapitalExplorer() {
   const [displayMode, setDisplayMode] = useDisplayMode();
   const isFullscreen = displayMode === "fullscreen";
+  const { theme } = useLayout();
 
   const { output, responseMetadata, isPending } =
     useToolInfo<"explore-capitals">();
@@ -39,7 +41,7 @@ function CapitalExplorer() {
     }
   }, [isFullscreen, pendingCapital, travelTo]);
 
-  const isLoadingCapital = isPending || isTraveling;
+  const isLoadingCapital = isPending || isTraveling || !!pendingCapital;
   const capitalLight = allCapitals.find(
     (capital) => capital.name === selectedCapital,
   );
@@ -78,7 +80,6 @@ function CapitalExplorer() {
           </div>
         </div>
       )}
-      Left Panel - Nearby Capitals
       <div
         className={`
           absolute left-0 top-0 bottom-0 w-72 transition-transform duration-500
@@ -113,6 +114,21 @@ function CapitalExplorer() {
           className="cursor-pointer absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-slate-900/80 backdrop-blur-sm text-slate-300 text-sm rounded-full border border-slate-700/50 hover:bg-slate-800 transition-colors"
         >
           Exit Fullscreen
+        </button>
+      )}
+      {!isFullscreen && (
+        <button
+          type="button"
+          onClick={() => setDisplayMode("fullscreen")}
+          className={`cursor-pointer absolute top-3 right-3 z-50 p-2 backdrop-blur-sm rounded-lg border transition-colors ${
+            theme === "dark"
+              ? "bg-white/15 border-white/20 text-white hover:bg-white/25"
+              : "bg-slate-900/80 border-slate-700/50 text-slate-300 hover:bg-slate-800"
+          }`}
+          aria-label="Expand map"
+          title="Expand map"
+        >
+          <Maximize2 size={16} />
         </button>
       )}
     </div>
