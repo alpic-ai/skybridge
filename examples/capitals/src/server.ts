@@ -93,7 +93,7 @@ const server = new McpServer(
           _meta: { allCapitals },
           structuredContent: { error: message },
           content: [{ type: "text", text: message }],
-          isError: false,
+          isError: true,
         };
       }
     },
