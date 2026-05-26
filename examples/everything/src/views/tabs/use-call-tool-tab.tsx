@@ -47,7 +47,9 @@ export function UseCallToolTab() {
       {data && (
         <div className="field">
           {(() => {
-            const won = (data.structuredContent as { won?: boolean }).won === true;
+            const sc = data.structuredContent as { won?: boolean } | undefined;
+            if (!sc) return null;
+            const won = sc.won === true;
             return (
               <p className={`coin-result ${won ? "coin-result--won" : "coin-result--lost"}`}>
                 {won ? "You Won!" : "You Lost!"}
