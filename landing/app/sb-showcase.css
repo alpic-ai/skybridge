@@ -1021,6 +1021,14 @@
 .sb-root-flat::before {
   display: none;
 }
+.sb-root-flat .sx-page {
+  padding-top: 144px;
+}
+@media (max-width: 600px) {
+  .sb-root-flat .sx-page {
+    padding-top: 112px;
+  }
+}
 .sx-cl-layout {
   display: grid;
   grid-template-columns: 200px minmax(0, 1fr);
