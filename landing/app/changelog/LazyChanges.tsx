@@ -8,16 +8,18 @@ export function LazyChanges({ slug, count }: { slug: string; count: number }) {
   const [html, setHtml] = useState<string | null>(
     () => cache.get(slug) ?? null,
   );
+  const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const inFlight = useRef(false);
 
-  const label =
-    count > 0
-      ? `Show ${count} merged PR${count === 1 ? "" : "s"}`
-      : "Show changes";
+  const noun =
+    count > 0 ? `${count} merged PR${count === 1 ? "" : "s"}` : "changes";
+  const label = `${open ? "Hide" : "Show"} ${noun}`;
 
   const onToggle = async (event: React.SyntheticEvent<HTMLDetailsElement>) => {
-    if (!event.currentTarget.open || html || inFlight.current) {
+    const isOpen = event.currentTarget.open;
+    setOpen(isOpen);
+    if (!isOpen || html || inFlight.current) {
       return;
     }
     inFlight.current = true;

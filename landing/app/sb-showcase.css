@@ -1018,6 +1018,9 @@
 }
 
 /* ===== Changelog (sx-cl-*) ===== */
+.sb-root-flat::before {
+  display: none;
+}
 .sx-cl-layout {
   display: grid;
   grid-template-columns: 200px minmax(0, 1fr);
@@ -1028,8 +1031,8 @@
 }
 .sx-cl-toc {
   position: sticky;
-  top: 96px;
-  max-height: calc(100vh - 120px);
+  top: 104px;
+  max-height: calc(100vh - 128px);
   overflow-y: auto;
   padding-right: 8px;
 }
@@ -1081,7 +1084,7 @@
   border: 1px solid var(--sb-border);
   border-radius: 18px;
   padding: 32px;
-  scroll-margin-top: 96px;
+  scroll-margin-top: 120px;
 }
 .sx-cl-head {
   display: flex;
