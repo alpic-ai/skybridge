@@ -4,8 +4,8 @@ import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import {
+  cleanBodyForMarkdown,
   getReleases,
-  linkifyReferences,
   slugifyTag,
   splitChanges,
 } from "../../lib";
@@ -17,13 +17,6 @@ const processor = unified()
   .use(remarkGfm)
   .use(remarkRehype)
   .use(rehypeStringify);
-
-function withExternalLinks(html: string): string {
-  return html.replace(
-    /<a\s+href=/g,
-    '<a target="_blank" rel="noreferrer" href=',
-  );
-}
 
 export async function generateStaticParams() {
   const releases = await getReleases();
@@ -43,14 +36,14 @@ export async function GET(
       headers: { "Content-Type": "text/html; charset=utf-8" },
     });
   }
-  const { changes } = splitChanges(linkifyReferences(release.body));
+  const { changes } = splitChanges(release.body);
   if (!changes) {
     return new Response("", {
       headers: { "Content-Type": "text/html; charset=utf-8" },
     });
   }
-  const file = await processor.process(changes);
-  return new Response(withExternalLinks(String(file)), {
+  const file = await processor.process(cleanBodyForMarkdown(changes));
+  return new Response(String(file), {
     headers: { "Content-Type": "text/html; charset=utf-8" },
   });
 }

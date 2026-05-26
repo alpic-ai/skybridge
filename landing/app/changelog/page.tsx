@@ -66,7 +66,7 @@ export default async function ChangelogPage() {
   };
 
   return (
-    <div className="sb-root" data-theme="dark">
+    <div className="sb-root sb-root-flat" data-theme="dark">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
