@@ -1291,7 +1291,7 @@
 
 @media (max-width: 880px) {
   .sx-cl-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 24px;
   }
   .sx-cl-toc {
