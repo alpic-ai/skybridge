@@ -45,30 +45,29 @@ const server = new McpServer(
         },
       };
     },
+  )
+  .registerTool(
+    {
+      name: "flip-coin",
+      description: "Flips a coin and checks if the user's guess is correct",
+      inputSchema: {
+        guess: z.enum(["heads", "tails"]).describe("The user's guess"),
+      },
+      _meta: {
+        "openai/widgetAccessible": true,
+      },
+    },
+    async ({ guess }) => {
+      const flip = Math.random() < 0.5 ? "heads" : "tails";
+      const won = guess === flip;
+      const structuredContent = { flip, guess, won };
+      return {
+        structuredContent,
+        content: [{ type: "text", text: JSON.stringify(structuredContent) }],
+        isError: false,
+      };
+    },
   );
-
-server.registerTool(
-  {
-    name: "flip-coin",
-    description: "Flips a coin and checks if the user's guess is correct",
-    inputSchema: {
-      guess: z.enum(["heads", "tails"]).describe("The user's guess"),
-    },
-    _meta: {
-      "openai/widgetAccessible": true,
-    },
-  },
-  async ({ guess }) => {
-    const flip = Math.random() < 0.5 ? "heads" : "tails";
-    const won = guess === flip;
-    const structuredContent = { flip, guess, won };
-    return {
-      structuredContent,
-      content: [{ type: "text", text: JSON.stringify(structuredContent) }],
-      isError: false,
-    };
-  },
-);
 
 server.run();
 
