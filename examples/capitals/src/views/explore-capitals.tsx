@@ -45,7 +45,10 @@ function CapitalExplorer() {
   );
   const mapCenter = capitalLight?.coordinates || { lat: 48, lng: 2 };
   const capital = data?.structuredContent?.capital || output?.capital;
-  const errorMessage = data?.structuredContent?.error ?? output?.error;
+  const errorMessage =
+    data !== undefined
+      ? data?.structuredContent?.error
+      : output?.error;
 
   const handleCapitalClick = (capitalName: string) => {
     setPendingCapital(capitalName);
