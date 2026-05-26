@@ -214,7 +214,7 @@ code.dark {
 
 .segmented {
   display: flex;
-  border: 1px solid #c7d2fe;
+  border: 1px solid var(--border);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -222,7 +222,7 @@ code.dark {
 .segmented-btn {
   padding: 0.5rem 1.25rem;
   background: transparent;
-  color: #4338ca;
+  color: var(--accent, #4338ca);
   border: none;
   font-size: 0.875rem;
   font-family: inherit;
@@ -231,16 +231,16 @@ code.dark {
 }
 
 .segmented-btn:not(:last-child) {
-  border-right: 1px solid #c7d2fe;
+  border-right: 1px solid var(--border);
 }
 
 .segmented-btn--active {
-  background: #4f46e5;
+  background: var(--accent, #4f46e5);
   color: #fff;
 }
 
 .segmented-btn:hover:not(.segmented-btn--active):not(:disabled) {
-  background: #eef2ff;
+  background: var(--bg-surface);
 }
 
 .segmented-btn:disabled {
