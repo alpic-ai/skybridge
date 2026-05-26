@@ -1,18 +1,23 @@
 import type {
   Adaptor,
   CallToolResponse,
+  DownloadParams,
+  DownloadResult,
   FileMetadata,
   HostContext,
   HostContextStore,
   OpenExternalOptions,
   RequestDisplayMode,
   RequestModalOptions,
+  RequestSizeOptions,
+  SendFollowUpMessageOptions,
   SetViewStateAction,
   UploadFileOptions,
 } from "../types.js";
 import { AppsSdkBridge } from "./bridge.js";
 import type { AppsSdkWidgetState } from "./types.js";
 
+/** @internal Apps SDK implementation of {@link Adaptor}. Resolved via {@link getAdaptor}. */
 export class AppsSdkAdaptor implements Adaptor {
   private static instance: AppsSdkAdaptor | null = null;
 
@@ -60,7 +65,15 @@ export class AppsSdkAdaptor implements Adaptor {
     name: string,
     args: ToolArgs,
   ): Promise<ToolResponse> => {
-    return window.openai.callTool<ToolArgs, ToolResponse>(name, args);
+    const response = await (window.openai.callTool(name, args) as Promise<
+      CallToolResponse & { _meta?: CallToolResponse["meta"] }
+    >);
+    return {
+      content: response.content,
+      structuredContent: response.structuredContent ?? {},
+      isError: response.isError ?? false,
+      meta: response._meta ?? response.meta ?? {},
+    } as ToolResponse;
   };
 
   public requestDisplayMode = (
@@ -69,8 +82,29 @@ export class AppsSdkAdaptor implements Adaptor {
     return window.openai.requestDisplayMode({ mode });
   };
 
-  public sendFollowUpMessage = (prompt: string): Promise<void> => {
-    return window.openai.sendFollowUpMessage({ prompt });
+  public requestClose = (): Promise<void> => {
+    return window.openai.requestClose();
+  };
+
+  public requestSize = async (_size: RequestSizeOptions): Promise<void> => {
+    console.warn("[skybridge] requestSize: not supported on Apps SDK");
+  };
+
+  public sendFollowUpMessage = (
+    prompt: string,
+    options?: SendFollowUpMessageOptions,
+  ): Promise<void> => {
+    return window.openai.sendFollowUpMessage({
+      prompt,
+      scrollToBottom: options?.scrollToBottom,
+    });
+  };
+
+  public download = async (
+    _params: DownloadParams,
+  ): Promise<DownloadResult> => {
+    console.error("[skybridge] download: not supported on Apps SDK");
+    return { isError: true };
   };
 
   public openExternal(href: string, options: OpenExternalOptions = {}): void {

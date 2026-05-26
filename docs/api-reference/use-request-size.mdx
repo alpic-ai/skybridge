@@ -1,0 +1,49 @@
+---
+title: useRequestSize
+description: "Resize the view to arbitrary dimensions."
+---
+
+The `useRequestSize` hook returns a function that asks the host to update the iframe height and/or width. Use it to deliberately pin a size.
+
+```tsx
+import { useEffect, useState } from "react";
+import { useRequestSize } from "skybridge/web";
+
+function Expandable() {
+  const requestSize = useRequestSize();
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    requestSize({ height: expanded ? 500 : undefined });
+  }, [expanded, requestSize]);
+
+  return (
+    <div>
+      <button onClick={() => setExpanded((v) => !v)}>
+        {expanded ? "Collapse" : "Expand"}
+      </button>
+      {expanded && <p>Lots of additional content...</p>}
+    </div>
+  );
+}
+```
+
+## Returns
+
+```ts
+requestSize: (size: { width?: number; height?: number }) => Promise<void>
+```
+
+An async function that asks the host to size your view's container to the given dimensions. Both `width` and `height` are optional; pass only what you want to update.
+
+## Runtime behavior
+
+| Runtime | Behavior |
+|---------|----------|
+| Apps SDK (ChatGPT) | Not supported |
+| MCP Apps | Sends `ui/notifications/size-changed` with both `width` and `height` to the host. |
+
+<Tip>
+The host may clamp the requested size or ignore it entirely in display modes that own the viewport.
+</Tip>
+

@@ -1,4 +1,4 @@
-import { userPromptMiddleware } from "@alpic-ai/insights";
+import { intentMiddleware } from "@alpic-ai/insights";
 import type { Spec } from "@json-render/core";
 import {
   autoFixSpec,
@@ -25,7 +25,7 @@ const server = new McpServer(
   },
   { capabilities: {} },
 )
-  .mcpMiddleware(userPromptMiddleware())
+  .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
       name: "get-ui-catalog",

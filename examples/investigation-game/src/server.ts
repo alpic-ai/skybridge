@@ -1,4 +1,4 @@
-import { userPromptMiddleware } from "@alpic-ai/insights";
+import { intentMiddleware } from "@alpic-ai/insights";
 import { McpServer } from "skybridge/server";
 
 const server = new McpServer(
@@ -8,7 +8,7 @@ const server = new McpServer(
   },
   { capabilities: {} },
 )
-  .mcpMiddleware(userPromptMiddleware())
+  .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
       name: "murder-in-the-valley",

@@ -84,6 +84,8 @@ type TypedToolInfoReturn<TInput, TOutput, TResponseMetadata> = ToolState<
  *   // toolInfo.output.structuredContent is typed based on view output schema
  * }
  * ```
+ *
+ * @see https://docs.skybridge.tech/api-reference/generate-helpers
  */
 export function generateHelpers<ServerType = never>() {
   type Tools = InferTools<ServerType>;

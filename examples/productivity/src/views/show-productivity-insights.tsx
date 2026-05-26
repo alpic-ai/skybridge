@@ -12,9 +12,12 @@ import { BarChart } from "../components/BarChart.js";
 import { DonutChart } from "../components/DonutChart.js";
 import { Legend } from "../components/Legend.js";
 import { type Output, useCallTool, useToolInfo } from "../helpers.js";
-import { supportedLanguages, useIntl } from "../i18n.js";
+import { useIntl } from "../i18n.js";
 
-type WidgetState = { weekOffset: number } & Output;
+const DURATION_OPTIONS = [1, 2, 4] as const;
+type Duration = (typeof DURATION_OPTIONS)[number];
+
+type WidgetState = { weekOffset: number; duration: Duration } & Output;
 
 function ShowProductivityInsights() {
   const { isSuccess, input, output, isPending } =
@@ -32,9 +35,9 @@ function ShowProductivityInsights() {
 
   const sendFollowUpMessage = useSendFollowUpMessage();
   const openExternal = useOpenExternal();
-  const lastSyncedInputOffset = useRef<number | null>(null);
+  const lastSyncedInput = useRef<{ weekOffset: number; duration: number } | null>(null);
 
-  const { t, locale, setLocale } = useIntl();
+  const { t } = useIntl();
 
   function getWeekLabel(offset: number): string {
     switch (offset) {
@@ -49,18 +52,25 @@ function ShowProductivityInsights() {
 
   useEffect(() => {
     const weekOffset = input?.weekOffset ?? 0;
-    if (isSuccess && output && lastSyncedInputOffset.current !== weekOffset) {
-      lastSyncedInputOffset.current = weekOffset;
-      setWidgetState({ weekOffset, ...output });
+    const duration = input?.duration ?? 1;
+    if (
+      isSuccess &&
+      output &&
+      (lastSyncedInput.current?.weekOffset !== weekOffset ||
+        lastSyncedInput.current?.duration !== duration)
+    ) {
+      lastSyncedInput.current = { weekOffset, duration };
+      setWidgetState({ weekOffset, duration: duration as Duration, ...output });
     }
   }, [isSuccess, input, output, setWidgetState]);
 
-  function goToWeek(newOffset: number) {
+  function goToWeek(newOffset: number, newDuration?: Duration) {
+    const duration = newDuration ?? widgetState?.duration ?? 1;
     navigate(
-      { weekOffset: newOffset },
+      { weekOffset: newOffset, duration },
       {
         onSuccess: ({ structuredContent }) => {
-          setWidgetState({ weekOffset: newOffset, ...structuredContent });
+          setWidgetState({ weekOffset: newOffset, duration, ...structuredContent });
         },
       },
     );
@@ -86,13 +96,15 @@ function ShowProductivityInsights() {
 
         <div className="header-controls">
           <select
-            className="lang-select"
-            value={locale}
-            onChange={(e) => setLocale(e.target.value)}
+            className="duration-select"
+            value={widgetState.duration}
+            onChange={(e) =>
+              goToWeek(widgetState.weekOffset, Number(e.target.value) as Duration)
+            }
           >
-            {supportedLanguages.map((lang) => (
-              <option key={lang} value={lang}>
-                {lang.toUpperCase()}
+            {DURATION_OPTIONS.map((d) => (
+              <option key={d} value={d}>
+                {d === 1 ? "1 week" : `${d} weeks`}
               </option>
             ))}
           </select>

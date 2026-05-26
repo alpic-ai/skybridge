@@ -28,5 +28,7 @@
     "paths": {
       "@/*": ["./src/*"]
     }
-  }
+  },
+  "include": ["src"],
+  "exclude": ["dist", "e2e", "node_modules"]
 }

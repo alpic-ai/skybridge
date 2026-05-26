@@ -20,6 +20,7 @@ import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/proto
 import type {
   ContentBlock,
   Implementation,
+  RequestMeta,
   ServerNotification,
   ServerRequest,
   ServerResult,
@@ -58,6 +59,13 @@ const mergeWithUnion = <T extends object, S extends object>(
   });
 };
 
+/**
+ * Type marker for a registered tool — carries its input, output, and response
+ * metadata shapes so views can infer types from `typeof server`.
+ *
+ * You normally never construct this by hand; it is produced by `registerTool`
+ * and consumed by helpers like {@link InferTools} and {@link generateHelpers}.
+ */
 export type ToolDef<
   TInput = unknown,
   TOutput = unknown,
@@ -68,8 +76,14 @@ export type ToolDef<
   responseMetadata: TResponseMetadata;
 };
 
+/** Which host runtime a view targets — `"apps-sdk"` (ChatGPT) or `"mcp-app"` (MCP Apps spec). */
 export type ViewHostType = "apps-sdk" | "mcp-app";
 
+/**
+ * Content Security Policy origins attached to a view's resource. Each list is
+ * passed through to the host's CSP for the view iframe; omit a field to inherit
+ * the host's default for that directive.
+ */
 export interface ViewCsp {
   /** Origins for static assets (images, fonts, scripts, styles). */
   resourceDomains?: string[];
@@ -83,32 +97,73 @@ export interface ViewCsp {
   baseUriDomains?: string[];
 }
 
+/**
+ * Registry of view component names. The Skybridge Vite plugin augments this
+ * interface in the generated `.skybridge/views.d.ts` with one key per view
+ * file, which narrows {@link ViewName} from `string` to the concrete union.
+ */
 // Must be exported: TS module augmentation only merges with exported
 // declarations. Without `export`, `.skybridge/views.d.ts` augmentation
 // would create a separate interface and `ViewName` would stay `string`.
 // biome-ignore lint/suspicious/noEmptyInterface: register pattern — augmented by `.skybridge/views.d.ts` to narrow ViewName
 export interface ViewNameRegistry {}
 
+/** Union of valid view component names. Narrowed by {@link ViewNameRegistry}. */
 export type ViewName = keyof ViewNameRegistry & string;
 
+/**
+ * Pass under `view` in a tool's `registerTool` config to render the tool's
+ * result through a Skybridge view instead of a plain text response.
+ */
 export interface ViewConfig {
+  /** Filename of the view module (without extension) — matches a file in your `viewsDir`. */
   component: ViewName;
+  /** Human-readable label the host may show alongside the view. */
   description?: string;
+  /** Restrict where the view is rendered. Defaults to all known hosts. */
   hosts?: ViewHostType[];
+  /** Apps SDK only: request a visible border around the widget. */
   prefersBorder?: boolean;
+  /** Apps SDK only: override the iframe's served domain (advanced). */
   domain?: string;
+  /** Per-view CSP overrides — see {@link ViewCsp}. */
   csp?: ViewCsp;
+  /** Free-form metadata forwarded on the view resource's `_meta`. */
   _meta?: Record<string, unknown>;
 }
 
+export type SecurityScheme =
+  | { type: "noauth" }
+  | { type: "oauth2"; scopes?: string[] };
+
+/**
+ * Well-known keys recognized by host runtimes when set on a tool's `_meta`.
+ * Use {@link ToolMeta} to also pass arbitrary custom metadata alongside these.
+ *
+ * @see https://developers.openai.com/apps-sdk/reference#tool-descriptor-parameters
+ */
 export interface KnownToolMeta {
+  /** Apps SDK: allow the rendered view to call this tool from inside its iframe. */
   "openai/widgetAccessible"?: boolean;
+  /** Apps SDK: status text shown while the tool is running (e.g. `"Searching trips"`). */
   "openai/toolInvocation/invoking"?: string;
+  /** Apps SDK: status text shown once the tool returns (e.g. `"Found 3 trips"`). */
   "openai/toolInvocation/invoked"?: string;
+  /** Apps SDK: input parameters that hold file references — the host attaches uploaded files to them. */
+  "openai/fileParams"?: string[];
+  /** MCP Apps: control whether the tool is exposed to the model, the app, or both. */
+  ui?: Pick<McpUiToolMeta, "visibility">;
+  securitySchemes?: SecurityScheme[];
 }
 
+/** {@link KnownToolMeta} merged with arbitrary string-keyed metadata for custom flags. */
 export type ToolMeta = KnownToolMeta & Record<string, unknown>;
 
+/**
+ * Convenient return type for tool handlers — a plain string, a single
+ * {@link ContentBlock}, or an array. Skybridge normalizes it to the MCP
+ * `content: ContentBlock[]` shape before responding.
+ */
 export type HandlerContent = string | ContentBlock | ContentBlock[];
 
 /** @see https://developers.openai.com/apps-sdk/reference#tool-descriptor-parameters */
@@ -129,6 +184,7 @@ type OpenaiToolMeta = {
   "openai/widgetAccessible"?: boolean;
   "openai/toolInvocation/invoking"?: string;
   "openai/toolInvocation/invoked"?: string;
+  "openai/fileParams"?: string[];
 };
 
 /** @see https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx#resource-discovery */
@@ -136,7 +192,13 @@ type McpAppsToolMeta = {
   ui: McpUiToolMeta;
 };
 
-type InternalToolMeta = Partial<OpenaiToolMeta & McpAppsToolMeta>;
+type SecuritySchemesToolMeta = {
+  securitySchemes: SecurityScheme[];
+};
+
+type InternalToolMeta = Partial<
+  OpenaiToolMeta & McpAppsToolMeta & SecuritySchemesToolMeta
+>;
 
 /** @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields */
 type OpenaiViewCSP = {
@@ -249,15 +311,60 @@ interface ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> {
   outputSchema?: ZodRawShapeCompat | AnySchema;
   annotations?: ToolAnnotations;
   view?: ViewConfig;
+  /**
+   * Declares which auth schemes this tool supports (e.g. `noauth`, `oauth2`).
+   * Lets clients label tools that require sign-in before calling, and pass
+   * the right scopes through the OAuth flow. Listing both `noauth` and
+   * `oauth2` signals that the tool works for anonymous callers and gives
+   * enhanced behavior to authenticated ones.
+   */
+  securitySchemes?: SecurityScheme[];
   _meta?: ToolMeta;
 }
+
+/**
+ * Optional client-supplied hints attached to `params._meta` on every tool call
+ * by the Apps SDK host. Hints only: never use for authorization, and tolerate
+ * absence.
+ * @see https://developers.openai.com/apps-sdk/reference#_meta-fields-the-client-provides
+ */
+export interface ClientHintsMeta {
+  /** Requested locale (BCP-47, e.g. `"en-US"`). */
+  "openai/locale"?: string;
+  /** Browser user-agent */
+  "openai/userAgent"?: string;
+  /** Coarse user location. May be partially populated. */
+  "openai/userLocation"?: {
+    city?: string;
+    region?: string;
+    country?: string;
+    timezone?: string;
+    longitude?: number;
+    latitude?: number;
+  };
+  /** Anonymized user id. */
+  "openai/subject"?: string;
+  /** Anonymized conversation id, stable within a ChatGPT session. */
+  "openai/session"?: string;
+  /** Anonymized organization id, when the user account is part of an organization. */
+  "openai/organization"?: string;
+  /** Stable id for the currently mounted widget instance. */
+  "openai/widgetSessionId"?: string;
+}
+
+type ToolHandlerExtra = Omit<
+  RequestHandlerExtra<ServerRequest, ServerNotification>,
+  "_meta"
+> & {
+  _meta?: RequestMeta & ClientHintsMeta;
+};
 
 type ToolHandler<
   TInput extends ZodRawShapeCompat,
   TReturn extends { content?: HandlerContent } = { content?: HandlerContent },
 > = (
   args: ShapeOutput<TInput>,
-  extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+  extra: ToolHandlerExtra,
 ) => TReturn | Promise<TReturn>;
 
 type ErrorMiddlewareConfig = {
@@ -265,6 +372,12 @@ type ErrorMiddlewareConfig = {
   handlers: ErrorRequestHandler[];
 };
 
+/**
+ * Coerce a tool handler's return value into an MCP `content` array. Strings
+ * become a single `TextContent`; a single block is wrapped in an array;
+ * `undefined` produces `[]`. Mostly used internally — exported so consumers
+ * who build content lazily can apply the same normalization.
+ */
 export function normalizeContent(
   content: HandlerContent | undefined,
 ): ContentBlock[] {
@@ -289,6 +402,35 @@ const McpServerBaseOmitted = McpServerBase as unknown as new (
   ...args: ConstructorParameters<typeof McpServerBase>
 ) => McpServerBaseOmitted;
 
+/**
+ * The Skybridge server. Extends the MCP SDK's `McpServer` with a typed tool
+ * registry, view resources, an embedded Express app, and protocol-level
+ * middleware. Construct it with the same `Implementation` info you would pass
+ * to the SDK, chain {@link McpServer.registerTool} calls to declare tools,
+ * then call {@link McpServer.run} to start the HTTP server.
+ *
+ * The `TTools` generic accumulates each registered tool's input/output/meta
+ * shape, so `typeof server` carries enough information for view-side helpers
+ * like {@link generateHelpers} to produce fully-typed hooks.
+ *
+ * @typeParam TTools - Accumulated tool registry. Filled in by `registerTool`
+ * chaining; you almost never set this manually.
+ *
+ * @example
+ * ```ts
+ * const server = new McpServer({ name: "my-app", version: "1.0.0" }, {})
+ *   .registerTool({
+ *     name: "search",
+ *     inputSchema: { query: z.string() },
+ *     view: { component: "search" },
+ *   }, async ({ query }) => ({ content: `Results for ${query}` }));
+ *
+ * await server.run();
+ * export type AppType = typeof server;
+ * ```
+ *
+ * @see https://docs.skybridge.tech/api-reference/mcp-server
+ */
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
 > extends McpServerBaseOmitted {
@@ -310,6 +452,10 @@ export class McpServer<
   private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private mcpMiddlewareApplied = false;
   private claimedViews = new Map<string, string>();
+  private viewMetaBuilders = new Map<
+    string,
+    (extra: McpExtra | undefined) => ResourceMeta
+  >();
   private viteManifest: Record<string, ViteManifestEntry> | null = null;
   private readonly serverInfo: Implementation;
   private readonly serverOptions?: ServerOptions;
@@ -322,6 +468,14 @@ export class McpServer<
     this.express.use(express.json());
   }
 
+  /**
+   * Register Express middleware on the underlying app. Mirrors `app.use` —
+   * pass handlers directly or a path-prefixed handler list. Register before
+   * {@link McpServer.run}; ordering matches Express.
+   *
+   * Note: Alpic Cloud only routes traffic to `/mcp`. Custom paths work
+   * locally and on self-hosted deployments.
+   */
   use(...handlers: RequestHandler[]): this;
   use(path: string, ...handlers: RequestHandler[]): this;
   use(
@@ -338,6 +492,19 @@ export class McpServer<
     return this;
   }
 
+  /**
+   * Register Express error-handling middleware to run after the built-in
+   * `/mcp` route (or your custom route). Use this to log or transform errors
+   * thrown by tool handlers before the default error handler responds.
+   *
+   * @example
+   * ```ts
+   * server.useOnError((err, _req, _res, next) => {
+   *   logger.error(err);
+   *   next(err);
+   * });
+   * ```
+   */
   useOnError(...handlers: ErrorRequestHandler[]): this;
   useOnError(path: string, ...handlers: ErrorRequestHandler[]): this;
   useOnError(
@@ -438,10 +605,35 @@ export class McpServer<
     }
     this.mcpMiddlewareApplied = true;
 
+    // Surface view-resource _meta on `resources/list` (per ext-apps spec:
+    // hosts/checkers read CSP & domain at list time before fetching content).
+    const viewListMetaEntry: McpMiddlewareEntry = {
+      filter: "resources/list",
+      handler: async (_req, extra, next) => {
+        const result = (await next()) as {
+          resources: Array<Record<string, unknown> & { uri: string }>;
+        };
+        for (const resource of result.resources) {
+          const builder = this.viewMetaBuilders.get(resource.uri);
+          if (!builder) {
+            continue;
+          }
+          const meta = builder(extra);
+          resource._meta = {
+            ...((resource._meta as Record<string, unknown>) ?? {}),
+            ...meta,
+          };
+        }
+        return result;
+      },
+    };
+
     const monitoringEntry = createMiddlewareEntry();
-    const entries = monitoringEntry
-      ? [monitoringEntry, ...this.mcpMiddlewareEntries]
-      : this.mcpMiddlewareEntries;
+    const entries = [
+      ...(monitoringEntry ? [monitoringEntry] : []),
+      viewListMetaEntry,
+      ...this.mcpMiddlewareEntries,
+    ];
 
     if (entries.length === 0) {
       return;
@@ -476,6 +668,14 @@ export class McpServer<
     instrumentMap(notificationHandlers, true);
   }
 
+  /**
+   * Connect to an MCP transport (override of the SDK's `connect`). Use this
+   * when you're embedding Skybridge in a host that already manages its own
+   * transport (e.g. stdio for desktop apps); for HTTP, prefer {@link McpServer.run}
+   * which sets the transport up for you. Locks in any middleware registered
+   * via {@link McpServer.mcpMiddleware} — further calls to that method will
+   * throw afterwards.
+   */
   async connect(
     transport: Parameters<typeof McpServerBase.prototype.connect>[0],
   ): Promise<void> {
@@ -512,6 +712,16 @@ export class McpServer<
     await fresh.connect(transport);
   }
 
+  /**
+   * Start the HTTP server. Listens on `process.env.__PORT` (default `3000`),
+   * mounts the `/mcp` route, applies any custom Express middleware registered
+   * via {@link McpServer.use} / {@link McpServer.useOnError}, and locks in
+   * any MCP middleware registered via {@link McpServer.mcpMiddleware}.
+   *
+   * On Cloudflare Workers / workerd, returns an object exposing `fetch` so
+   * the runtime can bridge incoming requests to the Node HTTP server. On
+   * Node, returns `undefined` once listening.
+   */
   async run(): Promise<{ fetch: (...args: unknown[]) => unknown } | undefined> {
     this.applyMcpMiddleware();
     const httpServer = http.createServer();
@@ -569,6 +779,65 @@ export class McpServer<
       );
     }
     this.claimedViews.set(component, toolName);
+  }
+
+  private resolveViewRequestContext(extra: McpExtra | undefined): {
+    serverUrl: string;
+    connectDomains: string[];
+    contentMetaOverrides: { domain?: string };
+  } {
+    const isProduction = process.env.NODE_ENV === "production";
+    const headers = extra?.requestInfo?.headers || {};
+    const header = (key: string) => {
+      const val = headers[key];
+      return Array.isArray(val) ? val[0] : val;
+    };
+    const isClaude = header("user-agent") === "Claude-User";
+
+    let serverUrl: string;
+    const forwardedHost = header("x-forwarded-host");
+    const origin = header("origin");
+    const host = header("host");
+
+    if (forwardedHost) {
+      const proto = header("x-forwarded-proto") || "https";
+      serverUrl = `${proto}://${forwardedHost}`;
+    } else if (origin) {
+      serverUrl = origin;
+    } else if (host) {
+      const proto = ["127.0.0.1:", "localhost:"].some((p) => host.startsWith(p))
+        ? "http"
+        : "https";
+      serverUrl = `${proto}://${host}`;
+    } else {
+      const devPort = process.env.__PORT || "3000";
+      serverUrl = `http://localhost:${devPort}`;
+    }
+
+    const connectDomains = [serverUrl];
+    if (!isProduction) {
+      const wsUrl = new URL(serverUrl);
+      wsUrl.protocol = wsUrl.protocol === "https:" ? "wss:" : "ws:";
+      connectDomains.push(wsUrl.origin);
+    }
+
+    let contentMetaOverrides: { domain?: string } = {};
+    if (isClaude) {
+      const pathname = extra?.requestInfo?.url?.pathname ?? "";
+      const rawUrl =
+        header("x-alpic-forwarded-url") ?? `${serverUrl}${pathname}`;
+      // Strip a lone trailing slash so the hash matches the connector URL
+      // as registered with Claude (which has no trailing slash on bare origins).
+      const url = rawUrl.endsWith("/") ? rawUrl.slice(0, -1) : rawUrl;
+      const hash = crypto
+        .createHash("sha256")
+        .update(url)
+        .digest("hex")
+        .slice(0, 32);
+      contentMetaOverrides = { domain: `${hash}.claudemcpcontent.com` };
+    }
+
+    return { serverUrl, connectDomains, contentMetaOverrides };
   }
 
   private registerViewResources(
@@ -701,7 +970,8 @@ export class McpServer<
       });
       // @ts-expect-error - For backwards compatibility with Claude current implementation of the specs
       toolMeta["ui/resourceUri"] = viewResource.uri;
-      toolMeta.ui = { resourceUri: viewResource.uri };
+
+      toolMeta.ui = { ...toolMeta.ui, resourceUri: viewResource.uri };
     }
   }
 
@@ -716,43 +986,28 @@ export class McpServer<
   }): void {
     const { hostType, uri: viewUri, mimeType, buildContentMeta } = viewResource;
 
+    const buildMeta = (extra: McpExtra | undefined): ResourceMeta => {
+      const { serverUrl, connectDomains, contentMetaOverrides } =
+        this.resolveViewRequestContext(extra);
+      return buildContentMeta(
+        {
+          resourceDomains: [serverUrl],
+          connectDomains,
+          domain: serverUrl,
+          baseUriDomains: [serverUrl],
+        },
+        contentMetaOverrides,
+      );
+    };
+    this.viewMetaBuilders.set(viewUri, buildMeta);
+
     this.registerResource(
       name,
       viewUri,
       { description: view.description },
       async (uri, extra) => {
         const isProduction = process.env.NODE_ENV === "production";
-        const isClaude =
-          extra?.requestInfo?.headers?.["user-agent"] === "Claude-User";
-
-        const headers = extra?.requestInfo?.headers || {};
-        const header = (key: string) => {
-          const val = headers[key];
-          return Array.isArray(val) ? val[0] : val;
-        };
-
-        let serverUrl: string;
-
-        const forwardedHost = header("x-forwarded-host");
-        const origin = header("origin");
-        const host = header("host");
-
-        if (forwardedHost) {
-          const proto = header("x-forwarded-proto") || "https";
-          serverUrl = `${proto}://${forwardedHost}`;
-        } else if (origin) {
-          serverUrl = origin;
-        } else if (host) {
-          const proto = ["127.0.0.1:", "localhost:"].some((p) =>
-            host.startsWith(p),
-          )
-            ? "http"
-            : "https";
-          serverUrl = `${proto}://${host}`;
-        } else {
-          const devPort = process.env.__PORT || "3000";
-          serverUrl = `http://localhost:${devPort}`;
-        }
+        const { serverUrl } = this.resolveViewRequestContext(extra);
 
         const html = isProduction
           ? templateHelper.renderProduction({
@@ -767,42 +1022,9 @@ export class McpServer<
               viewName: view.component,
             });
 
-        const connectDomains = [serverUrl];
-        if (!isProduction) {
-          const wsUrl = new URL(serverUrl);
-          wsUrl.protocol = wsUrl.protocol === "https:" ? "wss:" : "ws:";
-          connectDomains.push(wsUrl.origin);
-        }
-
-        let contentMetaOverrides: { domain?: string } = {};
-        if (isClaude) {
-          const pathname = extra?.requestInfo?.url?.pathname ?? "";
-          const rawUrl =
-            header("x-alpic-forwarded-url") ?? `${serverUrl}${pathname}`;
-          // Strip a lone trailing slash so the hash matches the connector URL
-          // as registered with Claude (which has no trailing slash on bare origins).
-          const url = rawUrl.endsWith("/") ? rawUrl.slice(0, -1) : rawUrl;
-          const hash = crypto
-            .createHash("sha256")
-            .update(url)
-            .digest("hex")
-            .slice(0, 32);
-          contentMetaOverrides = { domain: `${hash}.claudemcpcontent.com` };
-        }
-
-        const contentMeta = buildContentMeta(
-          {
-            resourceDomains: [serverUrl],
-            connectDomains,
-            domain: serverUrl,
-            baseUriDomains: [serverUrl],
-          },
-          contentMetaOverrides,
-        );
-
         return {
           contents: [
-            { uri: uri.href, mimeType, text: html, _meta: contentMeta },
+            { uri: uri.href, mimeType, text: html, _meta: buildMeta(extra) },
           ],
         };
       },
@@ -888,6 +1110,35 @@ export class McpServer<
     );
   }
 
+  /**
+   * Register a tool. Pass a `config` describing the tool (name, schemas,
+   * optional {@link ViewConfig}, optional {@link ToolMeta}) and a handler that
+   * returns the tool's result.
+   *
+   * Chain calls to build up a server: each call returns a new `McpServer`
+   * type that captures the tool's input/output/`_meta` shape so the
+   * resulting `typeof server` can drive {@link generateHelpers}.
+   *
+   * The handler's return shape determines the output types: the
+   * `structuredContent` field becomes the tool's typed output, and `_meta`
+   * becomes its `responseMetadata`. The `content` field is normalized through
+   * {@link normalizeContent}.
+   *
+   * @example
+   * ```ts
+   * server.registerTool({
+   *   name: "search",
+   *   inputSchema: { query: z.string() },
+   *   outputSchema: { results: z.array(z.string()) },
+   *   view: { component: "search" },
+   * }, async ({ query }) => ({
+   *   content: `Found results for ${query}`,
+   *   structuredContent: { results: [...] },
+   * }));
+   * ```
+   *
+   * @see https://docs.skybridge.tech/api-reference/register-tool
+   */
   registerTool<
     TName extends string,
     InputArgs extends ZodRawShapeCompat,
@@ -919,9 +1170,24 @@ export class McpServer<
     const config = args[0] as ToolConfig<ZodRawShapeCompat>;
     const cb = args[1] as ToolHandler<ZodRawShapeCompat>;
 
-    const { name, view, _meta: userToolMeta, ...toolFields } = config;
+    const {
+      name,
+      view,
+      securitySchemes,
+      _meta: userToolMeta,
+      ...toolFields
+    } = config;
 
     const toolMeta: InternalToolMeta = { ...userToolMeta };
+
+    if (securitySchemes) {
+      // SEP-1488 puts `securitySchemes` at the top level of the tool
+      // descriptor, but the SDK's `registerTool` drops unknown top-level
+      // fields, so the canonical spot isn't reachable without intercepting
+      // `tools/list`. Use the `_meta` back-compat mirror documented in the
+      // Apps SDK reference until SEP-1488 lands in the spec.
+      toolMeta.securitySchemes = securitySchemes;
+    }
 
     if (view) {
       this.enforceOneToolPerView(view.component, name);

@@ -7,7 +7,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): int
 - **Interactive Widget Rendering**: A React-based widget that displays interactive productivity charts directly in AI conversations
 - **Tool Info Access**: Widgets access tool input, output, and metadata via `useToolInfo()` hook
 - **Theme Support**: Adapts to light/dark mode using the `useLayout()` hook
-- **Localization**: Translates UI based on user locale via `useUser()` hook (English, French, Spanish, Chinese)
+- **Localization**: Automatically translates UI based on user locale via `useUser()` hook (English, French, Spanish, Chinese) — no manual selector needed
 - **Persistent State**: Maintains selected week and chart data across re-renders using `useWidgetState()` hook
 - **Display Mode Toggle**: Switches between inline and fullscreen views using `useDisplayMode()` hook
 - **Follow-up Messages**: Sends follow-up messages to the AI using `useSendFollowUpMessage()` hook

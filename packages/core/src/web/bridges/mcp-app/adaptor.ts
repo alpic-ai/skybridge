@@ -2,16 +2,21 @@ import { dequal } from "dequal/lite";
 import type {
   Adaptor,
   CallToolResponse,
+  DownloadParams,
+  DownloadResult,
   HostContext,
   HostContextStore,
   OpenExternalOptions,
   RequestDisplayMode,
   RequestModalOptions,
+  RequestSizeOptions,
+  SendFollowUpMessageOptions,
   SetViewStateAction,
 } from "../types.js";
 import { McpAppBridge } from "./bridge.js";
 import type { McpAppContext, McpAppContextKey } from "./types.js";
 
+/** @internal */
 type PickContext<K extends readonly McpAppContextKey[]> = {
   [P in K[number]]: McpAppContext[P];
 };
@@ -30,6 +35,7 @@ function findStorageKey(viewUUID: string): string | undefined {
   return undefined;
 }
 
+/** @internal MCP Apps implementation of {@link Adaptor}. Resolved via {@link getAdaptor}. */
 export class McpAppAdaptor implements Adaptor {
   private static instance: McpAppAdaptor | null = null;
   private stores: {
@@ -79,19 +85,10 @@ export class McpAppAdaptor implements Adaptor {
       arguments: args ?? undefined,
     });
 
-    const result = response.content
-      .filter(
-        (content): content is { type: "text"; text: string } =>
-          content.type === "text",
-      )
-      .map(({ text }) => text)
-      .join("\n");
-
     return {
       content: response.content,
       structuredContent: response.structuredContent ?? {},
       isError: response.isError ?? false,
-      result,
       meta: response._meta ?? {},
     } as ToolResponse;
   };
@@ -101,7 +98,20 @@ export class McpAppAdaptor implements Adaptor {
     return app.requestDisplayMode({ mode });
   };
 
-  public sendFollowUpMessage = async (prompt: string) => {
+  public requestClose = async (): Promise<void> => {
+    const app = await McpAppBridge.getInstance().getApp();
+    await app.requestTeardown();
+  };
+
+  public requestSize = async (size: RequestSizeOptions): Promise<void> => {
+    const app = await McpAppBridge.getInstance().getApp();
+    await app.sendSizeChanged(size);
+  };
+
+  public sendFollowUpMessage = async (
+    prompt: string,
+    _options?: SendFollowUpMessageOptions,
+  ) => {
     const app = await McpAppBridge.getInstance().getApp();
     await app.sendMessage({
       role: "user",
@@ -112,6 +122,17 @@ export class McpAppAdaptor implements Adaptor {
         },
       ],
     });
+  };
+
+  public download = async (params: DownloadParams): Promise<DownloadResult> => {
+    const app = await McpAppBridge.getInstance().getApp();
+    if (!app.getHostCapabilities()?.downloadFile) {
+      console.error(
+        "[skybridge] download: host does not support ui/download-file",
+      );
+      return { isError: true };
+    }
+    return app.downloadFile(params);
   };
 
   public openExternal(href: string, options?: OpenExternalOptions): void {

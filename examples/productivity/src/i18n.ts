@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useUser } from "skybridge/web";
 
 const translations = {
@@ -44,8 +43,6 @@ const translations = {
   },
 };
 
-export const supportedLanguages = Object.keys(translations);
-
 type Lang = keyof typeof translations;
 
 function getLang(code: string): Lang {
@@ -54,11 +51,9 @@ function getLang(code: string): Lang {
 
 export function useIntl() {
   const { locale } = useUser();
-  const [lang, setLang] = useState(() => getLang(locale.split("-")[0]));
+  const lang = getLang(locale.split("-")[0]);
 
   return {
     t: (key: keyof (typeof translations)["en"]) => translations[lang][key],
-    locale: lang,
-    setLocale: (code: string) => setLang(getLang(code)),
   };
 }

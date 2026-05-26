@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { assetBaseUrlTransform } from "./asset-base-url-transform-plugin.js";
+import {
+  assetBaseUrlTransform,
+  assetBaseUrlTransformPlugin,
+  isCssRequest,
+} from "./asset-base-url-transform-plugin.js";
 
 describe("assetBaseUrlTransform", () => {
   it("should transform asset paths to use window.skybridge.serverUrl", () => {
@@ -101,5 +105,75 @@ describe("assetBaseUrlTransform", () => {
     expect(result).toContain(
       `const logo = (window.skybridge?.serverUrl ?? "") + "/assets/logo.png";`,
     );
+  });
+});
+
+describe("isCssRequest", () => {
+  it("returns true for CSS-family extensions", () => {
+    expect(isCssRequest("/src/styles.css")).toBe(true);
+    expect(isCssRequest("/src/styles.module.css")).toBe(true);
+    expect(isCssRequest("/src/styles.scss")).toBe(true);
+    expect(isCssRequest("/src/styles.sass")).toBe(true);
+    expect(isCssRequest("/src/styles.less")).toBe(true);
+    expect(isCssRequest("/src/styles.styl")).toBe(true);
+  });
+
+  it("returns true for CSS modules with Vite query strings", () => {
+    expect(isCssRequest("/src/styles.css?direct")).toBe(true);
+    expect(isCssRequest("/src/styles.css?inline")).toBe(true);
+    expect(isCssRequest("/src/styles.css?used")).toBe(true);
+    expect(isCssRequest("/src/Foo.vue?vue&type=style&lang.css")).toBe(true);
+  });
+
+  it("returns false for non-CSS modules", () => {
+    expect(isCssRequest("/src/index.tsx")).toBe(false);
+    expect(isCssRequest("/src/utils.ts")).toBe(false);
+    expect(isCssRequest("/src/Logo.svg")).toBe(false);
+    expect(isCssRequest("/src/notes.cssx")).toBe(false);
+  });
+});
+
+describe("assetBaseUrlTransformPlugin", () => {
+  type TransformResult = { code: string; map: null } | null;
+
+  function runTransform(id: string, code: string): TransformResult {
+    const plugin = assetBaseUrlTransformPlugin();
+    const hook = plugin.transform;
+    if (!hook) {
+      throw new Error("plugin.transform is not defined");
+    }
+    const handler = typeof hook === "function" ? hook : hook.handler;
+    return handler.call(
+      // biome-ignore lint/suspicious/noExplicitAny: vitest harness for plugin hook
+      {} as any,
+      code,
+      id,
+      { moduleType: "js" },
+    ) as TransformResult;
+  }
+
+  it("rewrites asset paths in JS modules", () => {
+    const result = runTransform(
+      "/src/widget.tsx",
+      `const logo = "/assets/logo.png";`,
+    );
+    expect(result?.code).toContain(
+      `(window.skybridge?.serverUrl ?? "") + "/assets/logo.png"`,
+    );
+  });
+
+  // Reproducer for #697: CSS imports are served as JS modules with the
+  // stylesheet embedded as a string. Rewriting url("/foo.woff2") inside that
+  // string would produce invalid CSS once the styles are injected.
+  it("does not rewrite asset paths when transforming a CSS module", () => {
+    const cssCode = `__vite__updateStyle("style-id", "@font-face { src: url(\\"/fonts/Brand.woff2\\") format(\\"woff2\\"); }");`;
+
+    expect(runTransform("/src/fonts.css", cssCode)).toBeNull();
+    expect(runTransform("/src/fonts.css?direct", cssCode)).toBeNull();
+    expect(runTransform("/src/fonts.css?inline", cssCode)).toBeNull();
+    expect(runTransform("/src/styles.scss", cssCode)).toBeNull();
+    expect(
+      runTransform("/src/Foo.vue?vue&type=style&lang.css", cssCode),
+    ).toBeNull();
   });
 });

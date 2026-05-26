@@ -1,10 +1,20 @@
 export {
+  type AuthInfo,
+  type AuthMetadataOptions,
+  type BearerAuthMiddlewareOptions,
+  InvalidTokenError,
+  mcpAuthMetadataRouter,
+  optionalBearerAuth,
+  requireBearerAuth,
+} from "./auth.js";
+export {
   audio,
   embeddedResource,
   image,
   resourceLink,
   text,
 } from "./content-helpers.js";
+export { FileRef } from "./file-ref.js";
 export type {
   AnyToolRegistry,
   InferTools,
@@ -26,6 +36,7 @@ export type {
   HandlerContent,
   KnownToolMeta,
   McpServerTypes,
+  SecurityScheme,
   ToolDef,
   ToolMeta,
   ViewConfig,

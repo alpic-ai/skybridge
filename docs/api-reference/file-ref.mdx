@@ -1,0 +1,60 @@
+---
+title: FileRef
+description: "Zod schema and TypeScript type for ChatGPT file references in tool inputs and outputs"
+tag: "ChatGPT"
+---
+
+If your tool accepts user-provided files, declare file parameters with `_meta["openai/fileParams"]`. The value is a list of top-level input schema fields that ChatGPT will treat as files. Nested file fields are not supported.
+
+To return downloadable files from a tool, include a file reference in structuredContent, usually under a field such as `file_uri`.
+
+```ts
+import { FileRef, McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({ name: "my-app", version: "0.0.1" })
+  .registerTool(
+    {
+      name: "process-file",
+      inputSchema: {
+        file: FileRef,
+      },
+      outputSchema: {
+        file_uri: FileRef,
+      },
+      _meta: {
+        // Tell ChatGPT where to reference files
+        "openai/fileParams": ["file"],
+      },
+    },
+    async ({ file }) => {
+      const res = await fetch(file.download_url);
+      // ...do something with the file content
+
+      return {
+        // Tell ChatGPT where to find files
+        structuredContent: { file_uri: processedFile },
+        content: [],
+        isError: false,
+      };
+    },
+  );
+```
+
+## Shape
+
+```ts
+type FileRef = {
+  file_id: string;
+  download_url: string; // URL the tool handler or view component can fetch directly
+  mime_type?: string;
+  file_name?: string;
+}
+```
+
+`download_url` is required in both input and output positions. On input, the host fills it. On output, your tool handler is responsible for producing a URL the host can fetch.
+
+## See also
+
+- [`useFiles`](/api-reference/use-files): upload, pick, and resolve fileIds from the view
+- [OpenAI Apps SDK file handling doc](https://developers.openai.com/apps-sdk/build/mcp-server#file-handling)

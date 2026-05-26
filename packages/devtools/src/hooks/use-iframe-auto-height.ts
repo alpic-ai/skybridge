@@ -24,16 +24,18 @@ export const useIframeAutoHeight = ({
       return;
     }
 
-    let lastMeasured = 0;
     const measure = () => {
       const measured = measureIframeHeight(iframe, containerRef.current);
-      if (measured > 0 && measured !== lastMeasured) {
-        lastMeasured = measured;
+      if (measured > 0) {
         onHeightChange(measured);
       }
     };
 
     const observer = new ResizeObserver(measure);
+    const root = iframe.contentDocument.getElementById("root");
+    if (root) {
+      observer.observe(root);
+    }
     observer.observe(iframe.contentDocument.body);
     observer.observe(iframe.contentDocument.documentElement);
     const parentEl = containerRef.current?.parentElement;

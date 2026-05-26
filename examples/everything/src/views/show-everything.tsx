@@ -9,6 +9,7 @@ import { ImageTab } from "./tabs/image-tab/index.js";
 import { ToolInfoTab } from "./tabs/tool-info-tab.js";
 import { UseCallToolTab } from "./tabs/use-call-tool-tab.js";
 import { UseDisplayModeTab } from "./tabs/use-display-mode-tab.js";
+import { UseDownloadTab } from "./tabs/use-download-tab.js";
 import { UseFilesTab } from "./tabs/use-files-tab.js";
 import { UseLayoutTab } from "./tabs/use-layout-tab.js";
 import { UseOpenExternalTab } from "./tabs/use-open-external-tab.js";
@@ -25,6 +26,7 @@ const TABS = {
   image: { docPath: "image", Component: ImageTab },
   useCallTool: { docPath: "use-call-tool", Component: UseCallToolTab },
   useDisplayMode: { docPath: "use-display-mode", Component: UseDisplayModeTab },
+  useDownload: { docPath: "use-download", Component: UseDownloadTab },
   useFiles: { docPath: "use-files", Component: UseFilesTab },
   useLayout: { docPath: "use-layout", Component: UseLayoutTab },
   useOpenExternal: {

@@ -35,9 +35,32 @@ describe("useCallTool - onSuccess callback", () => {
     content: [{ type: "text" as const, text: "test result" }],
     structuredContent: { result: "test" },
     isError: false,
-    result: "test result",
+    meta: {},
   };
   const error = new Error("test error");
+
+  it("should normalize _meta to meta when SDK returns _meta instead of meta", async () => {
+    const rawSdkResponse = {
+      content: [{ type: "text" as const, text: "result" }],
+      structuredContent: { value: 1 },
+      isError: false,
+      _meta: { secret: "only visible to widget" },
+    };
+    OpenaiMock.callTool.mockResolvedValueOnce(rawSdkResponse);
+    const { result } = renderHook(() =>
+      useCallTool<typeof args, typeof data>(toolName),
+    );
+
+    await act(async () => {
+      result.current.callTool(args);
+    });
+
+    await waitFor(() => {
+      expect(result.current.data).toMatchObject({
+        meta: { secret: "only visible to widget" },
+      });
+    });
+  });
 
   it("should call window.openai.callTool with correct arguments", async () => {
     const { result } = renderHook(() =>
@@ -144,8 +167,14 @@ describe("useCallTool - onSuccess callback", () => {
       useCallTool<typeof args, typeof data>(toolName),
     );
 
-    const firstCallData = { ...data, result: "first call result" };
-    const secondCallData = { ...data, result: "second call result" };
+    const firstCallData = {
+      ...data,
+      structuredContent: { result: "first call result" },
+    };
+    const secondCallData = {
+      ...data,
+      structuredContent: { result: "second call result" },
+    };
     const { promise: firstCallToolPromise, resolve: resolveFirstCallTool } =
       Promise.withResolvers();
     const { promise: secondCallToolPromise, resolve: resolveSecondCallTool } =
@@ -201,7 +230,6 @@ describe("useCallTool - TypeScript typing", () => {
       content: [{ type: "text" as const, text: "test" }],
       structuredContent: { result: "test" },
       isError: false,
-      result: "test",
       meta: { id: 123 },
     };
 
@@ -230,7 +258,6 @@ describe("useCallTool - TypeScript typing", () => {
       content: [{ type: "text" as const, text: "answer" }],
       structuredContent: { answer: "test answer" },
       isError: false,
-      result: "answer",
       meta: {},
     };
 
@@ -256,7 +283,6 @@ describe("useCallTool - TypeScript typing", () => {
       content: [{ type: "text" as const, text: "data" }],
       structuredContent: { data: "test data" },
       isError: false,
-      result: "data",
       meta: {},
     };
 

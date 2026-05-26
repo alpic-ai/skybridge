@@ -12,20 +12,19 @@
     "deploy": "alpic deploy"
   },
   "dependencies": {
-    "@alpic-ai/insights": "^1.120.1",
+    "@alpic-ai/insights": "^1.127.1",
     "@auth0/auth0-api-js": "^1.4.0",
-    "@modelcontextprotocol/sdk": "^1.29.0",
     "cors": "^2.8.6",
     "dotenv": "^16.5.0",
     "jose": "^6.2.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "skybridge": ">=0.36.0 <1.0.0",
+    "skybridge": "^1.0.2",
     "vite": "^7.3.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@skybridge/devtools": ">=0.36.0 <1.0.0",
+    "@skybridge/devtools": "^1.0.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^22.15.30",

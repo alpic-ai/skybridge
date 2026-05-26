@@ -1,9 +1,15 @@
 import { Button } from "@alpic-ai/ui/components/button";
 import { Separator } from "@alpic-ai/ui/components/separator";
-import { LogOut } from "lucide-react";
+import { LogIn, LogOut } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store.js";
-import { logout, useServerInfo } from "@/lib/mcp/index.js";
+import { logout, signIn, useServerInfo } from "@/lib/mcp/index.js";
 import { StatusBadge } from "./status-badge.js";
+import {
+  AuditButton,
+  DeployButton,
+  PlaygroundButton,
+  TunnelButton,
+} from "./toolbar-actions.js";
 
 const EXTERNAL_LINKS: ReadonlyArray<{ label: string; href: string }> = [
   { label: "discord", href: "https://discord.gg/awV4gu74wK" },
@@ -13,7 +19,7 @@ const EXTERNAL_LINKS: ReadonlyArray<{ label: string; href: string }> = [
 
 function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <div className="inline-flex h-8 cursor-pointer items-center gap-2 rounded-md px-2.5 text-sm  bg-light-gray border">
+    <div className="inline-flex h-8 items-center gap-2 rounded-md px-2.5 text-sm  bg-light-gray border">
       {children}
     </div>
   );
@@ -38,22 +44,42 @@ function BrandChip() {
 }
 
 export const Header = () => {
-  const { status, requiresAuth, error } = useAuthStore();
+  const { status, requiresAuth, hasAuthRequiredTools, isSignedIn, error } =
+    useAuthStore();
+
+  const showSignIn =
+    requiresAuth &&
+    status === "authenticated" &&
+    hasAuthRequiredTools &&
+    !isSignedIn;
+  const showSignOut = requiresAuth && status === "authenticated" && isSignedIn;
 
   return (
     <header className="flex h-13 items-center justify-between gap-3 border-b border-border px-4">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-12">
         <BrandChip />
+      </div>
+
+      <div className="flex items-center gap-2">
+        <TunnelButton />
+        <PlaygroundButton />
+        <AuditButton />
+        <DeployButton />
+      </div>
+      <div className="flex items-center gap-3">
         {error && (
-          <span className="ml-2 max-w-48 truncate text-xs text-destructive">
+          <span className="max-w-48 truncate text-xs text-destructive">
             {error}
           </span>
         )}
-      </div>
-
-      <div className="flex items-center gap-3">
         {requiresAuth && <StatusBadge status={status} />}
-        {requiresAuth && status === "authenticated" && (
+        {showSignIn && (
+          <Button variant="tertiary" onClick={() => signIn()}>
+            <LogIn className="size-3.5" />
+            Sign in
+          </Button>
+        )}
+        {showSignOut && (
           <Button variant="tertiary" onClick={() => logout()}>
             <LogOut className="size-3.5" />
             Sign out
