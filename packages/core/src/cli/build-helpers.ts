@@ -62,6 +62,9 @@ export async function emitVercelBuildOutput(root: string): Promise<void> {
     outfile: path.join(funcDir, "index.js"),
     // Lets esbuild DCE dev-only branches that pull in vite/devtools.
     define: { "process.env.NODE_ENV": '"production"' },
+    // Dev-only deps reachable from re-exports; safe to leave unresolved since
+    // the code paths that touch them are eliminated by the NODE_ENV define.
+    external: ["vite", "@skybridge/devtools"],
     banner: {
       // ESM bundles miss CJS interop globals that some deps reach for.
       js: "import{createRequire}from'node:module';const require=createRequire(import.meta.url);",

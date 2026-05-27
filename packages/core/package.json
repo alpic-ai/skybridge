@@ -7,6 +7,7 @@
     "url": "https://github.com/alpic-ai/skybridge.git"
   },
   "type": "module",
+  "sideEffects": false,
   "engines": {
     "node": ">=22.0.0"
   },
