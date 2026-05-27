@@ -364,3 +364,57 @@ describe("HostAdaptor setViewState", () => {
     expect((adaptor as any)._viewState).toEqual({ count: 2 });
   });
 });
+
+describe("HostAdaptor getHostContextStore", () => {
+  beforeEach(() => {
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
+    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+    vi.stubGlobal("parent", { postMessage: vi.fn() });
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
+  });
+
+  it("routes `display` to oai when overlay is present", () => {
+    vi.stubGlobal("openai", { view: { mode: "fullscreen" } });
+    const adaptor = new HostAdaptor();
+    const store = adaptor.getHostContextStore("display");
+    expect(store.getSnapshot()).toEqual({ mode: "fullscreen" });
+  });
+
+  it("routes `viewState` to oai.widgetState.modelContent when overlay present", () => {
+    vi.stubGlobal("openai", {
+      widgetState: { modelContent: { count: 5 }, privateContent: {} },
+    });
+    const adaptor = new HostAdaptor();
+    const store = adaptor.getHostContextStore("viewState");
+    expect(store.getSnapshot()).toEqual({ count: 5 });
+  });
+
+  it("routes `display` to polyfill when oai is null", () => {
+    vi.stubGlobal("openai", undefined);
+    const adaptor = new HostAdaptor();
+    const store = adaptor.getHostContextStore("display");
+    expect(store.getSnapshot()).toEqual({ mode: "inline" });
+    adaptor.openModal({});
+    expect(store.getSnapshot()).toEqual({ mode: "modal", params: undefined });
+  });
+
+  it("routes `viewState` to local LRU state when oai is null", () => {
+    vi.stubGlobal("openai", undefined);
+    const adaptor = new HostAdaptor();
+    const store = adaptor.getHostContextStore("viewState");
+    expect(store.getSnapshot()).toBe(null);
+  });
+
+  it("routes other keys (theme, locale, etc.) to mcp regardless of overlay", () => {
+    vi.stubGlobal("openai", { view: { mode: "inline" } });
+    const adaptor = new HostAdaptor();
+    const theme = adaptor.getHostContextStore("theme");
+    // default fallback when no notification yet
+    expect(theme.getSnapshot()).toBe("light");
+  });
+});

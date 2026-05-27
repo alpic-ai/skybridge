@@ -81,11 +81,39 @@ export class HostAdaptor implements Adaptor {
 
   // ---- Adaptor interface (stubs) ----
 
-  public getHostContextStore<K extends keyof HostContext>(
-    _key: K,
-  ): HostContextStore<K> {
-    throw new NotSupportedError("getHostContextStore", "not yet implemented");
-  }
+  public getHostContextStore = <K extends keyof HostContext>(
+    key: K,
+  ): HostContextStore<K> => {
+    if (this.oaiStores && (key === "display" || key === "viewState")) {
+      return this.oaiStores[key as "display" | "viewState"] as HostContextStore<K>;
+    }
+
+    if (key === "display") {
+      return {
+        subscribe: (onChange: () => void) => {
+          this.polyfillDisplayListeners.add(onChange);
+          return () => {
+            this.polyfillDisplayListeners.delete(onChange);
+          };
+        },
+        getSnapshot: () => this._polyfillDisplay,
+      } as HostContextStore<K>;
+    }
+
+    if (key === "viewState") {
+      return {
+        subscribe: (onChange: () => void) => {
+          this.viewStateListeners.add(onChange);
+          return () => {
+            this.viewStateListeners.delete(onChange);
+          };
+        },
+        getSnapshot: () => this._viewState,
+      } as HostContextStore<K>;
+    }
+
+    return this.mcpStores[key as keyof typeof this.mcpStores] as HostContextStore<K>;
+  };
 
   public callTool = async <
     ToolArgs extends Record<string, unknown> | null = null,
