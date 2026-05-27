@@ -171,4 +171,8 @@ export class AppsSdkAdaptor implements Adaptor {
 
     return window.openai.setOpenInAppUrl({ href });
   }
+
+  public closeModal(): void {
+    // Apps SDK manages modal lifecycle host-side.
+  }
 }
