@@ -113,3 +113,66 @@ describe("HostAdaptor MCP-routed methods", () => {
     expect(fakeApp.downloadFile).not.toHaveBeenCalled();
   });
 });
+
+describe("HostAdaptor conditional routing", () => {
+  beforeEach(() => {
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
+    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+    vi.stubGlobal("parent", { postMessage: vi.fn() });
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
+  });
+
+  it("sendFollowUpMessage uses oai when scrollToBottom set", async () => {
+    const sendFollowUpMessage = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal("openai", { sendFollowUpMessage });
+    const adaptor = new HostAdaptor();
+    await adaptor.sendFollowUpMessage("hi", { scrollToBottom: false });
+    expect(sendFollowUpMessage).toHaveBeenCalledWith({
+      prompt: "hi",
+      scrollToBottom: false,
+    });
+  });
+
+  it("sendFollowUpMessage uses mcp when no options", async () => {
+    vi.stubGlobal("openai", undefined);
+    const adaptor = new HostAdaptor();
+    const fakeApp = { sendMessage: vi.fn().mockResolvedValue(undefined) };
+    // biome-ignore lint/suspicious/noExplicitAny: test seam
+    (adaptor as any).mcp.getApp = vi.fn().mockResolvedValue(fakeApp);
+    await adaptor.sendFollowUpMessage("hi");
+    expect(fakeApp.sendMessage).toHaveBeenCalledWith({
+      role: "user",
+      content: [{ type: "text", text: "hi" }],
+    });
+  });
+
+  it("openExternal uses oai when redirectUrl: false", async () => {
+    const openExternal = vi.fn();
+    vi.stubGlobal("openai", { openExternal });
+    const adaptor = new HostAdaptor();
+    adaptor.openExternal("https://x", { redirectUrl: false });
+    expect(openExternal).toHaveBeenCalledWith({
+      href: "https://x",
+      redirectUrl: false,
+    });
+  });
+
+  it("openExternal uses mcp.openLink for default case", async () => {
+    vi.stubGlobal("openai", undefined);
+    const adaptor = new HostAdaptor();
+    const openLink = vi.fn();
+    // biome-ignore lint/suspicious/noExplicitAny: test seam
+    (adaptor as any).mcp.getApp = vi
+      .fn()
+      .mockResolvedValue({ openLink });
+    adaptor.openExternal("https://x");
+    // openExternal is sync but mcp.openLink resolves async
+    await new Promise((r) => setTimeout(r, 0));
+    expect(openLink).toHaveBeenCalledWith({ url: "https://x" });
+  });
+});

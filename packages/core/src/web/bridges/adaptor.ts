@@ -121,16 +121,39 @@ export class HostAdaptor implements Adaptor {
     await app.sendSizeChanged(size);
   };
 
-  public sendFollowUpMessage(
-    _prompt: string,
-    _options?: SendFollowUpMessageOptions,
-  ): Promise<void> {
-    throw new NotSupportedError("sendFollowUpMessage", "not yet implemented");
-  }
+  public sendFollowUpMessage = async (
+    prompt: string,
+    options?: SendFollowUpMessageOptions,
+  ): Promise<void> => {
+    if (this.oai && options?.scrollToBottom !== undefined) {
+      await this.oai.sendFollowUpMessage({
+        prompt,
+        scrollToBottom: options.scrollToBottom,
+      });
+      return;
+    }
+    const app = await this.mcp.getApp();
+    await app.sendMessage({
+      role: "user",
+      content: [{ type: "text", text: prompt }],
+    });
+  };
 
-  public openExternal(_href: string, _options?: OpenExternalOptions): void {
-    throw new NotSupportedError("openExternal", "not yet implemented");
-  }
+  public openExternal = (
+    href: string,
+    options?: OpenExternalOptions,
+  ): void => {
+    if (this.oai && options?.redirectUrl === false) {
+      this.oai.openExternal({ href, redirectUrl: false });
+      return;
+    }
+    this.mcp
+      .getApp()
+      .then((app) => app.openLink({ url: href }))
+      .catch((err) => {
+        console.error("Failed to open external link:", err);
+      });
+  };
 
   public download = async (
     params: DownloadParams,
