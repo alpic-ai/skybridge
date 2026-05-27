@@ -1,6 +1,5 @@
 import type {
   Adaptor,
-  CallToolArgs,
   CallToolResponse,
   DownloadParams,
   DownloadResult,
@@ -87,24 +86,40 @@ export class HostAdaptor implements Adaptor {
     throw new NotSupportedError("getHostContextStore", "not yet implemented");
   }
 
-  public callTool<
-    ToolArgs extends CallToolArgs = null,
+  public callTool = async <
+    ToolArgs extends Record<string, unknown> | null = null,
     ToolResponse extends CallToolResponse = CallToolResponse,
-  >(_name: string, _args: ToolArgs): Promise<ToolResponse> {
-    throw new NotSupportedError("callTool", "not yet implemented");
-  }
+  >(
+    name: string,
+    args: ToolArgs,
+  ): Promise<ToolResponse> => {
+    const app = await this.mcp.getApp();
+    const response = await app.callServerTool({
+      name,
+      arguments: args ?? undefined,
+    });
+    return {
+      content: response.content,
+      structuredContent: response.structuredContent ?? {},
+      isError: response.isError ?? false,
+      meta: response._meta ?? {},
+    } as ToolResponse;
+  };
 
-  public requestDisplayMode(_mode: RequestDisplayMode): Promise<{ mode: RequestDisplayMode }> {
-    throw new NotSupportedError("requestDisplayMode", "not yet implemented");
-  }
+  public requestDisplayMode = async (mode: RequestDisplayMode) => {
+    const app = await this.mcp.getApp();
+    return app.requestDisplayMode({ mode });
+  };
 
-  public requestClose(): Promise<void> {
-    throw new NotSupportedError("requestClose", "not yet implemented");
-  }
+  public requestClose = async (): Promise<void> => {
+    const app = await this.mcp.getApp();
+    await app.requestTeardown();
+  };
 
-  public requestSize(_size: RequestSizeOptions): Promise<void> {
-    throw new NotSupportedError("requestSize", "not yet implemented");
-  }
+  public requestSize = async (size: RequestSizeOptions): Promise<void> => {
+    const app = await this.mcp.getApp();
+    await app.sendSizeChanged(size);
+  };
 
   public sendFollowUpMessage(
     _prompt: string,
@@ -117,9 +132,18 @@ export class HostAdaptor implements Adaptor {
     throw new NotSupportedError("openExternal", "not yet implemented");
   }
 
-  public download(_params: DownloadParams): Promise<DownloadResult> {
-    throw new NotSupportedError("download", "not yet implemented");
-  }
+  public download = async (
+    params: DownloadParams,
+  ): Promise<DownloadResult> => {
+    const app = await this.mcp.getApp();
+    if (!app.getHostCapabilities()?.downloadFile) {
+      console.error(
+        "[skybridge] download: host does not support ui/download-file",
+      );
+      return { isError: true };
+    }
+    return app.downloadFile(params);
+  };
 
   public setViewState(_s: SetViewStateAction): Promise<void> {
     throw new NotSupportedError("setViewState", "not yet implemented");
