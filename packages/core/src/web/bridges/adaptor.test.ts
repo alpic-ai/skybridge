@@ -248,6 +248,58 @@ describe("HostAdaptor Apps-SDK-only methods", () => {
   });
 });
 
+describe("HostAdaptor modal", () => {
+  beforeEach(() => {
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
+    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+    vi.stubGlobal("parent", { postMessage: vi.fn() });
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
+  });
+
+  it("openModal delegates to oai.requestModal when present", () => {
+    const requestModal = vi.fn();
+    vi.stubGlobal("openai", { requestModal });
+    const adaptor = new HostAdaptor();
+    adaptor.openModal({ title: "Hi" });
+    expect(requestModal).toHaveBeenCalledWith({ title: "Hi" });
+  });
+
+  it("closeModal is a no-op when oai is present", () => {
+    vi.stubGlobal("openai", { requestModal: vi.fn() });
+    const adaptor = new HostAdaptor();
+    expect(() => adaptor.closeModal()).not.toThrow();
+  });
+
+  it("openModal sets polyfill display state when oai is null", () => {
+    vi.stubGlobal("openai", undefined);
+    const adaptor = new HostAdaptor();
+    const listener = vi.fn();
+    // biome-ignore lint/suspicious/noExplicitAny: test seam
+    (adaptor as any).polyfillDisplayListeners.add(listener);
+    adaptor.openModal({ params: { x: 1 } });
+    // biome-ignore lint/suspicious/noExplicitAny: test seam
+    expect((adaptor as any)._polyfillDisplay).toEqual({
+      mode: "modal",
+      params: { x: 1 },
+    });
+    expect(listener).toHaveBeenCalled();
+  });
+
+  it("closeModal resets polyfill display state when oai is null", () => {
+    vi.stubGlobal("openai", undefined);
+    const adaptor = new HostAdaptor();
+    adaptor.openModal({});
+    adaptor.closeModal();
+    // biome-ignore lint/suspicious/noExplicitAny: test seam
+    expect((adaptor as any)._polyfillDisplay).toEqual({ mode: "inline" });
+  });
+});
+
 describe("HostAdaptor setViewState", () => {
   beforeEach(() => {
     McpAppBridge.resetInstance();

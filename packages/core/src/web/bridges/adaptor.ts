@@ -240,9 +240,14 @@ export class HostAdaptor implements Adaptor {
     return files;
   };
 
-  public openModal(_options: RequestModalOptions): void {
-    throw new NotSupportedError("openModal", "not yet implemented");
-  }
+  public openModal = (options: RequestModalOptions): void => {
+    if (this.oai) {
+      this.oai.requestModal(options);
+      return;
+    }
+    this._polyfillDisplay = { mode: "modal", params: options.params };
+    this.polyfillDisplayListeners.forEach((l) => l());
+  };
 
   public setOpenInAppUrl = (href: string): Promise<void> => {
     if (!this.oai) {
@@ -253,9 +258,11 @@ export class HostAdaptor implements Adaptor {
     return this.oai.setOpenInAppUrl({ href });
   };
 
-  public closeModal(): void {
-    throw new NotSupportedError("closeModal", "not yet implemented");
-  }
+  public closeModal = (): void => {
+    if (this.oai) return; // host owns modal lifecycle
+    this._polyfillDisplay = { mode: "inline" };
+    this.polyfillDisplayListeners.forEach((l) => l());
+  };
 
   private async trackFileIds(...fileIds: string[]): Promise<void> {
     if (!this.oai) return;
