@@ -1,7 +1,14 @@
 import { useHostContext } from "../bridges/index.js";
 import type { UnknownObject } from "../types.js";
 
-/** {@link useToolInfo} state before the tool has been invoked. */
+/**
+ * {@link useToolInfo} state before the tool has been invoked.
+ *
+ * @deprecated `useToolInfo` no longer returns the idle state — it starts in
+ * `"pending"` and transitions to `"success"`, so `isIdle` is always `false` at
+ * runtime. This type is retained in {@link ToolState} for backwards
+ * compatibility and will be removed in the next major.
+ */
 export type ToolIdleState = {
   status: "idle";
   isIdle: true;
@@ -12,18 +19,29 @@ export type ToolIdleState = {
   responseMetadata: undefined;
 };
 
-/** {@link useToolInfo} state while the tool is executing — `input` is available, output is not yet. */
+/**
+ * {@link useToolInfo} state while the tool is executing — `output` is not yet
+ * available.
+ *
+ * `input` is optional: the host may render the view before delivering the
+ * tool arguments.
+ */
 export type ToolPendingState<ToolInput extends UnknownObject> = {
   status: "pending";
   isIdle: false;
   isPending: true;
   isSuccess: false;
-  input: ToolInput;
+  input: ToolInput | undefined;
   output: undefined;
   responseMetadata: undefined;
 };
 
-/** {@link useToolInfo} state once the tool returned — `input`, `output`, and `responseMetadata` are all available. */
+/**
+ * {@link useToolInfo} state once the tool returned — `output` is available.
+ *
+ * `input` is optional: the host may not have surfaced the tool arguments by
+ * the time `output` arrives.
+ */
 export type ToolSuccessState<
   ToolInput extends UnknownObject,
   ToolOutput extends UnknownObject,
@@ -33,14 +51,14 @@ export type ToolSuccessState<
   isIdle: false;
   isPending: false;
   isSuccess: true;
-  input: ToolInput;
+  input: ToolInput | undefined;
   output: ToolOutput;
   responseMetadata: ToolResponseMetadata;
 };
 
 /**
  * Discriminated union describing the tool invocation that triggered the
- * current view render. Use `isIdle` / `isPending` / `isSuccess` to narrow.
+ * current view render. Use `isPending` / `isSuccess` to narrow.
  */
 export type ToolState<
   ToolInput extends UnknownObject,
@@ -58,13 +76,9 @@ type ToolSignature = {
 };
 
 function deriveStatus(
-  input: Record<string, unknown> | null,
   output: Record<string, unknown> | null,
   responseMetadata: Record<string, unknown> | null,
-): "idle" | "pending" | "success" {
-  if (input === null) {
-    return "idle";
-  }
+): "pending" | "success" {
   if (output === null && responseMetadata === null) {
     return "pending";
   }
@@ -74,7 +88,7 @@ function deriveStatus(
 /**
  * Access the tool invocation that produced the current view: its `input`,
  * resulting `output`, and `responseMetadata`. The shape evolves as the tool
- * runs (idle → pending → success), exposed through {@link ToolState}.
+ * runs (pending → success), exposed through {@link ToolState}.
  *
  * For full input/output typing per tool name, prefer the typed `useToolInfo`
  * returned by {@link generateHelpers} over the generic form.
@@ -104,16 +118,16 @@ export function useToolInfo<
   const output = useHostContext("toolOutput");
   const responseMetadata = useHostContext("toolResponseMetadata");
 
-  const status = deriveStatus(input, output, responseMetadata);
+  const status = deriveStatus(output, responseMetadata);
 
   type Input = UnknownObject & TS["input"];
   type Output = UnknownObject & TS["output"];
   type Metadata = UnknownObject & TS["responseMetadata"];
 
   return {
-    input,
+    input: input ?? undefined,
     status,
-    isIdle: status === "idle",
+    isIdle: false,
     isPending: status === "pending",
     isSuccess: status === "success",
     output,
