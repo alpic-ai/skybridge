@@ -60,6 +60,8 @@ export async function emitVercelBuildOutput(root: string): Promise<void> {
     target: "node22",
     format: "esm",
     outfile: path.join(funcDir, "index.js"),
+    // Lets esbuild DCE dev-only branches that pull in vite/devtools.
+    define: { "process.env.NODE_ENV": '"production"' },
     banner: {
       // ESM bundles miss CJS interop globals that some deps reach for.
       js: "import{createRequire}from'node:module';const require=createRequire(import.meta.url);",
