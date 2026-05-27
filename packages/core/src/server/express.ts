@@ -81,7 +81,9 @@ export async function createApp({
         `Ignoring invalid __TUNNEL_CONTROL_PORT=${process.env.__TUNNEL_CONTROL_PORT}`,
       );
     }
-  } else {
+  } else if (process.env.VERCEL !== "1") {
+    // On Vercel the CDN serves /assets/* directly (filesystem precedence
+    // over the catch-all rewrite to /api/mcp); skip the Express static mount.
     const assetsPath = path.join(process.cwd(), "dist", "assets");
 
     app.use("/assets", cors());

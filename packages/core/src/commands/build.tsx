@@ -1,89 +1,93 @@
-import { readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import {
+  emitManifestModule,
+  emitVercelFunction,
+} from "../cli/build-helpers.js";
 import { Header } from "../cli/header.js";
 import { resolveViewsDir } from "../cli/resolve-views-dir.js";
 import { type CommandStep, useExecuteSteps } from "../cli/use-execute-steps.js";
 import { scanAndWriteViewsDts } from "../web/plugin/scan-views.js";
 
-export const commandSteps: CommandStep[] = [
-  {
-    label: "Scanning views",
-    run: async () => {
-      const root = process.cwd();
-      const viewsDir = await resolveViewsDir(root);
-      scanAndWriteViewsDts(root, viewsDir);
+export function buildSteps(): CommandStep[] {
+  return [
+    {
+      label: "Scanning views",
+      run: async () => {
+        const root = process.cwd();
+        const viewsDir = await resolveViewsDir(root);
+        scanAndWriteViewsDts(root, viewsDir);
+      },
     },
-  },
-  {
-    label: "Compiling server",
-    run: () => rmSync("dist", { recursive: true, force: true }),
-    command: "tsc -b --force",
-  },
-  {
-    label: "Building views",
-    command: "vite build",
-  },
-  {
-    label: "Emitting manifest module",
-    // Inline the Vite manifest as a JS module so the server can `import` it
-    // instead of `readFileSync(process.cwd() + ...)` at runtime — required for
-    // workerd, where neither cwd nor the assets directory is readable.
-    // The path mirrors `skybridge start`'s entry convention (dist/server.js)
-    // so the import in the user's entry resolves to a sibling file.
-    run: () => {
-      const root = process.cwd();
-      const manifest = readFileSync(
-        path.join(root, "dist", "assets", ".vite", "manifest.json"),
-        "utf-8",
-      );
-      writeFileSync(
-        path.join(root, "dist", "vite-manifest.js"),
-        `export default ${manifest};\n`,
-      );
+    {
+      label: "Compiling server",
+      run: () => rmSync("dist", { recursive: true, force: true }),
+      command: "tsc -b --force",
     },
-  },
+    {
+      label: "Building views",
+      command: "vite build",
+    },
+    {
+      label: "Emitting manifest module",
+      run: () => {
+        const root = process.cwd();
+        emitManifestModule(
+          path.join(root, "dist", "assets", ".vite", "manifest.json"),
+          path.join(root, "dist", "vite-manifest.js"),
+        );
+      },
+    },
+    {
+      label: "Copying assets to public/ for Vercel",
+      run: () => {
+        const root = process.cwd();
+        const src = path.join(root, "dist", "assets");
+        const dst = path.join(root, "public", "assets");
+        rmSync(dst, { recursive: true, force: true });
+        cpSync(src, dst, { recursive: true });
+      },
+    },
+    {
+      label: "Emitting Cloudflare redirects",
+      run: () => {
+        const root = process.cwd();
+        writeFileSync(
+          path.join(root, "dist", "assets", "_redirects"),
+          "/assets/assets/* /assets/:splat 200\n",
+        );
+      },
+    },
+    {
+      label: "Emitting Cloudflare headers",
+      run: () => {
+        const root = process.cwd();
+        writeFileSync(
+          path.join(root, "dist", "assets", "_headers"),
+          "/assets/*\n  Access-Control-Allow-Origin: *\n",
+        );
+      },
+    },
+    {
+      label: "Emitting Vercel function",
+      run: () => emitVercelFunction(process.cwd()),
+    },
+  ];
+}
 
-  {
-    label: "Emitting Cloudflare redirects",
-    // Cloudflare's `assets.directory` maps URL → file literally — no
-    // mount-strip like `app.use("/assets", express.static(...))`. Rewrite
-    // `/assets/assets/*` to `/assets/*` before lookup; status 200 =
-    // server-side rewrite, not HTTP redirect.
-    run: () => {
-      const root = process.cwd();
-      writeFileSync(
-        path.join(root, "dist", "assets", "_redirects"),
-        "/assets/assets/* /assets/:splat 200\n",
-      );
-    },
-  },
-  {
-    label: "Emitting Cloudflare headers",
-    // Cloudflare's static asset handler bypasses the worker entirely, so
-    // `app.use("/assets", cors())` never fires for asset requests. Attach
-    // CORS at the edge so cross-origin view iframes can load JS/CSS.
-    run: () => {
-      const root = process.cwd();
-      writeFileSync(
-        path.join(root, "dist", "assets", "_headers"),
-        "/assets/*\n  Access-Control-Allow-Origin: *\n",
-      );
-    },
-  },
-];
+export const commandSteps: CommandStep[] = buildSteps();
 
 export default class Build extends Command {
   static override description = "Build the views and MCP server";
   static override examples = ["skybridge build"];
-  static override flags = {};
 
   public async run(): Promise<void> {
     const App = () => {
-      const { currentStep, status, error, execute } =
-        useExecuteSteps(commandSteps);
+      const steps = useMemo(() => buildSteps(), []);
+      const { currentStep, status, error, execute } = useExecuteSteps(steps);
 
       useEffect(() => {
         execute();
@@ -95,7 +99,7 @@ export default class Build extends Command {
             <Text color="green"> → building for production…</Text>
           </Header>
 
-          {commandSteps.map((step, index) => {
+          {steps.map((step, index) => {
             const isCurrent = index === currentStep && status === "running";
             const isCompleted = index < currentStep || status === "success";
             const isError = status === "error" && index === currentStep;

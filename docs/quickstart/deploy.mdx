@@ -123,6 +123,60 @@ bunx wrangler dev
 Skybridge's local dev server (`skybridge dev`) and the Cloudflare path are independent. Use `skybridge dev` for fast iteration on Node with HMR; use `wrangler dev` to validate the production worker bundle before shipping.
 </Note>
 
+## Vercel
+
+Skybridge builds emit a Vercel-compatible function entry (`api/mcp.js`) and a static asset tree (`public/assets/`) on every build. You only need to add a `vercel.json` at your project root so Vercel knows not to auto-detect Vite.
+
+### Configure
+
+Create `vercel.json` at your project root:
+
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "true",
+  "buildCommand": "true",
+  "outputDirectory": "public",
+  "rewrites": [{ "source": "/(.*)", "destination": "/api/mcp" }],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Access-Control-Allow-Origin", "value": "*" }]
+    }
+  ]
+}
+```
+
+Each field is load-bearing:
+
+- **`framework: null`** — without this Vercel detects `vite.config.ts` and runs `vite` instead of your function.
+- **`installCommand` / `buildCommand: "true"`** — no-ops, so Vercel's sandbox doesn't re-run install/build and overwrite the pre-built `public/assets/`.
+- **`outputDirectory: "public"`** — Vercel serves `public/assets/*` via its CDN (filesystem precedence over rewrites keeps `/assets/*` off the function).
+- **`rewrites`** — every other path lands on `api/mcp.js`, which re-exports the Express app from `dist/server.js`.
+- **`headers`** — CORS on `/assets/*` for view iframes loading bundled JS/CSS.
+
+### Build and deploy
+
+<CodeGroup>
+```bash npm
+npm run build
+npx vercel deploy
+```
+```bash pnpm
+pnpm build
+pnpm dlx vercel deploy
+```
+```bash yarn
+yarn build
+yarn dlx vercel deploy
+```
+```bash bun
+bun run build
+bunx vercel deploy
+```
+</CodeGroup>
+
 ## Docker
 
 Projects created with the [Skybridge scaffolder](/quickstart/create-new-app#scaffold-your-project) include a multi-stage `Dockerfile` so you can self-host on any container platform:
