@@ -13,7 +13,7 @@ export function useOpenTunnelBrowser(
   const opened = useRef(false);
 
   useEffect(() => {
-    if (!enabled || opened.current) return;
+    if (!enabled || opened.current) { return; }
     if (tunnelState.status === "connected") {
       opened.current = true;
       void open(`${tunnelState.url}/try`).catch(() => {});
