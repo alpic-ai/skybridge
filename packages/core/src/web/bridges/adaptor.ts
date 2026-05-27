@@ -169,9 +169,43 @@ export class HostAdaptor implements Adaptor {
     return app.downloadFile(params);
   };
 
-  public setViewState(_s: SetViewStateAction): Promise<void> {
-    throw new NotSupportedError("setViewState", "not yet implemented");
-  }
+  public setViewState = async (
+    stateOrUpdater: SetViewStateAction,
+  ): Promise<void> => {
+    if (this.oai) {
+      const modelContent =
+        typeof stateOrUpdater === "function"
+          ? stateOrUpdater(this.oai.widgetState?.modelContent ?? null)
+          : stateOrUpdater;
+      await this.oai.setWidgetState({
+        privateContent: {},
+        ...this.oai.widgetState,
+        modelContent,
+      });
+      return;
+    }
+
+    const newState =
+      typeof stateOrUpdater === "function"
+        ? stateOrUpdater(this._viewState)
+        : stateOrUpdater;
+
+    // update local state immediately so successive calls see fresh state
+    this._viewState = newState;
+    this.viewStateListeners.forEach((l) => l());
+
+    this.persistToLocalStorage(newState);
+
+    try {
+      const app = await this.mcp.getApp();
+      await app.updateModelContext({
+        structuredContent: newState,
+        content: [{ type: "text", text: JSON.stringify(newState) }],
+      });
+    } catch (error) {
+      console.error("Failed to update view state in MCP App.", error);
+    }
+  };
 
   public uploadFile = async (
     file: File,

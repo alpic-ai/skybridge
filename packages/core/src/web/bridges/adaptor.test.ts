@@ -247,3 +247,68 @@ describe("HostAdaptor Apps-SDK-only methods", () => {
     );
   });
 });
+
+describe("HostAdaptor setViewState", () => {
+  beforeEach(() => {
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
+    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+    vi.stubGlobal("parent", { postMessage: vi.fn() });
+    localStorage.clear();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
+    localStorage.clear();
+  });
+
+  it("uses window.openai.setWidgetState when oai is present", async () => {
+    const setWidgetState = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal("openai", { setWidgetState, widgetState: null });
+    const adaptor = new HostAdaptor();
+    await adaptor.setViewState({ count: 1 });
+    expect(setWidgetState).toHaveBeenCalledWith(
+      expect.objectContaining({ modelContent: { count: 1 } }),
+    );
+  });
+
+  it("calls mcp.updateModelContext and writes localStorage when oai is null", async () => {
+    vi.stubGlobal("openai", undefined);
+    const adaptor = new HostAdaptor();
+    const updateModelContext = vi.fn().mockResolvedValue(undefined);
+    // biome-ignore lint/suspicious/noExplicitAny: test seam
+    (adaptor as any).mcp.getApp = vi
+      .fn()
+      .mockResolvedValue({ updateModelContext });
+    // biome-ignore lint/suspicious/noExplicitAny: test seam
+    (adaptor as any)._viewUUID = "view-1";
+    await adaptor.setViewState({ count: 2 });
+    expect(updateModelContext).toHaveBeenCalledWith({
+      structuredContent: { count: 2 },
+      content: [{ type: "text", text: JSON.stringify({ count: 2 }) }],
+    });
+    const keys = Array.from(
+      { length: localStorage.length },
+      (_, i) => localStorage.key(i)!,
+    );
+    expect(keys.some((k) => k.endsWith(":view-1"))).toBe(true);
+  });
+
+  it("accepts an updater function form", async () => {
+    vi.stubGlobal("openai", undefined);
+    const adaptor = new HostAdaptor();
+    // biome-ignore lint/suspicious/noExplicitAny: test seam
+    (adaptor as any).mcp.getApp = vi.fn().mockResolvedValue({
+      updateModelContext: vi.fn().mockResolvedValue(undefined),
+    });
+    // biome-ignore lint/suspicious/noExplicitAny: test seam
+    (adaptor as any)._viewState = { count: 1 };
+    await adaptor.setViewState((prev) => ({
+      // biome-ignore lint/suspicious/noExplicitAny: test
+      count: (prev as any).count + 1,
+    }));
+    // biome-ignore lint/suspicious/noExplicitAny: test seam
+    expect((adaptor as any)._viewState).toEqual({ count: 2 });
+  });
+});
