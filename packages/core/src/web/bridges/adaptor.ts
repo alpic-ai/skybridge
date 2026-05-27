@@ -15,6 +15,7 @@ import type {
   UploadFileOptions,
 } from "./types.js";
 import { NotSupportedError } from "./types.js";
+import type { AppsSdkWidgetState } from "./apps-sdk/types.js";
 import { AppsSdkBridge } from "./apps-sdk/bridge.js";
 import { McpAppBridge } from "./mcp-app/bridge.js";
 import {
@@ -172,28 +173,65 @@ export class HostAdaptor implements Adaptor {
     throw new NotSupportedError("setViewState", "not yet implemented");
   }
 
-  public uploadFile(_f: File, _o?: UploadFileOptions): Promise<FileMetadata> {
-    throw new NotSupportedError("uploadFile", "not yet implemented");
-  }
+  public uploadFile = async (
+    file: File,
+    options?: UploadFileOptions,
+  ): Promise<FileMetadata> => {
+    if (!this.oai) throw new NotSupportedError("uploadFile");
+    const metadata = await this.oai.uploadFile(file, options);
+    await this.trackFileIds(metadata.fileId);
+    return metadata;
+  };
 
-  public getFileDownloadUrl(_f: FileMetadata): Promise<{ downloadUrl: string }> {
-    throw new NotSupportedError("getFileDownloadUrl", "not yet implemented");
-  }
+  public getFileDownloadUrl = (
+    file: FileMetadata,
+  ): Promise<{ downloadUrl: string }> => {
+    if (!this.oai) {
+      return Promise.reject(new NotSupportedError("getFileDownloadUrl"));
+    }
+    return this.oai.getFileDownloadUrl(file);
+  };
 
-  public selectFiles(): Promise<FileMetadata[]> {
-    throw new NotSupportedError("selectFiles", "not yet implemented");
-  }
+  public selectFiles = async (): Promise<FileMetadata[]> => {
+    if (!this.oai) throw new NotSupportedError("selectFiles");
+    if (!this.oai.selectFiles) {
+      throw new Error(
+        "selectFiles is not supported by the current host version.",
+      );
+    }
+    const files = await this.oai.selectFiles();
+    if (files.length > 0) {
+      await this.trackFileIds(...files.map((f) => f.fileId));
+    }
+    return files;
+  };
 
   public openModal(_options: RequestModalOptions): void {
     throw new NotSupportedError("openModal", "not yet implemented");
   }
 
-  public setOpenInAppUrl(_href: string): Promise<void> {
-    throw new NotSupportedError("setOpenInAppUrl", "not yet implemented");
-  }
+  public setOpenInAppUrl = (href: string): Promise<void> => {
+    if (!this.oai) {
+      return Promise.reject(new NotSupportedError("setOpenInAppUrl"));
+    }
+    href = href.trim();
+    if (!href) throw new Error("The href parameter is required.");
+    return this.oai.setOpenInAppUrl({ href });
+  };
 
   public closeModal(): void {
     throw new NotSupportedError("closeModal", "not yet implemented");
+  }
+
+  private async trackFileIds(...fileIds: string[]): Promise<void> {
+    if (!this.oai) return;
+    const current = this.oai.widgetState;
+    const state: AppsSdkWidgetState = current
+      ? { ...current }
+      : { modelContent: {}, privateContent: {} };
+    if (!state.imageIds) state.imageIds = [];
+    state.imageIds.push(...fileIds);
+    await this.oai.setWidgetState(state);
   }
 
   // ---- viewState persistence helpers (used in subsequent tasks) ----

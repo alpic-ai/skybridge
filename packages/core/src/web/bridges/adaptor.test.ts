@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HostAdaptor } from "./adaptor.js";
 import { AppsSdkBridge } from "./apps-sdk/bridge.js";
 import { McpAppBridge } from "./mcp-app/bridge.js";
+import { NotSupportedError } from "./types.js";
 
 describe("HostAdaptor constructor", () => {
   beforeEach(() => {
@@ -174,5 +175,75 @@ describe("HostAdaptor conditional routing", () => {
     // openExternal is sync but mcp.openLink resolves async
     await new Promise((r) => setTimeout(r, 0));
     expect(openLink).toHaveBeenCalledWith({ url: "https://x" });
+  });
+});
+
+describe("HostAdaptor Apps-SDK-only methods", () => {
+  beforeEach(() => {
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
+    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+    vi.stubGlobal("parent", { postMessage: vi.fn() });
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
+  });
+
+  it("uploadFile throws NotSupportedError when oai is null", async () => {
+    vi.stubGlobal("openai", undefined);
+    const adaptor = new HostAdaptor();
+    await expect(adaptor.uploadFile(new File([], "x"))).rejects.toThrow(
+      NotSupportedError,
+    );
+  });
+
+  it("uploadFile delegates to oai.uploadFile and tracks fileId", async () => {
+    const setWidgetState = vi.fn().mockResolvedValue(undefined);
+    const uploadFile = vi
+      .fn()
+      .mockResolvedValue({ fileId: "abc", fileName: "x" });
+    vi.stubGlobal("openai", {
+      uploadFile,
+      setWidgetState,
+      widgetState: null,
+    });
+    const adaptor = new HostAdaptor();
+    const file = new File([], "x");
+    const r = await adaptor.uploadFile(file, { library: true });
+    expect(uploadFile).toHaveBeenCalledWith(file, { library: true });
+    expect(r.fileId).toBe("abc");
+    expect(setWidgetState).toHaveBeenCalledWith(
+      expect.objectContaining({ imageIds: ["abc"] }),
+    );
+  });
+
+  it("selectFiles throws when oai is null", async () => {
+    vi.stubGlobal("openai", undefined);
+    const adaptor = new HostAdaptor();
+    await expect(adaptor.selectFiles()).rejects.toThrow(NotSupportedError);
+  });
+
+  it("selectFiles throws when host version lacks support", async () => {
+    vi.stubGlobal("openai", { selectFiles: undefined });
+    const adaptor = new HostAdaptor();
+    await expect(adaptor.selectFiles()).rejects.toThrow(/selectFiles/);
+  });
+
+  it("getFileDownloadUrl throws when oai is null", async () => {
+    vi.stubGlobal("openai", undefined);
+    const adaptor = new HostAdaptor();
+    await expect(
+      adaptor.getFileDownloadUrl({ fileId: "x" }),
+    ).rejects.toThrow(NotSupportedError);
+  });
+
+  it("setOpenInAppUrl throws when oai is null", async () => {
+    vi.stubGlobal("openai", undefined);
+    const adaptor = new HostAdaptor();
+    await expect(adaptor.setOpenInAppUrl("https://x")).rejects.toThrow(
+      NotSupportedError,
+    );
   });
 });
