@@ -18,7 +18,7 @@ export function useOpenTunnelBrowser(
     }
     if (tunnelState.status === "connected") {
       opened.current = true;
-      void open(`${tunnelState.url}/try`).catch(() => {});
+      void open(tunnelState.url).catch(() => {});
     }
   }, [tunnelState, enabled]);
 }
