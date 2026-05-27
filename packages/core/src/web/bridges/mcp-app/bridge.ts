@@ -61,9 +61,6 @@ export class McpAppBridge implements Bridge<McpAppContext> {
   public static getInstance(
     options?: Partial<{ appInfo: Implementation }>,
   ): McpAppBridge {
-    if (window.skybridge.hostType !== "mcp-app") {
-      throw new Error("MCP App Bridge can only be used in the mcp-app runtime");
-    }
     if (McpAppBridge.instance && options) {
       console.warn(
         "McpAppBridge.getInstance: options ignored, instance already exists",
