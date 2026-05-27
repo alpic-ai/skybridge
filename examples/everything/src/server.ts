@@ -47,6 +47,10 @@ const server = new McpServer(
     },
   );
 
+if (process.env.TEST_ERROR === "true") {
+  throw new Error("test");
+}
+
 server.run();
 
 export type AppType = typeof server;
