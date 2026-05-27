@@ -11,7 +11,9 @@ let cached: HostAdaptor | null = null;
  * integrations.
  */
 export const getAdaptor = (): Adaptor => {
-  if (cached) return cached;
+  if (cached) {
+    return cached;
+  }
 
   const hostType = window.skybridge?.hostType;
   const hasOai = typeof window !== "undefined" && window.openai !== undefined;

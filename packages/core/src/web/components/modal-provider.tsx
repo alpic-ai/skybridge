@@ -36,7 +36,9 @@ export function ModalProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         adaptor.closeModal();

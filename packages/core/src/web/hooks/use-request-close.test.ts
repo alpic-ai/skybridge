@@ -1,69 +1,54 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { _resetAdaptor, getAdaptor } from "../bridges/get-adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
-import {
-  getMcpAppHostPostMessageMock,
-  MockResizeObserver,
-} from "./test/utils.js";
 import { useRequestClose } from "./use-request-close.js";
 
 describe("useRequestClose", () => {
-  describe("apps-sdk host", () => {
-    let requestCloseMock: ReturnType<typeof vi.fn>;
-
-    beforeEach(() => {
-      requestCloseMock = vi.fn().mockResolvedValue(undefined);
-      vi.stubGlobal("openai", {
-        requestClose: requestCloseMock,
-      });
-      vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
-    });
-
-    afterEach(() => {
-      vi.unstubAllGlobals();
-      vi.resetAllMocks();
-    });
-
-    it("should return a function that calls window.openai.requestClose", async () => {
-      const { result } = renderHook(() => useRequestClose());
-
-      await result.current();
-
-      expect(requestCloseMock).toHaveBeenCalledTimes(1);
-      expect(requestCloseMock).toHaveBeenCalledWith();
-    });
+  beforeEach(() => {
+    _resetAdaptor();
+    McpAppBridge.resetInstance();
+    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    vi.stubGlobal("openai", undefined);
+    vi.stubGlobal("parent", { postMessage: vi.fn() });
   });
 
-  describe("mcp-app host", () => {
-    let postMessageMock: ReturnType<typeof getMcpAppHostPostMessageMock>;
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.resetAllMocks();
+    _resetAdaptor();
+    McpAppBridge.resetInstance();
+  });
 
-    beforeEach(() => {
-      vi.stubGlobal("skybridge", { hostType: "mcp-app" });
-      vi.stubGlobal("ResizeObserver", MockResizeObserver);
-      postMessageMock = getMcpAppHostPostMessageMock();
-      vi.stubGlobal("parent", { postMessage: postMessageMock });
-    });
+  it("calls app.requestTeardown via the MCP path", async () => {
+    const requestTeardown = vi.fn().mockResolvedValue(undefined);
+    // biome-ignore lint/suspicious/noExplicitAny: test seam
+    const adaptor = getAdaptor() as any;
+    adaptor.mcp.getApp = vi.fn().mockResolvedValue({ requestTeardown });
 
-    afterEach(async () => {
-      vi.unstubAllGlobals();
-      vi.resetAllMocks();
-      McpAppBridge.resetInstance();
-    });
-
-    it("should send a ui/notifications/request-teardown notification to the MCP host", async () => {
-      const { result } = renderHook(() => useRequestClose());
-
+    const { result } = renderHook(() => useRequestClose());
+    await act(async () => {
       await result.current();
-
-      await waitFor(() => {
-        expect(postMessageMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            jsonrpc: "2.0",
-            method: "ui/notifications/request-teardown",
-          }),
-          "*",
-        );
-      });
     });
+
+    expect(requestTeardown).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls app.requestTeardown even when window.openai is present", async () => {
+    vi.stubGlobal("openai", { requestClose: vi.fn() });
+    _resetAdaptor();
+    McpAppBridge.resetInstance();
+
+    const requestTeardown = vi.fn().mockResolvedValue(undefined);
+    // biome-ignore lint/suspicious/noExplicitAny: test seam
+    const adaptor = getAdaptor() as any;
+    adaptor.mcp.getApp = vi.fn().mockResolvedValue({ requestTeardown });
+
+    const { result } = renderHook(() => useRequestClose());
+    await act(async () => {
+      await result.current();
+    });
+
+    expect(requestTeardown).toHaveBeenCalledTimes(1);
   });
 });

@@ -37,9 +37,7 @@ describe("getAdaptor", () => {
     vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     vi.stubGlobal("openai", { view: { mode: "inline" } });
     getAdaptor();
-    expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining("hostType"),
-    );
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("hostType"));
     warn.mockRestore();
   });
 

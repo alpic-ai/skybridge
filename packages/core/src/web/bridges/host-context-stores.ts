@@ -1,10 +1,7 @@
 import { dequal } from "dequal/lite";
-import type { HostContextStore } from "./types.js";
 import type { McpAppBridge } from "./mcp-app/bridge.js";
-import type {
-  McpAppContext,
-  McpAppContextKey,
-} from "./mcp-app/types.js";
+import type { McpAppContext, McpAppContextKey } from "./mcp-app/types.js";
+import type { HostContextStore } from "./types.js";
 
 type PickContext<K extends readonly McpAppContextKey[]> = {
   [P in K[number]]: McpAppContext[P];
@@ -61,9 +58,13 @@ export function buildMcpContextStores(bridge: McpAppBridge): {
       ["locale"],
       ({ locale }) => locale ?? "en-US",
     ),
-    safeArea: createMcpStore(bridge, ["safeAreaInsets"], ({ safeAreaInsets }) => ({
-      insets: safeAreaInsets ?? { top: 0, right: 0, bottom: 0, left: 0 },
-    })),
+    safeArea: createMcpStore(
+      bridge,
+      ["safeAreaInsets"],
+      ({ safeAreaInsets }) => ({
+        insets: safeAreaInsets ?? { top: 0, right: 0, bottom: 0, left: 0 },
+      }),
+    ),
     displayMode: createMcpStore(
       bridge,
       ["displayMode"],
@@ -115,7 +116,9 @@ export function buildMcpContextStores(bridge: McpAppBridge): {
  * Build the Apps-SDK-sourced overlay stores (`display`, `viewState`).
  * Used by `HostAdaptor` only when `window.openai` is present.
  */
-export function buildAppsSdkOverlayStores(bridge: import("./apps-sdk/bridge.js").AppsSdkBridge): {
+export function buildAppsSdkOverlayStores(
+  bridge: import("./apps-sdk/bridge.js").AppsSdkBridge,
+): {
   display: HostContextStore<"display">;
   viewState: HostContextStore<"viewState">;
 } {

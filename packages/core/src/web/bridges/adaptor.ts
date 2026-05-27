@@ -1,3 +1,10 @@
+import { AppsSdkBridge } from "./apps-sdk/bridge.js";
+import type { AppsSdkWidgetState } from "./apps-sdk/types.js";
+import {
+  buildAppsSdkOverlayStores,
+  buildMcpContextStores,
+} from "./host-context-stores.js";
+import { McpAppBridge } from "./mcp-app/bridge.js";
 import type {
   Adaptor,
   CallToolResponse,
@@ -15,13 +22,6 @@ import type {
   UploadFileOptions,
 } from "./types.js";
 import { NotSupportedError } from "./types.js";
-import type { AppsSdkWidgetState } from "./apps-sdk/types.js";
-import { AppsSdkBridge } from "./apps-sdk/bridge.js";
-import { McpAppBridge } from "./mcp-app/bridge.js";
-import {
-  buildAppsSdkOverlayStores,
-  buildMcpContextStores,
-} from "./host-context-stores.js";
 
 const STORAGE_PREFIX = "sb:";
 const MAX_STORAGE_ENTRIES = 200;
@@ -49,7 +49,9 @@ export class HostAdaptor implements Adaptor {
   private readonly oaiBridge: AppsSdkBridge | null;
 
   private readonly mcpStores: ReturnType<typeof buildMcpContextStores>;
-  private readonly oaiStores: ReturnType<typeof buildAppsSdkOverlayStores> | null;
+  private readonly oaiStores: ReturnType<
+    typeof buildAppsSdkOverlayStores
+  > | null;
 
   private _viewState: HostContext["viewState"] = null;
   private readonly viewStateListeners = new Set<() => void>();
@@ -85,7 +87,9 @@ export class HostAdaptor implements Adaptor {
     key: K,
   ): HostContextStore<K> => {
     if (this.oaiStores && (key === "display" || key === "viewState")) {
-      return this.oaiStores[key as "display" | "viewState"] as HostContextStore<K>;
+      return this.oaiStores[
+        key as "display" | "viewState"
+      ] as HostContextStore<K>;
     }
 
     if (key === "display") {
@@ -112,7 +116,9 @@ export class HostAdaptor implements Adaptor {
       } as HostContextStore<K>;
     }
 
-    return this.mcpStores[key as keyof typeof this.mcpStores] as HostContextStore<K>;
+    return this.mcpStores[
+      key as keyof typeof this.mcpStores
+    ] as HostContextStore<K>;
   };
 
   public callTool = async <
@@ -168,10 +174,7 @@ export class HostAdaptor implements Adaptor {
     });
   };
 
-  public openExternal = (
-    href: string,
-    options?: OpenExternalOptions,
-  ): void => {
+  public openExternal = (href: string, options?: OpenExternalOptions): void => {
     if (this.oai && options?.redirectUrl === false) {
       this.oai.openExternal({ href, redirectUrl: false });
       return;
@@ -184,9 +187,7 @@ export class HostAdaptor implements Adaptor {
       });
   };
 
-  public download = async (
-    params: DownloadParams,
-  ): Promise<DownloadResult> => {
+  public download = async (params: DownloadParams): Promise<DownloadResult> => {
     const app = await this.mcp.getApp();
     if (!app.getHostCapabilities()?.downloadFile) {
       console.error(
@@ -220,7 +221,9 @@ export class HostAdaptor implements Adaptor {
 
     // update local state immediately so successive calls see fresh state
     this._viewState = newState;
-    this.viewStateListeners.forEach((l) => l());
+    this.viewStateListeners.forEach((l) => {
+      l();
+    });
 
     this.persistToLocalStorage(newState);
 
@@ -239,7 +242,9 @@ export class HostAdaptor implements Adaptor {
     file: File,
     options?: UploadFileOptions,
   ): Promise<FileMetadata> => {
-    if (!this.oai) throw new NotSupportedError("uploadFile");
+    if (!this.oai) {
+      throw new NotSupportedError("uploadFile");
+    }
     const metadata = await this.oai.uploadFile(file, options);
     await this.trackFileIds(metadata.fileId);
     return metadata;
@@ -255,7 +260,9 @@ export class HostAdaptor implements Adaptor {
   };
 
   public selectFiles = async (): Promise<FileMetadata[]> => {
-    if (!this.oai) throw new NotSupportedError("selectFiles");
+    if (!this.oai) {
+      throw new NotSupportedError("selectFiles");
+    }
     if (!this.oai.selectFiles) {
       throw new Error(
         "selectFiles is not supported by the current host version.",
@@ -274,7 +281,9 @@ export class HostAdaptor implements Adaptor {
       return;
     }
     this._polyfillDisplay = { mode: "modal", params: options.params };
-    this.polyfillDisplayListeners.forEach((l) => l());
+    this.polyfillDisplayListeners.forEach((l) => {
+      l();
+    });
   };
 
   public setOpenInAppUrl = (href: string): Promise<void> => {
@@ -282,23 +291,33 @@ export class HostAdaptor implements Adaptor {
       return Promise.reject(new NotSupportedError("setOpenInAppUrl"));
     }
     href = href.trim();
-    if (!href) throw new Error("The href parameter is required.");
+    if (!href) {
+      throw new Error("The href parameter is required.");
+    }
     return this.oai.setOpenInAppUrl({ href });
   };
 
   public closeModal = (): void => {
-    if (this.oai) return; // host owns modal lifecycle
+    if (this.oai) {
+      return; // host owns modal lifecycle
+    }
     this._polyfillDisplay = { mode: "inline" };
-    this.polyfillDisplayListeners.forEach((l) => l());
+    this.polyfillDisplayListeners.forEach((l) => {
+      l();
+    });
   };
 
   private async trackFileIds(...fileIds: string[]): Promise<void> {
-    if (!this.oai) return;
+    if (!this.oai) {
+      return;
+    }
     const current = this.oai.widgetState;
     const state: AppsSdkWidgetState = current
       ? { ...current }
       : { modelContent: {}, privateContent: {} };
-    if (!state.imageIds) state.imageIds = [];
+    if (!state.imageIds) {
+      state.imageIds = [];
+    }
     state.imageIds.push(...fileIds);
     await this.oai.setWidgetState(state);
   }
@@ -325,7 +344,9 @@ export class HostAdaptor implements Adaptor {
         const stored = localStorage.getItem(existingKey);
         if (stored !== null) {
           this._viewState = JSON.parse(stored);
-          this.viewStateListeners.forEach((l) => l());
+          this.viewStateListeners.forEach((l) => {
+            l();
+          });
         }
       }
     } catch (err) {
@@ -333,24 +354,32 @@ export class HostAdaptor implements Adaptor {
     }
   }
 
-  protected persistToLocalStorage(
-    state: Record<string, unknown> | null,
-  ): void {
-    if (!this._viewUUID || state === null) return;
+  protected persistToLocalStorage(state: Record<string, unknown> | null): void {
+    if (!this._viewUUID || state === null) {
+      return;
+    }
     try {
       const oldKey = findStorageKey(this._viewUUID);
-      if (oldKey) localStorage.removeItem(oldKey);
+      if (oldKey) {
+        localStorage.removeItem(oldKey);
+      }
       const newKey = `${STORAGE_PREFIX}${Date.now()}:${this._viewUUID}`;
       localStorage.setItem(newKey, JSON.stringify(state));
       const keys: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key?.startsWith(STORAGE_PREFIX)) keys.push(key);
+        if (key?.startsWith(STORAGE_PREFIX)) {
+          keys.push(key);
+        }
       }
-      if (keys.length <= MAX_STORAGE_ENTRIES) return;
+      if (keys.length <= MAX_STORAGE_ENTRIES) {
+        return;
+      }
       keys.sort();
       const toRemove = keys.slice(0, keys.length - MAX_STORAGE_ENTRIES);
-      for (const key of toRemove) localStorage.removeItem(key);
+      for (const key of toRemove) {
+        localStorage.removeItem(key);
+      }
     } catch (err) {
       console.error(err);
     }

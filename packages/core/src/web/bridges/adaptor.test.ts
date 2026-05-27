@@ -168,9 +168,7 @@ describe("HostAdaptor conditional routing", () => {
     const adaptor = new HostAdaptor();
     const openLink = vi.fn();
     // biome-ignore lint/suspicious/noExplicitAny: test seam
-    (adaptor as any).mcp.getApp = vi
-      .fn()
-      .mockResolvedValue({ openLink });
+    (adaptor as any).mcp.getApp = vi.fn().mockResolvedValue({ openLink });
     adaptor.openExternal("https://x");
     // openExternal is sync but mcp.openLink resolves async
     await new Promise((r) => setTimeout(r, 0));
@@ -234,9 +232,9 @@ describe("HostAdaptor Apps-SDK-only methods", () => {
   it("getFileDownloadUrl throws when oai is null", async () => {
     vi.stubGlobal("openai", undefined);
     const adaptor = new HostAdaptor();
-    await expect(
-      adaptor.getFileDownloadUrl({ fileId: "x" }),
-    ).rejects.toThrow(NotSupportedError);
+    await expect(adaptor.getFileDownloadUrl({ fileId: "x" })).rejects.toThrow(
+      NotSupportedError,
+    );
   });
 
   it("setOpenInAppUrl throws when oai is null", async () => {
@@ -340,10 +338,13 @@ describe("HostAdaptor setViewState", () => {
       structuredContent: { count: 2 },
       content: [{ type: "text", text: JSON.stringify({ count: 2 }) }],
     });
-    const keys = Array.from(
-      { length: localStorage.length },
-      (_, i) => localStorage.key(i)!,
-    );
+    const keys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key !== null) {
+        keys.push(key);
+      }
+    }
     expect(keys.some((k) => k.endsWith(":view-1"))).toBe(true);
   });
 
