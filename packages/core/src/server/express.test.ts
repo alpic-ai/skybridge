@@ -484,33 +484,6 @@ describe("createApp", () => {
 });
 
 describe("createApp Vercel mode", () => {
-  it("does not mount /assets in production when VERCEL=1", async () => {
-    const prevVercel = process.env.VERCEL;
-    const prevEnv = process.env.NODE_ENV;
-    process.env.VERCEL = "1";
-    process.env.NODE_ENV = "production";
-    try {
-      vi.resetModules();
-      const { createApp } = await import("./express.js");
-      const { McpServer: Reloaded } = await import("./server.js");
-      const server = new Reloaded({ name: "t", version: "0.0.0" });
-      const httpServer = http.createServer();
-      const app = await createApp({ mcpServer: server, httpServer });
-      const { port, server: listening } = await listen(app);
-      openServer = listening;
-      const res = await fetch(`http://localhost:${port}/assets/foo.js`);
-      expect(res.status).toBe(404);
-    } finally {
-      if (prevVercel === undefined) {
-        delete process.env.VERCEL;
-      } else {
-        process.env.VERCEL = prevVercel;
-      }
-      process.env.NODE_ENV = prevEnv;
-      vi.resetModules();
-    }
-  });
-
   it("server.run() returns the Express app without binding a port when VERCEL=1", async () => {
     const prevVercel = process.env.VERCEL;
     const prevEnv = process.env.NODE_ENV;

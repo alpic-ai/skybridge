@@ -1,11 +1,11 @@
-import { cpSync, rmSync, writeFileSync } from "node:fs";
+import { rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { useEffect, useMemo } from "react";
 import {
   emitManifestModule,
-  emitVercelFunction,
+  emitVercelBuildOutput,
 } from "../cli/build-helpers.js";
 import { Header } from "../cli/header.js";
 import { resolveViewsDir } from "../cli/resolve-views-dir.js";
@@ -42,16 +42,6 @@ export function buildSteps(): CommandStep[] {
       },
     },
     {
-      label: "Copying assets to public/ for Vercel",
-      run: () => {
-        const root = process.cwd();
-        const src = path.join(root, "dist", "assets");
-        const dst = path.join(root, "public", "assets");
-        rmSync(dst, { recursive: true, force: true });
-        cpSync(src, dst, { recursive: true });
-      },
-    },
-    {
       label: "Emitting Cloudflare redirects",
       run: () => {
         const root = process.cwd();
@@ -72,8 +62,8 @@ export function buildSteps(): CommandStep[] {
       },
     },
     {
-      label: "Emitting Vercel function",
-      run: () => emitVercelFunction(process.cwd()),
+      label: "Emitting Vercel build output",
+      run: () => emitVercelBuildOutput(process.cwd()),
     },
   ];
 }
