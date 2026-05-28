@@ -1,5 +1,5 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { McpServer } from "skybridge/server";
+import { McpServer, text } from "skybridge/server";
 import { z } from "zod";
 
 const server = new McpServer(
@@ -53,6 +53,11 @@ const server = new McpServer(
       inputSchema: {
         guess: z.enum(["heads", "tails"]).describe("The user's guess"),
       },
+      outputSchema: {
+        flip: z.enum(["heads", "tails"]).describe("The side the coin landed on"),
+        guess: z.enum(["heads", "tails"]).describe("The user's guess"),
+        won: z.boolean().describe("Whether the user won"),
+      },
       _meta: {
         "openai/widgetAccessible": true,
       },
@@ -63,7 +68,7 @@ const server = new McpServer(
       const structuredContent = { flip, guess, won };
       return {
         structuredContent,
-        content: [{ type: "text", text: JSON.stringify(structuredContent) }],
+        content: [text(`Coin landed on ${flip}. User guessed ${guess} and ${won ? "won" : "lost"}.`)],
         isError: false,
       };
     },
