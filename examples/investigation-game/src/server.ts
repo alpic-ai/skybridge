@@ -101,6 +101,6 @@ const server = new McpServer(
     },
   );
 
-server.run();
+export default server;
 
 export type AppType = typeof server;

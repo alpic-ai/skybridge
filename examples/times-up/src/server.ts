@@ -129,6 +129,6 @@ server.registerTool(
   },
 );
 
-server.run();
+export default server;
 
 export type AppType = typeof server;

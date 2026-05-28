@@ -148,6 +148,6 @@ router.get("/api/capital/:cca2", async (req: Request, res: Response) => {
 
 server.use(router);
 
-server.run();
+export default server;
 
 export type AppType = typeof server;
