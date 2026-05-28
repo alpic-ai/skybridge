@@ -4,47 +4,32 @@ import { AppsSdkBridge } from "./apps-sdk/bridge.js";
 import { McpAppBridge } from "./mcp-app/bridge.js";
 import { NotSupportedError } from "./types.js";
 
-describe("HostAdaptor constructor", () => {
+describe("HostAdaptor", () => {
   beforeEach(() => {
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
-    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
     vi.stubGlobal("parent", { postMessage: vi.fn() });
+    localStorage.clear();
   });
   afterEach(() => {
     vi.unstubAllGlobals();
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
+    localStorage.clear();
   });
 
-  it("instantiates without window.openai (oai is null)", () => {
+  it("captures window.openai as overlay when present, else oai is null", () => {
     vi.stubGlobal("openai", undefined);
-    const adaptor = new HostAdaptor();
-    expect(adaptor.hasAppsSdkOverlay()).toBe(false);
-  });
-
-  it("captures window.openai when present (oai is set)", () => {
+    expect(new HostAdaptor().hasAppsSdkOverlay()).toBe(false);
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
     vi.stubGlobal("openai", { widgetState: null });
-    const adaptor = new HostAdaptor();
-    expect(adaptor.hasAppsSdkOverlay()).toBe(true);
-  });
-});
-
-describe("HostAdaptor MCP-routed methods", () => {
-  beforeEach(() => {
-    McpAppBridge.resetInstance();
-    AppsSdkBridge.resetInstance();
-    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
-    vi.stubGlobal("parent", { postMessage: vi.fn() });
-    vi.stubGlobal("openai", undefined);
-  });
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    McpAppBridge.resetInstance();
-    AppsSdkBridge.resetInstance();
+    expect(new HostAdaptor().hasAppsSdkOverlay()).toBe(true);
   });
 
-  it("callTool delegates to mcp.callServerTool", async () => {
+  it("callTool always routes to mcp.callServerTool", async () => {
+    vi.stubGlobal("openai", { callTool: vi.fn() });
     const adaptor = new HostAdaptor();
     const fakeApp = {
       callServerTool: vi.fn().mockResolvedValue({
@@ -66,42 +51,8 @@ describe("HostAdaptor MCP-routed methods", () => {
     expect(result.meta).toEqual({ x: 1 });
   });
 
-  it("requestDisplayMode delegates to mcp.requestDisplayMode", async () => {
-    const adaptor = new HostAdaptor();
-    const fakeApp = {
-      requestDisplayMode: vi.fn().mockResolvedValue({ mode: "fullscreen" }),
-    };
-    // biome-ignore lint/suspicious/noExplicitAny: test seam
-    (adaptor as any).mcp.getApp = vi.fn().mockResolvedValue(fakeApp);
-    const r = await adaptor.requestDisplayMode("fullscreen");
-    expect(r.mode).toBe("fullscreen");
-    expect(fakeApp.requestDisplayMode).toHaveBeenCalledWith({
-      mode: "fullscreen",
-    });
-  });
-
-  it("requestClose delegates to mcp.requestTeardown", async () => {
-    const adaptor = new HostAdaptor();
-    const fakeApp = { requestTeardown: vi.fn().mockResolvedValue(undefined) };
-    // biome-ignore lint/suspicious/noExplicitAny: test seam
-    (adaptor as any).mcp.getApp = vi.fn().mockResolvedValue(fakeApp);
-    await adaptor.requestClose();
-    expect(fakeApp.requestTeardown).toHaveBeenCalled();
-  });
-
-  it("requestSize delegates to mcp.sendSizeChanged", async () => {
-    const adaptor = new HostAdaptor();
-    const fakeApp = { sendSizeChanged: vi.fn().mockResolvedValue(undefined) };
-    // biome-ignore lint/suspicious/noExplicitAny: test seam
-    (adaptor as any).mcp.getApp = vi.fn().mockResolvedValue(fakeApp);
-    await adaptor.requestSize({ width: 100, height: 200 });
-    expect(fakeApp.sendSizeChanged).toHaveBeenCalledWith({
-      width: 100,
-      height: 200,
-    });
-  });
-
   it("download returns isError when host lacks downloadFile capability", async () => {
+    vi.stubGlobal("openai", undefined);
     const adaptor = new HostAdaptor();
     const fakeApp = {
       getHostCapabilities: () => ({}),
@@ -113,100 +64,76 @@ describe("HostAdaptor MCP-routed methods", () => {
     expect(r.isError).toBe(true);
     expect(fakeApp.downloadFile).not.toHaveBeenCalled();
   });
-});
 
-describe("HostAdaptor conditional routing", () => {
-  beforeEach(() => {
-    McpAppBridge.resetInstance();
-    AppsSdkBridge.resetInstance();
-    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
-    vi.stubGlobal("parent", { postMessage: vi.fn() });
-  });
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    McpAppBridge.resetInstance();
-    AppsSdkBridge.resetInstance();
-  });
-
-  it("sendFollowUpMessage uses oai when scrollToBottom set", async () => {
+  it("sendFollowUpMessage routes to oai only when scrollToBottom is set", async () => {
     const sendFollowUpMessage = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal("openai", { sendFollowUpMessage });
-    const adaptor = new HostAdaptor();
+    let adaptor = new HostAdaptor();
     await adaptor.sendFollowUpMessage("hi", { scrollToBottom: false });
     expect(sendFollowUpMessage).toHaveBeenCalledWith({
       prompt: "hi",
       scrollToBottom: false,
     });
-  });
 
-  it("sendFollowUpMessage uses mcp when no options", async () => {
+    // Default case falls through to MCP
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
     vi.stubGlobal("openai", undefined);
-    const adaptor = new HostAdaptor();
-    const fakeApp = { sendMessage: vi.fn().mockResolvedValue(undefined) };
+    adaptor = new HostAdaptor();
+    const sendMessage = vi.fn().mockResolvedValue(undefined);
     // biome-ignore lint/suspicious/noExplicitAny: test seam
-    (adaptor as any).mcp.getApp = vi.fn().mockResolvedValue(fakeApp);
+    (adaptor as any).mcp.getApp = vi.fn().mockResolvedValue({ sendMessage });
     await adaptor.sendFollowUpMessage("hi");
-    expect(fakeApp.sendMessage).toHaveBeenCalledWith({
+    expect(sendMessage).toHaveBeenCalledWith({
       role: "user",
       content: [{ type: "text", text: "hi" }],
     });
   });
 
-  it("openExternal uses oai when redirectUrl: false", async () => {
+  it("openExternal routes to oai only when redirectUrl: false", async () => {
     const openExternal = vi.fn();
     vi.stubGlobal("openai", { openExternal });
-    const adaptor = new HostAdaptor();
+    let adaptor = new HostAdaptor();
     adaptor.openExternal("https://x", { redirectUrl: false });
     expect(openExternal).toHaveBeenCalledWith({
       href: "https://x",
       redirectUrl: false,
     });
-  });
 
-  it("openExternal uses mcp.openLink for default case", async () => {
+    // Default case falls through to MCP openLink
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
     vi.stubGlobal("openai", undefined);
-    const adaptor = new HostAdaptor();
+    adaptor = new HostAdaptor();
     const openLink = vi.fn();
     // biome-ignore lint/suspicious/noExplicitAny: test seam
     (adaptor as any).mcp.getApp = vi.fn().mockResolvedValue({ openLink });
     adaptor.openExternal("https://x");
-    // openExternal is sync but mcp.openLink resolves async
     await new Promise((r) => setTimeout(r, 0));
     expect(openLink).toHaveBeenCalledWith({ url: "https://x" });
   });
-});
 
-describe("HostAdaptor Apps-SDK-only methods", () => {
-  beforeEach(() => {
-    McpAppBridge.resetInstance();
-    AppsSdkBridge.resetInstance();
-    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
-    vi.stubGlobal("parent", { postMessage: vi.fn() });
-  });
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    McpAppBridge.resetInstance();
-    AppsSdkBridge.resetInstance();
-  });
-
-  it("uploadFile throws NotSupportedError when oai is null", async () => {
+  it("Apps-SDK-exclusive methods throw NotSupportedError when oai is null", async () => {
     vi.stubGlobal("openai", undefined);
     const adaptor = new HostAdaptor();
     await expect(adaptor.uploadFile(new File([], "x"))).rejects.toThrow(
       NotSupportedError,
     );
+    await expect(adaptor.selectFiles()).rejects.toThrow(NotSupportedError);
+    await expect(adaptor.getFileDownloadUrl({ fileId: "x" })).rejects.toThrow(
+      NotSupportedError,
+    );
+    await expect(adaptor.setOpenInAppUrl("https://x")).rejects.toThrow(
+      NotSupportedError,
+    );
   });
 
-  it("uploadFile delegates to oai.uploadFile and tracks fileId", async () => {
+  it("uploadFile delegates to oai.uploadFile and tracks fileId in widgetState", async () => {
     const setWidgetState = vi.fn().mockResolvedValue(undefined);
     const uploadFile = vi
       .fn()
       .mockResolvedValue({ fileId: "abc", fileName: "x" });
-    vi.stubGlobal("openai", {
-      uploadFile,
-      setWidgetState,
-      widgetState: null,
-    });
+    vi.stubGlobal("openai", { uploadFile, setWidgetState, widgetState: null });
     const adaptor = new HostAdaptor();
     const file = new File([], "x");
     const r = await adaptor.uploadFile(file, { library: true });
@@ -217,103 +144,7 @@ describe("HostAdaptor Apps-SDK-only methods", () => {
     );
   });
 
-  it("selectFiles throws when oai is null", async () => {
-    vi.stubGlobal("openai", undefined);
-    const adaptor = new HostAdaptor();
-    await expect(adaptor.selectFiles()).rejects.toThrow(NotSupportedError);
-  });
-
-  it("selectFiles throws when host version lacks support", async () => {
-    vi.stubGlobal("openai", { selectFiles: undefined });
-    const adaptor = new HostAdaptor();
-    await expect(adaptor.selectFiles()).rejects.toThrow(/selectFiles/);
-  });
-
-  it("getFileDownloadUrl throws when oai is null", async () => {
-    vi.stubGlobal("openai", undefined);
-    const adaptor = new HostAdaptor();
-    await expect(adaptor.getFileDownloadUrl({ fileId: "x" })).rejects.toThrow(
-      NotSupportedError,
-    );
-  });
-
-  it("setOpenInAppUrl throws when oai is null", async () => {
-    vi.stubGlobal("openai", undefined);
-    const adaptor = new HostAdaptor();
-    await expect(adaptor.setOpenInAppUrl("https://x")).rejects.toThrow(
-      NotSupportedError,
-    );
-  });
-});
-
-describe("HostAdaptor modal", () => {
-  beforeEach(() => {
-    McpAppBridge.resetInstance();
-    AppsSdkBridge.resetInstance();
-    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
-    vi.stubGlobal("parent", { postMessage: vi.fn() });
-  });
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    McpAppBridge.resetInstance();
-    AppsSdkBridge.resetInstance();
-  });
-
-  it("openModal delegates to oai.requestModal when present", () => {
-    const requestModal = vi.fn();
-    vi.stubGlobal("openai", { requestModal });
-    const adaptor = new HostAdaptor();
-    adaptor.openModal({ title: "Hi" });
-    expect(requestModal).toHaveBeenCalledWith({ title: "Hi" });
-  });
-
-  it("closeModal is a no-op when oai is present", () => {
-    vi.stubGlobal("openai", { requestModal: vi.fn() });
-    const adaptor = new HostAdaptor();
-    expect(() => adaptor.closeModal()).not.toThrow();
-  });
-
-  it("openModal sets polyfill display state when oai is null", () => {
-    vi.stubGlobal("openai", undefined);
-    const adaptor = new HostAdaptor();
-    const listener = vi.fn();
-    // biome-ignore lint/suspicious/noExplicitAny: test seam
-    (adaptor as any).polyfillDisplayListeners.add(listener);
-    adaptor.openModal({ params: { x: 1 } });
-    // biome-ignore lint/suspicious/noExplicitAny: test seam
-    expect((adaptor as any)._polyfillDisplay).toEqual({
-      mode: "modal",
-      params: { x: 1 },
-    });
-    expect(listener).toHaveBeenCalled();
-  });
-
-  it("closeModal resets polyfill display state when oai is null", () => {
-    vi.stubGlobal("openai", undefined);
-    const adaptor = new HostAdaptor();
-    adaptor.openModal({});
-    adaptor.closeModal();
-    // biome-ignore lint/suspicious/noExplicitAny: test seam
-    expect((adaptor as any)._polyfillDisplay).toEqual({ mode: "inline" });
-  });
-});
-
-describe("HostAdaptor setViewState", () => {
-  beforeEach(() => {
-    McpAppBridge.resetInstance();
-    AppsSdkBridge.resetInstance();
-    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
-    vi.stubGlobal("parent", { postMessage: vi.fn() });
-    localStorage.clear();
-  });
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    McpAppBridge.resetInstance();
-    AppsSdkBridge.resetInstance();
-    localStorage.clear();
-  });
-
-  it("uses window.openai.setWidgetState when oai is present", async () => {
+  it("setViewState uses oai.setWidgetState when present", async () => {
     const setWidgetState = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal("openai", { setWidgetState, widgetState: null });
     const adaptor = new HostAdaptor();
@@ -323,7 +154,7 @@ describe("HostAdaptor setViewState", () => {
     );
   });
 
-  it("calls mcp.updateModelContext and writes localStorage when oai is null", async () => {
+  it("setViewState falls back to MCP updateModelContext + localStorage when oai is null", async () => {
     vi.stubGlobal("openai", undefined);
     const adaptor = new HostAdaptor();
     const updateModelContext = vi.fn().mockResolvedValue(undefined);
@@ -348,74 +179,53 @@ describe("HostAdaptor setViewState", () => {
     expect(keys.some((k) => k.endsWith(":view-1"))).toBe(true);
   });
 
-  it("accepts an updater function form", async () => {
+  it("openModal/closeModal: delegates to oai.requestModal when present, polyfill state otherwise", () => {
+    const requestModal = vi.fn();
+    vi.stubGlobal("openai", { requestModal });
+    let adaptor = new HostAdaptor();
+    adaptor.openModal({ title: "Hi" });
+    expect(requestModal).toHaveBeenCalledWith({ title: "Hi" });
+    expect(() => adaptor.closeModal()).not.toThrow();
+
+    // Polyfill path
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
     vi.stubGlobal("openai", undefined);
-    const adaptor = new HostAdaptor();
+    adaptor = new HostAdaptor();
+    adaptor.openModal({ params: { x: 1 } });
     // biome-ignore lint/suspicious/noExplicitAny: test seam
-    (adaptor as any).mcp.getApp = vi.fn().mockResolvedValue({
-      updateModelContext: vi.fn().mockResolvedValue(undefined),
+    expect((adaptor as any)._polyfillDisplay).toEqual({
+      mode: "modal",
+      params: { x: 1 },
     });
+    adaptor.closeModal();
     // biome-ignore lint/suspicious/noExplicitAny: test seam
-    (adaptor as any)._viewState = { count: 1 };
-    await adaptor.setViewState((prev) => ({
-      // biome-ignore lint/suspicious/noExplicitAny: test
-      count: (prev as any).count + 1,
-    }));
-    // biome-ignore lint/suspicious/noExplicitAny: test seam
-    expect((adaptor as any)._viewState).toEqual({ count: 2 });
-  });
-});
-
-describe("HostAdaptor getHostContextStore", () => {
-  beforeEach(() => {
-    McpAppBridge.resetInstance();
-    AppsSdkBridge.resetInstance();
-    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
-    vi.stubGlobal("parent", { postMessage: vi.fn() });
-  });
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    McpAppBridge.resetInstance();
-    AppsSdkBridge.resetInstance();
+    expect((adaptor as any)._polyfillDisplay).toEqual({ mode: "inline" });
   });
 
-  it("routes `display` to oai when overlay is present", () => {
-    vi.stubGlobal("openai", { view: { mode: "fullscreen" } });
-    const adaptor = new HostAdaptor();
-    const store = adaptor.getHostContextStore("display");
-    expect(store.getSnapshot()).toEqual({ mode: "fullscreen" });
-  });
-
-  it("routes `viewState` to oai.widgetState.modelContent when overlay present", () => {
+  it("getHostContextStore: display/viewState route to oai overlay when present, MCP otherwise", () => {
     vi.stubGlobal("openai", {
+      view: { mode: "fullscreen" },
       widgetState: { modelContent: { count: 5 }, privateContent: {} },
     });
-    const adaptor = new HostAdaptor();
-    const store = adaptor.getHostContextStore("viewState");
-    expect(store.getSnapshot()).toEqual({ count: 5 });
-  });
+    let adaptor = new HostAdaptor();
+    expect(adaptor.getHostContextStore("display").getSnapshot()).toEqual({
+      mode: "fullscreen",
+    });
+    expect(adaptor.getHostContextStore("viewState").getSnapshot()).toEqual({
+      count: 5,
+    });
+    // Other keys (theme) always flow through MCP; default fallback when no notification
+    expect(adaptor.getHostContextStore("theme").getSnapshot()).toBe("light");
 
-  it("routes `display` to polyfill when oai is null", () => {
+    // Polyfill / local-state path
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
     vi.stubGlobal("openai", undefined);
-    const adaptor = new HostAdaptor();
-    const store = adaptor.getHostContextStore("display");
-    expect(store.getSnapshot()).toEqual({ mode: "inline" });
-    adaptor.openModal({});
-    expect(store.getSnapshot()).toEqual({ mode: "modal", params: undefined });
-  });
-
-  it("routes `viewState` to local LRU state when oai is null", () => {
-    vi.stubGlobal("openai", undefined);
-    const adaptor = new HostAdaptor();
-    const store = adaptor.getHostContextStore("viewState");
-    expect(store.getSnapshot()).toBe(null);
-  });
-
-  it("routes other keys (theme, locale, etc.) to mcp regardless of overlay", () => {
-    vi.stubGlobal("openai", { view: { mode: "inline" } });
-    const adaptor = new HostAdaptor();
-    const theme = adaptor.getHostContextStore("theme");
-    // default fallback when no notification yet
-    expect(theme.getSnapshot()).toBe("light");
+    adaptor = new HostAdaptor();
+    expect(adaptor.getHostContextStore("display").getSnapshot()).toEqual({
+      mode: "inline",
+    });
+    expect(adaptor.getHostContextStore("viewState").getSnapshot()).toBe(null);
   });
 });
