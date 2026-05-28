@@ -32,31 +32,33 @@ flowchart TB
         Unified["Unified React Interface"]
     end
 
-    Skybridge --> HostAdaptor
+    Skybridge --> AppsSdk
+    Skybridge --> McpApp
 
-    subgraph HostAdaptor["Host Adaptor (per-method routing)"]
-        Router["Routes each call to the best transport available"]
+    subgraph AppsSdk["Apps SDK Adaptor"]
+        OpenAI["window.openai"]
     end
 
-    HostAdaptor -->|"file ops, modal, viewState (when present)"| OpenAI["window.openai (Apps SDK)"]
-    HostAdaptor -->|"baseline transport (always)"| JsonRpc["JSON-RPC Bridge (MCP ext-apps)"]
+    subgraph McpApp["MCP App Adaptor"]
+        JsonRpc["JSON-RPC Bridge"]
+    end
 
-    OpenAI --> ChatGPT["ChatGPT"]
-    JsonRpc --> McpClients["Claude, Goose, VSCode..."]
+    AppsSdk --> ChatGPT["ChatGPT"]
+    McpApp --> McpClients["Claude, Goose, VSCode..."]
 
     style Code fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#334155
     style Skybridge fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#334155
-    style HostAdaptor fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#334155
+    style AppsSdk fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#334155
+    style McpApp fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#334155
     style ChatGPT fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#475569
     style McpClients fill:#f1f5f9,stroke:#cbd5e1,stroke-width:2px,color:#475569
     style Hooks fill:#2563EB,stroke:#1e40af,stroke-width:2px,color:#fff
     style Unified fill:#2563EB,stroke:#1e40af,stroke-width:2px,color:#fff
-    style Router fill:#2563EB,stroke:#1e40af,stroke-width:2px,color:#fff
     style OpenAI fill:#2563EB,stroke:#1e40af,stroke-width:2px,color:#fff
     style JsonRpc fill:#2563EB,stroke:#1e40af,stroke-width:2px,color:#fff
 ```
 
-These include [useToolInfo](/api-reference/use-tool-info), [useCallTool](/api-reference/use-call-tool), and other [API hooks](/api-reference). Skybridge detects which transports are available at load time and routes each call to the one that handles it best: the MCP ext-apps transport is always used as the baseline, and `window.openai` takes over for capabilities where Apps SDK behavior is materially better or unique.
+These include [useToolInfo](/api-reference/use-tool-info), [useCallTool](/api-reference/use-call-tool), and other [API hooks](/api-reference). Skybridge automatically detects which runtime is available and uses the appropriate adaptor.
 
 ## Benefits
 
