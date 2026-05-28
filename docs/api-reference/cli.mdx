@@ -32,6 +32,17 @@ skybridge dev
 | `--tunnel` | Open an Alpic tunnel for remote testing. |
 | `--no-open` | Don't open DevTools in the browser when the server is ready. |
 | `-v, --verbose` | Show tunnel logs. |
+| `--format-logs <command>` | Pipe server stdout through a formatter command (e.g. `bunyan`, `pino-pretty`). Useful when your server uses structured JSON logging. |
+
+#### Formatting structured logs
+
+If your server uses a structured JSON logger like [bunyan](https://github.com/trentm/node-bunyan) or [pino](https://github.com/pinojs/pino), the raw JSON output is hard to read. Pipe it through a formatter to get human-readable output in the Skybridge dev UI:
+
+```bash
+skybridge dev --format-logs bunyan
+```
+
+The formatter command must read JSON records from stdin and write formatted output to stdout. If the command isn't found, an error is displayed and logs fall through unformatted.
 
 You can also set the port via the `PORT` environment variable:
 
