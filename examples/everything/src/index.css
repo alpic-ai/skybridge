@@ -177,6 +177,77 @@ code.dark {
   opacity: 1;
 }
 
+.coin-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  background: var(--bg-surface);
+}
+
+.coin-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.coin-result {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.coin-result--won {
+  color: #3d7a4f;
+}
+
+.coin-result--lost {
+  color: #c0392b;
+}
+
+.coin-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.segmented {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.segmented-btn {
+  padding: 0.5rem 1.25rem;
+  background: transparent;
+  color: var(--accent, #4338ca);
+  border: none;
+  font-size: 0.875rem;
+  font-family: inherit;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.segmented-btn:not(:last-child) {
+  border-right: 1px solid var(--border);
+}
+
+.segmented-btn--active {
+  background: var(--accent, #4f46e5);
+  color: #fff;
+}
+
+.segmented-btn:hover:not(.segmented-btn--active):not(:disabled) {
+  background: var(--bg-surface);
+}
+
+.segmented-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .input {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
