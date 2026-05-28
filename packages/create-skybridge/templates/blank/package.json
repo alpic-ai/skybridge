@@ -17,12 +17,12 @@
     "vite": "^8.0.3"
   },
   "devDependencies": {
-    "@skybridge/devtools": "^1.0.0",
-    "@types/node": "^24.12.0",
-    "alpic": "^1.104.1",
-    "typescript": "^6.0.2"
+    "@skybridge/devtools": "^1.0.3",
+    "@types/node": "^24.12.4",
+    "alpic": "^1.129.7",
+    "typescript": "^6.0.3"
   },
   "engines": {
-    "node": ">=24.14.1"
+    "node": ">=24.16.0"
   }
 }
