@@ -1,17 +1,11 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import nodemonOriginal from "nodemon";
 import { useEffect } from "react";
 import type { ExtendedNodemon } from "./nodemon.d.ts";
 import type { PushMessage } from "./use-messages.js";
 
 const nodemon = nodemonOriginal as ExtendedNodemon;
-
-// Absolute path to the shipped dev wrapper. tsx execs it; the wrapper then
-// dynamically imports `<cwd>/src/server.ts`. Keeping the wrapper inside the
-// skybridge package means no generated file lands in the user's repo.
-const devEntryPath = fileURLToPath(new URL("./dev-entry.js", import.meta.url));
 
 const SOURCEMAP_WARNING = /^Sourcemap for ".*" points to missing source files$/;
 
@@ -29,7 +23,7 @@ export function useNodemon(
       : {
           watch: ["src"],
           ext: "ts,json",
-          exec: `tsx ${JSON.stringify(devEntryPath)}`,
+          exec: "tsx src/server.ts",
         };
 
     nodemon({ ...config, env, stdout: false });

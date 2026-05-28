@@ -1,23 +1,18 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
-// Handles two `dist/server.js` shapes:
-// - new: `export default server` — wrapper sets the manifest and awaits run().
-// - legacy: `export default await server.run()` (pre-wrapper templates) —
-//   wrapper passes the value through so existing projects keep booting after
-//   a skybridge upgrade without rebuilding.
-export const ENTRY_WRAPPER_CONTENT = `import manifest from "./vite-manifest.js";
-import userExport from "./server.js";
+// Primes the manifest in skybridge's module scope, then dynamically imports
+// `./server.js` so user code runs *after* the side channel is set. The
+// dynamic import is load-bearing: a static `export { default } from ...` is
+// hoisted with the rest of the static graph and would evaluate `server.js`
+// before `__setBuildManifest` runs.
+export const ENTRY_WRAPPER_CONTENT = `import { __setBuildManifest } from "skybridge/server";
+import manifest from "./vite-manifest.js";
 
-let resolved;
-if (userExport && typeof userExport.setViteManifest === "function") {
-  userExport.setViteManifest(manifest);
-  resolved = await userExport.run();
-} else {
-  resolved = userExport;
-}
+__setBuildManifest(manifest);
 
-export default resolved;
+const userMod = await import("./server.js");
+export default userMod.default;
 `;
 
 export function emitEntryWrapper(distDir: string): void {

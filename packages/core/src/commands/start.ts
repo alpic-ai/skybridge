@@ -24,12 +24,13 @@ export default class Start extends Command {
 
     console.clear();
 
-    // Prefer the wrapper (`dist/__entry.js`) when present, but fall back to
-    // `dist/server.js` so projects built with a previous skybridge version
-    // still start cleanly without a rebuild.
+    // `dist/server.js` is the natural entry (the user's `await server.run()`
+    // binds the port). Prefer `dist/__entry.js` when present because it
+    // primes the Vite manifest first — without it, hashed asset URLs in
+    // views won't resolve.
     const entryPath = resolve(process.cwd(), "dist/__entry.js");
-    const legacyPath = resolve(process.cwd(), "dist/server.js");
-    const indexPath = existsSync(entryPath) ? entryPath : legacyPath;
+    const fallbackPath = resolve(process.cwd(), "dist/server.js");
+    const indexPath = existsSync(entryPath) ? entryPath : fallbackPath;
 
     if (!existsSync(indexPath)) {
       console.error("❌ Error: No build output found");

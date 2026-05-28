@@ -172,6 +172,6 @@ const server = new McpServer(
     },
   );
 
-export default server;
+export default await server.run();
 
 export type AppType = typeof server;

@@ -431,6 +431,26 @@ const McpServerBaseOmitted = McpServerBase as unknown as new (
  *
  * @see https://docs.skybridge.tech/api-reference/mcp-server
  */
+// Side channel populated by `dist/__entry.js` before user code is imported.
+// Set at module scope rather than passed through the constructor because the
+// wrapper has the manifest before the user's `new McpServer(...)` runs, and
+// threading it through every call site (including user templates) is exactly
+// the boilerplate this design is trying to hide.
+let pendingBuildManifest: Record<string, { file: string }> | null = null;
+
+/**
+ * Prime the build-time Vite manifest before user code constructs its
+ * `McpServer`. Called from the generated `dist/__entry.js`; not part of the
+ * user-facing API.
+ *
+ * @internal
+ */
+export function __setBuildManifest(
+  manifest: Record<string, { file: string }>,
+): void {
+  pendingBuildManifest = manifest;
+}
+
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
 > extends McpServerBaseOmitted {
@@ -466,6 +486,12 @@ export class McpServer<
     this.serverOptions = options;
     this.express = express();
     this.express.use(express.json());
+    // Pick up the manifest if `dist/__entry.js` primed it before importing
+    // user code. Explicit `setViteManifest` calls still win because they
+    // happen after construction.
+    if (pendingBuildManifest) {
+      this.setViteManifest(pendingBuildManifest);
+    }
   }
 
   /**

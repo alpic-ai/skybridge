@@ -129,6 +129,6 @@ server.registerTool(
   },
 );
 
-export default server;
+export default await server.run();
 
 export type AppType = typeof server;
