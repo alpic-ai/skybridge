@@ -60,6 +60,9 @@ export class HostAdaptor implements Adaptor {
   private _polyfillDisplay: HostContext["display"] = { mode: "inline" };
   private readonly polyfillDisplayListeners = new Set<() => void>();
 
+  private readonly polyfillDisplayStore: HostContextStore<"display">;
+  private readonly polyfillViewStateStore: HostContextStore<"viewState">;
+
   private unsubscribeViewUUID: (() => void) | null = null;
 
   constructor() {
@@ -75,6 +78,27 @@ export class HostAdaptor implements Adaptor {
       this.appsSdkBridge = null;
       this.appsSdkStores = null;
     }
+
+    // Built once so that getHostContextStore returns stable references — required
+    // by useSyncExternalStore to avoid resubscribing on every render.
+    this.polyfillDisplayStore = {
+      subscribe: (onChange: () => void) => {
+        this.polyfillDisplayListeners.add(onChange);
+        return () => {
+          this.polyfillDisplayListeners.delete(onChange);
+        };
+      },
+      getSnapshot: () => this._polyfillDisplay,
+    };
+    this.polyfillViewStateStore = {
+      subscribe: (onChange: () => void) => {
+        this.viewStateListeners.add(onChange);
+        return () => {
+          this.viewStateListeners.delete(onChange);
+        };
+      },
+      getSnapshot: () => this._viewState,
+    };
 
     this.subscribeToViewUUID();
   }
@@ -101,27 +125,11 @@ export class HostAdaptor implements Adaptor {
     }
 
     if (key === "display") {
-      return {
-        subscribe: (onChange: () => void) => {
-          this.polyfillDisplayListeners.add(onChange);
-          return () => {
-            this.polyfillDisplayListeners.delete(onChange);
-          };
-        },
-        getSnapshot: () => this._polyfillDisplay,
-      } as HostContextStore<K>;
+      return this.polyfillDisplayStore as HostContextStore<K>;
     }
 
     if (key === "viewState") {
-      return {
-        subscribe: (onChange: () => void) => {
-          this.viewStateListeners.add(onChange);
-          return () => {
-            this.viewStateListeners.delete(onChange);
-          };
-        },
-        getSnapshot: () => this._viewState,
-      } as HostContextStore<K>;
+      return this.polyfillViewStateStore as HostContextStore<K>;
     }
 
     return this.mcpStores[
