@@ -60,6 +60,8 @@ export class HostAdaptor implements Adaptor {
   private _polyfillDisplay: HostContext["display"] = { mode: "inline" };
   private readonly polyfillDisplayListeners = new Set<() => void>();
 
+  private unsubscribeViewUUID: (() => void) | null = null;
+
   constructor() {
     this.mcp = McpAppBridge.getInstance();
     this.mcpStores = buildMcpContextStores(this.mcp);
@@ -79,6 +81,12 @@ export class HostAdaptor implements Adaptor {
 
   public hasAppsSdkOverlay(): boolean {
     return this.oai !== null;
+  }
+
+  /** @internal Release any subscriptions held on the underlying bridges. */
+  public cleanup(): void {
+    this.unsubscribeViewUUID?.();
+    this.unsubscribeViewUUID = null;
   }
 
   // ---- Adaptor interface (stubs) ----
@@ -290,11 +298,11 @@ export class HostAdaptor implements Adaptor {
     if (!this.oai) {
       return Promise.reject(new NotSupportedError("setOpenInAppUrl"));
     }
-    href = href.trim();
-    if (!href) {
-      throw new Error("The href parameter is required.");
+    const trimmed = href.trim();
+    if (!trimmed) {
+      return Promise.reject(new Error("The href parameter is required."));
     }
-    return this.oai.setOpenInAppUrl({ href });
+    return this.oai.setOpenInAppUrl({ href: trimmed });
   };
 
   public closeModal = (): void => {
@@ -325,7 +333,7 @@ export class HostAdaptor implements Adaptor {
   // ---- viewState persistence helpers (used in subsequent tasks) ----
 
   private subscribeToViewUUID(): void {
-    this.mcp.subscribe("toolResult")(() => {
+    this.unsubscribeViewUUID = this.mcp.subscribe("toolResult")(() => {
       const toolResult = this.mcp.getSnapshot("toolResult");
       const viewUUID = (
         toolResult?._meta as Record<string, unknown> | undefined

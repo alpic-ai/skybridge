@@ -40,10 +40,10 @@ describe("useSetOpenInAppUrl", () => {
       expect(setOpenInAppUrlMock).toHaveBeenCalledWith({ href });
     });
 
-    it("should throw an error when href is empty", () => {
+    it("should reject when href is empty", async () => {
       const { result } = renderHook(() => useSetOpenInAppUrl());
 
-      expect(() => result.current("")).toThrow(
+      await expect(result.current("")).rejects.toThrow(
         "The href parameter is required.",
       );
     });

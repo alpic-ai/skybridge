@@ -15,7 +15,8 @@ export const getAdaptor = (): Adaptor => {
     return cached;
   }
 
-  const hostType = window.skybridge?.hostType;
+  const hostType =
+    typeof window !== "undefined" ? window.skybridge?.hostType : undefined;
   const hasOai = typeof window !== "undefined" && window.openai !== undefined;
 
   if (hostType === "mcp-app" && hasOai) {
@@ -34,5 +35,6 @@ export const getAdaptor = (): Adaptor => {
 
 /** @internal Test-only. */
 export const _resetAdaptor = (): void => {
+  cached?.cleanup();
   cached = null;
 };
