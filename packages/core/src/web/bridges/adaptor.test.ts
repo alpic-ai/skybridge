@@ -19,7 +19,7 @@ describe("HostAdaptor", () => {
     localStorage.clear();
   });
 
-  it("captures window.openai as overlay when present, else oai is null", () => {
+  it("captures window.openai as overlay when present, else window.openai is null", () => {
     vi.stubGlobal("openai", undefined);
     expect(new HostAdaptor().hasAppsSdkOverlay()).toBe(false);
     McpAppBridge.resetInstance();
@@ -65,7 +65,7 @@ describe("HostAdaptor", () => {
     expect(fakeApp.downloadFile).not.toHaveBeenCalled();
   });
 
-  it("sendFollowUpMessage routes to oai only when scrollToBottom is set", async () => {
+  it("sendFollowUpMessage routes to window.openai only when scrollToBottom is set", async () => {
     const sendFollowUpMessage = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal("openai", { sendFollowUpMessage });
     let adaptor = new HostAdaptor();
@@ -90,7 +90,7 @@ describe("HostAdaptor", () => {
     });
   });
 
-  it("openExternal routes to oai only when redirectUrl: false", async () => {
+  it("openExternal routes to window.openai only when redirectUrl: false", async () => {
     const openExternal = vi.fn();
     vi.stubGlobal("openai", { openExternal });
     let adaptor = new HostAdaptor();
@@ -113,7 +113,7 @@ describe("HostAdaptor", () => {
     expect(openLink).toHaveBeenCalledWith({ url: "https://x" });
   });
 
-  it("Apps-SDK-exclusive methods throw NotSupportedError when oai is null", async () => {
+  it("Apps-SDK-exclusive methods throw NotSupportedError when window.openai is null", async () => {
     vi.stubGlobal("openai", undefined);
     const adaptor = new HostAdaptor();
     await expect(adaptor.uploadFile(new File([], "x"))).rejects.toThrow(
@@ -128,7 +128,7 @@ describe("HostAdaptor", () => {
     );
   });
 
-  it("uploadFile delegates to oai.uploadFile and tracks fileId in widgetState", async () => {
+  it("uploadFile delegates to window.openai.uploadFile and tracks fileId in widgetState", async () => {
     const setWidgetState = vi.fn().mockResolvedValue(undefined);
     const uploadFile = vi
       .fn()
@@ -144,7 +144,7 @@ describe("HostAdaptor", () => {
     );
   });
 
-  it("setViewState uses oai.setWidgetState when present", async () => {
+  it("setViewState uses window.openai.setWidgetState when present", async () => {
     const setWidgetState = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal("openai", { setWidgetState, widgetState: null });
     const adaptor = new HostAdaptor();
@@ -154,7 +154,7 @@ describe("HostAdaptor", () => {
     );
   });
 
-  it("setViewState falls back to MCP updateModelContext + localStorage when oai is null", async () => {
+  it("setViewState falls back to MCP updateModelContext + localStorage when window.openai is absent", async () => {
     vi.stubGlobal("openai", undefined);
     const adaptor = new HostAdaptor();
     const updateModelContext = vi.fn().mockResolvedValue(undefined);
@@ -179,7 +179,7 @@ describe("HostAdaptor", () => {
     expect(keys.some((k) => k.endsWith(":view-1"))).toBe(true);
   });
 
-  it("openModal/closeModal: delegates to oai.requestModal when present, polyfill state otherwise", () => {
+  it("openModal/closeModal: delegates to window.openai.requestModal when present, polyfill state otherwise", () => {
     const requestModal = vi.fn();
     vi.stubGlobal("openai", { requestModal });
     let adaptor = new HostAdaptor();
@@ -203,7 +203,7 @@ describe("HostAdaptor", () => {
     expect((adaptor as any)._polyfillDisplay).toEqual({ mode: "inline" });
   });
 
-  it("getHostContextStore: display/viewState route to oai overlay when present, MCP otherwise", () => {
+  it("getHostContextStore: display/viewState route to Apps SDK overlay when present, MCP otherwise", () => {
     vi.stubGlobal("openai", {
       view: { mode: "fullscreen" },
       widgetState: { modelContent: { count: 5 }, privateContent: {} },

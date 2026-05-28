@@ -26,19 +26,20 @@ function respondError(post: PostFn, id: number, code: number, message: string) {
 }
 
 function buildHostContext(): HostContext {
-  const prefs = useInspectorPreferencesStore.getState();
+  const preferences = useInspectorPreferencesStore.getState();
   return {
-    theme: prefs.theme,
-    locale: prefs.locale,
-    displayMode: prefs.displayMode,
-    safeAreaInsets: prefs.safeArea?.insets ?? {
+    theme: preferences.theme,
+    locale: preferences.locale,
+    displayMode: preferences.displayMode,
+    safeAreaInsets: preferences.safeArea?.insets ?? {
       top: 0,
       right: 0,
       bottom: 0,
       left: 0,
     },
-    platform: prefs.userAgent?.device?.type === "mobile" ? "mobile" : "web",
-    deviceCapabilities: prefs.userAgent?.capabilities,
+    platform:
+      preferences.userAgent?.device?.type === "mobile" ? "mobile" : "web",
+    deviceCapabilities: preferences.userAgent?.capabilities,
   };
 }
 
@@ -197,37 +198,39 @@ export function createMcpHostMock(
   window.addEventListener("message", handleMessage);
 
   // Subscribe to inspector preferences changes and push host-context-changed.
-  const unsubPrefs = useInspectorPreferencesStore.subscribe((prefs, prev) => {
-    const changed: HostContext = {};
-    if (prefs.theme !== prev.theme) {
-      changed.theme = prefs.theme;
-    }
-    if (prefs.locale !== prev.locale) {
-      changed.locale = prefs.locale;
-    }
-    if (prefs.displayMode !== prev.displayMode) {
-      changed.displayMode = prefs.displayMode;
-    }
-    if (prefs.safeArea !== prev.safeArea) {
-      changed.safeAreaInsets = prefs.safeArea?.insets;
-    }
-    if (prefs.userAgent !== prev.userAgent) {
-      changed.platform =
-        prefs.userAgent?.device?.type === "mobile" ? "mobile" : "web";
-      changed.deviceCapabilities = prefs.userAgent?.capabilities;
-    }
-    if (Object.keys(changed).length > 0) {
-      post({
-        jsonrpc: "2.0",
-        method: "ui/notifications/host-context-changed",
-        params: changed,
-      });
-    }
-  });
+  const unsubscribePreferences = useInspectorPreferencesStore.subscribe(
+    (preferences, previous) => {
+      const changed: HostContext = {};
+      if (preferences.theme !== previous.theme) {
+        changed.theme = preferences.theme;
+      }
+      if (preferences.locale !== previous.locale) {
+        changed.locale = preferences.locale;
+      }
+      if (preferences.displayMode !== previous.displayMode) {
+        changed.displayMode = preferences.displayMode;
+      }
+      if (preferences.safeArea !== previous.safeArea) {
+        changed.safeAreaInsets = preferences.safeArea?.insets;
+      }
+      if (preferences.userAgent !== previous.userAgent) {
+        changed.platform =
+          preferences.userAgent?.device?.type === "mobile" ? "mobile" : "web";
+        changed.deviceCapabilities = preferences.userAgent?.capabilities;
+      }
+      if (Object.keys(changed).length > 0) {
+        post({
+          jsonrpc: "2.0",
+          method: "ui/notifications/host-context-changed",
+          params: changed,
+        });
+      }
+    },
+  );
 
   return () => {
     window.removeEventListener("message", handleMessage);
-    unsubPrefs();
+    unsubscribePreferences();
   };
 }
 

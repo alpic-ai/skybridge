@@ -45,11 +45,11 @@ function findStorageKey(viewUUID: string): string | undefined {
  */
 export class HostAdaptor implements Adaptor {
   private readonly mcp: McpAppBridge;
-  private readonly oai: typeof window.openai | null;
-  private readonly oaiBridge: AppsSdkBridge | null;
+  private readonly openai: typeof window.openai | null;
+  private readonly appsSdkBridge: AppsSdkBridge | null;
 
   private readonly mcpStores: ReturnType<typeof buildMcpContextStores>;
-  private readonly oaiStores: ReturnType<
+  private readonly appsSdkStores: ReturnType<
     typeof buildAppsSdkOverlayStores
   > | null;
 
@@ -67,20 +67,20 @@ export class HostAdaptor implements Adaptor {
     this.mcpStores = buildMcpContextStores(this.mcp);
 
     if (typeof window !== "undefined" && window.openai !== undefined) {
-      this.oai = window.openai;
-      this.oaiBridge = AppsSdkBridge.getInstance();
-      this.oaiStores = buildAppsSdkOverlayStores(this.oaiBridge);
+      this.openai = window.openai;
+      this.appsSdkBridge = AppsSdkBridge.getInstance();
+      this.appsSdkStores = buildAppsSdkOverlayStores(this.appsSdkBridge);
     } else {
-      this.oai = null;
-      this.oaiBridge = null;
-      this.oaiStores = null;
+      this.openai = null;
+      this.appsSdkBridge = null;
+      this.appsSdkStores = null;
     }
 
     this.subscribeToViewUUID();
   }
 
   public hasAppsSdkOverlay(): boolean {
-    return this.oai !== null;
+    return this.openai !== null;
   }
 
   /** @internal Release any subscriptions held on the underlying bridges. */
@@ -94,8 +94,8 @@ export class HostAdaptor implements Adaptor {
   public getHostContextStore = <K extends keyof HostContext>(
     key: K,
   ): HostContextStore<K> => {
-    if (this.oaiStores && (key === "display" || key === "viewState")) {
-      return this.oaiStores[
+    if (this.appsSdkStores && (key === "display" || key === "viewState")) {
+      return this.appsSdkStores[
         key as "display" | "viewState"
       ] as HostContextStore<K>;
     }
@@ -168,8 +168,8 @@ export class HostAdaptor implements Adaptor {
     prompt: string,
     options?: SendFollowUpMessageOptions,
   ): Promise<void> => {
-    if (this.oai && options?.scrollToBottom !== undefined) {
-      await this.oai.sendFollowUpMessage({
+    if (this.openai && options?.scrollToBottom !== undefined) {
+      await this.openai.sendFollowUpMessage({
         prompt,
         scrollToBottom: options.scrollToBottom,
       });
@@ -183,8 +183,8 @@ export class HostAdaptor implements Adaptor {
   };
 
   public openExternal = (href: string, options?: OpenExternalOptions): void => {
-    if (this.oai && options?.redirectUrl === false) {
-      this.oai.openExternal({ href, redirectUrl: false });
+    if (this.openai && options?.redirectUrl === false) {
+      this.openai.openExternal({ href, redirectUrl: false });
       return;
     }
     this.mcp
@@ -209,14 +209,14 @@ export class HostAdaptor implements Adaptor {
   public setViewState = async (
     stateOrUpdater: SetViewStateAction,
   ): Promise<void> => {
-    if (this.oai) {
+    if (this.openai) {
       const modelContent =
         typeof stateOrUpdater === "function"
-          ? stateOrUpdater(this.oai.widgetState?.modelContent ?? null)
+          ? stateOrUpdater(this.openai.widgetState?.modelContent ?? null)
           : stateOrUpdater;
-      await this.oai.setWidgetState({
+      await this.openai.setWidgetState({
         privateContent: {},
-        ...this.oai.widgetState,
+        ...this.openai.widgetState,
         modelContent,
       });
       return;
@@ -250,10 +250,10 @@ export class HostAdaptor implements Adaptor {
     file: File,
     options?: UploadFileOptions,
   ): Promise<FileMetadata> => {
-    if (!this.oai) {
+    if (!this.openai) {
       throw new NotSupportedError("uploadFile");
     }
-    const metadata = await this.oai.uploadFile(file, options);
+    const metadata = await this.openai.uploadFile(file, options);
     await this.trackFileIds(metadata.fileId);
     return metadata;
   };
@@ -261,22 +261,22 @@ export class HostAdaptor implements Adaptor {
   public getFileDownloadUrl = (
     file: FileMetadata,
   ): Promise<{ downloadUrl: string }> => {
-    if (!this.oai) {
+    if (!this.openai) {
       return Promise.reject(new NotSupportedError("getFileDownloadUrl"));
     }
-    return this.oai.getFileDownloadUrl(file);
+    return this.openai.getFileDownloadUrl(file);
   };
 
   public selectFiles = async (): Promise<FileMetadata[]> => {
-    if (!this.oai) {
+    if (!this.openai) {
       throw new NotSupportedError("selectFiles");
     }
-    if (!this.oai.selectFiles) {
+    if (!this.openai.selectFiles) {
       throw new Error(
         "selectFiles is not supported by the current host version.",
       );
     }
-    const files = await this.oai.selectFiles();
+    const files = await this.openai.selectFiles();
     if (files.length > 0) {
       await this.trackFileIds(...files.map((f) => f.fileId));
     }
@@ -284,8 +284,8 @@ export class HostAdaptor implements Adaptor {
   };
 
   public openModal = (options: RequestModalOptions): void => {
-    if (this.oai) {
-      this.oai.requestModal(options);
+    if (this.openai) {
+      this.openai.requestModal(options);
       return;
     }
     this._polyfillDisplay = { mode: "modal", params: options.params };
@@ -295,18 +295,18 @@ export class HostAdaptor implements Adaptor {
   };
 
   public setOpenInAppUrl = (href: string): Promise<void> => {
-    if (!this.oai) {
+    if (!this.openai) {
       return Promise.reject(new NotSupportedError("setOpenInAppUrl"));
     }
     const trimmed = href.trim();
     if (!trimmed) {
       return Promise.reject(new Error("The href parameter is required."));
     }
-    return this.oai.setOpenInAppUrl({ href: trimmed });
+    return this.openai.setOpenInAppUrl({ href: trimmed });
   };
 
   public closeModal = (): void => {
-    if (this.oai) {
+    if (this.openai) {
       return; // host owns modal lifecycle
     }
     this._polyfillDisplay = { mode: "inline" };
@@ -316,10 +316,10 @@ export class HostAdaptor implements Adaptor {
   };
 
   private async trackFileIds(...fileIds: string[]): Promise<void> {
-    if (!this.oai) {
+    if (!this.openai) {
       return;
     }
-    const current = this.oai.widgetState;
+    const current = this.openai.widgetState;
     const state: AppsSdkWidgetState = current
       ? { ...current }
       : { modelContent: {}, privateContent: {} };
@@ -327,7 +327,7 @@ export class HostAdaptor implements Adaptor {
       state.imageIds = [];
     }
     state.imageIds.push(...fileIds);
-    await this.oai.setWidgetState(state);
+    await this.openai.setWidgetState(state);
   }
 
   // ---- viewState persistence helpers (used in subsequent tasks) ----
