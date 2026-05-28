@@ -50,4 +50,4 @@ EXPOSE 3000
 # Run the built server directly rather than via `npm start` / `skybridge start`.
 # Each wrapper adds a process layer that can swallow SIGTERM, which makes
 # graceful shutdowns time out on platforms like Cloud Run, Fly, and k8s.
-CMD ["node", "dist/server.js"]
+CMD ["node", "dist/__entry.js"]

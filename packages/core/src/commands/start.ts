@@ -24,7 +24,12 @@ export default class Start extends Command {
 
     console.clear();
 
-    const indexPath = resolve(process.cwd(), "dist/server.js");
+    // Prefer the wrapper (`dist/__entry.js`) when present, but fall back to
+    // `dist/server.js` so projects built with a previous skybridge version
+    // still start cleanly without a rebuild.
+    const entryPath = resolve(process.cwd(), "dist/__entry.js");
+    const legacyPath = resolve(process.cwd(), "dist/server.js");
+    const indexPath = existsSync(entryPath) ? entryPath : legacyPath;
 
     if (!existsSync(indexPath)) {
       console.error("❌ Error: No build output found");

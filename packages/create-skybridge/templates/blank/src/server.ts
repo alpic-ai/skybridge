@@ -11,11 +11,6 @@ const server = new McpServer(
 // Register tools with `server.registerTool(...)`.
 // Docs: https://docs.skybridge.tech/api-reference/register-tool
 
-if (process.env.NODE_ENV === "production") {
-  const { default: manifest } = await import("./vite-manifest.js");
-  server.setViteManifest(manifest);
-}
-
-export default await server.run();
+export default server;
 
 export type AppType = typeof server;

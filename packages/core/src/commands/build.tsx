@@ -1,8 +1,9 @@
-import { readFileSync, rmSync, writeFileSync } from "node:fs";
+import { rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { useEffect } from "react";
+import { emitEntryWrapper, emitManifestModule } from "../cli/build-helpers.js";
 import { Header } from "../cli/header.js";
 import { resolveViewsDir } from "../cli/resolve-views-dir.js";
 import { type CommandStep, useExecuteSteps } from "../cli/use-execute-steps.js";
@@ -28,24 +29,25 @@ export const commandSteps: CommandStep[] = [
   },
   {
     label: "Emitting manifest module",
-    // Inline the Vite manifest as a JS module so the server can `import` it
+    // Inline the Vite manifest as a JS module so the wrapper can `import` it
     // instead of `readFileSync(process.cwd() + ...)` at runtime — required for
     // workerd, where neither cwd nor the assets directory is readable.
-    // The path mirrors `skybridge start`'s entry convention (dist/server.js)
-    // so the import in the user's entry resolves to a sibling file.
     run: () => {
       const root = process.cwd();
-      const manifest = readFileSync(
+      emitManifestModule(
         path.join(root, "dist", "assets", ".vite", "manifest.json"),
-        "utf-8",
-      );
-      writeFileSync(
         path.join(root, "dist", "vite-manifest.js"),
-        `export default ${manifest};\n`,
       );
     },
   },
-
+  {
+    label: "Emitting entry wrapper",
+    // dist/__entry.js wires manifest + run() so the user's src/server.ts only
+    // needs to export the McpServer instance. Deploy targets point here.
+    run: () => {
+      emitEntryWrapper(path.join(process.cwd(), "dist"));
+    },
+  },
   {
     label: "Emitting Cloudflare redirects",
     // Cloudflare's `assets.directory` maps URL → file literally — no
