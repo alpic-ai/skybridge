@@ -6,7 +6,7 @@
 # (For bun or deno, adapt the install/build/prune commands below.)
 
 # Build stage: install deps, compile the app, then prune dev deps.
-FROM node:24-slim AS build
+FROM node:24.16.0-slim AS build
 WORKDIR /app
 
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
@@ -35,7 +35,7 @@ RUN if [ -f package-lock.json ]; then \
     fi
 
 # Runtime stage: copy built artifacts and prod deps, run as non-root.
-FROM node:24-slim AS runtime
+FROM node:24.16.0-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
