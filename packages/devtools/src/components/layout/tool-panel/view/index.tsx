@@ -108,6 +108,20 @@ export const View = () => {
       iframe,
       (name, args) => mcpClient.callTool(name, args),
       logFn,
+      () => ({
+        toolInput: openaiObjectRef.current?.toolInput as
+          | Record<string, unknown>
+          | null
+          | undefined,
+        toolOutput: openaiObjectRef.current?.toolOutput as
+          | Record<string, unknown>
+          | null
+          | undefined,
+        toolResponseMetadata: openaiObjectRef.current?.toolResponseMetadata as
+          | Record<string, unknown>
+          | null
+          | undefined,
+      }),
     );
 
     iframe.contentDocument.open();

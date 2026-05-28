@@ -44,6 +44,12 @@ function buildHostContext(): HostContext {
 
 export type McpHostMockCleanup = () => void;
 
+export type ToolDataSnapshot = {
+  toolInput?: Record<string, unknown> | null;
+  toolOutput?: Record<string, unknown> | null;
+  toolResponseMetadata?: Record<string, unknown> | null;
+};
+
 export function createMcpHostMock(
   iframe: HTMLIFrameElement,
   callToolFn: (
@@ -55,6 +61,7 @@ export function createMcpHostMock(
     args: Record<string, unknown>,
     type?: "default" | "response",
   ) => void,
+  getCurrentToolData: () => ToolDataSnapshot,
 ): McpHostMockCleanup {
   const post = (msg: unknown) => postToIframe(iframe, msg);
 
@@ -97,6 +104,31 @@ export function createMcpHostMock(
           },
           hostContext: buildHostContext(),
         });
+        // Push current tool state immediately after initialize so the widget
+        // sees toolInput/toolOutput without waiting for a separate update.
+        const snapshot = getCurrentToolData();
+        if (snapshot.toolInput != null) {
+          post({
+            jsonrpc: "2.0",
+            method: "ui/notifications/tool-input",
+            params: { arguments: snapshot.toolInput },
+          });
+        }
+        if (
+          snapshot.toolOutput != null ||
+          snapshot.toolResponseMetadata != null
+        ) {
+          post({
+            jsonrpc: "2.0",
+            method: "ui/notifications/tool-result",
+            params: {
+              content: [],
+              structuredContent: snapshot.toolOutput ?? {},
+              isError: false,
+              _meta: snapshot.toolResponseMetadata ?? {},
+            },
+          });
+        }
         break;
       }
       case "ui/update-model-context": {
