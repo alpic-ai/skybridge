@@ -19,13 +19,7 @@ import {
   ghostButtonClass,
 } from "./styles.js";
 
-function TruncatedDescription({
-  id,
-  text,
-}: {
-  id?: string;
-  text: string;
-}) {
+function TruncatedDescription({ id, text }: { id?: string; text: string }) {
   const [expanded, setExpanded] = useState(false);
   const [isClamped, setIsClamped] = useState(false);
   const spanRef = useRef<HTMLSpanElement>(null);
@@ -35,7 +29,7 @@ function TruncatedDescription({
     if (el) {
       setIsClamped(el.scrollHeight > el.clientHeight);
     }
-  }, [text]);
+  }, []);
 
   return (
     <p id={id} className={descriptionTextClass}>
@@ -213,11 +207,13 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
           {required && <span className="ml-1 text-destructive">*</span>}
         </div>
       )}
-      {!isRoot && description && (
-        typeof description === "string"
-          ? <TruncatedDescription text={description} />
-          : <p className={descriptionTextClass}>{description}</p>
-      )}
+      {!isRoot &&
+        description &&
+        (typeof description === "string" ? (
+          <TruncatedDescription text={description} />
+        ) : (
+          <p className={descriptionTextClass}>{description}</p>
+        ))}
       {properties
         .filter((p) => !p.hidden)
         .map((p) => (
