@@ -487,10 +487,13 @@ export class McpServer<
     this.express = express();
     this.express.use(express.json());
     // Pick up the manifest if `dist/__entry.js` primed it before importing
-    // user code. Explicit `setViteManifest` calls still win because they
-    // happen after construction.
+    // user code. Consume-once: clear after the first construction so a
+    // subsequent test that doesn't prime can't inherit stale state.
+    // Explicit `setViteManifest` calls still win because they happen after
+    // construction.
     if (pendingBuildManifest) {
       this.setViteManifest(pendingBuildManifest);
+      pendingBuildManifest = null;
     }
   }
 
