@@ -1,8 +1,12 @@
-import { readFileSync, rmSync, writeFileSync } from "node:fs";
+import { rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { useEffect } from "react";
+import {
+  emitManifestModule,
+  emitVercelBuildOutput,
+} from "../cli/build-helpers.js";
 import { Header } from "../cli/header.js";
 import { resolveViewsDir } from "../cli/resolve-views-dir.js";
 import { type CommandStep, useExecuteSteps } from "../cli/use-execute-steps.js";
@@ -28,30 +32,16 @@ export const commandSteps: CommandStep[] = [
   },
   {
     label: "Emitting manifest module",
-    // Inline the Vite manifest as a JS module so the server can `import` it
-    // instead of `readFileSync(process.cwd() + ...)` at runtime — required for
-    // workerd, where neither cwd nor the assets directory is readable.
-    // The path mirrors `skybridge start`'s entry convention (dist/server.js)
-    // so the import in the user's entry resolves to a sibling file.
     run: () => {
       const root = process.cwd();
-      const manifest = readFileSync(
+      emitManifestModule(
         path.join(root, "dist", "assets", ".vite", "manifest.json"),
-        "utf-8",
-      );
-      writeFileSync(
         path.join(root, "dist", "vite-manifest.js"),
-        `export default ${manifest};\n`,
       );
     },
   },
-
   {
     label: "Emitting Cloudflare redirects",
-    // Cloudflare's `assets.directory` maps URL → file literally — no
-    // mount-strip like `app.use("/assets", express.static(...))`. Rewrite
-    // `/assets/assets/*` to `/assets/*` before lookup; status 200 =
-    // server-side rewrite, not HTTP redirect.
     run: () => {
       const root = process.cwd();
       writeFileSync(
@@ -62,9 +52,6 @@ export const commandSteps: CommandStep[] = [
   },
   {
     label: "Emitting Cloudflare headers",
-    // Cloudflare's static asset handler bypasses the worker entirely, so
-    // `app.use("/assets", cors())` never fires for asset requests. Attach
-    // CORS at the edge so cross-origin view iframes can load JS/CSS.
     run: () => {
       const root = process.cwd();
       writeFileSync(
@@ -73,12 +60,15 @@ export const commandSteps: CommandStep[] = [
       );
     },
   },
+  {
+    label: "Emitting Vercel build output",
+    run: () => emitVercelBuildOutput(process.cwd()),
+  },
 ];
 
 export default class Build extends Command {
   static override description = "Build the views and MCP server";
   static override examples = ["skybridge build"];
-  static override flags = {};
 
   public async run(): Promise<void> {
     const App = () => {
