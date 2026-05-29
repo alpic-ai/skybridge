@@ -483,6 +483,35 @@ describe("createApp", () => {
   });
 });
 
+describe("createApp Vercel mode", () => {
+  it("server.run() returns the Express app without binding a port when VERCEL=1", async () => {
+    const prevVercel = process.env.VERCEL;
+    const prevEnv = process.env.NODE_ENV;
+    process.env.VERCEL = "1";
+    process.env.NODE_ENV = "production";
+    try {
+      vi.resetModules();
+      const { McpServer: Reloaded } = await import("./server.js");
+      const server = new Reloaded({ name: "t", version: "0.0.0" });
+      const result = await server.run();
+      expect(typeof result).toBe("function");
+      expect(result).toBe(server.express);
+      const { port, server: listening } = await listen(server.express);
+      openServer = listening;
+      const res = await postMcp(port);
+      expect(res.status).not.toBe(404);
+    } finally {
+      if (prevVercel === undefined) {
+        delete process.env.VERCEL;
+      } else {
+        process.env.VERCEL = prevVercel;
+      }
+      process.env.NODE_ENV = prevEnv;
+      vi.resetModules();
+    }
+  });
+});
+
 describe("createApp tunnel routes", () => {
   it("proxies POST /__skybridge/tunnel to the cli control server in dev mode", async () => {
     // Stand up a fake control listener that returns a known JSON body.

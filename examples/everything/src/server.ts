@@ -1,5 +1,5 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { McpServer } from "skybridge/server";
+import { McpServer, text } from "skybridge/server";
 import { z } from "zod";
 
 const server = new McpServer(
@@ -43,6 +43,33 @@ const server = new McpServer(
         _meta: {
           secret: "But _meta is only visible to you",
         },
+      };
+    },
+  )
+  .registerTool(
+    {
+      name: "flip-coin",
+      description: "Flips a coin and checks if the user's guess is correct",
+      inputSchema: {
+        guess: z.enum(["heads", "tails"]).describe("The user's guess"),
+      },
+      outputSchema: {
+        flip: z.enum(["heads", "tails"]).describe("The side the coin landed on"),
+        guess: z.enum(["heads", "tails"]).describe("The user's guess"),
+        won: z.boolean().describe("Whether the user won"),
+      },
+      _meta: {
+        "openai/widgetAccessible": true,
+      },
+    },
+    async ({ guess }) => {
+      const flip = Math.random() < 0.5 ? "heads" : "tails";
+      const won = guess === flip;
+      const structuredContent = { flip, guess, won };
+      return {
+        structuredContent,
+        content: [text(`Coin landed on ${flip}. User guessed ${guess} and ${won ? "won" : "lost"}.`)],
+        isError: false,
       };
     },
   );
