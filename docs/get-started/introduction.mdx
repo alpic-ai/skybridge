@@ -1,0 +1,73 @@
+---
+title: "Start building with Skybridge"
+description: "Everything you need to build MCP Apps that run in ChatGPT and Claude"
+sidebarTitle: "Introduction"
+icon: "house"
+---
+
+Skybridge is a fullstack TypeScript framework for building MCP Apps: interactive views that render inside model hosts. Define tools, write React components, and let Skybridge do the rest:
+
+<CodeGroup>
+```ts server.ts
+import { McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({ name: "my-app", version: "0.0.1" }, {})
+  .registerTool(
+    {
+      name: "greeting",
+      description: "Greet someone by name.",
+      inputSchema: { name: z.string() },
+      view: { component: "greeting" },
+    },
+    async ({ name }) => {
+      return { structuredContent: { message: `Hello, ${name}!` } };
+    },
+  );
+```
+
+```tsx views/greeting.tsx
+import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
+
+export default function Greeting() {
+  const { output } = useToolInfo<"greeting">();
+  return <h1>{output.message}</h1>;
+}
+```
+</CodeGroup>
+
+Start building now by scaffolding your first project:
+
+```bash
+npx skybridge create
+```
+
+## MCP Apps Are Hard, but Not for You
+
+MCP Apps are the surface on which humans and agents use software collaboratively. In practice, those apps use the [Model Context Protocol](https://modelcontextprotocol.io/) to run inside model hosts such as ChatGPT and Claude.
+
+MCP Apps introduce a fundamental shift: unlike bidirectional web apps, they are three-way systems where data flows between your app, the user, and the model. It boils down to mastering these core concepts:
+
+<Columns cols={3}>
+    <Card title="Architecture" icon="route" href="/get-started/architecture">
+        Design experiences leveraging models intelligence.
+    </Card>
+    <Card title="Tools" icon="tools">
+        Define what humans and agents can see and do.
+    </Card>
+    <Card title="Views" icon="palette">
+        Craft interactive UIs rendered in conversation.
+    </Card>
+</Columns>
+
+Skybridge is built around all three; it's the fastest, most complete way to build full-fledged MCP Apps. Protocol, authentication, and host support are baked in. It comes with a dead-simple architecture and a complete tooling suite, including HMR, inspector, tunneling, playground, and deployment. Your sole focus: what makes your app great.
+
+## The AI Sidekick of Your AI Sidekick
+
+With the Skybridge Skill, coding agents can autonomously develop MCP Apps. Better still, Skybridge-pilled LLMs help you brainstorm ideas, design your UX, and craft great apps that actually make sense inside ChatGPT or Claude.
+
+Install it now:
+
+```bash
+npx skills add alpic-ai/skybridge -s skybridge
+```

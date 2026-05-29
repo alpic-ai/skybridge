@@ -1,0 +1,114 @@
+---
+title: "Quickstart"
+description: "Build, test, and deploy your first MCP App"
+icon: "bolt"
+iconType: "regular"
+---
+
+To get a running codebase right away, you can scaffold a project from our templates. They come pre-configured with:
+- a working MCP server
+- a full development environment with a local emulator, file watching, and hot module reload.
+
+<Info>
+Prerequisite: Skybridge runs on [Node 24+](https://nodejs.org/en/download)
+</Info>
+
+## Scaffold Your Project
+
+Set up your app with a single command:
+
+```bash
+npx skybridge create
+```
+
+The default `demo` template comes with two tools:
+- `start`: mounts the `onboarding` view
+- `get-fortune-cookie`: with no view
+
+Tools are defined in `server.ts`, UI components in the `views` directory. Tools are bound to views in the tool definition.
+
+<Tip>
+To scaffold a bare-bones project without tools or view placeholders, select the `blank` template.
+</Tip>
+
+## Run Locally
+
+Start the development server from the project root:
+
+<CodeGroup>
+```bash npm
+npm run dev
+```
+```bash pnpm
+pnpm dev
+```
+```bash yarn
+yarn dev
+```
+```bash bun
+bun dev
+```
+```bash deno
+deno task dev
+```
+</CodeGroup>
+
+This spins up two routes:
+- `http://localhost:3000/mcp`: the MCP server your app is running on
+- `http://localhost:3000/`: the DevTools for testing and debugging your app
+
+<Tip>
+**Updates to your codebase are reflected right away:** server and UI components are reloaded on file save.
+</Tip>
+
+## Connect to ChatGPT and Claude
+
+You can plug your locally running server directly into AI hosts by exposing your app on the internet. To do so, start the dev server with an Alpic tunnel:
+
+<CodeGroup>
+```bash npm
+npm run dev --tunnel
+```
+```bash pnpm
+pnpm dev --tunnel
+```
+```bash yarn
+yarn dev --tunnel
+```
+```bash bun
+bun dev --tunnel
+```
+```bash deno
+deno task dev --tunnel
+```
+</CodeGroup>
+
+You'll be provided a public URL (e.g., `https://superb-marmot-fondue-420.alpic.dev/mcp`) to register your app as a ChatGPT app or a Claude connector.
+
+<Tip>
+[Alpic tunnels](https://docs.alpic.ai/cli/tunnel) come with a free LLM Playground on `/try`. No config needed: it's already wired to your local server.
+</Tip>
+
+## Ship
+
+Deploy your app to the [Alpic Cloud](https://docs.alpic.ai/) by running:
+
+<CodeGroup>
+```bash npm
+npm run deploy
+```
+```bash pnpm
+pnpm deploy
+```
+```bash yarn
+yarn deploy
+```
+```bash bun
+bun deploy
+```
+```bash deno
+deno task deploy
+```
+</CodeGroup>
+
+After deployment succeeds, the CLI prints the app's public URL. You're now live!
