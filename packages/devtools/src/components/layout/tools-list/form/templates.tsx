@@ -24,10 +24,12 @@ function TruncatedDescription({ id, text }: { id?: string; text: string }) {
   const [isClamped, setIsClamped] = useState(false);
   const spanRef = useRef<HTMLSpanElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: text is a trigger — reset expanded whenever the prop changes
   useEffect(() => {
     setExpanded(false);
   }, [text]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: text is a trigger — re-check clamping whenever the prop changes
   useEffect(() => {
     if (!expanded) {
       const element = spanRef.current;
@@ -153,7 +155,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
           {required && <span className="ml-1 text-destructive">*</span>}
         </label>
       )}
-      {showHint && <TruncatedDescription text={rawDescription!} />}
+      {showHint && <TruncatedDescription text={rawDescription as string} />}
       {children}
       {errors}
       {help}
