@@ -25,11 +25,12 @@ function TruncatedDescription({ id, text }: { id?: string; text: string }) {
   const spanRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    setExpanded(false);
     const el = spanRef.current;
     if (el) {
       setIsClamped(el.scrollHeight > el.clientHeight);
     }
-  }, []);
+  }, [text]);
 
   return (
     <p id={id} className={descriptionTextClass}>
