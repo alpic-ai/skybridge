@@ -24,14 +24,18 @@ function TruncatedDescription({ id, text }: { id?: string; text: string }) {
   const [isClamped, setIsClamped] = useState(false);
   const spanRef = useRef<HTMLSpanElement>(null);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: text triggers re-measurement of clamping without being read inside the effect
   useEffect(() => {
     setExpanded(false);
-    const el = spanRef.current;
-    if (el) {
-      setIsClamped(el.scrollHeight > el.clientHeight);
-    }
   }, [text]);
+
+  useEffect(() => {
+    if (!expanded) {
+      const element = spanRef.current;
+      if (element) {
+        setIsClamped(element.scrollHeight > element.clientHeight);
+      }
+    }
+  }, [expanded, text]);
 
   return (
     <p id={id} className={descriptionTextClass}>
@@ -149,7 +153,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
           {required && <span className="ml-1 text-destructive">*</span>}
         </label>
       )}
-      {showHint && <TruncatedDescription text={rawDescription as string} />}
+      {showHint && <TruncatedDescription text={rawDescription!} />}
       {children}
       {errors}
       {help}
@@ -213,13 +217,9 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
           {required && <span className="ml-1 text-destructive">*</span>}
         </div>
       )}
-      {!isRoot &&
-        description &&
-        (typeof description === "string" ? (
-          <TruncatedDescription text={description} />
-        ) : (
-          <p className={descriptionTextClass}>{description}</p>
-        ))}
+      {!isRoot && description && (
+        <TruncatedDescription text={String(description)} />
+      )}
       {properties
         .filter((p) => !p.hidden)
         .map((p) => (
