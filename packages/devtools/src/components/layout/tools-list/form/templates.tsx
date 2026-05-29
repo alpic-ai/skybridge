@@ -219,13 +219,13 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
           {required && <span className="ml-1 text-destructive">*</span>}
         </div>
       )}
-      {!isRoot && description && (
-        typeof description === "string" ? (
+      {!isRoot &&
+        description &&
+        (typeof description === "string" ? (
           <TruncatedDescription text={description} />
         ) : (
           <p className={descriptionTextClass}>{description}</p>
-        )
-      )}
+        ))}
       {properties
         .filter((p) => !p.hidden)
         .map((p) => (
