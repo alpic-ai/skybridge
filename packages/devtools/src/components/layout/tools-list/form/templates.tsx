@@ -11,12 +11,49 @@ import type {
 } from "@rjsf/utils";
 import { getInputProps } from "@rjsf/utils";
 import { Plus, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils.js";
 import {
   denseInputClass,
   descriptionTextClass,
   ghostButtonClass,
 } from "./styles.js";
+
+function TruncatedDescription({
+  id,
+  text,
+}: {
+  id?: string;
+  text: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [isClamped, setIsClamped] = useState(false);
+  const spanRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const el = spanRef.current;
+    if (el) {
+      setIsClamped(el.scrollHeight > el.clientHeight);
+    }
+  }, [text]);
+
+  return (
+    <p id={id} className={descriptionTextClass}>
+      <span ref={spanRef} className={expanded ? undefined : "line-clamp-3"}>
+        {text}
+      </span>
+      {isClamped && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="ml-1 text-[10px] text-muted-foreground underline"
+        >
+          {expanded ? "see less" : "see more"}
+        </button>
+      )}
+    </p>
+  );
+}
 
 export function BaseInputTemplate(props: BaseInputTemplateProps) {
   const {
@@ -116,7 +153,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
           {required && <span className="ml-1 text-destructive">*</span>}
         </label>
       )}
-      {showHint && <p className={descriptionTextClass}>{rawDescription}</p>}
+      {showHint && <TruncatedDescription text={rawDescription as string} />}
       {children}
       {errors}
       {help}
@@ -140,9 +177,7 @@ export function DescriptionFieldTemplate(props: DescriptionFieldProps) {
     return null;
   }
   return (
-    <p id={props.id} className={descriptionTextClass}>
-      {props.description}
-    </p>
+    <TruncatedDescription id={props.id} text={String(props.description)} />
   );
 }
 
@@ -179,7 +214,9 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         </div>
       )}
       {!isRoot && description && (
-        <p className={descriptionTextClass}>{description}</p>
+        typeof description === "string"
+          ? <TruncatedDescription text={description} />
+          : <p className={descriptionTextClass}>{description}</p>
       )}
       {properties
         .filter((p) => !p.hidden)
@@ -212,7 +249,7 @@ export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
           {required && <span className="ml-1 text-destructive">*</span>}
         </div>
       )}
-      {description && <p className={descriptionTextClass}>{description}</p>}
+      {description && <TruncatedDescription text={description} />}
       {/* rjsf v6: items is ReactElement[] (pre-rendered ArrayFieldItemTemplate). */}
       {items}
       {canAdd && (

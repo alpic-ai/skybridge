@@ -57,7 +57,7 @@ function ToolsList() {
         type="single"
         value={openTool ?? ""}
         onValueChange={handleToolClick}
-        className="min-h-0 overflow-y-auto"
+        className="min-h-0 overflow-y-auto scrollbar-hide"
       >
         {tools.map((tool) => (
           <ToolItem key={tool.name} tool={tool} open={openTool === tool.name} />

@@ -26,6 +26,13 @@
   --color-ring: #5eead4;
 }
 
+@utility scrollbar-hide {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 .preview-region {
   /* Figma “bg-secondary-subtle” / “border-tertiary” → @alpic-ai/ui @theme color tokens */
   --preview-region-bg: var(--color-light-gray);
