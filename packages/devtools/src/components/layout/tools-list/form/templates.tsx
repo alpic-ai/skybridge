@@ -220,7 +220,11 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
         </div>
       )}
       {!isRoot && description && (
-        <TruncatedDescription text={String(description)} />
+        typeof description === "string" ? (
+          <TruncatedDescription text={description} />
+        ) : (
+          <p className={descriptionTextClass}>{description}</p>
+        )
       )}
       {properties
         .filter((p) => !p.hidden)
