@@ -2,7 +2,7 @@ import { rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import {
   emitManifestModule,
   emitVercelBuildOutput,
@@ -12,63 +12,59 @@ import { resolveViewsDir } from "../cli/resolve-views-dir.js";
 import { type CommandStep, useExecuteSteps } from "../cli/use-execute-steps.js";
 import { scanAndWriteViewsDts } from "../web/plugin/scan-views.js";
 
-export function buildSteps(): CommandStep[] {
-  return [
-    {
-      label: "Scanning views",
-      run: async () => {
-        const root = process.cwd();
-        const viewsDir = await resolveViewsDir(root);
-        scanAndWriteViewsDts(root, viewsDir);
-      },
+export const commandSteps: CommandStep[] = [
+  {
+    label: "Scanning views",
+    run: async () => {
+      const root = process.cwd();
+      const viewsDir = await resolveViewsDir(root);
+      scanAndWriteViewsDts(root, viewsDir);
     },
-    {
-      label: "Compiling server",
-      run: () => rmSync("dist", { recursive: true, force: true }),
-      command: "tsc -b --force",
+  },
+  {
+    label: "Compiling server",
+    run: () => rmSync("dist", { recursive: true, force: true }),
+    command: "tsc -b --force",
+  },
+  {
+    label: "Building views",
+    command: "vite build",
+  },
+  {
+    label: "Emitting manifest module",
+    run: () => {
+      const root = process.cwd();
+      emitManifestModule(
+        path.join(root, "dist", "assets", ".vite", "manifest.json"),
+        path.join(root, "dist", "vite-manifest.js"),
+      );
     },
-    {
-      label: "Building views",
-      command: "vite build",
+  },
+  {
+    label: "Emitting Cloudflare redirects",
+    run: () => {
+      const root = process.cwd();
+      writeFileSync(
+        path.join(root, "dist", "assets", "_redirects"),
+        "/assets/assets/* /assets/:splat 200\n",
+      );
     },
-    {
-      label: "Emitting manifest module",
-      run: () => {
-        const root = process.cwd();
-        emitManifestModule(
-          path.join(root, "dist", "assets", ".vite", "manifest.json"),
-          path.join(root, "dist", "vite-manifest.js"),
-        );
-      },
+  },
+  {
+    label: "Emitting Cloudflare headers",
+    run: () => {
+      const root = process.cwd();
+      writeFileSync(
+        path.join(root, "dist", "assets", "_headers"),
+        "/assets/*\n  Access-Control-Allow-Origin: *\n",
+      );
     },
-    {
-      label: "Emitting Cloudflare redirects",
-      run: () => {
-        const root = process.cwd();
-        writeFileSync(
-          path.join(root, "dist", "assets", "_redirects"),
-          "/assets/assets/* /assets/:splat 200\n",
-        );
-      },
-    },
-    {
-      label: "Emitting Cloudflare headers",
-      run: () => {
-        const root = process.cwd();
-        writeFileSync(
-          path.join(root, "dist", "assets", "_headers"),
-          "/assets/*\n  Access-Control-Allow-Origin: *\n",
-        );
-      },
-    },
-    {
-      label: "Emitting Vercel build output",
-      run: () => emitVercelBuildOutput(process.cwd()),
-    },
-  ];
-}
-
-export const commandSteps: CommandStep[] = buildSteps();
+  },
+  {
+    label: "Emitting Vercel build output",
+    run: () => emitVercelBuildOutput(process.cwd()),
+  },
+];
 
 export default class Build extends Command {
   static override description = "Build the views and MCP server";
@@ -76,8 +72,8 @@ export default class Build extends Command {
 
   public async run(): Promise<void> {
     const App = () => {
-      const steps = useMemo(() => buildSteps(), []);
-      const { currentStep, status, error, execute } = useExecuteSteps(steps);
+      const { currentStep, status, error, execute } =
+        useExecuteSteps(commandSteps);
 
       useEffect(() => {
         execute();
@@ -89,7 +85,7 @@ export default class Build extends Command {
             <Text color="green"> → building for production…</Text>
           </Header>
 
-          {steps.map((step, index) => {
+          {commandSteps.map((step, index) => {
             const isCurrent = index === currentStep && status === "running";
             const isCompleted = index < currentStep || status === "success";
             const isError = status === "error" && index === currentStep;
