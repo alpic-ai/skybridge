@@ -24,6 +24,7 @@ function TruncatedDescription({ id, text }: { id?: string; text: string }) {
   const [isClamped, setIsClamped] = useState(false);
   const spanRef = useRef<HTMLSpanElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: text triggers re-measurement of clamping without being read inside the effect
   useEffect(() => {
     setExpanded(false);
     const el = spanRef.current;
@@ -171,8 +172,12 @@ export function DescriptionFieldTemplate(props: DescriptionFieldProps) {
   if (!props.description) {
     return null;
   }
-  return (
-    <TruncatedDescription id={props.id} text={String(props.description)} />
+  return typeof props.description === "string" ? (
+    <TruncatedDescription id={props.id} text={props.description} />
+  ) : (
+    <p id={props.id} className={descriptionTextClass}>
+      {props.description}
+    </p>
   );
 }
 
