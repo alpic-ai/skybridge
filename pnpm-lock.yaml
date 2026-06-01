@@ -815,9 +815,6 @@ importers:
 
   examples/supabase-triplog:
     dependencies:
-      '@alpic-ai/insights':
-        specifier: ^1.127.1
-        version: 1.128.0(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.3.6)
@@ -1359,15 +1356,6 @@ packages:
 
   '@alpic-ai/insights@1.122.1':
     resolution: {integrity: sha512-Mac+UjnpsemaNCioTOkF4NpYc8h2R4gxHO7OKEvM9MtiL1QnbbTSUMmEKIjqfe86xnjur76A0/7+RYuydXoJ6g==}
-    peerDependencies:
-      '@modelcontextprotocol/sdk': '>=1.29.0 <2'
-      skybridge: workspace:*
-    peerDependenciesMeta:
-      skybridge:
-        optional: true
-
-  '@alpic-ai/insights@1.128.0':
-    resolution: {integrity: sha512-F8BpPBkQC3qlCTQj/t+tk/SUR6Y1TELLG/lB8D9kAvYcO3pxfW249iNhd1w3VZcbqrLXJpfxQ3cgbzUQLcNwRQ==}
     peerDependencies:
       '@modelcontextprotocol/sdk': '>=1.29.0 <2'
       skybridge: workspace:*
@@ -10196,12 +10184,6 @@ snapshots:
       skybridge: link:packages/core
 
   '@alpic-ai/insights@1.122.1(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)':
-    dependencies:
-      '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
-    optionalDependencies:
-      skybridge: link:packages/core
-
-  '@alpic-ai/insights@1.128.0(@modelcontextprotocol/sdk@1.29.0(zod@4.3.6))(skybridge@packages+core)':
     dependencies:
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
     optionalDependencies:

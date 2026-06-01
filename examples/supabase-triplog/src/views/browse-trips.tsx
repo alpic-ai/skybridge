@@ -1,54 +1,58 @@
 import "@/index.css";
 
-import { useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 import { useLayout } from "skybridge/web";
 import { TripCarousel } from "../components/trip-carousel.js";
 import { TripDetail } from "../components/trip-detail.js";
+import {
+  CATEGORIES,
+  CATEGORY_META,
+  type Category,
+  STATUS_META,
+  STATUSES,
+  type Status,
+} from "../constants.js";
 import { useToolInfo } from "../helpers.js";
-import type { Trip } from "../types.js";
 
-const STATUS_FILTERS: { label: string; value: Trip["status"]; dot: string }[] = [
-  { label: "Completed", value: "completed", dot: "#22c55e" },
-  { label: "Ongoing",   value: "ongoing",   dot: "#3b82f6" },
-  { label: "Up Next",   value: "upnext",    dot: "#f59e0b" },
-];
-
-const CATEGORY_FILTERS: { label: string; value: Trip["category"]; icon: string }[] = [
-  { label: "Business",  value: "business",  icon: "💼" },
-  { label: "Family",    value: "family",    icon: "👨‍👩‍👧" },
-  { label: "Solo",      value: "solo",      icon: "🧍" },
-  { label: "Adventure", value: "adventure", icon: "🏔️" },
-  { label: "Leisure",   value: "leisure",   icon: "🌴" },
-];
+function Header({ count }: { count?: number }) {
+  return (
+    <div className="app-header">
+      <div className="app-header-left">
+        <h1 className="app-title">My Trips</h1>
+        <span className="app-subtitle">Personal travel log</span>
+      </div>
+      {count !== undefined && (
+        <span className="result-badge">{count} trips</span>
+      )}
+    </div>
+  );
+}
 
 function BrowseTrips() {
   const { theme } = useLayout();
   const { output, isPending, input } = useToolInfo<"browse-trips">();
 
   const [focusDismissed, setFocusDismissed] = useState(false);
-  const [activeStatuses, setActiveStatuses] = useState<Set<Trip["status"]>>(
+  const [activeStatuses, setActiveStatuses] = useState<Set<Status>>(
     () => new Set(input?.status ?? []),
   );
-  const [activeCategories, setActiveCategories] = useState<Set<Trip["category"]>>(
+  const [activeCategories, setActiveCategories] = useState<Set<Category>>(
     () => new Set(input?.category ?? []),
   );
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  const toggleStatus = (value: Trip["status"]) => {
+  const toggleFilter = <T,>(
+    setter: Dispatch<SetStateAction<Set<T>>>,
+    value: T,
+  ) => {
     setFocusDismissed(true);
-    setActiveStatuses((prev) => {
+    setter((prev) => {
       const next = new Set(prev);
-      next.has(value) ? next.delete(value) : next.add(value);
-      return next;
-    });
-    setSelectedId(null);
-  };
-
-  const toggleCategory = (value: Trip["category"]) => {
-    setFocusDismissed(true);
-    setActiveCategories((prev) => {
-      const next = new Set(prev);
-      next.has(value) ? next.delete(value) : next.add(value);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
       return next;
     });
     setSelectedId(null);
@@ -66,12 +70,7 @@ function BrowseTrips() {
   if (isPending) {
     return (
       <div className={`${theme} container`}>
-        <div className="app-header">
-          <div className="app-header-left">
-            <h1 className="app-title">My Trips</h1>
-            <span className="app-subtitle">Personal travel log</span>
-          </div>
-        </div>
+        <Header />
         <div className="message">Loading your trip log…</div>
       </div>
     );
@@ -80,57 +79,55 @@ function BrowseTrips() {
   if (!output || output.trips.length === 0) {
     return (
       <div className={`${theme} container`}>
-        <div className="app-header">
-          <div className="app-header-left">
-            <h1 className="app-title">My Trips</h1>
-            <span className="app-subtitle">Personal travel log</span>
-          </div>
-        </div>
+        <Header />
         <div className="message">No trips found.</div>
       </div>
     );
   }
 
   const totalTrips = output.trips.length;
-  const focusedTrip =
-    !focusDismissed && input?.focusPlace
-      ? output.trips.find(
-          (t) => t.place.toLowerCase() === input.focusPlace!.toLowerCase()
-        ) ?? null
-      : null;
+  const focusPlace = focusDismissed ? undefined : input?.focusPlace;
+  const focusedTrip = focusPlace
+    ? (output.trips.find(
+        (t) => t.place.toLowerCase() === focusPlace.toLowerCase(),
+      ) ?? null)
+    : null;
 
-  const visibleTrips = focusedTrip !== null
-    ? [focusedTrip]
-    : output.trips
-        .filter((t) => activeStatuses.size === 0 || activeStatuses.has(t.status))
-        .filter((t) => activeCategories.size === 0 || activeCategories.has(t.category));
+  const visibleTrips =
+    focusedTrip !== null
+      ? [focusedTrip]
+      : output.trips
+          .filter(
+            (t) => activeStatuses.size === 0 || activeStatuses.has(t.status),
+          )
+          .filter(
+            (t) =>
+              activeCategories.size === 0 || activeCategories.has(t.category),
+          );
 
   const selected =
     visibleTrips.find((t) => t.id === selectedId) ?? visibleTrips[0];
 
   return (
     <div className={`${theme} container`}>
-      <div className="app-header">
-        <div className="app-header-left">
-          <h1 className="app-title">My Trips</h1>
-          <span className="app-subtitle">Personal travel log</span>
-        </div>
-        <span className="result-badge">{totalTrips} trips</span>
-      </div>
+      <Header count={totalTrips} />
 
       <div className="filter-section">
         <div className="filter-row">
           <span className="filter-row-label">Status</span>
           <div className="filter-pills">
-            {STATUS_FILTERS.map((f) => (
+            {STATUSES.map((value) => (
               <button
-                key={f.value}
+                key={value}
                 type="button"
-                className={`filter-pill filter-pill-${f.value} ${activeStatuses.has(f.value) ? "active" : ""}`}
-                onClick={() => toggleStatus(f.value)}
+                className={`filter-pill filter-pill-${value} ${activeStatuses.has(value) ? "active" : ""}`}
+                onClick={() => toggleFilter(setActiveStatuses, value)}
               >
-                <span className="pill-dot" style={{ background: f.dot }} />
-                {f.label}
+                <span
+                  className="pill-dot"
+                  style={{ background: STATUS_META[value].color }}
+                />
+                {STATUS_META[value].label}
               </button>
             ))}
           </div>
@@ -139,15 +136,15 @@ function BrowseTrips() {
         <div className="filter-row">
           <span className="filter-row-label">Category</span>
           <div className="filter-pills">
-            {CATEGORY_FILTERS.map((f) => (
+            {CATEGORIES.map((value) => (
               <button
-                key={f.value}
+                key={value}
                 type="button"
-                className={`filter-pill filter-cat ${activeCategories.has(f.value) ? "active" : ""}`}
-                onClick={() => toggleCategory(f.value)}
+                className={`filter-pill filter-cat ${activeCategories.has(value) ? "active" : ""}`}
+                onClick={() => toggleFilter(setActiveCategories, value)}
               >
-                <span className="cat-icon">{f.icon}</span>
-                {f.label}
+                <span className="cat-icon">{CATEGORY_META[value].icon}</span>
+                {CATEGORY_META[value].label}
               </button>
             ))}
           </div>
@@ -170,8 +167,14 @@ function BrowseTrips() {
       {visibleTrips.length === 0 ? (
         <div className="no-results">
           <span className="no-results-icon">🔍</span>
-          <span className="no-results-label">No trips match the selected filters</span>
-          <button type="button" className="no-results-action" onClick={clearFilters}>
+          <span className="no-results-label">
+            No trips match the selected filters
+          </span>
+          <button
+            type="button"
+            className="no-results-action"
+            onClick={clearFilters}
+          >
             Clear all filters
           </button>
         </div>
