@@ -11,6 +11,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  ENTRY_WRAPPER_CONTENT,
+  emitEntryWrapper,
   emitManifestModule,
   emitVercelBuildOutput,
   VERCEL_CONFIG,
@@ -20,6 +22,24 @@ import {
 function mkTmp(prefix = "skybridge-build-helpers-") {
   return mkdtempSync(path.join(tmpdir(), prefix));
 }
+
+describe("emitEntryWrapper", () => {
+  it("writes dist/__entry.js that primes the manifest before importing user code", () => {
+    const dir = mkTmp();
+    emitEntryWrapper(dir);
+    const out = readFileSync(path.join(dir, "__entry.js"), "utf-8");
+    expect(out).toBe(ENTRY_WRAPPER_CONTENT);
+    expect(out).toContain(
+      'import { __setBuildManifest } from "skybridge/server"',
+    );
+    expect(out).toContain('import manifest from "./vite-manifest.js"');
+    expect(out).toContain("__setBuildManifest(manifest)");
+    // Dynamic import is load-bearing: `server.js` must evaluate after the
+    // setter runs, so a static re-export wouldn't work.
+    expect(out).toContain('await import("./server.js")');
+    expect(out).toContain("export default userMod.default");
+  });
+});
 
 describe("emitManifestModule", () => {
   it("inlines the JSON manifest as an ESM default export", () => {
@@ -46,6 +66,14 @@ describe("emitVercelBuildOutput", () => {
     writeFileSync(
       path.join(root, "dist", "server.js"),
       "export default function handler(_req, res) { res.end('ok'); }\n",
+    );
+    // Minimal `dist/__entry.js` (the real wrapper imports `skybridge/server`,
+    // which isn't resolvable in this test's tmp dir — the function-bundling
+    // contract we care about here is just "bundle whatever `__entry.js`
+    // imports into a single function file").
+    writeFileSync(
+      path.join(root, "dist", "__entry.js"),
+      "const userMod = await import('./server.js');\nexport default userMod.default;\n",
     );
     writeFileSync(
       path.join(root, "dist", "assets", "view-abc.js"),

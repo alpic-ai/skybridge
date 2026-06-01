@@ -4,6 +4,7 @@ import { Command } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { useEffect } from "react";
 import {
+  emitEntryWrapper,
   emitManifestModule,
   emitVercelBuildOutput,
 } from "../cli/build-helpers.js";
@@ -32,12 +33,24 @@ export const commandSteps: CommandStep[] = [
   },
   {
     label: "Emitting manifest module",
+    // Inline the Vite manifest as a JS module so the wrapper can `import` it
+    // instead of `readFileSync(process.cwd() + ...)` at runtime — required for
+    // workerd, where neither cwd nor the assets directory is readable.
     run: () => {
       const root = process.cwd();
       emitManifestModule(
         path.join(root, "dist", "assets", ".vite", "manifest.json"),
         path.join(root, "dist", "vite-manifest.js"),
       );
+    },
+  },
+  {
+    label: "Emitting entry wrapper",
+    // dist/__entry.js primes the Vite manifest via __setBuildManifest, then
+    // dynamically imports user code. Deploy targets (Cloudflare, Vercel)
+    // bundle from here so the manifest is available at runtime.
+    run: () => {
+      emitEntryWrapper(path.join(process.cwd(), "dist"));
     },
   },
   {
