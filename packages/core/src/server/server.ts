@@ -431,6 +431,26 @@ const McpServerBaseOmitted = McpServerBase as unknown as new (
  *
  * @see https://docs.skybridge.tech/api-reference/mcp-server
  */
+// Side channel populated by `dist/__entry.js` before user code is imported.
+// Set at module scope rather than passed through the constructor because the
+// wrapper has the manifest before the user's `new McpServer(...)` runs, and
+// threading it through every call site (including user templates) is exactly
+// the boilerplate this design is trying to hide.
+let pendingBuildManifest: Record<string, { file: string }> | null = null;
+
+/**
+ * Prime the build-time Vite manifest before user code constructs its
+ * `McpServer`. Called from the generated `dist/__entry.js`; not part of the
+ * user-facing API.
+ *
+ * @internal
+ */
+export function __setBuildManifest(
+  manifest: Record<string, { file: string }>,
+): void {
+  pendingBuildManifest = manifest;
+}
+
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
 > extends McpServerBaseOmitted {
@@ -466,6 +486,15 @@ export class McpServer<
     this.serverOptions = options;
     this.express = express();
     this.express.use(express.json());
+    // Pick up the manifest if `dist/__entry.js` primed it before importing
+    // user code. Consume-once: clear after the first construction so a
+    // subsequent test that doesn't prime can't inherit stale state.
+    // Explicit `setViteManifest` calls still win because they happen after
+    // construction.
+    if (pendingBuildManifest) {
+      this.setViteManifest(pendingBuildManifest);
+      pendingBuildManifest = null;
+    }
   }
 
   /**
@@ -720,10 +749,28 @@ export class McpServer<
    *
    * On Cloudflare Workers / workerd, returns an object exposing `fetch` so
    * the runtime can bridge incoming requests to the Node HTTP server. On
+   * Vercel (`VERCEL === "1"`), returns the Express app directly so the
+   * serverless function entry can call it as a `(req, res)` handler. On
    * Node, returns `undefined` once listening.
    */
-  async run(): Promise<{ fetch: (...args: unknown[]) => unknown } | undefined> {
+  async run(): Promise<
+    { fetch: (...args: unknown[]) => unknown } | Express | undefined
+  > {
     this.applyMcpMiddleware();
+
+    if (process.env.VERCEL === "1") {
+      // createApp only reads httpServer inside its dev-only branch
+      // (viewsDevServer); under VERCEL=1 + NODE_ENV=production it's a
+      // bare object passed to satisfy the required parameter.
+      const httpServer = http.createServer();
+      await createApp({
+        mcpServer: this,
+        httpServer,
+        errorMiddleware: this.customErrorMiddleware,
+      });
+      return this.express;
+    }
+
     const httpServer = http.createServer();
 
     await createApp({

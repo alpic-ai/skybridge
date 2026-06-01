@@ -28,10 +28,10 @@ function CapitalExplorer() {
   } = useCallTool("explore-capitals");
 
   useEffect(() => {
-    if (output?.capital.name) {
+    if (output?.capital?.name) {
       setSelectedCapital(output.capital.name);
     }
-  }, [output?.capital.name]);
+  }, [output?.capital?.name]);
 
   useEffect(() => {
     if (isFullscreen && pendingCapital) {
@@ -46,7 +46,11 @@ function CapitalExplorer() {
     (capital) => capital.name === selectedCapital,
   );
   const mapCenter = capitalLight?.coordinates || { lat: 48, lng: 2 };
-  const capital = data?.structuredContent.capital || output?.capital;
+  const capital = data?.structuredContent?.capital || output?.capital;
+  const errorMessage =
+    data !== undefined
+      ? data?.structuredContent?.error
+      : output?.error;
 
   const handleCapitalClick = (capitalName: string) => {
     setPendingCapital(capitalName);
@@ -69,6 +73,13 @@ function CapitalExplorer() {
           onCapitalClick={handleCapitalClick}
         />
       </div>
+      {errorMessage && (
+        <div className="absolute inset-x-0 bottom-6 flex justify-center z-20 pointer-events-none">
+          <div className="px-4 py-2 bg-slate-900/90 backdrop-blur-sm rounded-full border border-red-500/40 text-red-400 text-sm">
+            {errorMessage}
+          </div>
+        </div>
+      )}
       <div
         className={`
           absolute left-0 top-0 bottom-0 w-72 transition-transform duration-500

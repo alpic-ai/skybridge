@@ -46,6 +46,7 @@ export type {
   ViewNameRegistry,
 } from "./server.js";
 export {
+  __setBuildManifest,
   McpServer,
   normalizeContent,
 } from "./server.js";
