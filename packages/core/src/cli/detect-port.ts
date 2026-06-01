@@ -1,6 +1,7 @@
 import net from "node:net";
 
 const DEFAULT_PORT = 3000;
+const MAX_PORT_INCREMENT = 100;
 
 export async function resolvePort(flagPort?: number) {
   if (flagPort && flagPort > 1) {
@@ -25,8 +26,8 @@ export async function resolvePort(flagPort?: number) {
 }
 
 /**
- * Returns the given port if available, otherwise lets the OS
- * pick a free port via `listen(0)`.
+ * Returns the first available port at or after `startPort`, incrementing
+ * by one until a free port is found or `MAX_PORT_INCREMENT` is reached.
  *
  * @param host - Bind address for the check. Pass `"localhost"` for
  *   services that bind to 127.0.0.1 (e.g. Vite HMR). Omit for
@@ -36,29 +37,14 @@ export async function detectAvailablePort(
   startPort: number,
   host?: string,
 ): Promise<number> {
-  const available = await isPortAvailable(startPort, host);
-  if (available) {
-    return startPort;
+  for (let port = startPort; port < startPort + MAX_PORT_INCREMENT; port++) {
+    if (await isPortAvailable(port, host)) {
+      return port;
+    }
   }
-
-  return new Promise((resolve, reject) => {
-    const server = net.createServer();
-
-    server.once("error", reject);
-    server.once("listening", () => {
-      const addr = server.address();
-      if (addr && typeof addr === "object") {
-        const { port } = addr;
-        server.close(() => resolve(port));
-      } else {
-        server.close(() =>
-          reject(new Error("Failed to detect available port")),
-        );
-      }
-    });
-
-    server.listen(0, host);
-  });
+  throw new Error(
+    `No available port found between ${startPort} and ${startPort + MAX_PORT_INCREMENT - 1}`,
+  );
 }
 
 function isPortAvailable(port: number, host?: string): Promise<boolean> {
