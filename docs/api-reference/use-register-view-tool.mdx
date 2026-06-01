@@ -98,7 +98,8 @@ type ViewToolResult = {
 
 **Required.** Runs when the host calls the tool. `args` is typed from
 `config.inputSchema`. Return a standard MCP `CallToolResult` — `content`
-blocks plus optional `structuredContent`. Set `isError: true` to report a
+blocks plus optional `structuredContent` and `_meta` (forwarded to the host
+verbatim, same as a server tool result). Set `isError: true` to report a
 failure to the model.
 
 The handler is always read from the latest render, so it sees current state
