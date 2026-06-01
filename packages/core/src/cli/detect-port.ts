@@ -41,6 +41,7 @@ export async function detectAvailablePort(
     if (await isPortAvailable(port, host)) {
       return port;
     }
+    console.log(`Port ${port} is in use, trying another one...`);
   }
   throw new Error(
     `No available port found between ${startPort} and ${startPort + MAX_PORT_INCREMENT - 1}`,
