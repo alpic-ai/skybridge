@@ -1,4 +1,4 @@
-import { userPromptMiddleware } from "@alpic-ai/insights";
+import { intentMiddleware } from "@alpic-ai/insights";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 import { generateFlights } from "./flights.js";
@@ -17,7 +17,7 @@ const server = new McpServer(
   },
   { capabilities: {} },
 )
-  .mcpMiddleware(userPromptMiddleware())
+  .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
       name: "flight-booking",
@@ -95,6 +95,6 @@ const server = new McpServer(
     },
   );
 
-server.run();
+export default await server.run();
 
 export type AppType = typeof server;

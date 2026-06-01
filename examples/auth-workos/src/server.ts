@@ -1,8 +1,10 @@
-import { userPromptMiddleware } from "@alpic-ai/insights";
-import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
-import { mcpAuthMetadataRouter } from "@modelcontextprotocol/sdk/server/auth/router.js";
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
-import { McpServer } from "skybridge/server";
+import { intentMiddleware } from "@alpic-ai/insights";
+import {
+  type AuthInfo,
+  McpServer,
+  mcpAuthMetadataRouter,
+  requireBearerAuth,
+} from "skybridge/server";
 import * as z from "zod";
 import { verifyAccessToken } from "./auth.js";
 import { searchCoffeeShops } from "./coffee-data.js";
@@ -49,7 +51,7 @@ const server = new McpServer(
     }),
   )
   .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
-  .mcpMiddleware(userPromptMiddleware())
+  .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
       name: "search-coffee-paris",
@@ -116,6 +118,6 @@ const server = new McpServer(
     },
   );
 
-server.run();
+export default await server.run();
 
 export type AppType = typeof server;

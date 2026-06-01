@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Icon } from "./icons";
 
 type CodeTab = "server" | "view";
 
@@ -111,27 +110,13 @@ function ServerCode() {
       </div>
       <div>
         {"      "}
-        <span className="c-id">flights</span>: (
+        <span className="c-id">flights</span>:{" "}
         <span className="c-kw">await</span>{" "}
         <span className="c-fn">searchFlights</span>({"{ "}
         <span className="c-id">from</span>, <span className="c-id">to</span>,{" "}
         <span className="c-id">when</span>
-        {" }"})).<span className="c-fn">map</span>((
-        <span className="c-id">f</span>) {"=>"} ({"{"}
+        {" }"}),
       </div>
-      <div>
-        {"        "}...<span className="c-id">f</span>,
-      </div>
-      <div>
-        {"        "}
-        <span className="c-id">airline</span>: {"{ "}
-        <span className="c-id">name</span>: <span className="c-id">f</span>.
-        <span className="c-id">carrier</span>,{" "}
-        <span className="c-id">logo</span>:{" "}
-        <span className="c-fn">logoFor</span>(<span className="c-id">f</span>.
-        <span className="c-id">carrier</span>) {"}"},
-      </div>
-      <div>{"      "})),</div>
       <div>{"    }"},</div>
       <div>{"  }"}),</div>
       <div>);</div>
@@ -146,33 +131,9 @@ function ViewCode() {
         <span className="c-kw">import</span> {"{ "}
         <span className="c-id">useToolInfo</span>
         {" }"} <span className="c-kw">from</span>{" "}
-        <span className="c-str">"skybridge/vite"</span>
+        <span className="c-str">"../helpers"</span>
         {";"}
       </div>
-      <div>&nbsp;</div>
-      <div>
-        <span className="c-kw">type</span> <span className="c-id">Output</span>{" "}
-        = {"{"}
-      </div>
-      <div>
-        {"  "}
-        <span className="c-id">destination</span>: {"{ "}
-        <span className="c-id">name</span>: <span className="c-id">string</span>
-        {"; "}
-        <span className="c-id">photo</span>:{" "}
-        <span className="c-id">string</span> {"};"}
-      </div>
-      <div>
-        {"  "}
-        <span className="c-id">trip</span>: <span className="c-id">Trip</span>
-        {";"}
-      </div>
-      <div>
-        {"  "}
-        <span className="c-id">flights</span>:{" "}
-        <span className="c-id">Flight</span>[];
-      </div>
-      <div>{"}"};</div>
       <div>&nbsp;</div>
       <div>
         <span className="c-kw">export default function</span>{" "}
@@ -182,9 +143,8 @@ function ViewCode() {
         {"  "}
         <span className="c-kw">const</span> {"{ "}
         <span className="c-id">output</span>
-        {" }"} = <span className="c-fn">useToolInfo</span>&lt;{"{ "}
-        <span className="c-id">output</span>:{" "}
-        <span className="c-id">Output</span> {"}"}&gt;();
+        {" }"} = <span className="c-fn">useToolInfo</span>&lt;
+        <span className="c-str">"findFlights"</span>&gt;();
       </div>
       <div>&nbsp;</div>
       <div>
@@ -201,13 +161,6 @@ function ViewCode() {
         <span className="c-id">destination</span>={"{"}
         <span className="c-id">output</span>.
         <span className="c-id">destination</span>
-        {"}"} /&gt;
-      </div>
-      <div>
-        {"      "}
-        &lt;<span className="c-fn">TripSummary</span>{" "}
-        <span className="c-id">trip</span>={"{"}
-        <span className="c-id">output</span>.<span className="c-id">trip</span>
         {"}"} /&gt;
       </div>
       <div>
@@ -273,32 +226,40 @@ function FlightWidget() {
         <span className="sb-widget-dot" />
         Skybridge · flights.tsx
       </div>
-      {/* Destination hero — striped placeholder per design-system rules. */}
       <div
         style={{
           position: "relative",
           height: 96,
-          margin: "0 0 0 0",
           borderBottom: "1px solid var(--sb-border)",
-          background:
-            "linear-gradient(135deg, rgba(137,240,236,0.22), rgba(226,255,198,0.16) 60%, rgba(242,43,121,0.20))," +
-            "repeating-linear-gradient(135deg, rgba(255,255,255,0.04) 0 8px, transparent 8px 16px)",
           overflow: "hidden",
           display: "flex",
           alignItems: "flex-end",
-          padding: "12px 14px",
+          padding: "10px 14px",
+          backgroundImage: "url(/assets/tokyo.jpg)",
+          backgroundSize: "cover",
+          backgroundPosition: "center 60%",
         }}
       >
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)",
+          }}
+        />
         <span
           style={{
+            position: "relative",
+            zIndex: 1,
             font: "500 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace",
-            color: "var(--sb-ink-soft)",
-            letterSpacing: "0.18em",
+            color: "rgba(255,255,255,0.7)",
+            letterSpacing: "0.16em",
             textTransform: "uppercase",
-            textShadow: "0 1px 2px rgba(0,0,0,0.4)",
           }}
         >
-          [ destination · tokyo / 東京 ]
+          東京 · Tokyo
         </span>
       </div>
       <div className="sb-widget-body">
@@ -489,63 +450,112 @@ export function CodeDemoSection() {
             </div>
 
             <div className="sb-chat-window">
-              <div className="sb-chat-chrome">
-                <div className="sb-chat-chrome-dots">
-                  <span
-                    className="sb-demo-code-dot"
-                    style={{ background: "#ff6159" }}
-                  />
-                  <span
-                    className="sb-demo-code-dot"
-                    style={{ background: "#ffbd2e" }}
-                  />
-                  <span
-                    className="sb-demo-code-dot"
-                    style={{ background: "#27c93f" }}
-                  />
+              <div className="sb-gpt-sidebar" aria-hidden>
+                <div className="sb-gpt-logo">
+                  <svg
+                    viewBox="0 0 22 22"
+                    width="20"
+                    height="20"
+                    fill="none"
+                    aria-hidden
+                  >
+                    <circle cx="11" cy="11" r="10" fill="#fff" opacity="0.9" />
+                    <circle cx="11" cy="11" r="4.2" fill="#111" />
+                    <circle cx="11" cy="11" r="1.8" fill="#fff" />
+                  </svg>
                 </div>
-                <div className="sb-chat-chrome-tab">
-                  <span className="sb-chat-chrome-lock" aria-hidden></span>
-                  <span>claude.ai/chat</span>
+                <div className="sb-gpt-sidebar-icons">
+                  <span className="sb-gpt-icon-btn">
+                    <svg
+                      viewBox="0 0 16 16"
+                      width="14"
+                      height="14"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                    >
+                      <line x1="8" y1="3" x2="8" y2="13" />
+                      <line x1="3" y1="8" x2="13" y2="8" />
+                    </svg>
+                  </span>
+                  <span className="sb-gpt-icon-btn">
+                    <svg
+                      viewBox="0 0 16 16"
+                      width="14"
+                      height="14"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                    >
+                      <circle cx="6.5" cy="6.5" r="4.5" />
+                      <line x1="10" y1="10" x2="14" y2="14" />
+                    </svg>
+                  </span>
                 </div>
-                <div className="sb-chat-chrome-actions" aria-hidden>
-                  <span className="sb-chat-chrome-bar" />
-                  <span className="sb-chat-chrome-bar" />
-                  <span className="sb-chat-chrome-bar" />
+                <div className="sb-gpt-sidebar-hist">
+                  <span className="sb-gpt-hist-line" />
+                  <span className="sb-gpt-hist-line" />
+                  <span className="sb-gpt-hist-line sb-gpt-hist-active" />
+                  <span className="sb-gpt-hist-line" />
                 </div>
               </div>
-              <div className="sb-chat">
-                {/* user message */}
-                <div className="sb-chat-msg user">
-                  <div className="sb-chat-bubble user">
-                    Find me flights from Paris to Tokyo next week
-                  </div>
-                  <div className="sb-chat-avatar">
-                    <Icon name="user" size={14} stroke={1.8} />
+
+              <div className="sb-gpt-main">
+                <div className="sb-gpt-topbar">
+                  <button className="sb-gpt-model-btn" type="button">
+                    ChatGPT 5
+                    <svg
+                      viewBox="0 0 10 6"
+                      width="9"
+                      height="6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
+                      <polyline points="1,1 5,5 9,1" />
+                    </svg>
+                  </button>
+                  <div className="sb-gpt-topbar-right" aria-hidden>
+                    <span className="sb-gpt-share-btn">Share</span>
+                    <span className="sb-gpt-user-avatar">E</span>
                   </div>
                 </div>
 
-                {/* AI response */}
-                <div className="sb-chat-msg">
-                  <div className="sb-chat-avatar ai">
-                    <Icon name="sparkle" size={13} />
-                  </div>
-                  <div className="sb-chat-widget-wrap">
-                    <div
-                      className="sb-chat-bubble ai"
-                      style={{ marginBottom: 10 }}
-                    >
-                      Here are two nonstop options — Air France is the cheapest:
-                    </div>
-                    <FlightWidget />
-                    <div
-                      className="sb-chat-bubble ai"
-                      style={{ marginTop: 10 }}
-                    >
-                      Want me to hold the AF 276 seat, or compare with a
-                      one-stop under $700?
+                <div className="sb-chat">
+                  <div className="sb-chat-msg user">
+                    <div className="sb-chat-bubble user">
+                      Find me flights from Paris to Tokyo next week
                     </div>
                   </div>
+
+                  <div className="sb-chat-msg">
+                    <div className="sb-chat-widget-wrap">
+                      <div
+                        className="sb-chat-bubble ai"
+                        style={{ marginBottom: 10 }}
+                      >
+                        Here are two nonstop options — Air France is the
+                        cheapest:
+                      </div>
+                      <FlightWidget />
+                      <div
+                        className="sb-chat-bubble ai"
+                        style={{ marginTop: 10 }}
+                      >
+                        Want me to hold the AF 276 seat, or compare with a
+                        one-stop under $700?
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="sb-gpt-inputbar" aria-hidden>
+                  <span className="sb-gpt-input-placeholder">Ask anything</span>
                 </div>
               </div>
             </div>

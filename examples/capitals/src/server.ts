@@ -1,4 +1,4 @@
-import { userPromptMiddleware } from "@alpic-ai/insights";
+import { intentMiddleware } from "@alpic-ai/insights";
 import { type Request, type Response, Router } from "express";
 import { McpServer } from "skybridge/server";
 import * as z from "zod";
@@ -28,7 +28,7 @@ const server = new McpServer(
   },
   { capabilities: {} },
 )
-  .mcpMiddleware(userPromptMiddleware())
+  .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
       name: "explore-capitals",
@@ -86,13 +86,13 @@ const server = new McpServer(
           isError: false,
         };
       } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Unknown error";
+        const allCapitals = await getCachedAllCapitals().catch(() => []);
         return {
-          content: [
-            {
-              type: "text",
-              text: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
-            },
-          ],
+          _meta: { allCapitals },
+          structuredContent: { error: message },
+          content: [{ type: "text", text: message }],
           isError: true,
         };
       }
@@ -148,6 +148,6 @@ router.get("/api/capital/:cca2", async (req: Request, res: Response) => {
 
 server.use(router);
 
-server.run();
+export default await server.run();
 
 export type AppType = typeof server;

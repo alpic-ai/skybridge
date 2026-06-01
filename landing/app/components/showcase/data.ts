@@ -68,6 +68,8 @@ export type ShowcaseApp = {
   links: ShowcaseLinks;
   /** Per-app "What's interesting" bullet points shown on the detail page. */
   highlights?: string[];
+  /** ISO date string for sitemap lastModified — falls back to SITE_UPDATED if omitted. */
+  updatedAt?: Date;
 };
 
 function inferDefaultInlineMode(
@@ -256,44 +258,51 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
   },
   {
-    id: "evaneos",
-    slug: "evaneos",
-    name: "Evaneos",
-    tagline: "Travel destinations",
+    id: "alpic",
+    slug: "alpic",
+    name: "Alpic",
+    tagline: "Monitor your MCP Apps & servers",
     blurb:
-      "Personalized destination discovery with tailored itinerary ideas, travel period guidance, and sustainable alternatives curated by Evaneos experts.",
+      "Manage your projects, debug deployment, and check analytics for any MCP server you host with Alpic.",
     category: "3rd Party",
-    host: "ChatGPT",
-    accent: "#FFE54E",
-    icon: "/assets/showcase/icons/evaneos.webp",
-    img: "/assets/showcase/evaneos.webp",
+    host: "ChatGPT · Claude",
+    accent: "#E90060",
+    icon: "/assets/showcase/icons/alpic.webp",
+    img: "/assets/showcase/alpic-inline-1.webp",
     previews: [
       {
         mode: "chatgpt-inline",
         chat: {
-          user: "I want to travel somewhere sustainable in October, off the beaten track.",
-          assistant: "Let me ask Evaneos's local experts.",
+          user: "How are my MCP servers doing this week?",
+          assistant:
+            "Let me summarize your servers' performance from Alpic analytics.",
         },
-        screenshot: "/assets/showcase/evaneos.webp",
+        screenshot: "/assets/showcase/alpic-inline-1.webp",
       },
       {
-        mode: "chatgpt-fullscreen",
-        screenshot: "/assets/showcase/evaneos-fullscreen.webp",
+        mode: "chatgpt-inline",
+        chat: {
+          user: "How are my MCP servers doing this week?",
+          assistant:
+            "Let me summarize your servers' performance from Alpic analytics.",
+        },
+        screenshot: "/assets/showcase/alpic-inline-2.webp",
       },
     ],
     chat: {
-      user: "I want to travel somewhere sustainable in October, off the beaten track.",
-      assistant: "Let me ask Evaneos's local experts.",
+      user: "How are my MCP servers doing this week?",
+      assistant: "Let me check your Alpic dashboard.",
     },
-    tags: ["Travel", "Itinerary"],
+    tags: ["Analytics", "Monitoring"],
     highlights: [
-      "Curated itineraries surfaced from local expert knowledge, not generic search.",
-      "UI & Model sync via data-llm, allowing user to ask advanced question when looking at a destination.",
-      "Inline carousel & fullscreen details view for each destination.",
+      "Detailed analytics shared with the model via data-llm allowing to ask for weekly summaries & highlights to the LLM.",
+      "Fully OAuth app (via GitHub or Google SSO).",
+      "More coming soon!",
     ],
     links: {
+      demo: "https://mcp.alpic.ai/try",
       chatgpt:
-        "https://chatgpt.com/apps/evaneos/asdk_app_69612510d5288191b6a4174252337e93",
+        "https://chatgpt.com/apps/alpic/asdk_app_6996e5762c508191846b87c57edbbebe",
     },
   },
   {
@@ -393,6 +402,94 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
   },
   {
+    id: "facile",
+    slug: "facile",
+    name: "Facile.it Energia",
+    tagline: "Compare energy offers in Italy",
+    blurb:
+      "Facile.it Energia helps you compare gas and electricity offers in Italy. Instead of visiting each provider's website or deciphering confusing rate sheets, you can see the best available offers based on your actual consumption and location, all in one screen.",
+    category: "3rd Party",
+    host: "ChatGPT",
+    accent: "#FF6600",
+    icon: "/assets/showcase/icons/facile.webp",
+    img: "/assets/showcase/facile-inline-1.webp",
+    previews: [
+      {
+        mode: "chatgpt-inline",
+        chat: {
+          user: "Compare electricity and gas offers in Milan",
+          assistant: "Ok let me ask Facile.it comparator",
+        },
+        screenshot: "/assets/showcase/facile-inline-1.webp",
+      },
+      {
+        mode: "chatgpt-inline",
+        chat: {
+          user: "Compare electricity and gas offers in Milan",
+          assistant: "Ok let me ask Facile.it comparator",
+        },
+        screenshot: "/assets/showcase/facile-inline-2.webp",
+      },
+    ],
+    chat: {
+      user: "Compare electricity and gas offers in Milan",
+      assistant: "Ok let me ask Facile.it comparator",
+    },
+    tags: ["Energy", "Comparator"],
+    highlights: [
+      "Fill forms via the UI or by talking to ChatGPT, the LLM can manipulate the form for you if it has the right information.",
+      "Context shared with model to help users select the right consumption category",
+      "Access to all energy providers in Italy.",
+      "Mobile-first design.",
+    ],
+    links: {
+      chatgpt:
+        "https://chatgpt.com/apps/facile-it-energia/asdk_app_69fcc1c31b2081919069e1f5f6f7166d",
+    },
+  },
+
+  {
+    id: "evaneos",
+    slug: "evaneos",
+    name: "Evaneos",
+    tagline: "Travel destinations",
+    blurb:
+      "Personalized destination discovery with tailored itinerary ideas, travel period guidance, and sustainable alternatives curated by Evaneos experts.",
+    category: "3rd Party",
+    host: "ChatGPT",
+    accent: "#FFE54E",
+    icon: "/assets/showcase/icons/evaneos.webp",
+    img: "/assets/showcase/evaneos.webp",
+    previews: [
+      {
+        mode: "chatgpt-inline",
+        chat: {
+          user: "I want to travel somewhere sustainable in October, off the beaten track.",
+          assistant: "Let me ask Evaneos's local experts.",
+        },
+        screenshot: "/assets/showcase/evaneos.webp",
+      },
+      {
+        mode: "chatgpt-fullscreen",
+        screenshot: "/assets/showcase/evaneos-fullscreen.webp",
+      },
+    ],
+    chat: {
+      user: "I want to travel somewhere sustainable in October, off the beaten track.",
+      assistant: "Let me ask Evaneos's local experts.",
+    },
+    tags: ["Travel", "Itinerary"],
+    highlights: [
+      "Curated itineraries surfaced from local expert knowledge, not generic search.",
+      "UI & Model sync via data-llm, allowing user to ask advanced question when looking at a destination.",
+      "Inline carousel & fullscreen details view for each destination.",
+    ],
+    links: {
+      chatgpt:
+        "https://chatgpt.com/apps/evaneos/asdk_app_69612510d5288191b6a4174252337e93",
+    },
+  },
+  {
     id: "generative-ui",
     slug: "generative-ui",
     name: "Generative UI",
@@ -410,7 +507,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     tags: ["shadcn/ui", "Dynamic"],
     highlights: [
       "The AI composes the UI on the fly from 36 pre-built shadcn/ui primitives.",
-      "json-render interprets a JSON layout tree — no client-side code generation.",
+      "json-render interprets a JSON layout tree. No client-side code generation.",
       "Fully interactive: buttons, inputs, and state all work inside the widget.",
     ],
     links: {
@@ -436,7 +533,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
     tags: ["Maps", "Geo"],
     highlights: [
-      "Live interactive map rendered inline — pan, zoom, and click markers.",
+      "Live interactive map rendered inline: pan, zoom, and click markers.",
       "Wikipedia-sourced country info displayed alongside the map.",
       "Geolocation and region-based queries resolved to map pins in one tool call.",
     ],
@@ -492,7 +589,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     highlights: [
       "Persistent cart that survives across multiple tool calls in the same thread.",
       "Full localization (currency, language) driven by user context.",
-      "Modal dialogs for size guides and product details — no page navigation.",
+      "Modal dialogs for size guides and product details. No page navigation.",
     ],
     links: {
       demo: "https://ecommerce.skybridge.tech/try",
@@ -544,7 +641,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
     tags: ["Game", "Multi-screen"],
     highlights: [
-      "Multi-screen gameplay — evidence board, interrogation room, and map.",
+      "Multi-screen gameplay: evidence board, interrogation room, and map.",
       "Fullscreen display mode for immersive story moments.",
       "Dynamic story progression where the AI adapts the mystery to your choices.",
     ],
@@ -598,7 +695,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
     tags: ["Game", "Party"],
     highlights: [
-      "Secret word displayed only in the widget — the AI never sees it.",
+      "Secret word displayed only in the widget; the AI never sees it.",
       "Turn-based flow using useSendMessage to pass hints back to the model.",
       "Timer and scoring managed client-side via createStore.",
     ],
@@ -614,7 +711,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     name: "Magic 8-Ball",
     tagline: "The Skybridge starter",
     blurb:
-      "Classic fortune-telling toy — ask a yes-or-no question, shake the ball, and get a mystical answer. The default Skybridge starter app.",
+      "Classic fortune-telling toy: ask a yes-or-no question, shake the ball, and get a mystical answer. The default Skybridge starter app.",
     category: "Example",
     host: "ChatGPT · Claude",
     accent: "#89F0EC",
@@ -625,7 +722,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
     tags: ["Starter", "Toy"],
     highlights: [
-      "The default create-skybridge template — up and running in under a minute.",
+      "The default create-skybridge template, up and running in under a minute.",
       "Shake animation and answer reveal driven entirely by widget state.",
       "Minimal code: shows the smallest possible Skybridge app structure.",
     ],
@@ -651,7 +748,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
     tags: ["Auth", "OAuth"],
     highlights: [
-      "Full OAuth flow via Clerk — sign-in UI rendered inside the widget.",
+      "Full OAuth flow via Clerk, sign-in UI rendered inside the widget.",
       "Personalized results after auth (favourite neighbourhoods, past orders).",
       "Token refresh and session management handled transparently by Skybridge.",
     ],
@@ -703,7 +800,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     },
     tags: ["Auth", "OAuth"],
     highlights: [
-      "Stytch passwordless auth — magic links and OTPs inside the chat widget.",
+      "Stytch passwordless auth: magic links and OTPs inside the chat widget.",
       "Session tokens forwarded to tool calls for authenticated data fetching.",
       "Drop-in example for any Stytch project migrating to agent-native UX.",
     ],

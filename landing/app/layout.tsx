@@ -1,46 +1,48 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { Mozilla_Text } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
-const mozillaText = localFont({
-  src: "./fonts/mozilla-text.woff2",
+const mozillaText = Mozilla_Text({
+  subsets: ["latin"],
   variable: "--font-mozilla-text",
-  weight: "400 700",
   display: "swap",
 });
 
 const OG_IMAGE = {
-  url: "/assets/banner.jpg",
+  url: "/assets/Skybridge-og.jpg",
   width: 1200,
   height: 630,
-  alt: "Skybridge — the full-stack React framework for MCP Apps",
+  alt: "Skybridge, the full-stack React framework for MCP apps and MCP servers",
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://skybridge.tech"),
   title:
-    "Skybridge — the full-stack React framework for MCP Apps | Claude & ChatGPT",
+    "Skybridge, the full-stack React framework for MCP apps and MCP servers | Claude & ChatGPT",
   description:
-    "Skybridge is the open-source TypeScript framework for building MCP Apps. Write once, run in Claude, ChatGPT, VSCode, and any MCP client. 100K monthly downloads.",
+    "Skybridge is the leading open-source TypeScript framework for building MCP Apps. Write once, run in Claude, ChatGPT, VSCode, and any MCP client. 100K monthly downloads.",
   authors: [{ name: "Alpic" }],
   robots: { index: true, follow: true },
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     siteName: "Skybridge",
-    title: "Skybridge — the full-stack React framework for MCP Apps",
+    title:
+      "Skybridge, the full-stack React framework for MCP apps and MCP servers | Claude & ChatGPT",
     description:
-      "Open-source TypeScript framework for building MCP Apps. Write once, run in Claude, ChatGPT, VSCode, and any MCP client. 100K monthly downloads.",
+      "Skybridge is the leading open-source TypeScript framework for building MCP Apps. Write once, run in Claude, ChatGPT, VSCode, and any MCP client. 100K monthly downloads.",
     url: "/",
     images: [OG_IMAGE],
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    site: "@skybridgedev",
-    title: "Skybridge — the full-stack React framework for MCP Apps",
+    site: "@alpic_ai",
+    title:
+      "Skybridge, the full-stack React framework for MCP apps and MCP servers | Claude & ChatGPT",
     description:
-      "Open-source TypeScript framework for building MCP Apps. Write once, run in Claude, ChatGPT, VSCode, and any MCP client.",
+      "Skybridge is the leading open-source TypeScript framework for building MCP Apps. Write once, run in Claude, ChatGPT, VSCode, and any MCP client. 100K monthly downloads.",
     images: [OG_IMAGE],
   },
 };
@@ -87,6 +89,18 @@ export default function RootLayout({
   return (
     <html lang="en" className={mozillaText.variable}>
       <body>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-0W0ZMXTSDZ"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-0W0ZMXTSDZ');
+          `}
+        </Script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

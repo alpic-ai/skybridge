@@ -1,12 +1,13 @@
 {
   "name": "skybridge",
-  "version": "0.35.13",
+  "version": "1.0.0",
   "description": "Skybridge is a framework for building ChatGPT and MCP Apps",
   "repository": {
     "type": "git",
     "url": "https://github.com/alpic-ai/skybridge.git"
   },
   "type": "module",
+  "sideEffects": false,
   "engines": {
     "node": ">=22.0.0"
   },
@@ -50,7 +51,7 @@
   "license": "ISC",
   "peerDependencies": {
     "@modelcontextprotocol/sdk": ">=1.27.0",
-    "@skybridge/devtools": ">=0.35.14 <1.0.0",
+    "@skybridge/devtools": "^1.0.0",
     "nodemon": ">=3.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
@@ -65,6 +66,7 @@
     "cross-spawn": "^7.0.6",
     "dequal": "^2.0.3",
     "es-toolkit": "^1.45.1",
+    "esbuild": "^0.27.0",
     "express": "^5.2.1",
     "handlebars": "^4.7.9",
     "ink": "^7.0.0",
@@ -105,6 +107,10 @@
     "commands": "./dist/commands",
     "dirname": "skybridge",
     "topicSeparator": " ",
+    "helpClass": {
+      "target": "./dist/commands/create",
+      "identifier": "SkybridgeHelp"
+    },
     "hooks": {
       "finally": "./dist/cli/telemetry"
     }

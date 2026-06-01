@@ -1,5 +1,5 @@
-import { spawn } from "node:child_process";
 import { isAbsolute, relative } from "node:path";
+import spawn from "cross-spawn";
 import { useEffect, useRef, useState } from "react";
 
 type TsError = {

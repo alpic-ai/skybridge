@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { userPromptMiddleware } from "@alpic-ai/insights";
+import { intentMiddleware } from "@alpic-ai/insights";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
@@ -27,8 +27,8 @@ function getWeeks(weekOffset: number, duration: number): Week {
       const total = weeks.reduce(
         (sum, week) =>
           sum +
-          (week.days[dayIndex].activities.find((a) => a.type === type)
-            ?.hours ?? 0),
+          (week.days[dayIndex].activities.find((a) => a.type === type)?.hours ??
+            0),
         0,
       );
       return { type, hours: Math.round(total / duration) };
@@ -41,8 +41,7 @@ function getWeeks(weekOffset: number, duration: number): Week {
   const activities: Activity[] = ActivityTypes.map((type) => ({
     type,
     hours: days.reduce(
-      (sum, d) =>
-        sum + (d.activities.find((a) => a.type === type)?.hours ?? 0),
+      (sum, d) => sum + (d.activities.find((a) => a.type === type)?.hours ?? 0),
       0,
     ),
   }));
@@ -88,7 +87,7 @@ const server = new McpServer(
   },
   { capabilities: {} },
 )
-  .mcpMiddleware(userPromptMiddleware())
+  .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
       name: "show-productivity-insights",
@@ -135,6 +134,6 @@ const server = new McpServer(
     },
   );
 
-server.run();
+export default await server.run();
 
 export type AppType = typeof server;

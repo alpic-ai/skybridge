@@ -28,7 +28,7 @@ const COMMUNITY_LINKS: CommunityLink[] = [
     },
   },
   {
-    href: "https://x.com/skybridgedev",
+    href: "https://x.com/alpic_ai",
     label: "X",
     subtitle: "Follow updates",
     icon: <Icon name="x" size={18} />,
@@ -96,10 +96,7 @@ export function SiteFooter() {
               alt="Skybridge"
               className="sb-footer-logo"
             />
-            <p>
-              The full-stack React framework for MCP Apps. An open-source
-              project made by Alpic, in Paris.
-            </p>
+            <p>An open-source project made with taste in Paris. © Alpic 2026</p>
           </div>
           <div>
             <h4>FRAMEWORK</h4>
@@ -120,9 +117,6 @@ export function SiteFooter() {
               Contribute
             </a>
           </div>
-        </div>
-        <div className="sb-footer-bot">
-          <span>© 2026 Alpic · Skybridge is open source (MIT)</span>
         </div>
       </div>
     </footer>

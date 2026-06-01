@@ -40,7 +40,7 @@ const VALUES: ValueItem[] = [
   },
   {
     icon: "book",
-    title: "Examples library",
+    title: "Example library",
     description:
       "Get started quickly with production-ready app examples for e-commerce, travel, SaaS, and others.",
     cta: { label: "See examples", href: "/showcase" },

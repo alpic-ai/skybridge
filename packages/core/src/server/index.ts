@@ -1,4 +1,13 @@
 export {
+  type AuthInfo,
+  type AuthMetadataOptions,
+  type BearerAuthMiddlewareOptions,
+  InvalidTokenError,
+  mcpAuthMetadataRouter,
+  optionalBearerAuth,
+  requireBearerAuth,
+} from "./auth.js";
+export {
   audio,
   embeddedResource,
   image,
@@ -27,6 +36,7 @@ export type {
   HandlerContent,
   KnownToolMeta,
   McpServerTypes,
+  SecurityScheme,
   ToolDef,
   ToolMeta,
   ViewConfig,
@@ -36,6 +46,7 @@ export type {
   ViewNameRegistry,
 } from "./server.js";
 export {
+  __setBuildManifest,
   McpServer,
   normalizeContent,
 } from "./server.js";

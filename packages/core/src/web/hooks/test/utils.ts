@@ -1,4 +1,6 @@
 import type {
+  McpUiDownloadFileResult,
+  McpUiHostCapabilities,
   McpUiHostContext,
   McpUiInitializeResult,
   McpUiToolInputNotification,
@@ -16,8 +18,14 @@ export class MockResizeObserver {
 
 const DEFAULT_CONTEXT: McpUiHostContext = {};
 
+export type McpAppHostMockOptions = {
+  hostCapabilities?: McpUiHostCapabilities;
+  downloadFileResult?: McpUiDownloadFileResult;
+};
+
 export const getMcpAppHostPostMessageMock = (
   initialContext: McpUiHostContext = DEFAULT_CONTEXT,
+  options: McpAppHostMockOptions = {},
 ) =>
   vi.fn((message: { method: string; id: number }) => {
     switch (message.method) {
@@ -25,7 +33,7 @@ export const getMcpAppHostPostMessageMock = (
         const result: McpUiInitializeResult = {
           protocolVersion: "2025-06-18",
           hostInfo: { name: "test-host", version: "1.0.0" },
-          hostCapabilities: {},
+          hostCapabilities: options.hostCapabilities ?? {},
           hostContext: initialContext,
         };
         act(() =>
@@ -62,6 +70,26 @@ export const getMcpAppHostPostMessageMock = (
                 },
               },
             ),
+          ),
+        );
+        break;
+      }
+      case "ui/download-file": {
+        act(() =>
+          fireEvent(
+            window,
+            new MessageEvent<{
+              jsonrpc: "2.0";
+              id: number;
+              result: McpUiDownloadFileResult;
+            }>("message", {
+              source: window.parent,
+              data: {
+                jsonrpc: "2.0",
+                id: message.id,
+                result: options.downloadFileResult ?? {},
+              },
+            }),
           ),
         );
         break;

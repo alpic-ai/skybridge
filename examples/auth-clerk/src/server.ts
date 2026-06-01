@@ -1,12 +1,11 @@
 import "dotenv/config";
-import { userPromptMiddleware } from "@alpic-ai/insights";
+import { intentMiddleware } from "@alpic-ai/insights";
 import { clerkMiddleware } from "@clerk/express";
 import {
   mcpAuthClerk,
   protectedResourceHandlerClerk,
 } from "@clerk/mcp-tools/express";
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
-import { McpServer } from "skybridge/server";
+import { type AuthInfo, McpServer } from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 
@@ -33,7 +32,7 @@ const server = new McpServer(
     protectedResourceHandlerClerk({ scopes_supported: ["profile", "email"] }),
   )
   .use("/mcp", mcpAuthClerk)
-  .mcpMiddleware(userPromptMiddleware())
+  .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
       name: "search-coffee-paris",
@@ -100,6 +99,6 @@ const server = new McpServer(
     },
   );
 
-server.run();
+export default await server.run();
 
 export type AppType = typeof server;

@@ -66,8 +66,8 @@ const skybridgeVersion = getVersion("skybridge", explicitVersion);
 const devtoolsVersion = getVersion("@skybridge/devtools", explicitVersion);
 const alpicVersion = getVersion("alpic");
 
-const skybridgeRange = `>=${skybridgeVersion} <1.0.0`;
-const devtoolsRange = devtoolsVersion ? `>=${devtoolsVersion} <1.0.0` : null;
+const skybridgeRange = `^${skybridgeVersion}`;
+const devtoolsRange = devtoolsVersion ? `^${devtoolsVersion}` : null;
 const alpicRange = alpicVersion ? `^${alpicVersion}` : null;
 
 console.log(`skybridge:          ${skybridgeRange}`);
@@ -90,7 +90,8 @@ for (const dirEntry of readdirSync(join(rootDir, "examples"), {
 }
 
 const targets = [
-  "packages/create-skybridge/template/package.json",
+  "packages/create-skybridge/templates/demo/package.json",
+  "packages/create-skybridge/templates/blank/package.json",
   ...exampleTargets,
 ];
 

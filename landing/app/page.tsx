@@ -10,6 +10,7 @@ import {
   TrustSection,
 } from "./components/trust-final";
 import { ValuesSection } from "./components/values";
+import { VideoSection } from "./components/video";
 
 export default function Home() {
   return (
@@ -20,6 +21,7 @@ export default function Home() {
       <CodeDemoSection />
       <DevToolsSection />
       <SocialProofSection />
+      <VideoSection />
       <QuotesSection />
       <TrustSection />
       <FinalCtaSection />
