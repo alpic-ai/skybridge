@@ -1,7 +1,12 @@
 import type {
+  SchemaOutput,
+  ZodRawShapeCompat,
+} from "@modelcontextprotocol/sdk/server/zod-compat.js";
+import type {
   CallToolResult,
   EmbeddedResource,
   ResourceLink,
+  ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
 import type { useSyncExternalStore } from "react";
 import type { ViewHostType } from "../../server/index.js";
@@ -166,6 +171,54 @@ export type DownloadResult = {
 };
 
 /**
+ * Args passed to a {@link ViewToolHandler}, inferred from the tool's
+ * `inputSchema` (optionality preserved). Mirrors the server's `registerTool`.
+ */
+export type InferViewToolArgs<Shape extends ZodRawShapeCompat> = {
+  [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
+    ? never
+    : K]: SchemaOutput<Shape[K]>;
+} & {
+  [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
+    ? K
+    : never]?: SchemaOutput<Shape[K]>;
+};
+
+/**
+ * Declares a tool the view exposes to the host/model (the MCP Apps
+ * "app-provided tools" feature). Mirrors the server-side `registerTool` config.
+ * Namespace `name` (e.g. `chess_make_move`) to avoid clashing with server tools.
+ */
+export type ViewToolConfig<
+  TInput extends ZodRawShapeCompat = ZodRawShapeCompat,
+> = {
+  name: string;
+  title?: string;
+  description?: string;
+  inputSchema?: TInput;
+  annotations?: ToolAnnotations;
+};
+
+/**
+ * Value a {@link ViewToolHandler} returns — a standard MCP `CallToolResult`
+ * (`content` blocks plus optional `structuredContent` / `isError` / `_meta`),
+ * exactly as `ext-apps`' app tool callbacks return it.
+ */
+export type ViewToolResult = CallToolResult;
+
+/** Handler run when the host calls a view tool. Receives validated, typed args. */
+export type ViewToolHandler<
+  TInput extends ZodRawShapeCompat = ZodRawShapeCompat,
+> = (
+  args: InferViewToolArgs<TInput>,
+) => ViewToolResult | Promise<ViewToolResult>;
+
+/** @internal Untyped handler signature stored by the adaptor/bridge after type erasure. */
+export type AnyViewToolHandler = (
+  args: Record<string, unknown>,
+) => ViewToolResult | Promise<ViewToolResult>;
+
+/**
  * @internal
  * Low-level interface every host bridge implements. End-user code should use
  * the React hooks (`useCallTool`, `useViewState`, `useFiles`, …) rather than
@@ -194,4 +247,8 @@ export interface Adaptor {
   selectFiles(): Promise<FileMetadata[]>;
   openModal(options: RequestModalOptions): void;
   setOpenInAppUrl(href: string): Promise<void>;
+  registerViewTool(
+    config: ViewToolConfig,
+    handler: AnyViewToolHandler,
+  ): () => void;
 }

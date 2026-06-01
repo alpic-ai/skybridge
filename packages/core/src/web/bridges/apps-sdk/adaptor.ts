@@ -171,4 +171,11 @@ export class AppsSdkAdaptor implements Adaptor {
 
     return window.openai.setOpenInAppUrl({ href });
   }
+
+  public registerViewTool = (): (() => void) => {
+    console.warn(
+      "[skybridge] registerViewTool: view tools are not supported on the Apps SDK runtime",
+    );
+    return () => {};
+  };
 }
