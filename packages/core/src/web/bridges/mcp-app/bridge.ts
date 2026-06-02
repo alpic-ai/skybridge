@@ -3,7 +3,7 @@ import type { Implementation } from "@modelcontextprotocol/sdk/types.js";
 import type { Bridge, Subscribe } from "../types.js";
 import type { McpAppContext, McpAppContextKey } from "./types.js";
 
-/** @internal Singleton bridge over the `ext-apps` JSON-RPC App connection. Used by {@link McpAppAdaptor}. */
+/** @internal Singleton bridge over the `ext-apps` JSON-RPC App connection. Used by `HostAdaptor`. */
 export class McpAppBridge implements Bridge<McpAppContext> {
   private static instance: McpAppBridge | null = null;
   public context: McpAppContext = {
@@ -61,9 +61,6 @@ export class McpAppBridge implements Bridge<McpAppContext> {
   public static getInstance(
     options?: Partial<{ appInfo: Implementation }>,
   ): McpAppBridge {
-    if (window.skybridge.hostType !== "mcp-app") {
-      throw new Error("MCP App Bridge can only be used in the mcp-app runtime");
-    }
     if (McpAppBridge.instance && options) {
       console.warn(
         "McpAppBridge.getInstance: options ignored, instance already exists",

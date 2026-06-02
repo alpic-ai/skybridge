@@ -8,7 +8,8 @@ import {
   type Mock,
   vi,
 } from "vitest";
-import { McpAppAdaptor, McpAppBridge } from "../bridges/mcp-app/index.js";
+import { _resetAdaptor } from "../bridges/get-adaptor.js";
+import { McpAppBridge } from "../bridges/mcp-app/index.js";
 import {
   fireToolResultNotification,
   getMcpAppHostPostMessageMock,
@@ -31,6 +32,8 @@ describe("useViewState", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
+    _resetAdaptor();
+    McpAppBridge.resetInstance();
   });
 
   const defaultState = { count: 0, name: "test" };
@@ -98,6 +101,7 @@ describe("useViewState (mcp-app host — localStorage persistence)", () => {
   beforeEach(() => {
     vi.stubGlobal("parent", { postMessage: getMcpAppHostPostMessageMock() });
     vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    vi.stubGlobal("openai", undefined);
     vi.stubGlobal("ResizeObserver", MockResizeObserver);
     localStorage.clear();
   });
@@ -105,8 +109,8 @@ describe("useViewState (mcp-app host — localStorage persistence)", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
+    _resetAdaptor();
     McpAppBridge.resetInstance();
-    McpAppAdaptor.resetInstance();
     localStorage.clear();
   });
 

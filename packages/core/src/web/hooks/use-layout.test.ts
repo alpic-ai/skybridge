@@ -1,8 +1,7 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { McpAppAdaptor } from "../bridges/mcp-app/adaptor.js";
+import { _resetAdaptor } from "../bridges/get-adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
-import type { SafeArea, Theme } from "../bridges/types.js";
 import {
   getMcpAppHostPostMessageMock,
   MockResizeObserver,
@@ -11,65 +10,93 @@ import { useLayout } from "./use-layout.js";
 
 describe("useLayout", () => {
   describe("apps-sdk host type", () => {
-    let OpenaiMock: {
-      theme: Theme;
-      maxHeight: number;
-      safeArea: SafeArea;
-    };
-
     beforeEach(() => {
-      OpenaiMock = {
-        theme: "light",
-        maxHeight: 500,
-        safeArea: { insets: { top: 0, bottom: 0, left: 0, right: 0 } },
-      };
-      vi.stubGlobal("openai", OpenaiMock);
+      _resetAdaptor();
+      McpAppBridge.resetInstance();
       vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+      vi.stubGlobal("openai", { view: { mode: "inline" } });
+      vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
     afterEach(() => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
+      McpAppBridge.resetInstance();
+      _resetAdaptor();
     });
 
-    it("should return theme, maxHeight, and safeArea from window.openai", () => {
+    it("should return theme, maxHeight, and safeArea from mcp host context", async () => {
+      vi.stubGlobal("parent", {
+        postMessage: getMcpAppHostPostMessageMock({
+          theme: "light",
+          containerDimensions: { maxHeight: 500, width: 400 },
+          safeAreaInsets: { top: 0, bottom: 0, left: 0, right: 0 },
+        }),
+      });
       const { result } = renderHook(() => useLayout());
 
-      expect(result.current.theme).toBe("light");
-      expect(result.current.maxHeight).toBe(500);
-      expect(result.current.safeArea).toEqual({
-        insets: { top: 0, bottom: 0, left: 0, right: 0 },
+      await waitFor(() => {
+        expect(result.current.theme).toBe("light");
+        expect(result.current.maxHeight).toBe(500);
+        expect(result.current.safeArea).toEqual({
+          insets: { top: 0, bottom: 0, left: 0, right: 0 },
+        });
       });
     });
 
-    it("should return dark theme when set to dark", () => {
-      OpenaiMock.theme = "dark";
+    it("should return dark theme when set to dark", async () => {
+      vi.stubGlobal("parent", {
+        postMessage: getMcpAppHostPostMessageMock({
+          theme: "dark",
+          containerDimensions: { maxHeight: 500, width: 400 },
+          safeAreaInsets: { top: 0, bottom: 0, left: 0, right: 0 },
+        }),
+      });
       const { result } = renderHook(() => useLayout());
 
-      expect(result.current.theme).toBe("dark");
+      await waitFor(() => {
+        expect(result.current.theme).toBe("dark");
+      });
     });
 
-    it("should return different maxHeight when set", () => {
-      OpenaiMock.maxHeight = 800;
+    it("should return different maxHeight when set", async () => {
+      vi.stubGlobal("parent", {
+        postMessage: getMcpAppHostPostMessageMock({
+          theme: "light",
+          containerDimensions: { maxHeight: 800, width: 400 },
+          safeAreaInsets: { top: 0, bottom: 0, left: 0, right: 0 },
+        }),
+      });
       const { result } = renderHook(() => useLayout());
 
-      expect(result.current.maxHeight).toBe(800);
+      await waitFor(() => {
+        expect(result.current.maxHeight).toBe(800);
+      });
     });
 
-    it("should return safeArea with insets when set", () => {
-      OpenaiMock.safeArea = {
-        insets: { top: 44, bottom: 34, left: 0, right: 0 },
-      };
+    it("should return safeArea with insets when set", async () => {
+      vi.stubGlobal("parent", {
+        postMessage: getMcpAppHostPostMessageMock({
+          theme: "light",
+          containerDimensions: { maxHeight: 500, width: 400 },
+          safeAreaInsets: { top: 44, bottom: 34, left: 0, right: 0 },
+        }),
+      });
       const { result } = renderHook(() => useLayout());
 
-      expect(result.current.safeArea.insets.top).toBe(44);
-      expect(result.current.safeArea.insets.bottom).toBe(34);
+      await waitFor(() => {
+        expect(result.current.safeArea.insets.top).toBe(44);
+        expect(result.current.safeArea.insets.bottom).toBe(34);
+      });
     });
   });
 
   describe("mcp-app host type", () => {
     beforeEach(() => {
+      _resetAdaptor();
+      McpAppBridge.resetInstance();
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+      vi.stubGlobal("openai", undefined);
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
@@ -77,7 +104,7 @@ describe("useLayout", () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();
-      McpAppAdaptor.resetInstance();
+      _resetAdaptor();
     });
 
     it("should return theme, maxHeight, and safeArea from mcp host context", async () => {

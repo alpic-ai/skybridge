@@ -1,11 +1,7 @@
-import { act, fireEvent, renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  type AppsSdkContext,
-  SET_GLOBALS_EVENT_TYPE,
-  SetGlobalsEvent,
-} from "../bridges/apps-sdk/index.js";
-import { McpAppAdaptor, McpAppBridge } from "../bridges/mcp-app/index.js";
+import { _resetAdaptor } from "../bridges/get-adaptor.js";
+import { McpAppBridge } from "../bridges/mcp-app/index.js";
 import {
   fireToolInputNotification,
   fireToolResultNotification,
@@ -16,39 +12,46 @@ import { useToolInfo } from "./use-tool-info.js";
 
 describe("useToolInfo", () => {
   describe("apps-sdk host", () => {
-    let OpenaiMock: Pick<
-      AppsSdkContext,
-      "toolInput" | "toolOutput" | "toolResponseMetadata"
-    >;
-
     beforeEach(() => {
-      OpenaiMock = {
-        toolInput: { name: "pokemon", args: { name: "pikachu" } },
+      vi.stubGlobal("parent", { postMessage: getMcpAppHostPostMessageMock() });
+      vi.stubGlobal("openai", {
+        toolInput: null,
         toolOutput: null,
         toolResponseMetadata: null,
-      };
-      vi.stubGlobal("openai", OpenaiMock);
+      });
       vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+      vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
     afterEach(() => {
+      _resetAdaptor();
       vi.unstubAllGlobals();
       vi.resetAllMocks();
+      McpAppBridge.resetInstance();
     });
 
-    it("should return toolInput on initial mount window.openai", () => {
+    it("should return pending state with tool input from tool-input notification", async () => {
       const { result } = renderHook(() => useToolInfo());
 
-      expect(result.current).toMatchObject({
-        input: { name: "pokemon", args: { name: "pikachu" } },
-        status: "pending",
-        isIdle: false,
-        isPending: true,
-        isSuccess: false,
+      act(() => {
+        fireToolInputNotification({
+          name: "pokemon",
+          args: { name: "pikachu" },
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current).toMatchObject({
+          input: { name: "pokemon", args: { name: "pikachu" } },
+          status: "pending",
+          isIdle: false,
+          isPending: true,
+          isSuccess: false,
+        });
       });
     });
 
-    it("should eventually return tool output and response metadata once tool call completes", async () => {
+    it("should return success state once tool-result notification arrives", async () => {
       const toolOutput = {
         name: "pikachu",
         color: "yellow",
@@ -59,19 +62,15 @@ describe("useToolInfo", () => {
       const { result } = renderHook(() => useToolInfo());
 
       act(() => {
-        OpenaiMock.toolOutput = toolOutput;
-        OpenaiMock.toolResponseMetadata = toolResponseMetadata;
-        fireEvent(
-          window,
-          new SetGlobalsEvent(SET_GLOBALS_EVENT_TYPE, {
-            detail: {
-              globals: {
-                toolOutput,
-                toolResponseMetadata,
-              },
-            },
-          }),
-        );
+        fireToolInputNotification({
+          name: "pokemon",
+          args: { name: "pikachu" },
+        });
+        fireToolResultNotification({
+          content: [{ type: "text", text: JSON.stringify(toolOutput) }],
+          structuredContent: toolOutput,
+          _meta: toolResponseMetadata,
+        });
       });
 
       await waitFor(() => {
@@ -91,14 +90,15 @@ describe("useToolInfo", () => {
     beforeEach(() => {
       vi.stubGlobal("parent", { postMessage: getMcpAppHostPostMessageMock() });
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+      vi.stubGlobal("openai", undefined);
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
     afterEach(async () => {
+      _resetAdaptor();
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();
-      McpAppAdaptor.resetInstance();
     });
 
     it("should return idle state initially when tool input is not yet set", async () => {
