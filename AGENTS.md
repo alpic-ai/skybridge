@@ -73,7 +73,7 @@ Run `pnpm format` to auto-fix.
 ## Cross-cutting concerns
 
 When the public API of `packages/core/` changes (exports from `src/server/index.ts`, `src/web/index.ts`, and CLI commands in `src/commands/`):
-1. Update `skills/` references (chatgpt-app-builder)
+1. Update `skills/` references (skybridge)
 2. Update `docs/` — especially `api-reference/` and `guides/`
 
 PR reviewers must enforce these updates are included when a PR touches the public API.

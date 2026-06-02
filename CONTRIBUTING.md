@@ -65,7 +65,7 @@ Every PR is reviewed by Greptile. If the check does not return 5/5, address each
 
 When your PR changes the public API of `packages/core` (exports from `src/server/index.ts`, `src/web/index.ts`, or the CLI commands in `src/commands/`), it must also update:
 
-1. `skills/` references (notably `chatgpt-app-builder`)
+1. `skills/` references (notably `skybridge`)
 2. `docs/`, especially `api-reference/` and `guides/`
 
 Reviewers will block PRs that touch the public API without these updates.
