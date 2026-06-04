@@ -33,27 +33,24 @@ npm install
 
 1. Sign in to the [Descope Console](https://app.descope.com).
 2. Go to **Settings → Project**.
-3. Copy your **Project ID** (starts with `P2...`).
+3. Copy your **Project ID** (starts with `P...`).
 
-#### 2.2 Create an OIDC Application
+#### 2.2 Create an MCP Server
 
-1. Go to [Applications](https://app.descope.com/applications) → **+ Application** → **Generic OIDC Application**.
+1. Go to **Agentic Identity Hub → MCP Servers** → **+ MCP Server**.
 2. Give it a name (e.g., `Skybridge Coffee App`).
-3. Under **Flow Hosting URL**, set it to:
-   `https://auth.descope.io/<YOUR_PROJECT_ID>?flow=sign-up-or-in`
-4. Save the application.
-
-#### 2.3 Note your Client Credentials
-
-From the application settings:
-- **Client ID**: your Descope Project ID
-- **Client Secret**: create an Access Key at [Access Keys](https://app.descope.com/m2m/accessKeys) — this is used for the token exchange
+3. Set the **MCP Server URL** to your server's `/mcp` endpoint:
+   - Local: `http://localhost:3000/mcp`
+   - Tunnel: `https://<your-tunnel-url>/mcp`
+4. Save — copy the **MCP Server ID** (starts with `MS...`).
 
 ### 3. Create your `.env` file
 
 ```env
 DESCOPE_PROJECT_ID=P2xxxxxxxxxxxxxxxxxx
-SERVER_URL=http://localhost:3000
+DESCOPE_MCP_SERVER_ID=MSxxxxxxxxxxxxxxxxxx
+# SERVER_URL is auto-detected locally; set this only when using --tunnel
+# SERVER_URL=https://your-tunnel-url.alpic.app
 ```
 
 ### 4. Start your local server
@@ -66,4 +63,24 @@ This starts:
 - Your MCP server at `http://localhost:3000/mcp`
 - Skybridge DevTools UI at `http://localhost:3000/`
 
-### 5. Project structure
+### 5. Using the tunnel
+
+To test with the Alpic playground, start the tunnel instead:
+
+```bash
+npm run dev:tunnel
+```
+
+Then update the **MCP Server URL** in Descope Console to match the tunnel URL (e.g. `https://your-tunnel.alpic.dev/mcp`) and set `SERVER_URL` in your `.env` to the tunnel base URL (without `/mcp`).
+
+### 6. Project structure
+
+```
+src/
+  server.ts          # MCP server — tool definitions, auth middleware
+  auth.ts            # JWT verification against Descope's JWKS
+  env.ts             # Environment variable validation
+  coffee-data.ts     # Mock coffee shop data
+  views/
+    search-coffee-paris.tsx  # React widget rendered in the MCP client
+```
