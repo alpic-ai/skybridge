@@ -1,5 +1,5 @@
 import { cn } from "@alpic-ai/ui/lib/cn";
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 
 /** A labelled block: small uppercase caption above its value. */
 export function Field({
@@ -58,7 +58,7 @@ export function TabBody({
 }: {
   children: ReactNode;
   className?: string;
-} & React.HTMLAttributes<HTMLDivElement>) {
+} & HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn("flex flex-col gap-4", className)} {...rest}>
       {children}
