@@ -1,7 +1,11 @@
 # Skybridge Chess
 
-Play chess against the assistant inside the conversation. You play **White** and
-move first by dragging pieces; the assistant plays **Black**.
+Play chess against the assistant inside the conversation. The board opens on a
+**pick-a-side lobby**: choose **White** or **Black** to start. Picking a color
+is the user gesture that lets the view pop the board into **picture-in-picture**
+(via `useDisplayMode`), so you can keep chatting while you play. You drag your
+pieces; the assistant plays the other color (and opens the game if you take
+Black).
 
 This example is a Skybridge port of [MCPJam/chess-mcp](https://github.com/MCPJam/chess-mcp),
 and its purpose is to showcase **MCP Apps view-provided tools** — the
@@ -19,7 +23,7 @@ the model actually uses to play, with `useRegisterViewTool`:
 | `start_game` | server | Opens the board |
 | `chess_get_board_state` | **view** | Read FEN, turn, check, result, history |
 | `chess_get_legal_moves` | **view** | List legal moves (optionally from a square) |
-| `chess_make_move` | **view** | Play a move as Black |
+| `chess_make_move` | **view** | Play a move as the assistant's color |
 | `chess_reset_game` | **view** | Reset to the starting position |
 
 The host discovers the view tools via `tools/list` and invokes them via
@@ -30,11 +34,20 @@ move played, so the full game is pushed into the model's context on every change
 and survives a view remount. The chess logic is a thin, stateless wrapper
 (`src/lib/engine.ts`) — every helper rebuilds the engine from a FEN on demand.
 
+### Pick a side & picture-in-picture
+
+The view starts on a lobby with two buttons (White / Black). Picking a color
+calls the match store's `start` action and immediately requests
+`setDisplayMode("pip")` — most hosts only grant picture-in-picture in response
+to a user gesture, so the color choice doubles as that gesture. If you pick
+Black, the view fires a `sendFollowUpMessage` asking the assistant (White) to
+make the opening move.
+
 ### The turn loop
 
-1. The user drags a White piece. chess.js validates the move.
+1. You drag one of your pieces. chess.js validates the move.
 2. The view calls `sendFollowUpMessage`, asking the assistant (as the user) to
-   reply with its Black move.
+   reply with its move on the other color.
 3. The assistant calls the `chess_make_move` **view tool**, which updates the
    board in place.
 
