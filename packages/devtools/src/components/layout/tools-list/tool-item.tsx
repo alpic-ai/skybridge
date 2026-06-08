@@ -25,7 +25,7 @@ import type { RJSFSchema } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
 import { Braces, ClipboardList, Loader2, Play, Save } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { CopyButton } from "@/lib/copy.js";
 import {
@@ -62,6 +62,21 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
 
   const [tab, setTab] = useState<TabValue>("form");
   const [jsonError, setJsonError] = useState(false);
+
+  // Run is disabled when the current input doesn't validate against the schema
+  // (or the JSON is malformed).
+  const inputInvalid = useMemo(() => {
+    const schema = tool.inputSchema as RJSFSchema;
+    const hasNoInput =
+      !schema?.properties || Object.keys(schema.properties).length === 0;
+    if (hasNoInput) {
+      return false;
+    }
+    if (tab === "json" && jsonError) {
+      return true;
+    }
+    return validator.validateFormData(formData, schema).errors.length > 0;
+  }, [tool.inputSchema, tab, jsonError, formData]);
 
   const handleRun = async () => {
     if (needsSignIn) {
@@ -115,9 +130,17 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     { exactMatch: true },
   );
 
+  // Why Run is disabled, surfaced as a tooltip (no reason while it's running).
+  let disabledReason: string | null = null;
+  if (needsSignIn) {
+    disabledReason = "Sign in to call this tool";
+  } else if (inputInvalid) {
+    disabledReason = "Input is not valid";
+  }
+
   const runButton = (
     <Button
-      disabled={isPending || needsSignIn}
+      disabled={isPending || needsSignIn || inputInvalid}
       variant="primary"
       onClick={handleRun}
       icon={
@@ -144,13 +167,13 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
         )}
         action={
           open ? (
-            needsSignIn ? (
+            disabledReason ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   {/* Wrapper so the disabled button still surfaces hover. */}
                   <span className="inline-flex">{runButton}</span>
                 </TooltipTrigger>
-                <TooltipContent>Sign in to call this tool</TooltipContent>
+                <TooltipContent>{disabledReason}</TooltipContent>
               </Tooltip>
             ) : (
               runButton
