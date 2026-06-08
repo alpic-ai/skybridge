@@ -58,7 +58,7 @@ export function SavedQueriesDropdown({
             <DropdownMenuItem
               onSelect={onClear}
               className="cursor-pointer font-mono text-xs font-normal"
-              disabled={queries.length < 0}
+              disabled={queries.length <= 0}
             >
               {queries.length > 0 && (
                 <Check
