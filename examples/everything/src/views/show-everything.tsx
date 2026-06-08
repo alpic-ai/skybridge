@@ -89,9 +89,12 @@ function Widget() {
       className={`${theme === "dark" ? "dark" : ""} flex flex-col gap-6 bg-background p-4 text-foreground`}
     >
       <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
-        <TabsList variant="line" className="gap-x-3 gap-y-0">
+        <TabsList
+          variant="line"
+          className="w-full max-w-full justify-start overflow-x-auto group-data-[orientation=horizontal]/tabs:flex-nowrap"
+        >
           {(Object.keys(TABS) as Tab[]).map((t) => (
-            <TabsTrigger key={t} value={t}>
+            <TabsTrigger key={t} value={t} className="flex-none">
               {t}
             </TabsTrigger>
           ))}
