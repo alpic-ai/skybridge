@@ -33,6 +33,7 @@ import {
   useCallTool,
   useServerInfo,
 } from "@/lib/mcp/index.js";
+import { useSelectedToolName } from "@/lib/nuqs.js";
 import {
   type SavedQuery,
   useSavedQueries,
@@ -48,6 +49,7 @@ type TabValue = "form" | "json";
 
 export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
   const { mutateAsync: callTool, isPending } = useCallTool();
+  const [, setSelectedTool] = useSelectedToolName();
   const isSignedIn = useAuthStore((s) => s.isSignedIn);
   const requiresAuth = useAuthStore((s) => s.requiresAuth);
   const formRef = useRef<Form<unknown, RJSFSchema>>(null);
@@ -101,6 +103,9 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
         return;
       }
     }
+    // Focus this tool so the result view (right pane) shows its output — even
+    // when Run was clicked from a collapsed header.
+    setSelectedTool(tool.name);
     await callTool({ toolName: tool.name, args: formData });
   };
 
@@ -166,8 +171,15 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
           "no-underline data-[state=closed]:hover:bg-muted/40",
         )}
         action={
-          open ? (
-            disabledReason ? (
+          <div
+            className={cn(
+              "transition-opacity",
+              // Collapsed: reveal the button on header hover / focus only.
+              !open &&
+                "opacity-0 focus-within:opacity-100 group-hover/tool:opacity-100",
+            )}
+          >
+            {disabledReason ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   {/* Wrapper so the disabled button still surfaces hover. */}
@@ -177,8 +189,8 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
               </Tooltip>
             ) : (
               runButton
-            )
-          ) : null
+            )}
+          </div>
         }
       >
         <div className="min-w-0 flex-1 truncate text-left text-sm font-medium">
