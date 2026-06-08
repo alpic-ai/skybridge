@@ -1,12 +1,6 @@
 import { Badge } from "@alpic-ai/ui/components/badge";
 import { Button } from "@alpic-ai/ui/components/button";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@alpic-ai/ui/components/card";
-import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@alpic-ai/ui/components/toggle-group";
@@ -35,12 +29,8 @@ export function UseCallToolTab() {
         Trigger server-side tools directly from your widget. Make sure the tool
         _meta <Code>openai/widgetAccessible</Code> property is set to true.
       </Description>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Choose Heads or Tails?</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap items-center gap-3">
+      <Field label="Call flip-coin">
+        <div className="flex flex-wrap items-center gap-3">
           <ToggleGroup
             type="single"
             variant="outline"
@@ -65,8 +55,8 @@ export function UseCallToolTab() {
           >
             {isPending ? "Flipping…" : "Flip"}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </Field>
 
       {structuredContent && (
         <Field label="response">
