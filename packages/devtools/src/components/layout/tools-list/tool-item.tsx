@@ -421,7 +421,7 @@ function JsonBody({
     <div className="space-y-1.5">
       <textarea
         className={cn(
-          "h-80 w-full rounded-md border p-2 font-mono text-xs",
+          "max-h-80 min-h-20 w-full resize-none overflow-auto rounded-md border p-2 font-mono text-xs field-sizing-content",
           error ? "border-destructive" : "border-border",
         )}
         spellCheck={false}
