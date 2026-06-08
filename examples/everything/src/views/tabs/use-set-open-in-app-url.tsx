@@ -1,5 +1,13 @@
+import {
+  Alert,
+  AlertDescription,
+  ErrorAlert,
+} from "@alpic-ai/ui/components/alert";
+import { Button } from "@alpic-ai/ui/components/button";
+import { Input } from "@alpic-ai/ui/components/input";
 import { useState } from "react";
 import { useDisplayMode, useSetOpenInAppUrl } from "skybridge/web";
+import { Description, TabBody } from "../components/ui.js";
 
 export function UseSetOpenInAppUrlTab() {
   const setOpenInAppUrl = useSetOpenInAppUrl();
@@ -10,26 +18,25 @@ export function UseSetOpenInAppUrlTab() {
   const isFullscreen = displayMode === "fullscreen";
 
   return (
-    <div className="tab-content">
-      <p className="description">
+    <TabBody>
+      <Description>
         Set the URL that will be opened when the user clicks the "open in app"
         button. This button appears in the top right corner when the widget is
         displayed in fullscreen mode. The URL must have the same origin as your
         widget's server URL.
-      </p>
+      </Description>
 
-      <div className="button-row" style={{ marginBottom: "1rem" }}>
-        <button
-          type="button"
-          className={`btn ${isFullscreen ? "" : "btn-outline"}`}
+      <div>
+        <Button
+          variant={isFullscreen ? "primary" : "secondary"}
           onClick={() => setDisplayMode(isFullscreen ? "inline" : "fullscreen")}
         >
           {isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-        </button>
+        </Button>
       </div>
 
       <form
-        className="button-row"
+        className="flex items-end gap-2"
         onSubmit={async (e) => {
           e.preventDefault();
           if (url.trim()) {
@@ -46,45 +53,32 @@ export function UseSetOpenInAppUrlTab() {
           }
         }}
       >
-        <input
-          type="text"
-          className="input"
-          value={url}
-          placeholder="Enter URL"
-          onChange={(e) => {
-            setUrl(e.target.value);
-            setError(null);
-            setShowSuccess(false);
-          }}
-          style={{ flex: 1, maxWidth: "20rem" }}
-        />
-        <button type="submit" className="btn" disabled={!url.trim()}>
+        <div className="max-w-80 flex-1">
+          <Input
+            type="text"
+            value={url}
+            placeholder="Enter URL"
+            onChange={(e) => {
+              setUrl(e.target.value);
+              setError(null);
+              setShowSuccess(false);
+            }}
+          />
+        </div>
+        <Button type="submit" disabled={!url.trim()}>
           Set URL
-        </button>
+        </Button>
       </form>
+
       {showSuccess && (
-        <div
-          className="success"
-          style={{
-            maxWidth: "28rem",
-            wordBreak: "break-word",
-          }}
-        >
-          ✓ URL successfully set, enter fullscreen mode and click the open in
-          app button to open the URL in the host application.
-        </div>
+        <Alert variant="success" className="max-w-md">
+          <AlertDescription>
+            URL successfully set, enter fullscreen mode and click the open in
+            app button to open the URL in the host application.
+          </AlertDescription>
+        </Alert>
       )}
-      {error && (
-        <div
-          className="error"
-          style={{
-            maxWidth: "28rem",
-            wordBreak: "break-word",
-          }}
-        >
-          × {error}
-        </div>
-      )}
-    </div>
+      {error && <ErrorAlert description={error} className="max-w-md" />}
+    </TabBody>
   );
 }

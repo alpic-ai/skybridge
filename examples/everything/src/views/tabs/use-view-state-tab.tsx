@@ -1,36 +1,30 @@
+import { Button } from "@alpic-ai/ui/components/button";
 import { useViewState } from "skybridge/web";
+import { Code, Description, Field, TabBody } from "../components/ui.js";
 
 export function UseViewStateTab() {
   const [state, setState] = useViewState({ count: 0 });
 
   return (
-    <div className="tab-content">
-      <p className="description">
-        Persist state across widget lifecycle events.
-      </p>
+    <TabBody>
+      <Description>Persist state across widget lifecycle events.</Description>
 
-      <div className="field">
-        <span className="field-label">Count</span>
-        <code>{state.count ?? 0}</code>
-      </div>
+      <Field label="Count">
+        <Code>{state.count ?? 0}</Code>
+      </Field>
 
-      <div className="button-row">
-        <button
-          type="button"
-          className="btn"
-          onClick={() => setState((prev) => ({ count: prev.count + 1 }))}
-        >
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={() => setState((prev) => ({ count: prev.count + 1 }))}>
           Increment
-        </button>
-        <button
-          type="button"
-          className="btn btn-outline"
+        </Button>
+        <Button
+          variant="secondary"
           onClick={() => setState({ count: 0 })}
           disabled={state.count === 0}
         >
           Reset
-        </button>
+        </Button>
       </div>
-    </div>
+    </TabBody>
   );
 }

@@ -1,7 +1,15 @@
 import "@/index.css";
 
+import { Button } from "@alpic-ai/ui/components/button";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@alpic-ai/ui/components/tabs";
+import { SquareArrowOutUpRight } from "lucide-react";
 import { useState } from "react";
-import { useOpenExternal, useRequestModal } from "skybridge/web";
+import { useLayout, useOpenExternal, useRequestModal } from "skybridge/web";
 import { CreateStoreTab } from "./tabs/create-store-tab.js";
 import { DataLlmTab } from "./tabs/data-llm-tab.js";
 import { HomeTab } from "./tabs/home-tab.js";
@@ -54,10 +62,11 @@ type Tab = keyof typeof TABS;
 
 function Widget() {
   const [tab, setTab] = useState<Tab>("Home");
+  const { theme } = useLayout();
   const openExternal = useOpenExternal();
   const { isOpen, params } = useRequestModal();
 
-  const { docPath, Component } = TABS[tab];
+  const { docPath } = TABS[tab];
 
   // modal content need to be set at root
   // opening is triggered by UseRequestModalTab
@@ -68,8 +77,7 @@ function Widget() {
     }
     return (
       <div
-        className="container"
-        style={{ textAlign: "center", fontSize: "1.5rem" }}
+        className={`${theme === "dark" ? "dark" : ""} bg-background p-4 text-center type-display-xs font-semibold text-foreground`}
       >
         {message}
       </div>
@@ -77,32 +85,39 @@ function Widget() {
   }
 
   return (
-    <div className="container">
-      <nav className="tabs">
-        {(Object.keys(TABS) as Tab[]).map((t) => (
-          <button
-            key={t}
-            type="button"
-            className={`tab ${tab === t ? "active" : ""}`}
-            onClick={() => setTab(t)}
-          >
-            {t}
-          </button>
-        ))}
-      </nav>
+    <div
+      className={`${theme === "dark" ? "dark" : ""} flex flex-col gap-6 bg-background p-4 text-foreground`}
+    >
+      <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
+        <TabsList variant="line" className="gap-x-3 gap-y-0">
+          {(Object.keys(TABS) as Tab[]).map((t) => (
+            <TabsTrigger key={t} value={t}>
+              {t}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      <Component />
+        {(Object.keys(TABS) as Tab[]).map((t) => {
+          const { Component } = TABS[t];
+          return (
+            <TabsContent key={t} value={t} className="mt-4">
+              <Component />
+            </TabsContent>
+          );
+        })}
+      </Tabs>
 
-      <div style={{ marginTop: "1.75rem", textAlign: "right" }}>
-        <button
-          type="button"
-          className="btn btn-outline muted btn-small"
+      <div className="flex justify-end">
+        <Button
+          variant="link-muted"
+          size="default"
+          icon={<SquareArrowOutUpRight />}
           onClick={() =>
             openExternal(`https://docs.skybridge.tech/api-reference/${docPath}`)
           }
         >
-          ↗ See in docs
-        </button>
+          See in docs
+        </Button>
       </div>
     </div>
   );

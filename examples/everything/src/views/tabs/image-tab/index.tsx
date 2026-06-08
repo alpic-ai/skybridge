@@ -1,24 +1,22 @@
+import { Code, Description, Field, TabBody } from "../../components/ui.js";
 import skybridge from "./skybridge.jpg";
 
 export function ImageTab() {
   return (
-    <div className="tab-content">
-      <p className="description">
+    <TabBody>
+      <Description>
         This tab demonstrates how to display images in your widget by importing
-        them directly. You can use the <code>@/</code> alias for absolute paths
+        them directly. You can use the <Code>@/</Code> alias for absolute paths
         or relative imports.
-      </p>
+      </Description>
 
-      <div className="field">
-        <span className="field-label">Example</span>
-        <div style={{ marginTop: "1rem" }}>
-          <img
-            src={skybridge}
-            alt="skybridge"
-            style={{ maxWidth: "100%", height: "auto" }}
-          />
-        </div>
-      </div>
-    </div>
+      <Field label="Example">
+        <img
+          src={skybridge}
+          alt="skybridge"
+          className="h-auto max-w-full rounded-md"
+        />
+      </Field>
+    </TabBody>
   );
 }
