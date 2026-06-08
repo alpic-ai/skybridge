@@ -11,12 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@alpic-ai/ui/components/dialog";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@alpic-ai/ui/components/tabs";
+import { Tabs, TabsContent } from "@alpic-ai/ui/components/tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -29,7 +24,7 @@ import { Form as FormComponent } from "@rjsf/shadcn";
 import type { RJSFSchema } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
-import { Loader2, Play } from "lucide-react";
+import { Braces, Loader2, PanelsTopLeft, Play } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { CopyButton } from "@/lib/copy.js";
@@ -295,15 +290,31 @@ function ToolBody({
       )}
       {hasInput && (
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)}>
-          <div className="flex items-center justify-between gap-2">
-            <TabsList variant="line">
-              <TabsTrigger value="form">form</TabsTrigger>
-              <TabsTrigger value="json">json</TabsTrigger>
-            </TabsList>
-            <CopyButton
-              value={JSON.stringify(formData, null, 2)}
-              label="Copy input"
-            />
+          <div className="flex items-end justify-between gap-2 border-b border-border">
+            <span className="pb-2 text-xs font-medium text-muted-foreground">
+              Input
+            </span>
+            <div className="inline-flex h-7 items-stretch overflow-hidden rounded-t-md border border-b-0 border-border bg-background text-light-gray-foreground">
+              <button
+                type="button"
+                title="Toggle between form and JSON input"
+                onClick={() => setTab(tab === "form" ? "json" : "form")}
+                className="inline-flex cursor-pointer items-center gap-1.5 px-2 text-xs font-medium transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring"
+              >
+                {tab === "form" ? (
+                  <PanelsTopLeft className="size-3.5" />
+                ) : (
+                  <Braces className="size-3.5" />
+                )}
+                <span>{tab}</span>
+              </button>
+              <div className="w-px self-stretch bg-border" aria-hidden="true" />
+              <CopyButton
+                value={JSON.stringify(formData, null, 2)}
+                label="Copy input"
+                className="inline-flex items-center px-2 text-light-gray-foreground transition-colors hover:bg-light-gray hover:text-foreground"
+              />
+            </div>
           </div>
           <TabsContent value="form">
             <FormBody
