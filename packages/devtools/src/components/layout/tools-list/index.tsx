@@ -11,7 +11,12 @@ import { ToolItem } from "./tool-item.js";
 
 function ToolsList() {
   const tools = useSuspenseTools();
-  const [openTool, setOpenTool] = useSelectedToolName();
+  // `selectedTool` (?tool=) drives the result view (right pane). Which tool
+  // accordions are expanded is separate local state — 0..N can be open at once.
+  const [selectedTool, setSelectedTool] = useSelectedToolName();
+  const [openTools, setOpenTools] = useState<string[]>(() =>
+    selectedTool ? [selectedTool] : [],
+  );
   const [refreshing, setRefreshing] = useState(false);
   const [tailDelay, setTailDelay] = useState<number | undefined>(undefined);
 
@@ -20,11 +25,13 @@ function ToolsList() {
     setTailDelay(undefined);
   }, tailDelay);
 
+  // On first load with nothing selected, focus + open the first tool.
   useEffect(() => {
-    if (openTool == null && tools[0]) {
-      setOpenTool(tools[0].name);
+    if (selectedTool == null && tools[0]) {
+      setSelectedTool(tools[0].name);
+      setOpenTools((prev) => (prev.length ? prev : [tools[0].name]));
     }
-  }, [openTool, tools, setOpenTool]);
+  }, [selectedTool, tools, setSelectedTool]);
 
   const refreshTools = async () => {
     setTailDelay(undefined);
@@ -34,10 +41,6 @@ function ToolsList() {
     } finally {
       setTailDelay(600);
     }
-  };
-
-  const handleToolClick = (toolName: string) => {
-    setOpenTool(toolName);
   };
 
   return (
@@ -54,13 +57,17 @@ function ToolsList() {
         </Button>
       </header>
       <Accordion
-        type="single"
-        value={openTool ?? ""}
-        onValueChange={handleToolClick}
+        type="multiple"
+        value={openTools}
+        onValueChange={setOpenTools}
         className="min-h-0 overflow-y-auto"
       >
         {tools.map((tool) => (
-          <ToolItem key={tool.name} tool={tool} open={openTool === tool.name} />
+          <ToolItem
+            key={tool.name}
+            tool={tool}
+            open={openTools.includes(tool.name)}
+          />
         ))}
       </Accordion>
     </div>

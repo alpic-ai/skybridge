@@ -49,7 +49,8 @@ type TabValue = "form" | "json";
 
 export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
   const { mutateAsync: callTool, isPending } = useCallTool();
-  const [, setSelectedTool] = useSelectedToolName();
+  const [selectedTool, setSelectedTool] = useSelectedToolName();
+  const isSelected = selectedTool === tool.name;
   const isSignedIn = useAuthStore((s) => s.isSignedIn);
   const requiresAuth = useAuthStore((s) => s.requiresAuth);
   const formRef = useRef<Form<unknown, RJSFSchema>>(null);
@@ -109,11 +110,22 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     await callTool({ toolName: tool.name, args: formData });
   };
 
-  const inDialog = (event: KeyboardEvent) =>
-    (event.target as HTMLElement | null)?.closest("[role=dialog]") != null;
+  // Enter/⌘Enter run the tool whose input is focused. Scoped per tool so that
+  // with several tools open at once only the focused one runs — and never
+  // while a dialog (e.g. the save-query modal) is focused.
+  const isHotkeyTarget = (event: KeyboardEvent) => {
+    const target = event.target as HTMLElement | null;
+    if (!target || target.closest("[role=dialog]")) {
+      return false;
+    }
+    return (
+      target.closest("[data-tool-name]")?.getAttribute("data-tool-name") ===
+      tool.name
+    );
+  };
 
   useKeyPress("meta.enter", (event) => {
-    if (!open || inDialog(event)) {
+    if (!isHotkeyTarget(event)) {
       return;
     }
     handleRun();
@@ -122,7 +134,7 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
   useKeyPress(
     "enter",
     (event) => {
-      if (!open || inDialog(event)) {
+      if (!isHotkeyTarget(event)) {
         return;
       }
       const target = event.target as HTMLElement | null;
@@ -163,6 +175,7 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
   return (
     <AccordionItem
       value={tool.name}
+      data-tool-name={tool.name}
       className="border-b border-border last:border-b-0"
     >
       <AccordionTrigger
@@ -174,8 +187,10 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
           <div
             className={cn(
               "transition-opacity",
-              // Collapsed: reveal the button on header hover / focus only.
+              // Always visible when open or selected; otherwise reveal on
+              // header hover / focus.
               !open &&
+                !isSelected &&
                 "opacity-0 focus-within:opacity-100 group-hover/tool:opacity-100",
             )}
           >
