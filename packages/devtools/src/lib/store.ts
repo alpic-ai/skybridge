@@ -23,6 +23,8 @@ type ToolData = {
   openaiLogs: OpenAiLog[];
   openaiObject: AppsSdkContext | null;
   openInAppUrl: string | null;
+  // Key of the saved query the current input was loaded from (session-only).
+  activeSavedQueryKey?: string | null;
 };
 
 export type Store = {

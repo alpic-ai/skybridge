@@ -24,15 +24,25 @@ import { Form as FormComponent } from "@rjsf/shadcn";
 import type { RJSFSchema } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
-import { Braces, Loader2, PanelsTopLeft, Play } from "lucide-react";
+import { Braces, ClipboardList, Loader2, Play, Save } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { CopyButton } from "@/lib/copy.js";
-import { toolRequiresAuth, useCallTool } from "@/lib/mcp/index.js";
+import {
+  toolRequiresAuth,
+  useCallTool,
+  useServerInfo,
+} from "@/lib/mcp/index.js";
+import {
+  type SavedQuery,
+  useSavedQueries,
+  useSavedQueriesStore,
+} from "@/lib/saved-queries-store.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
 import { buildFormUiSchema, formTemplates, formWidgets } from "./form/index.js";
+import { SavedQueriesDropdown, SaveQueryDialog } from "./saved-queries.js";
 
 type TabValue = "form" | "json";
 
@@ -79,8 +89,13 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     await callTool({ toolName: tool.name, args: formData });
   };
 
-  useKeyPress("meta.enter", () => {
-    if (!open) {
+  // Enter/⌘Enter run the tool — but not while a dialog (e.g. the save-query
+  // modal) is open, so its own submit button handles Enter.
+  const inDialog = (event: KeyboardEvent) =>
+    (event.target as HTMLElement | null)?.closest("[role=dialog]") != null;
+
+  useKeyPress("meta.enter", (event) => {
+    if (!open || inDialog(event)) {
       return;
     }
     handleRun();
@@ -89,7 +104,7 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
   useKeyPress(
     "enter",
     (event) => {
-      if (!open) {
+      if (!open || inDialog(event)) {
         return;
       }
       const target = event.target as HTMLElement | null;
@@ -145,7 +160,9 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
           ) : null
         }
       >
-        <div className="min-w-0 flex-1 truncate text-left">{tool.name}</div>
+        <div className="min-w-0 flex-1 truncate text-left text-sm font-medium">
+          {tool.name}
+        </div>
       </AccordionTrigger>
       {!open && tool.description ? (
         <div aria-hidden="true" className="px-3 pb-3 -mt-1 font-sans">
@@ -154,7 +171,7 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
           </div>
         </div>
       ) : null}
-      <AccordionContent className="px-3 pt-1 pb-3 text-foreground">
+      <AccordionContent className="px-3 pt-0 pb-3 text-foreground">
         <ToolBody
           tool={tool}
           formData={formData}
@@ -201,6 +218,21 @@ function getToolVisibility(tool: Tool): Visibility[] | undefined {
   return values.length > 0 ? values : undefined;
 }
 
+// Keep only the fields the current schema still defines, so a query saved
+// against an older schema still applies cleanly.
+function intersectInputToSchema(
+  input: Record<string, unknown>,
+  tool: Tool,
+): Record<string, unknown> {
+  const properties = (tool.inputSchema?.properties ?? {}) as Record<
+    string,
+    unknown
+  >;
+  return Object.fromEntries(
+    Object.entries(input).filter(([name]) => name in properties),
+  );
+}
+
 function ToolBody({
   tool,
   formData,
@@ -225,6 +257,58 @@ function ToolBody({
     Object.keys(tool.inputSchema.properties ?? {}).length > 0;
   const visibility = getToolVisibility(tool);
   const [descriptionOpen, setDescriptionOpen] = useState(false);
+  const [saveOpen, setSaveOpen] = useState(false);
+  const serverName = useServerInfo()?.name;
+  const savedQueries = useSavedQueries(serverName, tool.name);
+  const saveQuery = useSavedQueriesStore((s) => s.saveQuery);
+  const updateQuery = useSavedQueriesStore((s) => s.updateQuery);
+  const deleteQuery = useSavedQueriesStore((s) => s.deleteQuery);
+  const setToolData = useStore((s) => s.setToolData);
+  const storedActiveKey =
+    useCallToolResult(tool.name)?.activeSavedQueryKey ?? null;
+
+  // The active query is the saved query the input was last loaded from/saved
+  // as. Ignore a stale key whose query was since deleted.
+  const activeQuery = storedActiveKey
+    ? savedQueries.find((q) => q.key === storedActiveKey)
+    : undefined;
+  const activeKey = activeQuery ? storedActiveKey : null;
+
+  const loadQuery = (query: SavedQuery) => {
+    // Both the form and JSON views read this shared input, so both update.
+    setToolData(tool.name, {
+      input: intersectInputToSchema(query.input, tool),
+      activeSavedQueryKey: query.key,
+    });
+  };
+
+  // Unselect the active query and clear the input.
+  const clearSelection = () => {
+    setToolData(tool.name, { input: {}, activeSavedQueryKey: null });
+  };
+
+  const saveFromModal = (key: string) => {
+    if (!serverName) {
+      return;
+    }
+    // An existing key overwrites that query; a new key creates one.
+    if (savedQueries.some((q) => q.key === key)) {
+      updateQuery(serverName, tool.name, key, formData);
+    } else {
+      saveQuery(serverName, tool.name, key, formData);
+    }
+    setToolData(tool.name, { activeSavedQueryKey: key });
+  };
+
+  const removeQuery = (key: string) => {
+    if (!serverName) {
+      return;
+    }
+    deleteQuery(serverName, tool.name, key);
+    if (key === storedActiveKey) {
+      setToolData(tool.name, { activeSavedQueryKey: null });
+    }
+  };
 
   return (
     <div className="space-y-3">
@@ -291,9 +375,21 @@ function ToolBody({
       {hasInput && (
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)}>
           <div className="flex items-end justify-between gap-2 border-b border-border">
-            <span className="pb-2 text-xs font-medium text-muted-foreground">
-              Input
-            </span>
+            {serverName ? (
+              <div className="min-w-0 pb-1.5">
+                <SavedQueriesDropdown
+                  queries={savedQueries}
+                  activeKey={activeKey}
+                  onSelect={loadQuery}
+                  onClear={clearSelection}
+                  onDelete={removeQuery}
+                />
+              </div>
+            ) : (
+              <span className="pb-2 text-xs font-medium text-muted-foreground">
+                Input
+              </span>
+            )}
             <div className="inline-flex h-7 items-stretch overflow-hidden rounded-t-md border border-b-0 border-border bg-background text-light-gray-foreground">
               <button
                 type="button"
@@ -302,18 +398,28 @@ function ToolBody({
                 className="inline-flex cursor-pointer items-center gap-1.5 px-2 text-xs font-medium transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring"
               >
                 {tab === "form" ? (
-                  <PanelsTopLeft className="size-3.5" />
+                  <ClipboardList className="size-3.5" />
                 ) : (
                   <Braces className="size-3.5" />
                 )}
                 <span>{tab}</span>
               </button>
-              <div className="w-px self-stretch bg-border" aria-hidden="true" />
-              <CopyButton
-                value={JSON.stringify(formData, null, 2)}
-                label="Copy input"
-                className="inline-flex items-center px-2 text-light-gray-foreground transition-colors hover:bg-light-gray hover:text-foreground"
-              />
+              {serverName && (
+                <>
+                  <div
+                    className="w-px self-stretch bg-border"
+                    aria-hidden="true"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setSaveOpen(true)}
+                    className="inline-flex cursor-pointer items-center gap-1.5 px-2 text-xs font-medium text-light-gray-foreground transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring"
+                  >
+                    <Save className="size-3.5" />
+                    <span>save</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
           <TabsContent value="form">
@@ -333,6 +439,15 @@ function ToolBody({
             />
           </TabsContent>
         </Tabs>
+      )}
+      {hasInput && serverName && (
+        <SaveQueryDialog
+          open={saveOpen}
+          onOpenChange={setSaveOpen}
+          defaultKey={activeKey ?? ""}
+          existingKeys={savedQueries.map((q) => q.key)}
+          onSave={saveFromModal}
+        />
       )}
     </div>
   );
@@ -419,15 +534,22 @@ function JsonBody({
 
   return (
     <div className="space-y-1.5">
-      <textarea
-        className={cn(
-          "max-h-80 min-h-20 w-full resize-none overflow-auto rounded-md border p-2 font-mono text-xs field-sizing-content",
-          error ? "border-destructive" : "border-border",
-        )}
-        spellCheck={false}
-        value={json}
-        onChange={(e) => handleChange(e.target.value)}
-      />
+      <div className="relative">
+        <textarea
+          className={cn(
+            "max-h-80 min-h-20 w-full resize-none overflow-auto rounded-md border p-2 pr-9 font-mono text-xs field-sizing-content",
+            error ? "border-destructive" : "border-border",
+          )}
+          spellCheck={false}
+          value={json}
+          onChange={(e) => handleChange(e.target.value)}
+        />
+        <CopyButton
+          value={json}
+          label="Copy input"
+          className="absolute top-2 right-2 z-10"
+        />
+      </div>
       {error && (
         <div className="text-xs text-destructive">
           The provided JSON is invalid
