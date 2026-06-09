@@ -215,7 +215,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
         </div>
       </AccordionTrigger>
       {tool.description ? (
-        <div className="px-3 pb-3 -mt-1 font-sans">
+        <div className="px-3 pb-3 font-sans">
           <ToolDescription name={tool.name} description={tool.description} />
         </div>
       ) : null}

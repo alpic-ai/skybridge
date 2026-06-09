@@ -19,7 +19,7 @@ export function AccordionTrigger({
   ...props
 }: AccordionTriggerProps) {
   return (
-    <AccordionPrimitive.Header className="flex w-full min-w-0 items-stretch">
+    <AccordionPrimitive.Header className="flex w-full min-w-0 items-stretch data-[state=open]:sticky data-[state=open]:top-0 data-[state=open]:z-20 data-[state=open]:bg-background">
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
