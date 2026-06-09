@@ -28,15 +28,15 @@ import {
 } from "@/lib/mcp/index.js";
 import { useSelectedToolName } from "@/lib/nuqs.js";
 import {
-  type SavedQuery,
-  useSavedQueries,
-  useSavedQueriesStore,
-} from "@/lib/saved-queries-store.js";
+  type SavedInput,
+  useSavedInputs,
+  useSavedInputsStore,
+} from "@/lib/saved-inputs-store.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
 import { buildFormUiSchema, formTemplates, formWidgets } from "./form/index.js";
-import { SavedQueriesDropdown, SaveQueryDialog } from "./saved-queries.js";
+import { SavedInputsDropdown, SaveInputDialog } from "./saved-inputs.js";
 import { TruncatedDescription } from "./truncated-description.js";
 
 type TabValue = "form" | "json";
@@ -55,7 +55,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
     setToolData(tool.name, { input: data ?? {} });
   };
 
-  const saved = useSavedQueryController(tool, formData);
+  const saved = useSavedInputController(tool, formData);
 
   const needsSignIn = requiresAuth && toolRequiresAuth(tool) && !isSignedIn;
 
@@ -108,7 +108,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
 
   // Enter/⌘Enter run the tool whose input is focused. Scoped per tool so that
   // with several tools open at once only the focused one runs — and never
-  // while a dialog (e.g. the save-query modal) is focused.
+  // while a dialog (e.g. the save-input modal) is focused.
   const isHotkeyTarget = (event: KeyboardEvent) => {
     const target = event.target as HTMLElement | null;
     if (!target || target.closest("[role=dialog]")) {
@@ -187,13 +187,13 @@ export function ToolItem({ tool }: { tool: Tool }) {
               isSelected ? "opacity-100" : "opacity-50",
             )}
           >
-            {saved.savedQueries.length > 0 && (
-              <SavedQueriesDropdown
-                queries={saved.savedQueries}
+            {saved.savedInputs.length > 0 && (
+              <SavedInputsDropdown
+                inputs={saved.savedInputs}
                 activeKey={saved.activeKey}
-                onSelect={saved.loadQuery}
+                onSelect={saved.loadInput}
                 onClear={saved.clearSelection}
-                onDelete={saved.removeQuery}
+                onDelete={saved.removeInput}
               />
             )}
             {disabledReason ? (
@@ -273,7 +273,7 @@ function getToolVisibility(tool: Tool): Visibility[] | undefined {
   return values.length > 0 ? values : undefined;
 }
 
-// Keep only the fields the current schema still defines, so a query saved
+// Keep only the fields the current schema still defines, so an input saved
 // against an older schema still applies cleanly.
 function intersectInputToSchema(
   input: Record<string, unknown>,
@@ -309,83 +309,83 @@ function ToolDescription({
   );
 }
 
-type SavedQueryController = {
+type SavedInputController = {
   serverName: string | undefined;
-  savedQueries: SavedQuery[];
+  savedInputs: SavedInput[];
   activeKey: string | null;
-  loadQuery: (query: SavedQuery) => void;
+  loadInput: (saved: SavedInput) => void;
   clearSelection: () => void;
   saveFromModal: (key: string) => void;
-  removeQuery: (key: string) => void;
+  removeInput: (key: string) => void;
 };
 
-// Saved-query state + actions for one tool, reading/writing the persisted store
+// Saved-input state + actions for one tool, reading/writing the persisted store
 // and the session-only active key. Called once per tool so the selector can be
 // mirrored in the collapsed header and the expanded input panel off one source.
-function useSavedQueryController(
+function useSavedInputController(
   tool: Tool,
   formData: Record<string, unknown>,
-): SavedQueryController {
+): SavedInputController {
   const serverName = useServerInfo()?.name;
-  const savedQueries = useSavedQueries(serverName, tool.name);
-  const saveQuery = useSavedQueriesStore((s) => s.saveQuery);
-  const updateQuery = useSavedQueriesStore((s) => s.updateQuery);
-  const deleteQuery = useSavedQueriesStore((s) => s.deleteQuery);
+  const savedInputs = useSavedInputs(serverName, tool.name);
+  const saveInput = useSavedInputsStore((s) => s.saveInput);
+  const updateInput = useSavedInputsStore((s) => s.updateInput);
+  const deleteInput = useSavedInputsStore((s) => s.deleteInput);
   const setToolData = useStore((s) => s.setToolData);
   const storedActiveKey =
-    useCallToolResult(tool.name)?.activeSavedQueryKey ?? null;
+    useCallToolResult(tool.name)?.activeSavedInputKey ?? null;
 
-  // The active query is the saved query the input was last loaded from/saved
-  // as. Ignore a stale key whose query was since deleted.
-  const activeQuery = storedActiveKey
-    ? savedQueries.find((q) => q.key === storedActiveKey)
+  // The active input is the saved input the form was last loaded from/saved
+  // as. Ignore a stale key whose input was since deleted.
+  const activeInput = storedActiveKey
+    ? savedInputs.find((entry) => entry.key === storedActiveKey)
     : undefined;
-  const activeKey = activeQuery ? storedActiveKey : null;
+  const activeKey = activeInput ? storedActiveKey : null;
 
-  const loadQuery = (query: SavedQuery) => {
+  const loadInput = (saved: SavedInput) => {
     // Both the form and JSON views read this shared input, so both update.
     setToolData(tool.name, {
-      input: intersectInputToSchema(query.input, tool),
-      activeSavedQueryKey: query.key,
+      input: intersectInputToSchema(saved.input, tool),
+      activeSavedInputKey: saved.key,
     });
   };
 
-  // Unselect the active query and clear the input.
+  // Unselect the active input and clear the form.
   const clearSelection = () => {
-    setToolData(tool.name, { input: {}, activeSavedQueryKey: null });
+    setToolData(tool.name, { input: {}, activeSavedInputKey: null });
   };
 
   const saveFromModal = (key: string) => {
     if (!serverName) {
       return;
     }
-    // An existing key overwrites that query; a new key creates one.
-    if (savedQueries.some((q) => q.key === key)) {
-      updateQuery(serverName, tool.name, key, formData);
+    // An existing key overwrites that input; a new key creates one.
+    if (savedInputs.some((entry) => entry.key === key)) {
+      updateInput(serverName, tool.name, key, formData);
     } else {
-      saveQuery(serverName, tool.name, key, formData);
+      saveInput(serverName, tool.name, key, formData);
     }
-    setToolData(tool.name, { activeSavedQueryKey: key });
+    setToolData(tool.name, { activeSavedInputKey: key });
   };
 
-  const removeQuery = (key: string) => {
+  const removeInput = (key: string) => {
     if (!serverName) {
       return;
     }
-    deleteQuery(serverName, tool.name, key);
+    deleteInput(serverName, tool.name, key);
     if (key === storedActiveKey) {
-      setToolData(tool.name, { activeSavedQueryKey: null });
+      setToolData(tool.name, { activeSavedInputKey: null });
     }
   };
 
   return {
     serverName,
-    savedQueries,
+    savedInputs,
     activeKey,
-    loadQuery,
+    loadInput,
     clearSelection,
     saveFromModal,
-    removeQuery,
+    removeInput,
   };
 }
 
@@ -409,7 +409,7 @@ function ToolBody({
   setTab: (tab: TabValue) => void;
   jsonError: boolean;
   setJsonError: (value: boolean) => void;
-  saved: SavedQueryController;
+  saved: SavedInputController;
   inputInvalid: boolean;
 }) {
   const hasInput =
@@ -417,15 +417,15 @@ function ToolBody({
     Object.keys(tool.inputSchema.properties ?? {}).length > 0;
   const visibility = getToolVisibility(tool);
   const [saveOpen, setSaveOpen] = useState(false);
-  const { serverName, savedQueries, activeKey } = saved;
+  const { serverName, savedInputs, activeKey } = saved;
 
   const saveButton = (
     <button
       type="button"
       onClick={() => setSaveOpen(true)}
       disabled={inputInvalid}
-      title={inputInvalid ? undefined : "Save query"}
-      aria-label="Save query"
+      title={inputInvalid ? undefined : "Save input"}
+      aria-label="Save input"
       className={cn(
         "shrink-0 cursor-pointer text-light-gray-foreground transition-colors hover:text-foreground",
         "disabled:cursor-not-allowed disabled:pointer-events-auto disabled:hover:text-light-gray-foreground",
@@ -485,12 +485,12 @@ function ToolBody({
                   saveButton
                 ))}
               {serverName ? (
-                <SavedQueriesDropdown
-                  queries={savedQueries}
+                <SavedInputsDropdown
+                  inputs={savedInputs}
                   activeKey={activeKey}
-                  onSelect={saved.loadQuery}
+                  onSelect={saved.loadInput}
                   onClear={saved.clearSelection}
-                  onDelete={saved.removeQuery}
+                  onDelete={saved.removeInput}
                 />
               ) : (
                 <span className="text-xs font-medium text-muted-foreground">
@@ -546,11 +546,11 @@ function ToolBody({
         </Tabs>
       )}
       {hasInput && serverName && (
-        <SaveQueryDialog
+        <SaveInputDialog
           open={saveOpen}
           onOpenChange={setSaveOpen}
           defaultKey={activeKey ?? ""}
-          existingKeys={savedQueries.map((q) => q.key)}
+          existingKeys={savedInputs.map((entry) => entry.key)}
           onSave={saved.saveFromModal}
         />
       )}
