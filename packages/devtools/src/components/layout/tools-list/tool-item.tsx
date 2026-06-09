@@ -212,14 +212,17 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
           {tool.name}
         </div>
       </AccordionTrigger>
-      {!open && tool.description ? (
-        <div aria-hidden="true" className="px-3 pb-3 -mt-1 font-sans">
-          <div className="rounded-md border border-border bg-muted/40 px-2.5 py-2 text-xs text-muted-foreground/70">
-            <span className="line-clamp-2">{tool.description}</span>
-          </div>
+      {tool.description ? (
+        <div className="px-3 pb-3 -mt-1 font-sans">
+          <ToolDescription name={tool.name} description={tool.description} />
         </div>
       ) : null}
-      <AccordionContent className="px-3 pt-0 pb-3 text-foreground">
+      <AccordionContent
+        className="px-3 pt-0 pb-3 text-foreground"
+        // Open/close instantly — disable the accordion slide animation (which
+        // the ui component hardcodes on the Content root).
+        style={{ animation: "none" }}
+      >
         <ToolBody
           tool={tool}
           formData={formData}
@@ -281,6 +284,41 @@ function intersectInputToSchema(
   );
 }
 
+// The tool's description, rendered once in the always-present header (so it
+// shows whether the tool is collapsed or expanded). A muted, two-line-clamped
+// box that opens the full text in a dialog on click.
+function ToolDescription({
+  name,
+  description,
+}: {
+  name: string;
+  description: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        title="Click to see full description"
+        className="block w-full cursor-pointer rounded-md border border-border bg-muted/40 px-2.5 py-2 text-left text-xs text-muted-foreground/70 hover:bg-muted/60"
+      >
+        <span className="line-clamp-2">{description}</span>
+      </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="font-mono">{name}</DialogTitle>
+            <DialogDescription className="whitespace-pre-wrap">
+              {description}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 function ToolBody({
   tool,
   formData,
@@ -304,7 +342,6 @@ function ToolBody({
     tool.inputSchema &&
     Object.keys(tool.inputSchema.properties ?? {}).length > 0;
   const visibility = getToolVisibility(tool);
-  const [descriptionOpen, setDescriptionOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
   const serverName = useServerInfo()?.name;
   const savedQueries = useSavedQueries(serverName, tool.name);
@@ -360,64 +397,35 @@ function ToolBody({
 
   return (
     <div className="space-y-3">
-      {(visibility || tool.description) && (
-        <div className="space-y-2">
-          {visibility && (
-            <div data-testid="tool-visibility" className="flex flex-wrap gap-1">
-              {visibility.map((scope) => (
-                <Tooltip key={scope}>
-                  <TooltipTrigger asChild>
-                    <Badge
-                      size="sm"
-                      className={VISIBILITY_META[scope].badgeClass}
-                    >
-                      {scope}
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipPrimitive.Portal>
-                    <TooltipPrimitive.Content
-                      sideOffset={6}
-                      className={cn(
-                        "z-50 w-fit rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-md",
-                        "animate-in fade-in-0 zoom-in-95",
-                        "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
-                        "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-                      )}
-                    >
-                      {VISIBILITY_META[scope].tooltip}
-                      <TooltipPrimitive.Arrow
-                        width={11}
-                        height={5}
-                        className="fill-background drop-shadow-[0_1px_0_var(--color-border)]"
-                      />
-                    </TooltipPrimitive.Content>
-                  </TooltipPrimitive.Portal>
-                </Tooltip>
-              ))}
-            </div>
-          )}
-          {tool.description && (
-            <>
-              <button
-                type="button"
-                onClick={() => setDescriptionOpen(true)}
-                className="block w-full cursor-pointer rounded-md border border-border bg-muted/40 px-2.5 py-2 text-left text-xs text-muted-foreground/70 hover:bg-muted/60"
-                title="Click to see full description"
-              >
-                <span className="line-clamp-2">{tool.description}</span>
-              </button>
-              <Dialog open={descriptionOpen} onOpenChange={setDescriptionOpen}>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="font-mono">{tool.name}</DialogTitle>
-                    <DialogDescription className="whitespace-pre-wrap">
-                      {tool.description}
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-            </>
-          )}
+      {visibility && (
+        <div data-testid="tool-visibility" className="flex flex-wrap gap-1">
+          {visibility.map((scope) => (
+            <Tooltip key={scope}>
+              <TooltipTrigger asChild>
+                <Badge size="sm" className={VISIBILITY_META[scope].badgeClass}>
+                  {scope}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipPrimitive.Portal>
+                <TooltipPrimitive.Content
+                  sideOffset={6}
+                  className={cn(
+                    "z-50 w-fit rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-md",
+                    "animate-in fade-in-0 zoom-in-95",
+                    "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
+                    "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+                  )}
+                >
+                  {VISIBILITY_META[scope].tooltip}
+                  <TooltipPrimitive.Arrow
+                    width={11}
+                    height={5}
+                    className="fill-background drop-shadow-[0_1px_0_var(--color-border)]"
+                  />
+                </TooltipPrimitive.Content>
+              </TooltipPrimitive.Portal>
+            </Tooltip>
+          ))}
         </div>
       )}
       {hasInput && (
