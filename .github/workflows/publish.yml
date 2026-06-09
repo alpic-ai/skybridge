@@ -136,7 +136,7 @@ jobs:
           RELEASE_URL: ${{ github.event.release.html_url }}
           RELEASE_BODY: ${{ github.event.release.body }}
         run: |
-          BODY=$(echo "$RELEASE_BODY" | cut -c 1-1500)
+          BODY=${RELEASE_BODY:0:4000}
           PAYLOAD=$(jq -n \
             --arg title "Skybridge $RELEASE_VERSION released" \
             --arg url "$RELEASE_URL" \
