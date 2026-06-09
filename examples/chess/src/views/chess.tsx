@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { PieceDropHandlerArgs } from "react-chessboard";
 import { Chessboard } from "react-chessboard";
 import {
+  useDisplayMode,
   useLayout,
   useRegisterViewTool,
   useSendFollowUpMessage,
@@ -103,7 +104,7 @@ function useChessViewTools() {
     {
       name: TOOL.makeMove,
       description:
-        "Make a move as Black. Pass either `san` (e.g. 'e5', 'Nf6', 'O-O') or both `from` and `to`. The move has to be legal and it must be Black's turn.",
+        "Make a move as your color — the side the user did not pick (Black if they chose White, White if they chose Black). Pass either `san` (e.g. 'e5', 'Nf6', 'O-O') or both `from` and `to`. The move has to be legal and it must be your turn.",
       inputSchema: {
         san: z
           .string()
@@ -215,8 +216,13 @@ export default function ChessView() {
   const theme: Theme = themeOverride ?? hostTheme;
 
   const sendFollowUpMessage = useSendFollowUpMessage();
+  const [, setDisplayMode] = useDisplayMode();
   useChessViewTools();
 
+  const started = useMatch((store) => store.started);
+  const human = useMatch((store) => store.human);
+  const assistant = useMatch((store) => store.assistant);
+  const start = useMatch((store) => store.start);
   const fen = useMatch((store) => store.fen);
   const toMove = useMatch((store) => store.toMove);
   const over = useMatch((store) => store.over);
@@ -225,8 +231,81 @@ export default function ChessView() {
   const play = useMatch((store) => store.play);
   const restart = useMatch((store) => store.restart);
 
+  const humanName = human === "w" ? "White" : "Black";
+  const assistantName = assistant === "w" ? "White" : "Black";
+
+  // Picking a side is the user gesture hosts require before granting
+  // picture-in-picture — so we request it straight off the click.
+  const beginGame = (side: "w" | "b") => {
+    start(side);
+    setDisplayMode("pip");
+    if (side === "b") {
+      // The user took Black, so the assistant (White) opens the game.
+      sendFollowUpMessage(
+        `I'll play Black this game. You're White and move first — make the opening move by calling the ${TOOL.makeMove} view tool (for example \`{ "san": "e4" }\`).`,
+      );
+    }
+  };
+
+  if (!started) {
+    return (
+      <div className="chess-app chess-app--lobby" data-theme={theme}>
+        <header className="chess-header">
+          <div className="chess-brand">
+            <span className="chess-mark" aria-hidden="true" />
+            <div>
+              <h1 className="chess-title">Skybridge Chess</h1>
+              <p className="chess-subtitle">Pick a side to start playing</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="chess-icon-button"
+            aria-label={
+              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+            }
+            onClick={() => setThemeOverride(theme === "dark" ? "light" : "dark")}
+          >
+            {theme === "dark" ? "☀" : "☾"}
+          </button>
+        </header>
+
+        <div className="chess-lobby">
+          <p className="chess-lobby-text">
+            Choose your color. The game opens in a picture-in-picture window so
+            you can keep chatting while you play.
+          </p>
+          <div className="chess-lobby-choices">
+            <button
+              type="button"
+              className="chess-side chess-side--white"
+              onClick={() => beginGame("w")}
+            >
+              <span className="chess-side-piece" aria-hidden="true">
+                ♔
+              </span>
+              <span className="chess-side-label">Play as White</span>
+              <span className="chess-side-note">You move first</span>
+            </button>
+            <button
+              type="button"
+              className="chess-side chess-side--black"
+              onClick={() => beginGame("b")}
+            >
+              <span className="chess-side-piece" aria-hidden="true">
+                ♚
+              </span>
+              <span className="chess-side-label">Play as Black</span>
+              <span className="chess-side-note">Assistant moves first</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const position = readPosition(fen);
-  const playerToMove = toMove === "w" && !over;
+  const playerToMove = toMove === human && !over;
   const palette = BOARD[theme];
 
   const squareStyles: Record<string, CSSProperties> = {};
@@ -259,7 +338,7 @@ export default function ChessView() {
     }
     if (!result.position.over) {
       sendFollowUpMessage(
-        `I played ${result.move.san} as White. Your turn — answer as Black with the ${TOOL.makeMove} tool.`,
+        `I played ${result.move.san} as ${humanName}. Your turn — answer as ${assistantName} with the ${TOOL.makeMove} tool.`,
       );
     }
     return true;
@@ -273,7 +352,7 @@ export default function ChessView() {
           <div>
             <h1 className="chess-title">Skybridge Chess</h1>
             <p className="chess-subtitle">
-              You play White · the assistant plays Black
+              You play {humanName} · the assistant plays {assistantName}
             </p>
           </div>
         </div>
@@ -305,7 +384,7 @@ export default function ChessView() {
           options={{
             position: fen,
             onPieceDrop,
-            boardOrientation: "white",
+            boardOrientation: human === "w" ? "white" : "black",
             allowDragging: playerToMove,
             id: "skybridge-chess",
             animationDurationInMs: 200,
@@ -327,7 +406,7 @@ export default function ChessView() {
         {log.length > 0 && (
           <span className="chess-moves">{formatLog(log)}</span>
         )}
-        {!over && toMove === "b" && (
+        {!over && toMove === assistant && (
           <span className="chess-hint">Waiting for the assistant…</span>
         )}
       </footer>

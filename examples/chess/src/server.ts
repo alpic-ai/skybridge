@@ -4,7 +4,9 @@ import { readPosition, STARTING_FEN } from "./lib/engine.js";
 // Deliberately tiny server. The only thing it does is open the board — all of
 // the gameplay tools are registered by the view itself (see
 // src/views/chess.tsx) through `useRegisterViewTool`, so they run inside the
-// widget. The human is White and moves first; the assistant answers as Black.
+// widget. The view opens on a pick-a-side lobby; once the user chooses a color
+// (which also pops the board into picture-in-picture), the assistant plays the
+// other side.
 const server = new McpServer(
   {
     name: "skybridge-chess",
@@ -15,7 +17,7 @@ const server = new McpServer(
   {
     name: "start_game",
     description:
-      "Open an interactive chess board. The user plays White and moves first; you play Black. After the board is open, drive your side with the tools the view exposes — `chess_get_board_state`, `chess_get_legal_moves`, `chess_make_move`, and `chess_reset_game` — to inspect the position and answer with Black's moves.",
+      "Open an interactive chess board. The user first picks a side (White or Black) in the view; you play the other color. If they pick Black, you are White and move first. Drive your side with the tools the view exposes — `chess_get_board_state`, `chess_get_legal_moves`, `chess_make_move`, and `chess_reset_game` — to inspect the position and answer with your moves.",
     annotations: {
       title: "Start a chess game",
       readOnlyHint: false,
@@ -39,9 +41,9 @@ const server = new McpServer(
         {
           type: "text",
           text: [
-            "A fresh chess game is on the board.",
-            "White belongs to the user and moves first; you are Black.",
-            'Hold until the user has moved, then reply with Black\'s move by calling the `chess_make_move` view tool (for example `{ "san": "e5" }`).',
+            "A fresh chess board is open on the pick-a-side lobby.",
+            "Wait for the user to choose White or Black — you play the other color, and choosing also opens the board in picture-in-picture.",
+            'If they pick White, hold until they move, then reply with your Black move via the `chess_make_move` view tool (for example `{ "san": "e5" }`). If they pick Black, the view will prompt you to open as White.',
             "Lean on `chess_get_board_state` and `chess_get_legal_moves` to study the position first.",
           ].join(" "),
         },
