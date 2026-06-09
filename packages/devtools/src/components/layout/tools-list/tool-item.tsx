@@ -181,8 +181,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
         action={
           <div
             className={cn(
-              "transition-opacity",
-              // Full opacity for the selected tool, dimmed for the rest.
+              "transition-opacity hover:opacity-100",
               isSelected ? "opacity-100" : "opacity-50",
             )}
           >
