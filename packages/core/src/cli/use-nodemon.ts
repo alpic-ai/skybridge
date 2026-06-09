@@ -1,5 +1,12 @@
+import {
+  type ChildProcessByStdio,
+  execFileSync,
+  spawn,
+} from "node:child_process";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { createInterface } from "node:readline";
+import type { Readable, Writable } from "node:stream";
 import nodemonOriginal from "nodemon";
 import { useEffect } from "react";
 import type { ExtendedNodemon } from "./nodemon.d.ts";
@@ -9,9 +16,59 @@ const nodemon = nodemonOriginal as ExtendedNodemon;
 
 const SOURCEMAP_WARNING = /^Sourcemap for ".*" points to missing source files$/;
 
+function resolveCommand(command: string): string | null {
+  try {
+    return execFileSync("which", [command], { encoding: "utf-8" }).trim();
+  } catch {
+    return null;
+  }
+}
+
+interface Formatter {
+  proc: ChildProcessByStdio<Writable, Readable, null>;
+  alive: boolean;
+}
+
+function spawnFormatter(
+  command: string,
+  pushMessage: PushMessage,
+): Formatter | null {
+  const bin = resolveCommand(command);
+  if (!bin) {
+    pushMessage(
+      `[format-logs] command not found: "${command}". Logs will not be formatted.`,
+      "error",
+    );
+    return null;
+  }
+  try {
+    const proc = spawn(bin, { stdio: ["pipe", "pipe", "ignore"] });
+    const formatter: Formatter = { proc, alive: true };
+    const rl = createInterface({ input: proc.stdout });
+
+    rl.on("line", (line) => {
+      pushMessage(line, "log");
+    });
+
+    // Prevent unhandled EPIPE crash if formatter exits while we write to stdin.
+    proc.stdin.on("error", () => {});
+    proc.on("error", () => {
+      formatter.alive = false;
+    });
+    proc.on("close", () => {
+      formatter.alive = false;
+    });
+
+    return formatter;
+  } catch {
+    return null;
+  }
+}
+
 export function useNodemon(
   env: NodeJS.ProcessEnv,
   pushMessage: PushMessage,
+  formatLogs?: string,
 ): void {
   useEffect(() => {
     const configFile = resolve(process.cwd(), "nodemon.json");
@@ -28,10 +85,26 @@ export function useNodemon(
 
     nodemon({ ...config, env, stdout: false });
 
+    const formatter = formatLogs
+      ? spawnFormatter(formatLogs, pushMessage)
+      : null;
+
     const handleStdoutData = (chunk: Buffer) => {
-      const message = chunk.toString().trim();
-      if (message) {
-        pushMessage(message, "log");
+      const raw = chunk.toString().trim();
+      if (!raw) {
+        return;
+      }
+      const lines = raw.split("\n");
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          continue;
+        }
+        if (formatter?.alive) {
+          formatter.proc.stdin.write(`${trimmed}\n`);
+        } else {
+          pushMessage(trimmed, "log");
+        }
       }
     };
 
@@ -83,7 +156,11 @@ export function useNodemon(
       if (nodemon.stderr) {
         nodemon.stderr.off("data", handleStderrData);
       }
+      if (formatter?.alive) {
+        formatter.proc.stdin.end();
+        formatter.proc.kill();
+      }
       nodemon.emit("quit");
     };
-  }, [env, pushMessage]);
+  }, [env, pushMessage, formatLogs]);
 }

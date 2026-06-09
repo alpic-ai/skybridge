@@ -35,6 +35,10 @@ export default class Dev extends Command {
       description: "Show tunnel logs",
       default: false,
     }),
+    "format-logs": Flags.string({
+      description:
+        'Pipe server logs through a formatter command (e.g. "bunyan", "pino-pretty").',
+    }),
   };
 
   public async run(): Promise<void> {
@@ -74,7 +78,7 @@ export default class Dev extends Command {
     const App = () => {
       const tsErrors = useTypeScriptCheck();
       const [messages, pushMessage] = useMessages();
-      useNodemon(env, pushMessage);
+      useNodemon(env, pushMessage, flags["format-logs"]);
       useOpenBrowser(port, flags.open && !flags.tunnel);
       const tunnelState = useTunnel(
         port,
