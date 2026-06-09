@@ -235,6 +235,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
           jsonError={jsonError}
           setJsonError={setJsonError}
           saved={saved}
+          inputInvalid={inputInvalid}
         />
       </AccordionContent>
     </AccordionItem>
@@ -398,6 +399,7 @@ function ToolBody({
   jsonError,
   setJsonError,
   saved,
+  inputInvalid,
 }: {
   tool: Tool;
   formData: Record<string, unknown>;
@@ -408,6 +410,7 @@ function ToolBody({
   jsonError: boolean;
   setJsonError: (value: boolean) => void;
   saved: SavedQueryController;
+  inputInvalid: boolean;
 }) {
   const hasInput =
     tool.inputSchema &&
@@ -415,6 +418,22 @@ function ToolBody({
   const visibility = getToolVisibility(tool);
   const [saveOpen, setSaveOpen] = useState(false);
   const { serverName, savedQueries, activeKey } = saved;
+
+  const saveButton = (
+    <button
+      type="button"
+      onClick={() => setSaveOpen(true)}
+      disabled={inputInvalid}
+      title={inputInvalid ? undefined : "Save query"}
+      aria-label="Save query"
+      className={cn(
+        "shrink-0 cursor-pointer text-light-gray-foreground transition-colors hover:text-foreground",
+        "disabled:cursor-not-allowed disabled:pointer-events-auto disabled:hover:text-light-gray-foreground",
+      )}
+    >
+      <Save className="size-3.5" />
+    </button>
+  );
 
   return (
     <div className="space-y-3">
@@ -454,17 +473,17 @@ function ToolBody({
           <div className="flex items-end justify-between gap-2 border-b border-border">
             {/* Left: [save] Input */}
             <div className="flex min-w-0 items-center gap-1 pb-1.5">
-              {serverName && (
-                <button
-                  type="button"
-                  onClick={() => setSaveOpen(true)}
-                  title="Save query"
-                  aria-label="Save query"
-                  className="shrink-0 cursor-pointer text-light-gray-foreground transition-colors hover:text-foreground"
-                >
-                  <Save className="size-3.5" />
-                </button>
-              )}
+              {serverName &&
+                (inputInvalid ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex">{saveButton}</span>
+                    </TooltipTrigger>
+                    <TooltipContent>Input is not valid</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  saveButton
+                ))}
               {serverName ? (
                 <SavedQueriesDropdown
                   queries={savedQueries}
