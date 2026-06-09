@@ -215,12 +215,12 @@ export function ToolItem({ tool }: { tool: Tool }) {
         </div>
       </AccordionTrigger>
       {tool.description ? (
-        <div className="px-3 pb-3 font-sans">
+        <div className="px-4 pb-3 font-sans">
           <ToolDescription name={tool.name} description={tool.description} />
         </div>
       ) : null}
       <AccordionContent
-        className="px-3 pt-0 pb-3 text-foreground"
+        className="px-4 pt-0 pb-3 text-foreground"
         // Open/close instantly — disable the accordion slide animation (which
         // the ui component hardcodes on the Content root).
         style={{ animation: "none" }}

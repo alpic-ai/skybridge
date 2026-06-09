@@ -45,7 +45,7 @@ function ToolsList() {
 
   return (
     <div className="grid h-full min-h-0 grid-rows-[auto_1fr]">
-      <header className="flex h-9 items-center justify-between border-b border-border  px-3 pr-0">
+      <header className="flex h-9 items-center justify-between border-b border-border pl-4 pr-0">
         <span className="text-sm font-medium">Tools</span>
         <Button
           onClick={refreshTools}
