@@ -486,7 +486,9 @@ function ToolBody({
               formRef={formRef}
             />
           </TabsContent>
-          <TabsContent value="json">
+          {/* -mt-4 cancels the Tabs gap so the textarea's top merges into the
+              header separator (its top border). */}
+          <TabsContent value="json" className="-mt-4">
             <JsonBody
               formData={formData}
               setFormData={setFormData}
@@ -593,7 +595,7 @@ function JsonBody({
       <div className="relative">
         <textarea
           className={cn(
-            "max-h-80 min-h-20 w-full resize-none overflow-auto rounded-md border p-2 pr-9 font-mono text-xs field-sizing-content",
+            "max-h-80 min-h-20 w-full resize-none overflow-auto rounded-b-md border border-t-0 p-2 pr-9 font-mono text-xs field-sizing-content",
             error ? "border-destructive" : "border-border",
           )}
           spellCheck={false}
