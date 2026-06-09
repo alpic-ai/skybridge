@@ -290,14 +290,18 @@ test("useToolInfo infers input and output types", () => {
   const { useToolInfo } = generateHelpers<TestServer>();
   const toolInfo = useToolInfo<"search-trip">();
 
-  // Input is only available when not in idle state
-  if (!(toolInfo.status === "idle")) {
+  // Input is optional in pending — host may not have delivered args yet
+  if (toolInfo.status === "pending") {
     expectTypeOf(toolInfo.input).toExtend<
-      ToolInput<TestServer, "search-trip">
+      ToolInput<TestServer, "search-trip"> | undefined
     >();
   }
 
   if (toolInfo.status === "success") {
+    // Input is optional in success — the host may not have surfaced args yet
+    expectTypeOf(toolInfo.input).toExtend<
+      ToolInput<TestServer, "search-trip"> | undefined
+    >();
     expectTypeOf(toolInfo.output).toExtend<
       ToolOutput<TestServer, "search-trip">
     >();

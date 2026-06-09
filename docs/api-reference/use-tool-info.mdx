@@ -58,7 +58,7 @@ The hook returns an object that varies based on the current status:
   status: "pending";
   isPending: true;
   isSuccess: false;
-  input: ToolInput;
+  input: ToolInput | undefined;
   output: undefined;
   responseMetadata: undefined;
 }
@@ -71,7 +71,7 @@ The hook returns an object that varies based on the current status:
   status: "success";
   isPending: false;
   isSuccess: true;
-  input: ToolInput;
+  input: ToolInput | undefined;
   output: ToolOutput;
   responseMetadata: ToolResponseMetadata;
 }
@@ -100,10 +100,10 @@ Boolean flags derived from `status` for convenience.
 #### `input`
 
 ```tsx
-input: ToolInput
+input: ToolInput | undefined
 ```
 
-The input arguments passed to the tool. Always available.
+The input arguments passed to the tool. May be `undefined` until the host delivers the tool arguments.
 
 #### `output`
 
