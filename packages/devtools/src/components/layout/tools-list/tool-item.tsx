@@ -153,6 +153,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
     <Button
       disabled={isPending || needsSignIn || inputInvalid}
       variant="primary"
+      className="disabled:cursor-not-allowed disabled:pointer-events-auto disabled:opacity-100"
       onClick={handleRun}
       icon={
         isPending ? (
