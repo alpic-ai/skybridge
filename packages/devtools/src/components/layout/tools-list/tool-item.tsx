@@ -408,8 +408,20 @@ function ToolBody({
       {hasInput && (
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)}>
           <div className="flex items-end justify-between gap-2 border-b border-border">
-            {serverName ? (
-              <div className="min-w-0 pb-1.5">
+            {/* Left: [save] Input */}
+            <div className="flex min-w-0 items-center gap-1 pb-1.5">
+              {serverName && (
+                <button
+                  type="button"
+                  onClick={() => setSaveOpen(true)}
+                  title="Save query"
+                  aria-label="Save query"
+                  className="shrink-0 cursor-pointer text-light-gray-foreground transition-colors hover:text-foreground"
+                >
+                  <Save className="size-3.5" />
+                </button>
+              )}
+              {serverName ? (
                 <SavedQueriesDropdown
                   queries={savedQueries}
                   activeKey={activeKey}
@@ -417,42 +429,37 @@ function ToolBody({
                   onClear={clearSelection}
                   onDelete={removeQuery}
                 />
-              </div>
-            ) : (
-              <span className="pb-2 text-xs font-medium text-muted-foreground">
-                Input
-              </span>
-            )}
-            <div className="inline-flex h-7 items-stretch overflow-hidden rounded-t-md border border-b-0 border-border bg-background text-light-gray-foreground">
-              <button
-                type="button"
-                title="Toggle between form and JSON input"
-                onClick={() => setTab(tab === "form" ? "json" : "form")}
-                className="inline-flex cursor-pointer items-center gap-1.5 px-2 text-xs font-medium transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring"
-              >
-                {tab === "form" ? (
-                  <ClipboardList className="size-3.5" />
-                ) : (
-                  <Braces className="size-3.5" />
-                )}
-                <span>{tab}</span>
-              </button>
-              {serverName && (
-                <>
-                  <div
-                    className="w-px self-stretch bg-border"
-                    aria-hidden="true"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setSaveOpen(true)}
-                    className="inline-flex cursor-pointer items-center gap-1.5 px-2 text-xs font-medium text-light-gray-foreground transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring"
-                  >
-                    <Save className="size-3.5" />
-                    <span>save</span>
-                  </button>
-                </>
+              ) : (
+                <span className="text-xs font-medium text-muted-foreground">
+                  Input
+                </span>
               )}
+            </div>
+            {/* Right: form / json tabs. The active tab's bottom border matches
+                the content background, so it reads as a connected tab. -mb-px
+                pulls the strip onto the header separator. */}
+            <div className="-mb-px flex">
+              {(["form", "json"] as const).map((value, index) => {
+                const Icon = value === "form" ? ClipboardList : Braces;
+                const active = tab === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setTab(value)}
+                    className={cn(
+                      "relative inline-flex h-7 cursor-pointer items-center gap-1.5 border border-border px-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring",
+                      index === 0 ? "rounded-tl-md" : "-ml-px rounded-tr-md",
+                      active
+                        ? "z-10 border-b-background bg-background text-foreground"
+                        : "bg-muted/40 text-light-gray-foreground hover:text-foreground",
+                    )}
+                  >
+                    <Icon className="size-3.5" />
+                    <span>{value}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
           <TabsContent value="form">
