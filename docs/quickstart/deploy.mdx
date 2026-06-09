@@ -59,7 +59,7 @@ Add a `wrangler.jsonc` at your project root:
 ```jsonc
 {
   "name": "your-skybridge-app",
-  "main": "dist/server.js",
+  "main": "dist/__entry.js",
   "compatibility_date": "2025-09-01",
   "compatibility_flags": ["nodejs_compat"],
   "assets": { "directory": "dist/assets" },
@@ -121,6 +121,35 @@ bunx wrangler dev
 
 <Note>
 Skybridge's local dev server (`skybridge dev`) and the Cloudflare path are independent. Use `skybridge dev` for fast iteration on Node with HMR; use `wrangler dev` to validate the production worker bundle before shipping.
+</Note>
+
+## Vercel
+
+`skybridge build` emits a [Build Output API](https://vercel.com/docs/build-output-api) tree under `.vercel/output/` — a bundled serverless function plus the static asset tree, along with the routing config. Deploy it with `vercel deploy --prebuilt`; no `vercel.json` is required.
+
+### Build and deploy
+
+<CodeGroup>
+```bash npm
+npm run build
+npx vercel deploy --prebuilt
+```
+```bash pnpm
+pnpm build
+pnpm dlx vercel deploy --prebuilt
+```
+```bash yarn
+yarn build
+yarn dlx vercel deploy --prebuilt
+```
+```bash bun
+bun run build
+bunx vercel deploy --prebuilt
+```
+</CodeGroup>
+
+<Note>
+`.vercel/` is gitignored by Vercel CLI convention, so the build artifacts stay out of your tracked working tree.
 </Note>
 
 ## Docker

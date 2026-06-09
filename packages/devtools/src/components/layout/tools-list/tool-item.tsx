@@ -4,19 +4,7 @@ import {
 } from "@alpic-ai/ui/components/accordion";
 import { Badge } from "@alpic-ai/ui/components/badge";
 import { Button } from "@alpic-ai/ui/components/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@alpic-ai/ui/components/dialog";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@alpic-ai/ui/components/tabs";
+import { Tabs, TabsContent } from "@alpic-ai/ui/components/tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -29,20 +17,34 @@ import { Form as FormComponent } from "@rjsf/shadcn";
 import type { RJSFSchema } from "@rjsf/utils";
 import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
-import { Loader2, Play } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Braces, ClipboardList, Loader2, Play, Save } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { CopyButton } from "@/lib/copy.js";
-import { toolRequiresAuth, useCallTool } from "@/lib/mcp/index.js";
+import {
+  toolRequiresAuth,
+  useCallTool,
+  useServerInfo,
+} from "@/lib/mcp/index.js";
+import { useSelectedToolName } from "@/lib/nuqs.js";
+import {
+  type SavedInput,
+  useSavedInputs,
+  useSavedInputsStore,
+} from "@/lib/saved-inputs-store.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
 import { buildFormUiSchema, formTemplates, formWidgets } from "./form/index.js";
+import { SavedInputsDropdown, SaveInputDialog } from "./saved-inputs.js";
+import { TruncatedDescription } from "./truncated-description.js";
 
 type TabValue = "form" | "json";
 
-export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
+export function ToolItem({ tool }: { tool: Tool }) {
   const { mutateAsync: callTool, isPending } = useCallTool();
+  const [selectedTool, setSelectedTool] = useSelectedToolName();
+  const isSelected = selectedTool === tool.name;
   const isSignedIn = useAuthStore((s) => s.isSignedIn);
   const requiresAuth = useAuthStore((s) => s.requiresAuth);
   const formRef = useRef<Form<unknown, RJSFSchema>>(null);
@@ -53,10 +55,27 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     setToolData(tool.name, { input: data ?? {} });
   };
 
+  const saved = useSavedInputController(tool, formData);
+
   const needsSignIn = requiresAuth && toolRequiresAuth(tool) && !isSignedIn;
 
   const [tab, setTab] = useState<TabValue>("form");
   const [jsonError, setJsonError] = useState(false);
+
+  // Run is disabled when the current input doesn't validate against the schema
+  // (or the JSON is malformed).
+  const inputInvalid = useMemo(() => {
+    const schema = tool.inputSchema as RJSFSchema;
+    const hasNoInput =
+      !schema?.properties || Object.keys(schema.properties).length === 0;
+    if (hasNoInput) {
+      return false;
+    }
+    if (tab === "json" && jsonError) {
+      return true;
+    }
+    return validator.validateFormData(formData, schema).errors.length > 0;
+  }, [tool.inputSchema, tab, jsonError, formData]);
 
   const handleRun = async () => {
     if (needsSignIn) {
@@ -81,11 +100,28 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
         return;
       }
     }
+    // Focus this tool so the result view (right pane) shows its output — even
+    // when Run was clicked from a collapsed header.
+    setSelectedTool(tool.name);
     await callTool({ toolName: tool.name, args: formData });
   };
 
-  useKeyPress("meta.enter", () => {
-    if (!open) {
+  // Enter/⌘Enter run the tool whose input is focused. Scoped per tool so that
+  // with several tools open at once only the focused one runs — and never
+  // while a dialog (e.g. the save-input modal) is focused.
+  const isHotkeyTarget = (event: KeyboardEvent) => {
+    const target = event.target as HTMLElement | null;
+    if (!target || target.closest("[role=dialog]")) {
+      return false;
+    }
+    return (
+      target.closest("[data-tool-name]")?.getAttribute("data-tool-name") ===
+      tool.name
+    );
+  };
+
+  useKeyPress("meta.enter", (event) => {
+    if (!isHotkeyTarget(event)) {
       return;
     }
     handleRun();
@@ -94,7 +130,7 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
   useKeyPress(
     "enter",
     (event) => {
-      if (!open) {
+      if (!isHotkeyTarget(event)) {
         return;
       }
       const target = event.target as HTMLElement | null;
@@ -107,10 +143,19 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     { exactMatch: true },
   );
 
+  // Why Run is disabled, surfaced as a tooltip (no reason while it's running).
+  let disabledReason: string | null = null;
+  if (needsSignIn) {
+    disabledReason = "Sign in to call this tool";
+  } else if (inputInvalid) {
+    disabledReason = "Input is not valid";
+  }
+
   const runButton = (
     <Button
-      disabled={isPending || needsSignIn}
+      disabled={isPending || needsSignIn || inputInvalid}
       variant="primary"
+      className="disabled:cursor-not-allowed disabled:pointer-events-auto disabled:opacity-100"
       onClick={handleRun}
       icon={
         isPending ? (
@@ -127,39 +172,59 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
   return (
     <AccordionItem
       value={tool.name}
-      className="border-b border-border last:border-b-0"
+      data-tool-name={tool.name}
+      className="border-b border-border transition-colors last:border-b-0 data-[state=closed]:hover:bg-muted/40"
     >
       <AccordionTrigger
         className={cn(
           "font-mono text-xs font-normal text-foreground",
-          "no-underline data-[state=closed]:hover:bg-muted/40",
+          "no-underline",
         )}
         action={
-          open ? (
-            needsSignIn ? (
+          <div
+            className={cn(
+              "flex items-center gap-1.5 transition-opacity hover:opacity-100",
+              isSelected ? "opacity-100" : "opacity-50",
+            )}
+          >
+            {saved.savedInputs.length > 0 && (
+              <SavedInputsDropdown
+                inputs={saved.savedInputs}
+                activeKey={saved.activeKey}
+                onSelect={saved.loadInput}
+                onClear={saved.clearSelection}
+                onDelete={saved.removeInput}
+              />
+            )}
+            {disabledReason ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   {/* Wrapper so the disabled button still surfaces hover. */}
                   <span className="inline-flex">{runButton}</span>
                 </TooltipTrigger>
-                <TooltipContent>Sign in to call this tool</TooltipContent>
+                <TooltipContent>{disabledReason}</TooltipContent>
               </Tooltip>
             ) : (
               runButton
-            )
-          ) : null
+            )}
+          </div>
         }
       >
-        <div className="min-w-0 flex-1 truncate text-left">{tool.name}</div>
+        <div className="min-w-0 flex-1 truncate text-left text-sm font-medium">
+          {tool.name}
+        </div>
       </AccordionTrigger>
-      {!open && tool.description ? (
-        <div aria-hidden="true" className="px-3 pb-3 -mt-1 font-sans">
-          <div className="rounded-md border border-border bg-muted/40 px-2.5 py-2 text-xs text-muted-foreground/70">
-            <span className="line-clamp-2">{tool.description}</span>
-          </div>
+      {tool.description ? (
+        <div className="px-3 pb-3 font-sans">
+          <ToolDescription name={tool.name} description={tool.description} />
         </div>
       ) : null}
-      <AccordionContent className="px-3 pt-1 pb-3 text-foreground">
+      <AccordionContent
+        className="px-3 pt-0 pb-3 text-foreground"
+        // Open/close instantly — disable the accordion slide animation (which
+        // the ui component hardcodes on the Content root).
+        style={{ animation: "none" }}
+      >
         <ToolBody
           tool={tool}
           formData={formData}
@@ -169,6 +234,8 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
           setTab={setTab}
           jsonError={jsonError}
           setJsonError={setJsonError}
+          saved={saved}
+          inputInvalid={inputInvalid}
         />
       </AccordionContent>
     </AccordionItem>
@@ -206,6 +273,122 @@ function getToolVisibility(tool: Tool): Visibility[] | undefined {
   return values.length > 0 ? values : undefined;
 }
 
+// Keep only the fields the current schema still defines, so an input saved
+// against an older schema still applies cleanly.
+function intersectInputToSchema(
+  input: Record<string, unknown>,
+  tool: Tool,
+): Record<string, unknown> {
+  const properties = (tool.inputSchema?.properties ?? {}) as Record<
+    string,
+    unknown
+  >;
+  return Object.fromEntries(
+    Object.entries(input).filter(([name]) => name in properties),
+  );
+}
+
+// The tool's description, rendered once in the always-present header (so it
+// shows whether the tool is collapsed or expanded). Muted box with the shared
+// "... more" truncation.
+function ToolDescription({
+  name,
+  description,
+}: {
+  name: string;
+  description: string;
+}) {
+  return (
+    <div className="rounded-md border border-border bg-muted/40 px-2.5 py-2">
+      <TruncatedDescription
+        text={description}
+        title={name}
+        className="text-xs text-muted-foreground/70"
+      />
+    </div>
+  );
+}
+
+type SavedInputController = {
+  serverName: string | undefined;
+  savedInputs: SavedInput[];
+  activeKey: string | null;
+  loadInput: (saved: SavedInput) => void;
+  clearSelection: () => void;
+  saveFromModal: (key: string) => void;
+  removeInput: (key: string) => void;
+};
+
+// Saved-input state + actions for one tool, reading/writing the persisted store
+// and the session-only active key. Called once per tool so the selector can be
+// mirrored in the collapsed header and the expanded input panel off one source.
+function useSavedInputController(
+  tool: Tool,
+  formData: Record<string, unknown>,
+): SavedInputController {
+  const serverName = useServerInfo()?.name;
+  const savedInputs = useSavedInputs(serverName, tool.name);
+  const saveInput = useSavedInputsStore((s) => s.saveInput);
+  const updateInput = useSavedInputsStore((s) => s.updateInput);
+  const deleteInput = useSavedInputsStore((s) => s.deleteInput);
+  const setToolData = useStore((s) => s.setToolData);
+  const storedActiveKey =
+    useCallToolResult(tool.name)?.activeSavedInputKey ?? null;
+
+  // The active input is the saved input the form was last loaded from/saved
+  // as. Ignore a stale key whose input was since deleted.
+  const activeInput = storedActiveKey
+    ? savedInputs.find((entry) => entry.key === storedActiveKey)
+    : undefined;
+  const activeKey = activeInput ? storedActiveKey : null;
+
+  const loadInput = (saved: SavedInput) => {
+    // Both the form and JSON views read this shared input, so both update.
+    setToolData(tool.name, {
+      input: intersectInputToSchema(saved.input, tool),
+      activeSavedInputKey: saved.key,
+    });
+  };
+
+  // Unselect the active input and clear the form.
+  const clearSelection = () => {
+    setToolData(tool.name, { input: {}, activeSavedInputKey: null });
+  };
+
+  const saveFromModal = (key: string) => {
+    if (!serverName) {
+      return;
+    }
+    // An existing key overwrites that input; a new key creates one.
+    if (savedInputs.some((entry) => entry.key === key)) {
+      updateInput(serverName, tool.name, key, formData);
+    } else {
+      saveInput(serverName, tool.name, key, formData);
+    }
+    setToolData(tool.name, { activeSavedInputKey: key });
+  };
+
+  const removeInput = (key: string) => {
+    if (!serverName) {
+      return;
+    }
+    deleteInput(serverName, tool.name, key);
+    if (key === storedActiveKey) {
+      setToolData(tool.name, { activeSavedInputKey: null });
+    }
+  };
+
+  return {
+    serverName,
+    savedInputs,
+    activeKey,
+    loadInput,
+    clearSelection,
+    saveFromModal,
+    removeInput,
+  };
+}
+
 function ToolBody({
   tool,
   formData,
@@ -215,6 +398,8 @@ function ToolBody({
   setTab,
   jsonError,
   setJsonError,
+  saved,
+  inputInvalid,
 }: {
   tool: Tool;
   formData: Record<string, unknown>;
@@ -224,86 +409,121 @@ function ToolBody({
   setTab: (tab: TabValue) => void;
   jsonError: boolean;
   setJsonError: (value: boolean) => void;
+  saved: SavedInputController;
+  inputInvalid: boolean;
 }) {
   const hasInput =
     tool.inputSchema &&
     Object.keys(tool.inputSchema.properties ?? {}).length > 0;
   const visibility = getToolVisibility(tool);
-  const [descriptionOpen, setDescriptionOpen] = useState(false);
+  const [saveOpen, setSaveOpen] = useState(false);
+  const { serverName, savedInputs, activeKey } = saved;
+
+  const saveButton = (
+    <button
+      type="button"
+      onClick={() => setSaveOpen(true)}
+      disabled={inputInvalid}
+      title={inputInvalid ? undefined : "Save input"}
+      aria-label="Save input"
+      className={cn(
+        "shrink-0 cursor-pointer text-light-gray-foreground transition-colors hover:text-foreground",
+        "disabled:cursor-not-allowed disabled:pointer-events-auto disabled:hover:text-light-gray-foreground",
+      )}
+    >
+      <Save className="size-3.5" />
+    </button>
+  );
 
   return (
     <div className="space-y-3">
-      {(visibility || tool.description) && (
-        <div className="space-y-2">
-          {visibility && (
-            <div data-testid="tool-visibility" className="flex flex-wrap gap-1">
-              {visibility.map((scope) => (
-                <Tooltip key={scope}>
-                  <TooltipTrigger asChild>
-                    <Badge
-                      size="sm"
-                      className={VISIBILITY_META[scope].badgeClass}
-                    >
-                      {scope}
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipPrimitive.Portal>
-                    <TooltipPrimitive.Content
-                      sideOffset={6}
-                      className={cn(
-                        "z-50 w-fit rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-md",
-                        "animate-in fade-in-0 zoom-in-95",
-                        "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
-                        "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-                      )}
-                    >
-                      {VISIBILITY_META[scope].tooltip}
-                      <TooltipPrimitive.Arrow
-                        width={11}
-                        height={5}
-                        className="fill-background drop-shadow-[0_1px_0_var(--color-border)]"
-                      />
-                    </TooltipPrimitive.Content>
-                  </TooltipPrimitive.Portal>
-                </Tooltip>
-              ))}
-            </div>
-          )}
-          {tool.description && (
-            <>
-              <button
-                type="button"
-                onClick={() => setDescriptionOpen(true)}
-                className="block w-full cursor-pointer rounded-md border border-border bg-muted/40 px-2.5 py-2 text-left text-xs text-muted-foreground/70 hover:bg-muted/60"
-                title="Click to see full description"
-              >
-                <span className="line-clamp-2">{tool.description}</span>
-              </button>
-              <Dialog open={descriptionOpen} onOpenChange={setDescriptionOpen}>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="font-mono">{tool.name}</DialogTitle>
-                    <DialogDescription className="whitespace-pre-wrap">
-                      {tool.description}
-                    </DialogDescription>
-                  </DialogHeader>
-                </DialogContent>
-              </Dialog>
-            </>
-          )}
+      {visibility && (
+        <div data-testid="tool-visibility" className="flex flex-wrap gap-1">
+          {visibility.map((scope) => (
+            <Tooltip key={scope}>
+              <TooltipTrigger asChild>
+                <Badge size="sm" className={VISIBILITY_META[scope].badgeClass}>
+                  {scope}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipPrimitive.Portal>
+                <TooltipPrimitive.Content
+                  sideOffset={6}
+                  className={cn(
+                    "z-50 w-fit rounded-md border border-border bg-background px-3 py-2 text-xs text-foreground shadow-md",
+                    "animate-in fade-in-0 zoom-in-95",
+                    "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
+                    "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+                  )}
+                >
+                  {VISIBILITY_META[scope].tooltip}
+                  <TooltipPrimitive.Arrow
+                    width={11}
+                    height={5}
+                    className="fill-background drop-shadow-[0_1px_0_var(--color-border)]"
+                  />
+                </TooltipPrimitive.Content>
+              </TooltipPrimitive.Portal>
+            </Tooltip>
+          ))}
         </div>
       )}
       {hasInput && (
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)}>
-          <div className="flex items-center justify-between gap-2">
-            <TabsList variant="line">
-              <TabsTrigger value="form">form</TabsTrigger>
-              <TabsTrigger value="json">json</TabsTrigger>
-            </TabsList>
-            <CopyButton
-              value={JSON.stringify(formData, null, 2)}
-              label="Copy input"
-            />
+          <div className="flex items-end justify-between gap-2 border-b border-border">
+            {/* Left: [save] Input */}
+            <div className="flex min-w-0 items-center gap-1 pb-1.5">
+              {serverName &&
+                (inputInvalid ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex">{saveButton}</span>
+                    </TooltipTrigger>
+                    <TooltipContent>Input is not valid</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  saveButton
+                ))}
+              {serverName ? (
+                <SavedInputsDropdown
+                  inputs={savedInputs}
+                  activeKey={activeKey}
+                  onSelect={saved.loadInput}
+                  onClear={saved.clearSelection}
+                  onDelete={saved.removeInput}
+                />
+              ) : (
+                <span className="text-xs font-medium text-muted-foreground">
+                  Input
+                </span>
+              )}
+            </div>
+            {/* Right: form / json tabs. The active tab's bottom border matches
+                the content background, so it reads as a connected tab. -mb-px
+                pulls the strip onto the header separator. */}
+            <div className="-mb-px flex">
+              {(["form", "json"] as const).map((value, index) => {
+                const Icon = value === "form" ? ClipboardList : Braces;
+                const active = tab === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setTab(value)}
+                    className={cn(
+                      "relative inline-flex h-7 cursor-pointer items-center gap-1.5 border border-border px-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring",
+                      index === 0 ? "rounded-tl-md" : "-ml-px rounded-tr-md",
+                      active
+                        ? "z-10 border-b-background bg-background text-foreground"
+                        : "bg-muted/40 text-light-gray-foreground hover:text-foreground",
+                    )}
+                  >
+                    <Icon className="size-3.5" />
+                    <span>{value}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <TabsContent value="form">
             <FormBody
@@ -313,7 +533,9 @@ function ToolBody({
               formRef={formRef}
             />
           </TabsContent>
-          <TabsContent value="json">
+          {/* -mt-4 cancels the Tabs gap so the textarea's top merges into the
+              header separator (its top border). */}
+          <TabsContent value="json" className="-mt-4">
             <JsonBody
               formData={formData}
               setFormData={setFormData}
@@ -322,6 +544,15 @@ function ToolBody({
             />
           </TabsContent>
         </Tabs>
+      )}
+      {hasInput && serverName && (
+        <SaveInputDialog
+          open={saveOpen}
+          onOpenChange={setSaveOpen}
+          defaultKey={activeKey ?? ""}
+          existingKeys={savedInputs.map((entry) => entry.key)}
+          onSave={saved.saveFromModal}
+        />
       )}
     </div>
   );
@@ -408,15 +639,22 @@ function JsonBody({
 
   return (
     <div className="space-y-1.5">
-      <textarea
-        className={cn(
-          "h-80 w-full rounded-md border p-2 font-mono text-xs",
-          error ? "border-destructive" : "border-border",
-        )}
-        spellCheck={false}
-        value={json}
-        onChange={(e) => handleChange(e.target.value)}
-      />
+      <div className="relative">
+        <textarea
+          className={cn(
+            "max-h-80 min-h-20 w-full resize-none overflow-auto rounded-b-md border border-t-0 p-2 pr-9 font-mono text-xs field-sizing-content",
+            error ? "border-destructive" : "border-border",
+          )}
+          spellCheck={false}
+          value={json}
+          onChange={(e) => handleChange(e.target.value)}
+        />
+        <CopyButton
+          value={json}
+          label="Copy input"
+          className="absolute top-2 right-2 z-10"
+        />
+      </div>
       {error && (
         <div className="text-xs text-destructive">
           The provided JSON is invalid
