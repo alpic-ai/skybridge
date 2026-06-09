@@ -33,14 +33,16 @@ export function SavedQueriesDropdown({
   onClear: () => void;
   onDelete: (key: string) => void;
 }) {
+  const label = activeKey ?? "Input";
+  const display = label.length > 12 ? `${label.slice(0, 12)}…` : label;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="inline-flex max-w-52 cursor-pointer items-center gap-1 rounded px-1 py-0.5 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring aria-expanded:text-foreground"
+          className="inline-flex cursor-pointer items-center gap-1 rounded px-1 py-0.5 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring aria-expanded:text-foreground"
         >
-          <span className="truncate">{activeKey ?? "Input"}</span>
+          <span>{display}</span>
           <ChevronDown className="size-3 shrink-0" />
         </button>
       </DropdownMenuTrigger>

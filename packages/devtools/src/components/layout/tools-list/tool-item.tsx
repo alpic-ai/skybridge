@@ -55,6 +55,8 @@ export function ToolItem({ tool }: { tool: Tool }) {
     setToolData(tool.name, { input: data ?? {} });
   };
 
+  const saved = useSavedQueryController(tool, formData);
+
   const needsSignIn = requiresAuth && toolRequiresAuth(tool) && !isSignedIn;
 
   const [tab, setTab] = useState<TabValue>("form");
@@ -181,10 +183,19 @@ export function ToolItem({ tool }: { tool: Tool }) {
         action={
           <div
             className={cn(
-              "transition-opacity hover:opacity-100",
+              "flex items-center gap-1.5 transition-opacity hover:opacity-100",
               isSelected ? "opacity-100" : "opacity-50",
             )}
           >
+            {saved.savedQueries.length > 0 && (
+              <SavedQueriesDropdown
+                queries={saved.savedQueries}
+                activeKey={saved.activeKey}
+                onSelect={saved.loadQuery}
+                onClear={saved.clearSelection}
+                onDelete={saved.removeQuery}
+              />
+            )}
             {disabledReason ? (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -223,6 +234,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
           setTab={setTab}
           jsonError={jsonError}
           setJsonError={setJsonError}
+          saved={saved}
         />
       </AccordionContent>
     </AccordionItem>
@@ -296,30 +308,23 @@ function ToolDescription({
   );
 }
 
-function ToolBody({
-  tool,
-  formData,
-  setFormData,
-  formRef,
-  tab,
-  setTab,
-  jsonError,
-  setJsonError,
-}: {
-  tool: Tool;
-  formData: Record<string, unknown>;
-  setFormData: (data: Record<string, unknown> | null) => void;
-  formRef: React.RefObject<Form<unknown, RJSFSchema> | null>;
-  tab: TabValue;
-  setTab: (tab: TabValue) => void;
-  jsonError: boolean;
-  setJsonError: (value: boolean) => void;
-}) {
-  const hasInput =
-    tool.inputSchema &&
-    Object.keys(tool.inputSchema.properties ?? {}).length > 0;
-  const visibility = getToolVisibility(tool);
-  const [saveOpen, setSaveOpen] = useState(false);
+type SavedQueryController = {
+  serverName: string | undefined;
+  savedQueries: SavedQuery[];
+  activeKey: string | null;
+  loadQuery: (query: SavedQuery) => void;
+  clearSelection: () => void;
+  saveFromModal: (key: string) => void;
+  removeQuery: (key: string) => void;
+};
+
+// Saved-query state + actions for one tool, reading/writing the persisted store
+// and the session-only active key. Called once per tool so the selector can be
+// mirrored in the collapsed header and the expanded input panel off one source.
+function useSavedQueryController(
+  tool: Tool,
+  formData: Record<string, unknown>,
+): SavedQueryController {
   const serverName = useServerInfo()?.name;
   const savedQueries = useSavedQueries(serverName, tool.name);
   const saveQuery = useSavedQueriesStore((s) => s.saveQuery);
@@ -371,6 +376,45 @@ function ToolBody({
       setToolData(tool.name, { activeSavedQueryKey: null });
     }
   };
+
+  return {
+    serverName,
+    savedQueries,
+    activeKey,
+    loadQuery,
+    clearSelection,
+    saveFromModal,
+    removeQuery,
+  };
+}
+
+function ToolBody({
+  tool,
+  formData,
+  setFormData,
+  formRef,
+  tab,
+  setTab,
+  jsonError,
+  setJsonError,
+  saved,
+}: {
+  tool: Tool;
+  formData: Record<string, unknown>;
+  setFormData: (data: Record<string, unknown> | null) => void;
+  formRef: React.RefObject<Form<unknown, RJSFSchema> | null>;
+  tab: TabValue;
+  setTab: (tab: TabValue) => void;
+  jsonError: boolean;
+  setJsonError: (value: boolean) => void;
+  saved: SavedQueryController;
+}) {
+  const hasInput =
+    tool.inputSchema &&
+    Object.keys(tool.inputSchema.properties ?? {}).length > 0;
+  const visibility = getToolVisibility(tool);
+  const [saveOpen, setSaveOpen] = useState(false);
+  const { serverName, savedQueries, activeKey } = saved;
 
   return (
     <div className="space-y-3">
@@ -425,9 +469,9 @@ function ToolBody({
                 <SavedQueriesDropdown
                   queries={savedQueries}
                   activeKey={activeKey}
-                  onSelect={loadQuery}
-                  onClear={clearSelection}
-                  onDelete={removeQuery}
+                  onSelect={saved.loadQuery}
+                  onClear={saved.clearSelection}
+                  onDelete={saved.removeQuery}
                 />
               ) : (
                 <span className="text-xs font-medium text-muted-foreground">
@@ -488,7 +532,7 @@ function ToolBody({
           onOpenChange={setSaveOpen}
           defaultKey={activeKey ?? ""}
           existingKeys={savedQueries.map((q) => q.key)}
-          onSave={saveFromModal}
+          onSave={saved.saveFromModal}
         />
       )}
     </div>
