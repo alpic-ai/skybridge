@@ -50,7 +50,7 @@ export function SavedQueriesDropdown({
             disabled
             className="font-mono text-xs font-normal text-muted-foreground"
           >
-            No saved queries yet
+            No saved input yet
           </DropdownMenuItem>
         ) : (
           <>
@@ -74,12 +74,8 @@ export function SavedQueriesDropdown({
               </span>
             </DropdownMenuItem>
             {queries.map((query) => (
-              // The trash sits as a sibling overlay (not a child of the item)
-              // so its click never enters the item's selection path: clicking
-              // it deletes without also loading the query.
               <div key={query.key} className="group/item relative">
                 <DropdownMenuItem
-                  // Clicking the already-selected query unselects it.
                   onSelect={() =>
                     query.key === activeKey ? onClear() : onSelect(query)
                   }
@@ -149,9 +145,9 @@ export function SaveQueryDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Save query</DialogTitle>
+          <DialogTitle>Save input</DialogTitle>
           <DialogDescription>
-            Save the current input to reuse it later.
+            Save the current values to reuse it later.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-3">

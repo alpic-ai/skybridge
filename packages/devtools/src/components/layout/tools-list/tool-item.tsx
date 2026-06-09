@@ -89,8 +89,6 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
     await callTool({ toolName: tool.name, args: formData });
   };
 
-  // Enter/⌘Enter run the tool — but not while a dialog (e.g. the save-query
-  // modal) is open, so its own submit button handles Enter.
   const inDialog = (event: KeyboardEvent) =>
     (event.target as HTMLElement | null)?.closest("[role=dialog]") != null;
 
