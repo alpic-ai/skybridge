@@ -1,21 +1,21 @@
 import { useLayout } from "skybridge/web";
+import { Code, Description, Field, TabBody } from "../components/ui.js";
 
 export function UseLayoutTab() {
   const { theme } = useLayout();
 
   return (
-    <div className="tab-content">
-      <p className="description">
+    <TabBody>
+      <Description>
         Access layout and visual environment info. Values update dynamically on
         resize or theme toggle.
-      </p>
+      </Description>
 
-      <div className="field">
-        <span className="field-label">Theme</span>
-        <code className={theme}>
+      <Field label="Theme">
+        <Code>
           Runtime theme is set to {theme} {theme === "light" ? "☀️" : "🌙"}
-        </code>
-      </div>
-    </div>
+        </Code>
+      </Field>
+    </TabBody>
   );
 }

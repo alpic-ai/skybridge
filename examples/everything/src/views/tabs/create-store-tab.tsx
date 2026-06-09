@@ -1,4 +1,7 @@
+import { Button } from "@alpic-ai/ui/components/button";
+import { Minus, Plus } from "lucide-react";
 import { createStore } from "skybridge/web";
+import { Code, Description, TabBody } from "../components/ui.js";
 
 type CounterState = {
   count: number;
@@ -18,22 +21,38 @@ export function CreateStoreTab() {
   const decrement = useCounterStore((state) => state.decrement);
 
   return (
-    <div className="tab-content">
-      <p className="description">
-        A <a href="https://github.com/pmndrs/zustand">Zustand</a> store that
-        auto-syncs with the host. State persists across re-renders and is
-        restored when the widget reloads.
-      </p>
+    <TabBody>
+      <Description>
+        A{" "}
+        <a
+          href="https://github.com/pmndrs/zustand"
+          className="text-primary underline underline-offset-4"
+        >
+          Zustand
+        </a>{" "}
+        store that auto-syncs with the host. State persists across re-renders
+        and is restored when the widget reloads.
+      </Description>
 
-      <div className="button-row">
-        <button type="button" className="btn" onClick={decrement}>
-          -
-        </button>
-        <code>{count}</code>
-        <button type="button" className="btn" onClick={increment}>
-          +
-        </button>
+      <div className="flex items-center gap-3">
+        <Button
+          variant="secondary"
+          size="icon"
+          aria-label="Decrement"
+          onClick={decrement}
+        >
+          <Minus />
+        </Button>
+        <Code className="min-w-10 text-center type-text-base">{count}</Code>
+        <Button
+          variant="secondary"
+          size="icon"
+          aria-label="Increment"
+          onClick={increment}
+        >
+          <Plus />
+        </Button>
       </div>
-    </div>
+    </TabBody>
   );
 }
