@@ -63,11 +63,7 @@ function ToolsList() {
         className="min-h-0 overflow-y-auto"
       >
         {tools.map((tool) => (
-          <ToolItem
-            key={tool.name}
-            tool={tool}
-            open={openTools.includes(tool.name)}
-          />
+          <ToolItem key={tool.name} tool={tool} />
         ))}
       </Accordion>
     </div>

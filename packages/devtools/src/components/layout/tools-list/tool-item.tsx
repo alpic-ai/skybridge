@@ -47,7 +47,7 @@ import { SavedQueriesDropdown, SaveQueryDialog } from "./saved-queries.js";
 
 type TabValue = "form" | "json";
 
-export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
+export function ToolItem({ tool }: { tool: Tool }) {
   const { mutateAsync: callTool, isPending } = useCallTool();
   const [selectedTool, setSelectedTool] = useSelectedToolName();
   const isSelected = selectedTool === tool.name;
@@ -187,11 +187,8 @@ export function ToolItem({ tool, open }: { tool: Tool; open: boolean }) {
           <div
             className={cn(
               "transition-opacity",
-              // Always visible when open or selected; otherwise reveal on
-              // header hover / focus.
-              !open &&
-                !isSelected &&
-                "opacity-0 focus-within:opacity-100 group-hover/tool:opacity-100",
+              // Full opacity for the selected tool, dimmed for the rest.
+              isSelected ? "opacity-100" : "opacity-50",
             )}
           >
             {disabledReason ? (
