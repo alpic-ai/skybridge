@@ -19,11 +19,11 @@ export function AccordionTrigger({
   ...props
 }: AccordionTriggerProps) {
   return (
-    <AccordionPrimitive.Header className="relative flex w-full min-w-0 items-stretch">
+    <AccordionPrimitive.Header className="flex w-full min-w-0 items-stretch">
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          "flex min-h-0 min-w-0 flex-1 items-center gap-2 px-3 py-2.5 h-12",
+          "flex min-h-0 min-w-0 flex-1 items-center gap-2 pl-3 pr-2 py-2.5 h-12",
           "type-text-md font-semibold text-foreground text-left",
           "outline-none focus-visible:outline-none rounded-sm",
           "disabled:pointer-events-none disabled:opacity-50",
@@ -37,9 +37,7 @@ export function AccordionTrigger({
         {children}
       </AccordionPrimitive.Trigger>
       {action != null ? (
-        <div className="absolute inset-y-0 right-3 flex shrink-0 items-center">
-          {action}
-        </div>
+        <div className="flex shrink-0 items-center pr-3">{action}</div>
       ) : null}
     </AccordionPrimitive.Header>
   );
