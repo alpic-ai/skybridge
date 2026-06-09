@@ -17,35 +17,37 @@ import { Input } from "@alpic-ai/ui/components/input";
 import { Label } from "@alpic-ai/ui/components/label";
 import { Check, ChevronDown, Trash2 } from "lucide-react";
 import { type FormEvent, useEffect, useId, useState } from "react";
-import type { SavedQuery } from "@/lib/saved-queries-store.js";
+import type { SavedInput } from "@/lib/saved-inputs-store.js";
 import { cn } from "@/lib/utils.js";
 
-export function SavedQueriesDropdown({
-  queries,
+export function SavedInputsDropdown({
+  inputs,
   activeKey,
   onSelect,
   onClear,
   onDelete,
 }: {
-  queries: SavedQuery[];
+  inputs: SavedInput[];
   activeKey: string | null;
-  onSelect: (query: SavedQuery) => void;
+  onSelect: (saved: SavedInput) => void;
   onClear: () => void;
   onDelete: (key: string) => void;
 }) {
+  const label = activeKey ?? "Input";
+  const display = label.length > 12 ? `${label.slice(0, 12)}…` : label;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="inline-flex max-w-52 cursor-pointer items-center gap-1 rounded px-1 py-0.5 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring aria-expanded:text-foreground"
+          className="inline-flex cursor-pointer items-center gap-1 rounded px-1 py-0.5 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring aria-expanded:text-foreground"
         >
-          <span className="truncate">{activeKey ?? "Input"}</span>
+          <span>{display}</span>
           <ChevronDown className="size-3 shrink-0" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-48">
-        {queries.length === 0 ? (
+        {inputs.length === 0 ? (
           <DropdownMenuItem
             disabled
             className="font-mono text-xs font-normal text-muted-foreground"
@@ -54,13 +56,13 @@ export function SavedQueriesDropdown({
           </DropdownMenuItem>
         ) : (
           <>
-            {/* "none" unselects the active query and clears the input. */}
+            {/* "none" unselects the active input and clears the form. */}
             <DropdownMenuItem
               onSelect={onClear}
               className="cursor-pointer font-mono text-xs font-normal"
-              disabled={queries.length <= 0}
+              disabled={inputs.length <= 0}
             >
-              {queries.length > 0 && (
+              {inputs.length > 0 && (
                 <Check
                   className={cn(
                     "size-3.5 shrink-0",
@@ -70,29 +72,29 @@ export function SavedQueriesDropdown({
               )}
 
               <span className="text-muted-foreground italic">
-                {queries.length > 0 ? "none" : "no saved input yet"}
+                {inputs.length > 0 ? "none" : "no saved input yet"}
               </span>
             </DropdownMenuItem>
-            {queries.map((query) => (
-              <div key={query.key} className="group/item relative">
+            {inputs.map((saved) => (
+              <div key={saved.key} className="group/item relative">
                 <DropdownMenuItem
                   onSelect={() =>
-                    query.key === activeKey ? onClear() : onSelect(query)
+                    saved.key === activeKey ? onClear() : onSelect(saved)
                   }
                   className="cursor-pointer pr-8 font-mono text-xs font-normal"
                 >
                   <Check
                     className={cn(
                       "size-3.5 shrink-0",
-                      query.key === activeKey ? "opacity-100" : "opacity-0",
+                      saved.key === activeKey ? "opacity-100" : "opacity-0",
                     )}
                   />
-                  <span className="truncate">{query.key}</span>
+                  <span className="truncate">{saved.key}</span>
                 </DropdownMenuItem>
                 <button
                   type="button"
-                  aria-label={`Delete saved query ${query.key}`}
-                  onClick={() => onDelete(query.key)}
+                  aria-label={`Delete saved input ${saved.key}`}
+                  onClick={() => onDelete(saved.key)}
                   className="absolute top-1/2 right-2.5 inline-flex -translate-y-1/2 cursor-pointer rounded p-1 text-light-gray-foreground opacity-0 transition-opacity hover:text-destructive focus-visible:opacity-100 group-hover/item:opacity-100"
                 >
                   <Trash2 className="size-3.5" />
@@ -106,7 +108,7 @@ export function SavedQueriesDropdown({
   );
 }
 
-export function SaveQueryDialog({
+export function SaveInputDialog({
   open,
   onOpenChange,
   defaultKey,
@@ -124,7 +126,7 @@ export function SaveQueryDialog({
   const trimmed = key.trim();
   const isOverwrite = trimmed.length > 0 && existingKeys.includes(trimmed);
 
-  // Prefill the field each time the dialog (re)opens: with the active query's
+  // Prefill the field each time the dialog (re)opens: with the active input's
   // key, so saving over it is one click.
   useEffect(() => {
     if (open) {
@@ -162,7 +164,7 @@ export function SaveQueryDialog({
             />
             {isOverwrite && (
               <p className="text-xs text-muted-foreground">
-                A query named "{trimmed}" already exists: it will be
+                An input named "{trimmed}" already exists: it will be
                 overwritten.
               </p>
             )}

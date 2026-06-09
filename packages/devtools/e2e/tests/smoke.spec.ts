@@ -18,7 +18,11 @@ test.describe("devtools smoke", () => {
 
     const token = `ping-${crypto.randomUUID()}`;
     await page.getByLabel("message").fill(token);
-    await page.getByRole("button", { name: /^run$/i }).click();
+    // Every tool header has its own Run button — scope to this tool.
+    await page
+      .locator('[data-tool-name="echo"]')
+      .getByRole("button", { name: /^run$/i })
+      .click();
 
     // Token appears in the rendered JSON response in the main panel.
     await expect(page.getByRole("main")).toContainText(token);
@@ -31,7 +35,10 @@ test.describe("devtools smoke", () => {
 
     const token = `card-${crypto.randomUUID()}`;
     await page.getByLabel("message").fill(token);
-    await page.getByRole("button", { name: /^run$/i }).click();
+    await page
+      .locator('[data-tool-name="echo-card"]')
+      .getByRole("button", { name: /^run$/i })
+      .click();
 
     // First-time view compilation by Vite can take a few seconds.
     const widget = page.frameLocator('iframe[title="html-preview"]');

@@ -23,7 +23,10 @@ test.describe("every-input-type tool", () => {
     await page.getByLabel("theme").click();
     await page.getByRole("option", { name: "dark" }).click();
 
-    await page.getByRole("button", { name: /^run$/i }).click();
+    await page
+      .locator('[data-tool-name="every-input-type"]')
+      .getByRole("button", { name: /^run$/i })
+      .click();
 
     const main = page.getByRole("main");
     await expect(main).toContainText('"name": "Alice"');
