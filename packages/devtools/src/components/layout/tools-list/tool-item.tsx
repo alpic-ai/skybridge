@@ -4,13 +4,6 @@ import {
 } from "@alpic-ai/ui/components/accordion";
 import { Badge } from "@alpic-ai/ui/components/badge";
 import { Button } from "@alpic-ai/ui/components/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@alpic-ai/ui/components/dialog";
 import { Tabs, TabsContent } from "@alpic-ai/ui/components/tabs";
 import {
   Tooltip,
@@ -44,6 +37,7 @@ import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
 import { buildFormUiSchema, formTemplates, formWidgets } from "./form/index.js";
 import { SavedQueriesDropdown, SaveQueryDialog } from "./saved-queries.js";
+import { TruncatedDescription } from "./truncated-description.js";
 
 type TabValue = "form" | "json";
 
@@ -282,8 +276,8 @@ function intersectInputToSchema(
 }
 
 // The tool's description, rendered once in the always-present header (so it
-// shows whether the tool is collapsed or expanded). A muted, two-line-clamped
-// box that opens the full text in a dialog on click.
+// shows whether the tool is collapsed or expanded). Muted box with the shared
+// "... more" truncation.
 function ToolDescription({
   name,
   description,
@@ -291,28 +285,14 @@ function ToolDescription({
   name: string;
   description: string;
 }) {
-  const [open, setOpen] = useState(false);
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        title="Click to see full description"
-        className="block w-full cursor-pointer rounded-md border border-border bg-muted/40 px-2.5 py-2 text-left text-xs text-muted-foreground/70 hover:bg-muted/60"
-      >
-        <span className="line-clamp-2">{description}</span>
-      </button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="font-mono">{name}</DialogTitle>
-            <DialogDescription className="whitespace-pre-wrap">
-              {description}
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
-    </>
+    <div className="rounded-md border border-border bg-muted/40 px-2.5 py-2">
+      <TruncatedDescription
+        text={description}
+        title={name}
+        className="text-xs text-muted-foreground/70"
+      />
+    </div>
   );
 }
 

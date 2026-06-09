@@ -12,6 +12,7 @@ import type {
 import { getInputProps } from "@rjsf/utils";
 import { Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils.js";
+import { TruncatedDescription } from "../truncated-description.js";
 import {
   denseInputClass,
   descriptionTextClass,
@@ -99,7 +100,6 @@ export function FieldTemplate(props: FieldTemplateProps) {
   // When ui:widget overrides them, that path is skipped — we must render here.
   const rendersOwnTitle = isContainer && !hasCustomWidget;
   const showLabel = !rendersOwnTitle && Boolean(label);
-  const showHint = !rendersOwnTitle && Boolean(rawDescription);
   const hasError = (rawErrors?.length ?? 0) > 0;
 
   return (
@@ -116,7 +116,13 @@ export function FieldTemplate(props: FieldTemplateProps) {
           {required && <span className="ml-1 text-destructive">*</span>}
         </label>
       )}
-      {showHint && <p className={descriptionTextClass}>{rawDescription}</p>}
+      {!rendersOwnTitle && rawDescription ? (
+        <TruncatedDescription
+          text={rawDescription}
+          title={label}
+          className={descriptionTextClass}
+        />
+      ) : null}
       {children}
       {errors}
       {help}
