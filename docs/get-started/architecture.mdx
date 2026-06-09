@@ -3,14 +3,18 @@ title: Architecture
 description: "Design conversational experiences leveraging models intelligence"
 icon: route
 ---
+<video
+autoPlay={true}
+loop={true}
+className="w-full aspect-video rounded-xl"
+src="/images/three-body-problem.mp4"
+></video>
 
-{/* todo: three body problem illustration */}
+MCP Apps have three actors involved: the app, the user, and the model. This creates context asymmetry: each actor holds a partial picture of the system. The model is blind to the UI: it can’t see visuals or user interactions unless you explicitly sync them back. The user can’t see the tool output flowing underneath. Building well means understanding these blind spots and designing the information flow between all three.
 
-MCP Apps have three actors involved: the view, the user, and the model. This creates context asymmetry: each actor holds a partial picture of the system. The model is blind to the UI: it can’t see visuals or user interactions unless you explicitly sync them back. The user can’t see the tool output flowing underneath. Building well means understanding these blind spots and designing the information flow between all three.
+The core design challenge isn’t layout or styling: it’s deciding who sees what, and when. What does the model need to know? What should stay hidden from it? Where should natural language replace traditional UI?
 
-The core design challenge isn’t layout or styling: it’s deciding who sees what, and when. What does the model need to know and when? What should stay hidden from it? Where should natural language replace traditional UI?
-
-The sections below introduce the vocabulary, walk through the lifecycle an app and how data flows at each step, and close with a working example that ties everything together.
+The sections below introduce the vocabulary, walk through the lifecycle of an MCP app and how data flows at each step, and close with a working example that ties everything together.
 
 ## Terminology
 
@@ -183,7 +187,7 @@ export default function Carousel() {
 
 ## Pair with the Skill
 
-The Skybridge Skill is the best teacher for crafting MCP App UX. It knows the lifecycle, the data-flow patterns, and the design moves that actually work inside ChatGPT and Claude.
+The Skybridge Skill is the best teacher for crafting excellent MCP App architecture. It knows the lifecycle, the data-flow patterns, and the design moves that actually work inside ChatGPT and Claude.
 
 Install it now:
 

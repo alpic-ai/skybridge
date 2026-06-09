@@ -7,7 +7,7 @@ iconType: "regular"
 
 To get a running codebase right away, you can scaffold a project from our templates. They come pre-configured with:
 - a working MCP server
-- a full development environment with a local emulator, file watching, and hot module reload.
+- a complete development environment with a local emulator, file watching, and hot module reload.
 
 <Info>
 Prerequisite: Skybridge runs on [Node 24+](https://nodejs.org/en/download)
@@ -82,11 +82,13 @@ deno task dev --tunnel
 ```
 </CodeGroup>
 
-You'll be provided a public URL (e.g., `https://superb-marmot-fondue-420.alpic.dev/mcp`) to register your app as a ChatGPT app or a Claude connector.
+You'll be provided a public URL (e.g., `https://superb-marmot-fondue-420.alpic.dev/mcp`) to register your server as a ChatGPT app or a Claude connector.
 
 <Tip>
-[Alpic tunnels](https://docs.alpic.ai/cli/tunnel) come with a free LLM Playground on `/try`. No config needed: it's already wired to your local server.
+[Alpic tunnel](https://docs.alpic.ai/cli/tunnel) comes with a free LLM Playground on `/try`. No config needed: it's already wired to your local server.
 </Tip>
+
+{/* @todo: link test page */}
 
 ## Ship
 
@@ -111,3 +113,5 @@ deno task deploy
 </CodeGroup>
 
 After deployment succeeds, the CLI prints the app's public URL. You're now live!
+
+{/* @todo: link deploy page */}
