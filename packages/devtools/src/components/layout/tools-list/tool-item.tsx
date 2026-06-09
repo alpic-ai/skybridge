@@ -171,12 +171,12 @@ export function ToolItem({ tool }: { tool: Tool }) {
     <AccordionItem
       value={tool.name}
       data-tool-name={tool.name}
-      className="border-b border-border last:border-b-0"
+      className="border-b border-border transition-colors last:border-b-0 data-[state=closed]:hover:bg-muted/40"
     >
       <AccordionTrigger
         className={cn(
           "font-mono text-xs font-normal text-foreground",
-          "no-underline data-[state=closed]:hover:bg-muted/40",
+          "no-underline",
         )}
         action={
           <div
