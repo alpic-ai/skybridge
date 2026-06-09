@@ -372,7 +372,12 @@ export default function ChessView() {
           <button
             type="button"
             className="chess-reset"
-            onClick={() => restart()}
+            onClick={() => {
+              restart();
+              sendFollowUpMessage(
+                "The player has restarted the game. The board is back to the starting position. Please wait for them to pick a side in the view before making any moves.",
+              );
+            }}
           >
             New game
           </button>
