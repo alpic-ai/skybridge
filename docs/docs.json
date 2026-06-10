@@ -31,7 +31,9 @@
             "group": "Get Started",
             "icon": "rocket",
             "pages": [
-              "home",
+              "get-started/introduction",
+              "get-started/quickstart",
+              "get-started/architecture",
               {
                 "group": "Fundamentals",
                 "icon": "graduation-cap",
