@@ -22,6 +22,7 @@ import {
 export function BaseInputTemplate(props: BaseInputTemplateProps) {
   const {
     id,
+    name,
     value,
     required,
     disabled,
@@ -57,6 +58,8 @@ export function BaseInputTemplate(props: BaseInputTemplateProps) {
   return (
     <input
       id={id}
+      name={name}
+      toolparamdescription={schema.description}
       className={denseInputClass}
       value={value ?? ""}
       required={required}
