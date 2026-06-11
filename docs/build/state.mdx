@@ -97,7 +97,7 @@ export default function Carousel() {
 
 ## Narrate the Screen with `data-llm`
 
-While `setWidgetState` pushes structured data to the model context, `data-llm` describes what the user currently sees in natural language. It's recomputed on every render and synced to the model:
+While `setViewState` pushes structured data to the model context, `data-llm` describes what the user currently sees in natural language. It's recomputed on every render and synced to the model:
 
 ```tsx views/carousel.tsx highlight={14}
 import { useState } from "react";
