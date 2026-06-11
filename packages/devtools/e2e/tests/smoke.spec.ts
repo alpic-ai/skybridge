@@ -17,12 +17,9 @@ test.describe("devtools smoke", () => {
     await page.goto("/?tool=echo");
 
     const token = `ping-${crypto.randomUUID()}`;
-    await page.getByLabel("message").fill(token);
-    // Every tool header has its own Run button — scope to this tool.
-    await page
-      .locator('[data-tool-name="echo"]')
-      .getByRole("button", { name: /^run$/i })
-      .click();
+    const echo = page.locator('[data-tool-name="echo"]');
+    await echo.getByLabel("message").fill(token);
+    await echo.getByRole("button", { name: /^run$/i }).click();
 
     // Token appears in the rendered JSON response in the main panel.
     await expect(page.getByRole("main")).toContainText(token);
@@ -34,11 +31,9 @@ test.describe("devtools smoke", () => {
     await page.goto("/?tool=echo-card");
 
     const token = `card-${crypto.randomUUID()}`;
-    await page.getByLabel("message").fill(token);
-    await page
-      .locator('[data-tool-name="echo-card"]')
-      .getByRole("button", { name: /^run$/i })
-      .click();
+    const echoCard = page.locator('[data-tool-name="echo-card"]');
+    await echoCard.getByLabel("message").fill(token);
+    await echoCard.getByRole("button", { name: /^run$/i }).click();
 
     // First-time view compilation by Vite can take a few seconds.
     const widget = page.frameLocator('iframe[title="html-preview"]');
@@ -51,7 +46,9 @@ test.describe("visibility badge", () => {
     page,
   }) => {
     await page.goto("/?tool=dual-visibility-tool");
-    const badges = page.getByTestId("tool-visibility");
+    const badges = page
+      .locator('[data-tool-name="dual-visibility-tool"]')
+      .getByTestId("tool-visibility");
     await expect(badges).toBeVisible();
     await expect(badges.getByText("model", { exact: true })).toBeVisible();
     await expect(badges.getByText("app", { exact: true })).toBeVisible();
@@ -61,7 +58,9 @@ test.describe("visibility badge", () => {
     page,
   }) => {
     await page.goto("/?tool=model-only-tool");
-    const badges = page.getByTestId("tool-visibility");
+    const badges = page
+      .locator('[data-tool-name="model-only-tool"]')
+      .getByTestId("tool-visibility");
     await expect(badges).toBeVisible();
     await expect(badges.getByText("model", { exact: true })).toBeVisible();
     await expect(badges.getByText("app", { exact: true })).toHaveCount(0);
@@ -71,7 +70,9 @@ test.describe("visibility badge", () => {
     page,
   }) => {
     await page.goto("/?tool=app-only-tool");
-    const badges = page.getByTestId("tool-visibility");
+    const badges = page
+      .locator('[data-tool-name="app-only-tool"]')
+      .getByTestId("tool-visibility");
     await expect(badges).toBeVisible();
     await expect(badges.getByText("app", { exact: true })).toBeVisible();
     await expect(badges.getByText("model", { exact: true })).toHaveCount(0);
@@ -79,6 +80,8 @@ test.describe("visibility badge", () => {
 
   test("hides the badge area when visibility is not set", async ({ page }) => {
     await page.goto("/?tool=echo");
-    await expect(page.getByTestId("tool-visibility")).toHaveCount(0);
+    await expect(
+      page.locator('[data-tool-name="echo"]').getByTestId("tool-visibility"),
+    ).toHaveCount(0);
   });
 });
