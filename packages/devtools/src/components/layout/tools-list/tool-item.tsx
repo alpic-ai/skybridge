@@ -633,6 +633,7 @@ function FormBody({
       <FormComponent
         ref={formRef as React.RefObject<Form<unknown, RJSFSchema>>}
         tagName={ToolFormTag}
+        idPrefix={tool.name}
         schema={schema}
         validator={validator}
         uiSchema={buildFormUiSchema(schema)}
