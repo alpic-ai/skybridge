@@ -5,7 +5,7 @@ import { readPosition, STARTING_FEN } from "./lib/engine.js";
 // the gameplay tools are registered by the view itself (see
 // src/views/chess.tsx) through `useRegisterViewTool`, so they run inside the
 // widget. The view opens on a pick-a-side lobby; once the user chooses a color
-// (which also pops the board into picture-in-picture), the assistant plays the
+// (which also pops the board into fullscreen), the assistant plays the
 // other side.
 const server = new McpServer(
   {
@@ -42,7 +42,7 @@ const server = new McpServer(
           type: "text",
           text: [
             "A fresh chess board is open on the pick-a-side lobby.",
-            "Wait for the user to choose White or Black — you play the other color, and choosing also opens the board in picture-in-picture.",
+            "Wait for the user to choose White or Black — you play the other color, and choosing also opens the board in fullscreen.",
             'If they pick White, hold until they move, then reply with your Black move via the `chess_make_move` view tool (for example `{ "san": "e5" }`). If they pick Black, the view will prompt you to open as White.',
             "Lean on `chess_get_board_state` and `chess_get_legal_moves` to study the position first.",
           ].join(" "),

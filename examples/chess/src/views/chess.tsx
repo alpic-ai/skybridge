@@ -235,10 +235,10 @@ export default function ChessView() {
   const assistantName = assistant === "w" ? "White" : "Black";
 
   // Picking a side is the user gesture hosts require before granting
-  // picture-in-picture — so we request it straight off the click.
+  // fullscreen — so we request it straight off the click.
   const beginGame = (side: "w" | "b") => {
     start(side);
-    setDisplayMode("pip");
+    setDisplayMode("fullscreen");
     if (side === "b") {
       // The user took Black, so the assistant (White) opens the game.
       sendFollowUpMessage(
@@ -272,8 +272,8 @@ export default function ChessView() {
 
         <div className="chess-lobby">
           <p className="chess-lobby-text">
-            Choose your color. The game opens in a picture-in-picture window so
-            you can keep chatting while you play.
+            Choose your color. The game opens in a fullscreen window so you can
+            keep chatting while you play.
           </p>
           <div className="chess-lobby-choices">
             <button
