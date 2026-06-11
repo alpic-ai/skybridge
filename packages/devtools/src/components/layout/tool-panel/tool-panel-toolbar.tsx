@@ -52,7 +52,12 @@ function applyViewOptions(data: FormData): string {
   const { userAgent, setPreference } = useInspectorPreferencesStore.getState();
 
   const mode = data.get("displayMode");
-  if (isOneOf(mode, ["inline", "pip", "fullscreen"] as const)) {
+  if (
+    isOneOf(
+      mode,
+      displayModes.map((d) => d.mode),
+    )
+  ) {
     setPreference("displayMode", mode);
   }
 
