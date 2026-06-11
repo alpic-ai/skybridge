@@ -19,6 +19,7 @@ import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
 import { Braces, ClipboardList, Loader2, Play, Save } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { CallToolResponse } from "skybridge/web";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { CopyButton } from "@/lib/copy.js";
 import {
@@ -26,6 +27,7 @@ import {
   useCallTool,
   useServerInfo,
 } from "@/lib/mcp/index.js";
+import { useRegisterWebMcpTool } from "@/lib/mcp/webmcp.js";
 import { useSelectedToolName } from "@/lib/nuqs.js";
 import {
   type SavedInput,
@@ -36,6 +38,7 @@ import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
 import { buildFormUiSchema, formTemplates, formWidgets } from "./form/index.js";
+import { ToolFormTag } from "./form/tool-form-tag.js";
 import { SavedInputsDropdown, SaveInputDialog } from "./saved-inputs.js";
 import { TruncatedDescription } from "./truncated-description.js";
 
@@ -103,7 +106,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
     // Focus this tool so the result view (right pane) shows its output — even
     // when Run was clicked from a collapsed header.
     setSelectedTool(tool.name);
-    await callTool({ toolName: tool.name, args: formData });
+    return await callTool({ toolName: tool.name, args: formData });
   };
 
   // Enter/⌘Enter run the tool whose input is focused. Scoped per tool so that
@@ -236,6 +239,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
           setJsonError={setJsonError}
           saved={saved}
           inputInvalid={inputInvalid}
+          onRun={handleRun}
         />
       </AccordionContent>
     </AccordionItem>
@@ -400,6 +404,7 @@ function ToolBody({
   setJsonError,
   saved,
   inputInvalid,
+  onRun,
 }: {
   tool: Tool;
   formData: Record<string, unknown>;
@@ -411,10 +416,28 @@ function ToolBody({
   setJsonError: (value: boolean) => void;
   saved: SavedInputController;
   inputInvalid: boolean;
+  onRun: () => Promise<unknown>;
 }) {
   const hasInput =
     tool.inputSchema &&
     Object.keys(tool.inputSchema.properties ?? {}).length > 0;
+
+  useRegisterWebMcpTool({
+    tool,
+    enabled: !hasInput,
+    execute: async () => {
+      const response = (await onRun()) as
+        | Pick<CallToolResponse, "content" | "isError">
+        | undefined;
+      return (
+        response ?? {
+          content: [{ type: "text", text: "The tool call was not executed." }],
+          isError: true,
+        }
+      );
+    },
+  });
+
   const visibility = getToolVisibility(tool);
   const [saveOpen, setSaveOpen] = useState(false);
   const { serverName, savedInputs, activeKey } = saved;
@@ -527,10 +550,11 @@ function ToolBody({
           </div>
           <TabsContent value="form">
             <FormBody
-              schema={tool.inputSchema as RJSFSchema}
+              tool={tool}
               formData={formData}
               setFormData={setFormData}
               formRef={formRef}
+              onRun={onRun}
             />
           </TabsContent>
           {/* -mt-4 cancels the Tabs gap so the textarea's top merges into the
@@ -559,16 +583,19 @@ function ToolBody({
 }
 
 function FormBody({
-  schema,
+  tool,
   formData,
   setFormData,
   formRef,
+  onRun,
 }: {
-  schema: RJSFSchema;
+  tool: Tool;
   formData: Record<string, unknown>;
   setFormData: (data: Record<string, unknown> | null) => void;
   formRef: React.RefObject<Form<unknown, RJSFSchema> | null>;
+  onRun: () => Promise<unknown>;
 }) {
+  const schema = tool.inputSchema as RJSFSchema;
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -590,11 +617,23 @@ function FormBody({
     <div ref={containerRef}>
       <FormComponent
         ref={formRef as React.RefObject<Form<unknown, RJSFSchema>>}
+        tagName={ToolFormTag(tool)}
+        idPrefix={tool.name}
         schema={schema}
         validator={validator}
         uiSchema={buildFormUiSchema(schema)}
         formData={formData}
         onChange={(data) => setFormData(data.formData)}
+        onSubmit={(_, event) => {
+          const native = event.nativeEvent;
+          const run = onRun();
+          if (
+            native instanceof SubmitEvent &&
+            typeof native.respondWith === "function"
+          ) {
+            native.respondWith(run);
+          }
+        }}
         showErrorList={false}
         widgets={formWidgets}
         templates={formTemplates}

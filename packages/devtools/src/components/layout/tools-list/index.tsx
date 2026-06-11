@@ -2,20 +2,16 @@ import { Accordion } from "@alpic-ai/ui/components/accordion";
 import { Button } from "@alpic-ai/ui/components/button";
 import { useTimeout } from "ahooks";
 import { RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSuspenseTools } from "@/lib/mcp/index.js";
-import { useSelectedToolName } from "@/lib/nuqs.js";
 import { queryClient } from "@/lib/query-client.js";
 import { cn } from "@/lib/utils.js";
 import { ToolItem } from "./tool-item.js";
 
 function ToolsList() {
   const tools = useSuspenseTools();
-  // `selectedTool` (?tool=) drives the result view (right pane). Which tool
-  // accordions are expanded is separate local state — 0..N can be open at once.
-  const [selectedTool, setSelectedTool] = useSelectedToolName();
-  const [openTools, setOpenTools] = useState<string[]>(() =>
-    selectedTool ? [selectedTool] : [],
+  const [openTools, setOpenTools] = useState<string[]>(
+    tools.map((tool) => tool.name),
   );
   const [refreshing, setRefreshing] = useState(false);
   const [tailDelay, setTailDelay] = useState<number | undefined>(undefined);
@@ -24,14 +20,6 @@ function ToolsList() {
     setRefreshing(false);
     setTailDelay(undefined);
   }, tailDelay);
-
-  // On first load with nothing selected, focus + open the first tool.
-  useEffect(() => {
-    if (selectedTool == null && tools[0]) {
-      setSelectedTool(tools[0].name);
-      setOpenTools((prev) => (prev.length ? prev : [tools[0].name]));
-    }
-  }, [selectedTool, tools, setSelectedTool]);
 
   const refreshTools = async () => {
     setTailDelay(undefined);
