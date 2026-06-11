@@ -272,8 +272,8 @@ export default function ChessView() {
 
         <div className="chess-lobby">
           <p className="chess-lobby-text">
-            Choose your color. The game opens in a fullscreen window so you can
-            keep chatting while you play.
+            Choose your color. The game opens fullscreen so you can focus on
+            the board.
           </p>
           <div className="chess-lobby-choices">
             <button
