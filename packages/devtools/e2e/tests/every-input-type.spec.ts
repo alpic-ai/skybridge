@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.describe("every-input-type tool", () => {
   test("returns each filled field as structuredContent", async ({ page }) => {
-    await page.goto("/?tool=every-input-type");
+    await page.goto("/");
 
     const tool = page.locator('[data-tool-name="every-input-type"]');
 

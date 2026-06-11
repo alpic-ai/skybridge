@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.describe("devtools smoke", () => {
   test("connects to the fixture and lists tools", async ({ page }) => {
-    await page.goto("/?tool=echo");
+    await page.goto("/");
 
     await expect(page.getByText("e2e-fixture")).toBeVisible();
     await expect(
@@ -14,7 +14,7 @@ test.describe("devtools smoke", () => {
   });
 
   test("calls a plain tool and renders the response", async ({ page }) => {
-    await page.goto("/?tool=echo");
+    await page.goto("/");
 
     const token = `ping-${crypto.randomUUID()}`;
     const echo = page.locator('[data-tool-name="echo"]');
@@ -28,7 +28,7 @@ test.describe("devtools smoke", () => {
   test("calls a widget tool and renders inside the iframe", async ({
     page,
   }) => {
-    await page.goto("/?tool=echo-card");
+    await page.goto("/");
 
     const token = `card-${crypto.randomUUID()}`;
     const echoCard = page.locator('[data-tool-name="echo-card"]');
@@ -45,7 +45,7 @@ test.describe("visibility badge", () => {
   test("renders both scopes when visibility is ['model', 'app']", async ({
     page,
   }) => {
-    await page.goto("/?tool=dual-visibility-tool");
+    await page.goto("/");
     const badges = page
       .locator('[data-tool-name="dual-visibility-tool"]')
       .getByTestId("tool-visibility");
@@ -57,7 +57,7 @@ test.describe("visibility badge", () => {
   test("renders only the model badge when visibility is ['model']", async ({
     page,
   }) => {
-    await page.goto("/?tool=model-only-tool");
+    await page.goto("/");
     const badges = page
       .locator('[data-tool-name="model-only-tool"]')
       .getByTestId("tool-visibility");
@@ -69,7 +69,7 @@ test.describe("visibility badge", () => {
   test("renders only the app badge when visibility is ['app']", async ({
     page,
   }) => {
-    await page.goto("/?tool=app-only-tool");
+    await page.goto("/");
     const badges = page
       .locator('[data-tool-name="app-only-tool"]')
       .getByTestId("tool-visibility");
@@ -79,7 +79,7 @@ test.describe("visibility badge", () => {
   });
 
   test("hides the badge area when visibility is not set", async ({ page }) => {
-    await page.goto("/?tool=echo");
+    await page.goto("/");
     await expect(
       page.locator('[data-tool-name="echo"]').getByTestId("tool-visibility"),
     ).toHaveCount(0);
