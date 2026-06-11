@@ -327,6 +327,14 @@ export const ToolPanelToolbar = ({
           </Command>
         </PopoverContent>
       </Popover>
+      <div className="sr-only" aria-hidden>
+        <ViewOptionSelect
+          name="locale"
+          description="The BCP 47 locale code to preview the view in."
+          value={locale}
+          options={locales.map((l) => l.code)}
+        />
+      </div>
 
       <ToolbarToggle
         icon={isMobile ? Smartphone : Monitor}
@@ -344,15 +352,6 @@ export const ToolPanelToolbar = ({
           onClick={onOpenLogs}
         />
       )}
-
-      <div className="sr-only" aria-hidden>
-        <ViewOptionSelect
-          name="locale"
-          description="The BCP 47 locale code to preview the view in."
-          value={locale}
-          options={locales.map((l) => l.code)}
-        />
-      </div>
     </form>
   );
 };
