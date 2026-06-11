@@ -1,4 +1,5 @@
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
+import { useEffect, useRef } from "react";
 import type { CallToolResponse } from "skybridge/web";
 
 // Minimal typings for the WebMCP proposal (https://github.com/webmachinelearning/webmcp).
@@ -71,4 +72,41 @@ declare module "react" {
   interface SelectHTMLAttributes<T> {
     toolparamdescription?: string;
   }
+}
+
+export function useRegisterWebMcpTool({
+  tool,
+  enabled,
+  execute,
+}: {
+  tool: Tool;
+  enabled: boolean;
+  execute: () => Promise<Pick<CallToolResponse, "content" | "isError">>;
+}) {
+  // Keep the latest handler without re-registering on every render.
+  const executeRef = useRef(execute);
+  useEffect(() => {
+    executeRef.current = execute;
+  });
+
+  const { name, description, inputSchema } = tool;
+  useEffect(() => {
+    const modelContext = document.modelContext ?? navigator.modelContext;
+    if (!enabled || !modelContext) {
+      return;
+    }
+    const controller = new AbortController();
+    void modelContext.registerTool(
+      {
+        name,
+        description,
+        inputSchema,
+        execute: () => executeRef.current(),
+      },
+      { signal: controller.signal },
+    );
+    return () => {
+      controller.abort();
+    };
+  }, [enabled, name, description, inputSchema]);
 }

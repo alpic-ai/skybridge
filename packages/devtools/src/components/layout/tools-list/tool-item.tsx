@@ -19,6 +19,7 @@ import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
 import { Braces, ClipboardList, Loader2, Play, Save } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { CallToolResponse } from "skybridge/web";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { CopyButton } from "@/lib/copy.js";
 import {
@@ -26,6 +27,7 @@ import {
   useCallTool,
   useServerInfo,
 } from "@/lib/mcp/index.js";
+import { useRegisterWebMcpTool } from "@/lib/mcp/webmcp.js";
 import { useSelectedToolName } from "@/lib/nuqs.js";
 import {
   type SavedInput,
@@ -418,6 +420,25 @@ function ToolBody({
   const hasInput =
     tool.inputSchema &&
     Object.keys(tool.inputSchema.properties ?? {}).length > 0;
+
+  // Tools without input render no form, so the declarative WebMCP path
+  // (`<form toolname …>`) never applies. Register them imperatively instead.
+  useRegisterWebMcpTool({
+    tool,
+    enabled: !hasInput,
+    execute: async () => {
+      const response = (await onRun()) as
+        | Pick<CallToolResponse, "content" | "isError">
+        | undefined;
+      return (
+        response ?? {
+          content: [{ type: "text", text: "The tool call was not executed." }],
+          isError: true,
+        }
+      );
+    },
+  });
+
   const visibility = getToolVisibility(tool);
   const [saveOpen, setSaveOpen] = useState(false);
   const { serverName, savedInputs, activeKey } = saved;
