@@ -2,7 +2,7 @@
 
 Play chess against the assistant inside the conversation. The board opens on a
 **pick-a-side lobby**: choose **White** or **Black** to start. Picking a color
-is the user gesture that lets the view pop the board into **picture-in-picture**
+is the user gesture that lets the view pop the board into **fullscreen**
 (via `useDisplayMode`), so you can keep chatting while you play. You drag your
 pieces; the assistant plays the other color (and opens the game if you take
 Black).
@@ -34,11 +34,11 @@ move played, so the full game is pushed into the model's context on every change
 and survives a view remount. The chess logic is a thin, stateless wrapper
 (`src/lib/engine.ts`) — every helper rebuilds the engine from a FEN on demand.
 
-### Pick a side & picture-in-picture
+### Pick a side & fullscreen
 
 The view starts on a lobby with two buttons (White / Black). Picking a color
 calls the match store's `start` action and immediately requests
-`setDisplayMode("pip")` — most hosts only grant picture-in-picture in response
+`setDisplayMode("fullscreen")` — most hosts only grant fullscreen in response
 to a user gesture, so the color choice doubles as that gesture. If you pick
 Black, the view fires a `sendFollowUpMessage` asking the assistant (White) to
 make the opening move.
