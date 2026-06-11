@@ -30,21 +30,13 @@ import type { RequestDisplayMode } from "skybridge/web";
 import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
 import { cn } from "@/lib/utils.js";
 import { locales } from "./locales.js";
+import { isOneOf } from "./utils.js";
 
 const displayModes: { mode: RequestDisplayMode; icon: LucideIcon }[] = [
   { mode: "fullscreen", icon: Maximize2 },
   { mode: "pip", icon: PictureInPicture2 },
   { mode: "inline", icon: SquareSplitVertical },
 ];
-
-function isOneOf<T extends string>(
-  value: unknown,
-  allowed: readonly T[],
-): value is T {
-  return (
-    typeof value === "string" && (allowed as readonly string[]).includes(value)
-  );
-}
 
 // Applies the form's current values to the preferences store and returns a
 // human-readable summary for the agent.
@@ -156,9 +148,6 @@ function ToolbarButton({
   );
 }
 
-// Native checkbox styled like a ToolbarButton, so binary preferences are real
-// form controls: the declarative WebMCP form derives a boolean property from
-// them, and toggling (by user click or agent fill) submits the form.
 function ToolbarToggle({
   icon: Icon,
   label,
@@ -212,9 +201,6 @@ export const ToolPanelToolbar = ({
   const formRef = useRef<HTMLFormElement>(null);
   const [localeOpen, setLocaleOpen] = useState(false);
 
-  // The locale picker is a custom popover (not a form control), so it writes
-  // the chosen code into its hidden mirror select and submits — keeping the
-  // form's submit handler the single place where preferences are applied.
   const submitLocale = (code: string) => {
     const form = formRef.current;
     const control = form?.elements.namedItem("locale");
@@ -359,8 +345,6 @@ export const ToolPanelToolbar = ({
         />
       )}
 
-      {/* Agent-facing mirror of the locale picker — the only control that
-          can't be a native form element (it's a searchable popover). */}
       <div className="sr-only" aria-hidden>
         <ViewOptionSelect
           name="locale"

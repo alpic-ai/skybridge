@@ -38,6 +38,7 @@ import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
 import { buildFormUiSchema, formTemplates, formWidgets } from "./form/index.js";
+import { ToolFormTag } from "./form/tool-form-tag.js";
 import { SavedInputsDropdown, SaveInputDialog } from "./saved-inputs.js";
 import { TruncatedDescription } from "./truncated-description.js";
 
@@ -421,8 +422,6 @@ function ToolBody({
     tool.inputSchema &&
     Object.keys(tool.inputSchema.properties ?? {}).length > 0;
 
-  // Tools without input render no form, so the declarative WebMCP path
-  // (`<form toolname …>`) never applies. Register them imperatively instead.
   useRegisterWebMcpTool({
     tool,
     enabled: !hasInput,
@@ -599,19 +598,6 @@ function FormBody({
   const schema = tool.inputSchema as RJSFSchema;
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const ToolFormTag = useMemo(() => {
-    return function ToolFormTag(props: React.ComponentProps<"form">) {
-      return (
-        <form
-          toolname={tool.name}
-          tooldescription={tool.description}
-          toolautosubmit=""
-          {...props}
-        />
-      );
-    };
-  }, [tool.name, tool.description]);
-
   useEffect(() => {
     const container = containerRef.current;
     if (!container) {
@@ -631,7 +617,7 @@ function FormBody({
     <div ref={containerRef}>
       <FormComponent
         ref={formRef as React.RefObject<Form<unknown, RJSFSchema>>}
-        tagName={ToolFormTag}
+        tagName={ToolFormTag(tool)}
         idPrefix={tool.name}
         schema={schema}
         validator={validator}
