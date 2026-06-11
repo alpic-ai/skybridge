@@ -600,18 +600,17 @@ function FormBody({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const ToolFormTag = useMemo(() => {
-    const { name, description } = tool;
     return function ToolFormTag(props: React.ComponentProps<"form">) {
       return (
         <form
-          toolname={name}
-          tooldescription={description}
+          toolname={tool.name}
+          tooldescription={tool.description}
           toolautosubmit=""
           {...props}
         />
       );
     };
-  }, [tool]);
+  }, [tool.name, tool.description]);
 
   useEffect(() => {
     const container = containerRef.current;
