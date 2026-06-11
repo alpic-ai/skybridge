@@ -19,7 +19,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "lucide-react": "^0.562.0",
-    "mapbox-gl": "^3.9.4",
+    "mapbox-gl": "^3.24.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-map-gl": "^7.1.8",
