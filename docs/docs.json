@@ -35,12 +35,26 @@
           {
             "group": "Build",
             "icon": "drafting-compass",
+            "root": "build/index",
             "pages": [
               "build/tools",
               "build/view",
               "build/state",
               "build/auth"
-            ]
+            ],
+            "expanded": true
+          },
+          {
+            "group": "Test",
+            "icon": "test-tube-diagonal",
+            "root": "test/index",
+            "pages": [
+              "test/devtools",
+              "test/tunnel",
+              "test/playground",
+              "test/audit"
+            ],
+            "expanded": true
           },
           {
             "group": "Get Started (legacy)",
@@ -293,5 +307,8 @@
   },
   "interaction": {
     "drilldown": false
+  },
+  "icons": {
+    "library": "lucide"
   }
 }
