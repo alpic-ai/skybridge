@@ -1,8 +1,18 @@
+import mapboxgl from "mapbox-gl";
+import MapboxWorker from "mapbox-gl/dist/mapbox-gl-csp-worker?worker&inline";
 import { useEffect, useRef } from "react";
 import type { MapRef } from "react-map-gl";
 import { Map as MapboxMap, Marker, NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useLayout } from "skybridge/web";
+
+// By default mapbox-gl spawns its workers by stringifying its own bundled
+// code into a classic (non-module) blob worker. Vite's build rewrites the
+// dynamic import() calls in that code to a helper using import.meta, which
+// is a SyntaxError in a classic worker — the workers die and no layers
+// render. Loading the worker from the separate CSP build avoids this.
+(mapboxgl as unknown as { workerClass: new () => Worker }).workerClass =
+  MapboxWorker;
 
 type CapitalMarker = {
   name: string;
