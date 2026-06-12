@@ -137,6 +137,18 @@ export type SecurityScheme =
   | { type: "oauth2"; scopes?: string[] };
 
 /**
+ * Options forwarded to the built-in `express.json()` body parser. Derived
+ * from Express's own types so the public API doesn't depend on `body-parser`.
+ */
+export type JsonOptions = NonNullable<Parameters<typeof express.json>[0]>;
+
+/** Skybridge-specific server options, passed as the third `McpServer` constructor argument. */
+export interface SkybridgeServerOptions {
+  /** Options for the built-in `express.json()` middleware, e.g. `{ limit: "10mb" }`. */
+  json?: JsonOptions;
+}
+
+/**
  * Well-known keys recognized by host runtimes when set on a tool's `_meta`.
  * Use {@link ToolMeta} to also pass arbitrary custom metadata alongside these.
  *
@@ -460,7 +472,9 @@ export class McpServer<
    * custom routes, middleware, or settings — e.g.
    * `server.express.get("/health", ...)`.
    *
-   * `express.json()` is pre-applied. Register your handlers before `run()`;
+   * `express.json()` is pre-applied — tune it via the constructor's third
+   * argument, e.g. `new McpServer(info, {}, { json: { limit: "10mb" } })`.
+   * Register your handlers before `run()`;
    * after `run()`, dev-mode middleware, the `/mcp` route, and the default
    * error handler are appended in that order.
    *
@@ -480,12 +494,16 @@ export class McpServer<
   private readonly serverInfo: Implementation;
   private readonly serverOptions?: ServerOptions;
 
-  constructor(serverInfo: Implementation, options?: ServerOptions) {
+  constructor(
+    serverInfo: Implementation,
+    options?: ServerOptions,
+    skybridgeOptions?: SkybridgeServerOptions,
+  ) {
     super(serverInfo, options);
     this.serverInfo = serverInfo;
     this.serverOptions = options;
     this.express = express();
-    this.express.use(express.json());
+    this.express.use(express.json(skybridgeOptions?.json));
     // Pick up the manifest if `dist/__entry.js` primed it before importing
     // user code. Consume-once: clear after the first construction so a
     // subsequent test that doesn't prime can't inherit stale state.
