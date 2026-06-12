@@ -22,7 +22,7 @@
     "tabs": [
       {
         "tab": "Documentation",
-        "groups": [
+        "pages": [
           {
             "group": "Get Started",
             "icon": "rocket",
@@ -56,6 +56,7 @@
             ],
             "expanded": true
           },
+          "ship",
           {
             "group": "Get Started (legacy)",
             "icon": "rocket",
@@ -110,12 +111,18 @@
           {
             "group": "DevTools (legacy)",
             "icon": "wrench",
-            "pages": ["devtools/skills", "devtools/devtools"]
+            "pages": [
+              "devtools/skills",
+              "devtools/devtools"
+            ]
           },
           {
             "group": "Resources (legacy)",
             "icon": "circle-question",
-            "pages": ["faq", "telemetry"]
+            "pages": [
+              "faq",
+              "telemetry"
+            ]
           }
         ]
       },
@@ -125,17 +132,24 @@
           {
             "group": "Overview",
             "icon": "house",
-            "pages": ["api-reference"]
+            "pages": [
+              "api-reference"
+            ]
           },
           {
             "group": "CLI",
             "icon": "terminal",
-            "pages": ["api-reference/cli"]
+            "pages": [
+              "api-reference/cli"
+            ]
           },
           {
             "group": "Server",
             "icon": "server",
-            "pages": ["api-reference/mcp-server", "api-reference/register-tool"]
+            "pages": [
+              "api-reference/mcp-server",
+              "api-reference/register-tool"
+            ]
           },
           {
             "group": "Hooks",
@@ -191,7 +205,10 @@
           "examples",
           {
             "group": "Basic",
-            "pages": ["examples/starter", "examples/everything"]
+            "pages": [
+              "examples/starter",
+              "examples/everything"
+            ]
           },
           {
             "group": "Use cases",
@@ -215,7 +232,10 @@
           },
           {
             "group": "UI and Component libraries",
-            "pages": ["examples/manifest-ui", "examples/generative-ui"]
+            "pages": [
+              "examples/manifest-ui",
+              "examples/generative-ui"
+            ]
           }
         ]
       }
