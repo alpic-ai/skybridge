@@ -27,9 +27,9 @@ The default `demo` template comes with two tools:
 
 Tools are defined in `server.ts`, UI components in the `views` directory. Tools are bound to views in the tool definition.
 
-<Tip>
+<Info>
 To scaffold a bare-bones project without tools or view placeholders, select the `blank` template.
-</Tip>
+</Info>
 
 ## Run Locally
 
@@ -55,15 +55,15 @@ deno task dev
 
 This spins up two routes:
 - `http://localhost:3000/mcp`: the MCP server your app is running on
-- `http://localhost:3000/`: the DevTools for testing and debugging your app
+- `http://localhost:3000/`: the [DevTools](/test/devtools) for testing and debugging your app
 
-<Tip>
+<Info>
 **Updates to your codebase are reflected right away:** server and UI components are reloaded on file save.
-</Tip>
+</Info>
 
 ## Connect to ChatGPT and Claude
 
-You can plug your locally running server directly into AI hosts by exposing your app on the internet. To do so, start the dev server with an Alpic tunnel:
+You can plug your locally running server directly into AI hosts by exposing your app on the internet. To do so, start the dev server with a [tunnel](/test/tunnel):
 
 <CodeGroup>
 ```bash npm
@@ -85,11 +85,9 @@ deno task dev --tunnel
 
 You'll be provided a public URL (e.g., `https://superb-marmot-fondue-420.alpic.dev/mcp`) to register your server as a ChatGPT app or a Claude connector.
 
-<Tip>
-[Alpic tunnel](https://docs.alpic.ai/cli/tunnel) comes with a free LLM Playground on `/try`. No config needed: it's already wired to your local server.
-</Tip>
-
-{/* @todo: link test page */}
+<Info>
+[Alpic tunnel](https://docs.alpic.ai/cli/tunnel) comes with a free [LLM Playground](/test/playground) on `/try`. No config needed: it's already wired to your local server.
+</Info>
 
 ## Ship
 
@@ -115,4 +113,15 @@ deno task deploy
 
 After deployment succeeds, the CLI prints the app's public URL. You're now live!
 
-{/* @todo: link deploy page */}
+## Go Further
+<Columns cols={3}>
+    <Card title="Architecture" img="/images/architecture.png" href="/get-started/architecture">
+        Design conversational experiences leveraging model intelligence
+    </Card>
+    <Card title="Build" img="/images/tools.png" href="/build">
+        Learn everything that makes great MCP Apps
+    </Card>
+    <Card title="Test" img="/images/devtools.png" href="/test">
+        Validate your app at every step
+    </Card>
+</Columns>
