@@ -41,6 +41,16 @@ function describeTunnel(state: TunnelState, port: number): string {
 export function runPlain(options: RunPlainOptions): () => void {
   const { env, port, fallback, version, tunnel, tunnelManager } = options;
 
+  // If the downstream formatter (e.g. `| bunyan`) exits, the next write raises
+  // EPIPE. Swallow it so a closed pipe doesn't crash the dev server.
+  const ignoreEpipe = (err: NodeJS.ErrnoException) => {
+    if (err.code !== "EPIPE") {
+      throw err;
+    }
+  };
+  process.stdout.on("error", ignoreEpipe);
+  process.stderr.on("error", ignoreEpipe);
+
   info(`⛰  Skybridge v${version}`);
   info(
     fallback
@@ -95,5 +105,7 @@ export function runPlain(options: RunPlainOptions): () => void {
     unsubscribeTunnel();
     stopNodemon();
     stopTypeScriptCheck();
+    process.stdout.off("error", ignoreEpipe);
+    process.stderr.off("error", ignoreEpipe);
   };
 }
