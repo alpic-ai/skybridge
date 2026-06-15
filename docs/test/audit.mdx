@@ -1,0 +1,64 @@
+---
+title: "Audit"
+description: "Catch spec and platform issues before submission"
+icon: "clipboard-check"
+---
+<img src="/images/audit.png" alt="Audit Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+
+Before a platform accepts your app, the server must conform to the MCP specs, and each platform layers its own requirements on top, which differ between OpenAI and Anthropic. The Audit checks your app's conformance and performs end-to-end tests in real ChatGPT and Claude conversations, triggering tools and rendering views.
+
+## Run the Audit
+
+The Audit needs your server publicly reachable: start the [tunnel](/test/tunnel), then click **Audit** in the [DevTools](/test/devtools) header.
+
+<CodeGroup>
+```bash npm
+npm run dev -- --tunnel
+```
+```bash pnpm
+pnpm dev --tunnel
+```
+```bash yarn
+yarn dev --tunnel
+```
+```bash bun
+bun dev --tunnel
+```
+```bash deno
+deno task dev --tunnel
+```
+</CodeGroup>
+
+<Info>
+The Audit is powered by [Alpic Beacon](https://docs.alpic.ai/testing/beacon). It can also be launched from [beacon.alpic.ai](https://beacon.alpic.ai) with your server's public URL, or via the [Alpic CLI](https://docs.alpic.ai/cli/tunnel).
+</Info>
+
+## What It Checks
+
+- **MCP protocol**: tool and resource conformance with the official specification.
+- **MCP Apps**: view resource requirements (metadata, Content Security Policy, annotations) for both ChatGPT and Claude.
+- **Platform requirements**: each platform's own submission guidelines.
+- **App behavior**: the app actually works, verified by triggering tools and rendering views in real ChatGPT and Claude conversations.
+
+<Frame caption="The Audit interface">
+<img src="/images/audit-screenshot.png" alt="Audit Illustration" />
+</Frame>
+
+The report returns an overall score, a readiness status per platform, and the issues found, each with its severity (error, warning, info), the affected component, and the solution. **Improve your score** turns the report into a prompt for your coding agent to fix them all.
+
+## Limitation
+
+OAuth-protected servers aren't supported yet.
+
+## Go Further
+<Columns cols={3}>
+    <Card title="DevTools" img="/images/devtools.png" href="/test/devtools">
+        Call tools and render views locally, without a host
+    </Card>
+    <Card title="Tunnel" img="/images/tunnel.png" href="/test/tunnel">
+        Expose your local server to real hosts
+    </Card>
+    <Card title="Playground" img="/images/playground.png" href="/test/playground">
+        Chat with a real model running your app
+    </Card>
+</Columns>

@@ -77,7 +77,7 @@ const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
   .registerTool(/* create-checkout … */);
 ```
 
-The endpoint values come from your OAuth provider's documentation. `resourceServerUrl` is this server's public URL: localhost in development, the tunnel URL when testing in a host, your domain in production.
+The endpoint values come from your OAuth provider's documentation. `resourceServerUrl` is this server's public URL: localhost in development, the [tunnel](/test/tunnel) URL when testing in a host, your domain in production.
 
 ## Verify Tokens with a Middleware
 
@@ -147,7 +147,7 @@ server
   .registerTool(/* create-checkout … */);
 ```
 
-### Declare Public Tools
+### Declare Tool Visibility
 
 Three declarations cover the combinations:
 
@@ -193,6 +193,10 @@ server.registerTool(
   },
 );
 ```
+
+<Card title="All done!" type="tip" href="/test" horizontal icon="check">
+    You now know how to authenticate users. Learn how to test your MCP App in the next chapter.
+</Card>
 
 ## Go Further
 <Columns cols={3}>

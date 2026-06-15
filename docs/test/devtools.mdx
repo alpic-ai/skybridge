@@ -1,0 +1,85 @@
+---
+title: "DevTools"
+description: "Call tools and render views locally, without a host"
+icon: "square-dashed-mouse-pointer"
+---
+{/* @todo: devtools illustration asset */}
+<img src="/images/devtools.png" alt="DevTools Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+
+Testing through a real host means exposing a public URL, registering a connector, starting a conversation, and prompting the model until it calls the right tool. DevTools cuts that loop down to a file save: it runs locally, emulates the host runtime, and lets you call tools directly, no model or host involved.
+
+## Start the Emulator
+
+DevTools ships with the dev server. In a scaffolded project (`npx skybridge create`), start it from the project root:
+
+<CodeGroup>
+```bash npm
+npm run dev
+```
+```bash pnpm
+pnpm dev
+```
+```bash yarn
+yarn dev
+```
+```bash bun
+bun dev
+```
+```bash deno
+deno task dev
+```
+</CodeGroup>
+
+Two routes come up:
+- `http://localhost:3000/mcp`: your MCP server
+- `http://localhost:3000/`: the DevTools
+
+Every tool registered on the server appears in the sidebar automatically, and edits to the server or the views reload the preview on save.
+
+## Explore the Features
+
+Select a tool in the sidebar and DevTools gives you the full exchange:
+
+<Frame caption="The DevTools interface">
+<img src="/images/devtools-screenshot.png" alt="DevTools Illustration" />
+</Frame>
+
+- **Tool controls**: generated from the tool's input schema. Inputs can be saved and re-run from the tool header.
+- **Tool output**: the raw server response (`content`, `structuredContent`, `_meta`), with status, latency, and payload size.
+- **State inspector**: the view state as a JSON tree, updated as the view mutates it.
+- **View preview**: the rendered view, with live controls to switch display mode, theme, locale, and device type; the preview updates immediately.
+- **Call logs**: every runtime API call the view makes (`setViewState`, `callTool`, `requestDisplayMode`) with its arguments and responses.
+
+## Limitations
+
+DevTools emulates, and three gaps separate the emulation from production:
+
+- **No model**: you pick the tool and type the arguments yourself. Tool selection, the prompt surface (names, descriptions, schemas), and follow-up messages are never exercised.
+- **One runtime**: as of today the preview mocks the Apps SDK runtime. MCP Apps-specific features are not yet supported.
+- **Loose CSP**: external resources blocked by hosts in production may load locally.
+
+## Custom Integration
+
+Projects created with `npx skybridge create` serve DevTools automatically. If you added Skybridge to an existing Express app instead, register the two DevTools middlewares yourself:
+
+```ts server.ts
+import { devtoolsStaticServer, viewsDevServer } from "skybridge/server";
+
+if (process.env.NODE_ENV !== "production") {
+  app.use(await devtoolsStaticServer());
+  app.use(await viewsDevServer());
+}
+```
+
+## Go Further
+<Columns cols={3}>
+    <Card title="Tunnel" img="/images/tunnel.png" href="/test/tunnel">
+        Expose your local server to real hosts
+    </Card>
+    <Card title="Playground" img="/images/playground.png" href="/test/playground">
+        Chat with a real model running your app
+    </Card>
+    <Card title="Audit" img="/images/audit.png" href="/test/audit">
+        Catch spec and platform issues before submission
+    </Card>
+</Columns>
