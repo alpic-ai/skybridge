@@ -28,12 +28,14 @@ import { denseSelectTriggerClass, denseTextareaClass } from "./styles.js";
 function TextareaWidget(props: WidgetProps) {
   const {
     id,
+    name,
     value,
     required,
     disabled,
     readonly,
     placeholder,
     options,
+    schema,
     onChange,
     onBlur,
     onFocus,
@@ -44,6 +46,8 @@ function TextareaWidget(props: WidgetProps) {
   return (
     <textarea
       id={id}
+      name={name}
+      toolparamdescription={schema.description}
       rows={rows}
       className={denseTextareaClass}
       value={value ?? ""}

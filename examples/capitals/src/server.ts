@@ -4,22 +4,11 @@ import { McpServer } from "skybridge/server";
 import * as z from "zod";
 import {
   type Capital,
-  type CapitalSummary,
   getAllCapitals,
   getCapitalByCountryCode,
   getCapitalByName,
   getCapitalSlug,
 } from "./capitals.js";
-
-// Cache allCapitals to be mindful of country REST API
-let cachedAllCapitals: CapitalSummary[] | null = null;
-
-async function getCachedAllCapitals(): Promise<CapitalSummary[]> {
-  if (!cachedAllCapitals) {
-    cachedAllCapitals = await getAllCapitals();
-  }
-  return cachedAllCapitals;
-}
 
 const server = new McpServer(
   {
@@ -65,8 +54,7 @@ const server = new McpServer(
     },
     async ({ name }) => {
       try {
-        // Fetch list first (minimal data), then details for requested capital
-        const allCapitals = await getCachedAllCapitals();
+        const allCapitals = await getAllCapitals();
         const capital = await getCapitalByName(name);
 
         return {
@@ -88,7 +76,7 @@ const server = new McpServer(
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Unknown error";
-        const allCapitals = await getCachedAllCapitals().catch(() => []);
+        const allCapitals = await getAllCapitals().catch(() => []);
         return {
           _meta: { allCapitals },
           structuredContent: { error: message },
