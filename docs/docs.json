@@ -22,14 +22,45 @@
     "tabs": [
       {
         "tab": "Documentation",
-        "groups": [
+        "pages": [
           {
             "group": "Get Started",
             "icon": "rocket",
             "pages": [
               "get-started/introduction",
               "get-started/quickstart",
-              "get-started/architecture",
+              "get-started/architecture"
+            ]
+          },
+          {
+            "group": "Build",
+            "icon": "drafting-compass",
+            "root": "build/index",
+            "pages": [
+              "build/tools",
+              "build/view",
+              "build/state",
+              "build/auth"
+            ],
+            "expanded": true
+          },
+          {
+            "group": "Test",
+            "icon": "test-tube-diagonal",
+            "root": "test/index",
+            "pages": [
+              "test/devtools",
+              "test/tunnel",
+              "test/playground",
+              "test/audit"
+            ],
+            "expanded": true
+          },
+          "ship",
+          {
+            "group": "Get Started (legacy)",
+            "icon": "rocket",
+            "pages": [
               {
                 "group": "Fundamentals",
                 "icon": "graduation-cap",
@@ -56,7 +87,7 @@
             ]
           },
           {
-            "group": "Concepts",
+            "group": "Concepts (legacy)",
             "icon": "lightbulb",
             "pages": [
               "concepts/index",
@@ -68,7 +99,7 @@
             ]
           },
           {
-            "group": "Guides",
+            "group": "Guides (legacy)",
             "icon": "book",
             "pages": [
               "guides/fetching-data",
@@ -78,14 +109,20 @@
             ]
           },
           {
-            "group": "DevTools",
+            "group": "DevTools (legacy)",
             "icon": "wrench",
-            "pages": ["devtools/skills", "devtools/devtools"]
+            "pages": [
+              "devtools/skills",
+              "devtools/devtools"
+            ]
           },
           {
-            "group": "Resources",
+            "group": "Resources (legacy)",
             "icon": "circle-question",
-            "pages": ["faq", "telemetry"]
+            "pages": [
+              "faq",
+              "telemetry"
+            ]
           }
         ]
       },
@@ -95,17 +132,24 @@
           {
             "group": "Overview",
             "icon": "house",
-            "pages": ["api-reference"]
+            "pages": [
+              "api-reference"
+            ]
           },
           {
             "group": "CLI",
             "icon": "terminal",
-            "pages": ["api-reference/cli"]
+            "pages": [
+              "api-reference/cli"
+            ]
           },
           {
             "group": "Server",
             "icon": "server",
-            "pages": ["api-reference/mcp-server", "api-reference/register-tool"]
+            "pages": [
+              "api-reference/mcp-server",
+              "api-reference/register-tool"
+            ]
           },
           {
             "group": "Hooks",
@@ -161,7 +205,10 @@
           "examples",
           {
             "group": "Basic",
-            "pages": ["examples/starter", "examples/everything"]
+            "pages": [
+              "examples/starter",
+              "examples/everything"
+            ]
           },
           {
             "group": "Use cases",
@@ -186,7 +233,10 @@
           },
           {
             "group": "UI and Component libraries",
-            "pages": ["examples/manifest-ui", "examples/generative-ui"]
+            "pages": [
+              "examples/manifest-ui",
+              "examples/generative-ui"
+            ]
           }
         ]
       }
@@ -278,5 +328,8 @@
   },
   "interaction": {
     "drilldown": false
+  },
+  "icons": {
+    "library": "lucide"
   }
 }

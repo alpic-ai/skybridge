@@ -1,20 +1,15 @@
 ---
 title: Architecture
-description: "Design conversational experiences leveraging models intelligence"
+description: "Design conversational experiences leveraging model intelligence"
 icon: route
 ---
-<video
-autoPlay={true}
-loop={true}
-className="w-full aspect-video rounded-xl"
-src="/images/three-body-problem.mp4"
-></video>
+<img src="/images/architecture.png" alt="Architecture Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
 
 MCP Apps have three actors involved: the app, the user, and the model. This creates context asymmetry: each actor holds a partial picture of the system. The model is blind to the UI: it can’t see visuals or user interactions unless you explicitly sync them back. The user can’t see the tool output flowing underneath. Building well means understanding these blind spots and designing the information flow between all three.
 
 The core design challenge isn’t layout or styling: it’s deciding who sees what, and when. What does the model need to know? What should stay hidden from it? Where should natural language replace traditional UI?
 
-The sections below introduce the vocabulary, walk through the lifecycle of an MCP app and how data flows at each step, and close with a working example that ties everything together.
+The sections below introduce the vocabulary, walk through the lifecycle of an MCP App and how data flows at each step, and close with a working example that ties everything together.
 
 ## Terminology
 
@@ -194,3 +189,16 @@ Install it now:
 ```bash
 npx skills add alpic-ai/skybridge -s skybridge
 ```
+
+## Go Further
+<Columns cols={3}>
+    <Card title="Build" img="/images/tools.png" href="/build">
+        Learn everything that makes great MCP Apps
+    </Card>
+    <Card title="Test" img="/images/devtools.png" href="/test">
+        Validate your app at every step
+    </Card>
+    <Card title="Ship" img="/images/deploy.png" href="/ship">
+        Deploy your app to a stable, public URL
+    </Card>
+</Columns>
