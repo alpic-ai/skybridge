@@ -1,0 +1,213 @@
+---
+title: "Authenticate Users"
+description: "Know who's behind every tool call"
+icon: "key"
+---
+<img src="/images/auth.png" alt="Auth Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+
+Tool calls are anonymous by default: nothing in the protocol tells you who's asking. OAuth closes that gap, and the host does most of the work: it discovers your authorization server, signs the user in, refreshes tokens, and attaches a Bearer token to every request. Your server keeps three jobs: publish the discovery metadata, verify the tokens, and read the user in your handlers.
+
+Here's a complete server where every tool requires sign-in:
+
+```ts server.ts
+import { McpServer, mcpAuthMetadataRouter, requireBearerAuth } from "skybridge/server";
+import { z } from "zod";
+
+import { verifyAccessToken } from "./auth.js";
+
+const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
+  .use(
+    mcpAuthMetadataRouter({
+      oauthMetadata: {
+        issuer: "https://auth.myshop.com",
+        authorization_endpoint: "https://auth.myshop.com/authorize",
+        token_endpoint: "https://auth.myshop.com/token",
+        response_types_supported: ["code"],
+      },
+      resourceServerUrl: new URL(process.env.SERVER_URL),
+    }),
+  )
+  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
+  .registerTool(
+    {
+      name: "search-products",
+      description: "Show products matching a query in a carousel.",
+      inputSchema: { query: z.string() },
+      securitySchemes: [{ type: "oauth2" }],
+      view: { component: "carousel" },
+    },
+    async ({ query }, extra) => ({
+      structuredContent: { products: await search(query, extra.authInfo) },
+    }),
+  )
+  .registerTool(
+    {
+      name: "create-checkout",
+      description: "Create a checkout session for the given products.",
+      inputSchema: { productIds: z.array(z.string()) },
+      securitySchemes: [{ type: "oauth2", scopes: ["checkout"] }],
+    },
+    async ({ productIds }, extra) => ({
+      structuredContent: { url: await checkout(productIds, extra.authInfo) },
+    }),
+  );
+```
+
+The sections below cover publishing the discovery metadata, verifying tokens with a middleware, declaring auth per tool, reading the user in handlers, and mixing public and authenticated tools.
+
+## Publish Discovery Metadata
+
+Hosts find your authorization server through standard metadata documents ([RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728)). `mcpAuthMetadataRouter` serves them at `/.well-known/oauth-protected-resource`, so the host can perform the authentication flow.
+
+```ts server.ts highlight={2-12}
+const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
+  .use(
+    mcpAuthMetadataRouter({
+      oauthMetadata: {
+        issuer: "https://auth.myshop.com",
+        authorization_endpoint: "https://auth.myshop.com/authorize",
+        token_endpoint: "https://auth.myshop.com/token",
+        response_types_supported: ["code"],
+      },
+      resourceServerUrl: new URL(process.env.SERVER_URL),
+    }),
+  )
+  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
+  .registerTool(/* search-products … */)
+  .registerTool(/* create-checkout … */);
+```
+
+The endpoint values come from your OAuth provider's documentation. `resourceServerUrl` is this server's public URL: localhost in development, the [tunnel](/test/tunnel) URL when testing in a host, your domain in production.
+
+## Verify Tokens with a Middleware
+
+Once the user is signed in, every request carries `Authorization: Bearer <token>`. `requireBearerAuth` validates it before any handler runs: missing, invalid, or expired tokens get a 401, insufficient scopes a 403.
+
+It takes a verifier you write, with one method: `verifyAccessToken(token)` resolves with an `AuthInfo` (handlers receive it as `extra.authInfo`) or throws `InvalidTokenError` (the middleware answers 401).
+
+<CodeGroup>
+```ts server.ts highlight={13}
+const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
+  .use(
+    mcpAuthMetadataRouter({
+      oauthMetadata: {
+        issuer: "https://auth.myshop.com",
+        authorization_endpoint: "https://auth.myshop.com/authorize",
+        token_endpoint: "https://auth.myshop.com/token",
+        response_types_supported: ["code"],
+      },
+      resourceServerUrl: new URL(process.env.SERVER_URL),
+    }),
+  )
+  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
+  .registerTool(/* search-products … */)
+  .registerTool(/* create-checkout … */);
+```
+
+```ts auth.ts
+import { type AuthInfo, InvalidTokenError } from "skybridge/server";
+
+export async function verifyAccessToken(token: string): Promise<AuthInfo> {
+  try {
+    // Provider-specific: JWKS verification, introspection endpoint, or SDK
+    const payload = await validateToken(token);
+
+    return {
+      token,
+      clientId: payload.clientId,
+      scopes: payload.scopes,
+      expiresAt: payload.expiresAt,
+      extra: { sub: payload.sub },
+    };
+  } catch (err) {
+    throw new InvalidTokenError(
+      err instanceof Error ? err.message : "Token validation failed",
+    );
+  }
+}
+```
+</CodeGroup>
+
+The validation body is provider-specific: JWKS verification for JWT-issuing providers, an introspection call for opaque tokens, or the provider's own middleware in place of `requireBearerAuth`.
+
+{/* @todo: link to full auth provider reference */}
+
+## Mix Public and Authenticated Tools
+
+Serving both anonymous and signed-in callers from one server takes three changes to the fully authenticated setup.
+
+### Switch the Middleware
+
+`optionalBearerAuth` validates the token when present, lets the request through when absent, and still rejects invalid tokens with a 401. Unauthenticated requests now reach your handlers.
+
+```ts server.ts highlight={2}
+server
+  .use("/mcp", optionalBearerAuth({ verifier: { verifyAccessToken } }))
+  .registerTool(/* search-products … */)
+  .registerTool(/* create-checkout … */);
+```
+
+### Declare Tool Visibility
+
+Three declarations cover the combinations:
+
+| `securitySchemes` | Meaning |
+|-------------------|---------|
+| `[{ type: "oauth2" }]` | Requires sign-in |
+| `[{ type: "noauth" }]` | Works signed out |
+| `[{ type: "noauth" }, { type: "oauth2" }]` | Works signed out, does more when signed in |
+
+```ts server.ts highlight={5}
+server.registerTool(
+  {
+    name: "search-products",
+    // …
+    securitySchemes: [{ type: "noauth" }, { type: "oauth2" }],
+  },
+  async ({ query }, extra) => ({
+    structuredContent: { products: await search(query, extra.authInfo) },
+  }),
+);
+```
+
+`search-products` lists both schemes: anonymous callers browse the public catalog, signed-in callers get results scoped to their account. `extra.authInfo` is set or `undefined` accordingly.
+
+### Guard the Handler
+
+With unauthenticated requests reaching handlers, the scope check is no longer a formality: it's the only gate on protected tools.
+
+```ts server.ts highlight={8-10}
+server.registerTool(
+  {
+    name: "create-checkout",
+    // …
+    securitySchemes: [{ type: "oauth2", scopes: ["checkout"] }],
+  },
+  async ({ productIds }, extra) => {
+    if (!extra.authInfo?.scopes.includes("checkout")) {
+      return { content: "Sign in to check out.", isError: true };
+    }
+    return {
+      structuredContent: { url: await checkout(productIds, extra.authInfo) },
+    };
+  },
+);
+```
+
+<Card title="All done!" type="tip" href="/test" horizontal icon="check">
+    You now know how to authenticate users. Learn how to test your MCP App in the next chapter.
+</Card>
+
+## Go Further
+<Columns cols={3}>
+    <Card title="Register Tools" img="/images/tools.png" href="/build/tools">
+        Define what humans and agents can do
+    </Card>
+    <Card title="Create Views" img="/images/view.png" href="/build/view">
+        Craft interactive UIs rendered in conversation
+    </Card>
+    <Card title="Manage State" img="/images/state.png" href="/build/state">
+        Decide what the model sees
+    </Card>
+</Columns>
+
