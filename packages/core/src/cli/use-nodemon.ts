@@ -1,12 +1,5 @@
-import {
-  type ChildProcessByStdio,
-  execFileSync,
-  spawn,
-} from "node:child_process";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { createInterface } from "node:readline";
-import type { Readable, Writable } from "node:stream";
 import nodemonOriginal from "nodemon";
 import { useEffect } from "react";
 import type { ExtendedNodemon } from "./nodemon.d.ts";
@@ -16,151 +9,117 @@ const nodemon = nodemonOriginal as ExtendedNodemon;
 
 const SOURCEMAP_WARNING = /^Sourcemap for ".*" points to missing source files$/;
 
-function resolveCommand(command: string): string | null {
-  try {
-    return execFileSync("which", [command], { encoding: "utf-8" }).trim();
-  } catch {
-    return null;
-  }
+export interface NodemonHandlers {
+  /** A line of server stdout. */
+  onStdout: (line: string) => void;
+  /** A (filtered) chunk of server stderr. */
+  onStderr: (message: string) => void;
+  /** The server restarted because the listed files changed. */
+  onRestart: (files: string[]) => void;
 }
 
-interface Formatter {
-  proc: ChildProcessByStdio<Writable, Readable, null>;
-  alive: boolean;
-}
+/**
+ * Boot nodemon and wire its stdout/stderr to the provided handlers. Returns a
+ * cleanup function that detaches the listeners and quits nodemon. Shared by the
+ * Ink-based dev UI (via {@link useNodemon}) and the `--plain` runner.
+ */
+export function startNodemon(
+  env: NodeJS.ProcessEnv,
+  handlers: NodemonHandlers,
+): () => void {
+  const configFile = resolve(process.cwd(), "nodemon.json");
 
-function spawnFormatter(
-  command: string,
-  pushMessage: PushMessage,
-): Formatter | null {
-  const bin = resolveCommand(command);
-  if (!bin) {
-    pushMessage(
-      `[format-logs] command not found: "${command}". Logs will not be formatted.`,
-      "error",
-    );
-    return null;
-  }
-  try {
-    const proc = spawn(bin, { stdio: ["pipe", "pipe", "ignore"] });
-    const formatter: Formatter = { proc, alive: true };
-    const rl = createInterface({ input: proc.stdout });
+  const config = existsSync(configFile)
+    ? {
+        configFile,
+      }
+    : {
+        watch: ["src"],
+        ext: "ts,json",
+        exec: "tsx src/server.ts",
+      };
 
-    rl.on("line", (line) => {
-      pushMessage(line, "log");
-    });
+  nodemon({ ...config, env, stdout: false });
 
-    // Prevent unhandled EPIPE crash if formatter exits while we write to stdin.
-    proc.stdin.on("error", () => {});
-    proc.on("error", () => {
-      formatter.alive = false;
-    });
-    proc.on("close", () => {
-      formatter.alive = false;
-    });
+  const handleStdoutData = (chunk: Buffer) => {
+    const raw = chunk.toString().trim();
+    if (!raw) {
+      return;
+    }
+    for (const line of raw.split("\n")) {
+      const trimmed = line.trim();
+      if (trimmed) {
+        handlers.onStdout(trimmed);
+      }
+    }
+  };
 
-    return formatter;
-  } catch {
-    return null;
-  }
+  const handleStderrData = (chunk: Buffer) => {
+    const message = chunk.toString().trim();
+    if (!message) {
+      return;
+    }
+    // Node's source-map warnings for third-party deps (superjson, @mcp/sdk, …) — not actionable.
+    const filtered = message
+      .split("\n")
+      .filter((line) => !SOURCEMAP_WARNING.test(line))
+      .join("\n");
+    if (filtered) {
+      handlers.onStderr(filtered);
+    }
+  };
+
+  const setupStdoutListener = () => {
+    if (nodemon.stdout) {
+      nodemon.stdout.off("data", handleStdoutData);
+      nodemon.stdout.on("data", handleStdoutData);
+    }
+  };
+
+  const setupStderrListener = () => {
+    if (nodemon.stderr) {
+      nodemon.stderr.off("data", handleStderrData);
+      nodemon.stderr.on("data", handleStderrData);
+    }
+  };
+
+  nodemon.on("readable", () => {
+    setupStdoutListener();
+    setupStderrListener();
+  });
+
+  nodemon.on("restart", (files: string[]) => {
+    handlers.onRestart(files);
+    setupStdoutListener();
+    setupStderrListener();
+  });
+
+  return () => {
+    if (nodemon.stdout) {
+      nodemon.stdout.off("data", handleStdoutData);
+    }
+    if (nodemon.stderr) {
+      nodemon.stderr.off("data", handleStderrData);
+    }
+    nodemon.emit("quit");
+  };
 }
 
 export function useNodemon(
   env: NodeJS.ProcessEnv,
   pushMessage: PushMessage,
-  formatLogs?: string,
 ): void {
-  useEffect(() => {
-    const configFile = resolve(process.cwd(), "nodemon.json");
-
-    const config = existsSync(configFile)
-      ? {
-          configFile,
-        }
-      : {
-          watch: ["src"],
-          ext: "ts,json",
-          exec: "tsx src/server.ts",
-        };
-
-    nodemon({ ...config, env, stdout: false });
-
-    const formatter = formatLogs
-      ? spawnFormatter(formatLogs, pushMessage)
-      : null;
-
-    const handleStdoutData = (chunk: Buffer) => {
-      const raw = chunk.toString().trim();
-      if (!raw) {
-        return;
-      }
-      const lines = raw.split("\n");
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed) {
-          continue;
-        }
-        if (formatter?.alive) {
-          formatter.proc.stdin.write(`${trimmed}\n`);
-        } else {
-          pushMessage(trimmed, "log");
-        }
-      }
-    };
-
-    const handleStderrData = (chunk: Buffer) => {
-      const message = chunk.toString().trim();
-      if (!message) {
-        return;
-      }
-      // Node's source-map warnings for third-party deps (superjson, @mcp/sdk, …) — not actionable.
-      const filtered = message
-        .split("\n")
-        .filter((line) => !SOURCEMAP_WARNING.test(line))
-        .join("\n");
-      if (filtered) {
-        pushMessage(filtered, "error");
-      }
-    };
-
-    const setupStdoutListener = () => {
-      if (nodemon.stdout) {
-        nodemon.stdout.off("data", handleStdoutData);
-        nodemon.stdout.on("data", handleStdoutData);
-      }
-    };
-
-    const setupStderrListener = () => {
-      if (nodemon.stderr) {
-        nodemon.stderr.off("data", handleStderrData);
-        nodemon.stderr.on("data", handleStderrData);
-      }
-    };
-
-    nodemon.on("readable", () => {
-      setupStdoutListener();
-      setupStderrListener();
-    });
-
-    nodemon.on("restart", (files: string[]) => {
-      const restartMessage = `Server restarted due to file changes: ${files.join(", ")}`;
-      pushMessage(restartMessage, "restart");
-      setupStdoutListener();
-      setupStderrListener();
-    });
-
-    return () => {
-      if (nodemon.stdout) {
-        nodemon.stdout.off("data", handleStdoutData);
-      }
-      if (nodemon.stderr) {
-        nodemon.stderr.off("data", handleStderrData);
-      }
-      if (formatter?.alive) {
-        formatter.proc.stdin.end();
-        formatter.proc.kill();
-      }
-      nodemon.emit("quit");
-    };
-  }, [env, pushMessage, formatLogs]);
+  useEffect(
+    () =>
+      startNodemon(env, {
+        onStdout: (line) => pushMessage(line, "log"),
+        onStderr: (message) => pushMessage(message, "error"),
+        onRestart: (files) =>
+          pushMessage(
+            `Server restarted due to file changes: ${files.join(", ")}`,
+            "restart",
+          ),
+      }),
+    [env, pushMessage],
+  );
 }

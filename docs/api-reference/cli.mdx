@@ -32,17 +32,18 @@ skybridge dev
 | `--tunnel` | Open an Alpic tunnel for remote testing. |
 | `--no-open` | Don't open DevTools in the browser when the server is ready. |
 | `-v, --verbose` | Show tunnel logs. |
-| `--format-logs <command>` | Pipe server stdout through a formatter command (e.g. `bunyan`, `pino-pretty`). Useful when your server uses structured JSON logging. |
+| `--plain` | Disable the interactive UI and stream raw server logs to stdout, so you can pipe them through a formatter (e.g. `skybridge dev --plain \| bunyan`). |
 
 #### Formatting structured logs
 
-If your server uses a structured JSON logger like [bunyan](https://github.com/trentm/node-bunyan) or [pino](https://github.com/pinojs/pino), the raw JSON output is hard to read. Pipe it through a formatter to get human-readable output in the Skybridge dev UI:
+If your server uses a structured JSON logger like [bunyan](https://github.com/trentm/node-bunyan) or [pino](https://github.com/pinojs/pino), the raw JSON output is hard to read in the interactive dev UI. Pass `--plain` to disable the UI and emit the server's stdout verbatim, then pipe it through the logger's formatter:
 
 ```bash
-skybridge dev --format-logs bunyan
+skybridge dev --plain | bunyan
+skybridge dev --plain | pino-pretty
 ```
 
-The formatter command must read JSON records from stdin and write formatted output to stdout. If the command isn't found, an error is displayed and logs fall through unformatted.
+In `--plain` mode the server's stdout is forwarded as-is so the formatter only sees your log lines. Everything else — the banner, URLs, tunnel state, restart notices, and TypeScript errors — is written to stderr, so it stays visible without polluting the pipe.
 
 You can also set the port via the `PORT` environment variable:
 
