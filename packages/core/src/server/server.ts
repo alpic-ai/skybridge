@@ -711,18 +711,24 @@ export class McpServer<
           return next();
         }
         req.params.uri = canonical;
-        const result = (await next()) as {
-          contents?: Array<{ uri?: string } & Record<string, unknown>>;
-        };
-        for (const content of result.contents ?? []) {
-          if (
-            typeof content.uri === "string" &&
-            stripQuery(content.uri) === path
-          ) {
-            content.uri = requested;
+        try {
+          const result = (await next()) as {
+            contents?: Array<{ uri?: string } & Record<string, unknown>>;
+          };
+          for (const content of result.contents ?? []) {
+            if (
+              typeof content.uri === "string" &&
+              stripQuery(content.uri) === path
+            ) {
+              content.uri = requested;
+            }
           }
+          return result;
+        } finally {
+          // Restore the shared request params so middleware outer to us never
+          // observes the rewritten lookup URI after next() unwinds.
+          req.params.uri = requested;
         }
-        return result;
       },
     };
 
