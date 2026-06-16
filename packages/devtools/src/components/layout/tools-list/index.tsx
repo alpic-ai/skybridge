@@ -10,8 +10,10 @@ import { ToolItem } from "./tool-item.js";
 
 function ToolsList() {
   const tools = useSuspenseTools();
+  // Start with only the first tool open; its form's first input gets autofocus
+  // (handled in FormBody, which only mounts for open tools).
   const [openTools, setOpenTools] = useState<string[]>(
-    tools.map((tool) => tool.name),
+    tools.length > 0 ? [tools[0].name] : [],
   );
   const [refreshing, setRefreshing] = useState(false);
   const [tailDelay, setTailDelay] = useState<number | undefined>(undefined);
