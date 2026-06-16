@@ -184,8 +184,6 @@ export function ToolItem({ tool }: { tool: Tool }) {
         isSelected && "border-l-cyan-400",
       )}
     >
-      {/* Clicking the header toggles the input panel (Radix) and, when the tool
-          has cached output, also selects it so that output shows on the right. */}
       <AccordionTrigger
         onClick={hasCachedOutput ? () => setSelectedTool(tool.name) : undefined}
         className={cn(
