@@ -52,6 +52,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
   const requiresAuth = useAuthStore((s) => s.requiresAuth);
   const formRef = useRef<Form<unknown, RJSFSchema>>(null);
   const result = useCallToolResult(tool.name);
+  const hasCachedOutput = Boolean(result?.response);
   const { setToolData } = useStore();
   const formData = (result?.input ?? {}) as Record<string, unknown>;
   const setFormData = (data: Record<string, unknown> | null) => {
@@ -176,9 +177,15 @@ export function ToolItem({ tool }: { tool: Tool }) {
     <AccordionItem
       value={tool.name}
       data-tool-name={tool.name}
-      className="border-b border-border transition-colors last:border-b-0 data-[state=closed]:hover:bg-muted/40"
+      className={cn(
+        // 5px left border always reserved (light grey) so the row never shifts;
+        // turns cyan when selected.
+        "border-b border-l-[5px] border-border transition-colors last:border-b-0 data-[state=closed]:hover:bg-muted/40",
+        isSelected && "border-l-cyan-400",
+      )}
     >
       <AccordionTrigger
+        onClick={hasCachedOutput ? () => setSelectedTool(tool.name) : undefined}
         className={cn(
           "font-mono text-xs font-normal text-foreground",
           "no-underline",
@@ -609,7 +616,9 @@ function FormBody({
       'input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]):not([type="file"]):not([type="button"]):not([type="submit"]), textarea',
     );
     if (focusable && !focusable.value) {
-      focusable.focus();
+      // preventScroll: focusing must not yank the (tall) tool list down to the
+      // input on first render.
+      focusable.focus({ preventScroll: true });
     }
   }, []);
 
