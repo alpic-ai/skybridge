@@ -5,6 +5,8 @@ test.describe("every-input-type tool", () => {
     await page.goto("/");
 
     const tool = page.locator('[data-tool-name="every-input-type"]');
+    // Only the first tool is expanded by default; open this one first.
+    await tool.locator('[data-slot="accordion-trigger"]').click();
 
     await tool.getByLabel("name").fill("Alice");
     await tool.getByLabel("age").fill("30");

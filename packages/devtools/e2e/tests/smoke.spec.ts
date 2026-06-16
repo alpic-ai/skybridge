@@ -32,12 +32,15 @@ test.describe("devtools smoke", () => {
 
     const token = `card-${crypto.randomUUID()}`;
     const echoCard = page.locator('[data-tool-name="echo-card"]');
+    // Only the first tool is expanded by default; open this one first.
+    await echoCard.locator('[data-slot="accordion-trigger"]').click();
     await echoCard.getByLabel("message").fill(token);
     await echoCard.getByRole("button", { name: /^run$/i }).click();
 
-    // First-time view compilation by Vite can take a few seconds.
+    // First-time view compilation by Vite can take a while, especially under
+    // the full suite where several devtools servers compile views in parallel.
     const widget = page.frameLocator('iframe[title="html-preview"]');
-    await expect(widget.getByText(token)).toBeVisible({ timeout: 20_000 });
+    await expect(widget.getByText(token)).toBeVisible({ timeout: 45_000 });
   });
 });
 
@@ -46,9 +49,9 @@ test.describe("visibility badge", () => {
     page,
   }) => {
     await page.goto("/");
-    const badges = page
-      .locator('[data-tool-name="dual-visibility-tool"]')
-      .getByTestId("tool-visibility");
+    const tool = page.locator('[data-tool-name="dual-visibility-tool"]');
+    await tool.locator('[data-slot="accordion-trigger"]').click();
+    const badges = tool.getByTestId("tool-visibility");
     await expect(badges).toBeVisible();
     await expect(badges.getByText("model", { exact: true })).toBeVisible();
     await expect(badges.getByText("app", { exact: true })).toBeVisible();
@@ -58,9 +61,9 @@ test.describe("visibility badge", () => {
     page,
   }) => {
     await page.goto("/");
-    const badges = page
-      .locator('[data-tool-name="model-only-tool"]')
-      .getByTestId("tool-visibility");
+    const tool = page.locator('[data-tool-name="model-only-tool"]');
+    await tool.locator('[data-slot="accordion-trigger"]').click();
+    const badges = tool.getByTestId("tool-visibility");
     await expect(badges).toBeVisible();
     await expect(badges.getByText("model", { exact: true })).toBeVisible();
     await expect(badges.getByText("app", { exact: true })).toHaveCount(0);
@@ -70,9 +73,9 @@ test.describe("visibility badge", () => {
     page,
   }) => {
     await page.goto("/");
-    const badges = page
-      .locator('[data-tool-name="app-only-tool"]')
-      .getByTestId("tool-visibility");
+    const tool = page.locator('[data-tool-name="app-only-tool"]');
+    await tool.locator('[data-slot="accordion-trigger"]').click();
+    const badges = tool.getByTestId("tool-visibility");
     await expect(badges).toBeVisible();
     await expect(badges.getByText("app", { exact: true })).toBeVisible();
     await expect(badges.getByText("model", { exact: true })).toHaveCount(0);
