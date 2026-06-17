@@ -32,6 +32,8 @@ import express, {
   type Express,
   type RequestHandler,
 } from "express";
+import type { OAuthConfig } from "./auth/index.js";
+import { setupOAuth } from "./auth/setup.js";
 import { createApp } from "./express.js";
 import { createMiddlewareEntry } from "./metric.js";
 import type {
@@ -146,6 +148,8 @@ export type JsonOptions = NonNullable<Parameters<typeof express.json>[0]>;
 export interface SkybridgeServerOptions {
   /** Options for the built-in `express.json()` middleware, e.g. `{ limit: "10mb" }`. */
   json?: JsonOptions;
+  /** Resource-server OAuth config. When set, mounts well-known metadata and bearer auth on `/mcp`. */
+  oauth?: OAuthConfig;
 }
 
 /**
@@ -521,6 +525,9 @@ export class McpServer<
     this.serverOptions = options;
     this.express = express();
     this.express.use(express.json(skybridgeOptions?.json));
+    if (skybridgeOptions?.oauth) {
+      setupOAuth(this.express, skybridgeOptions.oauth);
+    }
     // Pick up the manifest if `dist/__entry.js` primed it before importing
     // user code. Consume-once: clear after the first construction so a
     // subsequent test that doesn't prime can't inherit stale state.
