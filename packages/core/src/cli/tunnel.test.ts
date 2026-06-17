@@ -98,4 +98,48 @@ describe("TunnelManager", () => {
     emitter.emit("close");
     expect(manager.getState()).toEqual({ status: "idle" });
   });
+
+  it("ignores repeated start() while starting or connected", async () => {
+    const { handle } = fakeHandle();
+    const openTunnel = vi.fn().mockResolvedValue(handle);
+    const manager = new TunnelManager({ getPort: () => 3000, openTunnel });
+    manager.start();
+    manager.start();
+    await vi.waitFor(() => expect(manager.getState().status).toBe("connected"));
+    manager.start();
+    expect(openTunnel).toHaveBeenCalledTimes(1);
+  });
+
+  it("discards the handle when stopped while still connecting", async () => {
+    const { handle } = fakeHandle();
+    let resolveOpen: (h: TunnelHandle) => void = () => {};
+    const openTunnel = vi.fn(
+      () =>
+        new Promise<TunnelHandle>((resolve) => {
+          resolveOpen = resolve;
+        }),
+    );
+    const manager = new TunnelManager({ getPort: () => 3000, openTunnel });
+    manager.start();
+    manager.stop();
+    resolveOpen(handle);
+    await vi.waitFor(() => expect(handle.close).toHaveBeenCalled());
+    expect(manager.getState()).toEqual({ status: "idle" });
+  });
+
+  it("transitions to error when the connection times out", async () => {
+    vi.useFakeTimers();
+    try {
+      const openTunnel = vi.fn(() => new Promise<TunnelHandle>(() => {}));
+      const manager = new TunnelManager({ getPort: () => 3000, openTunnel });
+      manager.start();
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(manager.getState()).toEqual({
+        status: "error",
+        message: "Tunnel connection timed out after one minute",
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

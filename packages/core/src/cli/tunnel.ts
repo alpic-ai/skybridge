@@ -80,6 +80,7 @@ export class TunnelManager extends EventEmitter {
     this.setState({ status: "starting", message: "Starting tunnel…" });
 
     this.timeout = setTimeout(() => {
+      this.timeout = null;
       if (this.connecting) {
         this.connecting = false;
         this.setState({
