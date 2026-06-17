@@ -11,7 +11,7 @@ declare module "./server.js" {
   }
 }
 
-- a view resource must resolve no matter the `?v=` query param value.
+// - a view resource must resolve no matter the `?v=` query param value.
 // The version param is a content-derived cache key for external consumers
 // (it busts host/CDN caches when the bundle changes); it is not part of the
 // resource's identity, so a stale, absent, or arbitrary param must still serve
