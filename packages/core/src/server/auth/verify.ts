@@ -3,21 +3,16 @@ import type { OAuthTokenVerifier } from "@modelcontextprotocol/sdk/server/auth/p
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import * as jose from "jose";
 
-/** JWKS-based access-token verification settings. */
 export type JwksVerifyConfig = {
   /** Expected `iss` claim. */
   issuer: string;
   /** Expected `aud` claim. */
   audience: string;
-  /** JWKS URL. Defaults to `${issuer}/.well-known/jwks.json`. */
+  /** Defaults to `${issuer}/.well-known/jwks.json`. */
   jwksUri?: string;
 };
 
-/**
- * Builds an SDK `OAuthTokenVerifier` that validates JWT access tokens against a
- * remote JWKS using `jose`. Internal to the package — branded providers
- * (SKY-447) reuse it; it is never exported from `skybridge/server`.
- */
+/** Builds an `OAuthTokenVerifier` validating JWTs against a remote JWKS. Internal, not exported. */
 export function createJwksVerifier(
   config: JwksVerifyConfig,
 ): OAuthTokenVerifier {

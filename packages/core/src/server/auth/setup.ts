@@ -7,11 +7,7 @@ import { optionalBearerAuth, requireBearerAuth } from "../auth.js";
 import type { OAuthConfig } from "./index.js";
 import { createJwksVerifier } from "./verify.js";
 
-/**
- * Wires resource-server OAuth into the embedded Express app: serves the
- * well-known metadata and enforces bearer auth on `/mcp`. Called from the
- * `McpServer` constructor before any user middleware and the `/mcp` route.
- */
+/** Mounts the well-known OAuth metadata and bearer auth on `/mcp`. */
 export function setupOAuth(app: Express, config: OAuthConfig): void {
   let baseUrl: URL;
   try {

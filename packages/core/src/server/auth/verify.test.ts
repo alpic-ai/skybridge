@@ -10,7 +10,6 @@ const AUDIENCE = "api://default";
 let jwksServer: http.Server | undefined;
 afterEach(() => jwksServer?.close());
 
-// Spins a local JWKS endpoint and returns a signer bound to its key.
 async function startJwks() {
   const { publicKey, privateKey } = await jose.generateKeyPair("RS256");
   const jwk = {

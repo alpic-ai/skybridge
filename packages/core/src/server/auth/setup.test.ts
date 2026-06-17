@@ -59,8 +59,6 @@ function signToken(key: CryptoKey) {
     .sign(key);
 }
 
-// Builds an oauth-configured server with an echo tool that returns authInfo,
-// boots it on a random port, and returns the base URL.
 async function bootServer(
   jwksUri: string,
   {
