@@ -12,19 +12,18 @@ export type OAuthConfig = {
   /**
    * Public base URL of this resource server (e.g. `https://app.example.com`).
    * Used for the served `resourceServerUrl` and the `resource_metadata` URL
-   * advertised in 401 `WWW-Authenticate` headers. Developer-supplied — the
-   * framework never reads `process.env` for it.
+   * advertised in 401 `WWW-Authenticate` headers.
    */
   baseUrl: string;
 
   /**
    * Authorization-server metadata served verbatim at
    * `/.well-known/oauth-authorization-server`. Its endpoints point at the
-   * upstream IdP. Branded providers (SKY-447) fill this in.
+   * upstream IdP.
    */
   oauthMetadata: OAuthMetadata;
 
-  /** JWKS-based token verification (`jose`). */
+  /** JWKS-based token verification. */
   verify: JwksVerifyConfig;
 
   /** Scopes advertised in the protected-resource metadata. */
@@ -32,4 +31,12 @@ export type OAuthConfig = {
 
   /** Server-wide required-scope floor enforced by `requireBearerAuth`. */
   requiredScopes?: string[];
+
+  /**
+   * Transport-level enforcement on `/mcp`. `"required"` (default) gates every
+   * request — no valid token, no access. `"optional"` lets anonymous requests
+   * through for per-tool `securitySchemes` to decide (mixed-auth); a token, if
+   * present, must still verify and meet `requiredScopes`.
+   */
+  enforcement?: "required" | "optional";
 };

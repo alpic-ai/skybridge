@@ -1,9 +1,9 @@
-import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
 import {
   getOAuthProtectedResourceMetadataUrl,
   mcpAuthMetadataRouter,
 } from "@modelcontextprotocol/sdk/server/auth/router.js";
 import type { Express } from "express";
+import { optionalBearerAuth, requireBearerAuth } from "../auth.js";
 import type { OAuthConfig } from "./index.js";
 import { createJwksVerifier } from "./verify.js";
 
@@ -35,9 +35,11 @@ export function setupOAuth(app: Express, config: OAuthConfig): void {
     }),
   );
 
+  const bearer =
+    config.enforcement === "optional" ? optionalBearerAuth : requireBearerAuth;
   app.use(
     "/mcp",
-    requireBearerAuth({
+    bearer({
       verifier: createJwksVerifier(config.verify),
       requiredScopes: config.requiredScopes,
       resourceMetadataUrl: getOAuthProtectedResourceMetadataUrl(baseUrl),

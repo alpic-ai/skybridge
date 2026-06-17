@@ -63,7 +63,10 @@ function signToken(key: CryptoKey) {
 // boots it on a random port, and returns the base URL.
 async function bootServer(
   jwksUri: string,
-  baseUrl = "https://app.example.test",
+  {
+    baseUrl = "https://app.example.test",
+    enforcement = "required",
+  }: { baseUrl?: string; enforcement?: "required" | "optional" } = {},
 ) {
   const { createApp } = await import("../express.js");
   const server = new McpServer(
@@ -81,6 +84,7 @@ async function bootServer(
         verify: { issuer: ISSUER, audience: AUDIENCE, jwksUri },
         scopesSupported: ["openid", "email"],
         requiredScopes: ["openid"],
+        enforcement,
       },
     },
   ).registerTool(
@@ -165,6 +169,47 @@ describe("setupOAuth wiring", () => {
     expect(result.content[0]?.text).toBe("client-1");
 
     await client.close();
+  });
+});
+
+describe("enforcement: optional", () => {
+  it("lets an anonymous /mcp request through", async () => {
+    const { jwksUri } = await startJwks();
+    const base = await bootServer(jwksUri, { enforcement: "optional" });
+
+    const res = await fetch(`${base}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json, text/event-stream",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "initialize",
+        id: 1,
+        params: {
+          protocolVersion: "2025-06-18",
+          capabilities: {},
+          clientInfo: { name: "anon", version: "0.0.0" },
+        },
+      }),
+    });
+    expect(res.status).toBe(200);
+  });
+
+  it("still rejects a malformed token", async () => {
+    const { jwksUri } = await startJwks();
+    const base = await bootServer(jwksUri, { enforcement: "optional" });
+
+    const res = await fetch(`${base}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer not-a-real-token",
+      },
+      body: JSON.stringify({ jsonrpc: "2.0", method: "initialize", id: 1 }),
+    });
+    expect(res.status).toBe(401);
   });
 });
 
