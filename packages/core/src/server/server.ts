@@ -265,6 +265,16 @@ type ErrorMiddlewareConfig = {
   handlers: ErrorRequestHandler[];
 };
 
+/**
+ * Drop the query string from a `ui://` view URI, leaving the bare path. The
+ * `?v=` cache key is the only query we append, so a plain split is enough and
+ * sidesteps `URL` normalization quirks on the non-special `ui:` scheme.
+ */
+function stripQuery(uri: string): string {
+  const queryIndex = uri.indexOf("?");
+  return queryIndex === -1 ? uri : uri.slice(0, queryIndex);
+}
+
 export function normalizeContent(
   content: HandlerContent | undefined,
 ): ContentBlock[] {
@@ -310,6 +320,13 @@ export class McpServer<
   private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private mcpMiddlewareApplied = false;
   private claimedViews = new Map<string, string>();
+  /**
+   * Maps a view resource's query-less path to its canonical registered URI
+   * (the one carrying the `?v=` cache key). Lets `resources/read` resolve the
+   * underlying view no matter which version param the consumer sends, since
+   * the param is only a cache key, not part of the resource's identity.
+   */
+  private viewUriByPath = new Map<string, string>();
   private viteManifest: Record<string, ViteManifestEntry> | null = null;
   private readonly serverInfo: Implementation;
   private readonly serverOptions?: ServerOptions;
@@ -438,10 +455,52 @@ export class McpServer<
     }
     this.mcpMiddlewareApplied = true;
 
+    // Resolve a view's `resources/read` by its query-less path so the
+    // underlying asset is served no matter the `?v=` value (stale cache key,
+    // no param, etc.). The version param is a cache-busting hint for external
+    // consumers; it must not gate resolution. We rewrite the lookup URI to the
+    // canonical registered one, then restore the requested URI on the response
+    // so the consumer-facing URI is never rewritten.
+    const viewReadResolveEntry: McpMiddlewareEntry = {
+      filter: "resources/read",
+      handler: async (req, _extra, next) => {
+        const requested = req.params.uri;
+        if (typeof requested !== "string") {
+          return next();
+        }
+        const path = stripQuery(requested);
+        const canonical = this.viewUriByPath.get(path);
+        if (!canonical) {
+          return next();
+        }
+        req.params.uri = canonical;
+        try {
+          const result = (await next()) as {
+            contents?: Array<{ uri?: string } & Record<string, unknown>>;
+          };
+          for (const content of result.contents ?? []) {
+            if (
+              typeof content.uri === "string" &&
+              stripQuery(content.uri) === path
+            ) {
+              content.uri = requested;
+            }
+          }
+          return result;
+        } finally {
+          // Restore the shared request params so middleware outer to us never
+          // observes the rewritten lookup URI after next() unwinds.
+          req.params.uri = requested;
+        }
+      },
+    };
+
     const monitoringEntry = createMiddlewareEntry();
-    const entries = monitoringEntry
-      ? [monitoringEntry, ...this.mcpMiddlewareEntries]
-      : this.mcpMiddlewareEntries;
+    const entries = [
+      ...(monitoringEntry ? [monitoringEntry] : []),
+      viewReadResolveEntry,
+      ...this.mcpMiddlewareEntries,
+    ];
 
     if (entries.length === 0) {
       return;
@@ -715,6 +774,8 @@ export class McpServer<
     view: ViewConfig;
   }): void {
     const { hostType, uri: viewUri, mimeType, buildContentMeta } = viewResource;
+
+    this.viewUriByPath.set(stripQuery(viewUri), viewUri);
 
     this.registerResource(
       name,
