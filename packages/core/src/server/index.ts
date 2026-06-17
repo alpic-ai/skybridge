@@ -1,3 +1,4 @@
+export type { OAuthConfig } from "./auth/index.js";
 export {
   type AuthInfo,
   type AuthMetadataOptions,

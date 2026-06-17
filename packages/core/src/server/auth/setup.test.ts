@@ -167,3 +167,39 @@ describe("setupOAuth wiring", () => {
     await client.close();
   });
 });
+
+describe("oauth config validation", () => {
+  const validMetadata = {
+    issuer: ISSUER,
+    authorization_endpoint: `${ISSUER}/authorize`,
+    token_endpoint: `${ISSUER}/token`,
+    response_types_supported: ["code"],
+  };
+
+  it("throws on a non-absolute baseUrl", () => {
+    expect(
+      () =>
+        new McpServer({ name: "t", version: "0" }, undefined, {
+          oauth: {
+            baseUrl: "not-a-url",
+            oauthMetadata: validMetadata,
+            verify: { issuer: ISSUER, audience: AUDIENCE },
+          },
+        }),
+    ).toThrow(/baseUrl must be a valid absolute URL/);
+  });
+
+  it("throws when verify.audience is missing", () => {
+    expect(
+      () =>
+        new McpServer({ name: "t", version: "0" }, undefined, {
+          oauth: {
+            baseUrl: "https://app.example.test",
+            oauthMetadata: validMetadata,
+            // @ts-expect-error intentionally missing audience
+            verify: { issuer: ISSUER },
+          },
+        }),
+    ).toThrow(/verify requires both `issuer` and `audience`/);
+  });
+});
