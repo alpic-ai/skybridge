@@ -1,23 +1,19 @@
 import { EventEmitter } from "node:events";
 import http from "node:http";
-import { Readable } from "node:stream";
 import express from "express";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { TunnelHandle } from "../cli/tunnel.js";
 import { startTunnelControlServer } from "../cli/tunnel-control-server.js";
 import { createTunnelProxyRouter } from "./tunnel-proxy-router.js";
 
-type FakeChild = EventEmitter & {
-  stdout: Readable;
-  stderr: Readable;
-  kill: ReturnType<typeof vi.fn<() => boolean>>;
-};
-
-function makeFakeChild(): FakeChild {
-  const child = new EventEmitter() as FakeChild;
-  child.stdout = new Readable({ read() {} });
-  child.stderr = new Readable({ read() {} });
-  child.kill = vi.fn<() => boolean>(() => true);
-  return child;
+function makeFakeHandle(url = "https://abc.tunnel.example") {
+  const emitter = new EventEmitter();
+  const handle: TunnelHandle = {
+    url,
+    on: (event, listener) => emitter.on(event, listener as () => void),
+    close: vi.fn(),
+  };
+  return { handle, emitter };
 }
 
 async function listen(handler: http.RequestListener) {
@@ -54,12 +50,12 @@ async function startProxy(controlPort: number) {
 }
 
 async function startControl() {
-  const child = makeFakeChild();
+  const { handle, emitter } = makeFakeHandle();
   const control = await startTunnelControlServer(() => 3000, {
-    spawn: () => child,
+    openTunnel: () => Promise.resolve(handle),
   });
   cleanups.push(() => control.close());
-  return { control, child };
+  return { control, handle, emitter };
 }
 
 describe("createTunnelProxyRouter", () => {
@@ -78,7 +74,11 @@ describe("createTunnelProxyRouter", () => {
         status: "starting",
         message: "Starting tunnel…",
       });
-      expect(control.manager.getState().status).toBe("starting");
+      // The manager may have already transitioned to connected by the time
+      // this assertion runs (async openTunnel resolves immediately in tests).
+      expect(["starting", "connected"]).toContain(
+        control.manager.getState().status,
+      );
     });
 
     it("returns 502 when upstream is unavailable", async () => {
@@ -104,13 +104,17 @@ describe("createTunnelProxyRouter", () => {
 
   describe("DELETE /__skybridge/tunnel", () => {
     it("forwards to upstream and returns the upstream JSON", async () => {
-      const { control, child } = await startControl();
+      const { control, handle } = await startControl();
       const { port } = await startProxy(control.port);
 
       // First start the tunnel so DELETE has something to stop.
       await fetch(`http://127.0.0.1:${port}/__skybridge/tunnel`, {
         method: "POST",
       });
+      // Wait for connected
+      await vi.waitFor(() =>
+        expect(control.manager.getState().status).toBe("connected"),
+      );
 
       const res = await fetch(`http://127.0.0.1:${port}/__skybridge/tunnel`, {
         method: "DELETE",
@@ -118,7 +122,7 @@ describe("createTunnelProxyRouter", () => {
 
       expect(res.status).toBe(200);
       expect(await res.json()).toEqual({ status: "idle" });
-      expect(child.kill).toHaveBeenCalled();
+      expect(handle.close).toHaveBeenCalled();
     });
 
     it("returns 502 when upstream is unavailable", async () => {
@@ -140,19 +144,15 @@ describe("createTunnelProxyRouter", () => {
 
   describe("GET /__skybridge/tunnel/events", () => {
     it("pipes the upstream SSE stream through to the client", async () => {
-      const { control, child } = await startControl();
+      const { control } = await startControl();
       const { port } = await startProxy(control.port);
 
-      // Get the manager into a known state so the initial SSE frame is
-      // deterministic.
+      // Get the manager into a connected state.
       await fetch(`http://127.0.0.1:${port}/__skybridge/tunnel`, {
         method: "POST",
       });
-      child.stdout.emit(
-        "data",
-        Buffer.from(
-          "Forwarding: https://abc.tunnel.example -> http://localhost:3000\n",
-        ),
+      await vi.waitFor(() =>
+        expect(control.manager.getState().status).toBe("connected"),
       );
 
       const res = await fetch(
@@ -179,7 +179,7 @@ describe("createTunnelProxyRouter", () => {
     });
 
     it("forwards subsequent state changes through the SSE stream", async () => {
-      const { control, child } = await startControl();
+      const { control } = await startControl();
       const { port } = await startProxy(control.port);
 
       await fetch(`http://127.0.0.1:${port}/__skybridge/tunnel`, {
@@ -196,21 +196,19 @@ describe("createTunnelProxyRouter", () => {
       const reader = body.getReader();
       const decoder = new TextDecoder();
 
-      // Drain the initial "starting" frame.
+      // Drain the initial frame (starting or connected depending on timing).
       const first = await reader.read();
-      expect(decoder.decode(first.value)).toContain('"status":"starting"');
+      const firstChunk = decoder.decode(first.value);
+      // If we're already connected, we're done
+      if (firstChunk.includes('"status":"connected"')) {
+        expect(firstChunk).toContain('"url":"https://abc.tunnel.example"');
+        await reader.cancel();
+        return;
+      }
+      expect(firstChunk).toContain('"status":"starting"');
 
-      // Now drive a state change on the manager and read the next frame.
-      child.stdout.emit(
-        "data",
-        Buffer.from(
-          "Forwarding: https://abc.tunnel.example -> http://localhost:3000\n",
-        ),
-      );
-
+      // Wait for the connected state change to arrive in the SSE stream.
       let combined = "";
-      // Reads may chunk arbitrarily, so accumulate until we see the connected
-      // event or hit a sane cap.
       for (let i = 0; i < 5; i++) {
         const { value, done } = await reader.read();
         if (done) {

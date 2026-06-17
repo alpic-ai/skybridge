@@ -1,5 +1,5 @@
 import http from "node:http";
-import { type SpawnFn, TunnelManager } from "./tunnel.js";
+import { type OpenTunnelFn, TunnelManager } from "./tunnel.js";
 import { createTunnelHandler } from "./tunnel-handler.js";
 
 export type TunnelControlServer = {
@@ -10,9 +10,12 @@ export type TunnelControlServer = {
 
 export async function startTunnelControlServer(
   getPort: () => number,
-  options?: { spawn?: SpawnFn },
+  options?: { openTunnel?: OpenTunnelFn },
 ): Promise<TunnelControlServer> {
-  const manager = new TunnelManager({ getPort, spawn: options?.spawn });
+  const manager = new TunnelManager({
+    getPort,
+    openTunnel: options?.openTunnel,
+  });
   const server = http.createServer(createTunnelHandler(manager));
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);

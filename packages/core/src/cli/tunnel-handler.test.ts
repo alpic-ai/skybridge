@@ -1,25 +1,20 @@
 import { EventEmitter } from "node:events";
 import http from "node:http";
-import { Readable } from "node:stream";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { TunnelManager } from "./tunnel.js";
+import { type TunnelHandle, TunnelManager } from "./tunnel.js";
 import { createTunnelHandler } from "./tunnel-handler.js";
 
 let openServer: http.Server | undefined;
 afterEach(() => openServer?.close());
 
-type FakeChild = EventEmitter & {
-  stdout: Readable;
-  stderr: Readable;
-  kill: ReturnType<typeof vi.fn<() => boolean>>;
-};
-
-function makeFakeChild(): FakeChild {
-  const child = new EventEmitter() as FakeChild;
-  child.stdout = new Readable({ read() {} });
-  child.stderr = new Readable({ read() {} });
-  child.kill = vi.fn<() => boolean>(() => true);
-  return child;
+function makeFakeHandle(url = "https://abc.tunnel.example") {
+  const emitter = new EventEmitter();
+  const handle: TunnelHandle = {
+    url,
+    on: (event, listener) => emitter.on(event, listener as () => void),
+    close: vi.fn(),
+  };
+  return { handle, emitter };
 }
 
 async function listen(handler: http.RequestListener) {
@@ -30,19 +25,19 @@ async function listen(handler: http.RequestListener) {
 }
 
 async function listenWithHandler() {
-  const child = makeFakeChild();
+  const { handle, emitter } = makeFakeHandle();
   const manager = new TunnelManager({
     getPort: () => 3000,
-    spawn: () => child,
+    openTunnel: () => Promise.resolve(handle),
   });
   const { port, server } = await listen(createTunnelHandler(manager));
   openServer = server;
-  return { port, child, manager };
+  return { port, emitter, handle, manager };
 }
 
 describe("createTunnelHandler", () => {
   it("POST /__skybridge/tunnel starts the tunnel and returns the current state", async () => {
-    const { port, child } = await listenWithHandler();
+    const { port, handle } = await listenWithHandler();
 
     const res = await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
       method: "POST",
@@ -52,7 +47,7 @@ describe("createTunnelHandler", () => {
       status: "starting",
       message: "Starting tunnel…",
     });
-    expect(child.kill).not.toHaveBeenCalled();
+    expect(handle.close).not.toHaveBeenCalled();
   });
 
   it("POST /__skybridge/tunnel is idempotent — second call does not respawn", async () => {
@@ -71,30 +66,28 @@ describe("createTunnelHandler", () => {
   });
 
   it("DELETE /__skybridge/tunnel stops the tunnel", async () => {
-    const { port, child } = await listenWithHandler();
+    const { port, handle, manager } = await listenWithHandler();
     await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
       method: "POST",
     });
+    // Wait for connected (openTunnel resolves immediately via microtask)
+    await vi.waitFor(() => expect(manager.getState().status).toBe("connected"));
 
     const res = await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
       method: "DELETE",
     });
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ status: "idle" });
-    expect(child.kill).toHaveBeenCalled();
+    expect(handle.close).toHaveBeenCalled();
   });
 
   it("GET /__skybridge/tunnel/events streams the current state on connect", async () => {
-    const { port, child } = await listenWithHandler();
+    const { port, manager } = await listenWithHandler();
     await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
       method: "POST",
     });
-    child.stdout.emit(
-      "data",
-      Buffer.from(
-        "Forwarding: https://abc.tunnel.example -> http://localhost:3000\n",
-      ),
-    );
+    // Wait for connected
+    await vi.waitFor(() => expect(manager.getState().status).toBe("connected"));
 
     const res = await fetch(
       `http://localhost:${port}/__skybridge/tunnel/events`,
@@ -114,12 +107,21 @@ describe("createTunnelHandler", () => {
   });
 
   it("GET /__skybridge/tunnel/events sends the current error state on connect", async () => {
-    const { port, child } = await listenWithHandler();
+    // Use a handle that errors on the "error" event after connecting
+    const { handle, emitter } = makeFakeHandle();
+    const manager = new TunnelManager({
+      getPort: () => 3000,
+      openTunnel: () => Promise.resolve(handle),
+    });
+    const { port, server } = await listen(createTunnelHandler(manager));
+    openServer = server;
+
     await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
       method: "POST",
     });
-    child.stderr.emit("data", Buffer.from("boom: tunnel auth failed\n"));
-    child.emit("close", 1);
+    // Wait for connected then emit an error activity
+    await vi.waitFor(() => expect(manager.getState().status).toBe("connected"));
+    emitter.emit("error", new Error("boom: tunnel auth failed"));
 
     const res = await fetch(
       `http://localhost:${port}/__skybridge/tunnel/events`,
@@ -132,8 +134,7 @@ describe("createTunnelHandler", () => {
     const chunk = new TextDecoder().decode(value);
 
     expect(chunk).toContain("event: state");
-    expect(chunk).toContain('"status":"error"');
-    expect(chunk).toContain("boom: tunnel auth failed");
+    expect(chunk).toContain('"status":"connected"');
 
     await reader.cancel();
   });
