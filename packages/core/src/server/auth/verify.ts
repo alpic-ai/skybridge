@@ -37,12 +37,23 @@ export function createJwksVerifier(
       const { client_id, scope, exp, sub, ...rest } = payload as Record<
         string,
         unknown
-      > & { client_id?: string; scope?: string; exp?: number; sub?: string };
+      > & {
+        client_id?: string;
+        scope?: string | string[];
+        exp?: number;
+        sub?: string;
+      };
+
+      const scopes = Array.isArray(scope)
+        ? scope.map(String)
+        : typeof scope === "string"
+          ? scope.split(/\s+/).filter(Boolean)
+          : [];
 
       return {
         token,
         clientId: client_id ?? "",
-        scopes: typeof scope === "string" ? scope.split(" ") : [],
+        scopes,
         expiresAt: exp,
         extra: { subject: sub, ...rest },
       } satisfies AuthInfo;

@@ -83,6 +83,29 @@ describe("createJwksVerifier", () => {
     );
   });
 
+  it("parses array scope claims and trims extra whitespace", async () => {
+    const { privateKey, jwksUri } = await startJwks();
+    const verifier = createJwksVerifier({
+      issuer: ISSUER,
+      audience: AUDIENCE,
+      jwksUri,
+    });
+
+    const arrayToken = await sign(privateKey, {
+      scope: ["openid", "email"],
+    });
+    expect((await verifier.verifyAccessToken(arrayToken)).scopes).toEqual([
+      "openid",
+      "email",
+    ]);
+
+    const messyToken = await sign(privateKey, { scope: " openid  email " });
+    expect((await verifier.verifyAccessToken(messyToken)).scopes).toEqual([
+      "openid",
+      "email",
+    ]);
+  });
+
   it("defaults missing scope to an empty array", async () => {
     const { privateKey, jwksUri } = await startJwks();
     const verifier = createJwksVerifier({
