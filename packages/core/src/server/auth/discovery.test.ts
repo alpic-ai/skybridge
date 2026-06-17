@@ -6,21 +6,25 @@ import { discoverAuthorizationServer } from "./discovery.js";
 let server: http.Server | undefined;
 afterEach(() => server?.close());
 
-const DOC = {
-  issuer: "https://idp.test",
-  authorization_endpoint: "https://idp.test/authorize",
-  token_endpoint: "https://idp.test/token",
-  registration_endpoint: "https://idp.test/register",
-  response_types_supported: ["code"],
-  scopes_supported: ["openid", "email"],
-  jwks_uri: "https://idp.test/jwks",
-};
+function doc(origin: string, extra: Record<string, unknown> = {}) {
+  return {
+    issuer: origin,
+    authorization_endpoint: `${origin}/authorize`,
+    token_endpoint: `${origin}/token`,
+    registration_endpoint: `${origin}/register`,
+    response_types_supported: ["code"],
+    scopes_supported: ["openid", "email"],
+    jwks_uri: `${origin}/jwks`,
+    ...extra,
+  };
+}
 
-// Serves the given bodies at their well-known paths; returns the origin URL.
-// A string body is sent raw (text/html); anything else is JSON-encoded.
-async function serve(routes: Record<string, unknown>) {
+// Serves bodies built from the live origin at their well-known paths; returns
+// the origin. A string body is sent raw (text/html); anything else is JSON.
+async function serve(build: (origin: string) => Record<string, unknown>) {
+  let origin = "";
   const srv = http.createServer((req, res) => {
-    const body = routes[req.url ?? ""];
+    const body = build(origin)[req.url ?? ""];
     if (body === undefined) {
       res.writeHead(404).end();
       return;
@@ -34,49 +38,60 @@ async function serve(routes: Record<string, unknown>) {
   });
   await new Promise<void>((resolve) => srv.listen(0, resolve));
   server = srv;
-  const port = (srv.address() as { port: number }).port;
-  return `http://localhost:${port}`;
+  origin = `http://localhost:${(srv.address() as { port: number }).port}`;
+  return origin;
 }
 
 describe("discoverAuthorizationServer", () => {
   it("fetches and validates openid-configuration", async () => {
-    const base = await serve({ "/.well-known/openid-configuration": DOC });
+    const base = await serve((o) => ({
+      "/.well-known/openid-configuration": doc(o),
+    }));
     const meta = await discoverAuthorizationServer(base);
-    expect(meta.registration_endpoint).toBe("https://idp.test/register");
-    expect(meta.jwks_uri).toBe("https://idp.test/jwks");
+    expect(meta.registration_endpoint).toBe(`${base}/register`);
+    expect(meta.jwks_uri).toBe(`${base}/jwks`);
   });
 
   it("falls back to oauth-authorization-server when oidc is 404", async () => {
-    const base = await serve({
-      "/.well-known/oauth-authorization-server": DOC,
-    });
+    const base = await serve((o) => ({
+      "/.well-known/oauth-authorization-server": doc(o),
+    }));
     const meta = await discoverAuthorizationServer(base);
-    expect(meta.registration_endpoint).toBe("https://idp.test/register");
+    expect(meta.registration_endpoint).toBe(`${base}/register`);
   });
 
   it("throws when no well-known doc is reachable", async () => {
-    const base = await serve({});
+    const base = await serve(() => ({}));
     await expect(discoverAuthorizationServer(base)).rejects.toThrow(
       /discovery failed/i,
     );
   });
 
   it("falls through to oauth-authorization-server when oidc doc is schema-invalid", async () => {
-    const invalidDoc = { ...DOC };
-    delete (invalidDoc as Partial<typeof DOC>).response_types_supported;
-    const base = await serve({
-      "/.well-known/openid-configuration": invalidDoc,
-      "/.well-known/oauth-authorization-server": DOC,
-    });
+    const base = await serve((o) => ({
+      "/.well-known/openid-configuration": doc(o, {
+        response_types_supported: undefined,
+      }),
+      "/.well-known/oauth-authorization-server": doc(o),
+    }));
     const meta = await discoverAuthorizationServer(base);
-    expect(meta.registration_endpoint).toBe("https://idp.test/register");
+    expect(meta.registration_endpoint).toBe(`${base}/register`);
+  });
+
+  it("rejects a doc whose issuer does not match the fetch origin", async () => {
+    const base = await serve(() => ({
+      "/.well-known/openid-configuration": doc("https://evil.test"),
+    }));
+    await expect(discoverAuthorizationServer(base)).rejects.toThrow(
+      /discovery failed/i,
+    );
   });
 
   it("treats a 200 non-JSON body as unreachable and throws discovery failed", async () => {
-    const base = await serve({
+    const base = await serve(() => ({
       "/.well-known/openid-configuration": "<html>nope</html>",
       "/.well-known/oauth-authorization-server": "<html>nope</html>",
-    });
+    }));
     await expect(discoverAuthorizationServer(base)).rejects.toThrow(
       /discovery failed/i,
     );

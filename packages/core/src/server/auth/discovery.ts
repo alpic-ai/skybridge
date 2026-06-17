@@ -11,6 +11,8 @@ const WELL_KNOWN = [
   "/.well-known/oauth-authorization-server",
 ];
 
+const DISCOVERY_TIMEOUT_MS = 5000;
+
 /** Fetches and validates an authorization server's discovery document. */
 export async function discoverAuthorizationServer(
   issuer: string,
@@ -22,7 +24,9 @@ export async function discoverAuthorizationServer(
     const url = `${base}${path}`;
     let res: Response;
     try {
-      res = await fetch(url);
+      res = await fetch(url, {
+        signal: AbortSignal.timeout(DISCOVERY_TIMEOUT_MS),
+      });
     } catch (err) {
       errors.push(
         `${url}: ${err instanceof Error ? err.message : String(err)}`,
@@ -43,6 +47,13 @@ export async function discoverAuthorizationServer(
     const parsed = OAuthMetadataSchema.safeParse(json);
     if (!parsed.success) {
       errors.push(`${url}: invalid metadata (${parsed.error.message})`);
+      continue;
+    }
+    // RFC 8414 §3.3: the document's issuer must match the URL it came from.
+    if (parsed.data.issuer !== base) {
+      errors.push(
+        `${url}: issuer mismatch (${parsed.data.issuer} !== ${base})`,
+      );
       continue;
     }
     return parsed.data as DiscoveredMetadata;

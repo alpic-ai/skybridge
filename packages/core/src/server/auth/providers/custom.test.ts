@@ -6,38 +6,39 @@ import { customProvider } from "./custom.js";
 let server: http.Server | undefined;
 afterEach(() => server?.close());
 
-async function serveDiscovery(doc: Record<string, unknown>) {
+function doc(origin: string, extra: Record<string, unknown> = {}) {
+  return {
+    issuer: origin,
+    authorization_endpoint: `${origin}/authorize`,
+    token_endpoint: `${origin}/token`,
+    registration_endpoint: `${origin}/register`,
+    response_types_supported: ["code"],
+    scopes_supported: ["openid", "email", "profile"],
+    jwks_uri: `${origin}/jwks`,
+    ...extra,
+  };
+}
+
+// Serves the discovery doc (built from the live origin) at the OIDC well-known path.
+async function serveDiscovery(extra: Record<string, unknown> = {}) {
+  let origin = "";
   const srv = http.createServer((req, res) => {
     if (req.url !== "/.well-known/openid-configuration") {
       res.writeHead(404).end();
       return;
     }
     res.setHeader("content-type", "application/json");
-    res.end(JSON.stringify(doc));
+    res.end(JSON.stringify(doc(origin, extra)));
   });
   await new Promise<void>((resolve) => srv.listen(0, resolve));
   server = srv;
-  const port = (srv.address() as { port: number }).port;
-  return `http://localhost:${port}`;
-}
-
-const ISSUER = "https://idp.test";
-function doc(extra: Record<string, unknown> = {}) {
-  return {
-    issuer: ISSUER,
-    authorization_endpoint: `${ISSUER}/authorize`,
-    token_endpoint: `${ISSUER}/token`,
-    registration_endpoint: `${ISSUER}/register`,
-    response_types_supported: ["code"],
-    scopes_supported: ["openid", "email", "profile"],
-    jwks_uri: `${ISSUER}/jwks`,
-    ...extra,
-  };
+  origin = `http://localhost:${(srv.address() as { port: number }).port}`;
+  return origin;
 }
 
 describe("customProvider", () => {
   it("builds an OAuthConfig from discovery", async () => {
-    const base = await serveDiscovery(doc());
+    const base = await serveDiscovery();
 
     const config = await customProvider({
       issuer: base,
@@ -49,19 +50,17 @@ describe("customProvider", () => {
 
     expect(config.baseUrl).toBe("https://app.example.test");
     expect(config.verify).toEqual({
-      issuer: ISSUER,
+      issuer: base,
       audience: "my-api",
-      jwksUri: `${ISSUER}/jwks`,
+      jwksUri: `${base}/jwks`,
     });
     expect(config.scopesSupported).toEqual(["openid"]);
     expect(config.enforcement).toBe("optional");
-    expect(config.oauthMetadata.registration_endpoint).toBe(
-      `${ISSUER}/register`,
-    );
+    expect(config.oauthMetadata.registration_endpoint).toBe(`${base}/register`);
   });
 
   it("defaults scopesSupported to the discovered scopes", async () => {
-    const base = await serveDiscovery(doc());
+    const base = await serveDiscovery();
     const config = await customProvider({
       issuer: base,
       audience: "a",
@@ -71,9 +70,7 @@ describe("customProvider", () => {
   });
 
   it("rejects a non-DCR IdP (no registration_endpoint)", async () => {
-    const base = await serveDiscovery(
-      doc({ registration_endpoint: undefined }),
-    );
+    const base = await serveDiscovery({ registration_endpoint: undefined });
     await expect(
       customProvider({
         issuer: base,
@@ -84,7 +81,7 @@ describe("customProvider", () => {
   });
 
   it("applies metadataOverrides over discovered values", async () => {
-    const base = await serveDiscovery(doc());
+    const base = await serveDiscovery();
     const config = await customProvider({
       issuer: base,
       audience: "a",
