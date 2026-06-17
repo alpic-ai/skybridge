@@ -17,11 +17,16 @@ const DOC = {
 };
 
 // Serves the given bodies at their well-known paths; returns the origin URL.
+// A string body is sent raw (text/html); anything else is JSON-encoded.
 async function serve(routes: Record<string, unknown>) {
   const srv = http.createServer((req, res) => {
     const body = routes[req.url ?? ""];
     if (body === undefined) {
       res.writeHead(404).end();
+      return;
+    }
+    if (typeof body === "string") {
+      res.writeHead(200, { "content-type": "text/html" }).end(body);
       return;
     }
     res.setHeader("content-type", "application/json");
@@ -68,14 +73,10 @@ describe("discoverAuthorizationServer", () => {
   });
 
   it("treats a 200 non-JSON body as unreachable and throws discovery failed", async () => {
-    const srv = http.createServer((_req, res) => {
-      res.writeHead(200, { "content-type": "text/html" });
-      res.end("<html>nope</html>");
+    const base = await serve({
+      "/.well-known/openid-configuration": "<html>nope</html>",
+      "/.well-known/oauth-authorization-server": "<html>nope</html>",
     });
-    await new Promise<void>((resolve) => srv.listen(0, resolve));
-    server = srv;
-    const port = (srv.address() as { port: number }).port;
-    const base = `http://localhost:${port}`;
     await expect(discoverAuthorizationServer(base)).rejects.toThrow(
       /discovery failed/i,
     );
