@@ -1,6 +1,10 @@
 import { EventEmitter } from "node:events";
 import { describe, expect, it, vi } from "vitest";
-import { type TunnelHandle, TunnelManager } from "./tunnel.js";
+import {
+  type TunnelActivity,
+  type TunnelHandle,
+  TunnelManager,
+} from "./tunnel.js";
 
 function fakeHandle(url = "https://abc.tunnel.alpic.ai") {
   const emitter = new EventEmitter();
@@ -64,6 +68,34 @@ describe("TunnelManager", () => {
     await vi.waitFor(() => expect(manager.getState().status).toBe("connected"));
     manager.stop();
     expect(handle.close).toHaveBeenCalled();
+    expect(manager.getState()).toEqual({ status: "idle" });
+  });
+
+  it("emits an error-level activity when the tunnel errors", async () => {
+    const { handle, emitter } = fakeHandle();
+    const manager = new TunnelManager({
+      getPort: () => 3000,
+      openTunnel: () => Promise.resolve(handle),
+    });
+    const activities: TunnelActivity[] = [];
+    manager.on("activity", (a: TunnelActivity) => activities.push(a));
+    manager.start();
+    await vi.waitFor(() => expect(manager.getState().status).toBe("connected"));
+    emitter.emit("error", new Error("tunnel auth failed"));
+    expect(activities).toContainEqual(
+      expect.objectContaining({ text: "tunnel auth failed", level: "error" }),
+    );
+  });
+
+  it("returns to idle when the tunnel closes on its own", async () => {
+    const { handle, emitter } = fakeHandle();
+    const manager = new TunnelManager({
+      getPort: () => 3000,
+      openTunnel: () => Promise.resolve(handle),
+    });
+    manager.start();
+    await vi.waitFor(() => expect(manager.getState().status).toBe("connected"));
+    emitter.emit("close");
     expect(manager.getState()).toEqual({ status: "idle" });
   });
 });
