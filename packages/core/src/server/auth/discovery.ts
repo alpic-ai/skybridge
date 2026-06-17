@@ -42,9 +42,8 @@ export async function discoverAuthorizationServer(
     }
     const parsed = OAuthMetadataSchema.safeParse(json);
     if (!parsed.success) {
-      throw new Error(
-        `OAuth metadata at ${url} is invalid: ${parsed.error.message}`,
-      );
+      errors.push(`${url}: invalid metadata (${parsed.error.message})`);
+      continue;
     }
     return parsed.data as DiscoveredMetadata;
   }

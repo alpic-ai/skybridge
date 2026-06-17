@@ -56,6 +56,17 @@ describe("discoverAuthorizationServer", () => {
     );
   });
 
+  it("falls through to oauth-authorization-server when oidc doc is schema-invalid", async () => {
+    const invalidDoc = { ...DOC };
+    delete (invalidDoc as Partial<typeof DOC>).response_types_supported;
+    const base = await serve({
+      "/.well-known/openid-configuration": invalidDoc,
+      "/.well-known/oauth-authorization-server": DOC,
+    });
+    const meta = await discoverAuthorizationServer(base);
+    expect(meta.registration_endpoint).toBe("https://idp.test/register");
+  });
+
   it("treats a 200 non-JSON body as unreachable and throws discovery failed", async () => {
     const srv = http.createServer((_req, res) => {
       res.writeHead(200, { "content-type": "text/html" });

@@ -36,7 +36,7 @@ export async function customProvider(opts: {
     baseUrl: opts.baseUrl,
     oauthMetadata,
     verify: {
-      issuer: opts.issuer,
+      issuer: oauthMetadata.issuer,
       audience: opts.audience,
       jwksUri: oauthMetadata.jwks_uri,
     },

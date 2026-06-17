@@ -49,7 +49,7 @@ describe("customProvider", () => {
 
     expect(config.baseUrl).toBe("https://app.example.test");
     expect(config.verify).toEqual({
-      issuer: base,
+      issuer: ISSUER,
       audience: "my-api",
       jwksUri: `${ISSUER}/jwks`,
     });
