@@ -83,7 +83,7 @@ The `extra` parameter exposes:
 - `extra.requestInfo` — HTTP request details (headers, URL)
 - `extra.signal` — abort signal for cancellation
 
-## Response Fields
+## Response fields
 
 Three fields, three audiences:
 
@@ -93,7 +93,7 @@ Three fields, three audiences:
 | `structuredContent` | Typed data | Host and view (`useToolInfo`, `useCallTool`) |
 | `_meta` | Response metadata | View only (hidden from the model) |
 
-See [Data Flow: Response Fields](/concepts/data-flow#response-fields-explained).
+See [Data Flow: response fields](/concepts/data-flow#response-fields-explained).
 
 <Info>
 **viewUUID**: Skybridge automatically injects a unique `viewUUID` into `_meta` for every tool with view call. This enables `useViewState` and `createStore` to persist state across re-renders in MCP Apps via `localStorage`. Any `_meta` you return is preserved alongside the injected `viewUUID`.
@@ -227,7 +227,7 @@ return {
 
 You can still return plain `ContentBlock` objects — helpers are opt-in.
 
-## Input Schema
+## Input schema
 
 Define expected inputs with Zod:
 
@@ -244,7 +244,7 @@ inputSchema: {
 }
 ```
 
-## Output Schema
+## Output schema
 
 Optional type hints:
 
@@ -259,7 +259,7 @@ outputSchema: {
 }
 ```
 
-## CSP & Domains
+## CSP and domains
 
 Views run in a sandboxed iframe with strict Content Security Policy. If your view needs to:
 - **Fetch data from external APIs** → add to `connectDomains`
@@ -294,7 +294,7 @@ server.registerTool(
 );
 ```
 
-### CSP Fields
+### CSP fields
 
 | Field | Purpose | Example |
 |-------|---------|---------|

@@ -5,7 +5,7 @@ tag: "ChatGPT"
 ---
 
 <Warning>
-**Runtime Support**: ChatGPT Apps only
+**Runtime support**: ChatGPT Apps only
 
 This hook is not available in MCP Apps. Calling it in an MCP Apps environment will throw an error.
 </Warning>
@@ -60,7 +60,7 @@ The function may throw errors in the following cases:
 
 ## Examples
 
-### Setting URL with Form Input
+### Setting URL with form input
 
 ```tsx
 import { useSetOpenInAppUrl } from "skybridge/web";
@@ -101,7 +101,7 @@ function UrlSetter() {
 }
 ```
 
-### Dynamic URL Based on State
+### Dynamic URL based on state
 
 ```tsx
 import { useSetOpenInAppUrl, useDisplayMode } from "skybridge/web";
@@ -127,4 +127,8 @@ function ProductDetail({ productId }: { productId: string }) {
 }
 ```
 
+## Related
+
+- [Apps SDK (ChatGPT)](/fundamentals/apps-sdk)
+- [useDisplayMode](/api-reference/use-display-mode)
 

@@ -4,7 +4,7 @@ description: "Read and control view display modes: inline, fullscreen, or pictur
 ---
 
 <Info>
-**Runtime Support**: ChatGPT Apps | MCP Apps
+**Runtime support**: ChatGPT Apps | MCP Apps
 
 Note: MCP Apps do not support the "modal" display mode. Requesting modal mode in MCP Apps will throw an error.
 </Info>
@@ -59,7 +59,7 @@ A function to request a new display mode. Note that the host may reject the requ
 
 ## Examples
 
-### Fullscreen Media Player
+### Fullscreen media player
 
 ```tsx
 import { useDisplayMode } from "skybridge/web";
@@ -79,7 +79,7 @@ function MediaPlayer() {
 }
 ```
 
-### Adaptive Layout
+### Adaptive layout
 
 ```tsx
 import { useDisplayMode } from "skybridge/web";
@@ -105,7 +105,7 @@ function AdaptiveView() {
 }
 ```
 
-### Picture-in-Picture Mode
+### Picture-in-picture mode
 
 ```tsx
 import { useDisplayMode, useUser } from "skybridge/web";
@@ -130,3 +130,8 @@ function FloatingView() {
   );
 }
 ```
+
+## Related
+
+- [useRequestModal](/api-reference/use-request-modal)
+- [Host Environment Context](/guides/host-environment-context)

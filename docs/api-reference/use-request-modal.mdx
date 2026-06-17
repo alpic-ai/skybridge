@@ -4,7 +4,7 @@ description: "Trigger modals portaled outside the view iframe for better overlay
 ---
 
 <Warning>
-**Runtime Support**: In MCP Apps, `useRequestModal` is polyfilled. Modals render inside the view iframe rather than being portaled to the host.
+**Runtime support**: In MCP Apps, `useRequestModal` is polyfilled. Modals render inside the view iframe rather than being portaled to the host.
 </Warning>
 
 The `useRequestModal` hook returns a function to trigger a modal that is portaled outside of the view iframe. This ensures the modal is correctly displayed and not limited to the view's area, allowing for a better user experience when displaying detailed content or forms.
@@ -53,7 +53,7 @@ When the modal is opened, your view will be re-rendered and the `isOpen` propert
 
 ## Examples
 
-### Modal with Different Content
+### Modal with different content
 
 ```tsx
 import { useRequestModal } from "skybridge/web";
@@ -90,7 +90,7 @@ function ProductView() {
 }
 ```
 
-### Settings Modal
+### Settings modal
 
 ```tsx
 import { useRequestModal } from "skybridge/web";
@@ -155,7 +155,7 @@ function SettingsView() {
 }
 ```
 
-### Image Gallery Modal
+### Image gallery modal
 
 ```tsx
 import { useRequestModal } from "skybridge/web";
@@ -219,7 +219,7 @@ function ImageGallery({ images }: { images: Image[] }) {
 }
 ```
 
-### Form Modal
+### Form modal
 
 ```tsx
 import { useRequestModal, useViewState } from "skybridge/web";
@@ -286,3 +286,8 @@ function ContactForm() {
   );
 }
 ```
+
+## Related
+
+- [useDisplayMode](/api-reference/use-display-mode)
+- [Host Environment Context](/guides/host-environment-context)
