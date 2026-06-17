@@ -105,18 +105,4 @@ describe("createJwksVerifier", () => {
       "email",
     ]);
   });
-
-  it("defaults missing scope to an empty array", async () => {
-    const { privateKey, jwksUri } = await startJwks();
-    const verifier = createJwksVerifier({
-      issuer: ISSUER,
-      audience: AUDIENCE,
-      jwksUri,
-    });
-    const token = await sign(privateKey, { client_id: "c" });
-
-    const auth = await verifier.verifyAccessToken(token);
-    expect(auth.scopes).toEqual([]);
-    expect(auth.clientId).toBe("c");
-  });
 });

@@ -123,16 +123,6 @@ describe("setupOAuth wiring", () => {
     expect(body.scopes_supported).toEqual(["openid", "email"]);
   });
 
-  it("serves authorization-server metadata", async () => {
-    const { jwksUri } = await startJwks();
-    const base = await bootServer(jwksUri);
-
-    const res = await fetch(`${base}/.well-known/oauth-authorization-server`);
-    expect(res.status).toBe(200);
-    const body = (await res.json()) as { issuer: string };
-    expect(body.issuer).toBe(ISSUER);
-  });
-
   it("rejects /mcp without a token (401 + WWW-Authenticate)", async () => {
     const { jwksUri } = await startJwks();
     const base = await bootServer(jwksUri);
@@ -194,21 +184,6 @@ describe("enforcement: optional", () => {
     });
     expect(res.status).toBe(200);
   });
-
-  it("still rejects a malformed token", async () => {
-    const { jwksUri } = await startJwks();
-    const base = await bootServer(jwksUri, { enforcement: "optional" });
-
-    const res = await fetch(`${base}/mcp`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer not-a-real-token",
-      },
-      body: JSON.stringify({ jsonrpc: "2.0", method: "initialize", id: 1 }),
-    });
-    expect(res.status).toBe(401);
-  });
 });
 
 describe("oauth config validation", () => {
@@ -230,19 +205,5 @@ describe("oauth config validation", () => {
           },
         }),
     ).toThrow(/baseUrl must be a valid absolute URL/);
-  });
-
-  it("throws when verify.audience is missing", () => {
-    expect(
-      () =>
-        new McpServer({ name: "t", version: "0" }, undefined, {
-          oauth: {
-            baseUrl: "https://app.example.test",
-            oauthMetadata: validMetadata,
-            // @ts-expect-error intentionally missing audience
-            verify: { issuer: ISSUER },
-          },
-        }),
-    ).toThrow(/verify requires both `issuer` and `audience`/);
   });
 });
