@@ -17,7 +17,8 @@ import { McpServer } from "skybridge/server";
 ```typescript
 const server = new McpServer(
   serverInfo: { name: string; version: string },
-  options: McpServerOptions
+  options?: McpServerOptions,
+  skybridgeOptions?: SkybridgeServerOptions
 );
 ```
 
@@ -27,14 +28,26 @@ const server = new McpServer(
 |-----------|------|-------------|
 | `serverInfo.name` | `string` | Name of your MCP server |
 | `serverInfo.version` | `string` | Version of your server |
-| `options` | `McpServerOptions` | Configuration options |
+| `options` | `McpServerOptions` | Configuration options forwarded to the MCP SDK |
+| `skybridgeOptions` | `SkybridgeServerOptions` | Skybridge-specific options |
 
-### Options
+### Skybridge options
 
 ```typescript
-type McpServerOptions = {
-  // Additional options as needed
+type SkybridgeServerOptions = {
+  /** Options for the built-in express.json() middleware, e.g. { limit: "10mb" }. */
+  json?: JsonOptions;
 };
+```
+
+The `json` field is forwarded to the [`express.json()`](https://expressjs.com/en/5x/api/express/#expressjsonoptions) body parser that Skybridge pre-applies to the underlying Express app. Use it to tune parsing — for example, to raise the default 100kb body size limit:
+
+```typescript
+const server = new McpServer(
+  { name: "my-app", version: "1.0" },
+  {},
+  { json: { limit: "10mb" } },
+);
 ```
 
 ## Properties
@@ -55,7 +68,7 @@ server.express.get("/health", (_req, res) => {
 server.express.set("trust proxy", 1);
 ```
 
-`express.json()` is pre-applied. Register your handlers before `run()`; after `run()`, Skybridge appends dev-mode middleware (in development), the `/mcp` route, and the default error handler in that order.
+`express.json()` is pre-applied — tune it via the [constructor's `skybridgeOptions.json`](#skybridge-options). Register your handlers before `run()`; after `run()`, Skybridge appends dev-mode middleware (in development), the `/mcp` route, and the default error handler in that order.
 
 <Note>
 Alpic Cloud only routes traffic to `/mcp` on hosted workloads — custom routes work locally and on self-hosted deployments.
@@ -380,12 +393,14 @@ import type {
   AuthInfo,
   AuthMetadataOptions,
   BearerAuthMiddlewareOptions,
+  JsonOptions,
   McpExtra,
   McpMiddlewareFn,
   McpMiddlewareFilter,
   McpTypedMiddlewareFn,
   McpMethodString,
   SecurityScheme,
+  SkybridgeServerOptions,
 } from "skybridge/server";
 ```
 

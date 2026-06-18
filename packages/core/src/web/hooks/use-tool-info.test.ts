@@ -101,16 +101,16 @@ describe("useToolInfo", () => {
       McpAppAdaptor.resetInstance();
     });
 
-    it("should return idle state initially when tool input is not yet set", async () => {
+    it("should return pending state with undefined input before tool-input notification arrives", async () => {
       const { result } = renderHook(() => useToolInfo());
 
       await waitFor(() => {
         expect(result.current).toMatchObject({
-          status: "idle",
-          isIdle: true,
-          isPending: false,
+          status: "pending",
+          isIdle: false,
+          isPending: true,
           isSuccess: false,
-          input: null,
+          input: undefined,
           output: null,
           responseMetadata: null,
         });

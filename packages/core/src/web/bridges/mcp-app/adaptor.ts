@@ -1,6 +1,7 @@
 import { dequal } from "dequal/lite";
 import type {
   Adaptor,
+  AnyViewToolHandler,
   CallToolResponse,
   DownloadParams,
   DownloadResult,
@@ -12,6 +13,7 @@ import type {
   RequestSizeOptions,
   SendFollowUpMessageOptions,
   SetViewStateAction,
+  ViewToolConfig,
 } from "../types.js";
 import { McpAppBridge } from "./bridge.js";
 import type { McpAppContext, McpAppContextKey } from "./types.js";
@@ -294,6 +296,13 @@ export class McpAppAdaptor implements Adaptor {
   public setOpenInAppUrl(_href: string): Promise<void> {
     throw new Error("setOpenInAppUrl is not implemented in MCP App.");
   }
+
+  public registerViewTool = (
+    config: ViewToolConfig,
+    handler: AnyViewToolHandler,
+  ): (() => void) => {
+    return McpAppBridge.getInstance().registerViewTool(config, handler);
+  };
 
   private subscribeToViewUUID(): void {
     const bridge = McpAppBridge.getInstance();

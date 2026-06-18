@@ -2,16 +2,19 @@ import { Accordion } from "@alpic-ai/ui/components/accordion";
 import { Button } from "@alpic-ai/ui/components/button";
 import { useTimeout } from "ahooks";
 import { RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSuspenseTools } from "@/lib/mcp/index.js";
-import { useSelectedToolName } from "@/lib/nuqs.js";
 import { queryClient } from "@/lib/query-client.js";
 import { cn } from "@/lib/utils.js";
 import { ToolItem } from "./tool-item.js";
 
 function ToolsList() {
   const tools = useSuspenseTools();
-  const [openTool, setOpenTool] = useSelectedToolName();
+  // Start with only the first tool open; its form's first input gets autofocus
+  // (handled in FormBody, which only mounts for open tools).
+  const [openTools, setOpenTools] = useState<string[]>(
+    tools.length > 0 ? [tools[0].name] : [],
+  );
   const [refreshing, setRefreshing] = useState(false);
   const [tailDelay, setTailDelay] = useState<number | undefined>(undefined);
 
@@ -19,12 +22,6 @@ function ToolsList() {
     setRefreshing(false);
     setTailDelay(undefined);
   }, tailDelay);
-
-  useEffect(() => {
-    if (openTool == null && tools[0]) {
-      setOpenTool(tools[0].name);
-    }
-  }, [openTool, tools, setOpenTool]);
 
   const refreshTools = async () => {
     setTailDelay(undefined);
@@ -36,13 +33,9 @@ function ToolsList() {
     }
   };
 
-  const handleToolClick = (toolName: string) => {
-    setOpenTool(toolName);
-  };
-
   return (
     <div className="grid h-full min-h-0 grid-rows-[auto_1fr]">
-      <header className="flex h-9 items-center justify-between border-b border-border  px-3 pr-0">
+      <header className="flex h-9 items-center justify-between border-b border-border pl-4 pr-0">
         <span className="text-sm font-medium">Tools</span>
         <Button
           onClick={refreshTools}
@@ -54,13 +47,13 @@ function ToolsList() {
         </Button>
       </header>
       <Accordion
-        type="single"
-        value={openTool ?? ""}
-        onValueChange={handleToolClick}
+        type="multiple"
+        value={openTools}
+        onValueChange={setOpenTools}
         className="min-h-0 overflow-y-auto"
       >
         {tools.map((tool) => (
-          <ToolItem key={tool.name} tool={tool} open={openTool === tool.name} />
+          <ToolItem key={tool.name} tool={tool} />
         ))}
       </Accordion>
     </div>

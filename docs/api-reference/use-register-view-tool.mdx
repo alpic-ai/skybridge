@@ -1,0 +1,148 @@
+---
+title: useRegisterViewTool
+description: "React hook for exposing app-provided (view) tools that the host and model can call directly against the running view."
+---
+
+`useRegisterViewTool` registers a **view-provided tool** — a tool whose handler
+runs _inside the view_ rather than on the MCP server. The host discovers it via
+`tools/list` and invokes it via `tools/call`, and your handler executes against
+the view's live state. This is the MCP Apps ["app-provided
+tools"](https://github.com/modelcontextprotocol/ext-apps/pull/72) feature.
+
+It is the mirror image of [`useCallTool`](/api-reference/use-call-tool): with
+`useCallTool` the view _calls_ a server tool; with `useRegisterViewTool` the
+view _exposes_ a tool for the model to call.
+
+<Note>
+  View tools are an **MCP Apps** feature. The ChatGPT Apps SDK
+  (`window.openai`) runtime has no equivalent, so on that runtime
+  `useRegisterViewTool` is a no-op (a warning is logged). Use it when targeting
+  MCP Apps hosts.
+</Note>
+
+## Basic usage
+
+```tsx
+import { useRegisterViewTool } from "skybridge/web";
+import * as z from "zod";
+
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  useRegisterViewTool(
+    {
+      name: "counter_increment",
+      description: "Increment the on-screen counter by an amount.",
+      inputSchema: { by: z.number().int().default(1) },
+      annotations: { readOnlyHint: false },
+    },
+    ({ by }) => {
+      setCount((current) => current + by);
+      return {
+        content: [{ type: "text", text: `Counter is now ${count + by}.` }],
+        structuredContent: { count: count + by },
+      };
+    },
+  );
+
+  return <span>{count}</span>;
+}
+```
+
+The tool is registered when the component mounts and removed when it unmounts.
+Arguments are validated against `inputSchema` before the handler runs, and the
+handler receives them fully typed.
+
+## Parameters
+
+```tsx
+useRegisterViewTool(config, handler);
+```
+
+### `config`
+
+```tsx
+type ViewToolConfig = {
+  name: string;
+  title?: string;
+  description?: string;
+  inputSchema?: ZodRawShape;
+  annotations?: ToolAnnotations;
+};
+```
+
+**Required.** Describes the tool. Mirrors the server-side
+[`registerTool`](/api-reference/register-tool) config.
+
+- `name` — Unique tool name. Prefer namespacing (e.g. `chess_make_move`) so it
+  never collides with a server tool.
+- `description` — Written for the model, which decides when to call the tool.
+- `inputSchema` — A Zod raw shape describing the arguments. Validated before the
+  handler runs; surfaced to the host as JSON Schema.
+- `annotations` — MCP tool annotations such as `readOnlyHint` and
+  `destructiveHint`.
+
+### `handler`
+
+```tsx
+type ViewToolHandler = (args) => ViewToolResult | Promise<ViewToolResult>;
+
+// ViewToolResult is the standard MCP `CallToolResult`:
+type ViewToolResult = {
+  content: ContentBlock[];
+  structuredContent?: Record<string, unknown>;
+  isError?: boolean;
+  _meta?: Record<string, unknown>;
+};
+```
+
+**Required.** Runs when the host calls the tool. `args` is typed from
+`config.inputSchema`. Return a standard MCP `CallToolResult` — `content`
+blocks plus optional `structuredContent` and `_meta` (forwarded to the host
+verbatim, same as a server tool result). Set `isError: true` to report a
+failure to the model.
+
+The handler is always read from the latest render, so it sees current state
+without forcing a re-registration.
+
+## Behavior
+
+- The tool is (re)registered when `config.name` changes. Keep the name stable
+  and the schema fixed for the tool's lifetime.
+- Arguments are validated against `inputSchema` before your handler runs;
+  invalid input is rejected by the runtime and the handler is not called.
+- Each registration / removal notifies the host via
+  `notifications/tools/list_changed`.
+
+## Example: a chess move tool
+
+```tsx
+import { useRegisterViewTool } from "skybridge/web";
+import * as z from "zod";
+
+useRegisterViewTool(
+  {
+    name: "chess_make_move",
+    description: "Play a move as Black, in SAN (e.g. 'Nf6') or from/to squares.",
+    inputSchema: {
+      san: z.string().optional(),
+      from: z.string().length(2).optional(),
+      to: z.string().length(2).optional(),
+    },
+    annotations: { readOnlyHint: false },
+  },
+  ({ san, from, to }) => {
+    const result = game.move(san ? { san } : { from, to });
+    if (!result.ok) {
+      return { content: [{ type: "text", text: result.error }], isError: true };
+    }
+    return {
+      content: [{ type: "text", text: `Played ${result.san}.` }],
+      structuredContent: { fen: result.fen },
+    };
+  },
+);
+```
+
+See the [`chess` example](https://github.com/alpic-ai/skybridge/tree/main/examples/chess)
+for a full app built around view tools.

@@ -1,5 +1,8 @@
+import { Button } from "@alpic-ai/ui/components/button";
+import { Input } from "@alpic-ai/ui/components/input";
 import { useRef, useState } from "react";
 import { useFiles } from "skybridge/web";
+import { Code, Description, Field, TabBody } from "../components/ui.js";
 
 export function UseFilesTab() {
   const { upload, getDownloadUrl } = useFiles();
@@ -45,48 +48,34 @@ export function UseFilesTab() {
   }
 
   return (
-    <div className="tab-content">
-      <p className="description">
+    <TabBody>
+      <Description>
         Upload and download files via the host application.
-      </p>
+      </Description>
 
-      <div className="field">
-        <span className="field-label">Upload</span>
-        <input
-          ref={inputRef}
-          type="file"
-          onChange={handleUpload}
-          disabled={isUploading}
-        />
-      </div>
-
-      {error && <p className="error">{error}</p>}
+      <Input
+        ref={inputRef}
+        label="Upload"
+        type="file"
+        onChange={handleUpload}
+        disabled={isUploading}
+        error={error ?? undefined}
+      />
 
       {fileId && (
-        <div className="field">
-          <span className="field-label">File ID</span>
-          <code>{fileId}</code>
-        </div>
+        <Field label="File ID">
+          <Code>{fileId}</Code>
+        </Field>
       )}
 
-      <div className="button-row">
-        <button
-          type="button"
-          className="btn"
-          onClick={handleDownload}
-          disabled={!fileId}
-        >
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={handleDownload} disabled={!fileId}>
           Download
-        </button>
-        <button
-          type="button"
-          className="btn btn-outline"
-          onClick={handleClear}
-          disabled={!fileId}
-        >
+        </Button>
+        <Button variant="secondary" onClick={handleClear} disabled={!fileId}>
           Clear
-        </button>
+        </Button>
       </div>
-    </div>
+    </TabBody>
   );
 }

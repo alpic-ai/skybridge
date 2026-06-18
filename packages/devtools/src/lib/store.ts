@@ -23,6 +23,8 @@ type ToolData = {
   openaiLogs: OpenAiLog[];
   openaiObject: AppsSdkContext | null;
   openInAppUrl: string | null;
+  // Key of the saved input the current form was loaded from (session-only).
+  activeSavedInputKey?: string | null;
 };
 
 export type Store = {

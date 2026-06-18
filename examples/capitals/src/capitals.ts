@@ -1,14 +1,9 @@
-// Minimal data for list (5 fields)
-type RestCountryMinimal = {
-  name: { common: string };
-  capital?: string[];
-  capitalInfo?: { latlng?: [number, number] };
-  cca2: string;
-  flags: { svg: string };
-};
+// The restcountries.com API was deprecated in 2026 (now requires an API key),
+// so we fetch the same dataset from the original open-source project instead.
+const COUNTRIES_DATA_URL =
+  "https://gitlab.com/restcountries/restcountries/-/raw/master/src/main/resources/countriesV3.1.json";
 
-// Full data for details (10 fields)
-type RestCountryFull = {
+type RestCountry = {
   name: { common: string };
   capital?: string[];
   capitalInfo?: { latlng?: [number, number] };
@@ -45,56 +40,44 @@ export type CapitalSummary = {
   coordinates: { lat: number; lng: number };
 };
 
-// Cache for minimal capitals list
-let listCache: RestCountryMinimal[] | null = null;
-let listCacheTime = 0;
-const CACHE_TTL = 1000 * 60 * 60; // 1 hour
+// Cache the dataset in memory to avoid re-downloading it on every tool call
+let countriesCache: RestCountry[] | null = null;
+let countriesCacheTime = 0;
+const CACHE_TTL = 1000 * 60 * 60;
 
-async function fetchAllCountriesMinimal(): Promise<RestCountryMinimal[]> {
+async function fetchAllCountries(): Promise<RestCountry[]> {
   const now = Date.now();
-  if (listCache && now - listCacheTime < CACHE_TTL) {
-    return listCache;
+  if (countriesCache && now - countriesCacheTime < CACHE_TTL) {
+    return countriesCache;
   }
 
-  const fields = ["name", "capital", "capitalInfo", "cca2", "flags"].join(",");
-  const response = await fetch(
-    `https://restcountries.com/v3.1/all?fields=${fields}`,
-  );
+  const response = await fetch(COUNTRIES_DATA_URL);
   if (!response.ok) {
-    throw new Error(`RestCountries API error: ${response.status}`);
+    throw new Error(`Countries dataset error: ${response.status}`);
   }
 
-  const data = (await response.json()) as RestCountryMinimal[];
-  listCache = data.filter(
+  const data = await response.json();
+  if (!Array.isArray(data)) {
+    throw new Error("Countries dataset error: expected an array of countries");
+  }
+
+  countriesCache = (data as RestCountry[]).filter(
     (c) => c.capital && c.capital.length > 0 && c.capitalInfo?.latlng,
   );
-  listCacheTime = now;
+  countriesCacheTime = now;
 
-  return listCache;
+  return countriesCache;
 }
 
-async function fetchCountryByCode(cca2: string): Promise<RestCountryFull> {
-  const fields = [
-    "name",
-    "capital",
-    "capitalInfo",
-    "cca2",
-    "cca3",
-    "flags",
-    "latlng",
-    "population",
-    "continents",
-    "currencies",
-  ].join(",");
-
-  const response = await fetch(
-    `https://restcountries.com/v3.1/alpha/${cca2}?fields=${fields}`,
+async function getCountryByCode(cca2: string): Promise<RestCountry> {
+  const countries = await fetchAllCountries();
+  const country = countries.find(
+    (c) => c.cca2.toLowerCase() === cca2.toLowerCase(),
   );
-  if (!response.ok) {
-    throw new Error(`RestCountries API error: ${response.status}`);
+  if (!country) {
+    throw new Error(`Country "${cca2}" not found`);
   }
-
-  return (await response.json()) as RestCountryFull;
+  return country;
 }
 
 async function fetchWikipediaSummary(title: string) {
@@ -120,7 +103,7 @@ async function fetchWikipediaSummary(title: string) {
 }
 
 export async function getAllCapitals(): Promise<CapitalSummary[]> {
-  const countries = await fetchAllCountriesMinimal();
+  const countries = await fetchAllCountries();
 
   return countries.map((c) => ({
     name: c.capital?.[0] ?? "",
@@ -134,7 +117,7 @@ export async function getAllCapitals(): Promise<CapitalSummary[]> {
 }
 
 export async function getCapitalByCountryCode(cca2: string): Promise<Capital> {
-  const country = await fetchCountryByCode(cca2);
+  const country = await getCountryByCode(cca2);
 
   if (!country.capital) {
     throw new Error(`No capital found for country ${cca2}`);

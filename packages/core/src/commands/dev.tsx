@@ -7,7 +7,6 @@ import { startTunnelControlServer } from "../cli/tunnel-control-server.js";
 import { useMessages } from "../cli/use-messages.js";
 import { useNodemon } from "../cli/use-nodemon.js";
 import { useOpenBrowser } from "../cli/use-open-browser.js";
-import { useOpenTunnelBrowser } from "../cli/use-open-tunnel-browser.js";
 import { useTunnel } from "../cli/use-tunnel.js";
 import { useTypeScriptCheck } from "../cli/use-typescript-check.js";
 import { scanAndWriteViewsDts } from "../web/plugin/scan-views.js";
@@ -75,14 +74,13 @@ export default class Dev extends Command {
       const tsErrors = useTypeScriptCheck();
       const [messages, pushMessage] = useMessages();
       useNodemon(env, pushMessage);
-      useOpenBrowser(port, flags.open && !flags.tunnel);
+      useOpenBrowser(port, flags.open);
       const tunnelState = useTunnel(
         port,
         pushMessage,
         flags.verbose,
         flags.tunnel,
       );
-      useOpenTunnelBrowser(tunnelState, flags.open && flags.tunnel);
 
       return (
         <Box flexDirection="column" padding={1} marginLeft={1}>

@@ -21,7 +21,11 @@ test.describe("devtools auth", () => {
       page.getByRole("button", { name: "whoami", exact: true }),
     ).toBeVisible();
 
-    await page.getByRole("button", { name: /^run$/i }).click();
+    // Every tool header has its own Run button — scope to this tool.
+    await page
+      .locator('[data-tool-name="whoami"]')
+      .getByRole("button", { name: /^run$/i })
+      .click();
     await expect(page.getByRole("main")).toContainText(SEED_CLIENT_ID);
   });
 
@@ -38,7 +42,10 @@ test.describe("devtools auth", () => {
     await expect(page.getByText("Connected")).toBeVisible();
 
     await page.getByRole("button", { name: "whoami", exact: true }).click();
-    await page.getByRole("button", { name: /^run$/i }).click();
+    await page
+      .locator('[data-tool-name="whoami"]')
+      .getByRole("button", { name: /^run$/i })
+      .click();
 
     // The clientId is whatever the mock AS minted during DCR — a UUID, not
     // the pre-seeded client id. Asserting the UUID shape verifies that the

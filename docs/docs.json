@@ -111,6 +111,7 @@
             "pages": [
               "api-reference/use-tool-info",
               "api-reference/use-call-tool",
+              "api-reference/use-register-view-tool",
               "api-reference/use-layout",
               "api-reference/use-user",
               "api-reference/use-display-mode",
@@ -164,6 +165,7 @@
             "group": "Use cases",
             "pages": [
               "examples/capitals",
+              "examples/chess",
               "examples/flight-booking",
               "examples/ecommerce-carousel",
               "examples/investigation-game",

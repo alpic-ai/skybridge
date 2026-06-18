@@ -1,6 +1,15 @@
 import { App } from "@modelcontextprotocol/ext-apps";
-import type { Implementation } from "@modelcontextprotocol/sdk/types.js";
-import type { Bridge, Subscribe } from "../types.js";
+import {
+  type Implementation,
+  ListToolsRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
+import * as z from "zod";
+import type {
+  AnyViewToolHandler,
+  Bridge,
+  Subscribe,
+  ViewToolConfig,
+} from "../types.js";
 import type { McpAppContext, McpAppContextKey } from "./types.js";
 
 /** @internal Singleton bridge over the `ext-apps` JSON-RPC App connection. Used by {@link McpAppAdaptor}. */
@@ -16,7 +25,11 @@ export class McpAppBridge implements Bridge<McpAppContext> {
   private connectPromise: Promise<void>;
 
   constructor(options: { appInfo: Implementation }) {
-    this.app = new App(options.appInfo);
+    this.app = new App(options.appInfo, { tools: { listChanged: true } });
+
+    this.app.setRequestHandler(ListToolsRequestSchema, async () => ({
+      tools: [],
+    }));
 
     this.app.ontoolinput = (params) => {
       this.updateContext({ toolInput: params.arguments ?? {} });
@@ -56,6 +69,32 @@ export class McpAppBridge implements Bridge<McpAppContext> {
   public async getApp(): Promise<App> {
     await this.connectPromise;
     return this.app;
+  }
+
+  public registerViewTool(
+    config: ViewToolConfig,
+    handler: AnyViewToolHandler,
+  ): () => void {
+    const inputSchema = config.inputSchema
+      ? z.object(config.inputSchema)
+      : z.object({});
+
+    const registered = this.app.registerTool(
+      config.name,
+      {
+        ...(config.title !== undefined ? { title: config.title } : {}),
+        ...(config.description !== undefined
+          ? { description: config.description }
+          : {}),
+        inputSchema,
+        ...(config.annotations ? { annotations: config.annotations } : {}),
+      },
+      handler,
+    );
+
+    return () => {
+      registered.remove();
+    };
   }
 
   public static getInstance(

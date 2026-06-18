@@ -29,68 +29,62 @@ function AppLayout() {
   });
 
   return (
-    <div className="grid h-screen grid-rows-1 overflow-hidden bg-muted p-3 text-foreground">
-      <div className="grid min-h-0 grid-rows-[auto_1fr] overflow-hidden rounded-2xl border border-border bg-background shadow-sm">
-        <Header />
-        {isConnected ? (
-          <div
-            id="devtools-card-body"
-            className="relative flex min-h-0 min-w-0 flex-1"
+    <div className="grid h-screen grid-rows-[auto_1fr] overflow-hidden bg-background text-foreground">
+      <Header />
+      {isConnected ? (
+        <div
+          id="devtools-card-body"
+          className="relative flex min-h-0 min-w-0 flex-1"
+        >
+          <Group
+            orientation="horizontal"
+            id={TOOLS_SPLIT_GROUP_ID}
+            className="flex min-h-0 min-w-0 flex-1"
+            defaultLayout={defaultLayout}
+            onLayoutChanged={onLayoutChanged}
           >
-            <Group
-              orientation="horizontal"
-              id={TOOLS_SPLIT_GROUP_ID}
-              className="flex min-h-0 min-w-0 flex-1"
-              defaultLayout={defaultLayout}
-              onLayoutChanged={onLayoutChanged}
+            <Panel
+              id={TOOLS_LIST_PANEL_ID}
+              defaultSize={380}
+              minSize={250}
+              maxSize={510}
+              className="min-h-0 min-w-0"
             >
-              <Panel
-                id={TOOLS_LIST_PANEL_ID}
-                defaultSize={380}
-                minSize={250}
-                maxSize={510}
-                className="min-h-0 min-w-0"
-              >
-                <aside className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
-                  <Suspense fallback={null}>
-                    <ToolsList />
-                  </Suspense>
-                </aside>
-              </Panel>
-              <Separator className="w-px shrink-0 bg-border transition-colors hover:bg-ring data-separator-active:bg-ring" />
-              <Panel
-                id={TOOL_PANEL_ID}
-                minSize={320}
-                className="min-h-0 min-w-0"
-              >
-                <main className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
-                  <Suspense fallback={null}>
-                    <ToolPanel />
-                  </Suspense>
-                </main>
-              </Panel>
-            </Group>
+              <aside className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+                <Suspense fallback={null}>
+                  <ToolsList />
+                </Suspense>
+              </aside>
+            </Panel>
+            <Separator className="w-px shrink-0 bg-border transition-colors hover:bg-ring data-separator-active:bg-ring" />
+            <Panel id={TOOL_PANEL_ID} minSize={320} className="min-h-0 min-w-0">
+              <main className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+                <Suspense fallback={null}>
+                  <ToolPanel />
+                </Suspense>
+              </main>
+            </Panel>
+          </Group>
+        </div>
+      ) : (
+        <div className="flex items-center justify-center">
+          <div className="space-y-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              {status === "connecting"
+                ? "Connecting to server..."
+                : requiresAuth
+                  ? "Authentication required to access this server."
+                  : "Not connected to a server."}
+            </p>
+            {status !== "connecting" && (
+              <Button variant="secondary" onClick={connectToServer}>
+                <PlugZap className="size-3.5" />
+                Connect
+              </Button>
+            )}
           </div>
-        ) : (
-          <div className="flex items-center justify-center">
-            <div className="space-y-4 text-center">
-              <p className="text-sm text-muted-foreground">
-                {status === "connecting"
-                  ? "Connecting to server..."
-                  : requiresAuth
-                    ? "Authentication required to access this server."
-                    : "Not connected to a server."}
-              </p>
-              {status !== "connecting" && (
-                <Button variant="secondary" onClick={connectToServer}>
-                  <PlugZap className="size-3.5" />
-                  Connect
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

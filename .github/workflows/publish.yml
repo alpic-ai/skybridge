@@ -32,6 +32,9 @@ jobs:
 
       - name: Set version
         id: version
+        env:
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
         run: |
           if [ "${{ github.event_name }}" = "release" ]; then
             # Remove 'v' prefix from release tag (e.g., v1.0.0 -> 1.0.0)
@@ -45,14 +48,14 @@ jobs:
               exit 1
             fi
 
-            echo "version=$VERSION" >> $GITHUB_OUTPUT
-            echo "tag=latest" >> $GITHUB_OUTPUT
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
             echo "✅ Release version: $VERSION"
-            echo "Release name: ${{ github.event.release.name }}"
-            echo "Release body: ${{ github.event.release.body }}"
+            printf 'Release name: %s\n' "$RELEASE_NAME"
+            printf 'Release body:\n%s\n' "$RELEASE_BODY"
           else
-            echo "version=0.0.0-dev.${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
-            echo "tag=dev" >> $GITHUB_OUTPUT
+            echo "version=0.0.0-dev.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            echo "tag=dev" >> "$GITHUB_OUTPUT"
             echo "✅ Dev version: 0.0.0-dev.${GITHUB_SHA::7}"
           fi
 
