@@ -16,22 +16,27 @@ export async function customProvider(opts: {
   metadataOverrides?: Omit<Partial<OAuthMetadata>, "issuer">;
 }): Promise<OAuthConfig> {
   const discovered = await discoverAuthorizationServer(opts.issuer);
-  // Drop `issuer` from overrides at runtime (the type already forbids it) so it
-  // can't be swapped after discovery validated the original authorization server.
-  const { issuer: _ignoredIssuer, ...overrides } = (opts.metadataOverrides ??
-    {}) as Partial<OAuthMetadata>;
-  const oauthMetadata: DiscoveredMetadata = { ...discovered, ...overrides };
 
-  if (!oauthMetadata.registration_endpoint) {
+  // The IdP's own discovery must advertise DCR and a JWKS; overrides can't fake it.
+  if (!discovered.registration_endpoint) {
     throw new Error(
       `${opts.issuer} is not DCR-compatible (no registration_endpoint); customProvider only supports DCR IdPs.`,
     );
   }
-  if (!oauthMetadata.jwks_uri) {
+  if (!discovered.jwks_uri) {
     throw new Error(
       `${opts.issuer} discovery has no jwks_uri; JWKS verification requires it.`,
     );
   }
+
+  // Overrides adjust only advertised metadata (e.g. proxied endpoints). The
+  // trust anchor (issuer, jwks_uri) always comes from validated discovery.
+  const {
+    issuer: _issuer,
+    jwks_uri: _jwks,
+    ...overrides
+  } = (opts.metadataOverrides ?? {}) as Partial<DiscoveredMetadata>;
+  const oauthMetadata: DiscoveredMetadata = { ...discovered, ...overrides };
 
   return {
     baseUrl: opts.baseUrl,
@@ -39,7 +44,7 @@ export async function customProvider(opts: {
     verify: {
       issuer: discovered.issuer,
       audience: opts.audience,
-      jwksUri: oauthMetadata.jwks_uri,
+      jwksUri: discovered.jwks_uri,
     },
     scopesSupported: opts.scopes ?? oauthMetadata.scopes_supported,
     requiredScopes: opts.requiredScopes,

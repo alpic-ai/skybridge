@@ -84,6 +84,16 @@ describe("customProvider", () => {
     expect(config.oauthMetadata.issuer).toBe(base);
   });
 
+  it("ignores a runtime jwks_uri override (keeps the discovered signing keys)", async () => {
+    const base = await serveDiscovery();
+    const config = await customProvider({
+      issuer: base,
+      audience: "a",
+      metadataOverrides: { jwks_uri: "https://evil.test/keys" } as never,
+    });
+    expect(config.verify.jwksUri).toBe(`${base}/jwks`);
+  });
+
   it("rejects a non-DCR IdP (no registration_endpoint)", async () => {
     const base = await serveDiscovery({ registration_endpoint: undefined });
     await expect(
@@ -91,6 +101,17 @@ describe("customProvider", () => {
         issuer: base,
         audience: "a",
         baseUrl: "https://app.example.test",
+      }),
+    ).rejects.toThrow(/not DCR-compatible/);
+  });
+
+  it("rejects a non-DCR IdP even if an override supplies registration_endpoint", async () => {
+    const base = await serveDiscovery({ registration_endpoint: undefined });
+    await expect(
+      customProvider({
+        issuer: base,
+        audience: "a",
+        metadataOverrides: { registration_endpoint: `${base}/register` },
       }),
     ).rejects.toThrow(/not DCR-compatible/);
   });
