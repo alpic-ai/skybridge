@@ -4,7 +4,7 @@ import {
 } from "@modelcontextprotocol/sdk/server/auth/router.js";
 import cors from "cors";
 import type { Express, Request } from "express";
-import { optionalBearerAuth, requireBearerAuth } from "../auth.js";
+import { requireBearerAuth } from "../auth.js";
 import { resolveServerOrigin } from "../requestOrigin.js";
 import type { OAuthConfig } from "./index.js";
 import { createJwksVerifier } from "./verify.js";
@@ -16,8 +16,6 @@ export function setupOAuth(app: Express, config: OAuthConfig): void {
   }
 
   const verifier = createJwksVerifier(config.verify);
-  const bearer =
-    config.enforcement === "optional" ? optionalBearerAuth : requireBearerAuth;
 
   // baseUrl known at boot: bake the resource URLs once, no Host-header trust.
   if (config.baseUrl !== undefined) {
@@ -40,7 +38,7 @@ export function setupOAuth(app: Express, config: OAuthConfig): void {
     );
     app.use(
       "/mcp",
-      bearer({
+      requireBearerAuth({
         verifier,
         requiredScopes: config.requiredScopes,
         resourceMetadataUrl: getOAuthProtectedResourceMetadataUrl(baseUrl),
@@ -68,7 +66,7 @@ export function setupOAuth(app: Express, config: OAuthConfig): void {
     });
   });
   app.use("/mcp", (req, res, next) =>
-    bearer({
+    requireBearerAuth({
       verifier,
       requiredScopes: config.requiredScopes,
       resourceMetadataUrl: getOAuthProtectedResourceMetadataUrl(

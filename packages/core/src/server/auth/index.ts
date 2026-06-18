@@ -16,6 +16,4 @@ export type OAuthConfig = {
   scopesSupported?: string[];
   /** Server-wide required-scope floor. */
   requiredScopes?: string[];
-  /** `required` (default) gates `/mcp`; `optional` allows anonymous for per-tool checks. */
-  enforcement?: "required" | "optional";
 };

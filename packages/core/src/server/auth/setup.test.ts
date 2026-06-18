@@ -61,13 +61,7 @@ function signToken(key: CryptoKey) {
 
 async function bootServer(
   jwksUri: string,
-  {
-    baseUrl = "https://app.example.test",
-    enforcement = "required",
-  }: {
-    baseUrl?: string | null;
-    enforcement?: "required" | "optional";
-  } = {},
+  { baseUrl = "https://app.example.test" }: { baseUrl?: string | null } = {},
 ) {
   const { createApp } = await import("../express.js");
   const server = new McpServer(
@@ -85,7 +79,6 @@ async function bootServer(
         verify: { issuer: ISSUER, audience: AUDIENCE, jwksUri },
         scopesSupported: ["openid", "email"],
         requiredScopes: ["openid"],
-        enforcement,
       },
     },
   ).registerTool(
@@ -219,32 +212,6 @@ describe("baseUrl inferred from headers", () => {
     expect(res.headers.get("www-authenticate")).toMatch(
       /resource_metadata="https:\/\/infer\.example\.test\//,
     );
-  });
-});
-
-describe("enforcement: optional", () => {
-  it("lets an anonymous /mcp request through", async () => {
-    const { jwksUri } = await startJwks();
-    const base = await bootServer(jwksUri, { enforcement: "optional" });
-
-    const res = await fetch(`${base}/mcp`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json, text/event-stream",
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        method: "initialize",
-        id: 1,
-        params: {
-          protocolVersion: "2025-06-18",
-          capabilities: {},
-          clientInfo: { name: "anon", version: "0.0.0" },
-        },
-      }),
-    });
-    expect(res.status).toBe(200);
   });
 });
 
