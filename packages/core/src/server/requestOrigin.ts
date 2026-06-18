@@ -14,8 +14,10 @@ export function resolveServerOrigin(
     const proto = firstHop(header("x-forwarded-proto")) || "https";
     return `${proto}://${forwardedHost}`;
   }
+  // Skip opaque origins (browsers send the literal "null") and other
+  // non-URL values, falling through to the Host header.
   const origin = header("origin");
-  if (origin) {
+  if (origin && URL.canParse(origin)) {
     return origin;
   }
   const host = header("host");

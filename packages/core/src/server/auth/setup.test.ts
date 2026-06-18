@@ -191,6 +191,18 @@ describe("baseUrl inferred from headers", () => {
     expect(body.resource).toBe("https://public.example/");
   });
 
+  it("falls back to Host when Origin is opaque (null)", async () => {
+    const { jwksUri } = await startJwks();
+    const base = await bootServer(jwksUri, { baseUrl: null });
+
+    const res = await fetch(`${base}/.well-known/oauth-protected-resource`, {
+      headers: { origin: "null" },
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { resource: string };
+    expect(body.resource).toMatch(/^http:\/\/(localhost|127\.0\.0\.1):/);
+  });
+
   it("points the 401 WWW-Authenticate at the inferred host", async () => {
     const { jwksUri } = await startJwks();
     const base = await bootServer(jwksUri, { baseUrl: null });
