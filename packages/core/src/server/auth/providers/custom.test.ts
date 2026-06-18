@@ -73,6 +73,17 @@ describe("customProvider", () => {
     expect(config.baseUrl).toBeUndefined();
   });
 
+  it("ignores a runtime issuer override (keeps the discovered trust anchor)", async () => {
+    const base = await serveDiscovery();
+    const config = await customProvider({
+      issuer: base,
+      audience: "a",
+      metadataOverrides: { issuer: "https://evil.test" } as never,
+    });
+    expect(config.verify.issuer).toBe(base);
+    expect(config.oauthMetadata.issuer).toBe(base);
+  });
+
   it("rejects a non-DCR IdP (no registration_endpoint)", async () => {
     const base = await serveDiscovery({ registration_endpoint: undefined });
     await expect(

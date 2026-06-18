@@ -48,6 +48,14 @@ describe("discoverAuthorizationServer", () => {
     expect(meta.jwks_uri).toBe(`${base}/jwks`);
   });
 
+  it("accepts a canonically slash-terminated issuer", async () => {
+    const base = await serve((o) => ({
+      "/.well-known/openid-configuration": doc(o, { issuer: `${o}/` }),
+    }));
+    const meta = await discoverAuthorizationServer(base);
+    expect(meta.registration_endpoint).toBe(`${base}/register`);
+  });
+
   it("falls back to oauth-authorization-server when oidc is 404", async () => {
     const base = await serve((o) => ({
       "/.well-known/oauth-authorization-server": doc(o),

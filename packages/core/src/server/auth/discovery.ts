@@ -50,7 +50,9 @@ export async function discoverAuthorizationServer(
       continue;
     }
     // RFC 8414 §3.3: the document's issuer must match the URL it came from.
-    if (parsed.data.issuer !== base) {
+    // Compare slash-insensitively so a canonically slash-terminated issuer
+    // isn't rejected by the trailing-slash strip applied to `base`.
+    if (parsed.data.issuer.replace(/\/$/, "") !== base) {
       errors.push(
         `${url}: issuer mismatch (${parsed.data.issuer} !== ${base})`,
       );

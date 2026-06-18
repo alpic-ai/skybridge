@@ -16,10 +16,11 @@ export async function customProvider(opts: {
   metadataOverrides?: Omit<Partial<OAuthMetadata>, "issuer">;
 }): Promise<OAuthConfig> {
   const discovered = await discoverAuthorizationServer(opts.issuer);
-  const oauthMetadata: DiscoveredMetadata = {
-    ...discovered,
-    ...opts.metadataOverrides,
-  };
+  // Drop `issuer` from overrides at runtime (the type already forbids it) so it
+  // can't be swapped after discovery validated the original authorization server.
+  const { issuer: _ignoredIssuer, ...overrides } = (opts.metadataOverrides ??
+    {}) as Partial<OAuthMetadata>;
+  const oauthMetadata: DiscoveredMetadata = { ...discovered, ...overrides };
 
   if (!oauthMetadata.registration_endpoint) {
     throw new Error(
@@ -36,7 +37,7 @@ export async function customProvider(opts: {
     baseUrl: opts.baseUrl,
     oauthMetadata,
     verify: {
-      issuer: oauthMetadata.issuer,
+      issuer: discovered.issuer,
       audience: opts.audience,
       jwksUri: oauthMetadata.jwks_uri,
     },
