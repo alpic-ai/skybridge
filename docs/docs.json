@@ -60,6 +60,7 @@
           {
             "group": "Guides",
             "icon": "book-open",
+            "root": "guides/index",
             "pages": [
               "guides/csp",
               "guides/ux",

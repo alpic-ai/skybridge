@@ -6,7 +6,7 @@ icon: "sparkles"
 ---
 <img src="/images/ux.png" alt="UX Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
 
-An MCP App is a new kind of surface with its own UX principles. The view shares the screen with an ongoing conversation, on a canvas the host owns and can reshape at any moment. Skybridge surfaces that environment through hooks, so the view can read its context and adapt.
+An MCP App is a new kind of surface with its own UX principles. The view shares the screen with an ongoing conversation, in a frame the host controls. Skybridge surfaces that environment through hooks, so the view can read its context and adapt.
 
 ```tsx views/carousel.tsx
 import { useDisplayMode, useLayout, useUser } from "skybridge/web";
@@ -110,9 +110,9 @@ The carousel adds a `dark` class when the host is dark, the convention Tailwind'
 
 `useDisplayMode` returns the current mode and a setter. The three modes give the view different room and purpose:
 
-- **Inline** is the default: a compact panel embedded in the conversation. The smallest surface, so it suits a single result or a short list.
-- **Fullscreen** takes over the surface for richer, multi-step tasks.
-- **PiP** floats above the conversation and stays open, which fits live or changing content. On mobile it coerces to fullscreen.
+- `inline` is the default: a compact panel embedded in the conversation. The smallest surface, so it suits a single result or a short list.
+- `fullscreen` takes over the surface for richer, multi-step tasks.
+- `pip`(picture in picture) floats above the conversation and stays open, which fits live or changing content. On mobile it coerces to fullscreen.
 
 Switching is user-triggered, and the host can decline the request.
 
@@ -180,11 +180,9 @@ export default function Carousel() {
 
 The carousel renders a compact card on mobile. Reach for `capabilities.hover` before relying on hover affordances, and `locale` to translate copy.
 
-## Preview Every Surface
+## Iterate
 
-You don't need four devices to check this. The [DevTools](/test/devtools) environment inspector flips theme, display mode, locale, and device type live, so you can watch the view adapt on localhost, then confirm it in a real host through the [tunnel](/test/tunnel).
-
-For overlay surfaces, see [`useRequestModal`](/api-reference/use-request-modal) (a confirmation on top of the view) and [`useRequestSize`](/api-reference/use-request-size) (let the view ask for a height).
+The [DevTools](/test/devtools) environment inspector flips theme, display mode, locale, and device type live, so you can watch the view adapt on localhost, then confirm it in a real host through the [tunnel](/test/tunnel).
 
 ## Go Further
 <Columns cols={3}>

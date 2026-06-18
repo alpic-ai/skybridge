@@ -59,6 +59,10 @@ server.registerTool(
 
 The carousel checks live stock from `api.myshop.com`, so that origin is listed.
 
+<Info>
+Your server's origin is already in `connectDomains`, so same-origin requests need no entry. In development, the dev server's WebSocket origin is added too, for hot reload.
+</Info>
+
 ## Load External Assets
 
 `resourceDomains` covers the static assets the browser loads from another origin: images, fonts, scripts, and stylesheets, whether from a CDN, a fonts provider, or any other host.
@@ -85,6 +89,10 @@ server.registerTool(
 ```
 
 The carousel's product images come from `cdn.myshop.com`, so that origin has to be listed or they won't render.
+
+<Info>
+Your server's origin is already in `resourceDomains`, so assets served from it need no entry.
+</Info>
 
 ## Embed an Iframe
 
@@ -139,13 +147,6 @@ server.registerTool(
 ```
 
 The carousel hands off to `checkout.myshop.com` to take payment; listing it skips the interstitial on the way out.
-
-## Allowed Automatically
-
-You never declare your own server:
-
-- Your server's origin is added to `connectDomains` and `resourceDomains`, so same-origin requests and assets work untouched.
-- In development, the dev server's WebSocket origin is added to `connectDomains` for hot reload.
 
 ## Verify Your CSP
 
