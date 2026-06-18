@@ -1,7 +1,6 @@
 ---
 title: useDownload
 description: "Trigger file downloads from a view."
-tag: "MCP Apps"
 ---
 
 Views run in sandboxed iframes where direct downloads (`<a download>`, `URL.createObjectURL`) are blocked. The `useDownload` hook returns a `download` function that asks the host to save one or more files to the user's filesystem. The host shows a confirmation dialog before initiating the download.

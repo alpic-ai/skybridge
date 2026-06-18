@@ -150,13 +150,6 @@
             ]
           },
           {
-            "group": "CLI",
-            "icon": "terminal",
-            "pages": [
-              "api-reference/cli"
-            ]
-          },
-          {
             "group": "Server",
             "icon": "server",
             "pages": [
@@ -168,21 +161,23 @@
             "group": "Hooks",
             "icon": "fishing-rod",
             "pages": [
-              "api-reference/use-tool-info",
+              "api-reference/use-apps-sdk-context",
               "api-reference/use-call-tool",
-              "api-reference/use-register-view-tool",
-              "api-reference/use-layout",
-              "api-reference/use-user",
               "api-reference/use-display-mode",
-              "api-reference/use-open-external",
-              "api-reference/use-set-open-in-app-url",
-              "api-reference/use-send-follow-up-message",
-              "api-reference/use-view-state",
-              "api-reference/use-request-modal",
-              "api-reference/use-request-close",
-              "api-reference/use-request-size",
+              "api-reference/use-download",
               "api-reference/use-files",
-              "api-reference/use-download"
+              "api-reference/use-layout",
+              "api-reference/use-mcp-app-context",
+              "api-reference/use-open-external",
+              "api-reference/use-register-view-tool",
+              "api-reference/use-request-close",
+              "api-reference/use-request-modal",
+              "api-reference/use-request-size",
+              "api-reference/use-send-follow-up-message",
+              "api-reference/use-set-open-in-app-url",
+              "api-reference/use-tool-info",
+              "api-reference/use-user",
+              "api-reference/use-view-state"
             ]
           },
           {
@@ -190,24 +185,23 @@
             "icon": "toolbox",
             "pages": [
               "api-reference/create-store",
-              "api-reference/generate-helpers",
-              "api-reference/data-llm"
+              "api-reference/data-llm",
+              "api-reference/generate-helpers"
             ]
           },
           {
             "group": "Types",
-            "icon": "brackets-curly",
+            "icon": "type",
             "pages": [
-              "api-reference/infer-utility-types",
-              "api-reference/file-ref"
+              "api-reference/file-ref",
+              "api-reference/infer-utility-types"
             ]
           },
           {
-            "group": "Advanced",
-            "icon": "gear",
+            "group": "CLI",
+            "icon": "terminal",
             "pages": [
-              "api-reference/use-apps-sdk-context",
-              "api-reference/use-mcp-app-context"
+              "api-reference/cli"
             ]
           }
         ]
