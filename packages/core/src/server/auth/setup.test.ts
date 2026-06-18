@@ -191,12 +191,12 @@ describe("baseUrl inferred from headers", () => {
     expect(body.resource).toBe("https://public.example/");
   });
 
-  it("falls back to Host when Origin is opaque (null)", async () => {
+  it("ignores the client Origin header, using Host instead", async () => {
     const { jwksUri } = await startJwks();
     const base = await bootServer(jwksUri, { baseUrl: null });
 
     const res = await fetch(`${base}/.well-known/oauth-protected-resource`, {
-      headers: { origin: "null" },
+      headers: { origin: "https://chatgpt.com" },
     });
     expect(res.status).toBe(200);
     const body = (await res.json()) as { resource: string };
