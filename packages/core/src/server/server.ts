@@ -48,6 +48,7 @@ import type {
   McpWildcard,
 } from "./middleware.js";
 import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
+import { resolveServerOrigin } from "./requestOrigin.js";
 import { templateHelper } from "./templateHelper.js";
 
 const mergeWithUnion = <T extends object, S extends object>(
@@ -924,25 +925,7 @@ export class McpServer<
     };
     const isClaude = header("user-agent") === "Claude-User";
 
-    let serverUrl: string;
-    const forwardedHost = header("x-forwarded-host");
-    const origin = header("origin");
-    const host = header("host");
-
-    if (forwardedHost) {
-      const proto = header("x-forwarded-proto") || "https";
-      serverUrl = `${proto}://${forwardedHost}`;
-    } else if (origin) {
-      serverUrl = origin;
-    } else if (host) {
-      const proto = ["127.0.0.1:", "localhost:"].some((p) => host.startsWith(p))
-        ? "http"
-        : "https";
-      serverUrl = `${proto}://${host}`;
-    } else {
-      const devPort = process.env.__PORT || "3000";
-      serverUrl = `http://localhost:${devPort}`;
-    }
+    const serverUrl = resolveServerOrigin(header);
 
     const connectDomains = [serverUrl];
     if (!isProduction) {

@@ -64,7 +64,10 @@ async function bootServer(
   {
     baseUrl = "https://app.example.test",
     enforcement = "required",
-  }: { baseUrl?: string; enforcement?: "required" | "optional" } = {},
+  }: {
+    baseUrl?: string | null;
+    enforcement?: "required" | "optional";
+  } = {},
 ) {
   const { createApp } = await import("../express.js");
   const server = new McpServer(
@@ -72,7 +75,7 @@ async function bootServer(
     { capabilities: {} },
     {
       oauth: {
-        baseUrl,
+        ...(baseUrl === null ? {} : { baseUrl }),
         oauthMetadata: {
           issuer: ISSUER,
           authorization_endpoint: `${ISSUER}/authorize`,
@@ -157,6 +160,38 @@ describe("setupOAuth wiring", () => {
     expect(result.content[0]?.text).toBe("client-1");
 
     await client.close();
+  });
+});
+
+describe("baseUrl inferred from headers", () => {
+  it("derives the resource origin from x-forwarded-host", async () => {
+    const { jwksUri } = await startJwks();
+    const base = await bootServer(jwksUri, { baseUrl: null });
+
+    const res = await fetch(`${base}/.well-known/oauth-protected-resource`, {
+      headers: { "x-forwarded-host": "infer.example.test" },
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { resource: string };
+    expect(body.resource).toBe("https://infer.example.test/");
+  });
+
+  it("points the 401 WWW-Authenticate at the inferred host", async () => {
+    const { jwksUri } = await startJwks();
+    const base = await bootServer(jwksUri, { baseUrl: null });
+
+    const res = await fetch(`${base}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-forwarded-host": "infer.example.test",
+      },
+      body: JSON.stringify({ jsonrpc: "2.0", method: "initialize", id: 1 }),
+    });
+    expect(res.status).toBe(401);
+    expect(res.headers.get("www-authenticate")).toMatch(
+      /resource_metadata="https:\/\/infer\.example\.test\//,
+    );
   });
 });
 
