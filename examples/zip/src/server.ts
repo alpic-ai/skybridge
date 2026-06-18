@@ -1,3 +1,4 @@
+import "./env.js";
 import { FileRef, McpServer, text } from "skybridge/server";
 import { z } from "zod";
 import { getArchive, storeArchive } from "./storage.js";
@@ -35,57 +36,62 @@ const server = new McpServer(
     },
   },
   async ({ file }, extra) => {
-    // 1. Télécharger le fichier reçu.
-    const response = await fetch(file.download_url);
-    if (!response.ok) {
-      return {
-        content: [text(`Échec du téléchargement (HTTP ${response.status}).`)],
-        isError: true,
+    try {
+      // 1. Télécharger le fichier reçu.
+      const response = await fetch(file.download_url);
+      if (!response.ok) {
+        return {
+          content: [text(`Échec du téléchargement (HTTP ${response.status}).`)],
+          isError: true,
+        };
+      }
+      const input = Buffer.from(await response.arrayBuffer());
+
+      // 2. Zipper (zlib).
+      const entryName = file.file_name ?? "file";
+      const archiveName = `${entryName}.zip`;
+      const zipped = createZip([{ name: entryName, data: input }]);
+
+      // 3. Ranger en stockage temporaire (R2 en prod, mémoire en dev).
+      //    Pour le fallback local, on dérive l'URL de la requête entrante.
+      const headers = (extra.requestInfo?.headers ?? {}) as Record<
+        string,
+        string | string[] | undefined
+      >;
+      const pick = (name: string) => {
+        const value = headers[name];
+        return Array.isArray(value) ? value[0] : value;
       };
-    }
-    const input = Buffer.from(await response.arrayBuffer());
+      const host = pick("x-forwarded-host") ?? pick("host") ?? "localhost:3000";
+      const proto = pick("x-forwarded-proto") ?? "http";
+      const { id, downloadUrl } = await storeArchive(
+        zipped,
+        archiveName,
+        (archiveId) => `${proto}://${host}/files/${archiveId}`,
+      );
 
-    // 2. Zipper (zlib).
-    const entryName = file.file_name ?? "file";
-    const archiveName = `${entryName}.zip`;
-    const zipped = createZip([{ name: entryName, data: input }]);
-
-    // 3. Ranger en stockage temporaire (R2 en prod, mémoire en dev).
-    //    Pour le fallback local, on dérive l'URL de la requête entrante.
-    const headers = (extra.requestInfo?.headers ?? {}) as Record<
-      string,
-      string | string[] | undefined
-    >;
-    const pick = (name: string) => {
-      const value = headers[name];
-      return Array.isArray(value) ? value[0] : value;
-    };
-    const host = pick("x-forwarded-host") ?? pick("host") ?? "localhost:3000";
-    const proto = pick("x-forwarded-proto") ?? "http";
-    const { id, downloadUrl } = await storeArchive(
-      zipped,
-      archiveName,
-      (archiveId) => `${proto}://${host}/files/${archiveId}`,
-    );
-
-    return {
-      structuredContent: {
-        archive: {
-          file_id: id,
-          download_url: downloadUrl,
-          file_name: archiveName,
-          mime_type: "application/zip",
+      return {
+        structuredContent: {
+          archive: {
+            file_id: id,
+            download_url: downloadUrl,
+            file_name: archiveName,
+            mime_type: "application/zip",
+          },
+          originalBytes: input.length,
+          zippedBytes: zipped.length,
         },
-        originalBytes: input.length,
-        zippedBytes: zipped.length,
-      },
-      content: [
-        text(
-          `Created ${archiveName} (${input.length} → ${zipped.length} bytes).`,
-        ),
-      ],
-      isError: false,
-    };
+        content: [
+          text(
+            `Created ${archiveName} (${input.length} → ${zipped.length} bytes).`,
+          ),
+        ],
+        isError: false,
+      };
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   },
 );
 

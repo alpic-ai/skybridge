@@ -63,6 +63,8 @@ export async function storeArchive(
   fileName: string,
   buildLocalUrl: (id: string) => string,
 ): Promise<StoredResult> {
+  const isEnabled = isR2Enabled();
+  console.log(isEnabled);
   if (isR2Enabled()) {
     const key = `${randomUUID()}/${fileName}`;
     const downloadUrl = await uploadToR2(key, data);
