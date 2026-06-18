@@ -30,7 +30,6 @@ const server = new McpServer(
     },
     view: {
       component: "zip-files",
-      // Replace with the URL your widget will be served from in production.
       domain: "https://skybridge.tech",
       description: "Pick a file and download it as a zip.",
     },
