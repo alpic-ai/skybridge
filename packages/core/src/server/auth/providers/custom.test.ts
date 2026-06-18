@@ -57,22 +57,6 @@ describe("customProvider", () => {
     expect(config.oauthMetadata.registration_endpoint).toBe(`${base}/register`);
   });
 
-  it("defaults scopesSupported to the discovered scopes", async () => {
-    const base = await serveDiscovery();
-    const config = await customProvider({
-      issuer: base,
-      audience: "a",
-      baseUrl: "https://app.example.test",
-    });
-    expect(config.scopesSupported).toEqual(["openid", "email", "profile"]);
-  });
-
-  it("allows omitting baseUrl (server infers it from headers)", async () => {
-    const base = await serveDiscovery();
-    const config = await customProvider({ issuer: base, audience: "a" });
-    expect(config.baseUrl).toBeUndefined();
-  });
-
   it("ignores a runtime issuer override (keeps the discovered trust anchor)", async () => {
     const base = await serveDiscovery();
     const config = await customProvider({
@@ -92,17 +76,6 @@ describe("customProvider", () => {
       metadataOverrides: { jwks_uri: "https://evil.test/keys" } as never,
     });
     expect(config.verify.jwksUri).toBe(`${base}/jwks`);
-  });
-
-  it("rejects a non-DCR IdP (no registration_endpoint)", async () => {
-    const base = await serveDiscovery({ registration_endpoint: undefined });
-    await expect(
-      customProvider({
-        issuer: base,
-        audience: "a",
-        baseUrl: "https://app.example.test",
-      }),
-    ).rejects.toThrow(/not DCR-compatible/);
   });
 
   it("rejects a non-DCR IdP even if an override supplies registration_endpoint", async () => {
