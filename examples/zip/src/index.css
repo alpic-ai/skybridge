@@ -1,0 +1,59 @@
+@import url("https://fonts.googleapis.com/css2?family=Mozilla+Text:wght@400..700&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@alpic-ai/ui/theme";
+
+@source "../node_modules/@alpic-ai/ui/src";
+
+@theme {
+  --font-mozilla: "Mozilla Text", serif;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-twirl: twirl 20s ease-in-out infinite;
+  --animate-aurora: aurora 20s ease-in-out infinite;
+  --animate-gradient-flow: gradient-flow 6s linear infinite;
+}
+
+@keyframes gradient-flow {
+  0% {
+    background-position: 200% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes aurora {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes twirl {
+  0%,
+  80% {
+    transform: rotateY(0deg);
+  }
+  85% {
+    transform: rotateY(180deg);
+  }
+  95% {
+    transform: rotateY(180deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
