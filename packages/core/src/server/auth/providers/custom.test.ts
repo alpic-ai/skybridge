@@ -45,7 +45,6 @@ describe("customProvider", () => {
       audience: "my-api",
       baseUrl: "https://app.example.test",
       scopes: ["openid"],
-      enforcement: "optional",
     });
 
     expect(config.baseUrl).toBe("https://app.example.test");
@@ -55,7 +54,6 @@ describe("customProvider", () => {
       jwksUri: `${base}/jwks`,
     });
     expect(config.scopesSupported).toEqual(["openid"]);
-    expect(config.enforcement).toBe("optional");
     expect(config.oauthMetadata.registration_endpoint).toBe(`${base}/register`);
   });
 

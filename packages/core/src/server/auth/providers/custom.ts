@@ -12,7 +12,6 @@ export async function customProvider(opts: {
   baseUrl: string;
   scopes?: string[];
   requiredScopes?: string[];
-  enforcement?: "required" | "optional";
   metadataOverrides?: Omit<Partial<OAuthMetadata>, "issuer">;
 }): Promise<OAuthConfig> {
   const discovered = await discoverAuthorizationServer(opts.issuer);
@@ -42,6 +41,5 @@ export async function customProvider(opts: {
     },
     scopesSupported: opts.scopes ?? oauthMetadata.scopes_supported,
     requiredScopes: opts.requiredScopes,
-    enforcement: opts.enforcement,
   };
 }
