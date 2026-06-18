@@ -1,0 +1,51 @@
+---
+title: "Migrate to Skybridge"
+description: "Bring an existing MCP App over, whatever it's built on"
+sidebarTitle: "Migrate"
+icon: "bird"
+---
+
+<img src="/images/migrate.png" alt="Migrate Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+
+The Skybridge Skill migrates an existing MCP App for you, whatever framework or library it's built on. It teaches your coding agent Skybridge, then drives the rewrite.
+
+## Install the Skill
+
+<CodeGroup>
+```bash npm
+npx skills add alpic-ai/skybridge -s skybridge
+```
+```bash pnpm
+pnpm dlx skills add alpic-ai/skybridge -s skybridge
+```
+```bash yarn
+yarn dlx skills add alpic-ai/skybridge -s skybridge
+```
+```bash bun
+bunx skills add alpic-ai/skybridge -s skybridge
+```
+```bash deno
+deno run -A npm:skills add alpic-ai/skybridge -s skybridge
+```
+</CodeGroup>
+
+## Prompt Your Agent
+
+<Prompt description="`Migrate my app to /skybridge`" actions={["copy", "cursor"]}>
+Migrate my app to /skybridge
+</Prompt>
+
+Your agent scaffolds a Skybridge project, ports the tools and views, and wires them up. From there the same Skill handles ongoing work: building features, debugging, and deploying.
+
+## Go Further
+<Columns cols={3}>
+    <Card title="Register Tools" img="/images/tools.png" href="/build/tools">
+        Define what humans and agents can do
+    </Card>
+    <Card title="Create Views" img="/images/view.png" href="/build/view">
+        Craft interactive UIs rendered in conversation
+    </Card>
+    <Card title="Manage State" img="/images/state.png" href="/build/state">
+        Decide what the model sees
+    </Card>
+</Columns>

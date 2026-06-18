@@ -58,6 +58,18 @@
           },
           "ship",
           {
+            "group": "Guides",
+            "icon": "book-open",
+            "root": "guides/index",
+            "pages": [
+              "guides/csp",
+              "guides/ux",
+              "guides/files",
+              "guides/migrate"
+            ],
+            "expanded": true
+          },
+          {
             "group": "Get Started (legacy)",
             "icon": "rocket",
             "pages": [
