@@ -13,7 +13,7 @@ export async function customProvider(opts: {
   scopes?: string[];
   requiredScopes?: string[];
   enforcement?: "required" | "optional";
-  metadataOverrides?: Partial<OAuthMetadata>;
+  metadataOverrides?: Omit<Partial<OAuthMetadata>, "issuer">;
 }): Promise<OAuthConfig> {
   const discovered = await discoverAuthorizationServer(opts.issuer);
   const oauthMetadata: DiscoveredMetadata = {
