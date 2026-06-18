@@ -9,7 +9,8 @@ import type { OAuthConfig } from "../index.js";
 export async function customProvider(opts: {
   issuer: string;
   audience: string;
-  baseUrl: string;
+  /** Omit to let the server infer the resource origin from request headers. */
+  baseUrl?: string;
   scopes?: string[];
   requiredScopes?: string[];
   metadataOverrides?: Omit<Partial<OAuthMetadata>, "issuer">;

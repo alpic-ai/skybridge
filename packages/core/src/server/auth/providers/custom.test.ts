@@ -67,6 +67,12 @@ describe("customProvider", () => {
     expect(config.scopesSupported).toEqual(["openid", "email", "profile"]);
   });
 
+  it("allows omitting baseUrl (server infers it from headers)", async () => {
+    const base = await serveDiscovery();
+    const config = await customProvider({ issuer: base, audience: "a" });
+    expect(config.baseUrl).toBeUndefined();
+  });
+
   it("rejects a non-DCR IdP (no registration_endpoint)", async () => {
     const base = await serveDiscovery({ registration_endpoint: undefined });
     await expect(
