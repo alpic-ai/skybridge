@@ -176,6 +176,21 @@ describe("baseUrl inferred from headers", () => {
     expect(body.resource).toBe("https://infer.example.test/");
   });
 
+  it("uses the first hop of a forwarded-host chain", async () => {
+    const { jwksUri } = await startJwks();
+    const base = await bootServer(jwksUri, { baseUrl: null });
+
+    const res = await fetch(`${base}/.well-known/oauth-protected-resource`, {
+      headers: {
+        "x-forwarded-host": "public.example, internal.local",
+        "x-forwarded-proto": "https, http",
+      },
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { resource: string };
+    expect(body.resource).toBe("https://public.example/");
+  });
+
   it("points the 401 WWW-Authenticate at the inferred host", async () => {
     const { jwksUri } = await startJwks();
     const base = await bootServer(jwksUri, { baseUrl: null });

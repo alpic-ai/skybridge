@@ -6,9 +6,12 @@
 export function resolveServerOrigin(
   header: (key: string) => string | undefined,
 ): string {
-  const forwardedHost = header("x-forwarded-host");
+  // Proxies may send X-Forwarded-* as a comma-separated chain; the client-facing
+  // hop is the first entry.
+  const firstHop = (value: string | undefined) => value?.split(",")[0]?.trim();
+  const forwardedHost = firstHop(header("x-forwarded-host"));
   if (forwardedHost) {
-    const proto = header("x-forwarded-proto") || "https";
+    const proto = firstHop(header("x-forwarded-proto")) || "https";
     return `${proto}://${forwardedHost}`;
   }
   const origin = header("origin");
