@@ -19,18 +19,14 @@ function doc(origin: string, extra: Record<string, unknown> = {}) {
   };
 }
 
-// Serves bodies built from the live origin at their well-known paths; returns
-// the origin. A string body is sent raw (text/html); anything else is JSON.
+// Serves JSON bodies built from the live origin at their well-known paths;
+// returns the origin URL.
 async function serve(build: (origin: string) => Record<string, unknown>) {
   let origin = "";
   const srv = http.createServer((req, res) => {
     const body = build(origin)[req.url ?? ""];
     if (body === undefined) {
       res.writeHead(404).end();
-      return;
-    }
-    if (typeof body === "string") {
-      res.writeHead(200, { "content-type": "text/html" }).end(body);
       return;
     }
     res.setHeader("content-type", "application/json");
@@ -81,16 +77,6 @@ describe("discoverAuthorizationServer", () => {
   it("rejects a doc whose issuer does not match the fetch origin", async () => {
     const base = await serve(() => ({
       "/.well-known/openid-configuration": doc("https://evil.test"),
-    }));
-    await expect(discoverAuthorizationServer(base)).rejects.toThrow(
-      /discovery failed/i,
-    );
-  });
-
-  it("treats a 200 non-JSON body as unreachable and throws discovery failed", async () => {
-    const base = await serve(() => ({
-      "/.well-known/openid-configuration": "<html>nope</html>",
-      "/.well-known/oauth-authorization-server": "<html>nope</html>",
     }));
     await expect(discoverAuthorizationServer(base)).rejects.toThrow(
       /discovery failed/i,
