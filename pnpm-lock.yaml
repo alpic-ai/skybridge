@@ -1090,6 +1090,9 @@ importers:
       ink:
         specifier: ^7.0.0
         version: 7.0.0(@types/react@19.2.14)(react@19.2.4)
+      jose:
+        specifier: ^6.1.3
+        version: 6.2.3
       nodemon:
         specifier: '>=3.0.0'
         version: 3.1.11
@@ -10742,7 +10745,7 @@ snapshots:
 
   '@auth0/auth0-auth-js@1.6.0':
     dependencies:
-      jose: 6.2.1
+      jose: 6.2.3
       openid-client: 6.8.2
 
   '@aws-cdk/asset-awscli-v1@2.2.263': {}
@@ -20228,7 +20231,7 @@ snapshots:
 
   openid-client@6.8.2:
     dependencies:
-      jose: 6.2.1
+      jose: 6.2.3
       oauth4webapi: 3.8.5
 
   openid-client@6.8.4:

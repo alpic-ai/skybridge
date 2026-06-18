@@ -32,6 +32,8 @@ import express, {
   type Express,
   type RequestHandler,
 } from "express";
+import type { OAuthConfig } from "./auth/index.js";
+import { setupOAuth } from "./auth/setup.js";
 import { createApp } from "./express.js";
 import { createMiddlewareEntry } from "./metric.js";
 import type {
@@ -46,6 +48,7 @@ import type {
   McpWildcard,
 } from "./middleware.js";
 import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
+import { resolveServerOrigin } from "./requestOrigin.js";
 import { templateHelper } from "./templateHelper.js";
 
 const mergeWithUnion = <T extends object, S extends object>(
@@ -146,6 +149,8 @@ export type JsonOptions = NonNullable<Parameters<typeof express.json>[0]>;
 export interface SkybridgeServerOptions {
   /** Options for the built-in `express.json()` middleware, e.g. `{ limit: "10mb" }`. */
   json?: JsonOptions;
+  /** Resource-server OAuth config. When set, mounts well-known metadata and bearer auth on `/mcp`. */
+  oauth?: OAuthConfig;
 }
 
 /**
@@ -521,6 +526,9 @@ export class McpServer<
     this.serverOptions = options;
     this.express = express();
     this.express.use(express.json(skybridgeOptions?.json));
+    if (skybridgeOptions?.oauth) {
+      setupOAuth(this.express, skybridgeOptions.oauth);
+    }
     // Pick up the manifest if `dist/__entry.js` primed it before importing
     // user code. Consume-once: clear after the first construction so a
     // subsequent test that doesn't prime can't inherit stale state.
@@ -917,25 +925,7 @@ export class McpServer<
     };
     const isClaude = header("user-agent") === "Claude-User";
 
-    let serverUrl: string;
-    const forwardedHost = header("x-forwarded-host");
-    const origin = header("origin");
-    const host = header("host");
-
-    if (forwardedHost) {
-      const proto = header("x-forwarded-proto") || "https";
-      serverUrl = `${proto}://${forwardedHost}`;
-    } else if (origin) {
-      serverUrl = origin;
-    } else if (host) {
-      const proto = ["127.0.0.1:", "localhost:"].some((p) => host.startsWith(p))
-        ? "http"
-        : "https";
-      serverUrl = `${proto}://${host}`;
-    } else {
-      const devPort = process.env.__PORT || "3000";
-      serverUrl = `http://localhost:${devPort}`;
-    }
+    const serverUrl = resolveServerOrigin(header);
 
     const connectDomains = [serverUrl];
     if (!isProduction) {
