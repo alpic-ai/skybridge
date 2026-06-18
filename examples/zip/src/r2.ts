@@ -1,11 +1,5 @@
+import "./env.js";
 import { createHash, createHmac } from "node:crypto";
-
-// --- Configuration R2 (lue depuis l'environnement) ---
-// R2 est compatible S3 : on signe les requêtes en SigV4 (region "auto").
-const ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
-const ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID;
-const SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
-const BUCKET = process.env.R2_BUCKET;
 
 const REGION = "auto";
 const SERVICE = "s3";
@@ -13,21 +7,29 @@ const SERVICE = "s3";
 /** Durée de validité de l'URL présignée (par défaut 15 min). */
 export const R2_URL_TTL = Number(process.env.R2_URL_TTL ?? 15 * 60);
 
-/** `true` si toutes les variables R2 requises sont présentes. */
-export function isR2Enabled(): boolean {
-  return Boolean(ACCOUNT_ID && ACCESS_KEY_ID && SECRET_ACCESS_KEY && BUCKET);
+function requireConfig() {
+  const accountId = process.env.R2_ACCOUNT_ID;
+  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+  const bucket = process.env.R2_BUCKET;
+
+  if (!(accountId && accessKeyId && secretAccessKey && bucket)) {
+    throw new Error(
+      "Cloudflare R2 n'est pas configuré. Définissez R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY et R2_BUCKET.",
+    );
+  }
+
+  return {
+    host: `${accountId}.r2.cloudflarestorage.com`,
+    accessKeyId,
+    secretAccessKey,
+    bucket,
+  };
 }
 
-function requireConfig() {
-  if (!(ACCOUNT_ID && ACCESS_KEY_ID && SECRET_ACCESS_KEY && BUCKET)) {
-    throw new Error("R2 storage is not configured.");
-  }
-  return {
-    host: `${ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    accessKeyId: ACCESS_KEY_ID,
-    secretAccessKey: SECRET_ACCESS_KEY,
-    bucket: BUCKET,
-  };
+/** Vérifie la configuration R2 au démarrage du serveur. */
+export function assertR2Configured(): void {
+  requireConfig();
 }
 
 // Encodage URI conforme à AWS (RFC 3986). Les "/" du chemin sont préservés.
@@ -117,11 +119,19 @@ export async function uploadToR2(
   contentType = "application/zip",
 ): Promise<string> {
   const putUrl = presign("PUT", key, 300);
-  const response = await fetch(putUrl, {
-    method: "PUT",
-    body: new Uint8Array(data),
-    headers: { "content-type": contentType },
-  });
+  let response: Response;
+  try {
+    response = await fetch(putUrl, {
+      method: "PUT",
+      body: new Uint8Array(data),
+      headers: { "content-type": contentType },
+    });
+  } catch (err) {
+    throw new Error(
+      "Impossible de contacter Cloudflare R2. Vérifiez R2_ACCOUNT_ID et vos clés API R2 dans .env.",
+      { cause: err },
+    );
+  }
   if (!response.ok) {
     throw new Error(`R2 upload failed (HTTP ${response.status}).`);
   }

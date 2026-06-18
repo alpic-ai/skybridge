@@ -9,7 +9,7 @@
     "dev:tunnel": "skybridge dev --tunnel",
     "build": "skybridge build",
     "start": "skybridge start",
-    "deploy": "alpic deploy"
+    "deploy": "alpic deploy --non-interactive"
   },
   "dependencies": {
     "@alpic-ai/ui": "^1.122.0",

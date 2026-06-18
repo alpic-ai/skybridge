@@ -58,14 +58,12 @@ Zip files:
 
 ## Tools and Views
 
-**View: `zip-files`**
-- **Input**: `{ files: FileRef[], archiveName?: string }`
-  - `_meta["openai/fileParams"] = ["files"]` so ChatGPT can route attachments.
+**View: `zip-file`**
+- **Input**: `{ file: FileRef }`
+  - `_meta["openai/fileParams"] = ["file"]` so ChatGPT can route attachments.
   - `_meta["openai/widgetAccessible"] = true` so the view can call it directly.
-- **Output**: `{ archive: FileRef, fileCount, originalBytes, zippedBytes, expiresInSeconds }`
-- **Views**: single screen — file picker → result card.
-- **Behavior**: holds picked files as local state; resolves a fresh
-  `download_url` per file, builds `FileRef[]`, calls `zip-files`, then opens the
-  returned `archive.download_url` via `useOpenExternal`.
-- **Handler**: fetches each `FileRef.download_url`, builds the ZIP with `zlib`,
-  uploads to storage (R2 or local fallback), returns the archive `FileRef`.
+- **Output**: `{ archive: FileRef, originalBytes, zippedBytes }`
+- **Views**: two states driven by tool output via `useToolInfo()`:
+  - **Picker** (default): file upload / library pick → calls `zip-file`.
+  - **Complete** (when output contains a `.zip` archive): download + "Zipper un autre fichier".
+- **Handler**: fetches the input file, builds the ZIP with `zlib`, uploads to R2, returns the archive `FileRef`.

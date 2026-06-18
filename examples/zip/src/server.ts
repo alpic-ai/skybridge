@@ -1,8 +1,11 @@
 import "./env.js";
 import { FileRef, McpServer, text } from "skybridge/server";
 import { z } from "zod";
-import { getArchive, storeArchive } from "./storage.js";
+import { assertR2Configured } from "./r2.js";
+import { storeArchive } from "./storage.js";
 import { createZip } from "./zip.js";
+
+assertR2Configured();
 
 const server = new McpServer(
   {
@@ -12,15 +15,26 @@ const server = new McpServer(
   { capabilities: {} },
 ).registerTool(
   {
-    name: "zip-files",
-    description: "Compress one file into a single downloadable .zip archive.",
+    name: "zip-file",
+    description:
+      "Compress one file into a downloadable .zip archive. Call without a file to open the picker widget.",
     inputSchema: {
-      file: FileRef.describe("The file to compress into a .zip archive."),
+      file: FileRef.optional().describe(
+        "The file to compress. Omit to let the user pick one in the widget.",
+      ),
     },
     outputSchema: {
-      archive: FileRef.describe("The generated .zip archive."),
-      originalBytes: z.number().describe("Size of the input file."),
-      zippedBytes: z.number().describe("Size of the resulting archive."),
+      archive: FileRef.optional().describe(
+        "The generated .zip archive, when a file was compressed.",
+      ),
+      originalBytes: z
+        .number()
+        .optional()
+        .describe("Size of the input file."),
+      zippedBytes: z
+        .number()
+        .optional()
+        .describe("Size of the resulting archive."),
     },
 
     _meta: {
@@ -30,45 +44,38 @@ const server = new McpServer(
       "openai/toolInvocation/invoked": "Archive ready.",
     },
     view: {
-      component: "zip-files",
-      domain: "https://skybridge.tech",
+      component: "zip-file",
       description: "Pick a file and download it as a zip.",
     },
   },
-  async ({ file }, extra) => {
+  async ({ file }) => {
+    if (!file) {
+      return {
+        structuredContent: {},
+        content: [
+          text(
+            "No file provided. Pick a file in the widget to create a zip archive.",
+          ),
+        ],
+        isError: false,
+      };
+    }
+
     try {
-      // 1. Télécharger le fichier reçu.
       const response = await fetch(file.download_url);
       if (!response.ok) {
         return {
-          content: [text(`Échec du téléchargement (HTTP ${response.status}).`)],
+          content: [text(`Download failed (HTTP ${response.status}).`)],
           isError: true,
         };
       }
       const input = Buffer.from(await response.arrayBuffer());
 
-      // 2. Zipper (zlib).
       const entryName = file.file_name ?? "file";
       const archiveName = `${entryName}.zip`;
       const zipped = createZip([{ name: entryName, data: input }]);
 
-      // 3. Ranger en stockage temporaire (R2 en prod, mémoire en dev).
-      //    Pour le fallback local, on dérive l'URL de la requête entrante.
-      const headers = (extra.requestInfo?.headers ?? {}) as Record<
-        string,
-        string | string[] | undefined
-      >;
-      const pick = (name: string) => {
-        const value = headers[name];
-        return Array.isArray(value) ? value[0] : value;
-      };
-      const host = pick("x-forwarded-host") ?? pick("host") ?? "localhost:3000";
-      const proto = pick("x-forwarded-proto") ?? "http";
-      const { id, downloadUrl } = await storeArchive(
-        zipped,
-        archiveName,
-        (archiveId) => `${proto}://${host}/files/${archiveId}`,
-      );
+      const { id, downloadUrl } = await storeArchive(zipped, archiveName);
 
       return {
         structuredContent: {
@@ -94,27 +101,6 @@ const server = new McpServer(
     }
   },
 );
-
-// Route locale qui sert les archives stockées en mémoire (fallback dev).
-// Note : sur Alpic Cloud, seul `/mcp` est routé — d'où R2 en production.
-server.use((req, res, next) => {
-  const match = /^\/files\/([^/]+)$/.exec(req.path);
-  if (req.method !== "GET" || !match) {
-    next();
-    return;
-  }
-  const archive = getArchive(match[1]);
-  if (!archive) {
-    res.status(404).json({ error: "Archive introuvable ou expirée." });
-    return;
-  }
-  res.setHeader("Content-Type", archive.mimeType);
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename="${archive.fileName}"`,
-  );
-  res.send(archive.data);
-});
 
 export default await server.run();
 
