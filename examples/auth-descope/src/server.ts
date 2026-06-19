@@ -12,11 +12,9 @@ import { verifyAccessToken } from "./auth.js";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
 
-const DESCOPE_MCP_BASE = `https://api.descope.com/oauth2/v1/apps/agentic/${env.DESCOPE_PROJECT_ID}/${env.DESCOPE_MCP_SERVER_ID}`;
+const DESCOPE_MCP_BASE = `https://api.descope.com/oauth2/v1/apps/${env.DESCOPE_PROJECT_ID}`;
 const DESCOPE_REGISTRATION_URL = `https://api.descope.com/v1/mgmt/mcp/client/${env.DESCOPE_PROJECT_ID}/${env.DESCOPE_MCP_SERVER_ID}/register`;
 
-// Descope's registration endpoint blocks x-forwarded-host (sent by the playground).
-// Proxy it through this server so we control the headers.
 const registrationProxy: RequestHandler = async (req, res, next) => {
   try {
     const response = await fetch(DESCOPE_REGISTRATION_URL, {
@@ -49,7 +47,7 @@ const registrationProxy: RequestHandler = async (req, res, next) => {
  * 5. requireBearerAuth verifies the token against Descope's JWKS
  * 6. Tool handlers read user identity via extra.authInfo
  *
- * Configure in Descope Console: Agentic Identity Hub > MCP Servers
+ * Configure in Descope Console: Resources > MCP Servers
  */
 
 const server = new McpServer(
@@ -67,7 +65,7 @@ const server = new McpServer(
     mcpAuthMetadataRouter({
       oauthMetadata: {
         issuer: env.SERVER_URL,
-        authorization_endpoint: `${DESCOPE_MCP_BASE}/authorize`,
+        authorization_endpoint: `${DESCOPE_MCP_BASE}/authorize?audience=${encodeURIComponent(env.MCP_AUDIENCE)}`,
         token_endpoint: `${DESCOPE_MCP_BASE}/token`,
         registration_endpoint: `${env.SERVER_URL}/register`,
         jwks_uri: `https://api.descope.com/${env.DESCOPE_PROJECT_ID}/.well-known/jwks.json`,

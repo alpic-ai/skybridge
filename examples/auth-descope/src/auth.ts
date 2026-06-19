@@ -2,8 +2,8 @@ import * as jose from "jose";
 import { type AuthInfo, InvalidTokenError } from "skybridge/server";
 import { env } from "./env.js";
 
-// Issuer URL for the Descope MCP Server (Agentic Identity Hub)
-export const DESCOPE_MCP_ISSUER = `https://api.descope.com/v1/apps/agentic/${env.DESCOPE_PROJECT_ID}/${env.DESCOPE_MCP_SERVER_ID}`;
+// Issuer URL for the Descope MCP Server — driven by DESCOPE_MCP_SERVER_ISSUER_URL in env
+export const DESCOPE_MCP_ISSUER = env.DESCOPE_MCP_SERVER_ISSUER_URL;
 
 // JWKS is shared across all MCP servers within a Descope project
 const jwks = jose.createRemoteJWKSet(
@@ -11,7 +11,7 @@ const jwks = jose.createRemoteJWKSet(
 );
 
 // Must match the "MCP Server URL" set in Descope Console (added as aud claim)
-const MCP_AUDIENCE = `${env.SERVER_URL}/mcp`;
+const MCP_AUDIENCE = env.MCP_AUDIENCE;
 
 export async function verifyAccessToken(token: string): Promise<AuthInfo> {
   try {

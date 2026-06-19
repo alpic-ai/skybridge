@@ -37,20 +37,22 @@ npm install
 
 #### 2.2 Create an MCP Server
 
-1. Go to **Agentic Identity Hub → MCP Servers** → **+ MCP Server**.
+1. Go to **Resources → MCP Servers** → **+ MCP Server**.
 2. Give it a name (e.g., `Skybridge Coffee App`).
 3. Set the **MCP Server URL** to your server's `/mcp` endpoint:
    - Local: `http://localhost:3000/mcp`
    - Tunnel: `https://<your-tunnel-url>/mcp`
-4. Save — copy the **MCP Server ID** (starts with `MS...`).
+4. Save — copy the **MCP Server ID** (starts with `RS...`).
 
 ### 3. Create your `.env` file
 
 ```env
 DESCOPE_PROJECT_ID=P2xxxxxxxxxxxxxxxxxx
-DESCOPE_MCP_SERVER_ID=MSxxxxxxxxxxxxxxxxxx
+DESCOPE_MCP_SERVER_ID=RSxxxxxxxxxxxxxxxxxx
 # SERVER_URL is auto-detected locally; set this only when using --tunnel
 # SERVER_URL=https://your-tunnel-url.alpic.app
+# MCP_AUDIENCE is your MCP Server URL (with /mcp) — must match what's set in Descope Console
+MCP_AUDIENCE=https://your-tunnel-url.alpic.app/mcp
 ```
 
 ### 4. Start your local server
@@ -71,7 +73,7 @@ To test with the Alpic playground, start the tunnel instead:
 npm run dev:tunnel
 ```
 
-Then update the **MCP Server URL** in Descope Console to match the tunnel URL (e.g. `https://your-tunnel.alpic.dev/mcp`) and set `SERVER_URL` in your `.env` to the tunnel base URL (without `/mcp`).
+Make sure your MCP Server in Descope Console (**Resources -> MCP Servers**) was created with the tunnel URL as the **MCP Server URL** (e.g. `https://your-tunnel.alpic.dev/mcp`). Then set both `SERVER_URL` and `MCP_AUDIENCE` in your `.env` to match.
 
 ### 6. Project structure
 
