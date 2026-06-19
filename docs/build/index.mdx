@@ -1,0 +1,29 @@
+---
+title: "Build Your App"
+description: "The four decisions that make an MCP App"
+icon: "drafting-compass"
+---
+
+Building an MCP App means answering four questions: what the model can do, what the user sees, what the model knows, and who is asking. Each page below covers one, in build order, on the same running example: a personal shopper with a product carousel and an authenticated checkout.
+
+| Define | Page | Core APIs |
+|------------|------|-----------|
+| What the model can do | [Register Tools](/build/tools) | `registerTool` |
+| What the user sees | [Create Views](/build/view) | `useToolInfo`, `useCallTool` |
+| What the model knows | [Manage State](/build/state) | `useViewState`, `data-llm` |
+| Who is asking | [Authenticate Users](/build/auth) | `requireBearerAuth`, `securitySchemes` |
+
+<Columns cols={2}>
+    <Card title="Register Tools" img="/images/tools.png" href="/build/tools">
+        Define what humans and agents can do
+    </Card>
+    <Card title="Create Views" img="/images/view.png" href="/build/view">
+        Craft interactive UIs rendered in conversation
+    </Card>
+    <Card title="Manage State" img="/images/state.png" href="/build/state">
+        Decide what the model sees
+    </Card>
+    <Card title="Authenticate Users" img="/images/auth.png" href="/build/auth">
+        Know who's behind every tool call
+    </Card>
+</Columns>

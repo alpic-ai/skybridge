@@ -1,5 +1,5 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { McpServer, text } from "skybridge/server";
+import { FileRef, McpServer, text } from "skybridge/server";
 import { z } from "zod";
 
 const server = new McpServer(
@@ -54,7 +54,9 @@ const server = new McpServer(
         guess: z.enum(["heads", "tails"]).describe("The user's guess"),
       },
       outputSchema: {
-        flip: z.enum(["heads", "tails"]).describe("The side the coin landed on"),
+        flip: z
+          .enum(["heads", "tails"])
+          .describe("The side the coin landed on"),
         guess: z.enum(["heads", "tails"]).describe("The user's guess"),
         won: z.boolean().describe("Whether the user won"),
       },
@@ -68,7 +70,50 @@ const server = new McpServer(
       const structuredContent = { flip, guess, won };
       return {
         structuredContent,
-        content: [text(`Coin landed on ${flip}. User guessed ${guess} and ${won ? "won" : "lost"}.`)],
+        content: [
+          text(
+            `Coin landed on ${flip}. User guessed ${guess} and ${won ? "won" : "lost"}.`,
+          ),
+        ],
+        isError: false,
+      };
+    },
+  )
+  .registerTool(
+    {
+      name: "inspect-file",
+      description:
+        "Read a file the user uploaded and echo it back as a downloadable reference.",
+      inputSchema: {
+        file: FileRef,
+      },
+      outputSchema: {
+        file: FileRef.describe("The same file, echoed back as a reference"),
+        sizeBytes: z.number().describe("The file's size in bytes"),
+      },
+      _meta: {
+        // FileRef inputs must be listed here so ChatGPT routes the attachment to them.
+        "openai/fileParams": ["file"],
+        // Let the view hand a file to this tool.
+        "openai/widgetAccessible": true,
+      },
+    },
+    async ({ file }) => {
+      const blob = await fetch(file.download_url).then((res) => res.blob());
+      // Echo the same bytes (same file_id / download_url) under a changed
+      // file_name, so the returned ref is visibly distinct from the input.
+      const echoed = {
+        ...file,
+        file_name: `echoed-${file.file_name ?? "file"}`,
+      };
+      const structuredContent = { file: echoed, sizeBytes: blob.size };
+      return {
+        structuredContent,
+        content: [
+          text(
+            `Echoing ${file.file_name ?? "file"} as ${echoed.file_name} (${blob.size} bytes).`,
+          ),
+        ],
         isError: false,
       };
     },

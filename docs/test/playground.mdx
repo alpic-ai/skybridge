@@ -1,0 +1,62 @@
+---
+title: "Playground"
+description: "Chat with a real model running your app"
+icon: "message-circle"
+---
+<img src="/images/playground.png" alt="Playground Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+
+Putting a real model in the loop normally means registering your app in a host. The Playground skips that: a chat wired to your local server, where a real LLM uses your tools and the views render inline.
+
+## Start the Playground
+
+The Playground comes with the [tunnel](/test/tunnel). Start it with the `--tunnel` flag (or toggle **Tunnel** in the [DevTools](/test/devtools) header):
+
+<CodeGroup>
+```bash npm
+npm run dev -- --tunnel
+```
+```bash pnpm
+pnpm dev --tunnel
+```
+```bash yarn
+yarn dev --tunnel
+```
+```bash bun
+bun dev --tunnel
+```
+```bash deno
+deno task dev --tunnel
+```
+</CodeGroup>
+
+Your local server becomes publicly available, and so does the Playground: it runs on the tunnel URL suffixed with `/try` (e.g., `https://cool-marmot-fondue-420.alpic.dev/try`). Anyone with the link can open it from any browser and chat with your app.
+
+## Exercise the Model Loop
+
+With a model in the loop, the prompt surface and the state sync become testable:
+
+<Frame caption="The Playground interface">
+    <img src="/images/playground-screenshot.png" alt="Playground Illustration" />
+</Frame>
+
+- **Tool selection**: assess what the model understands from your tool names and descriptions.
+- **Argument filling**: check how it fills inputs from your schemas.
+- **Narration**: see how it presents your tool outputs in the conversation.
+- **State**: verify what it picks up from the view state on its next turn.
+
+## Limitations
+
+The Playground is not ChatGPT or Claude. Host specifics (model behavior, [state push policies](/build/state#decide-who-sees-what), view feature support) still need a real host.
+
+## Go Further
+<Columns cols={3}>
+    <Card title="DevTools" img="/images/devtools.png" href="/test/devtools">
+        Call tools and render views locally, without a host
+    </Card>
+    <Card title="Tunnel" img="/images/tunnel.png" href="/test/tunnel">
+        Expose your local server to real hosts
+    </Card>
+    <Card title="Audit" img="/images/audit.png" href="/test/audit">
+        Catch spec and platform issues before submission
+    </Card>
+</Columns>

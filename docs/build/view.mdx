@@ -1,0 +1,213 @@
+---
+title: "Create Views"
+description: "Craft interactive UIs rendered in conversation"
+icon: "palette"
+---
+<img src="/images/view.png" alt="View Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+
+Views are the face of your app: React components the host mounts inline when the tool they're bound to returns. A view reads what the tool produced, calls tools back when the user acts, and manages the state shared with the model. It's plain React, running in a sandboxed iframe inside the host.
+
+Here's a complete view, the `carousel` mounted by `search-products`, next to a minimal version of the tools it talks to:
+
+<CodeGroup>
+```tsx views/carousel.tsx
+import { useCallTool, useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
+
+export default function Carousel() {
+  const { input, output, responseMetadata, isPending } = useToolInfo<"search-products">();
+  const { callTool: checkout, isPending: isCheckingOut, isSuccess: hasCheckedOut, data } = useCallTool("create-checkout");
+
+  if (isPending) {
+    return <SearchSkeleton query={input?.query} />;
+  }
+
+  if (hasCheckedOut) {
+    return <a href={data.structuredContent.url}>Pay now</a>;
+  }
+
+  return (
+    <ProductGrid
+      products={output.products}
+      images={responseMetadata.images}
+      disabled={isCheckingOut}
+      onCheckout={(ids) => checkout({ productIds: ids })}
+    />
+  );
+}
+```
+
+```ts server.ts
+server
+  .registerTool(
+    {
+      name: "search-products",
+      description: "Show products matching a query in a carousel.",
+      inputSchema: { query: z.string() },
+      view: { component: "carousel" },
+    },
+    async ({ query }) => {
+      const products = await search(query);
+      return {
+        content: `Found ${products.length} products for "${query}".`,
+        structuredContent: {
+          products: products.map(({ id, name, price }) => ({ id, name, price })),
+        },
+        _meta: { images: products.map((p) => p.imageUrl) },
+      };
+    },
+  )
+  .registerTool(
+    {
+      name: "create-checkout",
+      description: "Create a checkout session for the given products.",
+      inputSchema: { productIds: z.array(z.string()) },
+    },
+    async ({ productIds }) => ({
+      structuredContent: { url: await checkout(productIds) },
+    }),
+  );
+```
+</CodeGroup>
+
+The sections below walk through it: the component itself, reading the tool, calling tools back, the typed helpers binding views to the server, and opening the sandbox to external domains.
+
+## The Component
+
+A view is a `.tsx` file with a default-exported React component in `views/`. The binding happens when you register the tool:
+
+```ts server.ts highlight={6}
+server.registerTool(
+  {
+    name: "search-products",
+    description: "Show products matching a query in a carousel.",
+    inputSchema: { query: z.string() },
+    view: { component: "carousel" }, // resolves to views/carousel.tsx
+  },
+  async ({ query }) => {
+    /* … */
+  },
+);
+```
+
+Beyond that, it's regular React: hooks, sub-components, any library you like. Each tool call mounts a fresh instance in a sandboxed iframe, so think in instances, not singletons: two carousels in one conversation are two separate mounts.
+
+## Read the Tool Call
+
+The host mounts the view as soon as the model calls the tool, often before your handler returns. `useToolInfo` tracks that lifecycle: `status` moves from `"pending"` to `"success"`, with `isPending` and `isSuccess` as shortcuts.
+
+```tsx views/carousel.tsx highlight={4,6-8,12-13}
+import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
+
+export default function Carousel() {
+  const { input, output, responseMetadata, isPending } = useToolInfo<"search-products">();
+
+  if (isPending) {
+    return <SearchSkeleton query={input?.query} />;
+  }
+
+  return (
+    <ProductGrid
+      products={output.products}
+      images={responseMetadata.images}
+    />
+  );
+}
+```
+
+The rest of the hook is the exchange itself: what the model sent in, and the two halves of what your handler sent back.
+
+- `input`: the tool call arguments, validated
+- `output`: the response `structuredContent`, also surfaced to the model
+- `responseMetadata`: the response `_meta`, not surfaced to the model
+
+## Call Tools Back
+
+`useCallTool` lets the view call any tool on your server without involving the model. It returns the trigger and the mutation state:
+
+```tsx views/carousel.tsx highlight={5,11-13,19-20}
+import { useCallTool, useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
+
+export default function Carousel() {
+  const { input, output, responseMetadata, isPending } = useToolInfo<"search-products">();
+  const { callTool: checkout, isPending: isCheckingOut, isSuccess: hasCheckedOut, data } = useCallTool("create-checkout");
+
+  if (isPending) {
+    return <SearchSkeleton query={input?.query} />;
+  }
+
+  if (hasCheckedOut) {
+    return <a href={data.structuredContent.url}>Pay now</a>;
+  }
+
+  return (
+    <ProductGrid
+      products={output.products}
+      images={responseMetadata.images}
+      disabled={isCheckingOut}
+      onCheckout={(ids) => checkout({ productIds: ids })}
+    />
+  );
+}
+```
+
+`status` runs `idle`, `pending`, then `success` (read the result on `data`) or `error`.
+
+<Info>
+Tool calls initiated from a view happen outside the conversation: the model sees neither the call nor its result, and no view gets mounted. The response goes to the calling view alone.
+</Info>
+
+## Generate Type-Safe Hooks
+
+The hooks above aren't imported from `skybridge/web` directly: they come from `helpers.ts`, a bridge file that infers every type from your server. Projects scaffolded with `npx skybridge create` include it out of the box.
+
+```ts helpers.ts
+import { generateHelpers } from "skybridge/web";
+import type { AppType } from "./server.js";
+
+export const { useToolInfo, useCallTool } = generateHelpers<AppType>();
+```
+
+Import `useToolInfo` and `useCallTool` from `helpers.ts` everywhere, and you get autocomplete on tool names, plus typed inputs, outputs, and metadata on both hooks.
+
+## Open the Sandbox
+
+The iframe ships with a strict Content Security Policy: your server's domain is allowed automatically, and everything else is blocked. If the view fetches from an external API or loads assets from the outside world, declare the domains on the view config, server side:
+
+```ts server.ts highlight={8-11}
+server.registerTool(
+  {
+    name: "search-products",
+    description: "Show products matching a query in a carousel.",
+    inputSchema: { query: z.string() },
+    view: {
+      component: "carousel",
+      csp: {
+        connectDomains: ["https://api.myshop.com"],   // fetch / XHR targets
+        resourceDomains: ["https://cdn.myshop.com"],  // images, fonts, scripts
+      },
+    },
+  },
+  async ({ query }) => {
+    /* … */
+  },
+);
+```
+
+`frameDomains` (embedded iframes) and `redirectDomains` (external redirects) follow the same pattern. See [Configure CSP](/guides/csp) for the full walkthrough.
+
+<Card title="All done!" type="tip" href="/build/state" horizontal icon="check">
+    You now know how to create views. Learn what the view holds between tool calls, and who sees it, in the next chapter.
+</Card>
+
+## Go Further
+<Columns cols={3}>
+    <Card title="Register Tools" img="/images/tools.png" href="/build/tools">
+        Define what humans and agents can do
+    </Card>
+    <Card title="Manage State" img="/images/state.png" href="/build/state">
+        Decide what the model sees
+    </Card>
+    <Card title="Authenticate Users" img="/images/auth.png" href="/build/auth">
+        Know who's behind every tool call
+    </Card>
+</Columns>
