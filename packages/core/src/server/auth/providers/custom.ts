@@ -35,7 +35,7 @@ export async function customProvider(opts: {
     issuer: _issuer,
     jwks_uri: _jwks,
     ...overrides
-  } = (opts.metadataOverrides ?? {}) as Partial<DiscoveredMetadata>;
+  }: Partial<DiscoveredMetadata> = opts.metadataOverrides ?? {};
   const oauthMetadata: DiscoveredMetadata = { ...discovered, ...overrides };
 
   return {

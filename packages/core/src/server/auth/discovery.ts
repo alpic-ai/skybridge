@@ -1,14 +1,15 @@
-import {
-  type OAuthMetadata,
-  OAuthMetadataSchema,
-} from "@modelcontextprotocol/sdk/shared/auth.js";
+import { OAuthMetadataSchema } from "@modelcontextprotocol/sdk/shared/auth.js";
+import { z } from "zod";
 
 /**
- * Discovered AS metadata + `jwks_uri` — the SDK's `OAuthMetadata` omits it (its
- * OAuth client never verifies tokens), but we need it to verify token signatures
- * via JWKS, so we re-type the field for typed access.
+ * Discovery doc validated as OAuth AS metadata + `jwks_uri`. The SDK's
+ * `OAuthMetadataSchema` omits `jwks_uri` (its client never verifies tokens), but
+ * we need it for JWKS token verification, so we extend the schema to keep it.
  */
-export type DiscoveredMetadata = OAuthMetadata & { jwks_uri?: string };
+const DiscoverySchema = OAuthMetadataSchema.extend({
+  jwks_uri: z.string().optional(),
+});
+export type DiscoveredMetadata = z.infer<typeof DiscoverySchema>;
 
 const WELL_KNOWN = [
   "/.well-known/openid-configuration",
@@ -35,15 +36,12 @@ export async function discoverAuthorizationServer(
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
       }
-      const parsed = OAuthMetadataSchema.safeParse(await res.json());
-      if (!parsed.success) {
-        throw new Error(`invalid metadata (${parsed.error.message})`);
-      }
+      const meta = DiscoverySchema.parse(await res.json());
       // RFC 8414 §3.3: issuer must match the fetch origin (slash-insensitive).
-      if (parsed.data.issuer.replace(/\/$/, "") !== base) {
-        throw new Error(`issuer mismatch: ${parsed.data.issuer}`);
+      if (meta.issuer.replace(/\/$/, "") !== base) {
+        throw new Error(`issuer mismatch: ${meta.issuer}`);
       }
-      return parsed.data as DiscoveredMetadata;
+      return meta;
     } catch (err) {
       errors.push(
         `${url}: ${err instanceof Error ? err.message : String(err)}`,
