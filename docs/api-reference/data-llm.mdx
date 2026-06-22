@@ -1,426 +1,61 @@
 ---
-title: data-llm Attribute
-description: "Create a feedback loop between your view UI state and the model for contextual responses."
+title: data-llm
+description: "Narrate the view's state to the model"
 ---
 
-The `data-llm` attribute allows your view to communicate its current UI state back to the model. This creates a feedback loop where the model can understand what the user is seeing and respond contextually to their questions.
+Between turns the model can't see what the user does in your view. The `data-llm` attribute narrates the view's current state to the model, so on the next turn it can answer about what is on screen.
 
-<Warning>
-**Runtime Support**: In MCP Apps, `data-llm` is polyfilled with the same limitation as [useViewState](/api-reference/use-view-state): state does not persist across view renders.
-</Warning>
+## Example
 
-## Basic usage
+The carousel tells the model whether the shopper is browsing or looking at one product, so a follow-up like "is this one in stock?" resolves to the right item.
 
-### Static string
-
-```tsx
-export function StatusView() {
-  return (
-    <div data-llm="User is on the home page">
-      <h1>Welcome Home</h1>
-    </div>
-  );
-}
-```
-
-### Dynamic expression
-
-```tsx
-export function FlightView() {
-  const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
+```tsx views/carousel.tsx
+function Carousel({ products }: { products: Product[] }) {
+  const [selected, setSelected] = useState<Product | null>(null);
 
   return (
-    <div data-llm={
-      selectedFlight
-        ? `User is viewing ${selectedFlight.name} (${selectedFlight.id})`
-        : "User is browsing the flight list"
-    }>
-      {selectedFlight ? (
-        <FlightDetails flight={selectedFlight} />
+    <div data-llm={selected ? `Viewing ${selected.name}` : "Browsing the catalog"}>
+      {selected ? (
+        <ProductDetails product={selected} />
       ) : (
-        <FlightList onSelect={setSelectedFlight} />
+        <ProductGrid products={products} onSelect={setSelected} />
       )}
     </div>
   );
 }
 ```
 
-## Why it exists
+Put it on any element, with a static string or an expression recomputed on render.
 
-Apps introduce a unique challenge: the model needs to understand both the conversation history **and** what the user is currently viewing in your view. Without `data-llm`, the model only knows about the initial tool call that rendered your view. As users interact with your UI, the model remains unaware of state changes unless you explicitly sync them.
+## Behavior
 
-**Example scenario:**
-1. User asks "Show me flights to Paris"
-2. Your view displays 10 flights
-3. User clicks on "Flight AF123" to view details
-4. User asks "What's the baggage policy?"
+- Only the content currently on screen is sent. It is recomputed on every render and dropped when the element unmounts.
+- The text is model-visible, but not live: the host surfaces it to the model on the next turn, not mid-interaction.
+- Nested attributes form an indented outline. This:
 
-Without `data-llm`, the model doesn't know which flight the user selected. With `data-llm`, your view can sync this context, allowing the model to answer accurately.
-
-## How it works
-
-The `data-llm` attribute is syntactic sugar that gets transformed at build time by Skybridge's Babel plugin:
-
-**What you write:**
 ```tsx
-<div data-llm="User is viewing Flight AF123">
-  {/* Your flight details UI */}
+<div data-llm="Reviewing the cart">
+  <div data-llm={`${items.length} items, ${total}`}>{/* ... */}</div>
 </div>
 ```
 
-**What gets compiled:**
-```tsx
-import { DataLLM } from "skybridge/web";
-
-<DataLLM content="User is viewing Flight AF123">
-  <div>
-    {/* Your flight details UI */}
-  </div>
-</DataLLM>
-```
-
-The `DataLLM` component:
-1. Registers its content in a global state tree
-2. Automatically syncs with `window.openai.setWidgetState`
-3. Only shares currently rendered content (removed components are cleaned up)
-4. Supports nested hierarchies for complex UIs
-
-## Use cases and examples
-
-### E-commerce: Product browsing
-
-```tsx
-import { useState } from "react";
-
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-};
-
-export function ProductCatalogView() {
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [cart, setCart] = useState<Product[]>([]);
-
-  return (
-    <div data-llm={
-      selectedProduct
-        ? `User is viewing ${selectedProduct.name} ($${selectedProduct.price}).
-           Cart has ${cart.length} items.`
-        : `User is browsing products. Cart has ${cart.length} items.`
-    }>
-      {selectedProduct ? (
-        <ProductDetails
-          product={selectedProduct}
-          onAddToCart={() => setCart([...cart, selectedProduct])}
-          onBack={() => setSelectedProduct(null)}
-        />
-      ) : (
-        <ProductGrid onSelect={setSelectedProduct} />
-      )}
-    </div>
-  );
-}
-```
-
-Now when the user asks "Can I get a discount?", the model knows which product they're viewing.
-
-### Multi-step wizard
-
-```tsx
-export function BookingWizard() {
-  const [step, setStep] = useState<"dates" | "rooms" | "payment">("dates");
-  const [bookingData, setBookingData] = useState({
-    checkIn: null,
-    checkOut: null,
-    roomType: null,
-  });
-
-  const stepDescriptions = {
-    dates: "User is selecting check-in and check-out dates",
-    rooms: `User is selecting a room type. Dates: ${bookingData.checkIn} to ${bookingData.checkOut}`,
-    payment: `User is on the payment page. Room: ${bookingData.roomType}, Dates: ${bookingData.checkIn} to ${bookingData.checkOut}`,
-  };
-
-  return (
-    <div data-llm={stepDescriptions[step]}>
-      {step === "dates" && <DateSelector onNext={(dates) => {
-        setBookingData({ ...bookingData, ...dates });
-        setStep("rooms");
-      }} />}
-      {step === "rooms" && <RoomSelector onNext={(room) => {
-        setBookingData({ ...bookingData, roomType: room });
-        setStep("payment");
-      }} />}
-      {step === "payment" && <PaymentForm bookingData={bookingData} />}
-    </div>
-  );
-}
-```
-
-The model now understands which step the user is on and can provide contextual guidance.
-
-### Interactive data visualization
-
-```tsx
-export function AnalyticsView() {
-  const [selectedMetric, setSelectedMetric] = useState<string>("revenue");
-  const [dateRange, setDateRange] = useState<string>("last-7-days");
-  const [hoveredDataPoint, setHoveredDataPoint] = useState<string | null>(null);
-
-  return (
-    <div data-llm={
-      hoveredDataPoint
-        ? `User is hovering over ${hoveredDataPoint} in the ${selectedMetric} chart (${dateRange})`
-        : `User is viewing ${selectedMetric} chart for ${dateRange}`
-    }>
-      <MetricSelector value={selectedMetric} onChange={setSelectedMetric} />
-      <DateRangeSelector value={dateRange} onChange={setDateRange} />
-      <Chart
-        metric={selectedMetric}
-        dateRange={dateRange}
-        onHover={setHoveredDataPoint}
-      />
-    </div>
-  );
-}
-```
-
-Now when the user asks "Why did it spike?", the model knows exactly which data point they're referencing.
-
-### Search and filter interfaces
-
-```tsx
-export function SearchView() {
-  const [query, setQuery] = useState("");
-  const [filters, setFilters] = useState({ category: "all", priceRange: "any" });
-  const [results, setResults] = useState<SearchResult[]>([]);
-
-  return (
-    <div data-llm={
-      query
-        ? `User searched for "${query}" with filters: ${JSON.stringify(filters)}.
-           Found ${results.length} results.`
-        : "User hasn't searched yet"
-    }>
-      <SearchInput value={query} onChange={setQuery} />
-      <Filters values={filters} onChange={setFilters} />
-      <ResultsList results={results} />
-    </div>
-  );
-}
-```
-
-The model can now help refine searches based on current query and filters.
-
-## Advanced patterns
-
-### Nested data-llm attributes
-
-You can nest `data-llm` attributes to create hierarchical context:
-
-```tsx
-export function DashboardView() {
-  const [activeSection, setActiveSection] = useState<"overview" | "details">("overview");
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
-
-  return (
-    <div data-llm={`User is on the ${activeSection} section`}>
-      {activeSection === "overview" && (
-        <div data-llm="Viewing 10 summary cards">
-          <SummaryCards onSelectItem={setSelectedItem} />
-        </div>
-      )}
-
-      {activeSection === "details" && selectedItem && (
-        <div data-llm={`Viewing detailed information for ${selectedItem}`}>
-          <DetailView item={selectedItem} />
-        </div>
-      )}
-    </div>
-  );
-}
-```
-
-The model receives a hierarchical description:
-```
-- User is on the details section
-  - Viewing detailed information for Item-123
-```
-
-### Conditional context
-
-Only render `data-llm` when there's meaningful state to share:
-
-```tsx
-export function NotificationView() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
-
-  return (
-    <div data-llm={
-      notifications.length === 0
-        ? "User has no notifications"
-        : selectedNotification
-        ? `User is reading notification: ${selectedNotification.title}`
-        : `User has ${notifications.length} unread notifications`
-    }>
-      {/* Your UI */}
-    </div>
-  );
-}
-```
-
-### Rich context descriptions
-
-Provide rich context that helps the model understand user intent:
-
-```tsx
-export function FormView() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    preferences: [],
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
-  return (
-    <div data-llm={
-      `User is filling out a registration form.
-       Completed fields: ${Object.keys(formData).filter(k => formData[k]).join(", ")}.
-       ${Object.keys(errors).length > 0
-         ? `Has validation errors in: ${Object.keys(errors).join(", ")}`
-         : "No validation errors"
-       }`
-    }>
-      <Form data={formData} errors={errors} onChange={setFormData} />
-    </div>
-  );
-}
-```
-
-## Best practices
-
-### Do: Describe what the user sees
-
-```tsx
-// Good: Describes the current UI state
-<div data-llm="User is viewing 3 available time slots for Dr. Smith">
-```
-
-```tsx
-// Bad: Describes internal state
-<div data-llm="timeSlots.length === 3">
-```
-
-### Do: Update when meaningful state changes
-
-```tsx
-// Good: Updates when selection changes
-<div data-llm={selectedItem ? `Selected: ${selectedItem.name}` : "No selection"}>
-```
-
-```tsx
-// Bad: Updates on every mouse move
-<div data-llm={`Mouse at ${mouseX}, ${mouseY}`}>
-```
-
-### Do: Be concise but descriptive
-
-```tsx
-// Good: Clear and concise
-<div data-llm="User viewing Flight AF123 details. Price: $450. Departure: 10:30 AM">
-```
-
-```tsx
-// Bad: Too verbose
-<div data-llm="The user is currently in the process of viewing the detailed information panel for the flight with the identifier AF123, which has a price point of $450.00 USD and is scheduled to depart at 10:30 AM local time">
-```
-
-### Don't: Include implementation details
-
-```tsx
-// Bad: Exposes technical details
-<div data-llm={`State: ${JSON.stringify(internalState)}`}>
-```
-
-```tsx
-// Good: User-focused description
-<div data-llm="User has filtered products by price: $50-$100">
-```
-
-### Don't: Use data-llm for every element
-
-```tsx
-// Bad: Too granular
-<div data-llm="Main container">
-  <button data-llm="Submit button">Submit</button>
-  <button data-llm="Cancel button">Cancel</button>
-</div>
-```
-
-```tsx
-// Good: One meaningful context per view
-<div data-llm="User is reviewing their order before checkout">
-  <button>Submit</button>
-  <button>Cancel</button>
-</div>
-```
-
-## When to use data-llm
-
-Use `data-llm` when:
-
-- User interactions change what's displayed (navigation, selections, filters)
-- The view shows different views or states (wizard steps, tabs, modals)
-- Context about the current view helps answer user questions
-- You want the model to understand progressive actions (multi-step flows)
-
-## When NOT to use data-llm
-
-Avoid `data-llm` when:
-
-- The view is purely static and never changes
-- State changes are too frequent (animations, hover effects)
-- The information is already in the conversation history
-- The state is purely cosmetic (theme, collapsed panels)
-
-## Technical details
-
-### How context is synced
-
-1. Each `data-llm` attribute creates a `DataLLM` component
-2. Each component gets a unique ID and registers itself in a global map
-3. When content changes, the entire tree is traversed and formatted
-4. The formatted string is stored in `window.openai.widgetState.__view_context`
-5. The host reads this value and includes it in the model's context
-
-### Component lifecycle
-
-```tsx
-// On mount or content change
-setNode({ id, parentId, content });
-window.openai.setWidgetState({
-  ...window.openai.widgetState,
-  __view_context: formatTree()
-});
-
-// On unmount
-removeNode(id);
-window.openai.setWidgetState({
-  ...window.openai.widgetState,
-  __view_context: formatTree()
-});
-```
-
-### Context format
-
-Nested `data-llm` attributes create an indented list:
+reaches the model as:
 
 ```
-- User is on the dashboard
-  - Viewing revenue metrics
-    - Hovering over Q4 data
-  - 5 notifications pending
+- Reviewing the cart
+  - 3 items, $240
 ```
+
+`data-llm` rides the same view state as [`useViewState`](/api-reference/use-view-state), so its [lifecycle](/api-reference/use-view-state#lifecycle) governs when and where the model sees it.
+
+<CardGroup cols={3}>
+  <Card title="Manage State" icon="database" href="/build/state">
+    What to narrate, and what to leave out
+  </Card>
+  <Card title="useViewState" icon="save" href="/api-reference/use-view-state">
+    Persist structured state alongside the narration
+  </Card>
+  <Card title="useToolInfo" icon="message-circle" href="/api-reference/use-tool-info">
+    Read the tool result the view mounted with
+  </Card>
+</CardGroup>

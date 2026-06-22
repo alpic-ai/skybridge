@@ -1,0 +1,61 @@
+---
+title: optionalBearerAuth
+description: "Accept a signed-in user when present, allow anonymous otherwise"
+---
+
+When some tools are public and others need sign-in, `optionalBearerAuth` validates a token if one is sent but lets anonymous requests through. Each tool then enforces its own [`securitySchemes`](/api-reference/register-tool#securityschemes) against `extra.authInfo`.
+
+## Example
+
+The server accepts a token when one is sent, so public tools run for anyone while gated tools check `extra.authInfo` themselves.
+
+```ts server.ts highlight={5}
+import { McpServer, optionalBearerAuth } from "skybridge/server";
+
+const server = new McpServer({ name: "shop", version: "1.0" }).use(
+  "/mcp",
+  optionalBearerAuth({ verifier: { verifyAccessToken } }),
+);
+```
+
+## Signature
+
+```ts
+optionalBearerAuth(options: BearerAuthMiddlewareOptions): RequestHandler;
+```
+
+## Parameters
+
+### `options`
+
+```ts
+type BearerAuthMiddlewareOptions = {
+  verifier: OAuthTokenVerifier; // the token check you write
+  requiredScopes?: string[]; // checked only when a token is sent; the token must carry all of these, or 403
+  resourceMetadataUrl?: string; // absolute URL appended to WWW-Authenticate on 401, for discovery
+};
+```
+
+- **`verifier`** the provider-specific token check, the same contract as [`requireBearerAuth`](/api-reference/require-bearer-auth#verifier).
+- **`requiredScopes`** a scope floor, enforced only when a token is actually sent.
+- **`resourceMetadataUrl`** points at your OAuth 2.0 [Protected Resource Metadata](https://datatracker.ietf.org/doc/html/rfc9728) so clients can discover the authorization server.
+
+## Returns
+
+An Express `RequestHandler` to pass to [`server.use`](/api-reference/mcp-server#use), typically on `/mcp`.
+
+- No `Authorization` header: the request proceeds with no `authInfo`.
+- A valid token: the request proceeds, and handlers read it from `extra.authInfo`.
+- A token that is present but invalid or expired: the same 401 / 403 as [`requireBearerAuth`](/api-reference/require-bearer-auth). Sending a bad token is still a client error.
+
+<CardGroup cols={3}>
+  <Card title="requireBearerAuth" icon="lock" href="/api-reference/require-bearer-auth">
+    Require a token on every request, with the verifier contract
+  </Card>
+  <Card title="registerTool" icon="wrench" href="/api-reference/register-tool">
+    Gate individual tools with `securitySchemes`
+  </Card>
+  <Card title="Authenticate Users" icon="lock" href="/build/auth">
+    Add sign-in to your app end to end
+  </Card>
+</CardGroup>

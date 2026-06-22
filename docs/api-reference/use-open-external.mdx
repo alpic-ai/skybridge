@@ -1,224 +1,65 @@
 ---
 title: useOpenExternal
-description: "Navigate users to external URLs properly from within your app views."
+description: "Open a URL outside the view's iframe through the host"
 ---
 
-The `useOpenExternal` hook returns a function to open external links. This is the proper way to navigate users to external URLs from within a view, as it delegates to the host application to handle the navigation appropriately.
+A view runs in a sandboxed iframe, so a normal external link goes nowhere: `window.open` and `target="_blank"` are both blocked. `useOpenExternal` sends the user out to a URL by routing the navigation through the host.
 
-## Basic usage
+{/* @todo: compatibility matrix */}
 
-```tsx
-import { useOpenExternal } from "skybridge/web";
+## Example
 
-function ExternalLink() {
-  const openExternal = useOpenExternal();
+The product card sends the shopper to the merchant's product page when they tap "View details"; the host opens it in the user's browser.
 
-  return (
-    <button onClick={() => openExternal("https://example.com")}>
-      Visit Website
-    </button>
-  );
-}
-```
-
-## Returns
-
-```tsx
-openExternal: (
-  href: string,
-  options?: { redirectUrl?: false }
-) => void
-```
-
-A function that opens the provided URL in the host's browser or redirects the mobile app accordingly.
-
-### Parameters
-
-- `href: string`
-  - **Required**
-  - The URL to open
-- `options.redirectUrl?: false`
-  - Prevent the host from appending a `?redirectUrl=...` query param
-  - Supported by ChatGPT only
-
-## Examples
-
-### Link Button Component
-
-```tsx
-import { useOpenExternal } from "skybridge/web";
-
-type ExternalLinkButtonProps = {
-  href: string;
-  children: React.ReactNode;
-};
-
-function ExternalLinkButton({ href, children }: ExternalLinkButtonProps) {
-  const openExternal = useOpenExternal();
-
-  return (
-    <button
-      onClick={() => openExternal(href)}
-      className="external-link-button"
-    >
-      {children}
-      <span aria-hidden="true"> ↗</span>
-    </button>
-  );
-}
-
-// Usage
-function App() {
-  return (
-    <ExternalLinkButton href="https://docs.example.com">
-      View Documentation
-    </ExternalLinkButton>
-  );
-}
-```
-
-### Product Card with External Link
-
-```tsx
+```tsx views/carousel.tsx highlight={1,10,16}
 import { useOpenExternal } from "skybridge/web";
 
 type Product = {
   name: string;
   price: number;
-  url: string;
-  imageUrl: string;
+  productUrl: string;
 };
 
 function ProductCard({ product }: { product: Product }) {
   const openExternal = useOpenExternal();
 
   return (
-    <div className="product-card">
-      <img src={product.imageUrl} alt={product.name} />
+    <div className="card">
       <h3>{product.name}</h3>
       <p>${product.price}</p>
-      <button onClick={() => openExternal(product.url)}>
-        Buy Now
+      <button onClick={() => openExternal(product.productUrl)}>
+        View details
       </button>
     </div>
   );
 }
 ```
 
-### Social Links
+## Returns
+
+`useOpenExternal` takes no arguments and returns a single function.
+
+### `openExternal`
 
 ```tsx
-import { useOpenExternal } from "skybridge/web";
-
-const socialLinks = [
-  { name: "Twitter", url: "https://twitter.com/example", icon: "🐦" },
-  { name: "GitHub", url: "https://github.com/example", icon: "🐙" },
-  { name: "LinkedIn", url: "https://linkedin.com/in/example", icon: "💼" },
-];
-
-function SocialLinks() {
-  const openExternal = useOpenExternal();
-
-  return (
-    <div className="social-links">
-      {socialLinks.map((link) => (
-        <button
-          key={link.name}
-          onClick={() => openExternal(link.url)}
-          aria-label={`Visit ${link.name}`}
-        >
-          {link.icon}
-        </button>
-      ))}
-    </div>
-  );
-}
+openExternal(href: string, options?: { redirectUrl?: false }): void;
 ```
 
-### Article with References
+Routes the navigation through the host. Returns `void`: a fire-and-forget side effect, nothing crosses back to the view or the model.
 
-```tsx
-import { useOpenExternal } from "skybridge/web";
+- **`href`** (required) The URL to open outside the iframe. The host opens it in the user's browser or hands it to the native app.
+- **`options`** Optional. Its only field, `redirectUrl`, is read on **ChatGPT** only: for allowlisted targets ChatGPT appends a `?redirectUrl=…` parameter (a link back into the conversation) by default, and `redirectUrl: false` skips it. On **Claude** it is ignored with a warning.
 
-type Reference = {
-  title: string;
-  url: string;
-};
+Origins that `openExternal` can send the user to without the host's safe-link confirmation modal are declared in the view's `redirectDomains`. The view passes that list to the host, which honors it. See [Configure CSP](/guides/csp).
 
-function ArticleReferences({ references }: { references: Reference[] }) {
-  const openExternal = useOpenExternal();
-
-  return (
-    <section className="references">
-      <h4>References</h4>
-      <ol>
-        {references.map((ref, index) => (
-          <li key={index}>
-            <button
-              onClick={() => openExternal(ref.url)}
-              className="reference-link"
-            >
-              {ref.title}
-            </button>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
-```
-
-
-### Disable redirect URL appending
-
-```tsx
-import { useOpenExternal } from "skybridge/web";
-
-function ExternalLinkNoReturn() {
-  const openExternal = useOpenExternal();
-
-  return (
-    <button
-      onClick={() =>
-        openExternal("https://example.com", { redirectUrl: false })
-      }
-    >
-      Visit Website
-    </button>
-  );
-}
-```
-
-### Dynamic URL Opening
-
-```tsx
-import { useOpenExternal } from "skybridge/web";
-import { useState } from "react";
-
-function SearchRedirect() {
-  const openExternal = useOpenExternal();
-  const [query, setQuery] = useState("");
-
-  const handleSearch = () => {
-    if (query.trim()) {
-      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-      openExternal(searchUrl);
-    }
-  };
-
-  return (
-    <div className="search-redirect">
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search..."
-        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-      />
-      <button onClick={handleSearch}>
-        Search on Google
-      </button>
-    </div>
-  );
-}
-```
+<CardGroup cols={3}>
+  <Card title="Create Views" icon="app-window" href="/build/view">
+    Open the sandbox to external domains from a view
+  </Card>
+  <Card title="Configure CSP" icon="globe" href="/guides/csp">
+    Allowlist redirect targets with `redirectDomains`
+  </Card>
+  <Card title="useSendFollowUpMessage" icon="send" href="/api-reference/use-send-follow-up-message">
+    Send a message back into the conversation
+  </Card>
+</CardGroup>

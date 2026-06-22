@@ -1,108 +1,141 @@
 ---
 title: useDownload
-description: "Trigger file downloads from a view."
+description: "Save files from a view to the user's device"
 ---
 
-Views run in sandboxed iframes where direct downloads (`<a download>`, `URL.createObjectURL`) are blocked. The `useDownload` hook returns a `download` function that asks the host to save one or more files to the user's filesystem. The host shows a confirmation dialog before initiating the download.
+Views run in sandboxed iframes where direct downloads (`<a download>`, `URL.createObjectURL`) are blocked. `useDownload` hands the host one or more resources to write to the user's device, so a view can save a file it produced.
 
-<Note>
-    This hook is not available on the Apps SDK. Calling `download` from ChatGPT will return `{ isError: true }`
-</Note>
+{/* @todo: compatibility matrix */}
 
-## Basic usage
+## Example
 
-```tsx
+The view builds a CSV from the carousel's products and hands the host an inline resource, then offers a server-hosted PDF as a resource link.
+
+```tsx views/carousel.tsx highlight={4,11-24,32-41}
 import { useDownload } from "skybridge/web";
 
-function ExportButton({ rows }: { rows: Row[] }) {
+function Carousel({ products }: { products: Product[] }) {
   const { download } = useDownload();
 
-  const handleClick = async () => {
-    const csv = rows.map((r) => `${r.id},${r.name}`).join("\n");
-    const { isError } = await download({
-      contents: [
-        {
-          type: "resource",
-          resource: {
-            uri: "file:///orders.csv",
-            mimeType: "text/csv",
-            text: csv,
+  const exportCsv = async () => {
+    const csv = products
+      .map((p) => `${p.id},${p.name},${p.price}`)
+      .join("\n");
+    try {
+      const { isError } = await download({
+        contents: [
+          {
+            type: "resource",
+            resource: {
+              uri: "file:///products.csv", // last segment is the suggested filename
+              mimeType: "text/csv",
+              text: csv,
+            },
           },
-        },
-      ],
-    });
-    if (isError) {
-      // user cancelled, host denied or not supported
+        ],
+      });
+      if (isError) {
+        console.warn("Export cancelled or not supported by this host");
+      }
+    } catch (err) {
+      console.error("Download failed to complete", err);
     }
   };
 
-  return <button onClick={handleClick}>Export CSV</button>;
+  const saveSpecSheet = async (product: Product) => {
+    await download({
+      contents: [
+        {
+          type: "resource_link",
+          uri: `https://shop.example.com/specs/${product.id}.pdf`,
+          name: `${product.name} spec sheet`,
+          mimeType: "application/pdf",
+        },
+      ],
+    });
+  };
+
+  return (
+    <div>
+      <button onClick={exportCsv}>Export catalog</button>
+      {products.map((p) => (
+        <button key={p.id} onClick={() => saveSpecSheet(p)}>
+          Save {p.name} spec
+        </button>
+      ))}
+    </div>
+  );
 }
 ```
 
 ## Returns
 
-```tsx
-{ download: (params: DownloadParams) => Promise<DownloadResult> }
-```
+`useDownload` returns a single function.
 
-### `DownloadParams`
-
-- `contents: (EmbeddedResource | ResourceLink)[]`: one or more resources to download.
-
-### `DownloadResult`
-
-- `isError?: boolean` = `true` if the user cancelled or the host denied. Transport errors (timeout, lost connection) throw an exception.
-
-## Resource shapes
-
-### Inline text — `EmbeddedResource`
-
-For content generated in the view (CSV, JSON, markdown):
+### `download`
 
 ```tsx
-{
-  type: "resource",
-  resource: {
-    uri: "file:///export.json",      // filename hint (last path segment)
-    mimeType: "application/json",
-    text: JSON.stringify(data, null, 2),
-  },
-}
+download(params: DownloadParams): Promise<DownloadResult>;
 ```
 
-### Inline binary — `EmbeddedResource`
+Asks the host to save the resources in `params`. The promise resolves once the host responds, and rejects if the request times out or the connection is lost.
 
-For binary data, pass base64 in `blob`:
+**`params`** one or more resources to save, each carried inline or fetched by the host from a URL.
 
 ```tsx
-{
-  type: "resource",
-  resource: {
-    uri: "file:///chart.png",
-    mimeType: "image/png",
-    blob: base64EncodedPng,
-  },
-}
+type DownloadParams = {
+  contents: (EmbeddedResource | ResourceLink)[];
+};
 ```
 
-### Resource link — `ResourceLink`
-
-When the file already lives on a server, let the host fetch it directly:
+**`EmbeddedResource`** carries the file inline; `resource` holds the bytes as a UTF-8 `text` string or a base64 `blob`. The `uri`'s last segment sets the suggested filename.
 
 ```tsx
-{
-  type: "resource_link",
-  uri: "https://api.example.com/reports/q4.pdf",
-  name: "Q4 Report",
-  mimeType: "application/pdf",
-}
+type EmbeddedResource = {
+  type: "resource";
+  resource:
+    | { uri: string; text: string; mimeType?: string; _meta?: Record<string, unknown> }
+    | { uri: string; blob: string; mimeType?: string; _meta?: Record<string, unknown> };
+  annotations?: Annotations; // standard MCP annotations
+  _meta?: Record<string, unknown>;
+};
 ```
 
-<Note>`resource_link` is not supported by Claude.</Note>
+**`ResourceLink`** points the host at a URL it fetches itself.
 
-## Notes
+```tsx
+type ResourceLink = {
+  type: "resource_link";
+  uri: string;
+  name: string;
+  title?: string;
+  description?: string;
+  mimeType?: string;
+  size?: number;
+  annotations?: Annotations; // standard MCP annotations
+  icons?: Icon[];
+  _meta?: Record<string, unknown>;
+};
+```
 
-- **Must be user-initiated** (button click, menu action). Hosts will reject calls fired from effects on mount.
-- The `uri` is a **filename hint**: the host derives the suggested save name from the last path segment.
-- For large binary content (more than a few hundred KB), prefer `resource_link` over inlining base64.
+The promise resolves with a `DownloadResult`:
+
+```tsx
+type DownloadResult = {
+  isError?: boolean;
+};
+```
+
+`isError` is `true` when the download did not happen: the user cancelled, or the host denied it (including a host that lacks the download capability). It is absent or `false` on success. A request that fails to complete (timeout, lost connection) rejects the promise instead of setting this flag.
+
+<CardGroup cols={3}>
+  <Card title="Handle Files" icon="paperclip" href="/guides/files">
+    Move files in and out of your app
+  </Card>
+  <Card title="useFiles" icon="upload" href="/api-reference/use-files">
+    Upload and resolve host-managed files
+  </Card>
+  <Card title="useOpenExternal" icon="external-link" href="/api-reference/use-open-external">
+    Open a link outside the view
+  </Card>
+</CardGroup>

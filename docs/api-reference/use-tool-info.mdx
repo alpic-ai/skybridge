@@ -1,34 +1,38 @@
 ---
 title: useToolInfo
-description: "React hook for accessing tool input, output, metadata, and execution status in Skybridge views."
+description: "Read the tool call that produced the current view"
 ---
 
-The `useToolInfo` hook provides access to the tool's input arguments, output, and response metadata. It also tracks whether the tool execution is still pending or has completed successfully.
+`useToolInfo` reads the tool call that rendered the current view, so a view can display the data its own tool produced.
 
-## Basic usage
+Import it from your generated [`helpers.ts`](/api-reference/generate-helpers): the typed hook infers `input`, `output`, and `responseMetadata` from your server, so you pass only the tool name.
 
-```tsx
-import { useToolInfo } from "skybridge/web";
+{/* @todo: compatibility matrix */}
 
-function WeatherView() {
-  const { input, output, isPending, isSuccess } = useToolInfo<{
-    input: { city: string };
-    output: { temperature: number; conditions: string };
-  }>();
+## Example
+
+The view reads the result of the tool that rendered it, branching on `status`.
+
+```tsx highlight={4-5,7,8,10,13,15}
+import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
+
+function Carousel() {
+  const { input, isPending, isSuccess, output, responseMetadata } =
+    useToolInfo<"search-products">();
 
   if (isPending) {
-    return <p>Loading weather for {input.city}...</p>;
+    return <p>Searching {input?.query}...</p>;
   }
-
   if (isSuccess) {
     return (
       <div>
-        <h3>Weather in {input.city}</h3>
-        <p>{output.temperature}°C - {output.conditions}</p>
+        <ProductGrid products={output.products} />
+        <p>
+          {output.products.length} results in {responseMetadata.ms}ms
+        </p>
       </div>
     );
   }
-
   return null;
 }
 ```
@@ -38,260 +42,67 @@ function WeatherView() {
 ### `ToolSignature`
 
 ```tsx
-type ToolSignature = {
-  input?: Record<string, unknown>;
-  output?: Record<string, unknown>;
-  responseMetadata?: Record<string, unknown>;
-}
+ToolSignature extends Partial<{
+  input: Record<string, unknown>;
+  output: Record<string, unknown>;
+  responseMetadata: Record<string, unknown>;
+}> = Record<string, never>;
 ```
 
-An optional type parameter to specify the shape of your tool's input, output, and response metadata.
+Refines the shape of `input`, `output`, and `responseMetadata`. This is the direct-import form; the generated helper takes a tool name instead and infers all three. With neither, each typed field resolves to `never`.
 
 ## Returns
 
-The hook returns an object that varies based on the current status:
-
-### When `status` is `"pending"`
+### `status`
 
 ```tsx
-{
-  status: "pending";
-  isPending: true;
-  isSuccess: false;
-  input: ToolInput | undefined;
-  output: undefined;
-  responseMetadata: undefined;
-}
+status: "pending" | "success";
 ```
 
-### When `status` is `"success"`
+- `"pending"`: the tool's output and metadata have not arrived yet.
+- `"success"`: the tool delivered its `output` or its `responseMetadata`.
 
-```tsx
-{
-  status: "success";
-  isPending: false;
-  isSuccess: true;
-  input: ToolInput | undefined;
-  output: ToolOutput;
-  responseMetadata: ToolResponseMetadata;
-}
-```
-
-### Properties
-
-#### `status`
-
-```tsx
-status: "pending" | "success"
-```
-
-- `pending` - The tool is still executing
-- `success` - The tool has completed and output is available
-
-#### `isPending`, `isSuccess`
+### `isPending`, `isSuccess`
 
 ```tsx
 isPending: boolean;
 isSuccess: boolean;
 ```
 
-Boolean flags derived from `status` for convenience.
+Each is `true` when `status` equals the matching value and `false` otherwise. `isIdle` is also returned but deprecated, always `false`.
 
-#### `input`
-
-```tsx
-input: ToolInput | undefined
-```
-
-The input arguments passed to the tool. May be `undefined` until the host delivers the tool arguments.
-
-#### `output`
+### `input`
 
 ```tsx
-output: ToolOutput | undefined
+input: ToolInput | undefined;
 ```
 
-The tool's output data. Only available when `status` is `"success"`.
+The arguments the view's tool was called with. The model sees these: they are part of the tool call in the conversation. It can be `undefined` in either state, because the host may render the view before it delivers the arguments.
 
-#### `responseMetadata`
+### `output`
 
 ```tsx
-responseMetadata: ToolResponseMetadata | undefined
+output: ToolOutput | undefined;
 ```
 
-Additional metadata from the tool response. Only available when `status` is `"success"`.
+The tool's structured output, set when `status` is `"success"`. The model sees this: it is the tool result in the conversation. It is `undefined` while pending, and `undefined` in success if the tool returned no structured output.
 
-## Examples
-
-### Loading State
+### `responseMetadata`
 
 ```tsx
-import { useToolInfo } from "skybridge/web";
-
-function DataView() {
-  const { input, isPending, isSuccess, output } = useToolInfo<{
-    input: { query: string };
-    output: { results: string[] };
-  }>();
-
-  return (
-    <div>
-      <h3>Search: {input.query}</h3>
-      {isPending && (
-        <div className="loading">
-          <span className="spinner" />
-          <p>Searching...</p>
-        </div>
-      )}
-      {isSuccess && (
-        <ul>
-          {output.results.map((result, i) => (
-            <li key={i}>{result}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
+responseMetadata: ToolResponseMetadata | undefined;
 ```
 
-### With Response Metadata
+The `_meta` the tool's handler returned alongside its result, typed from your server. It is `undefined` while pending, and `undefined` in success if the tool returned no metadata.
 
-```tsx
-import { useToolInfo } from "skybridge/web";
-
-function ApiResultView() {
-  const { input, output, responseMetadata, isSuccess } = useToolInfo<{
-    input: { endpoint: string };
-    output: { data: unknown };
-    responseMetadata: {
-      requestId: string;
-      duration: number;
-      cached: boolean;
-    };
-  }>();
-
-  if (!isSuccess) {
-    return <p>Loading {input.endpoint}...</p>;
-  }
-
-  return (
-    <div>
-      <pre>{JSON.stringify(output.data, null, 2)}</pre>
-      <footer className="metadata">
-        <span>Request ID: {responseMetadata.requestId}</span>
-        <span>Duration: {responseMetadata.duration}ms</span>
-        {responseMetadata.cached && <span>Cached</span>}
-      </footer>
-    </div>
-  );
-}
-```
-
-### Conditional Rendering Based on Input
-
-```tsx
-import { useToolInfo } from "skybridge/web";
-
-type ChartType = "bar" | "line" | "pie";
-
-function ChartView() {
-  const { input, output, isSuccess } = useToolInfo<{
-    input: { type: ChartType; data: number[] };
-    output: { processedData: { label: string; value: number }[] };
-  }>();
-
-  if (!isSuccess) {
-    return <p>Processing chart data...</p>;
-  }
-
-  switch (input.type) {
-    case "bar":
-      return <BarChart data={output.processedData} />;
-    case "line":
-      return <LineChart data={output.processedData} />;
-    case "pie":
-      return <PieChart data={output.processedData} />;
-    default:
-      return <p>Unknown chart type</p>;
-  }
-}
-```
-
-### Progressive Enhancement
-
-```tsx
-import { useToolInfo } from "skybridge/web";
-
-function ProductView() {
-  const { input, output, isPending, isSuccess } = useToolInfo<{
-    input: { productId: string; name: string };
-    output: {
-      price: number;
-      stock: number;
-      reviews: { rating: number; count: number };
-    };
-  }>();
-
-  return (
-    <div className="product-card">
-      {/* Always show name from input */}
-      <h2>{input.name}</h2>
-
-      {/* Show skeleton while loading */}
-      {isPending && (
-        <>
-          <div className="skeleton price-skeleton" />
-          <div className="skeleton stock-skeleton" />
-        </>
-      )}
-
-      {/* Show full details when loaded */}
-      {isSuccess && (
-        <>
-          <p className="price">${output.price}</p>
-          <p className="stock">
-            {output.stock > 0 ? `${output.stock} in stock` : "Out of stock"}
-          </p>
-          <div className="reviews">
-            <span>⭐ {output.reviews.rating}</span>
-            <span>({output.reviews.count} reviews)</span>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-```
-
-### Error Handling Pattern
-
-```tsx
-import { useToolInfo } from "skybridge/web";
-
-function SafeView() {
-  const { input, output, isSuccess } = useToolInfo<{
-    input: { id: string };
-    output: { success: boolean; data?: unknown; error?: string };
-  }>();
-
-  if (!isSuccess) {
-    return <p>Loading...</p>;
-  }
-
-  if (!output.success) {
-    return (
-      <div className="error">
-        <p>Error: {output.error}</p>
-        <button onClick={() => window.location.reload()}>Retry</button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="success">
-      <pre>{JSON.stringify(output.data, null, 2)}</pre>
-    </div>
-  );
-}
-```
+<CardGroup cols={3}>
+  <Card title="Create Views" icon="palette" href="/build/view">
+    Render a view from a tool result in context
+  </Card>
+  <Card title="generateHelpers" icon="wand-sparkles" href="/api-reference/generate-helpers">
+    The typed `useToolInfo` that infers from your server
+  </Card>
+  <Card title="useCallTool" icon="play" href="/api-reference/use-call-tool">
+    Call another tool from the view
+  </Card>
+</CardGroup>

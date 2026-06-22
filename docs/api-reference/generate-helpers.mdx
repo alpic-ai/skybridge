@@ -1,193 +1,74 @@
 ---
 title: generateHelpers
-description: "Create fully typed hooks with end-to-end inference from your MCP server, like tRPC for views."
+description: "Generate typed hooks inferred from your server"
 ---
 
+Without it, `useCallTool` and `useToolInfo` need their tool types written by hand, duplicating your server. `generateHelpers` infers them from your server type, so you import already-typed hooks. Set it up once and use the hooks across your views.
 
-`generateHelpers` is a factory function that creates fully typed versions of `useCallTool` and `useToolInfo` hooks with end-to-end type inference from your MCP server definition. Inspired by [TRPC](https://trpc.io) and [Hono](https://hono.dev), it provides a type-safe, developer-friendly API that eliminates the need for manual type annotations.
+## Example
 
-## Why generateHelpers?
+`helpers.ts` wires your server type to the hooks; views import the typed hooks from it.
 
-If you're familiar with TRPC or Hono, `generateHelpers` provides a similar developer experience:
-
-- **Full type inference**: Tool names, inputs, and outputs are automatically inferred from your server
-- **Autocomplete**: Get IntelliSense suggestions for all available tools
-- **Type safety**: Catch errors at compile time, not runtime
-
-Instead of manually typing each hook call:
-
-```tsx
-// ❌ Without generateHelpers - manual type annotations required
-const { callTool } = useCallTool<
-  { destination: string },
-  { structuredContent: { results: string[] } }
->("search-trip");
-```
-
-You get automatic type inference:
-
-```tsx
-// ✅ With generateHelpers - fully typed, zero annotations needed
-const { callTool } = useCallTool("search-trip");
-// TypeScript knows everything: tool name, input shape, output shape
-```
-
-## Prerequisites
-
-### Server Must Use Method Chaining
-
-Your MCP server **must** use method chaining for type inference to work. See [Type Safety: Method Chaining](/concepts/type-safety#method-chaining) for details.
-
-```ts
-// ✅ Works — chain registerTool calls
-const server = new McpServer({ name: "my-app", version: "1.0" }, {})
-  .registerTool(
-    {
-      name: "search-trip",
-      inputSchema: { destination: z.string() },
-      view: { component: "search-trip" },
-    },
-    async ({ destination }) => {
-      return { content: `Found trips to ${destination}` };
-    },
-  );
-
-export type AppType = typeof server;
-```
-
-### Export Server Type
-
-Export your server type so it can be imported in your view code:
-
-```ts
-// src/server.ts
-export type AppType = typeof server;
-```
-
-## Quick Start
-
-### 1. One-Time Setup
-
-Create a bridge file that connects your server types to your views:
-
-```ts
-// src/helpers.ts
+```ts helpers.ts
 import type { AppType } from "./server"; // type-only import
 import { generateHelpers } from "skybridge/web";
 
 export const { useCallTool, useToolInfo } = generateHelpers<AppType>();
 ```
 
-### 2. Use Typed Hooks in Views
+```tsx views/carousel.tsx
+import { useCallTool, useToolInfo } from "../helpers.js";
 
-Import and use the typed hooks throughout your app:
-
-```tsx
-// src/views/search-trip.tsx
-import { useCallTool, useToolInfo } from "../helpers";
-
-export default function SearchTrip() {
-  const { callTool, isPending } = useCallTool("search-trip");
-  //                                            ^ autocomplete for tool names
-
-  const toolInfo = useToolInfo<"search-trip">();
-  //                              ^ autocomplete for view names
-
-  const handleSearch = () => {
-    callTool({ destination: "Spain" });
-    //         ^ autocomplete for input fields
-  };
+function Carousel() {
+  const { output } = useToolInfo<"search-products">(); // output typed from the tool
+  const { callTool } = useCallTool("create-checkout"); // name autocompleted, input typed
 
   return (
-    <div>
-      <button onClick={handleSearch} disabled={isPending}>
-        Search
-      </button>
-      {toolInfo.isSuccess && (
-        <div>Found {toolInfo.output.structuredContent.totalCount} results</div>
-        //                      ^ typed output
-      )}
-    </div>
+    <button onClick={() => callTool({ items: output.products })}>Check out</button>
   );
 }
 ```
 
-## API Reference
+## Signature
 
 ```tsx
-const { useCallTool, useToolInfo } = generateHelpers<T>();
+const { useCallTool, useToolInfo } = generateHelpers<ServerType>();
 ```
 
 ## Type Parameters
 
-### `T`
+### `ServerType`
 
 ```tsx
-T extends McpServer<AnyToolRegistry>
+ServerType extends McpServer<AnyToolRegistry>;
 ```
 
-**Required**
+Your server's type, `typeof server`. Export it from your server file with `export type AppType = typeof server`, then pass it here.
 
-The type of your MCP server instance. Use `typeof server` to get the type:
-
-The server type must be defined using method chaining for type inference to work correctly. See [Prerequisites](#prerequisites) for more details.
+<Info>
+Inference works only when the server is built by chaining `.registerTool()` calls off the constructor, so the tool types accumulate on the server type.
+</Info>
 
 ## Returns
 
-An object containing typed versions of `useCallTool` and `useToolInfo` hooks:
+Two hooks. Both autocomplete tool names and infer types from `ServerType`, so you write no generics; their surface is otherwise identical to the untyped versions.
 
 ### `useCallTool`
 
-A typed version of the [`useCallTool`](/api-reference/use-call-tool) hook that provides autocomplete for tool names and full type inference for inputs and outputs.
-
-```tsx
-const {
-  data,
-  error,
-  isError,
-  isIdle,
-  isPending,
-  isSuccess,
-  status,
-  callTool,
-  callToolAsync,
-} = useCallTool<K extends Names>(name);
-```
-
-#### `name`
-
-```tsx
-name: K extends Names
-```
-
-**Required**
-
-The name of the tool to call. This must match a tool name from your server's registry. TypeScript will provide autocomplete suggestions based on all registered tools and views.
-
-#### Return Value
-
-The typed `useCallTool` returns the same structure as the untyped version, but with automatically inferred types. See the [`useCallTool` API reference](/api-reference/use-call-tool) for detailed documentation on all return properties.
+The typed [`useCallTool`](/api-reference/use-call-tool): the `name` argument autocompletes, and the input and output types follow the named tool.
 
 ### `useToolInfo`
 
-A typed version of the `useToolInfo` hook that provides autocomplete for tool names and full type inference for inputs, outputs, and response metadata.
+The typed [`useToolInfo`](/api-reference/use-tool-info): the tool name (its type argument) autocompletes, and `input`, `output`, and `responseMetadata` follow it.
 
-```tsx
-const toolInfo = useToolInfo<K extends Names>();
-```
-
-#### Type Parameter `K`
-
-```tsx
-K extends Names
-```
-
-**Required**
-
-The name of the tool/view. This must match a tool name from your server's registry. TypeScript will provide autocomplete suggestions based on all registered tools and views.
-
-## Limitations
-
-- **Chaining Required**: Server must use method chaining for type inference to work
-- **Runtime Types**: Types are inferred at compile time; runtime validation still uses Zod schemas
-- **Callback Return Type**: Output types are inferred from the callback's return value, not `outputSchema`
+<CardGroup cols={3}>
+  <Card title="useCallTool" icon="square-function" href="/api-reference/use-call-tool">
+    Call a tool from a view
+  </Card>
+  <Card title="useToolInfo" icon="database" href="/api-reference/use-tool-info">
+    Read the tool result the view mounted with
+  </Card>
+  <Card title="McpServer" icon="server" href="/api-reference/mcp-server">
+    The server whose type you infer from
+  </Card>
+</CardGroup>

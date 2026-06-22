@@ -1,20 +1,60 @@
 ---
 title: useRequestClose
-description: "Request the host to close (dismiss) the view from inside your app."
+description: "Dismiss the view from inside your app"
 ---
 
-The `useRequestClose` hook returns a function that asks the host to dismiss the view. Use it when the user has finished a flow and you want to return them to the conversation.
+When a view has run its course, dismissing it hands the user back to the conversation instead of leaving a spent panel on screen. `useRequestClose` asks the host to do that; the host owns the decision.
 
-```tsx
+{/* @todo: compatibility matrix */}
+
+## Example
+
+After the order is placed, a Done button dismisses the confirmation and hands the shopper back to the conversation.
+
+```tsx highlight={2,5,10}
+import { useState } from "react";
 import { useRequestClose } from "skybridge/web";
 
-function DoneButton() {
+function CheckoutConfirmation() {
   const requestClose = useRequestClose();
+  const [closing, setClosing] = useState(false);
+
+  const handleDone = async () => {
+    setClosing(true);
+    await requestClose();
+  };
 
   return (
-    <button onClick={() => requestClose()}>
-      Done
-    </button>
+    <div>
+      <p>Your order is on its way.</p>
+      <button disabled={closing} onClick={handleDone}>
+        {closing ? "Closing..." : "Done"}
+      </button>
+    </div>
   );
 }
 ```
+
+## Returns
+
+`useRequestClose` returns a single function.
+
+### `requestClose`
+
+```tsx
+requestClose(): Promise<void>;
+```
+
+Asks the host to dismiss the current view. The promise resolves once the request is sent, not when the view closes: the host owns the decision and returns no acknowledgement, so the view cannot tell whether it was actually dismissed.
+
+<CardGroup cols={3}>
+  <Card title="Design for the Host" icon="layout" href="/guides/ux">
+    Where dismissing a view fits in the view lifecycle
+  </Card>
+  <Card title="useRequestModal" icon="panel-top" href="/api-reference/use-request-modal">
+    Open the modal view you later close
+  </Card>
+  <Card title="useDisplayMode" icon="maximize" href="/api-reference/use-display-mode">
+    Request a different layout instead of closing
+  </Card>
+</CardGroup>

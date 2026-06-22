@@ -158,16 +158,23 @@
             ]
           },
           {
+            "group": "Auth",
+            "icon": "lock",
+            "pages": [
+              "api-reference/mcp-auth-metadata-router",
+              "api-reference/optional-bearer-auth",
+              "api-reference/require-bearer-auth"
+            ]
+          },
+          {
             "group": "Hooks",
             "icon": "fishing-rod",
             "pages": [
-              "api-reference/use-apps-sdk-context",
               "api-reference/use-call-tool",
               "api-reference/use-display-mode",
               "api-reference/use-download",
               "api-reference/use-files",
               "api-reference/use-layout",
-              "api-reference/use-mcp-app-context",
               "api-reference/use-open-external",
               "api-reference/use-register-view-tool",
               "api-reference/use-request-close",
@@ -194,7 +201,7 @@
             "icon": "type",
             "pages": [
               "api-reference/file-ref",
-              "api-reference/infer-utility-types"
+              "api-reference/utility-types"
             ]
           },
           {
@@ -202,6 +209,14 @@
             "icon": "terminal",
             "pages": [
               "api-reference/cli"
+            ]
+          },
+          {
+            "group": "Low-level",
+            "icon": "binary",
+            "pages": [
+              "api-reference/use-apps-sdk-context",
+              "api-reference/use-mcp-app-context"
             ]
           }
         ]
