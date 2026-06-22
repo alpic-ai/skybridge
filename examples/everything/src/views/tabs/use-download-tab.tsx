@@ -1,5 +1,7 @@
+import { Button } from "@alpic-ai/ui/components/button";
 import { useState } from "react";
 import { useDownload } from "skybridge/web";
+import { Code, Description, TabBody } from "../components/ui.js";
 
 export function UseDownloadTab() {
   const { download } = useDownload();
@@ -46,22 +48,22 @@ export function UseDownloadTab() {
   };
 
   return (
-    <div className="tab-content">
-      <p className="description">
+    <TabBody>
+      <Description>
         Ask the host to save a file to the user's filesystem. MCP Apps only — on
-        Apps SDK this will fail with {`{ isError: true }`}.
-      </p>
+        Apps SDK this will fail with <Code>{`{ isError: true }`}</Code>.
+      </Description>
 
-      <div className="button-row">
-        <button type="button" className="btn" onClick={downloadJson}>
-          Download hello.json (inline)
-        </button>
-        <button type="button" className="btn" onClick={downloadResourceLink}>
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={downloadJson}>Download hello.json (inline)</Button>
+        <Button onClick={downloadResourceLink}>
           Download README (resource link)
-        </button>
+        </Button>
       </div>
 
-      {status && <p className="description">Status: {status}</p>}
-    </div>
+      {status && (
+        <p className="type-text-sm text-muted-foreground">Status: {status}</p>
+      )}
+    </TabBody>
   );
 }

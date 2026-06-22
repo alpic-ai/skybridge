@@ -21,7 +21,7 @@ SPEC.md keeps track of the app's requirements and design decisions. Keep it up t
 ## Setup
 
 1. **Copy template** → [copy-template.md](references/copy-template.md): when starting a new project with ready SPEC.md
-2. **Run locally** → [run-locally.md](references/run-locally.md): when ready to test, need dev server or ChatGPT/Claude connection
+2. **Run locally** → [run-locally.md](references/run-locally.md): when ready to test, need dev server, use devtools to render views or connect to ChatGPT/Claude
 
 ## Architecture
 

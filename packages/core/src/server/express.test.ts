@@ -142,6 +142,47 @@ describe("McpServer.express", () => {
   });
 });
 
+describe("McpServer JSON body parser options", () => {
+  const largeBody = JSON.stringify({ data: "x".repeat(200 * 1024) });
+
+  async function postEcho(port: number, body: string) {
+    return fetch(`http://localhost:${port}/echo`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+    });
+  }
+
+  it("forwards json options to express.json", async () => {
+    const server = new McpServer(
+      { name: "t", version: "0.0.0" },
+      {},
+      { json: { limit: "10mb" } },
+    );
+    server.express.post("/echo", (req, res) => {
+      res.json({ received: req.body.data.length });
+    });
+    const { port, server: listening } = await listen(server.express);
+    openServer = listening;
+
+    const res = await postEcho(port, largeBody);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ received: 200 * 1024 });
+  });
+
+  it("keeps the default 100kb limit when no options are passed", async () => {
+    const server = new McpServer({ name: "t", version: "0.0.0" });
+    server.express.post("/echo", (_req, res) => {
+      res.json({ ok: true });
+    });
+    const { port, server: listening } = await listen(server.express);
+    openServer = listening;
+
+    const res = await postEcho(port, largeBody);
+    expect(res.status).toBe(413);
+  });
+});
+
 describe("createApp", () => {
   it("runs global custom middleware before the /mcp handler", async () => {
     const { createApp } = await import("./express.js");
@@ -480,6 +521,35 @@ describe("createApp", () => {
       expect.any(Error),
     );
     consoleSpy.mockRestore();
+  });
+});
+
+describe("createApp Vercel mode", () => {
+  it("server.run() returns the Express app without binding a port when VERCEL=1", async () => {
+    const prevVercel = process.env.VERCEL;
+    const prevEnv = process.env.NODE_ENV;
+    process.env.VERCEL = "1";
+    process.env.NODE_ENV = "production";
+    try {
+      vi.resetModules();
+      const { McpServer: Reloaded } = await import("./server.js");
+      const server = new Reloaded({ name: "t", version: "0.0.0" });
+      const result = await server.run();
+      expect(typeof result).toBe("function");
+      expect(result).toBe(server.express);
+      const { port, server: listening } = await listen(server.express);
+      openServer = listening;
+      const res = await postMcp(port);
+      expect(res.status).not.toBe(404);
+    } finally {
+      if (prevVercel === undefined) {
+        delete process.env.VERCEL;
+      } else {
+        process.env.VERCEL = prevVercel;
+      }
+      process.env.NODE_ENV = prevEnv;
+      vi.resetModules();
+    }
   });
 });
 

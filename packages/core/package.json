@@ -7,6 +7,7 @@
     "url": "https://github.com/alpic-ai/skybridge.git"
   },
   "type": "module",
+  "sideEffects": false,
   "engines": {
     "node": ">=22.0.0"
   },
@@ -50,7 +51,7 @@
   "license": "ISC",
   "peerDependencies": {
     "@modelcontextprotocol/sdk": ">=1.27.0",
-    "@skybridge/devtools": "^1.0.0",
+    "@skybridge/devtools": "^1.1.0",
     "nodemon": ">=3.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
@@ -58,16 +59,18 @@
   },
   "dependencies": {
     "@babel/core": "^7.29.0",
-    "@modelcontextprotocol/ext-apps": "^1.3.2",
+    "@modelcontextprotocol/ext-apps": "^1.7.3",
     "@oclif/core": "^4.10.3",
     "ci-info": "^4.4.0",
     "cors": "^2.8.6",
     "cross-spawn": "^7.0.6",
     "dequal": "^2.0.3",
     "es-toolkit": "^1.45.1",
+    "esbuild": "^0.27.0",
     "express": "^5.2.1",
     "handlebars": "^4.7.9",
     "ink": "^7.0.0",
+    "jose": "^6.1.3",
     "open": "^11.0.0",
     "posthog-node": "^5.28.9",
     "superjson": "^2.2.6",

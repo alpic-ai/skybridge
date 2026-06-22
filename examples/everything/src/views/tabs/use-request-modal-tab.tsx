@@ -1,23 +1,19 @@
+import { Button } from "@alpic-ai/ui/components/button";
 import { useRequestModal } from "skybridge/web";
+import { Description, TabBody } from "../components/ui.js";
 
 export function UseRequestModalTab() {
   const { open } = useRequestModal();
 
   return (
-    <div className="tab-content">
-      <p className="description">
-        Request to open the widget in a modal dialog.
-      </p>
+    <TabBody>
+      <Description>Request to open the widget in a modal dialog.</Description>
 
-      <div className="button-row">
-        <button
-          type="button"
-          className="btn"
-          onClick={() => open({ params: { message: "🤠 Howdy ! " } })}
-        >
+      <div>
+        <Button onClick={() => open({ params: { message: "🤠 Howdy ! " } })}>
           Open modal
-        </button>
+        </Button>
       </div>
-    </div>
+    </TabBody>
   );
 }

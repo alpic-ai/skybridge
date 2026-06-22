@@ -4,22 +4,11 @@ import { McpServer } from "skybridge/server";
 import * as z from "zod";
 import {
   type Capital,
-  type CapitalSummary,
   getAllCapitals,
   getCapitalByCountryCode,
   getCapitalByName,
   getCapitalSlug,
 } from "./capitals.js";
-
-// Cache allCapitals to be mindful of country REST API
-let cachedAllCapitals: CapitalSummary[] | null = null;
-
-async function getCachedAllCapitals(): Promise<CapitalSummary[]> {
-  if (!cachedAllCapitals) {
-    cachedAllCapitals = await getAllCapitals();
-  }
-  return cachedAllCapitals;
-}
 
 const server = new McpServer(
   {
@@ -65,8 +54,7 @@ const server = new McpServer(
     },
     async ({ name }) => {
       try {
-        // Fetch list first (minimal data), then details for requested capital
-        const allCapitals = await getCachedAllCapitals();
+        const allCapitals = await getAllCapitals();
         const capital = await getCapitalByName(name);
 
         return {
@@ -86,13 +74,13 @@ const server = new McpServer(
           isError: false,
         };
       } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Unknown error";
+        const allCapitals = await getAllCapitals().catch(() => []);
         return {
-          content: [
-            {
-              type: "text",
-              text: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
-            },
-          ],
+          _meta: { allCapitals },
+          structuredContent: { error: message },
+          content: [{ type: "text", text: message }],
           isError: true,
         };
       }
@@ -148,6 +136,6 @@ router.get("/api/capital/:cca2", async (req: Request, res: Response) => {
 
 server.use(router);
 
-server.run();
+export default await server.run();
 
 export type AppType = typeof server;

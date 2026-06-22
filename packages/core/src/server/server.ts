@@ -32,6 +32,8 @@ import express, {
   type Express,
   type RequestHandler,
 } from "express";
+import type { OAuthConfig } from "./auth/index.js";
+import { setupOAuth } from "./auth/setup.js";
 import { createApp } from "./express.js";
 import { createMiddlewareEntry } from "./metric.js";
 import type {
@@ -46,6 +48,7 @@ import type {
   McpWildcard,
 } from "./middleware.js";
 import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
+import { resolveServerOrigin } from "./requestOrigin.js";
 import { templateHelper } from "./templateHelper.js";
 
 const mergeWithUnion = <T extends object, S extends object>(
@@ -135,6 +138,20 @@ export interface ViewConfig {
 export type SecurityScheme =
   | { type: "noauth" }
   | { type: "oauth2"; scopes?: string[] };
+
+/**
+ * Options forwarded to the built-in `express.json()` body parser. Derived
+ * from Express's own types so the public API doesn't depend on `body-parser`.
+ */
+export type JsonOptions = NonNullable<Parameters<typeof express.json>[0]>;
+
+/** Skybridge-specific server options, passed as the third `McpServer` constructor argument. */
+export interface SkybridgeServerOptions {
+  /** Options for the built-in `express.json()` middleware, e.g. `{ limit: "10mb" }`. */
+  json?: JsonOptions;
+  /** Resource-server OAuth config. When set, mounts well-known metadata and bearer auth on `/mcp`. */
+  oauth?: OAuthConfig;
+}
 
 /**
  * Well-known keys recognized by host runtimes when set on a tool's `_meta`.
@@ -373,6 +390,16 @@ type ErrorMiddlewareConfig = {
 };
 
 /**
+ * Drop the query string from a `ui://` view URI, leaving the bare path. The
+ * `?v=` cache key is the only query we append, so a plain split is enough and
+ * sidesteps `URL` normalization quirks on the non-special `ui:` scheme.
+ */
+function stripQuery(uri: string): string {
+  const queryIndex = uri.indexOf("?");
+  return queryIndex === -1 ? uri : uri.slice(0, queryIndex);
+}
+
+/**
  * Coerce a tool handler's return value into an MCP `content` array. Strings
  * become a single `TextContent`; a single block is wrapped in an array;
  * `undefined` produces `[]`. Mostly used internally — exported so consumers
@@ -431,6 +458,26 @@ const McpServerBaseOmitted = McpServerBase as unknown as new (
  *
  * @see https://docs.skybridge.tech/api-reference/mcp-server
  */
+// Side channel populated by `dist/__entry.js` before user code is imported.
+// Set at module scope rather than passed through the constructor because the
+// wrapper has the manifest before the user's `new McpServer(...)` runs, and
+// threading it through every call site (including user templates) is exactly
+// the boilerplate this design is trying to hide.
+let pendingBuildManifest: Record<string, { file: string }> | null = null;
+
+/**
+ * Prime the build-time Vite manifest before user code constructs its
+ * `McpServer`. Called from the generated `dist/__entry.js`; not part of the
+ * user-facing API.
+ *
+ * @internal
+ */
+export function __setBuildManifest(
+  manifest: Record<string, { file: string }>,
+): void {
+  pendingBuildManifest = manifest;
+}
+
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
 > extends McpServerBaseOmitted {
@@ -440,7 +487,9 @@ export class McpServer<
    * custom routes, middleware, or settings — e.g.
    * `server.express.get("/health", ...)`.
    *
-   * `express.json()` is pre-applied. Register your handlers before `run()`;
+   * `express.json()` is pre-applied — tune it via the constructor's third
+   * argument, e.g. `new McpServer(info, {}, { json: { limit: "10mb" } })`.
+   * Register your handlers before `run()`;
    * after `run()`, dev-mode middleware, the `/mcp` route, and the default
    * error handler are appended in that order.
    *
@@ -456,16 +505,39 @@ export class McpServer<
     string,
     (extra: McpExtra | undefined) => ResourceMeta
   >();
+  /**
+   * Maps a view resource's query-less path to its canonical registered URI
+   * (the one carrying the `?v=` cache key). Lets `resources/read` resolve the
+   * underlying view no matter which version param the consumer sends, since
+   * the param is only a cache key, not part of the resource's identity.
+   */
+  private viewUriByPath = new Map<string, string>();
   private viteManifest: Record<string, ViteManifestEntry> | null = null;
   private readonly serverInfo: Implementation;
   private readonly serverOptions?: ServerOptions;
 
-  constructor(serverInfo: Implementation, options?: ServerOptions) {
+  constructor(
+    serverInfo: Implementation,
+    options?: ServerOptions,
+    skybridgeOptions?: SkybridgeServerOptions,
+  ) {
     super(serverInfo, options);
     this.serverInfo = serverInfo;
     this.serverOptions = options;
     this.express = express();
-    this.express.use(express.json());
+    this.express.use(express.json(skybridgeOptions?.json));
+    if (skybridgeOptions?.oauth) {
+      setupOAuth(this.express, skybridgeOptions.oauth);
+    }
+    // Pick up the manifest if `dist/__entry.js` primed it before importing
+    // user code. Consume-once: clear after the first construction so a
+    // subsequent test that doesn't prime can't inherit stale state.
+    // Explicit `setViteManifest` calls still win because they happen after
+    // construction.
+    if (pendingBuildManifest) {
+      this.setViteManifest(pendingBuildManifest);
+      pendingBuildManifest = null;
+    }
   }
 
   /**
@@ -628,10 +700,51 @@ export class McpServer<
       },
     };
 
+    // Resolve a view's `resources/read` by its query-less path so the
+    // underlying asset is served no matter the `?v=` value (stale cache key,
+    // no param, etc.). The version param is a cache-busting hint for external
+    // consumers; it must not gate resolution. We rewrite the lookup URI to the
+    // canonical registered one, then restore the requested URI on the response
+    // so the consumer-facing URI is never rewritten.
+    const viewReadResolveEntry: McpMiddlewareEntry = {
+      filter: "resources/read",
+      handler: async (req, _extra, next) => {
+        const requested = req.params.uri;
+        if (typeof requested !== "string") {
+          return next();
+        }
+        const path = stripQuery(requested);
+        const canonical = this.viewUriByPath.get(path);
+        if (!canonical) {
+          return next();
+        }
+        req.params.uri = canonical;
+        try {
+          const result = (await next()) as {
+            contents?: Array<{ uri?: string } & Record<string, unknown>>;
+          };
+          for (const content of result.contents ?? []) {
+            if (
+              typeof content.uri === "string" &&
+              stripQuery(content.uri) === path
+            ) {
+              content.uri = requested;
+            }
+          }
+          return result;
+        } finally {
+          // Restore the shared request params so middleware outer to us never
+          // observes the rewritten lookup URI after next() unwinds.
+          req.params.uri = requested;
+        }
+      },
+    };
+
     const monitoringEntry = createMiddlewareEntry();
     const entries = [
       ...(monitoringEntry ? [monitoringEntry] : []),
       viewListMetaEntry,
+      viewReadResolveEntry,
       ...this.mcpMiddlewareEntries,
     ];
 
@@ -720,10 +833,28 @@ export class McpServer<
    *
    * On Cloudflare Workers / workerd, returns an object exposing `fetch` so
    * the runtime can bridge incoming requests to the Node HTTP server. On
+   * Vercel (`VERCEL === "1"`), returns the Express app directly so the
+   * serverless function entry can call it as a `(req, res)` handler. On
    * Node, returns `undefined` once listening.
    */
-  async run(): Promise<{ fetch: (...args: unknown[]) => unknown } | undefined> {
+  async run(): Promise<
+    { fetch: (...args: unknown[]) => unknown } | Express | undefined
+  > {
     this.applyMcpMiddleware();
+
+    if (process.env.VERCEL === "1") {
+      // createApp only reads httpServer inside its dev-only branch
+      // (viewsDevServer); under VERCEL=1 + NODE_ENV=production it's a
+      // bare object passed to satisfy the required parameter.
+      const httpServer = http.createServer();
+      await createApp({
+        mcpServer: this,
+        httpServer,
+        errorMiddleware: this.customErrorMiddleware,
+      });
+      return this.express;
+    }
+
     const httpServer = http.createServer();
 
     await createApp({
@@ -794,25 +925,7 @@ export class McpServer<
     };
     const isClaude = header("user-agent") === "Claude-User";
 
-    let serverUrl: string;
-    const forwardedHost = header("x-forwarded-host");
-    const origin = header("origin");
-    const host = header("host");
-
-    if (forwardedHost) {
-      const proto = header("x-forwarded-proto") || "https";
-      serverUrl = `${proto}://${forwardedHost}`;
-    } else if (origin) {
-      serverUrl = origin;
-    } else if (host) {
-      const proto = ["127.0.0.1:", "localhost:"].some((p) => host.startsWith(p))
-        ? "http"
-        : "https";
-      serverUrl = `${proto}://${host}`;
-    } else {
-      const devPort = process.env.__PORT || "3000";
-      serverUrl = `http://localhost:${devPort}`;
-    }
+    const serverUrl = resolveServerOrigin(header);
 
     const connectDomains = [serverUrl];
     if (!isProduction) {
@@ -1000,6 +1113,7 @@ export class McpServer<
       );
     };
     this.viewMetaBuilders.set(viewUri, buildMeta);
+    this.viewUriByPath.set(stripQuery(viewUri), viewUri);
 
     this.registerResource(
       name,

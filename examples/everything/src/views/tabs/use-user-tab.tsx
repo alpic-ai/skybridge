@@ -1,4 +1,5 @@
 import { useUser } from "skybridge/web";
+import { Code, Description, Field, TabBody } from "../components/ui.js";
 
 function countryToFlag(countryCode: string): string {
   return countryCode
@@ -21,40 +22,35 @@ export function UseUserTab() {
   } catch {}
 
   return (
-    <div className="tab-content">
-      <p className="description">
+    <TabBody>
+      <Description>
         Access user information including locale and device details. Useful for
         adapting your widget to the user's environment.
-      </p>
+      </Description>
 
-      <div style={{ display: "flex", gap: "1rem" }}>
-        <div className="field">
-          <span className="field-label">Locale</span>
-          <code>{locale}</code>
-        </div>
+      <div className="flex flex-wrap gap-4">
+        <Field label="Locale">
+          <Code>{locale}</Code>
+        </Field>
 
-        <div className="field">
-          <span className="field-label">Device</span>
-          <code>{userAgent.device.type}</code>
-        </div>
+        <Field label="Device">
+          <Code>{userAgent.device.type}</Code>
+        </Field>
 
-        <div className="field">
-          <span className="field-label">Touch</span>
-          <code>{JSON.stringify(userAgent.capabilities.touch)}</code>
-        </div>
+        <Field label="Touch">
+          <Code>{JSON.stringify(userAgent.capabilities.touch)}</Code>
+        </Field>
 
-        <div className="field">
-          <span className="field-label">Hover</span>
-          <code>{JSON.stringify(userAgent.capabilities.hover)}</code>
-        </div>
+        <Field label="Hover">
+          <Code>{JSON.stringify(userAgent.capabilities.hover)}</Code>
+        </Field>
       </div>
 
       {flag && (
-        <div className="field">
-          <span className="field-label">Localized flag</span>
-          <code style={{ fontSize: "2rem" }}>{flag}</code>
-        </div>
+        <Field label="Localized flag">
+          <Code className="type-display-sm">{flag}</Code>
+        </Field>
       )}
-    </div>
+    </TabBody>
   );
 }
