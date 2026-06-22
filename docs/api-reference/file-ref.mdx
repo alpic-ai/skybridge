@@ -4,6 +4,10 @@ description: "Reference a host-managed file in a tool's schema"
 tag: "ChatGPT"
 ---
 
+import { Compat } from "/components/compat.jsx";
+
+<Compat chatgpt />
+
 `FileRef` is a reference to a file, an id and a URL to fetch its bytes. Use it in a tool's `inputSchema` or `outputSchema` to pass files in and out.
 
 <Info>

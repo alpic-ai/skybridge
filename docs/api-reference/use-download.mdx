@@ -3,9 +3,11 @@ title: useDownload
 description: "Save files from a view to the user's device"
 ---
 
-Views run in sandboxed iframes where direct downloads (`<a download>`, `URL.createObjectURL`) are blocked. `useDownload` hands the host one or more resources to write to the user's device, so a view can save a file it produced.
+import { Compat } from "/components/compat.jsx";
 
-{/* @todo: compatibility matrix */}
+<Compat claude />
+
+Views run in sandboxed iframes where direct downloads (`<a download>`, `URL.createObjectURL`) are blocked. `useDownload` hands the host one or more resources to write to the user's device, so a view can save a file it produced.
 
 ## Example
 

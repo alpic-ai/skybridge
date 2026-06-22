@@ -3,9 +3,11 @@ title: useViewState
 description: "Persist view state across remounts and share it with the model"
 ---
 
-A view loses its local React state when the host remounts it, and the model never sees what the view is showing. `useViewState` is a drop-in `useState` that fixes both.
+import { Compat } from "/components/compat.jsx";
 
-{/* @todo: compatibility matrix */}
+<Compat chatgpt claude />
+
+A view loses its local React state when the host remounts it, and the model never sees what the view is showing. `useViewState` is a drop-in `useState` that fixes both.
 
 ## Example
 

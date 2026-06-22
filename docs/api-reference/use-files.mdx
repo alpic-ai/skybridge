@@ -4,9 +4,11 @@ description: "Upload, pick, and resolve files from the host"
 tag: "ChatGPT"
 ---
 
-ChatGPT stores your app's files and hands your code a reference to each, never the bytes. `useFiles` produces a reference from a file the user supplies, by uploading a local file or picking one from ChatGPT's library, and resolves any reference into a download URL the view or a tool can fetch.
+import { Compat } from "/components/compat.jsx";
 
-{/* @todo: compatibility matrix */}
+<Compat chatgpt />
+
+ChatGPT stores your app's files and hands your code a reference to each, never the bytes. `useFiles` produces a reference from a file the user supplies, by uploading a local file or picking one from ChatGPT's library, and resolves any reference into a download URL the view or a tool can fetch.
 
 ## Example
 

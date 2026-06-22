@@ -3,11 +3,13 @@ title: useToolInfo
 description: "Read the tool call that produced the current view"
 ---
 
+import { Compat } from "/components/compat.jsx";
+
+<Compat chatgpt claude />
+
 `useToolInfo` reads the tool call that rendered the current view, so a view can display the data its own tool produced.
 
 Import it from your generated [`helpers.ts`](/api-reference/generate-helpers): the typed hook infers `input`, `output`, and `responseMetadata` from your server, so you pass only the tool name.
-
-{/* @todo: compatibility matrix */}
 
 ## Example
 

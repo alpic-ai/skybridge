@@ -141,14 +141,8 @@
       },
       {
         "tab": "API Reference",
-        "groups": [
-          {
-            "group": "Overview",
-            "icon": "house",
-            "pages": [
-              "api-reference"
-            ]
-          },
+        "pages": [
+          "api-reference/overview",
           {
             "group": "Server",
             "icon": "server",
@@ -204,13 +198,7 @@
               "api-reference/utility-types"
             ]
           },
-          {
-            "group": "CLI",
-            "icon": "terminal",
-            "pages": [
-              "api-reference/cli"
-            ]
-          },
+          "api-reference/cli",
           {
             "group": "Low-level",
             "icon": "binary",

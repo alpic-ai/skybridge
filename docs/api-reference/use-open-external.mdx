@@ -3,9 +3,11 @@ title: useOpenExternal
 description: "Open a URL outside the view's iframe through the host"
 ---
 
-A view runs in a sandboxed iframe, so a normal external link goes nowhere: `window.open` and `target="_blank"` are both blocked. `useOpenExternal` sends the user out to a URL by routing the navigation through the host.
+import { Compat } from "/components/compat.jsx";
 
-{/* @todo: compatibility matrix */}
+<Compat chatgpt claude />
+
+A view runs in a sandboxed iframe, so a normal external link goes nowhere: `window.open` and `target="_blank"` are both blocked. `useOpenExternal` sends the user out to a URL by routing the navigation through the host.
 
 ## Example
 

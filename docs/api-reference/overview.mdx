@@ -1,0 +1,59 @@
+---
+title: Overview
+description: Every server API, hook, and utility, with host compatibility.
+icon: house
+---
+
+Every Skybridge export. Server APIs run in your MCP server and work with any host. View hooks run inside the rendered view, where a host that lacks a capability degrades gracefully, either a no-op or a thrown error documented on the hook's page.
+
+## Server
+
+| API | Description |
+| --- | --- |
+| [`mcpAuthMetadataRouter`](/api-reference/mcp-auth-metadata-router) | Serve OAuth metadata for client discovery. |
+| [`McpServer`](/api-reference/mcp-server) | The server you register tools and views on. |
+| [`optionalBearerAuth`](/api-reference/optional-bearer-auth) | Attach a verified identity when a token is present. |
+| [`registerTool`](/api-reference/register-tool) | Register a tool, its schemas, and the view it renders. |
+| [`requireBearerAuth`](/api-reference/require-bearer-auth) | Gate a server behind a verified bearer token. |
+
+## Hooks
+
+| Hook | Description | Compatibility |
+| --- | --- | --- |
+| [`useCallTool`](/api-reference/use-call-tool) | Call server tools from the view and track call state. | <Badge stroke color="gray" size="sm" shape="pill">ChatGPT</Badge> <Badge stroke color="orange" size="sm" shape="pill">Claude</Badge> |
+| [`useDisplayMode`](/api-reference/use-display-mode) | Read and request inline, pip, or fullscreen. | <Badge stroke color="gray" size="sm" shape="pill">ChatGPT</Badge> <Badge stroke color="orange" size="sm" shape="pill">Claude</Badge> |
+| [`useDownload`](/api-reference/use-download) | Save files to the user's device. | <Badge stroke color="orange" size="sm" shape="pill">Claude</Badge> |
+| [`useFiles`](/api-reference/use-files) | Upload and pick host-managed files. | <Badge stroke color="gray" size="sm" shape="pill">ChatGPT</Badge> |
+| [`useLayout`](/api-reference/use-layout) | Read theme, max height, and safe-area insets. | <Badge stroke color="gray" size="sm" shape="pill">ChatGPT</Badge> <Badge stroke color="orange" size="sm" shape="pill">Claude</Badge> |
+| [`useOpenExternal`](/api-reference/use-open-external) | Open a URL outside the view iframe. | <Badge stroke color="gray" size="sm" shape="pill">ChatGPT</Badge> <Badge stroke color="orange" size="sm" shape="pill">Claude</Badge> |
+| [`useRegisterViewTool`](/api-reference/use-register-view-tool) | Expose a tool that runs inside the view. | - |
+| [`useRequestClose`](/api-reference/use-request-close) | Ask the host to dismiss the view. | <Badge stroke color="gray" size="sm" shape="pill">ChatGPT</Badge> <Badge stroke color="orange" size="sm" shape="pill">Claude</Badge> |
+| [`useRequestModal`](/api-reference/use-request-modal) | Open the view as a host modal. | <Badge stroke color="gray" size="sm" shape="pill">ChatGPT</Badge> <Badge stroke color="orange" size="sm" shape="pill">Claude</Badge> |
+| [`useRequestSize`](/api-reference/use-request-size) | Ask the host to resize the view iframe. | <Badge stroke color="orange" size="sm" shape="pill">Claude</Badge> |
+| [`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message) | Send a follow-up turn to the model. | <Badge stroke color="gray" size="sm" shape="pill">ChatGPT</Badge> <Badge stroke color="orange" size="sm" shape="pill">Claude</Badge> |
+| [`useSetOpenInAppUrl`](/api-reference/use-set-open-in-app-url) | Override the fullscreen open-in-app URL. | <Badge stroke color="gray" size="sm" shape="pill">ChatGPT</Badge> |
+| [`useToolInfo`](/api-reference/use-tool-info) | Read the tool input, output, and metadata that rendered the view. | <Badge stroke color="gray" size="sm" shape="pill">ChatGPT</Badge> <Badge stroke color="orange" size="sm" shape="pill">Claude</Badge> |
+| [`useUser`](/api-reference/use-user) | Read locale and device capabilities. | <Badge stroke color="gray" size="sm" shape="pill">ChatGPT</Badge> <Badge stroke color="orange" size="sm" shape="pill">Claude</Badge> |
+| [`useViewState`](/api-reference/use-view-state) | Persist UI state on the host across renders. | <Badge stroke color="gray" size="sm" shape="pill">ChatGPT</Badge> <Badge stroke color="orange" size="sm" shape="pill">Claude</Badge> |
+
+## Utilities
+
+| Utility | Description |
+| --- | --- |
+| [`createStore`](/api-reference/create-store) | A Zustand store synced with host view state. |
+| [`data-llm`](/api-reference/data-llm) | Describe on-screen state to the model in words. |
+| [`generateHelpers`](/api-reference/generate-helpers) | Generate typed hooks inferred from your server. |
+
+## Types
+
+| Type | Description |
+| --- | --- |
+| [`FileRef`](/api-reference/file-ref) | Reference a host-managed file in a tool schema. |
+| [Type Utilities](/api-reference/utility-types) | Pull tool input, output, and name types from your server. |
+
+## Low-level
+
+| Hook | Description |
+| --- | --- |
+| [`useAppsSdkContext`](/api-reference/use-apps-sdk-context) | Read a raw ChatGPT (Apps SDK) context value by key. |
+| [`useMcpAppContext`](/api-reference/use-mcp-app-context) | Read a raw MCP Apps context value by key. |

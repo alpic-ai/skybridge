@@ -4,6 +4,10 @@ description: "Read a raw ChatGPT host global by key"
 tag: "ChatGPT"
 ---
 
+import { Compat } from "/components/compat.jsx";
+
+<Compat chatgpt />
+
 ChatGPT exposes its view context to your app, which Skybridge's hooks read and normalize for you. `useAppsSdkContext` is the escape hatch: it reads a context value raw, by key, before that normalization. It works only under ChatGPT.
 
 ## Example

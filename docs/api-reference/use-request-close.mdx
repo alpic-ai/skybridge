@@ -3,9 +3,11 @@ title: useRequestClose
 description: "Dismiss the view from inside your app"
 ---
 
-When a view has run its course, dismissing it hands the user back to the conversation instead of leaving a spent panel on screen. `useRequestClose` asks the host to do that; the host owns the decision.
+import { Compat } from "/components/compat.jsx";
 
-{/* @todo: compatibility matrix */}
+<Compat chatgpt claude />
+
+When a view has run its course, dismissing it hands the user back to the conversation instead of leaving a spent panel on screen. `useRequestClose` asks the host to do that; the host owns the decision.
 
 ## Example
 

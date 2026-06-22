@@ -3,9 +3,11 @@ title: useMcpAppContext
 description: "Read a raw MCP Apps host context value by key"
 ---
 
-An MCP Apps host (Claude and others) exposes view context that Skybridge's cross-host hooks read for you. `useMcpAppContext` is the escape hatch: it reads that context raw, by key, for a protocol-level field the hooks don't surface. It runs only on MCP Apps hosts, not ChatGPT; the Apps SDK counterpart is [`useAppsSdkContext`](/api-reference/use-apps-sdk-context).
+import { Compat } from "/components/compat.jsx";
 
-{/* @todo: compatibility matrix */}
+<Compat claude />
+
+An MCP Apps host (Claude and others) exposes view context that Skybridge's cross-host hooks read for you. `useMcpAppContext` is the escape hatch: it reads that context raw, by key, for a protocol-level field the hooks don't surface. It runs only on MCP Apps hosts, not ChatGPT; the Apps SDK counterpart is [`useAppsSdkContext`](/api-reference/use-apps-sdk-context).
 
 ## Example
 

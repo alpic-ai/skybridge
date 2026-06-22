@@ -4,9 +4,11 @@ description: "Set where the host's Open in app button navigates"
 tag: "ChatGPT"
 ---
 
-When a user opens your view fullscreen, the host's "Open in app" button navigates to the view's current iframe path. `useSetOpenInAppUrl` redirects it to a canonical URL you set instead.
+import { Compat } from "/components/compat.jsx";
 
-{/* @todo: compatibility matrix */}
+<Compat chatgpt />
+
+When a user opens your view fullscreen, the host's "Open in app" button navigates to the view's current iframe path. `useSetOpenInAppUrl` redirects it to a canonical URL you set instead.
 
 ## Example
 

@@ -3,9 +3,11 @@ title: useRequestModal
 description: "Open the view as a modal overlay and read its modal state"
 ---
 
-A modal overlay is host-owned: a view cannot mount one itself. `useRequestModal` lets the view ask the host to open it as a modal, pass data into it, and read whether the modal is currently showing.
+import { Compat } from "/components/compat.jsx";
 
-{/* @todo: compatibility matrix */}
+<Compat chatgpt claude />
+
+A modal overlay is host-owned: a view cannot mount one itself. `useRequestModal` lets the view ask the host to open it as a modal, pass data into it, and read whether the modal is currently showing.
 
 ## Example
 
