@@ -71,6 +71,13 @@
           },
           "troubleshooting",
           {
+            "group": "Resources",
+            "icon": "library",
+            "pages": [
+              "resources/apps-sdk-and-mcp-apps"
+            ]
+          },
+          {
             "group": "Get Started (legacy)",
             "icon": "rocket",
             "pages": [
