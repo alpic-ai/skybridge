@@ -34,7 +34,8 @@
                 "pages": [
                   "fundamentals",
                   "fundamentals/apps-sdk",
-                  "fundamentals/mcp-apps"
+                  "fundamentals/mcp-apps",
+                  "fundamentals/client-support"
                 ]
               },
               "quickstart/create-new-app",
