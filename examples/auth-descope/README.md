@@ -1,11 +1,12 @@
-# Auth Example — Clerk
+# Auth Example — Descope
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating full OAuth authentication with [Clerk](https://clerk.com/).
+An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating full OAuth authentication with [Descope](https://docs.descope.com/mcp).
 
 ## What This Example Showcases
 
 - **Transport-Level Auth**: Auth is enforced at the `/mcp` transport level — unauthenticated requests receive HTTP 401 before reaching any tool handler
-- **Clerk OAuth**: One-line setup with `clerkProvider`, which discovers Clerk's OAuth metadata and verifies JWTs against its JWKS — no Clerk SDK or secret key
+- **Descope OAuth**: One-line setup with `descopeProvider`, which discovers the MCP Server's OAuth metadata and verifies JWTs against Descope's JWKS
+- **Branded provider via `oauth:`**: Passing `oauth: await descopeProvider(...)` auto-mounts the well-known metadata endpoints and Bearer verification — no manual router
 - **Personalized Results**: Authenticated users see favorites highlighted and sorted first
 - **User Identity in Widgets**: Displays the signed-in user's name directly in the widget UI
 - **Simplified Server Setup**: Uses [`server.run()`](https://docs.skybridge.tech/api-reference/run) and `.use()` for a single-file server with no manual Express boilerplate
@@ -18,7 +19,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a p
 ### Prerequisites
 
 - Node.js 24+
-- A [Clerk](https://clerk.com/) account
+- A [Descope](https://www.descope.com/) account with an MCP Server configured
 
 ### Local Development
 
@@ -34,16 +35,15 @@ pnpm install
 bun install
 ```
 
-#### 2. Configure Clerk
+#### 2. Configure Descope
 
-1. Sign up at [clerk.com](https://clerk.com/) and create an application.
-2. Create an OAuth application: enable **Dynamic client registration** and turn on **Generate access tokens as JWTs** (Settings).
-3. Copy your **Frontend API URL** (Clerk dashboard → API keys) and set the OAuth app's audience.
+1. Sign up at [descope.com](https://www.descope.com/) and create a project.
+2. In the console's **MCP Servers** section, create an MCP Server and enable **Dynamic Client Registration** on it.
+3. Copy the MCP Server's **Discovery URL** from its Connection Information.
 4. Create a `.env` file in the project root:
 
 ```env
-CLERK_DOMAIN=acme.clerk.accounts.dev
-CLERK_AUDIENCE=your-oauth-app-audience
+DESCOPE_MCP_SERVER_URL=https://api.descope.com/v1/apps/agentic/<projectId>/<mcpServerId>
 SERVER_URL=http://localhost:3000
 ```
 
@@ -68,7 +68,7 @@ This command starts:
 
 ```
 ├── src/
-│   ├── server.ts        # Server entry: McpServer + Clerk auth + widget + run()
+│   ├── server.ts        # Server entry: McpServer + descopeProvider auth + widget + run()
 │   ├── env.ts          # Env validation
 │   └── coffee-data.ts  # Mock coffee shop data & search
 │   ├── views/
@@ -110,12 +110,12 @@ The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 2. Connect your GitHub repository to automatically deploy at each commit.
 3. Use your remote App URL to connect it to MCP Clients, or use the Alpic Playground to easily test your App.
 
-[![Deploy it on Alpic](https://assets.alpic.ai/button.svg)](https://app.alpic.ai/new/clone?repositoryUrl=https://github.com/alpic-ai/skybridge&rootDir=examples/auth-clerk)
+[![Deploy it on Alpic](https://assets.alpic.ai/button.svg)](https://app.alpic.ai/new/clone?repositoryUrl=https://github.com/alpic-ai/skybridge&rootDir=examples/auth-descope)
 
 ## Resources
 
 - [Skybridge Documentation](https://docs.skybridge.tech/)
-- [Clerk Documentation](https://clerk.com/docs)
+- [Descope MCP Documentation](https://docs.descope.com/mcp)
 - [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)

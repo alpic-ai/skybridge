@@ -1,8 +1,8 @@
 {
-  "name": "skybridge-auth-clerk-example",
+  "name": "skybridge-auth-descope-alpic-example",
   "version": "0.0.1",
   "private": true,
-  "description": "Skybridge Auth Example - OAuth Authentication with Clerk",
+  "description": "Skybridge Auth Example - Descope via customProvider + Alpic DCR proxy",
   "type": "module",
   "scripts": {
     "dev": "skybridge dev",

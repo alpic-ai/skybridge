@@ -1,8 +1,8 @@
 {
-  "name": "skybridge-auth-clerk-example",
+  "name": "skybridge-auth-descope-example",
   "version": "0.0.1",
   "private": true,
-  "description": "Skybridge Auth Example - OAuth Authentication with Clerk",
+  "description": "Skybridge Auth Example - OAuth Authentication with Descope",
   "type": "module",
   "scripts": {
     "dev": "skybridge dev",

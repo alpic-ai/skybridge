@@ -1,23 +1,30 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type AuthInfo, clerkProvider, McpServer } from "skybridge/server";
+import { type AuthInfo, customProvider, McpServer } from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
 
 /**
- * Auth Example - OAuth Authentication with Clerk
+ * Auth Example - Descope with **DCR disabled**, fronted by the Alpic DCR proxy.
  *
- * This example demonstrates a fully authenticated MCP server where users
- * must sign in via OAuth before using any tools. Auth is enforced at the
- * transport level — unauthenticated requests to /mcp receive HTTP 401.
+ * Unlike `auth-descope` (branded `descopeProvider`), this wires OAuth via the
+ * low-level `customProvider` for the case where the IdP has **no DCR**:
  *
- * Auth is wired with the branded `clerkProvider`: it discovers the instance's
- * OAuth metadata, then auto-mounts the well-known endpoints and Bearer JWT
- * verification (against Clerk's JWKS). Clerk hosts the login + consent UI.
- * Requires Dynamic Client Registration enabled on the instance, and the OAuth
- * application set to issue JWT access tokens (opaque tokens can't be verified
- * via JWKS). `audience` is the OAuth application's configured audience.
+ * - `customProvider` serves metadata without a `registration_endpoint` when the
+ *   IdP's discovery omits one (Descope DCR disabled) — no special flag needed.
+ * - `serverUrl` advertises **this server** as the authorization server, so Alpic
+ *   sits in the registration path and can inject its DCR proxy endpoint. Pointing
+ *   clients straight at Descope would make Alpic "delegate" and skip the proxy.
+ *
+ * Token `aud` is the Descope Project ID (Descope binds `aud` to [client, project]).
  */
+
+const projectId = env.DESCOPE_MCP_SERVER_URL.match(/\/agentic\/([^/]+)\//)?.[1];
+if (!projectId) {
+  throw new Error(
+    `Could not derive the Descope project id from "${env.DESCOPE_MCP_SERVER_URL}".`,
+  );
+}
 
 const server = new McpServer(
   {
@@ -26,8 +33,10 @@ const server = new McpServer(
   },
   { capabilities: {} },
   {
-    oauth: await clerkProvider({
-      domain: env.CLERK_DOMAIN,
+    oauth: await customProvider({
+      issuer: env.DESCOPE_MCP_SERVER_URL,
+      audience: projectId,
+      serverUrl: env.SERVER_URL,
     }),
   },
 )

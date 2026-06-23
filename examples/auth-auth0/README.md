@@ -5,8 +5,8 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a p
 ## What This Example Showcases
 
 - **Transport-Level Auth**: Auth is enforced at the `/mcp` transport level — unauthenticated requests receive HTTP 401 before reaching any tool handler
-- **Auth0 OAuth**: Full OAuth2 setup with JWT verification via JWKS
-- **OAuth Metadata Router**: Mounts `mcpAuthMetadataRouter` so MCP clients can discover auth endpoints automatically
+- **Auth0 OAuth**: One-line setup with `auth0Provider`, which discovers Auth0's OIDC metadata and verifies JWTs against its JWKS
+- **Branded provider via `oauth:`**: Passing `oauth: await auth0Provider(...)` auto-mounts the well-known metadata endpoints and Bearer verification — no manual router
 - **Personalized Results**: Authenticated users see favorites highlighted and sorted first
 - **User Identity in Widgets**: Displays the signed-in user's name directly in the widget UI
 - **Simplified Server Setup**: Uses [`server.run()`](https://docs.skybridge.tech/api-reference/run) and `.use()` for a single-file server with no manual Express boilerplate
@@ -98,8 +98,7 @@ This command starts:
 
 ```
 ├── src/
-│   ├── server.ts        # Server entry: McpServer + Auth0 auth + widget + run()
-│   ├── auth.ts         # verifyAccessToken — JWT verification via Auth0 JWKS
+│   ├── server.ts        # Server entry: McpServer + auth0Provider auth + widget + run()
 │   ├── env.ts          # Env validation
 │   └── coffee-data.ts  # Mock coffee shop data & search
 │   ├── views/
