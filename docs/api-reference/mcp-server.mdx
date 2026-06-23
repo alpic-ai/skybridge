@@ -5,8 +5,6 @@ description: "Build and run a Skybridge MCP server"
 
 `McpServer` is the root of your app: an Express-backed server whose methods return the server itself, so you chain your tool registrations off it and export the resulting type for [`generateHelpers`](/api-reference/generate-helpers).
 
-{/* @todo: compatibility matrix */}
-
 ## Example
 
 A server registers one tool, exports its type for the typed client hooks, and starts listening.
@@ -39,7 +37,7 @@ new McpServer(
 
 ```ts
 type SkybridgeServerOptions = {
-  json?: JsonOptions; // options for the built-in express.json() body parser, e.g. { limit: "10mb" }
+  json?: JsonOptions;
 };
 ```
 
