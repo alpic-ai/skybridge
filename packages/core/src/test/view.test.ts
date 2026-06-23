@@ -350,27 +350,6 @@ describe("McpServer.registerTool (unified API)", () => {
     );
   });
 
-  it("should register tool with ui.resourceUri metadata", async () => {
-    server.registerTool(
-      {
-        name: "my-view",
-        description: "Test tool",
-        view: { component: "my-view" as ViewName, description: "Test view" },
-      },
-      vi.fn(),
-    );
-
-    expect(mockRegisterTool).toHaveBeenCalledTimes(1);
-
-    const toolCallArgs = mockRegisterTool.mock.calls[0];
-    const toolConfig = toolCallArgs?.[1] as { _meta?: Record<string, unknown> };
-
-    expect(toolConfig._meta).toHaveProperty("ui");
-    expect(toolConfig._meta?.ui).toEqual({
-      resourceUri: "ui://views/ext-apps/my-view.html",
-    });
-  });
-
   it("should advertise the single resource via ui.resourceUri and openai/outputTemplate alias", async () => {
     server.registerTool(
       {
