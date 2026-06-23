@@ -2,6 +2,10 @@
   "$schema": "https://mintlify.com/docs.json",
   "name": "Skybridge",
   "theme": "mint",
+  "banner": {
+    "content": "🚀 We're live on Product Hunt today, help us reach Product of the Day — [Upvote →](https://www.producthunt.com/products/skybridge?utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-skybridge)",
+    "dismissible": true
+  },
   "colors": {
     "primary": "#002FFF",
     "light": "#08F5F9",
@@ -111,6 +115,7 @@
             "pages": [
               "api-reference/use-tool-info",
               "api-reference/use-call-tool",
+              "api-reference/use-register-view-tool",
               "api-reference/use-layout",
               "api-reference/use-user",
               "api-reference/use-display-mode",
@@ -164,6 +169,7 @@
             "group": "Use cases",
             "pages": [
               "examples/capitals",
+              "examples/chess",
               "examples/flight-booking",
               "examples/ecommerce-carousel",
               "examples/investigation-game",

@@ -1,4 +1,9 @@
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@alpic-ai/ui/components/toggle-group";
 import { type RequestDisplayMode, useDisplayMode } from "skybridge/web";
+import { Description, Field, TabBody } from "../components/ui.js";
 
 const ColByMode = new Map<RequestDisplayMode, number>()
   .set("inline", 1)
@@ -10,15 +15,17 @@ export function UseDisplayModeTab() {
   const columns = displayMode === "modal" ? 1 : ColByMode.get(displayMode);
 
   return (
-    <div className="tab-content">
-      <p className="description">
+    <TabBody>
+      <Description>
         Control how your widget is displayed. The host may reject mode change
         requests.
-      </p>
+      </Description>
 
-      <div className="field">
-        <span className="field-label">View</span>
-        <code style={{ columnCount: columns, columnGap: "1rem" }}>
+      <Field label="View">
+        <p
+          className="rounded-md bg-muted p-3 type-text-sm text-foreground"
+          style={{ columnCount: columns, columnGap: "1rem" }}
+        >
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
           eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
           minim veniam, quis nostrud exercitation ullamco laboris nisi ut
@@ -26,21 +33,23 @@ export function UseDisplayModeTab() {
           reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
           pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
           culpa qui officia deserunt mollit anim id est laborum.
-        </code>
-      </div>
+        </p>
+      </Field>
 
-      <div className="button-row">
+      <ToggleGroup
+        type="single"
+        variant="outline"
+        value={displayMode}
+        onValueChange={(value) =>
+          value && setDisplayMode(value as RequestDisplayMode)
+        }
+      >
         {Array.from(ColByMode.entries()).map(([mode, col]) => (
-          <button
-            key={mode.toString()}
-            type="button"
-            className={`btn ${displayMode === mode ? "" : "btn-outline"}`}
-            onClick={() => setDisplayMode(mode)}
-          >
+          <ToggleGroupItem key={mode} value={mode}>
             {mode} ({col} column{col > 1 ? "s" : ""})
-          </button>
+          </ToggleGroupItem>
         ))}
-      </div>
-    </div>
+      </ToggleGroup>
+    </TabBody>
   );
 }

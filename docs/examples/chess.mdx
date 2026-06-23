@@ -1,0 +1,41 @@
+---
+title: Chess
+description: Play chess against the assistant with view-provided tools
+---
+
+Play chess against the assistant inside the conversation. Pick a side on the lobby screen, pop the board into picture-in-picture, and drag your pieces — the assistant plays the other color. Showcases MCP Apps view-provided tools: the server only opens the board, and the view registers the tools the model uses to play, executing them against a chess.js engine running inside the widget.
+
+<img
+  src="/images/showcase-chess.png"
+  alt="Chess showcase"
+  style={{ width: "100%", maxWidth: "960px", borderRadius: "12px" }}
+/>
+
+## Links
+
+<CardGroup cols={2}>
+  <Card
+    title="Try the demo"
+    icon="play"
+    href="https://chess.skybridge.tech/try"
+  >
+    Launch the live view experience.
+  </Card>
+  <Card
+    title="View source on GitHub"
+    icon="github"
+    href="https://github.com/alpic-ai/skybridge/tree/main/examples/chess"
+  >
+    Browse the full example code.
+  </Card>
+</CardGroup>
+
+## Skybridge APIs used
+
+- [`registerTool`](/api-reference/register-tool) — a single `start_game` tool that opens the board
+- [`useRegisterViewTool`](/api-reference/use-register-view-tool) — register `chess_get_board_state`, `chess_get_legal_moves`, `chess_make_move`, and `chess_reset_game` from the view
+- [`createStore`](/api-reference/create-store) — synced match state (position, move log, last move) pushed into the model's context and surviving remounts
+- [`useDisplayMode`](/api-reference/use-display-mode) — pop the board into picture-in-picture when a side is picked
+- [`useCallTool`](/api-reference/use-call-tool) — call server tools from the view
+- [`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message) — prompt the assistant to play its move
+- [`useToolInfo`](/api-reference/use-tool-info) — read the `start_game` tool output

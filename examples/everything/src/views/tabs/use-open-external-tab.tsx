@@ -1,18 +1,19 @@
+import { Button } from "@alpic-ai/ui/components/button";
+import { Input } from "@alpic-ai/ui/components/input";
 import { useState } from "react";
 import { useOpenExternal } from "skybridge/web";
+import { Description, TabBody } from "../components/ui.js";
 
 export function UseOpenExternalTab() {
   const openExternal = useOpenExternal();
   const [url, setUrl] = useState("https://alpic.ai");
 
   return (
-    <div className="tab-content">
-      <p className="description">
-        Open external URLs via the host application.
-      </p>
+    <TabBody>
+      <Description>Open external URLs via the host application.</Description>
 
       <form
-        className="button-row"
+        className="flex items-end gap-2"
         onSubmit={(e) => {
           e.preventDefault();
           if (url.trim()) {
@@ -20,18 +21,18 @@ export function UseOpenExternalTab() {
           }
         }}
       >
-        <input
-          type="text"
-          className="input"
-          value={url}
-          placeholder="Enter URL"
-          onChange={(e) => setUrl(e.target.value)}
-          style={{ flex: 1, maxWidth: "20rem" }}
-        />
-        <button type="submit" className="btn" disabled={!url.trim()}>
+        <div className="max-w-80 flex-1">
+          <Input
+            type="text"
+            value={url}
+            placeholder="Enter URL"
+            onChange={(e) => setUrl(e.target.value)}
+          />
+        </div>
+        <Button type="submit" disabled={!url.trim()}>
           Open
-        </button>
+        </Button>
       </form>
-    </div>
+    </TabBody>
   );
 }

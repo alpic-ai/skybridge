@@ -10,6 +10,7 @@ export { type DownloadFn, useDownload } from "./use-download.js";
 export { useFiles } from "./use-files.js";
 export { type LayoutState, useLayout } from "./use-layout.js";
 export { type OpenExternalFn, useOpenExternal } from "./use-open-external.js";
+export { useRegisterViewTool } from "./use-register-view-tool.js";
 export { type RequestCloseFn, useRequestClose } from "./use-request-close.js";
 export { useRequestModal } from "./use-request-modal.js";
 export { type RequestSizeFn, useRequestSize } from "./use-request-size.js";

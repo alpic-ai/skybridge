@@ -23,23 +23,18 @@ test("useToolInfo - TypeScript typing", () => {
       responseMetadata: TestMetadata;
     }>();
 
-    // When idle, input should be undefined
-    if (result.status === "idle") {
-      expectTypeOf<undefined>(result.input);
-      expectTypeOf<undefined>(result.output);
-      expectTypeOf<undefined>(result.responseMetadata);
-    }
-
-    // When pending, output and responseMetadata should be undefined
+    // When pending, input may be undefined (host hasn't delivered args yet,
+    // or the tool has no input schema)
     if (result.status === "pending") {
-      expectTypeOf<TestInput>(result.input);
+      expectTypeOf<TestInput | undefined>(result.input);
       expectTypeOf<undefined>(result.output);
       expectTypeOf<undefined>(result.responseMetadata);
     }
 
-    // When success, output and responseMetadata should be defined
+    // When success, output and responseMetadata are defined; input may still
+    // be undefined if the host hasn't surfaced the tool arguments
     if (result.status === "success") {
-      expectTypeOf<TestInput>(result.input);
+      expectTypeOf<TestInput | undefined>(result.input);
       expectTypeOf<TestOutput>(result.output);
       expectTypeOf<TestMetadata>(result.responseMetadata);
     }
@@ -56,23 +51,13 @@ test("useToolInfo - TypeScript typing", () => {
       responseMetadata: TestMetadata;
     }>();
 
-    // Test type narrowing for idle
-    if (result.isIdle) {
-      expectTypeOf<"idle">(result.status);
-      expectTypeOf<true>(result.isIdle);
-      expectTypeOf<false>(result.isPending);
-      expectTypeOf<false>(result.isSuccess);
-      expectTypeOf<undefined>(result.input);
-      expectTypeOf<undefined>(result.output);
-      expectTypeOf<undefined>(result.responseMetadata);
-    }
-
     // Test type narrowing for pending
     if (result.isPending) {
       expectTypeOf<"pending">(result.status);
       expectTypeOf<false>(result.isIdle);
       expectTypeOf<true>(result.isPending);
       expectTypeOf<false>(result.isSuccess);
+      expectTypeOf<TestInput | undefined>(result.input);
       expectTypeOf<undefined>(result.output);
       expectTypeOf<undefined>(result.responseMetadata);
     }
@@ -82,21 +67,13 @@ test("useToolInfo - TypeScript typing", () => {
       expectTypeOf<false>(result.isIdle);
       expectTypeOf<false>(result.isPending);
       expectTypeOf<true>(result.isSuccess);
+      expectTypeOf<TestInput | undefined>(result.input);
       expectTypeOf<TestOutput>(result.output);
       expectTypeOf<TestMetadata>(result.responseMetadata);
     }
 
-    if (result.status === "idle") {
-      expectTypeOf<true>(result.isIdle);
-      expectTypeOf<false>(result.isPending);
-      expectTypeOf<false>(result.isSuccess);
-      expectTypeOf<undefined>(result.input);
-      expectTypeOf<undefined>(result.output);
-      expectTypeOf<undefined>(result.responseMetadata);
-    }
-
     if (result.status === "pending") {
-      expectTypeOf<TestInput>(result.input);
+      expectTypeOf<TestInput | undefined>(result.input);
       expectTypeOf<false>(result.isIdle);
       expectTypeOf<true>(result.isPending);
       expectTypeOf<false>(result.isSuccess);
@@ -105,7 +82,7 @@ test("useToolInfo - TypeScript typing", () => {
     }
 
     if (result.status === "success") {
-      expectTypeOf<TestInput>(result.input);
+      expectTypeOf<TestInput | undefined>(result.input);
       expectTypeOf<false>(result.isIdle);
       expectTypeOf<false>(result.isPending);
       expectTypeOf<true>(result.isSuccess);
@@ -121,12 +98,14 @@ test("useToolInfo - TypeScript typing", () => {
       input: TestInput;
     }>();
 
-    // Input can be TestInput or undefined (when idle)
-    if (result.status === "pending" || result.status === "success") {
-      expectTypeOf<TestInput>(result.input);
+    // Input is optional in both states — undefined while args haven't arrived
+    // (pending) and for no-input tools (success).
+    if (result.status === "pending") {
+      expectTypeOf<TestInput | undefined>(result.input);
     }
 
     if (result.status === "success") {
+      expectTypeOf<TestInput | undefined>(result.input);
       expectTypeOf<Record<string, unknown>>(result.output);
       expectTypeOf<Record<string, unknown>>(result.responseMetadata);
     }
@@ -139,12 +118,12 @@ test("useToolInfo - TypeScript typing", () => {
       output: TestOutput;
     }>();
 
-    // Input can be Record<string, unknown> or undefined (when idle)
-    if (result.status === "pending" || result.status === "success") {
-      expectTypeOf<Record<string, unknown>>(result.input);
+    if (result.status === "pending") {
+      expectTypeOf<Record<string, unknown> | undefined>(result.input);
     }
 
     if (result.status === "success") {
+      expectTypeOf<Record<string, unknown> | undefined>(result.input);
       expectTypeOf<TestOutput>(result.output);
     }
   });

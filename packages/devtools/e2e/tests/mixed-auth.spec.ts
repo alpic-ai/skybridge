@@ -1,9 +1,15 @@
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { DEVTOOLS_MIXED_AUTH_URL } from "../fixtures/ports.js";
 import {
   SEED_CLIENT_ID,
   seedAuthInLocalStorage,
 } from "../fixtures/seed-auth.js";
+
+// Each tool header carries its own Run button; scope it to the tool under test.
+const runFor = (page: Page, tool: string) =>
+  page
+    .locator(`[data-tool-name="${tool}"]`)
+    .getByRole("button", { name: /^run$/i });
 
 test.describe("devtools mixed auth", () => {
   test("connects anonymously and exposes a sign-in CTA when the server has any auth-required tool", async ({
@@ -28,7 +34,7 @@ test.describe("devtools mixed auth", () => {
 
     await expect(page.getByText("Connected")).toBeVisible();
 
-    const runButton = page.getByRole("button", { name: /^run$/i });
+    const runButton = runFor(page, "whoami");
     await expect(runButton).toBeEnabled();
     await runButton.click();
     await expect(page.getByRole("main")).toContainText("anonymous");
@@ -41,7 +47,7 @@ test.describe("devtools mixed auth", () => {
 
     await expect(page.getByText("Connected")).toBeVisible();
 
-    const runButton = page.getByRole("button", { name: /^run$/i });
+    const runButton = runFor(page, "private-whoami");
     await expect(runButton).toBeDisabled();
 
     // Hovering the wrapper span surfaces the tooltip even though the button
@@ -63,7 +69,7 @@ test.describe("devtools mixed auth", () => {
       page.getByRole("button", { name: /^sign in$/i }),
     ).not.toBeVisible();
 
-    const runButton = page.getByRole("button", { name: /^run$/i });
+    const runButton = runFor(page, "private-whoami");
     await expect(runButton).toBeEnabled();
     await runButton.click();
     await expect(page.getByRole("main")).toContainText(SEED_CLIENT_ID);
@@ -88,7 +94,7 @@ test.describe("devtools mixed auth", () => {
       page.getByRole("button", { name: /^sign in$/i }),
     ).toBeVisible();
 
-    const runButton = page.getByRole("button", { name: /^run$/i });
+    const runButton = runFor(page, "private-whoami");
     await expect(runButton).toBeDisabled();
   });
 
@@ -100,7 +106,7 @@ test.describe("devtools mixed auth", () => {
     await page.goto(`${DEVTOOLS_MIXED_AUTH_URL}/?tool=private-whoami`);
 
     await expect(page.getByText("Connected")).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByRole("button", { name: /^run$/i })).toBeDisabled();
+    await expect(runFor(page, "private-whoami")).toBeDisabled();
 
     await page.getByRole("button", { name: /^sign in$/i }).click();
 
@@ -117,7 +123,7 @@ test.describe("devtools mixed auth", () => {
       .getByRole("button", { name: "private-whoami", exact: true })
       .click();
 
-    const runButton = page.getByRole("button", { name: /^run$/i });
+    const runButton = runFor(page, "private-whoami");
     await expect(runButton).toBeEnabled();
     await runButton.click();
 

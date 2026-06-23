@@ -107,6 +107,37 @@ body {
 
 /* ===== nav ===== */
 /* ===== nav (alpic.ai-style floating pill) ===== */
+.sb-ph-banner {
+  position: relative;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  color: var(--sb-ice-ink);
+  background: linear-gradient(90deg, var(--sb-accent), var(--sb-lime));
+  text-decoration: none;
+}
+.sb-ph-banner:hover .sb-ph-cta {
+  text-decoration: underline;
+}
+.sb-ph-emoji {
+  font-size: 16px;
+}
+.sb-ph-cta {
+  font-weight: 700;
+}
+@media (max-width: 560px) {
+  .sb-ph-banner {
+    font-size: 12.5px;
+    gap: 6px;
+  }
+}
+
 .sb-nav {
   position: sticky;
   top: 16px;

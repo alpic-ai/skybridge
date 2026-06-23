@@ -1,3 +1,5 @@
+export type { OAuthConfig } from "./auth/index.js";
+export { customProvider } from "./auth/providers/custom.js";
 export {
   type AuthInfo,
   type AuthMetadataOptions,
@@ -34,9 +36,11 @@ export type {
 } from "./middleware.js";
 export type {
   HandlerContent,
+  JsonOptions,
   KnownToolMeta,
   McpServerTypes,
   SecurityScheme,
+  SkybridgeServerOptions,
   ToolDef,
   ToolMeta,
   ViewConfig,

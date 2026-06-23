@@ -7,6 +7,7 @@ import {
 import { McpAppBridge } from "./mcp-app/bridge.js";
 import type {
   Adaptor,
+  AnyViewToolHandler,
   CallToolResponse,
   DownloadParams,
   DownloadResult,
@@ -20,6 +21,7 @@ import type {
   SendFollowUpMessageOptions,
   SetViewStateAction,
   UploadFileOptions,
+  ViewToolConfig,
 } from "./types.js";
 import { NotSupportedError } from "./types.js";
 
@@ -45,13 +47,13 @@ function findStorageKey(viewUUID: string): string | undefined {
  */
 export class HostAdaptor implements Adaptor {
   private readonly mcp: McpAppBridge;
-  private readonly openai: typeof window.openai | null;
-  private readonly appsSdkBridge: AppsSdkBridge | null;
+  private readonly openai: typeof window.openai | null = null;
+  private readonly appsSdkBridge: AppsSdkBridge | null = null;
 
   private readonly mcpStores: ReturnType<typeof buildMcpContextStores>;
   private readonly appsSdkStores: ReturnType<
     typeof buildAppsSdkOverlayStores
-  > | null;
+  > | null = null;
 
   private _viewState: HostContext["viewState"] = null;
   private readonly viewStateListeners = new Set<() => void>();
@@ -73,10 +75,6 @@ export class HostAdaptor implements Adaptor {
       this.openai = window.openai;
       this.appsSdkBridge = AppsSdkBridge.getInstance();
       this.appsSdkStores = buildAppsSdkOverlayStores(this.appsSdkBridge);
-    } else {
-      this.openai = null;
-      this.appsSdkBridge = null;
-      this.appsSdkStores = null;
     }
 
     // Built once so that getHostContextStore returns stable references — required
@@ -155,6 +153,13 @@ export class HostAdaptor implements Adaptor {
       isError: response.isError ?? false,
       meta: response._meta ?? {},
     } as ToolResponse;
+  };
+
+  public registerViewTool = (
+    config: ViewToolConfig,
+    handler: AnyViewToolHandler,
+  ): (() => void) => {
+    return this.mcp.registerViewTool(config, handler);
   };
 
   public requestDisplayMode = async (mode: RequestDisplayMode) => {

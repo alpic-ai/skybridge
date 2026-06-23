@@ -1,0 +1,255 @@
+@import "tailwindcss";
+
+/* Skybridge brand
+ *   blue     #002FFF   (primary)
+ *   cyan     #08F5F9   (accent / highlight)
+ *   midnight #051413   (dark surface)
+ */
+:root {
+  --sky-blue: #002fff;
+  --sky-cyan: #08f5f9;
+  --sky-gradient: linear-gradient(135deg, #002fff 0%, #08f5f9 100%);
+
+  --chess-bg: #ffffff;
+  --chess-panel: #f5f8ff;
+  --chess-fg: #0b1530;
+  --chess-muted: #5a6b8c;
+  --chess-border: #dbe4f5;
+  --chess-accent: var(--sky-blue);
+  --chess-accent-fg: #ffffff;
+  --chess-board-shadow: 0 10px 30px -12px rgba(0, 47, 255, 0.35);
+}
+
+[data-theme="dark"] {
+  --chess-bg: #051413;
+  --chess-panel: #0a1f2b;
+  --chess-fg: #eaf6ff;
+  --chess-muted: #7e97b3;
+  --chess-border: #142c3a;
+  --chess-accent: var(--sky-cyan);
+  --chess-accent-fg: #051413;
+  --chess-board-shadow: 0 10px 32px -10px rgba(8, 245, 249, 0.3);
+}
+
+.chess-app {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: 1.25rem;
+  color: var(--chess-fg);
+  background: var(--chess-bg);
+  border-radius: 1rem;
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.chess-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.chess-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+/* A small gradient tile that echoes the Skybridge logo mark. */
+.chess-mark {
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.5rem;
+  background: var(--sky-gradient);
+  box-shadow: 0 4px 12px -4px rgba(0, 47, 255, 0.5);
+}
+
+.chess-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.chess-subtitle {
+  margin: 0.125rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--chess-muted);
+}
+
+.chess-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.chess-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.9375rem;
+  line-height: 1;
+  color: var(--chess-fg);
+  background: var(--chess-panel);
+  border: 1px solid var(--chess-border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.chess-icon-button:hover {
+  border-color: var(--chess-accent);
+}
+
+.chess-icon-button:active {
+  transform: scale(0.94);
+}
+
+.chess-reset {
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--chess-accent-fg);
+  background: var(--sky-gradient);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition:
+    opacity 0.15s ease,
+    transform 0.1s ease;
+}
+
+.chess-reset:hover {
+  opacity: 0.92;
+}
+
+.chess-reset:active {
+  transform: scale(0.97);
+}
+
+.chess-board {
+  width: 100%;
+  border-radius: 0.75rem;
+  box-shadow: var(--chess-board-shadow);
+}
+
+/* Pre-game lobby: pick a side to start. */
+.chess-lobby {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.chess-lobby-text {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--chess-muted);
+}
+
+.chess-lobby-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.chess-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1.25rem 0.75rem;
+  text-align: center;
+  color: var(--chess-fg);
+  background: var(--chess-panel);
+  border: 1px solid var(--chess-border);
+  border-radius: 0.875rem;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    transform 0.1s ease,
+    box-shadow 0.15s ease;
+}
+
+.chess-side:hover {
+  border-color: var(--chess-accent);
+  box-shadow: var(--chess-board-shadow);
+}
+
+.chess-side:active {
+  transform: scale(0.97);
+}
+
+.chess-side-piece {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.chess-side--white .chess-side-piece {
+  color: #f5f8ff;
+  text-shadow: 0 1px 2px rgba(11, 21, 48, 0.45);
+}
+
+.chess-side--black .chess-side-piece {
+  color: #0b1530;
+}
+
+[data-theme="dark"] .chess-side--black .chess-side-piece {
+  color: #1a2a3a;
+  text-shadow: 0 0 1px rgba(234, 246, 255, 0.6);
+}
+
+.chess-side-label {
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.chess-side-note {
+  font-size: 0.75rem;
+  color: var(--chess-muted);
+}
+
+.chess-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.8125rem;
+  background: var(--chess-panel);
+  border: 1px solid var(--chess-border);
+  border-radius: 0.625rem;
+}
+
+.chess-status-badge {
+  font-weight: 700;
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  color: var(--sky-blue);
+  background: color-mix(in srgb, var(--sky-cyan) 22%, transparent);
+}
+
+[data-theme="dark"] .chess-status-badge {
+  color: var(--sky-cyan);
+}
+
+.chess-moves {
+  color: var(--chess-muted);
+  font-variant-numeric: tabular-nums;
+  word-break: break-word;
+}
+
+.chess-hint {
+  color: var(--chess-muted);
+  font-style: italic;
+}
