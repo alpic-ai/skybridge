@@ -62,7 +62,7 @@ Binds the tool to a React view.
 type ViewConfig = {
   component: ViewName;                   // File name in src/views/ (typed — see below)
   description?: string;                    // Shown during view discovery
-  hosts?: ("apps-sdk" | "mcp-app")[];      // Defaults to both
+  hosts?: ("apps-sdk" | "mcp-app")[];      // Deprecated, no-op — one resource is always emitted
   prefersBorder?: boolean;                 // Removes the default iframe border when false
   domain?: string;                         // Custom view domain
   csp?: {
