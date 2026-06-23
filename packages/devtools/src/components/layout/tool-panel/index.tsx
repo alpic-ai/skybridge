@@ -88,9 +88,9 @@ export const ToolPanel = () => {
       setPreference("displayMode", "inline");
     }
   });
-  const templateUri = tool?._meta?.["openai/outputTemplate"] as
-    | string
-    | undefined;
+  const templateUri =
+    (tool?._meta?.ui as { resourceUri?: string } | undefined)?.resourceUri ??
+    (tool?._meta?.["openai/outputTemplate"] as string | undefined);
   const hasResult = Boolean(tool && data?.response);
   const hasView = Boolean(templateUri);
 

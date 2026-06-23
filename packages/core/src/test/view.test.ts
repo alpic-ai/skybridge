@@ -350,7 +350,7 @@ describe("McpServer.registerTool (unified API)", () => {
     );
   });
 
-  it("should advertise the single resource via ui.resourceUri and openai/outputTemplate alias", async () => {
+  it("should advertise the single resource via ui.resourceUri only (no openai/outputTemplate)", async () => {
     server.registerTool(
       {
         name: "my-view",
@@ -367,7 +367,7 @@ describe("McpServer.registerTool (unified API)", () => {
 
     expect(toolConfig._meta?.ui?.resourceUri).toBe(uri);
     expect(toolConfig._meta?.["ui/resourceUri"]).toBe(uri);
-    expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(uri);
+    expect(toolConfig._meta?.["openai/outputTemplate"]).toBeUndefined();
   });
 
   it("treats the deprecated hosts option as a no-op (always the single resource)", async () => {
@@ -391,9 +391,7 @@ describe("McpServer.registerTool (unified API)", () => {
     expect(toolConfig._meta?.ui?.resourceUri).toBe(
       "ui://views/ext-apps/my-view.html",
     );
-    expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(
-      "ui://views/ext-apps/my-view.html",
-    );
+    expect(toolConfig._meta?.["openai/outputTemplate"]).toBeUndefined();
   });
 
   it("should not version view URIs in development", () => {
@@ -410,14 +408,12 @@ describe("McpServer.registerTool (unified API)", () => {
       _meta?: Record<string, unknown> & { ui?: { resourceUri?: string } };
     };
 
-    expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(
-      "ui://views/ext-apps/my-view.html",
-    );
+    expect(toolConfig._meta?.["openai/outputTemplate"]).toBeUndefined();
     expect(toolConfig._meta?.ui?.resourceUri).toBe(
       "ui://views/ext-apps/my-view.html",
     );
-    // The URI registered with the resource handler must match the URI in
-    // outputTemplate exactly so the SDK can resolve `resources/read` requests.
+    // The URI registered with the resource handler must match ui.resourceUri
+    // exactly so the SDK can resolve `resources/read` requests.
     expect(mockRegisterResource.mock.calls[0]?.[1]).toBe(
       "ui://views/ext-apps/my-view.html",
     );
@@ -443,9 +439,7 @@ describe("McpServer.registerTool (unified API)", () => {
       _meta?: Record<string, unknown> & { ui?: { resourceUri?: string } };
     };
 
-    expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(
-      `ui://views/ext-apps/my-view.html${expected}`,
-    );
+    expect(toolConfig._meta?.["openai/outputTemplate"]).toBeUndefined();
     expect(toolConfig._meta?.ui?.resourceUri).toBe(
       `ui://views/ext-apps/my-view.html${expected}`,
     );
@@ -475,11 +469,15 @@ describe("McpServer.registerTool (unified API)", () => {
     );
 
     const myviewTemplate = (
-      mockRegisterTool.mock.calls[0]?.[1] as { _meta?: Record<string, unknown> }
-    )._meta?.["openai/outputTemplate"];
+      mockRegisterTool.mock.calls[0]?.[1] as {
+        _meta?: { ui?: { resourceUri?: string } };
+      }
+    )._meta?.ui?.resourceUri;
     const folderviewTemplate = (
-      mockRegisterTool.mock.calls[1]?.[1] as { _meta?: Record<string, unknown> }
-    )._meta?.["openai/outputTemplate"];
+      mockRegisterTool.mock.calls[1]?.[1] as {
+        _meta?: { ui?: { resourceUri?: string } };
+      }
+    )._meta?.ui?.resourceUri;
 
     expect(myviewTemplate).not.toEqual(folderviewTemplate);
     expect(myviewTemplate).toMatch(/\?v=[0-9a-f]{8}$/);
@@ -499,9 +497,9 @@ describe("McpServer.registerTool (unified API)", () => {
     );
 
     const toolConfig = mockRegisterTool.mock.calls[0]?.[1] as {
-      _meta?: Record<string, unknown>;
+      _meta?: { ui?: { resourceUri?: string } };
     };
-    expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(
+    expect(toolConfig._meta?.ui?.resourceUri).toBe(
       "ui://views/ext-apps/unknown-view.html",
     );
   });

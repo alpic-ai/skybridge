@@ -124,4 +124,27 @@ describe("view resource resolution (cache key)", () => {
 
     await teardown();
   });
+
+  // Back-compat: older Skybridge advertised the view at `ui://views/apps-sdk/...`
+  // via openai/outputTemplate. We no longer advertise it, but apps published then
+  // have it cached, so the read must still resolve to the ext-apps content.
+  it("resolves the legacy apps-sdk URL to the ext-apps content", async () => {
+    const { client, teardown } = await connect(registerWidget);
+
+    const legacyUri = "ui://views/apps-sdk/widget.html";
+    const { contents } = await client.readResource({ uri: legacyUri });
+
+    expect(contents).toHaveLength(1);
+    const content = contents[0] as {
+      uri: string;
+      text: string;
+      mimeType: string;
+    };
+    expect(content.mimeType).toBe("text/html;profile=mcp-app");
+    expect(content.text.length).toBeGreaterThan(0);
+    // The response echoes the requested (legacy) URI, never the canonical one.
+    expect(content.uri).toBe(legacyUri);
+
+    await teardown();
+  });
 });

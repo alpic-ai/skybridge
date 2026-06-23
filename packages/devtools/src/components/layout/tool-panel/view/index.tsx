@@ -26,7 +26,8 @@ export const View = () => {
   const toolResult = useCallToolResult(tool.name);
   const { openaiObject } = toolResult ?? {};
   const { data: resource } = useSuspenseResource(
-    tool._meta?.["openai/outputTemplate"] as string | undefined,
+    (tool._meta?.ui as { resourceUri?: string } | undefined)?.resourceUri ??
+      (tool._meta?.["openai/outputTemplate"] as string | undefined),
   );
   const { setToolData, pushOpenAiLog, updateOpenaiObject, setOpenInAppUrl } =
     useStore();

@@ -716,7 +716,7 @@ export class McpServer<
           for (const content of result.contents ?? []) {
             if (
               typeof content.uri === "string" &&
-              stripQuery(content.uri) === path
+              stripQuery(content.uri) === stripQuery(canonical)
             ) {
               content.uri = requested;
             }
@@ -1014,10 +1014,10 @@ export class McpServer<
     };
     this.registerViewResource({ name: toolName, viewResource, view });
 
-    // Advertise the single resource through all three known pointers so both
-    // ext-apps hosts (ui.resourceUri) and ChatGPT (openai/outputTemplate) resolve it.
-    // TODO: drop openai/outputTemplate once ChatGPT is confirmed to render via ui.resourceUri alone and DevTools reads ui.resourceUri.
-    toolMeta["openai/outputTemplate"] = viewResource.uri;
+    // Advertise via the MCP Apps standard pointer only — ChatGPT renders from
+    // ui.resourceUri (verified), and not emitting openai/outputTemplate lets us
+    // retire the legacy apps-sdk resource later. The legacy apps-sdk URL is still
+    // served (see registerViewResource) so already-published apps keep resolving.
     // @ts-expect-error - For backwards compatibility with Claude current implementation of the specs
     toolMeta["ui/resourceUri"] = viewResource.uri;
     toolMeta.ui = { ...toolMeta.ui, resourceUri: viewResource.uri };
@@ -1049,6 +1049,12 @@ export class McpServer<
     };
     this.viewMetaBuilders.set(viewUri, buildMeta);
     this.viewUriByPath.set(stripQuery(viewUri), viewUri);
+    // Keep resolving the legacy apps-sdk URL (advertised by older Skybridge via
+    // openai/outputTemplate) so apps published before this change don't break on upgrade.
+    this.viewUriByPath.set(
+      `ui://views/apps-sdk/${view.component}.html`,
+      viewUri,
+    );
 
     this.registerResource(
       name,
