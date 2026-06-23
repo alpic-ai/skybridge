@@ -200,21 +200,6 @@ type InternalToolMeta = Partial<
   OpenaiToolMeta & McpAppsToolMeta & SecuritySchemesToolMeta
 >;
 
-/** @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields */
-type OpenaiViewCSP = {
-  connect_domains: string[];
-  resource_domains: string[];
-  frame_domains?: string[];
-  redirect_domains?: string[];
-};
-
-type OpenaiResourceMeta = {
-  "openai/widgetDescription"?: string;
-  "openai/widgetPrefersBorder"?: boolean;
-  "openai/widgetCSP"?: OpenaiViewCSP;
-  "openai/widgetDomain"?: string;
-};
-
 /**
  * MCP Apps CSP extended with upcoming / Skybridge-specific fields.
  * @see https://github.com/modelcontextprotocol/ext-apps/pull/158
@@ -236,7 +221,7 @@ type McpAppsResourceMeta = {
   ui?: ExtendedMcpUiResourceMeta;
 };
 
-type ResourceMeta = OpenaiResourceMeta | McpAppsResourceMeta;
+type ResourceMeta = McpAppsResourceMeta;
 
 type ViewResourceConfig<T extends ResourceMeta = ResourceMeta> = {
   hostType: ViewHostType;
@@ -892,134 +877,78 @@ export class McpServer<
     view: ViewConfig,
     toolMeta: InternalToolMeta,
   ): void {
-    const hosts = view.hosts ?? (["apps-sdk", "mcp-app"] as const);
+    // `hosts` is deprecated and ignored — every view emits the single ext-apps
+    // resource. Kept for backwards compatibility; see ViewConfig.hosts.
 
     // Append a content-derived version param so hosts (e.g. ChatGPT) bust
     // their cache when the bundle changes, but keep the URI stable across
     // `tools/list` calls when the bundle hasn't changed.
     const versionParam = this.computeViewVersionParam(view.component);
 
-    if (hosts.includes("apps-sdk")) {
-      const viewResource: ViewResourceConfig<OpenaiResourceMeta> = {
-        hostType: "apps-sdk",
-        uri: `ui://views/apps-sdk/${view.component}.html${versionParam}`,
-        mimeType: "text/html+skybridge",
-        buildContentMeta: (
-          { resourceDomains, connectDomains, domain },
-          overrides,
-        ) => {
-          const defaults: OpenaiResourceMeta = {
-            "openai/widgetCSP": {
-              resource_domains: resourceDomains,
-              connect_domains: connectDomains,
+    const viewResource: ViewResourceConfig<McpAppsResourceMeta> = {
+      hostType: "mcp-app",
+      uri: `ui://views/ext-apps/${view.component}.html${versionParam}`,
+      mimeType: "text/html;profile=mcp-app",
+      buildContentMeta: (
+        { resourceDomains, connectDomains, domain, baseUriDomains },
+        overrides,
+      ) => {
+        const defaults: McpAppsResourceMeta = {
+          ui: {
+            csp: {
+              resourceDomains,
+              connectDomains,
+              baseUriDomains,
             },
-            "openai/widgetDomain": domain,
-            "openai/widgetDescription": view.description,
-          };
+            domain,
+          },
+        };
 
-          const fromView: Partial<
-            Omit<
-              OpenaiResourceMeta,
-              "openai/widgetCSP" | "openai/widgetDescription"
-            > & {
-              "openai/widgetCSP": Partial<OpenaiViewCSP>;
-            }
-          > = {
-            "openai/widgetCSP": {
-              resource_domains: view.csp?.resourceDomains,
-              connect_domains: view.csp?.connectDomains,
-              frame_domains: view.csp?.frameDomains,
-              redirect_domains: view.csp?.redirectDomains,
-            },
-            "openai/widgetDomain": view.domain,
-            "openai/widgetPrefersBorder": view.prefersBorder,
-          };
-
-          const base = mergeWithUnion(mergeWithUnion(defaults, fromView), {
-            "openai/widgetDomain": overrides.domain,
-          });
-
-          if (view._meta) {
-            return { ...base, ...view._meta } as OpenaiResourceMeta;
-          }
-          return base;
-        },
-      };
-      this.registerViewResource({
-        name: toolName,
-        viewResource,
-        view,
-      });
-      toolMeta["openai/outputTemplate"] = viewResource.uri;
-    }
-
-    if (hosts.includes("mcp-app")) {
-      const viewResource: ViewResourceConfig<McpAppsResourceMeta> = {
-        hostType: "mcp-app",
-        uri: `ui://views/ext-apps/${view.component}.html${versionParam}`,
-        mimeType: "text/html;profile=mcp-app",
-        buildContentMeta: (
-          { resourceDomains, connectDomains, domain, baseUriDomains },
-          overrides,
-        ) => {
-          const defaults: McpAppsResourceMeta = {
-            ui: {
-              csp: {
-                resourceDomains,
-                connectDomains,
-                baseUriDomains,
-              },
-              domain,
-            },
-          };
-
-          const fromView: McpAppsResourceMeta = {
-            ui: {
-              ...(view.description && { description: view.description }),
-              ...(view.prefersBorder !== undefined && {
-                prefersBorder: view.prefersBorder,
+        const fromView: McpAppsResourceMeta = {
+          ui: {
+            ...(view.description && { description: view.description }),
+            ...(view.prefersBorder !== undefined && {
+              prefersBorder: view.prefersBorder,
+            }),
+            ...(view.domain && { domain: view.domain }),
+            csp: {
+              ...(view.csp?.resourceDomains && {
+                resourceDomains: view.csp.resourceDomains,
               }),
-              ...(view.domain && { domain: view.domain }),
-              csp: {
-                ...(view.csp?.resourceDomains && {
-                  resourceDomains: view.csp.resourceDomains,
-                }),
-                ...(view.csp?.connectDomains && {
-                  connectDomains: view.csp.connectDomains,
-                }),
-                ...(view.csp?.frameDomains && {
-                  frameDomains: view.csp.frameDomains,
-                }),
-                ...(view.csp?.baseUriDomains && {
-                  baseUriDomains: view.csp.baseUriDomains,
-                }),
-                ...(view.csp?.redirectDomains && {
-                  redirectDomains: view.csp.redirectDomains,
-                }),
-              },
+              ...(view.csp?.connectDomains && {
+                connectDomains: view.csp.connectDomains,
+              }),
+              ...(view.csp?.frameDomains && {
+                frameDomains: view.csp.frameDomains,
+              }),
+              ...(view.csp?.baseUriDomains && {
+                baseUriDomains: view.csp.baseUriDomains,
+              }),
+              ...(view.csp?.redirectDomains && {
+                redirectDomains: view.csp.redirectDomains,
+              }),
             },
-          };
+          },
+        };
 
-          const base = mergeWithUnion(mergeWithUnion(defaults, fromView), {
-            ui: overrides,
-          });
+        const base = mergeWithUnion(mergeWithUnion(defaults, fromView), {
+          ui: overrides,
+        });
 
-          if (view._meta) {
-            return { ...base, ...view._meta } as McpAppsResourceMeta;
-          }
-          return base;
-        },
-      };
-      this.registerViewResource({
-        name: toolName,
-        viewResource,
-        view,
-      });
-      // @ts-expect-error - For backwards compatibility with Claude current implementation of the specs
-      toolMeta["ui/resourceUri"] = viewResource.uri;
+        if (view._meta) {
+          return { ...base, ...view._meta } as McpAppsResourceMeta;
+        }
+        return base;
+      },
+    };
+    this.registerViewResource({ name: toolName, viewResource, view });
 
-      toolMeta.ui = { ...toolMeta.ui, resourceUri: viewResource.uri };
-    }
+    // Advertise the single resource through all three known pointers so both
+    // ext-apps hosts (ui.resourceUri) and ChatGPT (openai/outputTemplate) resolve it.
+    toolMeta["openai/outputTemplate"] = viewResource.uri;
+    // @ts-expect-error - For backwards compatibility with Claude current implementation of the specs
+    toolMeta["ui/resourceUri"] = viewResource.uri;
+    toolMeta.ui = { ...toolMeta.ui, resourceUri: viewResource.uri };
   }
 
   private registerViewResource({
