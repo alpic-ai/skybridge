@@ -1,21 +1,25 @@
-import { McpServer } from "skybridge/server";
+import type { ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { ZodRawShapeCompat } from "@modelcontextprotocol/sdk/server/zod-compat.js";
+import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
+import { McpServer, type ToolMeta, type ViewConfig } from "skybridge/server";
 import { z } from "zod/v3";
 import { exampleOpenuiProgram, openuiPrompt } from "./openui/library.js";
 
-type RenderArgs = { code: string };
-type TextContent = { type: "text"; text: string };
-type ToolResult = {
-  structuredContent?: Record<string, string>;
-  content: TextContent[];
-  isError?: boolean;
+type ToolConfig<InputArgs extends ZodRawShapeCompat | undefined = undefined> = {
+  name: string;
+  title?: string;
+  description?: string;
+  inputSchema?: InputArgs;
+  outputSchema?: ZodRawShapeCompat;
+  annotations?: ToolAnnotations;
+  view?: ViewConfig;
+  _meta?: ToolMeta;
 };
-type ToolHandler = (
-  args: Record<string, unknown>,
-) => ToolResult | Promise<ToolResult>;
-type RegisterTool = (
-  config: Record<string, unknown>,
-  handler: ToolHandler,
-) => unknown;
+
+type RegisterTool = <InputArgs extends ZodRawShapeCompat | undefined>(
+  config: ToolConfig<InputArgs>,
+  cb: ToolCallback<InputArgs>,
+) => McpServer;
 
 const renderInputSchema = {
   code: z
@@ -33,9 +37,7 @@ const server = new McpServer(
   { capabilities: {} },
 );
 
-const registerTool = server.registerTool.bind(
-  server,
-) as unknown as RegisterTool;
+const registerTool = server.registerTool.bind(server) as RegisterTool;
 
 registerTool(
   {
@@ -75,20 +77,16 @@ registerTool(
         "Renders an OpenUI Lang program with the standard OpenUI component library",
     },
   },
-  async (args) => {
-    const { code } = args as RenderArgs;
-
-    return {
-      structuredContent: { code },
-      content: [
-        {
-          type: "text" as const,
-          text: "OpenUI Lang UI rendered successfully.",
-        },
-      ],
-      isError: false,
-    };
-  },
+  async ({ code }) => ({
+    structuredContent: { code },
+    content: [
+      {
+        type: "text" as const,
+        text: "OpenUI Lang UI rendered successfully.",
+      },
+    ],
+    isError: false,
+  }),
 );
 
 registerTool(

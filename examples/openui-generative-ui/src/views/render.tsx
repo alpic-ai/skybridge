@@ -1,7 +1,7 @@
 import "@/index.css";
 
 import { type OpenUIError, Renderer } from "@openuidev/react-lang";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToolInfo } from "../helpers.js";
 import { openuiLibrary } from "../openui/library.js";
 
@@ -15,6 +15,11 @@ function RenderWidget() {
   const { output } = useToolInfo<{ output: { code?: string } }>();
   const [errors, setErrors] = useState<OpenUIError[]>([]);
   const code = typeof output?.code === "string" ? output.code : null;
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset parser errors when a new program is loaded
+  useEffect(() => {
+    setErrors([]);
+  }, [code]);
 
   if (!code) {
     return (
