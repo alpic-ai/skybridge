@@ -1,0 +1,229 @@
+@import "tailwindcss";
+@import "@openuidev/react-ui/components.css";
+
+:root {
+  color: #0c1533;
+  background: #f7faff;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+
+  --skybridge-blue: #002fff;
+  --skybridge-cyan: #08f5f9;
+  --skybridge-pink: #ff5277;
+  --skybridge-ink: #0c1533;
+  --skybridge-muted: rgba(12, 21, 51, 0.64);
+  --skybridge-border: rgba(0, 47, 255, 0.12);
+
+  --openui-background: #f7faff;
+  --openui-foreground: #ffffff;
+  --openui-popover-background: #ffffff;
+  --openui-sunk-light: rgba(0, 47, 255, 0.025);
+  --openui-sunk: rgba(0, 47, 255, 0.055);
+  --openui-sunk-deep: rgba(0, 47, 255, 0.095);
+  --openui-elevated-light: rgba(0, 47, 255, 0.045);
+  --openui-elevated: rgba(0, 47, 255, 0.08);
+  --openui-elevated-strong: rgba(0, 47, 255, 0.16);
+  --openui-elevated-intense: rgba(0, 47, 255, 0.28);
+  --openui-overlay: rgba(12, 21, 51, 0.42);
+  --openui-highlight-subtle: rgba(8, 245, 249, 0.08);
+  --openui-highlight: rgba(8, 245, 249, 0.14);
+  --openui-highlight-strong: rgba(0, 47, 255, 0.12);
+  --openui-highlight-intense: rgba(0, 47, 255, 0.26);
+  --openui-inverted-background: #061052;
+
+  --openui-info-background: rgba(8, 245, 249, 0.16);
+  --openui-success-background: rgba(61, 217, 102, 0.16);
+  --openui-alert-background: rgba(245, 158, 11, 0.18);
+  --openui-danger-background: rgba(255, 82, 119, 0.15);
+  --openui-purple-background: rgba(0, 47, 255, 0.12);
+  --openui-pink-background: rgba(255, 82, 119, 0.15);
+
+  --openui-text-neutral-primary: var(--skybridge-ink);
+  --openui-text-neutral-secondary: var(--skybridge-muted);
+  --openui-text-neutral-tertiary: rgba(12, 21, 51, 0.34);
+  --openui-text-neutral-link: var(--skybridge-blue);
+  --openui-text-brand: var(--skybridge-blue);
+  --openui-text-accent-primary: #ffffff;
+  --openui-text-accent-secondary: rgba(255, 255, 255, 0.74);
+  --openui-text-accent-tertiary: rgba(255, 255, 255, 0.45);
+  --openui-text-info-primary: #006b74;
+  --openui-text-info-inverted: #e9feff;
+  --openui-text-success-primary: #17763a;
+  --openui-text-success-inverted: #effff3;
+  --openui-text-alert-primary: #8a5700;
+  --openui-text-alert-inverted: #fff7df;
+  --openui-text-danger-primary: #c91f4f;
+  --openui-text-danger-secondary: #e34468;
+  --openui-text-danger-tertiary: #ff8ba2;
+  --openui-text-danger-inverted-primary: #fff1f4;
+
+  --openui-interactive-accent-default: var(--skybridge-blue);
+  --openui-interactive-accent-hover: #0025cf;
+  --openui-interactive-accent-disabled: rgba(0, 47, 255, 0.38);
+  --openui-interactive-accent-pressed: #001fba;
+  --openui-interactive-destructive-accent-default: var(--skybridge-pink);
+  --openui-interactive-destructive-accent-hover: #e64267;
+  --openui-interactive-destructive-accent-pressed: #c91f4f;
+  --openui-interactive-destructive-accent-disabled: rgba(255, 82, 119, 0.42);
+
+  --openui-chat-user-response-bg: rgba(0, 47, 255, 0.08);
+  --openui-chat-user-response-text: var(--skybridge-ink);
+  --openui-border-default: rgba(12, 21, 51, 0.08);
+  --openui-border-interactive: var(--skybridge-border);
+  --openui-border-interactive-emphasis: rgba(0, 47, 255, 0.34);
+  --openui-border-interactive-selected: var(--skybridge-blue);
+  --openui-border-accent: rgba(0, 47, 255, 0.14);
+  --openui-border-accent-emphasis: rgba(0, 47, 255, 0.36);
+  --openui-border-info: rgba(8, 245, 249, 0.2);
+  --openui-border-info-emphasis: #00bfc7;
+  --openui-border-alert: rgba(245, 158, 11, 0.22);
+  --openui-border-alert-emphasis: #d97706;
+  --openui-border-success: rgba(61, 217, 102, 0.22);
+  --openui-border-success-emphasis: #20a34a;
+  --openui-border-danger: rgba(255, 82, 119, 0.22);
+  --openui-border-danger-emphasis: var(--skybridge-pink);
+
+  --openui-radius-s: 6px;
+  --openui-radius-m: 8px;
+  --openui-radius-l: 8px;
+  --openui-radius-xl: 10px;
+  --openui-radius-2xl: 12px;
+  --openui-radius-3xl: 14px;
+  --openui-shadow-s: 0 1px 2px rgba(12, 21, 51, 0.06);
+  --openui-shadow-m: 0 8px 24px rgba(12, 21, 51, 0.08);
+  --openui-shadow-l: 0 14px 40px rgba(12, 21, 51, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #edf7ff;
+    background: #050b24;
+
+    --skybridge-ink: #edf7ff;
+    --skybridge-muted: rgba(237, 247, 255, 0.68);
+    --skybridge-border: rgba(8, 245, 249, 0.18);
+
+    --openui-background: #050b24;
+    --openui-foreground: #0b1435;
+    --openui-popover-background: #0b1435;
+    --openui-sunk-light: rgba(8, 245, 249, 0.035);
+    --openui-sunk: rgba(8, 245, 249, 0.07);
+    --openui-sunk-deep: rgba(8, 245, 249, 0.12);
+    --openui-elevated-light: rgba(8, 245, 249, 0.06);
+    --openui-elevated: rgba(8, 245, 249, 0.1);
+    --openui-elevated-strong: rgba(8, 245, 249, 0.18);
+    --openui-elevated-intense: rgba(8, 245, 249, 0.3);
+    --openui-highlight-subtle: rgba(8, 245, 249, 0.08);
+    --openui-highlight: rgba(8, 245, 249, 0.14);
+    --openui-highlight-strong: rgba(8, 245, 249, 0.2);
+    --openui-inverted-background: #edf7ff;
+    --openui-text-neutral-primary: #edf7ff;
+    --openui-text-neutral-secondary: rgba(237, 247, 255, 0.68);
+    --openui-text-neutral-tertiary: rgba(237, 247, 255, 0.36);
+    --openui-text-neutral-link: var(--skybridge-cyan);
+    --openui-text-brand: var(--skybridge-cyan);
+    --openui-text-accent-primary: #ffffff;
+    --openui-text-info-primary: #8afcff;
+    --openui-text-success-primary: #7bf09a;
+    --openui-text-alert-primary: #facc6b;
+    --openui-text-danger-primary: #ff8ba2;
+    --openui-interactive-accent-default: var(--skybridge-blue);
+    --openui-interactive-accent-hover: #244cff;
+    --openui-border-default: rgba(237, 247, 255, 0.08);
+    --openui-border-interactive: var(--skybridge-border);
+    --openui-border-interactive-emphasis: rgba(8, 245, 249, 0.34);
+    --openui-border-interactive-selected: var(--skybridge-cyan);
+    --openui-shadow-s: 0 1px 2px rgba(0, 0, 0, 0.24);
+    --openui-shadow-m: 0 10px 28px rgba(0, 0, 0, 0.28);
+    --openui-shadow-l: 0 16px 48px rgba(0, 0, 0, 0.32);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--openui-background);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.renderer-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(8, 245, 249, 0.16),
+      transparent 30rem
+    ),
+    var(--openui-background);
+  padding: 28px;
+}
+
+.renderer-shell > .openui-stack {
+  width: min(1040px, 100%);
+  margin: 0 auto;
+}
+
+.renderer-shell .openui-card {
+  border-color: var(--openui-border-default);
+}
+
+.renderer-shell .openui-card-clear {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.renderer-shell .openui-card:first-child .text-content:first-child {
+  color: var(--openui-text-brand);
+}
+
+.empty-state {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--openui-background);
+  color: var(--openui-text-neutral-secondary);
+  text-align: center;
+}
+
+.empty-state strong {
+  color: var(--openui-text-neutral-primary);
+}
+
+.error-panel {
+  width: min(1040px, 100%);
+  margin: 20px auto 0;
+  border: 1px solid var(--openui-border-danger-emphasis);
+  border-radius: 8px;
+  background: var(--openui-danger-background);
+  color: var(--openui-text-danger-primary);
+  padding: 12px;
+}
+
+.error-panel summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.error-panel pre {
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 640px) {
+  .renderer-shell {
+    padding: 16px;
+  }
+}
