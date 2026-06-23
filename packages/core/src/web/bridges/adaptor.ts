@@ -111,7 +111,7 @@ export class HostAdaptor implements Adaptor {
     this.unsubscribeViewUUID = null;
   }
 
-  // ---- Adaptor interface (stubs) ----
+  // ---- Adaptor interface ----
 
   public getHostContextStore = <K extends keyof HostContext>(
     key: K,
@@ -343,7 +343,7 @@ export class HostAdaptor implements Adaptor {
     await this.openai.setWidgetState(state);
   }
 
-  // ---- viewState persistence helpers (used in subsequent tasks) ----
+  // ---- viewState persistence helpers ----
 
   private subscribeToViewUUID(): void {
     this.unsubscribeViewUUID = this.mcp.subscribe("toolResult")(() => {
