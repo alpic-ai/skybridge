@@ -13,7 +13,7 @@ Your view runs for users on different devices and in different locales. `useUser
 
 The carousel formats prices in the host locale and adapts its controls to the device: a touch device gets larger tap targets, and hover styles apply only when the device reports hover.
 
-```tsx
+```tsx highlight={4-8,10}
 import { useUser } from "skybridge/web";
 
 function Carousel({ products }: { products: Product[] }) {
@@ -70,7 +70,8 @@ The host's device class and input capabilities.
 ```tsx
 type UserAgent = {
   device: {
-    type: "mobile" | "tablet" | "desktop" | "unknown"; // "unknown" when the host reports no device class
+    // "unknown" when the host reports no device class
+    type: "mobile" | "tablet" | "desktop" | "unknown";
   };
   capabilities: {
     hover: boolean; // device supports hover interactions
@@ -85,5 +86,8 @@ type UserAgent = {
   </Card>
   <Card title="useDisplayMode" icon="maximize" href="/api-reference/use-display-mode">
     Read and request the view's display mode
+  </Card>
+  <Card title="Design for the Host" icon="sparkles" href="/guides/ux">
+    Adapt the view to the user's device and locale
   </Card>
 </CardGroup>

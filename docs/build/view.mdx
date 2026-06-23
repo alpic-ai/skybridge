@@ -93,7 +93,7 @@ Beyond that, it's regular React: hooks, sub-components, any library you like. Ea
 
 ## Read the Tool Call
 
-The host mounts the view as soon as the model calls the tool, often before your handler returns. `useToolInfo` tracks that lifecycle: `status` moves from `"pending"` to `"success"`, with `isPending` and `isSuccess` as shortcuts.
+The host mounts the view as soon as the model calls the tool, often before your handler returns. [`useToolInfo`](/api-reference/use-tool-info) tracks that lifecycle: `status` moves from `"pending"` to `"success"`, with `isPending` and `isSuccess` as shortcuts.
 
 ```tsx views/carousel.tsx highlight={4,6-8,12-13}
 import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
@@ -122,7 +122,7 @@ The rest of the hook is the exchange itself: what the model sent in, and the two
 
 ## Call Tools Back
 
-`useCallTool` lets the view call any tool on your server without involving the model. It returns the trigger and the mutation state:
+[`useCallTool`](/api-reference/use-call-tool) lets the view call any tool on your server without involving the model. It returns the trigger and the mutation state:
 
 ```tsx views/carousel.tsx highlight={5,11-13,19-20}
 import { useCallTool, useToolInfo } from "../helpers.js"; // generated, type-safe from server schema

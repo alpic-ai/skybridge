@@ -9,7 +9,7 @@ Between turns the model can't see what the user does in your view. The `data-llm
 
 The carousel tells the model whether the shopper is browsing or looking at one product, so a follow-up like "is this one in stock?" resolves to the right item.
 
-```tsx views/carousel.tsx
+```tsx views/carousel.tsx highlight={5}
 function Carousel({ products }: { products: Product[] }) {
   const [selected, setSelected] = useState<Product | null>(null);
 
@@ -55,7 +55,7 @@ reaches the model as:
   <Card title="useViewState" icon="save" href="/api-reference/use-view-state">
     Persist structured state alongside the narration
   </Card>
-  <Card title="useToolInfo" icon="message-circle" href="/api-reference/use-tool-info">
+  <Card title="useToolInfo" icon="database" href="/api-reference/use-tool-info">
     Read the tool result the view mounted with
   </Card>
 </CardGroup>

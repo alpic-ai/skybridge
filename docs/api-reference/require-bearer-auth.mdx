@@ -9,8 +9,9 @@ description: "Require a signed-in user on every request"
 
 Every tool requires a signed-in user with the `shop.read` scope: the middleware validates the token before any handler runs.
 
-```ts server.ts highlight={5-8}
+```ts server.ts highlight={6-9}
 import { McpServer, requireBearerAuth } from "skybridge/server";
+import { verifyAccessToken } from "./verify-access-token.js"; // the verifier you implement
 
 const server = new McpServer({ name: "shop", version: "1.0" }).use(
   "/mcp",
@@ -33,59 +34,17 @@ requireBearerAuth(options: BearerAuthMiddlewareOptions): RequestHandler;
 
 ```ts
 type BearerAuthMiddlewareOptions = {
-  verifier: OAuthTokenVerifier; // the token check you write, see Verifier below
-  requiredScopes?: string[]; // every accepted token must carry all of these, or 403
-  resourceMetadataUrl?: string; // absolute URL appended to WWW-Authenticate on 401, for discovery
+  verifier: OAuthTokenVerifier;
+  requiredScopes?: string[];
+  resourceMetadataUrl?: string;
 };
 ```
 
-- **`verifier`** the provider-specific token check you implement. See [Verifier](#verifier).
-- **`requiredScopes`** a server-wide floor that layers under per-tool [`securitySchemes`](/api-reference/register-tool#securityschemes).
-- **`resourceMetadataUrl`** points at your OAuth 2.0 [Protected Resource Metadata](https://datatracker.ietf.org/doc/html/rfc9728) so clients can discover the authorization server.
-
-#### `verifier`
-
-The `verifier` is the piece you write against your provider. Its only required method is `verifyAccessToken(token: string): Promise<AuthInfo>`:
-
-- Resolve with an `AuthInfo` for a valid token. The middleware puts it on `extra.authInfo` for tool handlers.
-- Throw `InvalidTokenError` to reject a malformed, badly signed, or expired token. The middleware returns a 401 with the right `WWW-Authenticate` header.
-
-You do not check scopes here: the middleware enforces `requiredScopes` against `authInfo.scopes` and returns a 403 on a missing scope.
-
-```ts
-type AuthInfo = {
-  token: string; // the raw bearer token
-  clientId: string; // OAuth client_id (often the azp or client_id claim)
-  scopes: string[]; // scopes granted; checked against requiredScopes and securitySchemes
-  expiresAt: number; // unix seconds; required, requireBearerAuth rejects tokens with no expiration
-  extra?: Record<string, unknown>; // anything else you want in handlers, e.g. sub, email
-};
-```
-
-```ts
-import { type AuthInfo, InvalidTokenError } from "skybridge/server";
-
-async function verifyAccessToken(token: string): Promise<AuthInfo> {
-  try {
-    const payload = await validateToken(token); // JWT verification, introspection, etc.
-    return {
-      token,
-      clientId: payload.client_id,
-      scopes: payload.scope.split(" "),
-      expiresAt: payload.exp,
-      extra: { sub: payload.sub },
-    };
-  } catch (err) {
-    throw new InvalidTokenError(
-      err instanceof Error ? err.message : "Token validation failed",
-    );
-  }
-}
-```
-
-<Info>
-How you validate the token depends on your provider. Check its docs.
-</Info>
+| Field | Purpose |
+| --- | --- |
+| `verifier` | The provider-specific token check you implement. See [Verifier](/api-reference/verifier). |
+| `requiredScopes` | A server-wide scope floor every accepted token must carry, or the request gets a 403. Layers under per-tool [`securitySchemes`](/api-reference/register-tool#securityschemes). |
+| `resourceMetadataUrl` | Absolute URL appended to the `WWW-Authenticate` header on a 401, pointing at your OAuth 2.0 [Protected Resource Metadata](https://datatracker.ietf.org/doc/html/rfc9728) so clients can discover the authorization server. |
 
 ## Returns
 
@@ -105,7 +64,7 @@ A valid token only proves who the caller is. Authorizing what they can do, and s
   <Card title="mcpAuthMetadataRouter" icon="compass" href="/api-reference/mcp-auth-metadata-router">
     Advertise your authorization server for discovery
   </Card>
-  <Card title="Authenticate Users" icon="lock" href="/build/auth">
+  <Card title="Authenticate Users" icon="key" href="/build/auth">
     Add sign-in to your app end to end
   </Card>
 </CardGroup>

@@ -38,16 +38,21 @@ mcpAuthMetadataRouter(options: AuthMetadataOptions): Router;
 
 ```ts
 type AuthMetadataOptions = {
-  oauthMetadata: OAuthMetadata; // your authorization server's metadata (RFC 8414)
-  resourceServerUrl: URL; // the URL of this MCP server
-  scopesSupported?: string[]; // scopes this server recognizes
-  serviceDocumentationUrl?: URL; // link to human-readable docs for this server
-  resourceName?: string; // display name for this resource in the metadata
+  oauthMetadata: OAuthMetadata;
+  resourceServerUrl: URL;
+  scopesSupported?: string[];
+  serviceDocumentationUrl?: URL;
+  resourceName?: string;
 };
 ```
 
-- `oauthMetadata` is your authorization server's [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) metadata: at minimum the `issuer`, the `authorization_endpoint` and `token_endpoint`, and `response_types_supported`, as the example shows.
-- `resourceServerUrl` is published in the protected-resource metadata so clients map this server to that authorization server.
+| Field | Purpose |
+| --- | --- |
+| `oauthMetadata` | Your authorization server's [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) metadata. At minimum the `issuer`, `authorization_endpoint`, `token_endpoint`, and `response_types_supported`. |
+| `resourceServerUrl` | This MCP server's URL. Published in the protected-resource metadata so clients map this server to its authorization server. |
+| `scopesSupported` | The scopes this server recognizes. |
+| `serviceDocumentationUrl` | Link to human-readable docs for this server. |
+| `resourceName` | Display name for this resource in the metadata. |
 
 <Info>
 Check your OAuth provider's docs for the metadata values it expects.
@@ -64,7 +69,7 @@ An Express `Router` to pass to [`server.use`](/api-reference/mcp-server#use). It
   <Card title="optionalBearerAuth" icon="lock-open" href="/api-reference/optional-bearer-auth">
     Accept a token when present, allow anonymous otherwise
   </Card>
-  <Card title="Authenticate Users" icon="lock" href="/build/auth">
+  <Card title="Authenticate Users" icon="key" href="/build/auth">
     Add sign-in to your app end to end
   </Card>
 </CardGroup>

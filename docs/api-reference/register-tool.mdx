@@ -68,11 +68,11 @@ type ToolConfig = {
 
 ### `name`, `title`, `description`
 
-All three are the tool's prompt surface: the model reads them to decide when to call it, so write each for the model, not just `description`. `name` is also the identifier the call uses, and `title` a short display name.
+All three are the tool's prompt surface: the model reads them to decide when to call it, so write each for the model. `name` is also the identifier the call uses, and `title` a short display name.
 
 ### `inputSchema`, `outputSchema`
 
-[Zod](https://zod.dev/) raw shapes. `inputSchema` validates the call and types the handler's `input`, and a field's `.describe()` text reaches the model. `outputSchema` types `structuredContent` and tells the model the shape to expect back.
+[Zod](https://zod.dev/) raw shapes. `inputSchema` validates the call arguments and types the handler's `input`. Add `.describe()` to a field to tell the model what it's for. `outputSchema` tells the model the shape to expect back, it does not type the returned value.
 
 ### `view`
 
@@ -146,11 +146,10 @@ Metadata on the tool. Skybridge recognizes the keys below; any other key you set
 
 ```ts
 type ToolMeta = {
-  "openai/widgetAccessible"?: boolean;
+  ui?: { visibility?: Array<"model" | "app"> };
   "openai/toolInvocation/invoking"?: string;
   "openai/toolInvocation/invoked"?: string;
   "openai/fileParams"?: string[];
-  ui?: { visibility?: Array<"model" | "app"> };
   [key: string]: unknown;
 };
 ```
@@ -163,12 +162,12 @@ type ToolMeta = {
 | `openai/widgetAccessible` | Deprecated, use `ui.visibility`. |
 
 <Info>
-The `openai/*` keys are read only on **ChatGPT**.
+The `openai/*` keys are read only on **ChatGPT**. `openai/widgetAccessible`is deprecated, prefer `ui.visibility` instead.
 </Info>
 
 ## Handler
 
-Runs when the tool is called. It receives the validated `input` (typed from [`inputSchema`](#inputschema-outputschema)) and the request context `extra`, and returns the result fields below.
+Runs when the tool is called. It receives the validated `input` (typed from [`inputSchema`](#inputschema-outputschema)) and the request context `extra`:
 
 ```ts
 type ToolHandler = (input: Input, extra: RequestHandlerExtra) => Promise<{
@@ -270,7 +269,7 @@ Returning plain `ContentBlock` objects works too; the helpers are optional.
   <Card title="useToolInfo" icon="database" href="/api-reference/use-tool-info">
     Read the tool's result in the view
   </Card>
-  <Card title="FileRef" icon="paperclip" href="/api-reference/file-ref">
+  <Card title="FileRef" icon="file" href="/api-reference/file-ref">
     Pass files in and out of a tool
   </Card>
 </CardGroup>

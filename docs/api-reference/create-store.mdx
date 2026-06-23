@@ -9,7 +9,7 @@ description: "Persist view state in a Zustand store"
 
 A counter store persists its `count` across remounts, and the view reads and updates it through the store hook.
 
-```tsx
+```tsx highlight={8-11}
 import { createStore } from "skybridge/web";
 
 type CounterState = {

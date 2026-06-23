@@ -18,7 +18,7 @@ File params are a **ChatGPT** feature. Other hosts don't pass files through tool
 
 `summarize-document` takes a file in, fetches its bytes from `download_url`, and returns a summary file back.
 
-```ts server.ts
+```ts server.ts highlight={6-7}
 import { FileRef, McpServer } from "skybridge/server";
 
 const server = new McpServer({ name: "docs", version: "1.0" }).registerTool(

@@ -54,7 +54,7 @@ function Cart({ items }: { items: string[] }) {
 
 A shopper checks out and goes straight to payment. The view waits for the checkout, opens the payment page, and recovers if the request never completes.
 
-```tsx highlight={10,12-13}
+```tsx highlight={5,10,12-13}
 import { useCallTool } from "../helpers.js"; // generated, type-safe from server schema
 import { useOpenExternal } from "skybridge/web";
 
@@ -205,7 +205,7 @@ error: unknown | undefined;
 The thrown value, set only while `status` is `"error"`. It is `undefined` in every other state. A tool that completes but reports its own failure is a `"success"`, not an `"error"`.
 
 <CardGroup cols={3}>
-  <Card title="Create Views" icon="app-window" href="/build/view">
+  <Card title="Create Views" icon="palette" href="/build/view">
     Call tools back from a view in context
   </Card>
   <Card title="generateHelpers" icon="wand-sparkles" href="/api-reference/generate-helpers">

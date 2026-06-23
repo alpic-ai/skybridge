@@ -45,7 +45,7 @@ The sections below build this definition up piece by piece: the server it lives 
 
 ## Create the Server
 
-`McpServer` takes your app's identity and returns a chainable server. Chain every `registerTool` call, then `run()`:
+[`McpServer`](/api-reference/mcp-server) takes your app's identity and returns a chainable server. Chain every [`registerTool`](/api-reference/register-tool) call, then `run()`:
 
 ```ts server.ts
 const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})

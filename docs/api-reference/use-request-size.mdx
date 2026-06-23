@@ -62,10 +62,13 @@ requestSize(size: { width?: number; height?: number }): Promise<void>;
 Asks the host to resize the view, `width` and `height` in pixels; omit a dimension to leave it unchanged. The promise resolves once the request is sent, not once the host applies it: the host is free to clamp, ignore, or partially honor the size.
 
 <CardGroup cols={3}>
-  <Card title="useLayout" icon="maximize" href="/api-reference/use-layout">
+  <Card title="useLayout" icon="layout" href="/api-reference/use-layout">
     Read the height the host actually grants the view
   </Card>
-  <Card title="useDisplayMode" icon="expand" href="/api-reference/use-display-mode">
+  <Card title="useDisplayMode" icon="maximize" href="/api-reference/use-display-mode">
     Switch the view between inline, fullscreen, and pip
+  </Card>
+  <Card title="Design for the Host" icon="sparkles" href="/guides/ux">
+    Size and shape the view to fit the host
   </Card>
 </CardGroup>

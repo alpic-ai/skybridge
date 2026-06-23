@@ -98,7 +98,8 @@
             "pages": [
               "api-reference/mcp-auth-metadata-router",
               "api-reference/optional-bearer-auth",
-              "api-reference/require-bearer-auth"
+              "api-reference/require-bearer-auth",
+              "api-reference/verifier"
             ]
           },
           {

@@ -66,7 +66,8 @@ Asks the host to switch the view to `mode`. The host decides: it can grant the r
 **`mode`** the mode to request, every [`DisplayMode`](#displaymode) except `"modal"`:
 
 ```tsx
-type RequestDisplayMode = Exclude<DisplayMode, "modal">; // "inline" | "fullscreen" | "pip"
+// "inline" | "fullscreen" | "pip"
+type RequestDisplayMode = Exclude<DisplayMode, "modal">;
 ```
 
 <Info>
@@ -74,13 +75,13 @@ On mobile, **ChatGPT** coerces a `"pip"` request to `"fullscreen"`.
 </Info>
 
 <CardGroup cols={3}>
-  <Card title="Design for the Host" icon="route" href="/guides/ux">
+  <Card title="Design for the Host" icon="sparkles" href="/guides/ux">
     Adapt the view to display mode, theme, and device
   </Card>
-  <Card title="useLayout" icon="maximize" href="/api-reference/use-layout">
+  <Card title="useLayout" icon="layout" href="/api-reference/use-layout">
     Read the space and insets a mode switch brings
   </Card>
-  <Card title="useRequestModal" icon="panel-top" href="/api-reference/use-request-modal">
+  <Card title="useRequestModal" icon="app-window" href="/api-reference/use-request-modal">
     Open the view as a host modal
   </Card>
 </CardGroup>

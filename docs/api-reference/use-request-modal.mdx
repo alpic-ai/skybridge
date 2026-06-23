@@ -13,7 +13,7 @@ A modal overlay is host-owned: a view cannot mount one itself. `useRequestModal`
 
 The carousel opens a product in a modal to confirm adding it to the cart, then runs the add when the shopper confirms.
 
-```tsx
+```tsx highlight={4,6,15}
 import { useRequestModal } from "skybridge/web";
 
 function Carousel() {
@@ -79,10 +79,10 @@ type RequestModalOptions = {
 </Info>
 
 <CardGroup cols={3}>
-  <Card title="Design for the Host" icon="layout" href="/guides/ux">
+  <Card title="Design for the Host" icon="sparkles" href="/guides/ux">
     Adapt the view to display mode, theme, and device
   </Card>
-  <Card title="useDisplayMode" icon="expand" href="/api-reference/use-display-mode">
+  <Card title="useDisplayMode" icon="maximize" href="/api-reference/use-display-mode">
     Read and request the non-modal display modes
   </Card>
   <Card title="useRequestClose" icon="x" href="/api-reference/use-request-close">

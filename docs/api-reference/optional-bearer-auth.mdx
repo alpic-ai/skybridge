@@ -9,8 +9,9 @@ When some tools are public and others need sign-in, `optionalBearerAuth` validat
 
 The server accepts a token when one is sent, so public tools run for anyone while gated tools check `extra.authInfo` themselves.
 
-```ts server.ts highlight={5}
+```ts server.ts highlight={6}
 import { McpServer, optionalBearerAuth } from "skybridge/server";
+import { verifyAccessToken } from "./verify-access-token.js"; // the verifier you implement
 
 const server = new McpServer({ name: "shop", version: "1.0" }).use(
   "/mcp",
@@ -30,15 +31,17 @@ optionalBearerAuth(options: BearerAuthMiddlewareOptions): RequestHandler;
 
 ```ts
 type BearerAuthMiddlewareOptions = {
-  verifier: OAuthTokenVerifier; // the token check you write
-  requiredScopes?: string[]; // checked only when a token is sent; the token must carry all of these, or 403
-  resourceMetadataUrl?: string; // absolute URL appended to WWW-Authenticate on 401, for discovery
+  verifier: OAuthTokenVerifier;
+  requiredScopes?: string[];
+  resourceMetadataUrl?: string;
 };
 ```
 
-- **`verifier`** the provider-specific token check, the same contract as [`requireBearerAuth`](/api-reference/require-bearer-auth#verifier).
-- **`requiredScopes`** a scope floor, enforced only when a token is actually sent.
-- **`resourceMetadataUrl`** points at your OAuth 2.0 [Protected Resource Metadata](https://datatracker.ietf.org/doc/html/rfc9728) so clients can discover the authorization server.
+| Field | Purpose |
+| --- | --- |
+| `verifier` | The provider-specific token check you write. See [Verifier](/api-reference/verifier). |
+| `requiredScopes` | A scope floor, enforced only when a token is sent: the token must carry all of these, or the request gets a 403. |
+| `resourceMetadataUrl` | Absolute URL appended to the `WWW-Authenticate` header on a 401, pointing at your OAuth 2.0 [Protected Resource Metadata](https://datatracker.ietf.org/doc/html/rfc9728) so clients can discover the authorization server. |
 
 ## Returns
 
@@ -55,7 +58,7 @@ An Express `RequestHandler` to pass to [`server.use`](/api-reference/mcp-server#
   <Card title="registerTool" icon="wrench" href="/api-reference/register-tool">
     Gate individual tools with `securitySchemes`
   </Card>
-  <Card title="Authenticate Users" icon="lock" href="/build/auth">
+  <Card title="Authenticate Users" icon="key" href="/build/auth">
     Add sign-in to your app end to end
   </Card>
 </CardGroup>

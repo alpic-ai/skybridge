@@ -13,7 +13,7 @@ Views run in sandboxed iframes where direct downloads (`<a download>`, `URL.crea
 
 The view builds a CSV from the carousel's products and hands the host an inline resource, then offers a server-hosted PDF as a resource link.
 
-```tsx views/carousel.tsx highlight={4,11-24,32-41}
+```tsx views/carousel.tsx highlight={4,11-22,32-41}
 import { useDownload } from "skybridge/web";
 
 function Carousel({ products }: { products: Product[] }) {

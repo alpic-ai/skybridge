@@ -14,7 +14,7 @@ ChatGPT exposes its view context to your app, which Skybridge's hooks read and n
 
 `useUser` canonicalizes the locale (`fr_FR` becomes `fr-FR`). Reading it raw gives exactly what ChatGPT sent.
 
-```tsx
+```tsx highlight={4}
 import { useAppsSdkContext } from "skybridge/web";
 
 function LocaleBadge() {
@@ -71,5 +71,8 @@ The requested key's current value, read live from `window.openai`. It is un-norm
   </Card>
   <Card title="useToolInfo" icon="database" href="/api-reference/use-tool-info">
     Read the tool result the view mounted with, cross-host
+  </Card>
+  <Card title="Apps SDK and MCP Apps" icon="layers" href="/resources/apps-sdk-and-mcp-apps">
+    What the raw Apps SDK layer is, and how Skybridge unifies it
   </Card>
 </CardGroup>

@@ -40,7 +40,7 @@ The sections below cover fitting the space the host gives you, matching its them
 
 ## Fit the Available Space
 
-`useLayout` reports the room the host gives the view: `maxHeight`, and the `safeArea` insets that keep content clear of device notches and the chat composer.
+[`useLayout`](/api-reference/use-layout) reports the room the host gives the view: `maxHeight`, and the `safeArea` insets that keep content clear of device notches and the chat composer.
 
 ```tsx views/carousel.tsx highlight={6,13}
 import { useDisplayMode, useLayout, useUser } from "skybridge/web";
@@ -108,7 +108,7 @@ The carousel adds a `dark` class when the host is dark, the convention Tailwind'
 
 ## Respond to the Display Mode
 
-`useDisplayMode` returns the current mode and a setter. The three modes give the view different room and purpose:
+[`useDisplayMode`](/api-reference/use-display-mode) returns the current mode and a setter. The three modes give the view different room and purpose:
 
 - `inline` is the default: a compact panel embedded in the conversation. The smallest surface, so it suits a single result or a short list.
 - `fullscreen` takes over the surface for richer, multi-step tasks.
@@ -148,7 +148,7 @@ The carousel shows two columns inline and four in fullscreen, with a "See all" b
 
 ## Adapt to the User
 
-`useUser` reports the `locale` and the `userAgent`: the device type, and whether it supports `hover` and `touch`.
+[`useUser`](/api-reference/use-user) reports the `locale` and the `userAgent`: the device type, and whether it supports `hover` and `touch`.
 
 ```tsx views/carousel.tsx highlight={8,18}
 import { useDisplayMode, useLayout, useUser } from "skybridge/web";

@@ -13,7 +13,7 @@ An MCP Apps host (Claude and others) exposes view context that Skybridge's cross
 
 `useUser` gives the locale but not the host time zone, so a schedule reads `timeZone` from the context to render times in the user's zone.
 
-```tsx
+```tsx highlight={4}
 import { useMcpAppContext } from "skybridge/web";
 
 function Schedule({ events }: { events: Event[] }) {
@@ -91,5 +91,8 @@ The requested key's current value, empty until the host provides it: host-contex
   </Card>
   <Card title="useToolInfo" icon="database" href="/api-reference/use-tool-info">
     Read the tool result across both runtimes
+  </Card>
+  <Card title="Apps SDK and MCP Apps" icon="layers" href="/resources/apps-sdk-and-mcp-apps">
+    What the raw MCP Apps layer is, and how Skybridge unifies it
   </Card>
 </CardGroup>

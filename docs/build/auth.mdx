@@ -57,7 +57,7 @@ The sections below cover publishing the discovery metadata, verifying tokens wit
 
 ## Publish Discovery Metadata
 
-Hosts find your authorization server through standard metadata documents ([RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728)). `mcpAuthMetadataRouter` serves them at `/.well-known/oauth-protected-resource`, so the host can perform the authentication flow.
+Hosts find your authorization server through standard metadata documents ([RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728)). [`mcpAuthMetadataRouter`](/api-reference/mcp-auth-metadata-router) serves them at `/.well-known/oauth-protected-resource`, so the host can perform the authentication flow.
 
 ```ts server.ts highlight={2-12}
 const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
@@ -81,7 +81,7 @@ The endpoint values come from your OAuth provider's documentation. `resourceServ
 
 ## Verify Tokens with a Middleware
 
-Once the user is signed in, every request carries `Authorization: Bearer <token>`. `requireBearerAuth` validates it before any handler runs: missing, invalid, or expired tokens get a 401, insufficient scopes a 403.
+Once the user is signed in, every request carries `Authorization: Bearer <token>`. [`requireBearerAuth`](/api-reference/require-bearer-auth) validates it before any handler runs: missing, invalid, or expired tokens get a 401, insufficient scopes a 403.
 
 It takes a verifier you write, with one method: `verifyAccessToken(token)` resolves with an `AuthInfo` (handlers receive it as `extra.authInfo`) or throws `InvalidTokenError` (the middleware answers 401).
 
@@ -138,7 +138,7 @@ Serving both anonymous and signed-in callers from one server takes three changes
 
 ### Switch the Middleware
 
-`optionalBearerAuth` validates the token when present, lets the request through when absent, and still rejects invalid tokens with a 401. Unauthenticated requests now reach your handlers.
+[`optionalBearerAuth`](/api-reference/optional-bearer-auth) validates the token when present, lets the request through when absent, and still rejects invalid tokens with a 401. Unauthenticated requests now reach your handlers.
 
 ```ts server.ts highlight={2}
 server
