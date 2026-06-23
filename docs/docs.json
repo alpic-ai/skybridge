@@ -74,7 +74,8 @@
             "group": "Resources",
             "icon": "library",
             "pages": [
-              "resources/apps-sdk-and-mcp-apps"
+              "resources/apps-sdk-and-mcp-apps",
+              "resources/telemetry"
             ]
           },
           {
@@ -140,8 +141,7 @@
             "group": "Resources (legacy)",
             "icon": "circle-question",
             "pages": [
-              "faq",
-              "telemetry"
+              "faq"
             ]
           }
         ]
