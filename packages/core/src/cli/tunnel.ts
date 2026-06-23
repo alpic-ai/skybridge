@@ -1,6 +1,6 @@
 import { EventEmitter } from "node:events";
 // biome-ignore lint/correctness/noUndeclaredDependencies: dev-only symlink, intentionally not in package.json
-import { AlpicClient } from "@alpic-ai/sdk";
+import { Alpic } from "@alpic-ai/sdk";
 
 export type TunnelState =
   | { status: "idle" }
@@ -30,9 +30,9 @@ export type OpenTunnelFn = (port: number) => Promise<TunnelHandle>;
 const CONNECT_TIMEOUT_MS = 60_000;
 
 const defaultOpenTunnel: OpenTunnelFn = (() => {
-  let client: AlpicClient | null = null;
+  let client: Alpic | null = null;
   return async (port: number) => {
-    client ??= new AlpicClient();
+    client ??= new Alpic();
     // tunnel.open requires a token; log in on demand if not already authenticated.
     if (!(await client.auth.getValidAccessToken())) {
       await client.auth.login();
