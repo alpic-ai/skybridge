@@ -1,12 +1,6 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import {
-  type AuthInfo,
-  McpServer,
-  mcpAuthMetadataRouter,
-  requireBearerAuth,
-} from "skybridge/server";
+import { type AuthInfo, McpServer, workosProvider } from "skybridge/server";
 import * as z from "zod";
-import { verifyAccessToken } from "./auth.js";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
 
@@ -17,12 +11,10 @@ import { env } from "./env.js";
  * must sign in via OAuth before using any tools. Auth is enforced at the
  * transport level — unauthenticated requests to /mcp receive HTTP 401.
  *
- * Auth flow:
- * 1. MCP client discovers OAuth metadata via /.well-known/oauth-authorization-server
- * 2. User is prompted to sign in via WorkOS AuthKit
- * 3. MCP client connects to /mcp with a Bearer JWT token
- * 4. requireBearerAuth verifies the token via verifyAccessToken
- * 5. Tool handlers read user identity via extra.authInfo
+ * Auth is wired with the branded `workosProvider`: it discovers AuthKit's
+ * OAuth metadata, then auto-mounts the well-known endpoints and Bearer JWT
+ * verification (against AuthKit's JWKS). `audience` is the Resource Indicator
+ * configured in the WorkOS dashboard — here, this server's public URL.
  */
 
 const server = new McpServer(
@@ -31,26 +23,13 @@ const server = new McpServer(
     version: "0.0.1",
   },
   { capabilities: {} },
-)
-  // Mount OAuth metadata so MCP clients can discover auth endpoints
-  .use(
-    mcpAuthMetadataRouter({
-      oauthMetadata: {
-        issuer: `https://${env.AUTHKIT_DOMAIN}`,
-        authorization_endpoint: `https://${env.AUTHKIT_DOMAIN}/oauth2/authorize`,
-        token_endpoint: `https://${env.AUTHKIT_DOMAIN}/oauth2/token`,
-        registration_endpoint: `https://${env.AUTHKIT_DOMAIN}/oauth2/register`,
-        response_types_supported: ["code"],
-        response_modes_supported: ["query"],
-        scopes_supported: ["openid"],
-        grant_types_supported: ["authorization_code", "refresh_token"],
-        token_endpoint_auth_methods_supported: ["client_secret_post"],
-        code_challenge_methods_supported: ["S256"],
-      },
-      resourceServerUrl: new URL(env.SERVER_URL),
+  {
+    oauth: await workosProvider({
+      domain: env.AUTHKIT_DOMAIN,
+      audience: env.SERVER_URL,
     }),
-  )
-  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
+  },
+)
   .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
@@ -91,15 +70,15 @@ const server = new McpServer(
       const auth = extra.authInfo as AuthInfo;
 
       const email = auth.extra?.email as string | undefined;
-      const firstName = auth.extra?.firstName as string | null | undefined;
+      const subject = auth.extra?.subject as string | undefined;
 
       const results = searchCoffeeShops({
         query,
         minRating,
-        userId: auth.clientId,
+        userId: subject ?? auth.clientId,
       });
 
-      const displayName = firstName ?? email?.split("@")[0] ?? "User";
+      const displayName = email?.split("@")[0] ?? subject ?? "User";
 
       return {
         structuredContent: {

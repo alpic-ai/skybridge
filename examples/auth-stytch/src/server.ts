@@ -1,10 +1,6 @@
-import "dotenv/config";
 import { intentMiddleware } from "@alpic-ai/insights";
-import cors from "cors";
-import type { RequestHandler } from "express";
-import { type AuthInfo, McpServer, requireBearerAuth } from "skybridge/server";
+import { type AuthInfo, McpServer, stytchProvider } from "skybridge/server";
 import * as z from "zod";
-import { verifyAccessToken } from "./auth.js";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
 
@@ -15,39 +11,16 @@ import { env } from "./env.js";
  * must sign in via OAuth before using any tools. Auth is enforced at the
  * transport level — unauthenticated requests to /mcp receive HTTP 401.
  *
- * Auth flow:
- * 1. MCP client fetches /.well-known/oauth-protected-resource to discover the Stytch AS
- * 2. MCP client fetches Stytch's /.well-known/oauth-authorization-server for OAuth endpoints
- * 3. User signs in via Stytch
- * 4. MCP client connects to /mcp with a Bearer token
- * 5. requireBearerAuth verifies the token via Stytch's local introspection
- * 6. Tool handlers read user identity via extra.authInfo
+ * Auth is wired with the branded `stytchProvider`: it discovers the Connected
+ * App's OAuth metadata, then auto-mounts the well-known endpoints and Bearer
+ * JWT verification (against Stytch's JWKS). `audience` is the Stytch Project ID.
+ *
+ * Unlike WorkOS/Descope, Stytch ships its consent screen only as a React
+ * component, so this server also hosts the authorization page at
+ * /assets/authorize.html (+ login.html). Point the Connected App's
+ * "Authorization URL" (Stytch dashboard) at that page so Stytch's discovery
+ * advertises it as the authorization_endpoint.
  */
-// Describes this resource server and points to Stytch as the authorization server.
-const protectedResourceHandler: RequestHandler = (_req, res) => {
-  res.json({
-    resource: env.SERVER_URL,
-    authorization_servers: [env.SERVER_URL],
-    scopes_supported: ["openid", "email", "profile"],
-  });
-};
-
-// Proxies Stytch's AS metadata but overrides authorization_endpoint to point
-// to the static HTML page served by this server.
-const authorizationServerHandler: RequestHandler = async (_req, res, next) => {
-  try {
-    const stytchDomain = env.STYTCH_DOMAIN.replace(/\/$/, "");
-    const metadata = await fetch(
-      `${stytchDomain}/.well-known/oauth-authorization-server`,
-    ).then((r) => r.json());
-    res.json({
-      ...metadata,
-      authorization_endpoint: `${env.SERVER_URL}/assets/authorize.html`,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
 
 const server = new McpServer(
   {
@@ -55,17 +28,13 @@ const server = new McpServer(
     version: "0.0.1",
   },
   { capabilities: {} },
-)
-  .use(cors())
-  .use("/.well-known/oauth-protected-resource", protectedResourceHandler)
-  .use("/.well-known/oauth-authorization-server", authorizationServerHandler)
-  .use(
-    "/mcp",
-    requireBearerAuth({
-      verifier: { verifyAccessToken },
-      resourceMetadataUrl: `${env.SERVER_URL}/.well-known/oauth-protected-resource`,
+  {
+    oauth: await stytchProvider({
+      domain: env.STYTCH_DOMAIN,
+      audience: env.STYTCH_PROJECT_ID,
     }),
-  )
+  },
+)
   .mcpMiddleware(intentMiddleware())
   .registerTool(
     {

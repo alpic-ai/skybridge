@@ -6,8 +6,9 @@ import * as jose from "jose";
 export type JwksVerifyConfig = {
   /** Expected `iss` claim. */
   issuer: string;
-  /** Expected `aud` claim. */
-  audience: string;
+  /** Expected `aud` claim. Omit to skip audience verification — for IdPs that
+   * don't bind an audience to their access tokens (e.g. Clerk). */
+  audience?: string;
   /** Defaults to `${issuer}/.well-known/jwks.json`. */
   jwksUri?: string;
 };
@@ -27,7 +28,8 @@ export function createJwksVerifier(
       try {
         ({ payload } = await jose.jwtVerify(token, jwks, {
           issuer: config.issuer,
-          audience: config.audience,
+          // jose skips the aud check when `audience` is undefined.
+          ...(config.audience !== undefined && { audience: config.audience }),
         }));
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);

@@ -11,7 +11,6 @@ function requireEnv(name: string): string {
 export const env = {
   NODE_ENV:
     (process.env.NODE_ENV as "development" | "production") || "development",
-  SERVER_URL: process.env.SERVER_URL || "http://localhost:3000",
-  CLERK_SECRET_KEY: requireEnv("CLERK_SECRET_KEY"),
-  CLERK_PUBLISHABLE_KEY: requireEnv("CLERK_PUBLISHABLE_KEY"),
+  // Clerk Frontend API URL, e.g. `acme.clerk.accounts.dev` or a prod custom domain.
+  CLERK_DOMAIN: requireEnv("CLERK_DOMAIN"),
 };
