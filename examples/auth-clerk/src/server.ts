@@ -16,7 +16,7 @@ import { env } from "./env.js";
  * verification (against Clerk's JWKS). Clerk hosts the login + consent UI.
  * Requires Dynamic Client Registration enabled on the instance, and the OAuth
  * application set to issue JWT access tokens (opaque tokens can't be verified
- * via JWKS). `audience` is the OAuth application's configured audience.
+ * via JWKS). Clerk tokens carry no `aud`, so verification is issuer + JWKS only.
  */
 
 const server = new McpServer(

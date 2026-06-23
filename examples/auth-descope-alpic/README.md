@@ -51,7 +51,7 @@ DESCOPE_MCP_SERVER_URL=https://api.descope.com/v1/apps/agentic/<projectId>/<mcpS
 SERVER_URL=http://localhost:3000
 ```
 
-`SERVER_URL` is the URL clients use to reach **this** MCP server. Keep `http://localhost:3000` locally; on Alpic, set it to your deployed URL (or rely on `ALPIC_HOST` — see [Deploy to Production](#deploy-to-production)).
+`SERVER_URL` is the URL clients use to reach **this** MCP server. Keep `http://localhost:3000` locally; on Alpic, set it to your deployed URL. It must be the static public URL — skybridge advertises it as the authorization server `issuer`.
 
 #### 3. Start your local server
 
@@ -116,7 +116,7 @@ This example is designed for [Alpic](https://alpic.ai/). The auth wiring in `src
 2. Connect your GitHub repository and deploy this example (`examples/auth-descope-alpic`).
 3. Set environment variables on Alpic:
    - `DESCOPE_MCP_SERVER_URL` — your Descope MCP Server Discovery URL
-   - `SERVER_URL` — your deployed MCP server URL (Alpic also sets `ALPIC_HOST` automatically if you prefer that for OAuth metadata)
+   - `SERVER_URL` — your deployed MCP server URL (the static public URL, used as the advertised authorization-server `issuer`)
 
 [![Deploy it on Alpic](https://assets.alpic.ai/button.svg)](https://app.alpic.ai/new/clone?repositoryUrl=https://github.com/alpic-ai/skybridge&rootDir=examples/auth-descope-alpic)
 

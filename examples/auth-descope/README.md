@@ -44,7 +44,6 @@ bun install
 
 ```env
 DESCOPE_MCP_SERVER_URL=https://api.descope.com/v1/apps/agentic/<projectId>/<mcpServerId>
-SERVER_URL=http://localhost:3000
 ```
 
 #### 3. Start your local server

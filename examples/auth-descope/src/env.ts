@@ -11,7 +11,6 @@ function requireEnv(name: string): string {
 export const env = {
   NODE_ENV:
     (process.env.NODE_ENV as "development" | "production") || "development",
-  SERVER_URL: process.env.SERVER_URL || "http://localhost:3000",
   // MCP Server Discovery URL from the Descope console's Connection Information.
   DESCOPE_MCP_SERVER_URL: requireEnv("DESCOPE_MCP_SERVER_URL"),
 };

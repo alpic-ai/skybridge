@@ -38,13 +38,11 @@ bun install
 
 1. Sign up at [clerk.com](https://clerk.com/) and create an application.
 2. Create an OAuth application: enable **Dynamic client registration** and turn on **Generate access tokens as JWTs** (Settings).
-3. Copy your **Frontend API URL** (Clerk dashboard → API keys) and set the OAuth app's audience.
+3. Copy your **Frontend API URL** (Clerk dashboard → API keys).
 4. Create a `.env` file in the project root:
 
 ```env
 CLERK_DOMAIN=acme.clerk.accounts.dev
-CLERK_AUDIENCE=your-oauth-app-audience
-SERVER_URL=http://localhost:3000
 ```
 
 #### 3. Start your local server

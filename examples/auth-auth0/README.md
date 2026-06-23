@@ -77,6 +77,8 @@ Without this step, applications created via DCR won't have any login connection 
 ```env
 AUTH0_DOMAIN=your-tenant.us.auth0.com
 AUTH0_AUDIENCE=https://your-mcp-server.com
+# This server's public URL — advertised as the OAuth authorization server.
+SERVER_URL=http://localhost:3000
 ```
 
 ### 4. Start your local server
@@ -134,6 +136,8 @@ The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 ```env
 AUTH0_DOMAIN=your-tenant.us.auth0.com
 AUTH0_AUDIENCE=https://your-mcp-server.com
+# Your deployed public URL — advertised as the OAuth authorization server.
+SERVER_URL=https://your-mcp-server.com
 ```
 
 [![Deploy it on Alpic](https://assets.alpic.ai/button.svg)](https://app.alpic.ai/new/clone?repositoryUrl=https://github.com/alpic-ai/skybridge&rootDir=examples/auth-auth0)
