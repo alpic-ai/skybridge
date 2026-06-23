@@ -1,0 +1,39 @@
+{
+  "name": "skybridge-openui-generative-ui-example",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Generative UI with OpenUI Lang and Skybridge",
+  "type": "module",
+  "scripts": {
+    "dev": "skybridge dev",
+    "dev:tunnel": "skybridge dev --tunnel",
+    "build": "skybridge build",
+    "start": "skybridge start"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@openuidev/react-headless": "0.8.2",
+    "@openuidev/react-lang": "^0.2.6",
+    "@openuidev/react-ui": "0.11.8",
+    "@tailwindcss/vite": "^4.1.18",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "skybridge": "^1.1.0",
+    "tailwindcss": "^4.1.18",
+    "vite": "^7.3.1",
+    "zod": "^4.3.5",
+    "zustand": "^4.5.7"
+  },
+  "devDependencies": {
+    "@skybridge/devtools": "^1.1.0",
+    "@types/node": "^25.0.10",
+    "@types/react": "^19.2.8",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=24.13.0"
+  }
+}
