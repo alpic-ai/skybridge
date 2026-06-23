@@ -3,10 +3,6 @@ title: useRegisterViewTool
 description: "Expose a tool the host and model can call against the running view"
 ---
 
-import { Compat } from "/components/compat.jsx";
-
-<Compat claude />
-
 A tool the model calls normally runs on your server. `useRegisterViewTool` registers a tool that runs in the view instead: the model invokes it and the handler executes in your component, so the model can mutate view state or do any work that does not need the backend.
 
 ## Example
@@ -17,7 +13,7 @@ The model adds an on-screen product to the cart by calling a tool the view handl
 import * as z from "zod";
 import { useRegisterViewTool, useViewState } from "skybridge/web";
 
-function Carousel() {
+function Carousel({ products }: { products: Product[] }) {
   const [{ cart }, setState] = useViewState({ cart: [] }); // synced with the model, survives remount
 
   useRegisterViewTool(

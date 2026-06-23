@@ -4,9 +4,19 @@ description: "Test, build, and run your app from the terminal"
 icon: terminal
 ---
 
-Skybridge ships one CLI, available as both `skybridge` and `sb` once it's installed in your project. It has three commands: `dev` runs your project locally, `build` compiles it, and `start` serves the build.
+Skybridge ships one CLI, available as both `skybridge` and `sb` once it's installed in your project. 
 
 It's a project dependency, not a global install, so run it through your package manager, or the [package scripts](#package-scripts) a scaffold sets up.
+
+## `create`
+
+Scaffold a new project. Run it before the package is installed with `npx`:
+
+```bash
+npx skybridge create
+```
+
+See [Quickstart](/get-started/quickstart) to scaffold and run a project.
 
 ## `dev`
 
@@ -97,6 +107,10 @@ deno run -A npm:skybridge/skybridge start
 | Flag | Description |
 |------|-------------|
 | `-p, --port <number>` | Port to run on. Defaults to `3000`, or the next free port if it's taken. Also reads `PORT`. |
+
+## `telemetry`
+
+The CLI reports anonymous usage, on by default. Toggle it with `skybridge telemetry disable`, `enable`, or `status`. See [Telemetry](/resources/telemetry) for what's collected and every way to opt out.
 
 ## Package scripts
 

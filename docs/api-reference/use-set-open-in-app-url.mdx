@@ -33,7 +33,7 @@ function Carousel({ products }: { products: Product[] }) {
     );
   }, [featured, setOpenInAppUrl]);
 
-  return <ProductGrid products={output?.products ?? []} />;
+  return <ProductGrid products={products} />;
 }
 ```
 
