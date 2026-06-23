@@ -65,7 +65,10 @@ export const View = () => {
     _meta?: Record<string, unknown>;
   };
   const html = resourceEntry.text;
-  const viewDomain = asString(resourceEntry._meta?.["openai/widgetDomain"]);
+  const viewDomain = asString(
+    (resourceEntry._meta?.ui as { domain?: unknown })?.domain ??
+      resourceEntry._meta?.["openai/widgetDomain"],
+  );
 
   useEffect(() => {
     const iframe = iframeRef.current;
