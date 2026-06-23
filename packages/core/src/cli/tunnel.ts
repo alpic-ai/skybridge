@@ -31,12 +31,13 @@ const CONNECT_TIMEOUT_MS = 60_000;
 
 const defaultOpenTunnel: OpenTunnelFn = (() => {
   let client: AlpicClient | null = null;
-  return (port: number) => {
+  return async (port: number) => {
     client ??= new AlpicClient();
-    return client.tunnel.open({
-      port,
-      autoLogin: true,
-    });
+    // tunnel.open requires a token; log in on demand if not already authenticated.
+    if (!(await client.auth.getValidAccessToken())) {
+      await client.auth.login();
+    }
+    return client.tunnel.open({ port });
   };
 })();
 
