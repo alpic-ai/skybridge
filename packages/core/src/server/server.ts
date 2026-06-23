@@ -76,7 +76,11 @@ export type ToolDef<
   responseMetadata: TResponseMetadata;
 };
 
-/** Which host runtime a view targets — `"apps-sdk"` (ChatGPT) or `"mcp-app"` (MCP Apps spec). */
+/**
+ * @deprecated Views now always emit a single ext-apps resource; host targeting
+ * no longer applies. Retained for backwards compatibility; will be removed in a
+ * future major.
+ */
 export type ViewHostType = "apps-sdk" | "mcp-app";
 
 /**
@@ -120,11 +124,14 @@ export interface ViewConfig {
   component: ViewName;
   /** Human-readable label the host may show alongside the view. */
   description?: string;
-  /** Restrict where the view is rendered. Defaults to all known hosts. */
+  /**
+   * @deprecated No-op. Every view emits a single ext-apps resource regardless
+   * of this value. Will be removed in a future major.
+   */
   hosts?: ViewHostType[];
-  /** Apps SDK only: request a visible border around the widget. */
+  /** Request a visible border around the view (forwarded as `ui.prefersBorder`). */
   prefersBorder?: boolean;
-  /** Apps SDK only: override the iframe's served domain (advanced). */
+  /** Override the iframe's served domain (advanced; forwarded as `ui.domain`). */
   domain?: string;
   /** Per-view CSP overrides — see {@link ViewCsp}. */
   csp?: ViewCsp;
