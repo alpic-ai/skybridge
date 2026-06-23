@@ -20,9 +20,11 @@ function projectIdFromUrl(url: string): string {
  * OAuth provider for a Descope MCP Server. `url` is the MCP Server's **Discovery
  * URL** (a.k.a. Issuer) from the console's Connection Information, e.g.
  * `https://api.descope.com/v1/apps/agentic/<projectId>/<mcpServerId>` (or your
- * custom domain). Requires DCR enabled on the MCP Server. The token `audience`
- * defaults to the **Project ID** derived from the URL — Descope binds `aud` to
- * [DCR client id, project id], not the server URL; pass `audience` to override.
+ * custom domain). Requires DCR enabled on the MCP Server. For Descope with DCR
+ * disabled and Alpic's DCR proxy, use {@link customProvider} with `serverUrl`
+ * instead (see `examples/auth-descope-alpic`). The token `audience` defaults to
+ * the **Project ID** derived from the URL — Descope binds `aud` to [DCR client
+ * id, project id], not the server URL; pass `audience` to override.
  */
 export function descopeProvider(
   opts: { url: string } & Omit<CustomProviderOptions, "issuer">,

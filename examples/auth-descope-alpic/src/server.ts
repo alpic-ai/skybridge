@@ -19,12 +19,22 @@ import { env } from "./env.js";
  * Token `aud` is the Descope Project ID (Descope binds `aud` to [client, project]).
  */
 
-const projectId = env.DESCOPE_MCP_SERVER_URL.match(/\/agentic\/([^/]+)\//)?.[1];
-if (!projectId) {
-  throw new Error(
-    `Could not derive the Descope project id from "${env.DESCOPE_MCP_SERVER_URL}".`,
-  );
+/**
+ * Derives the Descope Project ID from an MCP Server URL
+ * (`…/agentic/<projectId>/<mcpServerId>`). Descope binds the token `aud` to the
+ * project id, so it doubles as the audience.
+ */
+function projectIdFromUrl(url: string): string {
+  const projectId = url.match(/\/agentic\/([^/]+)\/[^/]+/)?.[1];
+  if (!projectId) {
+    throw new Error(
+      `Could not derive the Descope project id from "${url}"; pass an explicit \`audience\`.`,
+    );
+  }
+  return projectId;
 }
+
+const projectId = projectIdFromUrl(env.DESCOPE_MCP_SERVER_URL);
 
 const server = new McpServer(
   {

@@ -104,6 +104,8 @@ To test your app with other MCP Clients like ChatGPT, Claude or VSCode, see [Tes
 
 Skybridge is infrastructure vendor agnostic, and your app can be deployed on any cloud platform supporting MCP.
 
+> **Deploying on Alpic with Descope DCR disabled?** Use [`auth-descope-alpic`](../auth-descope-alpic/) instead — it wires OAuth for [Alpic's DCR proxy](https://docs.alpic.ai/secure/auth/oauth-setup#using-an-oauth-2-0-compatible-identity-provider-idp-with-no-dcr) via `customProvider` and `serverUrl`.
+
 The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 
 1. Create an account on [Alpic platform](https://app.alpic.ai/).
