@@ -228,9 +228,7 @@ type McpAppsResourceMeta = {
   ui?: ExtendedMcpUiResourceMeta;
 };
 
-type ResourceMeta = McpAppsResourceMeta;
-
-type ViewResourceConfig<T extends ResourceMeta = ResourceMeta> = {
+type ViewResourceConfig = {
   hostType: ViewHostType;
   uri: string;
   mimeType: string;
@@ -242,7 +240,7 @@ type ViewResourceConfig<T extends ResourceMeta = ResourceMeta> = {
       baseUriDomains: string[];
     },
     overrides: { domain?: string },
-  ) => T;
+  ) => McpAppsResourceMeta;
 };
 
 /**
@@ -466,7 +464,7 @@ export class McpServer<
   private claimedViews = new Map<string, string>();
   private viewMetaBuilders = new Map<
     string,
-    (extra: McpExtra | undefined) => ResourceMeta
+    (extra: McpExtra | undefined) => McpAppsResourceMeta
   >();
   private viteManifest: Record<string, ViteManifestEntry> | null = null;
   private readonly serverInfo: Implementation;
@@ -892,7 +890,7 @@ export class McpServer<
     // `tools/list` calls when the bundle hasn't changed.
     const versionParam = this.computeViewVersionParam(view.component);
 
-    const viewResource: ViewResourceConfig<McpAppsResourceMeta> = {
+    const viewResource: ViewResourceConfig = {
       hostType: "mcp-app",
       uri: `ui://views/ext-apps/${view.component}.html${versionParam}`,
       mimeType: "text/html;profile=mcp-app",
@@ -969,7 +967,7 @@ export class McpServer<
   }): void {
     const { hostType, uri: viewUri, mimeType, buildContentMeta } = viewResource;
 
-    const buildMeta = (extra: McpExtra | undefined): ResourceMeta => {
+    const buildMeta = (extra: McpExtra | undefined): McpAppsResourceMeta => {
       const { serverUrl, connectDomains, contentMetaOverrides } =
         this.resolveViewRequestContext(extra);
       return buildContentMeta(
