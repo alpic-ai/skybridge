@@ -31,22 +31,4 @@ describe("getAdaptor", () => {
     const b = getAdaptor();
     expect(a).toBe(b);
   });
-
-  it("logs a warning when hostType disagrees with probe", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
-    vi.stubGlobal("openai", { view: { mode: "inline" } });
-    getAdaptor();
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining("hostType"));
-    warn.mockRestore();
-  });
-
-  it("does not warn when hostType matches probe", () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
-    vi.stubGlobal("openai", { view: { mode: "inline" } });
-    getAdaptor();
-    expect(warn).not.toHaveBeenCalled();
-    warn.mockRestore();
-  });
 });

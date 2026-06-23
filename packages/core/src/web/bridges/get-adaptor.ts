@@ -14,21 +14,6 @@ export const getAdaptor = (): Adaptor => {
   if (cached) {
     return cached;
   }
-
-  const hostType =
-    typeof window !== "undefined" ? window.skybridge?.hostType : undefined;
-  const hasOai = typeof window !== "undefined" && window.openai !== undefined;
-
-  if (hostType === "mcp-app" && hasOai) {
-    console.warn(
-      "[skybridge] hostType is 'mcp-app' but window.openai is present; trusting the probe.",
-    );
-  } else if (hostType === "apps-sdk" && !hasOai) {
-    console.warn(
-      "[skybridge] hostType is 'apps-sdk' but window.openai is absent; trusting the probe.",
-    );
-  }
-
   cached = new HostAdaptor();
   return cached;
 };
