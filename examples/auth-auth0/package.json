@@ -13,10 +13,7 @@
   },
   "dependencies": {
     "@alpic-ai/insights": "^1.127.1",
-    "@auth0/auth0-api-js": "^1.4.0",
-    "cors": "^2.8.6",
     "dotenv": "^16.5.0",
-    "jose": "^6.2.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "skybridge": "^1.1.0",
@@ -25,7 +22,6 @@
   },
   "devDependencies": {
     "@skybridge/devtools": "^1.1.0",
-    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^22.15.30",
     "@types/react": "^19.2.13",

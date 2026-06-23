@@ -71,6 +71,30 @@ describe("discoverAuthorizationServer", () => {
     );
   });
 
+  it("falls through to oauth-authorization-server when oidc doc is schema-invalid", async () => {
+    const base = await serve((o) => ({
+      "/.well-known/openid-configuration": doc(o, {
+        response_types_supported: undefined,
+      }),
+      "/.well-known/oauth-authorization-server": doc(o),
+    }));
+    const meta = await discoverAuthorizationServer(base);
+    expect(meta.registration_endpoint).toBe(`${base}/register`);
+  });
+
+  it("prefers the doc advertising DCR when oidc omits registration_endpoint", async () => {
+    // Clerk-shaped: valid openid-configuration without a registration_endpoint,
+    // DCR exposed only at oauth-authorization-server.
+    const base = await serve((o) => ({
+      "/.well-known/openid-configuration": doc(o, {
+        registration_endpoint: undefined,
+      }),
+      "/.well-known/oauth-authorization-server": doc(o),
+    }));
+    const meta = await discoverAuthorizationServer(base);
+    expect(meta.registration_endpoint).toBe(`${base}/register`);
+  });
+
   it("rejects a doc whose issuer does not match the fetch origin", async () => {
     const base = await serve(() => ({
       "/.well-known/openid-configuration": doc("https://evil.test"),

@@ -78,15 +78,33 @@ describe("customProvider", () => {
     expect(config.verify.jwksUri).toBe(`${base}/jwks`);
   });
 
-  it("rejects a non-DCR IdP even if an override supplies registration_endpoint", async () => {
+  it("serves metadata without a registration_endpoint when the IdP has no DCR", async () => {
     const base = await serveDiscovery({ registration_endpoint: undefined });
+    const config = await customProvider({ issuer: base, audience: "a" });
+    expect(config.oauthMetadata.registration_endpoint).toBeUndefined();
+    expect(config.verify.issuer).toBe(base);
+  });
+
+  it("throws when discovery has no jwks_uri (token verification needs it)", async () => {
+    const base = await serveDiscovery({ jwks_uri: undefined });
     await expect(
-      customProvider({
-        issuer: base,
-        audience: "a",
-        metadataOverrides: { registration_endpoint: `${base}/register` },
-      }),
-    ).rejects.toThrow(/not DCR-compatible/);
+      customProvider({ issuer: base, audience: "a" }),
+    ).rejects.toThrow(/jwks_uri/);
+  });
+
+  it("serverUrl advertises this server as the AS, keeping the IdP as the token issuer", async () => {
+    const base = await serveDiscovery();
+    const config = await customProvider({
+      issuer: base,
+      audience: "a",
+      serverUrl: "https://app.example.test/",
+      scopes: ["openid"],
+    });
+    // AS metadata + advertised scopes reflect this server.
+    expect(config.oauthMetadata.issuer).toBe("https://app.example.test");
+    expect(config.oauthMetadata.scopes_supported).toEqual(["openid"]);
+    // but the token's issuer is still verified against the IdP.
+    expect(config.verify.issuer).toBe(base);
   });
 
   it("applies metadataOverrides over discovered values", async () => {
