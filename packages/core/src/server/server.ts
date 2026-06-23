@@ -1016,6 +1016,7 @@ export class McpServer<
 
     // Advertise the single resource through all three known pointers so both
     // ext-apps hosts (ui.resourceUri) and ChatGPT (openai/outputTemplate) resolve it.
+    // TODO: drop openai/outputTemplate once ChatGPT is confirmed to render via ui.resourceUri alone and DevTools reads ui.resourceUri.
     toolMeta["openai/outputTemplate"] = viewResource.uri;
     // @ts-expect-error - For backwards compatibility with Claude current implementation of the specs
     toolMeta["ui/resourceUri"] = viewResource.uri;
