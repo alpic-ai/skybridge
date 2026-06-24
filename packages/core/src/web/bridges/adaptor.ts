@@ -196,8 +196,8 @@ export class HostAdaptor implements Adaptor {
   };
 
   public openExternal = (href: string, options?: OpenExternalOptions): void => {
-    if (this.openai && options?.redirectUrl === false) {
-      this.openai.openExternal({ href, redirectUrl: false });
+    if (this.openai) {
+      this.openai.openExternal({ href, ...options });
       return;
     }
     this.mcp

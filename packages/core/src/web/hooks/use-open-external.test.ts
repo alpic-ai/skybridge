@@ -31,22 +31,18 @@ describe("useOpenExternal", () => {
       vi.resetAllMocks();
     });
 
-    it("should fall back to mcp openLink when no redirectUrl option is given", async () => {
+    it("should call window.openai.openExternal even without a redirectUrl option", () => {
       const { result } = renderHook(() => useOpenExternal());
 
       const href = "https://example.com";
       result.current(href);
 
-      await waitFor(() => {
-        expect(postMessageMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            jsonrpc: "2.0",
-            method: "ui/open-link",
-            params: { url: href },
-          }),
-          "*",
-        );
-      });
+      expect(openExternalMock).toHaveBeenCalledTimes(1);
+      expect(openExternalMock).toHaveBeenCalledWith({ href });
+      expect(postMessageMock).not.toHaveBeenCalledWith(
+        expect.objectContaining({ method: "ui/open-link" }),
+        "*",
+      );
     });
 
     it("should call window.openai.openExternal when redirectUrl is false", () => {
