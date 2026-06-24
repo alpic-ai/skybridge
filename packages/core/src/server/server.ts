@@ -224,26 +224,23 @@ type InternalToolMeta = Partial<
   OpenaiToolMeta & McpAppsToolMeta & SecuritySchemesToolMeta
 >;
 
-/**
- * MCP Apps CSP extended with upcoming / Skybridge-specific fields.
- * @see https://github.com/modelcontextprotocol/ext-apps/pull/158
- */
-type ExtendedMcpUiResourceCsp = McpUiResourceMeta["csp"] & {
-  /**
-   * Origins that can receive openExternal redirects without the safe-link modal.
-   * OpenAI-specific; mirrored into the mcp-apps CSP for cross-host parity.
-   * @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields
-   */
-  redirectDomains?: string[];
-};
-
-type ExtendedMcpUiResourceMeta = Omit<McpUiResourceMeta, "csp"> & {
-  csp?: ExtendedMcpUiResourceCsp;
-};
-
 type McpAppsResourceMeta = {
-  ui?: ExtendedMcpUiResourceMeta;
+  ui?: McpUiResourceMeta;
 };
+
+/**
+ * ChatGPT-only resource `_meta` fields that have no `ui.*` equivalent ChatGPT
+ * reads, so they're emitted alongside the standard `ui.*` metadata.
+ * @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields
+ */
+type OpenaiResourceMeta = {
+  /** Model-facing summary surfaced when the component loads. No `ui.*` equivalent. */
+  "openai/widgetDescription"?: string;
+  /** `redirect_domains` is unsupported in `ui.csp`; ChatGPT reads it only here. */
+  "openai/widgetCSP"?: { redirect_domains?: string[] };
+};
+
+type ResourceMeta = McpAppsResourceMeta & OpenaiResourceMeta;
 
 type ViewResourceConfig = {
   hostType: ViewHostType;
@@ -257,7 +254,7 @@ type ViewResourceConfig = {
       baseUriDomains: string[];
     },
     overrides: { domain?: string },
-  ) => McpAppsResourceMeta;
+  ) => ResourceMeta;
 };
 
 /**
@@ -493,7 +490,7 @@ export class McpServer<
   private claimedViews = new Map<string, string>();
   private viewMetaBuilders = new Map<
     string,
-    (extra: McpExtra | undefined) => McpAppsResourceMeta
+    (extra: McpExtra | undefined) => ResourceMeta
   >();
   /**
    * Maps a view resource's query-less path to its canonical registered URI
@@ -995,19 +992,28 @@ export class McpServer<
               ...(view.csp?.baseUriDomains && {
                 baseUriDomains: view.csp.baseUriDomains,
               }),
-              ...(view.csp?.redirectDomains && {
-                redirectDomains: view.csp.redirectDomains,
-              }),
             },
           },
         };
 
-        const base = mergeWithUnion(mergeWithUnion(defaults, fromView), {
+        const ui = mergeWithUnion(mergeWithUnion(defaults, fromView), {
           ui: overrides,
         });
 
+        // ChatGPT-only fields with no ui.* equivalent (see OpenaiResourceMeta):
+        // the model-facing description, and redirect_domains (unsupported in ui.csp).
+        const base: ResourceMeta = {
+          ...ui,
+          ...(view.description && {
+            "openai/widgetDescription": view.description,
+          }),
+          ...(view.csp?.redirectDomains && {
+            "openai/widgetCSP": { redirect_domains: view.csp.redirectDomains },
+          }),
+        };
+
         if (view._meta) {
-          return { ...base, ...view._meta } as McpAppsResourceMeta;
+          return { ...base, ...view._meta } as ResourceMeta;
         }
         return base;
       },
@@ -1034,7 +1040,7 @@ export class McpServer<
   }): void {
     const { hostType, uri: viewUri, mimeType, buildContentMeta } = viewResource;
 
-    const buildMeta = (extra: McpExtra | undefined): McpAppsResourceMeta => {
+    const buildMeta = (extra: McpExtra | undefined): ResourceMeta => {
       const { serverUrl, connectDomains, contentMetaOverrides } =
         this.resolveViewRequestContext(extra);
       return buildContentMeta(

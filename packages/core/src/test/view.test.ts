@@ -143,6 +143,7 @@ describe("McpServer.registerTool (unified API)", () => {
               domain: serverUrl,
               description: "Test view",
             },
+            "openai/widgetDescription": "Test view",
           },
         },
       ],
@@ -209,6 +210,7 @@ describe("McpServer.registerTool (unified API)", () => {
               domain: serverUrl,
               description: "Test view",
             },
+            "openai/widgetDescription": "Test view",
           },
         },
       ],
@@ -281,6 +283,7 @@ describe("McpServer.registerTool (unified API)", () => {
         description: "Test view",
         domain: expectedDomain,
       },
+      "openai/widgetDescription": "Test view",
     });
   });
 
@@ -341,6 +344,7 @@ describe("McpServer.registerTool (unified API)", () => {
               description: "Test view",
               prefersBorder: true,
             },
+            "openai/widgetDescription": "Test view",
           },
         },
       ],
@@ -876,5 +880,18 @@ describe("resources/list view _meta injection", () => {
       "https://fonts.googleapis.com",
     );
     expect(extUi?.domain).toBe("skybridge.tech");
+
+    // ChatGPT-only resource fields with no ui.* equivalent are emitted too.
+    const meta = extApps?._meta as {
+      "openai/widgetDescription"?: string;
+      "openai/widgetCSP"?: { redirect_domains?: string[] };
+      ui?: { csp?: Record<string, unknown> };
+    };
+    expect(meta["openai/widgetDescription"]).toBe("Onboarding deck");
+    // redirect_domains is unsupported in ui.csp; ChatGPT reads it only here.
+    expect(meta["openai/widgetCSP"]?.redirect_domains).toEqual([
+      "https://docs.skybridge.tech",
+    ]);
+    expect(meta.ui?.csp).not.toHaveProperty("redirectDomains");
   });
 });
