@@ -1043,12 +1043,7 @@ export class McpServer<
     };
     this.viewMetaBuilders.set(viewUri, buildMeta);
     this.viewUriByPath.set(stripQuery(viewUri), viewUri);
-    // Keep resolving the legacy apps-sdk URL (advertised by older Skybridge via
-    // openai/outputTemplate) so apps published before this change don't break on upgrade.
-    this.viewUriByPath.set(
-      `ui://views/apps-sdk/${view.component}.html`,
-      viewUri,
-    );
+    this.serveLegacyAppsSdkUrl(view.component, viewUri);
 
     this.registerResource(
       name,
@@ -1077,6 +1072,13 @@ export class McpServer<
           ],
         };
       },
+    );
+  }
+
+  private serveLegacyAppsSdkUrl(component: string, canonicalUri: string): void {
+    this.viewUriByPath.set(
+      `ui://views/apps-sdk/${component}.html`,
+      canonicalUri,
     );
   }
 
