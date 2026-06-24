@@ -42,6 +42,20 @@ function findStorageKey(viewUUID: string): string | undefined {
  * routing rules are encoded inline.
  */
 export class HostAdaptor implements Adaptor {
+  private static instance: HostAdaptor | null = null;
+
+  static getInstance(): HostAdaptor {
+    if (!HostAdaptor.instance) {
+      HostAdaptor.instance = new HostAdaptor();
+    }
+    return HostAdaptor.instance;
+  }
+
+  static resetInstance(): void {
+    HostAdaptor.instance?.cleanup();
+    HostAdaptor.instance = null;
+  }
+
   private readonly mcp: McpAppBridge;
   private readonly openai: typeof window.openai | null = null;
 

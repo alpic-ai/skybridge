@@ -8,7 +8,7 @@ import {
   type Mock,
   vi,
 } from "vitest";
-import { _resetAdaptor } from "../bridges/get-adaptor.js";
+import { HostAdaptor } from "../bridges/adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/index.js";
 import {
   fireToolResultNotification,
@@ -32,7 +32,7 @@ describe("useViewState", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
   });
 
@@ -109,7 +109,7 @@ describe("useViewState (mcp-app host — localStorage persistence)", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     localStorage.clear();
   });

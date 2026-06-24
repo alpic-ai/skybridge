@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { HostAdaptor } from "../bridges/adaptor.js";
 import { AppsSdkBridge } from "../bridges/apps-sdk/bridge.js";
-import { _resetAdaptor } from "../bridges/get-adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import { useRequestModal } from "./use-request-modal.js";
 
@@ -9,7 +9,7 @@ describe("useRequestModal", () => {
   let requestModalMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
     requestModalMock = vi.fn();
@@ -24,7 +24,7 @@ describe("useRequestModal", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
   });

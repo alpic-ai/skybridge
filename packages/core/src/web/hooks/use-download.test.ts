@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { _resetAdaptor } from "../bridges/get-adaptor.js";
+import { HostAdaptor } from "../bridges/adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import type { DownloadParams } from "../bridges/types.js";
 import {
@@ -34,7 +34,7 @@ describe("useDownload", () => {
     afterEach(() => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
     });
 
@@ -62,7 +62,7 @@ describe("useDownload", () => {
     afterEach(async () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
     });
 
@@ -96,7 +96,7 @@ describe("useDownload", () => {
     afterEach(async () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
     });
 
@@ -119,7 +119,7 @@ describe("useDownload", () => {
     });
 
     it("returns { isError: true } when the host denies the request", async () => {
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
       postMessageMock = getMcpAppHostPostMessageMock(
         {},

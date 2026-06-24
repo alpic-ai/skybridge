@@ -8,7 +8,8 @@ import {
   type Mock,
   vi,
 } from "vitest";
-import { _resetAdaptor, getAdaptor } from "./bridges/get-adaptor.js";
+import { HostAdaptor } from "./bridges/adaptor.js";
+import { getAdaptor } from "./bridges/get-adaptor.js";
 import { McpAppBridge } from "./bridges/mcp-app/index.js";
 import { DataLLM } from "./data-llm.js";
 import {
@@ -20,7 +21,7 @@ describe("DataLLM", () => {
   afterEach(() => {
     // Clean up React components BEFORE unstubbing globals
     cleanup();
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     vi.unstubAllGlobals();
     vi.resetAllMocks();
   });
@@ -173,7 +174,7 @@ describe("DataLLM", () => {
     afterEach(() => {
       cleanup();
       McpAppBridge.resetInstance();
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
     });
 
     it("should register a node and update view state via adaptor", async () => {

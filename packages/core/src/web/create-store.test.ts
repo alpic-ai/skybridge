@@ -9,7 +9,8 @@ import {
   vi,
 } from "vitest";
 import type { StateCreator } from "zustand";
-import { _resetAdaptor, getAdaptor } from "./bridges/get-adaptor.js";
+import { HostAdaptor } from "./bridges/adaptor.js";
+import { getAdaptor } from "./bridges/get-adaptor.js";
 import { McpAppBridge } from "./bridges/mcp-app/bridge.js";
 import { createStore } from "./create-store.js";
 import { VIEW_CONTEXT_KEY } from "./data-llm.js";
@@ -20,7 +21,7 @@ import {
 
 describe("createStore", () => {
   afterEach(() => {
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     vi.unstubAllGlobals();
     vi.resetAllMocks();
   });
@@ -130,7 +131,7 @@ describe("createStore", () => {
 
     afterEach(async () => {
       cleanup();
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
     });
 

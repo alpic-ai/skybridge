@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { _resetAdaptor } from "../bridges/get-adaptor.js";
+import { HostAdaptor } from "../bridges/adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import {
   getMcpAppHostPostMessageMock,
@@ -11,7 +11,7 @@ import { useUser } from "./use-user.js";
 describe("useUser", () => {
   describe("apps-sdk host type", () => {
     beforeEach(() => {
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
       vi.stubGlobal("openai", { locale: "en-US" });
       vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
@@ -22,7 +22,7 @@ describe("useUser", () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
     });
 
     it("should return locale and userAgent from mcp host context", async () => {
@@ -123,7 +123,7 @@ describe("useUser", () => {
 
   describe("mcp-app host type", () => {
     beforeEach(() => {
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
       vi.stubGlobal("openai", undefined);
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
@@ -134,7 +134,7 @@ describe("useUser", () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
     });
 
     it("should return locale and userAgent from mcp host context", async () => {

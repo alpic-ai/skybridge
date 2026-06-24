@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { _resetAdaptor } from "../bridges/get-adaptor.js";
+import { HostAdaptor } from "../bridges/adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import {
   getMcpAppHostPostMessageMock,
@@ -25,7 +25,7 @@ describe("useOpenExternal", () => {
     });
 
     afterEach(() => {
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
       vi.unstubAllGlobals();
       vi.resetAllMocks();
@@ -71,7 +71,7 @@ describe("useOpenExternal", () => {
     });
 
     afterEach(async () => {
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
       vi.unstubAllGlobals();
       vi.resetAllMocks();

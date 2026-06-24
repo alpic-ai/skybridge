@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { _resetAdaptor } from "../bridges/get-adaptor.js";
+import { HostAdaptor } from "../bridges/adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import {
   getMcpAppHostPostMessageMock,
@@ -11,7 +11,7 @@ import { useLayout } from "./use-layout.js";
 describe("useLayout", () => {
   describe("apps-sdk host type", () => {
     beforeEach(() => {
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
       vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
       vi.stubGlobal("openai", { view: { mode: "inline" } });
@@ -22,7 +22,7 @@ describe("useLayout", () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
     });
 
     it("should return theme, maxHeight, and safeArea from mcp host context", async () => {
@@ -93,7 +93,7 @@ describe("useLayout", () => {
 
   describe("mcp-app host type", () => {
     beforeEach(() => {
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
       vi.stubGlobal("openai", undefined);
@@ -104,7 +104,7 @@ describe("useLayout", () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
     });
 
     it("should return theme, maxHeight, and safeArea from mcp host context", async () => {

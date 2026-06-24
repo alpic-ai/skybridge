@@ -9,9 +9,9 @@ import {
   type Mock,
   vi,
 } from "vitest";
-
+import { HostAdaptor } from "../bridges/adaptor.js";
 import { AppsSdkBridge } from "../bridges/apps-sdk/bridge.js";
-import { _resetAdaptor, getAdaptor } from "../bridges/get-adaptor.js";
+import { getAdaptor } from "../bridges/get-adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import type { CallToolResponse } from "../bridges/types.js";
 import { useCallTool } from "./use-call-tool.js";
@@ -20,7 +20,7 @@ describe("useCallTool - onSuccess callback", () => {
   let callToolMock: Mock;
 
   beforeEach(() => {
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
     vi.stubGlobal("parent", { postMessage: vi.fn() });
@@ -32,7 +32,7 @@ describe("useCallTool - onSuccess callback", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
   });
@@ -213,7 +213,7 @@ describe("useCallTool - TypeScript typing", () => {
   let callToolMock: Mock;
 
   beforeEach(() => {
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
     vi.stubGlobal("parent", { postMessage: vi.fn() });
@@ -225,7 +225,7 @@ describe("useCallTool - TypeScript typing", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
   });

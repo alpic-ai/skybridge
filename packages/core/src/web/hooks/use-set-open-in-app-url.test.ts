@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { HostAdaptor } from "../bridges/adaptor.js";
 import { AppsSdkBridge } from "../bridges/apps-sdk/bridge.js";
-import { _resetAdaptor } from "../bridges/get-adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import { NotSupportedError } from "../bridges/types.js";
 import { useSetOpenInAppUrl } from "./use-set-open-in-app-url.js";
@@ -10,7 +10,7 @@ describe("useSetOpenInAppUrl", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     AppsSdkBridge.resetInstance();
     McpAppBridge.resetInstance();
   });

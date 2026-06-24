@@ -1,7 +1,8 @@
 import { act, fireEvent, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { HostAdaptor } from "../bridges/adaptor.js";
 import { AppsSdkBridge } from "../bridges/apps-sdk/bridge.js";
-import { _resetAdaptor, getAdaptor } from "../bridges/get-adaptor.js";
+import { getAdaptor } from "../bridges/get-adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import {
   getMcpAppHostPostMessageMock,
@@ -11,7 +12,7 @@ import { useDisplayMode } from "./use-display-mode.js";
 
 describe("useDisplayMode", () => {
   beforeEach(() => {
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
     vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
@@ -22,7 +23,7 @@ describe("useDisplayMode", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
   });

@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { HostAdaptor } from "../bridges/adaptor.js";
 import { AppsSdkBridge } from "../bridges/apps-sdk/bridge.js";
-import { _resetAdaptor } from "../bridges/get-adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import { useFiles } from "./use-files.js";
 
@@ -16,7 +16,7 @@ describe("useFiles", () => {
   };
 
   beforeEach(() => {
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
     vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
@@ -27,7 +27,7 @@ describe("useFiles", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.clearAllMocks();
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
   });

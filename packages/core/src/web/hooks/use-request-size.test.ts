@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { _resetAdaptor } from "../bridges/get-adaptor.js";
+import { HostAdaptor } from "../bridges/adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import {
   getMcpAppHostPostMessageMock,
@@ -12,7 +12,7 @@ describe("useRequestSize", () => {
   let postMessageMock: ReturnType<typeof getMcpAppHostPostMessageMock>;
 
   beforeEach(() => {
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     vi.stubGlobal("openai", undefined);
@@ -24,7 +24,7 @@ describe("useRequestSize", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
   });
 

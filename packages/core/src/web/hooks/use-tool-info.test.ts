@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { _resetAdaptor } from "../bridges/get-adaptor.js";
+import { HostAdaptor } from "../bridges/adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/index.js";
 import {
   fireToolInputNotification,
@@ -24,7 +24,7 @@ describe("useToolInfo", () => {
     });
 
     afterEach(() => {
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();
@@ -95,7 +95,7 @@ describe("useToolInfo", () => {
     });
 
     afterEach(async () => {
-      _resetAdaptor();
+      HostAdaptor.resetInstance();
       vi.unstubAllGlobals();
       vi.resetAllMocks();
       McpAppBridge.resetInstance();

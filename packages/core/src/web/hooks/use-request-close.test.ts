@@ -1,12 +1,13 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { _resetAdaptor, getAdaptor } from "../bridges/get-adaptor.js";
+import { HostAdaptor } from "../bridges/adaptor.js";
+import { getAdaptor } from "../bridges/get-adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import { useRequestClose } from "./use-request-close.js";
 
 describe("useRequestClose", () => {
   beforeEach(() => {
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     vi.stubGlobal("openai", undefined);
@@ -16,7 +17,7 @@ describe("useRequestClose", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
   });
 
@@ -36,7 +37,7 @@ describe("useRequestClose", () => {
 
   it("calls app.requestTeardown even when window.openai is present", async () => {
     vi.stubGlobal("openai", { requestClose: vi.fn() });
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
 
     const requestTeardown = vi.fn().mockResolvedValue(undefined);

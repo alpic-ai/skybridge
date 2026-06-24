@@ -1,19 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HostAdaptor } from "./adaptor.js";
 import { AppsSdkBridge } from "./apps-sdk/bridge.js";
-import { _resetAdaptor, getAdaptor } from "./get-adaptor.js";
+import { getAdaptor } from "./get-adaptor.js";
 import { McpAppBridge } from "./mcp-app/bridge.js";
 
 describe("getAdaptor", () => {
   beforeEach(() => {
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
     vi.stubGlobal("parent", { postMessage: vi.fn() });
   });
   afterEach(() => {
     vi.unstubAllGlobals();
-    _resetAdaptor();
+    HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
   });
