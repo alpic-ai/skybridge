@@ -966,47 +966,58 @@ export class McpServer<
     const versionParam = this.computeViewVersionParam(view.component);
 
     if (hosts.includes("apps-sdk")) {
-      const viewResource: ViewResourceConfig<OpenaiResourceMeta> = {
-        hostType: "apps-sdk",
+      const viewResource: ViewResourceConfig<McpAppsResourceMeta> = {
+        hostType: "mcp-app",
         uri: `ui://views/apps-sdk/${view.component}.html${versionParam}`,
-        mimeType: "text/html+skybridge",
+        mimeType: "text/html;profile=mcp-app",
         buildContentMeta: (
-          { resourceDomains, connectDomains, domain },
+          { resourceDomains, connectDomains, domain, baseUriDomains },
           overrides,
         ) => {
-          const defaults: OpenaiResourceMeta = {
-            "openai/widgetCSP": {
-              resource_domains: resourceDomains,
-              connect_domains: connectDomains,
+          const defaults: McpAppsResourceMeta = {
+            ui: {
+              csp: {
+                resourceDomains,
+                connectDomains,
+                baseUriDomains,
+              },
+              domain,
             },
-            "openai/widgetDomain": domain,
-            "openai/widgetDescription": view.description,
           };
 
-          const fromView: Partial<
-            Omit<
-              OpenaiResourceMeta,
-              "openai/widgetCSP" | "openai/widgetDescription"
-            > & {
-              "openai/widgetCSP": Partial<OpenaiViewCSP>;
-            }
-          > = {
-            "openai/widgetCSP": {
-              resource_domains: view.csp?.resourceDomains,
-              connect_domains: view.csp?.connectDomains,
-              frame_domains: view.csp?.frameDomains,
-              redirect_domains: view.csp?.redirectDomains,
+          const fromView: McpAppsResourceMeta = {
+            ui: {
+              ...(view.description && { description: view.description }),
+              ...(view.prefersBorder !== undefined && {
+                prefersBorder: view.prefersBorder,
+              }),
+              ...(view.domain && { domain: view.domain }),
+              csp: {
+                ...(view.csp?.resourceDomains && {
+                  resourceDomains: view.csp.resourceDomains,
+                }),
+                ...(view.csp?.connectDomains && {
+                  connectDomains: view.csp.connectDomains,
+                }),
+                ...(view.csp?.frameDomains && {
+                  frameDomains: view.csp.frameDomains,
+                }),
+                ...(view.csp?.baseUriDomains && {
+                  baseUriDomains: view.csp.baseUriDomains,
+                }),
+                ...(view.csp?.redirectDomains && {
+                  redirectDomains: view.csp.redirectDomains,
+                }),
+              },
             },
-            "openai/widgetDomain": view.domain,
-            "openai/widgetPrefersBorder": view.prefersBorder,
           };
 
           const base = mergeWithUnion(mergeWithUnion(defaults, fromView), {
-            "openai/widgetDomain": overrides.domain,
+            ui: overrides,
           });
 
           if (view._meta) {
-            return { ...base, ...view._meta } as OpenaiResourceMeta;
+            return { ...base, ...view._meta } as McpAppsResourceMeta;
           }
           return base;
         },
