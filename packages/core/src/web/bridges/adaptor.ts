@@ -101,10 +101,6 @@ export class HostAdaptor implements Adaptor {
     this.subscribeToViewUUID();
   }
 
-  public hasAppsSdkOverlay(): boolean {
-    return this.openai !== null;
-  }
-
   /** @internal Release any subscriptions held on the underlying bridges. */
   public cleanup(): void {
     this.unsubscribeViewUUID?.();

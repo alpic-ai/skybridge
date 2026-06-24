@@ -19,15 +19,6 @@ describe("HostAdaptor", () => {
     localStorage.clear();
   });
 
-  it("captures window.openai as overlay when present, else window.openai is null", () => {
-    vi.stubGlobal("openai", undefined);
-    expect(new HostAdaptor().hasAppsSdkOverlay()).toBe(false);
-    McpAppBridge.resetInstance();
-    AppsSdkBridge.resetInstance();
-    vi.stubGlobal("openai", { widgetState: null });
-    expect(new HostAdaptor().hasAppsSdkOverlay()).toBe(true);
-  });
-
   it("callTool always routes to mcp.callServerTool", async () => {
     vi.stubGlobal("openai", { callTool: vi.fn() });
     const adaptor = new HostAdaptor();
