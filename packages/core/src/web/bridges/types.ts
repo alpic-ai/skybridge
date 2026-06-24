@@ -247,11 +247,6 @@ export interface Adaptor {
   selectFiles(): Promise<FileMetadata[]>;
   openModal(options: RequestModalOptions): void;
   setOpenInAppUrl(href: string): Promise<void>;
-  /**
-   * Close a modal opened via {@link Adaptor.openModal}. In the Apps SDK
-   * runtime this is a no-op (the host owns modal lifecycle). In the MCP App
-   * runtime it dismisses the in-iframe polyfill.
-   */
   closeModal(): void;
   registerViewTool(
     config: ViewToolConfig,

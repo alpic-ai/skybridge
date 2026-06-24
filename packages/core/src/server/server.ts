@@ -938,9 +938,6 @@ export class McpServer<
     view: ViewConfig,
     toolMeta: InternalToolMeta,
   ): void {
-    // `hosts` is deprecated and ignored — every view emits the single ext-apps
-    // resource. Kept for backwards compatibility; see ViewConfig.hosts.
-
     // Append a content-derived version param so hosts (e.g. ChatGPT) bust
     // their cache when the bundle changes, but keep the URI stable across
     // `tools/list` calls when the bundle hasn't changed.
