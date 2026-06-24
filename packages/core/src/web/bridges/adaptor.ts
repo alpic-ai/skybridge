@@ -1,9 +1,5 @@
 import { AppsSdkBridge } from "./apps-sdk/bridge.js";
 import type { AppsSdkWidgetState } from "./apps-sdk/types.js";
-import {
-  buildAppsSdkOverlayStores,
-  buildMcpContextStores,
-} from "./host-context-stores.js";
 import { McpAppBridge } from "./mcp-app/bridge.js";
 import type {
   Adaptor,
@@ -48,12 +44,8 @@ function findStorageKey(viewUUID: string): string | undefined {
 export class HostAdaptor implements Adaptor {
   private readonly mcp: McpAppBridge;
   private readonly openai: typeof window.openai | null = null;
-  private readonly appsSdkBridge: AppsSdkBridge | null = null;
 
-  private readonly mcpStores: ReturnType<typeof buildMcpContextStores>;
-  private readonly appsSdkStores: ReturnType<
-    typeof buildAppsSdkOverlayStores
-  > | null = null;
+  private readonly stores: { [K in keyof HostContext]: HostContextStore<K> };
 
   private _viewState: HostContext["viewState"] = null;
   private readonly viewStateListeners = new Set<() => void>();
@@ -69,12 +61,12 @@ export class HostAdaptor implements Adaptor {
 
   constructor() {
     this.mcp = McpAppBridge.getInstance();
-    this.mcpStores = buildMcpContextStores(this.mcp);
 
+    let overlayStores: ReturnType<AppsSdkBridge["createOverlayStores"]> | null =
+      null;
     if (typeof window !== "undefined" && window.openai !== undefined) {
       this.openai = window.openai;
-      this.appsSdkBridge = AppsSdkBridge.getInstance();
-      this.appsSdkStores = buildAppsSdkOverlayStores(this.appsSdkBridge);
+      overlayStores = AppsSdkBridge.getInstance().createOverlayStores();
     }
 
     // Built once so that getHostContextStore returns stable references — required
@@ -98,6 +90,12 @@ export class HostAdaptor implements Adaptor {
       getSnapshot: () => this._viewState,
     };
 
+    this.stores = {
+      ...this.mcp.createContextStores(),
+      display: overlayStores?.display ?? this.polyfillDisplayStore,
+      viewState: overlayStores?.viewState ?? this.polyfillViewStateStore,
+    };
+
     this.subscribeToViewUUID();
   }
 
@@ -111,25 +109,7 @@ export class HostAdaptor implements Adaptor {
 
   public getHostContextStore = <K extends keyof HostContext>(
     key: K,
-  ): HostContextStore<K> => {
-    if (this.appsSdkStores && (key === "display" || key === "viewState")) {
-      return this.appsSdkStores[
-        key as "display" | "viewState"
-      ] as HostContextStore<K>;
-    }
-
-    if (key === "display") {
-      return this.polyfillDisplayStore as HostContextStore<K>;
-    }
-
-    if (key === "viewState") {
-      return this.polyfillViewStateStore as HostContextStore<K>;
-    }
-
-    return this.mcpStores[
-      key as keyof typeof this.mcpStores
-    ] as HostContextStore<K>;
-  };
+  ): HostContextStore<K> => this.stores[key];
 
   public callTool = async <
     ToolArgs extends Record<string, unknown> | null = null,

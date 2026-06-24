@@ -1,4 +1,4 @@
-import type { Bridge, Subscribe } from "../types.js";
+import type { Bridge, HostContextStore, Subscribe } from "../types.js";
 import {
   type AppsSdkContext,
   SET_GLOBALS_EVENT_TYPE,
@@ -65,4 +65,21 @@ export class AppsSdkBridge implements Bridge<AppsSdkContext> {
 
     return window.openai[key];
   };
+
+  public createOverlayStores(): {
+    display: HostContextStore<"display">;
+    viewState: HostContextStore<"viewState">;
+  } {
+    return {
+      display: {
+        subscribe: this.subscribe("view"),
+        getSnapshot: () => this.getSnapshot("view"),
+      },
+      viewState: {
+        subscribe: this.subscribe("widgetState"),
+        getSnapshot: () =>
+          this.getSnapshot("widgetState")?.modelContent ?? null,
+      },
+    };
+  }
 }
