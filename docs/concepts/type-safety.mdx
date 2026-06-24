@@ -252,6 +252,16 @@ Check that:
 2. Your `helpers.ts` imports this type correctly
 3. You're using method chaining
 
+### `Type '"foo"' is not assignable to type 'ViewName'`
+
+Skybridge generates `.skybridge/views.d.ts` from the files in `src/views/`. That file augments `ViewNameRegistry`, so `component` in `registerTool` only accepts registered view names. If you add a new view and run TypeScript before that file exists, you'll see this error even when the view file and tool name match.
+
+This is expected — not a runtime bug. During normal development, `pnpm dev` scans `src/views/` and regenerates `.skybridge/views.d.ts` automatically (the Vite plugin does the same on startup).
+
+**When you might hit this:** you create `src/views/foo.tsx`, register `component: "foo"` in `server.ts`, then run `tsc` or your editor's type checker before ever starting dev.
+
+**Fix:** run `pnpm dev` or `pnpm build` once — both scan views before compiling the server. After `.skybridge/views.d.ts` exists, the error should clear. If you already started `pnpm dev` but errors persist, restart dev so `tsc --watch` picks up the newly created `.skybridge/` directory.
+
 ## Related
 
 - [generateHelpers API](/api-reference/generate-helpers) - Full API documentation
