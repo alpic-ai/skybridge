@@ -3,7 +3,10 @@ title: "Create Views"
 description: "Craft interactive UIs rendered in conversation"
 icon: "palette"
 ---
-<img src="/images/view.png" alt="View Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/view.png" alt="View Illustration" />
 
 Views are the face of your app: React components the host mounts inline when the tool they're bound to returns. A view reads what the tool produced, calls tools back when the user acts, and manages the state shared with the model. It's plain React, running in a sandboxed iframe inside the host.
 

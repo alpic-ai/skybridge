@@ -3,7 +3,10 @@ title: "Authenticate Users"
 description: "Know who's behind every tool call"
 icon: "key"
 ---
-<img src="/images/auth.png" alt="Auth Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/auth.png" alt="Auth Illustration" />
 
 Tool calls are anonymous by default: nothing in the protocol tells you who's asking. OAuth closes that gap, and the host does most of the work: it discovers your authorization server, signs the user in, refreshes tokens, and attaches a Bearer token to every request. Your server keeps three jobs: publish the discovery metadata, verify the tokens, and read the user in your handlers.
 

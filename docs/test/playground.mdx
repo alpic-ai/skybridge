@@ -3,7 +3,10 @@ title: "Playground"
 description: "Chat with a real model running your app"
 icon: "message-circle"
 ---
-<img src="/images/playground.png" alt="Playground Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/playground.png" alt="Playground Illustration" />
 
 Putting a real model in the loop normally means registering your app in a host. The Playground skips that: a chat wired to your local server, where a real LLM uses your tools and the views render inline.
 
@@ -36,7 +39,7 @@ Your local server becomes publicly available, and so does the Playground: it run
 With a model in the loop, the prompt surface and the state sync become testable:
 
 <Frame caption="The Playground interface">
-    <img src="/images/playground-screenshot.png" alt="Playground Illustration" />
+    <Hero src="/images/playground-screenshot.png" alt="Playground Illustration" />
 </Frame>
 
 - **Tool selection**: assess what the model understands from your tool names and descriptions.

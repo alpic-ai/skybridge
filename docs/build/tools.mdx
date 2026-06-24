@@ -3,7 +3,10 @@ title: "Register Tools"
 description: "Define what humans and agents can do"
 icon: "wrench"
 ---
-<img src="/images/tools.png" alt="Tools Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/tools.png" alt="Tools Illustration" />
 
 Tools are the entry point of your app: the model reads their metadata and triggers them when they fit the conversation. Think of them as an API: each tool has one job, and jobs can complement each other. Bind a view to a tool, and the host [mounts](/get-started/architecture#app-lifecycle) it inline in the conversation. The model isn't the only caller: the user can trigger tools too, via the view.
 

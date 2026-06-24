@@ -3,7 +3,10 @@ title: "Tunnel"
 description: "Expose your local server to real hosts"
 icon: "globe"
 ---
-<img src="/images/tunnel.png" alt="Tunnel Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/tunnel.png" alt="Tunnel Illustration" />
 
 ChatGPT and Claude connect to MCP servers over the internet, and your dev server lives on localhost. The tunnel bridges the two: it exposes your local server on a public URL, so real hosts run your app while it keeps reloading on every file save.
 

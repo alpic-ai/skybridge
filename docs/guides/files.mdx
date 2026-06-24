@@ -5,7 +5,9 @@ sidebarTitle: "Files"
 icon: "paperclip"
 ---
 
-<img src="/images/files.png" alt="Files Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/files.png" alt="Files Illustration" />
 
 Views run in a sandboxed iframe, cut off from the conversation and the user's disk. Each host opens its own door for files, and the two work differently: ChatGPT keeps a file store your tools and views read and write; Claude only lets a view save a file to the user's device. What you can build depends on the host.
 

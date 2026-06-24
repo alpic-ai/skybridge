@@ -4,7 +4,9 @@ description: "Call tools and render views locally, without a host"
 icon: "square-dashed-mouse-pointer"
 ---
 
-<img src="/images/devtools.png" alt="DevTools Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/devtools.png" alt="DevTools Illustration" />
 
 Testing through a real host means exposing a public URL, registering a connector, starting a conversation, and prompting the model until it calls the right tool. DevTools cuts that loop down to a file save: it runs locally, emulates the host runtime, and lets you call tools directly, no model or host involved.
 
@@ -41,7 +43,7 @@ Every tool registered on the server appears in the sidebar automatically, and ed
 Select a tool in the sidebar and DevTools gives you the full exchange:
 
 <Frame caption="The DevTools interface">
-<img src="/images/devtools-screenshot.png" alt="DevTools Illustration" />
+<Hero src="/images/devtools-screenshot.png" alt="DevTools Illustration" />
 </Frame>
 
 - **Tool controls**: generated from the tool's input schema. Inputs can be saved and re-run from the tool header.

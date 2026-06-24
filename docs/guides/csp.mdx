@@ -5,7 +5,9 @@ sidebarTitle: "CSP"
 icon: "shield"
 ---
 
-<img src="/images/csp.png" alt="CSP Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/csp.png" alt="CSP Illustration" />
 
 Views render in a sandboxed iframe under a strict Content Security Policy: it blocks every cross-origin request the view hasn't declared. Your server's own origin is allowed automatically, so a view that only talks to its server needs no configuration. For anything else, list the origin on the tool's `view.csp`.
 

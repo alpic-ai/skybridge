@@ -3,7 +3,10 @@ title: Architecture
 description: "Design conversational experiences leveraging model intelligence"
 icon: route
 ---
-<img src="/images/architecture.png" alt="Architecture Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/architecture.png" alt="Architecture Illustration" />
 
 MCP Apps have three actors involved: the app, the user, and the model. This creates context asymmetry: each actor holds a partial picture of the system. The model is blind to the UI: it can’t see visuals or user interactions unless you explicitly sync them back. The user can’t see the tool output flowing underneath. Building well means understanding these blind spots and designing the information flow between all three.
 
