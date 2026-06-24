@@ -262,7 +262,8 @@ export const useSelectedTool = () => {
   return tool;
 };
 
-export const useSuspenseResource = (uri?: string) => {
+export const useSuspenseResource = (ui: { resourceUri?: string }) => {
+  const uri = ui.resourceUri;
   return useSuspenseQuery({
     queryKey: ["resource", uri],
     queryFn: async () => {

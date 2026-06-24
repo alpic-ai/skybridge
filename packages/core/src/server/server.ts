@@ -197,7 +197,6 @@ type ViteManifestEntry = {
 };
 
 type OpenaiToolMeta = {
-  "openai/outputTemplate": string;
   "openai/widgetAccessible"?: boolean;
   "openai/toolInvocation/invoking"?: string;
   "openai/toolInvocation/invoked"?: string;
@@ -1016,7 +1015,6 @@ export class McpServer<
         viewResource,
         view,
       });
-      toolMeta["openai/outputTemplate"] = viewResource.uri;
     }
 
     if (hosts.includes("mcp-app")) {
