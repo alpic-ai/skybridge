@@ -1,21 +1,18 @@
-import type { Bridge, Subscribe } from "../types.js";
+import type { Bridge, HostContextStore, Subscribe } from "../types.js";
 import {
   type AppsSdkContext,
   SET_GLOBALS_EVENT_TYPE,
   type SetGlobalsEvent,
 } from "./types.js";
 
-/** @internal Singleton bridge over `window.openai` events. Used by {@link AppsSdkAdaptor}. */
+/** @internal Singleton bridge over `window.openai` events. Used by `HostAdaptor`. */
 export class AppsSdkBridge implements Bridge<AppsSdkContext> {
   private static instance: AppsSdkBridge | null = null;
 
   public static getInstance(): AppsSdkBridge {
-    if (
-      window.skybridge.hostType !== "apps-sdk" ||
-      window.openai === undefined
-    ) {
+    if (window.openai === undefined) {
       throw new Error(
-        "Apps SDK Bridge can only be used in the apps-sdk runtime",
+        "Apps SDK Bridge requires window.openai (Apps SDK runtime).",
       );
     }
     if (AppsSdkBridge.instance === null) {
@@ -68,4 +65,21 @@ export class AppsSdkBridge implements Bridge<AppsSdkContext> {
 
     return window.openai[key];
   };
+
+  public createOverlayStores(): {
+    display: HostContextStore<"display">;
+    viewState: HostContextStore<"viewState">;
+  } {
+    return {
+      display: {
+        subscribe: this.subscribe("view"),
+        getSnapshot: () => this.getSnapshot("view"),
+      },
+      viewState: {
+        subscribe: this.subscribe("widgetState"),
+        getSnapshot: () =>
+          this.getSnapshot("widgetState")?.modelContent ?? null,
+      },
+    };
+  }
 }

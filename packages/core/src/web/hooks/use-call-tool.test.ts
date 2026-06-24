@@ -9,24 +9,32 @@ import {
   type Mock,
   vi,
 } from "vitest";
-
+import { HostAdaptor } from "../bridges/adaptor.js";
+import { AppsSdkBridge } from "../bridges/apps-sdk/bridge.js";
+import { getAdaptor } from "../bridges/get-adaptor.js";
+import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import type { CallToolResponse } from "../bridges/types.js";
 import { useCallTool } from "./use-call-tool.js";
 
 describe("useCallTool - onSuccess callback", () => {
-  let OpenaiMock: { callTool: Mock };
+  let callToolMock: Mock;
 
   beforeEach(() => {
-    OpenaiMock = {
-      callTool: vi.fn(),
-    };
-    vi.stubGlobal("openai", OpenaiMock);
+    HostAdaptor.resetInstance();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
+    vi.stubGlobal("parent", { postMessage: vi.fn() });
     vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+    vi.stubGlobal("openai", { callTool: vi.fn() });
+    callToolMock = vi.spyOn(getAdaptor(), "callTool") as unknown as Mock;
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
+    HostAdaptor.resetInstance();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
   });
 
   const toolName = "test-tool";
@@ -44,9 +52,9 @@ describe("useCallTool - onSuccess callback", () => {
       content: [{ type: "text" as const, text: "result" }],
       structuredContent: { value: 1 },
       isError: false,
-      _meta: { secret: "only visible to widget" },
+      meta: { secret: "only visible to widget" },
     };
-    OpenaiMock.callTool.mockResolvedValueOnce(rawSdkResponse);
+    callToolMock.mockResolvedValueOnce(rawSdkResponse);
     const { result } = renderHook(() =>
       useCallTool<typeof args, typeof data>(toolName),
     );
@@ -62,20 +70,20 @@ describe("useCallTool - onSuccess callback", () => {
     });
   });
 
-  it("should call window.openai.callTool with correct arguments", async () => {
+  it("should call adaptor.callTool with correct arguments", async () => {
     const { result } = renderHook(() =>
       useCallTool<typeof args, typeof data>(toolName),
     );
     await act(async () => {
       result.current.callTool(args);
     });
-    expect(OpenaiMock.callTool).toHaveBeenCalledWith(toolName, args);
+    expect(callToolMock).toHaveBeenCalledWith(toolName, args);
   });
 
   it("should call onSuccess callback with correct data and toolArgs on successful execution", async () => {
     const onSuccess = vi.fn();
     const onError = vi.fn();
-    OpenaiMock.callTool.mockResolvedValueOnce(data);
+    callToolMock.mockResolvedValueOnce(data);
     const { result } = renderHook(() =>
       useCallTool<typeof args, typeof data>(toolName),
     );
@@ -96,7 +104,7 @@ describe("useCallTool - onSuccess callback", () => {
   it("should call onError callback with error and toolArgs on failed execution", async () => {
     const onSuccess = vi.fn();
     const onError = vi.fn();
-    OpenaiMock.callTool.mockRejectedValueOnce(error);
+    callToolMock.mockRejectedValueOnce(error);
     const { result } = renderHook(() =>
       useCallTool<typeof args, typeof data>(toolName),
     );
@@ -118,7 +126,7 @@ describe("useCallTool - onSuccess callback", () => {
     const onSuccess = vi.fn();
     const onError = vi.fn();
     const onSettled = vi.fn();
-    OpenaiMock.callTool.mockResolvedValueOnce(data);
+    callToolMock.mockResolvedValueOnce(data);
     const { result } = renderHook(() =>
       useCallTool<typeof args, typeof data>(toolName),
     );
@@ -142,7 +150,7 @@ describe("useCallTool - onSuccess callback", () => {
     const onSuccess = vi.fn();
     const onError = vi.fn();
     const onSettled = vi.fn();
-    OpenaiMock.callTool.mockRejectedValueOnce(error);
+    callToolMock.mockRejectedValueOnce(error);
     const { result } = renderHook(() =>
       useCallTool<typeof args, typeof data>(toolName),
     );
@@ -179,7 +187,7 @@ describe("useCallTool - onSuccess callback", () => {
       Promise.withResolvers();
     const { promise: secondCallToolPromise, resolve: resolveSecondCallTool } =
       Promise.withResolvers();
-    OpenaiMock.callTool
+    callToolMock
       .mockImplementationOnce(() => firstCallToolPromise)
       .mockImplementationOnce(() => secondCallToolPromise);
 
@@ -202,19 +210,24 @@ describe("useCallTool - onSuccess callback", () => {
 });
 
 describe("useCallTool - TypeScript typing", () => {
-  let OpenaiMock: { callTool: Mock };
+  let callToolMock: Mock;
 
   beforeEach(() => {
-    OpenaiMock = {
-      callTool: vi.fn(),
-    };
-    vi.stubGlobal("openai", OpenaiMock);
+    HostAdaptor.resetInstance();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
+    vi.stubGlobal("parent", { postMessage: vi.fn() });
     vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+    vi.stubGlobal("openai", { callTool: vi.fn() });
+    callToolMock = vi.spyOn(getAdaptor(), "callTool") as unknown as Mock;
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
+    HostAdaptor.resetInstance();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
   });
 
   it("should have correct return types when ToolArgs is null and ToolResponse is specified", async () => {
@@ -233,13 +246,13 @@ describe("useCallTool - TypeScript typing", () => {
       meta: { id: 123 },
     };
 
-    OpenaiMock.callTool.mockResolvedValueOnce(data);
+    callToolMock.mockResolvedValueOnce(data);
 
     await act(async () => {
       result.current.callTool();
     });
 
-    expect(OpenaiMock.callTool).toHaveBeenCalledWith("test-tool", null);
+    expect(callToolMock).toHaveBeenCalledWith("test-tool", null);
     expectTypeOf<typeof data | undefined>(result.current.data);
   });
 
@@ -261,7 +274,7 @@ describe("useCallTool - TypeScript typing", () => {
       meta: {},
     };
 
-    OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);
+    callToolMock.mockResolvedValueOnce(mockResponse);
 
     const returnedValue = await act(async () => {
       return result.current.callToolAsync(testArgs);
@@ -286,7 +299,7 @@ describe("useCallTool - TypeScript typing", () => {
       meta: {},
     };
 
-    OpenaiMock.callTool.mockResolvedValueOnce(mockResponse);
+    callToolMock.mockResolvedValueOnce(mockResponse);
 
     const returnedValue = await act(async () => {
       return result.current.callToolAsync();

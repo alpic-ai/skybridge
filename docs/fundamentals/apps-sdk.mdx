@@ -4,7 +4,7 @@ sidebarTitle: Apps SDK
 description: "Deep dive into ChatGPT's runtime: MCP Apps compatibility, the window.openai API, and ChatGPT-only features."
 ---
 
-The [OpenAI Apps SDK](https://developers.openai.com/apps-sdk/) is the ChatGPT runtime layer for ChatGPT Apps, [announced in October 2025](https://alpic.ai/blog/inside-openai-s-apps-sdk-how-to-build-interactive-chatgpt-apps-with-mcp). ChatGPT supports the MCP Apps UI model, and also provides `window.openai` for compatibility and ChatGPT-specific extensions.
+The [OpenAI Apps SDK](https://developers.openai.com/apps-sdk/) is the ChatGPT runtime layer for ChatGPT Apps, [announced in October 2025](https://alpic.ai/blog/inside-openai-s-apps-sdk-how-to-build-interactive-chatgpt-apps-with-mcp). ChatGPT supports the MCP Apps UI model, and also provides `window.openai` for compatibility and ChatGPT-specific extensions. Skybridge now serves ChatGPT the same single MCP Apps resource (`text/html;profile=mcp-app`) it serves every host, with `window.openai` remaining the overlay for ChatGPT-exclusive features.
 
 ## View Rendering Flow
 

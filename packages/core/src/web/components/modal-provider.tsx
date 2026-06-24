@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useSyncExternalStore } from "react";
-import { McpAppAdaptor } from "../bridges/index.js";
+import { getAdaptor } from "../bridges/index.js";
 
 const modalStyles = `
 .sb-modal-backdrop {
@@ -21,11 +21,11 @@ const modalStyles = `
 `;
 
 export function ModalProvider({ children }: { children: ReactNode }) {
-  const adaptor = McpAppAdaptor.getInstance();
-
+  const adaptor = getAdaptor();
+  const displayStore = adaptor.getHostContextStore("display");
   const { mode } = useSyncExternalStore(
-    adaptor.getHostContextStore("display").subscribe,
-    adaptor.getHostContextStore("display").getSnapshot,
+    displayStore.subscribe,
+    displayStore.getSnapshot,
   );
   const isOpen = mode === "modal";
 

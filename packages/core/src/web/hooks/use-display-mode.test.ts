@@ -1,63 +1,97 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, fireEvent, renderHook, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { HostAdaptor } from "../bridges/adaptor.js";
+import { AppsSdkBridge } from "../bridges/apps-sdk/bridge.js";
+import { getAdaptor } from "../bridges/get-adaptor.js";
+import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  type Mock,
-  vi,
-} from "vitest";
-import type { DisplayMode } from "../bridges/types.js";
+  getMcpAppHostPostMessageMock,
+  MockResizeObserver,
+} from "./test/utils.js";
 import { useDisplayMode } from "./use-display-mode.js";
 
 describe("useDisplayMode", () => {
-  let OpenaiMock: {
-    displayMode: DisplayMode;
-    requestDisplayMode: Mock;
-  };
-
   beforeEach(() => {
-    OpenaiMock = {
-      displayMode: "inline",
-      requestDisplayMode: vi.fn().mockResolvedValue({ mode: "inline" }),
-    };
-    vi.stubGlobal("openai", OpenaiMock);
+    HostAdaptor.resetInstance();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
     vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+    vi.stubGlobal("openai", { view: { mode: "inline" } });
+    vi.stubGlobal("ResizeObserver", MockResizeObserver);
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
+    HostAdaptor.resetInstance();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
   });
 
-  it("should return the current display mode from window.openai.displayMode", () => {
-    OpenaiMock.displayMode = "inline";
+  it("should return the current display mode from MCP host context", async () => {
+    vi.stubGlobal("parent", {
+      postMessage: getMcpAppHostPostMessageMock({ displayMode: "inline" }),
+    });
+
     const { result } = renderHook(() => useDisplayMode());
 
-    expect(result.current[0]).toBe("inline");
+    await waitFor(() => {
+      expect(result.current[0]).toBe("inline");
+    });
   });
 
-  it("should return different display modes when window.openai.displayMode changes", () => {
-    OpenaiMock.displayMode = "inline";
-    const { result, rerender } = renderHook(() => useDisplayMode());
+  it("should update display mode on host-context-changed notification", async () => {
+    vi.stubGlobal("parent", {
+      postMessage: getMcpAppHostPostMessageMock({ displayMode: "inline" }),
+    });
 
-    expect(result.current[0]).toBe("inline");
-
-    OpenaiMock.displayMode = "fullscreen";
-    rerender();
-
-    expect(result.current[0]).toBe("fullscreen");
-  });
-
-  it("should call window.openai.requestDisplayMode with correct mode when setDisplayMode is called", async () => {
     const { result } = renderHook(() => useDisplayMode());
+
+    await waitFor(() => {
+      expect(result.current[0]).toBe("inline");
+    });
+
+    act(() => {
+      fireEvent(
+        window,
+        new MessageEvent("message", {
+          source: window.parent,
+          data: {
+            jsonrpc: "2.0",
+            method: "ui/notifications/host-context-changed",
+            params: { displayMode: "fullscreen" },
+          },
+        }),
+      );
+    });
+
+    await waitFor(() => {
+      expect(result.current[0]).toBe("fullscreen");
+    });
+  });
+
+  it("should call requestDisplayMode on the adaptor when setDisplayMode is called", async () => {
+    vi.stubGlobal("parent", {
+      postMessage: getMcpAppHostPostMessageMock({ displayMode: "inline" }),
+    });
+
+    const { result } = renderHook(() => useDisplayMode());
+
+    await waitFor(() => expect(result.current[0]).toBe("inline"));
+
+    // Patch mcp.getApp to avoid real protocol request
+    const adaptor = getAdaptor();
+    const fakeApp = {
+      requestDisplayMode: vi.fn().mockResolvedValue({ mode: "fullscreen" }),
+    };
+    // biome-ignore lint/suspicious/noExplicitAny: test seam
+    (adaptor as any).mcp.getApp = vi.fn().mockResolvedValue(fakeApp);
 
     await act(async () => {
       await result.current[1]("fullscreen");
     });
 
-    expect(OpenaiMock.requestDisplayMode).toHaveBeenCalledWith({
+    expect(fakeApp.requestDisplayMode).toHaveBeenCalledWith({
       mode: "fullscreen",
     });
   });

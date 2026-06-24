@@ -8,6 +8,11 @@ import mcpClient, {
 } from "@/lib/mcp/index.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { asString, cn, injectWaitForOpenai } from "@/lib/utils.js";
+import {
+  createMcpHostMock,
+  pushToolInputNotification,
+  pushToolResultNotification,
+} from "./create-mcp-host-mock.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
 import { useSyncOpenaiLocale } from "./use-sync-openai-locale.js";
 import { useSyncOpenaiTheme } from "./use-sync-openai-theme.js";
@@ -21,7 +26,7 @@ export const View = () => {
   const toolResult = useCallToolResult(tool.name);
   const { openaiObject } = toolResult ?? {};
   const { data: resource } = useSuspenseResource(
-    tool._meta?.["openai/outputTemplate"] as string | undefined,
+    (tool._meta?.ui as { resourceUri?: string } | undefined)?.resourceUri,
   );
   const { setToolData, pushOpenAiLog, updateOpenaiObject, setOpenInAppUrl } =
     useStore();
@@ -60,7 +65,10 @@ export const View = () => {
     _meta?: Record<string, unknown>;
   };
   const html = resourceEntry.text;
-  const viewDomain = asString(resourceEntry._meta?.["openai/widgetDomain"]);
+  const viewDomain = asString(
+    (resourceEntry._meta?.ui as { domain?: unknown })?.domain ??
+      resourceEntry._meta?.["openai/widgetDomain"],
+  );
 
   useEffect(() => {
     const iframe = iframeRef.current;
@@ -72,18 +80,24 @@ export const View = () => {
       setOpenInAppUrl(tool.name, viewDomain);
     }
 
+    const logFn = (
+      command: string,
+      args: Record<string, unknown>,
+      type: "default" | "response" = "default",
+    ) => {
+      pushOpenAiLog(tool.name, {
+        timestamp: Date.now(),
+        source: "view",
+        command,
+        args,
+        type,
+      });
+    };
+
     createAndInjectOpenAi(
       iframe.contentWindow,
       openaiObjectRef.current,
-      (command, args, type = "default") => {
-        pushOpenAiLog(tool.name, {
-          timestamp: Date.now(),
-          source: "view",
-          command,
-          args,
-          type,
-        });
-      },
+      logFn,
       (key, value) => {
         updateOpenaiObject(tool.name, key, value);
       },
@@ -93,6 +107,26 @@ export const View = () => {
       },
     );
 
+    const cleanupMcpMock = createMcpHostMock(
+      iframe,
+      (name, args) => mcpClient.callTool(name, args),
+      logFn,
+      () => ({
+        toolInput: openaiObjectRef.current?.toolInput as
+          | Record<string, unknown>
+          | null
+          | undefined,
+        toolOutput: openaiObjectRef.current?.toolOutput as
+          | Record<string, unknown>
+          | null
+          | undefined,
+        toolResponseMetadata: openaiObjectRef.current?.toolResponseMetadata as
+          | Record<string, unknown>
+          | null
+          | undefined,
+      }),
+    );
+
     iframe.contentDocument.open();
     iframe.contentDocument.write(injectWaitForOpenai(html));
     iframe.contentDocument.close();
@@ -100,6 +134,8 @@ export const View = () => {
     setToolData(tool.name, {
       openaiRef: iframeRef as React.RefObject<HTMLIFrameElement>,
     });
+
+    return cleanupMcpMock;
   }, [
     html,
     viewDomain,
@@ -133,6 +169,37 @@ export const View = () => {
     locale,
     updateOpenaiObject,
   });
+
+  // Push MCP ext-apps tool notifications whenever the openaiObject is populated.
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe || !openaiObject) {
+      return;
+    }
+    if (openaiObject.toolInput != null) {
+      pushToolInputNotification(
+        iframe,
+        openaiObject.toolInput as Record<string, unknown>,
+      );
+    }
+    if (
+      openaiObject.toolOutput != null ||
+      openaiObject.toolResponseMetadata != null
+    ) {
+      pushToolResultNotification(iframe, {
+        content: [],
+        structuredContent: openaiObject.toolOutput as Record<
+          string,
+          unknown
+        > | null,
+        isError: false,
+        _meta: openaiObject.toolResponseMetadata as Record<
+          string,
+          unknown
+        > | null,
+      });
+    }
+  }, [openaiObject]);
 
   return (
     <div

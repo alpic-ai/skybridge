@@ -8,7 +8,9 @@ import {
   type Mock,
   vi,
 } from "vitest";
-import { McpAppAdaptor, McpAppBridge } from "./bridges/mcp-app/index.js";
+import { HostAdaptor } from "./bridges/adaptor.js";
+import { getAdaptor } from "./bridges/get-adaptor.js";
+import { McpAppBridge } from "./bridges/mcp-app/index.js";
 import { DataLLM } from "./data-llm.js";
 import {
   getMcpAppHostPostMessageMock,
@@ -19,6 +21,7 @@ describe("DataLLM", () => {
   afterEach(() => {
     // Clean up React components BEFORE unstubbing globals
     cleanup();
+    HostAdaptor.resetInstance();
     vi.unstubAllGlobals();
     vi.resetAllMocks();
   });
@@ -162,6 +165,7 @@ describe("DataLLM", () => {
 
     beforeEach(() => {
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+      vi.stubGlobal("openai", undefined);
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
       postMessageMock = getMcpAppHostPostMessageMock();
       vi.stubGlobal("parent", { postMessage: postMessageMock });
@@ -170,11 +174,11 @@ describe("DataLLM", () => {
     afterEach(() => {
       cleanup();
       McpAppBridge.resetInstance();
-      McpAppAdaptor.resetInstance();
+      HostAdaptor.resetInstance();
     });
 
     it("should register a node and update view state via adaptor", async () => {
-      const adaptor = McpAppAdaptor.getInstance();
+      const adaptor = getAdaptor();
 
       render(
         <DataLLM content="Test content">
@@ -191,7 +195,7 @@ describe("DataLLM", () => {
     });
 
     it("should preserve existing view state when updating context", async () => {
-      const adaptor = McpAppAdaptor.getInstance();
+      const adaptor = getAdaptor();
       await adaptor.setViewState({ existingKey: "existingValue" });
 
       render(
@@ -210,7 +214,7 @@ describe("DataLLM", () => {
     });
 
     it("should handle multiple DataLLM components sharing state through adaptor", async () => {
-      const adaptor = McpAppAdaptor.getInstance();
+      const adaptor = getAdaptor();
 
       render(
         <>

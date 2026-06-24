@@ -1,6 +1,8 @@
 import { renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { AppsSdkAdaptor } from "../bridges/apps-sdk/adaptor.js";
+import { HostAdaptor } from "../bridges/adaptor.js";
+import { AppsSdkBridge } from "../bridges/apps-sdk/bridge.js";
+import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import { useFiles } from "./use-files.js";
 
 describe("useFiles", () => {
@@ -14,14 +16,20 @@ describe("useFiles", () => {
   };
 
   beforeEach(() => {
+    HostAdaptor.resetInstance();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
     vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
     vi.stubGlobal("openai", OpenaiMock);
+    vi.stubGlobal("parent", { postMessage: vi.fn() });
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.clearAllMocks();
-    AppsSdkAdaptor.resetInstance();
+    HostAdaptor.resetInstance();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
   });
 
   const dummyFile = new File([], "test.txt");
