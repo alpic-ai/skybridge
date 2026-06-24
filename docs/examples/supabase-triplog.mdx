@@ -1,0 +1,35 @@
+---
+title: Supabase Triplog
+description: Supabase-backed personal trip log with CRUD tools, filtering, and a rich carousel view.
+---
+
+Supabase Triplog is a personal travel log backed by a Supabase `triplog` table. It demonstrates how Skybridge tools can fetch, create, update, and delete records while the React view handles filtering, trip focus, theme adaptation, and rich detail browsing.
+
+<img
+  src="/images/showcase-supabase-triplog.png"
+  alt="Supabase Triplog showcase"
+  style={{ width: "100%", maxWidth: "960px", borderRadius: "12px" }}
+/>
+
+## Links
+
+<CardGroup cols={1}>
+  <Card
+    title="View source on GitHub"
+    icon="github"
+    href="https://github.com/alpic-ai/skybridge/tree/main/examples/supabase-triplog"
+  >
+    Browse the full example code.
+  </Card>
+</CardGroup>
+
+## Skybridge APIs used
+
+- [`generateHelpers`](/api-reference/generate-helpers)
+- [`useLayout`](/api-reference/use-layout)
+- [`useToolInfo`](/api-reference/use-tool-info)
+
+## Third-party integrations
+
+- [`@supabase/supabase-js`](https://supabase.com/docs/reference/javascript/introduction) - Supabase table reads and writes
+- [`@t3-oss/env-core`](https://env.t3.gg/docs/core) - Environment variable validation
