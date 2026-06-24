@@ -228,15 +228,8 @@ type McpAppsResourceMeta = {
   ui?: McpUiResourceMeta;
 };
 
-/**
- * ChatGPT-only resource `_meta` fields that have no `ui.*` equivalent ChatGPT
- * reads, so they're emitted alongside the standard `ui.*` metadata.
- * @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields
- */
 type OpenaiResourceMeta = {
-  /** Model-facing summary surfaced when the component loads. No `ui.*` equivalent. */
   "openai/widgetDescription"?: string;
-  /** `redirect_domains` is unsupported in `ui.csp`; ChatGPT reads it only here. */
   "openai/widgetCSP"?: { redirect_domains?: string[] };
 };
 
@@ -1000,8 +993,6 @@ export class McpServer<
           ui: overrides,
         });
 
-        // ChatGPT-only fields with no ui.* equivalent (see OpenaiResourceMeta):
-        // the model-facing description, and redirect_domains (unsupported in ui.csp).
         const base: ResourceMeta = {
           ...ui,
           ...(view.description && {
