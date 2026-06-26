@@ -3,11 +3,14 @@ title: "Quickstart"
 description: "Build, test, and deploy your first MCP App"
 icon: "zap"
 ---
-<img src="/images/quickstart.png" alt="Quickstart Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/quickstart.png" alt="Quickstart Illustration" />
 
 To get a running codebase right away, you can scaffold a project from our templates. They come pre-configured with:
-- a working MCP server
-- a complete development environment with a local emulator, file watching, and hot module reload
+- a working [MCP server](/api-reference/mcp-server)
+- a complete development environment with a [local emulator](/test/devtools), file watching, and hot module reload
 
 <Info>
 Prerequisite: Skybridge runs on [Node 24+](https://nodejs.org/en/download)
@@ -25,7 +28,7 @@ The default `demo` template comes with two tools:
 - `start`: mounts the `onboarding` view
 - `get-fortune-cookie`: with no view
 
-Tools are defined in `server.ts`, UI components in the `views` directory. Tools are bound to views in the tool definition.
+[Tools](/build/tools) are defined in `server.ts`, [UI components](/build/view) in the `views` directory. Tools are bound to views in the tool definition.
 
 <Info>
 To scaffold a bare-bones project without tools or view placeholders, select the `blank` template.
@@ -58,7 +61,7 @@ This spins up two routes:
 - `http://localhost:3000/`: the [DevTools](/test/devtools) for testing and debugging your app
 
 <Info>
-**Updates to your codebase are reflected right away:** server and UI components are reloaded on file save.
+**Updates to your codebase are reflected right away:** server and views are reloaded on file save.
 </Info>
 
 ## Connect to ChatGPT and Claude
@@ -83,7 +86,7 @@ deno task dev --tunnel
 ```
 </CodeGroup>
 
-You'll be provided a public URL (e.g., `https://superb-marmot-fondue-420.alpic.dev/mcp`) to register your server as a ChatGPT app or a Claude connector.
+You'll be provided a public URL (e.g., `https://superb-marmot-fondue-420.alpic.dev/mcp`) to [register your server as a ChatGPT app or a Claude connector](/test/tunnel#connect-to-hosts).
 
 <Info>
 [Alpic tunnel](https://docs.alpic.ai/cli/tunnel) comes with a free [LLM Playground](/test/playground) on `/try`. No config needed: it's already wired to your local server.
@@ -112,6 +115,8 @@ deno task deploy
 </CodeGroup>
 
 After deployment succeeds, the CLI prints the app's public URL. You're now live!
+
+See [Ship](/ship) for all deployment options.
 
 ## Go Further
 <Columns cols={3}>

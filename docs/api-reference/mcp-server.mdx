@@ -1,411 +1,128 @@
 ---
 title: McpServer
-description: "The main class for building MCP servers with Skybridge, supporting tools, views, and type inference."
+description: "Build and run a Skybridge MCP server"
 ---
 
+`McpServer` is the root of your app: an [Express](https://expressjs.com/)-backed server whose methods return the server itself, so you chain your [tool](/build/tools) registrations off it and export the resulting type for [`generateHelpers`](/api-reference/generate-helpers).
 
-The main class for building MCP servers with Skybridge.
+## Example
 
-## Import
+A server registers one tool, exports its type for the typed client hooks, and starts listening.
 
-```typescript
+```ts server.ts
 import { McpServer } from "skybridge/server";
+
+const server = new McpServer({ name: "shop", version: "1.0" }).registerTool(
+  /* ... */
+);
+
+export type AppType = typeof server; // generateHelpers reads your tools from this
+
+await server.run();
 ```
 
 ## Constructor
 
-```typescript
-const server = new McpServer(
+```ts
+new McpServer(
   serverInfo: { name: string; version: string },
-  options?: McpServerOptions,
-  skybridgeOptions?: SkybridgeServerOptions
+  options?: ServerOptions,
+  skybridgeOptions?: SkybridgeServerOptions,
 );
 ```
 
-### Parameters
+- **`serverInfo`** your server's `name` and `version`.
+- **`options`** forwarded to the MCP SDK server.
+- **`skybridgeOptions`** Skybridge-specific configuration:
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `serverInfo.name` | `string` | Name of your MCP server |
-| `serverInfo.version` | `string` | Version of your server |
-| `options` | `McpServerOptions` | Configuration options forwarded to the MCP SDK |
-| `skybridgeOptions` | `SkybridgeServerOptions` | Skybridge-specific options |
-
-### Skybridge options
-
-```typescript
+```ts
 type SkybridgeServerOptions = {
-  /** Options for the built-in express.json() middleware, e.g. { limit: "10mb" }. */
   json?: JsonOptions;
 };
 ```
 
-The `json` field is forwarded to the [`express.json()`](https://expressjs.com/en/5x/api/express/#expressjsonoptions) body parser that Skybridge pre-applies to the underlying Express app. Use it to tune parsing — for example, to raise the default 100kb body size limit:
-
-```typescript
-const server = new McpServer(
-  { name: "my-app", version: "1.0" },
-  {},
-  { json: { limit: "10mb" } },
-);
-```
+`json` tunes the [`express.json()`](https://expressjs.com/en/5x/api/express/#expressjsonoptions) parser Skybridge pre-applies, for example to raise the default 100kb body-size limit.
 
 ## Properties
 
-### express
+### `express`
 
-The underlying [Express](https://expressjs.com/) app. Use this to register custom routes, middleware, or settings on the HTTP server backing your MCP server.
+The underlying Express app, for custom routes, middleware, and settings. Register handlers before `run()`.
 
-```typescript
-import { McpServer } from "skybridge/server";
-
-const server = new McpServer({ name: "my-app", version: "1.0" });
-
-server.express.get("/health", (_req, res) => {
-  res.json({ status: "ok" });
-});
-
-server.express.set("trust proxy", 1);
-```
-
-`express.json()` is pre-applied — tune it via the [constructor's `skybridgeOptions.json`](#skybridge-options). Register your handlers before `run()`; after `run()`, Skybridge appends dev-mode middleware (in development), the `/mcp` route, and the default error handler in that order.
-
-<Note>
-Alpic Cloud only routes traffic to `/mcp` on hosted workloads — custom routes work locally and on self-hosted deployments.
-</Note>
+<Info>
+[Alpic Cloud](https://alpic.ai/solutions/cloud) routes traffic only to `/mcp`. Custom routes work locally and on self-hosted deployments.
+</Info>
 
 ## Methods
 
-### registerTool
+Every method returns the server, so calls chain.
 
-Register a tool. Provide `view` to bind the tool to a view. See [registerTool](/api-reference/register-tool) for the full API.
+### `registerTool`
 
-```typescript
-server.registerTool(config, handler);
+```ts
+server.registerTool(config, handler): this;
 ```
 
-### use
+Registers a tool, optionally bound to a view. See [registerTool](/api-reference/register-tool) for the full config and handler.
 
-Register Express middleware on the underlying HTTP server. Supports optional path filtering.
+### `use`
 
-```typescript
-// Global middleware
-server.use(cors());
-
-// Path-scoped middleware
-server.use("/api", authMiddleware);
+```ts
+server.use(...handlers: RequestHandler[]): this;
+server.use(path: string, ...handlers: RequestHandler[]): this;
 ```
 
-### useOnError
-Register [Express error handler](https://expressjs.com/en/guide/error-handling.html) on the underlying HTTP server. Supports optional path filtering.
+Registers [Express middleware](https://expressjs.com/en/guide/using-middleware/) on the underlying app, optionally scoped to a path. Mirrors `app.use`.
 
-```typescript
-// Global error handler
-server.useOnError((err, req, res, next) => {
-  console.error(err);
-  res.status(500).send('Something broke!');
-})
+### `useOnError`
 
-// Path-scoped error handler
-server.useOnError('/api', (err, req, res, next) => {
-  console.error(err);
-  res.status(500).send('Something broke!');
-})
+```ts
+server.useOnError(...handlers: ErrorRequestHandler[]): this;
+server.useOnError(path: string, ...handlers: ErrorRequestHandler[]): this;
 ```
 
-There is a default error handler already registered, defined as:
-```typescript
-function defaultErrorHandler(
-  err: unknown,
-  _req: express.Request,
-  res: express.Response,
-  _next: express.NextFunction,
-) {
-  console.error("Error handling MCP request:", err);
-  if (!res.headersSent) {
-    res.status(500).json({
-      jsonrpc: "2.0",
-      error: { code: -32603, message: "Internal server error" },
-      id: null,
-    });
-  }
-}
+Registers an [Express error handler](https://expressjs.com/en/guide/error-handling.html), optionally path-scoped, to run after the `/mcp` route. A default handler runs last, responding with a 500 [JSON-RPC](https://www.jsonrpc.org/) error when nothing else has sent a response.
+
+### `mcpMiddleware`
+
+```ts
+server.mcpMiddleware(handler: McpMiddlewareFn): this;
+server.mcpMiddleware(filter: McpMiddlewareFilter, handler: McpMiddlewareFn): this;
 ```
 
-### mcpMiddleware
+Wraps MCP requests and notifications: each middleware runs `(request, extra, next)`, can inspect or short-circuit the call, and invokes `next()` to continue. Register it before `run()` or `connect()`; middleware runs in registration order, outermost first. An optional `filter` scopes which methods it runs for.
 
-Register MCP protocol-level middleware using an onion model. Middleware wraps request/notification handlers and can inspect, modify, or short-circuit them.
+| Filter | Matches |
+| --- | --- |
+| `"tools/call"` | that exact method |
+| `"tools/*"` | any method under `tools/` |
+| `"request"` | all requests |
+| `"notification"` | all notifications |
+| `["tools/call", "resources/read"]` | any pattern in the list |
 
-Must be registered **before** calling `server.run()` or `server.connect()`.
-
-```typescript
-server.mcpMiddleware(handler);
-server.mcpMiddleware(filter, handler);
-```
-
-#### Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `filter` | `McpMiddlewareFilter` | Optional. Determines which methods the middleware applies to. Omit for catch-all. |
-| `handler` | `McpMiddlewareFn` | The middleware function. Call `next()` to continue the chain. |
-
-#### Filter patterns
-
-| Pattern | Example | Matches |
-|---------|---------|---------|
-| Exact method | `"tools/call"` | Only `tools/call` |
-| Wildcard | `"tools/*"` | Any method starting with `tools/` |
-| Category | `"request"` | All requests (with `extra` context) |
-| Category | `"notification"` | All notifications (`extra` is `undefined`) |
-| Array | `["tools/call", "resources/read"]` | Multiple patterns (OR logic) |
-
-#### Middleware signature
-
-```typescript
-type McpMiddlewareFn = (
-  request: { method: string; params: Record<string, unknown> },
-  extra: McpExtra | undefined,
-  next: () => Promise<unknown>,
-) => Promise<unknown> | unknown;
-```
-
-- `request` — the incoming MCP request with `method` and `params`
-- `extra` — SDK context (`McpExtra`) for requests, `undefined` for notifications
-- `next()` — invoke the next middleware or original handler. Can only be called once per middleware.
-
-#### Type-safe filters
-
-When using an exact method string, both `params` and `extra` are narrowed automatically:
-
-```typescript
-server.mcpMiddleware("tools/call", (request, extra, next) => {
-  // request.params is typed as CallToolRequest["params"]
-  // extra is typed as McpExtra (not undefined)
-  console.log(`Tool called: ${request.params.name}`);
-  return next();
-});
-```
-
-#### Examples
-
-**Logging all requests:**
-
-```typescript
+```ts
 server.mcpMiddleware("request", (request, extra, next) => {
   console.log(`[MCP] ${request.method}`, request.params);
   return next();
 });
 ```
 
-**Auth guard on tool calls:**
+### `run`
 
-```typescript
-server.mcpMiddleware("tools/call", async (request, extra, next) => {
-  const token = extra.requestInfo?.headers?.["authorization"];
-  if (!token) {
-    throw new Error("Unauthorized");
-  }
-  return next();
-});
+```ts
+server.run(): Promise<{ fetch: (...args: unknown[]) => unknown } | Express | undefined>;
 ```
 
-**Modifying params:**
+Starts the HTTP server: applies your middleware, mounts `/mcp`, and listens (default port `3000`). On serverless platforms, export what it returns so the platform can route requests to it. See [Ship](/ship) for the per-platform setup.
 
-```typescript
-server.mcpMiddleware("tools/call", (request, extra, next) => {
-  request.params = { ...request.params, injectedAt: Date.now() };
-  return next();
-});
-```
-
-**Multiple middleware (onion order):**
-
-```typescript
-const server = new McpServer({ name: "my-app", version: "1.0" }, {})
-  .mcpMiddleware((request, extra, next) => {
-    console.log("outer: before");
-    const result = await next();
-    console.log("outer: after");
-    return result;
-  })
-  .mcpMiddleware((request, extra, next) => {
-    console.log("inner: before");
-    return next();
-  });
-// Logs: outer: before → inner: before → handler → outer: after
-```
-
-## Type Export Pattern
-
-Export the server type for client-side type inference:
-
-```typescript
-const server = new McpServer({ name: "my-app", version: "1.0" }, {})
-  .registerTool(
-    {
-      name: "search",
-      inputSchema: { query: z.string() },
-      view: { component: "search" },
-    },
-    async ({ query }) => {
-      return { structuredContent: { results: [] } };
-    },
-  );
-
-// Export for generateHelpers
-export type AppType = typeof server;
-```
-
-## Auth middlewares
-
-### requireBearerAuth
-
-Middleware that requires a valid Bearer token on every request. Use this when every tool needs sign-in.
-
-```typescript
-import { requireBearerAuth } from "skybridge/server";
-
-server.use(
-  "/mcp",
-  requireBearerAuth({ verifier: { verifyAccessToken } }),
-);
-```
-- **Valid Bearer token**: the request goes through, `authInfo` can be accessed in handler `extra` argument.
-- **Missing / invalid / expired tokens**: returns a 401 (with `WWW-Authenticate`), insufficient scopes get a 403.
-
-### optionalBearerAuth
-
-Middleware that validates a Bearer token when present, and lets requests through unauthenticated when no `Authorization` header is sent. Pair with per-tool [`securitySchemes`](/api-reference/register-tool#securityschemes) for mixed-auth servers.
-
-```typescript
-import { optionalBearerAuth } from "skybridge/server";
-
-server.use(
-  "/mcp",
-  optionalBearerAuth({
-    verifier: { verifyAccessToken },
-  }),
-);
-```
-
-Behavior:
-
-- **No `Authorization` header**: the request goes through and the downstream handler decides whether to reject based on its own `securitySchemes`.
-- **Valid Bearer token**: the request goes through, `authInfo` can be accessed in handler `extra` argument.
-- **Missing / invalid / expired tokens**: returns a 401 (with `WWW-Authenticate`), insufficient scopes get a 403.
-
-Takes the same [Options](#options) as `requireBearerAuth`.
-
-### Options
-
-Both helpers accept the same `BearerAuthMiddlewareOptions`:
-
-```typescript
-type BearerAuthMiddlewareOptions = {
-  verifier: OAuthTokenVerifier;
-  requiredScopes?: string[];
-  resourceMetadataUrl?: string;
-};
-```
-
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `verifier` | `OAuthTokenVerifier` | Yes | The provider-specific token check. See [Verifier](#verifier) for the contract. |
-| `requiredScopes` | `string[]` | No | Server-wide scope floor: every accepted token must include all listed scopes, or the request is rejected with 403 `InsufficientScopeError`. Per-tool [`securitySchemes`](/api-reference/register-tool#securityschemes) enforcement layers on top of this. For `optionalBearerAuth`, this is only checked when a token is actually sent. |
-| `resourceMetadataUrl` | `string` | No | Absolute URL to your OAuth 2.0 [Protected Resource Metadata](https://datatracker.ietf.org/doc/html/rfc9728) document. When set, it's appended to the `WWW-Authenticate` header on 401 responses so clients can discover the authorization server programmatically. |
-
-### Verifier
-
-Both `requireBearerAuth` and `optionalBearerAuth` accept a `verifier` whose only required method is `verifyAccessToken(token: string): Promise<AuthInfo>`. This is the provider-specific piece you have to write.
-
-Contract:
-
-- **Resolve** with an `AuthInfo` describing the validated token. The middleware sets it so tool handlers receive it in `extra.authInfo`.
-- **Throw** `InvalidTokenError` to reject the token because of malformed, bad signature, expired, or any failed claim check (issuer, audience, etc.). The middleware returns a 401 with the right `WWW-Authenticate` header.
-
-You don't need to check scopes in the verifier: the middleware enforces `requiredScopes` against `authInfo.scopes` automatically and returns 403 if a scope is missing.
-
-Required fields on `AuthInfo`:
-
-| Field | Type | Notes |
-|-------|------|-------|
-| `token` | `string` | The raw bearer token  |
-| `clientId` | `string` | OAuth `client_id` (often the `azp` or `client_id` claim). |
-| `scopes` | `string[]` | Scopes granted to the token. Checked by middleware `requiredScopes` and by per-tool [`securitySchemes`](/api-reference/register-tool#securityschemes) checks. |
-| `expiresAt` | `number` | Unix seconds. **Required**: `requireBearerAuth` rejects tokens with no expiration. |
-| `extra` | `Record<string, unknown>` | Optional: anything else you want available in handlers (e.g. `sub`, `email`). |
-
-```typescript
-import { type AuthInfo, InvalidTokenError } from "skybridge/server";
-
-async function verifyAccessToken(token: string): Promise<AuthInfo> {
-  try {
-    // Validate with your provider (JWT verification, introspection, etc.).
-    const payload = await validateToken(token);
-
-    return {
-      token,
-      clientId: payload.client_id,
-      scopes: payload.scope.split(" "),
-      expiresAt: payload.exp,
-      extra: { sub: payload.sub },
-    };
-  } catch (err) {
-    throw new InvalidTokenError(
-      err instanceof Error ? err.message : "Token validation failed",
-    );
-  }
-}
-```
-
-### mcpAuthMetadataRouter
-
-Express router that serves the OAuth 2.0 [Protected Resource Metadata](https://datatracker.ietf.org/doc/html/rfc9728) document at `/.well-known/oauth-protected-resource`, so clients can discover the authorization server programmatically.
-
-**Example:**
-```typescript
-import { mcpAuthMetadataRouter } from "skybridge/server";
-
-server.use(
-  mcpAuthMetadataRouter({
-    oauthMetadata: {
-      issuer: "https://auth.example.com",
-      authorization_endpoint: "https://auth.example.com/authorize",
-      token_endpoint: "https://auth.example.com/token",
-      response_types_supported: ["code"],
-    },
-    resourceServerUrl: new URL("https://api.example.com/mcp"),
-    scopesSupported: ["search.read"],
-  }),
-);
-```
-<Note>
-Values above are illustrative. See [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) and [RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728), and check your auth provider docs for the actual values.
-</Note>
-
-## Exported Types
-
-The following middleware types are available from `skybridge/server`:
-
-```typescript
-import type {
-  AuthInfo,
-  AuthMetadataOptions,
-  BearerAuthMiddlewareOptions,
-  JsonOptions,
-  McpExtra,
-  McpMiddlewareFn,
-  McpMiddlewareFilter,
-  McpTypedMiddlewareFn,
-  McpMethodString,
-  SecurityScheme,
-  SkybridgeServerOptions,
-} from "skybridge/server";
-```
-
-## Related
-
-- [registerTool](/api-reference/register-tool) - View registration details
-- [generateHelpers](/api-reference/generate-helpers) - Client-side type inference
-- [Type Safety concept](/concepts/type-safety) - Understanding the type system
+<CardGroup cols={3}>
+  <Card title="registerTool" icon="wrench" href="/api-reference/register-tool">
+    Define the tools and views the server exposes
+  </Card>
+  <Card title="generateHelpers" icon="wand-sparkles" href="/api-reference/generate-helpers">
+    Turn `AppType` into typed client hooks
+  </Card>
+  <Card title="requireBearerAuth" icon="lock" href="/api-reference/require-bearer-auth">
+    Require or optionally accept a signed-in user
+  </Card>
+</CardGroup>

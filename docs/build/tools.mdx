@@ -3,9 +3,12 @@ title: "Register Tools"
 description: "Define what humans and agents can do"
 icon: "wrench"
 ---
-<img src="/images/tools.png" alt="Tools Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
 
-Tools are the entry point of your app: the model reads their metadata and triggers them when they fit the conversation. Think of them as an API: each tool has one job, and jobs can complement each other. Bind a view to a tool, and the host [mounts](/get-started/architecture#app-lifecycle) it inline in the conversation. The model isn't the only caller: the user can trigger tools too, via the view.
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/tools.png" alt="Tools Illustration" />
+
+Tools are the entry point of your app: the model reads their metadata and triggers them when they fit the conversation. Think of them as an API: each tool has one job, and jobs can complement each other. Bind a view to a tool, and the host [mounts](/get-started/architecture#app-lifecycle) it inline in the conversation. The model isn't the only caller: the user can trigger tools too, via the [view](/build/view).
 
 Here's a complete tool definition:
 
@@ -45,7 +48,7 @@ The sections below build this definition up piece by piece: the server it lives 
 
 ## Create the Server
 
-`McpServer` takes your app's identity and returns a chainable server. Chain every `registerTool` call, then `run()`:
+[`McpServer`](/api-reference/mcp-server) takes your app's identity and returns a chainable server. Chain every [`registerTool`](/api-reference/register-tool) call, then `run()`:
 
 ```ts server.ts
 const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
@@ -90,7 +93,7 @@ These are prompt engineering. Write them for the model: state what the tool does
 
 ## Type the Contract
 
-Schemas are plain [Zod](https://zod.dev/) shapes. `inputSchema` declares what the model must provide. `outputSchema` is optional and declares the shape of the structured content returned to the model.
+Schemas are plain [Zod](https://zod.dev/) shapes. [`inputSchema`](/api-reference/register-tool#inputschema-outputschema) declares what the model must provide. [`outputSchema`](/api-reference/register-tool#inputschema-outputschema) is optional and declares the shape of the [structured content returned](/api-reference/register-tool#return) to the model.
 
 ```ts server.ts highlight={6-11}
 server.registerTool(
@@ -121,7 +124,7 @@ While it's recommended to provide the output schema, it's optional and isn't use
 
 ## Write the Handler
 
-The handler receives validated input and returns the tool's response. Three fields, three audiences:
+The [handler](api-reference/register-tool#handler) receives validated input and returns the tool's [response](/api-reference/register-tool#return). Three fields, three audiences:
 
 | Field | Consumed by |
 |-------|-------------|
@@ -159,13 +162,11 @@ server.registerTool(
 
 Choosing the recipient is a design decision: it controls what context each actor sees. Keep `content` and `structuredContent` concise, since they're model context. Use `_meta` for data the model has no use for or isn't supposed to know (image URLs, sensitive record fields): the view still accesses it, the model never sees it.
 
-Handlers also receive an `extra` argument carrying additional data such as auth info or HTTP request details.
-
-{/* @todo: link registerTool details */}
+Handlers also receive an `extra` argument carrying additional data such as auth info or [client hints](/api-reference/register-tool#client-hints).
 
 ## Annotate Behavior
 
-Annotations tell the host how cautious to be. They drive confirmation prompts before invocation, and app directories check them at review time:
+[Annotations](/api-reference/register-tool#annotations) tell the host how cautious to be. They drive confirmation prompts before invocation, and app directories check them at review time:
 
 ```ts server.ts highlight={12}
 server.registerTool(
@@ -198,7 +199,7 @@ Be honest with them: hosts trust these hints, and mislabeling a tool (claiming a
 
 ## Tune the Host with `_meta`
 
-Tool-level `_meta` (distinct from the response `_meta` above) carries host-specific configuration:
+Tool-level [`_meta`](/api-reference/register-tool#_meta) (distinct from the response `_meta` above) carries host-specific configuration:
 
 ```ts server.ts highlight={14-20}
 server.registerTool(
@@ -227,8 +228,6 @@ server.registerTool(
   },
 );
 ```
-
-{/* @todo: link registerTool api details for full _meta field list */}
 
 ## Bind a View
 

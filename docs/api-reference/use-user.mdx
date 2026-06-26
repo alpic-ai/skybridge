@@ -1,23 +1,49 @@
 ---
 title: useUser
-description: "Access session-stable user information like locale and timezone in your app views."
+description: "Read the host's locale and device capabilities"
 ---
 
-The `useUser` hook returns session-stable user information. These values are set once at initialization and do not change during the session.
+import { Compat } from "/components/compat.jsx";
 
-## Basic usage
+<Compat alpic chatgpt claude />
 
-```tsx
+Your [view](/build/view) runs for users on different devices and in different [locales](https://developer.mozilla.org/en-US/docs/Glossary/Locale). `useUser` reports the user's locale and device capabilities, so the view can format values and size controls for them.
+
+## Example
+
+The carousel formats prices in the host locale and adapts its controls to the device: a touch device gets larger tap targets, and hover styles apply only when the device reports hover.
+
+```tsx highlight={4-8,10}
 import { useUser } from "skybridge/web";
 
-function UserInfo() {
+function Carousel({ products }: { products: Product[] }) {
   const { locale, userAgent } = useUser();
+  const isMobile = userAgent.device.type === "mobile";
+  const canHover = userAgent.capabilities.hover;
+  const isTouch = userAgent.capabilities.touch;
+
+  const formatPrice = (amount: number) => {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
+  };
 
   return (
-    <div>
-      <p>Locale: {locale}</p>
-      <p>Device: {userAgent.device.type}</p>
-      <p>Touch: {userAgent.capabilities.touch ? "Yes" : "No"}</p>
+    <div className={isMobile ? "grid-mobile" : "grid-desktop"}>
+      {products.map((product) => (
+        <article
+          key={product.id}
+          className={canHover ? "card card-hoverable" : "card"}
+        >
+          <img src={product.image} alt={product.name} />
+          <p>{product.name}</p>
+          <p>{formatPrice(product.price)}</p>
+          <button className={isTouch ? "buy buy-large" : "buy"}>
+            Add to cart
+          </button>
+        </article>
+      ))}
     </div>
   );
 }
@@ -25,147 +51,43 @@ function UserInfo() {
 
 ## Returns
 
-```tsx
-type UserState = {
-  locale: string;
-  userAgent: UserAgent;
-};
-
-type UserAgent = {
-  device: {
-    type: "mobile" | "tablet" | "desktop" | "unknown";
-  };
-  capabilities: {
-    hover: boolean;
-    touch: boolean;
-  };
-};
-```
-
 ### `locale`
 
-The user's locale string in BCP 47 format (e.g., `"en-US"`, `"fr-FR"`, `"ja-JP"`).
+```tsx
+locale: string;
+```
+
+The user's language and region, canonical [BCP 47](https://developer.mozilla.org/en-US/docs/Glossary/BCP_47_language_tag). The hook canonicalizes what the host reports (underscores to hyphens, casing corrected, subtags preserved) and falls back to `"en-US"` when the value is not a valid locale. It is safe to pass straight to [`Intl`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl) APIs.
 
 ### `userAgent`
 
-Information about the user's device and its capabilities.
+```tsx
+userAgent: UserAgent;
+```
 
-#### `userAgent.device.type`
-
-The type of device the user is on:
-
-- `mobile` - Mobile phone
-- `tablet` - Tablet device
-- `desktop` - Desktop or laptop computer
-- `unknown` - Unable to determine device type
-
-#### `userAgent.capabilities.hover`
-
-Whether the device supports hover interactions (typically `true` for desktop, `false` for touch-only devices).
-
-#### `userAgent.capabilities.touch`
-
-Whether the device supports touch interactions.
-
-## Examples
-
-### Localized Greeting
+The host's device class and input capabilities.
 
 ```tsx
-import { useUser } from "skybridge/web";
-
-function LocalizedGreeting() {
-  const { locale } = useUser();
-
-  const greetings: Record<string, string> = {
-    en: "Hello!",
-    fr: "Bonjour!",
-    es: "Hola!",
-    de: "Hallo!",
-    ja: "こんにちは!",
+type UserAgent = {
+  device: {
+    // "unknown" when the host reports no device class
+    type: "mobile" | "tablet" | "desktop" | "unknown";
   };
-
-  const language = locale.split("-")[0];
-  const greeting = greetings[language] || greetings.en;
-
-  return <h1>{greeting}</h1>;
-}
+  capabilities: {
+    hover: boolean; // device supports hover interactions
+    touch: boolean; // device supports touch input
+  };
+};
 ```
 
-### Date Formatting
-
-```tsx
-import { useUser } from "skybridge/web";
-
-function LocalizedDate({ date }: { date: Date }) {
-  const { locale } = useUser();
-
-  const formattedDate = new Intl.DateTimeFormat(locale, {
-    dateStyle: "full",
-    timeStyle: "short",
-  }).format(date);
-
-  return <time dateTime={date.toISOString()}>{formattedDate}</time>;
-}
-```
-
-### Number and Currency Formatting
-
-```tsx
-import { useUser } from "skybridge/web";
-
-function PriceDisplay({ amount, currency }: { amount: number; currency: string }) {
-  const { locale } = useUser();
-
-  const formattedPrice = new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-  }).format(amount);
-
-  return <span className="price">{formattedPrice}</span>;
-}
-```
-
-### Responsive Component
-
-```tsx
-import { useUser } from "skybridge/web";
-
-function ResponsiveLayout({ children }: { children: React.ReactNode }) {
-  const { userAgent } = useUser();
-
-  const layoutClass = {
-    mobile: "layout-compact",
-    tablet: "layout-medium",
-    desktop: "layout-full",
-    unknown: "layout-full",
-  }[userAgent.device.type];
-
-  return <div className={layoutClass}>{children}</div>;
-}
-```
-
-### Touch-Friendly Controls
-
-```tsx
-import { useUser } from "skybridge/web";
-
-function Slider({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  const { userAgent } = useUser();
-
-  // Use larger touch targets on touch devices
-  const thumbSize = userAgent.capabilities.touch ? 44 : 20;
-
-  return (
-    <input
-      type="range"
-      value={value}
-      onChange={(e) => onChange(Number(e.target.value))}
-      style={{
-        height: thumbSize,
-        cursor: userAgent.capabilities.hover ? "pointer" : "default",
-      }}
-    />
-  );
-}
-```
+<CardGroup cols={3}>
+  <Card title="useLayout" icon="layout" href="/api-reference/use-layout">
+    Read the host's theme, available height, and safe-area insets
+  </Card>
+  <Card title="useDisplayMode" icon="maximize" href="/api-reference/use-display-mode">
+    Read and request the view's display mode
+  </Card>
+  <Card title="Design for the Host" icon="sparkles" href="/guides/ux">
+    Adapt the view to the user's device and locale
+  </Card>
+</CardGroup>

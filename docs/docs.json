@@ -69,92 +69,21 @@
             ],
             "expanded": true
           },
+          "troubleshooting",
           {
-            "group": "Get Started (legacy)",
-            "icon": "rocket",
+            "group": "Resources",
+            "icon": "library",
             "pages": [
-              {
-                "group": "Fundamentals",
-                "icon": "graduation-cap",
-                "pages": [
-                  "fundamentals",
-                  "fundamentals/apps-sdk",
-                  "fundamentals/mcp-apps"
-                ]
-              },
-              "quickstart/create-new-app",
-              {
-                "group": "Add to Existing App",
-                "icon": "puzzle-piece",
-                "pages": [
-                  "quickstart/add-to-existing-app",
-                  "quickstart/add-to-existing-app/server",
-                  "quickstart/add-to-existing-app/web"
-                ]
-              },
-              "quickstart/migrate",
-              "quickstart/test-your-app",
-              "quickstart/build-for-production",
-              "quickstart/deploy"
-            ]
-          },
-          {
-            "group": "Concepts (legacy)",
-            "icon": "lightbulb",
-            "pages": [
-              "concepts/index",
-              "concepts/write-once-run-everywhere",
-              "concepts/data-flow",
-              "concepts/llm-context-sync",
-              "concepts/fast-iteration",
-              "concepts/type-safety"
-            ]
-          },
-          {
-            "group": "Guides (legacy)",
-            "icon": "book",
-            "pages": [
-              "guides/fetching-data",
-              "guides/managing-state",
-              "guides/communicating-with-model",
-              "guides/host-environment-context"
-            ]
-          },
-          {
-            "group": "DevTools (legacy)",
-            "icon": "wrench",
-            "pages": [
-              "devtools/skills",
-              "devtools/devtools"
-            ]
-          },
-          {
-            "group": "Resources (legacy)",
-            "icon": "circle-question",
-            "pages": [
-              "faq",
-              "telemetry"
+              "resources/apps-sdk-and-mcp-apps",
+              "resources/telemetry"
             ]
           }
         ]
       },
       {
         "tab": "API Reference",
-        "groups": [
-          {
-            "group": "Overview",
-            "icon": "house",
-            "pages": [
-              "api-reference"
-            ]
-          },
-          {
-            "group": "CLI",
-            "icon": "terminal",
-            "pages": [
-              "api-reference/cli"
-            ]
-          },
+        "pages": [
+          "api-reference/overview",
           {
             "group": "Server",
             "icon": "server",
@@ -164,24 +93,34 @@
             ]
           },
           {
+            "group": "Auth",
+            "icon": "lock",
+            "pages": [
+              "api-reference/mcp-auth-metadata-router",
+              "api-reference/optional-bearer-auth",
+              "api-reference/require-bearer-auth",
+              "api-reference/verifier"
+            ]
+          },
+          {
             "group": "Hooks",
             "icon": "fishing-rod",
             "pages": [
-              "api-reference/use-tool-info",
               "api-reference/use-call-tool",
-              "api-reference/use-register-view-tool",
-              "api-reference/use-layout",
-              "api-reference/use-user",
               "api-reference/use-display-mode",
-              "api-reference/use-open-external",
-              "api-reference/use-set-open-in-app-url",
-              "api-reference/use-send-follow-up-message",
-              "api-reference/use-view-state",
-              "api-reference/use-request-modal",
-              "api-reference/use-request-close",
-              "api-reference/use-request-size",
+              "api-reference/use-download",
               "api-reference/use-files",
-              "api-reference/use-download"
+              "api-reference/use-layout",
+              "api-reference/use-open-external",
+              "api-reference/use-register-view-tool",
+              "api-reference/use-request-close",
+              "api-reference/use-request-modal",
+              "api-reference/use-request-size",
+              "api-reference/use-send-follow-up-message",
+              "api-reference/use-set-open-in-app-url",
+              "api-reference/use-tool-info",
+              "api-reference/use-user",
+              "api-reference/use-view-state"
             ]
           },
           {
@@ -189,21 +128,22 @@
             "icon": "toolbox",
             "pages": [
               "api-reference/create-store",
-              "api-reference/generate-helpers",
-              "api-reference/data-llm"
+              "api-reference/data-llm",
+              "api-reference/generate-helpers"
             ]
           },
           {
             "group": "Types",
-            "icon": "brackets-curly",
+            "icon": "type",
             "pages": [
-              "api-reference/infer-utility-types",
-              "api-reference/file-ref"
+              "api-reference/file-ref",
+              "api-reference/utility-types"
             ]
           },
+          "api-reference/cli",
           {
-            "group": "Advanced",
-            "icon": "gear",
+            "group": "Low-level",
+            "icon": "binary",
             "pages": [
               "api-reference/use-apps-sdk-context",
               "api-reference/use-mcp-app-context"

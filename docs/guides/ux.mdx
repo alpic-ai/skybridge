@@ -4,9 +4,12 @@ description: "Account for what makes an MCP App different"
 sidebarTitle: "UX"
 icon: "sparkles"
 ---
-<img src="/images/ux.png" alt="UX Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
 
-An MCP App is a new kind of surface with its own UX principles. The view shares the screen with an ongoing conversation, in a frame the host controls. Skybridge surfaces that environment through hooks, so the view can read its context and adapt.
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/ux.png" alt="UX Illustration" />
+
+An MCP App is a new kind of surface with its own UX principles. The [view](/build/view) shares the screen with an ongoing conversation, in a frame the host controls. Skybridge surfaces that environment through [hooks](/api-reference/overview#hooks), so the view can read its context and adapt.
 
 ```tsx views/carousel.tsx
 import { useDisplayMode, useLayout, useUser } from "skybridge/web";
@@ -40,7 +43,7 @@ The sections below cover fitting the space the host gives you, matching its them
 
 ## Fit the Available Space
 
-`useLayout` reports the room the host gives the view: `maxHeight`, and the `safeArea` insets that keep content clear of device notches and the chat composer.
+[`useLayout`](/api-reference/use-layout) reports the room the host gives the view: `maxHeight`, and the `safeArea` insets that keep content clear of device notches and the chat composer.
 
 ```tsx views/carousel.tsx highlight={6,13}
 import { useDisplayMode, useLayout, useUser } from "skybridge/web";
@@ -74,7 +77,7 @@ The carousel caps its height at `maxHeight` and pads its bottom by `safeArea.ins
 
 ## Match the Theme
 
-The same hook reports the host's color scheme as `theme`, `"light"` or `"dark"`. A view on its own palette looks pasted into the conversation; read `theme` and follow it.
+[`useLayout`](/api-reference/use-layout) reports the host's color scheme as `theme`, `"light"` or `"dark"`. A view on its own palette looks pasted into the conversation; read `theme` and follow it.
 
 ```tsx views/carousel.tsx highlight={6,12}
 import { useDisplayMode, useLayout, useUser } from "skybridge/web";
@@ -108,7 +111,7 @@ The carousel adds a `dark` class when the host is dark, the convention Tailwind'
 
 ## Respond to the Display Mode
 
-`useDisplayMode` returns the current mode and a setter. The three modes give the view different room and purpose:
+[`useDisplayMode`](/api-reference/use-display-mode) returns the current mode and a setter. The three modes give the view different room and purpose:
 
 - `inline` is the default: a compact panel embedded in the conversation. The smallest surface, so it suits a single result or a short list.
 - `fullscreen` takes over the surface for richer, multi-step tasks.
@@ -148,7 +151,7 @@ The carousel shows two columns inline and four in fullscreen, with a "See all" b
 
 ## Adapt to the User
 
-`useUser` reports the `locale` and the `userAgent`: the device type, and whether it supports `hover` and `touch`.
+[`useUser`](/api-reference/use-user) reports the `locale` and the `userAgent`: the device type, and whether it supports `hover` and `touch`.
 
 ```tsx views/carousel.tsx highlight={8,18}
 import { useDisplayMode, useLayout, useUser } from "skybridge/web";
