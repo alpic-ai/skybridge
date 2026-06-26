@@ -3,7 +3,7 @@ title: optionalBearerAuth
 description: "Accept a signed-in user when present, allow anonymous otherwise"
 ---
 
-When some tools are public and others need sign-in, `optionalBearerAuth` validates a token if one is sent but lets anonymous requests through. Each tool then enforces its own [`securitySchemes`](/api-reference/register-tool#securityschemes) against `extra.authInfo`.
+When some [tools](/build/tools) are public and others need sign-in, `optionalBearerAuth` validates a token if one is sent but lets anonymous requests through. Each tool then enforces its own [`securitySchemes`](/api-reference/register-tool#securityschemes) against `extra.authInfo`.
 
 ## Example
 
@@ -45,10 +45,10 @@ type BearerAuthMiddlewareOptions = {
 
 ## Returns
 
-An Express `RequestHandler` to pass to [`server.use`](/api-reference/mcp-server#use), typically on `/mcp`.
+An [Express `RequestHandler`](https://expressjs.com/en/5x/guide/routing/) to pass to [`server.use`](/api-reference/mcp-server#use), typically on `/mcp`.
 
 - No `Authorization` header: the request proceeds with no `authInfo`.
-- A valid token: the request proceeds, and handlers read it from `extra.authInfo`.
+- A valid token: the request proceeds, and [handlers](/api-reference/register-tool#handler) read it from `extra.authInfo`.
 - A token that is present but invalid or expired: the same 401 / 403 as [`requireBearerAuth`](/api-reference/require-bearer-auth). Sending a bad token is still a client error.
 
 <CardGroup cols={3}>

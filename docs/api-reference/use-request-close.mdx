@@ -7,11 +7,11 @@ import { Compat } from "/components/compat.jsx";
 
 <Compat chatgpt claude />
 
-When a view has run its course, dismissing it hands the user back to the conversation instead of leaving a spent panel on screen. `useRequestClose` asks the host to do that; the host owns the decision.
+When a [view](/build/view) has run its course, dismissing it hands the user back to the conversation instead of leaving a spent panel on screen. `useRequestClose` asks the host to do that; the host owns the decision.
 
 ## Example
 
-After the order is placed, a Done button dismisses the confirmation and hands the shopper back to the conversation.
+After the order is placed, a "Done" button dismisses the confirmation and hands the shopper back to the conversation.
 
 ```tsx highlight={2,5,10}
 import { useState } from "react";

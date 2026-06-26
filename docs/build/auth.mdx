@@ -8,7 +8,7 @@ import { Hero } from "/components/hero.jsx";
 
 <Hero src="/images/auth.png" alt="Auth Illustration" />
 
-Tool calls are anonymous by default: nothing in the protocol tells you who's asking. OAuth closes that gap, and the host does most of the work: it discovers your authorization server, signs the user in, refreshes tokens, and attaches a Bearer token to every request. Your server keeps three jobs: publish the discovery metadata, verify the tokens, and read the user in your handlers.
+[Tool](/build/tools) calls are anonymous by default: nothing in the protocol tells you who's asking. [OAuth](https://oauth.net/2/) closes that gap, and the host does most of the work: it discovers your authorization server, signs the user in, refreshes tokens, and attaches a Bearer token to every request. Your server keeps three jobs: publish the discovery metadata, verify the tokens, and read the user in your handlers.
 
 Here's a complete server where every tool requires sign-in:
 
@@ -86,7 +86,7 @@ The endpoint values come from your OAuth provider's documentation. `resourceServ
 
 Once the user is signed in, every request carries `Authorization: Bearer <token>`. [`requireBearerAuth`](/api-reference/require-bearer-auth) validates it before any handler runs: missing, invalid, or expired tokens get a 401, insufficient scopes a 403.
 
-It takes a verifier you write, with one method: `verifyAccessToken(token)` resolves with an `AuthInfo` (handlers receive it as `extra.authInfo`) or throws `InvalidTokenError` (the middleware answers 401).
+It takes a [verifier](/api-reference/verifier) you write, with one method: `verifyAccessToken(token)` resolves with an [`AuthInfo`](/api-reference/verifier#authinfo) (handlers receive it as `extra.authInfo`) or throws `InvalidTokenError` (the middleware answers 401).
 
 <CodeGroup>
 ```ts server.ts highlight={13}
@@ -131,7 +131,7 @@ export async function verifyAccessToken(token: string): Promise<AuthInfo> {
 ```
 </CodeGroup>
 
-The validation body is provider-specific: JWKS verification for JWT-issuing providers, an introspection call for opaque tokens, or the provider's own middleware in place of `requireBearerAuth`.
+The validation body is provider-specific: [JWKS](https://datatracker.ietf.org/doc/html/rfc7517) verification for [JWT](https://datatracker.ietf.org/doc/html/rfc7519)-issuing providers, an introspection call for opaque tokens, or the provider's own middleware in place of [`requireBearerAuth`](/api-reference/require-bearer-auth).
 
 {/* @todo: link to full auth provider reference */}
 
@@ -154,7 +154,7 @@ server
 
 Three declarations cover the combinations:
 
-| `securitySchemes` | Meaning |
+| [`securitySchemes`](/api-reference/register-tool#securityschemes) | Meaning |
 |-------------------|---------|
 | `[{ type: "oauth2" }]` | Requires sign-in |
 | `[{ type: "noauth" }]` | Works signed out |
@@ -177,7 +177,7 @@ server.registerTool(
 
 ### Guard the Handler
 
-With unauthenticated requests reaching handlers, the scope check is no longer a formality: it's the only gate on protected tools.
+With unauthenticated requests reaching [handlers](/api-reference/register-tool#handler), the scope check is no longer a formality: it's the only gate on protected tools.
 
 ```ts server.ts highlight={8-10}
 server.registerTool(

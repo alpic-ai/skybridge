@@ -4,7 +4,7 @@ description: "What Skybridge collects, why, and how to opt out"
 icon: activity
 ---
 
-Skybridge collects anonymous usage telemetry to understand how the framework is used and where to improve it. It comes from two places: the CLI when you run `skybridge dev`, `build`, or `start`, and the server runtime when a Skybridge-powered MCP server handles a `tools/call`. Telemetry is optional, and the same controls turn off both.
+Skybridge collects anonymous usage telemetry to understand how the framework is used and where to improve it. It comes from two places: the [CLI](/api-reference/cli) when you run `skybridge dev`, `build`, or `start`, and the server runtime when a Skybridge-powered [MCP server](/api-reference/mcp-server) handles a `tools/call`. Telemetry is optional, and the same controls turn off both.
 
 <Info>
 We collect only aggregate usage data. We never collect personal information, source code, file contents, tool names, arguments, or results, end-user prompts, secrets, or any other sensitive data.
@@ -47,7 +47,7 @@ Unlike the CLI, this carries no machine or session ID. Development builds emit n
 
 ## How to opt out
 
-Preferences are per-machine. On your own machine, use the CLI; on CI runners and deployed servers, use an environment variable.
+Preferences are per-machine. On your own machine, use the CLI; on CI runners and [deployed servers](/ship), use an environment variable.
 
 ### Configuration file
 
@@ -104,12 +104,3 @@ It prints the event to stderr instead of sending it. Debug mode is CLI-only: the
 **CLI events** go to [PostHog](https://posthog.com/), stored on its US servers. Events are anonymized, retained in aggregate for product analytics, and cannot be linked to a user.
 
 **Tool-call events** are emitted as a [DogStatsD](https://docs.datadoghq.com/developers/dogstatsd/) counter over UDP, fire-and-forget so they never block tool execution, and received by a Skybridge-operated [Vector](https://vector.dev/) instance. Only per-version counters are stored, with no per-event record, so individual calls cannot be linked to a server, project, or user.
-
-<CardGroup cols={2}>
-  <Card title="CLI" icon="terminal" href="/api-reference/cli">
-    The commands that emit CLI telemetry
-  </Card>
-  <Card title="Ship" icon="ship" href="/ship">
-    Where the runtime counter is emitted from
-  </Card>
-</CardGroup>

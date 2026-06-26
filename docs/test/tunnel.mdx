@@ -1,6 +1,6 @@
 ---
-title: "Tunnel"
-description: "Expose your local server to real hosts"
+title: "Connect to Hosts"
+description: "Tunnel your local server to ChatGPT and Claude"
 icon: "globe"
 ---
 
@@ -47,7 +47,7 @@ Skybridge runs an [Alpic tunnel](https://docs.alpic.ai/cli/tunnel), then prints 
 3. Click **Create**, then select your app with the **+** button in a new conversation
 
 <Info>
-Creating apps requires a Plus plan or above, with developer mode enabled (**Settings → Apps → Advanced settings → Developer mode**).
+Creating apps requires developer mode to be enabled: **Settings → Apps → Advanced settings → Developer mode**.
 </Info>
 
 ### Claude
@@ -60,10 +60,9 @@ Creating apps requires a Plus plan or above, with developer mode enabled (**Sett
 
 The Alpic tunnel URL is stable across restarts: register the app or connector once. Hot reload works through it too: view edits show up in the host on save, on desktop and mobile alike.
 
-
 ## Limitation
 
-Hosts cache your tool definitions at registration. When the server schema changes (a tool added or renamed, an input schema edited), refresh the app or connector in the host so the model sees the new definitions.
+ChatGPT and Claude cache your tool definitions at registration. When the server schema changes (a [tool](/build/tools) added or renamed, an [input schema](/api-reference/register-tool#inputschema-outputschema) edited), refresh the app or connector in the host so the model sees the new definitions.
 
 ## Go Further
 <Columns cols={3}>

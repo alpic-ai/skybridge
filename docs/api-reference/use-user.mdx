@@ -5,9 +5,9 @@ description: "Read the host's locale and device capabilities"
 
 import { Compat } from "/components/compat.jsx";
 
-<Compat chatgpt claude />
+<Compat alpic chatgpt claude />
 
-Your view runs for users on different devices and in different locales. `useUser` reports the user's locale and device capabilities, so the view can format values and size controls for them.
+Your [view](/build/view) runs for users on different devices and in different [locales](https://developer.mozilla.org/en-US/docs/Glossary/Locale). `useUser` reports the user's locale and device capabilities, so the view can format values and size controls for them.
 
 ## Example
 
@@ -57,7 +57,7 @@ function Carousel({ products }: { products: Product[] }) {
 locale: string;
 ```
 
-The user's language and region, canonical BCP 47. The hook canonicalizes what the host reports (underscores to hyphens, casing corrected, subtags preserved) and falls back to `"en-US"` when the value is not a valid locale. It is safe to pass straight to `Intl` APIs.
+The user's language and region, canonical [BCP 47](https://developer.mozilla.org/en-US/docs/Glossary/BCP_47_language_tag). The hook canonicalizes what the host reports (underscores to hyphens, casing corrected, subtags preserved) and falls back to `"en-US"` when the value is not a valid locale. It is safe to pass straight to [`Intl`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl) APIs.
 
 ### `userAgent`
 

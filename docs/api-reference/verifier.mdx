@@ -3,7 +3,7 @@ title: Verifier
 description: "Validate access tokens for the bearer-auth middleware"
 ---
 
-A verifier is the provider-specific token check you implement and pass to [`requireBearerAuth`](/api-reference/require-bearer-auth) or [`optionalBearerAuth`](/api-reference/optional-bearer-auth). The middleware calls it on each request to validate the bearer token before any tool runs.
+A verifier is the provider-specific token check you implement and pass to [`requireBearerAuth`](/api-reference/require-bearer-auth) or [`optionalBearerAuth`](/api-reference/optional-bearer-auth). The middleware calls it on each request to validate the bearer token before any [tool](/build/tools) runs.
 
 ## Example
 
@@ -42,7 +42,7 @@ verifyAccessToken(token: string): Promise<AuthInfo>;
 
 The verifier's only required method.
 
-- Resolve with an `AuthInfo` for a valid token. The middleware puts it on `extra.authInfo` for tool handlers.
+- Resolve with an `AuthInfo` for a valid token. The middleware puts it on `extra.authInfo` for tool [handlers](/api-reference/register-tool#handler).
 - Throw `InvalidTokenError` for a malformed, badly signed, or expired token. The middleware returns a 401 with the right `WWW-Authenticate` header.
 
 Do not check scopes here: the middleware enforces `requiredScopes` against `authInfo.scopes` and returns a 403 on a missing scope.

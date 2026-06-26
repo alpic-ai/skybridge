@@ -5,9 +5,9 @@ description: "Read the tool call that produced the current view"
 
 import { Compat } from "/components/compat.jsx";
 
-<Compat chatgpt claude />
+<Compat alpic chatgpt claude />
 
-`useToolInfo` reads the tool call that rendered the current view, so a view can display the data its own tool produced.
+`useToolInfo` reads the [tool](/build/tools) call that rendered the current [view](/build/view), so a view can display the data its own tool produced.
 
 Import it from your generated [`helpers.ts`](/api-reference/generate-helpers): the typed hook infers `input`, `output`, and `responseMetadata` from your server, so you pass only the tool name.
 
@@ -79,7 +79,7 @@ Each is `true` when `status` equals the matching value and `false` otherwise. `i
 input: ToolInput | undefined;
 ```
 
-The arguments the view's tool was called with. The model sees these: they are part of the tool call in the conversation. It can be `undefined` in either state, because the host may render the view before it delivers the arguments.
+The [arguments](/api-reference/register-tool#inputschema-outputschema) the view's tool was called with. The model sees these: they are part of the tool call in the conversation. It can be `undefined` in either state, because the host may render the view before it delivers the arguments.
 
 ### `output`
 
@@ -87,7 +87,7 @@ The arguments the view's tool was called with. The model sees these: they are pa
 output: ToolOutput | undefined;
 ```
 
-The tool's structured output, set when `status` is `"success"`. The model sees this: it is the tool result in the conversation. It is `undefined` while pending, and `undefined` in success if the tool returned no structured output.
+The tool's structured output, set when `status` is `"success"`. The model sees this: it is the tool [result](/api-reference/register-tool#return) in the conversation. It is `undefined` while pending, and `undefined` in success if the tool returned no structured output.
 
 ### `responseMetadata`
 
@@ -95,7 +95,7 @@ The tool's structured output, set when `status` is `"success"`. The model sees t
 responseMetadata: ToolResponseMetadata | undefined;
 ```
 
-The `_meta` the tool's handler returned alongside its result, typed from your server. It is `undefined` while pending, and `undefined` in success if the tool returned no metadata.
+The `_meta` the tool's [handler](/api-reference/register-tool#handler) returned alongside its result, typed from your server. It is `undefined` while pending, and `undefined` in success if the tool returned no metadata.
 
 <CardGroup cols={3}>
   <Card title="Create Views" icon="palette" href="/build/view">

@@ -9,7 +9,7 @@ import { Hero } from "/components/hero.jsx";
 
 <Hero src="/images/ux.png" alt="UX Illustration" />
 
-An MCP App is a new kind of surface with its own UX principles. The view shares the screen with an ongoing conversation, in a frame the host controls. Skybridge surfaces that environment through hooks, so the view can read its context and adapt.
+An MCP App is a new kind of surface with its own UX principles. The [view](/build/view) shares the screen with an ongoing conversation, in a frame the host controls. Skybridge surfaces that environment through [hooks](/api-reference/overview#hooks), so the view can read its context and adapt.
 
 ```tsx views/carousel.tsx
 import { useDisplayMode, useLayout, useUser } from "skybridge/web";
@@ -77,7 +77,7 @@ The carousel caps its height at `maxHeight` and pads its bottom by `safeArea.ins
 
 ## Match the Theme
 
-The same hook reports the host's color scheme as `theme`, `"light"` or `"dark"`. A view on its own palette looks pasted into the conversation; read `theme` and follow it.
+[`useLayout`](/api-reference/use-layout) reports the host's color scheme as `theme`, `"light"` or `"dark"`. A view on its own palette looks pasted into the conversation; read `theme` and follow it.
 
 ```tsx views/carousel.tsx highlight={6,12}
 import { useDisplayMode, useLayout, useUser } from "skybridge/web";

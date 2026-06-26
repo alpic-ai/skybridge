@@ -3,7 +3,7 @@ title: McpServer
 description: "Build and run a Skybridge MCP server"
 ---
 
-`McpServer` is the root of your app: an Express-backed server whose methods return the server itself, so you chain your tool registrations off it and export the resulting type for [`generateHelpers`](/api-reference/generate-helpers).
+`McpServer` is the root of your app: an [Express](https://expressjs.com/)-backed server whose methods return the server itself, so you chain your [tool](/build/tools) registrations off it and export the resulting type for [`generateHelpers`](/api-reference/generate-helpers).
 
 ## Example
 
@@ -47,10 +47,10 @@ type SkybridgeServerOptions = {
 
 ### `express`
 
-The underlying [Express](https://expressjs.com/) app, for custom routes, middleware, and settings. Register handlers before `run()`.
+The underlying Express app, for custom routes, middleware, and settings. Register handlers before `run()`.
 
 <Info>
-Alpic Cloud routes traffic only to `/mcp`. Custom routes work locally and on self-hosted deployments.
+[Alpic Cloud](https://alpic.ai/solutions/cloud) routes traffic only to `/mcp`. Custom routes work locally and on self-hosted deployments.
 </Info>
 
 ## Methods
@@ -72,7 +72,7 @@ server.use(...handlers: RequestHandler[]): this;
 server.use(path: string, ...handlers: RequestHandler[]): this;
 ```
 
-Registers Express middleware on the underlying app, optionally scoped to a path. Mirrors `app.use`.
+Registers [Express middleware](https://expressjs.com/en/guide/using-middleware/) on the underlying app, optionally scoped to a path. Mirrors `app.use`.
 
 ### `useOnError`
 
@@ -81,7 +81,7 @@ server.useOnError(...handlers: ErrorRequestHandler[]): this;
 server.useOnError(path: string, ...handlers: ErrorRequestHandler[]): this;
 ```
 
-Registers an [Express error handler](https://expressjs.com/en/guide/error-handling.html), optionally path-scoped, to run after the `/mcp` route. A default handler runs last, responding with a 500 JSON-RPC error when nothing else has sent a response.
+Registers an [Express error handler](https://expressjs.com/en/guide/error-handling.html), optionally path-scoped, to run after the `/mcp` route. A default handler runs last, responding with a 500 [JSON-RPC](https://www.jsonrpc.org/) error when nothing else has sent a response.
 
 ### `mcpMiddleware`
 

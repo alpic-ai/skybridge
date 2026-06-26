@@ -5,13 +5,13 @@ description: "Read a raw MCP Apps host context value by key"
 
 import { Compat } from "/components/compat.jsx";
 
-<Compat claude />
+<Compat alpic claude />
 
-An MCP Apps host (Claude and others) exposes view context that Skybridge's cross-host hooks read for you. `useMcpAppContext` is the escape hatch: it reads that context raw, by key, for a protocol-level field the hooks don't surface. It runs only on MCP Apps hosts, not ChatGPT; the Apps SDK counterpart is [`useAppsSdkContext`](/api-reference/use-apps-sdk-context).
+An MCP Apps host (Claude and others) exposes [view](/build/view) context that Skybridge's cross-host hooks read for you. `useMcpAppContext` is the escape hatch: it reads that context raw, by key, for a protocol-level field the hooks don't surface. It runs only on MCP Apps hosts, not ChatGPT; the Apps SDK counterpart is [`useAppsSdkContext`](/api-reference/use-apps-sdk-context).
 
 ## Example
 
-`useUser` gives the locale but not the host time zone, so a schedule reads `timeZone` from the context to render times in the user's zone.
+[`useUser`](/api-reference/use-user) gives the locale but not the host time zone, so a schedule reads `timeZone` from the context to render times in the user's zone.
 
 ```tsx highlight={4}
 import { useMcpAppContext } from "skybridge/web";

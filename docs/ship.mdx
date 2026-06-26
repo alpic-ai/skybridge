@@ -8,18 +8,18 @@ import { Hero } from "/components/hero.jsx";
 
 <Hero src="/images/deploy.png" alt="Deploy Illustration" />
 
-A deployed MCP App is a server on a public URL: hosts connect to `https://your-domain.com/mcp` and the built views are served from the same origin.
+A deployed MCP App is a server on a public URL: hosts connect to `https://your-domain.com/mcp` and the built [views](/build/view) are served from the same origin.
 
 Two commands take it there:
 
 - [`skybridge build`](/api-reference/cli) compiles the views and the server into `dist/`
-- `skybridge start` runs the result with `NODE_ENV=production`: pre-built assets on `/assets`, the MCP server on `/mcp`, dev tooling excluded
+- `skybridge start` runs the result with `NODE_ENV=production`: pre-built assets on `/assets`, the [MCP server](/api-reference/mcp-server) on `/mcp`, dev tooling excluded
 
-Run them on any Node.js-compatible infrastructure, or pick a platform that automates them:
+Run them on any [Node.js](https://nodejs.org/)-compatible infrastructure, or pick a platform that automates them:
 
 ## Alpic
 
-[Alpic](https://alpic.ai) is the preferred deployment target: a cloud platform built for MCP Apps, by the company behind Skybridge. Deployed apps get MCP analytics, logs, insights, and a public playground.
+[Alpic](https://alpic.ai) is the preferred deployment target: a cloud platform built for MCP Apps, by the company behind Skybridge. Deployed apps get MCP analytics, logs, insights, and a public [playground](/test/playground).
 
 Deploying is free, and one command away from any Skybridge project:
 
@@ -49,7 +49,7 @@ Alpic also ships its own [MCP App](https://docs.alpic.ai/features/mcp-server) to
 
 ## Cloudflare Workers
 
-Skybridge runs on Cloudflare Workers via [Wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/) and the `nodejs_compat` runtime. Static assets (your built views) are served by Cloudflare's edge directly; the worker handles `/mcp` traffic and any other dynamic routes.
+Skybridge runs on [Cloudflare Workers](https://developers.cloudflare.com/workers/) via [Wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/) and the [`nodejs_compat`](https://developers.cloudflare.com/workers/runtime-apis/nodejs/) runtime. Static assets (your built views) are served by Cloudflare's edge directly; the worker handles `/mcp` traffic and any other dynamic routes.
 
 Add a `wrangler.jsonc` at your project root:
 
@@ -69,8 +69,8 @@ Add a `wrangler.jsonc` at your project root:
 Each setting is load-bearing:
 
 - `compatibility_date >= 2025-09-01` and `nodejs_compat`: enable `cloudflare:node`'s `httpServerHandler`, which Skybridge uses to bridge the Express app to the Workers fetch event.
-- `assets.directory`: points at the views built by `skybridge build`. Cloudflare serves these at the edge before requests reach your worker.
-- `define.process.env.NODE_ENV`: forces production mode even under `wrangler dev`. Without it, wrangler defaults to `development` locally and Skybridge's dev tooling (Vite, the DevTools server) gets pulled into the worker bundle, where neither runs.
+- `assets.directory`: points at the [views](/build/view) built by `skybridge build`. Cloudflare serves these at the edge before requests reach your worker.
+- `define.process.env.NODE_ENV`: forces production mode even under `wrangler dev`. Without it, wrangler defaults to `development` locally and Skybridge's dev tooling ([Vite](https://vite.dev/), the [DevTools](/test/devtools) server) gets pulled into the worker bundle, where neither runs.
 
 Then build and deploy:
 
@@ -99,7 +99,7 @@ bunx wrangler deploy
 
 ## Docker
 
-Projects created with `npx skybridge create` include a multi-stage `Dockerfile`, so you can self-host on any container platform:
+Projects [scaffolded](/get-started/quickstart#scaffold-your-project) with `npx skybridge create` include a multi-stage [`Dockerfile`](https://docs.docker.com/reference/dockerfile/), so you can self-host on any container platform:
 
 ```bash
 docker build -t my-app .
@@ -134,5 +134,5 @@ bunx vercel deploy --prebuilt
 </CodeGroup>
 
 <Info>
-`.vercel/` is gitignored by Vercel CLI convention, so the build artifacts stay out of your tracked working tree.
+`.vercel/` is gitignored by [Vercel CLI](https://vercel.com/docs/cli) convention, so the build artifacts stay out of your tracked working tree.
 </Info>

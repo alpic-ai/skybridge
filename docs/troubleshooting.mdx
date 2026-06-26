@@ -12,7 +12,7 @@ Common Skybridge errors, grouped by symptom, each with its cause and fix.
 
 ## Typed hooks report "Property does not exist on type"
 
-The hooks came from `skybridge/web` instead of the generated `helpers.ts`. The bare hooks aren't typed against your server; only the generated ones carry your tool names, inputs, and outputs.
+The hooks came from `skybridge/web` instead of the [generated `helpers.ts`](/api-reference/generate-helpers). The bare [hooks](/api-reference/overview#hooks) aren't typed against your [server](/api-reference/mcp-server); only the generated ones carry your [tool names, inputs, and outputs](/api-reference/register-tool).
 
 ```ts
 import { useCallTool } from "skybridge/web"; // [!code --]
@@ -21,7 +21,7 @@ import { useCallTool } from "../helpers.js"; // [!code ++]
 
 ## Tool names don't autocomplete
 
-Type inference needs the server to export its type and `helpers.ts` to consume it, with every tool registered by method chaining so it lands in `AppType`.
+Type inference needs the [server](/api-reference/mcp-server) to export its type and `helpers.ts` to consume it, with every tool registered by method chaining so it lands in `AppType`.
 
 <CodeGroup>
 ```ts server.ts highlight={4-5,7}
@@ -50,11 +50,15 @@ Some hooks only work on one host. Skybridge picks the runtime at load, and calli
 
 ## A hook has no effect
 
-[`useDownload`](/api-reference/use-download), [`useRequestModal`](/api-reference/use-request-modal), and `requestDisplayMode` from [`useDisplayMode`](/api-reference/use-display-mode) must be user-initiated. Hosts reject calls fired from an effect on mount, with no visible result. Trigger them from a click or menu action instead.
+[`useDownload`](/api-reference/use-download), [`useRequestModal`](/api-reference/use-request-modal), and [`setDisplayMode`](/api-reference/use-display-mode#setdisplaymode) must be user-initiated. Hosts reject calls fired from an effect on mount, with no visible result. Trigger them from a click or menu action instead.
 
 ## The view loads in DevTools but breaks in a real host
 
 [DevTools](/test/devtools) runs a loose CSP, so violations don't surface locally. Production enforces the policy and blocks any origin the view didn't declare. List every domain the view reaches in the tool's CSP config, then confirm through the [tunnel](/test/tunnel) or the [Audit](/test/audit). See [Configure CSP](/guides/csp) for the field reference.
+
+## DevTools fails to authenticate with `invalid_client`
+
+[DevTools](/test/devtools#authenticated-servers) cached an OAuth registration that the server no longer recognizes, after you switched servers or rotated credentials. Click **Sign out** in the DevTools header to clear it and force a fresh registration on the next connect.
 
 ## Go Further
 <Columns cols={2}>

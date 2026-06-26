@@ -5,13 +5,13 @@ description: "Read and switch how the host lays out the view"
 
 import { Compat } from "/components/compat.jsx";
 
-<Compat chatgpt claude />
+<Compat alpic chatgpt claude />
 
-A host renders the view in one of a few layouts: a compact inline panel, fullscreen, or a floating picture-in-picture. `useDisplayMode` lets the view read which layout it is in and ask the host to switch to another.
+A host renders the [view](/build/view) in one of a few layouts: a compact inline panel, fullscreen, or a floating picture-in-picture. `useDisplayMode` lets the view read which layout it is in and ask the host to switch to another.
 
 ## Example
 
-The product carousel shows more columns when it takes the full screen. From the inline panel it offers a See all button to expand, and once expanded, a Collapse button to shrink back.
+The product carousel shows more columns when it takes the full screen. From the inline panel it offers a "See all" button to expand, and once expanded, a "Collapse" button to shrink back.
 
 ```tsx highlight={4,10,13,16}
 import { useDisplayMode } from "skybridge/web";

@@ -3,7 +3,11 @@ title: useRegisterViewTool
 description: "Expose a tool the host and model can call against the running view"
 ---
 
-A tool the model calls normally runs on your server. `useRegisterViewTool` registers a tool that runs in the view instead: the model invokes it and the handler executes in your component, so the model can mutate view state or do any work that does not need the backend.
+import { Compat } from "/components/compat.jsx";
+
+<Compat alpic />
+
+A [tool](/build/tools) the model calls normally runs on your server. `useRegisterViewTool` registers a tool that runs in the [view](/build/view) instead: the model invokes it and the handler executes in your component, so the model can mutate view [state](/build/state) or do any work that does not need the backend.
 
 ## Example
 

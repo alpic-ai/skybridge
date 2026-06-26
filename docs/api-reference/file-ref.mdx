@@ -8,10 +8,10 @@ import { Compat } from "/components/compat.jsx";
 
 <Compat chatgpt />
 
-`FileRef` is a reference to a file, an id and a URL to fetch its bytes. Use it in a tool's `inputSchema` or `outputSchema` to pass files in and out.
+`FileRef` is a reference to a file, an id and a URL to fetch its bytes. Use it in a [tool's `inputSchema` or `outputSchema`](/api-reference/register-tool#inputschema-outputschema) to pass files in and out.
 
 <Info>
-File params are a **ChatGPT** feature. Other hosts don't pass files through tool calls, so a `FileRef` field is populated only on ChatGPT.
+File params are a **ChatGPT** feature. Other hosts don't pass files through [tool](/build/tools) calls, so a `FileRef` field is populated only on ChatGPT.
 </Info>
 
 ## Example

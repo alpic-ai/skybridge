@@ -74,6 +74,28 @@ All three are the tool's prompt surface: the model reads them to decide when to 
 
 [Zod](https://zod.dev/) raw shapes. `inputSchema` validates the call arguments and types the handler's `input`. Add `.describe()` to a field to tell the model what it's for. `outputSchema` tells the model the shape to expect back, it does not type the returned value.
 
+### `annotations`
+
+Standard MCP hints describing what the tool does, so the host can label it and order calls. They are hints: the host may surface or ignore them, and never gates a call on them.
+
+```ts
+type ToolAnnotations = {
+  title?: string;
+  readOnlyHint?: boolean;
+  destructiveHint?: boolean;
+  idempotentHint?: boolean;
+  openWorldHint?: boolean;
+};
+```
+
+| Hint | Meaning | Default |
+| --- | --- | --- |
+| `title` | Human-readable label; the host gives it precedence over `name`. | none |
+| `readOnlyHint` | The tool does not modify its environment. | `false` |
+| `destructiveHint` | The tool may perform destructive updates, not only additive ones. Meaningful only when `readOnlyHint` is `false`. | `true` |
+| `idempotentHint` | Repeating the call with the same arguments has no further effect. Meaningful only when `readOnlyHint` is `false`. | `false` |
+| `openWorldHint` | The tool interacts with an open world of external entities, not a closed domain. | `true` |
+
 ### `view`
 
 Bind the tool to a React view to render its result instead of plain text. Each view backs exactly one tool.

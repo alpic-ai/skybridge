@@ -5,9 +5,9 @@ description: "Persist view state across remounts and share it with the model"
 
 import { Compat } from "/components/compat.jsx";
 
-<Compat chatgpt claude />
+<Compat alpic chatgpt claude />
 
-A view loses its local React state when the host remounts it, and the model never sees what the view is showing. `useViewState` is a drop-in `useState` that fixes both.
+A [view](/build/view) loses its local React state when the host remounts it, and the model never sees what the view is showing. `useViewState` is a drop-in `useState` that fixes both.
 
 ## Example
 
@@ -40,7 +40,7 @@ function Carousel() {
 T extends Record<string, unknown>;
 ```
 
-The shape of the persisted state. `T` is inferred from `defaultState`; set it explicitly only when `defaultState` is omitted or `null`.
+The shape of the persisted [state](/build/state). `T` is inferred from `defaultState`; set it explicitly only when `defaultState` is omitted or `null`.
 
 ## Parameters
 

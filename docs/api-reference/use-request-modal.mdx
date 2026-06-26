@@ -5,9 +5,9 @@ description: "Open the view as a modal overlay and read its modal state"
 
 import { Compat } from "/components/compat.jsx";
 
-<Compat chatgpt claude />
+<Compat alpic chatgpt claude />
 
-A modal overlay is host-owned: a view cannot mount one itself. `useRequestModal` lets the view ask the host to open it as a modal, pass data into it, and read whether the modal is currently showing.
+A modal overlay is host-owned: a [view](/build/view) cannot mount one itself. `useRequestModal` lets the view ask the host to open it as a modal, pass data into it, and read whether the modal is currently showing.
 
 ## Example
 
@@ -53,7 +53,7 @@ isOpen: boolean;
 params: Record<string, unknown> | undefined;
 ```
 
-The `params` the modal was opened with, surfaced back to the view while it is open. `undefined` when no modal is open, or when `open` was called without `params`. These stay inside the view: they are not part of `structuredContent` or the tool output, so the model does not see them.
+The `params` the modal was opened with, surfaced back to the view while it is open. `undefined` when no modal is open, or when `open` was called without `params`.
 
 ### `open`
 
