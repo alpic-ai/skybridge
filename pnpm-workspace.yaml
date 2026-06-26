@@ -11,6 +11,14 @@ packages:
 # supply-chain attacks via compromised releases.
 minimumReleaseAge: 20160
 
+# Exempt our own published packages from the cooldown — we publish them, so the
+# supply-chain delay adds no protection and would block installing fresh releases.
+minimumReleaseAgeExclude:
+  - skybridge
+  - alpic
+  - "@skybridge/*"
+  - "@alpic-ai/*"
+
 allowBuilds:
   esbuild: true
 
