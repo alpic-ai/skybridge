@@ -227,7 +227,7 @@ function TunnelLinkButton({
 export function PlaygroundButton() {
   return (
     <TunnelLinkButton
-      label="Playground"
+      label="Playground 2"
       icon={<MessagesSquareIcon className="size-3.5" />}
       buildUrl={(tunnelUrl) => `${tunnelUrl}/try`}
       description="Chat with your MCP server with a real LLM and share it"
