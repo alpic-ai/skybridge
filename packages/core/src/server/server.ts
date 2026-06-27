@@ -230,7 +230,11 @@ type McpAppsResourceMeta = {
 
 type OpenaiResourceMeta = {
   "openai/widgetDescription"?: string;
-  "openai/widgetCSP"?: { redirect_domains?: string[] };
+  "openai/widgetCSP"?: {
+    resource_domains?: string[];
+    connect_domains?: string[];
+    redirect_domains?: string[];
+  };
 };
 
 type ResourceMeta = McpAppsResourceMeta & OpenaiResourceMeta;
@@ -995,8 +999,18 @@ export class McpServer<
           ...(view.description && {
             "openai/widgetDescription": view.description,
           }),
-          ...(view.csp?.redirectDomains && {
-            "openai/widgetCSP": { redirect_domains: view.csp.redirectDomains },
+          ...(view.csp && {
+            "openai/widgetCSP": {
+              ...(view.csp?.redirectDomains && {
+                redirect_domains: view.csp.redirectDomains,
+              }),
+              ...(view.csp?.resourceDomains && {
+                resource_domains: view.csp.resourceDomains,
+              }),
+              ...(view.csp?.connectDomains && {
+                connect_domains: view.csp.connectDomains,
+              }),
+            },
           }),
         };
 

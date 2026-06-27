@@ -883,12 +883,19 @@ describe("resources/list view _meta injection", () => {
 
     const meta = extApps?._meta as {
       "openai/widgetDescription"?: string;
-      "openai/widgetCSP"?: { redirect_domains?: string[] };
+      "openai/widgetCSP"?: {
+        resource_domains: string[];
+        connect_domains: string[];
+        redirect_domains?: string[];
+      };
       ui?: { csp?: Record<string, unknown> };
     };
     expect(meta["openai/widgetDescription"]).toBe("Onboarding deck");
     expect(meta["openai/widgetCSP"]?.redirect_domains).toEqual([
       "https://docs.skybridge.tech",
+    ]);
+    expect(meta["openai/widgetCSP"]?.resource_domains).toEqual([
+      "https://fonts.googleapis.com",
     ]);
     expect(meta.ui?.csp).not.toHaveProperty("redirectDomains");
   });
