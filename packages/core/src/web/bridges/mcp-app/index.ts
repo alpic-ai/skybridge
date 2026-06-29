@@ -1,4 +1,3 @@
-export { McpAppAdaptor } from "./adaptor.js";
 export { McpAppBridge } from "./bridge.js";
 export type {
   McpAppContext,

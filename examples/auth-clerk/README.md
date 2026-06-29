@@ -5,7 +5,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a p
 ## What This Example Showcases
 
 - **Transport-Level Auth**: Auth is enforced at the `/mcp` transport level — unauthenticated requests receive HTTP 401 before reaching any tool handler
-- **Clerk OAuth**: Uses `@clerk/express` and `@clerk/mcp-tools` to handle sign-in and token verification
+- **Clerk OAuth**: One-line setup with `clerkProvider`, which discovers Clerk's OAuth metadata and verifies JWTs against its JWKS — no Clerk SDK or secret key
 - **Personalized Results**: Authenticated users see favorites highlighted and sorted first
 - **User Identity in Widgets**: Displays the signed-in user's name directly in the widget UI
 - **Simplified Server Setup**: Uses [`server.run()`](https://docs.skybridge.tech/api-reference/run) and `.use()` for a single-file server with no manual Express boilerplate
@@ -37,12 +37,12 @@ bun install
 #### 2. Configure Clerk
 
 1. Sign up at [clerk.com](https://clerk.com/) and create an application.
-2. Get your **Publishable Key** and **Secret Key** from the Clerk dashboard.
-3. Create a `.env` file in the project root:
+2. Create an OAuth application: enable **Dynamic client registration** and turn on **Generate access tokens as JWTs** (Settings).
+3. Copy your **Frontend API URL** (Clerk dashboard → API keys).
+4. Create a `.env` file in the project root:
 
 ```env
-CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
+CLERK_DOMAIN=acme.clerk.accounts.dev
 ```
 
 #### 3. Start your local server

@@ -3,16 +3,44 @@ import {
   type Implementation,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
+import { dequal } from "dequal/lite";
 import * as z from "zod";
 import type {
   AnyViewToolHandler,
   Bridge,
+  HostContextStore,
   Subscribe,
   ViewToolConfig,
 } from "../types.js";
 import type { McpAppContext, McpAppContextKey } from "./types.js";
 
-/** @internal Singleton bridge over the `ext-apps` JSON-RPC App connection. Used by {@link McpAppAdaptor}. */
+type PickContext<K extends readonly McpAppContextKey[]> = {
+  [P in K[number]]: McpAppContext[P];
+};
+
+function createMcpStore<const Keys extends readonly McpAppContextKey[], R>(
+  bridge: McpAppBridge,
+  keys: Keys,
+  computeSnapshot: (context: PickContext<Keys>) => R,
+) {
+  let cachedValue: R | undefined;
+  return {
+    subscribe: bridge.subscribe(keys),
+    getSnapshot: () => {
+      const context = Object.fromEntries(
+        keys.map((k) => [k, bridge.getSnapshot(k)]),
+      ) as PickContext<Keys>;
+      const newValue = computeSnapshot(context);
+      if (cachedValue !== undefined && dequal(cachedValue, newValue)) {
+        return cachedValue;
+      }
+      cachedValue = newValue;
+      return newValue;
+    },
+  };
+}
+
+/** @internal Singleton bridge over the `ext-apps` JSON-RPC App connection. Used by `HostAdaptor`. */
 export class McpAppBridge implements Bridge<McpAppContext> {
   private static instance: McpAppBridge | null = null;
   public context: McpAppContext = {
@@ -100,9 +128,6 @@ export class McpAppBridge implements Bridge<McpAppContext> {
   public static getInstance(
     options?: Partial<{ appInfo: Implementation }>,
   ): McpAppBridge {
-    if (window.skybridge.hostType !== "mcp-app") {
-      throw new Error("MCP App Bridge can only be used in the mcp-app runtime");
-    }
     if (McpAppBridge.instance && options) {
       console.warn(
         "McpAppBridge.getInstance: options ignored, instance already exists",
@@ -143,6 +168,78 @@ export class McpAppBridge implements Bridge<McpAppContext> {
 
   public getSnapshot<K extends keyof McpAppContext>(key: K): McpAppContext[K] {
     return this.context[key];
+  }
+
+  public createContextStores(): {
+    theme: HostContextStore<"theme">;
+    locale: HostContextStore<"locale">;
+    safeArea: HostContextStore<"safeArea">;
+    displayMode: HostContextStore<"displayMode">;
+    maxHeight: HostContextStore<"maxHeight">;
+    userAgent: HostContextStore<"userAgent">;
+    toolInput: HostContextStore<"toolInput">;
+    toolOutput: HostContextStore<"toolOutput">;
+    toolResponseMetadata: HostContextStore<"toolResponseMetadata">;
+  } {
+    return {
+      theme: createMcpStore(this, ["theme"], ({ theme }) => theme ?? "light"),
+      locale: createMcpStore(
+        this,
+        ["locale"],
+        ({ locale }) => locale ?? "en-US",
+      ),
+      safeArea: createMcpStore(
+        this,
+        ["safeAreaInsets"],
+        ({ safeAreaInsets }) => ({
+          insets: safeAreaInsets ?? { top: 0, right: 0, bottom: 0, left: 0 },
+        }),
+      ),
+      displayMode: createMcpStore(
+        this,
+        ["displayMode"],
+        ({ displayMode }) => displayMode ?? "inline",
+      ),
+      maxHeight: createMcpStore(
+        this,
+        ["containerDimensions"],
+        ({ containerDimensions }) => {
+          if (containerDimensions && "maxHeight" in containerDimensions) {
+            return containerDimensions.maxHeight;
+          }
+          return undefined;
+        },
+      ),
+      userAgent: createMcpStore(
+        this,
+        ["platform", "deviceCapabilities"],
+        ({ platform, deviceCapabilities }) => ({
+          device: {
+            type: platform === "web" ? "desktop" : (platform ?? "unknown"),
+          },
+          capabilities: {
+            hover: true,
+            touch: true,
+            ...deviceCapabilities,
+          },
+        }),
+      ),
+      toolInput: createMcpStore(
+        this,
+        ["toolInput"],
+        ({ toolInput }) => toolInput ?? null,
+      ),
+      toolOutput: createMcpStore(
+        this,
+        ["toolResult"],
+        ({ toolResult }) => toolResult?.structuredContent ?? null,
+      ),
+      toolResponseMetadata: createMcpStore(
+        this,
+        ["toolResult"],
+        ({ toolResult }) => toolResult?._meta ?? null,
+      ),
+    };
   }
 
   public cleanup = () => {

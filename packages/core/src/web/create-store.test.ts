@@ -9,7 +9,8 @@ import {
   vi,
 } from "vitest";
 import type { StateCreator } from "zustand";
-import { McpAppAdaptor } from "./bridges/mcp-app/adaptor.js";
+import { HostAdaptor } from "./bridges/adaptor.js";
+import { getAdaptor } from "./bridges/get-adaptor.js";
 import { McpAppBridge } from "./bridges/mcp-app/bridge.js";
 import { createStore } from "./create-store.js";
 import { VIEW_CONTEXT_KEY } from "./data-llm.js";
@@ -20,6 +21,7 @@ import {
 
 describe("createStore", () => {
   afterEach(() => {
+    HostAdaptor.resetInstance();
     vi.unstubAllGlobals();
     vi.resetAllMocks();
   });
@@ -122,18 +124,19 @@ describe("createStore", () => {
 
   describe("mcp-app mode", () => {
     beforeEach(() => {
+      vi.stubGlobal("openai", undefined);
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
     afterEach(async () => {
       cleanup();
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
-      McpAppAdaptor.resetInstance();
     });
 
     it("should initialize with null viewState", () => {
-      const adaptor = McpAppAdaptor.getInstance();
+      const adaptor = getAdaptor();
       const viewState = adaptor.getHostContextStore("viewState").getSnapshot();
 
       expect(viewState).toBeNull();
@@ -151,7 +154,7 @@ describe("createStore", () => {
     });
 
     it("should update in-memory state via setViewState", async () => {
-      const adaptor = McpAppAdaptor.getInstance();
+      const adaptor = getAdaptor();
       vi.spyOn(adaptor, "setViewState").mockResolvedValue(undefined);
 
       type TestState = { count: number; increment: () => void };
@@ -174,7 +177,7 @@ describe("createStore", () => {
       const postMessageMock = getMcpAppHostPostMessageMock();
       vi.stubGlobal("parent", { postMessage: postMessageMock });
 
-      const adaptor = McpAppAdaptor.getInstance();
+      const adaptor = getAdaptor();
       const listener = vi.fn();
 
       adaptor.getHostContextStore("viewState").subscribe(listener);

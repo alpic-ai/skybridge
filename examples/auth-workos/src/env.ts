@@ -13,5 +13,4 @@ export const env = {
     (process.env.NODE_ENV as "development" | "production") || "development",
   SERVER_URL: process.env.SERVER_URL || "http://localhost:3000",
   AUTHKIT_DOMAIN: requireEnv("AUTHKIT_DOMAIN"),
-  WORKOS_API_KEY: requireEnv("WORKOS_API_KEY"),
 };

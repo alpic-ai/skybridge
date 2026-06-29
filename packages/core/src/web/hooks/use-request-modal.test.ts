@@ -1,13 +1,20 @@
 import { renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { HostAdaptor } from "../bridges/adaptor.js";
+import { AppsSdkBridge } from "../bridges/apps-sdk/bridge.js";
+import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import { useRequestModal } from "./use-request-modal.js";
 
 describe("useRequestModal", () => {
   let requestModalMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
+    HostAdaptor.resetInstance();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
     requestModalMock = vi.fn();
     vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+    vi.stubGlobal("parent", { postMessage: vi.fn() });
     vi.stubGlobal("openai", {
       requestModal: requestModalMock,
       view: { mode: "inline" },
@@ -17,6 +24,9 @@ describe("useRequestModal", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.resetAllMocks();
+    HostAdaptor.resetInstance();
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
   });
 
   it("should return an object with open, isOpen, and params properties where isOpen is false when mode is not modal", () => {

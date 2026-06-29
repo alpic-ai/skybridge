@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { AppsSdkAdaptor } from "../bridges/apps-sdk/adaptor.js";
+import { HostAdaptor } from "../bridges/adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import type { DownloadParams } from "../bridges/types.js";
 import {
@@ -27,12 +27,15 @@ describe("useDownload", () => {
     beforeEach(() => {
       vi.stubGlobal("openai", {});
       vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+      vi.stubGlobal("ResizeObserver", MockResizeObserver);
+      vi.stubGlobal("parent", { postMessage: getMcpAppHostPostMessageMock() });
     });
 
     afterEach(() => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
-      AppsSdkAdaptor.resetInstance();
+      HostAdaptor.resetInstance();
+      McpAppBridge.resetInstance();
     });
 
     it("returns { isError: true } and logs an error", async () => {
@@ -43,13 +46,14 @@ describe("useDownload", () => {
 
       expect(res).toEqual({ isError: true });
       expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("not supported on Apps SDK"),
+        expect.stringContaining("does not support ui/download-file"),
       );
     });
   });
 
   describe("mcp-app host without downloadFile capability", () => {
     beforeEach(() => {
+      vi.stubGlobal("openai", undefined);
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
       vi.stubGlobal("parent", { postMessage: getMcpAppHostPostMessageMock() });
@@ -58,6 +62,7 @@ describe("useDownload", () => {
     afterEach(async () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
     });
 
@@ -78,6 +83,7 @@ describe("useDownload", () => {
     let postMessageMock: ReturnType<typeof getMcpAppHostPostMessageMock>;
 
     beforeEach(() => {
+      vi.stubGlobal("openai", undefined);
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
       postMessageMock = getMcpAppHostPostMessageMock(
@@ -90,6 +96,7 @@ describe("useDownload", () => {
     afterEach(async () => {
       vi.unstubAllGlobals();
       vi.resetAllMocks();
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
     });
 
@@ -112,6 +119,7 @@ describe("useDownload", () => {
     });
 
     it("returns { isError: true } when the host denies the request", async () => {
+      HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
       postMessageMock = getMcpAppHostPostMessageMock(
         {},
