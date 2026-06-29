@@ -1,0 +1,53 @@
+---
+title: "Migrate to Skybridge"
+description: "Bring an existing MCP App over, whatever it's built on"
+sidebarTitle: "Migrate"
+icon: "bird"
+---
+
+The Skybridge Skill migrates an existing MCP App for you, whatever framework or library it's built on. It teaches your coding agent Skybridge, then drives the rewrite.
+
+## Install the Skill
+
+<CodeGroup>
+```bash npm
+npx skills add alpic-ai/skybridge -s skybridge
+```
+```bash pnpm
+pnpm dlx skills add alpic-ai/skybridge -s skybridge
+```
+```bash yarn
+yarn dlx skills add alpic-ai/skybridge -s skybridge
+```
+```bash bun
+bunx skills add alpic-ai/skybridge -s skybridge
+```
+```bash deno
+deno run -A npm:skills add alpic-ai/skybridge -s skybridge
+```
+</CodeGroup>
+
+## Prompt Your Agent
+
+<Prompt description="`Migrate my app to /skybridge`" actions={["copy", "cursor"]}>
+Migrate my app to /skybridge
+</Prompt>
+
+Your agent scaffolds a Skybridge project, ports the [tools](/build/tools) and [views](/build/view), and wires them up. From there the same Skill handles ongoing work: building features, debugging, and [deploying](/ship).
+
+<Info>
+If your app calls `window.openai` or the `ext-apps` protocol directly, the [feature mapping](/resources/apps-sdk-and-mcp-apps#feature-mapping) gives the Skybridge hook that replaces each one.
+</Info>
+
+## Go Further
+<Columns cols={3}>
+    <Card title="Register Tools" icon="wrench" href="/build/tools">
+        Define what humans and agents can do
+    </Card>
+    <Card title="Create Views" icon="palette" href="/build/view">
+        Craft interactive UIs rendered in conversation
+    </Card>
+    <Card title="Manage State" icon="database" href="/build/state">
+        Decide what the model sees
+    </Card>
+</Columns>

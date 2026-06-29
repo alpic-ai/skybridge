@@ -1,0 +1,57 @@
+---
+title: clerkProvider
+sidebarTitle: "Clerk"
+description: "Wire OAuth from a Clerk instance"
+---
+
+`clerkProvider` wires authentication through [Clerk](https://clerk.com/). Clerk access tokens carry no `aud` claim, so there is no `audience` option.
+
+## Example
+
+```ts server.ts highlight={1,7-9}
+import { McpServer, clerkProvider } from "skybridge/server";
+
+const server = new McpServer(
+  { name: "personal-shopper", version: "0.0.1" },
+  { capabilities: {} },
+  {
+    oauth: await clerkProvider({
+      domain: process.env.CLERK_FRONTEND_API,
+    }),
+  },
+);
+```
+
+## Signature
+
+```ts
+clerkProvider(opts: ClerkProviderOptions): Promise<OAuthConfig>;
+```
+
+## Parameters
+
+### `opts`
+
+**`domain`** is the Clerk Frontend API URL, for example `acme.clerk.accounts.dev` or a production custom domain.
+
+There is no `audience` option: Clerk binds no audience to its tokens.
+
+It also accepts the shared [`CustomProviderOptions`](/api-reference/custom-provider#parameters) options: `baseUrl`, `serverUrl`, `scopes`, `requiredScopes`, and `metadataOverrides`.
+
+Requires Dynamic Client Registration enabled on the instance, and the OAuth application set to issue JWT access tokens (opaque tokens can't be verified).
+
+## Returns
+
+A `Promise` for the [`OAuthConfig`](/api-reference/custom-provider#returns) you pass to the [`oauth`](/api-reference/mcp-server#constructor) constructor option.
+
+<CardGroup cols={3}>
+  <Card title="Connect an Identity Provider" icon="fingerprint" href="/guides/auth-providers">
+    Set up sign-in with a hosted provider
+  </Card>
+  <Card title="Authenticate Users" icon="key" href="/build/auth">
+    Add sign-in to your app end to end
+  </Card>
+  <Card title="customProvider" icon="key-round" href="/api-reference/custom-provider">
+    Wire OAuth from any IdP's discovery document
+  </Card>
+</CardGroup>

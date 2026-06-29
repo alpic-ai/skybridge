@@ -1,49 +1,74 @@
 ---
 title: useRequestSize
-description: "Resize the view to arbitrary dimensions."
+description: "Ask the host to resize the view to fit its content"
 ---
 
-The `useRequestSize` hook returns a function that asks the host to update the iframe height and/or width. Use it to deliberately pin a size.
+import { Compat } from "/components/compat.jsx";
 
-```tsx
-import { useEffect, useState } from "react";
-import { useRequestSize } from "skybridge/web";
+<Compat alpic claude />
 
-function Expandable() {
+A [view](/build/view) renders at a size the host sets. `useRequestSize` lets the view ask the host to resize it to fit its content.
+
+## Example
+
+The carousel grows to fit its product grid as items load, and widens to show the full catalog when the shopper expands it.
+
+```tsx highlight={1,5,15,25}
+import { useRequestSize, useLayout } from "skybridge/web";
+import { useEffect, useRef } from "react";
+
+function Carousel({ products }: { products: Product[] }) {
   const requestSize = useRequestSize();
-  const [expanded, setExpanded] = useState(false);
+  const { maxHeight } = useLayout();
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    requestSize({ height: expanded ? 500 : undefined });
-  }, [expanded, requestSize]);
+    const root = rootRef.current;
+    if (!root) {
+      return;
+    }
+    const observer = new ResizeObserver(() => {
+      requestSize({ height: root.scrollHeight });
+    });
+    observer.observe(root);
+    return () => {
+      observer.disconnect();
+    };
+  }, [requestSize]);
 
   return (
-    <div>
-      <button onClick={() => setExpanded((v) => !v)}>
-        {expanded ? "Collapse" : "Expand"}
+    <div ref={rootRef} style={{ maxHeight, overflowY: "auto" }}>
+      <button onClick={() => requestSize({ width: 960, height: 600 })}>
+        See all {products.length}
       </button>
-      {expanded && <p>Lots of additional content...</p>}
+      <ProductGrid products={products} />
     </div>
   );
 }
 ```
 
+The host applies what it can, so read the height actually granted from [`useLayout`](/api-reference/use-layout) rather than assuming the request took.
+
 ## Returns
 
-```ts
-requestSize: (size: { width?: number; height?: number }) => Promise<void>
+`useRequestSize` returns a single function.
+
+### `requestSize`
+
+```tsx
+requestSize(size: { width?: number; height?: number }): Promise<void>;
 ```
 
-An async function that asks the host to size your view's container to the given dimensions. Both `width` and `height` are optional; pass only what you want to update.
+Asks the host to resize the view, `width` and `height` in pixels; omit a dimension to leave it unchanged. The promise resolves once the request is sent, not once the host applies it: the host is free to clamp, ignore, or partially honor the size.
 
-## Runtime behavior
-
-| Runtime | Behavior |
-|---------|----------|
-| Apps SDK (ChatGPT) | Not supported |
-| MCP Apps | Sends `ui/notifications/size-changed` with both `width` and `height` to the host. |
-
-<Tip>
-The host may clamp the requested size or ignore it entirely in display modes that own the viewport.
-</Tip>
-
+<CardGroup cols={3}>
+  <Card title="useLayout" icon="layout" href="/api-reference/use-layout">
+    Read the height the host actually grants the view
+  </Card>
+  <Card title="useDisplayMode" icon="maximize" href="/api-reference/use-display-mode">
+    Switch the view between inline, fullscreen, and pip
+  </Card>
+  <Card title="Design for the Host" icon="sparkles" href="/guides/ux">
+    Size and shape the view to fit the host
+  </Card>
+</CardGroup>
