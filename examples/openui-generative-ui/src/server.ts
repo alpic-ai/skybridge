@@ -1,27 +1,20 @@
-import type { ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { ZodRawShapeCompat } from "@modelcontextprotocol/sdk/server/zod-compat.js";
-import type { ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
-import { McpServer, type ToolMeta, type ViewConfig } from "skybridge/server";
-import { z } from "zod/v3";
-import { exampleOpenuiProgram, openuiPrompt } from "./openui/library.js";
+import { McpServer, type ToolDef } from "skybridge/server";
+import { z } from "zod";
+import { openuiPrompt } from "./openui/library.js";
 
-type ToolConfig<InputArgs extends ZodRawShapeCompat | undefined = undefined> = {
-  name: string;
-  title?: string;
-  description?: string;
-  inputSchema?: InputArgs;
-  outputSchema?: ZodRawShapeCompat;
-  annotations?: ToolAnnotations;
-  view?: ViewConfig;
-  _meta?: ToolMeta;
+type AppTools = {
+  "get-openui-prompt": ToolDef<Record<string, never>, never, unknown>;
+  render: ToolDef<{ code: string }, Record<string, never>, unknown>;
+};
+export type AppType = McpServer<AppTools>;
+
+type RenderResult = {
+  structuredContent: Record<string, never>;
+  content: string;
+  isError: false;
 };
 
-type RegisterTool = <InputArgs extends ZodRawShapeCompat | undefined>(
-  config: ToolConfig<InputArgs>,
-  cb: ToolCallback<InputArgs>,
-) => McpServer;
-
-const renderInputSchema = {
+const renderInputSchema: { code: z.ZodTypeAny } = {
   code: z
     .string()
     .describe(
@@ -29,91 +22,55 @@ const renderInputSchema = {
     ),
 };
 
-const server = new McpServer(
-  {
-    name: "openui-generative-ui",
-    version: "0.0.1",
-});
+async function getOpenuiPrompt() {
+  return {
+    content: openuiPrompt,
+  };
+}
 
-const registerTool = server.registerTool.bind(server) as RegisterTool;
+async function renderOpenui(): Promise<RenderResult> {
+  return {
+    structuredContent: {},
+    content: "OpenUI Lang UI rendered successfully.",
+    isError: false,
+  };
+}
 
-registerTool(
-  {
-    name: "get-openui-prompt",
-    description:
-      "Returns the OpenUI Lang component prompt and an example program. Call this before render to learn the available components and syntax.",
-    annotations: {
-      readOnlyHint: true,
-      openWorldHint: false,
-      destructiveHint: false,
-    },
-  },
-  async () => ({
-    content: [
-      {
-        type: "text" as const,
-        text: openuiPrompt,
-      },
-    ],
-  }),
-);
-
-registerTool(
-  {
-    name: "render",
-    description:
-      "Render a dynamic UI from an OpenUI Lang program. Call get-openui-prompt first, then pass only valid OpenUI Lang code.",
-    inputSchema: renderInputSchema,
-    annotations: {
-      readOnlyHint: true,
-      openWorldHint: false,
-      destructiveHint: false,
-    },
-    view: {
-      component: "render",
+const server: McpServer = new McpServer({
+  name: "openui-generative-ui",
+  version: "0.0.1",
+})
+  .registerTool(
+    {
+      name: "get-openui-prompt",
       description:
-        "Renders an OpenUI Lang program with the standard OpenUI component library",
-    },
-  },
-  async ({ code }) => ({
-    structuredContent: { code },
-    content: [
-      {
-        type: "text" as const,
-        text: "OpenUI Lang UI rendered successfully.",
+        "Returns the OpenUI Lang component prompt and an example program. Call this before render to learn the available components and syntax.",
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+        destructiveHint: false,
       },
-    ],
-    isError: false,
-  }),
-);
-
-registerTool(
-  {
-    name: "render-example",
-    description:
-      "Render the bundled OpenUI Lang example. Use this for a quick smoke test before generating a custom UI.",
-    annotations: {
-      readOnlyHint: true,
-      openWorldHint: false,
-      destructiveHint: false,
     },
-    view: {
-      component: "render-example",
-      description: "Renders the bundled OpenUI Lang example",
-    },
-  },
-  async () => ({
-    structuredContent: { code: exampleOpenuiProgram },
-    content: [
-      {
-        type: "text" as const,
-        text: "Example OpenUI Lang UI rendered successfully.",
+    getOpenuiPrompt,
+  )
+  .registerTool(
+    {
+      name: "render",
+      description:
+        "Render a dynamic UI from an OpenUI Lang program. Call get-openui-prompt first, then pass only valid OpenUI Lang code.",
+      inputSchema: renderInputSchema,
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+        destructiveHint: false,
       },
-    ],
-    isError: false,
-  }),
-);
+      view: {
+        component: "render",
+        description:
+          "Renders an OpenUI Lang program with the standard OpenUI component library",
+      },
+    },
+    renderOpenui,
+  );
 
 export default await server.run();
-
-export type AppType = typeof server;

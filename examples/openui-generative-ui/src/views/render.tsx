@@ -14,7 +14,7 @@ function formatError(error: OpenUIError): string {
 function RenderWidget() {
   const { input } = useToolInfo<"render">();
   const [errors, setErrors] = useState<OpenUIError[]>([]);
-  const code = typeof output?.code === "string" ? output.code : null;
+  const code = typeof input?.code === "string" ? input.code : null;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset parser errors when a new program is loaded
   useEffect(() => {
@@ -25,7 +25,7 @@ function RenderWidget() {
     return (
       <div className="empty-state">
         <strong>Waiting for OpenUI Lang...</strong>
-        <span>Call render-example or render with generated OpenUI Lang.</span>
+        <span>Call render with generated OpenUI Lang.</span>
       </div>
     );
   }

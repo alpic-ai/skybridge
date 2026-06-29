@@ -21,7 +21,7 @@
     "skybridge": "^1.1.0",
     "tailwindcss": "^4.1.18",
     "vite": "^7.3.1",
-    "zod": "^4.3.5",
+    "zod": "4.3.6",
     "zustand": "^4.5.7"
   },
   "devDependencies": {

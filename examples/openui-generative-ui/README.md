@@ -4,7 +4,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home) and 
 
 ## What This Example Showcases
 
-This example uses OpenUI's standard React component library instead of a JSON renderer catalog. The server exposes `get-openui-prompt`, which returns the generated OpenUI Lang instructions from `openuiLibrary.prompt()`. The model then calls `render` with an OpenUI Lang program. The Skybridge view renders that program with OpenUI's React `<Renderer />`.
+This example shows how a Skybridge MCP app can offer Generative UI with OpenUI's standard React component library. The server exposes `get-openui-prompt`, which returns the generated OpenUI Lang instructions from `openuiLibrary.prompt()`. The model then calls `render` with an OpenUI Lang program. The Skybridge view renders that program with OpenUI's React `<Renderer />`.
 
 ```mermaid
 sequenceDiagram
@@ -16,9 +16,9 @@ sequenceDiagram
     Server-->>Host: OpenUI Lang syntax, component signatures, example
 
     Host->>Server: call render({ code })
-    Server-->>Host: structuredContent: { code }
-    Host->>View: render iframe with tool output
-    View->>View: OpenUI Renderer parses and renders the program
+    Host->>View: stream tool input into iframe
+    Server-->>Host: success response
+    View->>View: OpenUI Renderer parses and renders the program while it streams
 ```
 
 OpenUI Lang is compact and stream-friendly: the first line defines `root`, while later lines can fill in forward references as the model generates details.
@@ -48,12 +48,12 @@ This starts:
 - MCP server at `http://localhost:3000/mcp`
 - Skybridge DevTools UI at `http://localhost:3000/`
 
-### Try the Bundled Demo
+### Try the Demo Flow
 
-Use the `render-example` tool for a quick smoke test, or ask the host to:
+Ask the host to:
 
 1. Call `get-openui-prompt`.
-2. Generate OpenUI Lang for a dashboard, report, checklist, or plan.
+2. Use the included example or generate OpenUI Lang for a dashboard, report, checklist, or plan.
 3. Call `render` with the generated `code`.
 
 ## Project Structure
