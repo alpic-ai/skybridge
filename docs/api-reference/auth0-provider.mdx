@@ -1,0 +1,61 @@
+---
+title: auth0Provider
+sidebarTitle: "Auth0"
+description: "Wire OAuth from an Auth0 tenant"
+---
+
+`auth0Provider` wires authentication through [Auth0](https://auth0.com/). Auth0 carries the audience in the authorize request rather than as a resource indicator, so it also requires this server's public URL as `serverUrl`.
+
+## Example
+
+```ts server.ts highlight={1,7-11}
+import { McpServer, auth0Provider } from "skybridge/server";
+
+const server = new McpServer(
+  { name: "personal-shopper", version: "0.0.1" },
+  { capabilities: {} },
+  {
+    oauth: await auth0Provider({
+      domain: process.env.AUTH0_DOMAIN,
+      audience: process.env.AUTH0_API_IDENTIFIER,
+      serverUrl: process.env.SERVER_URL,
+    }),
+  },
+);
+```
+
+## Signature
+
+```ts
+auth0Provider(opts: Auth0ProviderOptions): Promise<OAuthConfig>;
+```
+
+## Parameters
+
+### `opts`
+
+- **`domain`** is the tenant domain, for example `acme.us.auth0.com`.
+
+- **`audience`** is the API Identifier from the Auth0 dashboard, bound into the token's `aud` claim.
+
+- **`serverUrl`** is this server's public URL, required for Auth0.
+
+It also accepts the shared [`CustomProviderOptions`](/api-reference/custom-provider#parameters) options: `scopes`, `requiredScopes`, and `metadataOverrides`.
+
+Requires Dynamic Client Registration enabled on the tenant.
+
+## Returns
+
+A `Promise` for the [`OAuthConfig`](/api-reference/custom-provider#returns) you pass to the [`oauth`](/api-reference/mcp-server#constructor) constructor option.
+
+<CardGroup cols={3}>
+  <Card title="Connect an Identity Provider" icon="fingerprint" href="/guides/auth-providers">
+    Set up sign-in with a hosted provider
+  </Card>
+  <Card title="Authenticate Users" icon="key" href="/build/auth">
+    Add sign-in to your app end to end
+  </Card>
+  <Card title="customProvider" icon="key-round" href="/api-reference/custom-provider">
+    Wire OAuth from any IdP's discovery document
+  </Card>
+</CardGroup>

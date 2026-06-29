@@ -4,10 +4,6 @@ description: "Fix the errors you're most likely to hit"
 icon: "cross"
 ---
 
-import { Hero } from "/components/hero.jsx";
-
-<Hero src="/images/troubleshooting.png" alt="Troubleshooting Illustration" />
-
 Common Skybridge errors, grouped by symptom, each with its cause and fix.
 
 ## Typed hooks report "Property does not exist on type"
@@ -62,10 +58,10 @@ Some hooks only work on one host. Skybridge picks the runtime at load, and calli
 
 ## Go Further
 <Columns cols={2}>
-    <Card title="Configure CSP" img="/images/csp.png" href="/guides/csp">
+    <Card title="Configure CSP" icon="shield" href="/guides/csp">
         Let your views reach the domains they need
     </Card>
-    <Card title="Audit" img="/images/audit.png" href="/test/audit">
+    <Card title="Audit" icon="clipboard-check" href="/test/audit">
         Validate before submission
     </Card>
 </Columns>

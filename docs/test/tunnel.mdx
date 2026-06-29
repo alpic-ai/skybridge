@@ -4,10 +4,6 @@ description: "Tunnel your local server to ChatGPT and Claude"
 icon: "globe"
 ---
 
-import { Hero } from "/components/hero.jsx";
-
-<Hero src="/images/tunnel.png" alt="Tunnel Illustration" />
-
 ChatGPT and Claude connect to MCP servers over the internet, and your dev server lives on localhost. The tunnel bridges the two: it exposes your local server on a public URL, so real hosts run your app while it keeps reloading on every file save.
 
 <Info>
@@ -66,13 +62,13 @@ ChatGPT and Claude cache your tool definitions at registration. When the server 
 
 ## Go Further
 <Columns cols={3}>
-    <Card title="DevTools" img="/images/devtools.png" href="/test/devtools">
+    <Card title="DevTools" icon="square-dashed-mouse-pointer" href="/test/devtools">
         Call tools and render views locally, without a host
     </Card>
-    <Card title="Playground" img="/images/playground.png" href="/test/playground">
+    <Card title="Playground" icon="message-circle" href="/test/playground">
         Chat with a real model running your app
     </Card>
-    <Card title="Audit" img="/images/audit.png" href="/test/audit">
+    <Card title="Audit" icon="clipboard-check" href="/test/audit">
         Catch spec and platform issues before submission
     </Card>
 </Columns>

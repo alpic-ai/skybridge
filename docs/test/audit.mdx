@@ -4,10 +4,6 @@ description: "Catch spec and platform issues before submission"
 icon: "clipboard-check"
 ---
 
-import { Hero } from "/components/hero.jsx";
-
-<Hero src="/images/audit.png" alt="Audit Illustration" />
-
 Before a platform accepts your app, the server must conform to the MCP specs, and each platform layers its own requirements on top, which differ between [OpenAI](https://developers.openai.com/apps-sdk/app-submission-guidelines) and [Anthropic](https://claude.com/docs/connectors/building/submission). The Audit checks your app's conformance and performs end-to-end tests in real ChatGPT and Claude conversations, triggering [tools](/build/tools) and rendering [views](/build/view).
 
 ## Run the Audit
@@ -44,7 +40,7 @@ The Audit is powered by [Alpic Beacon](https://docs.alpic.ai/testing/beacon). It
 - **App behavior**: the app actually works, verified by triggering tools and rendering views in real ChatGPT and Claude conversations.
 
 <Frame caption="The Audit interface">
-<Hero src="/images/audit-screenshot.png" alt="Audit Illustration" />
+<img src="/images/audit-screenshot.png" alt="Audit Illustration" />
 </Frame>
 
 The report returns an overall score, a readiness status per platform, and the issues found, each with its severity (error, warning, info), the affected component, and the solution. **Improve your score** turns the report into a prompt for your coding agent to fix them all.
@@ -55,13 +51,13 @@ OAuth-protected servers aren't supported yet.
 
 ## Go Further
 <Columns cols={3}>
-    <Card title="DevTools" img="/images/devtools.png" href="/test/devtools">
+    <Card title="DevTools" icon="square-dashed-mouse-pointer" href="/test/devtools">
         Call tools and render views locally, without a host
     </Card>
-    <Card title="Tunnel" img="/images/tunnel.png" href="/test/tunnel">
+    <Card title="Tunnel" icon="globe" href="/test/tunnel">
         Expose your local server to real hosts
     </Card>
-    <Card title="Playground" img="/images/playground.png" href="/test/playground">
+    <Card title="Playground" icon="message-circle" href="/test/playground">
         Chat with a real model running your app
     </Card>
 </Columns>

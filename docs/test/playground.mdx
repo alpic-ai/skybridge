@@ -4,10 +4,6 @@ description: "Chat with a real model running your app"
 icon: "message-circle"
 ---
 
-import { Hero } from "/components/hero.jsx";
-
-<Hero src="/images/playground.png" alt="Playground Illustration" />
-
 Putting a real model in the loop normally means registering your app in a host. The Playground skips that: a chat wired to your local server, where a real LLM uses your [tools](/build/tools) and the [views](/build/view) render inline.
 
 ## Start the Playground
@@ -54,13 +50,13 @@ With a model in the loop, the prompt surface and the state sync become testable:
 
 ## Go Further
 <Columns cols={3}>
-    <Card title="DevTools" img="/images/devtools.png" href="/test/devtools">
+    <Card title="DevTools" icon="square-dashed-mouse-pointer" href="/test/devtools">
         Call tools and render views locally, without a host
     </Card>
-    <Card title="Tunnel" img="/images/tunnel.png" href="/test/tunnel">
+    <Card title="Tunnel" icon="globe" href="/test/tunnel">
         Expose your local server to real hosts
     </Card>
-    <Card title="Audit" img="/images/audit.png" href="/test/audit">
+    <Card title="Audit" icon="clipboard-check" href="/test/audit">
         Catch spec and platform issues before submission
     </Card>
 </Columns>

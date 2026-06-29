@@ -1,0 +1,58 @@
+---
+title: stytchProvider
+sidebarTitle: "Stytch"
+description: "Wire OAuth from Stytch Connected Apps"
+---
+
+`stytchProvider` wires authentication through [Stytch Connected Apps](https://stytch.com/), so your tools receive a signed-in Stytch user.
+
+## Example
+
+```ts server.ts highlight={1,7-10}
+import { McpServer, stytchProvider } from "skybridge/server";
+
+const server = new McpServer(
+  { name: "personal-shopper", version: "0.0.1" },
+  { capabilities: {} },
+  {
+    oauth: await stytchProvider({
+      domain: process.env.STYTCH_DOMAIN,
+      audience: process.env.STYTCH_PROJECT_ID,
+    }),
+  },
+);
+```
+
+## Signature
+
+```ts
+stytchProvider(opts: StytchProviderOptions): Promise<OAuthConfig>;
+```
+
+## Parameters
+
+### `opts`
+
+- **`domain`** is the project domain, for example `acme.customers.stytch.dev`, or a configured custom domain.
+
+- **`audience`** is the Stytch Project ID, the audience Stytch binds into the token's `aud` claim.
+
+It also accepts the shared [`CustomProviderOptions`](/api-reference/custom-provider#parameters) options: `baseUrl`, `serverUrl`, `scopes`, `requiredScopes`, and `metadataOverrides`.
+
+Requires Dynamic Client Registration enabled in the Stytch dashboard.
+
+## Returns
+
+A `Promise` for the [`OAuthConfig`](/api-reference/custom-provider#returns) you pass to the [`oauth`](/api-reference/mcp-server#constructor) constructor option.
+
+<CardGroup cols={3}>
+  <Card title="Connect an Identity Provider" icon="fingerprint" href="/guides/auth-providers">
+    Set up sign-in with a hosted provider
+  </Card>
+  <Card title="Authenticate Users" icon="key" href="/build/auth">
+    Add sign-in to your app end to end
+  </Card>
+  <Card title="customProvider" icon="key-round" href="/api-reference/custom-provider">
+    Wire OAuth from any IdP's discovery document
+  </Card>
+</CardGroup>

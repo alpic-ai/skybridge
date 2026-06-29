@@ -5,10 +5,6 @@ sidebarTitle: "CSP"
 icon: "shield"
 ---
 
-import { Hero } from "/components/hero.jsx";
-
-<Hero src="/images/csp.png" alt="CSP Illustration" />
-
 Views render in a sandboxed iframe under a strict [Content Security Policy](https://developer.mozilla.org/fr/docs/Web/HTTP/Guides/CSP): it blocks every cross-origin request the view hasn't declared. Your server's own origin is allowed automatically, so a view that only talks to its server needs no configuration. For anything else, list the origin on the [tool's config `view.csp`](http://localhost:3000/api-reference/register-tool#csp).
 
 ```ts server.ts
@@ -162,13 +158,13 @@ For the full field reference, see [registerTool](/api-reference/register-tool#cs
 
 ## Go Further
 <Columns cols={3}>
-    <Card title="Create Views" img="/images/view.png" href="/build/view">
+    <Card title="Create Views" icon="palette" href="/build/view">
         Craft interactive UIs rendered in conversation
     </Card>
-    <Card title="UX Design" img="/images/ux.png" href="/guides/ux">
+    <Card title="UX Design" icon="sparkles" href="/guides/ux">
         Account for what makes an MCP App different
     </Card>
-    <Card title="Audit" img="/images/audit.png" href="/test/audit">
+    <Card title="Audit" icon="clipboard-check" href="/test/audit">
         Validate before submission
     </Card>
 </Columns>

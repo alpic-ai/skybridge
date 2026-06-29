@@ -69,6 +69,7 @@
               "guides/csp",
               "guides/ux",
               "guides/files",
+              "guides/auth-providers",
               "guides/migrate"
             ],
             "expanded": true
@@ -104,6 +105,18 @@
               "api-reference/optional-bearer-auth",
               "api-reference/require-bearer-auth",
               "api-reference/verifier"
+            ]
+          },
+          {
+            "group": "Identity Providers",
+            "icon": "fingerprint",
+            "pages": [
+              "api-reference/auth0-provider",
+              "api-reference/clerk-provider",
+              "api-reference/descope-provider",
+              "api-reference/stytch-provider",
+              "api-reference/workos-provider",
+              "api-reference/custom-provider"
             ]
           },
           {

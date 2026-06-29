@@ -4,10 +4,6 @@ description: "Call tools and render views locally, without a host"
 icon: "square-dashed-mouse-pointer"
 ---
 
-import { Hero } from "/components/hero.jsx";
-
-<Hero src="/images/devtools.png" alt="DevTools Illustration" />
-
 Testing through a real host means exposing a public URL, registering a connector, starting a conversation, and prompting the model until it calls the right [tool](/build/tools). DevTools cuts that loop down to a file save: it runs locally, emulates the host runtime, and lets you call tools directly, no model or host involved.
 
 ## Start the Emulator
@@ -43,7 +39,7 @@ Every [tool](/build/tools) registered on the server appears in the sidebar autom
 Select a tool in the sidebar and DevTools gives you the full exchange:
 
 <Frame caption="The DevTools interface">
-<Hero src="/images/devtools-screenshot.png" alt="DevTools Illustration" />
+<img src="/images/devtools-screenshot.png" alt="DevTools Illustration" />
 </Frame>
 
 - **Tool controls**: generated from the tool's [input schema](/api-reference/register-tool#inputschema-outputschema). Inputs can be saved and re-run from the tool header.
@@ -72,13 +68,13 @@ To test your app against a real LLM, use the [playground](/test/playground) or c
 
 ## Go Further
 <Columns cols={3}>
-    <Card title="Tunnel" img="/images/tunnel.png" href="/test/tunnel">
+    <Card title="Tunnel" icon="globe" href="/test/tunnel">
         Expose your local server to real hosts
     </Card>
-    <Card title="Playground" img="/images/playground.png" href="/test/playground">
+    <Card title="Playground" icon="message-circle" href="/test/playground">
         Chat with a real model running your app
     </Card>
-    <Card title="Audit" img="/images/audit.png" href="/test/audit">
+    <Card title="Audit" icon="clipboard-check" href="/test/audit">
         Catch spec and platform issues before submission
     </Card>
 </Columns>
