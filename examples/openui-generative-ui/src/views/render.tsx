@@ -12,7 +12,7 @@ function formatError(error: OpenUIError): string {
 }
 
 function RenderWidget() {
-  const { output } = useToolInfo<{ output: { code?: string } }>();
+  const { input } = useToolInfo<"render">();
   const [errors, setErrors] = useState<OpenUIError[]>([]);
   const code = typeof output?.code === "string" ? output.code : null;
 
