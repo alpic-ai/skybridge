@@ -1,0 +1,57 @@
+---
+title: descopeProvider
+sidebarTitle: "Descope"
+description: "Wire OAuth from a Descope MCP Server"
+---
+
+`descopeProvider` wires authentication through a [Descope](https://www.descope.com/) MCP Server, so your tools receive a signed-in Descope user.
+
+## Example
+
+```ts server.ts highlight={1,7-9}
+import { McpServer, descopeProvider } from "skybridge/server";
+
+const server = new McpServer(
+  { name: "personal-shopper", version: "0.0.1" },
+  { capabilities: {} },
+  {
+    oauth: await descopeProvider({
+      url: process.env.DESCOPE_DISCOVERY_URL,
+    }),
+  },
+);
+```
+
+## Signature
+
+```ts
+descopeProvider(opts: DescopeProviderOptions): Promise<OAuthConfig>;
+```
+
+## Parameters
+
+### `opts`
+
+- **`url`** is the MCP Server's Discovery URL (its Issuer) from the console's Connection Information, for example `https://api.descope.com/v1/apps/agentic/<projectId>/<mcpServerId>`, or your custom domain.
+
+- **`audience`** defaults to the Project ID parsed from the `/agentic/<projectId>/<mcpServerId>` segment of `url` (Descope binds the token's `aud` to `[DCR client id, project id]`). If `url` lacks that segment, such as a custom domain, pass `audience` explicitly or the server throws at startup.
+
+It also accepts the shared [`CustomProviderOptions`](/api-reference/custom-provider#parameters) options: `baseUrl`, `serverUrl`, `scopes`, `requiredScopes`, and `metadataOverrides`.
+
+Requires Dynamic Client Registration enabled on the MCP Server. With DCR disabled and the Alpic DCR proxy, use [`customProvider`](/api-reference/custom-provider) with `serverUrl` instead.
+
+## Returns
+
+A `Promise` for the [`OAuthConfig`](/api-reference/custom-provider#returns) you pass to the [`oauth`](/api-reference/mcp-server#constructor) constructor option.
+
+<CardGroup cols={3}>
+  <Card title="Connect an Identity Provider" icon="fingerprint" href="/guides/auth-providers">
+    Set up sign-in with a hosted provider
+  </Card>
+  <Card title="Authenticate Users" icon="key" href="/build/auth">
+    Add sign-in to your app end to end
+  </Card>
+  <Card title="customProvider" icon="key-round" href="/api-reference/custom-provider">
+    Wire OAuth from any IdP's discovery document
+  </Card>
+</CardGroup>

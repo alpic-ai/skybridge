@@ -1,201 +1,237 @@
 ---
 title: registerTool
-description: "Register an MCP tool — with or without a React view"
+description: "Register a tool, with or without a view"
 ---
 
+`registerTool` adds an action the model can call to your server, optionally rendering its result through a [view](#view).
 
-Register an MCP tool on the server. Provide a `view` to bind the tool to a React view; omit `view` for a plain tool with no UI.
+## Example
+
+`search-products` searches the store catalog for the signed-in user and renders the matches in the `carousel` view.
+
+```ts server.ts
+import { McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({ name: "shop", version: "1.0" }).registerTool(
+  {
+    name: "search-products",
+    title: "Search products",
+    description: "Search the store catalog by keyword and optional price ceiling.",
+    inputSchema: {
+      query: z.string().describe("What the shopper is looking for"),
+    },
+    outputSchema: {
+      productIds: z.array(z.string()).describe("The IDs of products matching the query."),
+    },
+    annotations: { readOnlyHint: true },
+    securitySchemes: [{ type: "oauth2", scopes: ["catalog.read"] }],
+    view: {
+      component: "carousel",
+      csp: { connectDomains: ["https://api.myshop.com"] },
+    },
+  },
+  async ({ query, maxPrice }, { authInfo }) => {
+    const userId = authInfo.extra?.sub as string;
+    const products = await search(query, { maxPrice, userId });
+    return {
+      content: `Found ${products.length} products for "${query}".`,
+      structuredContent: { products },
+    };
+  },
+);
+```
 
 ## Signature
 
-```typescript
-server.registerTool(
-  config: ToolConfig,
-  handler: ToolHandler,
-): McpServer
+```ts
+server.registerTool(config: ToolConfig, handler: ToolHandler): McpServer;
 ```
 
 ## Config
 
-```typescript
+The first argument declares the tool.
+
+```ts
 type ToolConfig = {
-  name: string;              // Tool name, exposed to the model
-  title?: string;            // Human-readable title
-  description?: string;      // Shown to the model
-  inputSchema?: ZodRawShape; // Input validation (Zod)
-  outputSchema?: ZodRawShape;// Output type hints (Zod)
-  annotations?: ToolAnnotations;
-  view?: ViewConfig;         // ← present = view-tool, absent = plain tool
-  securitySchemes?: SecurityScheme[]; // Declare per-tool auth requirements
-  _meta?: ToolMeta;
+  name: string;
+  title?: string; // human-readable label
+  description?: string; // model-facing: decides when the model calls the tool
+  inputSchema?: ZodRawShape; // Zod shape; validates the call and types the handler input
+  outputSchema?: ZodRawShape; // Zod shape; types structuredContent
+  annotations?: ToolAnnotations; // standard MCP hints
+  view?: ViewConfig; // bind a view to render the result
+  securitySchemes?: SecurityScheme[]; // declare per-tool auth
+  _meta?: ToolMeta; // extra metadata
 };
-
-type ToolMeta = {
-  // Enable view-initiated tool calls (see useCallTool)
-  "openai/widgetAccessible"?: boolean;
-  // Custom status messages
-  "openai/toolInvocation/invoking"?: string; // While running
-  "openai/toolInvocation/invoked"?: string;  // After completion
-  "openai/fileParams"?: string[]; // List of top-level input fields that references files.
-  // Controls whether a tool is available to the model, the UI (app), or both.
-  ui?: { visibility?: Array<"model" | "app"> };
-  // Mirror of ToolConfig.securitySchemes
-  securitySchemes?: SecurityScheme[];
-  [key: string]: unknown;
-};
-
-type SecurityScheme =
-  | { type: "noauth" }
-  | { type: "oauth2"; scopes?: string[] };
 ```
 
-<Note>
-Flag input parameters that ChatGPT can use to reference files by adding the keys to `openai/fileParams`.
-Learn more about files lifecycle with tool calling by reading the [`FileRef`](/api-reference/file-ref) doc.
-</Note>
+### `name`, `title`, `description`
+
+All three are the tool's prompt surface: the model reads them to decide when to call it, so write each for the model. `name` is also the identifier the call uses, and `title` a short display name.
+
+### `inputSchema`, `outputSchema`
+
+[Zod](https://zod.dev/) raw shapes. `inputSchema` validates the call arguments and types the handler's `input`. Add `.describe()` to a field to tell the model what it's for. `outputSchema` tells the model the shape to expect back, it does not type the returned value.
+
+### `annotations`
+
+Standard MCP hints describing what the tool does, so the host can label it and order calls. They are hints: the host may surface or ignore them, and never gates a call on them.
+
+```ts
+type ToolAnnotations = {
+  title?: string;
+  readOnlyHint?: boolean;
+  destructiveHint?: boolean;
+  idempotentHint?: boolean;
+  openWorldHint?: boolean;
+};
+```
+
+| Hint | Meaning | Default |
+| --- | --- | --- |
+| `title` | Human-readable label; the host gives it precedence over `name`. | none |
+| `readOnlyHint` | The tool does not modify its environment. | `false` |
+| `destructiveHint` | The tool may perform destructive updates, not only additive ones. Meaningful only when `readOnlyHint` is `false`. | `true` |
+| `idempotentHint` | Repeating the call with the same arguments has no further effect. Meaningful only when `readOnlyHint` is `false`. | `false` |
+| `openWorldHint` | The tool interacts with an open world of external entities, not a closed domain. | `true` |
 
 ### `view`
 
-Binds the tool to a React view.
+Bind the tool to a React view to render its result instead of plain text. Each view backs exactly one tool.
 
-```typescript
+```ts
 type ViewConfig = {
-  component: ViewName;                   // File name in src/views/ (typed — see below)
-  description?: string;                    // Shown during view discovery
-  hosts?: ("apps-sdk" | "mcp-app")[];      // Deprecated, no-op
-  prefersBorder?: boolean;                 // Removes the default iframe border when false
-  domain?: string;                         // Custom view domain
-  csp?: {
-    resourceDomains?: string[];   // Static assets (images, fonts, scripts)
-    connectDomains?: string[];    // Fetch / XHR targets
-    frameDomains?: string[];      // Iframe embed origins
-    redirectDomains?: string[];   // Allowed external redirects (skips safe-link modal)
-    baseUriDomains?: string[];    // `<base href>` origins (mcp-apps only)
-  };
+  component: ViewName;
+  description?: string;
+  hosts?: Array<"apps-sdk" | "mcp-app">;
+  prefersBorder?: boolean;
+  domain?: string;
+  csp?: ViewCsp;
   _meta?: Record<string, unknown>;
 };
 ```
 
-See [CSP & Domains](#csp--domains) below.
+| Key | Purpose |
+| --- | --- |
+| `component` | The view's file name, type-checked against your views. |
+| `description` | Label the host may show during view discovery. |
+| `hosts` | Restrict where the view renders; defaults to all. |
+| `prefersBorder` | Apps SDK only: request a visible border around the view. |
+| `domain` | Apps SDK only: override the served domain (advanced). |
+| [`csp`](/api-reference/register-tool#csp) | Per-view CSP overrides; see below. |
+| `_meta` | Free-form metadata forwarded on the view resource. |
+
+#### `csp`
+
+A view runs in a sandboxed iframe; your server's domain is allowlisted automatically. Add external origins per directive:
+
+```ts
+type ViewCsp = {
+  resourceDomains?: string[];
+  connectDomains?: string[];
+  frameDomains?: string[];
+  redirectDomains?: string[];
+  baseUriDomains?: string[];
+};
+```
+
+| Directive | Purpose |
+| --- | --- |
+| `resourceDomains` | Static assets: images, fonts, scripts, styles. |
+| `connectDomains` | Fetch / XHR targets. |
+| `frameDomains` | Iframe embed origins (opts into stricter app review). |
+| `redirectDomains` | `openExternal` targets that skip the safe-link modal. |
+| `baseUriDomains` | `<base href>` origins (MCP Apps only). |
 
 ### `securitySchemes`
 
-Declare which auth schemes this tool supports so clients can label it as public vs. requires-sign-in *before* invocation, and request the right OAuth scopes during sign-in.
+Declare which auth a tool supports so clients can label it public vs. requires-sign-in before invocation, and request the right scopes during sign-in.
 
-```typescript
+```ts
 type SecurityScheme =
   | { type: "noauth" }
   | { type: "oauth2"; scopes?: string[] };
 ```
 
-- **Across the array: match ANY.** Each entry is an alternative. The request is authorized if any one scheme is satisfied.
-- **Within an `oauth2` entry's `scopes`: match ALL.** The validated token must carry every listed scope.
-- **Listing `noauth` + `oauth2`** means "works anonymously, but auth gives more features."
+- **Across the array, match any.** Each entry is an alternative.
+- **Within an `oauth2` entry's `scopes`, match all.** The token must carry every listed scope.
+- **`noauth` and `oauth2` together** means "works anonymously, but auth unlocks more."
 
 <Warning>
-This field is client-facing metadata. **Servers must still enforce auth on each call** — verify `extra.authInfo` and check `authInfo.scopes` in the handler (or use a tool-call middleware). The declaration is not self-enforcing.
+`securitySchemes` is client-facing metadata, not self-enforcing. Pair it with an auth middleware ([`requireBearerAuth`](/api-reference/require-bearer-auth) or [`optionalBearerAuth`](/api-reference/optional-bearer-auth)) to authenticate requests, and enforce the tool's own requirements in the handler from `extra.authInfo`.
 </Warning>
 
-#### Examples
+### `_meta`
 
-Protected tool:
+Metadata on the tool. Skybridge recognizes the keys below; any other key you set is forwarded on the tool's `_meta` untouched.
 
-```typescript
-const SEARCH_SCOPES = ["search.read"];
-
-server.registerTool(
-  {
-    name: "search-private-docs",
-    description: "Search documents in the user's workspace.",
-    inputSchema: { q: z.string() },
-    securitySchemes: [{ type: "oauth2", scopes: SEARCH_SCOPES }],
-  },
-  async ({ q }, extra) => {
-    if (!extra.authInfo) {
-      return { content: "Sign in required.", isError: true };
-    }
-    const missing = SEARCH_SCOPES.filter(
-      (s) => !extra.authInfo!.scopes.includes(s),
-    );
-    if (missing.length > 0) {
-      return {
-        content: `Missing scope(s): ${missing.join(", ")}.`,
-        isError: true,
-      };
-    }
-    return { content: await search(q) };
-  },
-);
+```ts
+type ToolMeta = {
+  ui?: { visibility?: Array<"model" | "app"> };
+  "openai/toolInvocation/invoking"?: string;
+  "openai/toolInvocation/invoked"?: string;
+  "openai/fileParams"?: string[];
+  [key: string]: unknown;
+};
 ```
 
-Public tool:
+| Key | Purpose |
+| --- | --- |
+| `ui.visibility` | Expose the tool to the model, the app, or both. |
+| `openai/toolInvocation/invoking`, `invoked` | Status text shown while the tool runs and after it completes. |
+| `openai/fileParams` | Top-level input fields that carry file references; see [`FileRef`](/api-reference/file-ref). |
+| `openai/widgetAccessible` | Deprecated, use `ui.visibility`. |
 
-```typescript
-server.registerTool(
-  {
-    name: "search-public-docs",
-    description: "Search public documents — no sign-in required.",
-    inputSchema: { q: z.string() },
-    securitySchemes: [{ type: "noauth" }],
-  },
-  async ({ q }) => ({ content: await search(q) }),
-);
-```
-
-Anonymous OR authenticated (single tool, different behavior):
-
-```typescript
-server.registerTool(
-  {
-    name: "search",
-    description: "Search docs. Authenticated users see their private workspace too.",
-    inputSchema: { q: z.string() },
-    securitySchemes: [
-      { type: "noauth" },
-      { type: "oauth2", scopes: ["search.read"] },
-    ],
-  },
-  async ({ q }, extra) => {
-    const includePrivate = !!extra.authInfo;
-    return { content: await search(q, { includePrivate }) };
-  },
-);
-```
-
-For the transport-level middleware that pairs with mixed-auth tools, see [`optionalBearerAuth`](/api-reference/mcp-server#optionalbearerauth).
+<Info>
+The `openai/*` keys are read only on **ChatGPT**. `openai/widgetAccessible`is deprecated, prefer `ui.visibility` instead.
+</Info>
 
 ## Handler
 
-```typescript
-type ToolHandler = (
-  input: Input,
-  extra: RequestHandlerExtra,
-) => Promise<{
-  content?: string | ContentBlock | ContentBlock[]; // Text(s) for the model
-  structuredContent?: StructuredData;               // Data for the view
-  _meta?: Record<string, unknown>;                  // Response metadata
+Runs when the tool is called. It receives the validated `input` (typed from [`inputSchema`](#inputschema-outputschema)) and the request context `extra`:
+
+```ts
+type ToolHandler = (input: Input, extra: RequestHandlerExtra) => Promise<{
+  content?: string | ContentBlock | ContentBlock[];
+  structuredContent?: Record<string, unknown>;
+  isError?: boolean;
+  _meta?: Record<string, unknown>;
 }>;
 ```
 
-`content` can be a plain string, a single `ContentBlock`, or an array of `ContentBlock`s. See the different [content helpers](#content-helpers) that Skybridge provides.
+### `extra`
 
-The `extra` parameter exposes:
-- `extra.authInfo` — populated by auth middleware (e.g. `authInfo.clientId`, `authInfo.extra.email`)
-- `extra.requestInfo` — HTTP request details (headers, URL)
-- `extra.signal` — abort signal for cancellation
-- `extra._meta` — client-supplied hints injected by the host (see [Client hints on `_meta`](#client-hints-on-meta))
+The request context.
 
-### Client hints on `_meta`
+| Field | Purpose |
+| --- | --- |
+| `authInfo` | Validated token from an auth middleware: `clientId`, `scopes`, `extra`. |
+| `requestInfo` | The HTTP request: headers and URL. |
+| `signal` | An `AbortSignal`, aborted when the call is cancelled. |
+| `_meta` | Client hints (below). |
 
-ChatGPT may inject context about the current conversation in tool calls. Skybridge types these fields on `extra._meta` so you can use them in the handler:
+### Return
 
-```typescript
+| Field | Purpose |
+| --- | --- |
+| `content` | Text for the model, shown in the conversation. A string, a `ContentBlock`, or an array. |
+| `structuredContent` | Typed data the model and the view read (via [`useToolInfo`](/api-reference/use-tool-info)). |
+| `isError` | Marks the call as failed. |
+| `_meta` | View-only response metadata, hidden from the model. |
+
+<Info>
+For a view tool, Skybridge adds a `viewUUID` to `_meta`, a reserved key used for state persistence.
+</Info>
+
+### Client hints
+
+**ChatGPT** attaches conversation context to `extra._meta`. They are hints: tolerate their absence and never use them for authorization.
+
+```ts
 type ClientHintsMeta = {
-  // Requested locale (BCP-47, e.g. "en-US")
   "openai/locale"?: string;
-  // Browser user-agent string of the ChatGPT client
   "openai/userAgent"?: string;
-  // Coarse user location
   "openai/userLocation"?: {
     city?: string;
     region?: string;
@@ -204,272 +240,58 @@ type ClientHintsMeta = {
     longitude?: number;
     latitude?: number;
   };
-  // Anonymized user id (for rate limiting / identification)
   "openai/subject"?: string;
-  // Anonymized conversation id, stable within a ChatGPT session
   "openai/session"?: string;
-  // Anonymized organization id, when the user account is part of an organization
   "openai/organization"?: string;
-  // Stable id for the currently mounted widget instance
   "openai/widgetSessionId"?: string;
 };
 ```
 
-```typescript
-server.registerTool(
-  {
-    name: "weather",
-    description: "Show weather for a location.",
-    inputSchema: { city: z.string().optional() },
-  },
-  async ({ city }, extra) => {
-    // Fall back to the user's current city when they didn't specify one.
-    const target =
-      city ?? extra._meta?.["openai/userLocation"]?.city ?? "Paris";
-    // Imperial for en-US, metric everywhere else.
-    const locale = extra._meta?.["openai/locale"] ?? "en-US";
-    const units = locale === "en-US" ? "imperial" : "metric";
-
-    const weather = await fetchWeather(target, units);
-    return {
-      content: `${target}: ${weather.temperature}° ${weather.conditions}`,
-    };
-  },
-);
-```
+| Key | Purpose |
+| --- | --- |
+| `openai/locale` | Requested locale, BCP-47, e.g. `en-US`. |
+| `openai/userAgent` | Browser user-agent of the ChatGPT client. |
+| `openai/userLocation` | Coarse location: `city`, `region`, `country`, `timezone`, `latitude`, `longitude` (each optional). |
+| `openai/subject` | Anonymized user id. |
+| `openai/session` | Anonymized conversation id, stable within a session. |
+| `openai/organization` | Anonymized organization id, when the user account is in an organization. |
+| `openai/widgetSessionId` | Stable id for the mounted view instance. |
 
 <Info>
-**ChatGPT only.** These hints are injected by the OpenAI Apps SDK runtime. MCP Apps hosts do not send them on tool calls. As a fallback, use [`useUser` (/api-reference/use-user) to get session context from the view.
+These hints are **ChatGPT** only.
 </Info>
 
-<Warning>
-These are **hints**. Never use them for authorization, and tolerate their absence.
-</Warning>
+### Content helpers
 
-## Response Fields
+`skybridge/server` exports helpers that build `ContentBlock`s for the handler's `content`:
 
-Three fields, three audiences:
-
-| Field | Purpose | Consumed by |
-|-------|---------|-------------|
-| `content` | Text description | The host (shown in conversation) |
-| `structuredContent` | Typed data | Host and view (`useToolInfo`, `useCallTool`) |
-| `_meta` | Response metadata | View only (hidden from the model) |
-
-See [Data Flow: Response Fields](/concepts/data-flow#response-fields-explained).
-
-<Info>
-**viewUUID**: Skybridge automatically injects a unique `viewUUID` into `_meta` for every tool with view call. This enables `useViewState` and `createStore` to persist state across re-renders in MCP Apps via `localStorage`. Any `_meta` you return is preserved alongside the injected `viewUUID`.
-</Info>
-
-## Examples
-
-### Tool with a view
-
-File `src/views/greeting.tsx` exports the React component. `view.component` matches its file name.
-
-```typescript
-import { McpServer } from "skybridge/server";
-import { z } from "zod";
-
-const server = new McpServer({ name: "my-app", version: "0.0.1" }, {})
-  .registerTool(
-    {
-      name: "greet",
-      description: "Greet someone by name.",
-      inputSchema: { name: z.string() },
-      view: { component: "greeting", description: "A greeting card" },
-    },
-    async ({ name }) => {
-      return {
-        content: `Greeting ${name}`,
-        structuredContent: { message: `Hello, ${name}!` },
-      };
-    },
-  );
-```
-
-### Tool without view
-
-```typescript
-server.registerTool(
-  {
-    name: "calculate",
-    description: "Evaluate an arithmetic expression.",
-    inputSchema: { expression: z.string() },
-  },
-  async ({ expression }) => {
-    const value = evaluate(expression);
-    return { content: `Result: ${value}` };
-  },
-);
-```
-
-### With external API and CSP
-
-```typescript
-server.registerTool(
-  {
-    name: "weather",
-    description: "Show weather for a location.",
-    inputSchema: {
-      city: z.string(),
-    },
-    outputSchema: {
-      temperature: z.number(),
-      conditions: z.string(),
-      humidity: z.number(),
-    },
-    view: {
-      component: "weather",
-    },
-  },
-  async ({ city }) => {
-    const weather = await fetchWeather(city);
-    return {
-      content: `Current weather in ${city}: ${weather.temperature}°, ${weather.conditions}`,
-      structuredContent: weather,
-    };
-  },
-);
-```
-
-### With auth context
-
-Pull authentication info from `extra` (requires auth middleware via [`.use()`](/api-reference/mcp-server#use)):
-
-```typescript
-server.registerTool(
-  {
-    name: "user-profile",
-    description: "Show user profile.",
-    inputSchema: { userId: z.string() },
-    view: { component: "user-profile" },
-  },
-  async ({ userId }, extra) => {
-    const email = extra.authInfo?.extra?.email;
-    const user = await getUser(userId);
-    if (!user) {
-      return {
-        content: "Error: User not found",
-        isError: true,
-      };
-    }
-
-    return {
-      content: `Showing profile for ${user.name}`,
-      structuredContent: { ...user, viewedBy: email },
-    };
-  },
-);
-```
-
-## Content helpers
-
-`skybridge/server` exports helpers for building `ContentBlock`s:
-
-```typescript
+```ts
 import { audio, embeddedResource, image, resourceLink, text } from "skybridge/server";
 
 return {
-  content: [
-    text("Here's your chart:"),
-    image(pngBuffer, "image/png"),
-  ],
-  structuredContent: { /* … */ },
+  content: [text("Here's your chart:"), image(pngBuffer, "image/png")],
+  structuredContent: { /* ... */ },
 };
 ```
 
-| Helper | Block type |
-|--------|------------|
+| Helper | Block |
+| --- | --- |
 | `text(value, annotations?)` | `TextContent` |
-| `image(data, mimeType, annotations?)` | `ImageContent` (base64-encoded) |
-| `audio(data, mimeType, annotations?)` | `AudioContent` (base64-encoded) |
+| `image(data, mimeType, annotations?)` | `ImageContent` (base64) |
+| `audio(data, mimeType, annotations?)` | `AudioContent` (base64) |
 | `embeddedResource(resource, annotations?)` | `EmbeddedResource` |
 | `resourceLink(link, annotations?)` | `ResourceLink` |
 
-You can still return plain `ContentBlock` objects — helpers are opt-in.
+Returning plain `ContentBlock` objects works too; the helpers are optional.
 
-## Input Schema
-
-Define expected inputs with Zod:
-
-```typescript
-inputSchema: {
-  query: z.string().describe("Search query"),
-  limit: z.number().optional().default(10),
-  sortBy: z.enum(["price", "rating", "distance"]),
-  filters: z.object({
-    minPrice: z.number().optional(),
-    maxPrice: z.number().optional(),
-  }).optional(),
-  amenities: z.array(z.string()).optional(),
-}
-```
-
-## Output Schema
-
-Optional type hints:
-
-```typescript
-outputSchema: {
-  results: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    price: z.number(),
-  })),
-  totalCount: z.number(),
-}
-```
-
-## CSP & Domains
-
-Views run in a sandboxed iframe with strict Content Security Policy. If your view needs to:
-- **Fetch data from external APIs** → add to `connectDomains`
-- **Load images, fonts, or scripts from CDNs** → add to `resourceDomains`
-- **Embed external iframes** → add to `frameDomains`
-- **Redirect to external sites** → add to `redirectDomains`
-
-<Note>
-Skybridge automatically includes your server's domain in the CSP. You only need to configure additional external domains.
-</Note>
-
-### Configuration
-
-```typescript
-server.registerTool(
-  {
-    name: "flight-search",
-    description: "Search for flights",
-    inputSchema: { /* … */ },
-    view: {
-      component: "flight-search",
-      prefersBorder: false,
-      csp: {
-        connectDomains: ["https://api.flights.com"],
-        resourceDomains: ["https://cdn.flights.com", "https://fonts.googleapis.com"],
-        frameDomains: ["https://maps.google.com"],
-        redirectDomains: ["https://booking.flights.com"],
-      },
-    },
-  },
-  async (input) => { /* … */ },
-);
-```
-
-### CSP Fields
-
-| Field | Purpose | Example |
-|-------|---------|---------|
-| `connectDomains` | Fetch/XHR targets | `["https://api.example.com"]` |
-| `resourceDomains` | Static assets (images, fonts, scripts, styles) | `["https://cdn.example.com"]` |
-| `frameDomains` | Iframe embed origins | `["https://youtube.com"]` |
-| `redirectDomains` | External redirect destinations | `["https://checkout.example.com"]` |
-| `baseUriDomains` | `<base href>` origins (mcp-apps only) | `["https://app.example.com"]` |
-
-## Related
-
-- [McpServer](/api-reference/mcp-server) - Server class
-- [useToolInfo](/api-reference/use-tool-info) - Access view data
-- [Data Flow](/concepts/data-flow) - The communication loop
-- [Type Safety](/concepts/type-safety) - End-to-end inference
+<CardGroup cols={3}>
+  <Card title="McpServer" icon="server" href="/api-reference/mcp-server">
+    The server you register tools on
+  </Card>
+  <Card title="useToolInfo" icon="database" href="/api-reference/use-tool-info">
+    Read the tool's result in the view
+  </Card>
+  <Card title="FileRef" icon="file" href="/api-reference/file-ref">
+    Pass files in and out of a tool
+  </Card>
+</CardGroup>

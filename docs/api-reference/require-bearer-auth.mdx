@@ -1,0 +1,70 @@
+---
+title: requireBearerAuth
+description: "Require a signed-in user on every request"
+---
+
+`requireBearerAuth` locks your server behind sign-in. Unauthenticated requests are turned away before any [tool](/build/tools) runs, and your tools receive the signed-in user.
+
+## Example
+
+Every tool requires a signed-in user with the `shop.read` scope: the middleware validates the token before any handler runs.
+
+```ts server.ts highlight={6-9}
+import { McpServer, requireBearerAuth } from "skybridge/server";
+import { verifyAccessToken } from "./verify-access-token.js"; // the verifier you implement
+
+const server = new McpServer({ name: "shop", version: "1.0" }).use(
+  "/mcp",
+  requireBearerAuth({
+    verifier: { verifyAccessToken },
+    requiredScopes: ["shop.read"],
+  }),
+);
+```
+
+## Signature
+
+```ts
+requireBearerAuth(options: BearerAuthMiddlewareOptions): RequestHandler;
+```
+
+## Parameters
+
+### `options`
+
+```ts
+type BearerAuthMiddlewareOptions = {
+  verifier: OAuthTokenVerifier;
+  requiredScopes?: string[];
+  resourceMetadataUrl?: string;
+};
+```
+
+| Field | Purpose |
+| --- | --- |
+| `verifier` | The provider-specific token check you implement. See [Verifier](/api-reference/verifier). |
+| `requiredScopes` | A server-wide scope floor every accepted token must carry, or the request gets a 403. Layers under per-tool [`securitySchemes`](/api-reference/register-tool#securityschemes). |
+| `resourceMetadataUrl` | Absolute URL appended to the `WWW-Authenticate` header on a 401, pointing at your OAuth 2.0 [Protected Resource Metadata](https://datatracker.ietf.org/doc/html/rfc9728) so clients can discover the authorization server. |
+
+## Returns
+
+An Express `RequestHandler` to pass to [`server.use`](/api-reference/mcp-server#use), typically on `/mcp`.
+
+- A valid token: the request proceeds, and handlers read it from `extra.authInfo`.
+- A missing, invalid, or expired token: a 401 with a `WWW-Authenticate` header. A token missing a required scope: a 403.
+
+<Info>
+A valid token only proves who the caller is. Authorizing what they can do, and scoping data to them, stays the handler's job: read `extra.authInfo` and never trust a client-supplied identifier.
+</Info>
+
+<CardGroup cols={3}>
+  <Card title="optionalBearerAuth" icon="lock-open" href="/api-reference/optional-bearer-auth">
+    Accept a token when present, allow anonymous otherwise
+  </Card>
+  <Card title="mcpAuthMetadataRouter" icon="compass" href="/api-reference/mcp-auth-metadata-router">
+    Advertise your authorization server for discovery
+  </Card>
+  <Card title="Authenticate Users" icon="key" href="/build/auth">
+    Add sign-in to your app end to end
+  </Card>
+</CardGroup>

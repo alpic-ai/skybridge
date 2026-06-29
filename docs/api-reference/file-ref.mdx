@@ -1,44 +1,39 @@
 ---
 title: FileRef
-description: "Zod schema and TypeScript type for ChatGPT file references in tool inputs and outputs"
+description: "Reference a host-managed file in a tool's schema"
 tag: "ChatGPT"
 ---
 
-If your tool accepts user-provided files, declare file parameters with `_meta["openai/fileParams"]`. The value is a list of top-level input schema fields that ChatGPT will treat as files. Nested file fields are not supported.
+import { Compat } from "/components/compat.jsx";
 
-To return downloadable files from a tool, include a file reference in structuredContent, usually under a field such as `file_uri`.
+<Compat chatgpt />
 
-```ts
+`FileRef` is a reference to a file, an id and a URL to fetch its bytes. Use it in a [tool's `inputSchema` or `outputSchema`](/api-reference/register-tool#inputschema-outputschema) to pass files in and out.
+
+<Info>
+File params are a **ChatGPT** feature. Other hosts don't pass files through [tool](/build/tools) calls, so a `FileRef` field is populated only on ChatGPT.
+</Info>
+
+## Example
+
+`summarize-document` takes a file in, fetches its bytes from `download_url`, and returns a summary file back.
+
+```ts server.ts highlight={6-7}
 import { FileRef, McpServer } from "skybridge/server";
-import { z } from "zod";
 
-const server = new McpServer({ name: "my-app", version: "0.0.1" })
-  .registerTool(
-    {
-      name: "process-file",
-      inputSchema: {
-        file: FileRef,
-      },
-      outputSchema: {
-        file_uri: FileRef,
-      },
-      _meta: {
-        // Tell ChatGPT where to reference files
-        "openai/fileParams": ["file"],
-      },
-    },
-    async ({ file }) => {
-      const res = await fetch(file.download_url);
-      // ...do something with the file content
-
-      return {
-        // Tell ChatGPT where to find files
-        structuredContent: { file_uri: processedFile },
-        content: [],
-        isError: false,
-      };
-    },
-  );
+const server = new McpServer({ name: "docs", version: "1.0" }).registerTool(
+  {
+    name: "summarize-document",
+    inputSchema: { document: FileRef },
+    outputSchema: { summary: FileRef },
+    _meta: { "openai/fileParams": ["document"] },
+  },
+  async ({ document }) => {
+    const bytes = await fetch(document.download_url).then((r) => r.blob());
+    const summary = await summarize(bytes); // returns a FileRef
+    return { structuredContent: { summary } };
+  },
+);
 ```
 
 ## Shape
@@ -46,15 +41,29 @@ const server = new McpServer({ name: "my-app", version: "0.0.1" })
 ```ts
 type FileRef = {
   file_id: string;
-  download_url: string; // URL the tool handler or view component can fetch directly
+  download_url: string;
   mime_type?: string;
   file_name?: string;
-}
+};
 ```
 
-`download_url` is required in both input and output positions. On input, the host fills it. On output, your tool handler is responsible for producing a URL the host can fetch.
+| Field | Purpose |
+| --- | --- |
+| `file_id` | The host's identifier for the file. |
+| `download_url` | A URL to fetch the file's bytes. |
+| `mime_type` | The file's MIME type, when known. |
+| `file_name` | The original file name, when known. |
 
-## See also
+`download_url` is required in both positions: on input the host fills it, on output your handler produces a URL the host can fetch.
 
-- [`useFiles`](/api-reference/use-files): upload, pick, and resolve fileIds from the view
-- [OpenAI Apps SDK file handling doc](https://developers.openai.com/apps-sdk/build/mcp-server#file-handling)
+<CardGroup cols={3}>
+  <Card title="Handle Files" icon="paperclip" href="/guides/files">
+    Move files in and out of your app across hosts
+  </Card>
+  <Card title="useFiles" icon="upload" href="/api-reference/use-files">
+    Upload, pick, and resolve files from the view
+  </Card>
+  <Card title="registerTool" icon="wrench" href="/api-reference/register-tool">
+    Declare file params with `openai/fileParams`
+  </Card>
+</CardGroup>
