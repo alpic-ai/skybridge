@@ -16,15 +16,14 @@ The branded providers discover the IdP's OAuth metadata and build the whole conf
 
 ```typescript
 // src/server.ts
-import { McpServer, workosProvider } from "skybridge/server";
+import { McpServer, descopeProvider } from "skybridge/server";
 
 const server = new McpServer(
   { name: "my-app", version: "0.0.1" },
   { capabilities: {} },
   {
-    oauth: await workosProvider({
-      domain: env.AUTHKIT_DOMAIN, // e.g. acme.authkit.app
-      audience: env.SERVER_URL,   // Resource Indicator
+    oauth: await descopeProvider({
+      url: env.DESCOPE_MCP_SERVER_URL, // MCP Server Discovery URL (Issuer)
     }),
   },
 );
