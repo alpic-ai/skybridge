@@ -12,9 +12,19 @@ Enable user authentication so tools can access user-specific data.
 
 ## Which path?
 
-- **Every tool requires sign-in, and a branded provider fits your IdP** → [Pick a provider](#1-pick-a-provider).
-- **Every tool requires sign-in, no branded helper, but the IdP exposes OAuth discovery + JWKS** → [`customProvider`](#2-any-other-idp--customprovider).
-- **Mixed auth** (some tools public, some gated), **or the IdP has no discovery doc / issues opaque tokens** → [Manual wiring](#manual-wiring). The `oauth` field can't express either case.
+The `oauth` field handles all-or-nothing auth; mixed auth or an unsupported IdP needs manual wiring.
+
+```
+All tools require sign-in?
+├─ No — some public, some gated ──────────────────→ Manual wiring
+└─ Yes
+   ├─ A branded provider fits your IdP ────────────→ Pick a provider
+   │     (WorkOS · Auth0 · Clerk · Stytch · Descope)
+   ├─ No helper, but IdP has OAuth discovery + JWKS → customProvider
+   └─ No discovery doc, or opaque tokens ───────────→ Manual wiring
+```
+
+- [Pick a provider](#1-pick-a-provider) · [`customProvider`](#2-any-other-idp--customprovider) · [Manual wiring](#manual-wiring)
 
 ## 1. Pick a provider
 
