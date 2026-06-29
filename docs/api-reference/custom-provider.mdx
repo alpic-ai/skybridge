@@ -1,0 +1,94 @@
+---
+title: customProvider
+sidebarTitle: "Custom"
+description: "Wire OAuth from any IdP's discovery document"
+---
+
+`customProvider` builds a complete [`OAuthConfig`](#returns) from an identity provider's OAuth discovery document: it reads the provider's metadata at boot and verifies access tokens against its JWKS. Reach for it when no [branded provider](/api-reference/workos-provider) fits, for any IdP that publishes [discovery metadata](https://datatracker.ietf.org/doc/html/rfc8414) and signs JWT access tokens.
+
+## Example
+
+```ts server.ts highlight={1,7-10}
+import { McpServer, customProvider } from "skybridge/server";
+
+const server = new McpServer(
+  { name: "personal-shopper", version: "0.0.1" },
+  { capabilities: {} },
+  {
+    oauth: await customProvider({
+      issuer: "https://auth.myshop.com",
+      audience: process.env.SERVER_URL,
+    }),
+  },
+);
+```
+
+`customProvider` fetches `https://auth.myshop.com`'s discovery document at boot, then the [`oauth`](/api-reference/mcp-server#constructor) option mounts the well-known metadata and JWKS bearer verification on `/mcp`. `audience` is the value the IdP binds into the token's `aud` claim, here this server's public URL.
+
+## Signature
+
+```ts
+customProvider(opts: CustomProviderOptions): Promise<OAuthConfig>;
+```
+
+## Parameters
+
+### `opts`
+
+```ts
+type CustomProviderOptions = {
+  issuer: string;
+  audience?: string;
+  baseUrl?: string;
+  serverUrl?: string;
+  scopes?: string[];
+  requiredScopes?: string[];
+  metadataOverrides?: Omit<Partial<OAuthMetadata>, "issuer">;
+};
+```
+
+| Field | Description |
+| --- | --- |
+| `issuer` | The only required option: the IdP base URL whose discovery document is fetched at boot. It must serve a `jwks_uri`, or the call throws. |
+| `audience` | Checked against each token's `aud` claim. Omit it only for an IdP that binds no audience (Clerk): the `aud` check is then skipped. |
+| `baseUrl` | This server's public URL. Set it and the resource URLs are baked once at boot; omit it and they resolve per request from the `x-forwarded-host` / `origin` / `host` headers. |
+| `serverUrl` | Advertises this server as the authorization server: the served AS metadata `issuer` and the PRM `authorization_servers` use this URL instead of the IdP's, while verification still trusts the IdP's real `iss`. Needed when this server must sit in the auth path, as [`auth0Provider`](/api-reference/auth0-provider) does, or behind the Alpic DCR proxy. |
+| `scopes` | Scopes advertised in the served metadata; defaults to the IdP's. |
+| `requiredScopes` | Server-wide scope floor enforced before any handler, layered under each tool's [`securitySchemes`](/api-reference/register-tool#securityschemes); a token missing one gets a 403. |
+| `metadataOverrides` | Adjusts advertised metadata only. |
+
+## Returns
+
+A `Promise` (discovery is a boot-time network call) for the `OAuthConfig` you pass to the [`oauth`](/api-reference/mcp-server#constructor) constructor option.
+
+```ts
+type OAuthConfig = {
+  baseUrl?: string;
+  oauthMetadata: OAuthMetadata;
+  verify: { issuer: string; audience?: string; jwksUri?: string };
+  scopesSupported?: string[];
+  requiredScopes?: string[];
+};
+```
+
+| Field | Description |
+| --- | --- |
+| `baseUrl` | Echoes the `baseUrl` option. |
+| `oauthMetadata` | AS metadata served at `/.well-known/oauth-authorization-server`. |
+| `verify` | JWKS token-verification config. |
+| `scopesSupported` | Scopes advertised in protected-resource metadata. |
+| `requiredScopes` | Server-wide required-scope floor. |
+
+Build this object by hand only to wire an IdP whose metadata `customProvider` can't discover: supply `verify.issuer` and `verify.jwksUri` yourself and the [`oauth`](/api-reference/mcp-server#constructor) option mounts the same endpoints.
+
+<CardGroup cols={3}>
+  <Card title="Connect an Identity Provider" icon="fingerprint" href="/guides/auth-providers">
+    Set up sign-in with a hosted provider
+  </Card>
+  <Card title="Authenticate Users" icon="key" href="/build/auth">
+    Add sign-in to your app end to end
+  </Card>
+  <Card title="McpServer" icon="server" href="/api-reference/mcp-server">
+    Pass the config to the oauth option
+  </Card>
+</CardGroup>
