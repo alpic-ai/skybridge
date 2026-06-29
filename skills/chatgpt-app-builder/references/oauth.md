@@ -55,11 +55,11 @@ oauth: await customProvider({
 }),
 ```
 
-`OAuthConfig` also accepts `baseUrl` (this server's public URL; inferred from request headers when omitted), `requiredScopes` (server-wide floor), and `metadataOverrides`.
+`customProvider` also accepts `baseUrl` (this server's public URL; inferred from request headers when omitted), `requiredScopes` (server-wide floor), and `metadataOverrides`.
 
 ## 3. Read auth in handlers
 
-`extra.authInfo` carries the verified token. `extra.subject` holds the `sub` claim; all other JWT claims (e.g. `email`) are spread alongside it.
+`extra.authInfo` carries the verified token. Its `extra.subject` holds the `sub` claim; all other JWT claims (e.g. `email`) are spread alongside it.
 
 ```typescript
 import type { AuthInfo } from "skybridge/server";
