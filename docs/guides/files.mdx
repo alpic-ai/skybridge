@@ -5,9 +5,11 @@ sidebarTitle: "Files"
 icon: "paperclip"
 ---
 
-<img src="/images/files.png" alt="Files Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+import { Hero } from "/components/hero.jsx";
 
-Views run in a sandboxed iframe, cut off from the conversation and the user's disk. Each host opens its own door for files, and the two work differently: ChatGPT keeps a file store your tools and views read and write; Claude only lets a view save a file to the user's device. What you can build depends on the host.
+<Hero src="/images/files.png" alt="Files Illustration" />
+
+[Views](/build/view) run in a sandboxed iframe, cut off from the conversation and the user's disk. Each host opens its own door for files, and the two work differently: ChatGPT keeps a file store your [tools](/build/tools) and views read and write; Claude only lets a view save a file to the user's device. What you can build depends on the host.
 
 ## Files in ChatGPT
 
@@ -63,11 +65,11 @@ const server = new McpServer({ name: "expenses", version: "0.0.1" })
   );
 ```
 
-`scan-receipt` declares `summary` as a `FileRef` in its `outputSchema` and returns it in `structuredContent`; `summarize` produces the ref: a `file_id` and a `download_url` the host uses to fetch and cache the file.
+`scan-receipt` declares `summary` as a [`FileRef`](/api-reference/file-ref) in its `outputSchema` and returns it in `structuredContent`; `summarize` produces the ref: a `file_id` and a `download_url` the host uses to fetch and cache the file.
 
 ### Steer from the View
 
-The view can run the whole exchange itself: pick a file, hand it to a tool, and resolve what comes back, no model in the loop. Here a receipt scanner lets the user pick a receipt and get a summary in return, built up in three steps:
+The viewcan run the whole exchange itself: pick a file, hand it to a tool, and resolve what comes back, no model in the loop. Here a receipt scanner lets the user pick a receipt and get a summary in return, built up in three steps:
 
 #### Pick a File
 
@@ -152,7 +154,7 @@ export default function ReceiptScanner() {
 
 #### Resolve the Returned File
 
-`scan-receipt` returns its own `FileRef` on `data.structuredContent`. Resolve it from `summary.file_id` when the user asks: a `download_url` is a temporary cache URL that expires; the `file_id` is the durable handle. Keep the `file_id` (in state, or in the model's context) and regenerate a URL on demand.
+`scan-receipt` returns its own [`FileRef`](/api-reference/file-ref) on `data.structuredContent`. Resolve it from `summary.file_id` when the user asks: a `download_url` is a temporary cache URL that expires; the `file_id` is the durable handle. Keep the `file_id` (in [state](/build/state), or in the model's context) and regenerate a URL on demand.
 
 ```tsx views/receipt-scanner.tsx highlight={7,18}
 import { useState } from "react";

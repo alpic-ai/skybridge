@@ -5,9 +5,11 @@ sidebarTitle: "CSP"
 icon: "shield"
 ---
 
-<img src="/images/csp.png" alt="CSP Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+import { Hero } from "/components/hero.jsx";
 
-Views render in a sandboxed iframe under a strict Content Security Policy: it blocks every cross-origin request the view hasn't declared. Your server's own origin is allowed automatically, so a view that only talks to its server needs no configuration. For anything else, list the origin on the tool's `view.csp`.
+<Hero src="/images/csp.png" alt="CSP Illustration" />
+
+Views render in a sandboxed iframe under a strict [Content Security Policy](https://developer.mozilla.org/fr/docs/Web/HTTP/Guides/CSP): it blocks every cross-origin request the view hasn't declared. Your server's own origin is allowed automatically, so a view that only talks to its server needs no configuration. For anything else, list the origin on the [tool's config `view.csp`](http://localhost:3000/api-reference/register-tool#csp).
 
 ```ts server.ts
 server.registerTool(
@@ -34,7 +36,7 @@ Each field maps to one kind of request the iframe would otherwise block. The sec
 
 ## Call an External API
 
-`connectDomains` lists the origins the view may reach with `fetch` or `XHR`. Without it, a direct request from the view is blocked.
+`connectDomains` lists the origins the view may reach with [`fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) or [`XHR`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest). Without it, a direct request from the view is blocked.
 
 ```ts server.ts highlight={8}
 server.registerTool(
@@ -60,7 +62,7 @@ server.registerTool(
 The carousel checks live stock from `api.myshop.com`, so that origin is listed.
 
 <Info>
-Your server's origin is already in `connectDomains`, so same-origin requests need no entry. In development, the dev server's WebSocket origin is added too, for hot reload.
+Your server's origin is already in `connectDomains`, so same-origin requests need no entry. In development, the dev server's [WebSocket](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API) origin is added too, for hot reload.
 </Info>
 
 ## Load External Assets
@@ -156,7 +158,7 @@ To check your CSP, run your app in a real host through the [tunnel](/test/tunnel
 [DevTools](/test/devtools) runs a loose policy, so CSP violations don't surface locally: a view that loads in the emulator can still have its requests blocked in production.
 </Info>
 
-For the full field reference, see [registerTool](/api-reference/register-tool#csp--domains).
+For the full field reference, see [registerTool](/api-reference/register-tool#csp).
 
 ## Go Further
 <Columns cols={3}>

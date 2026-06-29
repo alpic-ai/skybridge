@@ -1,33 +1,36 @@
 ---
 title: useDisplayMode
-description: "Read and control view display modes: inline, fullscreen, or picture-in-picture."
+description: "Read and switch how the host lays out the view"
 ---
 
-<Info>
-**Runtime Support**: ChatGPT Apps | MCP Apps
+import { Compat } from "/components/compat.jsx";
 
-Note: MCP Apps do not support the "modal" display mode. Requesting modal mode in MCP Apps will throw an error.
-</Info>
+<Compat alpic chatgpt claude />
 
-The `useDisplayMode` hook allows you to read and control the display mode of your view. Views can be displayed in three modes: `inline`, `fullscreen`, or `pip` (picture-in-picture).
+A host renders the [view](/build/view) in one of a few layouts: a compact inline panel, fullscreen, or a floating picture-in-picture. `useDisplayMode` lets the view read which layout it is in and ask the host to switch to another.
 
-## Basic usage
+## Example
 
-```tsx
+The product carousel shows more columns when it takes the full screen. From the inline panel it offers a "See all" button to expand, and once expanded, a "Collapse" button to shrink back.
+
+```tsx highlight={4,10,13,16}
 import { useDisplayMode } from "skybridge/web";
 
-function ExpandableView() {
-  const [displayMode, setDisplayMode] = useDisplayMode();
+function Carousel({ products }: { products: Product[] }) {
+  const [mode, setMode] = useDisplayMode();
 
   return (
     <div>
-      <p>Current mode: {displayMode}</p>
-      <button onClick={() => setDisplayMode("fullscreen")}>
-        Go Fullscreen
-      </button>
-      <button onClick={() => setDisplayMode("inline")}>
-        Back to Inline
-      </button>
+      <ProductGrid
+        products={products}
+        columns={mode === "fullscreen" ? 4 : 2}
+      />
+      {mode === "inline" && (
+        <button onClick={() => setMode("fullscreen")}>See all {products.length}</button>
+      )}
+      {mode === "fullscreen" && (
+        <button onClick={() => setMode("inline")}>Collapse</button>
+      )}
     </div>
   );
 }
@@ -35,98 +38,50 @@ function ExpandableView() {
 
 ## Returns
 
-The hook returns a tuple with two elements:
+`useDisplayMode` returns a tuple: the current mode first, the setter second.
 
 ### `displayMode`
 
 ```tsx
-displayMode: "inline" | "fullscreen" | "pip"
+displayMode: DisplayMode;
 ```
 
-The current display mode of the view:
+The mode the host is currently rendering the view in. It updates on its own when the host changes the layout (the user expanding or collapsing the view, for instance), so a component can render against it directly.
 
-- `inline` - The view is displayed inline within the chat
-- `fullscreen` - The view takes up the full screen
-- `pip` - The view is displayed in picture-in-picture mode (on mobile, this is coerced to fullscreen)
+| Mode | Layout | Requestable |
+| --- | --- | :---: |
+| `"inline"` | Compact panel embedded in the conversation, the default | <Icon icon="check" color="#22C55E" /> |
+| `"fullscreen"` | The view takes over the host surface | <Icon icon="check" color="#22C55E" /> |
+| `"pip"` | Picture in picture, floating above the conversation | <Icon icon="check" color="#22C55E" /> |
+| `"modal"` | Overlay opened through [`useRequestModal`](/api-reference/use-request-modal), host-driven | <Icon icon="x" color="#EF4444" /> |
 
 ### `setDisplayMode`
 
 ```tsx
-setDisplayMode: (mode: DisplayMode) => void
+setDisplayMode(mode: RequestDisplayMode): Promise<{ mode: RequestDisplayMode }>;
 ```
 
-A function to request a new display mode. Note that the host may reject the request.
+Asks the host to switch the view to `mode`. The host decides: it can grant the request, keep the current mode, or coerce to another. The promise resolves with the mode actually applied, so read the resolved value rather than assuming the request took.
 
-## Examples
-
-### Fullscreen Media Player
+**`mode`** the mode to request, every [`DisplayMode`](#displaymode) except `"modal"`:
 
 ```tsx
-import { useDisplayMode } from "skybridge/web";
-
-function MediaPlayer() {
-  const [displayMode, setDisplayMode] = useDisplayMode();
-  const isFullscreen = displayMode === "fullscreen";
-
-  return (
-    <div className={isFullscreen ? "fullscreen-player" : "inline-player"}>
-      <video src="/media/video.mp4" controls />
-      <button onClick={() => setDisplayMode(isFullscreen ? "inline" : "fullscreen")}>
-        {isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-      </button>
-    </div>
-  );
-}
+// "inline" | "fullscreen" | "pip"
+type RequestDisplayMode = Exclude<DisplayMode, "modal">;
 ```
 
-### Adaptive Layout
+<Info>
+On mobile, **ChatGPT** coerces a `"pip"` request to `"fullscreen"`.
+</Info>
 
-```tsx
-import { useDisplayMode } from "skybridge/web";
-
-function AdaptiveView() {
-  const [displayMode] = useDisplayMode();
-
-  if (displayMode === "fullscreen") {
-    return (
-      <div className="detailed-view">
-        <h1>Full Details</h1>
-        {/* Show comprehensive content */}
-      </div>
-    );
-  }
-
-  return (
-    <div className="compact-view">
-      <h3>Summary</h3>
-      {/* Show condensed content */}
-    </div>
-  );
-}
-```
-
-### Picture-in-Picture Mode
-
-```tsx
-import { useDisplayMode, useUser } from "skybridge/web";
-
-function FloatingView() {
-  const [displayMode, setDisplayMode] = useDisplayMode();
-  const { userAgent } = useUser();
-  const isMobile = userAgent.device.type === "mobile";
-
-  return (
-    <div>
-      <p>Mode: {displayMode}</p>
-      {!isMobile && (
-        <button onClick={() => setDisplayMode("pip")}>
-          Float (PiP)
-        </button>
-      )}
-      {isMobile && (
-        <p>PiP mode is not available on mobile devices</p>
-      )}
-    </div>
-  );
-}
-```
+<CardGroup cols={3}>
+  <Card title="Design for the Host" icon="sparkles" href="/guides/ux">
+    Adapt the view to display mode, theme, and device
+  </Card>
+  <Card title="useLayout" icon="layout" href="/api-reference/use-layout">
+    Read the space and insets a mode switch brings
+  </Card>
+  <Card title="useRequestModal" icon="app-window" href="/api-reference/use-request-modal">
+    Open the view as a host modal
+  </Card>
+</CardGroup>

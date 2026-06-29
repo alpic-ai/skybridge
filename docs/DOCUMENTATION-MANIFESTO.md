@@ -98,7 +98,7 @@ Never assume the reader is already an expert in Skybridge or MCP Apps. When you 
      - **createStore**: Zustand-based store creation for shared state.
      - **generateHelpers**: typed `useCallTool` and `useToolInfo` helpers generated from server types.
      - **data-llm**: an attribute for exposing DOM content to the model.
-   - **Types**: `infer-utility-types` and other helpers for server-to-client type inference.
+   - **Types**: `utility-types` and other helpers for server-to-client type inference.
    - **Advanced**: low-level context hooks such as `useAppsSdkContext` and `useMcpAppContext` when you need raw host APIs.
    
    </details>

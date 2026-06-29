@@ -3,7 +3,10 @@ title: Architecture
 description: "Design conversational experiences leveraging model intelligence"
 icon: route
 ---
-<img src="/images/architecture.png" alt="Architecture Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
+
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/architecture.png" alt="Architecture Illustration" />
 
 MCP Apps have three actors involved: the app, the user, and the model. This creates context asymmetry: each actor holds a partial picture of the system. The model is blind to the UI: it can’t see visuals or user interactions unless you explicitly sync them back. The user can’t see the tool output flowing underneath. Building well means understanding these blind spots and designing the information flow between all three.
 
@@ -18,11 +21,11 @@ A few MCP-App-specific terms used throughout this section:
 - **Host**: the AI client that embeds the model and runs your app (e.g., ChatGPT, Claude)
 - **MCP App**: the unit you build; a server exposing tools, plus optional views
 - **MCP Server**: the tool set exposed to models and views
-- **Tool**: a function on the server that the model or a view can call
-- **View**: a React component shipped bound to a tool and rendered inside the host
+- **[Tool](/build/tools)**: a function on the server that the model or a view can call
+- **[View](/build/view)**: a React component shipped bound to a tool and rendered inside the host
 - **Runtime**: the host's bridge between the server's response, the model, and the view
 - **View Instance**: one mounted occurrence of a view
-- **View State**: state attached to a view instance
+- **[View State](/build/state)**: state attached to a view instance
 
 ## App Lifecycle
 
@@ -54,7 +57,7 @@ sequenceDiagram
 ```
 
 <Info>
-The tool output shape lets you address each piece of data to a specific recipient: some fields can be sent only to the model, some only to the view, and some to both. Choosing the recipient is a design decision: it controls what context each actor sees.
+The [tool output shape](/api-reference/register-tool#return) lets you address each piece of data to a specific recipient: some fields can be sent only to the model, some only to the view, and some to both. Choosing the recipient is a design decision: it controls what context each actor sees.
 </Info>
 
 ### App is Running
@@ -88,7 +91,7 @@ The view can call the tools it's bound to, or any other tool. Tool calls initiat
 
 ### App Teardown
 
-When the conversation is closed, every view instance unmounts. The next time it's loaded, each one remounts with its own state restored.
+When the conversation is closed, every view instance unmounts. The next time it's loaded, each one remounts with its own [state](/build/state) restored.
 
 ## Hands On: Build a Personal Shopper
 
@@ -182,7 +185,7 @@ export default function Carousel() {
 
 ## Pair with the Skill
 
-The Skybridge Skill is the best teacher for crafting excellent MCP App architecture. It knows the lifecycle, the data-flow patterns, and the design moves that actually work inside ChatGPT and Claude.
+The Skybridge Skill is the best teacher for crafting excellent MCP App architecture. It knows the lifecycle, the data-flow patterns, and the [design moves](/guides/ux) that actually work inside ChatGPT and Claude.
 
 Install it now:
 

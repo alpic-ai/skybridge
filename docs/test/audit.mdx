@@ -3,9 +3,12 @@ title: "Audit"
 description: "Catch spec and platform issues before submission"
 icon: "clipboard-check"
 ---
-<img src="/images/audit.png" alt="Audit Illustration" style={{ width: "100%", maxHeight: "40vh", marginTop:"-0.75rem", objectFit: "cover", borderRadius: "15px" }} />
 
-Before a platform accepts your app, the server must conform to the MCP specs, and each platform layers its own requirements on top, which differ between OpenAI and Anthropic. The Audit checks your app's conformance and performs end-to-end tests in real ChatGPT and Claude conversations, triggering tools and rendering views.
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/audit.png" alt="Audit Illustration" />
+
+Before a platform accepts your app, the server must conform to the MCP specs, and each platform layers its own requirements on top, which differ between [OpenAI](https://developers.openai.com/apps-sdk/app-submission-guidelines) and [Anthropic](https://claude.com/docs/connectors/building/submission). The Audit checks your app's conformance and performs end-to-end tests in real ChatGPT and Claude conversations, triggering [tools](/build/tools) and rendering [views](/build/view).
 
 ## Run the Audit
 
@@ -35,13 +38,13 @@ The Audit is powered by [Alpic Beacon](https://docs.alpic.ai/testing/beacon). It
 
 ## What It Checks
 
-- **MCP protocol**: tool and resource conformance with the official specification.
-- **MCP Apps**: view resource requirements (metadata, Content Security Policy, annotations) for both ChatGPT and Claude.
+- **MCP protocol**: tool and resource conformance with the [official specification](https://modelcontextprotocol.io/specification/2025-11-25).
+- **[MCP Apps](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx)**: view resource requirements (metadata, Content Security Policy, annotations) for both ChatGPT and Claude.
 - **Platform requirements**: each platform's own submission guidelines.
 - **App behavior**: the app actually works, verified by triggering tools and rendering views in real ChatGPT and Claude conversations.
 
 <Frame caption="The Audit interface">
-<img src="/images/audit-screenshot.png" alt="Audit Illustration" />
+<Hero src="/images/audit-screenshot.png" alt="Audit Illustration" />
 </Frame>
 
 The report returns an overall score, a readiness status per platform, and the issues found, each with its severity (error, warning, info), the affected component, and the solution. **Improve your score** turns the report into a prompt for your coding agent to fix them all.
