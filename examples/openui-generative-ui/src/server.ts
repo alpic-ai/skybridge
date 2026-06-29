@@ -33,9 +33,7 @@ const server = new McpServer(
   {
     name: "openui-generative-ui",
     version: "0.0.1",
-  },
-  { capabilities: {} },
-);
+});
 
 const registerTool = server.registerTool.bind(server) as RegisterTool;
 
