@@ -7,8 +7,14 @@ Enable user authentication so tools can access user-specific data.
 1. Pass an `oauth` config as the third `McpServer` argument
 2. Skybridge auto-mounts the OAuth discovery endpoints (`/.well-known/oauth-authorization-server`, `/.well-known/oauth-protected-resource`) and Bearer JWT verification on `/mcp`
 3. The host reads the metadata, walks the user through OAuth, refreshes tokens, and calls `/mcp` with `Authorization: Bearer <token>`
-4. Unauthenticated/invalid requests get HTTP 401 before any tool handler runs
+4. Unauthenticated/invalid requests **to `/mcp`** get HTTP 401 before any tool handler runs. The `oauth` field guards `/mcp` only — any custom route you mount yourself is unprotected; gate it explicitly (see [Manual wiring](#manual-wiring))
 5. Tool handlers read user identity from `extra.authInfo`
+
+## Which path?
+
+- **Every tool requires sign-in, and a branded provider fits your IdP** → [Pick a provider](#1-pick-a-provider).
+- **Every tool requires sign-in, no branded helper, but the IdP exposes OAuth discovery + JWKS** → [`customProvider`](#2-any-other-idp--customprovider).
+- **Mixed auth** (some tools public, some gated), **or the IdP has no discovery doc / issues opaque tokens** → [Manual wiring](#manual-wiring). The `oauth` field can't express either case.
 
 ## 1. Pick a provider
 
@@ -78,6 +84,80 @@ server.registerTool(
 );
 ```
 
-## Manual wiring (escape hatch)
+## Manual wiring
 
-The `oauth` field replaces hand-mounting `mcpAuthMetadataRouter` + `requireBearerAuth`. Those primitives are still exported from `skybridge/server` if you need full control, but prefer a provider.
+Reach for this when the `oauth` field can't express your setup: **mixed auth** (some tools public, some gated), or an **IdP with no OAuth discovery / opaque tokens** (you verify by introspection instead of JWKS). The same primitives are exported from `skybridge/server`.
+
+### Write a verifier
+
+`verifyAccessToken` resolves with `AuthInfo` for a good token, or throws `InvalidTokenError`. For a JWT IdP, verify against its JWKS:
+
+```typescript
+import { type AuthInfo, InvalidTokenError } from "skybridge/server";
+import * as jose from "jose";
+
+const jwks = jose.createRemoteJWKSet(new URL("https://your-idp.com/.well-known/jwks.json"));
+
+export async function verifyAccessToken(token: string): Promise<AuthInfo> {
+  try {
+    const { payload } = await jose.jwtVerify(token, jwks, { issuer: "https://your-idp.com" });
+    return {
+      token,
+      clientId: (payload.client_id ?? payload.azp ?? "") as string,
+      scopes: typeof payload.scope === "string" ? payload.scope.split(" ") : [],
+      expiresAt: payload.exp, // required: requireBearerAuth rejects tokens with no expiry
+      extra: { subject: payload.sub },
+    };
+  } catch (err) {
+    throw new InvalidTokenError(err instanceof Error ? err.message : String(err));
+  }
+}
+```
+
+### Mount metadata + enforcement
+
+`mcpAuthMetadataRouter` serves the well-known endpoints. `requireBearerAuth` rejects every unauthenticated request; `optionalBearerAuth` lets unauthenticated requests through (validating a token only when one is sent) — this is the mixed-auth path.
+
+```typescript
+import {
+  mcpAuthMetadataRouter,
+  optionalBearerAuth,
+} from "skybridge/server";
+import { verifyAccessToken } from "./auth.js";
+
+const server = new McpServer({ name: "my-app", version: "0.0.1" }, { capabilities: {} })
+  .use(
+    mcpAuthMetadataRouter({
+      oauthMetadata: {
+        issuer: "https://your-idp.com",
+        authorization_endpoint: "https://your-idp.com/authorize",
+        token_endpoint: "https://your-idp.com/token",
+        response_types_supported: ["code"],
+        code_challenge_methods_supported: ["S256"],
+      },
+      resourceServerUrl: new URL(process.env.SERVER_URL),
+    }),
+  )
+  .use("/mcp", optionalBearerAuth({ verifier: { verifyAccessToken } }));
+```
+
+Then declare each tool's requirement with `securitySchemes` (`{ type: "noauth" }` for public, `{ type: "oauth2", scopes? }` for gated):
+
+```typescript
+server.registerTool(
+  { name: "public-search", description: "...", securitySchemes: [{ type: "noauth" }] },
+  handler,
+);
+server.registerTool(
+  { name: "get-orders", description: "...", securitySchemes: [{ type: "oauth2" }] },
+  async (_input, extra) => {
+    // securitySchemes is advertised to the host only — NOT enforced at runtime.
+    // optionalBearerAuth lets token-less requests through, so a gated handler
+    // MUST verify authInfo itself.
+    if (!extra.authInfo) throw new Error("Unauthorized");
+    // ...
+  },
+);
+```
+
+For an all-or-nothing manual server, swap `optionalBearerAuth` for `requireBearerAuth` and drop the per-tool `securitySchemes` — then `authInfo` is guaranteed in every handler.
