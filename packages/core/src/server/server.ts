@@ -1080,6 +1080,14 @@ export class McpServer<
       `ui://views/apps-sdk/${component}.html`,
       canonicalUri,
     );
+    this.viewUriByPath.set(
+      `ui://widgets/apps-sdk/${component}.html`,
+      canonicalUri,
+    );
+    this.viewUriByPath.set(
+      `ui://widgets/ext-apps/${component}.html`,
+      canonicalUri,
+    );
   }
 
   private wrapHandler<InputArgs extends ZodRawShapeCompat>(
