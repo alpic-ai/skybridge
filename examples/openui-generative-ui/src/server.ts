@@ -1,20 +1,8 @@
-import { McpServer, type ToolDef } from "skybridge/server";
+import { McpServer } from "skybridge/server";
 import { z } from "zod";
 import { openuiPrompt } from "./openui/library.js";
 
-type AppTools = {
-  "get-openui-prompt": ToolDef<Record<string, never>, never, unknown>;
-  render: ToolDef<{ code: string }, Record<string, never>, unknown>;
-};
-export type AppType = McpServer<AppTools>;
-
-type RenderResult = {
-  structuredContent: Record<string, never>;
-  content: string;
-  isError: false;
-};
-
-const renderInputSchema: { code: z.ZodTypeAny } = {
+const renderInputSchema = {
   code: z
     .string()
     .describe(
@@ -28,7 +16,7 @@ async function getOpenuiPrompt() {
   };
 }
 
-async function renderOpenui(): Promise<RenderResult> {
+async function renderOpenui() {
   return {
     structuredContent: {},
     content: "OpenUI Lang UI rendered successfully.",
@@ -36,7 +24,7 @@ async function renderOpenui(): Promise<RenderResult> {
   };
 }
 
-const server: McpServer = new McpServer({
+const server = new McpServer({
   name: "openui-generative-ui",
   version: "0.0.1",
 })
@@ -74,3 +62,5 @@ const server: McpServer = new McpServer({
   );
 
 export default await server.run();
+
+export type AppType = typeof server;
