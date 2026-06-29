@@ -34,7 +34,7 @@ descopeProvider(opts: DescopeProviderOptions): Promise<OAuthConfig>;
 
 - **`url`** is the MCP Server's Discovery URL (its Issuer) from the console's Connection Information, for example `https://api.descope.com/v1/apps/agentic/<projectId>/<mcpServerId>`, or your custom domain.
 
-- **`audience`** defaults to the Project ID derived from `url`: Descope binds the token's `aud` to `[DCR client id, project id]`. Pass it explicitly to override.
+- **`audience`** defaults to the Project ID parsed from the `/agentic/<projectId>/<mcpServerId>` segment of `url` (Descope binds the token's `aud` to `[DCR client id, project id]`). If `url` lacks that segment, such as a custom domain, pass `audience` explicitly or the server throws at startup.
 
 It also accepts the shared [`CustomProviderOptions`](/api-reference/custom-provider#parameters) options: `baseUrl`, `serverUrl`, `scopes`, `requiredScopes`, and `metadataOverrides`.
 
