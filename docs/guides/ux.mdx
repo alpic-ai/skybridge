@@ -5,10 +5,6 @@ sidebarTitle: "UX"
 icon: "sparkles"
 ---
 
-import { Hero } from "/components/hero.jsx";
-
-<Hero src="/images/ux.png" alt="UX Illustration" />
-
 An MCP App is a new kind of surface with its own UX principles. The [view](/build/view) shares the screen with an ongoing conversation, in a frame the host controls. Skybridge surfaces that environment through [hooks](/api-reference/overview#hooks), so the view can read its context and adapt.
 
 ```tsx views/carousel.tsx
@@ -189,13 +185,13 @@ The [DevTools](/test/devtools) environment inspector flips theme, display mode, 
 
 ## Go Further
 <Columns cols={3}>
-    <Card title="Create Views" img="/images/view.png" href="/build/view">
+    <Card title="Create Views" icon="palette" href="/build/view">
         Craft interactive UIs rendered in conversation
     </Card>
-    <Card title="Handle Files" img="/images/files.png" href="/guides/files">
+    <Card title="Handle Files" icon="paperclip" href="/guides/files">
         Move files in and out of your app
     </Card>
-    <Card title="Configure CSP" img="/images/csp.png" href="/guides/csp">
+    <Card title="Configure CSP" icon="shield" href="/guides/csp">
         Let your views reach the domains they need
     </Card>
 </Columns>

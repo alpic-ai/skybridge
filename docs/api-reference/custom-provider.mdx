@@ -8,7 +8,7 @@ description: "Wire OAuth from any IdP's discovery document"
 
 ## Example
 
-```ts server.ts highlight={1,7-10}
+```ts server.ts highlight={1,7-12}
 import { McpServer, customProvider } from "skybridge/server";
 
 const server = new McpServer(
@@ -18,6 +18,8 @@ const server = new McpServer(
     oauth: await customProvider({
       issuer: "https://auth.myshop.com",
       audience: process.env.SERVER_URL,
+      scopes: ["openid", "profile", "checkout"],
+      requiredScopes: ["openid"],
     }),
   },
 );

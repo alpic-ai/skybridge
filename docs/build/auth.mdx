@@ -4,11 +4,11 @@ description: "Know who's behind every tool call"
 icon: "key"
 ---
 
-import { Hero } from "/components/hero.jsx";
-
-<Hero src="/images/auth.png" alt="Auth Illustration" />
-
 [Tool](/build/tools) calls are anonymous by default: nothing in the protocol tells you who's asking. [OAuth](https://oauth.net/2/) closes that gap, and the host does most of the work: it discovers your authorization server, signs the user in, refreshes tokens, and attaches a Bearer token to every request. Your server keeps three jobs: publish the discovery metadata, verify the tokens, and read the user in your handlers.
+
+<Tip>
+Using [Auth0](/guides/auth-providers#auth0), [Clerk](/guides/auth-providers#clerk), [Descope](/guides/auth-providers#descope), [Stytch](/guides/auth-providers#stytch), [WorkOS](/guides/auth-providers#workos), or [any other OAuth provider](/guides/auth-providers#any-other-provider)? Connect it in one line instead of wiring this by hand. That path can't yet [mix public and authenticated tools](#mix-public-and-authenticated-tools).
+</Tip>
 
 Here's a complete server where every tool requires sign-in:
 
@@ -203,13 +203,13 @@ server.registerTool(
 
 ## Go Further
 <Columns cols={3}>
-    <Card title="Register Tools" img="/images/tools.png" href="/build/tools">
+    <Card title="Register Tools" icon="wrench" href="/build/tools">
         Define what humans and agents can do
     </Card>
-    <Card title="Create Views" img="/images/view.png" href="/build/view">
+    <Card title="Create Views" icon="palette" href="/build/view">
         Craft interactive UIs rendered in conversation
     </Card>
-    <Card title="Manage State" img="/images/state.png" href="/build/state">
+    <Card title="Manage State" icon="database" href="/build/state">
         Decide what the model sees
     </Card>
 </Columns>

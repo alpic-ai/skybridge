@@ -4,10 +4,6 @@ description: "Craft interactive UIs rendered in conversation"
 icon: "palette"
 ---
 
-import { Hero } from "/components/hero.jsx";
-
-<Hero src="/images/view.png" alt="View Illustration" />
-
 Views are the face of your app: UI components the host mounts inline when the [tool](/build/tools) they're bound to returns. A view reads what the tool produced, calls tools back when the user acts, and manages the [state](/build/state) shared with the model. It's plain [React](https://react.dev/), running in a sandboxed iframe inside the host.
 
 Here's a complete view, the `carousel` mounted by `search-products`, next to a minimal version of the tools it talks to:
@@ -206,13 +202,13 @@ server.registerTool(
 
 ## Go Further
 <Columns cols={3}>
-    <Card title="Register Tools" img="/images/tools.png" href="/build/tools">
+    <Card title="Register Tools" icon="wrench" href="/build/tools">
         Define what humans and agents can do
     </Card>
-    <Card title="Manage State" img="/images/state.png" href="/build/state">
+    <Card title="Manage State" icon="database" href="/build/state">
         Decide what the model sees
     </Card>
-    <Card title="Authenticate Users" img="/images/auth.png" href="/build/auth">
+    <Card title="Authenticate Users" icon="key" href="/build/auth">
         Know who's behind every tool call
     </Card>
 </Columns>

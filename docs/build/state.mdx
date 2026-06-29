@@ -4,10 +4,6 @@ description: "Decide what the model sees"
 icon: "database"
 ---
 
-import { Hero } from "/components/hero.jsx";
-
-<Hero src="/images/state.png" alt="State Illustration" />
-
 Between [tool](/build/tools) calls, the model is blind: it doesn't watch the user's interactions with the UI. Yet, to answer the user's next message, the model often needs to know what's on screen. State is how the [view](/build/view) closes that gap, and the design decision is always the same: what should the model see, what shouldn't, and when.
 
 Here's a complete view, the `carousel` mounted by a tool call to `search-products`, holding shared state, hidden state, and a narration for the model:
@@ -137,13 +133,13 @@ This is what lets the user speak in references: "what do you think of this one?"
 
 ## Go Further
 <Columns cols={3}>
-    <Card title="Register Tools" img="/images/tools.png" href="/build/tools">
+    <Card title="Register Tools" icon="wrench" href="/build/tools">
         Define what humans and agents can do
     </Card>
-    <Card title="Create Views" img="/images/view.png" href="/build/view">
+    <Card title="Create Views" icon="palette" href="/build/view">
         Craft interactive UIs rendered in conversation
     </Card>
-    <Card title="Authenticate Users" img="/images/auth.png" href="/build/auth">
+    <Card title="Authenticate Users" icon="key" href="/build/auth">
         Know who's behind every tool call
     </Card>
 </Columns>

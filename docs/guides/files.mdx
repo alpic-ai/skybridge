@@ -5,10 +5,6 @@ sidebarTitle: "Files"
 icon: "paperclip"
 ---
 
-import { Hero } from "/components/hero.jsx";
-
-<Hero src="/images/files.png" alt="Files Illustration" />
-
 [Views](/build/view) run in a sandboxed iframe, cut off from the conversation and the user's disk. Each host opens its own door for files, and the two work differently: ChatGPT keeps a file store your [tools](/build/tools) and views read and write; Claude only lets a view save a file to the user's device. What you can build depends on the host.
 
 ## Files in ChatGPT
@@ -235,13 +231,13 @@ export default function ReceiptSummary({ items }: { items: LineItem[] }) {
 
 ## Go Further
 <Columns cols={3}>
-    <Card title="Create Views" img="/images/view.png" href="/build/view">
+    <Card title="Create Views" icon="palette" href="/build/view">
         Craft interactive UIs rendered in conversation
     </Card>
-    <Card title="Register Tools" img="/images/tools.png" href="/build/tools">
+    <Card title="Register Tools" icon="wrench" href="/build/tools">
         Define what humans and agents can do
     </Card>
-    <Card title="UX Design" img="/images/ux.png" href="/guides/ux">
+    <Card title="UX Design" icon="sparkles" href="/guides/ux">
         Account for what makes an MCP App different
     </Card>
 </Columns>

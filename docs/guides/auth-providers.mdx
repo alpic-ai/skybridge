@@ -5,15 +5,11 @@ sidebarTitle: "Identity Providers"
 icon: "fingerprint"
 ---
 
-[Authenticating users](/build/auth) adds a signed-in identity to every tool call. The host runs the sign-in flow and attaches a token to each request; your server verifies that token, and the verification is specific to each identity provider. A provider does that work for you: you connect one to your server, and your handlers read the signed-in user with no token-checking code to write.
+[Authenticating users](/build/auth) wires sign-in through a hosted identity provider in one constructor option, so your tools receive a signed-in user. ChatGPT and Claude drive the flow the same way; what varies is the provider. The sections below cover one each: [Auth0](#auth0), [Clerk](#clerk), [Descope](#descope), [Stytch](#stytch), and [WorkOS](#workos), plus a [custom provider](#any-other-provider) for any other.
 
-ChatGPT and Claude run this flow the same way, so the part that varies is which identity provider you connect. The sections below cover one each: [Auth0](#auth0), [Clerk](#clerk), [Descope](#descope), [Stytch](#stytch), and [WorkOS](#workos), plus a [custom provider](/api-reference/custom-provider) for any other.
-
-Every provider here shares three requirements:
-
-- **[Dynamic Client Registration (DCR)](https://datatracker.ietf.org/doc/html/rfc7591)** enabled, so hosts can register themselves without a hand-issued client ID.
-- **JWT access tokens** (not opaque ones), so the server can verify a token by its signature.
-- **An audience** the provider binds into the token's `aud` claim, matched at verification. Clerk is the exception: its tokens carry no `aud`.
+<Info>
+These providers enforce sign-in on every request. To [mix public and authenticated tools](/build/auth#mix-public-and-authenticated-tools) in one server, wire the middleware by hand instead.
+</Info>
 
 ## Auth0
 
@@ -128,7 +124,13 @@ See the runnable [`auth-workos`](https://github.com/alpic-ai/skybridge/tree/main
 
 ## Any Other Provider
 
-For an identity provider without a branded wrapper, [`customProvider`](/api-reference/custom-provider) wires any IdP that publishes a discovery document and signs JWT access tokens. Pass the issuer and the audience it binds:
+For an identity provider without a branded wrapper, [`customProvider`](/api-reference/custom-provider) wires any IdP that meets three requirements:
+
+- **[Dynamic Client Registration (DCR)](https://datatracker.ietf.org/doc/html/rfc7591)** enabled, so hosts can register themselves without a hand-issued client ID.
+- **JWT access tokens** (not opaque ones), so the server can verify a token by its signature.
+- **An audience** the provider binds into the token's `aud` claim.
+
+Pass the issuer and the audience it binds:
 
 ```ts server.ts highlight={2-5}
 const server = new McpServer(serverInfo, capabilities, {
@@ -141,16 +143,18 @@ const server = new McpServer(serverInfo, capabilities, {
 
 Omit `audience` for a provider that binds none, and set `serverUrl` when Skybridge must advertise itself as the authorization server, as Auth0 and the Alpic DCR proxy require.
 
+[Google](https://developers.google.com/identity/protocols/oauth2) and [GitHub](https://docs.github.com/en/apps/oauth-apps) don't support DCR, so `customProvider` can't wire them directly. To offer Google or GitHub sign-in, configure a branded provider (Auth0, Clerk, Stytch, or WorkOS) with them as an upstream social connection.
+
 After sign-in, [reading the user and scoping data to them](/build/auth) is the same across every provider: handlers read `extra.authInfo`, and a tool declaring [`securitySchemes`](/api-reference/register-tool#securityschemes) with scopes gates access to them.
 
 <Columns cols={3}>
-    <Card title="Authenticate Users" img="/images/auth.png" href="/build/auth">
+    <Card title="Authenticate Users" icon="key" href="/build/auth">
         Publish metadata, verify tokens, read the user
     </Card>
-    <Card title="Register Tools" img="/images/tools.png" href="/build/tools">
+    <Card title="Register Tools" icon="wrench" href="/build/tools">
         Declare which tools require sign-in
     </Card>
-    <Card title="Tunnel" img="/images/tunnel.png" href="/test/tunnel">
+    <Card title="Tunnel" icon="globe" href="/test/tunnel">
         Test the OAuth flow in a real host
     </Card>
 </Columns>
