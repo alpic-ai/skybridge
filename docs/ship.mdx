@@ -1,0 +1,134 @@
+---
+title: "Ship"
+description: "Deploy your app to a stable, public URL"
+icon: "cloud-upload"
+---
+
+A deployed MCP App is a server on a public URL: hosts connect to `https://your-domain.com/mcp` and the built [views](/build/view) are served from the same origin.
+
+Two commands take it there:
+
+- [`skybridge build`](/api-reference/cli) compiles the views and the server into `dist/`
+- `skybridge start` runs the result with `NODE_ENV=production`: pre-built assets on `/assets`, the [MCP server](/api-reference/mcp-server) on `/mcp`, dev tooling excluded
+
+Run them on any [Node.js](https://nodejs.org/)-compatible infrastructure, or pick a platform that automates them:
+
+## Alpic
+
+[Alpic](https://alpic.ai) is the preferred deployment target: a cloud platform built for MCP Apps, by the company behind Skybridge. Deployed apps get MCP analytics, logs, insights, and a public [playground](/test/playground).
+
+Deploying is free, and one command away from any Skybridge project:
+
+<CodeGroup>
+```bash npm
+npm run deploy
+```
+```bash pnpm
+pnpm run deploy
+```
+```bash yarn
+yarn deploy
+```
+```bash bun
+bun run deploy
+```
+```bash deno
+deno task deploy
+```
+</CodeGroup>
+
+For continuous deployment, push your app to GitHub and connect the repository from [app.alpic.ai](https://app.alpic.ai): every commit then ships automatically.
+
+<Info>
+Alpic also ships its own [MCP App](https://docs.alpic.ai/features/mcp-server) to manage your deployments from any MCP client: connect to `https://mcp.alpic.ai/mcp`.
+</Info>
+
+## Cloudflare Workers
+
+Skybridge runs on [Cloudflare Workers](https://developers.cloudflare.com/workers/) via [Wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/) and the [`nodejs_compat`](https://developers.cloudflare.com/workers/runtime-apis/nodejs/) runtime. Static assets (your built views) are served by Cloudflare's edge directly; the worker handles `/mcp` traffic and any other dynamic routes.
+
+Add a `wrangler.jsonc` at your project root:
+
+```jsonc wrangler.jsonc
+{
+  "name": "your-skybridge-app",
+  "main": "dist/__entry.js",
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "dist/assets" },
+  "define": {
+    "process.env.NODE_ENV": "\"production\""
+  }
+}
+```
+
+Each setting is load-bearing:
+
+- `compatibility_date >= 2025-09-01` and `nodejs_compat`: enable `cloudflare:node`'s `httpServerHandler`, which Skybridge uses to bridge the Express app to the Workers fetch event.
+- `assets.directory`: points at the [views](/build/view) built by `skybridge build`. Cloudflare serves these at the edge before requests reach your worker.
+- `define.process.env.NODE_ENV`: forces production mode even under `wrangler dev`. Without it, wrangler defaults to `development` locally and Skybridge's dev tooling ([Vite](https://vite.dev/), the [DevTools](/test/devtools) server) gets pulled into the worker bundle, where neither runs.
+
+Then build and deploy:
+
+<CodeGroup>
+```bash npm
+npm run build
+npx wrangler deploy
+```
+```bash pnpm
+pnpm build
+pnpm dlx wrangler deploy
+```
+```bash yarn
+yarn build
+yarn dlx wrangler deploy
+```
+```bash bun
+bun run build
+bunx wrangler deploy
+```
+</CodeGroup>
+
+<Info>
+`wrangler dev` runs your worker in workerd on your machine, the same runtime as production, not a Node.js fallback. Use `skybridge dev` for fast iteration with HMR; use `wrangler dev` to validate the production worker bundle before shipping.
+</Info>
+
+## Docker
+
+Projects [scaffolded](/get-started/quickstart#scaffold-your-project) with `npx skybridge create` include a multi-stage [`Dockerfile`](https://docs.docker.com/reference/dockerfile/), so you can self-host on any container platform:
+
+```bash
+docker build -t my-app .
+docker run -p 3000:3000 my-app
+```
+
+<Info>
+The package manager is detected from the lockfile (`package-lock.json`, `yarn.lock`, or `pnpm-lock.yaml`). Bun and Deno are not supported yet: adapt the build stage inside the Dockerfile.
+</Info>
+
+## Vercel
+
+`skybridge build` emits a [Build Output API](https://vercel.com/docs/build-output-api) tree under `.vercel/output/`: a bundled serverless function, the static asset tree, and the routing config. No `vercel.json` required.
+
+<CodeGroup>
+```bash npm
+npm run build
+npx vercel deploy --prebuilt
+```
+```bash pnpm
+pnpm build
+pnpm dlx vercel deploy --prebuilt
+```
+```bash yarn
+yarn build
+yarn dlx vercel deploy --prebuilt
+```
+```bash bun
+bun run build
+bunx vercel deploy --prebuilt
+```
+</CodeGroup>
+
+<Info>
+`.vercel/` is gitignored by [Vercel CLI](https://vercel.com/docs/cli) convention, so the build artifacts stay out of your tracked working tree.
+</Info>

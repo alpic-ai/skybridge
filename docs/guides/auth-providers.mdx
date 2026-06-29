@@ -1,0 +1,160 @@
+---
+title: "Connect an Identity Provider"
+description: "Wire sign-in through a hosted OAuth provider"
+sidebarTitle: "Identity Providers"
+icon: "fingerprint"
+---
+
+[Authenticating users](/build/auth) wires sign-in through a hosted identity provider in one constructor option, so your tools receive a signed-in user. ChatGPT and Claude drive the flow the same way; what varies is the provider. The sections below cover one each: [Auth0](#auth0), [Clerk](#clerk), [Descope](#descope), [Stytch](#stytch), and [WorkOS](#workos), plus a [custom provider](#any-other-provider) for any other.
+
+<Info>
+These providers enforce sign-in on every request. To [mix public and authenticated tools](/build/auth#mix-public-and-authenticated-tools) in one server, wire the middleware by hand instead.
+</Info>
+
+## Auth0
+
+[Auth0](https://auth0.com/docs/) issues opaque tokens by default, so you register an API to get verifiable JWTs.
+
+1. In the [Auth0 dashboard](https://manage.auth0.com/), create a **Regular Web Application** and note its **Domain**.
+2. Create an **API** (**Applications → APIs**) with an **Identifier** (e.g. `https://your-mcp-server.com`); this identifier is your audience and need not be a real URL.
+3. Under **Settings → Tenant Settings → API Authorization Settings**, set **Default Audience** to that identifier and enable **Dynamic Client Registration**.
+4. Enable **Application Connections**, promote your login connection to domain level, and set the API's **user access policy** to **Allow**, so DCR-created clients can sign users in.
+
+Pass the tenant domain, the API Identifier as `audience`, and this server's public URL as `serverUrl` to [`auth0Provider`](/api-reference/auth0-provider):
+
+```ts server.ts highlight={1,7-11}
+import { McpServer, auth0Provider } from "skybridge/server";
+
+const server = new McpServer(
+  { name: "personal-shopper", version: "0.0.1" },
+  { capabilities: {} },
+  {
+    oauth: await auth0Provider({
+      domain: process.env.AUTH0_DOMAIN,
+      audience: process.env.AUTH0_API_IDENTIFIER,
+      serverUrl: process.env.SERVER_URL,
+    }),
+  },
+).registerTool(/* search-products, requires oauth2 */);
+```
+
+See the runnable [`auth-auth0`](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-auth0) example.
+
+## Clerk
+
+[Clerk](https://clerk.com/) access tokens carry no `aud` claim, so there is no audience to configure.
+
+1. Sign up at [clerk.com](https://clerk.com/) and create an application.
+2. Create an OAuth application with **Dynamic client registration** enabled and **Generate access tokens as JWTs** turned on.
+3. Copy your **Frontend API URL** (**API keys**), e.g. `acme.clerk.accounts.dev`.
+
+Pass the domain alone to [`clerkProvider`](/api-reference/clerk-provider), no audience:
+
+```ts server.ts highlight={2-4}
+const server = new McpServer(serverInfo, capabilities, {
+  oauth: await clerkProvider({
+    domain: process.env.CLERK_FRONTEND_API,
+  }),
+}).registerTool(/* search-products, requires oauth2 */);
+```
+
+See the [`auth-clerk`](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-clerk) example.
+
+## Descope
+
+A [Descope](https://docs.descope.com/mcp) MCP Server binds the token's `aud` to the project, so the provider derives the audience from the Discovery URL you pass.
+
+1. Sign up at [descope.com](https://www.descope.com/) and create a project.
+2. In the console's **MCP Servers** section, create an MCP Server and enable **Dynamic Client Registration** on it.
+3. Copy the MCP Server's **Discovery URL** from its Connection Information.
+
+Pass that URL to [`descopeProvider`](/api-reference/descope-provider); the audience defaults to the Project ID derived from it:
+
+```ts server.ts highlight={2-4}
+const server = new McpServer(serverInfo, capabilities, {
+  oauth: await descopeProvider({
+    url: process.env.DESCOPE_MCP_SERVER_URL,
+  }),
+}).registerTool(/* search-products, requires oauth2 */);
+```
+
+See the [`auth-descope`](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-descope) example.
+
+## Stytch
+
+[Stytch Connected Apps](https://stytch.com/docs/connected-apps) ships its consent screen only as a React component, so the login, consent, and callback pages are served as static HTML from your server, and the Connected App points at them.
+
+1. Sign up at [stytch.com](https://stytch.com/) and create a **Consumer** project.
+2. Under **Connected Apps**, create a Connected App with Dynamic Client Registration enabled.
+3. Note your **Project ID**, **project domain** (e.g. `acme.customers.stytch.dev`), and **Public Token**.
+4. Set the Connected App's **Authorization URL** to your server's consent page and add its callback to the **Redirect URLs** allowlist. The [`auth-stytch`](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-stytch) example ships those HTML pages.
+
+Pass the project domain and the Project ID as the audience to [`stytchProvider`](/api-reference/stytch-provider):
+
+```ts server.ts highlight={2-5}
+const server = new McpServer(serverInfo, capabilities, {
+  oauth: await stytchProvider({
+    domain: process.env.STYTCH_DOMAIN,
+    audience: process.env.STYTCH_PROJECT_ID,
+  }),
+}).registerTool(/* search-products, requires oauth2 */);
+```
+
+## WorkOS
+
+[WorkOS AuthKit](https://www.workos.com/docs/user-management/authkit) needs DCR enabled and your server registered as a Resource Indicator so issued tokens carry the right `aud`.
+
+1. Sign up at [workos.com](https://www.workos.com/) and enable AuthKit.
+2. Enable Dynamic Client Registration under **Connect → Configuration**.
+3. Register your server URL as a **Resource Indicator**, so AuthKit sets each token's `aud` to it.
+4. Copy your **AuthKit domain** (e.g. `acme.authkit.app`).
+
+Pass the domain and your server URL as the audience to [`workosProvider`](/api-reference/workos-provider):
+
+```ts server.ts highlight={2-5}
+const server = new McpServer(serverInfo, capabilities, {
+  oauth: await workosProvider({
+    domain: process.env.AUTHKIT_DOMAIN,
+    audience: process.env.SERVER_URL,
+  }),
+}).registerTool(/* search-products, requires oauth2 */);
+```
+
+See the runnable [`auth-workos`](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-workos) example.
+
+## Any Other Provider
+
+For an identity provider without a branded wrapper, [`customProvider`](/api-reference/custom-provider) wires any IdP that meets three requirements:
+
+- **[Dynamic Client Registration (DCR)](https://datatracker.ietf.org/doc/html/rfc7591)** enabled, so hosts can register themselves without a hand-issued client ID.
+- **JWT access tokens** (not opaque ones), so the server can verify a token by its signature.
+- **An audience** the provider binds into the token's `aud` claim.
+
+Pass the issuer and the audience it binds:
+
+```ts server.ts highlight={2-5}
+const server = new McpServer(serverInfo, capabilities, {
+  oauth: await customProvider({
+    issuer: "https://auth.example.com",
+    audience: process.env.SERVER_URL,
+  }),
+}).registerTool(/* search-products, requires oauth2 */);
+```
+
+Omit `audience` for a provider that binds none, and set `serverUrl` when Skybridge must advertise itself as the authorization server, as Auth0 and the Alpic DCR proxy require.
+
+[Google](https://developers.google.com/identity/protocols/oauth2) and [GitHub](https://docs.github.com/en/apps/oauth-apps) don't support DCR, so `customProvider` can't wire them directly. To offer Google or GitHub sign-in, configure a branded provider (Auth0, Clerk, Stytch, or WorkOS) with them as an upstream social connection.
+
+After sign-in, [reading the user and scoping data to them](/build/auth) is the same across every provider: handlers read `extra.authInfo`, and a tool declaring [`securitySchemes`](/api-reference/register-tool#securityschemes) with scopes gates access to them.
+
+<Columns cols={3}>
+    <Card title="Authenticate Users" icon="key" href="/build/auth">
+        Publish metadata, verify tokens, read the user
+    </Card>
+    <Card title="Register Tools" icon="wrench" href="/build/tools">
+        Declare which tools require sign-in
+    </Card>
+    <Card title="Tunnel" icon="globe" href="/test/tunnel">
+        Test the OAuth flow in a real host
+    </Card>
+</Columns>

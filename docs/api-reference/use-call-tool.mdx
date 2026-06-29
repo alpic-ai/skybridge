@@ -1,61 +1,108 @@
 ---
 title: useCallTool
-description: "React hook for calling MCP tools from views with typed API and state management."
+description: "Call a tool from a view"
 ---
 
-The `useCallTool` function allows you to call additional MCP tools from your view. It wraps the [`window.openai.callTool`](https://developers.openai.com/apps-sdk/build/chatgpt-ui#trigger-server-actions) function while providing a more convenient state management and typed API.
+import { Compat } from "/components/compat.jsx";
 
-Make sure your tool `_meta["openai/widgetAccessible"]` property is set to `true` to make it accessible from views - more info on [component-initiated tool calls](https://developers.openai.com/apps-sdk/build/mcp-server#component-initiated-tool-calls).
+<Compat alpic chatgpt claude />
 
-## Basic usage
+`useCallTool` lets a [view](/build/view) call one of your server's [tools](/build/tools) and tracks the call's state, so an interaction in the view can run server logic and render the result. The model does not see a view-initiated call.
 
-```tsx
-import { useCallTool } from "skybridge/web";
-import { useState } from "react";
+Import it from your [`generated helpers.ts`](/api-reference/generate-helpers): the typed hook infers the tool's argument and response types from your server, so you pass only the name.
 
-function BookTableView() {
-  const { callTool, isPending, isSuccess, data } = useCallTool<
-    { time: string; people: number },
-    { structuredContent: { tableNumber: string } }
-  >("bookTable");
+## Examples
+
+### Trigger a call and read the result
+
+A shopper checks out their cart without leaving the view. The button shows progress while the server creates the checkout, then turns into a Pay now link, or explains why checkout could not start.
+
+```tsx highlight={5-6,14-17,23,27}
+import { useCallTool } from "../helpers.js"; // generated, type-safe from server schema
+import { useOpenExternal } from "skybridge/web";
+
+function Cart({ items }: { items: string[] }) {
+  const { callTool, isPending, isSuccess, isError, data, error } =
+    useCallTool("create-checkout");
+  const openExternal = useOpenExternal();
 
   return (
     <div>
       <button
         disabled={isPending}
-        onClick={() => callTool({ time: "12:00", people: 2 })}
+        onClick={() =>
+          callTool(
+            { items },
+            { onError: (e) => console.error("Checkout failed", e) },
+          )
+        }
       >
-        Book Table
+        {isPending ? "Checking out..." : "Check out"}
       </button>
-      {isSuccess && <p>Table booked: {data.structuredContent.tableNumber}</p>}
+      {isSuccess && (
+        <button onClick={() => openExternal(data.structuredContent.checkoutUrl)}>
+          Pay now
+        </button>
+      )}
+      {isError && <p>Could not start checkout: {String(error)}</p>}
     </div>
   );
 }
 ```
 
-## Parameters
+### Await the call
+
+A shopper checks out and goes straight to payment. The view waits for the checkout, opens the payment page, and recovers if the request never completes.
+
+```tsx highlight={5,10,12-13}
+import { useCallTool } from "../helpers.js"; // generated, type-safe from server schema
+import { useOpenExternal } from "skybridge/web";
+
+function Cart() {
+  const { callToolAsync, isPending } = useCallTool("create-checkout");
+  const openExternal = useOpenExternal();
+
+  const checkout = async () => {
+    try {
+      const { structuredContent } = await callToolAsync({ items: ["jacket"] });
+      openExternal(structuredContent.checkoutUrl);
+    } catch (error) {
+      console.error("Checkout failed", error);
+    }
+  };
+
+  return (
+    <button disabled={isPending} onClick={checkout}>
+      Check out
+    </button>
+  );
+}
+```
+
+## Type Parameters
+
+The [generated helper](/api-reference/generate-helpers) infers both from your server. You set them by hand only when importing `useCallTool` from `skybridge/web` directly, which is not recommended.
+
+### `ToolArgs`
 
 ```tsx
-const {
-  data,
-  error,
-  isError,
-  isIdle,
-  isPending,
-  isSuccess,
-  status,
-  callTool,
-  callToolAsync,
-} = useCallTool<ToolArgs, ToolResponse>(name);
-
-callTool(toolArgs, {
-  onError,
-  onSettled,
-  onSuccess,
-});
-
-await callToolAsync(toolArgs);
+ToolArgs extends Record<string, unknown> | null = null;
 ```
+
+The arguments the tool accepts. Defaults to `null`, for a tool that takes no arguments.
+
+### `ToolResponse`
+
+```tsx
+ToolResponse extends Partial<{
+  structuredContent: Record<string, unknown>;
+  meta: Record<string, unknown>;
+}> = Record<string, never>;
+```
+
+The shape of the tool's `structuredContent` and `meta`. Defaults to an empty object. Whatever you set here types those two fields on `data`.
+
+## Parameters
 
 ### `name`
 
@@ -63,66 +110,50 @@ await callToolAsync(toolArgs);
 name: string;
 ```
 
-**Required**
+**Required.** The name of the tool to call. It must match a tool registered on your [MCP server](/api-reference/mcp-server).
 
-The name of the tool to call. This must match the name of a tool registered on your MCP server.
-
-## Type Parameters
-
-### `ToolArgs`
-
-```tsx
-ToolArgs extends CallToolArgs = null
-```
-
-The type of arguments your tool accepts. Defaults to `null` for tools that don't require arguments.
-
-- If your tool has no arguments, you can omit this type parameter or set it to `null`.
-- If your tool requires arguments, define the shape as a `Record<string, unknown>`.
-
-### `ToolResponse`
-
-```tsx
-ToolResponse extends Partial<
-  { structuredContent: Record<string, unknown>; meta: Record<string, unknown> }
-> = {}
-```
-
-The type of the response returned by your tool. This allows you to specify the exact shape of both the `structuredContent` and `meta` fields of your tool's response.
+<Info>
+A view can call a tool only when the tool's `_meta.ui.visibility` includes `"app"`, which is the default behavior. See [Register Tools](/build/tools).
+</Info>
 
 ## Returns
+
+`useCallTool` returns two call functions plus the live [state](/build/state) of the most recent call.
 
 ### `callTool`
 
 ```tsx
-callTool: (toolArgs?: ToolArgs, sideEffects?: SideEffects) => void
+callTool(toolArgs: ToolArgs, sideEffects?: SideEffects): void;
+callTool(sideEffects?: SideEffects): void; // overload available when the tool has no required arguments
 ```
 
-The mutation function you can call to trigger the tool. Optionally pass side-effect callbacks.
+Starts the call and tracks its state on the hook. Returns `void`: read the outcome from `status` / `data` / `error`. Drop `toolArgs` via the second overload when the tool has no required arguments.
 
-- `toolArgs: ToolArgs`
-  - Optional if `ToolArgs` is `null`
-  - The arguments to pass to the tool
-- `sideEffects: SideEffects`
-  - Optional
-  - The side-effect callbacks to execute when the tool call is successful, encounters an error, or is settled:
-    - `onSuccess: (data: ToolResponse, toolArgs: ToolArgs) => void`
-      - Optional
-      - This function will fire when the tool call is successful and will be passed the tool's response
-    - `onError: (error: unknown, toolArgs: ToolArgs) => void`
-      - Optional
-      - This function will fire if the tool call encounters an error
-    - `onSettled: (data: ToolResponse | undefined, error: unknown | undefined, toolArgs: ToolArgs) => void`
-      - Optional
-      - This function will fire when the tool call is either successful or encounters an error
+**`sideEffects`** Optional callbacks bound to this specific call, firing even when a later call supersedes it.
+
+```tsx
+type SideEffects = {
+  // the call completed: the host returned a response (which may carry data.isError === true)
+  onSuccess?: (data: CallToolResponse & ToolResponse, toolArgs: ToolArgs) => void;
+  // the call failed to complete: the host rejected it
+  onError?: (error: unknown, toolArgs: ToolArgs) => void;
+  // runs after onSuccess or onError, with the other argument undefined
+  onSettled?: (
+    data: (CallToolResponse & ToolResponse) | undefined,
+    error: unknown | undefined,
+    toolArgs: ToolArgs,
+  ) => void;
+};
+```
 
 ### `callToolAsync`
 
 ```tsx
-callToolAsync: (toolArgs?: ToolArgs) => Promise<ToolResponse>;
+callToolAsync(toolArgs: ToolArgs): Promise<CallToolResponse & ToolResponse>;
+callToolAsync(): Promise<CallToolResponse & ToolResponse>; // overload available when the tool has no required arguments
 ```
 
-Similar to `callTool` but returns a promise which can be awaited.
+Tracks state on the hook exactly like `callTool`, and also returns a promise. It resolves with the [`response`](#data) when the call completes, and rejects with the thrown value when the call fails to complete. It accepts no `sideEffects`.
 
 ### `status`
 
@@ -130,10 +161,10 @@ Similar to `callTool` but returns a promise which can be awaited.
 status: "idle" | "pending" | "success" | "error";
 ```
 
-- `idle` - Initial status prior to the tool call executing
-- `pending` - The tool call is currently executing
-- `success` - The last tool call was successful
-- `error` - The last tool call resulted in an error
+- `"idle"`: no call has started.
+- `"pending"`: a call is in flight.
+- `"success"`: the most recent call completed and the host returned a response. The response may carry `data.isError === true`.
+- `"error"`: the most recent call failed to complete and the host rejected it.
 
 ### `isIdle`, `isPending`, `isSuccess`, `isError`
 
@@ -144,26 +175,24 @@ isSuccess: boolean;
 isError: boolean;
 ```
 
-Boolean variables derived from `status` for convenience.
+Each is `true` when `status` equals the matching value and `false` otherwise. Exactly one is `true` at any time. `isError` here is the call-level flag (`status` is `"error"`). It is not `data.isError`, which marks a completed call whose tool reported a failure.
 
 ### `data`
 
 ```tsx
-data: ToolResponse | undefined;
+data: (CallToolResponse & ToolResponse) | undefined;
 ```
 
-- The successfully resolved data from the last tool call. Only available when the status is `success`.
-- Contains the default `CallToolResponse` shape merged with your `ToolResponse` type:
+The response, set only while `status` is `"success"`. It is `undefined` in every other state. A new call clears it to `undefined` as it enters `"pending"`. A tool that reports a failure still lands here, with `isError: true`; only a call that fails to complete sets `error` instead.
+
+`CallToolResponse` is the fixed part of every response, which your `ToolResponse` type parameter narrows on `structuredContent` and `meta`:
 
 ```tsx
 type CallToolResponse = {
-  /** content, isError and result shape is not configurable and shared across all tools */
-  content: { type: "text"; text: string }[];
-  isError: boolean;
-  result: string;
-  /** structuredContent and meta are shaped according to your ToolResponse type parameter */
+  content: ContentBlock[]; // the MCP content blocks the tool returned
   structuredContent: Record<string, unknown>;
-  meta: Record<string, unknown>;
+  isError: boolean; // true when the tool itself reported a failure
+  meta?: Record<string, unknown>;
 };
 ```
 
@@ -173,152 +202,16 @@ type CallToolResponse = {
 error: unknown | undefined;
 ```
 
-- Only available when the status is `error`.
-- The error object if the last tool call encountered an error
+The thrown value, set only while `status` is `"error"`. It is `undefined` in every other state. A tool that completes but reports its own failure is a `"success"`, not an `"error"`.
 
-## Examples
-
-### With Side Effects
-
-Handle success, error, and settled states with callbacks:
-
-```tsx
-import { useCallTool } from "skybridge/web";
-
-function SubmitForm() {
-  const { callTool, isPending } = useCallTool<{ email: string }>("subscribe");
-
-  const handleSubmit = (email: string) => {
-    callTool(
-      { email },
-      {
-        onSuccess: (data) => {
-          console.log("Subscribed successfully!", data);
-        },
-        onError: (error) => {
-          console.error("Subscription failed:", error);
-        },
-        onSettled: (data, error) => {
-          console.log("Request completed", { data, error });
-        },
-      }
-    );
-  };
-
-  return (
-    <button
-      disabled={isPending}
-      onClick={() => handleSubmit("user@example.com")}
-    >
-      Subscribe
-    </button>
-  );
-}
-```
-
-### Tools without arguments
-
-You can pass side effect options as the first argument to the `callTool` function if it doesn't require any arguments.
-
-```tsx
-import { useCallTool } from "skybridge/web";
-
-function RefreshButton() {
-  const { callTool, isPending } = useCallTool("refresh");
-
-  return (
-    <button
-      disabled={isPending}
-      onClick={() =>
-        callTool({
-          onSuccess: () => {
-            console.log("Refreshed");
-          },
-        })
-      }
-    >
-      {isPending ? "Refreshing..." : "Refresh"}
-    </button>
-  );
-}
-```
-
-### Async/Await Pattern
-
-Use `callToolAsync` for async/await syntax:
-
-```tsx
-import { useCallTool } from "skybridge/web";
-
-function AsyncExample() {
-  const { callToolAsync, isPending, isError, error } = useCallTool<
-    { id: string },
-    { structuredContent: { name: string; price: number } }
-  >("getProduct");
-
-  const handleClick = async () => {
-    try {
-      const response = await callToolAsync({ id: "123" });
-      console.log("Product:", response.structuredContent.name);
-    } catch (err) {
-      console.error("Failed to fetch product:", err);
-    }
-  };
-
-  return (
-    <div>
-      <button disabled={isPending} onClick={handleClick}>
-        Fetch Product
-      </button>
-      {isError && <p>Error: {String(error)}</p>}
-    </div>
-  );
-}
-```
-
-### Typed Response
-
-Leverage TypeScript to get full type safety on the response:
-
-```tsx
-import { useCallTool } from "skybridge/web";
-
-type WeatherArgs = {
-  city: string;
-  units?: "metric" | "imperial";
-};
-
-type WeatherResponse = {
-  structuredContent: {
-    temperature: number;
-    conditions: string;
-    humidity: number;
-  };
-};
-
-function WeatherView() {
-  const { callTool, data, isPending, isSuccess } = useCallTool<
-    WeatherArgs,
-    WeatherResponse
-  >("getWeather");
-
-  return (
-    <div>
-      <button
-        disabled={isPending}
-        onClick={() => callTool({ city: "Paris", units: "metric" })}
-      >
-        Get Weather
-      </button>
-
-      {isSuccess && (
-        <div>
-          <p>Temperature: {data.structuredContent.temperature}°C</p>
-          <p>Conditions: {data.structuredContent.conditions}</p>
-          <p>Humidity: {data.structuredContent.humidity}%</p>
-        </div>
-      )}
-    </div>
-  );
-}
-```
+<CardGroup cols={3}>
+  <Card title="Create Views" icon="palette" href="/build/view">
+    Call tools back from a view in context
+  </Card>
+  <Card title="generateHelpers" icon="wand-sparkles" href="/api-reference/generate-helpers">
+    The typed `useCallTool` that infers from your server
+  </Card>
+  <Card title="useToolInfo" icon="database" href="/api-reference/use-tool-info">
+    Read the tool result the view mounted with
+  </Card>
+</CardGroup>

@@ -1,0 +1,64 @@
+---
+title: optionalBearerAuth
+description: "Accept a signed-in user when present, allow anonymous otherwise"
+---
+
+When some [tools](/build/tools) are public and others need sign-in, `optionalBearerAuth` validates a token if one is sent but lets anonymous requests through. Each tool then enforces its own [`securitySchemes`](/api-reference/register-tool#securityschemes) against `extra.authInfo`.
+
+## Example
+
+The server accepts a token when one is sent, so public tools run for anyone while gated tools check `extra.authInfo` themselves.
+
+```ts server.ts highlight={6}
+import { McpServer, optionalBearerAuth } from "skybridge/server";
+import { verifyAccessToken } from "./verify-access-token.js"; // the verifier you implement
+
+const server = new McpServer({ name: "shop", version: "1.0" }).use(
+  "/mcp",
+  optionalBearerAuth({ verifier: { verifyAccessToken } }),
+);
+```
+
+## Signature
+
+```ts
+optionalBearerAuth(options: BearerAuthMiddlewareOptions): RequestHandler;
+```
+
+## Parameters
+
+### `options`
+
+```ts
+type BearerAuthMiddlewareOptions = {
+  verifier: OAuthTokenVerifier;
+  requiredScopes?: string[];
+  resourceMetadataUrl?: string;
+};
+```
+
+| Field | Purpose |
+| --- | --- |
+| `verifier` | The provider-specific token check you write. See [Verifier](/api-reference/verifier). |
+| `requiredScopes` | A scope floor, enforced only when a token is sent: the token must carry all of these, or the request gets a 403. |
+| `resourceMetadataUrl` | Absolute URL appended to the `WWW-Authenticate` header on a 401, pointing at your OAuth 2.0 [Protected Resource Metadata](https://datatracker.ietf.org/doc/html/rfc9728) so clients can discover the authorization server. |
+
+## Returns
+
+An [Express `RequestHandler`](https://expressjs.com/en/5x/guide/routing/) to pass to [`server.use`](/api-reference/mcp-server#use), typically on `/mcp`.
+
+- No `Authorization` header: the request proceeds with no `authInfo`.
+- A valid token: the request proceeds, and [handlers](/api-reference/register-tool#handler) read it from `extra.authInfo`.
+- A token that is present but invalid or expired: the same 401 / 403 as [`requireBearerAuth`](/api-reference/require-bearer-auth). Sending a bad token is still a client error.
+
+<CardGroup cols={3}>
+  <Card title="requireBearerAuth" icon="lock" href="/api-reference/require-bearer-auth">
+    Require a token on every request, with the verifier contract
+  </Card>
+  <Card title="registerTool" icon="wrench" href="/api-reference/register-tool">
+    Gate individual tools with `securitySchemes`
+  </Card>
+  <Card title="Authenticate Users" icon="key" href="/build/auth">
+    Add sign-in to your app end to end
+  </Card>
+</CardGroup>

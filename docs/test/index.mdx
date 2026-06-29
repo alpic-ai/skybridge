@@ -1,0 +1,29 @@
+---
+title: "Test Your App"
+description: "Pick the right tool for what you're testing"
+icon: "test-tube-diagonal"
+---
+
+Testing an MCP App means assessing how well it integrates with the host, interacts with the model, and responds to the user. The tools below put these actors in the loop, each trading setup for fidelity.
+
+| To | Use | Real model | Real host | Interactive |
+|-------------|-----|------------|-----------|-------------|
+| Iterate on [tools](/build/tools) and [views](/build/view) | [DevTools](/test/devtools) | <Icon icon="x" color="#EF4444" /> | <Icon icon="x" color="#EF4444" /> | <Icon icon="check" color="#22C55E" /> |
+| Verify behavior in ChatGPT and Claude | [Tunnel](/test/tunnel) | <Icon icon="check" color="#22C55E" /> | <Icon icon="check" color="#22C55E" /> | <Icon icon="check" color="#22C55E" /> |
+| Check what the model does with your app | [Playground](/test/playground) | <Icon icon="check" color="#22C55E" /> | <Icon icon="x" color="#EF4444" /> | <Icon icon="check" color="#22C55E" /> |
+| Validate before submission | [Audit](/test/audit) | <Icon icon="check" color="#22C55E" /> | <Icon icon="check" color="#22C55E" /> | <Icon icon="x" color="#EF4444" /> |
+
+<Columns cols={2}>
+    <Card title="DevTools" icon="square-dashed-mouse-pointer" href="/test/devtools">
+        Call tools and render views locally, without a host
+    </Card>
+    <Card title="Tunnel" icon="globe" href="/test/tunnel">
+        Expose your local server to real hosts
+    </Card>
+    <Card title="Playground" icon="message-circle" href="/test/playground">
+        Chat with a real model running your app
+    </Card>
+    <Card title="Audit" icon="clipboard-check" href="/test/audit">
+        Catch spec and platform issues before submission
+    </Card>
+</Columns>

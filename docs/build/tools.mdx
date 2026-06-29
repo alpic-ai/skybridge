@@ -1,0 +1,284 @@
+---
+title: "Register Tools"
+description: "Define what humans and agents can do"
+icon: "wrench"
+---
+
+Tools are the entry point of your app: the model reads their metadata and triggers them when they fit the conversation. Think of them as an API: each tool has one job, and jobs can complement each other. Bind a view to a tool, and the host [mounts](/get-started/architecture#app-lifecycle) it inline in the conversation. The model isn't the only caller: the user can trigger tools too, via the [view](/build/view).
+
+Here's a complete tool definition:
+
+```ts server.ts
+import { McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
+  .registerTool(
+    {
+      name: "search-products",
+      title: "Search Products",
+      description: "Show products matching a query in a carousel.",
+      inputSchema: { query: z.string().describe("Full-text product search") },
+      outputSchema: {
+        products: z.array(
+          z.object({ id: z.string(), name: z.string(), price: z.number() }),
+        ),
+      },
+      annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
+      view: { component: "carousel" },
+    },
+    async ({ query }) => {
+      const products = await search(query);
+      return {
+        content: `Found ${products.length} products for "${query}".`,
+        structuredContent: {
+          products: products.map(({ id, name, price }) => ({ id, name, price })),
+        },
+        _meta: { images: products.map((p) => p.imageUrl) },
+      };
+    },
+  );
+```
+
+The sections below build this definition up piece by piece: the server it lives on, the metadata and schemas the model reads, the handler, the behavior annotations, host-specific tuning, and the view binding.
+
+## Create the Server
+
+[`McpServer`](/api-reference/mcp-server) takes your app's identity and returns a chainable server. Chain every [`registerTool`](/api-reference/register-tool) call, then `run()`:
+
+```ts server.ts
+const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
+  .registerTool(/* … */)
+  .registerTool(/* … */);
+
+server.run();
+
+export type AppType = typeof server;
+```
+
+Chaining accumulates your tool signatures into one type. Exporting `AppType` is what makes the generated view hooks type-safe end to end.
+
+## Describe It to the Model
+
+```ts server.ts highlight={3-5}
+server.registerTool(
+  {
+    name: "search-products",
+    title: "Search Products",
+    description: "Show products matching a query in a carousel.",
+    inputSchema: { query: z.string().describe("Full-text product search") },
+    outputSchema: {
+      products: z.array(
+        z.object({ id: z.string(), name: z.string(), price: z.number() }),
+      ),
+    },
+    annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
+    view: { component: "carousel" },
+  },
+  async ({ query }) => {
+    /* … */
+  },
+);
+```
+
+- `name` identifies the tool. Keep it kebab-case and verb-led: `search-products`, `create-checkout`.
+- `title` is the human-readable display name.
+- `description` is read to decide *when* to call the tool.
+
+These are prompt engineering. Write them for the model: state what the tool does and what it shows, so the model can pick the right tool among many and narrate it correctly to the user.
+
+## Type the Contract
+
+Schemas are plain [Zod](https://zod.dev/) shapes. [`inputSchema`](/api-reference/register-tool#inputschema-outputschema) declares what the model must provide. [`outputSchema`](/api-reference/register-tool#inputschema-outputschema) is optional and declares the shape of the [structured content returned](/api-reference/register-tool#return) to the model.
+
+```ts server.ts highlight={6-11}
+server.registerTool(
+  {
+    name: "search-products",
+    title: "Search Products",
+    description: "Show products matching a query in a carousel.",
+    inputSchema: { query: z.string().describe("Full-text product search") },
+    outputSchema: {
+      products: z.array(
+        z.object({ id: z.string(), name: z.string(), price: z.number() }),
+      ),
+    },
+    annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
+    view: { component: "carousel" },
+  },
+  async ({ query }) => {
+    /* … */
+  },
+);
+```
+
+`.describe()` on a field is more prompt surface: it tells the model how to fill the argument.
+
+<Info>
+While it's recommended to provide the output schema, it's optional and isn't used for type safety, which is inferred from the handler's return type.
+</Info>
+
+## Write the Handler
+
+The [handler](api-reference/register-tool#handler) receives validated input and returns the tool's [response](/api-reference/register-tool#return). Three fields, three audiences:
+
+| Field | Consumed by |
+|-------|-------------|
+| `content` | The model: what it reads and narrates from |
+| `structuredContent` | The model **and** the view |
+| `_meta` | The view only: never reaches the model |
+
+```ts server.ts highlight={15-24}
+server.registerTool(
+  {
+    name: "search-products",
+    title: "Search Products",
+    description: "Show products matching a query in a carousel.",
+    inputSchema: { query: z.string().describe("Full-text product search") },
+    outputSchema: {
+      products: z.array(
+        z.object({ id: z.string(), name: z.string(), price: z.number() }),
+      ),
+    },
+    annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
+    view: { component: "carousel" },
+  },
+  async ({ query }) => {
+    const products = await search(query);
+    return {
+      content: `Found ${products.length} products for "${query}".`,
+      structuredContent: {
+        products: products.map(({ id, name, price }) => ({ id, name, price })),
+      },
+      _meta: { images: products.map((p) => p.imageUrl) },
+    };
+  },
+);
+```
+
+Choosing the recipient is a design decision: it controls what context each actor sees. Keep `content` and `structuredContent` concise, since they're model context. Use `_meta` for data the model has no use for or isn't supposed to know (image URLs, sensitive record fields): the view still accesses it, the model never sees it.
+
+Handlers also receive an `extra` argument carrying additional data such as auth info or [client hints](/api-reference/register-tool#client-hints).
+
+## Annotate Behavior
+
+[Annotations](/api-reference/register-tool#annotations) tell the host how cautious to be. They drive confirmation prompts before invocation, and app directories check them at review time:
+
+```ts server.ts highlight={12}
+server.registerTool(
+  {
+    name: "search-products",
+    title: "Search Products",
+    description: "Show products matching a query in a carousel.",
+    inputSchema: { query: z.string().describe("Full-text product search") },
+    outputSchema: {
+      products: z.array(
+        z.object({ id: z.string(), name: z.string(), price: z.number() }),
+      ),
+    },
+    annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
+    view: { component: "carousel" },
+  },
+  async ({ query }) => {
+    /* … */
+  },
+);
+```
+
+- `readOnlyHint`: only reads data, no side effects
+- `destructiveHint`: deletes or overwrites user data
+- `openWorldHint`: publishes content or reaches beyond the user's account
+
+<Info>
+Be honest with them: hosts trust these hints, and mislabeling a tool (claiming a write is read-only, hiding a destructive action) is a common cause of app directory rejection.
+</Info>
+
+## Tune the Host with `_meta`
+
+Tool-level [`_meta`](/api-reference/register-tool#_meta) (distinct from the response `_meta` above) carries host-specific configuration:
+
+```ts server.ts highlight={14-20}
+server.registerTool(
+  {
+    name: "search-products",
+    title: "Search Products",
+    description: "Show products matching a query in a carousel.",
+    inputSchema: { query: z.string().describe("Full-text product search") },
+    outputSchema: {
+      products: z.array(
+        z.object({ id: z.string(), name: z.string(), price: z.number() }),
+      ),
+    },
+    annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
+    view: { component: "carousel" },
+    _meta: {
+      // Expose the tool to the model, the view, or both (default)
+      ui: { visibility: ["model", "app"] },
+      // ChatGPT status messages shown while the tool runs
+      "openai/toolInvocation/invoking": "Searching the catalog…",
+      "openai/toolInvocation/invoked": "Found products",
+    },
+  },
+  async ({ query }) => {
+    /* … */
+  },
+);
+```
+
+## Bind a View
+
+Adding `view` to a tool makes the host mount a React component with the tool's result. `component` names a file in `views/`:
+
+<CodeGroup>
+```ts server.ts highlight={13}
+server.registerTool(
+  {
+    name: "search-products",
+    title: "Search Products",
+    description: "Show products matching a query in a carousel.",
+    inputSchema: { query: z.string().describe("Full-text product search") },
+    outputSchema: {
+      products: z.array(
+        z.object({ id: z.string(), name: z.string(), price: z.number() }),
+      ),
+    },
+    annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
+    view: { component: "carousel" }, // resolves to views/carousel.tsx
+  },
+  async ({ query }) => {
+    /* … */
+  },
+);
+```
+
+```tsx views/carousel.tsx
+import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
+
+export default function Carousel() {
+  const { output } = useToolInfo<"search-products">();
+
+  return (
+    <ProductGrid products={output.products} />
+  );
+}
+```
+</CodeGroup>
+
+Each model call to the tool mounts a fresh view instance. Tools without `view` are headless: data, no UI.
+
+<Card title="All done!" type="tip" href="/build/view" horizontal icon="check">
+    You now know how to register tools. Learn what happens inside the view in the next chapter.
+</Card>
+
+## Go Further
+<Columns cols={3}>
+    <Card title="Create Views" icon="palette" href="/build/view">
+        Craft interactive UIs rendered in conversation
+    </Card>
+    <Card title="Manage State" icon="database" href="/build/state">
+        Decide what the model sees
+    </Card>
+    <Card title="Authenticate Users" icon="key" href="/build/auth">
+        Know who's behind every tool call
+    </Card>
+</Columns>
