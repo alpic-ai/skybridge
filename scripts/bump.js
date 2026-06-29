@@ -29,6 +29,7 @@ function getVersion(packageName, expectedVersion, timeoutMs = 60_000) {
     }
   }
 
+  let reachable = false;
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     let latest;
@@ -36,6 +37,7 @@ function getVersion(packageName, expectedVersion, timeoutMs = 60_000) {
       latest = execSync(`npm view ${packageName} version`, {
         encoding: "utf8",
       }).trim();
+      reachable = true;
     } catch {
       // no-op
     }
@@ -46,6 +48,13 @@ function getVersion(packageName, expectedVersion, timeoutMs = 60_000) {
       `Waiting for ${packageName}@${expectedVersion} on npm (got ${latest ?? "error"})…`,
     );
     execSync("sleep 1");
+  }
+
+  if (!reachable) {
+    console.error(
+      `Error: Could not fetch latest version of ${packageName}. Aborting.`,
+    );
+    process.exit(1);
   }
 
   console.error(
