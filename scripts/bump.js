@@ -15,21 +15,43 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = dirname(__dirname);
 
-function getVersion(packageName, expectedVersion) {
-  if (expectedVersion) {
-    return expectedVersion;
+function getVersion(packageName, expectedVersion, timeoutMs = 10_000) {
+  if (!expectedVersion) {
+    try {
+      return execSync(`npm view ${packageName} version`, {
+        encoding: "utf8",
+      }).trim();
+    } catch {
+      console.error(
+        `Error: Could not fetch latest version of ${packageName}. Aborting.`,
+      );
+      process.exit(1);
+    }
   }
 
-  try {
-    return execSync(`npm view ${packageName} version`, {
-      encoding: "utf8",
-    }).trim();
-  } catch {
-    console.error(
-      `Error: Could not fetch latest version of ${packageName}. Aborting.`,
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    let latest;
+    try {
+      latest = execSync(`npm view ${packageName} version`, {
+        encoding: "utf8",
+      }).trim();
+    } catch {
+      // no-op
+    }
+    if (latest === expectedVersion) {
+      return latest;
+    }
+    console.log(
+      `Waiting for ${packageName}@${expectedVersion} on npm (got ${latest ?? "error"})…`,
     );
-    process.exit(1);
+    execSync("sleep 1");
   }
+
+  console.error(
+    `Timed out waiting for ${packageName}@${expectedVersion}, using it anyway`,
+  );
+  return expectedVersion;
 }
 
 const explicitVersion = process.argv[2];
