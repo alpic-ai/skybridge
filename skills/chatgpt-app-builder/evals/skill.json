@@ -12,8 +12,12 @@
     "expected_behavior": "Must read state-and-context.md and answer: Zustand. createStore is a thin wrapper around Zustand."
   },
   {
-    "query": "How do I return an auth error that prompts the user to sign in?",
-    "expected_behavior": "Must read oauth.md. Answer: return isError: true with _meta containing 'mcp/www_authenticate' key pointing to oauth-protected-resource endpoint."
+    "query": "Add WorkOS sign-in to my MCP server so tools require auth.",
+    "expected_behavior": "Must read oauth.md. Answer: pass oauth: await workosProvider({ domain, audience }) as the third McpServer arg. Must NOT hand-mount requireBearerAuth / mcpAuthMetadataRouter or hand-write a JWKS verifier."
+  },
+  {
+    "query": "How does an authenticated server prompt the user to sign in when they haven't yet?",
+    "expected_behavior": "Must read oauth.md. Answer: the oauth field auto-mounts discovery + Bearer verification; unauthenticated requests to /mcp get HTTP 401 before any handler runs and the host walks the user through OAuth. Handlers do NOT return a custom auth error for this."
   },
   {
     "query": "What CSP property triggers stricter review during publishing?",

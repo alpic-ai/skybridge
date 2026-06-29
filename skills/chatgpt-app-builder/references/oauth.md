@@ -4,108 +4,73 @@ Enable user authentication so tools can access user-specific data.
 
 ## How it works
 
-1. MCP server exposes OAuth discovery endpoints
-2. Host reads them, walks the user through OAuth, refreshes tokens
-3. Host calls `/mcp` with `Authorization: Bearer <token>`
-4. `requireBearerAuth` middleware verifies the token and rejects with HTTP 401 if invalid — tool handlers never run unauthenticated
+1. Pass an `oauth` config as the third `McpServer` argument
+2. Skybridge auto-mounts the OAuth discovery endpoints (`/.well-known/oauth-authorization-server`, `/.well-known/oauth-protected-resource`) and Bearer JWT verification on `/mcp`
+3. The host reads the metadata, walks the user through OAuth, refreshes tokens, and calls `/mcp` with `Authorization: Bearer <token>`
+4. Unauthenticated/invalid requests get HTTP 401 before any tool handler runs
 5. Tool handlers read user identity from `extra.authInfo`
 
-## 1. Discovery endpoints
+## 1. Pick a provider
 
-Mount OAuth metadata so MCP clients can discover the authorization server:
+The branded providers discover the IdP's OAuth metadata and build the whole config. All require **Dynamic Client Registration (DCR)** enabled in the provider dashboard, and return a `Promise` — `await` it.
 
 ```typescript
 // src/server.ts
-import { mcpAuthMetadataRouter } from "@modelcontextprotocol/sdk/server/auth/router.js";
-import { McpServer } from "skybridge/server";
+import { McpServer, workosProvider } from "skybridge/server";
 
 const server = new McpServer(
   { name: "my-app", version: "0.0.1" },
   { capabilities: {} },
-).use(
-  mcpAuthMetadataRouter({
-    oauthMetadata: {
-      issuer: "https://your-oauth-provider.com",
-      authorization_endpoint: "https://your-oauth-provider.com/oauth2/authorize",
-      token_endpoint: "https://your-oauth-provider.com/oauth2/token",
-      response_types_supported: ["code"],
-      grant_types_supported: ["authorization_code", "refresh_token"],
-      code_challenge_methods_supported: ["S256"],
-    },
-    // SERVER_URL: this server's public URL (localhost:3000, Alpic tunnel, or prod)
-    resourceServerUrl: new URL(process.env.SERVER_URL),
-  }),
+  {
+    oauth: await workosProvider({
+      domain: env.AUTHKIT_DOMAIN, // e.g. acme.authkit.app
+      audience: env.SERVER_URL,   // Resource Indicator
+    }),
+  },
 );
 ```
 
-This serves `/.well-known/oauth-authorization-server` and `/.well-known/oauth-protected-resource`.
+| Provider | Import | Required options | Notes |
+|---|---|---|---|
+| WorkOS AuthKit | `workosProvider` | `domain`, `audience` | `domain` = AuthKit domain; `audience` = Resource Indicator (this server's URL). DCR under Connect → Configuration. |
+| Auth0 | `auth0Provider` | `domain`, `audience`, `serverUrl` | `audience` = API Identifier. Runs skybridge-as-AS (`serverUrl`) and bakes `?audience=` into `/authorize`. Set `scopes` to what the app needs (e.g. `["openid","profile","email"]`) — Auth0 won't grant a DCR client its full OIDC set. |
+| Clerk | `clerkProvider` | `domain` | `domain` = Frontend API URL. No `audience` (Clerk tokens carry no `aud`). The OAuth app must issue **JWT** access tokens, not opaque. |
+| Stytch | `stytchProvider` | `domain`, `audience` | `domain` = project domain; `audience` = Stytch Project ID. |
+| Descope | `descopeProvider` | `url` | `url` = MCP Server Discovery URL (Issuer). `audience` defaults to the Project ID derived from the URL. DCR disabled + Alpic DCR proxy → use `customProvider` with `serverUrl` (see `examples/auth-descope-alpic`). |
 
-## 2. Write a token verifier
+Working servers for each: `examples/auth-workos`, `auth-auth0`, `auth-clerk`, `auth-stytch`, `auth-descope`.
 
-`requireBearerAuth` takes a `verifier` with `verifyAccessToken(token): Promise<AuthInfo>`. Verify the provider's JWT against its JWKS:
+## 2. Any other IdP — `customProvider`
 
-⚠️ Fetch your provider's docs for the exact JWKS URL and issuer.
+For an IdP without a branded helper, point `customProvider` at its issuer; it reads the OAuth discovery document (requires a `jwks_uri`):
 
 ```typescript
-// src/auth.ts
-import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
-import * as jose from "jose";
+import { customProvider } from "skybridge/server";
 
-const jwks = jose.createRemoteJWKSet(
-  new URL("https://your-oauth-provider.com/oauth2/jwks"),
-);
-
-export async function verifyAccessToken(token: string): Promise<AuthInfo> {
-  const { payload } = await jose.jwtVerify(token, jwks, {
-    issuer: "https://your-oauth-provider.com",
-  });
-
-  if (!payload.sub || typeof payload.sub !== "string") {
-    throw new InvalidTokenError("missing sub claim");
-  }
-
-  return {
-    token,
-    clientId: (payload.client_id ?? payload.azp ?? "") as string,
-    scopes: typeof payload.scope === "string" ? payload.scope.split(" ") : [],
-    expiresAt: payload.exp,
-    extra: { sub: payload.sub },
-  };
-}
+oauth: await customProvider({
+  issuer: "https://your-idp.com",
+  audience: "my-api",            // omit only if the IdP binds no aud
+  scopes: ["openid", "email", "profile"],
+  // serverUrl: env.SERVER_URL,  // skybridge-as-AS: needed when skybridge must
+                                 // sit in the auth path (e.g. Alpic DCR proxy)
+}),
 ```
 
-## 3. Enforce auth on /mcp
+`OAuthConfig` also accepts `baseUrl` (this server's public URL; inferred from request headers when omitted), `requiredScopes` (server-wide floor), and `metadataOverrides`.
+
+## 3. Read auth in handlers
+
+`extra.authInfo` carries the verified token. `extra.subject` holds the `sub` claim; all other JWT claims (e.g. `email`) are spread alongside it.
 
 ```typescript
-// src/server.ts (continued)
-import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
-import { verifyAccessToken } from "./auth.js";
-
-server.use(
-  "/mcp",
-  requireBearerAuth({
-    verifier: { verifyAccessToken },
-    requiredScopes: ["openid", "email", "profile"], // optional
-  }),
-);
-```
-
-Unauthenticated requests get HTTP 401 before any tool handler runs.
-
-## 4. Read auth in handlers
-
-```typescript
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
+import type { AuthInfo } from "skybridge/server";
 
 server.registerTool(
-  {
-    name: "get-orders",
-    description: "Get user orders",
-  },
+  { name: "get-orders", description: "Get user orders" },
   async (_input, extra) => {
     const auth = extra.authInfo as AuthInfo;
-    const orders = await fetchOrders(auth.extra?.sub as string);
+    const subject = auth.extra?.subject as string;
+    const orders = await fetchOrders(subject);
     return {
       structuredContent: { orders },
       content: [{ type: "text", text: `Found ${orders.length} orders` }],
@@ -113,3 +78,7 @@ server.registerTool(
   },
 );
 ```
+
+## Manual wiring (escape hatch)
+
+The `oauth` field replaces hand-mounting `mcpAuthMetadataRouter` + `requireBearerAuth`. Those primitives are still exported from `skybridge/server` if you need full control, but prefer a provider.
