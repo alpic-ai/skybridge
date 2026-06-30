@@ -1,0 +1,75 @@
+---
+title: mcpAuthMetadataRouter
+description: "Advertise your authorization server for client discovery"
+---
+
+When a client reaches your server without a token, it needs to know where the user signs in. `mcpAuthMetadataRouter` advertises that, so clients can discover your authorization server on their own.
+
+## Example
+
+The server publishes where to authorize, so a client hitting a 401 can find the authorization server on its own.
+
+```ts server.ts highlight={4-13}
+import { McpServer, mcpAuthMetadataRouter } from "skybridge/server";
+
+const server = new McpServer({ name: "shop", version: "1.0" }).use(
+  mcpAuthMetadataRouter({
+    oauthMetadata: {
+      issuer: "https://auth.example.com",
+      authorization_endpoint: "https://auth.example.com/authorize",
+      token_endpoint: "https://auth.example.com/token",
+      response_types_supported: ["code"],
+    },
+    resourceServerUrl: new URL("https://api.example.com/mcp"),
+    scopesSupported: ["shop.read"],
+  }),
+);
+```
+
+## Signature
+
+```ts
+mcpAuthMetadataRouter(options: AuthMetadataOptions): Router;
+```
+
+## Parameters
+
+### `options`
+
+```ts
+type AuthMetadataOptions = {
+  oauthMetadata: OAuthMetadata;
+  resourceServerUrl: URL;
+  scopesSupported?: string[];
+  serviceDocumentationUrl?: URL;
+  resourceName?: string;
+};
+```
+
+| Field | Purpose |
+| --- | --- |
+| `oauthMetadata` | Your authorization server's [RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) metadata. At minimum the `issuer`, `authorization_endpoint`, `token_endpoint`, and `response_types_supported`. |
+| `resourceServerUrl` | This MCP server's URL. Published in the protected-resource metadata so clients map this server to its authorization server. |
+| `scopesSupported` | The scopes this server recognizes. |
+| `serviceDocumentationUrl` | Link to human-readable docs for this server. |
+| `resourceName` | Display name for this resource in the metadata. |
+
+<Info>
+Check your OAuth provider's docs for the metadata values it expects.
+</Info>
+
+## Returns
+
+An [Express `Router`](https://expressjs.com/en/5x/api/router/) to pass to [`server.use`](/api-reference/mcp-server#use). It serves your OAuth 2.0 [Protected Resource Metadata](https://datatracker.ietf.org/doc/html/rfc9728) at `/.well-known/oauth-protected-resource`.
+
+<CardGroup cols={3}>
+  <Card title="requireBearerAuth" icon="lock" href="/api-reference/require-bearer-auth">
+    Require a token on every request
+  </Card>
+  <Card title="optionalBearerAuth" icon="lock-open" href="/api-reference/optional-bearer-auth">
+    Accept a token when present, allow anonymous otherwise
+  </Card>
+  <Card title="Authenticate Users" icon="key" href="/build/auth">
+    Add sign-in to your app end to end
+  </Card>
+</CardGroup>

@@ -11,6 +11,10 @@ packages:
 # supply-chain attacks via compromised releases.
 minimumReleaseAge: 20160
 
+minimumReleaseAgeExclude:
+  - skybridge
+  - "@skybridge/devtools"
+
 allowBuilds:
   esbuild: true
 

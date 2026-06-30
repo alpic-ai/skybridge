@@ -2,8 +2,8 @@ name: Publish
 
 on:
   push:
-    branches-ignore:
-      - main
+    branches:
+      - "**"
   release:
     types: [published]
 
@@ -53,6 +53,10 @@ jobs:
             echo "✅ Release version: $VERSION"
             printf 'Release name: %s\n' "$RELEASE_NAME"
             printf 'Release body:\n%s\n' "$RELEASE_BODY"
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "version=0.0.0-next.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            echo "tag=next" >> "$GITHUB_OUTPUT"
+            echo "✅ Next version: 0.0.0-next.${GITHUB_SHA::7}"
           else
             echo "version=0.0.0-dev.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
             echo "tag=dev" >> "$GITHUB_OUTPUT"

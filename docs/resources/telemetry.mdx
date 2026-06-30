@@ -1,0 +1,106 @@
+---
+title: Telemetry
+description: "What Skybridge collects, why, and how to opt out"
+icon: activity
+---
+
+Skybridge collects anonymous usage telemetry to understand how the framework is used and where to improve it. It comes from two places: the [CLI](/api-reference/cli) when you run `skybridge dev`, `build`, or `start`, and the server runtime when a Skybridge-powered [MCP server](/api-reference/mcp-server) handles a `tools/call`. Telemetry is optional, and the same controls turn off both.
+
+<Info>
+We collect only aggregate usage data. We never collect personal information, source code, file contents, tool names, arguments, or results, end-user prompts, secrets, or any other sensitive data.
+</Info>
+
+## What we collect
+
+### CLI commands
+
+Running a CLI command sends:
+
+| Data | Description | Example |
+|------|-------------|---------|
+| Command | The CLI command that ran | `dev`, `build`, `start` |
+| Version | The Skybridge CLI version | `1.2.3` |
+| Machine ID | A random UUID generated on first run | `a1b2c3d4-...` |
+| Session ID | A unique ID for this execution | `e5f6g7h8-...` |
+| Outcome | Whether the command succeeded or failed | `success`, `failure` |
+| Error | The error message if it failed | `Port 3000 in use` |
+| Platform | Your operating system | `darwin`, `linux`, `win32` |
+| Node version | Your Node.js version | `v24.0.0` |
+| Is CI | Whether it ran in a CI environment | `true`, `false` |
+
+### Server tool calls
+
+Every `tools/call` increments one anonymous counter so we can measure aggregate production usage. The only data attached is the runtime version, as a tag:
+
+| Data | Description | Example |
+|------|-------------|---------|
+| Version | The runtime version, major.minor only | `1.2` |
+
+Unlike the CLI, this carries no machine or session ID. Development builds emit nothing.
+
+## Why we collect it
+
+- See which commands are used and where developers spend time
+- Surface the errors developers hit most
+- Decide which platforms and Node versions to support
+- Measure production adoption and which versions stay in active use
+
+## How to opt out
+
+Preferences are per-machine. On your own machine, use the CLI; on CI runners and [deployed servers](/ship), use an environment variable.
+
+### Configuration file
+
+`~/.skybridge/config.json` stores settings per-machine:
+
+```json
+{
+  "machineId": "a1b2c3d4-e5f6-...",
+  "telemetry": { "enabled": false }
+}
+```
+
+It is created on the first CLI run with `telemetry.enabled` set to `true`. Set it to `false` to opt out.
+
+<Info>
+In CI (GitHub Actions, GitLab CI, Jenkins), telemetry is enabled by default and the machine ID is set to the CI provider name, for example `GitHub Actions`.
+</Info>
+
+### CLI
+
+```bash
+skybridge telemetry disable   # opt out
+skybridge telemetry enable    # opt back in
+skybridge telemetry status    # check the current setting
+```
+
+All three read and write `~/.skybridge/config.json`.
+
+### Environment variables
+
+```bash
+# in your shell profile (.bashrc, .zshrc, ...)
+export SKYBRIDGE_TELEMETRY_DISABLED=1
+# or the standard opt-out signal
+export DO_NOT_TRACK=1
+```
+
+<Info>
+Environment variables take precedence over the config file. With either set, telemetry is off regardless of the config file, or of whether one exists at all.
+</Info>
+
+## Debug mode
+
+To see the CLI telemetry payload without sending it:
+
+```bash
+SKYBRIDGE_TELEMETRY_DEBUG=1 skybridge dev
+```
+
+It prints the event to stderr instead of sending it. Debug mode is CLI-only: the runtime counter carries nothing beyond the version, so there is nothing to inspect.
+
+## Data handling
+
+**CLI events** go to [PostHog](https://posthog.com/), stored on its US servers. Events are anonymized, retained in aggregate for product analytics, and cannot be linked to a user.
+
+**Tool-call events** are emitted as a [DogStatsD](https://docs.datadoghq.com/developers/dogstatsd/) counter over UDP, fire-and-forget so they never block tool execution, and received by a Skybridge-operated [Vector](https://vector.dev/) instance. Only per-version counters are stored, with no per-event record, so individual calls cannot be linked to a server, project, or user.

@@ -3,32 +3,18 @@ title: Generative UI
 description: LLM-generated dynamic UIs with json-render and shadcn/ui components.
 ---
 
+import { ChatExample } from "/components/chat-example.jsx";
+
 Generative UI lets the LLM compose rich interfaces on the fly using [json-render](https://json-render.dev) and 36 pre-built shadcn/ui components. The AI generates a json-render spec, the server validates it against the component catalog, and the view renders it instantly.
 
-<img
+<ChatExample
+  prompt="Generate a dashboard UI for me."
+  app="Generative UI"
   src="/images/showcase-generative-ui.png"
   alt="Generative UI showcase"
-  style={{ width: "100%", maxWidth: "960px", borderRadius: "12px" }}
+  demo="https://generative-ui.skybridge.tech/try"
+  source="https://github.com/alpic-ai/skybridge/tree/main/examples/generative-ui"
 />
-
-## Links
-
-<CardGroup cols={2}>
-  <Card
-    title="Try the demo"
-    icon="play"
-    href="https://generative-ui.skybridge.tech/try"
-  >
-    Launch the live view experience.
-  </Card>
-  <Card
-    title="View source on GitHub"
-    icon="github"
-    href="https://github.com/alpic-ai/skybridge/tree/main/examples/generative-ui"
-  >
-    Browse the full example code.
-  </Card>
-</CardGroup>
 
 ## How it works
 

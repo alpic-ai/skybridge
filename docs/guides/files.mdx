@@ -1,0 +1,243 @@
+---
+title: "Handle Files"
+description: "Move files in and out of your app"
+sidebarTitle: "Files"
+icon: "paperclip"
+---
+
+[Views](/build/view) run in a sandboxed iframe, cut off from the conversation and the user's disk. Each host opens its own door for files, and the two work differently: ChatGPT keeps a file store your [tools](/build/tools) and views read and write; Claude only lets a view save a file to the user's device. What you can build depends on the host.
+
+## Files in ChatGPT
+
+ChatGPT manages files for you: it stores each one and hands your code a reference to it, never the bytes. References survive across tool calls, so files move through the app in both directions, into a tool and back out.
+
+### Receive a File
+
+A tool can take a file the user added to the conversation. The model only passes files already there, so the user adds one first, from their device or library; the handler receives a reference and fetches the contents.
+
+```ts server.ts highlight={9,11,14}
+import { FileRef, McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({ name: "expenses", version: "0.0.1" })
+  .registerTool(
+    {
+      name: "scan-receipt",
+      description: "Extract line items from a receipt.",
+      inputSchema: { receipt: FileRef },
+      outputSchema: { summary: FileRef },
+      _meta: { "openai/fileParams": ["receipt"] },
+    },
+    async ({ receipt }) => {
+      const bytes = await fetch(receipt.download_url).then((r) => r.blob());
+      return { structuredContent: { summary: await summarize(bytes) } };
+    },
+  );
+```
+
+Each file input is a [`FileRef`](/api-reference/file-ref) listed in `_meta["openai/fileParams"]` (top-level fields only), which tells ChatGPT to route the attachment to it. The host fills `download_url`, so `scan-receipt` reads the bytes straight from `receipt.download_url`.
+
+### Return a File
+
+A tool can also hand a file back. The host surfaces it in the conversation, so the user can download it and the model can see it.
+
+```ts server.ts highlight={10,15}
+import { FileRef, McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({ name: "expenses", version: "0.0.1" })
+  .registerTool(
+    {
+      name: "scan-receipt",
+      description: "Extract line items from a receipt.",
+      inputSchema: { receipt: FileRef },
+      outputSchema: { summary: FileRef },
+      _meta: { "openai/fileParams": ["receipt"] },
+    },
+    async ({ receipt }) => {
+      const bytes = await fetch(receipt.download_url).then((r) => r.blob());
+      return { structuredContent: { summary: await summarize(bytes) } };
+    },
+  );
+```
+
+`scan-receipt` declares `summary` as a [`FileRef`](/api-reference/file-ref) in its `outputSchema` and returns it in `structuredContent`; `summarize` produces the ref: a `file_id` and a `download_url` the host uses to fetch and cache the file.
+
+### Steer from the View
+
+The viewcan run the whole exchange itself: pick a file, hand it to a tool, and resolve what comes back, no model in the loop. Here a receipt scanner lets the user pick a receipt and get a summary in return, built up in three steps:
+
+#### Pick a File
+
+`upload` takes a file from the device and `selectFiles` opens the user's library. Both return a `FileMetadata`, a `fileId` with no bytes attached, which we hold in state.
+
+```tsx views/receipt-scanner.tsx highlight={7,13,18}
+import type { ChangeEvent } from "react";
+import { useState } from "react";
+
+import { type FileMetadata, useFiles } from "skybridge/web";
+
+export default function ReceiptScanner() {
+  const { upload, selectFiles } = useFiles();
+  const [file, setFile] = useState<FileMetadata>();
+
+  const fromDevice = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const picked = await upload(file)
+      setFile(picked);
+    }
+  };
+  const fromLibrary = async () => {
+    const [picked] = await selectFiles();
+    if (picked) {
+      setFile(picked);
+    }
+  };
+
+  return (
+    <div>
+      <input type="file" onChange={fromDevice} />
+      <button onClick={fromLibrary}>Pick from library</button>
+      {file && <p>{file.fileName ?? file.fileId}</p>}
+    </div>
+  );
+}
+```
+
+#### Hand It to a Tool
+
+`scan` resolves a fresh `download_url` for the held file with `getDownloadUrl`, packs it into a [`FileRef`](/api-reference/file-ref), and calls `scan-receipt` with it.
+
+```tsx views/receipt-scanner.tsx highlight={7,17}
+import { useState } from "react";
+
+import { type FileMetadata, useFiles } from "skybridge/web";
+import { useCallTool } from "../helpers.js"; // generated, type-safe from server schema
+
+export default function ReceiptScanner() {
+  const { upload, selectFiles, getDownloadUrl } = useFiles();
+  const { callTool } = useCallTool("scan-receipt");
+  const [file, setFile] = useState<FileMetadata>();
+
+  /* fromDevice and fromLibrary as above */
+
+  const scan = async () => {
+    if (!file) {
+      return;
+    }
+    const { downloadUrl } = await getDownloadUrl({ fileId: file.fileId });
+    callTool({
+      receipt: {
+        file_id: file.fileId,
+        download_url: downloadUrl,
+        file_name: file.fileName,
+        mime_type: file.mimeType,
+      },
+    });
+  };
+
+  return (
+    <div>
+      {/* file pickers as above */}
+      <button onClick={scan} disabled={!file}>
+        Scan
+      </button>
+    </div>
+  );
+}
+```
+
+#### Resolve the Returned File
+
+`scan-receipt` returns its own [`FileRef`](/api-reference/file-ref) on `data.structuredContent`. Resolve it from `summary.file_id` when the user asks: a `download_url` is a temporary cache URL that expires; the `file_id` is the durable handle. Keep the `file_id` (in [state](/build/state), or in the model's context) and regenerate a URL on demand.
+
+```tsx views/receipt-scanner.tsx highlight={7,18}
+import { useState } from "react";
+
+import { type FileMetadata, useFiles } from "skybridge/web";
+import { useCallTool } from "../helpers.js"; // generated, type-safe from server schema
+
+export default function ReceiptScanner() {
+  const { upload, selectFiles, getDownloadUrl } = useFiles();
+  const { data, callTool } = useCallTool("scan-receipt");
+  const [file, setFile] = useState<FileMetadata>();
+
+  /* fromDevice, fromLibrary and scan as above */
+
+  const downloadSummary = async () => {
+    const summary = data?.structuredContent?.summary;
+    if (!summary) {
+      return;
+    }
+    const { downloadUrl } = await getDownloadUrl({ fileId: summary.file_id });
+    window.open(downloadUrl, "_blank");
+  };
+
+  return (
+    <div>
+      {/* pickers and Scan button as above */}
+      {data?.structuredContent && (
+        <button onClick={downloadSummary}>Download summary</button>
+      )}
+    </div>
+  );
+}
+```
+
+<Info>
+[`useFiles`](/api-reference/use-files) is ChatGPT only. It won't work in other hosts.
+</Info>
+
+## Files in Claude
+
+Claude has no file store. The one operation is egress: the view hands the host content, and the host writes it to the user's disk after a confirmation prompt.
+
+### Download from the View
+
+A view can save a file to the user's device, whether content it built itself or a file returned by an earlier tool call. The host shows a confirmation, then writes it to disk.
+
+```tsx views/receipt-summary.tsx highlight={7-17}
+import { useDownload } from "skybridge/web";
+
+export default function ReceiptSummary({ items }: { items: LineItem[] }) {
+  const { download } = useDownload();
+
+  const exportCsv = async () => {
+    const csv = items.map((i) => `${i.label},${i.amount}`).join("\n");
+    await download({
+      contents: [
+        {
+          type: "resource",
+          resource: {
+            uri: "file:///receipt.csv", // filename hint
+            mimeType: "text/csv",
+            text: csv,
+          },
+        },
+      ],
+    });
+  };
+
+  return <button onClick={exportCsv}>Export receipt</button>;
+}
+```
+
+`ReceiptSummary` builds a CSV from its line `items`, then hands [`download`](/api-reference/use-download) a single resource: `text` carries the content, `mimeType` types it, and the `uri`'s last segment sets the suggested filename, here `receipt.csv`. A resource can instead carry a base64 `blob`, for bytes the view rendered or a file an earlier tool returned. The call fires from the Export button, not on mount: the host rejects downloads the user didn't trigger.
+
+<Info>
+**Claude** doesn't support `resource_link` as a content type.
+</Info>
+
+## Go Further
+<Columns cols={3}>
+    <Card title="Create Views" icon="palette" href="/build/view">
+        Craft interactive UIs rendered in conversation
+    </Card>
+    <Card title="Register Tools" icon="wrench" href="/build/tools">
+        Define what humans and agents can do
+    </Card>
+    <Card title="UX Design" icon="sparkles" href="/guides/ux">
+        Account for what makes an MCP App different
+    </Card>
+</Columns>
