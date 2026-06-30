@@ -115,8 +115,15 @@ export interface ViewCsp {
 // biome-ignore lint/suspicious/noEmptyInterface: register pattern — augmented by `.skybridge/views.d.ts` to narrow ViewName
 export interface ViewNameRegistry {}
 
-/** Union of valid view component names. Narrowed by {@link ViewNameRegistry}. */
-export type ViewName = keyof ViewNameRegistry & string;
+/**
+ * Union of valid view component names. Narrowed by {@link ViewNameRegistry}.
+ * Falls back to `string` when the registry is empty (before
+ * `.skybridge/views.d.ts` is generated), so valid view names don't error
+ * on a fresh checkout — narrowing kicks in once the file exists.
+ */
+export type ViewName = [keyof ViewNameRegistry & string] extends [never]
+  ? string
+  : keyof ViewNameRegistry & string;
 
 /**
  * Pass under `view` in a tool's `registerTool` config to render the tool's
