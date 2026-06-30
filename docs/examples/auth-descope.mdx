@@ -1,0 +1,25 @@
+---
+title: Descope
+description: Full OAuth authentication with Descope and personalized coffee shop search.
+---
+
+import { ChatExample } from "/components/chat-example.jsx";
+
+The Descope example app demonstrates a full OAuth authentication flow using [Descope](https://www.descope.com/), with a personalized coffee shop finder view that displays user-specific favorites.
+
+<ChatExample
+  prompt="Find a latte near me."
+  app="Descope"
+  src="/images/showcase-auth.png"
+  alt="Descope showcase"
+  source="https://github.com/alpic-ai/skybridge/tree/main/examples/auth-descope"
+/>
+
+It ships in two flavors. The default wires auth with the branded [`descopeProvider`](/api-reference/descope-provider), which expects Descope's Dynamic Client Registration enabled. The [`auth-descope-alpic`](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-descope-alpic) variant wires the low-level [`customProvider`](/api-reference/custom-provider) for a Descope project with DCR disabled, advertising this server as the authorization server so the Alpic DCR proxy sits in the registration path.
+
+## Skybridge APIs used
+
+- [`descopeProvider`](/api-reference/descope-provider)
+- [`customProvider`](/api-reference/custom-provider)
+- [`registerTool`](/api-reference/register-tool)
+- [`useToolInfo`](/api-reference/use-tool-info)

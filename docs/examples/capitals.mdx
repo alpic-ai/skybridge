@@ -3,32 +3,18 @@ title: Capitals Explorer
 description: Interactive world map with geolocation and dynamic capital exploration.
 ---
 
+import { ChatExample } from "/components/chat-example.jsx";
+
 Capitals Explorer uses Skybridge tools to fetch country data and create a rich, fullscreen map experience.
 
-<img
+<ChatExample
+  prompt="Show me the capital of Japan on a map."
+  app="Capitals Explorer"
   src="/images/showcase-capitals.png"
   alt="Capitals Explorer"
-  style={{ width: "100%", maxWidth: "960px", borderRadius: "12px" }}
+  demo="https://capitals.skybridge.tech/try"
+  source="https://github.com/alpic-ai/skybridge/tree/main/examples/capitals"
 />
-
-## Links
-
-<CardGroup cols={2}>
-  <Card
-    title="Try the demo"
-    icon="play"
-    href="https://capitals.skybridge.tech/try"
-  >
-    Launch the live view experience.
-  </Card>
-  <Card
-    title="View source on GitHub"
-    icon="github"
-    href="https://github.com/alpic-ai/skybridge/tree/main/examples/capitals"
-  >
-    Browse the full example code.
-  </Card>
-</CardGroup>
 
 ## Skybridge APIs used
 
