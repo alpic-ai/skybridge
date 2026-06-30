@@ -116,14 +116,18 @@ export interface ViewCsp {
 export interface ViewNameRegistry {}
 
 /**
- * Union of valid view component names. Narrowed by {@link ViewNameRegistry}.
- * Falls back to `string` when the registry is empty (before
- * `.skybridge/views.d.ts` is generated), so valid view names don't error
- * on a fresh checkout — narrowing kicks in once the file exists.
+ * Resolve view component names from a registry: the union of its keys, or
+ * `string` when the registry is empty. The empty case happens before
+ * `.skybridge/views.d.ts` is generated; falling back to `string` keeps valid
+ * view names from erroring on a fresh checkout, and narrowing kicks in once
+ * the generated file augments the registry.
  */
-export type ViewName = [keyof ViewNameRegistry & string] extends [never]
+export type ViewNameFor<Registry> = [keyof Registry & string] extends [never]
   ? string
-  : keyof ViewNameRegistry & string;
+  : keyof Registry & string;
+
+/** Union of valid view component names. Narrowed by {@link ViewNameRegistry}. */
+export type ViewName = ViewNameFor<ViewNameRegistry>;
 
 /**
  * Pass under `view` in a tool's `registerTool` config to render the tool's
