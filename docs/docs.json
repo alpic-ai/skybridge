@@ -2,10 +2,6 @@
   "$schema": "https://mintlify.com/docs.json",
   "name": "Skybridge",
   "theme": "mint",
-  "banner": {
-    "content": "🚀 We're live on Product Hunt today, help us reach Product of the Day — [Upvote →](https://www.producthunt.com/products/skybridge?utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-skybridge)",
-    "dismissible": true
-  },
   "colors": {
     "primary": "#002FFF",
     "light": "#08F5F9",
