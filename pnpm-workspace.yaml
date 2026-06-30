@@ -18,10 +18,6 @@ minimumReleaseAgeExclude:
   - "@skybridge/*"
   - create-skybridge
 
-minimumReleaseAgeExclude:
-  - skybridge
-  - "@skybridge/devtools"
-
 allowBuilds:
   esbuild: true
 
