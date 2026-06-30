@@ -184,8 +184,8 @@
             "pages": [
               "examples/capitals",
               "examples/chess",
-              "examples/flight-booking",
               "examples/ecommerce-carousel",
+              "examples/flight-booking",
               "examples/investigation-game",
               "examples/productivity",
               "examples/times-up"
@@ -194,18 +194,18 @@
           {
             "group": "Auth",
             "pages": [
-              "examples/auth-clerk",
-              "examples/auth-workos",
-              "examples/auth-stytch",
               "examples/auth-auth0",
-              "examples/auth-descope"
+              "examples/auth-clerk",
+              "examples/auth-descope",
+              "examples/auth-stytch",
+              "examples/auth-workos"
             ]
           },
           {
             "group": "UI and Component libraries",
             "pages": [
-              "examples/manifest-ui",
-              "examples/generative-ui"
+              "examples/generative-ui",
+              "examples/manifest-ui"
             ]
           }
         ]
