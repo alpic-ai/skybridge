@@ -115,8 +115,19 @@ export interface ViewCsp {
 // biome-ignore lint/suspicious/noEmptyInterface: register pattern — augmented by `.skybridge/views.d.ts` to narrow ViewName
 export interface ViewNameRegistry {}
 
+/**
+ * Resolve view component names from a registry: the union of its keys, or
+ * `string` when the registry is empty. The empty case happens before
+ * `.skybridge/views.d.ts` is generated; falling back to `string` keeps valid
+ * view names from erroring on a fresh checkout, and narrowing kicks in once
+ * the generated file augments the registry.
+ */
+export type ViewNameFor<Registry> = [keyof Registry & string] extends [never]
+  ? string
+  : keyof Registry & string;
+
 /** Union of valid view component names. Narrowed by {@link ViewNameRegistry}. */
-export type ViewName = keyof ViewNameRegistry & string;
+export type ViewName = ViewNameFor<ViewNameRegistry>;
 
 /**
  * Pass under `view` in a tool's `registerTool` config to render the tool's
@@ -1078,6 +1089,14 @@ export class McpServer<
   private serveLegacyAppsSdkUrl(component: string, canonicalUri: string): void {
     this.viewUriByPath.set(
       `ui://views/apps-sdk/${component}.html`,
+      canonicalUri,
+    );
+    this.viewUriByPath.set(
+      `ui://widgets/apps-sdk/${component}.html`,
+      canonicalUri,
+    );
+    this.viewUriByPath.set(
+      `ui://widgets/ext-apps/${component}.html`,
       canonicalUri,
     );
   }

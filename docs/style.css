@@ -1,0 +1,7 @@
+/* Auth example gallery cards: uniform 200px-tall logo illustrations on white
+   (logos and screenshots ship with transparent/varied backgrounds). */
+.auth-cards img {
+  height: 200px;
+  object-fit: contain;
+  background: #fff;
+}

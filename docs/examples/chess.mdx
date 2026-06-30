@@ -3,32 +3,18 @@ title: Chess
 description: Play chess against the assistant with view-provided tools
 ---
 
+import { ChatExample } from "/components/chat-example.jsx";
+
 Play chess against the assistant inside the conversation. Pick a side on the lobby screen, pop the board into picture-in-picture, and drag your pieces — the assistant plays the other color. Showcases MCP Apps view-provided tools: the server only opens the board, and the view registers the tools the model uses to play, executing them against a chess.js engine running inside the widget.
 
-<img
+<ChatExample
+  prompt="Play a game of chess with me."
+  app="Chess"
   src="/images/showcase-chess.png"
   alt="Chess showcase"
-  style={{ width: "100%", maxWidth: "960px", borderRadius: "12px" }}
+  demo="https://chess.skybridge.tech/try"
+  source="https://github.com/alpic-ai/skybridge/tree/main/examples/chess"
 />
-
-## Links
-
-<CardGroup cols={2}>
-  <Card
-    title="Try the demo"
-    icon="play"
-    href="https://chess.skybridge.tech/try"
-  >
-    Launch the live view experience.
-  </Card>
-  <Card
-    title="View source on GitHub"
-    icon="github"
-    href="https://github.com/alpic-ai/skybridge/tree/main/examples/chess"
-  >
-    Browse the full example code.
-  </Card>
-</CardGroup>
 
 ## Skybridge APIs used
 
