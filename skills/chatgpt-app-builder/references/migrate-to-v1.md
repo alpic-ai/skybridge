@@ -59,17 +59,18 @@ This applies to **every** tool, including data-only ones you didn't otherwise to
 The old config lived at `web/vite.config.ts`. When the two-directory layout collapses, that file must move to the **project root** and import the plugin from `skybridge/vite`:
 
 ```ts
-import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
 import { skybridge } from "skybridge/vite";
 import { defineConfig, type PluginOption } from "vite";
 
 export default defineConfig({
-  plugins: [skybridge() as PluginOption, vanillaExtractPlugin(), react()],
+  plugins: [skybridge() as PluginOption, react()],
   resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
 });
 ```
+
+`skybridge()` is the only Skybridge-required plugin; `react()` is standard for views. Keep whatever CSS plugin your v0 config used (`@tailwindcss/vite`, `@vanilla-extract/vite-plugin`, etc.) and add it back exactly as before — don't add one you weren't already using, or Vite fails to resolve the import before the build starts.
 
 The `skybridge build` CLI loads this via Vite's config resolution from the root. Without it the build fails with `Cannot resolve entry module index.html` — an error that says nothing about the actual cause (a missing root config).
 
