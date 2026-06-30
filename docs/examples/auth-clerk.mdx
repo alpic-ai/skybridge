@@ -1,29 +1,22 @@
 ---
-title: Auth — Clerk
+title: Clerk
 description: Full OAuth authentication with Clerk and personalized coffee shop search.
 ---
 
-Auth (Clerk) is an example that demonstrates full OAuth authentication using [Clerk](https://clerk.com/), with a personalized coffee shop finder view that displays user-specific favorites.
+import { ChatExample } from "/components/chat-example.jsx";
 
-<img
+The Clerk example app demonstrates a full OAuth authentication flow using [Clerk](https://clerk.com/), with a personalized coffee shop finder view that displays user-specific favorites.
+
+<ChatExample
+  prompt="Find a latte near me."
+  app="Clerk"
   src="/images/showcase-auth.png"
-  alt="Auth — Clerk"
-  style={{ width: "100%", maxWidth: "960px", borderRadius: "12px" }}
+  alt="Clerk showcase"
+  source="https://github.com/alpic-ai/skybridge/tree/main/examples/auth-clerk"
 />
-
-## Links
-
-<CardGroup cols={2}>
-  <Card
-    title="View source on GitHub"
-    icon="github"
-    href="https://github.com/alpic-ai/skybridge/tree/main/examples/auth-clerk"
-  >
-    Browse the full example code.
-  </Card>
-</CardGroup>
 
 ## Skybridge APIs used
 
+- [`clerk`](/api-reference/clerk-provider)
 - [`registerTool`](/api-reference/register-tool)
 - [`useToolInfo`](/api-reference/use-tool-info)

@@ -1,29 +1,22 @@
 ---
-title: Auth — WorkOS AuthKit
+title: WorkOS
 description: Full OAuth authentication with WorkOS AuthKit and personalized coffee shop search.
 ---
 
-Auth (WorkOS) is an example that demonstrates full OAuth authentication using [WorkOS AuthKit](https://workos.com/docs/user-management/authkit), with a personalized coffee shop finder view that displays user-specific favorites.
+import { ChatExample } from "/components/chat-example.jsx";
 
-<img
+The WorkOS example app demonstrates a full OAuth authentication flow using [WorkOS AuthKit](https://workos.com/docs/user-management/authkit), with a personalized coffee shop finder view that displays user-specific favorites.
+
+<ChatExample
+  prompt="Find a latte near me."
+  app="WorkOS AuthKit"
   src="/images/showcase-auth.png"
-  alt="Auth — WorkOS AuthKit"
-  style={{ width: "100%", maxWidth: "960px", borderRadius: "12px" }}
+  alt="WorkOS AuthKit showcase"
+  source="https://github.com/alpic-ai/skybridge/tree/main/examples/auth-workos"
 />
-
-## Links
-
-<CardGroup cols={2}>
-  <Card
-    title="View source on GitHub"
-    icon="github"
-    href="https://github.com/alpic-ai/skybridge/tree/main/examples/auth-workos"
-  >
-    Browse the full example code.
-  </Card>
-</CardGroup>
 
 ## Skybridge APIs used
 
+- [`workosProvider`](/api-reference/workos-provider)
 - [`registerTool`](/api-reference/register-tool)
 - [`useToolInfo`](/api-reference/use-tool-info)
