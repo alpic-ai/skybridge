@@ -197,7 +197,8 @@
               "examples/auth-clerk",
               "examples/auth-workos",
               "examples/auth-stytch",
-              "examples/auth-auth0"
+              "examples/auth-auth0",
+              "examples/auth-descope"
             ]
           },
           {
