@@ -15,11 +15,11 @@ These are exactly as documented. Apply them verbatim:
 | `useWidgetState` | `useViewState` |
 | `widgetsDevServer` | `viewsDevServer` |
 | `server/` + `web/` split | flat `src/` with `src/views/` |
-| `return { ..., result }` / `isError` in tool response | remove — dropped from `CallToolResponse` |
+| `return { ..., result }` in tool response | remove the `result` field — dropped from `CallToolResponse` (keep `isError`, see below) |
 
 Two of these are not pure 1:1 renames:
 - `useViewState`'s return type depends on whether you pass a default: with one it is `[T, …]`, without it is `[T | null, …]`. `useWidgetState` was always nullable, so the swap can change your state type.
-- Removing `isError` also removes the error signal the model received. If you relied on it, convey the error through `content`/`structuredContent` instead.
+- Only the Skybridge-specific `result` field was dropped, **not** `isError`. `isError` is part of the MCP `CallToolResult` and is still how you flag a failed call. Keep returning `isError: true` on error paths (or `throw` inside the handler — the SDK catches it and sets `isError: true` for you). If you drop `isError` from an error response, the missing field defaults to `false` and the host treats the failure as a successful result.
 
 ## Step 2 — What the notes omit
 
