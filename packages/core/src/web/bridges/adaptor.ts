@@ -171,10 +171,10 @@ export class HostAdaptor implements Adaptor {
     prompt: string,
     options?: SendFollowUpMessageOptions,
   ): Promise<void> => {
-    if (this.openai && options?.scrollToBottom !== undefined) {
+    if (this.openai) {
       await this.openai.sendFollowUpMessage({
         prompt,
-        scrollToBottom: options.scrollToBottom,
+        scrollToBottom: options?.scrollToBottom,
       });
       return;
     }
