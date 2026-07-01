@@ -531,6 +531,25 @@ function withSkillsCapability(
   };
 }
 
+function normalizeRegisterToolArgs(args: unknown[]): {
+  config: ToolConfig<ZodRawShapeCompat>;
+  cb: ToolHandler<ZodRawShapeCompat>;
+} {
+  if (typeof args[0] === "string") {
+    return {
+      config: {
+        name: args[0],
+        ...(args[1] as object),
+      } as ToolConfig<ZodRawShapeCompat>,
+      cb: args[2] as ToolHandler<ZodRawShapeCompat>,
+    };
+  }
+  return {
+    config: args[0] as ToolConfig<ZodRawShapeCompat>,
+    cb: args[1] as ToolHandler<ZodRawShapeCompat>,
+  };
+}
+
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
 > extends McpServerBaseOmitted {
@@ -1377,13 +1396,7 @@ export class McpServer<
       ...args: unknown[]
     ) => unknown;
 
-    if (typeof args[0] === "string") {
-      baseFn.call(this, args[0], args[1], args[2]);
-      return this;
-    }
-
-    const config = args[0] as ToolConfig<ZodRawShapeCompat>;
-    const cb = args[1] as ToolHandler<ZodRawShapeCompat>;
+    const { config, cb } = normalizeRegisterToolArgs(args);
 
     const {
       name,
