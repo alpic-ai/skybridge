@@ -2,6 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express, { type Router } from "express";
+import { createDeployRouter } from "./deploy-router.js";
 
 type PackageManager = "pnpm" | "npm" | "yarn" | "bun";
 
@@ -42,6 +43,7 @@ export const devtoolsStaticServer = async (): Promise<Router> => {
   router.get("/__skybridge/devtools/project", (_req, res) => {
     res.json({ packageManager: detectPackageManager() });
   });
+  router.use(createDeployRouter());
   router.use(express.static(distDir));
   router.get("/", (_req, res, next) => {
     const indexHtmlPath = path.join(distDir, "index.html");

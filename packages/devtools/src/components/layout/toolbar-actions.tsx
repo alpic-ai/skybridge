@@ -5,14 +5,14 @@ import {
   PopoverContent,
 } from "@alpic-ai/ui/components/popover";
 import { Separator } from "@alpic-ai/ui/components/separator";
-import { useQuery } from "@tanstack/react-query";
 import {
   Check,
   ClipboardCheck,
   Copy,
+  ExternalLinkIcon,
   Loader2Icon,
   MessagesSquareIcon,
-  RocketIcon,
+  TriangleAlertIcon,
   UnplugIcon,
 } from "lucide-react";
 import {
@@ -27,33 +27,15 @@ import {
   useState,
 } from "react";
 import { useCopyToClipboard } from "@/lib/copy.js";
+import {
+  type DeployProgress,
+  type DeployStatus,
+  useDeployStore,
+} from "@/lib/deploy-store.js";
+import { useServerInfo } from "@/lib/mcp/index.js";
 import { useTunnelStore } from "@/lib/tunnel-store.js";
 import { cn } from "@/lib/utils.js";
-
-type PackageManager = "pnpm" | "npm" | "yarn" | "bun";
-
-const RUN_PREFIX_BY_PM: Record<PackageManager, string> = {
-  pnpm: "pnpm run",
-  npm: "npm run",
-  yarn: "yarn",
-  bun: "bun run",
-};
-
-function useDeployCommand(): string {
-  const { data } = useQuery({
-    queryKey: ["devtools-project"],
-    queryFn: async () => {
-      const res = await fetch("/__skybridge/devtools/project");
-      if (!res.ok) {
-        return { packageManager: "npm" as PackageManager };
-      }
-      return (await res.json()) as { packageManager: PackageManager };
-    },
-    staleTime: Infinity,
-  });
-  const pm = data?.packageManager ?? "npm";
-  return `${RUN_PREFIX_BY_PM[pm]} deploy`;
-}
+import { DeployProjectDialog } from "./deploy-project-dialog.js";
 
 const DOT_BY_STATUS = {
   idle: "bg-gray-400",
@@ -248,50 +230,419 @@ export function AuditButton() {
   );
 }
 
+const ALPIC_APP_URL = "https://app.alpic.ai";
+
 export function DeployButton() {
-  const command = useDeployCommand();
-  const { copied, copy } = useCopyToClipboard();
+  const { status, progress, redeploy, createAndDeploy, signIn } =
+    useDeployStore();
+  const serverInfo = useServerInfo();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  // A deploy is in progress per this session's SSE stream, or per the API's
+  // latest deployment (survives refresh / triggered elsewhere) — keep the dot,
+  // the popover, and the disabled state in agreement.
+  const deploying =
+    progress.status === "deploying" ||
+    (status.state === "ready" && status.lastDeployStatus === "ongoing");
+  // A git-linked project routes redeploy through the popover's explicit
+  // "Deploy anyway" (an overwrite guard), so the main button is gated there.
+  const gitGated = status.state === "ready" && !!status.lastDeployGit;
+  // aria-disabled (not the native attribute) so the button stays hoverable —
+  // the popover keeps showing progress/guidance while it's disabled. Only
+  // enabled when a plain click does something (signedOut, needsProject, ready
+  // without a git overwrite to confirm).
+  const disabled =
+    signingIn ||
+    deploying ||
+    gitGated ||
+    status.state === "loading" ||
+    status.state === "noTeam" ||
+    status.state === "error";
+
+  const onSignIn = () => {
+    setActionError(null);
+    setSigningIn(true);
+    signIn()
+      .catch((err) =>
+        setActionError(err instanceof Error ? err.message : "Sign-in failed"),
+      )
+      .finally(() => setSigningIn(false));
+  };
+
+  const doRedeploy = () => {
+    setActionError(null);
+    redeploy().catch((err) =>
+      setActionError(err instanceof Error ? err.message : "Deploy failed"),
+    );
+  };
+
+  const onTriggerClick = () => {
+    setActionError(null);
+    if (status.state === "signedOut") {
+      onSignIn();
+      return;
+    }
+    if (status.state === "ready") {
+      doRedeploy();
+      return;
+    }
+    if (status.state === "needsProject") {
+      setDialogOpen(true);
+    }
+  };
 
   return (
-    <HoverPopover
-      className="w-60"
-      trigger={
-        <Button
-          variant="cta"
-          className="h-8 px-2 gap-1"
-          icon={<RocketIcon className="size-3.5" />}
-          onClick={() => copy(command)}
-        >
-          Deploy
-        </Button>
-      }
-    >
-      <div className="space-y-3">
-        <p
-          className={cn(
-            "text-sm text-muted-foreground py-2 mx-auto text-center",
-            DESCRIPTION_MAX_W,
-          )}
-        >
-          Run this command to deploy your project to the Alpic platform
-        </p>
-        <button
-          type="button"
-          aria-label="Copy command"
-          onClick={() => copy(command)}
-          className="flex w-full items-center gap-2 rounded-md border bg-light-gray px-2 py-1.5 text-left hover:bg-background-hover"
-        >
-          <span className="flex-1 truncate font-mono text-xs">{command}</span>
-          <span className="text-quaternary-foreground">
-            {copied ? (
-              <Check className="size-3.5" />
-            ) : (
-              <Copy className="size-3.5" />
+    <>
+      <HoverPopover
+        className="w-72"
+        trigger={
+          <Button
+            variant="cta"
+            className={cn(
+              "h-8 px-2 gap-1",
+              disabled && "opacity-50 cursor-not-allowed",
             )}
-          </span>
-        </button>
+            aria-disabled={disabled}
+            icon={
+              signingIn ? (
+                <Loader2Icon className="size-3.5 animate-spin" />
+              ) : (
+                <span
+                  className={`h-2 w-2 rounded-full ${deployDotClass(status, progress)}`}
+                  aria-hidden
+                />
+              )
+            }
+            onClick={disabled ? undefined : onTriggerClick}
+          >
+            Deploy
+          </Button>
+        }
+      >
+        <DeployPopoverContent
+          status={status}
+          progress={progress}
+          signingIn={signingIn}
+          actionError={actionError}
+          onRedeploy={doRedeploy}
+          onSignIn={onSignIn}
+        />
+      </HoverPopover>
+      {status.state === "needsProject" && (
+        <DeployProjectDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          defaultName={serverInfo?.name ?? "my-mcp-app"}
+          teams={status.teams}
+          defaultTeamId={status.defaultTeamId}
+          staleConfig={status.staleConfig}
+          onCreate={createAndDeploy}
+        />
+      )}
+    </>
+  );
+}
+
+function DeployPopoverContent({
+  status,
+  progress,
+  signingIn,
+  actionError,
+  onRedeploy,
+  onSignIn,
+}: {
+  status: DeployStatus;
+  progress: DeployProgress;
+  signingIn: boolean;
+  actionError: string | null;
+  onRedeploy: () => void;
+  onSignIn: () => void;
+}) {
+  if (progress.status === "deploying") {
+    return (
+      <DeployingContent
+        phase={progress.phase}
+        startedAt={progress.startedAt}
+        deploymentPageUrl={progress.deploymentPageUrl}
+      />
+    );
+  }
+
+  if (progress.status === "deployed") {
+    return (
+      <div className="space-y-3">
+        <p className="text-sm font-medium">Deployed</p>
+        <CopyUrlRow url={progress.mcpServerUrl} />
+        {progress.deploymentPageUrl && (
+          <>
+            <Separator />
+            <DeploymentPageButton href={progress.deploymentPageUrl} />
+          </>
+        )}
       </div>
-    </HoverPopover>
+    );
+  }
+
+  if (progress.status === "failed") {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-red-500">Deployment failed</p>
+        <p className="text-xs text-muted-foreground">{progress.message}</p>
+        {progress.deploymentPageUrl && (
+          <>
+            <Separator />
+            <ExternalLinkRow
+              href={progress.deploymentPageUrl}
+              label="Go to logs"
+            />
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // progress idle → reflect readiness/auth status
+  switch (status.state) {
+    case "loading":
+      return <p className="text-sm text-muted-foreground">Checking Alpic…</p>;
+    case "signedOut":
+      return (
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Sign in to Alpic to deploy</p>
+          <p className="text-xs text-muted-foreground">
+            Connect your Alpic account to deploy this server.
+          </p>
+          <Button
+            variant="primary"
+            className="h-7 w-full"
+            disabled={signingIn}
+            onClick={onSignIn}
+          >
+            {signingIn ? "Signing in…" : "Sign in to Alpic"}
+          </Button>
+          {actionError && <p className="text-xs text-red-500">{actionError}</p>}
+        </div>
+      );
+    case "noTeam":
+      return (
+        <div className="space-y-2">
+          <p className="text-sm font-medium">No team yet</p>
+          <p className="text-xs text-muted-foreground">
+            Create a team on Alpic before deploying.
+          </p>
+          <ExternalLinkRow href={ALPIC_APP_URL} label="Open Alpic" />
+        </div>
+      );
+    case "needsProject":
+      return <p className="text-sm">Click to deploy to Alpic</p>;
+    case "ready":
+      // A deploy is running (this session's SSE stream ended, or it was
+      // triggered elsewhere/by git) — show progress, not the idle CTA.
+      if (status.lastDeployStatus === "ongoing") {
+        return (
+          <DeployingContent
+            phase="Deploying"
+            startedAt={status.lastDeployStartedAt ?? null}
+            deploymentPageUrl={status.deploymentPageUrl ?? null}
+          />
+        );
+      }
+      return (
+        <div className="space-y-2">
+          <p className="text-sm">Click to deploy to Alpic</p>
+          {status.mcpServerUrl && (
+            <>
+              <p className="text-xs font-medium text-muted-foreground">
+                Last Deployment:
+              </p>
+              <CopyUrlRow url={status.mcpServerUrl} />
+            </>
+          )}
+          {status.deploymentPageUrl && (
+            <>
+              <Separator />
+              <DeploymentPageButton href={status.deploymentPageUrl} />
+            </>
+          )}
+          {status.lastDeployGit && (
+            <div className="space-y-2 rounded-md border border-orange-300 bg-orange-50 p-2">
+              <p className="flex items-center gap-1.5 text-xs text-orange-700">
+                <TriangleAlertIcon className="size-3.5 shrink-0" />
+                Last deployed from Git — redeploying replaces it.
+              </p>
+              <GitDeployInfo git={status.lastDeployGit} />
+              <Button
+                variant="primary"
+                className="h-7 w-full"
+                onClick={onRedeploy}
+              >
+                Deploy anyway
+              </Button>
+            </div>
+          )}
+          {actionError && <p className="text-xs text-red-500">{actionError}</p>}
+        </div>
+      );
+    case "error":
+      return <p className="text-xs text-red-500">{status.message}</p>;
+  }
+}
+
+function formatElapsed(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return minutes > 0
+    ? `${minutes}m ${String(seconds).padStart(2, "0")}s`
+    : `${seconds}s`;
+}
+
+function DeployingContent({
+  phase,
+  startedAt,
+  deploymentPageUrl,
+}: {
+  phase: string;
+  // Anchored to the server-provided start (replayed over SSE, or the latest
+  // deployment's startedAt on reconnect) so the clock survives hover remounts
+  // and page refreshes. Absent only when no start is known.
+  startedAt: number | null;
+  deploymentPageUrl: string | null;
+}) {
+  const [elapsedMs, setElapsedMs] = useState(() =>
+    startedAt == null ? 0 : Date.now() - startedAt,
+  );
+  useEffect(() => {
+    if (startedAt == null) {
+      return;
+    }
+    const tick = () => setElapsedMs(Date.now() - startedAt);
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [startedAt]);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Loader2Icon className="size-3.5 shrink-0 animate-spin" />
+        <p className="text-sm">{phase}…</p>
+        {startedAt != null && (
+          <span className="ml-auto font-mono text-xs text-muted-foreground">
+            {formatElapsed(elapsedMs)}
+          </span>
+        )}
+      </div>
+      {deploymentPageUrl && (
+        <>
+          <Separator />
+          <ExternalLinkRow href={deploymentPageUrl} label="Go to logs" />
+        </>
+      )}
+    </div>
+  );
+}
+
+function deployDotClass(
+  status: DeployStatus,
+  progress: DeployProgress,
+): string {
+  if (progress.status === "deploying") {
+    return "bg-orange-500 animate-pulse";
+  }
+  if (progress.status === "failed") {
+    return "bg-red-500";
+  }
+  if (progress.status === "deployed") {
+    return "bg-green-500";
+  }
+  // No active deploy this session — reflect the linked project's last deploy.
+  if (status.state === "ready") {
+    switch (status.lastDeployStatus) {
+      case "ongoing":
+        return "bg-orange-500 animate-pulse";
+      case "failed":
+      case "canceled":
+        return "bg-red-500";
+      case "deployed":
+        return "bg-green-500";
+      default:
+        return status.mcpServerUrl ? "bg-green-500" : "bg-gray-400";
+    }
+  }
+  return "bg-gray-400";
+}
+
+function CopyUrlRow({ url }: { url: string }) {
+  const { copied, copy } = useCopyToClipboard();
+  return (
+    <button
+      type="button"
+      aria-label="Copy MCP server URL"
+      onClick={() => copy(url)}
+      className="flex w-full items-center gap-2 rounded-md border bg-light-gray px-2 py-1.5 text-left hover:bg-background-hover"
+    >
+      <span className="flex-1 truncate font-mono text-xs">{url}</span>
+      <span className="text-quaternary-foreground">
+        {copied ? (
+          <Check className="size-3.5" />
+        ) : (
+          <Copy className="size-3.5" />
+        )}
+      </span>
+    </button>
+  );
+}
+
+function DeploymentPageButton({ href }: { href: string }) {
+  return (
+    <Button asChild variant="tertiary" className="w-full">
+      <a href={href} target="_blank" rel="noreferrer noopener">
+        <ExternalLinkIcon className="size-3.5" />
+        Go to deployment page
+      </a>
+    </Button>
+  );
+}
+
+function GitDeployInfo({
+  git,
+}: {
+  git: {
+    ref: string | null;
+    commitMessage: string | null;
+    author: string | null;
+  };
+}) {
+  if (!git.ref && !git.commitMessage && !git.author) {
+    return null;
+  }
+  return (
+    <div className="space-y-0.5 text-xs text-orange-700/90">
+      {git.ref && (
+        <p>
+          Branch <span className="font-mono">{git.ref}</span>
+          {git.author && <> · by {git.author}</>}
+        </p>
+      )}
+      {git.commitMessage && <p className="truncate">“{git.commitMessage}”</p>}
+    </div>
+  );
+}
+
+function ExternalLinkRow({ href, label }: { href: string; label: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+    >
+      <ExternalLinkIcon className="size-3.5" />
+      {label}
+    </a>
   );
 }
 

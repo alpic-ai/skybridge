@@ -1,0 +1,207 @@
+import { useEffect } from "react";
+import { z } from "zod";
+import { create } from "zustand";
+
+const teamSchema = z.object({ id: z.string(), name: z.string() });
+
+const statusSchema = z.discriminatedUnion("state", [
+  z.object({ state: z.literal("signedOut") }),
+  z.object({ state: z.literal("noTeam") }),
+  z.object({
+    state: z.literal("needsProject"),
+    teams: z.array(teamSchema),
+    defaultTeamId: z.string(),
+    staleConfig: z.boolean().optional(),
+  }),
+  z.object({
+    state: z.literal("ready"),
+    team: teamSchema,
+    project: z.object({ id: z.string(), name: z.string() }),
+    environmentId: z.string().optional(),
+    lastDeployGit: z
+      .object({
+        ref: z.string().nullable(),
+        commitMessage: z.string().nullable(),
+        author: z.string().nullable(),
+      })
+      .nullable()
+      .optional(),
+    lastDeployStatus: z
+      .enum(["ongoing", "deployed", "failed", "canceled"])
+      .optional(),
+    lastDeployStartedAt: z.number().optional(),
+    mcpServerUrl: z.string().optional(),
+    deploymentPageUrl: z.string().nullable().optional(),
+  }),
+  z.object({ state: z.literal("error"), message: z.string() }),
+]);
+
+export type DeployStatus = { state: "loading" } | z.infer<typeof statusSchema>;
+
+const progressSchema = z.discriminatedUnion("status", [
+  z.object({ status: z.literal("idle") }),
+  z.object({
+    status: z.literal("deploying"),
+    phase: z.string(),
+    startedAt: z.number(),
+    deploymentPageUrl: z.string().nullable(),
+  }),
+  z.object({
+    status: z.literal("deployed"),
+    deploymentId: z.string(),
+    mcpServerUrl: z.string(),
+    deploymentPageUrl: z.string().nullable(),
+    domains: z.array(z.string()),
+  }),
+  z.object({
+    status: z.literal("failed"),
+    message: z.string(),
+    deploymentPageUrl: z.string().nullable(),
+  }),
+]);
+
+export type DeployProgress = z.infer<typeof progressSchema>;
+
+type DeployStore = {
+  status: DeployStatus;
+  progress: DeployProgress;
+  refreshStatus: () => Promise<void>;
+  signIn: () => Promise<void>;
+  createAndDeploy: (name: string, teamId: string) => Promise<void>;
+  redeploy: () => Promise<void>;
+  connect: () => () => void;
+};
+
+const DEPLOY_PATH = "/__skybridge/deploy";
+
+// Shown the instant a deploy is triggered so the button flips to pending
+// without waiting for the first server SSE frame. Reconciled by real progress
+// (the server replaces startedAt with its own, ~ms apart).
+const optimisticDeploying = (): DeployProgress => ({
+  status: "deploying",
+  phase: "Preparing deployment",
+  startedAt: Date.now(),
+  deploymentPageUrl: null,
+});
+
+export const useDeployStore = create<DeployStore>()((set, get) => ({
+  status: { state: "loading" },
+  progress: { status: "idle" },
+
+  async refreshStatus() {
+    try {
+      const res = await fetch(`${DEPLOY_PATH}/status`);
+      const parsed = statusSchema.safeParse(await res.json());
+      set({
+        status: parsed.success
+          ? parsed.data
+          : { state: "error", message: "Unexpected status response" },
+      });
+    } catch (err) {
+      set({
+        status: {
+          state: "error",
+          message: err instanceof Error ? err.message : "Failed to load status",
+        },
+      });
+    }
+  },
+
+  async signIn() {
+    const res = await fetch(`${DEPLOY_PATH}/login`, { method: "POST" });
+    if (!res.ok) {
+      const { message } = (await res.json().catch(() => ({}))) as {
+        message?: string;
+      };
+      throw new Error(message ?? `Sign-in failed (${res.status})`);
+    }
+    await get().refreshStatus();
+  },
+
+  async createAndDeploy(name, teamId) {
+    set({ progress: optimisticDeploying() });
+    try {
+      const res = await fetch(`${DEPLOY_PATH}/project`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, teamId }),
+      });
+      if (!res.ok) {
+        const { message } = (await res.json().catch(() => ({}))) as {
+          message?: string;
+        };
+        throw new Error(message ?? `Failed to create project (${res.status})`);
+      }
+    } catch (err) {
+      set({ progress: { status: "idle" } });
+      throw err;
+    }
+  },
+
+  async redeploy() {
+    set({ progress: optimisticDeploying() });
+    try {
+      const res = await fetch(DEPLOY_PATH, { method: "POST" });
+      if (!res.ok) {
+        const { message } = (await res.json().catch(() => ({}))) as {
+          message?: string;
+        };
+        throw new Error(message ?? `Failed to deploy (${res.status})`);
+      }
+    } catch (err) {
+      set({ progress: { status: "idle" } });
+      throw err;
+    }
+  },
+
+  connect() {
+    const source = new EventSource(`${DEPLOY_PATH}/events`);
+
+    source.addEventListener("state", (event) => {
+      if (!(event instanceof MessageEvent)) {
+        return;
+      }
+      try {
+        const parsed = progressSchema.safeParse(JSON.parse(event.data));
+        if (parsed.success) {
+          const prev = get().progress.status;
+          set({ progress: parsed.data });
+          // A finished deploy creates/updates .alpic/project.json — refresh so
+          // a first deploy flips needsProject → ready for the next click.
+          if (parsed.data.status === "deployed" && prev !== "deployed") {
+            void get().refreshStatus();
+          }
+        }
+      } catch {
+        // ignore malformed frame
+      }
+    });
+
+    return () => {
+      source.close();
+    };
+  },
+}));
+
+export function useConnectDeploy() {
+  const connect = useDeployStore((s) => s.connect);
+  const refreshStatus = useDeployStore((s) => s.refreshStatus);
+  // SSE only streams this session's deploy; a deploy finishing out-of-session
+  // (git, CLI, killed session) never pushes. Poll /status while it's ongoing
+  // so the dot self-corrects to its terminal state.
+  const ongoing = useDeployStore(
+    (s) =>
+      s.status.state === "ready" && s.status.lastDeployStatus === "ongoing",
+  );
+  useEffect(() => {
+    void refreshStatus();
+    return connect();
+  }, [connect, refreshStatus]);
+  useEffect(() => {
+    if (!ongoing) {
+      return;
+    }
+    const id = setInterval(() => void refreshStatus(), 4000);
+    return () => clearInterval(id);
+  }, [ongoing, refreshStatus]);
+}
