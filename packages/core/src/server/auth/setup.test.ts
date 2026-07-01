@@ -256,6 +256,17 @@ async function bootMixedServer(jwksUri: string) {
       }),
     );
 
+  (server.registerTool as (...a: unknown[]) => unknown)(
+    "legacy-whoami",
+    {
+      description: "Registered via the legacy string overload.",
+      inputSchema: {},
+    },
+    (_args: unknown, extra: { authInfo?: { clientId?: string } }) => ({
+      content: [{ type: "text", text: extra.authInfo?.clientId ?? "anon" }],
+    }),
+  );
+
   const httpServer = http.createServer();
   await createApp({ mcpServer: server, httpServer });
   const listening = http.createServer(server.express);
@@ -341,6 +352,26 @@ describe("mixed-auth door", () => {
     expect(text).not.toContain("client-1");
     expect(text).toContain("Sign in to use this tool.");
     expect(text).toContain("resource_metadata=");
+  });
+
+  it("gates a tool registered via the legacy string overload (secure default)", async () => {
+    const { jwksUri } = await startJwks();
+    const base = await bootMixedServer(jwksUri);
+
+    const res = await fetch(`${base}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json, text/event-stream",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "tools/call",
+        params: { name: "legacy-whoami", arguments: {} },
+      }),
+    });
+    expect(res.status).toBe(401);
   });
 
   it("returns 401 + WWW-Authenticate for a protected tool while anonymous", async () => {
