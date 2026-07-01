@@ -35,7 +35,8 @@ import express, {
 import type { OAuthConfig } from "./auth/index.js";
 import {
   authToSecuritySchemes,
-  securitySchemesAllowAnonymous,
+  evaluateSecuritySchemes,
+  wwwAuthenticateHeader,
 } from "./auth/security-schemes.js";
 import { setupOAuth } from "./auth/setup.js";
 import { createApp } from "./express.js";
@@ -568,7 +569,6 @@ export class McpServer<
   private readonly serverInfo: Implementation;
   private readonly serverOptions?: ServerOptions;
   private oauthEnabled = false;
-  private acceptsAnonymous = false;
   private securitySchemesByTool = new Map<
     string,
     SecurityScheme[] | undefined
@@ -587,13 +587,11 @@ export class McpServer<
     this.express.use(express.json(skybridgeOptions?.json));
     if (skybridgeOptions?.oauth) {
       this.oauthEnabled = true;
-      setupOAuth(this.express, skybridgeOptions.oauth, {
-        acceptsAnonymous: () => this.acceptsAnonymous,
-        securitySchemesForTool: (name) =>
-          this.securitySchemesByTool.has(name)
-            ? { schemes: this.securitySchemesByTool.get(name) }
-            : undefined,
-      });
+      setupOAuth(
+        this.express,
+        skybridgeOptions.oauth,
+        this.securitySchemesByTool,
+      );
     }
     // Pick up the manifest if `dist/__entry.js` primed it before importing
     // user code. Consume-once: clear after the first construction so a
@@ -1228,9 +1226,25 @@ export class McpServer<
 
   private wrapHandler<InputArgs extends ZodRawShapeCompat>(
     cb: ToolHandler<InputArgs>,
-    { attachViewUUID }: { attachViewUUID: boolean },
+    {
+      attachViewUUID,
+      securitySchemes,
+    }: { attachViewUUID: boolean; securitySchemes?: SecurityScheme[] },
   ): ToolHandler<InputArgs> {
     return async (args, extra) => {
+      if (this.oauthEnabled) {
+        const failure = evaluateSecuritySchemes(
+          securitySchemes,
+          extra.authInfo,
+        );
+        if (failure) {
+          return {
+            isError: true,
+            content: [{ type: "text", text: failure.description }],
+            _meta: { "mcp/www_authenticate": [wwwAuthenticateHeader(failure)] },
+          };
+        }
+      }
       const result = await cb(args, extra);
       return {
         ...result,
@@ -1402,9 +1416,6 @@ export class McpServer<
       // `tools/list`. Use the `_meta` back-compat mirror documented in the
       // Apps SDK reference until SEP-1488 lands in the spec.
       toolMeta.securitySchemes = securitySchemes;
-      if (securitySchemesAllowAnonymous(securitySchemes)) {
-        this.acceptsAnonymous = true;
-      }
     }
 
     if (view) {
@@ -1412,7 +1423,10 @@ export class McpServer<
       this.registerViewResources(name, view, toolMeta);
     }
 
-    const wrappedCb = this.wrapHandler(cb, { attachViewUUID: Boolean(view) });
+    const wrappedCb = this.wrapHandler(cb, {
+      attachViewUUID: Boolean(view),
+      securitySchemes,
+    });
 
     baseFn.call(this, name, { ...toolFields, _meta: toolMeta }, wrappedCb);
 
