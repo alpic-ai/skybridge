@@ -238,7 +238,7 @@ async function bootMixedServer(jwksUri: string) {
         name: "public-whoami",
         description: "Public.",
         inputSchema: {},
-        securitySchemes: [{ type: "noauth" }, { type: "oauth2" }],
+        auth: "public",
       },
       (_args, extra) => ({
         content: [{ type: "text", text: extra.authInfo?.clientId ?? "anon" }],
@@ -249,7 +249,7 @@ async function bootMixedServer(jwksUri: string) {
         name: "private-whoami",
         description: "Private.",
         inputSchema: {},
-        securitySchemes: [{ type: "oauth2" }],
+        auth: "required",
       },
       (_args, extra) => ({
         content: [{ type: "text", text: extra.authInfo?.clientId ?? "anon" }],
@@ -316,6 +316,30 @@ describe("mixed-auth door", () => {
     };
     const whoami = json.result.tools.find((t) => t.name === "private-whoami");
     expect(whoami?.securitySchemes).toEqual([{ type: "oauth2" }]);
+  });
+
+  it("denies a protected tool inside an anonymous JSON-RPC batch", async () => {
+    const { jwksUri } = await startJwks();
+    const base = await bootMixedServer(jwksUri);
+
+    const res = await fetch(`${base}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json, text/event-stream",
+      },
+      body: JSON.stringify([
+        {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "tools/call",
+          params: { name: "private-whoami", arguments: {} },
+        },
+      ]),
+    });
+    const text = await res.text();
+    expect(text).not.toContain("client-1");
+    expect(text).toContain("Sign in to use this tool.");
   });
 
   it("returns 401 + WWW-Authenticate for a protected tool while anonymous", async () => {

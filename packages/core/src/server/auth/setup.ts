@@ -14,34 +14,29 @@ import {
   clientPrefersInBandChallenge,
   evaluateSecuritySchemes,
   httpStatusForFailure,
+  securitySchemesAllowAnonymous,
   wwwAuthenticateHeader,
 } from "./security-schemes.js";
 import { createJwksVerifier } from "./verify.js";
-
-export type SetupOAuthHooks = {
-  acceptsAnonymous?: () => boolean;
-  securitySchemesForTool?: (
-    toolName: string,
-  ) => { schemes: SecurityScheme[] | undefined } | undefined;
-};
 
 /** Mounts the well-known OAuth metadata and bearer auth on `/mcp`. */
 export function setupOAuth(
   app: Express,
   config: OAuthConfig,
-  hooks: SetupOAuthHooks = {},
+  schemesByTool: Map<string, SecurityScheme[] | undefined>,
 ): void {
   if (!config.verify?.issuer) {
     throw new Error("oauth.verify requires an `issuer`");
   }
 
-  const { acceptsAnonymous, securitySchemesForTool } = hooks;
+  const acceptsAnonymous = () =>
+    [...schemesByTool.values()].some(securitySchemesAllowAnonymous);
   const verifier = createJwksVerifier(config.verify);
   const bearer = (options: BearerAuthMiddlewareOptions): RequestHandler => {
     const required = requireBearerAuth(options);
     const optional = optionalBearerAuth(options);
     return (req, res, next) =>
-      (acceptsAnonymous?.() ? optional : required)(req, res, next);
+      (acceptsAnonymous() ? optional : required)(req, res, next);
   };
 
   const perToolGate =
@@ -54,16 +49,12 @@ export function setupOAuth(
             params?: { name?: string };
           }
         | undefined;
-      if (body?.method !== "tools/call" || !securitySchemesForTool) {
-        return next();
-      }
-      const tool = body.params?.name;
-      const entry = tool ? securitySchemesForTool(tool) : undefined;
-      if (!entry) {
+      const tool = body?.params?.name;
+      if (body?.method !== "tools/call" || !tool || !schemesByTool.has(tool)) {
         return next();
       }
       const failure = evaluateSecuritySchemes(
-        entry.schemes,
+        schemesByTool.get(tool),
         (req as Request & { auth?: AuthInfo }).auth,
       );
       if (!failure) {
