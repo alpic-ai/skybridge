@@ -58,6 +58,8 @@ export class HostAdaptor implements Adaptor {
 
   private readonly mcp: McpAppBridge;
   private readonly openai: typeof window.openai | null = null;
+  private readonly isAppsSdkHost: boolean =
+    typeof window !== "undefined" && window.skybridge?.hostType === "apps-sdk";
 
   private readonly stores: { [K in keyof HostContext]: HostContextStore<K> };
 
@@ -186,7 +188,11 @@ export class HostAdaptor implements Adaptor {
   };
 
   public openExternal = (href: string, options?: OpenExternalOptions): void => {
-    if (this.openai) {
+    // Route on the actual host type rather than the mere presence of
+    // `window.openai`: mcp-app hosts inject an `openai` shim, but their
+    // primary (already-connected) bridge is the one that answers `ui/open-link`.
+    // Only real Apps SDK hosts should go through `window.openai.openExternal`.
+    if (this.isAppsSdkHost && this.openai) {
       this.openai.openExternal({ href, ...options });
       return;
     }
