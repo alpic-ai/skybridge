@@ -507,6 +507,15 @@ describe("auth shorthand validation", () => {
     ).toThrow(/no `oauth` provider/);
   });
 
+  it("allows `auth: \"public\"` without an oauth provider", () => {
+    expect(() =>
+      new McpServer({ name: "t", version: "0" }).registerTool(
+        { name: "x", inputSchema: {}, auth: "public" },
+        () => ({ content: [{ type: "text", text: "" }] }),
+      ),
+    ).not.toThrow();
+  });
+
   it("throws when both `auth` and `securitySchemes` are set", () => {
     expect(() =>
       new McpServer({ name: "t", version: "0" }, undefined, {

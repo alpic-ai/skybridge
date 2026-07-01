@@ -776,10 +776,6 @@ export class McpServer<
       ...this.mcpMiddlewareEntries,
     ];
 
-    if (entries.length === 0) {
-      return;
-    }
-
     const { requestHandlers, notificationHandlers } = getHandlerMaps(
       this.server,
     );
@@ -1138,7 +1134,7 @@ export class McpServer<
     );
   }
 
-  private wrapHandler<InputArgs extends ZodRawShapeCompat>(
+  private decorateToolHandler<InputArgs extends ZodRawShapeCompat>(
     cb: ToolHandler<InputArgs>,
     {
       attachViewUUID,
@@ -1308,15 +1304,17 @@ export class McpServer<
           `Tool "${name}" sets both \`auth\` and \`securitySchemes\`; use one.`,
         );
       }
-      if (!this.oauthEnabled) {
+      if (auth !== "public" && !this.oauthEnabled) {
         throw new Error(
-          `Tool "${name}" sets \`auth\` but the server has no \`oauth\` provider configured.`,
+          `Tool "${name}" sets \`auth: ${JSON.stringify(auth)}\` but the server has no \`oauth\` provider configured.`,
         );
       }
     }
 
     const securitySchemes = auth
-      ? authToSecuritySchemes(auth)
+      ? this.oauthEnabled
+        ? authToSecuritySchemes(auth)
+        : undefined
       : rawSecuritySchemes;
 
     const toolMeta: InternalToolMeta = { ...userToolMeta };
@@ -1337,7 +1335,7 @@ export class McpServer<
       this.registerViewResources(name, view, toolMeta);
     }
 
-    const wrappedCb = this.wrapHandler(cb, {
+    const wrappedCb = this.decorateToolHandler(cb, {
       attachViewUUID: Boolean(view),
       securitySchemes,
     });
