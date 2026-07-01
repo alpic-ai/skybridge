@@ -487,17 +487,6 @@ describe("per-tool scope enforcement in fully-authenticated mode", () => {
 });
 
 describe("auth shorthand validation", () => {
-  const oauth = {
-    baseUrl: "https://app.example.test",
-    oauthMetadata: {
-      issuer: ISSUER,
-      authorization_endpoint: `${ISSUER}/authorize`,
-      token_endpoint: `${ISSUER}/token`,
-      response_types_supported: ["code"],
-    },
-    verify: { issuer: ISSUER, audience: AUDIENCE },
-  };
-
   it("throws when `auth` is set but no oauth provider is configured", () => {
     expect(() =>
       new McpServer({ name: "t", version: "0" }).registerTool(
@@ -516,11 +505,9 @@ describe("auth shorthand validation", () => {
     ).not.toThrow();
   });
 
-  it("throws when both `auth` and `securitySchemes` are set", () => {
+  it("prefers `securitySchemes` over `auth` when both are set", () => {
     expect(() =>
-      new McpServer({ name: "t", version: "0" }, undefined, {
-        oauth,
-      }).registerTool(
+      new McpServer({ name: "t", version: "0" }).registerTool(
         {
           name: "x",
           inputSchema: {},
@@ -529,7 +516,7 @@ describe("auth shorthand validation", () => {
         },
         () => ({ content: [{ type: "text", text: "" }] }),
       ),
-    ).toThrow(/use one/);
+    ).not.toThrow();
   });
 });
 

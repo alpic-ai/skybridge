@@ -1384,24 +1384,20 @@ export class McpServer<
       ...toolFields
     } = config;
 
-    if (auth !== undefined) {
-      if (rawSecuritySchemes) {
-        throw new Error(
-          `Tool "${name}" sets both \`auth\` and \`securitySchemes\`; use one.`,
-        );
-      }
-      if (auth !== "public" && !this.oauthEnabled) {
-        throw new Error(
-          `Tool "${name}" sets \`auth: ${JSON.stringify(auth)}\` but the server has no \`oauth\` provider configured.`,
-        );
-      }
+    if (
+      rawSecuritySchemes === undefined &&
+      auth !== undefined &&
+      auth !== "public" &&
+      !this.oauthEnabled
+    ) {
+      throw new Error(
+        `Tool "${name}" sets \`auth: ${JSON.stringify(auth)}\` but the server has no \`oauth\` provider configured.`,
+      );
     }
 
-    const securitySchemes = auth
-      ? this.oauthEnabled
-        ? authToSecuritySchemes(auth)
-        : undefined
-      : rawSecuritySchemes;
+    const securitySchemes =
+      rawSecuritySchemes ??
+      (auth && this.oauthEnabled ? authToSecuritySchemes(auth) : undefined);
 
     const toolMeta: InternalToolMeta = { ...userToolMeta };
 

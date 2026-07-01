@@ -147,7 +147,7 @@ type ViewCsp = {
 
 ### `auth`
 
-The recommended way to declare a tool's auth. Requires the [`oauth`](/api-reference/mcp-server#constructor) provider option; with it, Skybridge enforces the declaration for you (anonymous or under-scoped calls are rejected before the handler runs).
+The recommended way to declare a tool's auth. With the [`oauth`](/api-reference/mcp-server#constructor) provider option set, Skybridge enforces the declaration for you (anonymous or under-scoped calls are rejected before the handler runs).
 
 | Value | Meaning |
 | --- | --- |
@@ -155,11 +155,11 @@ The recommended way to declare a tool's auth. Requires the [`oauth`](/api-refere
 | `"required"` | Requires sign-in. |
 | `{ scopes: [...] }` | Requires sign-in with every listed scope. |
 
-Declaring any `"public"` tool turns the server [mixed](/build/auth#mix-public-and-authenticated-tools): it serves anonymous callers, and every other tool stays sign-in-gated by default. Setting `auth` without an `oauth` provider throws, as does setting both `auth` and `securitySchemes`.
+Declaring any `"public"` tool turns the server [mixed](/build/auth#mix-public-and-authenticated-tools): it serves anonymous callers, and every other tool stays sign-in-gated by default. `"required"` and `{ scopes }` need the `oauth` provider and throw without it; `"public"` works either way. If both `auth` and `securitySchemes` are set, `securitySchemes` wins.
 
 ### `securitySchemes`
 
-The low-level form behind `auth`, for cases it can't express (several alternative `oauth2` schemes, or pure `noauth` that never accepts a token). Mutually exclusive with `auth`.
+The low-level form behind `auth`, for cases it can't express (several alternative `oauth2` schemes, or pure `noauth` that never accepts a token). Takes precedence over `auth` when both are set.
 
 ```ts
 type SecurityScheme =
