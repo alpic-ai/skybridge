@@ -340,6 +340,7 @@ describe("mixed-auth door", () => {
     const text = await res.text();
     expect(text).not.toContain("client-1");
     expect(text).toContain("Sign in to use this tool.");
+    expect(text).toContain("resource_metadata=");
   });
 
   it("returns 401 + WWW-Authenticate for a protected tool while anonymous", async () => {
@@ -496,7 +497,7 @@ describe("auth shorthand validation", () => {
     ).toThrow(/no `oauth` provider/);
   });
 
-  it("allows `auth: \"public\"` without an oauth provider", () => {
+  it('allows `auth: "public"` without an oauth provider', () => {
     expect(() =>
       new McpServer({ name: "t", version: "0" }).registerTool(
         { name: "x", inputSchema: {}, auth: "public" },

@@ -19,12 +19,16 @@ import {
 } from "./security-schemes.js";
 import { createJwksVerifier } from "./verify.js";
 
+export type ResourceMetadataUrlResolver = (
+  getHeader: (key: string) => string | undefined,
+) => string;
+
 /** Mounts the well-known OAuth metadata and bearer auth on `/mcp`. */
 export function setupOAuth(
   app: Express,
   config: OAuthConfig,
   schemesByTool: Map<string, SecurityScheme[] | undefined>,
-): void {
+): ResourceMetadataUrlResolver {
   if (!config.verify?.issuer) {
     throw new Error("oauth.verify requires an `issuer`");
   }
@@ -39,7 +43,7 @@ export function setupOAuth(
       (acceptsAnonymous() ? optional : required)(req, res, next);
   };
 
-  let resourceMetadataUrl: (req: Request) => string;
+  let resourceMetadataUrl: ResourceMetadataUrlResolver;
 
   // baseUrl known at boot: bake the resource URLs once, no Host-header trust.
   if (config.baseUrl !== undefined) {
@@ -66,8 +70,8 @@ export function setupOAuth(
     // No baseUrl: resolve the resource origin per request from forwarded headers
     // (same precedence the framework uses for view serverUrl). Origin headers are
     // pathless, so the PRM path stays at root, matching the SDK's static layout.
-    const resolveOrigin = (req: Request) =>
-      new URL(resolveServerOrigin((key) => req.get(key)));
+    const resolveOrigin = (getHeader: (key: string) => string | undefined) =>
+      new URL(resolveServerOrigin(getHeader));
     app.use(
       "/.well-known/oauth-authorization-server",
       cors(),
@@ -75,20 +79,20 @@ export function setupOAuth(
     );
     app.use("/.well-known/oauth-protected-resource", cors(), (req, res) => {
       res.json({
-        resource: resolveOrigin(req).href,
+        resource: resolveOrigin((key) => req.get(key)).href,
         authorization_servers: [config.oauthMetadata.issuer],
         scopes_supported: config.scopesSupported,
       });
     });
-    resourceMetadataUrl = (req) =>
-      getOAuthProtectedResourceMetadataUrl(resolveOrigin(req));
+    resourceMetadataUrl = (getHeader) =>
+      getOAuthProtectedResourceMetadataUrl(resolveOrigin(getHeader));
   }
 
   app.use("/mcp", (req, res, next) =>
     bearer({
       verifier,
       requiredScopes: config.requiredScopes,
-      resourceMetadataUrl: resourceMetadataUrl(req),
+      resourceMetadataUrl: resourceMetadataUrl((key) => req.get(key)),
     })(req, res, next),
   );
 
@@ -111,7 +115,10 @@ export function setupOAuth(
     if (!failure) {
       return next();
     }
-    const challenge = wwwAuthenticateHeader(failure, resourceMetadataUrl(req));
+    const challenge = wwwAuthenticateHeader(
+      failure,
+      resourceMetadataUrl((key) => req.get(key)),
+    );
     if (clientPrefersInBandChallenge(req.get("user-agent"))) {
       res.json({
         jsonrpc: "2.0",
@@ -130,4 +137,6 @@ export function setupOAuth(
       error_description: failure.description,
     });
   });
+
+  return resourceMetadataUrl;
 }
