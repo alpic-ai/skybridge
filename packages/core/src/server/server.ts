@@ -38,7 +38,7 @@ import {
   evaluateSecuritySchemes,
   wwwAuthenticateHeader,
 } from "./auth/security-schemes.js";
-import { setupOAuth } from "./auth/setup.js";
+import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
 import { createApp } from "./express.js";
 import { createMiddlewareEntry } from "./metric.js";
 import type {
@@ -515,6 +515,7 @@ export class McpServer<
   private readonly serverInfo: Implementation;
   private readonly serverOptions?: ServerOptions;
   private oauthEnabled = false;
+  private resolveResourceMetadataUrl?: ResourceMetadataUrlResolver;
   private securitySchemesByTool = new Map<
     string,
     SecurityScheme[] | undefined
@@ -532,7 +533,7 @@ export class McpServer<
     this.express.use(express.json(skybridgeOptions?.json));
     if (skybridgeOptions?.oauth) {
       this.oauthEnabled = true;
-      setupOAuth(
+      this.resolveResourceMetadataUrl = setupOAuth(
         this.express,
         skybridgeOptions.oauth,
         this.securitySchemesByTool,
@@ -1148,10 +1149,19 @@ export class McpServer<
           extra.authInfo,
         );
         if (failure) {
+          const headers = extra?.requestInfo?.headers ?? {};
+          const header = (key: string) => {
+            const value = headers[key];
+            return Array.isArray(value) ? value[0] : value;
+          };
+          const challenge = wwwAuthenticateHeader(
+            failure,
+            this.resolveResourceMetadataUrl?.(header),
+          );
           return {
             isError: true,
             content: [{ type: "text", text: failure.description }],
-            _meta: { "mcp/www_authenticate": [wwwAuthenticateHeader(failure)] },
+            _meta: { "mcp/www_authenticate": [challenge] },
           };
         }
       }
