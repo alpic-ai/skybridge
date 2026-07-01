@@ -33,6 +33,10 @@ import express, {
   type RequestHandler,
 } from "express";
 import type { OAuthConfig } from "./auth/index.js";
+import {
+  authToSecuritySchemes,
+  securitySchemesAllowAnonymous,
+} from "./auth/security-schemes.js";
 import { setupOAuth } from "./auth/setup.js";
 import { createApp } from "./express.js";
 import { createMiddlewareEntry } from "./metric.js";
@@ -156,6 +160,8 @@ export interface ViewConfig {
 export type SecurityScheme =
   | { type: "noauth" }
   | { type: "oauth2"; scopes?: string[] };
+
+export type ToolAuth = "public" | "required" | { scopes: string[] };
 
 /**
  * Options forwarded to the built-in `express.json()` body parser. Derived
@@ -319,6 +325,7 @@ interface ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> {
   outputSchema?: ZodRawShapeCompat | AnySchema;
   annotations?: ToolAnnotations;
   view?: ViewConfig;
+  auth?: ToolAuth;
   /**
    * Declares which auth schemes this tool supports (e.g. `noauth`, `oauth2`).
    * Lets clients label tools that require sign-in before calling, and pass
@@ -506,6 +513,12 @@ export class McpServer<
   private viteManifest: Record<string, ViteManifestEntry> | null = null;
   private readonly serverInfo: Implementation;
   private readonly serverOptions?: ServerOptions;
+  private oauthEnabled = false;
+  private acceptsAnonymous = false;
+  private securitySchemesByTool = new Map<
+    string,
+    SecurityScheme[] | undefined
+  >();
 
   constructor(
     serverInfo: Implementation,
@@ -518,7 +531,14 @@ export class McpServer<
     this.express = express();
     this.express.use(express.json(skybridgeOptions?.json));
     if (skybridgeOptions?.oauth) {
-      setupOAuth(this.express, skybridgeOptions.oauth);
+      this.oauthEnabled = true;
+      setupOAuth(this.express, skybridgeOptions.oauth, {
+        acceptsAnonymous: () => this.acceptsAnonymous,
+        securitySchemesForTool: (name) =>
+          this.securitySchemesByTool.has(name)
+            ? { schemes: this.securitySchemesByTool.get(name) }
+            : undefined,
+      });
     }
     // Pick up the manifest if `dist/__entry.js` primed it before importing
     // user code. Consume-once: clear after the first construction so a
@@ -731,11 +751,30 @@ export class McpServer<
       },
     };
 
+    const toolsListSecuritySchemesEntry: McpMiddlewareEntry = {
+      filter: "tools/list",
+      handler: async (_req, _extra, next) => {
+        const result = (await next()) as {
+          tools: Array<
+            Record<string, unknown> & { _meta?: Record<string, unknown> }
+          >;
+        };
+        for (const tool of result.tools) {
+          const schemes = tool._meta?.securitySchemes;
+          if (schemes && !("securitySchemes" in tool)) {
+            tool.securitySchemes = schemes;
+          }
+        }
+        return result;
+      },
+    };
+
     const monitoringEntry = createMiddlewareEntry();
     const entries = [
       ...(monitoringEntry ? [monitoringEntry] : []),
       viewListMetaEntry,
       viewReadResolveEntry,
+      toolsListSecuritySchemesEntry,
       ...this.mcpMiddlewareEntries,
     ];
 
@@ -1243,12 +1282,32 @@ export class McpServer<
     const {
       name,
       view,
-      securitySchemes,
+      auth,
+      securitySchemes: rawSecuritySchemes,
       _meta: userToolMeta,
       ...toolFields
     } = config;
 
+    if (auth !== undefined) {
+      if (rawSecuritySchemes) {
+        throw new Error(
+          `Tool "${name}" sets both \`auth\` and \`securitySchemes\`; use one.`,
+        );
+      }
+      if (!this.oauthEnabled) {
+        throw new Error(
+          `Tool "${name}" sets \`auth\` but the server has no \`oauth\` provider configured.`,
+        );
+      }
+    }
+
+    const securitySchemes = auth
+      ? authToSecuritySchemes(auth)
+      : rawSecuritySchemes;
+
     const toolMeta: InternalToolMeta = { ...userToolMeta };
+
+    this.securitySchemesByTool.set(name, securitySchemes);
 
     if (securitySchemes) {
       // SEP-1488 puts `securitySchemes` at the top level of the tool
@@ -1257,6 +1316,9 @@ export class McpServer<
       // `tools/list`. Use the `_meta` back-compat mirror documented in the
       // Apps SDK reference until SEP-1488 lands in the spec.
       toolMeta.securitySchemes = securitySchemes;
+      if (securitySchemesAllowAnonymous(securitySchemes)) {
+        this.acceptsAnonymous = true;
+      }
     }
 
     if (view) {

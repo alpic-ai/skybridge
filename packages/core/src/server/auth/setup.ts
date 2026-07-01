@@ -1,21 +1,96 @@
+import type { BearerAuthMiddlewareOptions } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
 import {
   getOAuthProtectedResourceMetadataUrl,
   mcpAuthMetadataRouter,
 } from "@modelcontextprotocol/sdk/server/auth/router.js";
 import cors from "cors";
-import type { Express, Request } from "express";
-import { requireBearerAuth } from "../auth.js";
+import type { Express, Request, RequestHandler } from "express";
+import type { AuthInfo } from "../auth.js";
+import { optionalBearerAuth, requireBearerAuth } from "../auth.js";
 import { resolveServerOrigin } from "../requestOrigin.js";
+import type { SecurityScheme } from "../server.js";
 import type { OAuthConfig } from "./index.js";
+import {
+  clientPrefersInBandChallenge,
+  evaluateSecuritySchemes,
+  httpStatusForFailure,
+  wwwAuthenticateHeader,
+} from "./security-schemes.js";
 import { createJwksVerifier } from "./verify.js";
 
+export type SetupOAuthHooks = {
+  acceptsAnonymous?: () => boolean;
+  securitySchemesForTool?: (
+    toolName: string,
+  ) => { schemes: SecurityScheme[] | undefined } | undefined;
+};
+
 /** Mounts the well-known OAuth metadata and bearer auth on `/mcp`. */
-export function setupOAuth(app: Express, config: OAuthConfig): void {
+export function setupOAuth(
+  app: Express,
+  config: OAuthConfig,
+  hooks: SetupOAuthHooks = {},
+): void {
   if (!config.verify?.issuer) {
     throw new Error("oauth.verify requires an `issuer`");
   }
 
+  const { acceptsAnonymous, securitySchemesForTool } = hooks;
   const verifier = createJwksVerifier(config.verify);
+  const bearer = (options: BearerAuthMiddlewareOptions): RequestHandler => {
+    const required = requireBearerAuth(options);
+    const optional = optionalBearerAuth(options);
+    return (req, res, next) =>
+      (acceptsAnonymous?.() ? optional : required)(req, res, next);
+  };
+
+  const perToolGate =
+    (resourceMetadataUrl: (req: Request) => string): RequestHandler =>
+    (req, res, next) => {
+      const body = req.body as
+        | {
+            id?: string | number | null;
+            method?: string;
+            params?: { name?: string };
+          }
+        | undefined;
+      if (body?.method !== "tools/call" || !securitySchemesForTool) {
+        return next();
+      }
+      const tool = body.params?.name;
+      const entry = tool ? securitySchemesForTool(tool) : undefined;
+      if (!entry) {
+        return next();
+      }
+      const failure = evaluateSecuritySchemes(
+        entry.schemes,
+        (req as Request & { auth?: AuthInfo }).auth,
+      );
+      if (!failure) {
+        return next();
+      }
+      const challenge = wwwAuthenticateHeader(
+        failure,
+        resourceMetadataUrl(req),
+      );
+      if (clientPrefersInBandChallenge(req.get("user-agent"))) {
+        res.json({
+          jsonrpc: "2.0",
+          id: body.id ?? null,
+          result: {
+            content: [{ type: "text", text: failure.description }],
+            isError: true,
+            _meta: { "mcp/www_authenticate": [challenge] },
+          },
+        });
+        return;
+      }
+      res.set("WWW-Authenticate", challenge);
+      res.status(httpStatusForFailure(failure)).json({
+        error: failure.error,
+        error_description: failure.description,
+      });
+    };
 
   // baseUrl known at boot: bake the resource URLs once, no Host-header trust.
   if (config.baseUrl !== undefined) {
@@ -29,6 +104,7 @@ export function setupOAuth(app: Express, config: OAuthConfig): void {
         )}`,
       );
     }
+    const resourceMetadataUrl = getOAuthProtectedResourceMetadataUrl(baseUrl);
     app.use(
       mcpAuthMetadataRouter({
         oauthMetadata: config.oauthMetadata,
@@ -38,11 +114,15 @@ export function setupOAuth(app: Express, config: OAuthConfig): void {
     );
     app.use(
       "/mcp",
-      requireBearerAuth({
+      bearer({
         verifier,
         requiredScopes: config.requiredScopes,
-        resourceMetadataUrl: getOAuthProtectedResourceMetadataUrl(baseUrl),
+        resourceMetadataUrl,
       }),
+    );
+    app.use(
+      "/mcp",
+      perToolGate(() => resourceMetadataUrl),
     );
     return;
   }
@@ -52,6 +132,8 @@ export function setupOAuth(app: Express, config: OAuthConfig): void {
   // pathless, so the PRM path stays at root, matching the SDK's static layout.
   const resolveOrigin = (req: Request) =>
     new URL(resolveServerOrigin((key) => req.get(key)));
+  const resourceMetadataUrl = (req: Request) =>
+    getOAuthProtectedResourceMetadataUrl(resolveOrigin(req));
 
   app.use(
     "/.well-known/oauth-authorization-server",
@@ -66,12 +148,11 @@ export function setupOAuth(app: Express, config: OAuthConfig): void {
     });
   });
   app.use("/mcp", (req, res, next) =>
-    requireBearerAuth({
+    bearer({
       verifier,
       requiredScopes: config.requiredScopes,
-      resourceMetadataUrl: getOAuthProtectedResourceMetadataUrl(
-        resolveOrigin(req),
-      ),
+      resourceMetadataUrl: resourceMetadataUrl(req),
     })(req, res, next),
   );
+  app.use("/mcp", perToolGate(resourceMetadataUrl));
 }
