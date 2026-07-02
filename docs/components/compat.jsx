@@ -1,7 +1,8 @@
-// Host-compatibility badges, rendered inline. Pass `alpic`, `chatgpt`, and/or
-// `claude`; hosts render in lexicographic order. SVGs are inlined so fills can
-// follow the theme: Alpic is always #ed115e, Claude keeps its brand orange, and
-// ChatGPT uses currentColor (black in light mode, white in dark).
+// Host-compatibility badges, rendered inline. Pass `alpic`, `chatgpt`,
+// `claude`, and/or `cursor`; hosts render in lexicographic order. SVGs are
+// inlined so fills can follow the theme: Alpic is always #ed115e, Claude keeps
+// its brand orange, and ChatGPT/Cursor use currentColor (black in light mode,
+// white in dark).
 //
 // Two modes:
 // - default: an outlined pill (logo + name), bordered in the host color. Used
@@ -15,6 +16,7 @@ export const Compat = ({
   alpic = false,
   chatgpt = false,
   claude = false,
+  cursor = false,
   compact = false,
 }) => (
   <div
@@ -71,6 +73,23 @@ export const Compat = ({
           style={{ display: "block" }}
         >
           <path d="m19.6 66.5 19.7-11 .3-1-.3-.5h-1l-3.3-.2-11.2-.3L14 53l-9.5-.5-2.4-.5L0 49l.2-1.5 2-1.3 2.9.2 6.3.5 9.5.6 6.9.4L38 49.1h1.6l.2-.7-.5-.4-.4-.4L29 41l-10.6-7-5.6-4.1-3-2-1.5-2-.6-4.2 2.7-3 3.7.3.9.2 3.7 2.9 8 6.1L37 36l1.5 1.2.6-.4.1-.3-.7-1.1L33 25l-6-10.4-2.7-4.3-.7-2.6c-.3-1-.4-2-.4-3l3-4.2L28 0l4.2.6L33.8 2l2.6 6 4.1 9.3L47 29.9l2 3.8 1 3.4.3 1h.7v-.5l.5-7.2 1-8.7 1-11.2.3-3.2 1.6-3.8 3-2L61 2.6l2 2.9-.3 1.8-1.1 7.7L59 27.1l-1.5 8.2h.9l1-1.1 4.1-5.4 6.9-8.6 3-3.5L77 13l2.3-1.8h4.3l3.1 4.7-1.4 4.9-4.4 5.6-3.7 4.7-5.3 7.1-3.2 5.7.3.4h.7l12-2.6 6.4-1.1 7.6-1.3 3.5 1.6.4 1.6-1.4 3.4-8.2 2-9.6 2-14.3 3.3-.2.1.2.3 6.4.6 2.8.2h6.8l12.6 1 3.3 2 1.9 2.7-.3 2-5.1 2.6-6.8-1.6-16-3.8-5.4-1.3h-.8v.4l4.6 4.5 8.3 7.5L89 80.1l.5 2.4-1.3 2-1.4-.2-9.2-7-3.6-3-8-6.8h-.5v.7l1.8 2.7 9.8 14.7.5 4.5-.7 1.4-2.6 1-2.7-.6-5.8-8-6-9-4.7-8.2-.5.4-2.9 30.2-1.3 1.5-3 1.2-2.5-2-1.4-3 1.4-6.2 1.6-8 1.3-6.4 1.2-7.9.7-2.6v-.2H49L43 72l-9 12.3-7.2 7.6-1.7.7-3-1.5.3-2.8L24 86l10-12.8 6-7.9 4-4.6-.1-.5h-.3L17.2 77.4l-4.7.6-2-2 .2-3 1-1 8-5.5Z" />
+        </svg>,
+      ],
+      [
+        cursor,
+        "Cursor",
+        "currentColor",
+        <svg
+          fill="currentColor"
+          fillRule="evenodd"
+          height="15"
+          style={{ display: "block", flex: "none", lineHeight: 1 }}
+          viewBox="0 0 24 24"
+          width="15"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <title>Cursor</title>
+          <path d="M22.106 5.68L12.5.135a.998.998 0 00-.998 0L1.893 5.68a.84.84 0 00-.419.726v11.186c0 .3.16.577.42.727l9.607 5.547a.999.999 0 00.998 0l9.608-5.547a.84.84 0 00.42-.727V6.407a.84.84 0 00-.42-.726zm-.603 1.176L12.228 22.92c-.063.108-.228.064-.228-.061V12.34a.59.59 0 00-.295-.51l-9.11-5.26c-.107-.062-.063-.228.062-.228h18.55c.264 0 .428.286.296.514z" />
         </svg>,
       ],
       [
