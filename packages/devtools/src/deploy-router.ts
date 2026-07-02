@@ -157,31 +157,28 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
         return;
       }
 
-      const teams = await alpic().api.teams.list.v1();
-      const team = teams[0];
-      if (!team) {
-        res.json({ state: "noTeam" });
-        return;
-      }
-
       const cfg = loadConfig();
-      if (!cfg) {
-        res.json({ state: "needsProject", teams, defaultTeamId: team.id });
-        return;
+      let staleConfig = false;
+      if (cfg) {
+        try {
+          await alpic().api.projects.get.v1({ projectId: cfg.projectId });
+        } catch {
+          // Stale config: linked project deleted/inaccessible — fall back to first deploy.
+          staleConfig = true;
+        }
       }
-
-      let project: Awaited<ReturnType<Alpic["api"]["projects"]["get"]["v1"]>>;
-      try {
-        project = await alpic().api.projects.get.v1({
-          projectId: cfg.projectId,
-        });
-      } catch {
-        // Stale config: linked project deleted/inaccessible — fall back to first deploy.
+      if (!cfg || staleConfig) {
+        const teams = await alpic().api.teams.list.v1();
+        const team = teams[0];
+        if (!team) {
+          res.json({ state: "noTeam" });
+          return;
+        }
         res.json({
           state: "needsProject",
           teams,
           defaultTeamId: team.id,
-          staleConfig: true,
+          staleConfig,
         });
         return;
       }
@@ -230,9 +227,6 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
 
       res.json({
         state: "ready",
-        team,
-        project: { id: project.id, name: project.name },
-        environmentId: cfg.environmentId,
         lastDeployGit,
         lastDeployStatus,
         lastDeployStartedAt,
@@ -254,6 +248,8 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
     }
     const name = typeof req.body?.name === "string" ? req.body.name.trim() : "";
     const teamId = typeof req.body?.teamId === "string" ? req.body.teamId : "";
+    const teamName =
+      typeof req.body?.teamName === "string" ? req.body.teamName : undefined;
     if (!name || !teamId) {
       res.status(400).json({ message: "name and teamId are required." });
       return;
@@ -278,17 +274,6 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
           message: "Project created without a Production environment.",
         });
         return;
-      }
-      // Best-effort: teamName is cosmetic + optional. A failure here must not
-      // skip saveConfig, or the created project is orphaned (config never
-      // written → next attempt hits the name-conflict 409).
-      let teamName: string | undefined;
-      try {
-        teamName = (await alpic().api.teams.list.v1()).find(
-          (t) => t.id === teamId,
-        )?.name;
-      } catch {
-        // ignore — proceed without teamName
       }
       saveConfig({
         projectId: created.id,

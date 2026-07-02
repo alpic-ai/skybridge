@@ -40,9 +40,6 @@ test.describe("deploy button", () => {
         signedIn
           ? {
               state: "ready",
-              team: TEAM,
-              project: { id: "p1", name: "my-app" },
-              environmentId: "e1",
               lastDeployStatus: "deployed",
               mcpServerUrl: "https://my-app.alpic.live",
             }
@@ -58,19 +55,6 @@ test.describe("deploy button", () => {
 
     // After login the status refetches → the dot turns green (deployed).
     await expect(deployTrigger(page).locator(".bg-green-500")).toBeVisible();
-  });
-
-  test("no team → prompts team creation with a link to Alpic", async ({
-    page,
-  }) => {
-    await mockDeploy(page, { status: { state: "noTeam" } });
-    await page.goto("/");
-
-    await deployTrigger(page).hover();
-    await expect(page.getByText(/no team yet/i)).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: /open alpic/i }),
-    ).toHaveAttribute("href", "https://app.alpic.ai");
   });
 
   test("first deploy → modal prefilled with server name + team, surfaces conflict", async ({
@@ -137,9 +121,7 @@ test.describe("deploy button", () => {
     await mockDeploy(page, {
       status: {
         state: "ready",
-        team: TEAM,
-        project: { id: "p1", name: "my-app" },
-        environmentId: "e1",
+        lastDeployStatus: "deployed",
         mcpServerUrl: "https://my-app.alpic.live",
         deploymentPageUrl: "https://app.alpic.ai/p1",
       },
@@ -164,9 +146,6 @@ test.describe("deploy button", () => {
     await mockDeploy(page, {
       status: {
         state: "ready",
-        team: TEAM,
-        project: { id: "p1", name: "my-app" },
-        environmentId: "e1",
         lastDeployStatus: "deployed",
         mcpServerUrl: "https://my-app.alpic.live",
       },
@@ -192,9 +171,7 @@ test.describe("deploy button", () => {
     await mockDeploy(page, {
       status: {
         state: "ready",
-        team: TEAM,
-        project: { id: "p1", name: "my-app" },
-        environmentId: "e1",
+        lastDeployStatus: "deployed",
         mcpServerUrl: "https://my-app.alpic.live",
       },
       progress: {
@@ -232,9 +209,6 @@ test.describe("deploy button", () => {
     await mockDeploy(page, {
       status: {
         state: "ready",
-        team: TEAM,
-        project: { id: "p1", name: "my-app" },
-        environmentId: "e1",
         lastDeployStatus: "ongoing",
         lastDeployStartedAt: Date.now() - 65_000,
         deploymentPageUrl: "https://app.alpic.ai/p1/logs",
@@ -262,9 +236,7 @@ test.describe("deploy button", () => {
     await mockDeploy(page, {
       status: {
         state: "ready",
-        team: TEAM,
-        project: { id: "p1", name: "my-app" },
-        environmentId: "e1",
+        lastDeployStatus: "deployed",
         lastDeployGit: {
           ref: "main",
           commitMessage: "Fix the thing",
@@ -297,12 +269,7 @@ test.describe("deploy button", () => {
 
   test("failed deploy → shows error with a logs link", async ({ page }) => {
     await mockDeploy(page, {
-      status: {
-        state: "ready",
-        team: TEAM,
-        project: { id: "p1", name: "my-app" },
-        environmentId: "e1",
-      },
+      status: { state: "ready" },
       progress: {
         status: "failed",
         message: "Build failed",

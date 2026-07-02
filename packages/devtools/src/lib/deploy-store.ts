@@ -15,9 +15,6 @@ const statusSchema = z.discriminatedUnion("state", [
   }),
   z.object({
     state: z.literal("ready"),
-    team: teamSchema,
-    project: z.object({ id: z.string(), name: z.string() }),
-    environmentId: z.string().optional(),
     lastDeployGit: z
       .object({
         ref: z.string().nullable(),
@@ -65,7 +62,11 @@ type DeployStore = {
   progress: DeployProgress;
   refreshStatus: () => Promise<void>;
   signIn: () => Promise<void>;
-  createAndDeploy: (name: string, teamId: string) => Promise<void>;
+  createAndDeploy: (
+    name: string,
+    teamId: string,
+    teamName?: string,
+  ) => Promise<void>;
   redeploy: () => Promise<void>;
   connect: () => () => void;
 };
@@ -132,12 +133,12 @@ export const useDeployStore = create<DeployStore>()((set, get) => ({
     await get().refreshStatus();
   },
 
-  async createAndDeploy(name, teamId) {
+  async createAndDeploy(name, teamId, teamName) {
     set({ progress: optimisticDeploying() });
     try {
       await postJson(
         `${DEPLOY_PATH}/project`,
-        { name, teamId },
+        { name, teamId, teamName },
         "Failed to create project",
       );
     } catch (err) {
@@ -160,11 +161,10 @@ export const useDeployStore = create<DeployStore>()((set, get) => ({
     const source = new EventSource(`${DEPLOY_PATH}/events`);
 
     source.addEventListener("state", (event) => {
-      if (!(event instanceof MessageEvent)) {
-        return;
-      }
       try {
-        const parsed = progressSchema.safeParse(JSON.parse(event.data));
+        const parsed = progressSchema.safeParse(
+          JSON.parse((event as MessageEvent).data),
+        );
         if (parsed.success) {
           const prev = get().progress.status;
           set({ progress: parsed.data });

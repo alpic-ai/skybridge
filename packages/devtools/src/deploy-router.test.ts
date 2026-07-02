@@ -121,37 +121,22 @@ describe("deploy-router POST /project", () => {
     expect(alpic.api.projects.create.v1).not.toHaveBeenCalled();
   });
 
-  it("prechecks + creates under the submitted team, not the default", async () => {
+  it("prechecks + creates under the submitted team, then writes config", async () => {
     const alpic = fakeAlpic({ teams: [{ id: "t1", name: "Acme" }] });
     const base = await start(alpic);
     const res = await fetch(`${base}/project`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "fresh", teamId: "t2" }),
+      body: JSON.stringify({ name: "fresh", teamId: "t2", teamName: "Globex" }),
     });
     expect(res.status).toBe(202);
     expect(alpic.api.projects.list.v1).toHaveBeenCalledWith({ teamId: "t2" });
     expect(alpic.api.projects.create.v1).toHaveBeenCalledWith(
       expect.objectContaining({ teamId: "t2", name: "fresh" }),
     );
-  });
-
-  it("still writes config (no orphan) when the post-create team lookup fails", async () => {
-    const alpic = fakeAlpic({ teams: [{ id: "t1", name: "Acme" }] });
-    // The teamName lookup after create fails — must not 502 or skip saveConfig.
-    (alpic.api.teams.list.v1 as ReturnType<typeof vi.fn>).mockRejectedValue(
-      new Error("boom"),
-    );
-    const base = await start(alpic);
-    const res = await fetch(`${base}/project`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: "fresh", teamId: "t1" }),
-    });
-    expect(res.status).toBe(202);
     const cfg = JSON.parse(
       readFileSync(join(process.cwd(), ".alpic", "project.json"), "utf8"),
     );
-    expect(cfg.projectId).toBe("p-new");
+    expect(cfg).toMatchObject({ projectId: "p-new", teamName: "Globex" });
   });
 });

@@ -568,8 +568,6 @@ function deployDotClass(
         return "bg-red-500";
       case "deployed":
         return "bg-green-500";
-      default:
-        return status.mcpServerUrl ? "bg-green-500" : "bg-gray-400";
     }
   }
   return "bg-gray-400";

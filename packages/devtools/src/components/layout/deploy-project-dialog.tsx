@@ -36,7 +36,7 @@ export function DeployProjectDialog({
   teams: Team[];
   defaultTeamId: string;
   staleConfig?: boolean;
-  onCreate: (name: string, teamId: string) => Promise<void>;
+  onCreate: (name: string, teamId: string, teamName?: string) => Promise<void>;
 }) {
   const inputId = useId();
   const [name, setName] = useState(defaultName);
@@ -63,7 +63,7 @@ export function DeployProjectDialog({
     setSubmitting(true);
     setError(null);
     try {
-      await onCreate(trimmed, teamId);
+      await onCreate(trimmed, teamId, selectedTeam?.name);
       onOpenChange(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create project");
