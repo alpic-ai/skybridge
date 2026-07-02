@@ -7,17 +7,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@alpic-ai/ui/components/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@alpic-ai/ui/components/dropdown-menu";
 import { Input } from "@alpic-ai/ui/components/input";
 import { Label } from "@alpic-ai/ui/components/label";
-import { Check, ChevronDown } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@alpic-ai/ui/components/select";
 import { type FormEvent, useEffect, useId, useState } from "react";
-import { cn } from "@/lib/utils.js";
 
 type Team = { id: string; name: string };
 
@@ -96,41 +95,32 @@ export function DeployProjectDialog({
             {teams.length > 1 ? (
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span>Team:</span>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className="inline-flex cursor-pointer items-center gap-1 rounded px-1 py-0.5 font-medium text-foreground transition-colors hover:bg-background-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    >
-                      <span>{selectedTeam?.name}</span>
-                      <ChevronDown className="size-3 shrink-0" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="min-w-48">
+                <Select value={teamId} onValueChange={setTeamId}>
+                  <SelectTrigger
+                    size="sm"
+                    className="h-6 gap-1 border-none bg-transparent px-1 font-medium text-foreground text-xs shadow-none hover:bg-background-hover"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent align="start" className="min-w-48">
                     {teams.map((team) => (
-                      <DropdownMenuItem
+                      <SelectItem
                         key={team.id}
-                        onSelect={() => setTeamId(team.id)}
+                        value={team.id}
                         className="cursor-pointer text-xs"
                       >
-                        <Check
-                          className={cn(
-                            "size-3.5 shrink-0",
-                            team.id === teamId ? "opacity-100" : "opacity-0",
-                          )}
-                        />
-                        <span className="truncate">{team.name}</span>
-                      </DropdownMenuItem>
+                        {team.name}
+                      </SelectItem>
                     ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                  </SelectContent>
+                </Select>
               </div>
             ) : (
               <p className="text-xs text-muted-foreground">
                 Team: <span className="font-medium">{selectedTeam?.name}</span>
               </p>
             )}
-            {error && <p className="text-xs text-red-500">{error}</p>}
+            {error && <p className="text-destructive text-xs">{error}</p>}
           </div>
           <DialogFooter>
             <Button

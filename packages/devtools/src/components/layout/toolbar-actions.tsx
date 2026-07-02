@@ -1,3 +1,4 @@
+import { WarningAlert } from "@alpic-ai/ui/components/alert";
 import { Button } from "@alpic-ai/ui/components/button";
 import {
   Popover,
@@ -5,14 +6,17 @@ import {
   PopoverContent,
 } from "@alpic-ai/ui/components/popover";
 import { Separator } from "@alpic-ai/ui/components/separator";
+import { Spinner } from "@alpic-ai/ui/components/spinner";
+import {
+  StatusDot,
+  type StatusDotVariantProps,
+} from "@alpic-ai/ui/components/status-dot";
 import {
   Check,
   ClipboardCheck,
   Copy,
   ExternalLinkIcon,
-  Loader2Icon,
   MessagesSquareIcon,
-  TriangleAlertIcon,
   UnplugIcon,
 } from "lucide-react";
 import {
@@ -38,11 +42,11 @@ import { cn } from "@/lib/utils.js";
 import { DeployProjectDialog } from "./deploy-project-dialog.js";
 
 const DOT_BY_STATUS = {
-  idle: "bg-gray-400",
-  starting: "bg-orange-500 animate-pulse",
-  connected: "bg-green-500",
-  error: "bg-red-500",
-} as const;
+  idle: { variant: "muted", pulse: false },
+  starting: { variant: "warning", pulse: true },
+  connected: { variant: "success", pulse: false },
+  error: { variant: "destructive", pulse: false },
+} as const satisfies Record<string, StatusDotVariantProps>;
 
 const HOVER_CLOSE_DELAY_MS = 120;
 const DESCRIPTION_MAX_W = "max-w-[200px]";
@@ -174,11 +178,7 @@ function TunnelLinkButton({
           aria-disabled={isDisabled}
           className={cn(isDisabled && "opacity-50 cursor-not-allowed")}
           icon={
-            isLaunching ? (
-              <Loader2Icon className="size-3.5 animate-spin" />
-            ) : (
-              icon
-            )
+            isLaunching ? <Spinner size="sm" className="text-current" /> : icon
           }
           onClick={isDisabled ? undefined : onClick}
         >
@@ -240,19 +240,12 @@ export function DeployButton() {
   const [signingIn, setSigningIn] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  // A deploy is in progress per this session's SSE stream, or per the API's
-  // latest deployment (survives refresh / triggered elsewhere) — keep the dot,
-  // the popover, and the disabled state in agreement.
   const deploying =
     progress.status === "deploying" ||
     (status.state === "ready" && status.lastDeployStatus === "ongoing");
-  // A git-linked project routes redeploy through the popover's explicit
-  // "Deploy anyway" (an overwrite guard), so the main button is gated there.
   const gitGated = status.state === "ready" && !!status.lastDeployGit;
-  // aria-disabled (not the native attribute) so the button stays hoverable —
-  // the popover keeps showing progress/guidance while it's disabled. Only
-  // enabled when a plain click does something (signedOut, needsProject, ready
-  // without a git overwrite to confirm).
+  // aria-disabled (not the native attribute) so the button stays hoverable and
+  // the popover keeps showing progress/guidance while disabled.
   const disabled =
     signingIn ||
     deploying ||
@@ -307,10 +300,11 @@ export function DeployButton() {
             aria-disabled={disabled}
             icon={
               signingIn ? (
-                <Loader2Icon className="size-3.5 animate-spin" />
+                <Spinner size="sm" className="text-current" />
               ) : (
-                <span
-                  className={`h-2 w-2 rounded-full ${deployDotClass(status, progress)}`}
+                <StatusDot
+                  className="size-2"
+                  {...deployDotVariant(status, progress)}
                   aria-hidden
                 />
               )
@@ -370,7 +364,9 @@ function DeployPopoverContent({
     );
   }
 
-  if (progress.status === "deployed") {
+  const gitGated = status.state === "ready" && !!status.lastDeployGit;
+
+  if (progress.status === "deployed" && !gitGated) {
     return (
       <div className="space-y-3">
         <p className="text-sm font-medium">Deployed</p>
@@ -385,10 +381,12 @@ function DeployPopoverContent({
     );
   }
 
-  if (progress.status === "failed") {
+  if (progress.status === "failed" && !gitGated) {
     return (
       <div className="space-y-2">
-        <p className="text-sm font-medium text-red-500">Deployment failed</p>
+        <p className="text-sm font-medium text-destructive">
+          Deployment failed
+        </p>
         <p className="text-xs text-muted-foreground">{progress.message}</p>
         {progress.deploymentPageUrl && (
           <>
@@ -403,7 +401,6 @@ function DeployPopoverContent({
     );
   }
 
-  // progress idle → reflect readiness/auth status
   switch (status.state) {
     case "loading":
       return <p className="text-sm text-muted-foreground">Checking Alpic…</p>;
@@ -422,7 +419,9 @@ function DeployPopoverContent({
           >
             {signingIn ? "Signing in…" : "Sign in to Alpic"}
           </Button>
-          {actionError && <p className="text-xs text-red-500">{actionError}</p>}
+          {actionError && (
+            <p className="text-xs text-destructive">{actionError}</p>
+          )}
         </div>
       );
     case "noTeam":
@@ -438,8 +437,6 @@ function DeployPopoverContent({
     case "needsProject":
       return <p className="text-sm">Click to deploy to Alpic</p>;
     case "ready":
-      // A deploy is running (this session's SSE stream ended, or it was
-      // triggered elsewhere/by git) — show progress, not the idle CTA.
       if (status.lastDeployStatus === "ongoing") {
         return (
           <DeployingContent
@@ -451,7 +448,9 @@ function DeployPopoverContent({
       }
       return (
         <div className="space-y-2">
-          <p className="text-sm">Click to deploy to Alpic</p>
+          {!status.lastDeployGit && (
+            <p className="text-sm">Click to deploy to Alpic</p>
+          )}
           {status.mcpServerUrl && (
             <>
               <p className="text-xs font-medium text-muted-foreground">
@@ -467,26 +466,30 @@ function DeployPopoverContent({
             </>
           )}
           {status.lastDeployGit && (
-            <div className="space-y-2 rounded-md border border-orange-300 bg-orange-50 p-2">
-              <p className="flex items-center gap-1.5 text-xs text-orange-700">
-                <TriangleAlertIcon className="size-3.5 shrink-0" />
-                Last deployed from Git — redeploying replaces it.
-              </p>
-              <GitDeployInfo git={status.lastDeployGit} />
-              <Button
-                variant="primary"
-                className="h-7 w-full"
-                onClick={onRedeploy}
-              >
-                Deploy anyway
-              </Button>
-            </div>
+            <WarningAlert
+              className="px-3 py-2"
+              title="Last deployed from Git — redeploying replaces it."
+              description={
+                <div className="space-y-2">
+                  <GitDeployInfo git={status.lastDeployGit} />
+                  <Button
+                    variant="primary"
+                    className="h-7 w-full"
+                    onClick={onRedeploy}
+                  >
+                    Deploy anyway
+                  </Button>
+                </div>
+              }
+            />
           )}
-          {actionError && <p className="text-xs text-red-500">{actionError}</p>}
+          {actionError && (
+            <p className="text-xs text-destructive">{actionError}</p>
+          )}
         </div>
       );
     case "error":
-      return <p className="text-xs text-red-500">{status.message}</p>;
+      return <p className="text-xs text-destructive">{status.message}</p>;
   }
 }
 
@@ -505,9 +508,8 @@ function DeployingContent({
   deploymentPageUrl,
 }: {
   phase: string;
-  // Anchored to the server-provided start (replayed over SSE, or the latest
-  // deployment's startedAt on reconnect) so the clock survives hover remounts
-  // and page refreshes. Absent only when no start is known.
+  // Server-provided start, so the elapsed clock survives hover remounts and
+  // page refreshes.
   startedAt: number | null;
   deploymentPageUrl: string | null;
 }) {
@@ -527,7 +529,7 @@ function DeployingContent({
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <Loader2Icon className="size-3.5 shrink-0 animate-spin" />
+        <Spinner size="sm" className="shrink-0 text-current" />
         <p className="text-sm">{phase}…</p>
         {startedAt != null && (
           <span className="ml-auto font-mono text-xs text-muted-foreground">
@@ -545,32 +547,32 @@ function DeployingContent({
   );
 }
 
-function deployDotClass(
+function deployDotVariant(
   status: DeployStatus,
   progress: DeployProgress,
-): string {
+): StatusDotVariantProps {
   if (progress.status === "deploying") {
-    return "bg-orange-500 animate-pulse";
+    return { variant: "warning", pulse: true };
   }
-  if (progress.status === "failed") {
-    return "bg-red-500";
+  const gitGated = status.state === "ready" && !!status.lastDeployGit;
+  if (progress.status === "failed" && !gitGated) {
+    return { variant: "destructive", pulse: false };
   }
-  if (progress.status === "deployed") {
-    return "bg-green-500";
+  if (progress.status === "deployed" && !gitGated) {
+    return { variant: "success", pulse: false };
   }
-  // No active deploy this session — reflect the linked project's last deploy.
   if (status.state === "ready") {
     switch (status.lastDeployStatus) {
       case "ongoing":
-        return "bg-orange-500 animate-pulse";
+        return { variant: "warning", pulse: true };
       case "failed":
       case "canceled":
-        return "bg-red-500";
+        return { variant: "destructive", pulse: false };
       case "deployed":
-        return "bg-green-500";
+        return { variant: "success", pulse: false };
     }
   }
-  return "bg-gray-400";
+  return { variant: "muted", pulse: false };
 }
 
 function CopyUrlRow({ url }: { url: string }) {
@@ -618,7 +620,7 @@ function GitDeployInfo({
     return null;
   }
   return (
-    <div className="space-y-0.5 text-xs text-orange-700/90">
+    <div className="space-y-0.5 text-xs">
       {git.ref && (
         <p>
           Branch <span className="font-mono">{git.ref}</span>
@@ -663,8 +665,9 @@ export function TunnelButton() {
       )}
       trigger={
         <Button variant="secondary" onClick={onClick}>
-          <span
-            className={`h-2 w-2 rounded-full ${DOT_BY_STATUS[state.status]}`}
+          <StatusDot
+            className="size-2"
+            {...DOT_BY_STATUS[state.status]}
             aria-hidden
           />
           {mcpUrl ? (
@@ -732,14 +735,11 @@ function StartingContent({ message }: { message: string }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-center gap-2">
-        <span
-          className="h-2 w-2 rounded-full bg-orange-500 animate-pulse"
-          aria-hidden
-        />
+        <StatusDot className="size-2" variant="warning" pulse aria-hidden />
         <p className={cn("text-sm text-muted-foreground", DESCRIPTION_MAX_W)}>
           {message}
         </p>
-        <Loader2Icon className="size-3.5 animate-spin" />
+        <Spinner size="sm" className="text-current" />
       </div>
     </div>
   );

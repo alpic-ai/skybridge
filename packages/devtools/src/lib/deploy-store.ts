@@ -73,8 +73,6 @@ type DeployStore = {
 
 const DEPLOY_PATH = "/__skybridge/deploy";
 
-// POST a deploy endpoint, surfacing the server's `message` (or a fallback) on
-// a non-2xx response.
 async function postJson(
   path: string,
   body?: unknown,
@@ -95,9 +93,6 @@ async function postJson(
   }
 }
 
-// Shown the instant a deploy is triggered so the button flips to pending
-// without waiting for the first server SSE frame. Reconciled by real progress
-// (the server replaces startedAt with its own, ~ms apart).
 const optimisticDeploying = (): DeployProgress => ({
   status: "deploying",
   phase: "Preparing deployment",
@@ -168,8 +163,8 @@ export const useDeployStore = create<DeployStore>()((set, get) => ({
         if (parsed.success) {
           const prev = get().progress.status;
           set({ progress: parsed.data });
-          // A finished deploy creates/updates .alpic/project.json — refresh so
-          // a first deploy flips needsProject → ready for the next click.
+          // A finished deploy writes .alpic/project.json — refresh so a first
+          // deploy flips needsProject → ready.
           if (parsed.data.status === "deployed" && prev !== "deployed") {
             void get().refreshStatus();
           }
@@ -188,9 +183,8 @@ export const useDeployStore = create<DeployStore>()((set, get) => ({
 export function useConnectDeploy() {
   const connect = useDeployStore((s) => s.connect);
   const refreshStatus = useDeployStore((s) => s.refreshStatus);
-  // SSE only streams this session's deploy; a deploy finishing out-of-session
-  // (git, CLI, killed session) never pushes. Poll /status while it's ongoing
-  // so the dot self-corrects to its terminal state.
+  // SSE only streams this session's deploy — poll while ongoing so a deploy
+  // finishing out-of-session (git, CLI) still reaches its terminal state.
   const ongoing = useDeployStore(
     (s) =>
       s.status.state === "ready" && s.status.lastDeployStatus === "ongoing",
