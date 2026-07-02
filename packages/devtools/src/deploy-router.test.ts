@@ -1,31 +1,16 @@
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import http from "node:http";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import express from "express";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeployRouter } from "./deploy-router.js";
 
 type Alpic = NonNullable<Parameters<typeof createDeployRouter>[0]>;
 
 const cleanups: Array<() => Promise<void>> = [];
 
-// Isolate cwd per test: the router reads/writes `.alpic/project.json` against
-// process.cwd(), so a fresh tmp dir keeps tests independent and pollution-free.
-let originalCwd: string;
-let tmpCwd: string;
-beforeEach(() => {
-  originalCwd = process.cwd();
-  tmpCwd = mkdtempSync(join(tmpdir(), "deploy-router-"));
-  process.chdir(tmpCwd);
-});
-
 afterEach(async () => {
   while (cleanups.length > 0) {
     await cleanups.pop()?.();
   }
-  process.chdir(originalCwd);
-  rmSync(tmpCwd, { recursive: true, force: true });
 });
 
 function fakeAlpic(overrides: {
@@ -39,16 +24,20 @@ function fakeAlpic(overrides: {
       teams: { list: { v1: vi.fn().mockResolvedValue(overrides.teams ?? []) } },
       projects: {
         list: { v1: vi.fn().mockResolvedValue(overrides.projects ?? []) },
-        create: {
-          v1: vi.fn().mockResolvedValue({
-            id: "p-new",
-            teamId: "t1",
-            name: "ok",
-            productionEnvironment: { id: "env-1", name: "production" },
-          }),
-        },
-        get: { v1: vi.fn() },
       },
+    },
+    projects: {
+      loadConfig: vi.fn().mockReturnValue(null),
+      validateLink: vi.fn().mockImplementation(async (cfg) => cfg),
+      detectRuntime: vi.fn().mockReturnValue(null),
+      createLinked: vi.fn().mockResolvedValue({
+        projectId: "p-new",
+        teamId: "t1",
+        teamName: "Globex",
+        projectName: "ok",
+        environmentId: "env-1",
+        environmentName: "production",
+      }),
     },
     deployments: {
       getLatestForEnvironment: vi.fn(),
@@ -93,7 +82,6 @@ describe("deploy-router /status", () => {
       }),
     );
     const res = await fetch(`${base}/status`);
-    // No .alpic/project.json in the per-test tmp cwd → first-deploy state.
     expect(await res.json()).toMatchObject({
       state: "needsProject",
       defaultTeamId: "t1",
@@ -101,6 +89,22 @@ describe("deploy-router /status", () => {
         { id: "t1", name: "Acme" },
         { id: "t2", name: "Globex" },
       ],
+    });
+  });
+
+  it("flags staleConfig when the linked project no longer validates", async () => {
+    const alpic = fakeAlpic({ teams: [{ id: "t1", name: "Acme" }] });
+    vi.mocked(alpic.projects.loadConfig).mockReturnValue({
+      projectId: "gone",
+      teamId: "t1",
+      projectName: "old",
+    });
+    vi.mocked(alpic.projects.validateLink).mockResolvedValue(null);
+    const base = await start(alpic);
+    const res = await fetch(`${base}/status`);
+    expect(await res.json()).toMatchObject({
+      state: "needsProject",
+      staleConfig: true,
     });
   });
 });
@@ -118,10 +122,10 @@ describe("deploy-router POST /project", () => {
       body: JSON.stringify({ name: "taken", teamId: "t1" }),
     });
     expect(res.status).toBe(409);
-    expect(alpic.api.projects.create.v1).not.toHaveBeenCalled();
+    expect(alpic.projects.createLinked).not.toHaveBeenCalled();
   });
 
-  it("prechecks + creates under the submitted team, then writes config", async () => {
+  it("prechecks the submitted team, then creates the linked project", async () => {
     const alpic = fakeAlpic({ teams: [{ id: "t1", name: "Acme" }] });
     const base = await start(alpic);
     const res = await fetch(`${base}/project`, {
@@ -131,12 +135,11 @@ describe("deploy-router POST /project", () => {
     });
     expect(res.status).toBe(202);
     expect(alpic.api.projects.list.v1).toHaveBeenCalledWith({ teamId: "t2" });
-    expect(alpic.api.projects.create.v1).toHaveBeenCalledWith(
-      expect.objectContaining({ teamId: "t2", name: "fresh" }),
-    );
-    const cfg = JSON.parse(
-      readFileSync(join(process.cwd(), ".alpic", "project.json"), "utf8"),
-    );
-    expect(cfg).toMatchObject({ projectId: "p-new", teamName: "Globex" });
+    expect(alpic.projects.createLinked).toHaveBeenCalledWith({
+      name: "fresh",
+      teamId: "t2",
+      teamName: "Globex",
+      runtime: "node24",
+    });
   });
 });

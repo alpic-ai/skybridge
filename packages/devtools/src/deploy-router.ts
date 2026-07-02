@@ -1,5 +1,3 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
 import {
   Alpic,
   type DeployEvent,
@@ -8,16 +6,6 @@ import {
 } from "@alpic-ai/sdk";
 import express, { type Router } from "express";
 
-type ProjectConfig = {
-  projectId: string;
-  teamId: string;
-  teamName?: string;
-  projectName: string;
-  environmentId?: string;
-  environmentName?: string;
-};
-
-// `collecting`/`collected` share step 1, so there are 4 numbered steps.
 const TOTAL_STEPS = 4;
 const PHASE_STEPS: Record<
   DeployEvent["type"],
@@ -39,9 +27,8 @@ type DeployState =
   | {
       status: "deploying";
       phase: string;
-      // Epoch ms when this deploy started. Held in the (process-lived) server
-      // state and replayed over SSE, so the client's elapsed clock survives
-      // both hover remounts and page refreshes.
+      // Held in server state and replayed over SSE so the client's elapsed
+      // clock survives hover remounts and page refreshes.
       startedAt: number;
       deploymentPageUrl: string | null;
     }
@@ -55,34 +42,15 @@ type DeployState =
 const errMessage = (err: unknown, fallback: string): string =>
   err instanceof Error ? err.message : fallback;
 
-const configPath = () => join(process.cwd(), ".alpic", "project.json");
-
-function loadConfig(): ProjectConfig | null {
-  const path = configPath();
-  if (!existsSync(path)) {
-    return null;
-  }
-  return JSON.parse(readFileSync(path, "utf8")) as ProjectConfig;
-}
-
-function saveConfig(cfg: ProjectConfig): void {
-  mkdirSync(join(process.cwd(), ".alpic"), { recursive: true });
-  writeFileSync(configPath(), JSON.stringify(cfg, null, 2));
-}
-
 /**
  * Dev-only router that drives the devtools Deploy button. Runs `@alpic-ai/sdk`
  * in-process (no CLI spawning): `/status` is a plain request, deploy progress
  * streams over SSE at `/events`.
- *
- * ponytail: deploy state + subscriber set are per-router-instance (closure
- * scoped). The dev server mounts one router for one project, so a single
- * in-flight deploy is fine; no change needed unless it ever hosts several.
  */
 export function createDeployRouter(alpicOverride?: Alpic): Router {
   const router = express.Router();
-  // Lazy: `new Alpic()` reads server-side env at construction, so defer it to
-  // the first request rather than mount time (keeps createApp test-safe).
+  // `new Alpic()` reads server-side env at construction — defer to the first
+  // request so mounting the router stays test-safe.
   let alpicInstance = alpicOverride;
   const alpic = () => {
     alpicInstance ??= new Alpic();
@@ -157,17 +125,10 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
         return;
       }
 
-      const cfg = loadConfig();
-      let staleConfig = false;
-      if (cfg) {
-        try {
-          await alpic().api.projects.get.v1({ projectId: cfg.projectId });
-        } catch {
-          // Stale config: linked project deleted/inaccessible — fall back to first deploy.
-          staleConfig = true;
-        }
-      }
-      if (!cfg || staleConfig) {
+      const loaded = alpic().projects.loadConfig();
+      const cfg = loaded && (await alpic().projects.validateLink(loaded));
+      const staleConfig = loaded !== null && cfg === null;
+      if (!cfg) {
         const teams = await alpic().api.teams.list.v1();
         const team = teams[0];
         if (!team) {
@@ -183,13 +144,6 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
         return;
       }
 
-      // Surface the live URL + deployment page so the persistent "Deployed"
-      // view renders on load (not only after a fresh deploy). A git-driven
-      // latest deploy (commit/author set) means the last deploy came from a
-      // connected repo, not this local button — expose its details so the UI
-      // can inform + warn before redeploying over it.
-      // ponytail: git vs local is the only distinction the API exposes; CLI and
-      // devtools local deploys are indistinguishable.
       let lastDeployGit: {
         ref: string | null;
         commitMessage: string | null;
@@ -263,28 +217,14 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
         return;
       }
 
-      const created = await alpic().api.projects.create.v1({
+      const cfg = await alpic().projects.createLinked({
         name,
         teamId,
-        runtime: "node24",
-      });
-      const productionEnv = created.productionEnvironment;
-      if (!productionEnv) {
-        res.status(500).json({
-          message: "Project created without a Production environment.",
-        });
-        return;
-      }
-      saveConfig({
-        projectId: created.id,
-        teamId: created.teamId,
         teamName,
-        projectName: created.name,
-        environmentId: productionEnv.id,
-        environmentName: productionEnv.name,
+        runtime: alpic().projects.detectRuntime() ?? "node24",
       });
       res.status(202).json({ ok: true });
-      void runDeploy(productionEnv.id, created.teamId);
+      void runDeploy(cfg.environmentId, cfg.teamId);
     } catch (err) {
       res.status(502).json({
         message: errMessage(err, "Failed to create project"),
@@ -308,7 +248,7 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
       res.status(409).json({ message: "A deployment is already in progress." });
       return;
     }
-    const cfg = loadConfig();
+    const cfg = alpic().projects.loadConfig();
     if (!cfg?.environmentId) {
       res.status(409).json({ message: "No linked project to redeploy." });
       return;
