@@ -468,7 +468,7 @@ function DeployPopoverContent({
           {status.lastDeployGit && (
             <WarningAlert
               className="px-3 py-2"
-              title="Last deployed from Git — redeploying replaces it."
+              title="Last deployed from Git"
               description={
                 <div className="space-y-2">
                   <GitDeployInfo git={status.lastDeployGit} />
