@@ -163,9 +163,14 @@ export const useDeployStore = create<DeployStore>()((set, get) => ({
         if (parsed.success) {
           const prev = get().progress.status;
           set({ progress: parsed.data });
-          // A finished deploy writes .alpic/project.json — refresh so a first
-          // deploy flips needsProject → ready.
-          if (parsed.data.status === "deployed" && prev !== "deployed") {
+          // A finished deploy (even a failed one) has already written
+          // .alpic/project.json — refresh so a first deploy flips
+          // needsProject → ready instead of re-opening the create dialog.
+          if (
+            (parsed.data.status === "deployed" ||
+              parsed.data.status === "failed") &&
+            parsed.data.status !== prev
+          ) {
             void get().refreshStatus();
           }
         }

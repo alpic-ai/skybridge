@@ -1,9 +1,11 @@
 import http from "node:http";
+import type { Alpic } from "@alpic-ai/sdk";
 import express from "express";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createDeployRouter } from "./deploy-router.js";
 
-type Alpic = NonNullable<Parameters<typeof createDeployRouter>[0]>;
+const mock = vi.hoisted(() => ({ alpic: {} as Record<string, unknown> }));
+vi.mock("./alpic-sdk.js", () => ({ alpic: mock.alpic }));
 
 const cleanups: Array<() => Promise<void>> = [];
 
@@ -47,9 +49,10 @@ function fakeAlpic(overrides: {
 }
 
 async function start(alpic: Alpic) {
+  Object.assign(mock.alpic, alpic);
   const app = express();
   app.use(express.json());
-  app.use(createDeployRouter(alpic));
+  app.use(createDeployRouter());
   const server = http.createServer(app);
   await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
   const port = (server.address() as { port: number }).port;

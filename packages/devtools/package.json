@@ -30,7 +30,7 @@
     "test:e2e:install": "playwright install --with-deps chromium"
   },
   "dependencies": {
-    "@alpic-ai/sdk": "0.0.0-dev.g9fb64c1",
+    "@alpic-ai/sdk": "^1.146.1",
     "@t3-oss/env-core": "^0.13.11",
     "cors": "^2.8.6",
     "express": "^5.2.1",

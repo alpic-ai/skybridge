@@ -1,10 +1,10 @@
-import {
-  Alpic,
-  type DeployEvent,
-  type DeploymentStatus,
-  type DeployResult,
+import type {
+  DeployEvent,
+  DeploymentStatus,
+  DeployResult,
 } from "@alpic-ai/sdk";
 import express, { type Router } from "express";
+import { alpic } from "./alpic-sdk.js";
 
 const TOTAL_STEPS = 4;
 const PHASE_STEPS: Record<
@@ -47,15 +47,8 @@ const errMessage = (err: unknown, fallback: string): string =>
  * in-process (no CLI spawning): `/status` is a plain request, deploy progress
  * streams over SSE at `/events`.
  */
-export function createDeployRouter(alpicOverride?: Alpic): Router {
+export function createDeployRouter(): Router {
   const router = express.Router();
-  // `new Alpic()` reads server-side env at construction — defer to the first
-  // request so mounting the router stays test-safe.
-  let alpicInstance = alpicOverride;
-  const alpic = () => {
-    alpicInstance ??= new Alpic();
-    return alpicInstance;
-  };
 
   let state: DeployState = { status: "idle" };
   const subscribers = new Set<express.Response>();
@@ -80,7 +73,7 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
     });
     let pageUrl: string | null = null;
     try {
-      const result: DeployResult = await alpic().deployments.deploy({
+      const result: DeployResult = await alpic.deployments.deploy({
         environmentId,
         teamId,
         onProgress: (event) => {
@@ -119,17 +112,17 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
 
   router.get("/__skybridge/deploy/status", async (_req, res) => {
     try {
-      const whoami = await alpic().whoami();
+      const whoami = await alpic.whoami();
       if (whoami.method === "unauthenticated") {
         res.json({ state: "signedOut" });
         return;
       }
 
-      const loaded = alpic().projects.loadConfig();
-      const cfg = loaded && (await alpic().projects.validateLink(loaded));
+      const loaded = alpic.projects.loadConfig();
+      const cfg = loaded && (await alpic.projects.validateLink(loaded));
       const staleConfig = loaded !== null && cfg === null;
       if (!cfg) {
-        const teams = await alpic().api.teams.list.v1();
+        const teams = await alpic.api.teams.list.v1();
         const team = teams[0];
         if (!team) {
           res.json({ state: "noTeam" });
@@ -155,7 +148,7 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
       let deploymentPageUrl: string | null = null;
       if (cfg.environmentId) {
         try {
-          const latest = await alpic().deployments.getLatestForEnvironment(
+          const latest = await alpic.deployments.getLatestForEnvironment(
             cfg.environmentId,
           );
           if (latest.sourceCommitId !== null) {
@@ -169,7 +162,7 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
           lastDeployStartedAt = latest.startedAt?.getTime();
           deploymentPageUrl = latest.deploymentPageUrl;
           if (latest.status === "deployed") {
-            const environment = await alpic().api.environments.get.v1({
+            const environment = await alpic.api.environments.get.v1({
               environmentId: cfg.environmentId,
             });
             mcpServerUrl = environment.mcpServerUrl;
@@ -209,7 +202,7 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
       return;
     }
     try {
-      const existing = await alpic().api.projects.list.v1({ teamId });
+      const existing = await alpic.api.projects.list.v1({ teamId });
       if (existing.some((p) => p.name === name)) {
         res
           .status(409)
@@ -217,11 +210,11 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
         return;
       }
 
-      const cfg = await alpic().projects.createLinked({
+      const cfg = await alpic.projects.createLinked({
         name,
         teamId,
         teamName,
-        runtime: alpic().projects.detectRuntime() ?? "node24",
+        runtime: alpic.projects.detectRuntime() ?? "node24",
       });
       res.status(202).json({ ok: true });
       void runDeploy(cfg.environmentId, cfg.teamId);
@@ -234,7 +227,7 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
 
   router.post("/__skybridge/deploy/login", async (_req, res) => {
     try {
-      await alpic().auth.login();
+      await alpic.auth.login();
       res.json({ ok: true });
     } catch (err) {
       res.status(502).json({
@@ -248,7 +241,7 @@ export function createDeployRouter(alpicOverride?: Alpic): Router {
       res.status(409).json({ message: "A deployment is already in progress." });
       return;
     }
-    const cfg = alpic().projects.loadConfig();
+    const cfg = alpic.projects.loadConfig();
     if (!cfg?.environmentId) {
       res.status(409).json({ message: "No linked project to redeploy." });
       return;

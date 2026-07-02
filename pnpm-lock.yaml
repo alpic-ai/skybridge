@@ -1431,8 +1431,8 @@ importers:
   packages/devtools:
     dependencies:
       '@alpic-ai/sdk':
-        specifier: 0.0.0-dev.g9fb64c1
-        version: 0.0.0-dev.g9fb64c1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.2)
+        specifier: ^1.146.1
+        version: 1.146.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.2)
       '@t3-oss/env-core':
         specifier: ^0.13.11
         version: 0.13.11(arktype@2.1.27)(typescript@6.0.2)(zod@4.4.3)
@@ -1608,11 +1608,11 @@ packages:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
 
-  '@alpic-ai/api@0.0.0-dev.g9fb64c1':
-    resolution: {integrity: sha512-ocOC/orDjO/psF7zNMpsCzGeXjn3owZiIPuIg4wKHid/EW4ZVQmZT7H+DpBNTfjnGUtLdC+IwceeIlBvL/o2nQ==}
-
   '@alpic-ai/api@1.136.3':
     resolution: {integrity: sha512-d2NsEsanyBLaATvjn9TS2riycH8Z/UQkyr/SipuNJ4dgGt5AmRo2mwZnSUYXziuBbbUropqzK/A+tJSo2r02Mg==}
+
+  '@alpic-ai/api@1.146.1':
+    resolution: {integrity: sha512-5u+NsrWWiDWjCb9hLSHL13EGEJneKPAsPSxU24/xC5FfRE9P901iTEc8fpkLMKk5YqjePzgvw2OUXtdfHJ1SfA==}
 
   '@alpic-ai/insights@1.127.1':
     resolution: {integrity: sha512-VLeva10Ft30MeQhZnGTBbyU8rXp2I3Oqpv9gfyEUIbmu6k4lkGcAnpE834rJ7RI0/yT8JHTW5a21MrloUzj5tQ==}
@@ -1623,8 +1623,8 @@ packages:
       skybridge:
         optional: true
 
-  '@alpic-ai/sdk@0.0.0-dev.g9fb64c1':
-    resolution: {integrity: sha512-R+wD4VXwcm6hKlOw88sRJ9r0ZKcb4v9MSM3mWmmUOmMGb1X3aQKtuT4s+HbrDkyRpUb2l72739gP/6Bx5dgi3w==}
+  '@alpic-ai/sdk@1.146.1':
+    resolution: {integrity: sha512-4UmRQPfo5VfDdAecR2Z4VQo2fDGmN7qi+nhTps/tAQbr8MJl2VWYreYOeNd1lg6sRbUI1dDNe3qF2X0lzkaENA==}
     engines: {node: '>= 18.20.8'}
 
   '@alpic-ai/ui@1.116.0':
@@ -10780,7 +10780,7 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@alpic-ai/api@0.0.0-dev.g9fb64c1(@opentelemetry/api@1.9.1)':
+  '@alpic-ai/api@1.136.3(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/contract': 1.14.6(@opentelemetry/api@1.9.1)
       ms: 2.1.3
@@ -10788,7 +10788,7 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@alpic-ai/api@1.136.3(@opentelemetry/api@1.9.1)':
+  '@alpic-ai/api@1.146.1(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/contract': 1.14.6(@opentelemetry/api@1.9.1)
       ms: 2.1.3
@@ -10802,9 +10802,9 @@ snapshots:
     optionalDependencies:
       skybridge: link:packages/core
 
-  '@alpic-ai/sdk@0.0.0-dev.g9fb64c1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.2)':
+  '@alpic-ai/sdk@1.146.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.2)':
     dependencies:
-      '@alpic-ai/api': 0.0.0-dev.g9fb64c1(@opentelemetry/api@1.9.1)
+      '@alpic-ai/api': 1.146.1(@opentelemetry/api@1.9.1)
       '@orpc/client': 1.14.6(@opentelemetry/api@1.9.1)
       '@orpc/contract': 1.14.6(@opentelemetry/api@1.9.1)
       '@orpc/openapi-client': 1.14.6(@opentelemetry/api@1.9.1)
