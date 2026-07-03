@@ -1,6 +1,7 @@
 name: Deploy Infrastructure
 
 on:
+  workflow_dispatch:
   release:
     types: [published]
 
