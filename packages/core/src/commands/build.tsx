@@ -10,7 +10,9 @@ export default class Build extends Command {
   static override examples = ["skybridge build"];
 
   public async run(): Promise<void> {
-    const commandSteps = await getCommandSteps();
+    const commandSteps = await getCommandSteps().catch((e: unknown) =>
+      this.error(e instanceof Error ? e.message : String(e)),
+    );
 
     const App = () => {
       const { currentStep, status, error, execute } =
