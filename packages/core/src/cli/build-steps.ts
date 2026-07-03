@@ -1,8 +1,8 @@
 import { rmSync, writeFileSync } from "node:fs";
 import path, { isAbsolute, resolve } from "node:path";
 import {
-  discoverViewsSync,
   scanAndWriteViewsDts,
+  scanViewsSync,
 } from "../web/plugin/scan-views.js";
 import {
   emitEmptyManifestModule,
@@ -20,7 +20,9 @@ export async function getCommandSteps(
   const viewsDir = await resolveViewsDir(root);
   const rawDir = viewsDir ?? "src/views";
   const resolvedDir = isAbsolute(rawDir) ? rawDir : resolve(root, rawDir);
-  const hasViews = discoverViewsSync(resolvedDir).length > 0;
+  // Non-throwing pre-check: duplicate view names are validated in the
+  // "Scanning views" step so useExecuteSteps can render a styled error.
+  const hasViews = scanViewsSync(resolvedDir).valid.length > 0;
 
   const steps: CommandStep[] = [
     {
@@ -31,7 +33,8 @@ export async function getCommandSteps(
     },
     {
       label: "Compiling server",
-      run: () => rmSync("dist", { recursive: true, force: true }),
+      run: () =>
+        rmSync(path.join(root, "dist"), { recursive: true, force: true }),
       command: "tsc -b --force",
     },
   ];
