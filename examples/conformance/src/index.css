@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@alpic-ai/ui/theme";
+
+/* Tailwind v4 skips node_modules; register the UI library so its utility
+   classes are generated. */
+@source "../node_modules/@alpic-ai/ui/src";
