@@ -5,7 +5,7 @@ description: "Open a URL outside the view's iframe through the host"
 
 import { Compat } from "/components/compat.jsx";
 
-<Compat alpic chatgpt claude />
+<Compat alpic chatgpt claude cursor goose />
 
 A [view](/build/view) runs in a sandboxed iframe, so a normal external link goes nowhere: `window.open` and `target="_blank"` are both blocked. `useOpenExternal` sends the user out to a URL by routing the navigation through the host.
 

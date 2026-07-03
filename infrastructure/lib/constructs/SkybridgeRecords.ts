@@ -52,6 +52,7 @@ export class SkybridgeRecords extends Construct {
     for (const subdomain of [
       "capitals",
       "chess",
+      "conformance",
       "ecommerce",
       "flight-booking",
       "generative-ui",
