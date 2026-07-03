@@ -198,9 +198,8 @@ function UserTest({ onResult }: TestProps) {
     if (problems.length === 0) {
       return supported(detail);
     }
-    return problems.length < 3
-      ? partial(`${problems.join(" · ")} · ${detail}`)
-      : failed(detail);
+    const problemDetail = `${problems.join(" · ")} · ${detail}`;
+    return problems.length < 3 ? partial(problemDetail) : failed(problemDetail);
   });
   return null;
 }
