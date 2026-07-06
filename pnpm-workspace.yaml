@@ -21,6 +21,8 @@ minimumReleaseAgeExclude:
   # 4 days old); drop once devtools is back on a stable SDK release.
   - tar
 
+saveWorkspaceProtocol: false
+
 allowBuilds:
   esbuild: true
 
