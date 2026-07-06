@@ -10,8 +10,8 @@ const nodemon = nodemonOriginal as ExtendedNodemon;
 const SOURCEMAP_WARNING = /^Sourcemap for ".*" points to missing source files$/;
 
 export interface NodemonHandlers {
-  /** A line of server stdout. */
-  onStdout: (line: string) => void;
+  /** A raw chunk of server stdout, forwarded untouched. */
+  onStdout: (chunk: Buffer) => void;
   /** A (filtered) chunk of server stderr. */
   onStderr: (message: string) => void;
   /** The server restarted because the listed files changed. */
@@ -42,16 +42,7 @@ export function startNodemon(
   nodemon({ ...config, env, stdout: false });
 
   const handleStdoutData = (chunk: Buffer) => {
-    const raw = chunk.toString().trim();
-    if (!raw) {
-      return;
-    }
-    for (const line of raw.split("\n")) {
-      const trimmed = line.trim();
-      if (trimmed) {
-        handlers.onStdout(trimmed);
-      }
-    }
+    handlers.onStdout(chunk);
   };
 
   const handleStderrData = (chunk: Buffer) => {
@@ -112,7 +103,12 @@ export function useNodemon(
   useEffect(
     () =>
       startNodemon(env, {
-        onStdout: (line) => pushMessage(line, "log"),
+        onStdout: (chunk) => {
+          const message = chunk.toString().trim();
+          if (message) {
+            pushMessage(message, "log");
+          }
+        },
         onStderr: (message) => pushMessage(message, "error"),
         onRestart: (files) =>
           pushMessage(

@@ -63,7 +63,7 @@ export function runPlain(options: RunPlainOptions): () => void {
   }
 
   const stopNodemon = startNodemon(env, {
-    onStdout: (line) => process.stdout.write(`${line}\n`),
+    onStdout: (chunk) => process.stdout.write(chunk),
     onStderr: (message) => info(message),
     onRestart: (files) =>
       info(`✓  Server restarted due to file changes: ${files.join(", ")}`),
