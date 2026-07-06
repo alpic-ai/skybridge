@@ -27,7 +27,10 @@ const MIME_EXT: Record<string, string> = {
 
 /** Original file name, or "file" plus a MIME-derived extension as a fallback. */
 function entryNameFor(file: FileRef): string {
-  const base = file.file_name ?? "file";
+  // prevent path-traversal attack
+  const segment = (file.file_name ?? "").split(/[/\\]/).pop() ?? "";
+  const base =
+    segment && segment !== "." && segment !== ".." ? segment : "file";
   if (extname(base)) {
     return base;
   }
