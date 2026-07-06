@@ -3,7 +3,7 @@ import { act } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as z from "zod";
 import { MockResizeObserver } from "../../hooks/test/utils.js";
-import { McpAppAdaptor } from "./adaptor.js";
+import { HostAdaptor } from "../adaptor.js";
 import { McpAppBridge } from "./bridge.js";
 
 type JsonRpcMessage = {
@@ -72,7 +72,6 @@ describe("McpApp view tools", () => {
     vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     vi.stubGlobal("ResizeObserver", MockResizeObserver);
     McpAppBridge.resetInstance();
-    McpAppAdaptor.resetInstance();
     installHostMock();
   });
 
@@ -90,7 +89,7 @@ describe("McpApp view tools", () => {
   });
 
   it("lists a registered view tool with its input schema", async () => {
-    const adaptor = McpAppAdaptor.getInstance();
+    const adaptor = new HostAdaptor();
     await McpAppBridge.getInstance().getApp();
 
     adaptor.registerViewTool(
@@ -119,7 +118,7 @@ describe("McpApp view tools", () => {
   });
 
   it("invokes the handler with validated args and returns its result", async () => {
-    const adaptor = McpAppAdaptor.getInstance();
+    const adaptor = new HostAdaptor();
     await McpAppBridge.getInstance().getApp();
 
     const handler = vi.fn(({ san }: { san: string }) => ({
@@ -146,7 +145,7 @@ describe("McpApp view tools", () => {
   });
 
   it("rejects the call without invoking the handler when args are invalid", async () => {
-    const adaptor = McpAppAdaptor.getInstance();
+    const adaptor = new HostAdaptor();
     await McpAppBridge.getInstance().getApp();
 
     const handler = vi.fn(() => ({ content: [] }));
@@ -176,7 +175,7 @@ describe("McpApp view tools", () => {
   });
 
   it("removes the tool and notifies the host when unregistered", async () => {
-    const adaptor = McpAppAdaptor.getInstance();
+    const adaptor = new HostAdaptor();
     await McpAppBridge.getInstance().getApp();
 
     const unregister = adaptor.registerViewTool(

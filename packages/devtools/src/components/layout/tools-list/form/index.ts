@@ -29,7 +29,7 @@ const baseUiSchema: UiSchema = {
 };
 
 function isArrayOfEnum(schema: RJSFSchema | undefined): boolean {
-  if (!schema || schema.type !== "array") {
+  if (schema?.type !== "array") {
     return false;
   }
   const items = schema.items;

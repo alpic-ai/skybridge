@@ -1,200 +1,78 @@
 ---
 title: useAppsSdkContext
-description: "Low-level hook for subscribing to OpenAI host global state values directly."
+description: "Read a raw ChatGPT host global by key"
 tag: "ChatGPT"
 ---
 
+import { Compat } from "/components/compat.jsx";
 
-The `useAppsSdkContext` hook is a low-level hook that subscribes to global state values exposed by the OpenAI host. This hook powers many of the other Skybridge hooks and can be used directly when you need access to specific global values.
+<Compat chatgpt />
 
-<Tip>
-For most use cases, prefer using the specialized hooks like `useLayout`, `useUser`, `useDisplayMode`, etc., as they provide a more convenient API.
-</Tip>
+ChatGPT exposes its host context to your app, which Skybridge's hooks read and normalize for you. `useAppsSdkContext` is the escape hatch: it reads a context value raw, by key, before that normalization. It works only under ChatGPT.
 
-## Basic usage
+## Example
 
-```tsx
+`useUser` canonicalizes the locale (`fr_FR` becomes `fr-FR`). Reading it raw gives exactly what ChatGPT sent.
+
+```tsx highlight={4}
 import { useAppsSdkContext } from "skybridge/web";
 
-function ThemeDisplay() {
-  const theme = useAppsSdkContext("theme");
-
-  return <p>Current theme: {theme}</p>;
+function LocaleBadge() {
+  const locale = useAppsSdkContext("locale"); // raw, e.g. "fr_FR"
+  return <span>{locale}</span>;
 }
 ```
+
+## Type Parameters
+
+### `K`
+
+```tsx
+K extends keyof AppsSdkContext;
+```
+
+Inferred from `key`: the literal key you pass fixes the return type to `AppsSdkContext[K]`.
 
 ## Parameters
 
 ### `key`
 
 ```tsx
-key: keyof AppsSdkContext
+key: K;
 ```
 
-**Required**
-
-The key of the global value to subscribe to. Available keys include:
-
-| Key | Type | Description |
-|-----|------|-------------|
-| `theme` | `"light" \| "dark"` | The current color theme |
-| `locale` | `string` | The user's locale (e.g., `"en-US"`) |
-| `displayMode` | `"inline" \| "fullscreen" \| "pip"` | The view's display mode |
-| `userAgent` | `UserAgent` | Device and capability information |
-| `maxHeight` | `number \| undefined` | Maximum height available for the view (if provided by host) |
-| `safeArea` | `SafeArea` | Safe area insets for the view |
-| `toolInput` | `object` | The input arguments passed to the tool |
-| `toolOutput` | `object \| null` | The tool's output (when available) |
-| `toolResponseMetadata` | `object \| null` | Additional metadata from the tool response |
-| `viewState` | `object \| null` | The persisted view state |
-| `view` | `{ mode: "inline" \| "fullscreen" \| "pip"; params?: Record<string, unknown> }` | Current view state, including modal params |
+**Required.** The context key to read. The hook re-renders when the host pushes a new value for that key, and ignores changes to other keys.
 
 ## Returns
 
 ```tsx
-value: AppsSdkContext[K] | undefined
+value: AppsSdkContext[K];
 ```
 
-The current value of the specified global, or `undefined` if not available.
+The requested key's current value, read live from `window.openai`. It is un-normalized: every key also has a cross-host hook that returns a wrapped form, so reach here only for the raw value.
 
-## Examples
+| Key | Value | Also via |
+| --- | --- | --- |
+| `theme` | `"light"` or `"dark"` | [`useLayout`](/api-reference/use-layout) |
+| `locale` | locale string, not canonicalized | [`useUser`](/api-reference/use-user) |
+| `userAgent` | device type and input capabilities | [`useUser`](/api-reference/use-user) |
+| `maxHeight` | max view height in pixels | [`useLayout`](/api-reference/use-layout) |
+| `displayMode` | current layout (`pip` / `inline` / `fullscreen` / `modal`) | [`useDisplayMode`](/api-reference/use-display-mode) |
+| `safeArea` | insets to keep clear of host chrome | [`useLayout`](/api-reference/use-layout) |
+| `view` | current mode and modal params | [`useRequestModal`](/api-reference/use-request-modal) |
+| `toolInput` | the tool call's arguments | [`useToolInfo`](/api-reference/use-tool-info) |
+| `toolOutput` | the tool's structured output | [`useToolInfo`](/api-reference/use-tool-info) |
+| `toolResponseMetadata` | the tool's response `_meta` | [`useToolInfo`](/api-reference/use-tool-info) |
+| `widgetState` | persisted state: `modelContent` (model-shared), `privateContent` (view-only), `imageIds` | [`useViewState`](/api-reference/use-view-state) |
 
-### Reading Safe Area Insets
-
-```tsx
-import { useAppsSdkContext } from "skybridge/web";
-
-function SafeAreaAwareView() {
-  const safeArea = useAppsSdkContext("safeArea");
-
-  if (!safeArea) {
-    return <div>Loading...</div>;
-  }
-
-  return (
-    <div
-      style={{
-        paddingTop: safeArea.insets.top,
-        paddingBottom: safeArea.insets.bottom,
-        paddingLeft: safeArea.insets.left,
-        paddingRight: safeArea.insets.right,
-      }}
-    >
-      <p>Content with safe area padding</p>
-    </div>
-  );
-}
-```
-
-### Respecting Max Height
-
-```tsx
-import { useAppsSdkContext } from "skybridge/web";
-
-function ScrollableContent() {
-  const maxHeight = useAppsSdkContext("maxHeight");
-
-  return (
-    <div
-      style={{
-        maxHeight: maxHeight ? `${maxHeight}px` : "auto",
-        overflow: "auto",
-      }}
-    >
-      {/* Scrollable content */}
-    </div>
-  );
-}
-```
-
-### Accessing Tool Input
-
-```tsx
-import { useAppsSdkContext } from "skybridge/web";
-
-function ToolInputDisplay() {
-  const toolInput = useAppsSdkContext("toolInput");
-
-  return (
-    <div>
-      <h3>Tool Input:</h3>
-      <pre>{JSON.stringify(toolInput, null, 2)}</pre>
-    </div>
-  );
-}
-```
-
-### Multiple Globals
-
-```tsx
-import { useAppsSdkContext } from "skybridge/web";
-
-function EnvironmentInfo() {
-  const theme = useAppsSdkContext("theme");
-  const locale = useAppsSdkContext("locale");
-  const displayMode = useAppsSdkContext("displayMode");
-  const userAgent = useAppsSdkContext("userAgent");
-
-  return (
-    <div>
-      <h3>Environment</h3>
-      <ul>
-        <li>Theme: {theme}</li>
-        <li>Locale: {locale}</li>
-        <li>Display Mode: {displayMode}</li>
-        <li>Device: {userAgent?.device.type}</li>
-        <li>Touch: {userAgent?.capabilities.touch ? "Yes" : "No"}</li>
-        <li>Hover: {userAgent?.capabilities.hover ? "Yes" : "No"}</li>
-      </ul>
-    </div>
-  );
-}
-```
-
-## Type Reference
-
-### `AppsSdkContext`
-
-```tsx
-type AppsSdkContext = {
-  theme: "light" | "dark";
-  userAgent: UserAgent;
-  locale: string;
-  maxHeight: number | undefined;
-  displayMode: "inline" | "fullscreen" | "pip" | "modal";
-  safeArea: SafeArea;
-  toolInput: Record<string, unknown>;
-  toolOutput: Record<string, unknown> | { text: string } | null;
-  toolResponseMetadata: Record<string, unknown> | null;
-  widgetState: Record<string, unknown> | null;
-  view: {
-    mode: "inline" | "fullscreen" | "pip" | "modal";
-    params?: Record<string, unknown>;
-  };
-};
-```
-
-### `UserAgent`
-
-```tsx
-type UserAgent = {
-  device: { type: "mobile" | "tablet" | "desktop" | "unknown" };
-  capabilities: {
-    hover: boolean;
-    touch: boolean;
-  };
-};
-```
-
-### `SafeArea`
-
-```tsx
-type SafeArea = {
-  insets: {
-    top: number;
-    bottom: number;
-    left: number;
-    right: number;
-  };
-};
-```
+<CardGroup cols={3}>
+  <Card title="useMcpAppContext" icon="smartphone" href="/api-reference/use-mcp-app-context">
+    The same escape hatch for the MCP Apps runtime
+  </Card>
+  <Card title="useToolInfo" icon="database" href="/api-reference/use-tool-info">
+    Read the tool result the view mounted with, cross-host
+  </Card>
+  <Card title="Apps SDK and MCP Apps" icon="layers" href="/resources/apps-sdk-and-mcp-apps">
+    What the raw Apps SDK layer is, and how Skybridge unifies it
+  </Card>
+</CardGroup>

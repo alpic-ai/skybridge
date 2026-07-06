@@ -1,0 +1,82 @@
+---
+title: Verifier
+description: "Validate access tokens for the bearer-auth middleware"
+---
+
+A verifier is the provider-specific token check you implement and pass to [`requireBearerAuth`](/api-reference/require-bearer-auth) or [`optionalBearerAuth`](/api-reference/optional-bearer-auth). The middleware calls it on each request to validate the bearer token before any [tool](/build/tools) runs.
+
+## Example
+
+`verifyAccessToken` validates the token however your provider requires, returns an `AuthInfo` for a valid token, and throws `InvalidTokenError` otherwise. Pass it to the middleware as `verifier: { verifyAccessToken }`.
+
+```ts
+import { type AuthInfo, InvalidTokenError } from "skybridge/server";
+
+async function verifyAccessToken(token: string): Promise<AuthInfo> {
+  try {
+    const payload = await validateToken(token); // JWT verification, introspection, etc.
+    return {
+      token,
+      clientId: payload.client_id,
+      scopes: payload.scope.split(" "),
+      expiresAt: payload.exp,
+      extra: { sub: payload.sub },
+    };
+  } catch (err) {
+    throw new InvalidTokenError(
+      err instanceof Error ? err.message : "Token validation failed",
+    );
+  }
+}
+```
+
+<Info>
+How you validate the token depends on your provider. Check its docs.
+</Info>
+
+## `verifyAccessToken`
+
+```ts
+verifyAccessToken(token: string): Promise<AuthInfo>;
+```
+
+The verifier's only required method.
+
+- Resolve with an `AuthInfo` for a valid token. The middleware puts it on `extra.authInfo` for tool [handlers](/api-reference/register-tool#handler).
+- Throw `InvalidTokenError` for a malformed, badly signed, or expired token. The middleware returns a 401 with the right `WWW-Authenticate` header.
+
+Do not check scopes here: the middleware enforces `requiredScopes` against `authInfo.scopes` and returns a 403 on a missing scope.
+
+## `AuthInfo`
+
+What `verifyAccessToken` resolves with for a valid token.
+
+```ts
+type AuthInfo = {
+  token: string;
+  clientId: string;
+  scopes: string[];
+  expiresAt: number;
+  extra?: Record<string, unknown>;
+};
+```
+
+| Field | Purpose |
+| --- | --- |
+| `token` | The raw bearer token. |
+| `clientId` | The OAuth `client_id`, often the `azp` or `client_id` claim. |
+| `scopes` | The scopes granted, checked against `requiredScopes` and per-tool [`securitySchemes`](/api-reference/register-tool#securityschemes). |
+| `expiresAt` | Expiry in unix seconds. Required: tokens with no expiration are rejected. |
+| `extra` | Anything else you want available to handlers, for example `sub` or `email`. |
+
+<CardGroup cols={3}>
+  <Card title="requireBearerAuth" icon="lock" href="/api-reference/require-bearer-auth">
+    Require a token on every request
+  </Card>
+  <Card title="optionalBearerAuth" icon="lock-open" href="/api-reference/optional-bearer-auth">
+    Accept a token when present, allow anonymous otherwise
+  </Card>
+  <Card title="Authenticate Users" icon="key" href="/build/auth">
+    Add sign-in to your app end to end
+  </Card>
+</CardGroup>

@@ -1,13 +1,8 @@
-import "dotenv/config";
 import { intentMiddleware } from "@alpic-ai/insights";
-import { clerkMiddleware } from "@clerk/express";
-import {
-  mcpAuthClerk,
-  protectedResourceHandlerClerk,
-} from "@clerk/mcp-tools/express";
-import { type AuthInfo, McpServer } from "skybridge/server";
+import { type AuthInfo, clerkProvider, McpServer } from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
+import { env } from "./env.js";
 
 /**
  * Auth Example - OAuth Authentication with Clerk
@@ -16,7 +11,12 @@ import { searchCoffeeShops } from "./coffee-data.js";
  * must sign in via OAuth before using any tools. Auth is enforced at the
  * transport level — unauthenticated requests to /mcp receive HTTP 401.
  *
- * Tool handlers read user identity via extra.authInfo.
+ * Auth is wired with the branded `clerkProvider`: it discovers the instance's
+ * OAuth metadata, then auto-mounts the well-known endpoints and Bearer JWT
+ * verification (against Clerk's JWKS). Clerk hosts the login + consent UI.
+ * Requires Dynamic Client Registration enabled on the instance, and the OAuth
+ * application set to issue JWT access tokens (opaque tokens can't be verified
+ * via JWKS). Clerk tokens carry no `aud`, so verification is issuer + JWKS only.
  */
 
 const server = new McpServer(
@@ -25,13 +25,12 @@ const server = new McpServer(
     version: "0.0.1",
   },
   { capabilities: {} },
+  {
+    oauth: await clerkProvider({
+      domain: env.CLERK_DOMAIN,
+    }),
+  },
 )
-  .use(clerkMiddleware())
-  .use(
-    "/.well-known/oauth-protected-resource",
-    protectedResourceHandlerClerk({ scopes_supported: ["profile", "email"] }),
-  )
-  .use("/mcp", mcpAuthClerk)
   .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
@@ -72,15 +71,15 @@ const server = new McpServer(
       const auth = extra.authInfo as AuthInfo;
 
       const email = auth.extra?.email as string | undefined;
-      const firstName = auth.extra?.firstName as string | null | undefined;
+      const subject = auth.extra?.subject as string | undefined;
 
       const results = searchCoffeeShops({
         query,
         minRating,
-        userId: auth.clientId,
+        userId: subject ?? auth.clientId,
       });
 
-      const displayName = firstName ?? email?.split("@")[0] ?? "User";
+      const displayName = email?.split("@")[0] ?? subject ?? "User";
 
       return {
         structuredContent: {

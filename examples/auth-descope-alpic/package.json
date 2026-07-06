@@ -1,0 +1,39 @@
+{
+  "name": "skybridge-auth-descope-alpic-example",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Skybridge Auth Example - Descope via customProvider + Alpic DCR proxy",
+  "type": "module",
+  "scripts": {
+    "dev": "skybridge dev",
+    "dev:tunnel": "skybridge dev --tunnel",
+    "build": "skybridge build",
+    "start": "skybridge start",
+    "deploy": "alpic deploy"
+  },
+  "dependencies": {
+    "@alpic-ai/insights": "^1.142.1",
+    "dotenv": "^16.6.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "skybridge": "^1.1.0",
+    "vite": "^8.0.16",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@skybridge/devtools": "^1.2.3",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.20.0",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "alpic": "^1.142.1",
+    "nodemon": "^3.1.14",
+    "tsx": "^4.22.4",
+    "typescript": "^5.9.3"
+  },
+  "workspaces": [],
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

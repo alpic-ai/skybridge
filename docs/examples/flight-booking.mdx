@@ -3,32 +3,18 @@ title: Flight Booking
 description: Flight search carousel with route details, pricing comparison, and external booking links.
 ---
 
+import { ChatExample } from "/components/chat-example.jsx";
+
 Flight Booking showcases a Skyscanner-style flight carousel with outbound/inbound legs, price comparison, and external redirect via `useOpenExternal`.
 
-<img
+<ChatExample
+  prompt="Find me a flight from Paris to Tokyo."
+  app="Flight Booking"
   src="/images/showcase-flight-booking.png"
   alt="Flight Booking"
-  style={{ width: "100%", maxWidth: "960px", borderRadius: "12px" }}
+  demo="https://flight-booking.skybridge.tech/try"
+  source="https://github.com/alpic-ai/skybridge/tree/main/examples/flight-booking"
 />
-
-## Links
-
-<CardGroup cols={2}>
-  <Card
-    title="Try the demo"
-    icon="play"
-    href="https://flight-booking.skybridge.tech/try"
-  >
-    Launch the live view experience.
-  </Card>
-  <Card
-    title="View source on GitHub"
-    icon="github"
-    href="https://github.com/alpic-ai/skybridge/tree/main/examples/flight-booking"
-  >
-    Browse the full example code.
-  </Card>
-</CardGroup>
 
 ## Skybridge APIs used
 

@@ -12,9 +12,11 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   ENTRY_WRAPPER_CONTENT,
+  emitEmptyManifestModule,
   emitEntryWrapper,
   emitManifestModule,
   emitVercelBuildOutput,
+  ensureAssetsDir,
   VERCEL_CONFIG,
   VERCEL_VC_CONFIG,
 } from "./build-helpers.js";
@@ -56,6 +58,24 @@ describe("emitManifestModule", () => {
       .trim()
       .replace(/;$/, "");
     expect(JSON.parse(literal)).toEqual(manifest);
+  });
+});
+
+describe("emitEmptyManifestModule", () => {
+  it("writes an empty object default export", () => {
+    const dir = mkTmp();
+    const outPath = path.join(dir, "vite-manifest.js");
+    emitEmptyManifestModule(outPath);
+    expect(readFileSync(outPath, "utf-8")).toBe("export default {};\n");
+  });
+});
+
+describe("ensureAssetsDir", () => {
+  it("creates the assets directory when missing", () => {
+    const dir = mkTmp();
+    const assetsDir = path.join(dir, "dist", "assets");
+    ensureAssetsDir(assetsDir);
+    expect(existsSync(assetsDir)).toBe(true);
   });
 });
 
@@ -101,5 +121,36 @@ describe("emitVercelBuildOutput", () => {
         "utf-8",
       ),
     ).toContain("bundled view");
+  });
+
+  it("emits static assets directory when dist/assets is missing", async () => {
+    const root = mkTmp();
+    mkdirSync(path.join(root, "dist"), { recursive: true });
+    writeFileSync(
+      path.join(root, "dist", "__entry.js"),
+      "const userMod = await import('./server.js');\nexport default userMod.default;\n",
+    );
+    writeFileSync(
+      path.join(root, "dist", "server.js"),
+      "export default function handler(_req, res) { res.end('ok'); }\n",
+    );
+
+    await emitVercelBuildOutput(root);
+
+    expect(
+      existsSync(path.join(root, ".vercel", "output", "static", "assets")),
+    ).toBe(true);
+    expect(
+      existsSync(
+        path.join(
+          root,
+          ".vercel",
+          "output",
+          "functions",
+          "mcp.func",
+          "index.js",
+        ),
+      ),
+    ).toBe(true);
   });
 });

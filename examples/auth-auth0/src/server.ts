@@ -1,37 +1,10 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import cors from "cors";
-import type { RequestHandler } from "express";
-import {
-  type AuthInfo,
-  McpServer,
-  mcpAuthMetadataRouter,
-  requireBearerAuth,
-} from "skybridge/server";
+import { type AuthInfo, auth0Provider, McpServer } from "skybridge/server";
 import * as z from "zod";
-import { verifyAccessToken } from "./auth.js";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
 
 const AUTH0_BASE_URL = `https://${env.AUTH0_DOMAIN}`;
-
-// Auth0's /oidc/register endpoint does not return CORS headers, so browser-based
-// MCP clients can't call it directly. Proxy it through this server instead.
-const registrationProxy: RequestHandler = async (req, res, next) => {
-  try {
-    const response = await fetch(`${AUTH0_BASE_URL}/oidc/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(req.body),
-    });
-    const body = await response.text();
-    res
-      .status(response.status)
-      .type(response.headers.get("content-type") ?? "application/json")
-      .send(body);
-  } catch (err) {
-    next(err);
-  }
-};
 
 /**
  * Auth Example - Full OAuth Authentication with Auth0
@@ -40,12 +13,11 @@ const registrationProxy: RequestHandler = async (req, res, next) => {
  * must sign in via OAuth before using any tools. Auth is enforced at the
  * transport level — unauthenticated requests to /mcp receive HTTP 401.
  *
- * Auth flow:
- * 1. MCP client discovers OAuth metadata via /.well-known/oauth-authorization-server
- * 2. User is prompted to sign in via Auth0
- * 3. MCP client connects to /mcp with a Bearer JWT token
- * 4. requireBearerAuth verifies the token via verifyAccessToken
- * 5. Tool handlers read user identity via extra.authInfo
+ * Auth is wired with the branded `auth0Provider`. Auth0 only mints a verifiable
+ * JWT when `/authorize` carries an `audience`, so the provider runs skybridge as
+ * the authorization server (`serverUrl`) and bakes `?audience=` into the authorize
+ * URL — no reliance on the client's resource indicator. Tenant setup: enable
+ * Dynamic Client Registration and register an API whose Identifier is `audience`.
  */
 
 const server = new McpServer(
@@ -54,38 +26,18 @@ const server = new McpServer(
     version: "0.0.1",
   },
   { capabilities: {} },
+  {
+    oauth: await auth0Provider({
+      domain: env.AUTH0_DOMAIN,
+      audience: env.AUTH0_AUDIENCE, // Auth0 API Identifier
+      serverUrl: env.SERVER_URL, // public URL (skybridge-as-AS)
+      // Narrow to what the app needs: Auth0 won't grant a third-party (DCR) client
+      // its full OIDC scope set, so advertising it yields "not all authorizations
+      // granted".
+      scopes: ["openid", "profile", "email"],
+    }),
+  },
 )
-  .use(cors())
-  .use("/oidc/register", registrationProxy)
-  // Mount OAuth metadata so MCP clients can discover auth endpoints
-  .use(
-    mcpAuthMetadataRouter({
-      oauthMetadata: {
-        issuer: env.SERVER_URL,
-        authorization_endpoint: `${AUTH0_BASE_URL}/authorize?audience=${encodeURIComponent(env.AUTH0_AUDIENCE)}`,
-        token_endpoint: `${AUTH0_BASE_URL}/oauth/token`,
-        registration_endpoint: `${env.NODE_ENV === "production" ? AUTH0_BASE_URL : env.SERVER_URL}/oidc/register`,
-        response_types_supported: ["code"],
-        code_challenge_methods_supported: ["S256"],
-        response_modes_supported: ["query"],
-        scopes_supported: ["openid", "profile", "email"],
-        grant_types_supported: ["authorization_code", "refresh_token"],
-        token_endpoint_auth_methods_supported: [
-          "none",
-          "client_secret_basic",
-          "client_secret_post",
-        ],
-      },
-      resourceServerUrl: new URL(env.SERVER_URL),
-    }),
-  )
-  .use(
-    "/mcp",
-    requireBearerAuth({
-      verifier: { verifyAccessToken },
-      requiredScopes: ["openid", "email", "profile"],
-    }),
-  )
   .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
@@ -141,7 +93,7 @@ const server = new McpServer(
         const results = searchCoffeeShops({
           query,
           minRating,
-          userId: auth?.extra?.sub as string,
+          userId: auth?.extra?.subject as string,
         });
 
         return {

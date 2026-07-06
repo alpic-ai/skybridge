@@ -1,0 +1,51 @@
+---
+title: "Apps SDK and MCP Apps"
+description: "How ChatGPT and other hosts run your views, and what Skybridge unifies"
+icon: layers
+---
+
+MCP Apps is the open contract for rendering interactive views inside an AI client. ChatGPT also exposes the Apps SDK: an optional layer of `window.openai` APIs for its own capabilities, on top of that same contract. Skybridge targets the MCP Apps baseline and reaches the Apps SDK only where you opt into a ChatGPT feature, so one server and one set of views run on both.
+
+## MCP Apps
+
+MCP Apps extends the [Model Context Protocol](https://modelcontextprotocol.io) with a UI contract: a tool result can carry a view, and the view talks to the host over a JSON-RPC `ui/*` bridge to read the tool's data, call other tools, sync state, and request layout. It is the portable baseline, so a view built against it runs on any host that implements the spec. The full contract is in the [MCP Apps specification](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx).
+
+## Apps SDK
+
+ChatGPT implements MCP Apps and layers the Apps SDK on top: `window.openai`, a set of APIs for ChatGPT-only capabilities such as [file params](/api-reference/file-ref) and the [open-in-app URL](/api-reference/use-set-open-in-app-url). OpenAI's guidance is to use the MCP Apps `ui/*` bridge by default and reach for `window.openai` only for those extras. The [Apps SDK reference](https://developers.openai.com/apps-sdk/reference) documents the surface, and [MCP Apps in ChatGPT](https://developers.openai.com/apps-sdk/mcp-apps-in-chatgpt/) covers how the two fit together.
+
+## In Skybridge
+
+You write one MCP server and one set of views. Skybridge detects the runtime when the view loads and routes each call to the right layer: the MCP Apps bridge everywhere, `window.openai` only for ChatGPT features. Where a capability exists on one host and not the other, it surfaces as ChatGPT versus Claude in the [compatibility overview](/api-reference/overview). When you need a raw value the cross-host hooks don't expose, [`useAppsSdkContext`](/api-reference/use-apps-sdk-context) and [`useMcpAppContext`](/api-reference/use-mcp-app-context) are the escape hatches to each layer.
+
+### Feature Mapping
+
+Each hook, and the host API it routes to on either runtime.
+
+| Skybridge | Apps SDK (`window.openai`) | MCP Apps (`ext-apps`) |
+| --- | --- | --- |
+| [`useToolInfo`](/api-reference/use-tool-info) | `toolInput`, `toolOutput`, `toolResponseMetadata` | `ui/notifications/tool-input`, `ui/notifications/tool-result` |
+| [`useViewState`](/api-reference/use-view-state) | `viewState`, `setViewState()` | `ui/update-model-context` |
+| [`useCallTool`](/api-reference/use-call-tool) | `callTool()` | `tools/call` |
+| [`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message) | `sendFollowUpMessage()` | `ui/message` |
+| [`useOpenExternal`](/api-reference/use-open-external) | `openExternal()` | `ui/open-link` |
+| [`useDisplayMode`](/api-reference/use-display-mode) | `displayMode`, `requestDisplayMode()` | `ui/request-display-mode` |
+| [`useLayout`](/api-reference/use-layout) | `theme`, `maxHeight`, `safeArea` | `ui/notifications/host-context-changed` |
+| [`useUser`](/api-reference/use-user) | `locale`, `userAgent` | `ui/notifications/host-context-changed` |
+| [`useRequestModal`](/api-reference/use-request-modal) | `requestModal()` | Polyfilled in-iframe |
+| [`useRequestClose`](/api-reference/use-request-close) | `requestClose()` | `ui/notifications/request-teardown` |
+| [`useRequestSize`](/api-reference/use-request-size) | Not supported | `ui/notifications/size-changed` |
+| [`useFiles`](/api-reference/use-files) | `uploadFile()`, `getFileDownloadUrl()` | Not supported |
+| [`useSetOpenInAppUrl`](/api-reference/use-set-open-in-app-url) | `setOpenInAppUrl()` | Not supported |
+
+<CardGroup cols={3}>
+  <Card title="Compatibility" icon="house" href="/api-reference/overview">
+    Which hosts each API runs on
+  </Card>
+  <Card title="useAppsSdkContext" icon="panel-top" href="/api-reference/use-apps-sdk-context">
+    Read a raw ChatGPT (Apps SDK) value
+  </Card>
+  <Card title="useMcpAppContext" icon="smartphone" href="/api-reference/use-mcp-app-context">
+    Read a raw MCP Apps value
+  </Card>
+</CardGroup>

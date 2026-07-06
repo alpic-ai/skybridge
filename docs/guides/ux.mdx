@@ -1,0 +1,197 @@
+---
+title: "UX Design"
+description: "Account for what makes an MCP App different"
+sidebarTitle: "UX"
+icon: "sparkles"
+---
+
+An MCP App is a new kind of surface with its own UX principles. The [view](/build/view) shares the screen with an ongoing conversation, in a frame the host controls. Skybridge surfaces that environment through [hooks](/api-reference/overview#hooks), so the view can read its context and adapt.
+
+```tsx views/carousel.tsx
+import { useDisplayMode, useLayout, useUser } from "skybridge/web";
+import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
+
+export default function Carousel() {
+  const { output } = useToolInfo<"search-products">();
+  const { theme, maxHeight, safeArea } = useLayout();
+  const [mode, setMode] = useDisplayMode();
+  const { userAgent } = useUser();
+
+  return (
+    <div
+      className={theme === "dark" ? "dark" : ""}
+      style={{ maxHeight, paddingBottom: safeArea.insets.bottom }}
+    >
+      <ProductGrid
+        products={output.products}
+        columns={mode === "fullscreen" ? 4 : 2}
+        compact={userAgent.device.type === "mobile"}
+      />
+      {mode === "inline" && (
+        <button onClick={() => setMode("fullscreen")}>See all</button>
+      )}
+    </div>
+  );
+}
+```
+
+The sections below cover fitting the space the host gives you, matching its theme, responding to the display mode, and adapting to the user's device.
+
+## Fit the Available Space
+
+[`useLayout`](/api-reference/use-layout) reports the room the host gives the view: `maxHeight`, and the `safeArea` insets that keep content clear of device notches and the chat composer.
+
+```tsx views/carousel.tsx highlight={6,13}
+import { useDisplayMode, useLayout, useUser } from "skybridge/web";
+import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
+
+export default function Carousel() {
+  const { output } = useToolInfo<"search-products">();
+  const { theme, maxHeight, safeArea } = useLayout();
+  const [mode, setMode] = useDisplayMode();
+  const { userAgent } = useUser();
+
+  return (
+    <div
+      className={theme === "dark" ? "dark" : ""}
+      style={{ maxHeight, paddingBottom: safeArea.insets.bottom }}
+    >
+      <ProductGrid
+        products={output.products}
+        columns={mode === "fullscreen" ? 4 : 2}
+        compact={userAgent.device.type === "mobile"}
+      />
+      {mode === "inline" && (
+        <button onClick={() => setMode("fullscreen")}>See all</button>
+      )}
+    </div>
+  );
+}
+```
+
+The carousel caps its height at `maxHeight` and pads its bottom by `safeArea.insets.bottom`, so the last row clears the composer instead of hiding behind it.
+
+## Match the Theme
+
+[`useLayout`](/api-reference/use-layout) reports the host's color scheme as `theme`, `"light"` or `"dark"`. A view on its own palette looks pasted into the conversation; read `theme` and follow it.
+
+```tsx views/carousel.tsx highlight={6,12}
+import { useDisplayMode, useLayout, useUser } from "skybridge/web";
+import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
+
+export default function Carousel() {
+  const { output } = useToolInfo<"search-products">();
+  const { theme, maxHeight, safeArea } = useLayout();
+  const [mode, setMode] = useDisplayMode();
+  const { userAgent } = useUser();
+
+  return (
+    <div
+      className={theme === "dark" ? "dark" : ""}
+      style={{ maxHeight, paddingBottom: safeArea.insets.bottom }}
+    >
+      <ProductGrid
+        products={output.products}
+        columns={mode === "fullscreen" ? 4 : 2}
+        compact={userAgent.device.type === "mobile"}
+      />
+      {mode === "inline" && (
+        <button onClick={() => setMode("fullscreen")}>See all</button>
+      )}
+    </div>
+  );
+}
+```
+
+The carousel adds a `dark` class when the host is dark, the convention Tailwind's `dark:` variants key off, so its styles track the host.
+
+## Respond to the Display Mode
+
+[`useDisplayMode`](/api-reference/use-display-mode) returns the current mode and a setter. The three modes give the view different room and purpose:
+
+- `inline` is the default: a compact panel embedded in the conversation. The smallest surface, so it suits a single result or a short list.
+- `fullscreen` takes over the surface for richer, multi-step tasks.
+- `pip`(picture in picture) floats above the conversation and stays open, which fits live or changing content. On mobile it coerces to fullscreen.
+
+Switching is user-triggered, and the host can decline the request.
+
+```tsx views/carousel.tsx highlight={7,17,20-22}
+import { useDisplayMode, useLayout, useUser } from "skybridge/web";
+import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
+
+export default function Carousel() {
+  const { output } = useToolInfo<"search-products">();
+  const { theme, maxHeight, safeArea } = useLayout();
+  const [mode, setMode] = useDisplayMode();
+  const { userAgent } = useUser();
+
+  return (
+    <div
+      className={theme === "dark" ? "dark" : ""}
+      style={{ maxHeight, paddingBottom: safeArea.insets.bottom }}
+    >
+      <ProductGrid
+        products={output.products}
+        columns={mode === "fullscreen" ? 4 : 2}
+        compact={userAgent.device.type === "mobile"}
+      />
+      {mode === "inline" && (
+        <button onClick={() => setMode("fullscreen")}>See all</button>
+      )}
+    </div>
+  );
+}
+```
+
+The carousel shows two columns inline and four in fullscreen, with a "See all" button that requests fullscreen only while inline. Keep inline compact, and let the denser layout wait for the room fullscreen gives you.
+
+## Adapt to the User
+
+[`useUser`](/api-reference/use-user) reports the `locale` and the `userAgent`: the device type, and whether it supports `hover` and `touch`.
+
+```tsx views/carousel.tsx highlight={8,18}
+import { useDisplayMode, useLayout, useUser } from "skybridge/web";
+import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
+
+export default function Carousel() {
+  const { output } = useToolInfo<"search-products">();
+  const { theme, maxHeight, safeArea } = useLayout();
+  const [mode, setMode] = useDisplayMode();
+  const { userAgent } = useUser();
+
+  return (
+    <div
+      className={theme === "dark" ? "dark" : ""}
+      style={{ maxHeight, paddingBottom: safeArea.insets.bottom }}
+    >
+      <ProductGrid
+        products={output.products}
+        columns={mode === "fullscreen" ? 4 : 2}
+        compact={userAgent.device.type === "mobile"}
+      />
+      {mode === "inline" && (
+        <button onClick={() => setMode("fullscreen")}>See all</button>
+      )}
+    </div>
+  );
+}
+```
+
+The carousel renders a compact card on mobile. Reach for `capabilities.hover` before relying on hover affordances, and `locale` to translate copy.
+
+## Iterate
+
+The [DevTools](/test/devtools) environment inspector flips theme, display mode, locale, and device type live, so you can watch the view adapt on localhost, then confirm it in a real host through the [tunnel](/test/tunnel).
+
+## Go Further
+<Columns cols={3}>
+    <Card title="Create Views" icon="palette" href="/build/view">
+        Craft interactive UIs rendered in conversation
+    </Card>
+    <Card title="Handle Files" icon="paperclip" href="/guides/files">
+        Move files in and out of your app
+    </Card>
+    <Card title="Configure CSP" icon="shield" href="/guides/csp">
+        Let your views reach the domains they need
+    </Card>
+</Columns>

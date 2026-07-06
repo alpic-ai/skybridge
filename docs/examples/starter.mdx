@@ -3,32 +3,17 @@ title: Starter
 description: The default app scaffolded by `npm create skybridge`. A guided onboarding tour through Skybridge's core APIs.
 ---
 
+import { ChatExample } from "/components/chat-example.jsx";
+
 The Starter is what `npm create skybridge` scaffolds. It's a short, interactive onboarding deck featuring the Skybridge mascot and a swappable hat. The deck walks new users through Skybridge's core primitives: reading tool output, sharing view state with the model, and triggering tools from the view.
 
-<img
+<ChatExample
+  prompt="Get me started with Skybridge."
+  app="Starter"
   src="/images/showcase-starter.png"
   alt="Skybridge Starter"
-  style={{ width: "100%", maxWidth: "960px", borderRadius: "12px" }}
+  source="https://github.com/alpic-ai/apps-sdk-template"
 />
-
-## Links
-
-<CardGroup cols={2}>
-  <Card
-    title="View source on GitHub"
-    icon="github"
-    href="https://github.com/alpic-ai/apps-sdk-template"
-  >
-    Browse the full template code.
-  </Card>
-  <Card
-    title="Create your own"
-    icon="terminal"
-    href="/quickstart/create-new-app"
-  >
-    Scaffold the Starter locally with `npm create skybridge`.
-  </Card>
-</CardGroup>
 
 ## What it demonstrates
 

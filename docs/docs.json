@@ -2,10 +2,6 @@
   "$schema": "https://mintlify.com/docs.json",
   "name": "Skybridge",
   "theme": "mint",
-  "banner": {
-    "content": "🚀 We're live on Product Hunt today, help us reach Product of the Day — [Upvote →](https://www.producthunt.com/products/skybridge?utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-skybridge)",
-    "dismissible": true
-  },
   "colors": {
     "primary": "#002FFF",
     "light": "#08F5F9",
@@ -26,108 +22,127 @@
     "tabs": [
       {
         "tab": "Documentation",
-        "groups": [
+        "pages": [
           {
             "group": "Get Started",
             "icon": "rocket",
             "pages": [
-              "home",
-              {
-                "group": "Fundamentals",
-                "icon": "graduation-cap",
-                "pages": [
-                  "fundamentals",
-                  "fundamentals/apps-sdk",
-                  "fundamentals/mcp-apps"
-                ]
-              },
-              "quickstart/create-new-app",
-              {
-                "group": "Add to Existing App",
-                "icon": "puzzle-piece",
-                "pages": [
-                  "quickstart/add-to-existing-app",
-                  "quickstart/add-to-existing-app/server",
-                  "quickstart/add-to-existing-app/web"
-                ]
-              },
-              "quickstart/migrate",
-              "quickstart/test-your-app",
-              "quickstart/build-for-production",
-              "quickstart/deploy"
+              "get-started/introduction",
+              "get-started/quickstart",
+              "get-started/architecture"
             ]
           },
           {
-            "group": "Concepts",
-            "icon": "lightbulb",
+            "group": "Build",
+            "icon": "drafting-compass",
+            "root": "build/index",
             "pages": [
-              "concepts/index",
-              "concepts/write-once-run-everywhere",
-              "concepts/data-flow",
-              "concepts/llm-context-sync",
-              "concepts/fast-iteration",
-              "concepts/type-safety"
-            ]
+              "build/tools",
+              "build/view",
+              "build/state",
+              "build/auth"
+            ],
+            "expanded": true
+          },
+          {
+            "group": "Test",
+            "icon": "test-tube-diagonal",
+            "root": "test/index",
+            "pages": [
+              "test/devtools",
+              "test/tunnel",
+              "test/playground",
+              "test/audit"
+            ],
+            "expanded": true
+          },
+          {
+            "group": "Ship",
+            "icon": "ship",
+            "root": "ship/index",
+            "pages": [
+              "ship/deploy",
+              "ship/versioning"
+            ],
+            "expanded": true
           },
           {
             "group": "Guides",
-            "icon": "book",
+            "icon": "book-open",
+            "root": "guides/index",
             "pages": [
-              "guides/fetching-data",
-              "guides/managing-state",
-              "guides/communicating-with-model",
-              "guides/host-environment-context"
-            ]
+              "guides/csp",
+              "guides/ux",
+              "guides/files",
+              "guides/auth-providers",
+              "guides/migrate"
+            ],
+            "expanded": true
           },
-          {
-            "group": "DevTools",
-            "icon": "wrench",
-            "pages": ["devtools/skills", "devtools/devtools"]
-          },
+          "troubleshooting",
           {
             "group": "Resources",
-            "icon": "circle-question",
-            "pages": ["faq", "telemetry"]
+            "icon": "library",
+            "pages": [
+              "resources/apps-sdk-and-mcp-apps",
+              "resources/telemetry"
+            ]
           }
         ]
       },
       {
         "tab": "API Reference",
-        "groups": [
-          {
-            "group": "Overview",
-            "icon": "house",
-            "pages": ["api-reference"]
-          },
-          {
-            "group": "CLI",
-            "icon": "terminal",
-            "pages": ["api-reference/cli"]
-          },
+        "pages": [
+          "api-reference/overview",
           {
             "group": "Server",
             "icon": "server",
-            "pages": ["api-reference/mcp-server", "api-reference/register-tool"]
+            "pages": [
+              "api-reference/mcp-server",
+              "api-reference/register-tool"
+            ]
+          },
+          {
+            "group": "Auth",
+            "icon": "lock",
+            "pages": [
+              "api-reference/mcp-auth-metadata-router",
+              "api-reference/optional-bearer-auth",
+              "api-reference/require-bearer-auth",
+              "api-reference/verifier"
+            ]
+          },
+          {
+            "group": "Identity Providers",
+            "icon": "fingerprint",
+            "pages": [
+              "api-reference/auth0-provider",
+              "api-reference/clerk-provider",
+              "api-reference/descope-provider",
+              "api-reference/stytch-provider",
+              "api-reference/workos-provider",
+              "api-reference/custom-provider"
+            ]
           },
           {
             "group": "Hooks",
             "icon": "fishing-rod",
             "pages": [
-              "api-reference/use-tool-info",
               "api-reference/use-call-tool",
-              "api-reference/use-register-view-tool",
-              "api-reference/use-layout",
-              "api-reference/use-user",
               "api-reference/use-display-mode",
-              "api-reference/use-open-external",
-              "api-reference/use-set-open-in-app-url",
-              "api-reference/use-send-follow-up-message",
-              "api-reference/use-view-state",
-              "api-reference/use-request-modal",
-              "api-reference/use-request-close",
-              "api-reference/use-request-size",
+              "api-reference/use-download",
               "api-reference/use-files",
-              "api-reference/use-download"
+              "api-reference/use-layout",
+              "api-reference/use-open-external",
+              "api-reference/use-register-view-tool",
+              "api-reference/use-request-close",
+              "api-reference/use-request-modal",
+              "api-reference/use-request-size",
+              "api-reference/use-send-follow-up-message",
+              "api-reference/use-set-open-in-app-url",
+              "api-reference/use-tool-info",
+              "api-reference/use-user",
+              "api-reference/use-view-state"
             ]
           },
           {
@@ -135,21 +150,22 @@
             "icon": "toolbox",
             "pages": [
               "api-reference/create-store",
-              "api-reference/generate-helpers",
-              "api-reference/data-llm"
+              "api-reference/data-llm",
+              "api-reference/generate-helpers"
             ]
           },
           {
             "group": "Types",
-            "icon": "brackets-curly",
+            "icon": "type",
             "pages": [
-              "api-reference/infer-utility-types",
-              "api-reference/file-ref"
+              "api-reference/file-ref",
+              "api-reference/utility-types"
             ]
           },
+          "api-reference/cli",
           {
-            "group": "Advanced",
-            "icon": "gear",
+            "group": "Low-level",
+            "icon": "binary",
             "pages": [
               "api-reference/use-apps-sdk-context",
               "api-reference/use-mcp-app-context"
@@ -163,15 +179,18 @@
           "examples",
           {
             "group": "Basic",
-            "pages": ["examples/starter", "examples/everything"]
+            "pages": [
+              "examples/starter",
+              "examples/everything"
+            ]
           },
           {
             "group": "Use cases",
             "pages": [
               "examples/capitals",
               "examples/chess",
-              "examples/flight-booking",
               "examples/ecommerce-carousel",
+              "examples/flight-booking",
               "examples/investigation-game",
               "examples/productivity",
               "examples/supabase-triplog",
@@ -181,15 +200,19 @@
           {
             "group": "Auth",
             "pages": [
+              "examples/auth-auth0",
               "examples/auth-clerk",
-              "examples/auth-workos",
+              "examples/auth-descope",
               "examples/auth-stytch",
-              "examples/auth-auth0"
+              "examples/auth-workos"
             ]
           },
           {
             "group": "UI and Component libraries",
-            "pages": ["examples/manifest-ui", "examples/generative-ui"]
+            "pages": [
+              "examples/generative-ui",
+              "examples/manifest-ui"
+            ]
           }
         ]
       }
@@ -281,5 +304,8 @@
   },
   "interaction": {
     "drilldown": false
+  },
+  "icons": {
+    "library": "lucide"
   }
 }

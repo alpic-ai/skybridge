@@ -4,6 +4,7 @@
   "description": "Skybridge is a framework for building ChatGPT and MCP Apps",
   "type": "module",
   "scripts": {
+    "prepare": "pnpm --filter skybridge build",
     "build": "pnpm --filter \"./packages/*\" build",
     "test": "pnpm -r --if-present test",
     "format": "pnpm -r --if-present format",
@@ -21,10 +22,10 @@
   "author": "Frédéric Barthelet",
   "license": "ISC",
   "devDependencies": {
-    "@biomejs/biome": "^2.4.10",
+    "@biomejs/biome": "^2.5.0",
     "@total-typescript/tsconfig": "^1.0.4",
-    "@types/node": "^24.12.0",
-    "typescript": "^6.0.2"
+    "@types/node": "^24.13.2",
+    "typescript": "^6.0.3"
   },
   "pnpm": {
     "overrides": {

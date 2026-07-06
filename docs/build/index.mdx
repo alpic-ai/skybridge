@@ -1,0 +1,29 @@
+---
+title: "Build Your App"
+description: "The four decisions that make an MCP App"
+icon: "drafting-compass"
+---
+
+Building an MCP App means answering four questions: what the model can do, what the user sees, what the model knows, and who is asking. Each page below covers one, in build order, on the same running example: a personal shopper with a product carousel and an authenticated checkout.
+
+| Define | Page | Core APIs |
+|------------|------|-----------|
+| What the model can do | [Register Tools](/build/tools) | [`registerTool`](/api-reference/register-tool) |
+| What the user sees | [Create Views](/build/view) | [`useToolInfo`](/api-reference/use-tool-info), [`useCallTool`](/api-reference/use-call-tool) |
+| What the model knows | [Manage State](/build/state) | [`useViewState`](/api-reference/use-view-state), [`data-llm`](/api-reference/data-llm) |
+| Who is asking | [Authenticate Users](/build/auth) | [`requireBearerAuth`](/api-reference/require-bearer-auth), [`securitySchemes`](/api-reference/register-tool#securityschemes) |
+
+<Columns cols={2}>
+    <Card title="Register Tools" icon="wrench" href="/build/tools">
+        Define what humans and agents can do
+    </Card>
+    <Card title="Create Views" icon="palette" href="/build/view">
+        Craft interactive UIs rendered in conversation
+    </Card>
+    <Card title="Manage State" icon="database" href="/build/state">
+        Decide what the model sees
+    </Card>
+    <Card title="Authenticate Users" icon="key" href="/build/auth">
+        Know who's behind every tool call
+    </Card>
+</Columns>

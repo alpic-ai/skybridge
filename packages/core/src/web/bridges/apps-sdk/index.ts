@@ -1,4 +1,3 @@
-export { AppsSdkAdaptor } from "./adaptor.js";
 export { AppsSdkBridge } from "./bridge.js";
 export type {
   AppsSdkContext,

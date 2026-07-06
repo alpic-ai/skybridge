@@ -5,8 +5,8 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a p
 ## What This Example Showcases
 
 - **Transport-Level Auth**: Auth is enforced at the `/mcp` transport level — unauthenticated requests receive HTTP 401 before reaching any tool handler
-- **WorkOS AuthKit OAuth**: Full OAuth2 setup with JWT verification via JWKS and user lookup via the WorkOS API
-- **OAuth Metadata Router**: Mounts `mcpAuthMetadataRouter` so MCP clients can discover auth endpoints automatically
+- **WorkOS AuthKit OAuth**: One-line setup with `workosProvider`, which discovers AuthKit's OAuth metadata and verifies JWTs against its JWKS
+- **Branded provider via `oauth:`**: Passing `oauth: await workosProvider(...)` auto-mounts the well-known metadata endpoints and Bearer verification — no manual router
 - **Personalized Results**: Authenticated users see favorites highlighted and sorted first
 - **User Identity in Widgets**: Displays the signed-in user's name directly in the widget UI
 - **Simplified Server Setup**: Uses [`server.run()`](https://docs.skybridge.tech/api-reference/run) and `.use()` for a single-file server with no manual Express boilerplate
@@ -38,12 +38,13 @@ bun install
 #### 2. Configure WorkOS AuthKit
 
 1. Sign up at [workos.com](https://workos.com/) and enable AuthKit.
-2. Get your **AuthKit domain** and **API key** from the WorkOS dashboard.
-3. Create a `.env` file in the project root:
+2. Get your **AuthKit domain** from the WorkOS dashboard, and enable Dynamic Client Registration (Connect → Configuration).
+3. Register your server URL as a **Resource Indicator** so AuthKit issues tokens with `aud` set to it.
+4. Create a `.env` file in the project root:
 
 ```env
-AUTHKIT_DOMAIN=your-authkit-domain.authkit.com
-WORKOS_API_KEY=sk_test_...
+AUTHKIT_DOMAIN=your-authkit-domain.authkit.app
+SERVER_URL=http://localhost:3000
 ```
 
 #### 3. Start your local server
@@ -67,8 +68,7 @@ This command starts:
 
 ```
 ├── src/
-│   ├── server.ts        # Server entry: McpServer + WorkOS auth + widget + run()
-│   ├── auth.ts         # verifyAccessToken — JWT verification + WorkOS user lookup
+│   ├── server.ts        # Server entry: McpServer + workosProvider auth + widget + run()
 │   ├── env.ts          # Env validation
 │   └── coffee-data.ts  # Mock coffee shop data & search
 │   ├── views/

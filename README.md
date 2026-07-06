@@ -26,15 +26,6 @@
   <a href="https://github.com/alpic-ai/skybridge/blob/main/LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/github/license/alpic-ai/skybridge?color=D7FFC8&amp;labelColor=161B22&amp;style=for-the-badge"><img alt="License: MIT" src="https://img.shields.io/github/license/alpic-ai/skybridge?color=E8FBD9&amp;labelColor=F6F8FA&amp;style=for-the-badge"></picture></a>
 </p>
 
-<p align="center">
-  <a href="https://www.producthunt.com/products/skybridge?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-skybridge" target="_blank" rel="noopener noreferrer">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1162357&amp;theme=dark" />
-      <img alt="Skybridge - The full-stack open source React framework for MCP Apps | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1162357&amp;theme=light" />
-    </picture>
-  </a>
-</p>
-
 ## About Skybridge
 
 Skybridge helps developers build type-safe MCP apps for Claude, ChatGPT and other UI-enabled MCP clients, with a complete set of tooling designed for both humans and agents.
@@ -148,6 +139,7 @@ Explore all our example templates in the [Examples](https://docs.skybridge.tech/
 
 | Preview | Provider | Description | Code |
 | --- | --- | --- | --- |
+| <img src="docs/images/descope.webp" alt="Auth Descope" width="160" /> | Descope | Full OAuth authentication with Descope and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-descope) |
 | <img src="docs/images/showcase-clerk.png" alt="Auth Clerk" width="160" /> | Clerk | Full OAuth authentication with Clerk and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-clerk) |
 | <img src="docs/images/showcase-workos.png" alt="Auth WorkOS AuthKit" width="160" /> | WorkOS AuthKit | Full OAuth authentication with WorkOS AuthKit and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-workos) |
 | <img src="docs/images/showcase-stytch.png" alt="Auth Stytch" width="160" /> | Stytch | Full OAuth authentication with Stytch and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-stytch) |

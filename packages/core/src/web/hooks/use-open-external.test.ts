@@ -1,5 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { HostAdaptor } from "../bridges/adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/bridge.js";
 import {
   getMcpAppHostPostMessageMock,
@@ -10,6 +11,7 @@ import { useOpenExternal } from "./use-open-external.js";
 describe("useOpenExternal", () => {
   describe("apps-sdk host", () => {
     let openExternalMock: ReturnType<typeof vi.fn>;
+    let postMessageMock: ReturnType<typeof getMcpAppHostPostMessageMock>;
 
     beforeEach(() => {
       openExternalMock = vi.fn();
@@ -17,14 +19,19 @@ describe("useOpenExternal", () => {
         openExternal: openExternalMock,
       });
       vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+      vi.stubGlobal("ResizeObserver", MockResizeObserver);
+      postMessageMock = getMcpAppHostPostMessageMock();
+      vi.stubGlobal("parent", { postMessage: postMessageMock });
     });
 
     afterEach(() => {
+      HostAdaptor.resetInstance();
+      McpAppBridge.resetInstance();
       vi.unstubAllGlobals();
       vi.resetAllMocks();
     });
 
-    it("should return a function that calls window.openai.openExternal with the href", () => {
+    it("should call window.openai.openExternal even without a redirectUrl option", () => {
       const { result } = renderHook(() => useOpenExternal());
 
       const href = "https://example.com";
@@ -32,9 +39,13 @@ describe("useOpenExternal", () => {
 
       expect(openExternalMock).toHaveBeenCalledTimes(1);
       expect(openExternalMock).toHaveBeenCalledWith({ href });
+      expect(postMessageMock).not.toHaveBeenCalledWith(
+        expect.objectContaining({ method: "ui/open-link" }),
+        "*",
+      );
     });
 
-    it("should forward redirectUrl false option to window.openai.openExternal", () => {
+    it("should call window.openai.openExternal when redirectUrl is false", () => {
       const { result } = renderHook(() => useOpenExternal());
 
       const href = "https://example.com";
@@ -52,6 +63,7 @@ describe("useOpenExternal", () => {
     let postMessageMock: ReturnType<typeof getMcpAppHostPostMessageMock>;
 
     beforeEach(() => {
+      vi.stubGlobal("openai", undefined);
       vi.stubGlobal("skybridge", { hostType: "mcp-app" });
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
       postMessageMock = getMcpAppHostPostMessageMock();
@@ -59,9 +71,10 @@ describe("useOpenExternal", () => {
     });
 
     afterEach(async () => {
+      HostAdaptor.resetInstance();
+      McpAppBridge.resetInstance();
       vi.unstubAllGlobals();
       vi.resetAllMocks();
-      McpAppBridge.resetInstance();
     });
 
     it("should return a function that sends ui/open-link request to the MCP host", async () => {

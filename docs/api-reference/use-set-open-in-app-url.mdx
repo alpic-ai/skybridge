@@ -1,130 +1,66 @@
 ---
 title: useSetOpenInAppUrl
-description: "Set the URL that will be opened when users click the 'open in app' button in fullscreen mode."
+description: "Set where the host's Open in app button navigates"
 tag: "ChatGPT"
 ---
 
-<Warning>
-**Runtime Support**: ChatGPT Apps only
+import { Compat } from "/components/compat.jsx";
 
-This hook is not available in MCP Apps. Calling it in an MCP Apps environment will throw an error.
-</Warning>
+<Compat chatgpt />
 
-The `useSetOpenInAppUrl` hook returns a function to set the URL that will be opened when the user clicks the "open in app" button. This button appears in the top right corner when the view is displayed in fullscreen mode.
+When a user opens your [view](/build/view) fullscreen, the host's "Open in app" button navigates to the view's current iframe path. `useSetOpenInAppUrl` redirects it to a canonical URL you set instead.
 
-## Basic usage
+## Example
 
-```tsx
+Opening the carousel fullscreen and using "Open in app" deep-links to the featured product's page in the web app, instead of reopening the view.
+
+```tsx highlight={2,5,14}
+import { useEffect } from "react";
 import { useSetOpenInAppUrl } from "skybridge/web";
 
-function SetAppUrl() {
+function Carousel({ products }: { products: Product[] }) {
   const setOpenInAppUrl = useSetOpenInAppUrl();
+  const featured = products[0];
 
-  const handleSetUrl = async () => {
-    try {
-      await setOpenInAppUrl("https://example.com/app");
-    } catch (error) {
-      console.error("Failed to set URL:", error);
+  useEffect(() => {
+    if (!featured) {
+      return;
     }
-  };
+    setOpenInAppUrl(`https://shop.example.com/products/${featured.id}`).catch(
+      (error) => {
+        console.error("Could not set the open-in-app URL", error);
+      },
+    );
+  }, [featured, setOpenInAppUrl]);
 
-  return (
-    <button onClick={handleSetUrl}>
-      Set App URL
-    </button>
-  );
+  return <ProductGrid products={products} />;
 }
 ```
 
 ## Returns
 
-```tsx
-setOpenInAppUrl: (href: string) => Promise<void>
-```
+`useSetOpenInAppUrl` returns a single function.
 
-An async function that sets the URL to be opened when the user clicks the "open in app" button. The function returns a Promise that resolves when the URL has been successfully set.
-
-### Parameters
-
-- `href: string`
-  - **Required**
-  - The URL to set.
-  - If the origin matches the view's server URL, ChatGPT navigates to the full `href`.
-  - If the origin differs from the view's server URL, ChatGPT ignores the `href` and falls back to the view's server URL.
-
-### Errors
-
-The function may throw errors in the following cases:
-
-- If `href` is empty or only whitespace: `"The href parameter is required."`
-
-## Examples
-
-### Setting URL with Form Input
+### `setOpenInAppUrl`
 
 ```tsx
-import { useSetOpenInAppUrl } from "skybridge/web";
-import { useState } from "react";
-
-function UrlSetter() {
-  const setOpenInAppUrl = useSetOpenInAppUrl();
-  const [url, setUrl] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(false);
-
-    try {
-      await setOpenInAppUrl(url);
-      setSuccess(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to set URL");
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        placeholder="Enter URL"
-      />
-      <button type="submit">Set URL</button>
-      {success && <p>✓ URL successfully set!</p>}
-      {error && <p>× {error}</p>}
-    </form>
-  );
-}
+setOpenInAppUrl(href: string): Promise<void>;
 ```
 
-### Dynamic URL Based on State
+Sets `href` as the target the host's fullscreen "Open in app" button navigates to. `href` is required: an empty or whitespace-only string throws synchronously, before the host is called. The function reference is stable across renders, so it is safe to list in an effect's dependency array. The promise resolves once the host accepts the URL.
 
-```tsx
-import { useSetOpenInAppUrl, useDisplayMode } from "skybridge/web";
-import { useEffect } from "react";
+<Info>
+**ChatGPT** is the only host with this button; calling the hook on another host throws.
+</Info>
 
-function ProductDetail({ productId }: { productId: string }) {
-  const setOpenInAppUrl = useSetOpenInAppUrl();
-  const [displayMode] = useDisplayMode();
-
-  useEffect(() => {
-    if (displayMode === "fullscreen") {
-      const productUrl = `https://example.com/products/${productId}`;
-      setOpenInAppUrl(productUrl).catch(console.error);
-    }
-  }, [displayMode, productId, setOpenInAppUrl]);
-
-  return (
-    <div>
-      <h2>Product {productId}</h2>
-      {/* Product details */}
-    </div>
-  );
-}
-```
-
-
+<CardGroup cols={3}>
+  <Card title="Design for the Host" icon="sparkles" href="/guides/ux">
+    Adapt the view to display mode, theme, and device
+  </Card>
+  <Card title="useDisplayMode" icon="maximize" href="/api-reference/use-display-mode">
+    Read and switch the view's layout, including fullscreen
+  </Card>
+  <Card title="useOpenExternal" icon="external-link" href="/api-reference/use-open-external">
+    Open a URL outside the view's iframe through the host
+  </Card>
+</CardGroup>
