@@ -17,6 +17,9 @@ minimumReleaseAgeExclude:
   - skybridge
   - "@skybridge/*"
   - create-skybridge
+  # TODO(sky-440): temporary for the @alpic-ai/sdk dev build (needs tar 7.5.19,
+  # 4 days old); drop once devtools is back on a stable SDK release.
+  - tar
 
 allowBuilds:
   esbuild: true
