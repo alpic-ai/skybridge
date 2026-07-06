@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.10/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.0/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -12,7 +12,8 @@
       "!!**/dist",
       "!!docs",
       "!!**/nextImageExportOptimizer/**",
-      "!!landing/public/assets/next-image-export-optimizer-hashes.json"
+      "!!landing/public/assets/next-image-export-optimizer-hashes.json",
+      "!!landing/public/assets/customer-logos"
     ]
   },
   "formatter": {
