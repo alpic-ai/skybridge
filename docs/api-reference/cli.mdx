@@ -65,8 +65,6 @@ skybridge dev --plain | bunyan
 skybridge dev --plain | pino-pretty
 ```
 
-In `--plain` mode the server's stdout is forwarded byte-for-byte, so the formatter only ever sees your log lines. Everything else — the banner, URLs, tunnel state, restart notices, and TypeScript errors — goes to stderr, where it stays visible without polluting the pipe.
-
 ## `build`
 
 Compile your views and MCP server for production.
