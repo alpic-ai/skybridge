@@ -24,6 +24,9 @@ export async function discoverAuthorizationServer(
 ): Promise<DiscoveredMetadata> {
   const base = issuer.replace(/\/$/, "");
   const errors: string[] = [];
+  // First valid doc lacking a registration_endpoint, kept as a fallback so a
+  // genuinely non-DCR IdP still resolves (and is rejected later by the caller).
+  let fallback: DiscoveredMetadata | undefined;
 
   for (const path of WELL_KNOWN) {
     const url = `${base}${path}`;
@@ -41,7 +44,13 @@ export async function discoverAuthorizationServer(
       if (meta.issuer.replace(/\/$/, "") !== base) {
         throw new Error(`issuer mismatch: ${meta.issuer}`);
       }
-      return meta;
+      // Prefer the document that advertises DCR: some IdPs (e.g. Clerk) serve a
+      // valid openid-configuration without `registration_endpoint` yet expose
+      // it at oauth-authorization-server. Keep looking past a doc that omits it.
+      if (meta.registration_endpoint) {
+        return meta;
+      }
+      fallback ??= meta;
     } catch (err) {
       errors.push(
         `${url}: ${err instanceof Error ? err.message : String(err)}`,
@@ -49,5 +58,8 @@ export async function discoverAuthorizationServer(
     }
   }
 
+  if (fallback) {
+    return fallback;
+  }
   throw new Error(`OAuth discovery failed for ${issuer}: ${errors.join("; ")}`);
 }

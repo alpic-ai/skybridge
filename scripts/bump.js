@@ -15,7 +15,7 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = dirname(__dirname);
 
-function getVersion(packageName, expectedVersion, timeoutMs = 10_000) {
+function getVersion(packageName, expectedVersion, timeoutMs = 60_000) {
   if (!expectedVersion) {
     try {
       return execSync(`npm view ${packageName} version`, {

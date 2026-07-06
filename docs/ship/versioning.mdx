@@ -1,0 +1,27 @@
+---
+title: "Version Your App"
+description: "Run several versions of one app on the same domain"
+sidebarTitle: "Versioning"
+icon: "layers"
+---
+
+ChatGPT requires every version of an app to live on the same (sub)domain: you can't point `v1` and `v2` at separate hosts. You separate versions by path prefix on that shared origin instead, and a reverse proxy or your cloud platform routes each prefix to its deployment.
+
+```
+https://your-domain.com/v1/mcp   →  version 1
+https://your-domain.com/v2/mcp   →  version 2
+```
+
+## Serve versioned assets
+
+[Views](/build/view) fetch their assets by absolute URL, so a view served under `/v2` must request its bundle from `/v2/assets/...`. Skybridge reads the prefix from the `x-forwarded-prefix` header on each request and prepends it to every asset URL a view emits, alongside the origin it reads from `x-forwarded-host`.
+
+The build is identical across versions: the prefix is applied when the [server](/api-reference/mcp-server) renders the view, not baked into the bundle. One running process serves any number of versions at once, each gets view HTML pointing at its own asset path.
+
+## Set the header
+
+The prefix comes from your infrastructure, not your code: set `x-forwarded-prefix` on each version's route in your reverse proxy or cloud environment, for example `x-forwarded-prefix: /v1`.
+
+<Info>
+**[Alpic](https://app.alpic.ai)** injects `x-forwarded-prefix` natively, so versioned deployments work with no extra configuration. On other providers, make sure the header is set when you [deploy](/ship/deploy).
+</Info>

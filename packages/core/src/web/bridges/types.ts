@@ -247,8 +247,25 @@ export interface Adaptor {
   selectFiles(): Promise<FileMetadata[]>;
   openModal(options: RequestModalOptions): void;
   setOpenInAppUrl(href: string): Promise<void>;
+  closeModal(): void;
   registerViewTool(
     config: ViewToolConfig,
     handler: AnyViewToolHandler,
   ): () => void;
+}
+
+/**
+ * Thrown when a host bridge method is called in a runtime that doesn't
+ * support it (e.g. `uploadFile` outside the Apps SDK runtime).
+ */
+export class NotSupportedError extends Error {
+  constructor(
+    public readonly method: string,
+    public readonly reason?: string,
+  ) {
+    super(
+      `${method} is not supported in this runtime${reason ? `: ${reason}` : ""}`,
+    );
+    this.name = "NotSupportedError";
+  }
 }

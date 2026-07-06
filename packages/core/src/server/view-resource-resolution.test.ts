@@ -1,7 +1,21 @@
+import http from "node:http";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import { afterEach, describe, expect, it } from "vitest";
+import type { RequestHandler } from "express";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { __setBuildManifest, McpServer } from "./index.js";
+
+vi.mock("@skybridge/devtools", () => ({
+  devtoolsStaticServer: () =>
+    ((_req: unknown, _res: unknown, next: () => void) =>
+      next()) as RequestHandler,
+}));
+vi.mock("./viewsDevServer.js", () => ({
+  viewsDevServer: (_httpServer: unknown) =>
+    ((_req: unknown, _res: unknown, next: () => void) =>
+      next()) as RequestHandler,
+}));
 
 // Mirror what the Skybridge Vite plugin generates in `.skybridge/views.d.ts`:
 // narrow `ViewName` so `component: "widget"` typechecks against the registry.
@@ -25,6 +39,39 @@ async function connect(register: (server: McpServer) => void) {
     InMemoryTransport.createLinkedPair();
   await server.connect(serverTransport);
   await client.connect(clientTransport);
+  return {
+    client,
+    teardown: async () => {
+      await client.close();
+      await server.close();
+    },
+  };
+}
+
+let openHttpServer: http.Server | undefined;
+afterEach(() => openHttpServer?.close());
+
+// Connect over real HTTP so forwarded proxy headers reach the resource handler.
+async function connectHttp(
+  register: (server: McpServer) => void,
+  headers: Record<string, string>,
+) {
+  const { createApp } = await import("./express.js");
+  const server = new McpServer({ name: "test", version: "1.0.0" });
+  register(server);
+  const httpServer = http.createServer();
+  await createApp({ mcpServer: server, httpServer });
+  const listening = http.createServer(server.express);
+  await new Promise<void>((resolve) => listening.listen(0, resolve));
+  openHttpServer = listening;
+  const port = (listening.address() as { port: number }).port;
+
+  const client = new Client({ name: "test-client", version: "1.0.0" });
+  const transport = new StreamableHTTPClientTransport(
+    new URL(`http://localhost:${port}/mcp`),
+    { requestInit: { headers } },
+  );
+  await client.connect(transport);
   return {
     client,
     teardown: async () => {
@@ -59,17 +106,17 @@ describe("view resource resolution (cache key)", () => {
 
     const { resources } = await client.listResources();
     const listed = resources.find((r) =>
-      r.uri.startsWith("ui://views/apps-sdk/widget.html"),
+      r.uri.startsWith("ui://views/ext-apps/widget.html"),
     );
     // Dev build advertises no cache key.
-    expect(listed?.uri).toBe("ui://views/apps-sdk/widget.html");
+    expect(listed?.uri).toBe("ui://views/ext-apps/widget.html");
 
     // A stale/arbitrary/absent param all resolve the same underlying asset,
     // and the response echoes the URI the consumer asked for (never rewritten).
     for (const uri of [
-      "ui://views/apps-sdk/widget.html?v=stale123",
-      "ui://views/apps-sdk/widget.html?v=whatever-else",
-      "ui://views/apps-sdk/widget.html",
+      "ui://views/ext-apps/widget.html?v=stale123",
+      "ui://views/ext-apps/widget.html?v=whatever-else",
+      "ui://views/ext-apps/widget.html",
     ]) {
       const { contents } = await client.readResource({ uri });
       expect(contents).toHaveLength(1);
@@ -97,15 +144,15 @@ describe("view resource resolution (cache key)", () => {
 
     const { resources } = await client.listResources();
     const listed = resources.find((r) =>
-      r.uri.startsWith("ui://views/apps-sdk/widget.html"),
+      r.uri.startsWith("ui://views/ext-apps/widget.html"),
     );
     // Production advertises a content-derived cache key.
     expect(listed?.uri).toMatch(
-      /^ui:\/\/views\/apps-sdk\/widget\.html\?v=[0-9a-f]{8}$/,
+      /^ui:\/\/views\/ext-apps\/widget\.html\?v=[0-9a-f]{8}$/,
     );
 
     // A consumer holding a stale key still resolves the current asset.
-    const staleUri = "ui://views/apps-sdk/widget.html?v=00000000";
+    const staleUri = "ui://views/ext-apps/widget.html?v=00000000";
     const { contents } = await client.readResource({ uri: staleUri });
     expect(contents).toHaveLength(1);
     const content = textContent(contents);
@@ -119,8 +166,72 @@ describe("view resource resolution (cache key)", () => {
     const { client, teardown } = await connect(registerWidget);
 
     await expect(
-      client.readResource({ uri: "ui://views/apps-sdk/nope.html?v=1" }),
+      client.readResource({ uri: "ui://views/ext-apps/nope.html?v=1" }),
     ).rejects.toThrow();
+
+    await teardown();
+  });
+
+  // A proxy routing the request under a path prefix sends x-forwarded-prefix;
+  // the view's asset URLs must carry that prefix (and the forwarded origin) so
+  // they resolve back through the same routing. Per-request, so one process can
+  // serve many hosts/prefixes at once.
+  it("prefixes emitted asset URLs with x-forwarded-prefix (prod)", async () => {
+    process.env.NODE_ENV = "production";
+    __setBuildManifest({
+      "src/views/widget.tsx": {
+        isEntry: true,
+        name: "widget",
+        file: "assets/widget-ABC123.js",
+      },
+      "style.css": { file: "assets/style-XYZ.css" },
+    } as unknown as Record<string, { file: string }>);
+
+    const { client, teardown } = await connectHttp(registerWidget, {
+      "x-forwarded-host": "foo.com",
+      "x-forwarded-proto": "https",
+      "x-forwarded-prefix": "/v1/canary",
+    });
+    try {
+      const { contents } = await client.readResource({
+        uri: "ui://views/ext-apps/widget.html",
+      });
+      const { text } = textContent(contents);
+      // Forwarded origin + prefix. (`assets/assets` is the existing layout: the
+      // manifest `file` already carries `assets/` and the template prepends
+      // `/assets/`; build.tsx's `_redirects` collapses it on the asset host.)
+      expect(text).toContain(
+        "https://foo.com/v1/canary/assets/assets/widget-ABC123.js",
+      );
+      expect(text).toContain(
+        "https://foo.com/v1/canary/assets/assets/style-XYZ.css",
+      );
+      // No unprefixed asset URL leaks through.
+      expect(text).not.toContain("foo.com/assets/");
+    } finally {
+      await teardown();
+    }
+  });
+
+  // Back-compat: older Skybridge advertised the view at `ui://views/apps-sdk/...`
+  // via openai/outputTemplate. We no longer advertise it, but apps published then
+  // have it cached, so the read must still resolve to the ext-apps content.
+  it("resolves the legacy apps-sdk URL to the ext-apps content", async () => {
+    const { client, teardown } = await connect(registerWidget);
+
+    const legacyUri = "ui://views/apps-sdk/widget.html";
+    const { contents } = await client.readResource({ uri: legacyUri });
+
+    expect(contents).toHaveLength(1);
+    const content = contents[0] as {
+      uri: string;
+      text: string;
+      mimeType: string;
+    };
+    expect(content.mimeType).toBe("text/html;profile=mcp-app");
+    expect(content.text.length).toBeGreaterThan(0);
+    // The response echoes the requested (legacy) URI, never the canonical one.
+    expect(content.uri).toBe(legacyUri);
 
     await teardown();
   });

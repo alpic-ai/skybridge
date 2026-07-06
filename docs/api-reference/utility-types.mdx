@@ -1,0 +1,51 @@
+---
+title: Type Utilities
+description: "Type your own code from your server's tools"
+---
+
+[`generateHelpers`](/api-reference/generate-helpers) already types [`useCallTool`](/api-reference/use-call-tool) and [`useToolInfo`](/api-reference/use-tool-info) for you. These utilities go one level lower: they pull a [tool](/build/tools)'s input, output, or name types straight from your [server](/api-reference/mcp-server) type, so you can type your own components and helpers from the same source of truth.
+
+## Example
+
+Type a component's props from a tool's output, with no shape to redeclare:
+
+```tsx
+import type { ToolOutput } from "skybridge/server";
+import type { AppType } from "../server";
+
+type Products = ToolOutput<AppType, "search-products">["products"];
+
+function ProductGrid({ products }: { products: Products }) {
+  return (
+    <ul>
+      {products.map((p) => (
+        <li key={p.id}>{p.name}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## Utilities
+
+Each takes your server type (`AppType`, that is `typeof server`), and the tool-specific ones also take a tool name. All import from `skybridge/server`.
+
+| Utility | Resolves to |
+| --- | --- |
+| `ToolInput<AppType, Name>` | The tool's input type. |
+| `ToolOutput<AppType, Name>` | The tool's output (`structuredContent`) type. |
+| `ToolResponseMetadata<AppType, Name>` | The tool's response `_meta` type. |
+| `ToolNames<AppType>` | A union of the server's tool names. |
+| `InferTools<AppType>` | The full tool registry, mostly used internally by `generateHelpers`. |
+
+<CardGroup cols={3}>
+  <Card title="generateHelpers" icon="wand-sparkles" href="/api-reference/generate-helpers">
+    Typed hooks, the common path
+  </Card>
+  <Card title="useToolInfo" icon="database" href="/api-reference/use-tool-info">
+    Read the tool result in the view
+  </Card>
+  <Card title="McpServer" icon="server" href="/api-reference/mcp-server">
+    The server you infer from
+  </Card>
+</CardGroup>

@@ -1,187 +1,140 @@
 ---
-title: "CLI Reference"
-description: "Complete reference for Skybridge CLI commands"
+title: "CLI"
+description: "Test, build, and run your app from the terminal"
+icon: terminal
 ---
 
-Skybridge provides two CLI tools: the main `skybridge` CLI for development and production workflows, and `create-skybridge` for bootstrapping new projects.
+Skybridge ships one CLI, available as both `skybridge` and `sb` once it's installed in your project. 
 
-## Skybridge CLI
+It's a project dependency, not a global install, so run it through your package manager, or the [package scripts](#package-scripts) a scaffold sets up.
 
-The main CLI is available as both `skybridge` and `sb` commands after installing `skybridge` in your project.
+## `create`
 
-### skybridge dev
+Scaffold a new project. Run it before the package is installed with `npx`:
+
+```bash
+npx skybridge create
+```
+
+See [Quickstart](/get-started/quickstart) to scaffold and run a project.
+
+## `dev`
 
 Start the development server with hot module reloading and DevTools.
 
-```bash
-skybridge dev
+<CodeGroup>
+```bash npm
+npx skybridge dev
 ```
+```bash pnpm
+pnpm skybridge dev
+```
+```bash yarn
+yarn skybridge dev
+```
+```bash bun
+bun skybridge dev
+```
+```bash deno
+deno run -A npm:skybridge/skybridge dev
+```
+</CodeGroup>
 
-**What it does:**
-- Starts a development server at `http://localhost:3000/`
+- Serves the MCP endpoint at `http://localhost:3000/mcp`
 - Opens DevTools for local testing at `http://localhost:3000/`
-- Exposes MCP server at `http://localhost:3000/mcp`
-- Enables file watching with automatic server restart
-- Enables Hot Module Reloading (HMR) for views
-
-#### Flags
+- Watches files and restarts the server, with HMR for views
 
 | Flag | Description |
 |------|-------------|
-| `-p, --port <number>` | Port to run the server on. Defaults to `3000`, or the next available port if `3000` is in use. |
-| `--tunnel` | Open an Alpic tunnel for remote testing. |
-| `--no-open` | Don't open DevTools in the browser when the server is ready. |
+| `-p, --port <number>` | Port to run on. Defaults to `3000`, or the next free port if it's taken. |
+| `--tunnel` | Open an Alpic tunnel for remote testing and Playground access. |
+| `--no-open` | Don't open DevTools when the server is ready. |
 | `-v, --verbose` | Show tunnel logs. |
-| `--plain` | Disable the interactive UI and stream raw server logs to stdout, so you can pipe them through a formatter (e.g. `skybridge dev --plain \| bunyan`). |
+| `--plain` | Disable the interactive UI and stream the server's stdout verbatim, so you can pipe it through a formatter (e.g. `skybridge dev --plain \| bunyan`). |
 
-#### Formatting structured logs
+The [scaffolded](/get-started/quickstart#scaffold-your-project) `package.json` adds a `dev:tunnel` script, shorthand for `skybridge dev --tunnel`.
 
-If your server uses a structured JSON logger like [bunyan](https://github.com/trentm/node-bunyan) or [pino](https://github.com/pinojs/pino), the raw JSON output is hard to read in the interactive dev UI. Pass `--plain` to disable the UI and emit the server's stdout verbatim, then pipe it through the logger's formatter:
+The port also reads from the `PORT` environment variable. Set `SKYBRIDGE_OPEN=false` in your shell profile to skip opening DevTools on every run, the equivalent of always passing `--no-open`.
+
+### Formatting structured logs
+
+If your server uses a structured JSON logger like [bunyan](https://github.com/trentm/node-bunyan) or [pino](https://github.com/pinojs/pino), pass `--plain` and pipe through the logger's formatter:
 
 ```bash
 skybridge dev --plain | bunyan
 skybridge dev --plain | pino-pretty
 ```
 
-In `--plain` mode the server's stdout is forwarded as-is so the formatter only sees your log lines. Everything else — the banner, URLs, tunnel state, restart notices, and TypeScript errors — is written to stderr, so it stays visible without polluting the pipe.
+In `--plain` mode the server's stdout is forwarded byte-for-byte, so the formatter only ever sees your log lines. Everything else — the banner, URLs, tunnel state, restart notices, and TypeScript errors — goes to stderr, where it stays visible without polluting the pipe.
 
-You can also set the port via the `PORT` environment variable:
+## `build`
 
-```bash
-PORT=8080 skybridge dev
-```
-
-If you'd rather never have DevTools opened automatically, export `SKYBRIDGE_OPEN=false` at the shell level (e.g. in your `~/.zshrc`, `~/.bashrc`, or shell profile). It's equivalent to passing `--no-open` on every run, but lets you opt out once globally instead of per-invocation:
-
-```bash
-# one-off
-SKYBRIDGE_OPEN=false skybridge dev
-
-# persistent (add to your shell profile)
-export SKYBRIDGE_OPEN=false
-```
-
----
-
-### skybridge build
-
-Build your views and MCP server for production deployment.
-
-```bash
-skybridge build
-```
-
-**What it does:**
-
-1. **Building views** - Compiles your React views using Vite
-2. **Compiling server** - Transpiles TypeScript server code
-3. **Copying static assets** - Moves built assets to the `dist/` directory
-
-The output is placed in the `dist/` directory, ready for production deployment.
-
----
-
-### skybridge start
-
-Start the production server.
-
-```bash
-skybridge start
-```
-
-**Requirements:**
-- Must run `skybridge build` first
-- Requires `dist/index.js` to exist
-
-**What it does:**
-- Runs the compiled server from `dist/index.js`
-- Sets `NODE_ENV=production`
-- Serves the MCP endpoint at `http://localhost:3000/mcp`
-- Serves pre-built view assets from `/assets`
-
----
-
-## create-skybridge
-
-A standalone CLI for bootstrapping new Skybridge projects.
-
-```bash
-npm create skybridge@latest [directory]
-```
-
-Or with other package managers:
+Compile your views and MCP server for production.
 
 <CodeGroup>
 ```bash npm
-npm create skybridge@latest
+npx skybridge build
 ```
 ```bash pnpm
-pnpm create skybridge@latest
+pnpm skybridge build
 ```
 ```bash yarn
-yarn create skybridge
+yarn skybridge build
 ```
 ```bash bun
-bun create skybridge
+bun skybridge build
+```
+```bash deno
+deno run -A npm:skybridge/skybridge build
 ```
 </CodeGroup>
 
-### Arguments
+The output lands in `dist/`, ready for the `deploy` script or `skybridge start`.
 
-| Argument | Description |
-|----------|-------------|
-| `[directory]` | Target directory for the new project. If not specified, you'll be prompted to enter a project name. Use `.` to create in the current directory. |
+## `start`
 
-### Options
+Run the production server from the build output. Run `skybridge build` first.
 
-| Option | Description |
-|--------|-------------|
-| `-h, --help` | Show help message |
-| `--overwrite` | Remove existing files in target directory without prompting |
-| `--immediate` | Install dependencies and start the development server automatically after scaffolding |
-
-### Examples
-
-**Create a new project interactively:**
-
-```bash
-npm create skybridge@latest
+<CodeGroup>
+```bash npm
+npx skybridge start
 ```
-
-**Create a project in a specific directory:**
-
-```bash
-npm create skybridge@latest my-app
+```bash pnpm
+pnpm skybridge start
 ```
-
-**Create in current directory, overwrite existing files, and start immediately:**
-
-```bash
-npm create skybridge@latest . --overwrite --immediate
+```bash yarn
+yarn skybridge start
 ```
+```bash bun
+bun skybridge start
+```
+```bash deno
+deno run -A npm:skybridge/skybridge start
+```
+</CodeGroup>
 
-### What it creates
+- Serves the MCP endpoint at `http://localhost:3000/mcp`
+- Runs the compiled server and pre-built view assets from `dist/`
 
-The scaffolder copies a starter template that includes:
+| Flag | Description |
+|------|-------------|
+| `-p, --port <number>` | Port to run on. Defaults to `3000`, or the next free port if it's taken. Also reads `PORT`. |
 
-- `server/index.ts` - MCP server with example tools
-- `web/` - React views with example components
-- `package.json` - Pre-configured with all dependencies
-- `tsconfig.json` files - TypeScript configuration
-- `vite.config.ts` - Vite configuration for view bundling
-- `nodemon.json` - File watching configuration for development
+## `telemetry`
 
----
+The CLI reports anonymous usage, on by default. Toggle it with `skybridge telemetry disable`, `enable`, or `status`. See [Telemetry](/resources/telemetry) for what's collected and every way to opt out.
 
-## Package Manager Scripts
+## Package scripts
 
-When you create a new Skybridge project, the `package.json` includes these scripts:
+A scaffolded project wires the commands into `package.json`:
 
 | Script | Command | Description |
 |--------|---------|-------------|
-| `dev` | `skybridge dev` | Start development server |
-| `build` | `skybridge build` | Build for production |
-| `start` | `skybridge start` | Start production server |
+| `dev` | `skybridge dev` | Start the development server. |
+| `dev:tunnel` | `skybridge dev --tunnel` | Start the dev server behind an Alpic tunnel. |
+| `build` | `skybridge build` | Build for production. |
+| `start` | `skybridge start` | Serve the production build. |
+| `deploy` | `alpic deploy` | Deploy through the Alpic CLI. See [Deploy](/ship/deploy) for per-platform setup. |
 
 Run them with your package manager:
 
@@ -212,3 +165,15 @@ deno task build
 deno task start
 ```
 </CodeGroup>
+
+<CardGroup cols={3}>
+  <Card title="Quickstart" icon="zap" href="/get-started/quickstart">
+    Scaffold and run your first app
+  </Card>
+  <Card title="Ship" icon="cloud-upload" href="/ship">
+    Deploy to your platform of choice
+  </Card>
+  <Card title="McpServer" icon="server" href="/api-reference/mcp-server">
+    The server the CLI builds and runs
+  </Card>
+</CardGroup>

@@ -10,6 +10,16 @@ packages:
 # Delay installing newly published versions by 2 weeks to reduce exposure to
 # supply-chain attacks via compromised releases.
 minimumReleaseAge: 20160
+# First-party packages we publish ourselves: the delay buys no safety.
+minimumReleaseAgeExclude:
+  - alpic
+  - "@alpic-ai/*"
+  - skybridge
+  - "@skybridge/*"
+  - create-skybridge
+  # TODO(sky-440): temporary for the @alpic-ai/sdk dev build (needs tar 7.5.19,
+  # 4 days old); drop once devtools is back on a stable SDK release.
+  - tar
 
 allowBuilds:
   esbuild: true

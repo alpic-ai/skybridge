@@ -1,0 +1,80 @@
+---
+title: "DevTools"
+description: "Call tools and render views locally, without a host"
+icon: "square-dashed-mouse-pointer"
+---
+
+Testing through a real host means exposing a public URL, registering a connector, starting a conversation, and prompting the model until it calls the right [tool](/build/tools). DevTools cuts that loop down to a file save: it runs locally, emulates the host runtime, and lets you call tools directly, no model or host involved.
+
+## Start the Emulator
+
+DevTools ships with the dev server. In a [scaffolded](/get-started/quickstart#scaffold-your-project) project, start it from the project root:
+
+<CodeGroup>
+```bash npm
+npm run dev
+```
+```bash pnpm
+pnpm dev
+```
+```bash yarn
+yarn dev
+```
+```bash bun
+bun dev
+```
+```bash deno
+deno task dev
+```
+</CodeGroup>
+
+Two routes come up:
+- `http://localhost:3000/mcp`: your MCP server
+- `http://localhost:3000/`: the DevTools
+
+Every [tool](/build/tools) registered on the server appears in the sidebar automatically, and edits to the server or the [views](/build/view) reload the preview on save.
+
+## Explore the Features
+
+Select a tool in the sidebar and DevTools gives you the full exchange:
+
+<Frame caption="The DevTools interface">
+<img src="/images/devtools-screenshot.png" alt="DevTools Illustration" />
+</Frame>
+
+- **Tool controls**: generated from the tool's [input schema](/api-reference/register-tool#inputschema-outputschema). Inputs can be saved and re-run from the tool header.
+- **Tool output**: the raw server [response](/api-reference/register-tool#return) (`content`, `structuredContent`, `_meta`), with status, latency, and payload size.
+- **State inspector**: the view [state](/build/state) as a JSON tree, updated as the view mutates it.
+- **View preview**: the rendered [View](/build/view), with live controls to switch [display mode](/api-reference/use-display-mode#displaymode), theme, locale, and device type; the preview updates immediately.
+- **Call logs**: every runtime API call the view makes (`setViewState`, `callTool`, `requestDisplayMode`) with its arguments and responses.
+
+## Authenticated Servers
+
+When your server [requires OAuth](/build/auth), DevTools registers itself through Dynamic Client Registration on first connect and walks the full PKCE flow as a public client. A server that needs a pre-registered client or a different grant type won't connect from DevTools.
+
+DevTools caches the authorization within the browser, so later sessions reconnect without prompting. To clear a cached registration, click **Sign out** in the header.
+
+## Limitations
+
+DevTools emulates, and three gaps separate the emulation from production:
+
+- **No model**: you pick the [tool](/build/tools) and type the arguments yourself. Tool selection, the prompt surface (names, descriptions, schemas), and follow-up messages are never exercised.
+- **One runtime**: as of today the preview mocks the [Apps SDK runtime](/resources/apps-sdk-and-mcp-apps#apps-sdk). [MCP Apps](/resources/apps-sdk-and-mcp-apps#mcp-apps)-specific features are not yet supported.
+- **Loose [CSP](/guides/csp)**: external resources blocked by hosts in production may load locally.
+
+<Info>
+To test your app against a real LLM, use the [playground](/test/playground) or connect your server to ChatGPT or Claude using the [tunnel](/test/tunnel).
+</Info>
+
+## Go Further
+<Columns cols={3}>
+    <Card title="Tunnel" icon="globe" href="/test/tunnel">
+        Expose your local server to real hosts
+    </Card>
+    <Card title="Playground" icon="message-circle" href="/test/playground">
+        Chat with a real model running your app
+    </Card>
+    <Card title="Audit" icon="clipboard-check" href="/test/audit">
+        Catch spec and platform issues before submission
+    </Card>
+</Columns>

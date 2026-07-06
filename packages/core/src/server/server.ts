@@ -79,7 +79,11 @@ export type ToolDef<
   responseMetadata: TResponseMetadata;
 };
 
-/** Which host runtime a view targets — `"apps-sdk"` (ChatGPT) or `"mcp-app"` (MCP Apps spec). */
+/**
+ * @deprecated Views now always emit a single ext-apps resource; host targeting
+ * no longer applies. Retained for backwards compatibility; will be removed in a
+ * future major.
+ */
 export type ViewHostType = "apps-sdk" | "mcp-app";
 
 /**
@@ -111,8 +115,19 @@ export interface ViewCsp {
 // biome-ignore lint/suspicious/noEmptyInterface: register pattern — augmented by `.skybridge/views.d.ts` to narrow ViewName
 export interface ViewNameRegistry {}
 
+/**
+ * Resolve view component names from a registry: the union of its keys, or
+ * `string` when the registry is empty. The empty case happens before
+ * `.skybridge/views.d.ts` is generated; falling back to `string` keeps valid
+ * view names from erroring on a fresh checkout, and narrowing kicks in once
+ * the generated file augments the registry.
+ */
+export type ViewNameFor<Registry> = [keyof Registry & string] extends [never]
+  ? string
+  : keyof Registry & string;
+
 /** Union of valid view component names. Narrowed by {@link ViewNameRegistry}. */
-export type ViewName = keyof ViewNameRegistry & string;
+export type ViewName = ViewNameFor<ViewNameRegistry>;
 
 /**
  * Pass under `view` in a tool's `registerTool` config to render the tool's
@@ -123,11 +138,14 @@ export interface ViewConfig {
   component: ViewName;
   /** Human-readable label the host may show alongside the view. */
   description?: string;
-  /** Restrict where the view is rendered. Defaults to all known hosts. */
+  /**
+   * @deprecated No-op. Every view emits a single ext-apps resource regardless
+   * of this value. Will be removed in a future major.
+   */
   hosts?: ViewHostType[];
-  /** Apps SDK only: request a visible border around the widget. */
+  /** Request a visible border around the view (forwarded as `ui.prefersBorder`). */
   prefersBorder?: boolean;
-  /** Apps SDK only: override the iframe's served domain (advanced). */
+  /** Override the iframe's served domain (advanced; forwarded as `ui.domain`). */
   domain?: string;
   /** Per-view CSP overrides — see {@link ViewCsp}. */
   csp?: ViewCsp;
@@ -151,6 +169,20 @@ export interface SkybridgeServerOptions {
   json?: JsonOptions;
   /** Resource-server OAuth config. When set, mounts well-known metadata and bearer auth on `/mcp`. */
   oauth?: OAuthConfig;
+}
+
+/**
+ * Normalize an `x-forwarded-prefix` value into a leading-slash, no-trailing-slash
+ * path. Takes the first hop of a comma-separated proxy chain.
+ * "/v1/", "v1", "/v1, /internal" → "/v1"; "", "/", undefined → "".
+ */
+function normalizeForwardedPrefix(raw: string | undefined): string {
+  const firstHop = raw?.split(",")[0]?.trim() ?? "";
+  const trimmed = firstHop.replace(/\/+$/, "");
+  if (trimmed === "") {
+    return "";
+  }
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 }
 
 /**
@@ -217,45 +249,18 @@ type InternalToolMeta = Partial<
   OpenaiToolMeta & McpAppsToolMeta & SecuritySchemesToolMeta
 >;
 
-/** @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields */
-type OpenaiViewCSP = {
-  connect_domains: string[];
-  resource_domains: string[];
-  frame_domains?: string[];
-  redirect_domains?: string[];
+type McpAppsResourceMeta = {
+  ui?: McpUiResourceMeta;
 };
 
 type OpenaiResourceMeta = {
   "openai/widgetDescription"?: string;
-  "openai/widgetPrefersBorder"?: boolean;
-  "openai/widgetCSP"?: OpenaiViewCSP;
-  "openai/widgetDomain"?: string;
+  "openai/widgetCSP"?: { redirect_domains?: string[] };
 };
 
-/**
- * MCP Apps CSP extended with upcoming / Skybridge-specific fields.
- * @see https://github.com/modelcontextprotocol/ext-apps/pull/158
- */
-type ExtendedMcpUiResourceCsp = McpUiResourceMeta["csp"] & {
-  /**
-   * Origins that can receive openExternal redirects without the safe-link modal.
-   * OpenAI-specific; mirrored into the mcp-apps CSP for cross-host parity.
-   * @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields
-   */
-  redirectDomains?: string[];
-};
+type ResourceMeta = McpAppsResourceMeta & OpenaiResourceMeta;
 
-type ExtendedMcpUiResourceMeta = Omit<McpUiResourceMeta, "csp"> & {
-  csp?: ExtendedMcpUiResourceCsp;
-};
-
-type McpAppsResourceMeta = {
-  ui?: ExtendedMcpUiResourceMeta;
-};
-
-type ResourceMeta = OpenaiResourceMeta | McpAppsResourceMeta;
-
-type ViewResourceConfig<T extends ResourceMeta = ResourceMeta> = {
+type ViewResourceConfig = {
   hostType: ViewHostType;
   uri: string;
   mimeType: string;
@@ -267,7 +272,7 @@ type ViewResourceConfig<T extends ResourceMeta = ResourceMeta> = {
       baseUriDomains: string[];
     },
     overrides: { domain?: string },
-  ) => T;
+  ) => ResourceMeta;
 };
 
 /**
@@ -726,7 +731,7 @@ export class McpServer<
           for (const content of result.contents ?? []) {
             if (
               typeof content.uri === "string" &&
-              stripQuery(content.uri) === path
+              stripQuery(content.uri) === stripQuery(canonical)
             ) {
               content.uri = requested;
             }
@@ -914,6 +919,7 @@ export class McpServer<
 
   private resolveViewRequestContext(extra: McpExtra | undefined): {
     serverUrl: string;
+    assetsBasePath: string;
     connectDomains: string[];
     contentMetaOverrides: { domain?: string };
   } {
@@ -926,6 +932,13 @@ export class McpServer<
     const isClaude = header("user-agent") === "Claude-User";
 
     const serverUrl = resolveServerOrigin(header);
+    // Path prefix the proxy routed this request under (e.g. `foo.com/v1`). Read
+    // per-request so one process can serve many hosts/prefixes at once: the
+    // origin is recovered from x-forwarded-host, the prefix from
+    // x-forwarded-prefix. Empty when served at the origin root.
+    const assetsBasePath = normalizeForwardedPrefix(
+      header("x-forwarded-prefix"),
+    );
 
     const connectDomains = [serverUrl];
     if (!isProduction) {
@@ -950,7 +963,7 @@ export class McpServer<
       contentMetaOverrides = { domain: `${hash}.claudemcpcontent.com` };
     }
 
-    return { serverUrl, connectDomains, contentMetaOverrides };
+    return { serverUrl, assetsBasePath, connectDomains, contentMetaOverrides };
   }
 
   private registerViewResources(
@@ -958,134 +971,83 @@ export class McpServer<
     view: ViewConfig,
     toolMeta: InternalToolMeta,
   ): void {
-    const hosts = view.hosts ?? (["apps-sdk", "mcp-app"] as const);
-
     // Append a content-derived version param so hosts (e.g. ChatGPT) bust
     // their cache when the bundle changes, but keep the URI stable across
     // `tools/list` calls when the bundle hasn't changed.
     const versionParam = this.computeViewVersionParam(view.component);
 
-    if (hosts.includes("apps-sdk")) {
-      const viewResource: ViewResourceConfig<OpenaiResourceMeta> = {
-        hostType: "apps-sdk",
-        uri: `ui://views/apps-sdk/${view.component}.html${versionParam}`,
-        mimeType: "text/html+skybridge",
-        buildContentMeta: (
-          { resourceDomains, connectDomains, domain },
-          overrides,
-        ) => {
-          const defaults: OpenaiResourceMeta = {
-            "openai/widgetCSP": {
-              resource_domains: resourceDomains,
-              connect_domains: connectDomains,
+    const viewResource: ViewResourceConfig = {
+      hostType: "mcp-app",
+      uri: `ui://views/ext-apps/${view.component}.html${versionParam}`,
+      mimeType: "text/html;profile=mcp-app",
+      buildContentMeta: (
+        { resourceDomains, connectDomains, domain, baseUriDomains },
+        overrides,
+      ) => {
+        const defaults: McpAppsResourceMeta = {
+          ui: {
+            csp: {
+              resourceDomains,
+              connectDomains,
+              baseUriDomains,
             },
-            "openai/widgetDomain": domain,
-            "openai/widgetDescription": view.description,
-          };
+            domain,
+          },
+        };
 
-          const fromView: Partial<
-            Omit<
-              OpenaiResourceMeta,
-              "openai/widgetCSP" | "openai/widgetDescription"
-            > & {
-              "openai/widgetCSP": Partial<OpenaiViewCSP>;
-            }
-          > = {
-            "openai/widgetCSP": {
-              resource_domains: view.csp?.resourceDomains,
-              connect_domains: view.csp?.connectDomains,
-              frame_domains: view.csp?.frameDomains,
-              redirect_domains: view.csp?.redirectDomains,
-            },
-            "openai/widgetDomain": view.domain,
-            "openai/widgetPrefersBorder": view.prefersBorder,
-          };
-
-          const base = mergeWithUnion(mergeWithUnion(defaults, fromView), {
-            "openai/widgetDomain": overrides.domain,
-          });
-
-          if (view._meta) {
-            return { ...base, ...view._meta } as OpenaiResourceMeta;
-          }
-          return base;
-        },
-      };
-      this.registerViewResource({
-        name: toolName,
-        viewResource,
-        view,
-      });
-      toolMeta["openai/outputTemplate"] = viewResource.uri;
-    }
-
-    if (hosts.includes("mcp-app")) {
-      const viewResource: ViewResourceConfig<McpAppsResourceMeta> = {
-        hostType: "mcp-app",
-        uri: `ui://views/ext-apps/${view.component}.html${versionParam}`,
-        mimeType: "text/html;profile=mcp-app",
-        buildContentMeta: (
-          { resourceDomains, connectDomains, domain, baseUriDomains },
-          overrides,
-        ) => {
-          const defaults: McpAppsResourceMeta = {
-            ui: {
-              csp: {
-                resourceDomains,
-                connectDomains,
-                baseUriDomains,
-              },
-              domain,
-            },
-          };
-
-          const fromView: McpAppsResourceMeta = {
-            ui: {
-              ...(view.description && { description: view.description }),
-              ...(view.prefersBorder !== undefined && {
-                prefersBorder: view.prefersBorder,
+        const fromView: McpAppsResourceMeta = {
+          ui: {
+            ...(view.description && { description: view.description }),
+            ...(view.prefersBorder !== undefined && {
+              prefersBorder: view.prefersBorder,
+            }),
+            ...(view.domain && { domain: view.domain }),
+            csp: {
+              ...(view.csp?.resourceDomains && {
+                resourceDomains: view.csp.resourceDomains,
               }),
-              ...(view.domain && { domain: view.domain }),
-              csp: {
-                ...(view.csp?.resourceDomains && {
-                  resourceDomains: view.csp.resourceDomains,
-                }),
-                ...(view.csp?.connectDomains && {
-                  connectDomains: view.csp.connectDomains,
-                }),
-                ...(view.csp?.frameDomains && {
-                  frameDomains: view.csp.frameDomains,
-                }),
-                ...(view.csp?.baseUriDomains && {
-                  baseUriDomains: view.csp.baseUriDomains,
-                }),
-                ...(view.csp?.redirectDomains && {
-                  redirectDomains: view.csp.redirectDomains,
-                }),
-              },
+              ...(view.csp?.connectDomains && {
+                connectDomains: view.csp.connectDomains,
+              }),
+              ...(view.csp?.frameDomains && {
+                frameDomains: view.csp.frameDomains,
+              }),
+              ...(view.csp?.baseUriDomains && {
+                baseUriDomains: view.csp.baseUriDomains,
+              }),
             },
-          };
+          },
+        };
 
-          const base = mergeWithUnion(mergeWithUnion(defaults, fromView), {
-            ui: overrides,
-          });
+        const ui = mergeWithUnion(mergeWithUnion(defaults, fromView), {
+          ui: overrides,
+        });
 
-          if (view._meta) {
-            return { ...base, ...view._meta } as McpAppsResourceMeta;
-          }
-          return base;
-        },
-      };
-      this.registerViewResource({
-        name: toolName,
-        viewResource,
-        view,
-      });
-      // @ts-expect-error - For backwards compatibility with Claude current implementation of the specs
-      toolMeta["ui/resourceUri"] = viewResource.uri;
+        const base: ResourceMeta = {
+          ...ui,
+          ...(view.description && {
+            "openai/widgetDescription": view.description,
+          }),
+          ...(view.csp?.redirectDomains && {
+            "openai/widgetCSP": { redirect_domains: view.csp.redirectDomains },
+          }),
+        };
 
-      toolMeta.ui = { ...toolMeta.ui, resourceUri: viewResource.uri };
-    }
+        if (view._meta) {
+          return { ...base, ...view._meta } as ResourceMeta;
+        }
+        return base;
+      },
+    };
+    this.registerViewResource({ name: toolName, viewResource, view });
+
+    // Advertise via the MCP Apps standard pointer only — ChatGPT renders from
+    // ui.resourceUri (verified), and not emitting openai/outputTemplate lets us
+    // retire the legacy apps-sdk resource later. The legacy apps-sdk URL is still
+    // served (see registerViewResource) so already-published apps keep resolving.
+    // @ts-expect-error - For backwards compatibility with Claude current implementation of the specs
+    toolMeta["ui/resourceUri"] = viewResource.uri;
+    toolMeta.ui = { ...toolMeta.ui, resourceUri: viewResource.uri };
   }
 
   private registerViewResource({
@@ -1114,6 +1076,7 @@ export class McpServer<
     };
     this.viewMetaBuilders.set(viewUri, buildMeta);
     this.viewUriByPath.set(stripQuery(viewUri), viewUri);
+    this.serveLegacyAppsSdkUrl(view.component, viewUri);
 
     this.registerResource(
       name,
@@ -1121,18 +1084,23 @@ export class McpServer<
       { description: view.description },
       async (uri, extra) => {
         const isProduction = process.env.NODE_ENV === "production";
-        const { serverUrl } = this.resolveViewRequestContext(extra);
+        const { serverUrl, assetsBasePath } =
+          this.resolveViewRequestContext(extra);
+        // The view resolves all assets (template imports + runtime lazy chunks
+        // via `window.skybridge.serverUrl`) against this base, so it carries the
+        // proxy path prefix. CSP domains in `buildMeta` stay the bare origin.
+        const viewBase = `${serverUrl}${assetsBasePath}`;
 
         const html = isProduction
           ? templateHelper.renderProduction({
               hostType,
-              serverUrl,
+              serverUrl: viewBase,
               viewFile: this.lookupViewFile(view.component),
               styleFile: this.lookupDistFile("style.css") ?? "",
             })
           : templateHelper.renderDevelopment({
               hostType,
-              serverUrl,
+              serverUrl: viewBase,
               viewName: view.component,
             });
 
@@ -1142,6 +1110,21 @@ export class McpServer<
           ],
         };
       },
+    );
+  }
+
+  private serveLegacyAppsSdkUrl(component: string, canonicalUri: string): void {
+    this.viewUriByPath.set(
+      `ui://views/apps-sdk/${component}.html`,
+      canonicalUri,
+    );
+    this.viewUriByPath.set(
+      `ui://widgets/apps-sdk/${component}.html`,
+      canonicalUri,
+    );
+    this.viewUriByPath.set(
+      `ui://widgets/ext-apps/${component}.html`,
+      canonicalUri,
     );
   }
 

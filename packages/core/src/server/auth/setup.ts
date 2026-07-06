@@ -11,8 +11,8 @@ import { createJwksVerifier } from "./verify.js";
 
 /** Mounts the well-known OAuth metadata and bearer auth on `/mcp`. */
 export function setupOAuth(app: Express, config: OAuthConfig): void {
-  if (!config.verify?.issuer || !config.verify?.audience) {
-    throw new Error("oauth.verify requires both `issuer` and `audience`");
+  if (!config.verify?.issuer) {
+    throw new Error("oauth.verify requires an `issuer`");
   }
 
   const verifier = createJwksVerifier(config.verify);

@@ -83,6 +83,21 @@ describe("createJwksVerifier", () => {
     );
   });
 
+  it("skips the aud check when no audience is configured (e.g. Clerk)", async () => {
+    const { privateKey, jwksUri } = await startJwks();
+    const verifier = createJwksVerifier({ issuer: ISSUER, jwksUri });
+    // Clerk-shaped access token: no `aud` claim at all.
+    const token = await new jose.SignJWT({ client_id: "c", sub: "u" })
+      .setProtectedHeader({ alg: "RS256", kid: "test-key" })
+      .setIssuer(ISSUER)
+      .setExpirationTime("1h")
+      .sign(privateKey);
+
+    const auth = await verifier.verifyAccessToken(token);
+    expect(auth.clientId).toBe("c");
+    expect(auth.extra?.subject).toBe("u");
+  });
+
   it("parses array scope claims and trims extra whitespace", async () => {
     const { privateKey, jwksUri } = await startJwks();
     const verifier = createJwksVerifier({
