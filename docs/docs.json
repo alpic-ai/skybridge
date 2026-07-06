@@ -193,6 +193,7 @@
               "examples/flight-booking",
               "examples/investigation-game",
               "examples/productivity",
+              "examples/supabase-triplog",
               "examples/times-up"
             ]
           },
