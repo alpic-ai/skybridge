@@ -1,5 +1,6 @@
 import {
   cpSync,
+  existsSync,
   mkdirSync,
   readFileSync,
   rmSync,
@@ -31,6 +32,15 @@ export function emitManifestModule(
 ): void {
   const manifest = readFileSync(manifestPath, "utf-8");
   writeFileSync(outPath, `export default ${manifest};\n`);
+}
+
+/** Emit an empty Vite manifest for view-less (headless) servers. */
+export function emitEmptyManifestModule(outPath: string): void {
+  writeFileSync(outPath, "export default {};\n");
+}
+
+export function ensureAssetsDir(assetsDir: string): void {
+  mkdirSync(assetsDir, { recursive: true });
 }
 
 export const VERCEL_FUNCTION_NAME = "mcp";
@@ -104,9 +114,12 @@ export async function emitVercelBuildOutput(root: string): Promise<void> {
     `${JSON.stringify({ type: "module" }, null, 2)}\n`,
   );
 
-  cpSync(path.join(root, "dist", "assets"), staticAssetsDir, {
-    recursive: true,
-  });
+  const assetsSrc = path.join(root, "dist", "assets");
+  if (existsSync(assetsSrc)) {
+    cpSync(assetsSrc, staticAssetsDir, { recursive: true });
+  } else {
+    mkdirSync(staticAssetsDir, { recursive: true });
+  }
 
   writeFileSync(
     path.join(outputDir, "config.json"),
