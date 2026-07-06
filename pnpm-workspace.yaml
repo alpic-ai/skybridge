@@ -7,9 +7,9 @@ packages:
   - "packages/create-skybridge/templates/blank"
   - "examples/*"
 
-# Delay installing newly published versions by 2 weeks to reduce exposure to
+# Delay installing newly published versions by 3 days to reduce exposure to
 # supply-chain attacks via compromised releases.
-minimumReleaseAge: 20160
+minimumReleaseAge: 4320
 # First-party packages we publish ourselves: the delay buys no safety.
 minimumReleaseAgeExclude:
   - alpic
