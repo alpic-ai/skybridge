@@ -8,11 +8,25 @@
   "prConcurrentLimit": 5,
   "timezone": "Europe/Paris",
   "rangeStrategy": "bump",
+  "minimumReleaseAge": "3 days",
   "packageRules": [
     {
       "description": "Ignore pnpm overrides (security floor pins managed manually)",
       "matchDepTypes": ["pnpm.overrides"],
       "enabled": false
+    },
+    {
+      "description": "Automerge non-major updates once CI passes",
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    },
+    {
+      "description": "Automerge devDependencies (including majors) once CI passes",
+      "matchDepTypes": ["devDependencies"],
+      "automerge": true
     }
-  ]
+  ],
+  "vulnerabilityAlerts": {
+    "automerge": true
+  }
 }
