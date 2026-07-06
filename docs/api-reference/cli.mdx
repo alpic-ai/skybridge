@@ -50,10 +50,20 @@ deno run -A npm:skybridge/skybridge dev
 | `--tunnel` | Open an Alpic tunnel for remote testing and Playground access. |
 | `--no-open` | Don't open DevTools when the server is ready. |
 | `-v, --verbose` | Show tunnel logs. |
+| `--plain` | Disable the interactive UI and stream the server's stdout verbatim, so you can pipe it through a formatter (e.g. `skybridge dev --plain \| bunyan`). |
 
 The [scaffolded](/get-started/quickstart#scaffold-your-project) `package.json` adds a `dev:tunnel` script, shorthand for `skybridge dev --tunnel`.
 
 The port also reads from the `PORT` environment variable. Set `SKYBRIDGE_OPEN=false` in your shell profile to skip opening DevTools on every run, the equivalent of always passing `--no-open`.
+
+### Formatting structured logs
+
+If your server uses a structured JSON logger like [bunyan](https://github.com/trentm/node-bunyan) or [pino](https://github.com/pinojs/pino), pass `--plain` and pipe through the logger's formatter:
+
+```bash
+skybridge dev --plain | bunyan
+skybridge dev --plain | pino-pretty
+```
 
 ## `build`
 
