@@ -17,7 +17,7 @@ const VIEW_STATE_TOKEN_WARNING_THRESHOLD = 4000;
 
 function getApproximateTokenCount(value: unknown): number {
   try {
-    return Math.max(1, Math.round(JSON.stringify(value).length / 4));
+    return Math.max(1, Math.ceil(JSON.stringify(value).length / 4));
   } catch {
     return 0;
   }
