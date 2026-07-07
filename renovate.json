@@ -26,6 +26,17 @@
       "description": "Automerge devDependencies (including majors) once CI passes",
       "matchDepTypes": ["devDependencies"],
       "automerge": true
+    },
+    {
+      "description": "Automerge GitHub Actions updates (including majors) once CI passes",
+      "matchDepTypes": ["action"],
+      "automerge": true
+    },
+    {
+      "description": "Never bump engines.node in published packages; Node support changes are deliberate semver-major decisions",
+      "matchDepNames": ["node"],
+      "matchFileNames": ["packages/*/package.json"],
+      "enabled": false
     }
   ],
   "vulnerabilityAlerts": {
