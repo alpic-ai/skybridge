@@ -145,6 +145,23 @@ describe("HostAdaptor", () => {
     );
   });
 
+  it("warns when setViewState persists more than 4K tokens", async () => {
+    const setWidgetState = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal("openai", { setWidgetState, widgetState: null });
+    const adaptor = new HostAdaptor();
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    await adaptor.setViewState({
+      longText: "x".repeat(4096 * 4 + 50),
+    });
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("setWidgetState is persisting"),
+    );
+
+    warnSpy.mockRestore();
+  });
+
   it("setViewState falls back to MCP updateModelContext + localStorage when window.openai is absent", async () => {
     vi.stubGlobal("openai", undefined);
     const adaptor = new HostAdaptor();

@@ -90,6 +90,24 @@ describe("DataLLM", () => {
       expect(callArgs).toHaveProperty("__view_context");
     });
 
+    it("warns when DataLLM content exceeds the 4K token warning threshold", async () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      render(
+        <DataLLM content={"x".repeat(4096 * 4 + 50)}>
+          <div>Child</div>
+        </DataLLM>,
+      );
+
+      await vi.waitFor(() => {
+        expect(warnSpy).toHaveBeenCalledWith(
+          expect.stringContaining("setWidgetState is persisting"),
+        );
+      });
+
+      warnSpy.mockRestore();
+    });
+
     it("should handle deeply nested DataLLM components", () => {
       render(
         <DataLLM content="Level 1">
