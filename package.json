@@ -22,7 +22,7 @@
   "author": "Frédéric Barthelet",
   "license": "ISC",
   "devDependencies": {
-    "@biomejs/biome": "^2.5.0",
+    "@biomejs/biome": "^2.5.2",
     "@total-typescript/tsconfig": "^1.0.4",
     "@types/node": "^24.13.2",
     "typescript": "^6.0.3"
@@ -50,8 +50,8 @@
       "iron-session>cookie": "^0.7.0"
     }
   },
-  "packageManager": "pnpm@10.33.0",
+  "packageManager": "pnpm@10.34.4",
   "engines": {
-    "node": ">=24.14.1"
+    "node": ">=24.18.0"
   }
 }
