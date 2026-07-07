@@ -158,8 +158,12 @@ type SecurityScheme =
 - **Within an `oauth2` entry's `scopes`, match all.** The token must carry every listed scope.
 - **`noauth` and `oauth2` together** means "works anonymously, but auth unlocks more."
 
+<Info>
+With an [`oauth`](/api-reference/mcp-server#constructor) provider configured, Skybridge enforces `securitySchemes` for you: anonymous or under-scoped calls are rejected before the handler runs, and any tool declaring a `noauth` scheme flips the server into mixed mode. Declaring no schemes falls back to the secure default (sign-in required).
+</Info>
+
 <Warning>
-`securitySchemes` is client-facing metadata, not self-enforcing. Pair it with an auth middleware ([`requireBearerAuth`](/api-reference/require-bearer-auth) or [`optionalBearerAuth`](/api-reference/optional-bearer-auth)) to authenticate requests, and enforce the tool's own requirements in the handler from `extra.authInfo`.
+If you wire auth by hand instead (`mcpAuthMetadataRouter` + [`requireBearerAuth`](/api-reference/require-bearer-auth) / [`optionalBearerAuth`](/api-reference/optional-bearer-auth)), `securitySchemes` is client-facing metadata only, not self-enforcing: enforce each tool's own requirements in the handler from `extra.authInfo`.
 </Warning>
 
 ### `_meta`

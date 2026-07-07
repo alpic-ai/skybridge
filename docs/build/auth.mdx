@@ -7,7 +7,7 @@ icon: "key"
 [Tool](/build/tools) calls are anonymous by default: nothing in the protocol tells you who's asking. [OAuth](https://oauth.net/2/) closes that gap, and the host does most of the work: it discovers your authorization server, signs the user in, refreshes tokens, and attaches a Bearer token to every request. Your server keeps three jobs: publish the discovery metadata, verify the tokens, and read the user in your handlers.
 
 <Tip>
-Using [Auth0](/guides/auth-providers#auth0), [Clerk](/guides/auth-providers#clerk), [Descope](/guides/auth-providers#descope), [Stytch](/guides/auth-providers#stytch), [WorkOS](/guides/auth-providers#workos), or [any other OAuth provider](/guides/auth-providers#any-other-provider)? Connect it in one line instead of wiring this by hand. That path can't yet [mix public and authenticated tools](#mix-public-and-authenticated-tools).
+Using [Auth0](/guides/auth-providers#auth0), [Clerk](/guides/auth-providers#clerk), [Descope](/guides/auth-providers#descope), [Stytch](/guides/auth-providers#stytch), [WorkOS](/guides/auth-providers#workos), or [any other OAuth provider](/guides/auth-providers#any-other-provider)? Connect it in one line instead of wiring this by hand. With a provider configured you can also [mix public and authenticated tools](#mix-public-and-authenticated-tools) by declaring each tool's `securitySchemes` — Skybridge enforces them for you, no middleware or handler guards needed.
 </Tip>
 
 Here's a complete server where every tool requires sign-in:
