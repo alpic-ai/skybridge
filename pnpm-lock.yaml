@@ -492,9 +492,6 @@ importers:
       skybridge:
         specifier: workspace:*
         version: link:../../packages/core
-      sonner:
-        specifier: ^2.0.7
-        version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
