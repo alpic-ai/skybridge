@@ -4,8 +4,6 @@ on:
   schedule:
     - cron: "0 */6 * * *"
   workflow_dispatch:
-  push:
-    branches: [ conformance-runner ]   # TEMP: remove before merge
 
 permissions:
   contents: read

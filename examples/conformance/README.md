@@ -104,7 +104,7 @@ pnpm notte:run   # ids from .env; or override: --function-id <id> --profile-id n
 
 This cloud-runs the function (result and logs stay retrievable via `notte functions run-metadata`), writes `results.json` and `screenshot.png` into `--out`, and compares every hook's verdict against the `chatgpt_expected.json` baseline (override with `--expected`, empty string to skip). It exits non-zero when the run fails **or any verdict deviates from the baseline**. A regression fails CI, and an improvement does too until the baseline is updated. Mismatches are printed and recorded in `results.json`.
 
-The scheduled GitHub Actions workflow lives at `.github/workflows/conformance.yml` (every 6 hours + manual dispatch, Slack alert on failure with the mismatches). It needs the repo secrets `NOTTE_API_KEY`, `NOTTE_PROFILE_ID`, `SLACK_WEBHOOK_URL` and the variable `NOTTE_CHATGPT_FUNCTION_ID`.
+The scheduled GitHub Actions workflow lives at `.github/workflows/conformance.yml` (every 6 hours + manual dispatch, Slack alert on failure with the mismatches). It needs the repo secrets `NOTTE_API_KEY` and `SLACK_WEBHOOK_URL`, and the variables `NOTTE_CHATGPT_FUNCTION_ID` and `NOTTE_PROFILE_ID`.
 
 ### Caveats
 
