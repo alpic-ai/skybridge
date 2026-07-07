@@ -1,0 +1,78 @@
+name: Hooks Conformance
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+  push:
+    branches: [ conformance-runner ]   # TEMP: remove before merge
+
+permissions:
+  contents: read
+
+jobs:
+  chatgpt:
+    name: ChatGPT
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      mismatches: ${{ steps.results.outputs.mismatches }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Run conformance on ChatGPT
+        run: |
+          node examples/conformance/notte/run-conformance.ts \
+            --function-id ${{ vars.NOTTE_CHATGPT_FUNCTION_ID }} \
+            --profile-id ${{ vars.NOTTE_PROFILE_ID }} \
+            --out conformance-results
+        env:
+          NOTTE_API_KEY: ${{ secrets.NOTTE_API_KEY }}
+
+      - name: Collect results for notifications
+        id: results
+        if: always()
+        run: |
+          FILE=conformance-results/results.json
+          if [ -f "$FILE" ]; then
+            MISMATCHES=$(jq -r '.mismatches[]?' "$FILE" | head -10 | sed 's/^/• /')
+          fi
+          [ -z "${MISMATCHES:-}" ] && MISMATCHES="(no results produced — see the job logs)"
+          {
+            echo "mismatches<<RESULTS_EOF"
+            echo "$MISMATCHES"
+            echo "RESULTS_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: chatgpt-conformance-results
+          path: conformance-results/
+
+  notify-slack:
+    needs: [chatgpt]
+    if: always() && (needs.chatgpt.result == 'failure' || needs.chatgpt.result == 'timed_out')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_USERNAME: GitHub Actions
+          SLACK_TITLE: ❌ Hooks conformance failed
+          SLACK_COLOR: failure
+          SLACK_MESSAGE_ON_FAILURE: |
+            The scheduled hooks conformance run failed (chatgpt: ${{ needs.chatgpt.result }}).
+
+            Baseline mismatches:
+            ${{ needs.chatgpt.outputs.mismatches }}
+
+            Full results (json + screenshot) in the chatgpt-conformance-results artifact.
+          MSG_MINIMAL: actions url
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}

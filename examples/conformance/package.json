@@ -9,7 +9,10 @@
     "dev:tunnel": "skybridge dev --tunnel",
     "build": "skybridge build",
     "start": "skybridge start",
-    "deploy": "alpic deploy"
+    "deploy": "alpic deploy",
+    "notte:run": "node --env-file-if-exists=.env notte/run-conformance.ts",
+    "notte:profile": "node --env-file-if-exists=.env notte/create-profile.ts",
+    "notte:update": "notte functions update --file notte/chatgpt-conformance-function.py"
   },
   "dependencies": {
     "@alpic-ai/ui": "^1.134.0",

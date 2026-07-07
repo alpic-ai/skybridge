@@ -58,14 +58,59 @@ Note: the DevTools emulator doesn't implement every host capability (`useDownloa
 src/
   server.ts              # MCP server: one widget-accessible `conformance` view tool
   tests.tsx              # One test component per hook + the ordered TESTS list
+  automation.ts          # postMessage remote-control protocol for external drivers
   index.css              # Tailwind + @alpic-ai/ui theme
   views/conformance.tsx  # The single view: stepper + copyable results table
+notte/                   # Automated runs on real hosts (see E2E below)
 ```
 
 ## Adding a test
 
 1. In `src/tests.tsx`, write a component that drives the hook and calls `onResult` exactly once (the `useProbe` helper does this for you).
 2. Add a `TestDef` entry to `TESTS`: mark it `auto` if it has no visible side effect, or give it a `confirm` question if only the user can verify the effect.
+
+## E2E
+
+`notte/` runs the app end-to-end on a real ChatGPT host via a [Notte](https://notte.cc) cloud browser, acting as the human tester: it presses Run/Close on the action tests and answers the Yes/No confirmations by verifying the side effects from outside the widget (modal overlay, new tab, follow-up message in the conversation). A confirmation it has no way to verify falls back to Skip, which no ChatGPT test currently hits (the only unverified candidate, `useDownload`, self-reports `unsupported` there before any confirmation shows). No LLM is involved (no scrape, no agent), the run cost is Notte session time only.
+
+| File                              | What it does                                                                    |
+| --------------------------------- |---------------------------------------------------------------------------------|
+| `chatgpt-conformance-function.py` | Notte function: sends `run @Conformance`, drives the stepper, extracts the rows |
+| `run-conformance.ts`              | CI entrypoint: cloud-runs the function, saves artifacts, gates on the baseline  |
+| `chatgpt_expected.json`           | Expected verdict per hook: the CI baseline                                      |
+| `create-profile.ts`               | Creates/reopens a Notte profile so you can log into the ChatGPT account         |
+
+The driver talks to the app over postMessage in both directions (the widget iframes are cross-origin, so it cannot click or read them): buttons are pressed through the drive hook (`{type: "conformance:drive", action: run|skip|yes|no|close-modal|restore-inline}`) and progress is read from the app's state broadcasts (`{type: "conformance:state", state}`, sent to `window.top` on every change plus a 1.5s heartbeat). Both sides live in `src/automation.ts`.
+
+### Setup
+
+The function expects the conformance app to be already connected in the ChatGPT account/workspace the profile is logged into:
+
+0. **Environment**: `cp .env.example .env` and fill it in — the `notte:*` scripts load it via Node's `--env-file-if-exists` (`NOTTE_API_KEY`, plus `NOTTE_CHATGPT_FUNCTION_ID`/`NOTTE_PROFILE_ID` as defaults for the run flags). CI passes real env vars instead; flags always override.
+1. **Connect the app** from any browser logged into the target ChatGPT account/workspace (connectors are account-level): enable developer mode, then connect the deployed conformance server as an app named `Conformance`.
+2. **Create a Notte profile logged into that account**: log in via the live viewer this opens, then press Enter to persist:
+
+```bash
+pnpm notte:profile my-chatgpt-workspace
+```
+
+3. **Deploy the function** (`notte auth login` first): `notte functions create --file notte/chatgpt-conformance-function.py --name "ChatGPT Skybridge Conformance"` the first time, `pnpm notte:update` afterwards. Without `--function-id`, the CLI targets its machine-local "current function" (`~/.notte/cli/current_function`, set by the last `create`) — pass `pnpm notte:update --function-id <id>` if you have created other functions since. The function takes `profile_id` (required) and `app_name` (default `Conformance`) as variables.
+
+### Running
+
+```bash
+pnpm notte:run   # ids from .env; or override: --function-id <id> --profile-id notte-profile-... --out <dir>
+```
+
+This cloud-runs the function (result and logs stay retrievable via `notte functions run-metadata`), writes `results.json` and `screenshot.png` into `--out`, and compares every hook's verdict against the `chatgpt_expected.json` baseline (override with `--expected`, empty string to skip). It exits non-zero when the run fails **or any verdict deviates from the baseline**. A regression fails CI, and an improvement does too until the baseline is updated. Mismatches are printed and recorded in `results.json`.
+
+The scheduled GitHub Actions workflow lives at `.github/workflows/conformance.yml` (every 6 hours + manual dispatch, Slack alert on failure with the mismatches). It needs the repo secrets `NOTTE_API_KEY`, `NOTTE_PROFILE_ID`, `SLACK_WEBHOOK_URL` and the variable `NOTTE_CHATGPT_FUNCTION_ID`.
+
+### Caveats
+
+- `headless=False` is required: headless Chromium drops cross-origin MessagePort transfers, which breaks the widget init handshake.
+- A full run takes several minutes (fifteen tests, waits between actions, and the follow-up verification can wait up to 2 minutes for ChatGPT to commit the turn). Budget a ~12 minute timeout.
+- The function itself must be Python: Notte executes it server-side in a Python AST sandbox (which also rejects some nodes, e.g. lambdas — keep it to plain functions). The client-side scripts are zero-dependency TypeScript, run directly with Node 24 (native type stripping).
 
 ## Resources
 
