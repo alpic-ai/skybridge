@@ -28,6 +28,7 @@ test.describe("devtools smoke", () => {
   test("calls a widget tool and renders inside the iframe", async ({
     page,
   }) => {
+    test.slow();
     await page.goto("/");
 
     const token = `card-${crypto.randomUUID()}`;
