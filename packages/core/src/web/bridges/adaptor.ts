@@ -158,6 +158,9 @@ export class HostAdaptor implements Adaptor {
   };
 
   public requestClose = async (): Promise<void> => {
+    if (this.openai) {
+      await this.openai.requestClose();
+    }
     const app = await this.mcp.getApp();
     await app.requestTeardown();
   };
