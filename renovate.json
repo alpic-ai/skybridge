@@ -9,6 +9,7 @@
   "timezone": "Europe/Paris",
   "rangeStrategy": "bump",
   "rebaseWhen": "behind-base-branch",
+  "platformAutomerge": false,
   "minimumReleaseAge": "3 days",
   "packageRules": [
     {
