@@ -188,6 +188,7 @@
             "group": "Use cases",
             "pages": [
               "examples/capitals",
+              "examples/chatgpt-files",
               "examples/chess",
               "examples/ecommerce-carousel",
               "examples/flight-booking",
