@@ -36,7 +36,7 @@ export default defineConfig({
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: `http://localhost:${DEVTOOLS_PORT}`,
-    trace: "on-first-retry",
+    trace: "retain-on-failure",
   },
   projects: [
     {
