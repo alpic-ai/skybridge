@@ -33,7 +33,11 @@ import express, {
   type RequestHandler,
 } from "express";
 import type { OAuthConfig } from "./auth/index.js";
-import { setupOAuth } from "./auth/setup.js";
+import {
+  evaluateSecuritySchemes,
+  wwwAuthenticateHeader,
+} from "./auth/security-schemes.js";
+import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
 import { createApp } from "./express.js";
 import { createMiddlewareEntry } from "./metric.js";
 import type {
@@ -469,6 +473,25 @@ export function __setBuildManifest(
   pendingBuildManifest = manifest;
 }
 
+function normalizeRegisterToolArgs(args: unknown[]): {
+  config: ToolConfig<ZodRawShapeCompat>;
+  cb: ToolHandler<ZodRawShapeCompat>;
+} {
+  if (typeof args[0] === "string") {
+    return {
+      config: {
+        name: args[0],
+        ...(args[1] as object),
+      } as ToolConfig<ZodRawShapeCompat>,
+      cb: args[2] as ToolHandler<ZodRawShapeCompat>,
+    };
+  }
+  return {
+    config: args[0] as ToolConfig<ZodRawShapeCompat>,
+    cb: args[1] as ToolHandler<ZodRawShapeCompat>,
+  };
+}
+
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
 > extends McpServerBaseOmitted {
@@ -506,6 +529,12 @@ export class McpServer<
   private viteManifest: Record<string, ViteManifestEntry> | null = null;
   private readonly serverInfo: Implementation;
   private readonly serverOptions?: ServerOptions;
+  private oauthEnabled = false;
+  private resolveResourceMetadataUrl?: ResourceMetadataUrlResolver;
+  private securitySchemesByTool = new Map<
+    string,
+    SecurityScheme[] | undefined
+  >();
 
   constructor(
     serverInfo: Implementation,
@@ -518,7 +547,12 @@ export class McpServer<
     this.express = express();
     this.express.use(express.json(skybridgeOptions?.json));
     if (skybridgeOptions?.oauth) {
-      setupOAuth(this.express, skybridgeOptions.oauth);
+      this.oauthEnabled = true;
+      this.resolveResourceMetadataUrl = setupOAuth(
+        this.express,
+        skybridgeOptions.oauth,
+        this.securitySchemesByTool,
+      );
     }
     // Pick up the manifest if `dist/__entry.js` primed it before importing
     // user code. Consume-once: clear after the first construction so a
@@ -731,17 +765,32 @@ export class McpServer<
       },
     };
 
+    const toolsListSecuritySchemesEntry: McpMiddlewareEntry = {
+      filter: "tools/list",
+      handler: async (_req, _extra, next) => {
+        const result = (await next()) as {
+          tools: Array<
+            Record<string, unknown> & { _meta?: Record<string, unknown> }
+          >;
+        };
+        for (const tool of result.tools) {
+          const schemes = tool._meta?.securitySchemes;
+          if (schemes && !("securitySchemes" in tool)) {
+            tool.securitySchemes = schemes;
+          }
+        }
+        return result;
+      },
+    };
+
     const monitoringEntry = createMiddlewareEntry();
     const entries = [
       ...(monitoringEntry ? [monitoringEntry] : []),
       viewListMetaEntry,
       viewReadResolveEntry,
+      toolsListSecuritySchemesEntry,
       ...this.mcpMiddlewareEntries,
     ];
-
-    if (entries.length === 0) {
-      return;
-    }
 
     const { requestHandlers, notificationHandlers } = getHandlerMaps(
       this.server,
@@ -1101,11 +1150,36 @@ export class McpServer<
     );
   }
 
-  private wrapHandler<InputArgs extends ZodRawShapeCompat>(
+  private decorateToolHandler<InputArgs extends ZodRawShapeCompat>(
     cb: ToolHandler<InputArgs>,
-    { attachViewUUID }: { attachViewUUID: boolean },
+    {
+      attachViewUUID,
+      securitySchemes,
+    }: { attachViewUUID: boolean; securitySchemes?: SecurityScheme[] },
   ): ToolHandler<InputArgs> {
     return async (args, extra) => {
+      if (this.oauthEnabled) {
+        const failure = evaluateSecuritySchemes(
+          securitySchemes,
+          extra.authInfo,
+        );
+        if (failure) {
+          const headers = extra?.requestInfo?.headers ?? {};
+          const header = (key: string) => {
+            const value = headers[key];
+            return Array.isArray(value) ? value[0] : value;
+          };
+          const challenge = wwwAuthenticateHeader(
+            failure,
+            this.resolveResourceMetadataUrl?.(header),
+          );
+          return {
+            isError: true,
+            content: [{ type: "text", text: failure.description }],
+            _meta: { "mcp/www_authenticate": [challenge] },
+          };
+        }
+      }
       const result = await cb(args, extra);
       return {
         ...result,
@@ -1232,13 +1306,7 @@ export class McpServer<
       ...args: unknown[]
     ) => unknown;
 
-    if (typeof args[0] === "string") {
-      baseFn.call(this, args[0], args[1], args[2]);
-      return this;
-    }
-
-    const config = args[0] as ToolConfig<ZodRawShapeCompat>;
-    const cb = args[1] as ToolHandler<ZodRawShapeCompat>;
+    const { config, cb } = normalizeRegisterToolArgs(args);
 
     const {
       name,
@@ -1249,6 +1317,8 @@ export class McpServer<
     } = config;
 
     const toolMeta: InternalToolMeta = { ...userToolMeta };
+
+    this.securitySchemesByTool.set(name, securitySchemes);
 
     if (securitySchemes) {
       // SEP-1488 puts `securitySchemes` at the top level of the tool
@@ -1264,7 +1334,10 @@ export class McpServer<
       this.registerViewResources(name, view, toolMeta);
     }
 
-    const wrappedCb = this.wrapHandler(cb, { attachViewUUID: Boolean(view) });
+    const wrappedCb = this.decorateToolHandler(cb, {
+      attachViewUUID: Boolean(view),
+      securitySchemes,
+    });
 
     baseFn.call(this, name, { ...toolFields, _meta: toolMeta }, wrappedCb);
 
