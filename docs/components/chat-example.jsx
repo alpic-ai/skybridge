@@ -28,10 +28,15 @@ export const ChatExample = ({
   card ? (
     <a
       href={href}
-      className="sb-ex-card relative block my-2 w-full overflow-hidden rounded-2xl bg-white dark:bg-background-dark border border-gray-950/10 dark:border-white/10 cursor-pointer hover:!border-primary dark:hover:!border-primary-light"
+      className="sb-ex-card relative block my-2 w-full overflow-hidden rounded-2xl border border-gray-950/10 dark:border-white/10 cursor-pointer hover:!border-primary dark:hover:!border-primary-light"
       style={{ display: "flex", flexDirection: "column", textDecoration: "none" }}
     >
       <style>{`
+        /* Tailwind purges dark:bg-background-dark from this custom component on the
+           hosted build, so the card base stayed white in dark mode. Drive it from
+           Mintlify's theme vars in this always-emitted style block instead. */
+        .sb-ex-card { background: rgb(var(--background-light)) !important; }
+        .dark .sb-ex-card { background: rgb(var(--background-dark)) !important; }
         .sb-ex-card__link { text-decoration: none !important; }
         .sb-ex-card__link:hover {
           color: inherit !important;
