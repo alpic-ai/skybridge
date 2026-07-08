@@ -1120,12 +1120,14 @@ export class McpServer<
         let html: string;
         if (isProduction) {
           html = renderBundled();
-        } else {
+        } else if (useBundledDevTemplate) {
           try {
-            html = useBundledDevTemplate ? renderBundled() : renderUnbundled();
+            html = renderBundled();
           } catch {
             html = renderUnbundled();
           }
+        } else {
+          html = renderUnbundled();
         }
 
         return {
