@@ -121,12 +121,7 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
             `${resolvedViewsDir}/*.{tsx,jsx}`,
             `${resolvedViewsDir}/*/index.{tsx,jsx}`,
           ],
-          include: [
-            "react",
-            "react-dom/client",
-            "react/jsx-runtime",
-            "skybridge/web",
-          ],
+          include: ["react", "react-dom/client", "react/jsx-runtime"],
         },
         experimental: {
           renderBuiltUrl: (filename) => {
