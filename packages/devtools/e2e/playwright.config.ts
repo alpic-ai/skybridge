@@ -22,7 +22,10 @@ const devtools = (port: number, fixturePort: number) => ({
   command: `pnpm dev -- --port ${port} --strictPort`,
   port,
   reuseExistingServer: !process.env.CI,
-  env: { VITE_MCP_SERVER_URL: `http://localhost:${fixturePort}/mcp` },
+  env: {
+    VITE_MCP_SERVER_URL: `http://localhost:${fixturePort}/mcp`,
+    DEVTOOLS_VITE_CACHE_DIR: `node_modules/.vite-e2e-${port}`,
+  },
   stdout: "pipe" as const,
   stderr: "pipe" as const,
   timeout: 60_000,
