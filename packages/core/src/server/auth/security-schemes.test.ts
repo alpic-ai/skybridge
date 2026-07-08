@@ -57,6 +57,20 @@ describe("evaluateSecuritySchemes", () => {
     expect(evaluateSecuritySchemes(schemes, undefined)).toBeUndefined();
   });
 
+  it("enforces oauth2 scopes on a public tool once a token is present", () => {
+    const schemes: SecurityScheme[] = [
+      { type: "noauth" },
+      { type: "oauth2", scopes: ["checkout"] },
+    ];
+    expect(evaluateSecuritySchemes(schemes, undefined)).toBeUndefined();
+    expect(evaluateSecuritySchemes(schemes, authInfo(["openid"]))?.error).toBe(
+      "insufficient_scope",
+    );
+    expect(
+      evaluateSecuritySchemes(schemes, authInfo(["checkout"])),
+    ).toBeUndefined();
+  });
+
   it("fails an oauth2-only tool with no token (invalid_token / 401)", () => {
     expect(
       evaluateSecuritySchemes([{ type: "oauth2" }], undefined)?.error,

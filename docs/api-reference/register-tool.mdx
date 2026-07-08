@@ -154,7 +154,7 @@ The recommended way to declare a tool's auth. With the [`oauth`](/api-reference/
 | `{ public: true }` | Callable signed out; uses the token when one is present. |
 | `{}` | Requires sign-in. |
 | `{ scopes: [...] }` | Requires sign-in with every listed scope. |
-| `{ public: true, scopes: [...] }` | Callable signed out; advertises the scopes for signed-in callers. |
+| `{ public: true, scopes: [...] }` | Callable signed out; a signed-in caller must carry every listed scope. |
 
 Declaring any `{ public: true }` tool turns the server [mixed](/build/auth#mix-public-and-authenticated-tools): it serves anonymous callers, and every other tool stays sign-in-gated by default. Requiring sign-in (`{}` or `{ scopes }`) needs the `oauth` provider and throws without it; `{ public: true }` works either way. Omit `auth` entirely for the secure default (sign-in required whenever the server has auth).
 
