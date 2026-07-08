@@ -68,14 +68,6 @@ export async function createApp({
     const { devtoolsStaticServer } = await import("@skybridge/devtools");
     app.use(await devtoolsStaticServer());
 
-    // Serve the bundled build of the views (like production) so remote hosts
-    // reach a view in ~2 requests instead of the unbundled dev server's
-    // per-module waterfall (browsers cap ~6 HTTP/1.1 connections per origin and
-    // each request pays a full round-trip to the tunnel edge). The CLI runs the
-    // watch build that writes dist/assets when a tunnel is active; here we just
-    // serve it, mounted before the Vite middleware so built hashed assets win.
-    // Unbundled dev module requests (localhost/DevTools) miss on disk and fall
-    // through to Vite unchanged.
     const assetsPath = path.join(process.cwd(), "dist", "assets");
     app.use("/assets", cors());
     app.use("/assets", express.static(assetsPath));

@@ -1,6 +1,5 @@
 import path from "node:path";
 
-/** Fire-and-forget watch build of the views; the dev server serves its output to tunnel hosts. */
 export function startTunnelViewBuild(root = process.cwd()): void {
   void (async () => {
     const { build } = await import("vite");

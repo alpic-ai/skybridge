@@ -964,12 +964,6 @@ export class McpServer<
       contentMetaOverrides = { domain: `${hash}.claudemcpcontent.com` };
     }
 
-    // In dev, serve remote hosts the bundled build instead of the unbundled
-    // dev entry — the per-module waterfall is what makes the first render slow
-    // through the tunnel. A remote origin in dev means the request came through
-    // a tunnel (started via `--tunnel` or the DevTools UI), which is what the
-    // CLI keys the watch build off. Localhost/DevTools keep the unbundled entry
-    // so HMR is untouched.
     const isLocalhost =
       serverUrl.startsWith("http://localhost") ||
       serverUrl.startsWith("http://127.0.0.1");
@@ -1126,16 +1120,12 @@ export class McpServer<
         let html: string;
         if (isProduction) {
           html = renderBundled();
-        } else if (useBundledDevTemplate) {
+        } else {
           try {
-            html = renderBundled();
+            html = useBundledDevTemplate ? renderBundled() : renderUnbundled();
           } catch {
-            // The watch build hasn't emitted a manifest yet — fall back to the
-            // unbundled dev entry so the first render still works (just slow).
             html = renderUnbundled();
           }
-        } else {
-          html = renderUnbundled();
         }
 
         return {
