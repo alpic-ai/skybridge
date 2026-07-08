@@ -964,9 +964,11 @@ export class McpServer<
       contentMetaOverrides = { domain: `${hash}.claudemcpcontent.com` };
     }
 
+    const serverHostname = new URL(serverUrl).hostname;
     const isLocalhost =
-      serverUrl.startsWith("http://localhost") ||
-      serverUrl.startsWith("http://127.0.0.1");
+      serverHostname === "localhost" ||
+      serverHostname === "127.0.0.1" ||
+      serverHostname === "[::1]";
     const useBundledDevTemplate = !isProduction && !isLocalhost;
 
     return {
