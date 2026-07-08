@@ -348,10 +348,12 @@ describe("mixed-auth door", () => {
         },
       ]),
     });
+    expect(res.status).toBe(401);
+    const wwwAuthenticate = res.headers.get("www-authenticate") ?? "";
+    expect(wwwAuthenticate).toMatch(/^Bearer /);
+    expect(wwwAuthenticate).toContain("resource_metadata=");
     const text = await res.text();
     expect(text).not.toContain("client-1");
-    expect(text).toContain("Sign in to use this tool.");
-    expect(text).toContain("resource_metadata=");
   });
 
   it("gates a tool registered via the legacy string overload (secure default)", async () => {

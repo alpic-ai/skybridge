@@ -14,6 +14,7 @@ import {
   clientPrefersInBandChallenge,
   evaluateSecuritySchemes,
   httpStatusForFailure,
+  type SchemeFailure,
   securitySchemesAllowAnonymous,
   wwwAuthenticateHeader,
 } from "./security-schemes.js";
@@ -97,21 +98,24 @@ export function setupOAuth(
   );
 
   app.use("/mcp", (req, res, next) => {
-    const body = req.body as
-      | {
-          id?: string | number | null;
-          method?: string;
-          params?: { name?: string };
+    type Call = {
+      id?: string | number | null;
+      method?: string;
+      params?: { name?: string };
+    };
+    const body = req.body as Call | Call[] | undefined;
+    const calls = Array.isArray(body) ? body : [body];
+    const auth = (req as Request & { auth?: AuthInfo }).auth;
+    let failure: SchemeFailure | undefined;
+    for (const call of calls) {
+      const tool = call?.params?.name;
+      if (call?.method === "tools/call" && tool && schemesByTool.has(tool)) {
+        failure = evaluateSecuritySchemes(schemesByTool.get(tool), auth);
+        if (failure) {
+          break;
         }
-      | undefined;
-    const tool = body?.params?.name;
-    if (body?.method !== "tools/call" || !tool || !schemesByTool.has(tool)) {
-      return next();
+      }
     }
-    const failure = evaluateSecuritySchemes(
-      schemesByTool.get(tool),
-      (req as Request & { auth?: AuthInfo }).auth,
-    );
     if (!failure) {
       return next();
     }
@@ -120,9 +124,12 @@ export function setupOAuth(
       resourceMetadataUrl((key) => req.get(key)),
     );
     if (clientPrefersInBandChallenge(req.get("user-agent"))) {
+      if (Array.isArray(body)) {
+        return next();
+      }
       res.json({
         jsonrpc: "2.0",
-        id: body.id ?? null,
+        id: body?.id ?? null,
         result: {
           content: [{ type: "text", text: failure.description }],
           isError: true,
