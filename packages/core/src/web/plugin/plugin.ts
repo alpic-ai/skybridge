@@ -125,15 +125,8 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
             "react",
             "react-dom/client",
             "react/jsx-runtime",
-            "skybridge > @modelcontextprotocol/ext-apps",
-            "skybridge > @modelcontextprotocol/sdk/server/zod-compat.js",
-            "skybridge > @modelcontextprotocol/sdk/types.js",
-            "skybridge > dequal/lite",
-            "skybridge > superjson",
-            "skybridge > zod",
-            "skybridge > zustand",
+            "skybridge/web",
           ],
-          exclude: ["skybridge/web"],
         },
         experimental: {
           renderBuiltUrl: (filename) => {

@@ -7,5 +7,3 @@ cdk.out
 .skybridge/
 packages/core/src/server/templates.generated.js
 .vercel
-packages/devtools/e2e/fixtures/web/.vite-*
-
