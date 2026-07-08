@@ -99,6 +99,7 @@ function textContent(contents: Array<{ uri: string }>): {
 describe("view resource resolution (cache key)", () => {
   afterEach(() => {
     delete process.env.NODE_ENV;
+    delete process.env.__TUNNEL_BUNDLE;
   });
 
   it("resolves regardless of the ?v= param and echoes the requested URI", async () => {
@@ -210,6 +211,58 @@ describe("view resource resolution (cache key)", () => {
       expect(text).not.toContain("foo.com/assets/");
     } finally {
       await teardown();
+    }
+  });
+
+  // `dev --tunnel` (`__TUNNEL_BUNDLE`): remote hosts get the bundled build (few
+  // requests, fast first render through the tunnel) while localhost keeps the
+  // unbundled dev entry (HMR). The split is per-request on the forwarded origin.
+  it("serves bundled to remote and unbundled to localhost in tunnel-bundle dev", async () => {
+    process.env.__TUNNEL_BUNDLE = "1";
+    // `__setBuildManifest` is consume-once (cleared on the next construction),
+    // so re-prime before each server.
+    const primeManifest = () =>
+      __setBuildManifest({
+        "src/views/widget.tsx": {
+          isEntry: true,
+          name: "widget",
+          file: "assets/widget-ABC123.js",
+        },
+        "style.css": { file: "assets/style-XYZ.css" },
+      } as unknown as Record<string, { file: string }>);
+
+    primeManifest();
+    const remote = await connectHttp(registerWidget, {
+      "x-forwarded-host": "foo.com",
+      "x-forwarded-proto": "https",
+    });
+    try {
+      const { text } = textContent(
+        (
+          await remote.client.readResource({
+            uri: "ui://views/ext-apps/widget.html",
+          })
+        ).contents,
+      );
+      expect(text).toContain("https://foo.com/assets/assets/widget-ABC123.js");
+      expect(text).not.toContain("/_skybridge/view/");
+    } finally {
+      await remote.teardown();
+    }
+
+    primeManifest();
+    const local = await connectHttp(registerWidget, {});
+    try {
+      const { text } = textContent(
+        (
+          await local.client.readResource({
+            uri: "ui://views/ext-apps/widget.html",
+          })
+        ).contents,
+      );
+      expect(text).toContain("/_skybridge/view/widget");
+    } finally {
+      await local.teardown();
     }
   });
 

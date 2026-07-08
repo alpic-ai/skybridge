@@ -922,6 +922,7 @@ export class McpServer<
     assetsBasePath: string;
     connectDomains: string[];
     contentMetaOverrides: { domain?: string };
+    useBundledDevTemplate: boolean;
   } {
     const isProduction = process.env.NODE_ENV === "production";
     const headers = extra?.requestInfo?.headers || {};
@@ -963,7 +964,23 @@ export class McpServer<
       contentMetaOverrides = { domain: `${hash}.claudemcpcontent.com` };
     }
 
-    return { serverUrl, assetsBasePath, connectDomains, contentMetaOverrides };
+    // In `dev --tunnel` (`__TUNNEL_BUNDLE`), serve remote hosts the bundled
+    // build instead of the unbundled dev entry — the per-module waterfall is
+    // what makes the first render slow through the tunnel. Localhost/DevTools
+    // keep the unbundled entry so HMR is untouched.
+    const isLocalhost =
+      serverUrl.startsWith("http://localhost") ||
+      serverUrl.startsWith("http://127.0.0.1");
+    const useBundledDevTemplate =
+      !isProduction && process.env.__TUNNEL_BUNDLE === "1" && !isLocalhost;
+
+    return {
+      serverUrl,
+      assetsBasePath,
+      connectDomains,
+      contentMetaOverrides,
+      useBundledDevTemplate,
+    };
   }
 
   private registerViewResources(
@@ -1084,25 +1101,41 @@ export class McpServer<
       { description: view.description },
       async (uri, extra) => {
         const isProduction = process.env.NODE_ENV === "production";
-        const { serverUrl, assetsBasePath } =
+        const { serverUrl, assetsBasePath, useBundledDevTemplate } =
           this.resolveViewRequestContext(extra);
         // The view resolves all assets (template imports + runtime lazy chunks
         // via `window.skybridge.serverUrl`) against this base, so it carries the
         // proxy path prefix. CSP domains in `buildMeta` stay the bare origin.
         const viewBase = `${serverUrl}${assetsBasePath}`;
 
-        const html = isProduction
-          ? templateHelper.renderProduction({
-              hostType,
-              serverUrl: viewBase,
-              viewFile: this.lookupViewFile(view.component),
-              styleFile: this.lookupDistFile("style.css") ?? "",
-            })
-          : templateHelper.renderDevelopment({
-              hostType,
-              serverUrl: viewBase,
-              viewName: view.component,
-            });
+        const renderBundled = () =>
+          templateHelper.renderProduction({
+            hostType,
+            serverUrl: viewBase,
+            viewFile: this.lookupViewFile(view.component),
+            styleFile: this.lookupDistFile("style.css") ?? "",
+          });
+        const renderUnbundled = () =>
+          templateHelper.renderDevelopment({
+            hostType,
+            serverUrl: viewBase,
+            viewName: view.component,
+          });
+
+        let html: string;
+        if (isProduction) {
+          html = renderBundled();
+        } else if (useBundledDevTemplate) {
+          try {
+            html = renderBundled();
+          } catch {
+            // The watch build hasn't emitted a manifest yet — fall back to the
+            // unbundled dev entry so the first render still works (just slow).
+            html = renderUnbundled();
+          }
+        } else {
+          html = renderUnbundled();
+        }
 
         return {
           contents: [

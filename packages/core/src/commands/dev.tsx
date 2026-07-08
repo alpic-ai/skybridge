@@ -4,6 +4,7 @@ import { resolvePort } from "../cli/detect-port.js";
 import { Header } from "../cli/header.js";
 import { resolveViewsDir } from "../cli/resolve-views-dir.js";
 import { runPlain } from "../cli/run-plain.js";
+import { startTunnelViewBuild } from "../cli/start-tunnel-view-build.js";
 import { startTunnelControlServer } from "../cli/tunnel-control-server.js";
 import { useMessages } from "../cli/use-messages.js";
 import { useNodemon } from "../cli/use-nodemon.js";
@@ -74,7 +75,12 @@ export default class Dev extends Command {
       ...process.env,
       __PORT: String(port),
       __TUNNEL_CONTROL_PORT: String(controlPort),
+      ...(flags.tunnel ? { __TUNNEL_BUNDLE: "1" } : {}),
     };
+
+    if (flags.tunnel) {
+      startTunnelViewBuild(root);
+    }
 
     if (flags.plain) {
       const teardown = runPlain({
