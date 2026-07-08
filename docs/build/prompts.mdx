@@ -1,0 +1,78 @@
+---
+title: "Register Prompts"
+description: "Ship reusable prompts users can invoke"
+icon: "message-square"
+---
+
+A **prompt** is the third MCP server primitive, alongside [tools](/build/tools) and [resources](/build/resources). It's a named, parameterized message template the user picks from the host's prompt menu; your handler returns the messages the host drops into the conversation. Use it to ship canned starting points, "Summarize this trip", "Draft a reply", so users don't retype them.
+
+```ts server.ts
+import { McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({ name: "travel", version: "1.0" }).registerPrompt(
+  {
+    name: "trip-summary",
+    title: "Trip summary",
+    description: "Summarize a trip to a destination.",
+    argsSchema: { destination: z.string() },
+  },
+  ({ destination }) => ({
+    messages: [
+      {
+        role: "user",
+        content: { type: "text", text: `Summarize a trip to ${destination}.` },
+      },
+    ],
+  }),
+);
+```
+
+[`registerPrompt`](/api-reference/register-prompt) returns the server, so it chains next to your other registrations. `argsSchema` is a [Zod](https://zod.dev/) shape: it validates the arguments the host passes and types the handler's input.
+
+<Info>
+Register prompts up front, at startup. Adding or removing them at runtime relies on `list_changed` notifications, which the stateless JSON transport can't deliver, so hosts won't see the change.
+</Info>
+
+## Completions
+
+Wrap an argument in `completable()` to autocomplete it as the user fills in the prompt:
+
+```ts server.ts
+import { completable } from "@modelcontextprotocol/sdk/server/completable.js";
+import { z } from "zod";
+
+server.registerPrompt(
+  {
+    name: "trip-summary",
+    argsSchema: {
+      destination: completable(z.string(), async (value) =>
+        (await matchCities(value)).slice(0, 20),
+      ),
+    },
+  },
+  ({ destination }) => ({
+    messages: [
+      {
+        role: "user",
+        content: { type: "text", text: `Summarize a trip to ${destination}.` },
+      },
+    ],
+  }),
+);
+```
+
+The completion callback receives what the user has typed and returns the candidate values.
+
+## Go Further
+<Columns cols={3}>
+    <Card title="registerPrompt" icon="message-square" href="/api-reference/register-prompt">
+        Full config and handler reference
+    </Card>
+    <Card title="Register Resources" icon="file-text" href="/build/resources">
+        Expose readable content
+    </Card>
+    <Card title="Register Tools" icon="wrench" href="/build/tools">
+        The action primitive
+    </Card>
+</Columns>

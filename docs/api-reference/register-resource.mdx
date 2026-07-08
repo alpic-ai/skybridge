@@ -1,0 +1,135 @@
+---
+title: registerResource
+description: "Expose a resource the host can read"
+---
+
+`registerResource` adds a [resource](/build/resources) to your server: addressable content a host can read by URI, such as reference docs, a data file, or a live-generated report. Pass a `uri` for a fixed resource or a `template` for a family of URIs.
+
+## Example
+
+A static Markdown document at a fixed URI.
+
+```ts server.ts
+import { McpServer } from "skybridge/server";
+
+const server = new McpServer({ name: "shop", version: "1.0" }).registerResource(
+  {
+    name: "pricing",
+    uri: "docs://pricing",
+    title: "Pricing",
+    description: "Current plan pricing, in Markdown.",
+    mimeType: "text/markdown",
+  },
+  async (uri) => ({
+    contents: [{ uri: uri.href, text: await loadPricingDoc() }],
+  }),
+);
+```
+
+## Signature
+
+```ts
+server.registerResource(config: ResourceConfig, handler: ReadHandler): McpServer;
+```
+
+The config-object form returns the server, so it chains alongside [`registerTool`](/api-reference/register-tool) and [`registerPrompt`](/api-reference/register-prompt).
+
+## Config
+
+Provide either `uri` (static) or `template` (dynamic), never both. The remaining fields are the resource's metadata.
+
+```ts
+type ResourceConfig =
+  | { name: string; uri: string } & ResourceMetadata
+  | { name: string; template: ResourceTemplate } & ResourceMetadata;
+
+type ResourceMetadata = {
+  title?: string;
+  description?: string;
+  mimeType?: string;
+  _meta?: Record<string, unknown>;
+};
+```
+
+### `name`
+
+Identifier for the resource, unique per server.
+
+### `uri`
+
+The fixed URI a static resource is read from, e.g. `docs://pricing`. The handler receives this back as a `URL`.
+
+<Warning>
+The `ui://views/` namespace is reserved for Skybridge view resources. Registering a resource under it throws.
+</Warning>
+
+### `template`
+
+A [`ResourceTemplate`](https://github.com/modelcontextprotocol/typescript-sdk) for a family of URIs, described by an [RFC 6570](https://www.rfc-editor.org/rfc/rfc6570) URI template. Use it when the URI carries a variable, such as a record id.
+
+```ts
+import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+
+server.registerResource(
+  {
+    name: "order",
+    template: new ResourceTemplate("orders://{orderId}", {
+      // List concrete resources the template can produce (or `undefined`).
+      list: async () => ({
+        resources: (await recentOrders()).map((id) => ({
+          name: id,
+          uri: `orders://${id}`,
+        })),
+      }),
+      // Autocomplete a template variable as the user types.
+      complete: {
+        orderId: async (value) => (await matchOrderIds(value)).slice(0, 20),
+      },
+    }),
+  },
+  async (uri, { orderId }) => ({
+    contents: [{ uri: uri.href, text: await renderOrder(orderId as string) }],
+  }),
+);
+```
+
+The `list` callback is required (pass `undefined` to opt out) so a resource family is never accidentally unlistable. See [Completions](/build/resources#completions).
+
+### `mimeType`, `title`, `description`, `_meta`
+
+`mimeType` labels the content (`text/markdown`, `application/json`, …). `title` and `description` are the discovery surface a host shows. `_meta` carries free-form metadata, forwarded untouched.
+
+## Handler
+
+Runs when the resource is read. A static resource's handler receives the requested `uri`; a template's also receives the resolved template `variables`.
+
+```ts
+type ReadHandler = (
+  uri: URL,
+  variablesOrExtra: Variables | RequestHandlerExtra,
+  extra?: RequestHandlerExtra,
+) => Promise<{
+  contents: Array<{
+    uri: string;
+    mimeType?: string;
+    text?: string; // text content
+    blob?: string; // base64 content
+    _meta?: Record<string, unknown>;
+  }>;
+  _meta?: Record<string, unknown>;
+}>;
+```
+
+Return `text` for text resources or `blob` (base64) for binary. Set each entry's `uri` to `uri.href` so the response echoes the URI that was requested.
+
+<CardGroup cols={3}>
+  <Card title="Register Resources" icon="file-text" href="/build/resources">
+    The guide, with completions
+  </Card>
+  <Card title="registerPrompt" icon="message-square" href="/api-reference/register-prompt">
+    Ship reusable prompts
+  </Card>
+  <Card title="McpServer" icon="server" href="/api-reference/mcp-server">
+    The server you register on
+  </Card>
+</CardGroup>

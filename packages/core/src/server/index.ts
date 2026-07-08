@@ -44,6 +44,8 @@ export type {
   JsonOptions,
   KnownToolMeta,
   McpServerTypes,
+  PromptConfig,
+  ResourceConfig,
   SecurityScheme,
   SkybridgeServerOptions,
   ToolDef,

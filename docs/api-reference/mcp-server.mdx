@@ -68,6 +68,22 @@ server.registerTool(config, handler): this;
 
 Registers a tool, optionally bound to a view. See [registerTool](/api-reference/register-tool) for the full config and handler.
 
+### `registerResource`
+
+```ts
+server.registerResource(config, handler): this;
+```
+
+Registers a [resource](/build/resources) the host can read by URI, static or template-based. See [registerResource](/api-reference/register-resource).
+
+### `registerPrompt`
+
+```ts
+server.registerPrompt(config, handler): this;
+```
+
+Registers a [prompt](/build/prompts) the user can invoke from the host's prompt menu. See [registerPrompt](/api-reference/register-prompt).
+
 ### `use`
 
 ```ts

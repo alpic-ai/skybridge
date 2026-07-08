@@ -1,0 +1,90 @@
+---
+title: registerPrompt
+description: "Ship a reusable prompt users can invoke"
+---
+
+`registerPrompt` adds a [prompt](/build/prompts) to your server: a named, parameterized message template the user picks from the host's prompt menu. The handler returns the messages the host inserts into the conversation.
+
+## Example
+
+A prompt that takes one argument and returns a single user message.
+
+```ts server.ts
+import { McpServer } from "skybridge/server";
+import { z } from "zod";
+
+const server = new McpServer({ name: "travel", version: "1.0" }).registerPrompt(
+  {
+    name: "trip-summary",
+    title: "Trip summary",
+    description: "Summarize a trip to a destination.",
+    argsSchema: { destination: z.string() },
+  },
+  ({ destination }) => ({
+    messages: [
+      {
+        role: "user",
+        content: { type: "text", text: `Summarize a trip to ${destination}.` },
+      },
+    ],
+  }),
+);
+```
+
+## Signature
+
+```ts
+server.registerPrompt(config: PromptConfig, handler: PromptHandler): McpServer;
+```
+
+The config-object form returns the server, so it chains alongside [`registerTool`](/api-reference/register-tool) and [`registerResource`](/api-reference/register-resource).
+
+## Config
+
+```ts
+type PromptConfig = {
+  name: string;
+  title?: string;
+  description?: string;
+  argsSchema?: ZodRawShape; // Zod shape; validates args and types the handler
+};
+```
+
+### `name`, `title`, `description`
+
+`name` identifies the prompt; `title` and `description` are what the host shows in its prompt menu.
+
+### `argsSchema`
+
+A [Zod](https://zod.dev/) raw shape whose fields become the prompt's arguments. It validates what the host passes and types the handler's input. Wrap a field in `completable()` to autocomplete it as the user types, see [Completions](/build/prompts#completions).
+
+## Handler
+
+Receives the validated arguments and returns the messages to insert.
+
+```ts
+type PromptHandler = (
+  args: Args,
+  extra: RequestHandlerExtra,
+) => Promise<{
+  description?: string;
+  messages: Array<{
+    role: "user" | "assistant";
+    content: ContentBlock;
+  }>;
+}>;
+```
+
+Each message's `content` is a standard MCP [`ContentBlock`](/api-reference/register-tool#content-helpers), most often `{ type: "text", text }`.
+
+<CardGroup cols={3}>
+  <Card title="Register Prompts" icon="message-square" href="/build/prompts">
+    The guide, with completions
+  </Card>
+  <Card title="registerResource" icon="file-text" href="/api-reference/register-resource">
+    Expose readable content
+  </Card>
+  <Card title="McpServer" icon="server" href="/api-reference/mcp-server">
+    The server you register on
+  </Card>
+</CardGroup>

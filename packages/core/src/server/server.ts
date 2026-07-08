@@ -10,7 +10,17 @@ import {
   Server as SdkServer,
   type ServerOptions,
 } from "@modelcontextprotocol/sdk/server/index.js";
-import { McpServer as McpServerBase } from "@modelcontextprotocol/sdk/server/mcp.js";
+import {
+  McpServer as McpServerBase,
+  type PromptCallback,
+  type ReadResourceCallback,
+  type ReadResourceTemplateCallback,
+  type RegisteredPrompt,
+  type RegisteredResource,
+  type RegisteredResourceTemplate,
+  type ResourceMetadata,
+  type ResourceTemplate,
+} from "@modelcontextprotocol/sdk/server/mcp.js";
 import type {
   AnySchema,
   SchemaOutput,
@@ -345,6 +355,33 @@ interface ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> {
 }
 
 /**
+ * Config object for {@link McpServer.registerResource}. Provide `uri` for a
+ * static resource or `template` (a `ResourceTemplate`) for a dynamic one; the
+ * remaining fields mirror the SDK's `ResourceMetadata` (`title`, `description`,
+ * `mimeType`, `_meta`, …).
+ */
+export type ResourceConfig =
+  | ({ name: string; uri: string; template?: never } & ResourceMetadata)
+  | ({
+      name: string;
+      template: ResourceTemplate;
+      uri?: never;
+    } & ResourceMetadata);
+
+/**
+ * Config object for {@link McpServer.registerPrompt}. `argsSchema` is a Zod raw
+ * shape; wrap individual args in `completable()` for argument autocompletion.
+ */
+export interface PromptConfig<
+  Args extends ZodRawShapeCompat = ZodRawShapeCompat,
+> {
+  name: string;
+  title?: string;
+  description?: string;
+  argsSchema?: Args;
+}
+
+/**
  * Optional client-supplied hints attached to `params._meta` on every tool call
  * by the Apps SDK host. Hints only: never use for authorization, and tolerate
  * absence.
@@ -404,6 +441,15 @@ function stripQuery(uri: string): string {
   return queryIndex === -1 ? uri : uri.slice(0, queryIndex);
 }
 
+/** `ui://views/` is reserved for Skybridge's internal view HTML resources. */
+function assertNotViewNamespace(uri: string): void {
+  if (uri.startsWith("ui://views/")) {
+    throw new Error(
+      `Cannot register resource "${uri}": the "ui://views/" namespace is reserved for Skybridge views.`,
+    );
+  }
+}
+
 /**
  * Coerce a tool handler's return value into an MCP `content` array. Strings
  * become a single `TextContent`; a single block is wrapped in an array;
@@ -425,11 +471,15 @@ export function normalizeContent(
   return [content];
 }
 
-// We Omit `registerTool` from the base class at the type level so our
-// unified 2-arg signature can replace the SDK's 3-arg one without an
-// incompatible override.  The runtime prototype chain is unaffected.
+// We Omit `registerTool`/`registerResource`/`registerPrompt` from the base
+// class at the type level so our config-object overloads can sit alongside the
+// SDK's positional ones without an incompatible override. The runtime prototype
+// chain is unaffected.
 interface McpServerBaseOmitted
-  extends Omit<McpServerBase, "registerTool" | "connect"> {}
+  extends Omit<
+    McpServerBase,
+    "registerTool" | "registerResource" | "registerPrompt" | "connect"
+  > {}
 const McpServerBaseOmitted = McpServerBase as unknown as new (
   ...args: ConstructorParameters<typeof McpServerBase>
 ) => McpServerBaseOmitted;
@@ -1295,6 +1345,97 @@ export class McpServer<
 
     baseFn.call(this, name, { ...toolFields, _meta: toolMeta }, wrappedCb);
 
+    return this;
+  }
+
+  /**
+   * Register an MCP resource. Pass a config object for a chainable,
+   * Skybridge-style registration; the SDK's positional overloads remain
+   * available for internal use.
+   *
+   * @example
+   * ```ts
+   * server.registerResource(
+   *   { name: "pricing", uri: "docs://pricing", mimeType: "text/markdown" },
+   *   async (uri) => ({ contents: [{ uri: uri.href, text: pricingDoc }] }),
+   * );
+   * ```
+   *
+   * @see https://docs.skybridge.tech/build/resources
+   */
+  registerResource(
+    config: { name: string; uri: string } & ResourceMetadata,
+    readCallback: ReadResourceCallback,
+  ): this;
+  registerResource(
+    config: { name: string; template: ResourceTemplate } & ResourceMetadata,
+    readCallback: ReadResourceTemplateCallback,
+  ): this;
+  registerResource(
+    name: string,
+    uri: string,
+    config: ResourceMetadata,
+    readCallback: ReadResourceCallback,
+  ): RegisteredResource;
+  registerResource(
+    name: string,
+    template: ResourceTemplate,
+    config: ResourceMetadata,
+    readCallback: ReadResourceTemplateCallback,
+  ): RegisteredResourceTemplate;
+  registerResource(...args: unknown[]): unknown {
+    const baseFn = McpServerBase.prototype.registerResource as (
+      ...args: unknown[]
+    ) => unknown;
+
+    if (typeof args[0] === "string") {
+      return baseFn.call(this, args[0], args[1], args[2], args[3]);
+    }
+
+    const { name, uri, template, ...metadata } = args[0] as ResourceConfig;
+    const uriOrTemplate = template ?? uri;
+    assertNotViewNamespace(
+      template ? String(template.uriTemplate) : (uri as string),
+    );
+    baseFn.call(this, name, uriOrTemplate, metadata, args[1]);
+    return this;
+  }
+
+  /**
+   * Register an MCP prompt. Pass a config object for a chainable,
+   * Skybridge-style registration; the SDK's positional overloads remain
+   * available for internal use.
+   *
+   * @example
+   * ```ts
+   * server.registerPrompt(
+   *   { name: "trip-summary", argsSchema: { destination: z.string() } },
+   *   ({ destination }) => ({ messages: [] }),
+   * );
+   * ```
+   *
+   * @see https://docs.skybridge.tech/build/prompts
+   */
+  registerPrompt<Args extends ZodRawShapeCompat>(
+    config: PromptConfig<Args>,
+    cb: PromptCallback<Args>,
+  ): this;
+  registerPrompt<Args extends ZodRawShapeCompat>(
+    name: string,
+    config: { title?: string; description?: string; argsSchema?: Args },
+    cb: PromptCallback<Args>,
+  ): RegisteredPrompt;
+  registerPrompt(...args: unknown[]): unknown {
+    const baseFn = McpServerBase.prototype.registerPrompt as (
+      ...args: unknown[]
+    ) => unknown;
+
+    if (typeof args[0] === "string") {
+      return baseFn.call(this, args[0], args[1], args[2]);
+    }
+
+    const { name, ...config } = args[0] as PromptConfig;
+    baseFn.call(this, name, config, args[1]);
     return this;
   }
 }
