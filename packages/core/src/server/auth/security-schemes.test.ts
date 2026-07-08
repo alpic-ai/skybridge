@@ -19,15 +19,18 @@ describe("clientPrefersInBandChallenge", () => {
 });
 
 describe("authToSecuritySchemes", () => {
-  it("maps the three auth shorthands", () => {
-    expect(authToSecuritySchemes("public")).toEqual([
+  it("maps the auth shorthand", () => {
+    expect(authToSecuritySchemes({ public: true })).toEqual([
       { type: "noauth" },
       { type: "oauth2" },
     ]);
-    expect(authToSecuritySchemes("required")).toEqual([{ type: "oauth2" }]);
+    expect(authToSecuritySchemes({})).toEqual([{ type: "oauth2" }]);
     expect(authToSecuritySchemes({ scopes: ["checkout"] })).toEqual([
       { type: "oauth2", scopes: ["checkout"] },
     ]);
+    expect(
+      authToSecuritySchemes({ public: true, scopes: ["checkout"] }),
+    ).toEqual([{ type: "noauth" }, { type: "oauth2", scopes: ["checkout"] }]);
   });
 });
 

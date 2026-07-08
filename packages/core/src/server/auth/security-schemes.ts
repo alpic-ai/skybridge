@@ -2,13 +2,11 @@ import type { AuthInfo } from "../auth.js";
 import type { SecurityScheme, ToolAuth } from "../server.js";
 
 export function authToSecuritySchemes(auth: ToolAuth): SecurityScheme[] {
-  if (auth === "public") {
-    return [{ type: "noauth" }, { type: "oauth2" }];
-  }
-  if (auth === "required") {
-    return [{ type: "oauth2" }];
-  }
-  return [{ type: "oauth2", scopes: auth.scopes }];
+  const oauth2: SecurityScheme = {
+    type: "oauth2",
+    ...(auth.scopes?.length ? { scopes: auth.scopes } : {}),
+  };
+  return auth.public ? [{ type: "noauth" }, oauth2] : [oauth2];
 }
 
 export function securitySchemesAllowAnonymous(

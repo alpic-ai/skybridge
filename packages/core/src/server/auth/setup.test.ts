@@ -238,7 +238,7 @@ async function bootMixedServer(jwksUri: string) {
         name: "public-whoami",
         description: "Public.",
         inputSchema: {},
-        auth: "public",
+        auth: { public: true },
       },
       (_args, extra) => ({
         content: [{ type: "text", text: extra.authInfo?.clientId ?? "anon" }],
@@ -249,7 +249,7 @@ async function bootMixedServer(jwksUri: string) {
         name: "private-whoami",
         description: "Private.",
         inputSchema: {},
-        auth: "required",
+        auth: {},
       },
       (_args, extra) => ({
         content: [{ type: "text", text: extra.authInfo?.clientId ?? "anon" }],
@@ -519,31 +519,44 @@ describe("per-tool scope enforcement in fully-authenticated mode", () => {
 });
 
 describe("auth shorthand validation", () => {
-  it("throws when `auth` is set but no oauth provider is configured", () => {
+  it("throws when `auth` requires sign-in but no oauth provider is configured", () => {
     expect(() =>
       new McpServer({ name: "t", version: "0" }).registerTool(
-        { name: "x", inputSchema: {}, auth: "required" },
+        { name: "x", inputSchema: {}, auth: {} },
         () => ({ content: [{ type: "text", text: "" }] }),
       ),
     ).toThrow(/no `oauth` provider/);
   });
 
-  it('allows `auth: "public"` without an oauth provider', () => {
+  it("throws when `auth` sets scopes but no oauth provider is configured", () => {
     expect(() =>
       new McpServer({ name: "t", version: "0" }).registerTool(
-        { name: "x", inputSchema: {}, auth: "public" },
+        { name: "x", inputSchema: {}, auth: { scopes: ["checkout"] } },
+        () => ({ content: [{ type: "text", text: "" }] }),
+      ),
+    ).toThrow(/no `oauth` provider/);
+  });
+
+  it("allows `auth: { public: true }` without an oauth provider", () => {
+    expect(() =>
+      new McpServer({ name: "t", version: "0" }).registerTool(
+        { name: "x", inputSchema: {}, auth: { public: true } },
         () => ({ content: [{ type: "text", text: "" }] }),
       ),
     ).not.toThrow();
   });
 
-  it("prefers `securitySchemes` over `auth` when both are set", () => {
+  it("prefers `securitySchemes` over `auth` when both are set (untyped path)", () => {
     expect(() =>
-      new McpServer({ name: "t", version: "0" }).registerTool(
+      (
+        new McpServer({ name: "t", version: "0" }).registerTool as (
+          ...a: unknown[]
+        ) => unknown
+      )(
         {
           name: "x",
           inputSchema: {},
-          auth: "required",
+          auth: {},
           securitySchemes: [{ type: "oauth2" }],
         },
         () => ({ content: [{ type: "text", text: "" }] }),

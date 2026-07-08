@@ -17,8 +17,8 @@ For the fully-authenticated variant (every tool requires sign-in), see
 
 | Tool | `auth` declaration | Compiles to | Behavior |
 | --- | --- | --- | --- |
-| `browse-catalog` | `"public"` | `[{noauth},{oauth2}]` | Callable signed out; uses the token when present (greets you by name). |
-| `whoami` | `"required"` | `[{oauth2}]` | Requires sign-in. |
+| `browse-catalog` | `{ public: true }` | `[{noauth},{oauth2}]` | Callable signed out; uses the token when present (greets you by name). |
+| `whoami` | `{}` | `[{oauth2}]` | Requires sign-in. |
 | `checkout` | `{ scopes: ["checkout"] }` | `[{oauth2, scopes:["checkout"]}]` | Requires sign-in **and** the `checkout` scope. |
 | `account` | *(omitted)* | — | No declaration → secure default: sign-in required. |
 
