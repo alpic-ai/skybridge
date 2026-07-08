@@ -1,6 +1,12 @@
 import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { extname, join } from "node:path";
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  statSync,
+} from "node:fs";
+import { extname, join, resolve, sep } from "node:path";
 import type {
   ReadResourceCallback,
   ReadResourceTemplateCallback,
@@ -311,11 +317,30 @@ export function manifestSource(manifest: SkillsManifest): SkillsSource {
 
 /** Source that reads live from disk — used in dev so skill edits need no restart. */
 export function diskSource(dir: string): SkillsSource {
+  const rootReal = existsSync(dir) ? realpathSync(dir) : resolve(dir);
+
+  /**
+   * Resolve a skill path and confirm its real (symlink-followed) location stays
+   * within the skills root, else return null. `skillUriToRelPath` already
+   * rejects `..`/`.` segments; this closes the remaining hole where an in-tree
+   * symlink points outside the root.
+   */
+  const contain = (name: string, relPath: string): string | null => {
+    const path = join(dir, name, relPath);
+    if (!existsSync(path)) {
+      return null;
+    }
+    const real = realpathSync(path);
+    return real === rootReal || real.startsWith(`${rootReal}${sep}`)
+      ? path
+      : null;
+  };
+
   return {
     list: () => discoverSkills(dir),
     readFile: (name, relPath) => {
-      const path = join(dir, name, relPath || "SKILL.md");
-      if (!existsSync(path) || !statSync(path).isFile()) {
+      const path = contain(name, relPath || "SKILL.md");
+      if (!path || !statSync(path).isFile()) {
         return null;
       }
       return {
@@ -324,8 +349,8 @@ export function diskSource(dir: string): SkillsSource {
       };
     },
     readDir: (name, relPath) => {
-      const path = join(dir, name, relPath);
-      if (!existsSync(path) || !statSync(path).isDirectory()) {
+      const path = contain(name, relPath);
+      if (!path || !statSync(path).isDirectory()) {
         return null;
       }
       return readdirSync(path, { withFileTypes: true }).map((entry) => ({

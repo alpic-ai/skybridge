@@ -1,5 +1,7 @@
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { describe, expect, it, vi } from "vitest";
 import {
   __setSkillsManifest,
@@ -61,6 +63,40 @@ describe("skills server option", () => {
       extensionsOf(server)?.["io.modelcontextprotocol/skills"],
     ).toBeUndefined();
     expect(registeredResourceNames(server)).not.toContain("skill://index.json");
+  });
+
+  it("serves skills through the stateless transport (capability + reads)", async () => {
+    __setSkillsManifest(MANIFEST);
+    const server = new McpServer(
+      { name: "t", version: "0.0.1" },
+      {},
+      { skills: true },
+    );
+    const client = new Client({ name: "c", version: "0.0.1" });
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    // The production HTTP path builds a fresh per-request server and copies
+    // handler maps by reference; exercise it directly to lock that skills
+    // (capability + resource reads) survive that hop.
+    await server.connectStatelessTransport(serverTransport);
+    await client.connect(clientTransport);
+
+    expect(
+      client.getServerCapabilities()?.extensions?.[
+        "io.modelcontextprotocol/skills"
+      ],
+    ).toEqual({ directoryRead: true });
+
+    const index = await client.readResource({ uri: "skill://index.json" });
+    expect((index.contents[0] as { text?: string }).text).toContain(
+      "skill://demo/SKILL.md",
+    );
+
+    const skill = await client.readResource({ uri: "skill://demo/SKILL.md" });
+    expect((skill.contents[0] as { text?: string }).text).toBe("# Demo");
+
+    await client.close();
+    await server.close();
   });
 
   it("warns when skills are enabled but none are found at the resolved path", () => {

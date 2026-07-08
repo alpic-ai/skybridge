@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -234,5 +234,17 @@ describe("diskSource", () => {
     expect(source.readFile("refunds", "templates/email.md")?.text).toBe("Hi");
     expect(source.readFile("refunds", "missing.md")).toBeNull();
     expect(source.readDir("refunds", "nope")).toBeNull();
+  });
+
+  it("refuses to read or list through a symlink that escapes the skills root", () => {
+    const outside = mkdtempSync(join(tmpdir(), "skybridge-outside-"));
+    writeFileSync(join(outside, "secret.txt"), "TOP SECRET");
+    const dir = mkSkillDir({ "demo/SKILL.md": FM("demo", "d") });
+    symlinkSync(join(outside, "secret.txt"), join(dir, "demo", "leak.txt"));
+    symlinkSync(outside, join(dir, "demo", "escape"));
+
+    const source = diskSource(dir);
+    expect(source.readFile("demo", "leak.txt")).toBeNull();
+    expect(source.readDir("demo", "escape")).toBeNull();
   });
 });

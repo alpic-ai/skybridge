@@ -63,4 +63,3 @@ Skill content is untrusted model input, not a trusted instruction. Hosts treat i
 - **Build / production** — `skybridge build` snapshots your skills into the bundle. They are served from memory at runtime, never read from disk, so the feature works on every deploy target including filesystem-less ones (Cloudflare Workers) and bundled functions (Vercel).
 
 `{ skills: { dir: "path/to/skills" } }` overrides the directory in dev; production builds always snapshot `src/skills`.
-</content>

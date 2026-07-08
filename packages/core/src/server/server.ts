@@ -599,9 +599,13 @@ export class McpServer<
     options?: ServerOptions,
     skybridgeOptions?: SkybridgeServerOptions,
   ) {
-    super(serverInfo, withSkillsCapability(options, skybridgeOptions));
+    const mergedOptions = withSkillsCapability(options, skybridgeOptions);
+    super(serverInfo, mergedOptions);
     this.serverInfo = serverInfo;
-    this.serverOptions = options;
+    // Store the merged options: the per-request stateless server is built from
+    // these, so it must carry the skills capability too (a host keys off
+    // `capabilities.extensions` to decide whether to look for skills).
+    this.serverOptions = mergedOptions;
     this.express = express();
     this.express.use(express.json(skybridgeOptions?.json));
     if (skybridgeOptions?.oauth) {
