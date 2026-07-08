@@ -56,7 +56,14 @@ export type {
 } from "./server.js";
 export {
   __setBuildManifest,
+  __setSkillsManifest,
   McpServer,
   normalizeContent,
 } from "./server.js";
+export {
+  discoverSkills,
+  type Skill,
+  type SkillFile,
+  type SkillsManifest,
+} from "./skills.js";
 export { viewsDevServer } from "./viewsDevServer.js";

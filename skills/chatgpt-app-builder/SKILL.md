@@ -38,6 +38,7 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 - **External links** → [open-external-links.md](references/open-external-links.md): when redirecting to external URLs or setting "open in app" target
 - **OAuth** → [oauth.md](references/oauth.md): when tools need user authentication to access user-specific data
 - **CSP** → [csp.md](references/csp.md): when declaring allowed domains for fetch, assets, redirects, or iframes
+- **Skills over MCP** → [skills.md](references/skills.md): when shipping Agent Skills (SKILL.md workflows) alongside the server (experimental)
 
 ## Deploy
 

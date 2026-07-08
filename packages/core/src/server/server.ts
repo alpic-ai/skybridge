@@ -49,6 +49,13 @@ import type {
 } from "./middleware.js";
 import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
 import { resolveServerOrigin } from "./requestOrigin.js";
+import {
+  diskSource,
+  manifestSource,
+  registerSkills,
+  SKILLS_EXTENSION_KEY,
+  type SkillsManifest,
+} from "./skills.js";
 import { templateHelper } from "./templateHelper.js";
 
 const mergeWithUnion = <T extends object, S extends object>(
@@ -169,7 +176,20 @@ export interface SkybridgeServerOptions {
   json?: JsonOptions;
   /** Resource-server OAuth config. When set, mounts well-known metadata and bearer auth on `/mcp`. */
   oauth?: OAuthConfig;
+  /**
+   * Serve Agent Skills over MCP ([SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640)).
+   * `true` serves skills from `src/skills`; a string sets a custom directory
+   * (dev only — production builds snapshot `src/skills`). Its presence gates the
+   * feature and declares the `io.modelcontextprotocol/skills` capability. Omit
+   * to disable entirely.
+   *
+   * @experimental Tracks SEP-2640, which is under active development.
+   */
+  skills?: boolean | string;
 }
+
+/** Default directory scanned for skills when `skills: true`. */
+const DEFAULT_SKILLS_DIR = "src/skills";
 
 /**
  * Normalize an `x-forwarded-prefix` value into a leading-slash, no-trailing-slash
@@ -483,6 +503,52 @@ export function __setBuildManifest(
   pendingBuildManifest = manifest;
 }
 
+// Side channel for the build-time skills snapshot, primed by `dist/__entry.js`
+// before user code runs — same rationale as `pendingBuildManifest`. Injected in
+// memory so production never reads skills from disk, which keeps the feature
+// working on filesystem-less targets (Cloudflare Workers) and bundled functions
+// (Vercel), exactly like the Vite manifest.
+let pendingSkillsManifest: SkillsManifest | null = null;
+
+/**
+ * Prime the build-time skills snapshot before user code constructs its
+ * `McpServer`. Called from the generated `dist/__entry.js`; not part of the
+ * user-facing API.
+ *
+ * @internal
+ */
+export function __setSkillsManifest(manifest: SkillsManifest): void {
+  pendingSkillsManifest = manifest;
+}
+
+/** Whether the `skills` option enables the feature. */
+const skillsEnabled = (skills: SkybridgeServerOptions["skills"]): boolean =>
+  skills === true || typeof skills === "string";
+
+/**
+ * Deep-merge the skills extension capability into `options` when skills are
+ * enabled, so it appears in the `initialize` response. Pure and `this`-free so
+ * it can run inside the `super(...)` call, before `this` exists.
+ */
+function withSkillsCapability(
+  options: ServerOptions | undefined,
+  skybridgeOptions: SkybridgeServerOptions | undefined,
+): ServerOptions | undefined {
+  if (!skillsEnabled(skybridgeOptions?.skills)) {
+    return options;
+  }
+  return {
+    ...options,
+    capabilities: {
+      ...options?.capabilities,
+      extensions: {
+        ...options?.capabilities?.extensions,
+        [SKILLS_EXTENSION_KEY]: { directoryRead: true },
+      },
+    },
+  };
+}
+
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
 > extends McpServerBaseOmitted {
@@ -526,7 +592,7 @@ export class McpServer<
     options?: ServerOptions,
     skybridgeOptions?: SkybridgeServerOptions,
   ) {
-    super(serverInfo, options);
+    super(serverInfo, withSkillsCapability(options, skybridgeOptions));
     this.serverInfo = serverInfo;
     this.serverOptions = options;
     this.express = express();
@@ -543,6 +609,28 @@ export class McpServer<
       this.setViteManifest(pendingBuildManifest);
       pendingBuildManifest = null;
     }
+    this.setupSkills(skybridgeOptions?.skills);
+  }
+
+  /**
+   * Register skill resources when the `skills` option is set. Production reads
+   * from the injected build snapshot (primed by `dist/__entry.js`); dev reads
+   * live from disk so edits show up without a restart.
+   */
+  private setupSkills(skills: SkybridgeServerOptions["skills"]): void {
+    // Consume-once regardless of the option so a primed manifest can't leak
+    // into a later server constructed without priming (mirrors the Vite manifest).
+    const manifest = pendingSkillsManifest;
+    pendingSkillsManifest = null;
+    if (!skillsEnabled(skills)) {
+      return;
+    }
+
+    const source = manifest
+      ? manifestSource(manifest)
+      : diskSource(typeof skills === "string" ? skills : DEFAULT_SKILLS_DIR);
+
+    registerSkills(this, source, { directoryRead: true });
   }
 
   /**

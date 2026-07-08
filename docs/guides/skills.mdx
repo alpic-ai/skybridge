@@ -1,0 +1,66 @@
+---
+title: "Serve Skills over MCP"
+description: "Ship Agent Skills alongside your server"
+sidebarTitle: "Skills"
+icon: "book-sparkles"
+---
+
+<Info>
+Skills over MCP tracks [SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640), which is still under review. This feature is **experimental** and may change with the spec.
+</Info>
+
+A [tool](/build/tools) description tells an agent *what* a tool does. A **skill** tells it *how* to orchestrate a workflow — a directory of instructions (`SKILL.md` plus supporting files) that the host loads into context on demand. Skybridge serves skills as MCP resources under the `skill://` scheme, following the [Agent Skills](https://agentskills.io/) format, so any host that adopts the standard can discover and read them.
+
+## Enable skills
+
+Drop your skills under `src/skills/`, one directory per skill, and turn the option on:
+
+```ts server.ts
+const server = new McpServer(
+  { name: "shop", version: "1.0" },
+  {},
+  { skills: true },
+);
+```
+
+```
+src/skills/
+  refunds/
+    SKILL.md            # required — frontmatter + instructions
+    templates/
+      email.md          # supporting files, read on demand
+```
+
+Each `SKILL.md` begins with YAML frontmatter whose `name` matches its directory:
+
+```md src/skills/refunds/SKILL.md
+---
+name: refunds
+description: Process customer refund requests per company policy.
+---
+
+1. Look up the order with `get-order`.
+2. ...
+```
+
+That is all. Skybridge validates every skill at build and dev startup (a bad `name`, missing `description`, or name/directory mismatch fails loudly), then exposes:
+
+- `skill://refunds/SKILL.md` and each supporting file as MCP resources.
+- `skill://index.json`, the discovery index (each entry carries the skill's `url`, a `sha256` digest, and its frontmatter verbatim).
+- the `io.modelcontextprotocol/skills` capability, so hosts know to look.
+
+## How hosts use them
+
+Skills are **pull-based**: the server never pushes them. A host reads `skill://index.json`, surfaces each skill's `name` and `description`, and lets the model read the full `SKILL.md` only when it's relevant ([progressive disclosure](https://agentskills.io/specification#progressive-disclosure)). To point the model at a skill, reference its URI from a tool description or a tool result, e.g. *"see `skill://refunds/SKILL.md`"*.
+
+<Warning>
+Skill content is untrusted model input, not a trusted instruction. Hosts treat it as a prompt-injection surface and never grant it higher authority or execute code from it.
+</Warning>
+
+## Lifecycle
+
+- **Dev** — skills are read live from `src/skills/`, so edits show up without a restart.
+- **Build / production** — `skybridge build` snapshots your skills into the bundle. They are served from memory at runtime, never read from disk, so the feature works on every deploy target including filesystem-less ones (Cloudflare Workers) and bundled functions (Vercel).
+
+A string value (`{ skills: "path/to/skills" }`) sets a custom directory in dev; production builds always snapshot `src/skills`.
+</content>

@@ -74,6 +74,7 @@
               "guides/csp",
               "guides/ux",
               "guides/files",
+              "guides/skills",
               "guides/auth-providers",
               "guides/migrate"
             ],
