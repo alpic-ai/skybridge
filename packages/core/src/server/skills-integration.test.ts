@@ -1,4 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { describe, expect, it, vi } from "vitest";
 import {
   __setSkillsManifest,
   McpServer,
@@ -59,5 +61,18 @@ describe("skills server option", () => {
       extensionsOf(server)?.["io.modelcontextprotocol/skills"],
     ).toBeUndefined();
     expect(registeredResourceNames(server)).not.toContain("skill://index.json");
+  });
+
+  it("warns when skills are enabled but none are found at the resolved path", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    new McpServer(
+      { name: "t", version: "0.0.1" },
+      {},
+      { skills: { dir: join(tmpdir(), "skybridge-no-skills-here") } },
+    );
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("no skills were found"),
+    );
+    warn.mockRestore();
   });
 });

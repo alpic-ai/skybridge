@@ -19,7 +19,7 @@ Drop your skills under `src/skills/`, one directory per skill, and turn the opti
 const server = new McpServer(
   { name: "shop", version: "1.0" },
   {},
-  { skills: true },
+  { skills: true }, // or { dir } to override the directory
 );
 ```
 
@@ -62,5 +62,5 @@ Skill content is untrusted model input, not a trusted instruction. Hosts treat i
 - **Dev** — skills are read live from `src/skills/`, so edits show up without a restart.
 - **Build / production** — `skybridge build` snapshots your skills into the bundle. They are served from memory at runtime, never read from disk, so the feature works on every deploy target including filesystem-less ones (Cloudflare Workers) and bundled functions (Vercel).
 
-A string value (`{ skills: "path/to/skills" }`) sets a custom directory in dev; production builds always snapshot `src/skills`.
+`{ skills: { dir: "path/to/skills" } }` overrides the directory in dev; production builds always snapshot `src/skills`.
 </content>

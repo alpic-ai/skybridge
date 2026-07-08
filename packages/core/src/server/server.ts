@@ -178,17 +178,24 @@ export interface SkybridgeServerOptions {
   oauth?: OAuthConfig;
   /**
    * Serve Agent Skills over MCP ([SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640)).
-   * `true` serves skills from `src/skills`; a string sets a custom directory
-   * (dev only — production builds snapshot `src/skills`). Its presence gates the
-   * feature and declares the `io.modelcontextprotocol/skills` capability. Omit
-   * to disable entirely.
+   * `true` (or a config object) enables the feature and declares the
+   * `io.modelcontextprotocol/skills` capability; omit or `false` to disable.
    *
    * @experimental Tracks SEP-2640, which is under active development.
    */
-  skills?: boolean | string;
+  skills?: boolean | SkillsOptions;
 }
 
-/** Default directory scanned for skills when `skills: true`. */
+/** Configuration for {@link SkybridgeServerOptions.skills}. */
+export interface SkillsOptions {
+  /**
+   * Directory scanned for skills. Defaults to `src/skills`. A custom value
+   * applies in dev only — production builds snapshot `src/skills`.
+   */
+  dir?: string;
+}
+
+/** Default directory scanned for skills. */
 const DEFAULT_SKILLS_DIR = "src/skills";
 
 /**
@@ -521,9 +528,9 @@ export function __setSkillsManifest(manifest: SkillsManifest): void {
   pendingSkillsManifest = manifest;
 }
 
-/** Whether the `skills` option enables the feature. */
+/** Whether the `skills` option enables the feature (`true` or a config object). */
 const skillsEnabled = (skills: SkybridgeServerOptions["skills"]): boolean =>
-  skills === true || typeof skills === "string";
+  skills === true || (typeof skills === "object" && skills !== null);
 
 /**
  * Deep-merge the skills extension capability into `options` when skills are
@@ -626,9 +633,18 @@ export class McpServer<
       return;
     }
 
-    const source = manifest
-      ? manifestSource(manifest)
-      : diskSource(typeof skills === "string" ? skills : DEFAULT_SKILLS_DIR);
+    const dir =
+      (typeof skills === "object" ? skills.dir : undefined) ??
+      DEFAULT_SKILLS_DIR;
+    const source = manifest ? manifestSource(manifest) : diskSource(dir);
+
+    if (source.list().length === 0) {
+      console.warn(
+        manifest
+          ? `skybridge: the "skills" option is enabled but the build shipped no skills. Add a <name>/SKILL.md under "${DEFAULT_SKILLS_DIR}" and rebuild, or remove the option.`
+          : `skybridge: the "skills" option is enabled but no skills were found in "${dir}". Add a <name>/SKILL.md there, or remove the option.`,
+      );
+    }
 
     registerSkills(this, source, { directoryRead: true });
   }

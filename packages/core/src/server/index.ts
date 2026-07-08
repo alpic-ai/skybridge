@@ -45,6 +45,7 @@ export type {
   KnownToolMeta,
   McpServerTypes,
   SecurityScheme,
+  SkillsOptions,
   SkybridgeServerOptions,
   ToolDef,
   ToolMeta,

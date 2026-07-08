@@ -12,7 +12,7 @@ Place skills under `src/skills/`, one directory per skill, and set the option:
 const server = new McpServer(
   { name: "shop", version: "1.0" },
   {},
-  { skills: true }, // presence gates the feature; string sets a custom dev dir
+  { skills: true }, // or { dir } to override the dev directory
 );
 ```
 
@@ -43,6 +43,6 @@ description: Process customer refund requests per company policy.
 
 - **Pull-based**: the server never pushes a skill. To steer the model, reference a `skill://` URI from a tool description or tool result (e.g. `"see skill://refunds/SKILL.md"`).
 - **Untrusted**: hosts treat skill content as model input, not a trusted directive — never rely on it for security decisions.
-- **Lifecycle**: dev reads live from disk (edits need no restart); `skybridge build` snapshots skills into the bundle and serves them from memory, so it works on every deploy target (Cloudflare Workers, Vercel, Docker, Alpic Cloud). Custom string dirs apply to dev only; production builds snapshot `src/skills`.
+- **Lifecycle**: dev reads live from disk (edits need no restart); `skybridge build` snapshots skills into the bundle and serves them from memory, so it works on every deploy target (Cloudflare Workers, Vercel, Docker, Alpic Cloud). A custom `dir` applies to dev only; production builds snapshot `src/skills`.
 
 See the [Skills guide](https://docs.skybridge.tech/guides/skills).
