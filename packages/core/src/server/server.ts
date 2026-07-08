@@ -179,6 +179,20 @@ export interface SkybridgeServerOptions {
 }
 
 /**
+ * Normalize an `x-forwarded-prefix` value into a leading-slash, no-trailing-slash
+ * path. Takes the first hop of a comma-separated proxy chain.
+ * "/v1/", "v1", "/v1, /internal" → "/v1"; "", "/", undefined → "".
+ */
+function normalizeForwardedPrefix(raw: string | undefined): string {
+  const firstHop = raw?.split(",")[0]?.trim() ?? "";
+  const trimmed = firstHop.replace(/\/+$/, "");
+  if (trimmed === "") {
+    return "";
+  }
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+}
+
+/**
  * Well-known keys recognized by host runtimes when set on a tool's `_meta`.
  * Use {@link ToolMeta} to also pass arbitrary custom metadata alongside these.
  *
@@ -963,6 +977,7 @@ export class McpServer<
 
   private resolveViewRequestContext(extra: McpExtra | undefined): {
     serverUrl: string;
+    assetsBasePath: string;
     connectDomains: string[];
     contentMetaOverrides: { domain?: string };
   } {
@@ -975,6 +990,13 @@ export class McpServer<
     const isClaude = header("user-agent") === "Claude-User";
 
     const serverUrl = resolveServerOrigin(header);
+    // Path prefix the proxy routed this request under (e.g. `foo.com/v1`). Read
+    // per-request so one process can serve many hosts/prefixes at once: the
+    // origin is recovered from x-forwarded-host, the prefix from
+    // x-forwarded-prefix. Empty when served at the origin root.
+    const assetsBasePath = normalizeForwardedPrefix(
+      header("x-forwarded-prefix"),
+    );
 
     const connectDomains = [serverUrl];
     if (!isProduction) {
@@ -999,7 +1021,7 @@ export class McpServer<
       contentMetaOverrides = { domain: `${hash}.claudemcpcontent.com` };
     }
 
-    return { serverUrl, connectDomains, contentMetaOverrides };
+    return { serverUrl, assetsBasePath, connectDomains, contentMetaOverrides };
   }
 
   private registerViewResources(
@@ -1120,18 +1142,23 @@ export class McpServer<
       { description: view.description },
       async (uri, extra) => {
         const isProduction = process.env.NODE_ENV === "production";
-        const { serverUrl } = this.resolveViewRequestContext(extra);
+        const { serverUrl, assetsBasePath } =
+          this.resolveViewRequestContext(extra);
+        // The view resolves all assets (template imports + runtime lazy chunks
+        // via `window.skybridge.serverUrl`) against this base, so it carries the
+        // proxy path prefix. CSP domains in `buildMeta` stay the bare origin.
+        const viewBase = `${serverUrl}${assetsBasePath}`;
 
         const html = isProduction
           ? templateHelper.renderProduction({
               hostType,
-              serverUrl,
+              serverUrl: viewBase,
               viewFile: this.lookupViewFile(view.component),
               styleFile: this.lookupDistFile("style.css") ?? "",
             })
           : templateHelper.renderDevelopment({
               hostType,
-              serverUrl,
+              serverUrl: viewBase,
               viewName: view.component,
             });
 

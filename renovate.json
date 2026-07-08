@@ -8,11 +8,33 @@
   "prConcurrentLimit": 5,
   "timezone": "Europe/Paris",
   "rangeStrategy": "bump",
+  "rebaseWhen": "behind-base-branch",
+  "platformAutomerge": false,
+  "minimumReleaseAge": "3 days",
   "packageRules": [
     {
       "description": "Ignore pnpm overrides (security floor pins managed manually)",
       "matchDepTypes": ["pnpm.overrides"],
       "enabled": false
+    },
+    {
+      "description": "Automerge non-major updates once CI passes",
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    },
+    {
+      "description": "Automerge devDependencies (including majors) once CI passes",
+      "matchDepTypes": ["devDependencies"],
+      "automerge": true
+    },
+    {
+      "description": "Never bump engines.node in published packages; Node support changes are deliberate semver-major decisions",
+      "matchDepNames": ["node"],
+      "matchFileNames": ["packages/*/package.json"],
+      "enabled": false
     }
-  ]
+  ],
+  "vulnerabilityAlerts": {
+    "automerge": true
+  }
 }

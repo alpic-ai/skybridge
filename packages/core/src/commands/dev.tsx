@@ -3,6 +3,7 @@ import { Box, render, Text } from "ink";
 import { resolvePort } from "../cli/detect-port.js";
 import { Header } from "../cli/header.js";
 import { resolveViewsDir } from "../cli/resolve-views-dir.js";
+import { runPlain } from "../cli/run-plain.js";
 import { startTunnelControlServer } from "../cli/tunnel-control-server.js";
 import { useMessages } from "../cli/use-messages.js";
 import { useNodemon } from "../cli/use-nodemon.js";
@@ -32,6 +33,11 @@ export default class Dev extends Command {
     verbose: Flags.boolean({
       char: "v",
       description: "Show tunnel logs",
+      default: false,
+    }),
+    plain: Flags.boolean({
+      description:
+        "Disable the interactive UI and stream raw server logs to stdout, so you can pipe them through a formatter (e.g. `skybridge dev --plain | bunyan`).",
       default: false,
     }),
   };
@@ -69,6 +75,35 @@ export default class Dev extends Command {
       __PORT: String(port),
       __TUNNEL_CONTROL_PORT: String(controlPort),
     };
+
+    if (flags.plain) {
+      const teardown = runPlain({
+        env,
+        port,
+        fallback,
+        version: this.config.version,
+        tunnel: flags.tunnel,
+        tunnelManager,
+      });
+
+      // Synchronous-first shutdown: kill the alpic subprocess up front so we
+      // can't leave it orphaned even if another SIGINT listener (e.g.
+      // nodemon's) exits the process before our async cleanup completes.
+      const shutdown = (code: number) => () => {
+        tunnelManager.stop();
+        teardown();
+        void closeTunnelControl()
+          .catch((err) => {
+            console.error("Failed to close tunnel control server", err);
+          })
+          .finally(() => {
+            process.exit(code);
+          });
+      };
+      process.once("SIGINT", shutdown(130));
+      process.once("SIGTERM", shutdown(143));
+      return;
+    }
 
     const App = () => {
       const tsErrors = useTypeScriptCheck();

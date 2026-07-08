@@ -56,7 +56,16 @@
             ],
             "expanded": true
           },
-          "ship",
+          {
+            "group": "Ship",
+            "icon": "ship",
+            "root": "ship/index",
+            "pages": [
+              "ship/deploy",
+              "ship/versioning"
+            ],
+            "expanded": true
+          },
           {
             "group": "Guides",
             "icon": "book-open",
@@ -179,11 +188,13 @@
             "group": "Use cases",
             "pages": [
               "examples/capitals",
+              "examples/chatgpt-files",
               "examples/chess",
               "examples/ecommerce-carousel",
               "examples/flight-booking",
               "examples/investigation-game",
               "examples/productivity",
+              "examples/supabase-triplog",
               "examples/times-up"
             ]
           },

@@ -22,7 +22,10 @@ const devtools = (port: number, fixturePort: number) => ({
   command: `pnpm dev -- --port ${port} --strictPort`,
   port,
   reuseExistingServer: !process.env.CI,
-  env: { VITE_MCP_SERVER_URL: `http://localhost:${fixturePort}/mcp` },
+  env: {
+    VITE_MCP_SERVER_URL: `http://localhost:${fixturePort}/mcp`,
+    DEVTOOLS_VITE_CACHE_DIR: `node_modules/.vite-e2e-${port}`,
+  },
   stdout: "pipe" as const,
   stderr: "pipe" as const,
   timeout: 60_000,
@@ -32,11 +35,11 @@ export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  retries: 0,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   use: {
     baseURL: `http://localhost:${DEVTOOLS_PORT}`,
-    trace: "on-first-retry",
+    trace: "retain-on-failure",
   },
   projects: [
     {

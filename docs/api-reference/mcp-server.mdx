@@ -116,7 +116,7 @@ server.mcpMiddleware("request", (request, extra, next) => {
 server.run(): Promise<{ fetch: (...args: unknown[]) => unknown } | Express | undefined>;
 ```
 
-Starts the HTTP server: applies your middleware, mounts `/mcp`, and listens (default port `3000`). On serverless platforms, export what it returns so the platform can route requests to it. See [Ship](/ship) for the per-platform setup.
+Starts the HTTP server: applies your middleware, mounts `/mcp`, and listens (default port `3000`). On serverless platforms, export what it returns so the platform can route requests to it. See [Deploy](/ship/deploy) for the per-platform setup.
 
 <CardGroup cols={3}>
   <Card title="registerTool" icon="wrench" href="/api-reference/register-tool">

@@ -1,8 +1,8 @@
 import { isAbsolute, relative } from "node:path";
 import spawn from "cross-spawn";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-type TsError = {
+export type TsError = {
   file: string;
   line: number;
   col: number;
@@ -32,96 +32,101 @@ function extractBestMessage(
   return deepest ?? message;
 }
 
+/**
+ * Spawn `tsc --noEmit --watch` and report each completed check via `onErrors`
+ * (empty array when the check is clean). Returns a cleanup function that kills
+ * the watcher. Shared by the Ink-based dev UI (via {@link useTypeScriptCheck})
+ * and the `--plain` runner.
+ */
+export function startTypeScriptCheck(
+  onErrors: (errors: Array<TsError>) => void,
+): () => void {
+  const tsProcess = spawn(
+    "npx",
+    ["tsc", "--noEmit", "--watch", "--pretty", "false"],
+    {
+      stdio: ["ignore", "pipe", "pipe"],
+      shell: true,
+    },
+  );
+
+  let outputBuffer = "";
+  let currentErrors: Array<TsError> = [];
+  let pendingError: TsError | null = null;
+  let continuationLines: Array<string> = [];
+
+  const flushPending = () => {
+    if (!pendingError) {
+      return;
+    }
+    pendingError.message = extractBestMessage(
+      pendingError.message,
+      continuationLines,
+    );
+    currentErrors.push(pendingError);
+    pendingError = null;
+    continuationLines = [];
+  };
+
+  const processOutput = (data: Buffer) => {
+    outputBuffer += data.toString();
+    const lines = outputBuffer.split("\n");
+    outputBuffer = lines.pop() || "";
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+
+      const errorMatch = trimmed.match(
+        /^(.+?)\((\d+),(\d+)\):\s+error\s+(TS\d+)?\s*:?\s*(.+)$/,
+      );
+      if (errorMatch) {
+        flushPending();
+        const [, file, lineStr, colStr, code, message] = errorMatch;
+        if (file && lineStr && colStr && message) {
+          let cleanFile = file.trim();
+          if (isAbsolute(cleanFile)) {
+            cleanFile = relative(process.cwd(), cleanFile);
+          }
+          pendingError = {
+            file: cleanFile,
+            line: Number.parseInt(lineStr, 10),
+            col: Number.parseInt(colStr, 10),
+            code: code ?? "",
+            message: message.trim(),
+          };
+        }
+        continue;
+      }
+
+      if (pendingError && line.startsWith(" ")) {
+        continuationLines.push(line);
+        continue;
+      }
+
+      if (trimmed.includes("Found") && trimmed.includes("error")) {
+        flushPending();
+        onErrors(trimmed.match(/Found 0 error/) ? [] : [...currentErrors]);
+        currentErrors = [];
+      }
+    }
+  };
+
+  if (tsProcess.stdout) {
+    tsProcess.stdout.on("data", processOutput);
+  }
+  if (tsProcess.stderr) {
+    tsProcess.stderr.on("data", processOutput);
+  }
+
+  return () => {
+    tsProcess.kill();
+  };
+}
+
 export function useTypeScriptCheck(): Array<TsError> {
-  const tsProcessRef = useRef<ReturnType<typeof spawn> | null>(null);
   const [tsErrors, setTsErrors] = useState<Array<TsError>>([]);
 
-  useEffect(() => {
-    const tsProcess = spawn(
-      "npx",
-      ["tsc", "--noEmit", "--watch", "--pretty", "false"],
-      {
-        stdio: ["ignore", "pipe", "pipe"],
-        shell: true,
-      },
-    );
-
-    tsProcessRef.current = tsProcess;
-
-    let outputBuffer = "";
-    let currentErrors: Array<TsError> = [];
-    let pendingError: TsError | null = null;
-    let continuationLines: Array<string> = [];
-
-    const flushPending = () => {
-      if (!pendingError) {
-        return;
-      }
-      pendingError.message = extractBestMessage(
-        pendingError.message,
-        continuationLines,
-      );
-      currentErrors.push(pendingError);
-      pendingError = null;
-      continuationLines = [];
-    };
-
-    const processOutput = (data: Buffer) => {
-      outputBuffer += data.toString();
-      const lines = outputBuffer.split("\n");
-      outputBuffer = lines.pop() || "";
-
-      for (const line of lines) {
-        const trimmed = line.trim();
-
-        const errorMatch = trimmed.match(
-          /^(.+?)\((\d+),(\d+)\):\s+error\s+(TS\d+)?\s*:?\s*(.+)$/,
-        );
-        if (errorMatch) {
-          flushPending();
-          const [, file, lineStr, colStr, code, message] = errorMatch;
-          if (file && lineStr && colStr && message) {
-            let cleanFile = file.trim();
-            if (isAbsolute(cleanFile)) {
-              cleanFile = relative(process.cwd(), cleanFile);
-            }
-            pendingError = {
-              file: cleanFile,
-              line: Number.parseInt(lineStr, 10),
-              col: Number.parseInt(colStr, 10),
-              code: code ?? "",
-              message: message.trim(),
-            };
-          }
-          continue;
-        }
-
-        if (pendingError && line.startsWith(" ")) {
-          continuationLines.push(line);
-          continue;
-        }
-
-        if (trimmed.includes("Found") && trimmed.includes("error")) {
-          flushPending();
-          setTsErrors(trimmed.match(/Found 0 error/) ? [] : [...currentErrors]);
-          currentErrors = [];
-        }
-      }
-    };
-
-    if (tsProcess.stdout) {
-      tsProcess.stdout.on("data", processOutput);
-    }
-    if (tsProcess.stderr) {
-      tsProcess.stderr.on("data", processOutput);
-    }
-
-    return () => {
-      if (tsProcessRef.current) {
-        tsProcessRef.current.kill();
-      }
-    };
-  }, []);
+  useEffect(() => startTypeScriptCheck(setTsErrors), []);
 
   return tsErrors;
 }
