@@ -99,7 +99,6 @@ function textContent(contents: Array<{ uri: string }>): {
 describe("view resource resolution (cache key)", () => {
   afterEach(() => {
     delete process.env.NODE_ENV;
-    delete process.env.__TUNNEL_BUNDLE;
   });
 
   it("resolves regardless of the ?v= param and echoes the requested URI", async () => {
@@ -214,11 +213,10 @@ describe("view resource resolution (cache key)", () => {
     }
   });
 
-  // `dev --tunnel` (`__TUNNEL_BUNDLE`): remote hosts get the bundled build (few
-  // requests, fast first render through the tunnel) while localhost keeps the
-  // unbundled dev entry (HMR). The split is per-request on the forwarded origin.
-  it("serves bundled to remote and unbundled to localhost in tunnel-bundle dev", async () => {
-    process.env.__TUNNEL_BUNDLE = "1";
+  // In dev, remote hosts (reached through the tunnel) get the bundled build —
+  // few requests, fast first render — while localhost keeps the unbundled dev
+  // entry (HMR). The split is per-request on the forwarded origin.
+  it("serves bundled to remote and unbundled to localhost in dev", async () => {
     // `__setBuildManifest` is consume-once (cleared on the next construction),
     // so re-prime before each server.
     const primeManifest = () =>

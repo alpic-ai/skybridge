@@ -75,12 +75,20 @@ export default class Dev extends Command {
       ...process.env,
       __PORT: String(port),
       __TUNNEL_CONTROL_PORT: String(controlPort),
-      ...(flags.tunnel ? { __TUNNEL_BUNDLE: "1" } : {}),
     };
 
-    if (flags.tunnel) {
+    // Kick off the bundled view build the first time a tunnel becomes active,
+    // whether opened via `--tunnel` or the DevTools UI — both flip the manager
+    // off "idle". The server serves that build to remote hosts; until it lands
+    // the view falls back to the unbundled entry.
+    let viewBuildStarted = false;
+    tunnelManager.subscribe((state) => {
+      if (viewBuildStarted || state.status === "idle") {
+        return;
+      }
+      viewBuildStarted = true;
       startTunnelViewBuild(root);
-    }
+    });
 
     if (flags.plain) {
       const teardown = runPlain({

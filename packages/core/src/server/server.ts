@@ -964,15 +964,16 @@ export class McpServer<
       contentMetaOverrides = { domain: `${hash}.claudemcpcontent.com` };
     }
 
-    // In `dev --tunnel` (`__TUNNEL_BUNDLE`), serve remote hosts the bundled
-    // build instead of the unbundled dev entry — the per-module waterfall is
-    // what makes the first render slow through the tunnel. Localhost/DevTools
-    // keep the unbundled entry so HMR is untouched.
+    // In dev, serve remote hosts the bundled build instead of the unbundled
+    // dev entry — the per-module waterfall is what makes the first render slow
+    // through the tunnel. A remote origin in dev means the request came through
+    // a tunnel (started via `--tunnel` or the DevTools UI), which is what the
+    // CLI keys the watch build off. Localhost/DevTools keep the unbundled entry
+    // so HMR is untouched.
     const isLocalhost =
       serverUrl.startsWith("http://localhost") ||
       serverUrl.startsWith("http://127.0.0.1");
-    const useBundledDevTemplate =
-      !isProduction && process.env.__TUNNEL_BUNDLE === "1" && !isLocalhost;
+    const useBundledDevTemplate = !isProduction && !isLocalhost;
 
     return {
       serverUrl,
