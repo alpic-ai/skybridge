@@ -28,7 +28,7 @@ const server = new McpServer(
       description:
         "Browse the public coffee catalog. Works signed out, and greets you by name when a token is present.",
       inputSchema: {},
-      auth: "public",
+      auth: { public: true },
       view: { component: "catalog", description: "The coffee catalog" },
     },
     (_args, extra) => {
@@ -47,7 +47,7 @@ const server = new McpServer(
       name: "whoami",
       description: "Return the signed-in user. Requires sign-in.",
       inputSchema: {},
-      auth: "required",
+      auth: {},
     },
     (_args, extra) => text(`You are ${who(extra.authInfo)}.`),
   )

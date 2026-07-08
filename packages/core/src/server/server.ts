@@ -168,7 +168,7 @@ export type SecurityScheme =
   | { type: "noauth" }
   | { type: "oauth2"; scopes?: string[] };
 
-export type ToolAuth = "public" | "required" | { scopes: string[] };
+export type ToolAuth = { public?: boolean; scopes?: string[] };
 
 /**
  * Options forwarded to the built-in `express.json()` body parser. Derived
@@ -345,7 +345,7 @@ type AddTool<
   }
 >;
 
-interface ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> {
+interface ToolConfigBase<TInput extends ZodRawShapeCompat | AnySchema> {
   name: string;
   title?: string;
   description?: string;
@@ -353,17 +353,22 @@ interface ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> {
   outputSchema?: ZodRawShapeCompat | AnySchema;
   annotations?: ToolAnnotations;
   view?: ViewConfig;
-  auth?: ToolAuth;
-  /**
-   * Declares which auth schemes this tool supports (e.g. `noauth`, `oauth2`).
-   * Lets clients label tools that require sign-in before calling, and pass
-   * the right scopes through the OAuth flow. Listing both `noauth` and
-   * `oauth2` signals that the tool works for anonymous callers and gives
-   * enhanced behavior to authenticated ones.
-   */
-  securitySchemes?: SecurityScheme[];
   _meta?: ToolMeta;
 }
+
+type ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> =
+  | (ToolConfigBase<TInput> & { auth?: ToolAuth; securitySchemes?: never })
+  | (ToolConfigBase<TInput> & {
+      auth?: never;
+      /**
+       * Declares which auth schemes this tool supports (e.g. `noauth`, `oauth2`).
+       * Lets clients label tools that require sign-in before calling, and pass
+       * the right scopes through the OAuth flow. Listing both `noauth` and
+       * `oauth2` signals that the tool works for anonymous callers and gives
+       * enhanced behavior to authenticated ones.
+       */
+      securitySchemes?: SecurityScheme[];
+    });
 
 /**
  * Optional client-supplied hints attached to `params._meta` on every tool call
@@ -1407,10 +1412,11 @@ export class McpServer<
       ...toolFields
     } = config;
 
+    const authNeedsProvider =
+      auth !== undefined && (!auth.public || Boolean(auth.scopes?.length));
     if (
       rawSecuritySchemes === undefined &&
-      auth !== undefined &&
-      auth !== "public" &&
+      authNeedsProvider &&
       !this.oauthEnabled
     ) {
       throw new Error(

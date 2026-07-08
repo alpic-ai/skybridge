@@ -61,8 +61,8 @@ type ToolConfig = {
   outputSchema?: ZodRawShape; // Zod shape; types structuredContent
   annotations?: ToolAnnotations; // standard MCP hints
   view?: ViewConfig; // bind a view to render the result
-  auth?: "public" | "required" | { scopes: string[] }; // per-tool auth
-  securitySchemes?: SecurityScheme[]; // low-level alternative to `auth`
+  auth?: { public?: boolean; scopes?: string[] }; // per-tool auth
+  securitySchemes?: SecurityScheme[]; // low-level alternative to `auth` (mutually exclusive)
   _meta?: ToolMeta; // extra metadata
 };
 ```
@@ -151,15 +151,16 @@ The recommended way to declare a tool's auth. With the [`oauth`](/api-reference/
 
 | Value | Meaning |
 | --- | --- |
-| `"public"` | Callable signed out; uses the token when one is present. |
-| `"required"` | Requires sign-in. |
+| `{ public: true }` | Callable signed out; uses the token when one is present. |
+| `{}` | Requires sign-in. |
 | `{ scopes: [...] }` | Requires sign-in with every listed scope. |
+| `{ public: true, scopes: [...] }` | Callable signed out; advertises the scopes for signed-in callers. |
 
-Declaring any `"public"` tool turns the server [mixed](/build/auth#mix-public-and-authenticated-tools): it serves anonymous callers, and every other tool stays sign-in-gated by default. `"required"` and `{ scopes }` need the `oauth` provider and throw without it; `"public"` works either way. If both `auth` and `securitySchemes` are set, `securitySchemes` wins.
+Declaring any `{ public: true }` tool turns the server [mixed](/build/auth#mix-public-and-authenticated-tools): it serves anonymous callers, and every other tool stays sign-in-gated by default. Requiring sign-in (`{}` or `{ scopes }`) needs the `oauth` provider and throws without it; `{ public: true }` works either way. Omit `auth` entirely for the secure default (sign-in required whenever the server has auth).
 
 ### `securitySchemes`
 
-The low-level form behind `auth`, for cases it can't express (several alternative `oauth2` schemes, or pure `noauth` that never accepts a token). Takes precedence over `auth` when both are set.
+The low-level form behind `auth`, for cases it can't express (several alternative `oauth2` schemes, or pure `noauth` that never accepts a token). Mutually exclusive with `auth` — setting both is a compile error.
 
 ```ts
 type SecurityScheme =
