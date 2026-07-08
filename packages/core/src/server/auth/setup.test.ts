@@ -518,6 +518,37 @@ describe("per-tool scope enforcement in fully-authenticated mode", () => {
   });
 });
 
+describe("securitySchemes validation", () => {
+  it("throws when a tool mixes `noauth` with a scoped `oauth2` scheme", () => {
+    expect(() =>
+      new McpServer({ name: "t", version: "0" }).registerTool(
+        {
+          name: "x",
+          inputSchema: {},
+          securitySchemes: [
+            { type: "noauth" },
+            { type: "oauth2", scopes: ["checkout"] },
+          ],
+        },
+        () => ({ content: [{ type: "text", text: "" }] }),
+      ),
+    ).toThrow(/unenforceable/);
+  });
+
+  it("allows `noauth` with an unscoped `oauth2` scheme", () => {
+    expect(() =>
+      new McpServer({ name: "t", version: "0" }).registerTool(
+        {
+          name: "x",
+          inputSchema: {},
+          securitySchemes: [{ type: "noauth" }, { type: "oauth2" }],
+        },
+        () => ({ content: [{ type: "text", text: "" }] }),
+      ),
+    ).not.toThrow();
+  });
+});
+
 describe("oauth config validation", () => {
   const validMetadata = {
     issuer: ISSUER,

@@ -35,6 +35,7 @@ import express, {
 import type { OAuthConfig } from "./auth/index.js";
 import {
   evaluateSecuritySchemes,
+  securitySchemesAllowAnonymous,
   wwwAuthenticateHeader,
 } from "./auth/security-schemes.js";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
@@ -1315,6 +1316,17 @@ export class McpServer<
       _meta: userToolMeta,
       ...toolFields
     } = config;
+
+    if (
+      securitySchemesAllowAnonymous(securitySchemes) &&
+      securitySchemes?.some(
+        (scheme) => scheme.type === "oauth2" && scheme.scopes?.length,
+      )
+    ) {
+      throw new Error(
+        `Tool "${name}": a \`noauth\` scheme makes its \`oauth2\` scopes unenforceable (the tool stays public). Drop \`noauth\` to gate this tool by scope.`,
+      );
+    }
 
     const toolMeta: InternalToolMeta = { ...userToolMeta };
 
