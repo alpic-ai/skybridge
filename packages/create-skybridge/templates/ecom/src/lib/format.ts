@@ -26,13 +26,13 @@ export function narrateSearchResults({
     header += ` Total hits: ${totalHits}.`;
   }
 
-  const body: string[] = [header];
+  const content = [header];
   for (const { id, properties } of products) {
     const item = [`# ID: ${id}`];
     for (const { name, value } of properties) {
       item.push(`- ${name}: ${value.join(", ")}`);
     }
-    body.push(item.join("\n"));
+    content.push(item.join("\n"));
   }
 
   const footer =
@@ -51,6 +51,6 @@ export function narrateSearchResults({
           "3. Call render-carousel with the selected IDs.",
         ].join("\n");
 
-  const content = [header, ...body, footer].join("\n\n");
-  return { content };
+  content.push(footer);
+  return { content: content.join("\n\n") };
 }
