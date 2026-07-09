@@ -78,9 +78,20 @@ describe("discoverSkills", () => {
     expect(() => discoverSkills(dir)).toThrow(/must match its directory name/);
   });
 
-  it("throws on unsupported (non-scalar) frontmatter values", () => {
+  it("preserves arbitrary YAML frontmatter (arrays, nesting) verbatim", () => {
     const dir = mkSkillDir({
-      "s/SKILL.md": "---\nname: s\ndescription: d\ntags:\n  - a\n  - b\n---\n",
+      "s/SKILL.md":
+        "---\nname: s\ndescription: d\nallowed-tools:\n  - get-order\n  - refund\n---\n",
+    });
+    expect(discoverSkills(dir)[0]?.frontmatter["allowed-tools"]).toEqual([
+      "get-order",
+      "refund",
+    ]);
+  });
+
+  it("throws on malformed YAML frontmatter", () => {
+    const dir = mkSkillDir({
+      "s/SKILL.md": "---\nname: 's\ndescription: [unclosed\n---\n",
     });
     expect(() => discoverSkills(dir)).toThrow(/Cannot parse frontmatter/);
   });

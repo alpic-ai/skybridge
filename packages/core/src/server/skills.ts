@@ -6,7 +6,7 @@ import {
   realpathSync,
   statSync,
 } from "node:fs";
-import { extname, join, resolve, sep } from "node:path";
+import { join, resolve, sep } from "node:path";
 import type {
   ReadResourceCallback,
   ReadResourceTemplateCallback,
@@ -15,6 +15,8 @@ import type {
 } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
+import { lookup as lookupMimeType } from "mrmime";
+import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 
 /**
@@ -60,86 +62,34 @@ export interface Skill {
 
 export type SkillsManifest = Skill[];
 
-const mimeTypeForFile = (name: string): string => {
-  switch (extname(name)) {
-    case ".md":
-      return "text/markdown";
-    case ".json":
-      return "application/json";
-    default:
-      return "text/plain";
-  }
-};
+// Skills are read as UTF-8 text, so unknown extensions fall back to text/plain.
+const mimeTypeForFile = (name: string): string =>
+  lookupMimeType(name) ?? "text/plain";
 
 const sha256 = (content: string): string =>
   `sha256:${createHash("sha256").update(content, "utf8").digest("hex")}`;
 
-const unquote = (raw: string): string => {
-  const v = raw.trim();
-  if (
-    v.length >= 2 &&
-    ((v.startsWith('"') && v.endsWith('"')) ||
-      (v.startsWith("'") && v.endsWith("'")))
-  ) {
-    return v.slice(1, -1);
-  }
-  return v;
-};
+const FRONTMATTER_RE = /^﻿?\s*---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/;
 
-// Supports only the frontmatter subset the Agent Skills spec uses — top-level
-// scalars plus one level of nested `key: value` maps. Anything else (sequences,
-// block scalars, deeper nesting) throws rather than silently mis-parsing, which
-// avoids pulling in a full YAML dependency.
 function parseFrontmatter(
   content: string,
   source: string,
 ): Record<string, unknown> {
-  const match = /^﻿?\s*---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/.exec(
-    content,
-  );
+  const match = FRONTMATTER_RE.exec(content);
   if (!match) {
     throw new Error(`Skill ${source} is missing YAML frontmatter`);
   }
-
-  const result: Record<string, unknown> = {};
-  let currentMap: Record<string, string> | null = null;
-
-  for (const line of (match[1] ?? "").split(/\r?\n/)) {
-    if (line.trim() === "" || line.trim().startsWith("#")) {
-      continue;
-    }
-
-    if (/^\s/.test(line)) {
-      const nested = /^\s+([^:#]+):[ \t]?(.*)$/.exec(line);
-      const nestedKey = nested?.[1];
-      if (!currentMap || nestedKey === undefined) {
-        throw new Error(`Cannot parse frontmatter of ${source} at: "${line}"`);
-      }
-      currentMap[nestedKey.trim()] = unquote(nested?.[2] ?? "");
-      continue;
-    }
-
-    const top = /^([^:#\s][^:]*):[ \t]?(.*)$/.exec(line);
-    const topKey = top?.[1];
-    if (topKey === undefined) {
-      throw new Error(`Cannot parse frontmatter of ${source} at: "${line}"`);
-    }
-    const key = topKey.trim();
-    const value = top?.[2] ?? "";
-    if (value.trim() === "") {
-      currentMap = {};
-      result[key] = currentMap;
-    } else {
-      if (/^[-|>[{]/.test(value.trim())) {
-        throw new Error(
-          `Unsupported frontmatter value for "${key}" in ${source}: only scalars and simple maps are supported`,
-        );
-      }
-      result[key] = unquote(value);
-      currentMap = null;
-    }
+  let data: unknown;
+  try {
+    data = parseYaml(match[1] ?? "");
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`Cannot parse frontmatter of ${source}: ${detail}`);
   }
-  return result;
+  if (data === null || typeof data !== "object" || Array.isArray(data)) {
+    throw new Error(`Frontmatter of ${source} must be a YAML mapping`);
+  }
+  return data as Record<string, unknown>;
 }
 
 const readSkillDir = (root: string, rel = ""): Record<string, SkillFile> => {
