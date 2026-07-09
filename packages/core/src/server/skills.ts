@@ -18,31 +18,18 @@ import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 
 /**
- * Skills over MCP — server-side implementation of the Skills Extension
- * ([SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640)).
- *
- * All spec-facing logic lives in this one module so that churn in the (still
- * in-review) SEP stays a single-file change. The framework wires it up from
- * `McpServer`; users only opt in via the `skills` server option.
- *
- * @experimental Tracks SEP-2640, which is under active development.
+ * Skills over MCP — the Skills Extension ([SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640), experimental).
+ * All spec-facing logic is kept in this one module so churn in the in-review
+ * SEP stays a single-file change.
  */
 
-/** MCP extension identifier for the Skills Extension. */
 export const SKILLS_EXTENSION_KEY = "io.modelcontextprotocol/skills";
-
-/** Well-known URI of the skill discovery index. */
 export const SKILL_INDEX_URI = "skill://index.json";
 
 const SKILL_NAME_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
-/**
- * Frontmatter fields required + recognized by the Agent Skills spec. Unknown
- * fields are preserved verbatim (the index echoes frontmatter as-is), so this
- * only validates the fields the extension depends on.
- *
- * @see https://agentskills.io/specification#frontmatter
- */
+// Only the fields the extension depends on are validated; `.loose()` keeps any
+// other frontmatter, which the index echoes verbatim.
 const SkillFrontmatterSchema = z
   .object({
     name: z
@@ -57,31 +44,20 @@ const SkillFrontmatterSchema = z
   })
   .loose();
 
-/** A single file inside a skill directory, addressable as a `skill://` resource. */
 export interface SkillFile {
-  /** File text (skills are text: markdown, scripts, templates). */
   text: string;
   mimeType: string;
 }
 
-/** A discovered skill: its `SKILL.md`, supporting files, and derived metadata. */
 export interface Skill {
-  /** Skill name — the frontmatter `name`, equal to the directory name. */
   name: string;
-  /** Frontmatter parsed from `SKILL.md`, echoed verbatim into the index. */
   frontmatter: Record<string, unknown>;
-  /** `sha256:<hex>` digest over the raw `SKILL.md` bytes. */
+  /** `sha256:<hex>` over the raw `SKILL.md` bytes. */
   digest: string;
-  /** Every file in the skill directory, keyed by POSIX path relative to it (incl. `SKILL.md`). */
+  /** Keyed by POSIX path relative to the skill directory, including `SKILL.md`. */
   files: Record<string, SkillFile>;
 }
 
-/**
- * A build-time snapshot of all skills. Emitted as a JS module by
- * `skybridge build` and injected in memory at runtime — never read from disk in
- * production, so it works on filesystem-less targets (Cloudflare Workers) and
- * bundled functions (Vercel) exactly like the Vite manifest.
- */
 export type SkillsManifest = Skill[];
 
 const mimeTypeForFile = (name: string): string => {
@@ -110,14 +86,10 @@ const unquote = (raw: string): string => {
   return v;
 };
 
-/**
- * Parse the YAML frontmatter block of a `SKILL.md`.
- *
- * ponytail: deliberately supports only the subset the Agent Skills spec uses —
- * top-level scalars plus one level of nested `key: value` maps (e.g.
- * `metadata:`). Sequences, block scalars, and deeper nesting throw rather than
- * silently mis-parse. Swap in a full YAML dependency if the spec ever needs it.
- */
+// Supports only the frontmatter subset the Agent Skills spec uses — top-level
+// scalars plus one level of nested `key: value` maps. Anything else (sequences,
+// block scalars, deeper nesting) throws rather than silently mis-parsing, which
+// avoids pulling in a full YAML dependency.
 function parseFrontmatter(
   content: string,
   source: string,
@@ -186,12 +158,9 @@ const readSkillDir = (root: string, rel = ""): Record<string, SkillFile> => {
   return files;
 };
 
-/**
- * Scan a directory for skills. Each immediate subdirectory containing a
- * `SKILL.md` is one skill; its directory name must equal the frontmatter
- * `name`. Throws with an actionable message on any invalid skill — we fail the
- * build/dev startup rather than silently skip.
- */
+// Each immediate subdirectory with a `SKILL.md` is one skill; its directory name
+// must equal the frontmatter `name`. Throws on any invalid skill so the
+// build/dev startup fails loudly instead of silently skipping.
 export function discoverSkills(dir: string): SkillsManifest {
   if (!existsSync(dir)) {
     return [];
@@ -235,11 +204,7 @@ export function discoverSkills(dir: string): SkillsManifest {
   return skills;
 }
 
-/**
- * Resolve the file path of a `skill://<name>/<subpath>` URI relative to a skill
- * directory root, rejecting anything that escapes it. Shared by disk reads and
- * directory listing; the sole guard against path traversal.
- */
+// Parses a `skill://<name>/<subpath>` URI and rejects `..`/`.` traversal.
 export function skillUriToRelPath(uri: string): {
   name: string;
   relPath: string;
@@ -256,29 +221,17 @@ export function skillUriToRelPath(uri: string): {
   return { name, relPath: segments.join("/") };
 }
 
-/**
- * A live view over the set of skills. Two implementations: an in-memory
- * manifest (production) and a disk reader (dev, so edits show up without a
- * restart). Registration and every resource read go through this interface, so
- * the two runtime modes share one code path.
- */
+// The indirection both runtime modes share: an in-memory manifest (production)
+// and a live disk reader (dev). `readFile`/`readDir` return null when absent.
 export interface SkillsSource {
-  /** All skills, for registration + index generation. */
   list(): Skill[];
-  /** A single file's content, or null if it doesn't exist. */
   readFile(name: string, relPath: string): SkillFile | null;
-  /**
-   * Immediate children of a directory within a skill, or null if the path is
-   * not a directory. Entries mark subdirectories with the `inode/directory`
-   * mimeType per SEP-2640.
-   */
   readDir(
     name: string,
     relPath: string,
   ): { name: string; mimeType: string }[] | null;
 }
 
-/** Source backed by an in-memory manifest — used in production (no disk access). */
 export function manifestSource(manifest: SkillsManifest): SkillsSource {
   const byName = new Map(manifest.map((s) => [s.name, s]));
   const fileKey = (relPath: string) => relPath.replace(/\/+$/, "");
@@ -315,16 +268,11 @@ export function manifestSource(manifest: SkillsManifest): SkillsSource {
   };
 }
 
-/** Source that reads live from disk — used in dev so skill edits need no restart. */
 export function diskSource(dir: string): SkillsSource {
   const rootReal = existsSync(dir) ? realpathSync(dir) : resolve(dir);
 
-  /**
-   * Resolve a skill path and confirm its real (symlink-followed) location stays
-   * within the skills root, else return null. `skillUriToRelPath` already
-   * rejects `..`/`.` segments; this closes the remaining hole where an in-tree
-   * symlink points outside the root.
-   */
+  // Confirms the real (symlink-followed) path stays within the skills root, else
+  // null — closes the traversal hole where an in-tree symlink points outside it.
   const contain = (name: string, relPath: string): string | null => {
     const path = join(dir, name, relPath);
     if (!existsSync(path)) {
@@ -385,11 +333,8 @@ const DirectoryReadRequestSchema = z.object({
   params: z.object({ uri: z.string(), cursor: z.string().optional() }),
 });
 
-/**
- * Register a server's skills as `skill://` resources per SEP-2640: one resource
- * per `SKILL.md`, a template for supporting files, the `skill://index.json`
- * discovery index, and (optionally) the `resources/directory/read` method.
- */
+// Registers per SEP-2640: one resource per `SKILL.md`, a template for supporting
+// files, the `skill://index.json` index, and optionally `resources/directory/read`.
 export function registerSkills(
   server: SkillRegistrar,
   source: SkillsSource,

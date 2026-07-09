@@ -177,26 +177,13 @@ export interface SkybridgeServerOptions {
   /** Resource-server OAuth config. When set, mounts well-known metadata and bearer auth on `/mcp`. */
   oauth?: OAuthConfig;
   /**
-   * Serve Agent Skills over MCP ([SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640)).
-   * `true` (or a config object) enables the feature and declares the
-   * `io.modelcontextprotocol/skills` capability; omit or `false` to disable.
-   *
-   * @experimental Tracks SEP-2640, which is under active development.
+   * Serve Agent Skills from `src/skills` over MCP, declaring the
+   * `io.modelcontextprotocol/skills` capability ([SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640), experimental).
    */
-  skills?: boolean | SkillsOptions;
+  skills?: boolean;
 }
 
-/** Configuration for {@link SkybridgeServerOptions.skills}. */
-export interface SkillsOptions {
-  /**
-   * Directory scanned for skills. Defaults to `src/skills`. A custom value
-   * applies in dev only — production builds snapshot `src/skills`.
-   */
-  dir?: string;
-}
-
-/** Default directory scanned for skills. */
-const DEFAULT_SKILLS_DIR = "src/skills";
+const SKILLS_DIR = "src/skills";
 
 /**
  * Normalize an `x-forwarded-prefix` value into a leading-slash, no-trailing-slash
@@ -510,38 +497,22 @@ export function __setBuildManifest(
   pendingBuildManifest = manifest;
 }
 
-// Side channel for the build-time skills snapshot, primed by `dist/__entry.js`
-// before user code runs — same rationale as `pendingBuildManifest`. Injected in
-// memory so production never reads skills from disk, which keeps the feature
-// working on filesystem-less targets (Cloudflare Workers) and bundled functions
-// (Vercel), exactly like the Vite manifest.
+// Injected in memory (never read from disk) so skills ride the bundle on
+// filesystem-less targets like Cloudflare Workers, exactly like the Vite manifest.
 let pendingSkillsManifest: SkillsManifest | null = null;
 
-/**
- * Prime the build-time skills snapshot before user code constructs its
- * `McpServer`. Called from the generated `dist/__entry.js`; not part of the
- * user-facing API.
- *
- * @internal
- */
+/** @internal Primes the build-time skills snapshot; called by `dist/__entry.js`. */
 export function __setSkillsManifest(manifest: SkillsManifest): void {
   pendingSkillsManifest = manifest;
 }
 
-/** Whether the `skills` option enables the feature (`true` or a config object). */
-const skillsEnabled = (skills: SkybridgeServerOptions["skills"]): boolean =>
-  skills === true || (typeof skills === "object" && skills !== null);
-
-/**
- * Deep-merge the skills extension capability into `options` when skills are
- * enabled, so it appears in the `initialize` response. Pure and `this`-free so
- * it can run inside the `super(...)` call, before `this` exists.
- */
+// Pure and `this`-free so it can run inside the `super(...)` call, before `this`
+// exists — the capability must be present for the `initialize` response.
 function withSkillsCapability(
   options: ServerOptions | undefined,
   skybridgeOptions: SkybridgeServerOptions | undefined,
 ): ServerOptions | undefined {
-  if (!skillsEnabled(skybridgeOptions?.skills)) {
+  if (!skybridgeOptions?.skills) {
     return options;
   }
   return {
@@ -620,33 +591,23 @@ export class McpServer<
       this.setViteManifest(pendingBuildManifest);
       pendingBuildManifest = null;
     }
-    this.setupSkills(skybridgeOptions?.skills);
+    this.setupSkills(Boolean(skybridgeOptions?.skills));
   }
 
-  /**
-   * Register skill resources when the `skills` option is set. Production reads
-   * from the injected build snapshot (primed by `dist/__entry.js`); dev reads
-   * live from disk so edits show up without a restart.
-   */
-  private setupSkills(skills: SkybridgeServerOptions["skills"]): void {
-    // Consume-once regardless of the option so a primed manifest can't leak
-    // into a later server constructed without priming (mirrors the Vite manifest).
+  // Production serves from the injected build snapshot; dev reads live from disk
+  // so edits show up without a restart. Consume the manifest unconditionally so
+  // it can't leak into a later server constructed without priming.
+  private setupSkills(enabled: boolean): void {
     const manifest = pendingSkillsManifest;
     pendingSkillsManifest = null;
-    if (!skillsEnabled(skills)) {
+    if (!enabled) {
       return;
     }
 
-    const dir =
-      (typeof skills === "object" ? skills.dir : undefined) ??
-      DEFAULT_SKILLS_DIR;
-    const source = manifest ? manifestSource(manifest) : diskSource(dir);
-
+    const source = manifest ? manifestSource(manifest) : diskSource(SKILLS_DIR);
     if (source.list().length === 0) {
       console.warn(
-        manifest
-          ? `skybridge: the "skills" option is enabled but the build shipped no skills. Add a <name>/SKILL.md under "${DEFAULT_SKILLS_DIR}" and rebuild, or remove the option.`
-          : `skybridge: the "skills" option is enabled but no skills were found in "${dir}". Add a <name>/SKILL.md there, or remove the option.`,
+        `skybridge: the "skills" option is enabled but no skills were found in "${SKILLS_DIR}". Add a <name>/SKILL.md there, or remove the option.`,
       );
     }
 

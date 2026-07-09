@@ -1,5 +1,3 @@
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { describe, expect, it, vi } from "vitest";
@@ -99,13 +97,10 @@ describe("skills server option", () => {
     await server.close();
   });
 
-  it("warns when skills are enabled but none are found at the resolved path", () => {
+  it("warns when skills are enabled but none are found", () => {
+    __setSkillsManifest([]);
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    new McpServer(
-      { name: "t", version: "0.0.1" },
-      {},
-      { skills: { dir: join(tmpdir(), "skybridge-no-skills-here") } },
-    );
+    new McpServer({ name: "t", version: "0.0.1" }, {}, { skills: true });
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining("no skills were found"),
     );

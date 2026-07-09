@@ -13,11 +13,9 @@ import { discoverSkills } from "../server/skills.js";
 // dynamically imports `./server.js` so user code runs *after* the side channels
 // are set. The dynamic import is load-bearing: a static
 // `export { default } from ...` is hoisted with the rest of the static graph
-// and would evaluate `server.js` before the primers run.
-//
-// `skills.js` is imported (not read from disk at runtime) so skills ride the
-// bundle on filesystem-less targets (Cloudflare Workers) and bundled functions
-// (Vercel), exactly like the Vite manifest.
+// and would evaluate `server.js` before the primers run. Both `skills.js` and
+// the manifest are imported (not read from disk) so they ride the bundle on
+// filesystem-less targets like Cloudflare Workers.
 export const ENTRY_WRAPPER_CONTENT = `import { __setBuildManifest, __setSkillsManifest } from "skybridge/server";
 import manifest from "./vite-manifest.js";
 import skills from "./skills.js";
@@ -33,12 +31,8 @@ export function emitEntryWrapper(distDir: string): void {
   writeFileSync(path.join(distDir, "__entry.js"), ENTRY_WRAPPER_CONTENT);
 }
 
-/**
- * Emit the skills snapshot as a JS module (`export default [...]`). Scans
- * `skillsDir` and inlines each skill's frontmatter, files, and digest, so the
- * runtime never reads skills from disk. Emits an empty array when the directory
- * is absent. Throws (failing the build) on any invalid skill.
- */
+// Inlines the discovered skills as a JS module so the runtime never reads them
+// from disk. Empty array when absent; throws (failing the build) on any invalid skill.
 export function emitSkillsModule(skillsDir: string, outPath: string): void {
   const skills = existsSync(skillsDir) ? discoverSkills(skillsDir) : [];
   writeFileSync(outPath, `export default ${JSON.stringify(skills)};\n`);
