@@ -290,32 +290,25 @@ export function registerSkills(
   source: SkillsSource,
   { directoryRead }: { directoryRead: boolean },
 ): void {
+  const serveFile = (name: string, relPath: string, href: string) => {
+    const file = source.readFile(name, relPath);
+    if (!file) {
+      throw new McpError(ErrorCode.InvalidParams, `Not found: ${href}`);
+    }
+    return {
+      contents: [{ uri: href, text: file.text, mimeType: file.mimeType }],
+    };
+  };
+
   for (const skill of source.list()) {
-    const uri = `skill://${skill.name}/SKILL.md`;
     server.registerResource(
       skill.name,
-      uri,
+      `skill://${skill.name}/SKILL.md`,
       {
-        description:
-          typeof skill.frontmatter.description === "string"
-            ? skill.frontmatter.description
-            : undefined,
+        description: String(skill.frontmatter.description),
         mimeType: "text/markdown",
       },
-      (readUri) => {
-        const file = source.readFile(skill.name, "SKILL.md");
-        if (!file) {
-          throw new McpError(
-            ErrorCode.InvalidParams,
-            `Not found: ${readUri.href}`,
-          );
-        }
-        return {
-          contents: [
-            { uri: readUri.href, text: file.text, mimeType: file.mimeType },
-          ],
-        };
-      },
+      (readUri) => serveFile(skill.name, "SKILL.md", readUri.href),
     );
   }
 
@@ -327,18 +320,7 @@ export function registerSkills(
     {},
     (readUri) => {
       const { name, relPath } = skillUriToRelPath(readUri.href);
-      const file = source.readFile(name, relPath);
-      if (!file) {
-        throw new McpError(
-          ErrorCode.InvalidParams,
-          `Not found: ${readUri.href}`,
-        );
-      }
-      return {
-        contents: [
-          { uri: readUri.href, text: file.text, mimeType: file.mimeType },
-        ],
-      };
+      return serveFile(name, relPath, readUri.href);
     },
   );
 
