@@ -154,9 +154,7 @@ describe("registerSkills", () => {
   it("builds an index.json with url, digest, and verbatim frontmatter", () => {
     const { server, resources } = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
-    registerSkills(server as any, manifest, {
-      directoryRead: false,
-    });
+    registerSkills(server as any, manifest);
     const index = resources.get("skill-index");
     const result = index?.cb(new URL(SKILL_INDEX_URI)) as {
       contents: { text: string }[];
@@ -175,9 +173,7 @@ describe("registerSkills", () => {
   it("serves supporting files through the template resource", () => {
     const { server, resources } = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
-    registerSkills(server as any, manifest, {
-      directoryRead: false,
-    });
+    registerSkills(server as any, manifest);
     const tpl = resources.get("skill-files");
     expect(tpl?.uri).toBeInstanceOf(ResourceTemplate);
     const url = new URL("skill://refunds/templates/email.md");
@@ -185,19 +181,10 @@ describe("registerSkills", () => {
     expect(result.contents[0]?.text).toBe("Hi");
   });
 
-  it("only registers the directory-read handler when enabled", () => {
-    const off = fakeRegistrar();
-    // biome-ignore lint/suspicious/noExplicitAny: structural test double
-    registerSkills(off.server as any, manifest, {
-      directoryRead: false,
-    });
-    expect(off.getDirHandler()).toBeUndefined();
-
+  it("lists a subdirectory through the directory-read handler", () => {
     const on = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
-    registerSkills(on.server as any, manifest, {
-      directoryRead: true,
-    });
+    registerSkills(on.server as any, manifest);
     const result = on.getDirHandler()?.({
       params: { uri: "skill://refunds/templates" },
     }) as { resources: { uri: string; name: string; mimeType: string }[] };
@@ -213,9 +200,7 @@ describe("registerSkills", () => {
   it("lists a skill root and marks subdirectories as inode/directory", () => {
     const { server, getDirHandler } = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
-    registerSkills(server as any, manifest, {
-      directoryRead: true,
-    });
+    registerSkills(server as any, manifest);
     const result = getDirHandler()?.({
       params: { uri: "skill://refunds" },
     }) as { resources: { name: string; mimeType: string }[] };

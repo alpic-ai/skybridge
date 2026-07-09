@@ -71,7 +71,6 @@
     "handlebars": "^4.7.9",
     "ink": "^7.1.0",
     "jose": "^6.2.3",
-    "mrmime": "^2.0.1",
     "open": "^11.0.0",
     "posthog-node": "^5.39.4",
     "superjson": "^2.2.6",

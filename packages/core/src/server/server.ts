@@ -610,7 +610,7 @@ export class McpServer<
       );
     }
 
-    registerSkills(this, skills, { directoryRead: true });
+    registerSkills(this, skills);
   }
 
   /**

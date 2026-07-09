@@ -34,7 +34,7 @@ export function emitEntryWrapper(distDir: string): void {
 // Inlines the discovered skills as a JS module so the runtime never reads them
 // from disk. Empty array when absent; throws (failing the build) on any invalid skill.
 export function emitSkillsModule(skillsDir: string, outPath: string): void {
-  const skills = existsSync(skillsDir) ? discoverSkills(skillsDir) : [];
+  const skills = discoverSkills(skillsDir);
   writeFileSync(outPath, `export default ${JSON.stringify(skills)};\n`);
 }
 

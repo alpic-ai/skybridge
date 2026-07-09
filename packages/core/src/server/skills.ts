@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { extname, join } from "node:path";
 import type {
   ReadResourceCallback,
   ReadResourceTemplateCallback,
@@ -9,7 +9,6 @@ import type {
 } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
-import { lookup as lookupMimeType } from "mrmime";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 
@@ -57,8 +56,16 @@ export interface Skill {
 export type SkillsManifest = Skill[];
 
 // Skills are read as UTF-8 text, so unknown extensions fall back to text/plain.
-const mimeTypeForFile = (name: string): string =>
-  lookupMimeType(name) ?? "text/plain";
+const mimeTypeForFile = (name: string): string => {
+  switch (extname(name)) {
+    case ".md":
+      return "text/markdown";
+    case ".json":
+      return "application/json";
+    default:
+      return "text/plain";
+  }
+};
 
 const sha256 = (content: string): string =>
   `sha256:${createHash("sha256").update(content, "utf8").digest("hex")}`;
@@ -170,48 +177,32 @@ export function skillUriToRelPath(uri: string): {
   return { name, relPath: segments.join("/") };
 }
 
-// Read access over a manifest — the shape `registerSkills` serves from. Both
-// runtime modes produce a manifest first (prod injects it, dev discovers it at
-// startup), so there is a single accessor. `null` means the path is absent.
-interface SkillsAccessor {
-  readFile(name: string, relPath: string): SkillFile | null;
-  readDir(
-    name: string,
-    relPath: string,
-  ): { name: string; mimeType: string }[] | null;
-}
-
-function accessor(manifest: SkillsManifest): SkillsAccessor {
-  const byName = new Map(manifest.map((s) => [s.name, s]));
-  return {
-    readFile: (name, relPath) => byName.get(name)?.files[relPath] ?? null,
-    readDir: (name, relPath) => {
-      const skill = byName.get(name);
-      if (!skill) {
-        return null;
-      }
-      const prefix = relPath === "" ? "" : `${relPath}/`;
-      const children = new Map<string, string>();
-      let matched = relPath === "";
-      for (const filePath of Object.keys(skill.files)) {
-        if (!filePath.startsWith(prefix)) {
-          continue;
-        }
-        matched = true;
-        const rest = filePath.slice(prefix.length);
-        const slash = rest.indexOf("/");
-        if (slash === -1) {
-          children.set(rest, mimeTypeForFile(rest));
-        } else {
-          children.set(rest.slice(0, slash), "inode/directory");
-        }
-      }
-      if (!matched) {
-        return null;
-      }
-      return [...children].map(([name, mimeType]) => ({ name, mimeType }));
-    },
-  };
+// Lists the immediate children of `relPath` within a skill. `null` means the
+// path is absent (empty `relPath` always matches the skill root).
+function listDir(
+  skill: Skill,
+  relPath: string,
+): { name: string; mimeType: string }[] | null {
+  const prefix = relPath === "" ? "" : `${relPath}/`;
+  const children = new Map<string, string>();
+  let matched = relPath === "";
+  for (const filePath of Object.keys(skill.files)) {
+    if (!filePath.startsWith(prefix)) {
+      continue;
+    }
+    matched = true;
+    const rest = filePath.slice(prefix.length);
+    const slash = rest.indexOf("/");
+    if (slash === -1) {
+      children.set(rest, mimeTypeForFile(rest));
+    } else {
+      children.set(rest.slice(0, slash), "inode/directory");
+    }
+  }
+  if (!matched) {
+    return null;
+  }
+  return [...children].map(([name, mimeType]) => ({ name, mimeType }));
 }
 
 /** The subset of `McpServer` that skill registration needs. */
@@ -237,15 +228,14 @@ const DirectoryReadRequestSchema = z.object({
 });
 
 // Registers per SEP-2640: one resource per `SKILL.md`, a template for supporting
-// files, the `skill://index.json` index, and optionally `resources/directory/read`.
+// files, the `skill://index.json` index, and the `resources/directory/read` handler.
 export function registerSkills(
   server: SkillRegistrar,
   manifest: SkillsManifest,
-  { directoryRead }: { directoryRead: boolean },
 ): void {
-  const source = accessor(manifest);
+  const byName = new Map(manifest.map((s) => [s.name, s]));
   const serveFile = (name: string, relPath: string, href: string) => {
-    const file = source.readFile(name, relPath);
+    const file = byName.get(name)?.files[relPath];
     if (!file) {
       throw new McpError(ErrorCode.InvalidParams, `Not found: ${href}`);
     }
@@ -299,27 +289,23 @@ export function registerSkills(
     }),
   );
 
-  if (directoryRead) {
-    server.server.setRequestHandler(
-      DirectoryReadRequestSchema,
-      ({ params }) => {
-        const { name, relPath } = skillUriToRelPath(params.uri);
-        const entries = source.readDir(name, relPath);
-        if (!entries) {
-          throw new McpError(
-            ErrorCode.InvalidParams,
-            `Not a directory: ${params.uri}`,
-          );
-        }
-        const base = params.uri.replace(/\/+$/, "");
-        return {
-          resources: entries.map((entry) => ({
-            uri: `${base}/${entry.name}`,
-            name: entry.name,
-            mimeType: entry.mimeType,
-          })),
-        };
-      },
-    );
-  }
+  server.server.setRequestHandler(DirectoryReadRequestSchema, ({ params }) => {
+    const { name, relPath } = skillUriToRelPath(params.uri);
+    const skill = byName.get(name);
+    const entries = skill ? listDir(skill, relPath) : null;
+    if (!entries) {
+      throw new McpError(
+        ErrorCode.InvalidParams,
+        `Not a directory: ${params.uri}`,
+      );
+    }
+    const base = params.uri.replace(/\/+$/, "");
+    return {
+      resources: entries.map((entry) => ({
+        uri: `${base}/${entry.name}`,
+        name: entry.name,
+        mimeType: entry.mimeType,
+      })),
+    };
+  });
 }
