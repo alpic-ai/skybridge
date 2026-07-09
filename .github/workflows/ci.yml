@@ -3,7 +3,8 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, v0, v1]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -93,7 +94,7 @@ jobs:
         run: pnpm run build
 
   draft-release:
-    if: github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
