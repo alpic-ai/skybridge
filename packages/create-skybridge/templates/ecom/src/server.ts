@@ -71,14 +71,14 @@ const server = new McpServer(
     instructions: `\
 Two phases:
 
-SEARCH: Call search_products ${MIN_SEARCH_ITERATIONS}+ times before presenting—never off one call. \
+SEARCH: Call search-products ${MIN_SEARCH_ITERATIONS}+ times before presenting—never off one call. \
 Vary the keyword, apply filters from a prior response, or page deeper. \
 Stay silent while searching: emit NO text between calls. Speak only \
 once the carousel renders. Never call a category unavailable before searching.`,
   },
 ).registerTool(
   {
-    name: "search_products",
+    name: "search-products",
     // @todo: describe YOUR catalog and how the agent should search and curate
     // it. This is the model's main guide: be specific about your categories,
     // the multi-call search loop, and when to render vs. keep searching.

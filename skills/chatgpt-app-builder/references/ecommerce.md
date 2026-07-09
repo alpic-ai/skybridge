@@ -1,8 +1,8 @@
 # Fill the template
 
-The `ecom` template is a skeleton: the wiring is in place, the data is not. One tool, `search_products`, takes a keyword plus filters, runs a `search()` stub, and narrates the results for the model. This reference connects it to a real catalog.
+The `ecom` template is a skeleton: the wiring is in place, the data is not. One tool, `search-products`, takes a keyword plus filters, runs a `search()` stub, and narrates the results for the model. This reference connects it to a real catalog.
 
-Not in a scaffolded `ecom` project (no `search_products` tool in `src/server.ts`)? Scaffold it first with the `--ecom` flag: [copy-template.md](copy-template.md). Then return here.
+Not in a scaffolded `ecom` project (no `search-products` tool in `src/server.ts`)? Scaffold it first with the `--ecom` flag: [copy-template.md](copy-template.md). Then return here.
 
 Work in the order below. Do not skip ahead: each step depends on the previous ones. Never invent a schema, endpoint, or credential.
 
@@ -39,7 +39,7 @@ Each tool's verify curl is in its section below.
 - [ ] `CAROUSEL_MAX_SIZE`: number of products to curate toward.
 - [ ] `MIN_SEARCH_ITERATIONS`: minimum searches before rendering.
 
-### `search_products`
+### `search-products`
 
 - [ ] `description`: describe the catalog, its categories, and the search/curate loop.
 - [ ] `_meta`: the invoking and invoked status messages.
@@ -54,7 +54,7 @@ Verify: curl the stateless `/mcp` endpoint (`Accept` must include `text/event-st
 curl -s http://localhost:3000/mcp \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search_products","arguments":{"keyword":"<real keyword>"}}}'
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search-products","arguments":{"keyword":"<real keyword>"}}}'
 ```
 
 Confirm `result.content` carries real products from the live source. (`"method":"tools/list"` with no `params` lists the registered schema.)
