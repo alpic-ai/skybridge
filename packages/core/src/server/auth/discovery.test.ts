@@ -1,10 +1,7 @@
 // @vitest-environment node
 import http from "node:http";
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  discoverAuthorizationServer,
-  fetchDeclaredIssuer,
-} from "./discovery.js";
+import { discoverAuthorizationServer } from "./discovery.js";
 
 let server: http.Server | undefined;
 afterEach(() => server?.close());
@@ -105,23 +102,5 @@ describe("discoverAuthorizationServer", () => {
     await expect(discoverAuthorizationServer(base)).rejects.toThrow(
       /discovery failed/i,
     );
-  });
-});
-
-describe("fetchDeclaredIssuer", () => {
-  it("returns the declared issuer even when it differs from the fetch origin", async () => {
-    const base = await serve(() => ({
-      "/.well-known/openid-configuration": doc(
-        "https://api.descope.com/v1/apps/P123",
-      ),
-    }));
-    expect(await fetchDeclaredIssuer(base)).toBe(
-      "https://api.descope.com/v1/apps/P123",
-    );
-  });
-
-  it("returns undefined when no well-known doc is reachable", async () => {
-    const base = await serve(() => ({}));
-    expect(await fetchDeclaredIssuer(base)).toBeUndefined();
   });
 });
