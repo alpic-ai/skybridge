@@ -31,9 +31,17 @@ export async function descopeProvider(
   opts: { url: string } & Omit<CustomProviderOptions, "issuer">,
 ): Promise<OAuthConfig> {
   const { url, audience, ...rest } = opts;
-  const serverUrl = url
-    .replace(/\/\.well-known\/[^?#]*$/, "")
-    .replace(/\/$/, "");
+  // Strip a trailing `/.well-known/...` discovery suffix with linear string ops
+  // (an anchored `.*`-style regex over the untrusted url risks ReDoS): only when
+  // the suffix runs to the end without a query/fragment, matching prior behavior.
+  const wellKnownAt = url.indexOf("/.well-known/");
+  const base =
+    wellKnownAt !== -1 &&
+    !url.includes("?", wellKnownAt) &&
+    !url.includes("#", wellKnownAt)
+      ? url.slice(0, wellKnownAt)
+      : url;
+  const serverUrl = base.replace(/\/$/, "");
   // Newer Descope MCP Servers serve discovery under the agentic path but declare
   // the base project as `issuer`; follow that so customProvider's strict RFC 8414
   // self-reference check holds against it. Only follow a same-origin issuer — a
