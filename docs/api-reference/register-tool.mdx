@@ -160,7 +160,7 @@ Declaring any `{ public: true }` tool turns the server [mixed](/build/auth#mix-p
 
 ### `securitySchemes`
 
-The low-level form behind `auth`, for cases it can't express (several alternative `oauth2` schemes, or pure `noauth` that never accepts a token). Mutually exclusive with `auth` — setting both is a compile error.
+The low-level form behind `auth`, for cases it can't express (several alternative `oauth2` schemes, or pure `noauth` that never accepts a token). Mutually exclusive with `auth`.
 
 ```ts
 type SecurityScheme =
