@@ -434,6 +434,32 @@ describe("mixed-auth door", () => {
     expect(challenge[0]).toMatch(/error="invalid_token"/);
     expect(challenge[0]).toMatch(/resource_metadata=/);
   });
+
+  it("fails closed on a ChatGPT batch (transport 401, no in-band challenge)", async () => {
+    const { jwksUri } = await startJwks();
+    const base = await bootMixedServer(jwksUri);
+
+    const res = await fetch(`${base}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json, text/event-stream",
+        "User-Agent": "openai-mcp/1.0",
+      },
+      body: JSON.stringify([
+        {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "tools/call",
+          params: { name: "private-whoami", arguments: {} },
+        },
+      ]),
+    });
+    expect(res.status).toBe(401);
+    expect(res.headers.get("www-authenticate")).toMatch(/^Bearer /);
+    const text = await res.text();
+    expect(text).not.toContain("client-1");
+  });
 });
 
 async function bootScopedServer(jwksUri: string) {

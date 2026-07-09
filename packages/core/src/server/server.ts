@@ -36,7 +36,7 @@ import type { OAuthConfig } from "./auth/index.js";
 import {
   authToSecuritySchemes,
   evaluateSecuritySchemes,
-  wwwAuthenticateHeader,
+  inBandChallengeResult,
 } from "./auth/security-schemes.js";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
 import { createApp } from "./express.js";
@@ -537,6 +537,11 @@ function withSkillsCapability(
   };
 }
 
+// Collapses registerTool's two overloads into a single { config, cb } shape.
+//   registerTool("greet", { description }, handler)
+//     -> { config: { name: "greet", description }, cb: handler }
+//   registerTool({ name: "greet", description }, handler)
+//     -> { config: { name: "greet", description }, cb: handler }
 function normalizeRegisterToolArgs(args: unknown[]): {
   config: ToolConfig<ZodRawShapeCompat>;
   cb: ToolHandler<ZodRawShapeCompat>;
@@ -848,6 +853,12 @@ export class McpServer<
       },
     };
 
+    // ChatGPT reads `securitySchemes` at the tool descriptor top level (SEP-1488,
+    // still Draft), but the SDK's registerTool strips unknown top-level fields, so
+    // it's stashed in `_meta` at registration. This restores it to the top level
+    // on tools/list output. Remove once SEP-1488 lands and the SDK preserves it.
+    //   { name: "checkout", _meta: { securitySchemes: [{ type: "oauth2" }] } }
+    //     -> { name: "checkout", _meta: {…}, securitySchemes: [{ type: "oauth2" }] }
     const toolsListSecuritySchemesEntry: McpMiddlewareEntry = {
       filter: "tools/list",
       handler: async (_req, _extra, next) => {
@@ -1265,15 +1276,10 @@ export class McpServer<
             const value = headers[key];
             return Array.isArray(value) ? value[0] : value;
           };
-          const challenge = wwwAuthenticateHeader(
+          return inBandChallengeResult(
             failure,
             this.resolveResourceMetadataUrl?.(header),
           );
-          return {
-            isError: true,
-            content: [{ type: "text", text: failure.description }],
-            _meta: { "mcp/www_authenticate": [challenge] },
-          };
         }
       }
       const result = await cb(args, extra);

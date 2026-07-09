@@ -76,3 +76,18 @@ export function wwwAuthenticateHeader(
   }
   return header;
 }
+
+export function inBandChallengeResult(
+  failure: SchemeFailure,
+  resourceMetadataUrl?: string,
+) {
+  return {
+    isError: true,
+    content: [{ type: "text" as const, text: failure.description }],
+    _meta: {
+      "mcp/www_authenticate": [
+        wwwAuthenticateHeader(failure, resourceMetadataUrl),
+      ],
+    },
+  };
+}

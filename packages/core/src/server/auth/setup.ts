@@ -14,6 +14,7 @@ import {
   clientPrefersInBandChallenge,
   evaluateSecuritySchemes,
   httpStatusForFailure,
+  inBandChallengeResult,
   type SchemeFailure,
   securitySchemesAllowAnonymous,
   wwwAuthenticateHeader,
@@ -119,26 +120,19 @@ export function setupOAuth(
     if (!failure) {
       return next();
     }
-    const challenge = wwwAuthenticateHeader(
-      failure,
-      resourceMetadataUrl((key) => req.get(key)),
-    );
-    if (clientPrefersInBandChallenge(req.get("user-agent"))) {
-      if (Array.isArray(body)) {
-        return next();
-      }
+    const url = resourceMetadataUrl((key) => req.get(key));
+    if (
+      !Array.isArray(body) &&
+      clientPrefersInBandChallenge(req.get("user-agent"))
+    ) {
       res.json({
         jsonrpc: "2.0",
         id: body?.id ?? null,
-        result: {
-          content: [{ type: "text", text: failure.description }],
-          isError: true,
-          _meta: { "mcp/www_authenticate": [challenge] },
-        },
+        result: inBandChallengeResult(failure, url),
       });
       return;
     }
-    res.set("WWW-Authenticate", challenge);
+    res.set("WWW-Authenticate", wwwAuthenticateHeader(failure, url));
     res.status(httpStatusForFailure(failure)).json({
       error: failure.error,
       error_description: failure.description,
