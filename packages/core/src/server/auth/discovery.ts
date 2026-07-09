@@ -63,3 +63,30 @@ export async function discoverAuthorizationServer(
   }
   throw new Error(`OAuth discovery failed for ${issuer}: ${errors.join("; ")}`);
 }
+
+/**
+ * Reads the `issuer` a discovery doc at `url` declares, trying the well-known
+ * paths in order. Unlike {@link discoverAuthorizationServer} this does NOT
+ * enforce the RFC 8414 §3.3 self-reference check — the caller resolves the
+ * declared issuer and re-runs full discovery against it. Returns `undefined`
+ * when no valid doc is reachable.
+ */
+export async function fetchDeclaredIssuer(
+  url: string,
+): Promise<string | undefined> {
+  const base = url.replace(/\/$/, "");
+  for (const path of WELL_KNOWN) {
+    try {
+      const res = await fetch(`${base}${path}`, {
+        signal: AbortSignal.timeout(DISCOVERY_TIMEOUT_MS),
+      });
+      if (!res.ok) {
+        continue;
+      }
+      return DiscoverySchema.parse(await res.json()).issuer.replace(/\/$/, "");
+    } catch {
+      // Fall through to the next path.
+    }
+  }
+  return undefined;
+}

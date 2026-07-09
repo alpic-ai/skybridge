@@ -1,3 +1,4 @@
+import { fetchDeclaredIssuer } from "../discovery.js";
 import type { OAuthConfig } from "../index.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
 
@@ -26,14 +27,26 @@ function projectIdFromUrl(url: string): string {
  * the **Project ID** derived from the URL — Descope binds `aud` to [DCR client
  * id, project id], not the server URL; pass `audience` to override.
  */
-export function descopeProvider(
+export async function descopeProvider(
   opts: { url: string } & Omit<CustomProviderOptions, "issuer">,
 ): Promise<OAuthConfig> {
   const { url, audience, ...rest } = opts;
-  const issuer = url.replace(/\/\.well-known\/[^?#]*$/, "").replace(/\/$/, "");
+  const serverUrl = url
+    .replace(/\/\.well-known\/[^?#]*$/, "")
+    .replace(/\/$/, "");
+  // Newer Descope MCP Servers serve discovery under the agentic path but declare
+  // the base project as `issuer`; follow that so customProvider's strict RFC 8414
+  // self-reference check holds against it. Only follow a same-origin issuer — a
+  // cross-origin one is untrusted, so fall back to the configured URL.
+  const declared = await fetchDeclaredIssuer(serverUrl);
+  const issuer =
+    declared && new URL(declared).origin === new URL(serverUrl).origin
+      ? declared
+      : serverUrl;
   return customProvider({
     issuer,
-    audience: audience ?? projectIdFromUrl(issuer),
+    // `aud` is bound to the project id, always carried by the agentic server URL.
+    audience: audience ?? projectIdFromUrl(serverUrl),
     ...rest,
   });
 }
