@@ -40,6 +40,7 @@ import {
 } from "./auth/security-schemes.js";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
 import { createApp } from "./express.js";
+import { hostFromUserAgent } from "./host.js";
 import { createMiddlewareEntry } from "./metric.js";
 import type {
   McpExtra,
@@ -1046,7 +1047,7 @@ export class McpServer<
       const val = headers[key];
       return Array.isArray(val) ? val[0] : val;
     };
-    const isClaude = header("user-agent") === "Claude-User";
+    const isClaude = hostFromUserAgent(header("user-agent")) === "claude";
 
     const serverUrl = resolveServerOrigin(header);
     // Path prefix the proxy routed this request under (e.g. `foo.com/v1`). Read
