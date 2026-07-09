@@ -50,8 +50,7 @@ import type {
 import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
 import { resolveServerOrigin } from "./requestOrigin.js";
 import {
-  diskSource,
-  manifestSource,
+  discoverSkills,
   registerSkills,
   SKILLS_EXTENSION_KEY,
   type SkillsManifest,
@@ -594,9 +593,9 @@ export class McpServer<
     this.setupSkills(Boolean(skybridgeOptions?.skills));
   }
 
-  // Production serves from the injected build snapshot; dev reads live from disk
-  // so edits show up without a restart. Consume the manifest unconditionally so
-  // it can't leak into a later server constructed without priming.
+  // Production serves the injected build snapshot; dev discovers skills from
+  // disk at startup (nodemon restarts on `.md` edits). Consume the manifest
+  // unconditionally so it can't leak into a later server built without priming.
   private setupSkills(enabled: boolean): void {
     const manifest = pendingSkillsManifest;
     pendingSkillsManifest = null;
@@ -604,14 +603,14 @@ export class McpServer<
       return;
     }
 
-    const source = manifest ? manifestSource(manifest) : diskSource(SKILLS_DIR);
-    if (source.list().length === 0) {
+    const skills = manifest ?? discoverSkills(SKILLS_DIR);
+    if (skills.length === 0) {
       console.warn(
         `skybridge: the "skills" option is enabled but no skills were found in "${SKILLS_DIR}". Add a <name>/SKILL.md there, or remove the option.`,
       );
     }
 
-    registerSkills(this, source, { directoryRead: true });
+    registerSkills(this, skills, { directoryRead: true });
   }
 
   /**

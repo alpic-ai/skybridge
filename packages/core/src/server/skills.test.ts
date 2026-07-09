@@ -6,8 +6,6 @@ import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { describe, expect, it, vi } from "vitest";
 import {
   discoverSkills,
-  diskSource,
-  manifestSource,
   registerSkills,
   SKILL_INDEX_URI,
   type Skill,
@@ -156,7 +154,7 @@ describe("registerSkills", () => {
   it("builds an index.json with url, digest, and verbatim frontmatter", () => {
     const { server, resources } = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
-    registerSkills(server as any, manifestSource(manifest), {
+    registerSkills(server as any, manifest, {
       directoryRead: false,
     });
     const index = resources.get("skill-index");
@@ -177,7 +175,7 @@ describe("registerSkills", () => {
   it("serves supporting files through the template resource", () => {
     const { server, resources } = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
-    registerSkills(server as any, manifestSource(manifest), {
+    registerSkills(server as any, manifest, {
       directoryRead: false,
     });
     const tpl = resources.get("skill-files");
@@ -190,14 +188,14 @@ describe("registerSkills", () => {
   it("only registers the directory-read handler when enabled", () => {
     const off = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
-    registerSkills(off.server as any, manifestSource(manifest), {
+    registerSkills(off.server as any, manifest, {
       directoryRead: false,
     });
     expect(off.getDirHandler()).toBeUndefined();
 
     const on = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
-    registerSkills(on.server as any, manifestSource(manifest), {
+    registerSkills(on.server as any, manifest, {
       directoryRead: true,
     });
     const result = on.getDirHandler()?.({
@@ -215,7 +213,7 @@ describe("registerSkills", () => {
   it("lists a skill root and marks subdirectories as inode/directory", () => {
     const { server, getDirHandler } = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
-    registerSkills(server as any, manifestSource(manifest), {
+    registerSkills(server as any, manifest, {
       directoryRead: true,
     });
     const result = getDirHandler()?.({
@@ -234,28 +232,18 @@ describe("registerSkills", () => {
   });
 });
 
-describe("diskSource", () => {
-  it("reads files live and lists directories", () => {
-    const dir = mkSkillDir({
-      "refunds/SKILL.md": FM("refunds", "d"),
-      "refunds/templates/email.md": "Hi",
-    });
-    const source = diskSource(dir);
-    expect(source.list()).toHaveLength(1);
-    expect(source.readFile("refunds", "templates/email.md")?.text).toBe("Hi");
-    expect(source.readFile("refunds", "missing.md")).toBeNull();
-    expect(source.readDir("refunds", "nope")).toBeNull();
-  });
-
-  it("refuses to read or list through a symlink that escapes the skills root", () => {
+describe("discoverSkills symlink safety", () => {
+  it("excludes symlinked files and directories from the manifest", () => {
     const outside = mkdtempSync(join(tmpdir(), "skybridge-outside-"));
     writeFileSync(join(outside, "secret.txt"), "TOP SECRET");
-    const dir = mkSkillDir({ "demo/SKILL.md": FM("demo", "d") });
+    const dir = mkSkillDir({
+      "demo/SKILL.md": FM("demo", "d"),
+      "demo/real.md": "ok",
+    });
     symlinkSync(join(outside, "secret.txt"), join(dir, "demo", "leak.txt"));
     symlinkSync(outside, join(dir, "demo", "escape"));
 
-    const source = diskSource(dir);
-    expect(source.readFile("demo", "leak.txt")).toBeNull();
-    expect(source.readDir("demo", "escape")).toBeNull();
+    const files = discoverSkills(dir)[0]?.files ?? {};
+    expect(Object.keys(files).sort()).toEqual(["SKILL.md", "real.md"]);
   });
 });

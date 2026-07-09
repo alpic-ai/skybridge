@@ -1,12 +1,6 @@
 import { createHash } from "node:crypto";
-import {
-  existsSync,
-  readdirSync,
-  readFileSync,
-  realpathSync,
-  statSync,
-} from "node:fs";
-import { join, resolve, sep } from "node:path";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import type {
   ReadResourceCallback,
   ReadResourceTemplateCallback,
@@ -96,6 +90,11 @@ const readSkillDir = (root: string, rel = ""): Record<string, SkillFile> => {
   const files: Record<string, SkillFile> = {};
   for (const entry of readdirSync(join(root, rel), { withFileTypes: true })) {
     const childRel = rel ? `${rel}/${entry.name}` : entry.name;
+    // Skip symlinks so a link can't pull content from outside the skills tree
+    // into the served manifest.
+    if (entry.isSymbolicLink()) {
+      continue;
+    }
     if (entry.isDirectory()) {
       Object.assign(files, readSkillDir(root, childRel));
     } else if (entry.isFile()) {
@@ -171,10 +170,10 @@ export function skillUriToRelPath(uri: string): {
   return { name, relPath: segments.join("/") };
 }
 
-// The indirection both runtime modes share: an in-memory manifest (production)
-// and a live disk reader (dev). `readFile`/`readDir` return null when absent.
-export interface SkillsSource {
-  list(): Skill[];
+// Read access over a manifest — the shape `registerSkills` serves from. Both
+// runtime modes produce a manifest first (prod injects it, dev discovers it at
+// startup), so there is a single accessor. `null` means the path is absent.
+interface SkillsAccessor {
   readFile(name: string, relPath: string): SkillFile | null;
   readDir(
     name: string,
@@ -182,19 +181,16 @@ export interface SkillsSource {
   ): { name: string; mimeType: string }[] | null;
 }
 
-export function manifestSource(manifest: SkillsManifest): SkillsSource {
+function accessor(manifest: SkillsManifest): SkillsAccessor {
   const byName = new Map(manifest.map((s) => [s.name, s]));
-  const fileKey = (relPath: string) => relPath.replace(/\/+$/, "");
-
   return {
-    list: () => manifest,
     readFile: (name, relPath) => byName.get(name)?.files[relPath] ?? null,
     readDir: (name, relPath) => {
       const skill = byName.get(name);
       if (!skill) {
         return null;
       }
-      const prefix = relPath === "" ? "" : `${fileKey(relPath)}/`;
+      const prefix = relPath === "" ? "" : `${relPath}/`;
       const children = new Map<string, string>();
       let matched = relPath === "";
       for (const filePath of Object.keys(skill.files)) {
@@ -214,49 +210,6 @@ export function manifestSource(manifest: SkillsManifest): SkillsSource {
         return null;
       }
       return [...children].map(([name, mimeType]) => ({ name, mimeType }));
-    },
-  };
-}
-
-export function diskSource(dir: string): SkillsSource {
-  const rootReal = existsSync(dir) ? realpathSync(dir) : resolve(dir);
-
-  // Confirms the real (symlink-followed) path stays within the skills root, else
-  // null — closes the traversal hole where an in-tree symlink points outside it.
-  const contain = (name: string, relPath: string): string | null => {
-    const path = join(dir, name, relPath);
-    if (!existsSync(path)) {
-      return null;
-    }
-    const real = realpathSync(path);
-    return real === rootReal || real.startsWith(`${rootReal}${sep}`)
-      ? path
-      : null;
-  };
-
-  return {
-    list: () => discoverSkills(dir),
-    readFile: (name, relPath) => {
-      const path = contain(name, relPath || "SKILL.md");
-      if (!path || !statSync(path).isFile()) {
-        return null;
-      }
-      return {
-        text: readFileSync(path, "utf8"),
-        mimeType: mimeTypeForFile(path),
-      };
-    },
-    readDir: (name, relPath) => {
-      const path = contain(name, relPath);
-      if (!path || !statSync(path).isDirectory()) {
-        return null;
-      }
-      return readdirSync(path, { withFileTypes: true }).map((entry) => ({
-        name: entry.name,
-        mimeType: entry.isDirectory()
-          ? "inode/directory"
-          : mimeTypeForFile(entry.name),
-      }));
     },
   };
 }
@@ -287,9 +240,10 @@ const DirectoryReadRequestSchema = z.object({
 // files, the `skill://index.json` index, and optionally `resources/directory/read`.
 export function registerSkills(
   server: SkillRegistrar,
-  source: SkillsSource,
+  manifest: SkillsManifest,
   { directoryRead }: { directoryRead: boolean },
 ): void {
+  const source = accessor(manifest);
   const serveFile = (name: string, relPath: string, href: string) => {
     const file = source.readFile(name, relPath);
     if (!file) {
@@ -300,7 +254,7 @@ export function registerSkills(
     };
   };
 
-  for (const skill of source.list()) {
+  for (const skill of manifest) {
     server.registerResource(
       skill.name,
       `skill://${skill.name}/SKILL.md`,
@@ -334,7 +288,7 @@ export function registerSkills(
           uri: SKILL_INDEX_URI,
           mimeType: "application/json",
           text: JSON.stringify({
-            skills: source.list().map((skill) => ({
+            skills: manifest.map((skill) => ({
               url: `skill://${skill.name}/SKILL.md`,
               digest: skill.digest,
               frontmatter: skill.frontmatter,
