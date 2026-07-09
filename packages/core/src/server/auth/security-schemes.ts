@@ -1,4 +1,5 @@
 import type { AuthInfo } from "../auth.js";
+import { hostFromUserAgent } from "../host.js";
 import type { SecurityScheme, ToolAuth } from "../server.js";
 
 export function authToSecuritySchemes(auth: ToolAuth): SecurityScheme[] {
@@ -59,8 +60,7 @@ export function httpStatusForFailure(failure: SchemeFailure): 401 | 403 {
 export function clientPrefersInBandChallenge(
   userAgent: string | undefined,
 ): boolean {
-  const ua = (userAgent ?? "").toLowerCase();
-  return ua.includes("openai") || ua.includes("chatgpt");
+  return hostFromUserAgent(userAgent) === "openai";
 }
 
 export function wwwAuthenticateHeader(
