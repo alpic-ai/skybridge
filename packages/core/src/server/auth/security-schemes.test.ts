@@ -57,17 +57,14 @@ describe("evaluateSecuritySchemes", () => {
     expect(evaluateSecuritySchemes(schemes, undefined)).toBeUndefined();
   });
 
-  it("enforces oauth2 scopes on a public tool once a token is present", () => {
+  it("lets any caller through a public tool, scoped or not", () => {
     const schemes: SecurityScheme[] = [
       { type: "noauth" },
       { type: "oauth2", scopes: ["checkout"] },
     ];
     expect(evaluateSecuritySchemes(schemes, undefined)).toBeUndefined();
-    expect(evaluateSecuritySchemes(schemes, authInfo(["openid"]))?.error).toBe(
-      "insufficient_scope",
-    );
     expect(
-      evaluateSecuritySchemes(schemes, authInfo(["checkout"])),
+      evaluateSecuritySchemes(schemes, authInfo(["openid"])),
     ).toBeUndefined();
   });
 

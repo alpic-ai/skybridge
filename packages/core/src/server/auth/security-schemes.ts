@@ -25,7 +25,7 @@ export function evaluateSecuritySchemes(
   schemes: SecurityScheme[] | undefined,
   authInfo: AuthInfo | undefined,
 ): SchemeFailure | undefined {
-  if (securitySchemesAllowAnonymous(schemes) && !authInfo) {
+  if (securitySchemesAllowAnonymous(schemes)) {
     return undefined;
   }
   const oauth2 = (schemes ?? []).filter((scheme) => scheme.type === "oauth2");
