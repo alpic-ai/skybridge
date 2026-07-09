@@ -30,10 +30,11 @@ export function descopeProvider(
   opts: { url: string } & Omit<CustomProviderOptions, "issuer">,
 ): Promise<OAuthConfig> {
   const { url, audience, ...rest } = opts;
-  const issuer = url.replace(/\/\.well-known\/[^?#]*$/, "").replace(/\/$/, "");
+  const projectId = projectIdFromUrl(url);
+  const issuer = `${url.slice(0, url.indexOf("/agentic/"))}/${projectId}`;
   return customProvider({
     issuer,
-    audience: audience ?? projectIdFromUrl(issuer),
+    audience: audience ?? projectId,
     ...rest,
   });
 }
