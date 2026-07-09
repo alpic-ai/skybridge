@@ -15,12 +15,12 @@
     "dotenv": "^16.5.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "skybridge": "workspace:*",
+    "skybridge": "0.0.0-dev.93dffd6",
     "vite": "^8.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@skybridge/devtools": "^1.1.0",
+    "@skybridge/devtools": "0.0.0-dev.93dffd6",
     "@types/express": "^5.0.6",
     "@types/node": "^22.15.30",
     "@types/react": "^19.2.13",
