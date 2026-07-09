@@ -8,6 +8,7 @@ export {
 export { useDisplayMode } from "./use-display-mode.js";
 export { type DownloadFn, useDownload } from "./use-download.js";
 export { useFiles } from "./use-files.js";
+export { type HostState, useHost } from "./use-host.js";
 export { type LayoutState, useLayout } from "./use-layout.js";
 export { type OpenExternalFn, useOpenExternal } from "./use-open-external.js";
 export { useRegisterViewTool } from "./use-register-view-tool.js";

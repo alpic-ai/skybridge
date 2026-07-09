@@ -86,6 +86,10 @@ export class McpAppBridge implements Bridge<McpAppContext> {
     try {
       await this.app.connect();
       const hostContext = this.app.getHostContext();
+      const hostInfo = this.app.getHostVersion();
+      if (hostInfo) {
+        this.updateContext({ hostInfo });
+      }
       if (hostContext) {
         this.updateContext(hostContext);
       }

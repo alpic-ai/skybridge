@@ -1,5 +1,6 @@
 import { AppsSdkBridge } from "./apps-sdk/bridge.js";
 import type { AppsSdkWidgetState } from "./apps-sdk/types.js";
+import { detectHost } from "./detect-host.js";
 import { McpAppBridge } from "./mcp-app/bridge.js";
 import type {
   Adaptor,
@@ -122,8 +123,26 @@ export class HostAdaptor implements Adaptor {
       getSnapshot: () => this._viewState,
     };
 
+    let cachedHost: HostContext["host"] | undefined;
+    const hostStore: HostContextStore<"host"> = {
+      subscribe: this.mcp.subscribe(["userAgent", "hostInfo"]),
+      getSnapshot: () => {
+        const nextHost = detectHost({
+          userAgent: this.mcp.getSnapshot("userAgent"),
+          hostInfoName: this.mcp.getSnapshot("hostInfo")?.name,
+          hasOpenAI: this.openai !== null,
+        });
+        if (cachedHost?.name === nextHost.name) {
+          return cachedHost;
+        }
+        cachedHost = nextHost;
+        return nextHost;
+      },
+    };
+
     this.stores = {
       ...this.mcp.createContextStores(),
+      host: hostStore,
       display: overlayStores?.display ?? this.polyfillDisplayStore,
       viewState: overlayStores?.viewState ?? this.polyfillViewStateStore,
     };
