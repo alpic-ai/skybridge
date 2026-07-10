@@ -24,7 +24,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@skybridge/devtools": "^1.2.4",
+    "@skybridge/devtools": "^1.2.5",
     "@tailwindcss/vite": "^4.3.2",
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",
