@@ -6,21 +6,14 @@ import type {
 import express, { type Router } from "express";
 import { alpic } from "./alpic-sdk.js";
 
-const TOTAL_STEPS = 4;
-const PHASE_STEPS: Record<
-  DeployEvent["type"],
-  { step: number; label: string }
-> = {
-  collecting: { step: 1, label: "Collecting files" },
-  collected: { step: 1, label: "Collecting files" },
-  uploading: { step: 2, label: "Uploading source" },
-  triggering: { step: 3, label: "Triggering deployment" },
-  deploying: { step: 4, label: "Deploying" },
+const PHASE_LABELS: Record<DeployEvent["type"], string> = {
+  collecting: "Collecting files",
+  collected: "Collecting files",
+  uploading: "Uploading source",
+  triggering: "Triggering deployment",
+  deploying: "Deploying",
 };
-const phaseText = (type: DeployEvent["type"]): string => {
-  const { step, label } = PHASE_STEPS[type];
-  return `${step}/${TOTAL_STEPS} ${label}`;
-};
+const phaseText = (type: DeployEvent["type"]): string => PHASE_LABELS[type];
 
 type DeployState =
   | { status: "idle" }

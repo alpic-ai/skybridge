@@ -12,10 +12,15 @@ import {
   type StatusDotVariantProps,
 } from "@alpic-ai/ui/components/status-dot";
 import {
+  TaskProgress,
+  type TaskProgressStep,
+} from "@alpic-ai/ui/components/task-progress";
+import {
   Check,
   ClipboardCheck,
   Copy,
   ExternalLinkIcon,
+  Globe,
   MessagesSquareIcon,
   UnplugIcon,
 } from "lucide-react";
@@ -232,6 +237,46 @@ export function AuditButton() {
 
 const ALPIC_APP_URL = "https://app.alpic.ai";
 
+const DEPLOY_STEPS = [
+  { id: "collect", label: "Collecting files" },
+  { id: "upload", label: "Uploading source" },
+  { id: "trigger", label: "Triggering deployment" },
+  { id: "deploy", label: "Deploying" },
+] as const;
+
+export function LiveUrlChip() {
+  const url = useDeployStore((s) =>
+    s.status.state === "ready" && s.status.mcpServerUrl
+      ? s.status.mcpServerUrl
+      : s.progress.status === "deployed"
+        ? s.progress.mcpServerUrl
+        : null,
+  );
+  const { copied, copy } = useCopyToClipboard();
+  if (!url) {
+    return null;
+  }
+  const host = url.replace(/^https?:\/\//, "");
+  return (
+    <button
+      type="button"
+      aria-label="Copy live MCP server URL"
+      onClick={() => copy(url)}
+      className="inline-flex h-8 items-center gap-2 rounded-md border bg-light-gray px-2.5 text-sm hover:bg-background-hover"
+    >
+      <Globe className="size-3.5 text-quaternary-foreground" aria-hidden />
+      <span className="max-w-48 truncate font-mono text-xs">{host}</span>
+      <span className="text-quaternary-foreground">
+        {copied ? (
+          <Check className="size-3.5" />
+        ) : (
+          <Copy className="size-3.5" />
+        )}
+      </span>
+    </button>
+  );
+}
+
 export function DeployButton() {
   const { status, progress, redeploy, createAndDeploy, signIn } =
     useDeployStore();
@@ -372,10 +417,7 @@ function DeployPopoverContent({
         <p className="text-sm font-medium">Deployed</p>
         <CopyUrlRow url={progress.mcpServerUrl} />
         {progress.deploymentPageUrl && (
-          <>
-            <Separator />
-            <DeploymentPageButton href={progress.deploymentPageUrl} />
-          </>
+          <DeploymentPageButton href={progress.deploymentPageUrl} />
         )}
       </div>
     );
@@ -389,13 +431,10 @@ function DeployPopoverContent({
         </p>
         <p className="text-xs text-muted-foreground">{progress.message}</p>
         {progress.deploymentPageUrl && (
-          <>
-            <Separator />
-            <ExternalLinkRow
-              href={progress.deploymentPageUrl}
-              label="Go to logs"
-            />
-          </>
+          <ExternalLinkRow
+            href={progress.deploymentPageUrl}
+            label="Go to logs"
+          />
         )}
       </div>
     );
@@ -460,10 +499,7 @@ function DeployPopoverContent({
             </>
           )}
           {status.deploymentPageUrl && (
-            <>
-              <Separator />
-              <DeploymentPageButton href={status.deploymentPageUrl} />
-            </>
+            <DeploymentPageButton href={status.deploymentPageUrl} />
           )}
           {status.lastDeployGit && (
             <WarningAlert
@@ -526,22 +562,29 @@ function DeployingContent({
     return () => clearInterval(id);
   }, [startedAt]);
 
+  const currentIdx = Math.max(
+    0,
+    DEPLOY_STEPS.findIndex((s) => s.label === phase),
+  );
+  const steps: TaskProgressStep[] = DEPLOY_STEPS.map((step, i) => ({
+    id: step.id,
+    label: step.label,
+    status: i < currentIdx ? "done" : i === currentIdx ? "running" : "pending",
+  }));
+
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <Spinner size="sm" className="shrink-0 text-current" />
-        <p className="text-sm">{phase}…</p>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium">Deploying…</p>
         {startedAt != null && (
-          <span className="ml-auto font-mono text-xs text-muted-foreground">
+          <span className="font-mono text-xs text-muted-foreground">
             {formatElapsed(elapsedMs)}
           </span>
         )}
       </div>
+      <TaskProgress steps={steps} />
       {deploymentPageUrl && (
-        <>
-          <Separator />
-          <ExternalLinkRow href={deploymentPageUrl} label="Go to logs" />
-        </>
+        <ExternalLinkRow href={deploymentPageUrl} label="Go to logs" />
       )}
     </div>
   );

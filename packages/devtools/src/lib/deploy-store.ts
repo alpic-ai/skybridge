@@ -113,12 +113,9 @@ export const useDeployStore = create<DeployStore>()((set, get) => ({
           ? parsed.data
           : { state: "error", message: "Unexpected status response" },
       });
-    } catch (err) {
+    } catch {
       set({
-        status: {
-          state: "error",
-          message: err instanceof Error ? err.message : "Failed to load status",
-        },
+        status: { state: "error", message: "Can't reach the dev server." },
       });
     }
   },

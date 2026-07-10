@@ -138,6 +138,9 @@ test.describe("deploy button", () => {
     const deploy = deployTrigger(page);
     await expect(deploy).toBeVisible();
     await expect(deploy.locator(".bg-success")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /copy live mcp server url/i }),
+    ).toContainText("my-app.alpic.live");
     await hoverDeployPopover(page);
     await expect(page.getByText("https://my-app.alpic.live")).toBeVisible();
     await expect(
@@ -181,7 +184,7 @@ test.describe("deploy button", () => {
       },
       progress: {
         status: "deploying",
-        phase: "2/4 Uploading source",
+        phase: "Uploading source",
         startedAt: Date.now() - 65_000,
         deploymentPageUrl: "https://app.alpic.ai/p1/logs",
       },
@@ -193,7 +196,8 @@ test.describe("deploy button", () => {
     await expect(deploy.locator(".animate-pulse")).toBeVisible();
     await expect(deploy).toHaveAttribute("aria-disabled", "true");
     await hoverDeployPopover(page);
-    await expect(page.getByText("2/4 Uploading source…")).toBeVisible();
+    await expect(page.getByText("Deploying…")).toBeVisible();
+    await expect(page.getByText("Uploading source")).toBeVisible();
     await expect(
       page.getByRole("link", { name: /go to logs/i }),
     ).toHaveAttribute("href", "https://app.alpic.ai/p1/logs");
