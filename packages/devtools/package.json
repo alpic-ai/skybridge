@@ -30,20 +30,20 @@
     "test:e2e:install": "playwright install --with-deps chromium"
   },
   "dependencies": {
-    "@alpic-ai/sdk": "^1.148.0",
+    "@alpic-ai/sdk": "^1.148.1",
     "@t3-oss/env-core": "^0.13.11",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@alpic-ai/ui": "^1.148.0",
+    "@alpic-ai/ui": "^1.148.1",
     "@base-ui/react": "^1.6.0",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@playwright/test": "^1.61.1",
-    "@radix-ui/react-accordion": "^1.2.15",
-    "@radix-ui/react-tooltip": "^1.2.11",
+    "@radix-ui/react-accordion": "^1.2.16",
+    "@radix-ui/react-tooltip": "^1.2.12",
     "@rjsf/core": "^6.6.2",
     "@rjsf/shadcn": "^6.6.2",
     "@rjsf/utils": "^6.6.2",

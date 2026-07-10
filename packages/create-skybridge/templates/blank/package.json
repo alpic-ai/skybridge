@@ -19,7 +19,7 @@
   "devDependencies": {
     "@skybridge/devtools": "^1.2.4",
     "@types/node": "^24.13.2",
-    "alpic": "^1.148.0",
+    "alpic": "^1.148.1",
     "tsx": "^4.23.0",
     "typescript": "^6.0.3"
   },
