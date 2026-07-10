@@ -1,5 +1,6 @@
 import { type ComponentType, useEffect, useRef } from "react";
 import {
+  getAdaptor,
   useCallTool,
   useDisplayMode,
   useDownload,
@@ -40,7 +41,12 @@ import { z } from "zod";
  * whether the effect actually happened.
  */
 export type Verdict = "supported" | "partial" | "unsupported" | "error";
-export type TestResult = { verdict: Verdict; detail: string };
+export type TestResult = {
+  verdict: Verdict;
+  detail: string;
+  /** Set false when a `confirm` test verified the effect programmatically. */
+  needsConfirm?: boolean;
+};
 export type TestProps = { onResult: (result: TestResult) => void };
 export type TestDef = {
   /** Hook under test, e.g. `useCallTool`. */
@@ -55,6 +61,8 @@ export type TestDef = {
   confirm?: string;
   /** Label for the action button (defaults to "Run"). */
   runLabel?: string;
+  /** Runner safety-net timeout for auto tests (defaults to 15s). */
+  timeoutMs?: number;
   Test: ComponentType<TestProps>;
 };
 
@@ -121,15 +129,20 @@ function ToolInfoTest({ onResult }: TestProps) {
   latest.current = { input, output, responseMetadata };
 
   useProbe(onResult, async () => {
-    const deadline = Date.now() + 4000;
+    // The tool result reaches the view asynchronously (bridge handshake, then
+    // a host push that competes with the still-streaming assistant turn), so
+    // wait generously instead of racing it, and report the observed latency.
+    const start = Date.now();
+    const deadline = start + 30_000;
     while (Date.now() < deadline) {
       const current = latest.current;
       if (
         current.output?.marker === OUTPUT_MARKER &&
         current.responseMetadata?.secret === META_SECRET
       ) {
+        const seconds = ((Date.now() - start) / 1000).toFixed(1);
         return supported(
-          `structuredContent and result _meta delivered · input ${
+          `structuredContent and result _meta delivered after ${seconds}s · input ${
             current.input ? JSON.stringify(current.input) : "not delivered"
           }`,
         );
@@ -139,7 +152,7 @@ function ToolInfoTest({ onResult }: TestProps) {
     const { output: out, responseMetadata: meta } = latest.current;
     if (!out) {
       return unsupported(
-        "the tool's structuredContent was not delivered to the view",
+        "the tool's structuredContent was not delivered to the view within 30s",
       );
     }
     if (out.marker !== OUTPUT_MARKER) {
@@ -304,10 +317,28 @@ function RequestModalTest({ onResult }: TestProps) {
   useProbe(onResult, async () => {
     try {
       open({ title: "Skybridge conformance", params: { probe: "modal" } });
-      return supported("modal requested");
     } catch (e) {
       return unsupported(`open() failed: ${errMessage(e)}`);
     }
+    // When the host re-renders THIS view instance in modal mode the runner
+    // unmounts (the modal content replaces the tree at the root), so watch the
+    // display mode through the adaptor store, which outlives the unmount.
+    const deadline = Date.now() + 4000;
+    while (Date.now() < deadline) {
+      const { mode } = getAdaptor()
+        .getHostContextStore("display")
+        .getSnapshot();
+      if (mode === "modal") {
+        return {
+          ...supported("the view re-rendered in modal mode"),
+          needsConfirm: false,
+        };
+      }
+      await sleep(150);
+    }
+    // No in-view flip: the host may have opened a separate modal instance
+    // (Apps SDK); only the user can tell.
+    return supported("modal requested");
   });
   return null;
 }
@@ -450,8 +481,9 @@ export const TESTS: TestDef[] = [
     hook: "useToolInfo",
     name: "tool output & _meta delivery",
     description:
-      "The rendering tool's structuredContent and result _meta reach the view.",
+      "The rendering tool's structuredContent and result _meta reach the view (waits up to 30s for delivery).",
     auto: true,
+    timeoutMs: 35_000,
     Test: ToolInfoTest,
   },
   {

@@ -5,10 +5,12 @@ import { Check, Copy, Play, RefreshCw, SkipForward, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getAdaptor,
+  useDisplayMode,
   useLayout,
   useRequestModal,
   useViewState,
 } from "skybridge/web";
+import { useDriveListener, useStateBroadcast } from "@/automation.js";
 import {
   detectRuntime,
   TESTS,
@@ -155,12 +157,71 @@ function Runner({ onRestart }: { onRestart: () => void }) {
     onRestart();
   };
 
+  const skipCurrent = () =>
+    recordAt(step, { verdict: "skipped", detail: "skipped by user" });
+  const confirmYes = () => {
+    if (confirming) {
+      recordAt(step, {
+        ...confirming,
+        detail: `${confirming.detail} · confirmed by user`,
+      });
+    }
+  };
+  const confirmNo = () => {
+    if (confirming) {
+      recordAt(step, {
+        verdict: "unsupported",
+        detail: `${confirming.detail} without error · but user saw no effect`,
+      });
+    }
+  };
+
+  // Remote control for external drivers (e.g. the Notte conformance
+  // function): see src/automation.ts for the protocol.
+  const [, setDisplayMode] = useDisplayMode();
+  useDriveListener((action) => {
+    if (action === "run" && test && !test.auto && !confirming) {
+      setArmed(true);
+    } else if (action === "skip" && !done) {
+      skipCurrent();
+    } else if (action === "yes") {
+      confirmYes();
+    } else if (action === "no") {
+      confirmNo();
+    } else if (action === "close-modal") {
+      getAdaptor().closeModal();
+    } else if (action === "restore-inline") {
+      // The displayMode test leaves fullscreen for the user to undo; an
+      // automated driver undoes it through the same public API.
+      setDisplayMode("inline").catch(() => {});
+    }
+  });
+  useStateBroadcast(() => ({
+    run_complete: done,
+    current_hook: test?.hook ?? null,
+    action_button:
+      test && !test.auto && !armed && !confirming
+        ? (test.runLabel ?? "Run")
+        : null,
+    confirm_question: confirming ? (test?.confirm ?? null) : null,
+    modal_open: false,
+    rows: TESTS.map((t, i) => ({
+      hook: t.hook,
+      result: rows[i]?.verdict ?? (i === step ? "testing" : ""),
+      detail: rows[i]?.detail ?? "",
+    })),
+  }));
+
   const handleResult = useCallback(
     (index: number, result: TestResult) => {
       if (recordedRef.current.has(index)) {
         return;
       }
-      if (TESTS[index].confirm && result.verdict === "supported") {
+      if (
+        TESTS[index].confirm &&
+        result.verdict === "supported" &&
+        result.needsConfirm !== false
+      ) {
         setConfirming(result);
       } else {
         recordAt(index, result);
@@ -174,9 +235,14 @@ function Runner({ onRestart }: { onRestart: () => void }) {
     if (!TESTS[step]?.auto) {
       return;
     }
+    const timeoutMs = TESTS[step].timeoutMs ?? 15_000;
     const timer = setTimeout(
-      () => recordAt(step, { verdict: "error", detail: "timed out after 15s" }),
-      15_000,
+      () =>
+        recordAt(step, {
+          verdict: "error",
+          detail: `timed out after ${timeoutMs / 1000}s`,
+        }),
+      timeoutMs,
     );
     return () => clearTimeout(timer);
   }, [step, recordAt]);
@@ -239,12 +305,7 @@ function Runner({ onRestart }: { onRestart: () => void }) {
               <Button
                 variant="secondary"
                 icon={<SkipForward />}
-                onClick={() =>
-                  recordAt(step, {
-                    verdict: "skipped",
-                    detail: "skipped by user",
-                  })
-                }
+                onClick={() => skipCurrent()}
               >
                 Skip
               </Button>
@@ -269,27 +330,10 @@ function Runner({ onRestart }: { onRestart: () => void }) {
                   {confirming.detail}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <Button
-                    icon={<Check />}
-                    onClick={() =>
-                      recordAt(step, {
-                        ...confirming,
-                        detail: `${confirming.detail} · confirmed by user`,
-                      })
-                    }
-                  >
+                  <Button icon={<Check />} onClick={confirmYes}>
                     Yes, it worked
                   </Button>
-                  <Button
-                    variant="secondary"
-                    icon={<X />}
-                    onClick={() =>
-                      recordAt(step, {
-                        verdict: "unsupported",
-                        detail: `${confirming.detail} without error · but user saw no effect`,
-                      })
-                    }
-                  >
+                  <Button variant="secondary" icon={<X />} onClick={confirmNo}>
                     No effect
                   </Button>
                 </div>
@@ -389,16 +433,36 @@ function Runner({ onRestart }: { onRestart: () => void }) {
   );
 }
 
-function ModalNotice() {
+const MODAL_STATE = {
+  run_complete: false,
+  current_hook: null,
+  action_button: null,
+  confirm_question: null,
+  modal_open: true,
+  rows: [],
+};
+
+function ModalNotice({ params }: { params?: Record<string, unknown> }) {
+  // The runner is unmounted while the modal shows, so the remote control
+  // needs its own wiring here (see src/automation.ts).
+  useDriveListener((action) => {
+    if (action === "close-modal") {
+      getAdaptor().closeModal();
+    }
+  });
+  useStateBroadcast(() => MODAL_STATE);
+
   return (
-    <div className="flex max-w-sm flex-col gap-2 p-6">
+    <div className="flex max-w-sm flex-col gap-3 p-6">
       <h2 className="type-text-lg font-semibold text-foreground">
         Modal opened ✓
       </h2>
       <p className="type-text-sm text-muted-foreground">
-        useRequestModal rendered this view in modal mode. Close it to answer the
-        confirmation.
+        useRequestModal rendered this view in modal mode. Params received:
       </p>
+      <code className="w-fit rounded-md bg-muted px-2 py-1 font-mono type-text-xs text-foreground">
+        {JSON.stringify(params ?? {})}
+      </code>
       <Button
         className="w-fit"
         icon={<X />}
@@ -412,30 +476,28 @@ function ModalNotice() {
 
 function App() {
   const { theme } = useLayout();
-  const { isOpen } = useRequestModal();
-  // A view born in modal mode is the host's dedicated modal instance — show
-  // the notice only, never a second runner.
-  const bornInModal = useRef(isOpen);
+  const { isOpen, params } = useRequestModal();
   const [epoch, setEpoch] = useState(0);
+
+  if (isOpen) {
+    return (
+      <div
+        className={`${theme === "dark" ? "dark " : ""}bg-background text-foreground`}
+      >
+        <ModalNotice params={params} />
+      </div>
+    );
+  }
 
   return (
     <div
       className={`${theme === "dark" ? "dark " : ""}bg-background text-foreground`}
     >
-      {bornInModal.current ? (
-        <ModalNotice />
-      ) : (
-        <>
-          {isOpen && <ModalNotice />}
-          {/* Keep the runner mounted (hidden) during the modal round-trip so
-              results and the pending confirmation survive. */}
-          <div hidden={isOpen} className="min-h-dvh">
-            <div className="mx-auto max-w-2xl p-4">
-              <Runner key={epoch} onRestart={() => setEpoch((e) => e + 1)} />
-            </div>
-          </div>
-        </>
-      )}
+      <div className="min-h-dvh">
+        <div className="mx-auto max-w-2xl p-4">
+          <Runner key={epoch} onRestart={() => setEpoch((e) => e + 1)} />
+        </div>
+      </div>
     </div>
   );
 }
