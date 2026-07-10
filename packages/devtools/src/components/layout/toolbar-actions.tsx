@@ -234,13 +234,15 @@ export function AuditButton() {
 const ALPIC_APP_URL = "https://app.alpic.ai";
 
 export function LiveUrlChip() {
-  const url = useDeployStore((s) =>
-    s.status.state === "ready" && s.status.mcpServerUrl
-      ? s.status.mcpServerUrl
-      : s.progress.status === "deployed"
-        ? s.progress.mcpServerUrl
-        : null,
-  );
+  const url = useDeployStore((s) => {
+    if (s.status.state === "ready" && s.status.mcpServerUrl) {
+      return s.status.mcpServerUrl;
+    }
+    if (s.progress.status === "deployed") {
+      return s.progress.mcpServerUrl;
+    }
+    return null;
+  });
   const { copied, copy } = useCopyToClipboard();
   if (!url) {
     return null;
