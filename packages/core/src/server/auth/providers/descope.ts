@@ -35,6 +35,7 @@ export function descopeProvider(
   return customProvider({
     issuer,
     audience: audience ?? projectId,
+    authorizationServer: url,
     ...rest,
   });
 }
