@@ -12,10 +12,6 @@ import {
   type StatusDotVariantProps,
 } from "@alpic-ai/ui/components/status-dot";
 import {
-  TaskProgress,
-  type TaskProgressStep,
-} from "@alpic-ai/ui/components/task-progress";
-import {
   Check,
   ClipboardCheck,
   Copy,
@@ -237,13 +233,6 @@ export function AuditButton() {
 
 const ALPIC_APP_URL = "https://app.alpic.ai";
 
-const DEPLOY_STEPS = [
-  { id: "collect", label: "Collecting files" },
-  { id: "upload", label: "Uploading source" },
-  { id: "trigger", label: "Triggering deployment" },
-  { id: "deploy", label: "Deploying" },
-] as const;
-
 export function LiveUrlChip() {
   const url = useDeployStore((s) =>
     s.status.state === "ready" && s.status.mcpServerUrl
@@ -402,7 +391,6 @@ function DeployPopoverContent({
   if (progress.status === "deploying") {
     return (
       <DeployingContent
-        phase={progress.phase}
         startedAt={progress.startedAt}
         deploymentPageUrl={progress.deploymentPageUrl}
       />
@@ -479,7 +467,6 @@ function DeployPopoverContent({
       if (status.lastDeployStatus === "ongoing") {
         return (
           <DeployingContent
-            phase="Deploying"
             startedAt={status.lastDeployStartedAt ?? null}
             deploymentPageUrl={status.deploymentPageUrl ?? null}
           />
@@ -539,11 +526,9 @@ function formatElapsed(ms: number): string {
 }
 
 function DeployingContent({
-  phase,
   startedAt,
   deploymentPageUrl,
 }: {
-  phase: string;
   // Server-provided start, so the elapsed clock survives hover remounts and
   // page refreshes.
   startedAt: number | null;
@@ -562,27 +547,17 @@ function DeployingContent({
     return () => clearInterval(id);
   }, [startedAt]);
 
-  const currentIdx = Math.max(
-    0,
-    DEPLOY_STEPS.findIndex((s) => s.label === phase),
-  );
-  const steps: TaskProgressStep[] = DEPLOY_STEPS.map((step, i) => ({
-    id: step.id,
-    label: step.label,
-    status: i < currentIdx ? "done" : i === currentIdx ? "running" : "pending",
-  }));
-
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-medium">Deploying…</p>
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Spinner size="sm" className="shrink-0 text-current" />
+        <p className="text-sm">Deploying…</p>
         {startedAt != null && (
-          <span className="font-mono text-xs text-muted-foreground">
+          <span className="ml-auto font-mono text-xs text-muted-foreground">
             {formatElapsed(elapsedMs)}
           </span>
         )}
       </div>
-      <TaskProgress steps={steps} />
       {deploymentPageUrl && (
         <ExternalLinkRow href={deploymentPageUrl} label="Go to logs" />
       )}

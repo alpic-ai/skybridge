@@ -184,7 +184,6 @@ test.describe("deploy button", () => {
       },
       progress: {
         status: "deploying",
-        phase: "Uploading source",
         startedAt: Date.now() - 65_000,
         deploymentPageUrl: "https://app.alpic.ai/p1/logs",
       },
@@ -197,7 +196,6 @@ test.describe("deploy button", () => {
     await expect(deploy).toHaveAttribute("aria-disabled", "true");
     await hoverDeployPopover(page);
     await expect(page.getByText("Deploying…")).toBeVisible();
-    await expect(page.getByText("Uploading source")).toBeVisible();
     await expect(
       page.getByRole("link", { name: /go to logs/i }),
     ).toHaveAttribute("href", "https://app.alpic.ai/p1/logs");

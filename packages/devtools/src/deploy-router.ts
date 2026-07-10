@@ -1,25 +1,11 @@
-import type {
-  DeployEvent,
-  DeploymentStatus,
-  DeployResult,
-} from "@alpic-ai/sdk";
+import type { DeploymentStatus, DeployResult } from "@alpic-ai/sdk";
 import express, { type Router } from "express";
 import { alpic } from "./alpic-sdk.js";
-
-const PHASE_LABELS: Record<DeployEvent["type"], string> = {
-  collecting: "Collecting files",
-  collected: "Collecting files",
-  uploading: "Uploading source",
-  triggering: "Triggering deployment",
-  deploying: "Deploying",
-};
-const phaseText = (type: DeployEvent["type"]): string => PHASE_LABELS[type];
 
 type DeployState =
   | { status: "idle" }
   | {
       status: "deploying";
-      phase: string;
       // Held in server state and replayed over SSE so the client's elapsed
       // clock survives hover remounts and page refreshes.
       startedAt: number;
@@ -58,12 +44,7 @@ export function createDeployRouter(): Router {
 
   const runDeploy = async (environmentId: string, teamId: string) => {
     const startedAt = Date.now();
-    setState({
-      status: "deploying",
-      phase: phaseText("collecting"),
-      startedAt,
-      deploymentPageUrl: null,
-    });
+    setState({ status: "deploying", startedAt, deploymentPageUrl: null });
     let pageUrl: string | null = null;
     try {
       const result: DeployResult = await alpic.deployments.deploy({
@@ -75,7 +56,6 @@ export function createDeployRouter(): Router {
           }
           setState({
             status: "deploying",
-            phase: phaseText(event.type),
             startedAt,
             deploymentPageUrl: pageUrl,
           });
