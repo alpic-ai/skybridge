@@ -107,6 +107,31 @@ describe("customProvider", () => {
     expect(config.verify.issuer).toBe(base);
   });
 
+  it("authorizationServer advertises a distinct AS, keeping the discovered issuer for verification", async () => {
+    const base = await serveDiscovery();
+    const config = await customProvider({
+      issuer: base,
+      audience: "a",
+      authorizationServer: "https://as.example.test/agentic/P1/MS1/",
+    });
+    expect(config.oauthMetadata.issuer).toBe(
+      "https://as.example.test/agentic/P1/MS1",
+    );
+    expect(config.verify.issuer).toBe(base);
+  });
+
+  it("serverUrl takes precedence over authorizationServer", async () => {
+    const base = await serveDiscovery();
+    const config = await customProvider({
+      issuer: base,
+      audience: "a",
+      serverUrl: "https://app.example.test/",
+      authorizationServer: "https://as.example.test/agentic/P1/MS1",
+    });
+    expect(config.oauthMetadata.issuer).toBe("https://app.example.test");
+    expect(config.verify.issuer).toBe(base);
+  });
+
   it("applies metadataOverrides over discovered values", async () => {
     const base = await serveDiscovery();
     const config = await customProvider({

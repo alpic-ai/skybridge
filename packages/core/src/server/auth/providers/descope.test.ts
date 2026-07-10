@@ -39,6 +39,7 @@ describe("descopeProvider", () => {
     );
     expect(config.verify.issuer).toBe(base);
     expect(config.verify.audience).toBe("P123");
+    expect(config.oauthMetadata.issuer).toBe(url);
   });
 
   it("lets an explicit audience override the derived project id", async () => {
