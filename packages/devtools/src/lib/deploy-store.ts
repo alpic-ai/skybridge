@@ -39,7 +39,6 @@ const progressSchema = z.discriminatedUnion("status", [
   z.object({ status: z.literal("idle") }),
   z.object({
     status: z.literal("deploying"),
-    phase: z.string(),
     startedAt: z.number(),
     deploymentPageUrl: z.string().nullable(),
   }),
@@ -95,7 +94,6 @@ async function postJson(
 
 const optimisticDeploying = (): DeployProgress => ({
   status: "deploying",
-  phase: "Preparing deployment",
   startedAt: Date.now(),
   deploymentPageUrl: null,
 });
@@ -113,12 +111,9 @@ export const useDeployStore = create<DeployStore>()((set, get) => ({
           ? parsed.data
           : { state: "error", message: "Unexpected status response" },
       });
-    } catch (err) {
+    } catch {
       set({
-        status: {
-          state: "error",
-          message: err instanceof Error ? err.message : "Failed to load status",
-        },
+        status: { state: "error", message: "Can't reach the dev server." },
       });
     }
   },

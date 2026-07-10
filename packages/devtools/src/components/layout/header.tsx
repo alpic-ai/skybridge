@@ -7,6 +7,7 @@ import { StatusBadge } from "./status-badge.js";
 import {
   AuditButton,
   DeployButton,
+  LiveUrlChip,
   PlaygroundButton,
   TunnelButton,
 } from "./toolbar-actions.js";
@@ -56,8 +57,9 @@ export const Header = () => {
 
   return (
     <header className="flex h-13 items-center justify-between gap-3 border-b border-border px-4">
-      <div className="flex items-center gap-12">
+      <div className="flex items-center gap-2">
         <BrandChip />
+        <LiveUrlChip />
       </div>
 
       <div className="flex items-center gap-2">
