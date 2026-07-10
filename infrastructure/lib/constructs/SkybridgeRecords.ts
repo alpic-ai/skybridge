@@ -65,6 +65,7 @@ export class SkybridgeRecords extends Construct {
       "times-up",
       "auth0",
       "clerk",
+      "descope",
       "stytch",
       "workos",
     ]) {
