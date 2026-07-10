@@ -24,6 +24,18 @@ async function mockDeploy(
 const deployTrigger = (page: Page) =>
   page.getByRole("button", { name: /^Deploy$/ });
 
+async function hoverDeployPopover(page: Page) {
+  await expect(
+    page.getByRole("button", { name: "echo", exact: true }),
+  ).toBeVisible();
+  await expect(async () => {
+    await deployTrigger(page).hover();
+    await expect(page.locator('[data-slot="popover-content"]')).toBeVisible({
+      timeout: 1_500,
+    });
+  }).toPass({ timeout: 15_000 });
+}
+
 test.describe("deploy button", () => {
   test("signed out → sign-in gate triggers login then re-resolves", async ({
     page,
@@ -46,7 +58,7 @@ test.describe("deploy button", () => {
     });
     await page.goto("/");
 
-    await deployTrigger(page).hover();
+    await hoverDeployPopover(page);
     await expect(page.getByText(/sign in to alpic to deploy/i)).toBeVisible();
     // Click the trigger rather than the in-popover button — same action,
     // avoids hover-popover reposition flakiness.
@@ -126,7 +138,10 @@ test.describe("deploy button", () => {
     const deploy = deployTrigger(page);
     await expect(deploy).toBeVisible();
     await expect(deploy.locator(".bg-success")).toBeVisible();
-    await deploy.hover();
+    await expect(
+      page.getByRole("button", { name: /copy live mcp server url/i }),
+    ).toContainText("my-app.alpic.live");
+    await hoverDeployPopover(page);
     await expect(page.getByText("https://my-app.alpic.live")).toBeVisible();
     await expect(
       page.getByRole("link", { name: /go to deployment page/i }),
@@ -169,7 +184,6 @@ test.describe("deploy button", () => {
       },
       progress: {
         status: "deploying",
-        phase: "2/4 Uploading source",
         startedAt: Date.now() - 65_000,
         deploymentPageUrl: "https://app.alpic.ai/p1/logs",
       },
@@ -180,8 +194,8 @@ test.describe("deploy button", () => {
     await expect(deploy).toBeVisible();
     await expect(deploy.locator(".animate-pulse")).toBeVisible();
     await expect(deploy).toHaveAttribute("aria-disabled", "true");
-    await deploy.hover();
-    await expect(page.getByText("2/4 Uploading source…")).toBeVisible();
+    await hoverDeployPopover(page);
+    await expect(page.getByText("Deploying…")).toBeVisible();
     await expect(
       page.getByRole("link", { name: /go to logs/i }),
     ).toHaveAttribute("href", "https://app.alpic.ai/p1/logs");
@@ -204,7 +218,7 @@ test.describe("deploy button", () => {
     const deploy = deployTrigger(page);
     await expect(deploy.locator(".animate-pulse")).toBeVisible();
     await expect(deploy).toHaveAttribute("aria-disabled", "true");
-    await deploy.hover();
+    await hoverDeployPopover(page);
     await expect(page.getByText("Deploying…")).toBeVisible();
     await expect(page.getByText(/1m \d\ds/)).toBeVisible();
     await expect(
@@ -235,16 +249,15 @@ test.describe("deploy button", () => {
     await page.goto("/");
 
     await expect(deployTrigger(page)).toHaveAttribute("aria-disabled", "true");
-    await deployTrigger(page).hover();
+    await hoverDeployPopover(page);
     await expect(page.getByText(/last deployed from git/i)).toBeVisible();
     await expect(page.getByText("main")).toBeVisible();
     await expect(page.getByText("octocat")).toBeVisible();
     await expect(page.getByText(/Fix the thing/)).toBeVisible();
 
-    // force: the popover is mid-animation in headless CI, skip the stability wait.
     await page
       .getByRole("button", { name: /deploy anyway/i })
-      .click({ force: true });
+      .dispatchEvent("click");
     await expect.poll(() => deployCalls).toBeGreaterThan(0);
   });
 
@@ -277,14 +290,14 @@ test.describe("deploy button", () => {
 
     // The session's replayed "deployed" state must not mask the git gate:
     // "Deploy anyway" is the only way to redeploy a git-deployed project.
-    await deployTrigger(page).hover();
+    await hoverDeployPopover(page);
     await expect(page.getByText(/last deployed from git/i)).toBeVisible();
     await expect(
       page.getByText("https://stale-session.alpic.live"),
     ).toHaveCount(0);
     await page
       .getByRole("button", { name: /deploy anyway/i })
-      .click({ force: true });
+      .dispatchEvent("click");
     await expect.poll(() => deployCalls).toBeGreaterThan(0);
   });
 
@@ -299,7 +312,7 @@ test.describe("deploy button", () => {
     });
     await page.goto("/");
 
-    await deployTrigger(page).hover();
+    await hoverDeployPopover(page);
     await expect(page.getByText(/deployment failed/i)).toBeVisible();
     await expect(page.getByText("Build failed")).toBeVisible();
     await expect(

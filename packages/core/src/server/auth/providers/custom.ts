@@ -21,6 +21,12 @@ export type CustomProviderOptions = {
    * injects the registration endpoint). Use the static public URL; `verify.issuer`
    * stays the IdP (the token's real `iss`). */
   serverUrl?: string;
+  /** Advertise this URL as the authorization server (served AS metadata `issuer`
+   * and PRM `authorization_servers`) while `verify.issuer` stays the IdP's `iss`.
+   * Use when DCR/authorize/token live at a different URL than the token issuer
+   * (e.g. Descope's agentic URL vs. its base-project issuer). `serverUrl` wins if
+   * both are set. */
+  authorizationServer?: string;
   scopes?: string[];
   requiredScopes?: string[];
   metadataOverrides?: Omit<Partial<OAuthMetadata>, "issuer">;
@@ -51,12 +57,16 @@ export async function customProvider(
   const base: DiscoveredMetadata = { ...discovered, ...overrides };
   const scopesSupported = opts.scopes ?? base.scopes_supported;
 
-  // serverUrl => skybridge-as-AS: advertise this server's URL as the issuer (and
-  // keep the served scopes in sync). The verifier still trusts the IdP's `iss`.
-  const oauthMetadata: DiscoveredMetadata = opts.serverUrl
+  // serverUrl (skybridge-as-AS) or authorizationServer (a distinct AS URL)
+  // override the advertised issuer (and keep the served scopes in sync). The
+  // verifier still trusts the IdP's `iss`. serverUrl wins when both are set.
+  const advertisedIssuer =
+    opts.serverUrl?.replace(/\/$/, "") ??
+    opts.authorizationServer?.replace(/\/$/, "");
+  const oauthMetadata: DiscoveredMetadata = advertisedIssuer
     ? {
         ...base,
-        issuer: opts.serverUrl.replace(/\/$/, ""),
+        issuer: advertisedIssuer,
         scopes_supported: scopesSupported,
       }
     : base;

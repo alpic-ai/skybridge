@@ -51,6 +51,7 @@ export class SkybridgeRecords extends Construct {
     // Showcase apps pointing to alpic.ai
     for (const subdomain of [
       "capitals",
+      "chatgpt-files",
       "chess",
       "conformance",
       "ecommerce",
@@ -64,6 +65,7 @@ export class SkybridgeRecords extends Construct {
       "times-up",
       "auth0",
       "clerk",
+      "descope",
       "stytch",
       "workos",
     ]) {

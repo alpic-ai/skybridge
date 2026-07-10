@@ -11,6 +11,7 @@ import type {
 } from "@rjsf/utils";
 import { getInputProps } from "@rjsf/utils";
 import { Plus, X } from "lucide-react";
+import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils.js";
 import { TruncatedDescription } from "../truncated-description.js";
 import {
@@ -106,7 +107,10 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const hasError = (rawErrors?.length ?? 0) > 0;
 
   return (
-    <div className={cn("flex flex-col gap-1", classNames)} style={style}>
+    <div
+      className={cn("flex flex-col gap-1", classNames)}
+      style={style as CSSProperties}
+    >
       {showLabel && (
         <label
           htmlFor={id}

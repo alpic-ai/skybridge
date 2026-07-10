@@ -6,6 +6,7 @@ import { defineConfig } from "vite";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  cacheDir: process.env.DEVTOOLS_VITE_CACHE_DIR,
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

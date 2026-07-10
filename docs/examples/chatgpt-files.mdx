@@ -1,0 +1,25 @@
+---
+title: ChatGPT Files
+description: Pick a file from the filesystem or the ChatGPT library and zip it
+---
+
+import { ChatExample } from "/components/chat-example.jsx";
+
+Handles ChatGPT files end to end: takes a file attachment, compresses it server-side, stores the archive in Cloudflare R2, and hands back a presigned download link. Relies on the ChatGPT Apps SDK file APIs, so it runs in ChatGPT.
+
+<ChatExample
+  prompt="Zip this file for me."
+  app="ChatGPT Files"
+  src="/images/showcase-chatgpt-files.png"
+  alt="ChatGPT Files"
+  source="https://github.com/alpic-ai/skybridge/tree/main/examples/chatgpt-files"
+/>
+
+## Skybridge APIs used
+
+- [`FileRef`](/api-reference/file-ref)
+- [`useCallTool`](/api-reference/use-call-tool)
+- [`useFiles`](/api-reference/use-files)
+- [`useLayout`](/api-reference/use-layout)
+- [`useOpenExternal`](/api-reference/use-open-external)
+- [`useToolInfo`](/api-reference/use-tool-info)

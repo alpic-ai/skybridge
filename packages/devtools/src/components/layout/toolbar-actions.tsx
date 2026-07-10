@@ -16,6 +16,7 @@ import {
   ClipboardCheck,
   Copy,
   ExternalLinkIcon,
+  Globe,
   MessagesSquareIcon,
   UnplugIcon,
 } from "lucide-react";
@@ -232,6 +233,41 @@ export function AuditButton() {
 
 const ALPIC_APP_URL = "https://app.alpic.ai";
 
+export function LiveUrlChip() {
+  const url = useDeployStore((s) => {
+    if (s.status.state === "ready" && s.status.mcpServerUrl) {
+      return s.status.mcpServerUrl;
+    }
+    if (s.progress.status === "deployed") {
+      return s.progress.mcpServerUrl;
+    }
+    return null;
+  });
+  const { copied, copy } = useCopyToClipboard();
+  if (!url) {
+    return null;
+  }
+  const host = url.replace(/^https?:\/\//, "");
+  return (
+    <button
+      type="button"
+      aria-label="Copy live MCP server URL"
+      onClick={() => copy(url)}
+      className="inline-flex h-8 items-center gap-2 rounded-md border bg-light-gray px-2.5 text-sm hover:bg-background-hover"
+    >
+      <Globe className="size-3.5 text-quaternary-foreground" aria-hidden />
+      <span className="max-w-48 truncate font-mono text-xs">{host}</span>
+      <span className="text-quaternary-foreground">
+        {copied ? (
+          <Check className="size-3.5" />
+        ) : (
+          <Copy className="size-3.5" />
+        )}
+      </span>
+    </button>
+  );
+}
+
 export function DeployButton() {
   const { status, progress, redeploy, createAndDeploy, signIn } =
     useDeployStore();
@@ -357,7 +393,6 @@ function DeployPopoverContent({
   if (progress.status === "deploying") {
     return (
       <DeployingContent
-        phase={progress.phase}
         startedAt={progress.startedAt}
         deploymentPageUrl={progress.deploymentPageUrl}
       />
@@ -372,10 +407,7 @@ function DeployPopoverContent({
         <p className="text-sm font-medium">Deployed</p>
         <CopyUrlRow url={progress.mcpServerUrl} />
         {progress.deploymentPageUrl && (
-          <>
-            <Separator />
-            <DeploymentPageButton href={progress.deploymentPageUrl} />
-          </>
+          <DeploymentPageButton href={progress.deploymentPageUrl} />
         )}
       </div>
     );
@@ -389,13 +421,10 @@ function DeployPopoverContent({
         </p>
         <p className="text-xs text-muted-foreground">{progress.message}</p>
         {progress.deploymentPageUrl && (
-          <>
-            <Separator />
-            <ExternalLinkRow
-              href={progress.deploymentPageUrl}
-              label="Go to logs"
-            />
-          </>
+          <ExternalLinkRow
+            href={progress.deploymentPageUrl}
+            label="Go to logs"
+          />
         )}
       </div>
     );
@@ -440,7 +469,6 @@ function DeployPopoverContent({
       if (status.lastDeployStatus === "ongoing") {
         return (
           <DeployingContent
-            phase="Deploying"
             startedAt={status.lastDeployStartedAt ?? null}
             deploymentPageUrl={status.deploymentPageUrl ?? null}
           />
@@ -460,10 +488,7 @@ function DeployPopoverContent({
             </>
           )}
           {status.deploymentPageUrl && (
-            <>
-              <Separator />
-              <DeploymentPageButton href={status.deploymentPageUrl} />
-            </>
+            <DeploymentPageButton href={status.deploymentPageUrl} />
           )}
           {status.lastDeployGit && (
             <WarningAlert
@@ -503,11 +528,9 @@ function formatElapsed(ms: number): string {
 }
 
 function DeployingContent({
-  phase,
   startedAt,
   deploymentPageUrl,
 }: {
-  phase: string;
   // Server-provided start, so the elapsed clock survives hover remounts and
   // page refreshes.
   startedAt: number | null;
@@ -530,7 +553,7 @@ function DeployingContent({
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <Spinner size="sm" className="shrink-0 text-current" />
-        <p className="text-sm">{phase}…</p>
+        <p className="text-sm">Deploying…</p>
         {startedAt != null && (
           <span className="ml-auto font-mono text-xs text-muted-foreground">
             {formatElapsed(elapsedMs)}
@@ -538,10 +561,7 @@ function DeployingContent({
         )}
       </div>
       {deploymentPageUrl && (
-        <>
-          <Separator />
-          <ExternalLinkRow href={deploymentPageUrl} label="Go to logs" />
-        </>
+        <ExternalLinkRow href={deploymentPageUrl} label="Go to logs" />
       )}
     </div>
   );

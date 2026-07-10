@@ -23,6 +23,24 @@ import { NotSupportedError } from "./types.js";
 
 const STORAGE_PREFIX = "sb:";
 const MAX_STORAGE_ENTRIES = 200;
+const VIEW_STATE_TOKEN_WARNING_THRESHOLD = 4000;
+
+function getApproximateTokenCount(value: unknown): number {
+  try {
+    return Math.max(1, Math.ceil(JSON.stringify(value).length / 4));
+  } catch {
+    return 0;
+  }
+}
+
+function warnOnLargeViewState(value: unknown, source: string): void {
+  const tokenCount = getApproximateTokenCount(value);
+  if (tokenCount > VIEW_STATE_TOKEN_WARNING_THRESHOLD) {
+    console.warn(
+      `[skybridge] ${source} is persisting ${tokenCount} tokens in view state; this exceeds the ${VIEW_STATE_TOKEN_WARNING_THRESHOLD}-token warning threshold and may overload model context.`,
+    );
+  }
+}
 
 function findStorageKey(viewUUID: string): string | undefined {
   const suffix = `:${viewUUID}`;
@@ -158,6 +176,9 @@ export class HostAdaptor implements Adaptor {
   };
 
   public requestClose = async (): Promise<void> => {
+    if (this.openai) {
+      await this.openai.requestClose();
+    }
     const app = await this.mcp.getApp();
     await app.requestTeardown();
   };
@@ -217,6 +238,7 @@ export class HostAdaptor implements Adaptor {
         typeof stateOrUpdater === "function"
           ? stateOrUpdater(this.openai.widgetState?.modelContent ?? null)
           : stateOrUpdater;
+      warnOnLargeViewState(modelContent, "setWidgetState");
       await this.openai.setWidgetState({
         privateContent: {},
         ...this.openai.widgetState,
@@ -229,6 +251,7 @@ export class HostAdaptor implements Adaptor {
       typeof stateOrUpdater === "function"
         ? stateOrUpdater(this._viewState)
         : stateOrUpdater;
+    warnOnLargeViewState(newState, "setViewState");
 
     // update local state immediately so successive calls see fresh state
     this._viewState = newState;

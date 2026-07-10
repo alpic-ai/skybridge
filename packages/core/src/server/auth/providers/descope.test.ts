@@ -17,33 +17,36 @@ function discoveryDoc(issuer: string) {
 }
 
 function mockDiscovery(issuer: string) {
-  return vi.spyOn(globalThis, "fetch").mockResolvedValue(
-    new Response(JSON.stringify(discoveryDoc(issuer)), {
-      headers: { "content-type": "application/json" },
-    }),
+  return vi.spyOn(globalThis, "fetch").mockImplementation(
+    async () =>
+      new Response(JSON.stringify(discoveryDoc(issuer)), {
+        headers: { "content-type": "application/json" },
+      }),
   );
 }
 
 describe("descopeProvider", () => {
-  it("derives issuer and audience (project id) from the MCP Server URL", async () => {
-    const issuer = "https://api.descope.com/v1/apps/agentic/P123/MS456";
-    const fetchSpy = mockDiscovery(issuer);
+  it("builds the base-project issuer and audience (project id) from the MCP Server URL", async () => {
+    const url = "https://api.descope.com/v1/apps/agentic/P123/MS456";
+    const base = "https://api.descope.com/v1/apps/P123";
+    const fetchSpy = mockDiscovery(base);
 
-    const config = await descopeProvider({ url: issuer });
+    const config = await descopeProvider({ url });
 
     expect(fetchSpy).toHaveBeenCalledWith(
-      `${issuer}/.well-known/openid-configuration`,
+      `${base}/.well-known/openid-configuration`,
       expect.anything(),
     );
-    expect(config.verify.issuer).toBe(issuer);
+    expect(config.verify.issuer).toBe(base);
     expect(config.verify.audience).toBe("P123");
+    expect(config.oauthMetadata.issuer).toBe(url);
   });
 
   it("lets an explicit audience override the derived project id", async () => {
-    const issuer = "https://api.descope.com/v1/apps/agentic/P123/MS456";
-    mockDiscovery(issuer);
+    const url = "https://api.descope.com/v1/apps/agentic/P123/MS456";
+    mockDiscovery("https://api.descope.com/v1/apps/P123");
 
-    const config = await descopeProvider({ url: issuer, audience: "custom" });
+    const config = await descopeProvider({ url, audience: "custom" });
 
     expect(config.verify.audience).toBe("custom");
   });
