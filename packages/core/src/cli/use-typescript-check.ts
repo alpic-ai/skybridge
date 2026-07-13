@@ -46,7 +46,6 @@ export function startTypeScriptCheck(
     ["tsc", "--noEmit", "--watch", "--pretty", "false"],
     {
       stdio: ["ignore", "pipe", "pipe"],
-      shell: true,
     },
   );
 
