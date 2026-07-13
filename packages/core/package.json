@@ -98,7 +98,7 @@
     "vitest": "^4.1.10",
     "zod": "^4.4.3"
   },
-  "packageManager": "pnpm@10.34.4",
+  "packageManager": "pnpm@10.34.5",
   "bin": {
     "sb": "./bin/run.js",
     "skybridge": "./bin/run.js"
