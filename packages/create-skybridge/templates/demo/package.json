@@ -12,7 +12,7 @@
     "deploy": "alpic deploy"
   },
   "dependencies": {
-    "@alpic-ai/ui": "^1.151.0",
+    "@alpic-ai/ui": "^1.152.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "lucide-react": "^1.24.0",
     "react": "^19.2.7",
@@ -30,7 +30,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
-    "alpic": "^1.151.0",
+    "alpic": "^1.152.0",
     "tailwindcss": "^4.3.2",
     "tsx": "^4.23.0",
     "typescript": "^6.0.3"
