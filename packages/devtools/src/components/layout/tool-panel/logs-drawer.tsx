@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from "framer-motion";
 import { ChevronRight, Trash2, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { CopyButton } from "@/lib/copy.js";
 import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
