@@ -13,6 +13,7 @@ import {
   slugifyTag,
   splitChanges,
 } from "./lib";
+import { PatchChanges } from "./PatchChanges";
 
 const description =
   "Every Skybridge release, sourced directly from GitHub. New features, fixes, and breaking changes.";
@@ -48,6 +49,14 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-static";
+
+const mdComponents = {
+  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
+    <a href={href} target="_blank" rel="noreferrer">
+      {children}
+    </a>
+  ),
+};
 
 export default async function ChangelogPage() {
   const releases = await getReleases();
@@ -156,17 +165,7 @@ export default async function ChangelogPage() {
                           <div className="sx-cl-body">
                             <ReactMarkdown
                               remarkPlugins={[remarkGfm]}
-                              components={{
-                                a: ({ href, children }) => (
-                                  <a
-                                    href={href}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                  >
-                                    {children}
-                                  </a>
-                                ),
-                              }}
+                              components={mdComponents}
                             >
                               {intro}
                             </ReactMarkdown>
@@ -175,7 +174,68 @@ export default async function ChangelogPage() {
                         {changes && <LazyChanges slug={id} count={count} />}
                       </>
                     ) : (
-                      <p className="sx-cl-empty-body">No release notes.</p>
+                      !release.patches?.length && (
+                        <p className="sx-cl-empty-body">No release notes.</p>
+                      )
+                    )}
+                    {release.patches && release.patches.length > 0 && (
+                      <div className="sx-cl-patches">
+                        {release.patches.map((patch) => {
+                          const patchLinkified = patch.body
+                            ? linkifyReferences(patch.body)
+                            : "";
+                          const {
+                            intro: patchBody,
+                            changes: patchChanges,
+                            count: patchCount,
+                          } = splitChanges(patchLinkified);
+                          const patchId = slugifyTag(patch.tag_name);
+                          return (
+                            <section
+                              key={patch.tag_name}
+                              id={patchId}
+                              className="sx-cl-patch"
+                            >
+                              <div className="sx-cl-patch-head">
+                                <a
+                                  href={`#${patchId}`}
+                                  className="sx-cl-patch-tag"
+                                >
+                                  {patch.tag_name}
+                                </a>
+                                <time
+                                  className="sx-cl-date"
+                                  dateTime={patch.published_at ?? undefined}
+                                >
+                                  {formatDate(patch.published_at)}
+                                </time>
+                              </div>
+                              {patchBody ? (
+                                <div className="sx-cl-body">
+                                  <ReactMarkdown
+                                    remarkPlugins={[remarkGfm]}
+                                    components={mdComponents}
+                                  >
+                                    {patchBody}
+                                  </ReactMarkdown>
+                                </div>
+                              ) : (
+                                !patchChanges && (
+                                  <p className="sx-cl-empty-body">
+                                    No release notes.
+                                  </p>
+                                )
+                              )}
+                              {patchChanges && (
+                                <PatchChanges
+                                  count={patchCount}
+                                  markdown={patchChanges}
+                                />
+                              )}
+                            </section>
+                          );
+                        })}
+                      </div>
                     )}
                   </li>
                 );

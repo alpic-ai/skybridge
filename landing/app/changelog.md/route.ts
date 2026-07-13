@@ -2,6 +2,7 @@ import {
   cleanBodyForMarkdown,
   formatDate,
   getReleases,
+  splitChanges,
 } from "../changelog/lib";
 
 export const dynamic = "force-static";
@@ -16,7 +17,15 @@ export async function GET() {
       ? `## ${release.tag_name}: ${title}${date ? ` (${date})` : ""}`
       : `## ${release.tag_name}${date ? ` (${date})` : ""}`;
     const body = release.body ? cleanBodyForMarkdown(release.body).trim() : "";
-    return body ? `${heading}\n\n${body}` : heading;
+    const patches = (release.patches ?? []).map((patch) => {
+      const patchDate = formatDate(patch.published_at);
+      const patchHeading = `### ${patch.tag_name}${patchDate ? ` (${patchDate})` : ""}`;
+      const patchBody = patch.body
+        ? cleanBodyForMarkdown(splitChanges(patch.body).intro).trim()
+        : "";
+      return patchBody ? `${patchHeading}\n\n${patchBody}` : patchHeading;
+    });
+    return [body ? `${heading}\n\n${body}` : heading, ...patches].join("\n\n");
   });
   const md = [
     "# Skybridge changelog",

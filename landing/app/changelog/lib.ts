@@ -9,6 +9,8 @@ export type Release = {
   html_url: string;
   draft: boolean;
   prerelease: boolean;
+  // On a merged minor (v1.2), the patch releases (1.2.1…) newest-first.
+  patches?: Release[];
 };
 
 let releasesPromise: Promise<Release[]> | null = null;
@@ -37,16 +39,69 @@ async function fetchReleases(): Promise<Release[]> {
       return [];
     }
     const data = (await res.json()) as Release[];
-    return data
-      .filter((r) => !r.draft && !r.prerelease)
+    const stable = data
+      .filter(
+        (r) => !r.draft && !r.prerelease && parseVersion(r.tag_name).major >= 1,
+      )
       .sort((a, b) => {
         const aT = a.published_at ? Date.parse(a.published_at) : 0;
         const bT = b.published_at ? Date.parse(b.published_at) : 0;
         return bT - aT;
       });
+    return mergeByMinor(stable);
   } catch {
     return [];
   }
+}
+
+function parseVersion(tag: string): {
+  major: number;
+  minor: number;
+  patch: number;
+} {
+  const [major = 0, minor = 0, patch = 0] = tag
+    .replace(/^v/i, "")
+    .split(".")
+    .map((n) => Number.parseInt(n, 10) || 0);
+  return { major, minor, patch };
+}
+
+// Collapse a minor line into one section: `v1.2` keeps the `.0` release as its
+// body and hangs the patch releases (1.2.1…) off `.patches`, newest-first.
+// `releases` must be sorted newest-first.
+function mergeByMinor(releases: Release[]): Release[] {
+  const groups = new Map<string, Release[]>();
+  for (const r of releases) {
+    const { major, minor } = parseVersion(r.tag_name);
+    const key = `v${major}.${minor}`;
+    const group = groups.get(key);
+    if (group) {
+      group.push(r);
+    } else {
+      groups.set(key, [r]);
+    }
+  }
+  return [...groups].map(([tag_name, patches]) =>
+    mergePatches(tag_name, patches),
+  );
+}
+
+function mergePatches(tag_name: string, patches: Release[]): Release {
+  const latest = patches[0];
+  const codename = patches
+    .map((p) => p.name?.match(/:\s*(.+)$/)?.[1])
+    .find(Boolean);
+  const base =
+    patches.find((p) => parseVersion(p.tag_name).patch === 0) ?? latest;
+  const patchReleases = patches.filter((p) => p !== base);
+  return {
+    ...base,
+    tag_name,
+    name: codename ?? null,
+    published_at: latest.published_at,
+    html_url: latest.html_url,
+    patches: patchReleases,
+  };
 }
 
 export function formatDate(iso: string | null): string {

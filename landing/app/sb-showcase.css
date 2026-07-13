@@ -1201,7 +1201,7 @@
   align-items: center;
   gap: 8px;
   font: 600 12px / 1 var(--font-body);
-  color: var(--sb-ink-soft);
+  color: var(--sb-ink-mute);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   padding: 6px 0;
@@ -1223,6 +1223,33 @@
 }
 .sx-cl-changes-body {
   margin-top: 12px;
+}
+
+.sx-cl-patches {
+  margin-top: 24px;
+  border-top: 1px solid var(--sb-border);
+}
+.sx-cl-patch {
+  padding-top: 20px;
+  margin-top: 20px;
+  scroll-margin-top: 120px;
+}
+.sx-cl-patch + .sx-cl-patch {
+  border-top: 1px solid var(--sb-border);
+}
+.sx-cl-patch-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.sx-cl-patch-tag {
+  font: 600 14px / 1 var(--font-mono);
+  color: var(--sb-ink-soft);
+  text-decoration: none;
+}
+.sx-cl-patch-tag:hover {
+  color: var(--sb-accent);
 }
 
 .sx-cl-foot {
