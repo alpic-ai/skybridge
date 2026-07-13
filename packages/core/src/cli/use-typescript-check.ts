@@ -41,10 +41,13 @@ function extractBestMessage(
 export function startTypeScriptCheck(
   onErrors: (errors: Array<TsError>) => void,
 ): () => void {
-  const tsProcess = spawn("npx tsc --noEmit --watch --pretty false", {
-    stdio: ["ignore", "pipe", "pipe"],
-    shell: true,
-  });
+  const tsProcess = spawn(
+    "npx",
+    ["tsc", "--noEmit", "--watch", "--pretty", "false"],
+    {
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
 
   let outputBuffer = "";
   let currentErrors: Array<TsError> = [];
@@ -113,6 +116,10 @@ export function startTypeScriptCheck(
   if (tsProcess.stderr) {
     tsProcess.stderr.on("data", processOutput);
   }
+
+  tsProcess.on("error", (err) => {
+    console.error(`TypeScript watcher failed to start: ${err.message}`);
+  });
 
   return () => {
     tsProcess.kill();
