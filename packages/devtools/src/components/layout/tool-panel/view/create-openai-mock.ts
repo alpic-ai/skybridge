@@ -7,6 +7,7 @@ import type {
   CallToolResponse,
   DisplayMode,
   RequestDisplayMode,
+  RequestModalOptions,
   UnknownObject,
 } from "skybridge/web";
 
@@ -84,10 +85,10 @@ function createOpenaiMethods(
       openai.widgetState = state;
       setValue("widgetState", state);
     },
-    requestModal: async (args: { title?: string }) => {
+    requestModal: async (args: RequestModalOptions) => {
       log("requestModal", args);
       openai.displayMode = "modal" as DisplayMode; // TODO: To remove once https://github.com/alpic-ai/skybridge/pull/92 is merged
-      openai.view = { mode: "modal" };
+      openai.view = { mode: "modal", params: args.params };
       setValue("displayMode", "modal");
     },
     uploadFile: async (file: File) => {

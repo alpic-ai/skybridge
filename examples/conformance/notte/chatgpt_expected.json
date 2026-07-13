@@ -7,7 +7,7 @@
   "useSetOpenInAppUrl": "supported",
   "useDisplayMode": "supported",
   "useRequestSize": "unsupported",
-  "useRequestModal": "supported",
+  "useRequestModal": "error",
   "useOpenExternal": "supported",
   "useDownload": "unsupported",
   "useFiles": "supported",
