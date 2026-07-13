@@ -336,9 +336,12 @@ function RequestModalTest({ onResult }: TestProps) {
       }
       await sleep(150);
     }
-    // No in-view flip: the host may have opened a separate modal instance
-    // (Apps SDK); only the user can tell.
-    return supported("modal requested");
+    // open() resolved but the display mode never flipped to "modal" within the
+    // window: the host acknowledged requestModal (e.g. blurs the background)
+    // yet never rendered the view as a modal. Treat as a real failure.
+    return failed(
+      'display mode never became "modal" after requestModal (host did not render the view as a modal)',
+    );
   });
   return null;
 }
