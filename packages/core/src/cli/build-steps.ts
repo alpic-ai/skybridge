@@ -8,6 +8,7 @@ import {
   emitEmptyManifestModule,
   emitEntryWrapper,
   emitManifestModule,
+  emitSkillsModule,
   emitVercelBuildOutput,
   ensureAssetsDir,
 } from "./build-helpers.js";
@@ -59,6 +60,15 @@ export async function getCommandSteps(
         } else {
           emitEmptyManifestModule(manifestOut);
         }
+      },
+    },
+    {
+      label: "Emitting skills module",
+      run: () => {
+        emitSkillsModule(
+          resolve(root, "src/skills"),
+          path.join(root, "dist", "skills.js"),
+        );
       },
     },
     {

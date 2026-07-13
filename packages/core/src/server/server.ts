@@ -49,6 +49,12 @@ import type {
 } from "./middleware.js";
 import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
 import { resolveServerOrigin } from "./requestOrigin.js";
+import {
+  discoverSkills,
+  registerSkills,
+  SKILLS_EXTENSION_KEY,
+  type SkillsManifest,
+} from "./skills.js";
 import { templateHelper } from "./templateHelper.js";
 
 const mergeWithUnion = <T extends object, S extends object>(
@@ -169,7 +175,14 @@ export interface SkybridgeServerOptions {
   json?: JsonOptions;
   /** Resource-server OAuth config. When set, mounts well-known metadata and bearer auth on `/mcp`. */
   oauth?: OAuthConfig;
+  /**
+   * @experimental Serve Agent Skills from `src/skills` over MCP (SEP-2640).
+   * API may change.
+   */
+  skills?: boolean;
 }
+
+const SKILLS_DIR = "src/skills";
 
 /**
  * Normalize an `x-forwarded-prefix` value into a leading-slash, no-trailing-slash
@@ -483,6 +496,33 @@ export function __setBuildManifest(
   pendingBuildManifest = manifest;
 }
 
+let pendingSkillsManifest: SkillsManifest | null = null;
+
+export function __setSkillsManifest(manifest: SkillsManifest): void {
+  pendingSkillsManifest = manifest;
+}
+
+// Pure and `this`-free so it can run inside the `super(...)` call, before `this`
+// exists — the capability must be present for the `initialize` response.
+function withSkillsCapability(
+  options: ServerOptions | undefined,
+  skybridgeOptions: SkybridgeServerOptions | undefined,
+): ServerOptions | undefined {
+  if (!skybridgeOptions?.skills) {
+    return options;
+  }
+  return {
+    ...options,
+    capabilities: {
+      ...options?.capabilities,
+      extensions: {
+        ...options?.capabilities?.extensions,
+        [SKILLS_EXTENSION_KEY]: { directoryRead: true },
+      },
+    },
+  };
+}
+
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
 > extends McpServerBaseOmitted {
@@ -526,9 +566,10 @@ export class McpServer<
     options?: ServerOptions,
     skybridgeOptions?: SkybridgeServerOptions,
   ) {
-    super(serverInfo, options);
+    const mergedOptions = withSkillsCapability(options, skybridgeOptions);
+    super(serverInfo, mergedOptions);
     this.serverInfo = serverInfo;
-    this.serverOptions = options;
+    this.serverOptions = mergedOptions;
     this.express = express();
     this.express.use(express.json(skybridgeOptions?.json));
     if (skybridgeOptions?.oauth) {
@@ -543,6 +584,24 @@ export class McpServer<
       this.setViteManifest(pendingBuildManifest);
       pendingBuildManifest = null;
     }
+    this.setupSkills(Boolean(skybridgeOptions?.skills));
+  }
+
+  private setupSkills(enabled: boolean): void {
+    const manifest = pendingSkillsManifest;
+    pendingSkillsManifest = null;
+    if (!enabled) {
+      return;
+    }
+
+    const skills = manifest ?? discoverSkills(SKILLS_DIR);
+    if (skills.length === 0) {
+      console.warn(
+        `skybridge: the "skills" option is enabled but no skills were found in "${SKILLS_DIR}". Add a <name>/SKILL.md there, or remove the option.`,
+      );
+    }
+
+    registerSkills(this, skills);
   }
 
   /**

@@ -35,7 +35,7 @@ export function startNodemon(
       }
     : {
         watch: ["src"],
-        ext: "ts,json",
+        ext: "ts,json,md",
         exec: "tsx src/server.ts",
       };
 

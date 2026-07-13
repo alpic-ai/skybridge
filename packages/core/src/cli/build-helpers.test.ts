@@ -15,6 +15,7 @@ import {
   emitEmptyManifestModule,
   emitEntryWrapper,
   emitManifestModule,
+  emitSkillsModule,
   emitVercelBuildOutput,
   ensureAssetsDir,
   VERCEL_CONFIG,
@@ -32,14 +33,49 @@ describe("emitEntryWrapper", () => {
     const out = readFileSync(path.join(dir, "__entry.js"), "utf-8");
     expect(out).toBe(ENTRY_WRAPPER_CONTENT);
     expect(out).toContain(
-      'import { __setBuildManifest } from "skybridge/server"',
+      'import { __setBuildManifest, __setSkillsManifest } from "skybridge/server"',
     );
     expect(out).toContain('import manifest from "./vite-manifest.js"');
+    expect(out).toContain('import skills from "./skills.js"');
     expect(out).toContain("__setBuildManifest(manifest)");
+    expect(out).toContain("__setSkillsManifest(skills)");
     // Dynamic import is load-bearing: `server.js` must evaluate after the
-    // setter runs, so a static re-export wouldn't work.
+    // setters run, so a static re-export wouldn't work.
     expect(out).toContain('await import("./server.js")');
     expect(out).toContain("export default userMod.default");
+  });
+});
+
+describe("emitSkillsModule", () => {
+  it("inlines discovered skills as an ESM default export", () => {
+    const dir = mkTmp();
+    const skillsDir = path.join(dir, "src", "skills");
+    mkdirSync(path.join(skillsDir, "refunds"), { recursive: true });
+    writeFileSync(
+      path.join(skillsDir, "refunds", "SKILL.md"),
+      "---\nname: refunds\ndescription: Process refunds\n---\nBody",
+    );
+    const outPath = path.join(dir, "skills.js");
+    emitSkillsModule(skillsDir, outPath);
+    const out = readFileSync(outPath, "utf-8");
+    const literal = out
+      .slice("export default ".length)
+      .trim()
+      .replace(/;$/, "");
+    const skills = JSON.parse(literal);
+    expect(skills).toHaveLength(1);
+    expect(skills[0]).toMatchObject({
+      name: "refunds",
+      frontmatter: { name: "refunds", description: "Process refunds" },
+    });
+    expect(skills[0].digest).toMatch(/^sha256:[a-f0-9]{64}$/);
+  });
+
+  it("emits an empty array when the skills directory is absent", () => {
+    const dir = mkTmp();
+    const outPath = path.join(dir, "skills.js");
+    emitSkillsModule(path.join(dir, "nope"), outPath);
+    expect(readFileSync(outPath, "utf-8")).toBe("export default [];\n");
   });
 });
 

@@ -39,12 +39,19 @@ new McpServer(
 type SkybridgeServerOptions = {
   json?: JsonOptions;
   oauth?: OAuthConfig;
+  skills?: boolean;
 };
 ```
 
 `json` tunes the [`express.json()`](https://expressjs.com/en/5x/api/express/#expressjsonoptions) parser Skybridge pre-applies, for example to raise the default 100kb body-size limit.
 
 `oauth` is an [`OAuthConfig`](/api-reference/custom-provider#returns), usually from [`customProvider`](/api-reference/custom-provider) or a branded provider. When set, it mounts the well-known OAuth metadata and bearer-token verification on `/mcp`.
+
+`skills` set to `true` serves [Agent Skills over MCP](/guides/skills) from `src/skills` and declares the `io.modelcontextprotocol/skills` capability. See the [Skills guide](/guides/skills).
+
+<Info>
+Skills over MCP tracks [SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640), which is still under review. The feature is **experimental** and may change with the spec.
+</Info>
 
 ## Properties
 
