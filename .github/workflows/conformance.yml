@@ -48,7 +48,7 @@ jobs:
             echo "RESULTS_EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: chatgpt-conformance-results
