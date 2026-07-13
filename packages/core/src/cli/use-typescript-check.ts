@@ -117,7 +117,7 @@ export function startTypeScriptCheck(
     tsProcess.stderr.on("data", processOutput);
   }
 
-  tsProcess.on("error", (err) => {
+  tsProcess.on("error", (err: Error) => {
     console.error(`TypeScript watcher failed to start: ${err.message}`);
   });
 
