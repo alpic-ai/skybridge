@@ -121,8 +121,8 @@ describe("registerSkills", () => {
       frontmatter: { name: "refunds", description: "Process refunds" },
       digest: "sha256:abc",
       files: {
-        "SKILL.md": { text: "# Refunds", mimeType: "text/markdown" },
-        "templates/email.md": { text: "Hi", mimeType: "text/markdown" },
+        "SKILL.md": "# Refunds",
+        "templates/email.md": "Hi",
       },
     },
   ];
@@ -220,15 +220,26 @@ describe("registerSkills", () => {
 describe("discoverSkills symlink safety", () => {
   it("excludes symlinked files and directories from the manifest", () => {
     const outside = mkdtempSync(join(tmpdir(), "skybridge-outside-"));
-    writeFileSync(join(outside, "secret.txt"), "TOP SECRET");
+    writeFileSync(join(outside, "secret.md"), "TOP SECRET");
     const dir = mkSkillDir({
       "demo/SKILL.md": FM("demo", "d"),
       "demo/real.md": "ok",
     });
-    symlinkSync(join(outside, "secret.txt"), join(dir, "demo", "leak.txt"));
+    symlinkSync(join(outside, "secret.md"), join(dir, "demo", "leak.md"));
     symlinkSync(outside, join(dir, "demo", "escape"));
 
     const files = discoverSkills(dir)[0]?.files ?? {};
     expect(Object.keys(files).sort()).toEqual(["SKILL.md", "real.md"]);
+  });
+
+  it("ignores non-markdown supporting files", () => {
+    const dir = mkSkillDir({
+      "demo/SKILL.md": FM("demo", "d"),
+      "demo/notes.md": "kept",
+      "demo/data.json": "{}",
+      "demo/scripts/run.py": "print(1)",
+    });
+    const files = discoverSkills(dir)[0]?.files ?? {};
+    expect(Object.keys(files).sort()).toEqual(["SKILL.md", "notes.md"]);
   });
 });

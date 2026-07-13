@@ -12,19 +12,11 @@ import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 
-/**
- * Skills over MCP — the Skills Extension ([SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640), experimental).
- * All spec-facing logic is kept in this one module so churn in the in-review
- * SEP stays a single-file change.
- */
-
 export const SKILLS_EXTENSION_KEY = "io.modelcontextprotocol/skills";
 export const SKILL_INDEX_URI = "skill://index.json";
 
 const SKILL_NAME_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
-// Only the fields the extension depends on are validated; `.loose()` keeps any
-// other frontmatter, which the index echoes verbatim.
 const SkillFrontmatterSchema = z
   .object({
     name: z
@@ -39,84 +31,49 @@ const SkillFrontmatterSchema = z
   })
   .loose();
 
-export interface SkillFile {
-  text: string;
-  mimeType: string;
-}
-
 export interface Skill {
   name: string;
   frontmatter: Record<string, unknown>;
-  /** `sha256:<hex>` over the raw `SKILL.md` bytes. */
   digest: string;
-  /** Keyed by POSIX path relative to the skill directory, including `SKILL.md`. */
-  files: Record<string, SkillFile>;
+  files: Record<string, string>;
 }
 
 export type SkillsManifest = Skill[];
-
-// Skills are read as UTF-8 text, so unknown extensions fall back to text/plain.
-const mimeTypeForFile = (name: string): string => {
-  switch (extname(name)) {
-    case ".md":
-      return "text/markdown";
-    case ".json":
-      return "application/json";
-    default:
-      return "text/plain";
-  }
-};
 
 const sha256 = (content: string): string =>
   `sha256:${createHash("sha256").update(content, "utf8").digest("hex")}`;
 
 const FRONTMATTER_RE = /^﻿?\s*---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/;
 
-function parseFrontmatter(
-  content: string,
-  source: string,
-): Record<string, unknown> {
+function parseFrontmatter(content: string, source: string): unknown {
   const match = FRONTMATTER_RE.exec(content);
   if (!match) {
     throw new Error(`Skill ${source} is missing YAML frontmatter`);
   }
-  let data: unknown;
   try {
-    data = parseYaml(match[1] ?? "");
+    return parseYaml(match[1] ?? "");
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
     throw new Error(`Cannot parse frontmatter of ${source}: ${detail}`);
   }
-  if (data === null || typeof data !== "object" || Array.isArray(data)) {
-    throw new Error(`Frontmatter of ${source} must be a YAML mapping`);
-  }
-  return data as Record<string, unknown>;
 }
 
-const readSkillDir = (root: string, rel = ""): Record<string, SkillFile> => {
-  const files: Record<string, SkillFile> = {};
+const readSkillDir = (root: string, rel = ""): Record<string, string> => {
+  const files: Record<string, string> = {};
   for (const entry of readdirSync(join(root, rel), { withFileTypes: true })) {
     const childRel = rel ? `${rel}/${entry.name}` : entry.name;
-    // Skip symlinks so a link can't pull content from outside the skills tree
-    // into the served manifest.
     if (entry.isSymbolicLink()) {
       continue;
     }
     if (entry.isDirectory()) {
       Object.assign(files, readSkillDir(root, childRel));
-    } else if (entry.isFile()) {
-      files[childRel] = {
-        text: readFileSync(join(root, childRel), "utf8"),
-        mimeType: mimeTypeForFile(entry.name),
-      };
+    } else if (entry.isFile() && extname(entry.name) === ".md") {
+      files[childRel] = readFileSync(join(root, childRel), "utf8");
     }
   }
   return files;
 };
 
-// Each immediate subdirectory with a `SKILL.md` is one skill; its directory name
-// must equal the frontmatter `name`. Throws on any invalid skill so the
-// build/dev startup fails loudly instead of silently skipping.
 export function discoverSkills(dir: string): SkillsManifest {
   if (!existsSync(dir)) {
     return [];
@@ -136,9 +93,10 @@ export function discoverSkills(dir: string): SkillsManifest {
 
     const skillMd = readFileSync(skillMdPath, "utf8");
     const source = `${entry.name}/SKILL.md`;
-    const raw = parseFrontmatter(skillMd, source);
 
-    const parsed = SkillFrontmatterSchema.safeParse(raw);
+    const parsed = SkillFrontmatterSchema.safeParse(
+      parseFrontmatter(skillMd, source),
+    );
     if (!parsed.success) {
       throw new Error(
         `Invalid skill frontmatter in ${source}: ${z.prettifyError(parsed.error)}`,
@@ -152,7 +110,7 @@ export function discoverSkills(dir: string): SkillsManifest {
 
     skills.push({
       name: entry.name,
-      frontmatter: raw,
+      frontmatter: parsed.data,
       digest: sha256(skillMd),
       files: readSkillDir(skillRoot),
     });
@@ -160,7 +118,6 @@ export function discoverSkills(dir: string): SkillsManifest {
   return skills;
 }
 
-// Parses a `skill://<name>/<subpath>` URI and rejects `..`/`.` traversal.
 export function skillUriToRelPath(uri: string): {
   name: string;
   relPath: string;
@@ -177,8 +134,6 @@ export function skillUriToRelPath(uri: string): {
   return { name, relPath: segments.join("/") };
 }
 
-// Lists the immediate children of `relPath` within a skill. `null` means the
-// path is absent (empty `relPath` always matches the skill root).
 function listDir(
   skill: Skill,
   relPath: string,
@@ -194,7 +149,7 @@ function listDir(
     const rest = filePath.slice(prefix.length);
     const slash = rest.indexOf("/");
     if (slash === -1) {
-      children.set(rest, mimeTypeForFile(rest));
+      children.set(rest, "text/markdown");
     } else {
       children.set(rest.slice(0, slash), "inode/directory");
     }
@@ -205,7 +160,6 @@ function listDir(
   return [...children].map(([name, mimeType]) => ({ name, mimeType }));
 }
 
-/** The subset of `McpServer` that skill registration needs. */
 interface SkillRegistrar {
   registerResource(
     name: string,
@@ -227,20 +181,18 @@ const DirectoryReadRequestSchema = z.object({
   params: z.object({ uri: z.string(), cursor: z.string().optional() }),
 });
 
-// Registers per SEP-2640: one resource per `SKILL.md`, a template for supporting
-// files, the `skill://index.json` index, and the `resources/directory/read` handler.
 export function registerSkills(
   server: SkillRegistrar,
   manifest: SkillsManifest,
 ): void {
   const byName = new Map(manifest.map((s) => [s.name, s]));
   const serveFile = (name: string, relPath: string, href: string) => {
-    const file = byName.get(name)?.files[relPath];
-    if (!file) {
+    const text = byName.get(name)?.files[relPath];
+    if (text === undefined) {
       throw new McpError(ErrorCode.InvalidParams, `Not found: ${href}`);
     }
     return {
-      contents: [{ uri: href, text: file.text, mimeType: file.mimeType }],
+      contents: [{ uri: href, text, mimeType: "text/markdown" }],
     };
   };
 

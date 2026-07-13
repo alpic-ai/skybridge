@@ -35,7 +35,6 @@ export function startNodemon(
       }
     : {
         watch: ["src"],
-        // `md` so editing a skill's SKILL.md restarts and re-discovers it.
         ext: "ts,json,md",
         exec: "tsx src/server.ts",
       };

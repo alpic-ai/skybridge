@@ -63,7 +63,6 @@ export {
 export {
   discoverSkills,
   type Skill,
-  type SkillFile,
   type SkillsManifest,
 } from "./skills.js";
 export { viewsDevServer } from "./viewsDevServer.js";

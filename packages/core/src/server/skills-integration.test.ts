@@ -12,7 +12,7 @@ const MANIFEST: SkillsManifest = [
     name: "demo",
     frontmatter: { name: "demo", description: "A demo skill" },
     digest: "sha256:deadbeef",
-    files: { "SKILL.md": { text: "# Demo", mimeType: "text/markdown" } },
+    files: { "SKILL.md": "# Demo" },
   },
 ];
 

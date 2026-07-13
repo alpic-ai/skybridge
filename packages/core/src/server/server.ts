@@ -175,10 +175,6 @@ export interface SkybridgeServerOptions {
   json?: JsonOptions;
   /** Resource-server OAuth config. When set, mounts well-known metadata and bearer auth on `/mcp`. */
   oauth?: OAuthConfig;
-  /**
-   * Serve Agent Skills from `src/skills` over MCP, declaring the
-   * `io.modelcontextprotocol/skills` capability ([SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640), experimental).
-   */
   skills?: boolean;
 }
 
@@ -496,11 +492,8 @@ export function __setBuildManifest(
   pendingBuildManifest = manifest;
 }
 
-// Injected in memory (never read from disk) so skills ride the bundle on
-// filesystem-less targets like Cloudflare Workers, exactly like the Vite manifest.
 let pendingSkillsManifest: SkillsManifest | null = null;
 
-/** @internal Primes the build-time skills snapshot; called by `dist/__entry.js`. */
 export function __setSkillsManifest(manifest: SkillsManifest): void {
   pendingSkillsManifest = manifest;
 }
@@ -572,9 +565,6 @@ export class McpServer<
     const mergedOptions = withSkillsCapability(options, skybridgeOptions);
     super(serverInfo, mergedOptions);
     this.serverInfo = serverInfo;
-    // Store the merged options: the per-request stateless server is built from
-    // these, so it must carry the skills capability too (a host keys off
-    // `capabilities.extensions` to decide whether to look for skills).
     this.serverOptions = mergedOptions;
     this.express = express();
     this.express.use(express.json(skybridgeOptions?.json));
@@ -593,9 +583,6 @@ export class McpServer<
     this.setupSkills(Boolean(skybridgeOptions?.skills));
   }
 
-  // Production serves the injected build snapshot; dev discovers skills from
-  // disk at startup (nodemon restarts on `.md` edits). Consume the manifest
-  // unconditionally so it can't leak into a later server built without priming.
   private setupSkills(enabled: boolean): void {
     const manifest = pendingSkillsManifest;
     pendingSkillsManifest = null;
