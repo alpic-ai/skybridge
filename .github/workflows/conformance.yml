@@ -18,7 +18,7 @@ jobs:
     outputs:
       mismatches: ${{ steps.results.outputs.mismatches }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:
@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2
         env:
