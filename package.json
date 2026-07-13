@@ -25,7 +25,7 @@
     "@biomejs/biome": "^2.5.3",
     "@total-typescript/tsconfig": "^1.0.4",
     "@types/node": "^24.13.3",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "pnpm": {
     "overrides": {
