@@ -117,6 +117,10 @@ export function startTypeScriptCheck(
     tsProcess.stderr.on("data", processOutput);
   }
 
+  tsProcess.on("error", () => {
+    onErrors([]);
+  });
+
   return () => {
     tsProcess.kill();
   };
