@@ -86,12 +86,12 @@ export function discoverSkills(dir: string): SkillsManifest {
     }
 
     const skillRoot = join(dir, entry.name);
-    const skillMdPath = join(skillRoot, "SKILL.md");
-    if (!existsSync(skillMdPath)) {
+    const files = readSkillDir(skillRoot);
+    const skillMd = files["SKILL.md"];
+    if (skillMd === undefined) {
       continue;
     }
 
-    const skillMd = readFileSync(skillMdPath, "utf8");
     const source = `${entry.name}/SKILL.md`;
 
     const parsed = SkillFrontmatterSchema.safeParse(
@@ -112,7 +112,7 @@ export function discoverSkills(dir: string): SkillsManifest {
       name: entry.name,
       frontmatter: parsed.data,
       digest: sha256(skillMd),
-      files: readSkillDir(skillRoot),
+      files,
     });
   }
   return skills;

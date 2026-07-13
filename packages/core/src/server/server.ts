@@ -175,6 +175,10 @@ export interface SkybridgeServerOptions {
   json?: JsonOptions;
   /** Resource-server OAuth config. When set, mounts well-known metadata and bearer auth on `/mcp`. */
   oauth?: OAuthConfig;
+  /**
+   * @experimental Serve Agent Skills from `src/skills` over MCP (SEP-2640).
+   * API may change.
+   */
   skills?: boolean;
 }
 
