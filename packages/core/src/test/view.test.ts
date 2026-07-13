@@ -473,15 +473,17 @@ describe("McpServer.registerTool (unified API)", () => {
     );
 
     const myviewTemplate = (
-      mockRegisterTool.mock.calls[0]?.[1] as {
-        _meta?: { ui?: { resourceUri?: string } };
-      }
-    )._meta?.ui?.resourceUri;
+      mockRegisterTool.mock.calls[0] as [
+        unknown,
+        { _meta?: { ui?: { resourceUri?: string } } },
+      ]
+    )[1]._meta?.ui?.resourceUri;
     const folderviewTemplate = (
-      mockRegisterTool.mock.calls[1]?.[1] as {
-        _meta?: { ui?: { resourceUri?: string } };
-      }
-    )._meta?.ui?.resourceUri;
+      mockRegisterTool.mock.calls[1] as [
+        unknown,
+        { _meta?: { ui?: { resourceUri?: string } } },
+      ]
+    )[1]._meta?.ui?.resourceUri;
 
     expect(myviewTemplate).not.toEqual(folderviewTemplate);
     expect(myviewTemplate).toMatch(/\?v=[0-9a-f]{8}$/);
@@ -868,13 +870,15 @@ describe("resources/list view _meta injection", () => {
     expect(extApps?._meta).toBeDefined();
 
     const extUi = (
-      extApps?._meta as {
-        ui?: {
-          csp?: { connectDomains?: string[]; resourceDomains?: string[] };
-          domain?: string;
+      extApps as {
+        _meta?: {
+          ui?: {
+            csp?: { connectDomains?: string[]; resourceDomains?: string[] };
+            domain?: string;
+          };
         };
       }
-    ).ui;
+    )._meta?.ui;
     expect(extUi?.csp?.connectDomains?.length).toBeGreaterThan(0);
     expect(extUi?.csp?.resourceDomains).toContain(
       "https://fonts.googleapis.com",
