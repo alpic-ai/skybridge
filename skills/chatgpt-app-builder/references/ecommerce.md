@@ -17,7 +17,9 @@ List the credentials the data source needs. Have the user fill the `.env`; the s
 
 ## 3. Explore the data source
 
-Using the docs and credentials, run real queries. Confirm the exact response shape, the real sort keys, the available filter facets and their values, the image and price fields, and the pagination model. Map each to the tool's shape before editing.
+Delegate this to a dedicated subagent with a fresh context window: it runs the real queries and returns only the mapping, so the main agent's context isn't filled with large API payloads.
+
+Have it confirm the exact response shape, the real sort keys, the available filter facets and their values, the image and price fields, and the pagination model, then map each onto the tool's shape. Record the mapping in SPEC.md so later work doesn't re-run the exploration.
 
 ## 4. Fill the @todos and verify
 

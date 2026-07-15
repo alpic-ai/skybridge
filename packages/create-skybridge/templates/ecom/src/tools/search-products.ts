@@ -167,8 +167,8 @@ The sweet spot is ${CAROUSEL_RANGE} products.
 
   // @todo: customize the status messages shown in ChatGPT while the tool runs.
   _meta: {
-    "openai/toolInvocation/invoking": "Searching",
-    "openai/toolInvocation/invoked": "Done searching",
+    "openai/toolInvocation/invoking": "Searching the catalog",
+    "openai/toolInvocation/invoked": "Searched the catalog",
   },
 
   inputSchema,

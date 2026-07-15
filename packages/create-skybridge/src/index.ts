@@ -389,7 +389,7 @@ function cancel() {
   process.exit(0);
 }
 
-function abort(...lines: string[]): never {
+function abort(...lines: string[]) {
   for (const line of lines) {
     prompts.log.error(line);
   }
