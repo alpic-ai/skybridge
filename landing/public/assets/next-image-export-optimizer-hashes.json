@@ -1,4 +1,6 @@
 {
+    "/Skybridge-og.jpg": "bJnh40j9JtNpQmJS5Ge5F1bkN6TP12m3rwbr2CWd5QM=",
+    "/Skybridge-showcase-apps-og.jpg": "GhK3Djyr38mpDKr+HBPZSA-4MT8tkT-kQ2eQfTIi2WU=",
     "/alpic-mountain-bg.webp": "2zYm36DlMI9iRAVR2WdtagNgPfxlUkyMjPy-8rZhgvc=",
     "/banner.jpg": "P1uEsEYl+axSXGtOZmae8uqcw4ZsoCqjR1jTrtNEj0I=",
     "clients/chatgpt.webp": "kKTh0cG5AtU7bHs-TrmW01o0Il1EYZeUkSLw16Zo6mY=",
@@ -20,6 +22,8 @@
     "people/meir.webp": "uUGoCxMTNRKfXZmFHcYMWE3+6riQAHxUraC2LAbk+pg=",
     "people/pierre-loic.webp": "hHT7+GFImatj4VQWgBNN5G2SmTNNm1EEyDngVtEQqxU=",
     "people/stefan.webp": "IF6arrzBIgDzJ8fbES6eemaaZV7R0FXjr5bvRnJuoeE=",
+    "showcase/alpic-inline-1.webp": "cBKo6ENCPfW-+E9UMjRgmzRJRkpnn7k4GrxAswPuJFI=",
+    "showcase/alpic-inline-2.webp": "tLDsnJtvGTM5xNknePQMB2rqUMz5gCYE0rBM+YF+f8s=",
     "showcase/auth0.webp": "OQVN+Y0qsjq8KNPCQ+MB0pfZnHZkvgkNcFvpoq0p+Uk=",
     "showcase/capitals.webp": "iCkNuEOur3cqtOCzIJzR1xkZGonwbENlDcE5n6+fPII=",
     "showcase/clerk.webp": "9CmDUvkY4S44SmRkGPqPpp2Sb3IZpnZcllAna9hTNcM=",
@@ -29,10 +33,14 @@
     "showcase/evaneos-fullscreen.webp": "owIPIsRVoVNGupKXoSpJhZMuJ1A4yWEwKplMM0RHOMI=",
     "showcase/evaneos.webp": "PZXlN+DqeQZRDyHvWvfnevFh1Ua1BimiE8Tzpwtabws=",
     "showcase/everything.webp": "lzn4Z6HjYjRxRQaM+zYhohSDTtyugGelkQuLqcVFAfI=",
+    "showcase/facile-inline-1.webp": "SqZanFiW8hzCtLGSTuoqxBhVCxpTrqZrzgSbapAlhlk=",
+    "showcase/facile-inline-2.webp": "1D4StIwRDNwPJGk1xieWXFuln8gs+y9ApDZyj+m0gpg=",
     "showcase/flight-booking.webp": "NS02uXdggLUNWdNRb2c-bRSU9tdaMfPLtreYRblP6ks=",
     "showcase/generative-ui.webp": "FeYR+1K+4v0dpDtkA4r5d2qLGPm4bgjxJPfIf1Td2Vk=",
+    "showcase/icons/alpic.webp": "sdvvUBslClwYENHIGjLSoL+LNCgJOfzdCdBBTgL0EKU=",
     "showcase/icons/cottages.webp": "bxwcQeG85+xi1SG7zbHGSsD-pxToodCxRUpBLSifpUs=",
     "showcase/icons/evaneos.webp": "njOdN+yVzcnu+UyEKUBq8s7Sy+hDpgpSaYvi-yHMIHo=",
+    "showcase/icons/facile.webp": "y9uMbvGekbzY2ewAkVkEHMFvAjlnsKHkl8Eg4TNdPe8=",
     "showcase/icons/kiwi.webp": "y0u7yzu-xhWLW+5oznU07-7CnqjQVdi3rMHJzCXRpw0=",
     "showcase/icons/recommerce-tradein.webp": "TkJxIxFCpXyh8dmWb8P5gt2CeClBpxh8VatJb5i7BSw=",
     "showcase/icons/recommerce.webp": "91kg5UWGK0Nl8TJ4BSpZHPdGQSTqm2huG3MVTcslQbA=",
@@ -52,5 +60,7 @@
     "showcase/times-up.webp": "5raUKHaLcYwoqfXKM-rwdPunsQug5hLDL90nIcOJvi0=",
     "showcase/vpfullscreen.webp": "EvNfdahzwlvAThG-vPL-QTp7Ndc5JflZDLue25CnquU=",
     "showcase/vpinline.webp": "fBvdy8VnqQIrqjgx+m7Cw3T4Nyfb5Xq78Mho8e7H0ug=",
-    "showcase/workos.webp": "rtUGk3IINa9USGJgu0nFauF6-IC8628HKuEV3MU+4Zw="
+    "showcase/workos.webp": "rtUGk3IINa9USGJgu0nFauF6-IC8628HKuEV3MU+4Zw=",
+    "/tokyo.jpg": "6fiIUMa2q7dKR9ypuH+g80DN1dSVaIHbl99jjcnNomo=",
+    "/video-poster.jpg": "--WSfEt+kB9jq1oaxKYUQt1pMNPsVTu+mn6uEWbLEb4="
 }

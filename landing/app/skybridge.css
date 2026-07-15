@@ -274,6 +274,11 @@ body {
   color: var(--sb-ink);
   text-transform: none;
 }
+@media (max-width: 600px) {
+  .sb-nav-links {
+    display: none;
+  }
+}
 @media (max-width: 480px) {
   .sb-nav {
     padding: 0 8px;
