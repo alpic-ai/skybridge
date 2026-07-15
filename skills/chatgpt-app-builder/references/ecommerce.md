@@ -1,6 +1,6 @@
 # Fill the template
 
-The `ecom` template is a skeleton: the wiring is in place, the data is not. One tool, `search-products`, takes a keyword plus filters, runs a `search()` stub, and narrates the results for the model. This reference connects it to a real catalog.
+The `ecom` template is a skeleton: the wiring is in place, the data is not. One tool, `search-products`, takes a keyword plus filters, runs a `search()` stub, and returns the matching products as structured output plus next-step guidance for the model. This reference connects it to a real catalog.
 
 Not in a scaffolded `ecom` project (no `src/tools/search-products.ts`)? Scaffold it first with the `--ecom` flag: [copy-template.md](copy-template.md). Then return here.
 
@@ -48,8 +48,10 @@ Each tool's verify curl is in its section below.
 - [ ] `inputSchema.keyword`: rewrite the description for the catalog's vocabulary.
 - [ ] `inputSchema.sort`: set the real sort options, or remove.
 - [ ] `inputSchema` filters: replace `priceRange` with one optional param per real facet.
-- [ ] `search()`: query the data source with `keyword`, `sort`, and filters; map each hit to `{ id, properties: [{ name, value: string[] }] }[]`; set `pages` and `totalHits`.
-- [ ] `narrate()` NEXT STEP: adapt the post-search guidance to your flow.
+- [ ] `propertyName`: set the property names the model curates on (e.g. `name`, `price`, `description`). Grounding only — no presentational data (images, media).
+- [ ] `outputSchema`: adjust the model-facing fields (product `id` + `properties`).
+- [ ] `search()`: query the data source with `keyword`, `sort`, and filters; map each hit into the `outputSchema` shape (`{ id, properties: [{ name, value: string[] }] }[]`); set `pages` and `totalHits`.
+- [ ] `narrate()` NEXT STEPS: adapt the post-search guidance to your flow (framing only; it carries no result data).
 
 Verify: curl the stateless `/mcp` endpoint (`Accept` must include `text/event-stream` or the SDK rejects the request). Set `arguments` to `keyword` plus any `sort`/filters you implemented:
 
@@ -60,5 +62,5 @@ curl -s http://localhost:3000/mcp \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search-products","arguments":{"keyword":"<real keyword>"}}}'
 ```
 
-Confirm `result.content` carries real products from the live source. (`"method":"tools/list"` with no `params` lists the registered schema.)
+Confirm `result.structuredContent` carries real products from the live source (`result.content` is just the next-step guidance text). (`"method":"tools/list"` with no `params` lists the registered schema.)
 

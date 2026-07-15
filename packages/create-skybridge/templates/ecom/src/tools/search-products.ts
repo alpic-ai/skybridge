@@ -5,9 +5,10 @@ import {
   MIN_SEARCH_ITERATIONS,
 } from "../config.js";
 
-// The `search-products` tool: takes a keyword + filters, queries your catalog,
-// and narrates the results as text for the model (the user never sees them).
-// Everything this tool needs lives in this file.
+// The `search-products` tool: keyword + filters in, matching products out as
+// structured output for the model. It has NO view — include only what the model
+// needs to curate (ids + properties), never presentational data (images, media);
+// render-carousel handles that. Everything this tool needs lives in this file.
 
 // ---------------------------------------------------------------------------
 // Input
@@ -42,75 +43,92 @@ Preserve the existing keyword across filter refinements; only replace when the u
 type SearchInput = z.infer<z.ZodObject<typeof inputSchema>>;
 
 // ---------------------------------------------------------------------------
-// Data access
+// Output — model-facing grounding, returned in structuredContent.
 // ---------------------------------------------------------------------------
 
-type SearchResults = {
-  keyword: string;
-  products: { id: string; properties: { name: string; value: string[] }[] }[];
-  pages?: { current: number; total: number };
-  totalHits?: number;
+// The property names the model curates on (grounding only, no presentational data).
+// @todo: replace with your catalog's property names.
+const propertyName = z.enum(["name", "price", "description"]);
+
+const outputSchema = {
+  products: z
+    .array(
+      z.object({
+        id: z.string().describe("Stable product ID; pass to render-carousel."),
+        properties: z
+          .array(
+            z.object({
+              name: propertyName.describe("Which property this is."),
+              value: z.array(z.string()).describe("The property's value(s)."),
+            }),
+          )
+          .describe("Product properties to curate on."),
+      }),
+    )
+    .describe("Matching products, sorted."),
+  pages: z
+    .object({
+      current: z.number(),
+      total: z.number(),
+    })
+    .optional()
+    .describe("Pagination: current page and total page count."),
+  totalHits: z
+    .number()
+    .optional()
+    .describe("Total matching products across all pages."),
 };
+
+type SearchResults = z.infer<z.ZodObject<typeof outputSchema>>;
+
+// ---------------------------------------------------------------------------
+// Data access
+// ---------------------------------------------------------------------------
 
 function search(input: SearchInput): SearchResults {
   // @todo: plug in your product API / DB. Query it with the input params and map
   // each result into `products` below. `pages` and `totalHits` are optional.
   return {
-    keyword: input.keyword,
-    products: [], // { id: string; properties: { name: string; value: string[] }[] }[]
+    products: [], // { id: string; properties: { name: PropertyName; value: string[] }[] }[]
     pages: { current: 1, total: 1 },
     totalHits: 0,
   };
 }
 
 // ---------------------------------------------------------------------------
-// Narration — render results as text for the model (client never sees this)
+// Narration — framing + next-step instructions for the model. The products
+// themselves ride in structuredContent; this text carries NO result data.
+// @todo: customize the NEXT STEPS guidance below for your flow (keep searching
+// vs. curate and render). Remind the model to ground claims in the structured
+// results and never invent attributes.
 // ---------------------------------------------------------------------------
 
-function narrate({
-  keyword,
-  pages,
-  products,
-  totalHits,
-}: SearchResults): string {
+function narrate({ products }: SearchResults): string {
   const size = products.length;
-  if (size <= 0) {
-    return "No product found.";
+
+  if (size === 0) {
+    return `\
+No products found.
+
+NEXT STEP: Broaden the keyword or relax filters, then search again.`;
   }
 
-  let header = `${size} product${size === 1 ? "" : "s"} found for ${keyword}.`;
-  if (pages) {
-    header += ` Page ${pages.current} of ${pages.total}.`;
-  }
-  if (totalHits) {
-    header += ` Total hits: ${totalHits}.`;
+  if (size < CAROUSEL_MAX_SIZE) {
+    return `\
+Only a few results.
+
+NEXT STEPS:
+1. If the client asked for a specific product by name, these are fine: curate and call render-carousel with the selected IDs.
+2. Otherwise, search again with broader terms before rendering.`;
   }
 
-  const body = [header];
-  for (const { id, properties } of products) {
-    const item = [`# ID: ${id}`];
-    for (const { name, value } of properties) {
-      item.push(`- ${name}: ${value.join(", ")}`);
-    }
-    body.push(item.join("\n"));
-  }
+  return `\
+Enough results to present.
 
-  // @todo: customize this NEXT STEP guidance for your flow. It steers what the
-  // model does after a search (keep searching vs. curate and render).
-  const footer =
-    size < CAROUSEL_MAX_SIZE
-      ? `\
-NEXT STEP: Only a few results found.
-If the client asked for a specific product by name, these are fine: curate and call render-carousel with selected IDs.
-Otherwise, search again with broader terms before rendering.`
-      : `\
-NEXT STEP:
-1. Curate the best matches for the client's intent from the list above.
+NEXT STEPS:
+1. Curate the best matches for the client's intent from the structured results.
 2. Write your recommendation mentioning the selected products.
 3. Call render-carousel with the selected IDs.`;
-
-  body.push(footer);
-  return body.join("\n\n");
 }
 
 // ---------------------------------------------------------------------------
@@ -119,6 +137,7 @@ NEXT STEP:
 
 export const searchProductsDefinition = {
   name: "search-products" as const,
+
   // @todo: describe YOUR catalog and how the agent should search and curate
   // it. This is the model's main guide: be specific about your categories,
   // the multi-call search loop, and when to render vs. keep searching.
@@ -145,17 +164,22 @@ The sweet spot is ${CAROUSEL_RANGE} products.
     openWorldHint: false,
     destructiveHint: false,
   },
+
   // @todo: customize the status messages shown in ChatGPT while the tool runs.
   _meta: {
     "openai/toolInvocation/invoking": "Searching",
     "openai/toolInvocation/invoked": "Done searching",
   },
+
   inputSchema,
+  outputSchema,
 };
 
 export function searchProductsHandler(input: SearchInput) {
+  const results = search(input);
   return {
-    content: [{ type: "text" as const, text: narrate(search(input)) }],
+    structuredContent: results,
+    content: [{ type: "text" as const, text: narrate(results) }],
     isError: false,
   };
 }
