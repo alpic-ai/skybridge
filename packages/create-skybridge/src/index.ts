@@ -12,7 +12,7 @@ const DEFAULT_PROJECT_NAME = "skybridge-project";
 const PACKAGE_MANAGERS = ["bun", "deno", "npm", "pnpm", "yarn"] as const;
 type PackageManager = (typeof PACKAGE_MANAGERS)[number];
 
-const TEMPLATES = ["demo", "blank"] as const;
+const TEMPLATES = ["demo", "blank", "ecom"] as const;
 type Template = (typeof TEMPLATES)[number];
 
 const pkg = JSON.parse(
@@ -32,6 +32,7 @@ Arguments:
 
 Options:
   --blank        scaffold a minimal project without demo tools and views
+  --ecom         scaffold the ecommerce template (search products, render carousel)
   --overwrite    remove existing files if target directory is not empty
   --pm <choice>  package manager to use (choices: ${PACKAGE_MANAGERS.join(", ")}. default to npm when none is provided or infered)
   --skip-skills  skip installing coding agent skills
@@ -74,13 +75,22 @@ export async function init(args: string[] = process.argv.slice(2)) {
   const argv = mri<{
     help?: boolean;
     blank?: boolean;
+    ecom?: boolean;
     overwrite?: boolean;
     pm?: string;
     "skip-skills"?: boolean;
     start?: boolean;
     yes?: boolean;
   }>(args, {
-    boolean: ["help", "blank", "overwrite", "skip-skills", "start", "yes"],
+    boolean: [
+      "help",
+      "blank",
+      "ecom",
+      "overwrite",
+      "skip-skills",
+      "start",
+      "yes",
+    ],
     string: ["pm"],
     alias: { h: "help" },
   });
@@ -153,32 +163,46 @@ export async function init(args: string[] = process.argv.slice(2)) {
   }
 
   // 3. Template
-  let template: Template;
+  let template: Template | undefined;
   if (argv.blank) {
     template = "blank";
-  } else if (yes) {
-    template = "demo";
-  } else {
-    const choice = await prompts.select<Template>({
-      message: "Choose a template:",
-      options: [
-        {
-          value: "demo",
-          label: "demo",
-          hint: "starter code with tools and UI",
-        },
-        {
-          value: "blank",
-          label: "blank",
-          hint: "minimal boilerplate without tools",
-        },
-      ],
-      initialValue: "demo",
-    });
-    if (prompts.isCancel(choice)) {
-      return cancel();
+  }
+  if (argv.ecom) {
+    if (template) {
+      abort("Cannot specify both --blank and --ecom.");
     }
-    template = choice;
+    template = "ecom";
+  }
+  if (!template) {
+    if (yes) {
+      template = "demo";
+    } else {
+      const choice = await prompts.select<Template>({
+        message: "Choose a template:",
+        options: [
+          {
+            value: "demo",
+            label: "demo",
+            hint: "starter code with tools and UI",
+          },
+          {
+            value: "blank",
+            label: "blank",
+            hint: "minimal boilerplate without tools",
+          },
+          {
+            value: "ecom",
+            label: "ecom",
+            hint: "ecommerce template with product search tool and carousel view",
+          },
+        ],
+        initialValue: "demo",
+      });
+      if (prompts.isCancel(choice)) {
+        return cancel();
+      }
+      template = choice;
+    }
   }
 
   // 4. Copy template
