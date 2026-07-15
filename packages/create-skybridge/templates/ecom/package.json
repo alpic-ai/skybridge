@@ -1,0 +1,29 @@
+{
+  "name": "skybridge-ecom",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Skybridge MCP ecommerce template",
+  "type": "module",
+  "scripts": {
+    "dev": "skybridge dev",
+    "dev:tunnel": "skybridge dev --tunnel",
+    "build": "skybridge build",
+    "start": "skybridge start",
+    "deploy": "alpic deploy"
+  },
+  "dependencies": {
+    "skybridge": "workspace:*",
+    "vite": "^8.1.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@skybridge/devtools": "^1.2.4",
+    "@types/node": "^24.13.2",
+    "alpic": "^1.147.1",
+    "tsx": "^4.23.0",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=24.18.0"
+  }
+}
