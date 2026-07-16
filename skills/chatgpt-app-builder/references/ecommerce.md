@@ -185,6 +185,12 @@ For an internal tool or prototype with no brand, keep the neutral primitives. Se
 
 The view layer under `src/components/` and `src/views/`, built on the design system. Preview any component in Ladle (`{pm} run ladle`; each `*.stories.tsx` is a story); the devtools emulator shows a view against a live tool call. One feature per subsection.
 
+#### Labels (i18n)
+
+All user-facing text is centralized in `src/i18n.ts`, shared across every component. `useLabels()` reads the host locale from `useUser()`, matches on the language subtag (`en-US` -> `en`), and falls back to English. Ships English only.
+
+- [ ] `src/i18n.ts`: adapt the English label copy to the brand voice, and add a locale key per language you want to support.
+
 #### Carousel
 
 `render-carousel`'s inline view (`src/views/carousel/`), plus `ProductCard` (image, title, price, out-of-stock; presentational), `ProductCarousel` (scroll-snap track and desktop nav buttons; reports on-screen cards), and `EmptyState`. The view reads `responseMetadata.products` (the tool's `_meta`), renders one card per product, and narrates the on-screen ones via `data-llm`.

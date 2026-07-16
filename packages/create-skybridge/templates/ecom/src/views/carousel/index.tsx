@@ -10,6 +10,7 @@ import { ProductCarousel } from "../../components/product-carousel";
 import { ViewFrame } from "../../components/view-frame";
 import { sprinkles } from "../../design/tokens";
 import { useToolInfo } from "../../helpers.js";
+import { useLabels } from "../../i18n";
 import { formatPrice } from "../../lib/format";
 import type { Product } from "../../tools/render-carousel.js";
 
@@ -32,6 +33,7 @@ function narrate(product: Product, index: number): string {
 function Carousel() {
   const { responseMetadata } = useToolInfo<"render-carousel">();
   const [visibleIndices, setVisibleIndices] = useState<number[]>([]);
+  const labels = useLabels();
 
   // Tool still resolving: reserve the layout with skeleton cards.
   if (responseMetadata == null) {
@@ -53,7 +55,7 @@ function Carousel() {
   if (products.length === 0) {
     return (
       <ViewFrame>
-        <EmptyState message="No products to show." />
+        <EmptyState message={labels.noProducts} />
       </ViewFrame>
     );
   }

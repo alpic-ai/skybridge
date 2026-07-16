@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useUser } from "skybridge/web";
 import { text } from "../design/tokens";
+import { useLabels } from "../i18n";
 import { cx } from "../lib/cx";
 import { formatPrice } from "../lib/format";
 import type { Price } from "../types.js";
@@ -28,6 +29,7 @@ export function ProductCard({
   outOfStock,
 }: ProductCardProps) {
   const { locale } = useUser();
+  const labels = useLabels();
   // Show the first image. @todo: the rest of `media` is available here, e.g.
   // to cross-fade to media[1] on hover.
   const cover = media?.[0];
@@ -46,7 +48,7 @@ export function ProductCard({
           <div className={styles.placeholder} />
         )}
         {outOfStock ? (
-          <span className={styles.oosBadge}>Out of stock</span>
+          <span className={styles.oosBadge}>{labels.outOfStock}</span>
         ) : null}
       </div>
 

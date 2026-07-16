@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useLabels } from "../i18n";
 import { cx } from "../lib/cx";
 import * as styles from "./product-carousel.css";
 
@@ -55,6 +56,7 @@ export function ProductCarousel({
   onVisibleChange,
   loading = false,
 }: ProductCarouselProps) {
+  const labels = useLabels();
   const trackRef = useRef<HTMLElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -158,8 +160,8 @@ export function ProductCarousel({
       <section
         ref={trackRef}
         className={styles.track({ framed: FRAMED, loading })}
-        aria-roledescription="carousel"
-        aria-label="Products"
+        aria-roledescription={labels.carousel}
+        aria-label={labels.products}
       >
         {cells}
       </section>
@@ -167,7 +169,7 @@ export function ProductCarousel({
         <>
           <button
             type="button"
-            aria-label="Previous"
+            aria-label={labels.previous}
             className={cx(styles.nav, styles.navPrev)}
             disabled={!canScrollLeft}
             onClick={() => step(-1)}
@@ -176,7 +178,7 @@ export function ProductCarousel({
           </button>
           <button
             type="button"
-            aria-label="Next"
+            aria-label={labels.next}
             className={cx(styles.nav, styles.navNext)}
             disabled={!canScrollRight}
             onClick={() => step(1)}
