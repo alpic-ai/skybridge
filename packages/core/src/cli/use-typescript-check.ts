@@ -46,7 +46,6 @@ export function startTypeScriptCheck(
     ["tsc", "--noEmit", "--watch", "--pretty", "false"],
     {
       stdio: ["ignore", "pipe", "pipe"],
-      shell: true,
     },
   );
 
@@ -117,6 +116,10 @@ export function startTypeScriptCheck(
   if (tsProcess.stderr) {
     tsProcess.stderr.on("data", processOutput);
   }
+
+  tsProcess.on("error", () => {
+    onErrors([]);
+  });
 
   return () => {
     tsProcess.kill();
