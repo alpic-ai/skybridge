@@ -43,11 +43,11 @@ src/
     sprinkles.css.ts             atomic style props
     recipes/typography.css.ts    the `text` recipe
     tokens.ts                    barrel (single import door)
-  components/view-frame.tsx    ViewFrame: activates the theme
-  views/carousel/              carousel view skeleton (separate effort)
+  components/                  ViewFrame, ProductCard, ProductCarousel, EmptyState
+  views/carousel/              the render-carousel view (reads _meta, renders cards)
 ```
 
-The template is `@todo`-driven: `grep -rn "@todo" src` lists every decision point. The two subsections below, **Server** and **Design system**, are independent: do them in either order, resolving every `@todo` and verifying as you go. `{pm} run build` typechecks the whole tree at any point.
+The template is `@todo`-driven: `grep -rn "@todo" src` lists every decision point. The subsections below (**Server**, **Design system**, **Components**) each own their markers: Server and Design system are independent; Components build on the Design system. Resolve every `@todo` and verify as you go. `{pm} run build` typechecks the whole tree at any point.
 
 ### Server
 
@@ -93,18 +93,18 @@ Confirm `result.structuredContent` carries real products from the live source (`
 
 Takes the curated IDs and returns the products for the carousel. The full product data (variants, media, options) rides in `_meta` for the view; a trimmed grounding subset goes to `structuredContent` for the model.
 
-- [ ] Product model (`Product`, `Variant`, `Option`, `Meta`): match your catalog. A `Product` groups sibling `Variant`s and declares the `Option` axes. `variants` is sparse (list only the combinations that exist; a missing one encodes a contingent variation). `card` is the variant or union shown on the carousel card.
+- [ ] Product model (`Product`, `Variant`, `Option`, `Meta`): match your catalog. A `Product` groups sibling `Variant`s and declares the `Option` axes. `variants` is sparse (list only the combinations that exist; a missing one encodes a contingent variation). `card` (required) is what the carousel shows for the product: it is surfaced both in the view (rendered directly) and to the model (`structuredContent` is projected from it).
 - [ ] `getProducts()`: fetch each id and map results into `Product[]`. Pick a mapping strategy (see below).
-- [ ] `toStructuredContent()`: choose the model-facing fields per product (grounding only; the view reads the full data from `_meta`).
+- [ ] `toStructuredContent()`: trim each product's `card` and `options` into the model-facing grounding, dropping presentational fields (media, url). The view reads the full products from `_meta`.
 - [ ] `description`: adapt the wording and brand voice; the behavioral rules (order, no-repeat, accuracy) apply to any catalog.
 - [ ] `_meta`: the invoking and invoked status messages.
-- [ ] `view` (once built): point it at your carousel view under `src/views/render-carousel`.
+- [ ] `view`: already wired to the `carousel` view (`view: { component: "carousel" }`); customize it in the Components subsection.
 
 ##### Mapping ids to products (`getProducts`)
 
-`getProducts` turns the curated ids into `Product[]`. It is unprescriptive: choose what fits your catalog. Whatever `search-products` put in each `id` is what arrives here, so keep the two tools consistent.
+`getProducts` turns the curated ids into `Product[]`. It is unprescriptive: choose what fits your catalog. Whatever `search-products` put in each `id` is what arrives here, so keep the two tools consistent. Every `Product` must set `card` (displayed in carousel, surfaced to llm); how you build it depends on the strategy.
 
-**Products have no variants (simple products).** Map each id to a `Product` with a single variant and `options: []`. Nothing else to decide.
+**Products have no variants (simple products).** Map each id to a `Product` with a single variant, `card` set to that variant, and `options: []`. Nothing else to decide.
 
 **Products have variants.** Choose how variants become carousel cards:
 
@@ -128,7 +128,7 @@ Confirm `result._meta.products` carries the full products for the view and `resu
 
 ### Design system
 
-Reskin the vanilla-extract design system (`src/design/`) to the brand, using the assets gathered in step 1. The carousel view that consumes it is a skeleton; building it out is a separate effort, so this is only about the tokens and theme.
+Reskin the vanilla-extract design system (`src/design/`) to the brand, using the assets gathered in step 1. This subsection is only the tokens and theme; the components that consume them are in Components below.
 
 #### The layers
 
@@ -179,4 +179,17 @@ For an internal tool or prototype with no brand, keep the neutral primitives. Se
 
 #### Verify
 
-`{pm} run build` compiles the tokens and type-checks the themes (the contract fails the build if either theme leaves a slot unset). Preview the result in the devtools emulator, or with `{pm} run ladle` once you add component stories.
+`{pm} run build` compiles the tokens and type-checks the themes (the contract fails the build if either theme leaves a slot unset). Preview the result in the devtools emulator or with `{pm} run ladle`.
+
+### Components
+
+The view layer under `src/components/` and `src/views/`, built on the design system. Preview any component in Ladle (`{pm} run ladle`; each `*.stories.tsx` is a story); the devtools emulator shows a view against a live tool call. One feature per subsection.
+
+#### Carousel
+
+`render-carousel`'s inline view (`src/views/carousel/`), plus `ProductCard` (image, title, price, out-of-stock; presentational), `ProductCarousel` (scroll-snap track and desktop nav buttons; reports on-screen cards), and `EmptyState`. The view reads `responseMetadata.products` (the tool's `_meta`), renders one card per product, and narrates the on-screen ones via `data-llm`.
+
+- [ ] `product-card.css.ts`: `TITLE_LINES` (title clamp); the surface token behind the image; image fit (`contain` vs `cover`).
+- [ ] `product-card.tsx`: extra images from `media` (e.g. hover cross-fade to `media[1]`); extra fields from `attributes` (ratings, tags, badges).
+- [ ] `product-carousel.css.ts`: tuning knobs (`gap`, `CARDS_VISIBLE`, `CARDS_VISIBLE_COMPACT`, `COMPACT_MAX_WIDTH`).
+- [ ] Framing: the `FRAMED` flag boxes each card (`product-card.tsx`, includes its skeleton) or the whole strip (`product-carousel.tsx`). Both `false` for plain cards (default); set at most one to `true`, never both. If you enable one, tune the frame (padding, border, radius, shadow) in `product-card.css.ts` or `product-carousel.css.ts`.
