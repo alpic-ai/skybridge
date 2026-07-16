@@ -28,7 +28,7 @@ const server = new McpServer(
       description:
         "Browse the public coffee catalog. Works signed out, and greets you by name when a token is present.",
       inputSchema: {},
-      auth: { public: true },
+      auth: { allowsAnonymous: true },
       view: { component: "catalog", description: "The coffee catalog" },
     },
     (_args, extra) => {
@@ -45,9 +45,9 @@ const server = new McpServer(
   .registerTool(
     {
       name: "whoami",
-      description: "Return the signed-in user. Requires sign-in.",
+      description:
+        "Return the signed-in user. No auth declared, so it falls back to the secure default (sign-in required).",
       inputSchema: {},
-      auth: {},
     },
     (_args, extra) => text(`You are ${who(extra.authInfo)}.`),
   )
@@ -59,15 +59,6 @@ const server = new McpServer(
       auth: { scopes: ["checkout"] },
     },
     ({ item }, extra) => text(`Order placed for ${who(extra.authInfo)}: ${item}.`),
-  )
-  .registerTool(
-    {
-      name: "account",
-      description:
-        "View account details. No auth declared, so it falls back to the secure default (sign-in required).",
-      inputSchema: {},
-    },
-    (_args, extra) => text(`Account details for ${who(extra.authInfo)}.`),
   );
 
 export default await server.run();

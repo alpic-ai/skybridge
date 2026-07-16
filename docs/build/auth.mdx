@@ -7,7 +7,7 @@ icon: "key"
 [Tool](/build/tools) calls are anonymous by default: nothing in the protocol tells you who's asking. [OAuth](https://oauth.net/2/) closes that gap, and the host does most of the work: it discovers your authorization server, signs the user in, refreshes tokens, and attaches a Bearer token to every request. Your server keeps three jobs: publish the discovery metadata, verify the tokens, and read the user in your handlers.
 
 <Tip>
-Using [Auth0](/guides/auth-providers#auth0), [Clerk](/guides/auth-providers#clerk), [Descope](/guides/auth-providers#descope), [Stytch](/guides/auth-providers#stytch), [WorkOS](/guides/auth-providers#workos), or [any other OAuth provider](/guides/auth-providers#any-other-provider)? Connect it in one line instead of wiring this by hand, and still [mix public and authenticated tools](#mix-public-and-authenticated-tools) with `auth: { public: true }`.
+Using [Auth0](/guides/auth-providers#auth0), [Clerk](/guides/auth-providers#clerk), [Descope](/guides/auth-providers#descope), [Stytch](/guides/auth-providers#stytch), [WorkOS](/guides/auth-providers#workos), or [any other OAuth provider](/guides/auth-providers#any-other-provider)? Connect it in one line instead of wiring this by hand, and still [mix public and authenticated tools](#mix-public-and-authenticated-tools) with `auth: { allowsAnonymous: true }`.
 </Tip>
 
 Here's a complete server where every tool requires sign-in:
@@ -144,11 +144,11 @@ On the [provider path](/guides/auth-providers) (the `oauth` constructor option),
 
 ```ts
 server
-  .registerTool({ name: "search-products", auth: { public: true }, /* … */ }, handler)
+  .registerTool({ name: "search-products", auth: { allowsAnonymous: true }, /* … */ }, handler)
   .registerTool({ name: "create-checkout", auth: { scopes: ["checkout"] }, /* … */ }, handler);
 ```
 
-Any `auth: { public: true }` tool makes the server serve anonymous callers; every other tool stays sign-in-gated, with scopes enforced before the handler. No manual middleware swap or handler guard. The lower-level steps below apply when you wire the middleware by hand instead.
+Any `auth: { allowsAnonymous: true }` tool makes the server serve anonymous callers; every other tool stays sign-in-gated, with scopes enforced before the handler. No manual middleware swap or handler guard. The lower-level steps below apply when you wire the middleware by hand instead.
 </Tip>
 
 ### Switch the Middleware

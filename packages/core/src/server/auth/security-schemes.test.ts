@@ -20,7 +20,7 @@ describe("clientPrefersInBandChallenge", () => {
 
 describe("authToSecuritySchemes", () => {
   it("maps the auth shorthand", () => {
-    expect(authToSecuritySchemes({ public: true })).toEqual([
+    expect(authToSecuritySchemes({ allowsAnonymous: true })).toEqual([
       { type: "noauth" },
       { type: "oauth2" },
     ]);
@@ -29,7 +29,7 @@ describe("authToSecuritySchemes", () => {
       { type: "oauth2", scopes: ["checkout"] },
     ]);
     expect(
-      authToSecuritySchemes({ public: true, scopes: ["checkout"] }),
+      authToSecuritySchemes({ allowsAnonymous: true, scopes: ["checkout"] }),
     ).toEqual([{ type: "noauth" }, { type: "oauth2", scopes: ["checkout"] }]);
   });
 });

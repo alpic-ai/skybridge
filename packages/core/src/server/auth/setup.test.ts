@@ -238,7 +238,7 @@ async function bootMixedServer(jwksUri: string) {
         name: "public-whoami",
         description: "Public.",
         inputSchema: {},
-        auth: { public: true },
+        auth: { allowsAnonymous: true },
       },
       (_args, extra) => ({
         content: [{ type: "text", text: extra.authInfo?.clientId ?? "anon" }],
@@ -565,10 +565,10 @@ describe("auth shorthand validation", () => {
     ).toThrow(/no `oauth` provider/);
   });
 
-  it("allows `auth: { public: true }` without an oauth provider", () => {
+  it("allows `auth: { allowsAnonymous: true }` without an oauth provider", () => {
     expect(() =>
       new McpServer({ name: "t", version: "0" }).registerTool(
-        { name: "x", inputSchema: {}, auth: { public: true } },
+        { name: "x", inputSchema: {}, auth: { allowsAnonymous: true } },
         () => ({ content: [{ type: "text", text: "" }] }),
       ),
     ).not.toThrow();

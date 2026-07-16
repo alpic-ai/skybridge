@@ -8,7 +8,7 @@ icon: "fingerprint"
 [Authenticating users](/build/auth) wires sign-in through a hosted identity provider in one constructor option, so your tools receive a signed-in user. ChatGPT and Claude drive the flow the same way; what varies is the provider. The sections below cover one each: [Auth0](#auth0), [Clerk](#clerk), [Descope](#descope), [Stytch](#stytch), and [WorkOS](#workos), plus a [custom provider](#any-other-provider) for any other.
 
 <Info>
-These providers require sign-in on every request by default. Set [`auth: { public: true }`](/api-reference/register-tool#auth) on any tool to [mix public and authenticated tools](/build/auth#mix-public-and-authenticated-tools): the server then serves anonymous requests and Skybridge enforces each tool's own auth declaration before the handler runs.
+These providers require sign-in on every request by default. Set [`auth: { allowsAnonymous: true }`](/api-reference/register-tool#auth) on any tool to [mix public and authenticated tools](/build/auth#mix-public-and-authenticated-tools): the server then serves anonymous requests and Skybridge enforces each tool's own auth declaration before the handler runs.
 </Info>
 
 ## Auth0

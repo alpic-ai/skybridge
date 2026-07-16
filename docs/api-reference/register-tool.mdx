@@ -61,7 +61,7 @@ type ToolConfig = {
   outputSchema?: ZodRawShape; // Zod shape; types structuredContent
   annotations?: ToolAnnotations; // standard MCP hints
   view?: ViewConfig; // bind a view to render the result
-  auth?: { public?: boolean; scopes?: string[] }; // per-tool auth
+  auth?: { allowsAnonymous?: boolean; scopes?: string[] }; // per-tool auth
   securitySchemes?: SecurityScheme[]; // low-level alternative to `auth` (mutually exclusive)
   _meta?: ToolMeta; // extra metadata
 };
@@ -151,12 +151,12 @@ The recommended way to declare a tool's auth. With the [`oauth`](/api-reference/
 
 | Value | Meaning |
 | --- | --- |
-| `{ public: true }` | Callable signed out; uses the token when one is present. |
-| `{}` | Requires sign-in. |
+| _omitted_ (default) | Requires sign-in, the secure default when the server has an `oauth` provider. |
+| `{ allowsAnonymous: true }` | Callable signed out; uses the token when one is present. |
 | `{ scopes: [...] }` | Requires sign-in with every listed scope. |
-| `{ public: true, scopes: [...] }` | Callable signed out; a signed-in caller missing a listed scope gets a step-up challenge (`insufficient_scope`) instead of the anonymous path. |
+| `{ allowsAnonymous: true, scopes: [...] }` | Callable signed out; a signed-in caller missing a listed scope gets a step-up challenge (`insufficient_scope`) instead of the anonymous path. |
 
-Declaring any `{ public: true }` tool turns the server [mixed](/build/auth#mix-public-and-authenticated-tools): it serves anonymous callers, and every other tool stays sign-in-gated by default. Requiring sign-in (`{}` or `{ scopes }`) needs the `oauth` provider and throws without it; `{ public: true }` works either way. Omit `auth` entirely for the secure default (sign-in required whenever the server has auth).
+Declaring any `{ allowsAnonymous: true }` tool turns the server [mixed](/build/auth#mix-public-and-authenticated-tools): it serves anonymous callers, and every other tool stays sign-in-gated by default. Requiring sign-in (`{ scopes }`) needs the `oauth` provider and throws without it; `{ allowsAnonymous: true }` works either way. Omit `auth` entirely for the secure default (sign-in required whenever the server has auth).
 
 ### `securitySchemes`
 

@@ -7,7 +7,7 @@ export function authToSecuritySchemes(auth: ToolAuth): SecurityScheme[] {
     type: "oauth2",
     ...(auth.scopes?.length ? { scopes: auth.scopes } : {}),
   };
-  return auth.public ? [{ type: "noauth" }, oauth2] : [oauth2];
+  return auth.allowsAnonymous ? [{ type: "noauth" }, oauth2] : [oauth2];
 }
 
 export function securitySchemesAllowAnonymous(

@@ -17,29 +17,28 @@ For the fully-authenticated variant (every tool requires sign-in), see
 
 | Tool | `auth` declaration | Compiles to | Behavior |
 | --- | --- | --- | --- |
-| `browse-catalog` | `{ public: true }` | `[{noauth},{oauth2}]` | Callable signed out; uses the token when present (greets you by name). |
-| `whoami` | `{}` | `[{oauth2}]` | Requires sign-in. |
+| `browse-catalog` | `{ allowsAnonymous: true }` | `[{noauth},{oauth2}]` | Callable signed out; uses the token when present (greets you by name). |
+| `whoami` | *(omitted)* | `[{oauth2}]` | No declaration → secure default: sign-in required. |
 | `checkout` | `{ scopes: ["checkout"] }` | `[{oauth2, scopes:["checkout"]}]` | Requires sign-in **and** the `checkout` scope. |
-| `account` | *(omitted)* | — | No declaration → secure default: sign-in required. |
 
-Declaring `browse-catalog` as `public` is what flips the server into mixed mode:
-the `/mcp` door starts accepting anonymous requests, and every other tool stays
-sign-in-gated, enforced by the framework before the handler runs.
+Declaring `browse-catalog` with `allowsAnonymous` is what flips the server into
+mixed mode: the `/mcp` door starts accepting anonymous requests, and every other
+tool stays sign-in-gated, enforced by the framework before the handler runs.
 
 ## What to test
 
 **Anonymous (no token)**
 - `browse-catalog` → succeeds, returns "Catalog for guest…".
-- `whoami`, `checkout`, `account` → denied with `mcp/www_authenticate`, so the
-  host surfaces its sign-in UI.
+- `whoami`, `checkout` → denied with `mcp/www_authenticate`, so the host
+  surfaces its sign-in UI.
 
 **Signed in, without the `checkout` scope**
 - `browse-catalog` → greets you by name.
-- `whoami`, `account` → succeed.
+- `whoami` → succeeds.
 - `checkout` → denied with `insufficient_scope`.
 
 **Signed in, with the `checkout` scope**
-- All four tools succeed.
+- All three tools succeed.
 
 ## Setup
 
