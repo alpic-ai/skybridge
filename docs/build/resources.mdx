@@ -1,0 +1,93 @@
+---
+title: "Register Resources"
+description: "Expose readable content to the host"
+icon: "file-text"
+---
+
+MCP has three server primitives. [Tools](/build/tools) are the ones the model calls; resources and prompts round out the set. A **resource** is addressable content a host can read by URI: reference docs, a data file, a live-generated report. Where a tool is an action, a resource is a document.
+
+```ts server.ts
+import { McpServer } from "skybridge/server";
+
+const server = new McpServer({ name: "shop", version: "1.0" }).registerResource(
+  {
+    name: "pricing",
+    uri: "docs://pricing",
+    title: "Pricing",
+    description: "Current plan pricing, in Markdown.",
+    mimeType: "text/markdown",
+  },
+  async (uri) => ({
+    contents: [{ uri: uri.href, text: await loadPricingDoc() }],
+  }),
+);
+```
+
+[`registerResource`](/api-reference/register-resource) returns the server, so it chains next to your tool registrations. The handler runs when the host reads the URI and returns the content: `text` for text, `blob` (base64) for binary.
+
+<Info>
+Register resources up front, at startup. Adding or removing them at runtime relies on `list_changed` notifications, which the stateless JSON transport can't deliver, so hosts won't see the change.
+</Info>
+
+## Static vs. dynamic
+
+A **static** resource lives at one fixed `uri`. A **dynamic** resource uses a `template`, an [RFC 6570](https://www.rfc-editor.org/rfc/rfc6570) URI template, to cover a family of URIs that share a shape:
+
+```ts server.ts
+import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+
+server.registerResource(
+  {
+    name: "order",
+    template: new ResourceTemplate("orders://{orderId}", { list: undefined }),
+  },
+  async (uri, { orderId }) => ({
+    contents: [{ uri: uri.href, text: await renderOrder(orderId as string) }],
+  }),
+);
+```
+
+The template's handler receives the resolved `variables` as its second argument.
+
+<Warning>
+The `ui://views/` namespace is reserved for the view resources Skybridge registers for you. Registering a resource under it throws.
+</Warning>
+
+## Completions
+
+A dynamic resource can help the host discover and complete its URIs. The `ResourceTemplate` constructor takes two callbacks:
+
+```ts server.ts
+new ResourceTemplate("orders://{orderId}", {
+  // Enumerate concrete resources the template produces.
+  list: async () => ({
+    resources: (await recentOrders()).map((id) => ({
+      name: id,
+      uri: `orders://${id}`,
+    })),
+  }),
+  // Autocomplete a variable as the user types it.
+  complete: {
+    orderId: async (value) => (await matchOrderIds(value)).slice(0, 20),
+  },
+});
+```
+
+`list` is required: pass `undefined` to opt out, so a template is never accidentally unlistable. `complete` is optional, one callback per template variable, returning the candidate values for what the user has typed so far.
+
+<Card title="Register Prompts" type="tip" href="/build/prompts" horizontal icon="message-square">
+  The third primitive: reusable prompts users can invoke.
+</Card>
+
+## Go Further
+<Columns cols={3}>
+    <Card title="registerResource" icon="file-text" href="/api-reference/register-resource">
+        Full config and handler reference
+    </Card>
+    <Card title="Register Prompts" icon="message-square" href="/build/prompts">
+        Ship reusable prompts
+    </Card>
+    <Card title="Register Tools" icon="wrench" href="/build/tools">
+        The action primitive
+    </Card>
+</Columns>

@@ -9,6 +9,8 @@ A **view** is a tool with a UI. It renders the tool output visually. The UI is a
 - manage its own state
 - call other tools to fetch data absent from the view output schema or trigger actions.
 
+A **resource** is readable content addressed by URI (`server.registerResource`), static or template-based; a **prompt** is a reusable message template the user invokes (`server.registerPrompt`). Both chain off the server like `registerTool`. Reach for them only when the SPEC calls for exposing reference content or canned prompts; most apps need only tools and views. See `/build/resources` and `/build/prompts`.
+
 ## Step 1: Identify the UX Flows
 
 A **flow** is an end-to-end user journey that accomplishes one goal (e.g., "book a flight" = search → select → checkout).

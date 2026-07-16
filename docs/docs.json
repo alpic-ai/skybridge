@@ -38,6 +38,8 @@
             "root": "build/index",
             "pages": [
               "build/tools",
+              "build/resources",
+              "build/prompts",
               "build/view",
               "build/state",
               "build/auth"
@@ -100,7 +102,9 @@
             "icon": "server",
             "pages": [
               "api-reference/mcp-server",
-              "api-reference/register-tool"
+              "api-reference/register-tool",
+              "api-reference/register-resource",
+              "api-reference/register-prompt"
             ]
           },
           {
