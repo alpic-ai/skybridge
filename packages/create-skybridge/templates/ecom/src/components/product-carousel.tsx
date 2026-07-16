@@ -92,10 +92,13 @@ export function ProductCarousel({
 
   // Track which cells are in view and report them (only when a consumer asks).
   const childCount = Children.count(children);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: childCount re-subscribes the observer when the cell count changes; it is intentionally not read inside.
+  // Re-subscribe when a consumer starts (or stops) passing onVisibleChange, even
+  // if the child count is unchanged; the callback itself is read via the ref.
+  const observeVisibility = onVisibleChange != null;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: childCount and observeVisibility drive re-subscription; neither is read inside the effect.
   useEffect(() => {
     const el = trackRef.current;
-    if (!el || !onVisibleChangeRef.current) {
+    if (!el || !observeVisibility) {
       return;
     }
     const cells = Array.from(el.children);
@@ -130,7 +133,7 @@ export function ProductCarousel({
       window.clearTimeout(timer);
       observer.disconnect();
     };
-  }, [childCount]);
+  }, [childCount, observeVisibility]);
 
   const step = (direction: 1 | -1) => {
     const el = trackRef.current;
