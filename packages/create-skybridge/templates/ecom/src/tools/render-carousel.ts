@@ -212,6 +212,14 @@ Use only the data returned for each product. Never invent attributes, materials,
     "openai/toolInvocation/invoked": "Loaded product carousel",
   },
 
+  // The carousel view rendered inline in the conversation.
+  view: {
+    // `as const` keeps this a literal (like `name` above) so it matches the
+    // generated ViewNameRegistry; a bare string widens and fails the build.
+    component: "carousel" as const,
+    description: "Browse the curated products.",
+  },
+
   inputSchema,
 };
 
