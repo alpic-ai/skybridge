@@ -1,6 +1,10 @@
 import { existsSync } from "node:fs";
 import { McpServer } from "skybridge/server";
-import { MIN_SEARCH_ITERATIONS } from "./config.js";
+import { CAROUSEL_RANGE, MIN_SEARCH_ITERATIONS } from "./config.js";
+import {
+  renderCarouselDefinition,
+  renderCarouselHandler,
+} from "./tools/render-carousel.js";
 import {
   searchProductsDefinition,
   searchProductsHandler,
@@ -27,9 +31,12 @@ Vary the keyword, apply filters from a prior response, or page deeper. \
 Stay silent while searching: emit NO text between calls. Speak only \
 once the carousel renders. Never call a category unavailable before searching.
 
-RENDER: not implemented yet`,
+RENDER: After curating, call render-carousel with the chosen product IDs (aim for ${CAROUSEL_RANGE}). \
+Speak only once it renders, then recommend in carousel order.`,
   },
-).registerTool(searchProductsDefinition, searchProductsHandler);
+)
+  .registerTool(searchProductsDefinition, searchProductsHandler)
+  .registerTool(renderCarouselDefinition, renderCarouselHandler);
 
 export default await server.run();
 

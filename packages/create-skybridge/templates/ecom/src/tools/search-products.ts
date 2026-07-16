@@ -4,6 +4,7 @@ import {
   CAROUSEL_RANGE,
   MIN_SEARCH_ITERATIONS,
 } from "../config.js";
+import { AttributeSchema, PriceSchema } from "../types.js";
 
 // The `search-products` tool: keyword + filters in, matching products out as
 // structured output for the model. It has NO view — include only what the model
@@ -46,26 +47,22 @@ type SearchInput = z.infer<z.ZodObject<typeof inputSchema>>;
 // Output — model-facing grounding, returned in structuredContent.
 // ---------------------------------------------------------------------------
 
-// The property names the model curates on (grounding only, no presentational data).
-// @todo: replace with your catalog's property names.
-const propertyName = z.enum(["name", "price", "description"]);
+const productSchema = z.object({
+  id: z.string().describe("Stable product ID; pass to render-carousel."),
+  title: z.string(),
+  description: z.string().optional(),
+  price: PriceSchema.optional(),
+  outOfStock: z
+    .boolean()
+    .optional()
+    .describe("True when the product is not purchasable."),
+  attributes: z
+    .array(AttributeSchema)
+    .describe("Facts to curate on (specs, materials, promo labels…)."),
+});
 
 const outputSchema = {
-  products: z
-    .array(
-      z.object({
-        id: z.string().describe("Stable product ID; pass to render-carousel."),
-        properties: z
-          .array(
-            z.object({
-              name: propertyName.describe("Which property this is."),
-              value: z.array(z.string()).describe("The property's value(s)."),
-            }),
-          )
-          .describe("Product properties to curate on."),
-      }),
-    )
-    .describe("Matching products, sorted."),
+  products: z.array(productSchema).describe("Matching products, sorted."),
   pages: z
     .object({
       current: z.number(),
@@ -79,13 +76,13 @@ const outputSchema = {
     .describe("Total matching products across all pages."),
 };
 
-type SearchResults = z.infer<z.ZodObject<typeof outputSchema>>;
+type SearchOutput = z.infer<z.ZodObject<typeof outputSchema>>;
 
 // ---------------------------------------------------------------------------
 // Data access
 // ---------------------------------------------------------------------------
 
-function search(input: SearchInput): SearchResults {
+function search(_input: SearchInput): SearchOutput {
   // @todo: plug in your product API / DB. Query it with the input params and map
   // each result into `products` below. `pages` and `totalHits` are optional.
   return {
@@ -103,7 +100,7 @@ function search(input: SearchInput): SearchResults {
 // results and never invent attributes.
 // ---------------------------------------------------------------------------
 
-function narrate({ products }: SearchResults): string {
+function narrate({ products }: SearchOutput): string {
   const size = products.length;
 
   if (size === 0) {
