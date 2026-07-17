@@ -26,7 +26,11 @@ jobs:
 
       # The driver connects to a Notte cloud browser over CDP (--mode notte),
       # so no local browser is launched; uv resolves the script's inline deps.
+      # Step timeout sits below the job's, so a stuck run fails the step but
+      # still leaves the collect/upload/Slack steps room to report it (a job
+      # timeout would kill the runner before any of them could fire).
       - name: Run conformance on ${{ matrix.host }}
+        timeout-minutes: 30
         working-directory: examples/conformance
         run: |
           uv run notte/conformance.py \
