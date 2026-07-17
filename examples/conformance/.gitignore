@@ -1,1 +1,6 @@
 conformance-results/
+notte/.profiles/
+notte/out/
+# Python
+__pycache__/
+*.pyc

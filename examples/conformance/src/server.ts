@@ -36,10 +36,8 @@ const server = new McpServer(
       component: "conformance",
       description:
         "A stepper that exercises every Skybridge web hook on the current host and fills a copyable results table.",
-      // Allowlist the openExternal target so it skips safe-link modals.
-      csp: {
-        redirectDomains: ["https://docs.skybridge.tech"],
-      },
+      // not adding external link domain to csp so automated runner can infer
+      // openExternal from redirect modal existence
     },
   },
   async ({ label }) => {

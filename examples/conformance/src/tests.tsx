@@ -41,12 +41,7 @@ import { z } from "zod";
  * whether the effect actually happened.
  */
 export type Verdict = "supported" | "partial" | "unsupported" | "error";
-export type TestResult = {
-  verdict: Verdict;
-  detail: string;
-  /** Set false when a `confirm` test verified the effect programmatically. */
-  needsConfirm?: boolean;
-};
+export type TestResult = { verdict: Verdict; detail: string };
 export type TestProps = { onResult: (result: TestResult) => void };
 export type TestDef = {
   /** Hook under test, e.g. `useCallTool`. */
@@ -222,16 +217,25 @@ function ViewStateTest({ onResult }: TestProps) {
   const stateRef = useRef(state);
   stateRef.current = state;
   useProbe(onResult, async () => {
-    const target = (stateRef.current?.probe ?? 0) + 1;
-    setState((prev) => ({ ...prev, probe: target }));
-    await sleep(150);
     // Note: this observes the hook's state, which Skybridge keeps even when the
     // host write fails — host-side persistence isn't programmatically checkable.
-    return stateRef.current?.probe === target
-      ? supported(`setViewState wrote probe=${target} and read it back`)
-      : failed(
-          `wrote probe=${target} but read back ${JSON.stringify(stateRef.current)}`,
-        );
+    // The Runner mirrors results into the SAME host viewState store, and both
+    // are independent useViewState writers: a late mirror write (from the prior
+    // test's recordAt) can replace the store from a stale snapshot and drop our
+    // probe within the read window. That's the app racing itself, not the host,
+    // so retry past a one-shot clobber to measure the host's real round-trip.
+    let target = 0;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      target = (stateRef.current?.probe ?? 0) + 1;
+      setState((prev) => ({ ...prev, probe: target }));
+      await sleep(150);
+      if (stateRef.current?.probe === target) {
+        return supported(`setViewState wrote probe=${target} and read it back`);
+      }
+    }
+    return failed(
+      `wrote probe=${target} but read back ${JSON.stringify(stateRef.current)}`,
+    );
   });
   return null;
 }
@@ -320,27 +324,14 @@ function RequestModalTest({ onResult }: TestProps) {
     } catch (e) {
       return unsupported(`open() failed: ${errMessage(e)}`);
     }
-    // When the host re-renders THIS view instance in modal mode the runner
-    // unmounts (the modal content replaces the tree at the root), so watch the
-    // display mode through the adaptor store, which outlives the unmount.
-    const deadline = Date.now() + 4000;
-    while (Date.now() < deadline) {
-      const { mode } = getAdaptor()
-        .getHostContextStore("display")
-        .getSnapshot();
-      if (mode === "modal") {
-        return {
-          ...supported("the view re-rendered in modal mode"),
-          needsConfirm: false,
-        };
-      }
-      await sleep(150);
-    }
-    // open() resolved but the display mode never flipped to "modal" within the
-    // window: the host acknowledged requestModal (e.g. blurs the background)
-    // yet never rendered the view as a modal. Treat as a real failure.
-    return failed(
-      'display mode never became "modal" after requestModal (host did not render the view as a modal)',
+    // Whether a modal actually RENDERED (same-view re-render on MCP Apps, a
+    // dedicated instance on Apps SDK) is a visual fact: the confirmation
+    // answers it. The store check below only enriches the detail.
+    const { mode } = getAdaptor().getHostContextStore("display").getSnapshot();
+    return supported(
+      mode === "modal"
+        ? "modal requested (this view re-rendered in modal mode)"
+        : "modal requested (no in-view mode change: the host may render the modal as a separate view)",
     );
   });
   return null;
@@ -528,18 +519,20 @@ export const TESTS: TestDef[] = [
     Test: SetOpenInAppUrlTest,
   },
   {
-    hook: "useDisplayMode",
-    name: "fullscreen request",
-    description:
-      "Requests fullscreen and checks the granted mode. Restore the initial mode yourself via the host controls.",
-    Test: DisplayModeTest,
-  },
-  {
+    // Before useDisplayMode: resize requests only apply to the inline view,
+    // and the displayMode test leaves the view fullscreen.
     hook: "useRequestSize",
     name: "resize the view iframe",
     description:
       "Requests a smaller height and checks the iframe actually resized.",
     Test: RequestSizeTest,
+  },
+  {
+    hook: "useDisplayMode",
+    name: "fullscreen request",
+    description:
+      "Requests fullscreen and checks the granted mode. Restore the initial mode yourself via the host controls.",
+    Test: DisplayModeTest,
   },
   {
     hook: "useRequestModal",

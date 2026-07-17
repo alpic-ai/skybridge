@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 
 /**
- * The app's remote-control protocol, used by external drivers (e.g. the Notte
- * conformance function in `scripts/`) that cannot click or read across the
+ * The app's remote-control protocol, used by external drivers (the Playwright
+ * driver in `notte/conformance.py`) that cannot click or read across the
  * host's cross-origin iframes:
  *
  * - Inbound: the driver posts `{type: "conformance:drive", action}` into the

@@ -106,7 +106,7 @@ function toMarkdown(rows: (RowResult | null)[], runtime: string): string {
 
 type RunState = { step: number; rows: (RowResult | null)[] };
 
-function Runner({ onRestart }: { onRestart: () => void }) {
+function Runner() {
   const runtime = detectRuntime();
   // Recorded results are mirrored to the host viewState so the run survives
   // host-driven view remounts (fullscreen switches, the modal round-trip).
@@ -152,9 +152,16 @@ function Runner({ onRestart }: { onRestart: () => void }) {
     [setViewState],
   );
 
+  // Reset in place rather than remounting (a key bump would unmount this
+  // component in the same batch and React can drop the pending viewState
+  // updater, resurrecting the old run on the next mount).
   const restart = () => {
+    recordedRef.current.clear();
+    setStep(0);
+    setRows(TESTS.map(() => null));
+    setArmed(false);
+    setConfirming(null);
     setViewState((prev) => ({ ...prev, run: undefined }));
-    onRestart();
   };
 
   const skipCurrent = () =>
@@ -176,8 +183,8 @@ function Runner({ onRestart }: { onRestart: () => void }) {
     }
   };
 
-  // Remote control for external drivers (e.g. the Notte conformance
-  // function): see src/automation.ts for the protocol.
+  // Remote control for external drivers (the Playwright driver in
+  // notte/conformance.py): see src/automation.ts for the protocol.
   const [, setDisplayMode] = useDisplayMode();
   useDriveListener((action) => {
     if (action === "run" && test && !test.auto && !confirming) {
@@ -204,6 +211,10 @@ function Runner({ onRestart }: { onRestart: () => void }) {
         ? (test.runLabel ?? "Run")
         : null,
     confirm_question: confirming ? (test?.confirm ?? null) : null,
+    // Never derived from useRequestModal().isOpen: on Apps SDK the store flag
+    // flips even when the host renders no usable modal, which would falsely
+    // confirm the test. A modal_open:true broadcast comes only from an
+    // actually-mounted modal view (StandaloneModalRemote).
     modal_open: false,
     rows: TESTS.map((t, i) => ({
       hook: t.hook,
@@ -217,11 +228,7 @@ function Runner({ onRestart }: { onRestart: () => void }) {
       if (recordedRef.current.has(index)) {
         return;
       }
-      if (
-        TESTS[index].confirm &&
-        result.verdict === "supported" &&
-        result.needsConfirm !== false
-      ) {
+      if (TESTS[index].confirm && result.verdict === "supported") {
         setConfirming(result);
       } else {
         recordAt(index, result);
@@ -433,25 +440,33 @@ function Runner({ onRestart }: { onRestart: () => void }) {
   );
 }
 
-const MODAL_STATE = {
-  run_complete: false,
-  current_hook: null,
-  action_button: null,
-  confirm_question: null,
-  modal_open: true,
-  rows: [],
-};
-
-function ModalNotice({ params }: { params?: Record<string, unknown> }) {
-  // The runner is unmounted while the modal shows, so the remote control
-  // needs its own wiring here (see src/automation.ts).
+function StandaloneModalRemote() {
+  // Wiring for a DEDICATED modal instance (Apps SDK renders the modal as a
+  // fresh view): no runner is mounted there, so the remote control needs its
+  // own listener and state broadcast.
   useDriveListener((action) => {
     if (action === "close-modal") {
       getAdaptor().closeModal();
     }
   });
-  useStateBroadcast(() => MODAL_STATE);
+  // Only claim modal_open on MCP Apps, where the polyfill renders the modal in
+  // our own tree and is therefore verifiable. On Apps SDK the modal is
+  // host-owned and a mounted view instance does NOT prove a usable modal
+  // rendered, so we don't self-report it: the driver then answers the
+  // confirmation "no" and the hook records unsupported.
+  const modalOpen = detectRuntime() === "mcp-app";
+  useStateBroadcast(() => ({
+    run_complete: false,
+    current_hook: null,
+    action_button: null,
+    confirm_question: null,
+    modal_open: modalOpen,
+    rows: [],
+  }));
+  return null;
+}
 
+function ModalNotice({ params }: { params?: Record<string, unknown> }) {
   return (
     <div className="flex max-w-sm flex-col gap-3 p-6">
       <h2 className="type-text-lg font-semibold text-foreground">
@@ -475,27 +490,44 @@ function ModalNotice({ params }: { params?: Record<string, unknown> }) {
 }
 
 function App() {
-  const { theme } = useLayout();
+  const { theme, safeArea } = useLayout();
   const { isOpen, params } = useRequestModal();
-  const [epoch, setEpoch] = useState(0);
+  // A view born in modal mode is the host's dedicated modal instance (Apps
+  // SDK): render the notice alone, never a runner.
+  const bornInModal = useRef(isOpen).current;
 
-  if (isOpen) {
+  if (bornInModal) {
     return (
       <div
         className={`${theme === "dark" ? "dark " : ""}bg-background text-foreground`}
       >
+        <StandaloneModalRemote />
         <ModalNotice params={params} />
       </div>
     );
   }
 
+  // The runner is always mounted AND visible — never hidden on `isOpen`.
+  // Coupling visibility to the modal flag bricked the run when a host left it
+  // stuck: on Apps SDK `closeModal` is a no-op and the display store can stay
+  // `mode: "modal"` after the modal test, so a hidden runner never came back
+  // and every later step ran blind. On MCP Apps the host's ModalProvider frames
+  // this view as the modal on its own; we don't need a second treatment.
   return (
     <div
       className={`${theme === "dark" ? "dark " : ""}bg-background text-foreground`}
     >
-      <div className="min-h-dvh">
+      <div
+        className="min-h-dvh"
+        style={{
+          paddingTop: safeArea.insets.top,
+          paddingBottom: safeArea.insets.bottom,
+          paddingLeft: safeArea.insets.left,
+          paddingRight: safeArea.insets.right,
+        }}
+      >
         <div className="mx-auto max-w-2xl p-4">
-          <Runner key={epoch} onRestart={() => setEpoch((e) => e + 1)} />
+          <Runner />
         </div>
       </div>
     </div>

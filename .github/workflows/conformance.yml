@@ -11,23 +11,29 @@ permissions:
   contents: read
 
 jobs:
-  chatgpt:
-    name: ChatGPT
+  conformance:
+    name: ${{ matrix.host }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [chatgpt, claude]
     outputs:
       mismatches: ${{ steps.results.outputs.mismatches }}
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: ".nvmrc"
+      - uses: astral-sh/setup-uv@v6
 
-      - name: Run conformance on ChatGPT
+      # The driver connects to a Notte cloud browser over CDP (--mode notte),
+      # so no local browser is launched; uv resolves the script's inline deps.
+      - name: Run conformance on ${{ matrix.host }}
+        working-directory: examples/conformance
         run: |
-          node examples/conformance/notte/run-conformance.ts \
-            --function-id ${{ vars.NOTTE_CHATGPT_FUNCTION_ID }} \
+          uv run notte/conformance.py \
+            --host ${{ matrix.host }} \
+            --mode notte \
             --profile-id ${{ vars.NOTTE_PROFILE_ID }} \
             --out conformance-results
         env:
@@ -36,6 +42,7 @@ jobs:
       - name: Collect results for notifications
         id: results
         if: always()
+        working-directory: examples/conformance
         run: |
           FILE=conformance-results/results.json
           if [ -f "$FILE" ]; then
@@ -51,12 +58,12 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: chatgpt-conformance-results
-          path: conformance-results/
+          name: ${{ matrix.host }}-conformance-results
+          path: examples/conformance/conformance-results/
 
   notify-slack:
-    needs: [chatgpt]
-    if: always() && (needs.chatgpt.result == 'failure' || needs.chatgpt.result == 'timed_out')
+    needs: [conformance]
+    if: always() && (needs.conformance.result == 'failure' || needs.conformance.result == 'timed_out')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -68,11 +75,11 @@ jobs:
           SLACK_TITLE: ❌ Hooks conformance failed
           SLACK_COLOR: failure
           SLACK_MESSAGE_ON_FAILURE: |
-            The scheduled hooks conformance run failed (chatgpt: ${{ needs.chatgpt.result }}).
+            The scheduled hooks conformance run failed (${{ needs.conformance.result }}).
 
             Baseline mismatches:
-            ${{ needs.chatgpt.outputs.mismatches }}
+            ${{ needs.conformance.outputs.mismatches }}
 
-            Full results (json + screenshot) in the chatgpt-conformance-results artifact.
+            Full results (json + screenshot) are in the per-host conformance-results artifacts.
           MSG_MINIMAL: actions url
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}

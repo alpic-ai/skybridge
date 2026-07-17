@@ -71,46 +71,56 @@ notte/                   # Automated runs on real hosts (see E2E below)
 
 ## E2E
 
-`notte/` runs the app end-to-end on a real ChatGPT host via a [Notte](https://notte.cc) cloud browser, acting as the human tester: it presses Run/Close on the action tests and answers the Yes/No confirmations by verifying the side effects from outside the widget (modal overlay, new tab, follow-up message in the conversation). A confirmation it has no way to verify falls back to Skip, which no ChatGPT test currently hits (the only unverified candidate, `useDownload`, self-reports `unsupported` there before any confirmation shows). No LLM is involved (no scrape, no agent), the run cost is Notte session time only.
+`notte/conformance.py` runs the app end-to-end on a real host (ChatGPT or Claude), acting as the human tester: it presses Run/Close on the action tests and answers the Yes/No confirmations by verifying the side effects from outside the widget (modal overlay, new tab, follow-up message, host permission dialog). No LLM is involved (no scrape, no agent).
 
-| File                              | What it does                                                                    |
-| --------------------------------- |---------------------------------------------------------------------------------|
-| `chatgpt-conformance-function.py` | Notte function: sends `run @Conformance`, drives the stepper, extracts the rows |
-| `run-conformance.ts`              | CI entrypoint: cloud-runs the function, saves artifacts, gates on the baseline  |
-| `chatgpt_expected.json`           | Expected verdict per hook: the CI baseline                                      |
-| `create-profile.ts`               | Creates/reopens a Notte profile so you can log into the ChatGPT account         |
+It's one plain [Playwright](https://playwright.dev) (sync) script, driven by [`uv`](https://docs.astral.sh/uv/) (inline script deps, no separate install). Two flags:
 
-The driver talks to the app over postMessage in both directions (the widget iframes are cross-origin, so it cannot click or read them): buttons are pressed through the drive hook (`{type: "conformance:drive", action: run|skip|yes|no|close-modal|restore-inline}`) and progress is read from the app's state broadcasts (`{type: "conformance:state", state}`, sent to `window.top` on every change plus a 1.5s heartbeat). Both sides live in `src/automation.ts`.
+- `--host chatgpt|claude`: which host to drive.
+- `--mode local|notte`: the browser backend. `local` is a persistent Chrome profile on your machine (`notte/.profiles/local`, gitignored) that you log into once by hand; `notte` connects to a [Notte](https://notte.cc) cloud browser over Chrome DevTools Protocol, which is what CI uses (no display needed, and the login persists in the Notte profile).
 
-### Setup
+The driver presses the widget's real buttons (Playwright reaches across the host's cross-origin iframes) and only falls back to the postMessage drive protocol when a button isn't reachable. Real clicks matter: ChatGPT gates the follow-up and open-external effects behind a genuine user gesture, which postMessage can't supply.
 
-The function expects the conformance app to be already connected in the ChatGPT account/workspace the profile is logged into:
+| File                    | What it does                                                                   |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| `conformance.py`        | The driver: `--host chatgpt\|claude`, `--mode local\|notte`, gates on the baseline |
+| `chatgpt_expected.json` | Expected verdict per hook on ChatGPT: the CI baseline                          |
+| `claude_expected.json`  | Expected verdict per hook on Claude                                            |
+| `create-profile.ts`     | Creates/reopens a Notte profile so you can log into the host account           |
 
-0. **Environment**: `cp .env.example .env` and fill it in — the `notte:*` scripts load it via Node's `--env-file-if-exists` (`NOTTE_API_KEY`, plus `NOTTE_CHATGPT_FUNCTION_ID`/`NOTTE_PROFILE_ID` as defaults for the run flags). CI passes real env vars instead; flags always override.
-1. **Connect the app** from any browser logged into the target ChatGPT account/workspace (connectors are account-level): enable developer mode, then connect the deployed conformance server as an app named `Conformance`.
-2. **Create a Notte profile logged into that account**: log in via the live viewer this opens, then press Enter to persist:
-
-```bash
-pnpm notte:profile my-chatgpt-workspace
-```
-
-3. **Deploy the function** (`notte auth login` first): `notte functions create --file notte/chatgpt-conformance-function.py --name "ChatGPT Skybridge Conformance"` the first time, `pnpm notte:update` afterwards. Without `--function-id`, the CLI targets its machine-local "current function" (`~/.notte/cli/current_function`, set by the last `create`) — pass `pnpm notte:update --function-id <id>` if you have created other functions since. The function takes `profile_id` (required) and `app_name` (default `Conformance`) as variables.
+The driver talks to the app over postMessage (the widget iframes are cross-origin): the drive hook accepts `{type: "conformance:drive", action: run|skip|yes|no|close-modal|restore-inline}` and the app broadcasts `{type: "conformance:state", state}` to `window.top` on every change plus a 1.5s heartbeat. Both sides live in `src/automation.ts`.
 
 ### Running
 
 ```bash
-pnpm notte:run   # ids from .env; or override: --function-id <id> --profile-id notte-profile-... --out <dir>
+uv run notte/conformance.py --host chatgpt --mode local            # local Chrome, logged-in profile
+uv run notte/conformance.py --host claude  --mode local
+uv run notte/conformance.py --host chatgpt --mode notte            # Notte cloud browser (profile id from .env)
+pnpm notte:run --host claude --mode notte                          # same, via the npm script
 ```
 
-This cloud-runs the function (result and logs stay retrievable via `notte functions run-metadata`), writes `results.json` and `screenshot.png` into `--out`, and compares every hook's verdict against the `chatgpt_expected.json` baseline (override with `--expected`, empty string to skip). It exits non-zero when the run fails **or any verdict deviates from the baseline**. A regression fails CI, and an improvement does too until the baseline is updated. Mismatches are printed and recorded in `results.json`.
+Each run writes `results.json` and `screenshot.png` to `notte/out/<host>/` (override with `--out`) and exits non-zero when the run fails **or any gated verdict deviates from `<host>_expected.json`** (override with `--expected`, empty string to skip). A regression fails CI, and so does an improvement until you update the baseline. Mismatches are printed and recorded in `results.json`.
 
-The scheduled GitHub Actions workflow lives at `.github/workflows/conformance.yml` (every 6 hours + manual dispatch, Slack alert on failure with the mismatches). It needs the repo secrets `NOTTE_API_KEY` and `SLACK_WEBHOOK_URL`, and the variables `NOTTE_CHATGPT_FUNCTION_ID` and `NOTTE_PROFILE_ID`.
+Host quirks the driver handles: both hosts gate `openExternal` (and Claude also `useDownload`) behind a native permission dialog ("Open link" / "Download") that the driver accepts, which both confirms the host handled the hook and dismisses the backdrop; ChatGPT also gates the follow-up effect behind a real user gesture, so the driver clicks the widget's real buttons rather than only posting messages; Claude renders `useRequestModal` inside the widget rather than as a host dialog. When a test stalls or the widget fails to boot, the driver retries the whole run in a fresh conversation.
+
+### Setup
+
+The app must be connected in the host account the profile is logged into:
+
+0. **Environment**: `cp .env.example .env` and fill in `NOTTE_API_KEY` and `NOTTE_PROFILE_ID`. `conformance.py` loads `.env` itself; `pnpm notte:profile` loads it via Node. CI passes real env vars instead; flags always override.
+1. **Connect the app** from any browser logged into the target account (connectors are account-level): enable developer mode, then connect the deployed conformance server as an app named `Conformance`. Both ChatGPT and Claude need the connection on their respective accounts.
+2. **Create a Notte profile logged into that account** (for `--mode notte`): log in via the live viewer this opens, then press Enter to persist. For `--mode local`, just run once and log in by hand in the Chrome window that opens.
+
+```bash
+pnpm notte:profile my-workspace
+```
+
+The scheduled GitHub Actions workflow lives at `.github/workflows/conformance.yml` (every 6 hours + manual dispatch, one matrix job per host, Slack alert on failure with the mismatches). It needs the repo secrets `NOTTE_API_KEY` and `SLACK_WEBHOOK_URL`, and the variable `NOTTE_PROFILE_ID`.
 
 ### Caveats
 
-- `headless=False` is required: headless Chromium drops cross-origin MessagePort transfers, which breaks the widget init handshake.
-- A full run takes several minutes (fifteen tests, waits between actions, and the follow-up verification can wait up to 2 minutes for ChatGPT to commit the turn). Budget a ~12 minute timeout.
-- The function itself must be Python: Notte executes it server-side in a Python AST sandbox (which also rejects some nodes, e.g. lambdas — keep it to plain functions). The client-side scripts are zero-dependency TypeScript, run directly with Node 24 (native type stripping).
+- `headless=False` is required (local mode, and the Notte session is non-headless too): headless Chromium drops cross-origin MessagePort transfers, which breaks the widget init handshake.
+- A full run takes several minutes (fifteen tests, waits between actions, the 60s `useRegisterViewTool` timeout, and the follow-up verification can wait up to 2 minutes for the host to commit the turn). Over Notte, real clicks cost ~7s each on top (CDP round-trip), so budget ~15 minutes per host.
+- `useOpenExternal` is gated on both hosts now that each pops an observable "Open link" confirmation dialog the driver accepts. (It used to be un-gated over `--mode notte`, when ChatGPT opened a new tab that never surfaced to Playwright over Notte's CDP.) `UNVERIFIABLE_BY_MODE` in `conformance.py` is the seam for re-excluding any hook that becomes unobservable in a given mode; excluded hooks are recorded under `not_gated` in `results.json`.
 
 ## Resources
 
