@@ -19,8 +19,6 @@ jobs:
       fail-fast: false
       matrix:
         host: [chatgpt, claude]
-    outputs:
-      mismatches: ${{ steps.results.outputs.mismatches }}
     steps:
       - uses: actions/checkout@v7
 
@@ -39,7 +37,7 @@ jobs:
         env:
           NOTTE_API_KEY: ${{ secrets.NOTTE_API_KEY }}
 
-      - name: Collect results for notifications
+      - name: Collect mismatches
         id: results
         if: always()
         working-directory: examples/conformance
@@ -61,25 +59,22 @@ jobs:
           name: ${{ matrix.host }}-conformance-results
           path: examples/conformance/conformance-results/
 
-  notify-slack:
-    needs: [conformance]
-    if: always() && (needs.conformance.result == 'failure' || needs.conformance.result == 'timed_out')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
+      # Alert per host, inside the matrix job: matrix children collapse to one
+      # shared job output, so a single downstream notify job would drop one
+      # host's mismatches. Notifying here keeps each host's failure intact.
       - name: Slack Notification
+        if: failure()
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_USERNAME: GitHub Actions
-          SLACK_TITLE: ❌ Hooks conformance failed
+          SLACK_TITLE: "❌ Hooks conformance failed: ${{ matrix.host }}"
           SLACK_COLOR: failure
           SLACK_MESSAGE_ON_FAILURE: |
-            The scheduled hooks conformance run failed (${{ needs.conformance.result }}).
+            The scheduled hooks conformance run failed on ${{ matrix.host }}.
 
             Baseline mismatches:
-            ${{ needs.conformance.outputs.mismatches }}
+            ${{ steps.results.outputs.mismatches }}
 
-            Full results (json + screenshot) are in the per-host conformance-results artifacts.
+            Full results (json + screenshot) are in the ${{ matrix.host }}-conformance-results artifact.
           MSG_MINIMAL: actions url
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}

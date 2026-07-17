@@ -571,35 +571,8 @@ def close_host_modal(page: Page, selector: str) -> None:
     drive_widget(page, selector, "close-modal")
 
 
-def check_new_tab(context: BrowserContext, main_page: Page) -> bool:
-    """Detect whether openExternal opened the target in a new tab.
-
-    visibilityState is useless here (the automated tab stays "visible" no
-    matter what), so probe for a second page directly: a new tab shows up as
-    an extra entry in context.pages. Read its hostname, close it, and refocus
-    the main page. No second tab -> not verified.
-    """
-    time.sleep(3)  # give the new tab a beat to open
-    if len(context.pages) < 2:
-        return False
-    new_page = context.pages[-1]
-    host = ""
-    try:
-        host = new_page.evaluate("() => location.hostname")
-    except Exception as exc:
-        print(f"[conformance] failed reading new tab host: {exc}", flush=True)
-    print(f"[conformance] second tab host: {host}", flush=True)
-    try:
-        new_page.close()
-    except Exception as exc:
-        print(f"[conformance] closing new tab failed: {exc}", flush=True)
-    main_page.bring_to_front()
-    return "skybridge" in host
-
-
 def answer_confirm(
     page: Page,
-    context: BrowserContext,
     selector: str,
     host: HostConfig,
     hook: str,
@@ -608,9 +581,8 @@ def answer_confirm(
 ) -> None:
     """Answer the app's Yes/No confirmation by verifying the effect from outside.
 
-    Effects the browser cannot observe (e.g. a file landing on disk, or an
-    external tab that a cloud browser never surfaces) are skipped rather than
-    guessed, so the report stays honest.
+    Effects the browser cannot observe (e.g. a file landing on disk) are
+    skipped rather than guessed, so the report stays honest.
     """
     if hook in unverifiable:
         print(f"[conformance] '{hook}' is not observable in this mode, skipping", flush=True)
@@ -618,8 +590,10 @@ def answer_confirm(
         return
     hook_lc = hook.lower()
     if hook in verified_effects:
-        # A host-native permission dialog already settled this (Claude's
-        # Open link / Download / in-widget modal), recorded right after Run.
+        # A host-native permission dialog already settled this after Run: the
+        # "Open link" / "Download" dialog both hosts pop, or Claude's in-widget
+        # modal. openExternal lives here now (both hosts pop the link dialog),
+        # so there's no new-tab guessing to do.
         verified = verified_effects[hook]
     elif "requestmodal" in hook_lc:
         # On Apps SDK (ChatGPT) the modal is a no-op: the host mounts a modal
@@ -630,8 +604,6 @@ def answer_confirm(
         # (Claude's real in-widget modal is handled above via verified_effects.)
         verified = False
         dismiss_host_overlay(page)
-    elif "openexternal" in hook_lc:
-        verified = check_new_tab(context, page)
     elif "sendfollowupmessage" in hook_lc:
         verified = host.check_follow_up(page)
     else:
@@ -673,7 +645,7 @@ def finalize_close(page: Page, selector: str, rows: list[ResultRow]) -> list[Res
 
 
 def drive_stepper(
-    page: Page, context: BrowserContext, host: HostConfig, unverifiable: frozenset[str]
+    page: Page, host: HostConfig, unverifiable: frozenset[str]
 ) -> tuple[list[ResultRow], bytes | None]:
     host.hide_sidebar(page)
     host.dismiss_modal(page)
@@ -727,7 +699,7 @@ def drive_stepper(
 
         if state.confirm_question:
             answer_confirm(
-                page, context, selector, host, state.current_hook or "", verified_effects, unverifiable
+                page, selector, host, state.current_hook or "", verified_effects, unverifiable
             )
             continue
 
@@ -775,7 +747,6 @@ def drive_stepper(
 def run_conformance(
     host: HostConfig,
     page: Page,
-    context: BrowserContext,
     app_name: str,
     unverifiable: frozenset[str],
 ) -> dict[str, Any]:
@@ -797,7 +768,7 @@ def run_conformance(
                 time.sleep(12)  # let the app's automatic tests record
                 # Early capture, replaced by the pre-close one when the run gets there.
                 screenshot_bytes = take_screenshot(page, host.widget_iframe_selector) or screenshot_bytes
-                rows, final_screenshot = drive_stepper(page, context, host, unverifiable)
+                rows, final_screenshot = drive_stepper(page, host, unverifiable)
                 screenshot_bytes = final_screenshot or screenshot_bytes
             except (TimeoutError, StallError) as exc:
                 print(f"[conformance] attempt {attempt + 1} aborted: {exc}", flush=True)
@@ -1024,7 +995,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         with browser_cm as context:
             page = context.pages[0] if context.pages else context.new_page()
-            result = run_conformance(host, page, context, args.app_name, unverifiable)
+            result = run_conformance(host, page, args.app_name, unverifiable)
             rows = result["rows"]
             counts = result["counts"]
             screenshot_bytes = result["screenshot_bytes"]
