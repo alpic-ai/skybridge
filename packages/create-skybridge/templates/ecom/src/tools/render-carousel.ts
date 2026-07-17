@@ -55,7 +55,7 @@ type Variant = Meta & {
 
 // A product: one carousel card backed by one or more variants and the axes they
 // vary on (none for a single-variant product).
-type Product = {
+export type Product = {
   id: string; // stable product key
   options: Option[]; // the axes the variants vary on
   // Only the variants that actually exist. A missing combination (e.g. no
@@ -63,10 +63,10 @@ type Product = {
   // contingent variations are expressed. Derive the selectable values for an axis
   // by filtering this list on the choices already made.
   variants: Variant[];
-  // What the carousel card shows for the whole product. Optional: when omitted, the
-  // first variant is used. Set it to showcase a specific variant or give the product
-  // its own title/price, e.g. a "from" price spanning the variants.
-  card?: Meta;
+  // The product's carousel card. Surfaced both in the carousel (the view
+  // renders it) and to the model (structuredContent is projected from it).
+  // How you build it depends on your mapping strategy: see getProducts.
+  card: Meta;
 };
 
 // ---------------------------------------------------------------------------
@@ -122,7 +122,7 @@ async function getProducts(_ids: string[]): Promise<Product[]> {
   // `Product`s (rename `_ids` -> `ids` once you use it).
   //
   // First decide your mapping strategy — it depends on your catalog:
-  //   - no variants (simple products): one `Product`, a single variant, options: []
+  //   - no variants (simple products): one `Product`, a single variant, card = that variant, options: [],
   //   - grouped: one `Product` per product; `card` = union of its variants, one picture per requested variant
   //   - one card per requested variant: `card` = that variant
   // Either way, set `variants` to ALL variants the source returns for the product;
@@ -133,10 +133,10 @@ async function getProducts(_ids: string[]): Promise<Product[]> {
 }
 
 // ---------------------------------------------------------------------------
-// Mapping — trim products to the model-facing grounding (outputSchema). The full
-// data stays in `_meta` for the view. The card, else the first variant,
-// represents the product; options collapse to label + value labels.
-// @todo: choose what the model sees per product. Grounding only — no
+// Mapping: trim each product's `card` and `options` into the model-facing
+// grounding (outputSchema), dropping presentational fields (media, url). The
+// full data stays in `_meta` for the view.
+// @todo: choose what the model sees per product. Grounding only: no
 // presentational data (media, styling); that rides in `_meta` for the view.
 // ---------------------------------------------------------------------------
 
@@ -144,15 +144,7 @@ function toStructuredContent(products: Product[]): RenderOutput {
   const groundingProducts: RenderOutput["products"] = [];
 
   for (const product of products) {
-    const rep = product.card ?? product.variants[0];
-
-    let outOfStock = true;
-    for (const variant of product.variants) {
-      if (!variant.outOfStock) {
-        outOfStock = false;
-        break;
-      }
-    }
+    const { card } = product;
 
     const options: { label: string; values: string[] }[] = [];
     for (const option of product.options) {
@@ -165,12 +157,12 @@ function toStructuredContent(products: Product[]): RenderOutput {
 
     groundingProducts.push({
       id: product.id,
-      title: rep.title,
-      description: rep.description,
-      price: rep.price,
-      outOfStock,
+      title: card.title,
+      description: card.description,
+      price: card.price,
+      outOfStock: card.outOfStock ?? false,
       options,
-      attributes: rep.attributes,
+      attributes: card.attributes,
     });
   }
 
@@ -221,6 +213,7 @@ Use only the data returned for each product. Never invent attributes, materials,
   },
 
   inputSchema,
+  outputSchema,
 };
 
 export async function renderCarouselHandler({ ids }: RenderInput) {
