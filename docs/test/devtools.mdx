@@ -48,6 +48,77 @@ Select a tool in the sidebar and DevTools gives you the full exchange:
 - **View preview**: the rendered [View](/build/view), with live controls to switch [display mode](/api-reference/use-display-mode#displaymode), theme, locale, and device type; the preview updates immediately.
 - **Call logs**: every runtime API call the view makes (`setViewState`, `callTool`, `requestDisplayMode`) with its arguments and responses.
 
+## Drive DevTools from a Coding Agent
+
+DevTools exposes its actions as [WebMCP](https://github.com/webmachinelearning/webmcp) tools, so a coding agent that drives your browser runs them directly. The agent connects through [chrome-devtools-mcp](https://github.com/ChromeDevTools/chrome-devtools-mcp), an MCP server that discovers and calls a page's WebMCP tools. On the DevTools page it can:
+
+- **Run any registered tool** and render its view in the preview.
+- **Read the rendered view** by screenshotting the preview, then drive it as a real page.
+- **Switch the preview controls**: display mode, theme, locale, and device.
+
+### Set It Up
+
+<Steps>
+  <Step title="Add chrome-devtools-mcp to your agent">
+    Register the MCP server with the WebMCP flag, forwarding the browser feature flag to the Chrome it launches.
+
+    <Tabs>
+      <Tab title="Claude Code">
+        ```bash
+        claude mcp add chrome-devtools --scope user -- \
+          npx chrome-devtools-mcp@latest \
+          --categoryExperimentalWebmcp=true \
+          --chrome-arg=--enable-features=WebMCP,DevToolsWebMCPSupport
+        ```
+      </Tab>
+      <Tab title="Codex">
+        ```bash
+        codex mcp add chrome-devtools -- \
+          npx chrome-devtools-mcp@latest \
+          --categoryExperimentalWebmcp=true \
+          --chrome-arg=--enable-features=WebMCP,DevToolsWebMCPSupport
+        ```
+      </Tab>
+      <Tab title="Cursor">
+        [![Add to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=chrome-devtools&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsImNocm9tZS1kZXZ0b29scy1tY3BAbGF0ZXN0IiwiLS1jYXRlZ29yeUV4cGVyaW1lbnRhbFdlYm1jcD10cnVlIiwiLS1jaHJvbWUtYXJnPS0tZW5hYmxlLWZlYXR1cmVzPVdlYk1DUCxEZXZUb29sc1dlYk1DUFN1cHBvcnQiXX0=)
+      </Tab>
+      <Tab title="Others">
+        See the [client configuration guide](https://github.com/ChromeDevTools/chrome-devtools-mcp#mcp-client-configuration), or add this to your MCP config:
+
+        ```json mcp.json
+        {
+          "mcpServers": {
+            "chrome-devtools": {
+              "command": "npx",
+              "args": [
+                "-y",
+                "chrome-devtools-mcp@latest",
+                "--categoryExperimentalWebmcp=true",
+                "--chrome-arg=--enable-features=WebMCP,DevToolsWebMCPSupport"
+              ]
+            }
+          }
+        }
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+  <Step title="Start DevTools">
+    Run `npm run dev` and open the DevTools URL printed in the terminal.
+  </Step>
+  <Step title="Prompt your agent">
+    <Prompt description="`Open my app in DevTools, run a tool, and check the view renders`" actions={["copy", "cursor"]}>
+    Open the app in DevTools with chrome-devtools-mcp, list its WebMCP tools, call one with sample input, and screenshot the preview to check the view renders.
+    </Prompt>
+  </Step>
+</Steps>
+
+Your agent now closes its own loop: it edits a view, runs the tool, reads the rendered result, and fixes what is wrong.
+
+<Info>
+    WebMCP is experimental and supported Chrome version 149 or newer.
+</Info>
+
 ## Authenticated Servers
 
 When your server [requires OAuth](/build/auth), DevTools registers itself through Dynamic Client Registration on first connect and walks the full PKCE flow as a public client. A server that needs a pre-registered client or a different grant type won't connect from DevTools.
