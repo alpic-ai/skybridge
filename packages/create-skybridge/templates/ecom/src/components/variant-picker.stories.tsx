@@ -5,7 +5,11 @@ import { VariantPicker } from "./variant-picker";
 
 // A sparse catalog: {black,40}, {black,42}, {white,40} exist — but not
 // {white,42}. Picking "White" therefore disables "42".
-function variant(id: string, color: string, size: string): Product["variants"][number] {
+function variant(
+  id: string,
+  color: string,
+  size: string,
+): Product["variants"][number] {
   return {
     id,
     selection: { color, size },

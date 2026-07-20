@@ -57,6 +57,14 @@ export function ImageGallery({ media, alt }: { media: string[]; alt: string }) {
     }
   }
 
+  // The gallery stays mounted across a variant switch, so reset to the first
+  // image when the media set changes; otherwise a stale index can point past a
+  // shorter set (bad progress width, wrong nav state).
+  useEffect(() => {
+    setIndex(0);
+    trackRef.current?.scrollTo({ left: 0 });
+  }, [media]);
+
   // Rail only: cap the rail to the main image's height so it scrolls instead of
   // stretching the layout. A vertical scroll container needs a definite height;
   // the square image provides it, measured here.

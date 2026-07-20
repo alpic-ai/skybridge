@@ -72,7 +72,10 @@ export const specRow = style({
 });
 
 export const specName = style({ color: colors.content.subtle });
-export const specValue = style({ color: colors.content.intense, textAlign: "right" });
+export const specValue = style({
+  color: colors.content.intense,
+  textAlign: "right",
+});
 
 // Primary CTA. @todo: tune to your brand; add a secondary action beside it
 // (ask-the-assistant, contact) as a per-catalog extension.

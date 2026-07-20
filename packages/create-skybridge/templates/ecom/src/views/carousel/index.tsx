@@ -178,6 +178,10 @@ function Carousel() {
     selectedId != null
       ? products.find((product) => product.id === selectedId)
       : undefined;
+  // The detail actually renders only when we have a product to show. Everything
+  // that hides the carousel keys off this, so a stale id shows the carousel, not
+  // a blank page.
+  const detailProduct = showDetail ? selectedProduct : undefined;
 
   const cards: ReactNode[] = [];
   for (const [index, product] of products.entries()) {
@@ -187,7 +191,7 @@ function Carousel() {
         <ProductCard
           // Drop per-card grounding while the detail owns the screen.
           data-llm={
-            !showDetail && visibleIndices.includes(index)
+            !detailProduct && visibleIndices.includes(index)
               ? narrate(product, index)
               : ""
           }
@@ -212,19 +216,17 @@ function Carousel() {
     <ViewFrame>
       <div
         className={sprinkles({ p: "3xs" })}
-        style={{ display: showDetail ? "none" : undefined }}
+        style={{ display: detailProduct ? "none" : undefined }}
       >
         <ProductCarousel
           trackRef={trackRef}
           onVisibleChange={setVisibleIndices}
-          data-llm={showDetail ? "" : narration}
+          data-llm={detailProduct ? "" : narration}
         >
           {cards}
         </ProductCarousel>
       </div>
-      {showDetail && selectedProduct ? (
-        <DetailView product={selectedProduct} />
-      ) : null}
+      {detailProduct ? <DetailView product={detailProduct} /> : null}
     </ViewFrame>
   );
 }

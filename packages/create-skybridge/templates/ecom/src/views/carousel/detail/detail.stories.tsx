@@ -10,7 +10,12 @@ const DESCRIPTION =
 
 // Two axes with a sparse variant set: {black,M}, {black,L}, {sand,M} exist —
 // so choosing "Sand" disables "L".
-function jacket(id: string, color: string, colorLabel: string, size: string): Product["variants"][number] {
+function jacket(
+  id: string,
+  color: string,
+  colorLabel: string,
+  size: string,
+): Product["variants"][number] {
   return {
     id,
     selection: { color, size },
@@ -59,9 +64,7 @@ const PRODUCT: Product = {
   },
 };
 
-export const Default = () => (
-  <DetailView product={PRODUCT} />
-);
+export const Default = () => <DetailView product={PRODUCT} />;
 
 // Single-variant product: no picker, buyable immediately.
 const SIMPLE: Product = {
@@ -87,6 +90,4 @@ const SIMPLE: Product = {
   },
 };
 
-export const SingleVariant = () => (
-  <DetailView product={SIMPLE} />
-);
+export const SingleVariant = () => <DetailView product={SIMPLE} />;

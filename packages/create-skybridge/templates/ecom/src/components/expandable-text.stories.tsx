@@ -13,6 +13,8 @@ export const Long = () => (
 
 export const Short = () => (
   <div style={frame}>
-    <ExpandableText>A short description that never needs a toggle.</ExpandableText>
+    <ExpandableText>
+      A short description that never needs a toggle.
+    </ExpandableText>
   </div>
 );

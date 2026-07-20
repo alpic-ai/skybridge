@@ -14,7 +14,13 @@ type ChipProps = {
  * variant picker's `radiogroup`; the picker owns selection state and passes
  * `selected`/`disabled` computed from the sparse variant list.
  */
-export function Chip({ label, selected, disabled, onSelect, media }: ChipProps) {
+export function Chip({
+  label,
+  selected,
+  disabled,
+  onSelect,
+  media,
+}: ChipProps) {
   return (
     <button
       type="button"

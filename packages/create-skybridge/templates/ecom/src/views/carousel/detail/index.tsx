@@ -108,8 +108,9 @@ export function DetailView({ product }: { product: Product }) {
   const url = variant?.url ?? product.card.url;
 
   const price = priceText(product, variant?.price, locale, labels);
-  // Buy CTA is enabled only once a real, linkable variant is resolved.
-  const canBuy = variant != null && url != null;
+  // Buy CTA is enabled only once a variant resolves and carries a real link
+  // (an empty url would leave the button enabled but dead).
+  const canBuy = variant != null && Boolean(url);
 
   // Point the host's fullscreen "Open in app" affordance at the selected
   // variant's page. Apps-SDK only; MCP Apps hosts reject, so ignore that.
@@ -122,7 +123,14 @@ export function DetailView({ product }: { product: Product }) {
   return (
     <div
       className={styles.detail}
-      data-llm={grounding(product, displayTitle, price, selection, outOfStock, labels)}
+      data-llm={grounding(
+        product,
+        displayTitle,
+        price,
+        selection,
+        outOfStock,
+        labels,
+      )}
     >
       <div className={styles.grid}>
         <div className={styles.galleryCell}>
@@ -132,11 +140,18 @@ export function DetailView({ product }: { product: Product }) {
         </div>
 
         <div className={styles.info}>
-          <h1 className={cx(text({ style: "headingS", weight: "medium" }), styles.title)}>
+          <h1
+            className={cx(
+              text({ style: "headingS", weight: "medium" }),
+              styles.title,
+            )}
+          >
             {displayTitle}
           </h1>
 
-          <p className={cx(text({ style: "headingS" }), styles.price)}>{price}</p>
+          <p className={cx(text({ style: "headingS" }), styles.price)}>
+            {price}
+          </p>
 
           {outOfStock ? (
             <p className={cx(text({ style: "bodyS" }), styles.oos)}>
@@ -173,10 +188,14 @@ export function DetailView({ product }: { product: Product }) {
               </h2>
               {attributes.map((attribute) => (
                 <div key={attribute.name} className={styles.specRow}>
-                  <span className={cx(text({ style: "bodyS" }), styles.specName)}>
+                  <span
+                    className={cx(text({ style: "bodyS" }), styles.specName)}
+                  >
                     {attribute.name}
                   </span>
-                  <span className={cx(text({ style: "bodyS" }), styles.specValue)}>
+                  <span
+                    className={cx(text({ style: "bodyS" }), styles.specValue)}
+                  >
                     {attribute.value}
                   </span>
                 </div>

@@ -1,10 +1,7 @@
 import { text } from "../design/tokens";
 import { cx } from "../lib/cx";
 import type { Product } from "../tools/render-carousel.js";
-import {
-  type Selection,
-  selectableValues,
-} from "../lib/variants.js";
+import { type Selection, selectableValues } from "../lib/variants.js";
 import { Chip } from "./chip";
 import * as styles from "./variant-picker.css";
 
@@ -37,7 +34,10 @@ export function VariantPicker({
         continue;
       }
       const chosen = next[option.id];
-      if (chosen != null && !selectableValues(product, option.id, next).has(chosen)) {
+      if (
+        chosen != null &&
+        !selectableValues(product, option.id, next).has(chosen)
+      ) {
         delete next[option.id];
       }
     }
