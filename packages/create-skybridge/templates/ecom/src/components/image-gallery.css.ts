@@ -14,7 +14,9 @@ export const galleryRail = style({
       display: "flex",
       flexDirection: "row",
       gap: primitives.space["2xs"],
-      alignItems: "stretch",
+      // Top-align so the rail sits beside the image; the rail's own max-height
+      // (set from the measured image height) caps it and scrolls the excess.
+      alignItems: "flex-start",
     },
   },
 });
@@ -116,7 +118,8 @@ export const progressMobileOnly = style({
 });
 
 // Desktop thumbnail rail (THUMBNAIL_RAIL). Hidden on mobile, where the swipe
-// track + progress bar own navigation. @todo: tune the rail width / thumb size.
+// track + progress bar own navigation. Capped to the image height via an inline
+// max-height and scrolls the excess. @todo: tune the rail width / thumb size.
 export const rail = style({
   display: "none",
   "@container": {

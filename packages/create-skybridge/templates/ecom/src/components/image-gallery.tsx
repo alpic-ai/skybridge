@@ -5,9 +5,9 @@ import * as styles from "./image-gallery.css";
 
 // @todo: show a thumbnail rail beside the image on desktop (at the two-column
 // breakpoint); swipe-only when false. Off by default. When true, tune the rail
-// width / thumb size in image-gallery.css.ts. Deferred polish (add if the rail
-// earns it): an edge-fade mask and auto-centering the active thumb, both of
-// which need a vertical scroll-edges hook.
+// width / thumb size in image-gallery.css.ts. The rail is capped to the image
+// height and scrolls its excess; deferred polish (add if it earns it): an
+// edge-fade mask and auto-centering the active thumb.
 const THUMBNAIL_RAIL: boolean = false;
 
 function Chevron({ direction }: { direction: "left" | "right" }) {
@@ -56,9 +56,9 @@ export function ImageGallery({ media, alt }: { media: string[]; alt: string }) {
     }
   }
 
-  // Rail only: cap the rail to the main image's height so it scrolls instead of
-  // stretching the layout. A vertical scroll container needs a definite height;
-  // the square image provides it, measured here.
+  // Rail only: cap the rail to the main image's height so its extra thumbnails
+  // scroll instead of dangling past the image. A vertical scroll container needs
+  // a definite height; the square image provides it, measured here.
   useEffect(() => {
     if (!THUMBNAIL_RAIL) {
       return;

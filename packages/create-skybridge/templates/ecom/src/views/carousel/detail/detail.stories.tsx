@@ -5,6 +5,27 @@ function shot(fill: string) {
   return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='400' height='400' fill='%23${fill}'/%3E%3Ccircle cx='200' cy='200' r='110' fill='%23ffffff' fill-opacity='0.5'/%3E%3C/svg%3E`;
 }
 
+// A long media set (primary shot + several accents) so the desktop thumbnail
+// rail is taller than the image and overflows past its bottom.
+const ACCENT_FILLS = [
+  "c9d4f5",
+  "f5d4c9",
+  "d4f5c9",
+  "f5f0c9",
+  "e0c9f5",
+  "c9f5f0",
+  "f5c9e0",
+  "d9d9d9",
+];
+
+function galleryMedia(primaryFill: string): string[] {
+  const media = [shot(primaryFill)];
+  for (const fill of ACCENT_FILLS) {
+    media.push(shot(fill));
+  }
+  return media;
+}
+
 const DESCRIPTION =
   "A relaxed-fit jacket in water-repellent cotton.\n\nDropped shoulders, a two-way zip, and ribbed cuffs. Fully lined, with two zip pockets at the front and one inside.";
 
@@ -22,7 +43,7 @@ function jacket(
     title: `Field jacket — ${colorLabel}`,
     description: DESCRIPTION,
     price: { amount: color === "sand" ? 249 : 229, currency: "EUR" },
-    media: [shot(color === "sand" ? "d8c7a8" : "2b2b2b"), shot("c9d4f5")],
+    media: galleryMedia(color === "sand" ? "d8c7a8" : "2b2b2b"),
     url: "https://example.com/jacket",
     attributes: [
       { name: "Material", value: "Water-repellent cotton" },
