@@ -1,6 +1,7 @@
 import {
   Children,
   type ReactNode,
+  type RefObject,
   useCallback,
   useEffect,
   useRef,
@@ -44,6 +45,10 @@ type ProductCarouselProps = {
   onVisibleChange?: (indices: number[]) => void;
   // Skeleton state: locks the scroll and hides the nav buttons.
   loading?: boolean;
+  // Optional external ref to the scroll track. The orchestrator uses it to save
+  // and restore scroll position across the carousel ⇄ detail transition (the
+  // carousel is hidden, not unmounted, but display:none resets scrollLeft).
+  trackRef?: RefObject<HTMLElement | null>;
 };
 
 /**
@@ -55,9 +60,11 @@ export function ProductCarousel({
   children,
   onVisibleChange,
   loading = false,
+  trackRef: externalTrackRef,
 }: ProductCarouselProps) {
   const labels = useLabels();
-  const trackRef = useRef<HTMLElement>(null);
+  const internalTrackRef = useRef<HTMLElement>(null);
+  const trackRef = externalTrackRef ?? internalTrackRef;
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
