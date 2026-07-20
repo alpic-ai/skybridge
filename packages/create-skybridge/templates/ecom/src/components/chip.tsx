@@ -22,6 +22,7 @@ export function Chip({
   media,
 }: ChipProps) {
   return (
+    // biome-ignore lint/a11y/useSemanticElements: custom radio; a styled button carries the swatch and disabled state a native radio cannot, inside the picker radiogroup.
     <button
       type="button"
       role="radio"

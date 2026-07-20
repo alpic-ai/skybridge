@@ -9,11 +9,11 @@ import {
 } from "react";
 import { useDisplayMode, useViewState } from "skybridge/web";
 import { EmptyState } from "../../components/empty-state";
-import * as cardStyles from "../../components/product-card.css";
 import {
   ProductCard,
   ProductCardSkeleton,
 } from "../../components/product-card";
+import * as cardStyles from "../../components/product-card.css";
 import { ProductCarousel } from "../../components/product-carousel";
 import { ViewFrame } from "../../components/view-frame";
 import { sprinkles } from "../../design/tokens";

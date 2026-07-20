@@ -1,7 +1,7 @@
 import { text } from "../design/tokens";
 import { cx } from "../lib/cx";
-import type { Product } from "../tools/render-carousel.js";
 import { type Selection, selectableValues } from "../lib/variants.js";
+import type { Product } from "../tools/render-carousel.js";
 import { Chip } from "./chip";
 import * as styles from "./variant-picker.css";
 

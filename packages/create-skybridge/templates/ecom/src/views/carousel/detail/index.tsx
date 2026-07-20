@@ -135,7 +135,13 @@ export function DetailView({ product }: { product: Product }) {
       <div className={styles.grid}>
         <div className={styles.galleryCell}>
           {media.length > 0 ? (
-            <ImageGallery media={media} alt={displayTitle} />
+            // Key on the media set so switching to a variant with different
+            // images remounts the gallery fresh (index reset to the first image).
+            <ImageGallery
+              key={media.join("|")}
+              media={media}
+              alt={displayTitle}
+            />
           ) : null}
         </div>
 

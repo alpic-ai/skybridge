@@ -20,6 +20,7 @@ export function ExpandableText({ children }: { children: string }) {
   // Measure against the collapsed height (the clamp is applied whenever
   // collapsed, so scrollHeight vs clientHeight is meaningful). Re-run when the
   // text changes (e.g. the client switches variant) so the toggle tracks it.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: children re-triggers the measure, it is not read in the body.
   useLayoutEffect(() => {
     const el = bodyRef.current;
     if (el && collapsed) {

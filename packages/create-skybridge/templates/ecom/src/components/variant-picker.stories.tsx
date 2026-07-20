@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { Product } from "../tools/render-carousel.js";
 import { initialSelection, type Selection } from "../lib/variants.js";
+import type { Product } from "../tools/render-carousel.js";
 import { VariantPicker } from "./variant-picker";
 
 // A sparse catalog: {black,40}, {black,42}, {white,40} exist — but not

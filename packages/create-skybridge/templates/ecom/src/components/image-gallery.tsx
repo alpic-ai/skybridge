@@ -39,7 +39,6 @@ function Chevron({ direction }: { direction: "left" | "right" }) {
 export function ImageGallery({ media, alt }: { media: string[]; alt: string }) {
   const labels = useLabels();
   const trackRef = useRef<HTMLDivElement>(null);
-  const railRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const [imageHeight, setImageHeight] = useState<number>();
 
@@ -56,14 +55,6 @@ export function ImageGallery({ media, alt }: { media: string[]; alt: string }) {
       el.scrollTo({ left: i * el.clientWidth });
     }
   }
-
-  // The gallery stays mounted across a variant switch, so reset to the first
-  // image when the media set changes; otherwise a stale index can point past a
-  // shorter set (bad progress width, wrong nav state).
-  useEffect(() => {
-    setIndex(0);
-    trackRef.current?.scrollTo({ left: 0 });
-  }, [media]);
 
   // Rail only: cap the rail to the main image's height so it scrolls instead of
   // stretching the layout. A vertical scroll container needs a definite height;
@@ -86,14 +77,13 @@ export function ImageGallery({ media, alt }: { media: string[]; alt: string }) {
   const multiple = media.length > 1;
 
   return (
-    <div
+    <section
       className={cx(styles.gallery, THUMBNAIL_RAIL && styles.galleryRail)}
       aria-roledescription={labels.carousel}
       aria-label={alt}
     >
       {THUMBNAIL_RAIL && multiple ? (
         <div
-          ref={railRef}
           className={styles.rail}
           style={{ maxHeight: imageHeight ? `${imageHeight}px` : undefined }}
         >
@@ -167,6 +157,6 @@ export function ImageGallery({ media, alt }: { media: string[]; alt: string }) {
           </>
         ) : null}
       </div>
-    </div>
+    </section>
   );
 }
