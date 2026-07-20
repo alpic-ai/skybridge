@@ -1,17 +1,17 @@
 ---
 title: "Serve Skills over MCP"
 description: "Ship Agent Skills alongside your server"
-sidebarTitle: "Skills"
-icon: "book-sparkles"
+sidebarTitle: "Skills Over MCP"
+icon: "book-open-text"
 ---
 
 <Info>
-Skills over MCP tracks [SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640), which is still under review. This feature is **experimental** and may change with the spec. Most hosts do not yet support it, so skills you serve today may go unused until they adopt the standard.
+Skills over MCP tracks [SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640), still under review. The feature is **experimental** and may change with the spec. Few hosts support it yet, so skills you serve today may go unused until they adopt the standard.
 </Info>
 
-A [tool](/build/tools) description tells an agent *what* a tool does. A **skill** tells it *how* to orchestrate a workflow — a directory of instructions (`SKILL.md` plus supporting files) that the host loads into context on demand. Skybridge serves skills as MCP resources under the `skill://` scheme, following the [Agent Skills](https://agentskills.io/) format, so any host that adopts the standard can discover and read them.
+A [tool](/build/tools) description tells the model *what* a tool does. A **skill** tells it *how* to run a workflow: a directory of instructions (`SKILL.md` plus supporting files) the host loads into context on demand.
 
-## Enable skills
+## Enable Skills
 
 Drop your skills under `src/skills/`, one directory per skill, and turn the option on:
 
@@ -26,12 +26,12 @@ const server = new McpServer(
 ```
 src/skills/
   refunds/
-    SKILL.md            # required — frontmatter + instructions
+    SKILL.md            # required: frontmatter + instructions
     templates/
       email.md          # supporting files, read on demand
 ```
 
-Each `SKILL.md` begins with YAML frontmatter whose `name` matches its directory:
+Each `SKILL.md` opens with YAML frontmatter whose `name` matches its directory:
 
 ```md src/skills/refunds/SKILL.md
 ---
@@ -43,23 +43,29 @@ description: Process customer refund requests per company policy.
 2. ...
 ```
 
-That is all. Skybridge validates every skill at build and dev startup (a bad `name`, missing `description`, or name/directory mismatch fails loudly), then exposes:
+Skybridge validates every skill at build and dev startup: a bad `name`, a missing `description`, or a name that mismatches its directory fails loudly. Each valid skill is then served at `skill://<name>/SKILL.md`, with its supporting files alongside.
 
-- `skill://refunds/SKILL.md` and each supporting file as MCP resources.
-- `skill://index.json`, the discovery index (each entry carries the skill's `url`, a `sha256` digest, and its frontmatter verbatim).
-- the `io.modelcontextprotocol/skills` capability, so hosts know to look.
+<Info>
+Skills are markdown files only: `SKILL.md` and any supporting `.md` files are served as `text/markdown`, other formats and symlinks are ignored.
+</Info>
 
-Skills are markdown-only for now: `SKILL.md` and any supporting `.md` files are served as `text/markdown`. Files of other formats, and symlinks, are ignored.
+## How Hosts Use Skills
 
-## How hosts use them
+Hosts don't inject skills on their own. To put one in front of the model, reference its URI from a tool description or a tool result, for example *"see `skill://refunds/SKILL.md`"*. The host pulls in the full instructions only when they're relevant.
 
-Skills are **pull-based**: the server never pushes them. A host reads `skill://index.json`, surfaces each skill's `name` and `description`, and lets the model read the full `SKILL.md` only when it's relevant ([progressive disclosure](https://agentskills.io/specification#progressive-disclosure)). To point the model at a skill, reference its URI from a tool description or a tool result, e.g. *"see `skill://refunds/SKILL.md`"*.
+<Info>
+A skill is a set of instructions a model may or may not act on: it does not bypass the model's system directives or guardrails.
+</Info>
 
-<Warning>
-Skill content is untrusted model input, not a trusted instruction. Hosts treat it as a prompt-injection surface and never grant it higher authority or execute code from it.
-</Warning>
-
-## Lifecycle
-
-- **Dev** — editing a skill under `src/skills/` triggers a dev-server restart that re-discovers it.
-- **Build / production** — `skybridge build` snapshots your skills into the bundle. They are served from memory at runtime, never read from disk, so the feature works on every deploy target including filesystem-less ones (Cloudflare Workers) and bundled functions (Vercel).
+## Go Further
+<Columns cols={3}>
+    <Card title="Register Tools" icon="wrench" href="/build/tools">
+        Define what humans and agents can do
+    </Card>
+    <Card title="UX Design" icon="sparkles" href="/guides/ux">
+        Account for what makes an MCP App different
+    </Card>
+    <Card title="Deploy" icon="rocket" href="/ship">
+        Ship your server to any host
+    </Card>
+</Columns>
