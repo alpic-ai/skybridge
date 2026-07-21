@@ -81,14 +81,18 @@ Have it return the findings mapped onto the template's shapes (`productSchema` i
 
 ## Phase 3: decide the UX
 
-Only now, with the confirmed field inventory in `SPEC.md`, settle how the catalog is presented; never decide these ad hoc while coding, and never propose a layout built on a field the data does not carry (no rating row if the API has no ratings, no thumbnail rail if products ship one image). Study the live site from phase 1 for how it lays out its cards and product page, then lock down four decisions; phase 6 applies them:
+Only now, with the confirmed field inventory in `SPEC.md`, settle how the catalog is presented; never decide these ad hoc while coding, and never propose a layout built on a field the data does not carry (no rating row if the API has no ratings, no thumbnail rail if products ship one image). Study the live site from phase 1 for how it lays out its cards and product page, then lock down five decisions; phase 6 applies them:
 
-- **D1, carousel card fields:** which fields beyond image, title, and price to show (rating, discount, badges, tags) and how (for example a tag row).
-- **D2, carousel framing:** plain (default), each card boxed (border + surface), or the whole strip boxed. At most one, never both.
-- **D3, product detail sections:** which sections appear (identity, price, rating, description, specs, delivery) and their order, in particular what sits before or after the CTA (the skeleton puts specs after the "view on site" CTA).
-- **D4, thumbnail rail:** whether the detail gallery shows the desktop thumbnail rail or stays swipe-only.
+**Carousel:**
+- D1, card fields: which fields beyond image, title, and price to show (rating, discount, badges, tags) and how (for example a tag row).
+- D2, framing: plain (default), each card boxed (border + surface), or the whole strip boxed. At most one, never both.
 
-Play the layout back as two ASCII wireframes and get sign-off: the carousel card (every field placed, D1/D2 visible) and the product detail (every section in order, the gallery/rail per D4, the CTA position per D3). Populate them with real values from the phase 2 exploration, not invented ones. Cheap to redraw, expensive to rebuild. For example:
+**Product detail**:
+- D3, sections: which sections appear (identity, price, rating, description, specs, delivery) and their order, in particular what sits before or after the CTA (the skeleton puts specs after the "view on site" CTA).
+- D4, thumbnail rail: whether the detail gallery shows the desktop thumbnail rail or stays swipe-only.
+- D5, specs presentation: how the product facts (`specs`): a simple `label: value` list (default), a two-column table, grouped sections, or inline chips/bullets. Match the shape to the data (a few labeled specs, many grouped specs, or short label-less highlights).
+
+Play the layout back as two ASCII wireframes and get sign-off: the carousel card (every field placed, D1/D2 visible) and the product detail (every section in order, the gallery/rail per D4, the CTA position per D3, the specs in the D5 shape). Populate them with real values from the phase 2 exploration, not invented ones. Cheap to redraw, expensive to rebuild. For example:
 
 ```
 CAROUSEL CARD (one card of the strip, D1 fields placed, D2 = boxed card)
@@ -128,7 +132,7 @@ PRODUCT DETAIL (desktop two-column, D4 = rail on; mobile stacks, swipe gallery)
                            │ SPECS
                            │ Material    recycled wool
                            │ Weight      340 g
-                           │ Made in     Portugal
+                           │ Organic, Made in Portugal
 
 order: identity ► rating ► price ► variants ► description ► CTA ► specs
 gallery sticky on desktop; CTA follows the selected variant's url
@@ -137,7 +141,7 @@ gallery sticky on desktop; CTA follows the selected variant's url
 **Gate 3:**
 
 - [ ] Every field in the wireframes exists in the phase 2 inventory.
-- [ ] D1-D4 decided; wireframes signed off by the user.
+- [ ] D1-D5 decided; wireframes signed off by the user.
 - [ ] `SPEC.md` records the decisions and the agreed wireframes.
 
 ## Phase 4: server
@@ -165,7 +169,7 @@ Keyword/filter search returning model-facing grounding. No view, so keep the out
 - [ ] `inputSchema.keyword`: rewrite the description for the catalog's vocabulary.
 - [ ] `inputSchema.sort`: set the real sort options, or remove.
 - [ ] `inputSchema` filters: replace `priceRange` with one optional param per real facet.
-- [ ] `productSchema` / `outputSchema`: adjust the model-facing fields (`id`, `title`, `description`, `price`, `outOfStock`, `attributes`).
+- [ ] `productSchema` / `outputSchema`: adjust the model-facing fields (`id`, `title`, `description`, `price`, `outOfStock`, `specs`).
 - [ ] `search()`: query the data source with the input params and map each hit into `productSchema`; set `pages` and `totalHits`.
 - [ ] `narrate()` NEXT STEPS: adapt the post-search guidance to your flow (framing only; it carries no result data).
 
@@ -253,7 +257,7 @@ All user-facing text is centralized in `src/i18n.ts`, shared across every compon
 `render-carousel`'s inline view (`src/views/carousel/`), plus `ProductCard` (presentational), `ProductCarousel` (scroll-snap track, desktop nav buttons; reports on-screen cards), and `EmptyState`. The view reads `responseMetadata.products` (the tool's `_meta`), renders one card per product, and narrates the on-screen ones via `data-llm`.
 
 - [ ] `product-card.css.ts`: image aspect ratio, `object-fit`, and the surface behind the image, decided by looking at the phase 2 image sample: square vs portrait/landscape; `contain` for cutouts/mixed ratios vs `cover` for consistent photos; neutral grey behind transparent cutouts vs white for full-bleed photos. Use the same choice in the gallery. Also `TITLE_LINES` (title clamp).
-- [ ] `product-card.tsx` (D1): extra images from `media` (e.g. hover cross-fade to `media[1]`); extra fields from `attributes` (ratings, tags, badges).
+- [ ] `product-card.tsx` (D1): extra images from `media` (e.g. hover cross-fade to `media[1]`);
 - [ ] `product-carousel.css.ts`: tuning knobs (`gap`, `CARDS_VISIBLE`, `CARDS_VISIBLE_COMPACT`, `COMPACT_MAX_WIDTH`).
 - [ ] Framing (D2): the `FRAMED` flag boxes each card (`product-card.tsx`, includes its skeleton) or the whole strip (`product-carousel.tsx`). Both `false` for plain (default); set at most one to `true`. If you enable one, tune the frame (padding, border, radius, shadow) in the matching `.css.ts`.
 
@@ -273,7 +277,7 @@ Two facts to preserve when customizing:
 - [ ] `image-gallery` (D4): `THUMBNAIL_RAIL` adds a desktop thumbnail rail (off = swipe only); style the progress bar and, if enabled, the rail.
 - [ ] `detail.css.ts`: the two-column breakpoint, and whether the gallery is sticky on desktop.
 - [ ] CTA: `viewOnSite` deep-links to `variant.url ?? card.url` (`useOpenExternal`), and `setOpenInAppUrl` points the host "open in app" at the same URL. Needs the product site in the view CSP (phase 4).
-- [ ] Specs: a table after the CTA. Group, restyle, or drop it (the full spec is already in view state for the model).
+- [ ] Specs (D5): implement the agreed presentation.
 
 ## Final gate
 

@@ -4,7 +4,7 @@ import {
   CAROUSEL_RANGE,
   MIN_SEARCH_ITERATIONS,
 } from "../config.js";
-import { AttributeSchema, PriceSchema } from "../types.js";
+import { PriceSchema, SpecSchema } from "../types.js";
 
 // The `search-products` tool: keyword + filters in, matching products out as
 // structured output for the model. It has NO view — include only what the model
@@ -56,9 +56,9 @@ const productSchema = z.object({
     .boolean()
     .optional()
     .describe("True when the product is not purchasable."),
-  attributes: z
-    .array(AttributeSchema)
-    .describe("Facts to curate on (specs, materials, promo labels…)."),
+  specs: z
+    .array(SpecSchema)
+    .describe("Product-specific facts to curate on (material, dimensions…)."),
 });
 
 const outputSchema = {
@@ -97,7 +97,7 @@ function search(_input: SearchInput): SearchOutput {
 // themselves ride in structuredContent; this text carries NO result data.
 // @todo: customize the NEXT STEPS guidance below for your flow (keep searching
 // vs. curate and render). Remind the model to ground claims in the structured
-// results and never invent attributes.
+// results and never invent facts.
 // ---------------------------------------------------------------------------
 
 function narrate({ products }: SearchOutput): string {
@@ -142,7 +142,7 @@ export const searchProductsDefinition = {
 Search the product catalog. Handles any query: specific products, broad categories, gifts, occasions, or open discovery.
 Never assume a category is unavailable: always search before responding.
 
-The response is data only: a list of matching products (name, ID, price, description, and any product-specific attributes) plus pagination and the available filters. The raw results are for your eyes only: the client never sees them.
+The response is data only: a list of matching products (name, ID, price, description, and any product-specific facts) plus pagination and the available filters. The raw results are for your eyes only: the client never sees them.
 
 NEVER describe or characterize the raw results to the client: do not mention how many there are, what categories they fall into, or that they look off-topic. While searching, stay silent: do not narrate what you are doing, announce searches, or report progress between tool calls. Speak only once the carousel is rendered.
 

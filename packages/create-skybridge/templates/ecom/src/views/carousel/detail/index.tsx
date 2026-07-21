@@ -103,7 +103,7 @@ export function DetailView({ product }: { product: Product }) {
   const displayTitle = variant?.title ?? product.card.title;
   const description = variant?.description ?? product.card.description;
   const media = variant?.media.length ? variant.media : product.card.media;
-  const attributes = variant?.attributes ?? product.card.attributes;
+  const specs = variant?.specs ?? product.card.specs;
   const outOfStock = variant?.outOfStock ?? product.card.outOfStock ?? false;
   const url = variant?.url ?? product.card.url;
   // The shown item's id: the resolved variant's SKU, else the product id.
@@ -191,30 +191,42 @@ export function DetailView({ product }: { product: Product }) {
             {variant ? labels.viewOnSite : labels.selectOptions}
           </button>
 
-          {/* Specs rendered as a simple table, after the CTA. This is the visual
-              treatment only — the full spec is already in view state for the
-              model (see the carousel orchestrator), so hiding the table never
-              hides specs from the assistant. @todo: group/collapse, restyle, or
-              drop the table entirely. */}
-          {attributes.length > 0 ? (
-            <section className={styles.specs}>
+          {/* Product facts as a simple list, after the CTA: one "label: value"
+              line per fact (label-less facts show the value alone). This is the
+              visual treatment only; the full spec is already in view state for
+              the model (see the carousel orchestrator), so restyling or dropping
+              it never hides facts from the assistant. @todo: pick the shape that
+              best presents your specs: this list (default), a two-column table,
+              grouped sections, inline chips, etc. */}
+          {specs.length > 0 ? (
+            <section>
               <h2 className={text({ style: "labelM", weight: "medium" })}>
                 {labels.specifications}
               </h2>
-              {attributes.map((attribute) => (
-                <div key={attribute.name} className={styles.specRow}>
-                  <span
-                    className={cx(text({ style: "bodyS" }), styles.specName)}
+              <dl className={styles.specList}>
+                {specs.map((spec) => (
+                  <div
+                    key={`${spec.label ?? ""}:${spec.value}`}
+                    className={styles.specRow}
                   >
-                    {attribute.name}
-                  </span>
-                  <span
-                    className={cx(text({ style: "bodyS" }), styles.specValue)}
-                  >
-                    {attribute.value}
-                  </span>
-                </div>
-              ))}
+                    {spec.label ? (
+                      <dt
+                        className={cx(
+                          text({ style: "bodyS" }),
+                          styles.specLabel,
+                        )}
+                      >
+                        {spec.label}:
+                      </dt>
+                    ) : null}
+                    <dd
+                      className={cx(text({ style: "bodyS" }), styles.specValue)}
+                    >
+                      {spec.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             </section>
           ) : null}
         </div>

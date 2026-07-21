@@ -66,8 +66,7 @@ export function ProductCard({
             {formatPrice(price, locale)}
           </p>
         ) : null}
-        {/* @todo: extra fields. Render catalog-specific data here, e.g. from the
-            product's `attributes`: ratings, discounts, tags, badges. */}
+        {/* @todo: Render product's `specs` (facts) here */}
       </div>
     </article>
   );

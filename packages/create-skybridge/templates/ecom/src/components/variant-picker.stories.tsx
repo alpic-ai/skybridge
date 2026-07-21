@@ -16,7 +16,7 @@ function variant(
     title: `Sneaker ${color} ${size}`,
     price: { amount: 120, currency: "EUR" },
     media: [],
-    attributes: [],
+    specs: [],
   };
 }
 
@@ -45,7 +45,7 @@ const PRODUCT: Product = {
     variant("s-b-42", "black", "42"),
     variant("s-w-40", "white", "40"),
   ],
-  card: { title: "Sneaker", media: [], attributes: [] },
+  card: { title: "Sneaker", media: [], specs: [] },
 };
 
 export const Contingency = () => {
