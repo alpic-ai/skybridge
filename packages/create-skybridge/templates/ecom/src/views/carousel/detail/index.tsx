@@ -106,6 +106,8 @@ export function DetailView({ product }: { product: Product }) {
   const attributes = variant?.attributes ?? product.card.attributes;
   const outOfStock = variant?.outOfStock ?? product.card.outOfStock ?? false;
   const url = variant?.url ?? product.card.url;
+  // The shown item's id: the resolved variant's SKU, else the product id.
+  const reference = variant?.id ?? product.id;
 
   const price = priceText(product, variant?.price, locale, labels);
   // Buy CTA is enabled only once a variant resolves and carries a real link
@@ -132,6 +134,13 @@ export function DetailView({ product }: { product: Product }) {
         labels,
       )}
     >
+      {/* Product / variant reference, idiomatically top-right. @todo: move it
+          (e.g. into the info column under the title) or drop it; restyle in
+          detail.css.ts (`reference`). */}
+      <p className={cx(text({ style: "bodyS" }), styles.reference)}>
+        {labels.reference} {reference}
+      </p>
+
       <div className={styles.grid}>
         <div className={styles.galleryCell}>
           {media.length > 0 ? (

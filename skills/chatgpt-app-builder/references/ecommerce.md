@@ -41,7 +41,7 @@ src/
 
 ## Phase 1: gather
 
-Collect three bundles and configure access. Ask for everything in one turn where possible.
+Prompt the user for the resources below, in one turn, and wait for their answer. Do not research the catalog or brand on your own yet. For whatever they say they lack, write a short complementary research plan (what you would look up, where, and why) and get the user to sign off on it before running any of it.
 
 **Data source.** API or database, base URL or connection string, auth method, the product schema (fields and types), the filters and sort options it supports, the image and price fields, and how it paginates. Request any reference docs and save them under `docs/` (create it if missing); read them before writing code.
 
@@ -112,6 +112,7 @@ CAROUSEL CARD (one card of the strip, D1 fields placed, D2 = boxed card)
 ```
 PRODUCT DETAIL (desktop two-column, D4 = rail on; mobile stacks, swipe gallery)
 
+                           │                      Ref #
 ┌────┬───────────────────┐ │ Brand · Product title
 │ th │                   │ │ ★ 4.6 (1 204 reviews)
 ├────┤                   │ │ €249  ~€349~  (in stock)
@@ -121,8 +122,8 @@ PRODUCT DETAIL (desktop two-column, D4 = rail on; mobile stacks, swipe gallery)
 ├────┤                   │ │
 │ .. │                   │ │ Description text, clamped
 └────┴───────────────────┘ │ with "read more"…
-      ───-----------       │
-      (progress bar)       │ [   View on site  ▸   ]
+                           │
+                           │ [   View on site  ▸   ]
                            │
                            │ SPECS
                            │ Material    recycled wool
@@ -229,10 +230,13 @@ Reskin `src/design/` to the brand using the phase 1 assets. This phase is only t
 
 Whatever the route, record provenance in a comment (Figma `fileKey` + node ids, or the source URL) so the tokens are regenerable.
 
+The design system must be signed off by the user, same as the wireframes in phase 3. Present the retheme for review: point them at the running Ladle (`{pm} run ladle`), alongside a short summary of the chosen tokens (font, accent, surfaces) and where each came from. Rework until they approve; every component inherits these tokens, so a wrong accent fixed now is fixed everywhere.
+
 **Gate 5:**
 
 - [ ] `{pm} run build` passes (the contract fails the build if either theme leaves a slot unset).
 - [ ] Retheme previewed in light and dark with `{pm} run ladle`: the stories render the still-skeleton components with the new tokens against mock data.
+- [ ] User signed off on the retheme.
 
 ## Phase 6: components
 

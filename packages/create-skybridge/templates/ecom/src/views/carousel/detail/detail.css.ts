@@ -12,6 +12,14 @@ export const detail = style({
   paddingBottom: `calc(${primitives.space.s} + env(safe-area-inset-bottom))`,
 });
 
+// Product / variant id, idiomatically top-right. @todo: reposition (drop the
+// right align, or move it in the JSX) or remove it.
+export const reference = style({
+  textAlign: "right",
+  color: colors.content.subtle,
+  marginBottom: primitives.space["3xs"],
+});
+
 // Single column by default; two columns (gallery | info) once the pane is wide.
 export const grid = style({
   display: "flex",
