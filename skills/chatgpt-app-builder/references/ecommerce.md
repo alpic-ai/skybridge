@@ -1,32 +1,27 @@
 # Fill the template
 
-The `ecom` template is a skeleton: the wiring is in place, the data is not. Two tools: `search-products` (keyword + filters in, matching products out as model-facing structured output) and `render-carousel` (curated product/variant IDs in, an inline carousel out). It also ships a vanilla-extract design system under `src/design/`. This reference connects the tools to a real catalog and the design system to the brand's look.
+The `ecom` template is a skeleton: the wiring is in place, the data is not. Two tools: `search-products` (keyword + filters in, matching products out as model-facing structured output, no view) and `render-carousel` (curated product/variant ids in, an inline carousel out). A vanilla-extract design system under `src/design/` styles everything. This reference connects the tools to a real catalog and the design system to the brand.
 
 Not in a scaffolded `ecom` project (no `src/tools/`)? Scaffold it first with the `--ecom` flag: [copy-template.md](copy-template.md). Then return here.
 
-Do the prerequisites (steps 1 to 3) first, then implement (step 4). Never invent a schema, endpoint, or credential.
+## The path
 
-## 1. Gather context
+Six phases, each ending at a gate. Do not start a phase before the previous gate passes. Phases 4 and 5 are independent of each other (5 needs only phase 1's brand assets); phase 6 needs both.
 
-Collect two things up front.
+```
+1 Gather ──► 2 Explore data ──► 3 Decide UX ──► 4 Server ──┐
+     └────────────────────────────────────► 5 Design ──────┴──► 6 Components ──► Final gate
+```
 
-**Data source.** Ask about the API or database, base URL or connection string, auth method, the product schema (fields and types), the filters and sort options it supports, the image and price fields, and how it paginates. Request any reference docs and save them under `docs/` (create it if missing). Read them before writing code.
+Ground rules for every phase:
 
-**Brand assets** (for the design system). Ask whether the brand has a Figma file (a design system, or the design of an existing web / mobile / desktop app) and get the link. If not, get the web app URL and/or screenshots (web, mobile, or desktop). Either way, collect the brand's font files. If there is no brand at all (internal tool, prototype), note that and move on.
+- Never invent a schema, endpoint, or credential. Everything comes from the user or the live data source.
+- `grep -rn "@todo" src` is the master worklist. Resolving a marker means making the decision, applying it, and removing the `@todo` tag; whatever grep still returns is what remains to do.
+- Record each confirmed decision in `SPEC.md` as you go. Later phases read it instead of re-asking.
+- Delegate heavy-payload exploration (live API queries, Figma reads, devtools dumps) to subagents with fresh context windows; only distilled findings enter the main context. Phases 2 and 5 say when.
+- `{pm} run build` typechecks the whole tree at any point.
 
-Record what you gather in `SPEC.md`.
-
-## 2. Configure access
-
-List the credentials the data source needs. Have the user fill the `.env`; the server sources `.env` at startup. Never commit `.env` or print secrets.
-
-## 3. Explore the data source
-
-Delegate this to a dedicated subagent with a fresh context window: it runs the real queries and returns only the mapping, so the main agent's context isn't filled with large API payloads.
-
-Have it confirm the exact response shape, the real sort keys, the available filter facets and their values, the image and price fields, how variants/options are represented, and the pagination model, then map each onto the template's shapes. Append the findings to `SPEC.md` so later work doesn't re-run the exploration.
-
-## 4. Implementation
+Orientation map (curated; each phase details its own files):
 
 ```
 src/
@@ -36,13 +31,7 @@ src/
   tools/
     search-products.ts         keyword + filters -> matching products (no view)
     render-carousel.ts         curated ids -> products for the carousel view
-  design/                      vanilla-extract design system
-    primitives.css.ts            raw tokens (colors, type, spacing)
-    contract.css.ts              semantic color slots
-    themes/{light,dark}.css.ts   slot -> primitive, per mode
-    sprinkles.css.ts             atomic style props
-    recipes/typography.css.ts    the `text` recipe
-    tokens.ts                    barrel (single import door)
+  design/                      vanilla-extract design system (see Phase 5)
   components/                  ViewFrame, ProductCard, ProductCarousel, EmptyState,
                                ImageGallery, VariantPicker, Chip, ExpandableText
   lib/                         format, cx, variants (resolve a selection to a variant)
@@ -50,27 +39,125 @@ src/
     detail/                      fullscreen product detail (display-mode switch)
 ```
 
-The template is `@todo`-driven: `grep -rn "@todo" src` lists every decision point. The subsections below (**Server**, **Design system**, **Components**) each own their markers: Server and Design system are independent; Components build on the Design system. Resolve every `@todo` and verify as you go. `{pm} run build` typechecks the whole tree at any point.
+## Phase 1: gather
 
-### Server
+Collect three bundles and configure access. Ask for everything in one turn where possible.
 
-Fill `config.ts`, `types.ts`, `server.ts`, and the two tools. Start the dev server and keep it running to verify with curl:
+**Data source.** API or database, base URL or connection string, auth method, the product schema (fields and types), the filters and sort options it supports, the image and price fields, and how it paginates. Request any reference docs and save them under `docs/` (create it if missing); read them before writing code.
+
+**Brand assets.** A Figma link if the brand has one (a design system, or the design of an existing web / mobile / desktop app). Otherwise the web app URL and/or screenshots. Either way, the brand's font files. No brand at all (internal tool, prototype)? Note that and move on.
+
+**Layout inspiration.** The URL of the catalog's live site, if one exists: phase 3 studies its product cards and product page before proposing layouts. Distinct from the brand assets above, which feed token extraction.
+
+**Access.** List the credentials the data source needs and have the user fill `.env` (the server sources it at startup). Never commit `.env` or print secrets.
+
+**Gate 1:**
+
+- [ ] Data source docs saved under `docs/` and read.
+- [ ] Brand assets collected, or "no brand" noted.
+- [ ] Live site URL collected, or noted absent.
+- [ ] `.env` filled.
+
+## Phase 2: explore the data source
+
+Everything downstream (tool schemas, UX decisions, component choices) is built on what this phase reports, so the discovery must be extensive: docs describe the API's intent, only live responses show its actual shape. Delegate it to a subagent with a fresh context window: it runs the real queries and returns only the findings, so large API payloads never enter the main context.
+
+The subagent's brief:
+
+- **Run many varied queries, not one.** Several keywords across different categories, plus a misspelled and a zero-result query (what does an empty result look like?). Note which response fields are always present and which are optional or null; a field seen once is not a field you can rely on.
+- **Exercise every declared capability.** Each documented sort key, each filter facet (and where do facet values come from: an enum, a dedicated endpoint, the response itself?), and the pagination model (page/offset/cursor, page size limits, total count). Confirm they actually work; drop what doesn't.
+- **Fetch single products by id**, the way `render-carousel` will: confirm the lookup endpoint, whether ids from search resolve there unchanged, and the batch behavior (one call per id, or a multi-id endpoint?).
+- **Dissect variants on a variant-rich product.** Which axes exist (color, size, capacity), how sibling variants and their option values are represented, whether every combination exists or the matrix is sparse, and whether price / stock / images / url vary per variant.
+- **Inventory the extras.** Ratings, review counts, discounts and original prices, badges, stock and delivery info, spec attributes, brand, product page URL, number of images per product. Phase 3's layout decisions may only use fields that exist here, so record per field: type, coverage (always / sometimes / rare), and a real example value.
+- **Sample the imagery.** A handful of real image URLs from different categories: aspect ratios, cutout vs in-context photography, transparent or white backgrounds, resolution, and any URL-based resizing params. Phase 6 chooses the card and gallery aspect ratio / fit by looking at these, never by guessing.
+- **Note the sharp edges.** Rate limits, auth quirks, encoding oddities, slow endpoints, fields whose content is HTML rather than text.
+
+Have it return the findings mapped onto the template's shapes (`productSchema` in search-products, `Product`/`Variant`/`Option` in render-carousel), a full raw JSON sample of one representative product, plus one variant-rich and one edge-case example (out of stock, single image, or missing description).
+
+**Gate 2:**
+
+- [ ] The field mapping, the per-field inventory (type, coverage, example), the raw samples, and the image URLs are appended to `SPEC.md`, so nothing re-runs the exploration.
+- [ ] Every capability the tools will expose (sort keys, filters, pagination, id lookup) was verified against the live source, not just the docs.
+
+## Phase 3: decide the UX
+
+Only now, with the confirmed field inventory in `SPEC.md`, settle how the catalog is presented; never decide these ad hoc while coding, and never propose a layout built on a field the data does not carry (no rating row if the API has no ratings, no thumbnail rail if products ship one image). Study the live site from phase 1 for how it lays out its cards and product page, then lock down four decisions; phase 6 applies them:
+
+- **D1, carousel card fields:** which fields beyond image, title, and price to show (rating, discount, badges, tags) and how (for example a tag row).
+- **D2, carousel framing:** plain (default), each card boxed (border + surface), or the whole strip boxed. At most one, never both.
+- **D3, product detail sections:** which sections appear (identity, price, rating, description, specs, delivery) and their order, in particular what sits before or after the CTA (the skeleton puts specs after the "view on site" CTA).
+- **D4, thumbnail rail:** whether the detail gallery shows the desktop thumbnail rail or stays swipe-only.
+
+Play the layout back as two ASCII wireframes and get sign-off: the carousel card (every field placed, D1/D2 visible) and the product detail (every section in order, the gallery/rail per D4, the CTA position per D3). Populate them with real values from the phase 2 exploration, not invented ones. Cheap to redraw, expensive to rebuild. For example:
+
+```
+CAROUSEL CARD (one card of the strip, D1 fields placed, D2 = boxed card)
+
+┌──────────────────┐ ┌────────────
+│ ╭──────────────╮ │ │ ╭──────────
+│ │              │ │ │ │
+│ │    image     │ │ │ │   next
+│ │       [-30%] │ │ │ │   card…
+│ ╰──────────────╯ │ │ ╰──────────
+│ Product title on │ │ Other titl…
+│ two lines max…   │ │
+│ €249  ~€349~     │ │ €89
+│ ★ 4.6 (1 204)    │ │ ★ 4.2 (87)
+│ (eco) (bestsell) │ │ (new)
+└──────────────────┘ └────────────
+  image: 1:1, contain, grey stage     badge: discount, top-right
+  price: current + struck original    tag row: max 2 chips
+```
+
+```
+PRODUCT DETAIL (desktop two-column, D4 = rail on; mobile stacks, swipe gallery)
+
+┌────┬───────────────────┐ │ Brand · Product title
+│ th │                   │ │ ★ 4.6 (1 204 reviews)
+├────┤                   │ │ €249  ~€349~  (in stock)
+│ th │       image       │ │
+├────┤                   │ │ Color:  [◉ black] [○ sand]
+│ th │                   │ │ Size:   [S] [M] [L] [XL]
+├────┤                   │ │
+│ .. │                   │ │ Description text, clamped
+└────┴───────────────────┘ │ with "read more"…
+      ───-----------       │
+      (progress bar)       │ [   View on site  ▸   ]
+                           │
+                           │ SPECS
+                           │ Material    recycled wool
+                           │ Weight      340 g
+                           │ Made in     Portugal
+
+order: identity ► rating ► price ► variants ► description ► CTA ► specs
+gallery sticky on desktop; CTA follows the selected variant's url
+```
+
+**Gate 3:**
+
+- [ ] Every field in the wireframes exists in the phase 2 inventory.
+- [ ] D1-D4 decided; wireframes signed off by the user.
+- [ ] `SPEC.md` records the decisions and the agreed wireframes.
+
+## Phase 4: server
+
+Fill `config.ts`, `types.ts`, `server.ts`, and the two tools. Start the dev server and keep it running:
 
 ```bash
 {pm} run dev   # prints the local MCP URL (default http://localhost:3000/mcp)
 ```
 
-#### Shared
+### Shared
 
-- [ ] `.env.template`: regenerate from the user's `.env` (same keys, values blanked) so the committed placeholder matches the credentials the integration needs.
+- [ ] `.env.template`: regenerate from the user's `.env` (same keys, values blanked).
 - [ ] `src/server.ts` `name` / `version`.
 - [ ] `src/server.ts` `instructions`: adapt the server-wide prompt to the catalog.
 - [ ] `src/config.ts` `CAROUSEL_MAX_SIZE`: max products the carousel shows.
 - [ ] `src/config.ts` `MIN_SEARCH_ITERATIONS`: minimum searches before rendering.
 
-#### `search-products` (`src/tools/search-products.ts`)
+### `search-products` (`src/tools/search-products.ts`)
 
-Keyword/filter search that returns matching products as model-facing grounding. It has NO view, so keep the output to what the model needs to curate (ids + facts), never presentational data (images, media): render-carousel handles that.
+Keyword/filter search returning model-facing grounding. No view, so keep the output to what the model needs to curate (ids + facts), never presentational data (images, media): render-carousel handles that.
 
 - [ ] `description`: describe the catalog, its categories, and the search/curate loop.
 - [ ] `_meta`: the invoking and invoked status messages.
@@ -81,141 +168,113 @@ Keyword/filter search that returns matching products as model-facing grounding. 
 - [ ] `search()`: query the data source with the input params and map each hit into `productSchema`; set `pages` and `totalHits`.
 - [ ] `narrate()` NEXT STEPS: adapt the post-search guidance to your flow (framing only; it carries no result data).
 
-Verify: curl the stateless `/mcp` endpoint (`Accept` must include `text/event-stream` or the SDK rejects the request). Set `arguments` to `keyword` plus any `sort`/filters you implemented:
+### `render-carousel` (`src/tools/render-carousel.ts`)
 
-```bash
-curl -s http://localhost:3000/mcp \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json, text/event-stream" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search-products","arguments":{"keyword":"<real keyword>"}}}'
-```
+Takes the curated ids and returns the products for the carousel. The full product data (variants, media, options) rides in `_meta` for the view; a trimmed grounding subset goes to `structuredContent` for the model.
 
-Confirm `result.structuredContent` carries real products from the live source (`result.content` is just the next-step guidance). (`"method":"tools/list"` with no `params` lists the registered schema.)
-
-#### `render-carousel` (`src/tools/render-carousel.ts`)
-
-Takes the curated IDs and returns the products for the carousel. The full product data (variants, media, options) rides in `_meta` for the view; a trimmed grounding subset goes to `structuredContent` for the model.
-
-- [ ] Product model (`Product`, `Variant`, `Option`, `Meta`): match your catalog. A `Product` groups sibling `Variant`s and declares the `Option` axes. `variants` is sparse (list only the combinations that exist; a missing one encodes a contingent variation). `card` (required) is what the carousel shows for the product: it is surfaced both in the view (rendered directly) and to the model (`structuredContent` is projected from it).
-- [ ] `getProducts()`: fetch each id and map results into `Product[]`. Pick a mapping strategy (see below).
+- [ ] Product model (`Product`, `Variant`, `Option`, `Meta`): match your catalog. A `Product` groups sibling `Variant`s and declares the `Option` axes. `variants` is sparse (list only the combinations that exist; a missing one encodes a contingent variation). `card` (required) is what the carousel shows for the product, surfaced both to the view and to the model (`structuredContent` is projected from it).
+- [ ] `getProducts()`: fetch each id and map results into `Product[]` (mapping strategy below).
 - [ ] `toStructuredContent()`: trim each product's `card` and `options` into the model-facing grounding, dropping presentational fields (media, url). The view reads the full products from `_meta`.
 - [ ] `description`: adapt the wording and brand voice; the behavioral rules (order, no-repeat, accuracy) apply to any catalog.
 - [ ] `_meta`: the invoking and invoked status messages.
-- [ ] `view`: already wired to the `carousel` view (`view: { component: "carousel" }`); customize it in the Components subsection.
-- [ ] `view.csp`: add your image host to `resourceDomains` (so product images load) and the product site to `redirectDomains` (so the detail view's "view on site" link and the host "open in app" URL are allowed).
+- [ ] `view.csp`: add your image host to `resourceDomains` (product images) and the product site to `redirectDomains` (the detail CTA and the host "open in app" URL). `view` itself is already wired to the `carousel` view.
 
-##### Mapping ids to products (`getProducts`)
+**Mapping ids to products (`getProducts`).** Whatever `search-products` put in each `id` is what arrives here; keep the two tools consistent. Preserve the `ids` order, and decide how to handle ids with no match (skip, or surface them).
 
-`getProducts` turns the curated ids into `Product[]`. It is unprescriptive: choose what fits your catalog. Whatever `search-products` put in each `id` is what arrives here, so keep the two tools consistent. Every `Product` must set `card` (displayed in carousel, surfaced to llm); how you build it depends on the strategy.
+- **No variants (simple products):** one `Product` per id with a single variant, `card` set to that variant, `options: []`. Nothing else to decide.
+- **Variants, grouped (one card per product):** all queried variants of a product collapse into one carousel item. `card` is the union of the available variants (a "from" price, in stock if any variant is), and `card.media` holds one picture per requested variant.
+- **Variants, one card per requested variant:** each requested variant is its own carousel item, `card` set to that variant.
 
-**Products have no variants (simple products).** Map each id to a `Product` with a single variant, `card` set to that variant, and `options: []`. Nothing else to decide.
+Either way, each item's `Product` must hold ALL the variants the data source returned in `variants` (only `card` differs): the detail view reads `variants` so the client can switch to any of them.
 
-**Products have variants.** Choose how variants become carousel cards:
-
-- **Group (one card per product).** All queried variants of a product collapse into a single carousel item. `card` is the union of the product's available variants returned by the data source (e.g. a "from" price, in stock if any variant is), and `card.media` holds one picture per requested variant.
-- **One card per requested variant.** Each requested variant is its own carousel item, with `card` set to that variant.
-
-> Either way, each carousel item's `Product` must hold ALL the variants the data source returned in `variants` (only `card` differs). The detail view reads `variants` so the client can switch to any variant.
-
-Cross-cutting: preserve the `ids` order, and decide how to handle ids with no match (skip, or surface them).
-
-Verify: `arguments.ids` is an array of product IDs, in display order:
+**Gate 4: verify both tools with curl** against the running server. `Accept` must include `text/event-stream` or the SDK rejects the request. (`"method":"tools/list"` with no `params` lists the registered schemas.)
 
 ```bash
 curl -s http://localhost:3000/mcp \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"render-carousel","arguments":{"ids":["<real id>"]}}}'
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"<tool>","arguments":<args>}}'
 ```
 
-Confirm `result._meta.products` carries the full products for the view and `result.structuredContent` the trimmed grounding.
+- [ ] `search-products` with `{"keyword":"<real keyword>"}` plus any sort/filters you implemented: `result.structuredContent` carries real products from the live source (`result.content` is just the next-step guidance).
+- [ ] `render-carousel` with `{"ids":["<real id>", ...]}` in display order: `result._meta.products` carries the full products, `result.structuredContent` the trimmed grounding.
 
-### Design system
+## Phase 5: design system
 
-Reskin the vanilla-extract design system (`src/design/`) to the brand, using the assets gathered in step 1. This subsection is only the tokens and theme; the components that consume them are in Components below.
+Reskin `src/design/` to the brand using the phase 1 assets. This phase is only the tokens and theme; the components that consume them are phase 6.
 
-#### The layers
-
-`src/design/` is a five-tier pipeline. Change values, not the shape:
+**The layers.** A five-tier pipeline; change values, not the shape:
 
 - `primitives.css.ts`: raw, mode-agnostic scales (space, radius, font, grey ramp, accent, status). The only place hexes and sizes are literal.
 - `contract.css.ts`: semantic color slots (`surface` / `content` / `border` / `common`), all `null`. The compiler forces both themes to fill every slot.
 - `themes/{light,dark}.css.ts`: map each slot to a primitive, per mode.
-- `sprinkles.css.ts`: atomic style props (spacing, color, layout). Leave as-is unless you change the contract.
+- `sprinkles.css.ts`: atomic style props. Leave as-is unless you change the contract.
 - `recipes/typography.css.ts`: the `text` recipe. Add a component recipe (button, tag) only when a component has real variants; otherwise style with sprinkles or a `style()` block.
 
 `components/view-frame.tsx` (`ViewFrame`) wraps every view: it activates the theme and pins the base surface, font, and content color. `src/design/tokens.ts` is the single import door: `import { text, sprinkles } from "../design/tokens"`.
 
-#### Fill the design @todos
+**Fill:**
 
 - [ ] `primitives.css.ts`: replace the neutral placeholders with real brand tokens (colors, type scale, spacing, radius).
 - [ ] `themes/{light,dark}.css.ts`: map the slots; keep both in sync (the contract enforces it).
 - [ ] `contract.css.ts`: add or remove semantic slots only if your UI needs them.
-- [ ] `design/fonts.css` + `public/fonts/`: brand `@font-face`, then point `primitives.font.family` at it.
+- [ ] `design/fonts.css` + `public/fonts/`: brand `@font-face` (served under `/assets/fonts/`), then point `primitives.font.family` at it.
 - [ ] `components/view-frame.tsx`: theme policy (follow the host theme, or lock to light).
 
-Source the token values one of three ways, depending on what step 1 turned up.
+**Source the values** one of three ways, per what phase 1 turned up. For the first two routes, delegate the extraction to a subagent with a fresh context window, same as phase 2: Figma payloads and devtools dumps are large and noisy, and only the distilled token mapping (values + provenance) belongs in the main context.
 
-#### From a Figma file
+- **Figma file (prefer whenever one exists).** The subagent uses the Figma MCP (Dev Mode). It locates the foundation frames itself (the MCP can enumerate pages, search by name, switch pages); it asks only if the structure is ambiguous. `get_variable_defs` on those frames returns the color ramps, type scale, and spacing: "primitives" / "foundations" frames for the raw palette, "semantic" / "core" frames for the light and dark mappings.
+- **Existing app (no Figma).** URL: the subagent inspects the live site's computed styles and `:root` CSS custom properties (fonts, color ramps, spacing, radii) via browser devtools and captures exact values. Screenshots: derive the palette, type scale, and spacing from them, with the collected font files.
+- **No brand.** Keep the neutral primitives. Set at most a font family and an accent color, confirm light and dark contrast, and move on. Do not invent a brand.
 
-With the Figma file from step 1, use the Figma MCP (Dev Mode) to pull the real tokens instead of guessing. Prefer this whenever a file exists.
+Whatever the route, record provenance in a comment (Figma `fileKey` + node ids, or the source URL) so the tokens are regenerable.
 
-1. Open the file link from step 1 and locate the foundation frames (colors, typography, spacing). The MCP can navigate the file itself (enumerate pages and frames, search by name, switch pages), so find them without the user's help; ask only if the structure is ambiguous.
-2. Read the variables. `get_variable_defs` on the foundation frames returns the color ramps, type scale, and spacing collection. Read the "primitives" / "foundations" frames for the raw palette, and the "semantic" / "core" frames for the light and dark mappings.
-3. Populate `primitives.css.ts` (raw ramps and scales) and `themes/{light,dark}.css.ts` (semantic mappings). Keep the shape; replace the values.
-4. Record provenance in a comment: the Figma `fileKey` and the node ids you sourced, so the tokens are regenerable (the `@todo` header in `primitives.css.ts` already asks for this).
-5. Fonts: add each `@font-face` to `design/fonts.css`, drop the files in `public/fonts/` (served under `/assets/fonts/`), and set `primitives.font.family`.
+**Gate 5:**
 
-Delegate the extraction to a subagent when the Figma payload is large, same as the data-source exploration: it returns the token mapping, not the raw dump.
+- [ ] `{pm} run build` passes (the contract fails the build if either theme leaves a slot unset).
+- [ ] Retheme previewed in light and dark with `{pm} run ladle`: the stories render the still-skeleton components with the new tokens against mock data.
 
-#### From an existing app (no Figma)
+## Phase 6: components
 
-With the web app URL and/or screenshots from step 1, lift the system from the shipped product:
+The view layer under `src/components/` and `src/views/`, built on the design system. Preview any component in Ladle (`{pm} run ladle`; each `*.stories.tsx` is a story); the devtools emulator shows a view against a live tool call. Verify your own work in the emulator as you go, don't just tell the user to look: drive it through the Chrome DevTools MCP, preferring its WebMCP tools (`list_webmcp_tools` / `execute_webmcp_tool`) over click/screenshot loops to call tools and switch display mode, theme, mobile, and locale; see [run-locally.md](run-locally.md). Apply D1-D4 from `SPEC.md`; use the phase 2 image URLs for every imagery choice.
 
-- URL: inspect the live site's computed styles and `:root` CSS custom properties (fonts, color ramps, spacing, radii) via browser devtools, and capture the exact values into `primitives.css.ts`. (This is how the reference apps captured values that were not in Figma.)
-- Screenshots: derive the palette, type scale, and spacing from them, and use the font files collected in step 1.
-
-Record where each value came from in a comment so it can be re-extracted later.
-
-#### No brand identity
-
-For an internal tool or prototype with no brand, keep the neutral primitives. Set at most a font family and an accent color, confirm light and dark contrast, and move on. Do not invent a brand.
-
-#### Verify
-
-`{pm} run build` compiles the tokens and type-checks the themes (the contract fails the build if either theme leaves a slot unset). Preview the result in the devtools emulator or with `{pm} run ladle`.
-
-### Components
-
-The view layer under `src/components/` and `src/views/`, built on the design system. Preview any component in Ladle (`{pm} run ladle`; each `*.stories.tsx` is a story); the devtools emulator shows a view against a live tool call. One feature per subsection.
-
-#### Labels (i18n)
+### Labels (i18n)
 
 All user-facing text is centralized in `src/i18n.ts`, shared across every component. `useLabels()` reads the host locale from `useUser()`, matches on the language subtag (`en-US` -> `en`), and falls back to English. Ships English only.
 
-- [ ] `src/i18n.ts`: adapt the English label copy to the brand voice, and add a locale key per language you want to support.
+- [ ] `src/i18n.ts`: adapt the English copy to the brand voice; add a locale key per language you want to support.
 
-#### Carousel
+### Carousel
 
-`render-carousel`'s inline view (`src/views/carousel/`), plus `ProductCard` (image, title, price, out-of-stock; presentational), `ProductCarousel` (scroll-snap track and desktop nav buttons; reports on-screen cards), and `EmptyState`. The view reads `responseMetadata.products` (the tool's `_meta`), renders one card per product, and narrates the on-screen ones via `data-llm`.
+`render-carousel`'s inline view (`src/views/carousel/`), plus `ProductCard` (presentational), `ProductCarousel` (scroll-snap track, desktop nav buttons; reports on-screen cards), and `EmptyState`. The view reads `responseMetadata.products` (the tool's `_meta`), renders one card per product, and narrates the on-screen ones via `data-llm`.
 
-- [ ] `product-card.css.ts`: `TITLE_LINES` (title clamp); the surface token behind the image; image fit (`contain` vs `cover`).
-- [ ] `product-card.tsx`: extra images from `media` (e.g. hover cross-fade to `media[1]`); extra fields from `attributes` (ratings, tags, badges).
+- [ ] `product-card.css.ts`: image aspect ratio, `object-fit`, and the surface behind the image, decided by looking at the phase 2 image sample: square vs portrait/landscape; `contain` for cutouts/mixed ratios vs `cover` for consistent photos; neutral grey behind transparent cutouts vs white for full-bleed photos. Use the same choice in the gallery. Also `TITLE_LINES` (title clamp).
+- [ ] `product-card.tsx` (D1): extra images from `media` (e.g. hover cross-fade to `media[1]`); extra fields from `attributes` (ratings, tags, badges).
 - [ ] `product-carousel.css.ts`: tuning knobs (`gap`, `CARDS_VISIBLE`, `CARDS_VISIBLE_COMPACT`, `COMPACT_MAX_WIDTH`).
-- [ ] Framing: the `FRAMED` flag boxes each card (`product-card.tsx`, includes its skeleton) or the whole strip (`product-carousel.tsx`). Both `false` for plain cards (default); set at most one to `true`, never both. If you enable one, tune the frame (padding, border, radius, shadow) in `product-card.css.ts` or `product-carousel.css.ts`.
+- [ ] Framing (D2): the `FRAMED` flag boxes each card (`product-card.tsx`, includes its skeleton) or the whole strip (`product-carousel.tsx`). Both `false` for plain (default); set at most one to `true`. If you enable one, tune the frame (padding, border, radius, shadow) in the matching `.css.ts`.
 
-#### Product detail
+### Product detail
 
-The fullscreen page a user opens by tapping a carousel card (`src/views/carousel/detail/`). It is not a second tool or view: the carousel orchestrator (`views/carousel/index.tsx`) switches display mode to `fullscreen` and renders the detail over the carousel (hidden, not unmounted). It reads the same `_meta` products, so opening a product and switching variants needs no fetch. Selection, carousel scroll, and the full product spec ride in `useViewState`, so an open detail survives a host remount.
+The fullscreen page opened by tapping a carousel card (`src/views/carousel/detail/`). Not a second tool or view: the carousel orchestrator (`views/carousel/index.tsx`) switches display mode to `fullscreen` and renders the detail over the carousel (hidden, not unmounted). It reads the same `_meta` products, so opening a product and switching variants needs no fetch. Selection, carousel scroll, and the full product spec ride in `useViewState`, so an open detail survives a host remount.
 
-The building blocks live in `src/components/` (each previews in Ladle): `ImageGallery`, `VariantPicker` + `Chip`, `ExpandableText`. Variant logic is pure in `src/lib/variants.ts` (`resolveVariant`, `selectableValues`, `initialSelection`).
+Building blocks in `src/components/` (each previews in Ladle): `ImageGallery`, `VariantPicker` + `Chip`, `ExpandableText`. Variant logic is pure in `src/lib/variants.ts`.
 
-Variant selection. `variants` is sparse, so contingency is derived, never ruled: `selectableValues` filters the list on the other axes' current choices, and the picker disables any value with no surviving variant. Selection is in-place (every axis is local state, no remount). The initial selection is the tapped variant (its id equals the opened product id), else the first variant, so a variant is always preselected and the buy CTA is live on open (it disables only if the resolved variant has no link).
+Two facts to preserve when customizing:
 
-Grounding. The detail's `data-llm` narrates only the variant on screen. The full spec (every variant) is pushed to `useViewState` by the orchestrator, so the model can answer detail questions beyond what is visible; the on-screen spec table is a display choice, not the model's source.
+- **Variant selection.** `variants` is sparse, so contingency is derived, never ruled: `selectableValues` filters on the other axes' current choices and the picker disables any value with no surviving variant. Selection is in-place (each axis is local state, no remount). The initial selection is the tapped variant (its id equals the opened product id), else the first variant, so the buy CTA is live on open (it disables only if the resolved variant has no link).
+- **Grounding.** The detail's `data-llm` narrates only the variant on screen; the full spec (every variant) is pushed to `useViewState` by the orchestrator, so the model can answer questions beyond what is visible. The on-screen spec table is a display choice, not the model's source.
 
+- [ ] Section order (D3): apply the agreed sections and before/after-CTA placement in `detail/index.tsx`.
 - [ ] `variant-picker`: chips are the default. For a long text-only axis (many sizes), swap the chip row for a native `<select>`; keep image chips for swatch axes (color, material). Promote an axis to a cross-product switch only if the catalog models it as separate products.
-- [ ] `image-gallery`: `THUMBNAIL_RAIL` adds a desktop thumbnail rail (off = swipe only); style the progress bar and, if enabled, the rail.
+- [ ] `image-gallery` (D4): `THUMBNAIL_RAIL` adds a desktop thumbnail rail (off = swipe only); style the progress bar and, if enabled, the rail.
 - [ ] `detail.css.ts`: the two-column breakpoint, and whether the gallery is sticky on desktop.
-- [ ] CTA: `viewOnSite` deep-links to `variant.url ?? card.url` (`useOpenExternal`), and `setOpenInAppUrl` points the host "open in app" at the same URL. Needs the product site in the view CSP (above).
+- [ ] CTA: `viewOnSite` deep-links to `variant.url ?? card.url` (`useOpenExternal`), and `setOpenInAppUrl` points the host "open in app" at the same URL. Needs the product site in the view CSP (phase 4).
 - [ ] Specs: a table after the CTA. Group, restyle, or drop it (the full spec is already in view state for the model).
+
+## Final gate
+
+- [ ] `grep -rn "@todo" src` returns nothing.
+- [ ] `{pm} run build` passes.
+- [ ] Both phase 4 curl checks still pass against live data.
+- [ ] Carousel and detail previewed (emulator or Ladle) in light and dark.
+- [ ] `SPEC.md` matches what was built.
