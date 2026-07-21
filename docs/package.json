@@ -7,7 +7,7 @@
     "lint": "mintlify broken-links"
   },
   "devDependencies": {
-    "mintlify": "^4.2.699"
+    "mintlify": "^4.2.715"
   },
   "engines": {
     "node": ">=24.18.0"
