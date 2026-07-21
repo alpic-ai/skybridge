@@ -91,6 +91,10 @@ jobs:
         working-directory: ./packages/create-skybridge/templates/blank
         run: pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
 
+      - name: Pin ecom template skybridge dep for publish
+        working-directory: ./packages/create-skybridge/templates/ecom
+        run: pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
+
       - name: Publish create-skybridge to npm
         working-directory: ./packages/create-skybridge
         run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance --no-git-checks
@@ -101,7 +105,7 @@ jobs:
 
       - name: Restore templates workspace deps
         if: github.event_name == 'release'
-        run: git checkout -- packages/create-skybridge/templates/demo/package.json packages/create-skybridge/templates/blank/package.json
+        run: git checkout -- packages/create-skybridge/templates/demo/package.json packages/create-skybridge/templates/blank/package.json packages/create-skybridge/templates/ecom/package.json
 
       - name: Deploy docs to Mintlify
         if: github.event_name == 'release'

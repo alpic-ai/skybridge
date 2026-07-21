@@ -1,6 +1,7 @@
 import {
   Children,
   type ReactNode,
+  type RefObject,
   useCallback,
   useEffect,
   useRef,
@@ -44,6 +45,10 @@ type ProductCarouselProps = {
   onVisibleChange?: (indices: number[]) => void;
   // Skeleton state: locks the scroll and hides the nav buttons.
   loading?: boolean;
+  // Optional external ref to the scroll track. The orchestrator uses it to save
+  // and restore scroll position across the carousel ⇄ detail transition (the
+  // carousel is hidden, not unmounted, but display:none resets scrollLeft).
+  trackRef?: RefObject<HTMLElement | null>;
 };
 
 /**
@@ -55,31 +60,34 @@ export function ProductCarousel({
   children,
   onVisibleChange,
   loading = false,
+  trackRef: externalTrackRef,
 }: ProductCarouselProps) {
   const labels = useLabels();
   const trackRef = useRef<HTMLElement>(null);
+  // Merge the internal ref with the optional external one via a callback ref, so
+  // the orchestrator can read/restore scroll while `trackRef` stays a plain
+  // useRef (its `.current` reads need no effect dependency).
+  const setTrackRef = useCallback(
+    (el: HTMLElement | null) => {
+      trackRef.current = el;
+      if (externalTrackRef) {
+        externalTrackRef.current = el;
+      }
+    },
+    [externalTrackRef],
+  );
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
-
-  // Keep the latest callback in a ref so the observer effect does not
-  // re-subscribe when the parent passes a new function each render.
-  const onVisibleChangeRef = useRef(onVisibleChange);
-  onVisibleChangeRef.current = onVisibleChange;
-
-  const updateEdges = useCallback(() => {
-    const el = trackRef.current;
-    if (!el) {
-      return;
-    }
-    setCanScrollLeft(el.scrollLeft > 0);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
-  }, []);
 
   useEffect(() => {
     const el = trackRef.current;
     if (!el) {
       return;
     }
+    const updateEdges = () => {
+      setCanScrollLeft(el.scrollLeft > 0);
+      setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+    };
     updateEdges();
     el.addEventListener("scroll", updateEdges, { passive: true });
     const observer = new ResizeObserver(updateEdges);
@@ -88,17 +96,16 @@ export function ProductCarousel({
       el.removeEventListener("scroll", updateEdges);
       observer.disconnect();
     };
-  }, [updateEdges]);
+  }, []);
 
   // Track which cells are in view and report them (only when a consumer asks).
+  // Pass a stable `onVisibleChange` (e.g. a useState setter): a new identity
+  // each render re-subscribes the observer.
   const childCount = Children.count(children);
-  // Re-subscribe when a consumer starts (or stops) passing onVisibleChange, even
-  // if the child count is unchanged; the callback itself is read via the ref.
-  const observeVisibility = onVisibleChange != null;
-  // biome-ignore lint/correctness/useExhaustiveDependencies: childCount and observeVisibility drive re-subscription; neither is read inside the effect.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: childCount re-subscribes when the number of cells changes; it is not read in the body.
   useEffect(() => {
     const el = trackRef.current;
-    if (!el || !observeVisibility) {
+    if (!el || !onVisibleChange) {
       return;
     }
     const cells = Array.from(el.children);
@@ -106,7 +113,7 @@ export function ProductCarousel({
     let timer: number | undefined;
     const emit = () => {
       const indices = [...visible].sort((a, b) => a - b);
-      onVisibleChangeRef.current?.(indices);
+      onVisibleChange?.(indices);
     };
     const observer = new IntersectionObserver(
       (entries) => {
@@ -133,7 +140,7 @@ export function ProductCarousel({
       window.clearTimeout(timer);
       observer.disconnect();
     };
-  }, [childCount, observeVisibility]);
+  }, [childCount, onVisibleChange]);
 
   const step = (direction: 1 | -1) => {
     const el = trackRef.current;
@@ -161,7 +168,7 @@ export function ProductCarousel({
   return (
     <div className={styles.carousel({ framed: FRAMED })}>
       <section
-        ref={trackRef}
+        ref={setTrackRef}
         className={styles.track({ framed: FRAMED, loading })}
         aria-roledescription={labels.carousel}
         aria-label={labels.products}
