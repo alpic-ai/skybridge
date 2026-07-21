@@ -43,8 +43,11 @@ src/
     sprinkles.css.ts             atomic style props
     recipes/typography.css.ts    the `text` recipe
     tokens.ts                    barrel (single import door)
-  components/                  ViewFrame, ProductCard, ProductCarousel, EmptyState
-  views/carousel/              the render-carousel view (reads _meta, renders cards)
+  components/                  ViewFrame, ProductCard, ProductCarousel, EmptyState,
+                               ImageGallery, VariantPicker, Chip, ExpandableText
+  lib/                         format, cx, variants (resolve a selection to a variant)
+  views/carousel/              render-carousel view: carousel + product detail
+    detail/                      fullscreen product detail (display-mode switch)
 ```
 
 The template is `@todo`-driven: `grep -rn "@todo" src` lists every decision point. The subsections below (**Server**, **Design system**, **Components**) each own their markers: Server and Design system are independent; Components build on the Design system. Resolve every `@todo` and verify as you go. `{pm} run build` typechecks the whole tree at any point.
@@ -99,6 +102,7 @@ Takes the curated IDs and returns the products for the carousel. The full produc
 - [ ] `description`: adapt the wording and brand voice; the behavioral rules (order, no-repeat, accuracy) apply to any catalog.
 - [ ] `_meta`: the invoking and invoked status messages.
 - [ ] `view`: already wired to the `carousel` view (`view: { component: "carousel" }`); customize it in the Components subsection.
+- [ ] `view.csp`: add your image host to `resourceDomains` (so product images load) and the product site to `redirectDomains` (so the detail view's "view on site" link and the host "open in app" URL are allowed).
 
 ##### Mapping ids to products (`getProducts`)
 
@@ -199,3 +203,19 @@ All user-facing text is centralized in `src/i18n.ts`, shared across every compon
 - [ ] `product-card.tsx`: extra images from `media` (e.g. hover cross-fade to `media[1]`); extra fields from `attributes` (ratings, tags, badges).
 - [ ] `product-carousel.css.ts`: tuning knobs (`gap`, `CARDS_VISIBLE`, `CARDS_VISIBLE_COMPACT`, `COMPACT_MAX_WIDTH`).
 - [ ] Framing: the `FRAMED` flag boxes each card (`product-card.tsx`, includes its skeleton) or the whole strip (`product-carousel.tsx`). Both `false` for plain cards (default); set at most one to `true`, never both. If you enable one, tune the frame (padding, border, radius, shadow) in `product-card.css.ts` or `product-carousel.css.ts`.
+
+#### Product detail
+
+The fullscreen page a user opens by tapping a carousel card (`src/views/carousel/detail/`). It is not a second tool or view: the carousel orchestrator (`views/carousel/index.tsx`) switches display mode to `fullscreen` and renders the detail over the carousel (hidden, not unmounted). It reads the same `_meta` products, so opening a product and switching variants needs no fetch. Selection, carousel scroll, and the full product spec ride in `useViewState`, so an open detail survives a host remount.
+
+The building blocks live in `src/components/` (each previews in Ladle): `ImageGallery`, `VariantPicker` + `Chip`, `ExpandableText`. Variant logic is pure in `src/lib/variants.ts` (`resolveVariant`, `selectableValues`, `initialSelection`).
+
+Variant selection. `variants` is sparse, so contingency is derived, never ruled: `selectableValues` filters the list on the other axes' current choices, and the picker disables any value with no surviving variant. Selection is in-place (every axis is local state, no remount). The initial selection is the tapped variant (its id equals the opened product id), else the first variant, so a variant is always preselected and the buy CTA is live on open (it disables only if the resolved variant has no link).
+
+Grounding. The detail's `data-llm` narrates only the variant on screen. The full spec (every variant) is pushed to `useViewState` by the orchestrator, so the model can answer detail questions beyond what is visible; the on-screen spec table is a display choice, not the model's source.
+
+- [ ] `variant-picker`: chips are the default. For a long text-only axis (many sizes), swap the chip row for a native `<select>`; keep image chips for swatch axes (color, material). Promote an axis to a cross-product switch only if the catalog models it as separate products.
+- [ ] `image-gallery`: `THUMBNAIL_RAIL` adds a desktop thumbnail rail (off = swipe only); style the progress bar and, if enabled, the rail.
+- [ ] `detail.css.ts`: the two-column breakpoint, and whether the gallery is sticky on desktop.
+- [ ] CTA: `viewOnSite` deep-links to `variant.url ?? card.url` (`useOpenExternal`), and `setOpenInAppUrl` points the host "open in app" at the same URL. Needs the product site in the view CSP (above).
+- [ ] Specs: a table after the CTA. Group, restyle, or drop it (the full spec is already in view state for the model).

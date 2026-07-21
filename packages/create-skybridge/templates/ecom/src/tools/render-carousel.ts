@@ -46,7 +46,7 @@ type Meta = {
 };
 
 // One buyable product: full display Meta plus which value it takes on each axis.
-type Variant = Meta & {
+export type Variant = Meta & {
   id: string; // SKU / article number; unique within the catalog
   // The chosen value per axis: keys are Option.id, values are OptionValue.id.
   // e.g. { color: "black", size: "40" }
@@ -204,12 +204,20 @@ Use only the data returned for each product. Never invent attributes, materials,
     "openai/toolInvocation/invoked": "Loaded product carousel",
   },
 
-  // The carousel view rendered inline in the conversation.
+  // The carousel and product details UI rendered inline in the conversation.
   view: {
     // `as const` keeps this a literal (like `name` above) so it matches the
     // generated ViewNameRegistry; a bare string widens and fails the build.
     component: "carousel" as const,
     description: "Browse the curated products.",
+    // @todo: declare the CSP domains this view needs. Add your image origins to
+    // `resourceDomains` so product images load, and the product site to
+    // `redirectDomains` so the detail view's "View on site" link and the host's
+    // "Open in app" URL (useOpenExternal / setOpenInAppUrl) are allowed.
+    // csp: {
+    //   resourceDomains: ["https://images.example.com"],
+    //   redirectDomains: ["https://www.example.com"],
+    // },
   },
 
   inputSchema,
