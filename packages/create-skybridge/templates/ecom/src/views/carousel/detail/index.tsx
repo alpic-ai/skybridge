@@ -108,6 +108,10 @@ export function DetailView({ product }: { product: Product }) {
   const url = variant?.url ?? product.card.url;
   // The shown item's id: the resolved variant's SKU, else the product id.
   const reference = variant?.id ?? product.id;
+  // @todo: read any custom Meta fields you added the same way (variant first,
+  // then card), e.g. `const rating = variant?.rating ?? product.card.rating;`,
+  // then render them in the agreed spot (rating by the title, discount by the
+  // price, badges as chips…).
 
   const price = priceText(product, variant?.price, locale, labels);
   // Buy CTA is enabled only once a variant resolves and carries a real link

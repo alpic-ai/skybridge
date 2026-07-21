@@ -59,6 +59,9 @@ const productSchema = z.object({
   specs: z
     .array(SpecSchema)
     .describe("Product-specific facts to curate on (material, dimensions…)."),
+
+  // @todo: Add whatever custom fields the model should curate on as real types,
+  // not `specs` strings (e.g. `rating`, `discountPct`, `badges`).
 });
 
 const outputSchema = {

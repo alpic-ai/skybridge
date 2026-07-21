@@ -66,7 +66,9 @@ export function ProductCard({
             {formatPrice(price, locale)}
           </p>
         ) : null}
-        {/* @todo: Render product's `specs` (facts) here */}
+        {/* @todo: to show a custom Meta field (rating → stars, discountPct →
+            badge, badges → chips), add it to ProductCardProps, pass
+            card.<field> from the carousel view, and render it here. */}
       </div>
     </article>
   );

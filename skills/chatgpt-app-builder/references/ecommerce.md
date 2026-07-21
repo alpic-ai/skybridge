@@ -88,7 +88,7 @@ Only now, with the confirmed field inventory in `SPEC.md`, settle how the catalo
 - D2, framing: plain (default), each card boxed (border + surface), or the whole strip boxed. At most one, never both.
 
 **Product detail**:
-- D3, sections: which sections appear (identity, price, rating, description, specs, delivery) and their order, in particular what sits before or after the CTA (the skeleton puts specs after the "view on site" CTA).
+- D3, sections: which sections appear (identity, price, description, specs, custom fields) and their order, in particular what sits before or after the CTA
 - D4, thumbnail rail: whether the detail gallery shows the desktop thumbnail rail or stays swipe-only.
 - D5, specs presentation: how the product facts (`specs`): a simple `label: value` list (default), a two-column table, grouped sections, or inline chips/bullets. Match the shape to the data (a few labeled specs, many grouped specs, or short label-less highlights).
 
@@ -170,6 +170,7 @@ Keyword/filter search returning model-facing grounding. No view, so keep the out
 - [ ] `inputSchema.sort`: set the real sort options, or remove.
 - [ ] `inputSchema` filters: replace `priceRange` with one optional param per real facet.
 - [ ] `productSchema` / `outputSchema`: adjust the model-facing fields (`id`, `title`, `description`, `price`, `outOfStock`, `specs`).
+- [ ] `productSchema` custom fields (optional): add any typed field the model should curate on (e.g. `rating`, `discountPct`).
 - [ ] `search()`: query the data source with the input params and map each hit into `productSchema`; set `pages` and `totalHits`.
 - [ ] `narrate()` NEXT STEPS: adapt the post-search guidance to your flow (framing only; it carries no result data).
 
@@ -180,6 +181,7 @@ Takes the curated ids and returns the products for the carousel. The full produc
 - [ ] Product model (`Product`, `Variant`, `Option`, `Meta`): match your catalog. A `Product` groups sibling `Variant`s and declares the `Option` axes. `variants` is sparse (list only the combinations that exist; a missing one encodes a contingent variation). `card` (required) is what the carousel shows for the product, surfaced both to the view and to the model (`structuredContent` is projected from it).
 - [ ] `getProducts()`: fetch each id and map results into `Product[]` (mapping strategy below).
 - [ ] `toStructuredContent()`: trim each product's `card` and `options` into the model-facing grounding, dropping presentational fields (media, url). The view reads the full products from `_meta`.
+- [ ] `Meta` custom fields (optional): add any typed field the view renders (e.g. `rating`, `discountPct`).
 - [ ] `description`: adapt the wording and brand voice; the behavioral rules (order, no-repeat, accuracy) apply to any catalog.
 - [ ] `_meta`: the invoking and invoked status messages.
 - [ ] `view.csp`: add your image host to `resourceDomains` (product images) and the product site to `redirectDomains` (the detail CTA and the host "open in app" URL). `view` itself is already wired to the `carousel` view.
@@ -257,7 +259,7 @@ All user-facing text is centralized in `src/i18n.ts`, shared across every compon
 `render-carousel`'s inline view (`src/views/carousel/`), plus `ProductCard` (presentational), `ProductCarousel` (scroll-snap track, desktop nav buttons; reports on-screen cards), and `EmptyState`. The view reads `responseMetadata.products` (the tool's `_meta`), renders one card per product, and narrates the on-screen ones via `data-llm`.
 
 - [ ] `product-card.css.ts`: image aspect ratio, `object-fit`, and the surface behind the image, decided by looking at the phase 2 image sample: square vs portrait/landscape; `contain` for cutouts/mixed ratios vs `cover` for consistent photos; neutral grey behind transparent cutouts vs white for full-bleed photos. Use the same choice in the gallery. Also `TITLE_LINES` (title clamp).
-- [ ] `product-card.tsx` (D1): extra images from `media` (e.g. hover cross-fade to `media[1]`);
+- [ ] `product-card.tsx` (D1): extra images from `media` (e.g. hover cross-fade to `media[1]`); and any rich `Meta` field (rating, discount, badges), threaded through `ProductCardProps` and the carousel view, then rendered (stars, badge, chips).
 - [ ] `product-carousel.css.ts`: tuning knobs (`gap`, `CARDS_VISIBLE`, `CARDS_VISIBLE_COMPACT`, `COMPACT_MAX_WIDTH`).
 - [ ] Framing (D2): the `FRAMED` flag boxes each card (`product-card.tsx`, includes its skeleton) or the whole strip (`product-carousel.tsx`). Both `false` for plain (default); set at most one to `true`. If you enable one, tune the frame (padding, border, radius, shadow) in the matching `.css.ts`.
 
@@ -278,6 +280,7 @@ Two facts to preserve when customizing:
 - [ ] `detail.css.ts`: the two-column breakpoint, and whether the gallery is sticky on desktop.
 - [ ] CTA: `viewOnSite` deep-links to `variant.url ?? card.url` (`useOpenExternal`), and `setOpenInAppUrl` points the host "open in app" at the same URL. Needs the product site in the view CSP (phase 4).
 - [ ] Specs (D5): implement the agreed presentation.
+- [ ] Custom fields (D1): render the typed `Meta` fields you added, read variant-first (`variant ?? card`), in their agreed spots (rating by the title, discount by the price, badges as chips).
 
 ## Final gate
 

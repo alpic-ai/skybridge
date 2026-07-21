@@ -39,6 +39,9 @@ type Meta = {
   // Objective, product-specific facts (material, dimensions, capacity, care…),
   // rendered as-is. Each fact's label is optional.
   specs: Spec[];
+
+  // @todo: Add whatever custom fields the carousel should render as real types
+  // (e.g. `rating` → stars, `discountPct` → badge, `badges` → chips).
 };
 
 // One buyable product: full display Meta plus which value it takes on each axis.
