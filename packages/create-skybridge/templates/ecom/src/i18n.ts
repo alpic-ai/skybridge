@@ -13,12 +13,19 @@ const LABELS = {
     products: "Products",
     previous: "Previous",
     next: "Next",
+    // Detail view.
+    viewOnSite: "View on site",
+    selectOptions: "Select options",
+    priceOnRequest: "Price on request",
+    specifications: "Specifications",
+    readMore: "Read more",
+    readLess: "Read less",
   },
 } as const;
 
 const DEFAULT_LOCALE = "en";
 
-type Labels = (typeof LABELS)[typeof DEFAULT_LOCALE];
+export type Labels = (typeof LABELS)[typeof DEFAULT_LOCALE];
 
 export function useLabels(): Labels {
   const { locale } = useUser();

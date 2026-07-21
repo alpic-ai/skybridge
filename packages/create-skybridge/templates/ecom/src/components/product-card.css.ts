@@ -31,6 +31,25 @@ export const card = recipe({
   defaultVariants: { framed: false },
 });
 
+// Turns a whole card into one tap target (opens the detail view) using the
+// stretched-link pattern: the card renders normally, and a transparent <button>
+// overlays it. A real button (not role="button") gives keyboard + screen-reader
+// support for free, and it holds no flow content, so the markup stays valid
+// (a <button> wrapping the card's <article>/<p> would not be).
+export const cardClickable = style({ position: "relative" });
+
+export const cardButton = style({
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  padding: 0,
+  border: "none",
+  background: "none",
+  cursor: "pointer",
+  borderRadius: primitives.radius.m,
+});
+
 export const imageBox = style({
   position: "relative",
   aspectRatio: "1",
