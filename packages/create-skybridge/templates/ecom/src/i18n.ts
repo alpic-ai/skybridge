@@ -8,6 +8,7 @@ import { useUser } from "skybridge/web";
 const LABELS = {
   en: {
     outOfStock: "Out of stock",
+    combinationUnavailable: "Combination unavailable",
     noProducts: "No products to show.",
     carousel: "carousel",
     products: "Products",
@@ -16,7 +17,6 @@ const LABELS = {
     // Detail view.
     reference: "Ref.",
     viewOnSite: "View on site",
-    selectOptions: "Select options",
     priceOnRequest: "Price on request",
     specifications: "Specifications",
     readMore: "Read more",

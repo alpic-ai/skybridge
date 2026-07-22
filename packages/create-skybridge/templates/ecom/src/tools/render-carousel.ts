@@ -56,7 +56,10 @@ export type Variant = Meta & {
 // vary on (none for a single-variant product).
 export type Product = {
   id: string; // stable product key
-  options: Option[]; // the axes the variants vary on
+  // The axes the variants vary on, in display order. Order is semantic: the
+  // detail picker narrows availability top-down (each axis constrained by the
+  // ones before it), so put the imagery-driving axis (usually color) first.
+  options: Option[];
   // Only the variants that actually exist. A missing combination (e.g. no
   // { color: "black", size: "40" }) is simply absent from this list — that is how
   // contingent variations are expressed. Derive the selectable values for an axis
@@ -125,7 +128,8 @@ async function getProducts(_ids: string[]): Promise<Product[]> {
   //   - grouped: one `Product` per product; `card` = union of its variants, one picture per requested variant
   //   - one card per requested variant: `card` = that variant
   // Either way, set `variants` to ALL variants the source returns for the product;
-  // the detail view reads them so the client can switch variant.
+  // the detail view reads them so the client can switch variant. Order `options`
+  // with the imagery-driving axis first (see the Product type: order is semantic).
   //
   // Returns [] for now, so the carousel is empty.
   return [];

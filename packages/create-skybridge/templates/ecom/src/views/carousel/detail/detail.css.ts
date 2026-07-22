@@ -63,8 +63,6 @@ export const title = style({ color: colors.content.intense });
 
 export const price = style({ color: colors.content.intense });
 
-export const oos = style({ color: colors.common.error });
-
 // Product facts as a simple list: one line per fact, "label: value" (or just
 // the value when unlabeled). marginTop separates it from the section heading.
 // @todo: reshape freely (a table, grouped sections, inline chips…)
