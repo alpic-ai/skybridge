@@ -7,7 +7,8 @@ import * as styles from "./image-gallery.css";
 // breakpoint); swipe-only when false. Off by default. When true, tune the rail
 // width / thumb size in image-gallery.css.ts. The rail is capped to the image
 // height and scrolls its excess; deferred polish (add if it earns it): an
-// edge-fade mask and auto-centering the active thumb.
+// edge-fade mask and auto-centering the active thumb. Progress bar is hidden
+// when thumbnail rail is active.
 const THUMBNAIL_RAIL: boolean = false;
 
 function Chevron({ direction }: { direction: "left" | "right" }) {
@@ -32,9 +33,9 @@ function Chevron({ direction }: { direction: "left" | "right" }) {
 /**
  * Product image gallery: a native scroll-snap track with prev/next chevrons and
  * a progress bar; the current index is read from scroll position (no library).
- * With the rail on, a desktop thumbnail rail is added as a second controller of
- * the SAME track (shared index, click = scroll). Mobile is always the swipe
- * track.
+ * With the rail on, a desktop thumbnail rail controls the SAME track (shared
+ * index, click = scroll), and the progress bar is hidden where the rail shows
+ * (desktop) so the two never appear together. Mobile is always the swipe track.
  */
 export function ImageGallery({ media, alt }: { media: string[]; alt: string }) {
   const labels = useLabels();

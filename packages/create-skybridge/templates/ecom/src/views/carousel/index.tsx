@@ -21,7 +21,7 @@ import { useToolInfo } from "../../helpers.js";
 import { useLabels } from "../../i18n";
 import { formatPrice } from "../../lib/format";
 import type { Product } from "../../tools/render-carousel.js";
-import type { Attribute, Price } from "../../types.js";
+import type { Price, Spec } from "../../types.js";
 import { DetailView } from "./detail";
 
 const SKELETON_COUNT = 4;
@@ -43,7 +43,7 @@ type VariantSpec = {
   selection: Record<string, string>; // option label -> chosen value label
   price?: Price;
   available: boolean;
-  attributes: Attribute[];
+  specs: Spec[];
 };
 type ProductSpec = { id: string; title: string; variants: VariantSpec[] };
 type ViewState = {
@@ -78,7 +78,7 @@ function buildProductSpec(product: Product): ProductSpec {
       selection,
       price: variant.price,
       available: !variant.outOfStock,
-      attributes: variant.attributes,
+      specs: variant.specs,
     });
   }
   return { id: product.id, title: product.card.title, variants };
