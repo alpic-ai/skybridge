@@ -14,7 +14,8 @@ export const States = () => (
   <div style={row}>
     <Chip label="M" />
     <Chip label="L" selected />
-    <Chip label="XL" disabled />
+    <Chip label="XL" outOfStock /> {/* exists, sold out: clickable */}
+    <Chip label="XXL" nonExistent /> {/* combination does not exist */}
   </div>
 );
 

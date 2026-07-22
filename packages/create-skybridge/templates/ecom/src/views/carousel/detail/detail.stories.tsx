@@ -29,22 +29,31 @@ function galleryMedia(primaryFill: string): string[] {
 const DESCRIPTION =
   "A relaxed-fit jacket in water-repellent cotton.\n\nDropped shoulders, a two-way zip, and ribbed cuffs. Fully lined, with two zip pockets at the front and one inside.";
 
-// Two axes with a sparse variant set: {black,M}, {black,L}, {sand,M} exist —
-// so choosing "Sand" disables "L".
+// One story, every picker behavior:
+// - Hole in the matrix: {sand,L} does not exist, so under Sand, L is
+//   hard-disabled; switching to Sand while L is selected snaps Size to M.
+// - Sold out: {black,L} renders struck but selectable; the CTA locks as
+//   "Out of stock".
+// - Axis not applicable: the indigo colorway is one-size (no `size` key), so
+//   choosing "Indigo" hides the Size row; indigo resolves and stays buyable.
 function jacket(
   id: string,
   color: string,
   colorLabel: string,
-  size: string,
+  size: string | null,
+  outOfStock = false,
 ): Product["variants"][number] {
+  const fill =
+    color === "sand" ? "d8c7a8" : color === "indigo" ? "3f4a8a" : "2b2b2b";
   return {
     id,
-    selection: { color, size },
+    selection: size == null ? { color } : { color, size },
     title: `Field jacket — ${colorLabel}`,
     description: DESCRIPTION,
-    price: { amount: color === "sand" ? 249 : 229, currency: "EUR" },
-    media: galleryMedia(color === "sand" ? "d8c7a8" : "2b2b2b"),
+    price: { amount: color === "black" ? 229 : 249, currency: "EUR" },
+    media: galleryMedia(fill),
     url: "https://example.com/jacket",
+    outOfStock,
     specs: [
       { label: "Material", value: "Water-repellent cotton" },
       { label: "Fit", value: "Relaxed" },
@@ -62,6 +71,7 @@ const PRODUCT: Product = {
       values: [
         { id: "black", label: "Black", media: shot("2b2b2b") },
         { id: "sand", label: "Sand", media: shot("d8c7a8") },
+        { id: "indigo", label: "Indigo", media: shot("3f4a8a") },
       ],
     },
     {
@@ -75,8 +85,9 @@ const PRODUCT: Product = {
   ],
   variants: [
     jacket("fj-black-m", "black", "Black", "m"),
-    jacket("fj-black-l", "black", "Black", "l"),
+    jacket("fj-black-l", "black", "Black", "l", true),
     jacket("fj-sand-m", "sand", "Sand", "m"),
+    jacket("fj-indigo", "indigo", "Indigo", null),
   ],
   card: {
     title: "Field jacket",
