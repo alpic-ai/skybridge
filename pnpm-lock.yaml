@@ -1398,6 +1398,9 @@ importers:
       superjson:
         specifier: ^2.2.6
         version: 2.2.6
+      tldts:
+        specifier: ^7.0.19
+        version: 7.0.19
       yaml:
         specifier: ^2.9.0
         version: 2.9.0
