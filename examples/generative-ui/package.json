@@ -2,7 +2,7 @@
   "name": "skybridge-generative-ui-example",
   "version": "0.0.1",
   "private": true,
-  "description": "Generative UI with json-render and Skybridge",
+  "description": "Generative UI - JSON Renderer with json-render and Skybridge",
   "type": "module",
   "scripts": {
     "dev": "skybridge dev",
