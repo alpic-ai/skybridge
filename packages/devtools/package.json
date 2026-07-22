@@ -67,7 +67,7 @@
     "lucide-react": "^1.25.0",
     "motion": "^12.42.2",
     "nuqs": "^2.9.1",
-    "postcss": "^8.5.19",
+    "postcss": "^8.5.20",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-resizable-panels": "^4.12.2",
