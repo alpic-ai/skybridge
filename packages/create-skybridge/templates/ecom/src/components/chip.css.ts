@@ -2,8 +2,9 @@ import { style } from "@vanilla-extract/css";
 import { recipe } from "@vanilla-extract/recipes";
 import { colors, primitives } from "../design/tokens";
 
-// A selectable pill used for option values (sizes, colors…). `selected` and
-// `disabled` are driven by the variant picker from the sparse variant list.
+// A selectable pill used for option values (sizes, colors…). `selected`,
+// `outOfStock` and `nonExistent` are driven by the variant picker from the
+// sparse variant list.
 // @todo: tune the chip to your brand (radius, borders, selected treatment).
 export const chip = recipe({
   base: {
@@ -32,18 +33,24 @@ export const chip = recipe({
       },
       false: {},
     },
-    disabled: {
-      // Unreachable value given the other choices: greyed and struck, but kept
-      // visible so the client sees the axis exists (never silently hidden).
+    outOfStock: {
+      // Struck but still clickable; the buy CTA carries the state.
       true: {
-        cursor: "not-allowed",
-        opacity: 0.4,
+        color: colors.content.subtle,
         textDecoration: "line-through",
       },
       false: {},
     },
+    nonExistent: {
+      // Faded and non-interactive, distinct from sold out above.
+      true: {
+        opacity: 0.35,
+        cursor: "default",
+      },
+      false: {},
+    },
   },
-  defaultVariants: { selected: false, disabled: false },
+  defaultVariants: { selected: false, outOfStock: false, nonExistent: false },
 });
 
 // Small color/material swatch shown before the label on image chips.
