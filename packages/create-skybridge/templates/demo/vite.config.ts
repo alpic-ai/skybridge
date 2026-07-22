@@ -6,6 +6,12 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [skybridge(), react(), tailwindcss()],
+  server: {
+    forwardConsole: {
+      unhandledErrors: true,
+      logLevels: ["error"],
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

@@ -48,6 +48,10 @@ Some hooks only work on one host. Skybridge picks the runtime at load, and calli
 
 [`useDownload`](/api-reference/use-download), [`useRequestModal`](/api-reference/use-request-modal), and [`setDisplayMode`](/api-reference/use-display-mode#setdisplaymode) must be user-initiated. Hosts reject calls fired from an effect on mount, with no visible result. Trigger them from a click or menu action instead.
 
+## Mobile or desktop app logs cannot be accessed
+
+When your app runs in the ChatGPT or Claude desktop or mobile app, the [view](/build/view) has no console you can open. Run the dev server through the [tunnel](/test/tunnel) and update `forwardConsole` in `vite.config.ts` to forward the view's logs to your terminal: see [Read View Logs on Mobile or Desktop Apps](/test/tunnel#read-view-logs-on-mobile-or-desktop-apps).
+
 ## The view loads in DevTools but breaks in a real host
 
 [DevTools](/test/devtools) runs a loose CSP, so violations don't surface locally. Production enforces the policy and blocks any origin the view didn't declare. List every domain the view reaches in the tool's CSP config, then confirm through the [tunnel](/test/tunnel) or the [Audit](/test/audit). See [Configure CSP](/guides/csp) for the field reference.

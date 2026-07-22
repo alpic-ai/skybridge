@@ -35,6 +35,7 @@ export const viewsDevServer = async (
     build,
     preview,
     plugins: userPlugins = [],
+    server: userServer,
     ...devConfig
   } = configResult?.config || {};
 
@@ -45,6 +46,9 @@ export const viewsDevServer = async (
     configFile: false,
     appType: "custom",
     server: {
+      // Keep the user's server options (e.g. forwardConsole) but force the
+      // three settings skybridge's Express integration requires.
+      ...userServer,
       allowedHosts: true,
       middlewareMode: true,
       hmr: {
