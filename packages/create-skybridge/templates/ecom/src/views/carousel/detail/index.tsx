@@ -12,7 +12,7 @@ import {
   resolveVariant,
   type Selection,
 } from "../../../lib/variants.js";
-import type { Product } from "../../../tools/render-carousel.js";
+import type { Product, Variant } from "../../../tools/render-carousel.js";
 import * as styles from "./detail.css";
 
 // Price to show: the resolved variant's price, else the range across variants
@@ -54,22 +54,30 @@ function priceText(
 // scoped to the visible selection.
 function grounding(
   product: Product,
+  variant: Variant | undefined,
   title: string,
   price: string,
   selection: Selection,
-  outOfStock: boolean,
+  unpurchasable: boolean,
   labels: Labels,
 ): string {
   const parts = [`The user is viewing "${title}" (product id: ${product.id}).`];
   const chosen: string[] = [];
   for (const option of product.options) {
-    let label = "not selected";
     const valueId = selection[option.id];
+    let label: string | undefined;
     for (const value of option.values) {
       if (value.id === valueId) {
         label = value.label;
         break;
       }
+    }
+    if (label === undefined) {
+      // Axis skipped by the shown variant vs simply not picked yet.
+      label =
+        variant != null && variant.selection[option.id] == null
+          ? "not applicable"
+          : "not selected";
     }
     chosen.push(`${option.label}: ${label}`);
   }
@@ -77,8 +85,11 @@ function grounding(
     parts.push(`Selected — ${chosen.join(", ")}.`);
   }
   parts.push(`Price: ${price}.`);
-  if (outOfStock) {
-    parts.push(labels.outOfStock);
+  if (unpurchasable) {
+    // Sold-out real variant vs a combination that does not exist.
+    parts.push(
+      variant != null ? labels.outOfStock : labels.combinationUnavailable,
+    );
   }
   return parts.join(" ");
 }
@@ -98,25 +109,27 @@ export function DetailView({ product }: { product: Product }) {
     initialSelection(product),
   );
 
-  const variant = resolveVariant(product, selection);
-  // Fall back to the card for display fields until a variant resolves.
-  const displayTitle = variant?.title ?? product.card.title;
-  const description = variant?.description ?? product.card.description;
-  const media = variant?.media.length ? variant.media : product.card.media;
-  const specs = variant?.specs ?? product.card.specs;
-  const outOfStock = variant?.outOfStock ?? product.card.outOfStock ?? false;
-  const url = variant?.url ?? product.card.url;
+  // The exact variant for the selection; card fields fill in when none
+  // resolves (the applyChoice edge case, or a product with no variants).
+  const shown = resolveVariant(product, selection);
+  const displayTitle = shown?.title ?? product.card.title;
+  const description = shown?.description ?? product.card.description;
+  const media = shown?.media.length ? shown.media : product.card.media;
+  const specs = shown?.specs ?? product.card.specs;
+  // Sold out, or no variant resolved.
+  const unpurchasable = shown ? (shown.outOfStock ?? false) : true;
+  const url = shown?.url ?? product.card.url;
   // The shown item's id: the resolved variant's SKU, else the product id.
-  const reference = variant?.id ?? product.id;
-  // @todo: read any custom Meta fields you added the same way (variant first,
-  // then card), e.g. `const rating = variant?.rating ?? product.card.rating;`,
+  const reference = shown?.id ?? product.id;
+  // @todo: read any custom Meta fields you added the same way (shown first,
+  // then card), e.g. `const rating = shown?.rating ?? product.card.rating;`,
   // then render them in the agreed spot (rating by the title, discount by the
   // price, badges as chips…).
 
-  const price = priceText(product, variant?.price, locale, labels);
-  // Buy CTA is enabled only once a variant resolves and carries a real link
+  const price = priceText(product, shown?.price, locale, labels);
+  // Buy CTA is enabled only for an exact, in-stock variant with a real link
   // (an empty url would leave the button enabled but dead).
-  const canBuy = variant != null && Boolean(url);
+  const canBuy = shown != null && Boolean(url) && !unpurchasable;
 
   // Point the host's fullscreen "Open in app" affordance at the selected
   // variant's page. Apps-SDK only; MCP Apps hosts reject, so ignore that.
@@ -131,10 +144,11 @@ export function DetailView({ product }: { product: Product }) {
       className={styles.detail}
       data-llm={grounding(
         product,
+        shown,
         displayTitle,
         price,
         selection,
-        outOfStock,
+        unpurchasable,
         labels,
       )}
     >
@@ -172,12 +186,6 @@ export function DetailView({ product }: { product: Product }) {
             {price}
           </p>
 
-          {outOfStock ? (
-            <p className={cx(text({ style: "bodyS" }), styles.oos)}>
-              {labels.outOfStock}
-            </p>
-          ) : null}
-
           <VariantPicker
             product={product}
             selection={selection}
@@ -186,13 +194,19 @@ export function DetailView({ product }: { product: Product }) {
 
           {description ? <ExpandableText>{description}</ExpandableText> : null}
 
+          {/* Sold-out and unresolved selections stay composable; the CTA locks
+              and its label names the cause. */}
           <button
             type="button"
             className={cx(styles.cta, sprinkles({ mt: "3xs" }))}
             disabled={!canBuy}
             onClick={canBuy && url ? () => openExternal(url) : undefined}
           >
-            {variant ? labels.viewOnSite : labels.selectOptions}
+            {shown
+              ? unpurchasable
+                ? labels.outOfStock
+                : labels.viewOnSite
+              : labels.combinationUnavailable}
           </button>
 
           {/* Product facts as a simple list, after the CTA: one "label: value"

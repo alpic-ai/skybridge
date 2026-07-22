@@ -1,6 +1,6 @@
 import { text } from "../design/tokens";
 import { cx } from "../lib/cx";
-import { type Selection, selectableValues } from "../lib/variants.js";
+import { applyChoice, axisStates, type Selection } from "../lib/variants.js";
 import type { Product } from "../tools/render-carousel.js";
 import { Chip } from "./chip";
 import * as styles from "./variant-picker.css";
@@ -12,10 +12,11 @@ type VariantPickerProps = {
 };
 
 /**
- * Renders one section per option axis and resolves the client's choices against
- * the product's SPARSE variant list. Values with no surviving variant (given
- * the other choices) are disabled, not hidden. Selecting a value that strands an
- * earlier choice drops that choice so the selection stays reachable.
+ * Renders one section per option axis. Chip states come from axisStates
+ * (lib/variants.ts, top-down): nonexistent values are hard-disabled, sold-out
+ * ones struck but clickable (the CTA names the cause), and an axis that does
+ * not apply hides its row. A pick goes through applyChoice, which keeps
+ * still-existing later choices and snaps the rest onto a real variant.
  *
  * This is the in-place model: every axis is local state, no remount. @todo: if
  * a catalog models an axis (e.g. color) as separate products, promote it to a
@@ -26,32 +27,14 @@ export function VariantPicker({
   selection,
   onChange,
 }: VariantPickerProps) {
-  function choose(axisId: string, valueId: string) {
-    const next: Selection = { ...selection, [axisId]: valueId };
-    // Repair: drop any other-axis choice the new pick just made unreachable.
-    for (const option of product.options) {
-      if (option.id === axisId) {
-        continue;
-      }
-      const chosen = next[option.id];
-      if (
-        chosen != null &&
-        !selectableValues(product, option.id, next).has(chosen)
-      ) {
-        delete next[option.id];
-      }
-    }
-    onChange(next);
-  }
-
   return (
     <div className={styles.picker}>
       {product.options.map((option) => {
-        // A single-value axis is not a choice; skip it.
-        if (option.values.length <= 1) {
+        // Empty map: the axis does not apply to the current configuration.
+        const states = axisStates(product, option.id, selection);
+        if (states.size === 0) {
           return null;
         }
-        const reachable = selectableValues(product, option.id, selection);
         return (
           <div
             key={option.id}
@@ -69,8 +52,13 @@ export function VariantPicker({
                   label={value.label}
                   media={value.media}
                   selected={selection[option.id] === value.id}
-                  disabled={!reachable.has(value.id)}
-                  onSelect={() => choose(option.id, value.id)}
+                  nonExistent={!states.has(value.id)}
+                  outOfStock={states.get(value.id) === "soldOut"}
+                  onSelect={() =>
+                    onChange(
+                      applyChoice(product, selection, option.id, value.id),
+                    )
+                  }
                 />
               ))}
             </div>

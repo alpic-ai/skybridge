@@ -3,12 +3,14 @@ import { initialSelection, type Selection } from "../lib/variants.js";
 import type { Product } from "../tools/render-carousel.js";
 import { VariantPicker } from "./variant-picker";
 
-// A sparse catalog: {black,40}, {black,42}, {white,40} exist — but not
-// {white,42}. Picking "White" therefore disables "42".
+// A sparse catalog: {white,42} does not exist, so "42" is hard-disabled under
+// "White"; {black,42} is sold out, so it renders struck (yet clickable) under
+// "Black".
 function variant(
   id: string,
   color: string,
   size: string,
+  outOfStock = false,
 ): Product["variants"][number] {
   return {
     id,
@@ -17,6 +19,7 @@ function variant(
     price: { amount: 120, currency: "EUR" },
     media: [],
     specs: [],
+    outOfStock,
   };
 }
 
@@ -42,7 +45,7 @@ const PRODUCT: Product = {
   ],
   variants: [
     variant("s-b-40", "black", "40"),
-    variant("s-b-42", "black", "42"),
+    variant("s-b-42", "black", "42", true),
     variant("s-w-40", "white", "40"),
   ],
   card: { title: "Sneaker", media: [], specs: [] },
