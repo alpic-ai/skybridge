@@ -80,9 +80,14 @@ It's one plain [Playwright](https://playwright.dev) (sync) script, driven by [`u
 
 The driver presses the widget's real buttons (Playwright reaches across the host's cross-origin iframes) and only falls back to the postMessage drive protocol when a button isn't reachable. Real clicks matter: ChatGPT gates the follow-up and open-external effects behind a genuine user gesture, which postMessage can't supply.
 
+The `notte/` files:
+
 | File                    | What it does                                                                   |
 | ----------------------- | ----------------------------------------------------------------------------- |
-| `conformance.py`        | The driver: `--host chatgpt\|claude`, `--mode local\|notte`, gates on the baseline |
+| `conformance.py`        | Entry point: the stepper loop, browser backends, baseline gate, and CLI       |
+| `chatgpt.py`            | ChatGPT host adapter (prompt, chrome, follow-up check, open-link dialog)       |
+| `claude.py`             | Claude host adapter (prompt, cookie banner, follow-up check, permission dialogs) |
+| `utils.py`              | Shared result models, `HostConfig`, and host-agnostic widget/overlay helpers   |
 | `chatgpt_expected.json` | Expected verdict per hook on ChatGPT: the CI baseline                          |
 | `claude_expected.json`  | Expected verdict per hook on Claude                                            |
 | `create-profile.ts`     | Creates/reopens a Notte profile so you can log into the host account           |
