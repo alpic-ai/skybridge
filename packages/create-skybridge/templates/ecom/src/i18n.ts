@@ -14,6 +14,7 @@ const LABELS = {
     previous: "Previous",
     next: "Next",
     // Detail view.
+    reference: "Ref.",
     viewOnSite: "View on site",
     selectOptions: "Select options",
     priceOnRequest: "Price on request",

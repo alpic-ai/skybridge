@@ -45,9 +45,10 @@ function jacket(
     price: { amount: color === "sand" ? 249 : 229, currency: "EUR" },
     media: galleryMedia(color === "sand" ? "d8c7a8" : "2b2b2b"),
     url: "https://example.com/jacket",
-    attributes: [
-      { name: "Material", value: "Water-repellent cotton" },
-      { name: "Fit", value: "Relaxed" },
+    specs: [
+      { label: "Material", value: "Water-repellent cotton" },
+      { label: "Fit", value: "Relaxed" },
+      { value: "Machine washable" }, // label-less fact (renders value only)
     ],
   };
 }
@@ -81,7 +82,7 @@ const PRODUCT: Product = {
     title: "Field jacket",
     price: { amount: 229, currency: "EUR" },
     media: [shot("2b2b2b")],
-    attributes: [],
+    specs: [],
   },
 };
 
@@ -100,14 +101,14 @@ const SIMPLE: Product = {
       price: { amount: 39, currency: "EUR" },
       media: [shot("e1e1e1")],
       url: "https://example.com/tote",
-      attributes: [{ name: "Material", value: "Canvas" }],
+      specs: [{ label: "Material", value: "Canvas" }],
     },
   ],
   card: {
     title: "Canvas tote",
     price: { amount: 39, currency: "EUR" },
     media: [shot("e1e1e1")],
-    attributes: [],
+    specs: [],
   },
 };
 
