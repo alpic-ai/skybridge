@@ -1,11 +1,6 @@
 import { z } from "zod";
 import { CAROUSEL_MAX_SIZE, CAROUSEL_RANGE } from "../config.js";
-import {
-  type Attribute,
-  AttributeSchema,
-  type Price,
-  PriceSchema,
-} from "../types.js";
+import { type Price, PriceSchema, type Spec, SpecSchema } from "../types.js";
 
 // The `render-carousel` tool: takes the IDs the model curated and returns the
 // matching products for the carousel view to render.
@@ -41,8 +36,12 @@ type Meta = {
   media: string[]; // images for this item; media[0] is the primary/cover
   url?: string; // link to this item's external product page
   outOfStock?: boolean; // true = not purchasable
-  // Facts to display: spec rows, promo labels, etc.
-  attributes: Attribute[];
+  // Objective, product-specific facts (material, dimensions, capacity, care…),
+  // rendered as-is. Each fact's label is optional.
+  specs: Spec[];
+
+  // @todo: Add whatever custom fields the carousel should render as real types
+  // (e.g. `rating` → stars, `discountPct` → badge, `badges` → chips).
 };
 
 // One buyable product: full display Meta plus which value it takes on each axis.
@@ -101,13 +100,13 @@ const outputSchema = {
         description: z.string().optional(),
         price: PriceSchema.optional(),
         outOfStock: z.boolean(),
-        attributes: z
-          .array(AttributeSchema)
-          .describe("Product facts (specs, promo labels…)."),
+        specs: z
+          .array(SpecSchema)
+          .describe("Product-specific facts (material, dimensions, care…)."),
       }),
     )
     .describe(
-      "The products shown in the carousel, in display order. For your reference only — to curate, compare, and answer follow-ups. Ground every claim in this data; never invent attributes.",
+      "The products shown in the carousel, in display order. For your reference only — to curate, compare, and answer follow-ups. Ground every claim in this data; never invent facts.",
     ),
 };
 
@@ -162,7 +161,7 @@ function toStructuredContent(products: Product[]): RenderOutput {
       price: card.price,
       outOfStock: card.outOfStock ?? false,
       options,
-      attributes: card.attributes,
+      specs: card.specs,
     });
   }
 
@@ -191,7 +190,7 @@ Pass the IDs of the ${CAROUSEL_RANGE} products you chose, in display order (most
 Recommend in carousel order so the client can follow along. The cards already show image, title, price, and key facts, so do not repeat them: add useful analysis tied to the client's need. Suggest a refinement the client has not addressed yet (from the available filters), never one they already used.
 
 ## Accuracy
-Use only the data returned for each product. Never invent attributes, materials, or availability. If the client asks about something not present, open that product's detail or search again before answering.`,
+Use only the data returned for each product. Never invent facts, materials, or availability. If the client asks about something not present, open that product's detail or search again before answering.`,
   annotations: {
     readOnlyHint: true,
     openWorldHint: false,
