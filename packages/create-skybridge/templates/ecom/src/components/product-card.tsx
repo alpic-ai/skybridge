@@ -66,8 +66,9 @@ export function ProductCard({
             {formatPrice(price, locale)}
           </p>
         ) : null}
-        {/* @todo: extra fields. Render catalog-specific data here, e.g. from the
-            product's `attributes`: ratings, discounts, tags, badges. */}
+        {/* @todo: to show a custom Meta field (rating → stars, discountPct →
+            badge, badges → chips), add it to ProductCardProps, pass
+            card.<field> from the carousel view, and render it here. */}
       </div>
     </article>
   );

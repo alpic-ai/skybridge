@@ -50,8 +50,8 @@ globalStyle(`${track}::-webkit-scrollbar`, { display: "none" });
 export const slide = style({
   flex: "0 0 100%",
   scrollSnapAlign: "start",
-  // Reserve a square box so images load without shifting the page. @todo: match
-  // the carousel card's aspect ratio / fit if you changed them there.
+  // Reserve the box so images load without shifting the page. @todo: use the
+  // same aspect ratio / fit you chose for the card from the real image sample.
   aspectRatio: "1",
   backgroundColor: colors.surface.subtle,
 });

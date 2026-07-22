@@ -52,20 +52,24 @@ export const cardButton = style({
 
 export const imageBox = style({
   position: "relative",
+  // @todo: aspect ratio for product imagery. Do not assume: fetch a sample of
+  // the catalog's real images and pick from what they actually are (square,
+  // portrait for fashion, landscape…). Keep it consistent with the gallery.
   aspectRatio: "1",
   overflow: "hidden",
   borderRadius: primitives.radius.m,
-  // Stage behind the product image. @todo: pick the surface token that suits
-  // your imagery (a neutral grey for transparent cutouts, `extraLight`/white
-  // for full-bleed photos).
+  // Stage behind the product image. @todo: pick the surface from that same image
+  // sample (a neutral grey for transparent cutouts, `extraLight`/white for
+  // full-bleed photos).
   backgroundColor: colors.surface.subtle,
 });
 
 export const image = style({
   width: "100%",
   height: "100%",
-  // @todo: `contain` never crops; switch to `cover` for uniform, bleed-friendly
-  // cutout images.
+  // @todo: object-fit, from that same image sample: `contain` never crops (good
+  // for cutouts or mixed ratios); `cover` fills for a uniform grid (good for
+  // consistent, bleed-friendly photos).
   objectFit: "contain",
   display: "block",
   // Keep image drag from hijacking the swipe/scroll gesture.
