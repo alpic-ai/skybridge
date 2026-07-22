@@ -30,5 +30,5 @@ export function resolveServerOrigin(
 /** Resolve the registrable host used as the default widget security domain. */
 export function resolveWidgetDomain(serverOrigin: string): string {
   const hostname = new URL(serverOrigin).hostname;
-  return getDomain(hostname) ?? serverOrigin;
+  return getDomain(hostname, { allowPrivateDomains: true }) ?? serverOrigin;
 }
