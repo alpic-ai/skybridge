@@ -20,7 +20,7 @@
     "react-dom": "^19.2.7",
     "skybridge": "^1.1.0",
     "stripe": "^18.5.0",
-    "vite": "^7.3.5",
+    "vite": "^8.1.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {

@@ -6,6 +6,12 @@ import { defineConfig, type PluginOption } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    forwardConsole: {
+      unhandledErrors: true,
+      logLevels: ["error"],
+    },
+  },
   plugins: [skybridge() as PluginOption, tailwindcss(), react()],
   resolve: {
     alias: {

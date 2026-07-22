@@ -4,6 +4,12 @@ import { skybridge } from "skybridge/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  server: {
+    forwardConsole: {
+      unhandledErrors: true,
+      logLevels: ["error"],
+    },
+  },
   plugins: [skybridge(), react()],
   resolve: {
     alias: {

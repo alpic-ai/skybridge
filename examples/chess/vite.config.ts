@@ -5,6 +5,12 @@ import { skybridge } from "skybridge/vite";
 import { defineConfig, type PluginOption } from "vite";
 
 export default defineConfig({
+  server: {
+    forwardConsole: {
+      unhandledErrors: true,
+      logLevels: ["error"],
+    },
+  },
   plugins: [skybridge() as PluginOption, react(), tailwindcss()],
   resolve: {
     alias: {

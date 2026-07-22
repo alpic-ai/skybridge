@@ -56,6 +56,24 @@ Creating apps requires developer mode to be enabled: **Settings → Apps → Adv
 
 The Alpic tunnel URL is stable across restarts: register the app or connector once. Hot reload works through it too: view edits show up in the host on save, on desktop and mobile alike.
 
+## Read View Logs on Mobile or Desktop Apps
+
+When your app runs in the ChatGPT or Claude desktop or mobile app, there's no console to open, so the [view](/build/view)'s logs are out of reach. Vite's [`forwardConsole`](https://vite.dev/config/server-options#server-forwardconsole) prints them in the terminal running your dev server. The [scaffold](/get-started/quickstart#scaffold-your-project) limits it to errors: add the levels you want to `logLevels` in `vite.config.ts`.
+
+```ts vite.config.ts
+server: {
+  forwardConsole: {
+    unhandledErrors: true,
+    logLevels: ["error"], // [!code --]
+    logLevels: ["error", "warn", "log"], // [!code ++]
+  },
+},
+```
+
+<Info>
+A log placed in a component's render body appears twice per render: views run under React `StrictMode` in development, which invokes each render twice.
+</Info>
+
 ## Limitation
 
 ChatGPT and Claude cache your tool definitions at registration. When the server schema changes (a [tool](/build/tools) added or renamed, an [input schema](/api-reference/register-tool#inputschema-outputschema) edited), refresh the app or connector in the host so the model sees the new definitions.
