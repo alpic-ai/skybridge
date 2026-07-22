@@ -61,7 +61,8 @@ type ToolConfig = {
   outputSchema?: ZodRawShape; // Zod shape; types structuredContent
   annotations?: ToolAnnotations; // standard MCP hints
   view?: ViewConfig; // bind a view to render the result
-  securitySchemes?: SecurityScheme[]; // declare per-tool auth
+  auth?: { allowsAnonymous?: boolean; scopes?: string[] }; // per-tool auth
+  securitySchemes?: SecurityScheme[]; // low-level alternative to `auth` (mutually exclusive)
   _meta?: ToolMeta; // extra metadata
 };
 ```
@@ -144,9 +145,22 @@ type ViewCsp = {
 | `redirectDomains` | `openExternal` targets that skip the safe-link modal. |
 | `baseUriDomains` | `<base href>` origins (MCP Apps only). |
 
+### `auth`
+
+The recommended way to declare a tool's auth. With the [`oauth`](/api-reference/mcp-server#constructor) provider option set, Skybridge enforces the declaration for you (anonymous or under-scoped calls are rejected before the handler runs).
+
+| Value | Meaning |
+| --- | --- |
+| _omitted_ (default) | Requires sign-in, the secure default when the server has an `oauth` provider. |
+| `{ allowsAnonymous: true }` | Callable signed out; uses the token when one is present. |
+| `{ scopes: [...] }` | Requires sign-in with every listed scope. |
+| `{ allowsAnonymous: true, scopes: [...] }` | Callable signed out; a signed-in caller missing a listed scope gets a step-up challenge (`insufficient_scope`) instead of the anonymous path. |
+
+Declaring any `{ allowsAnonymous: true }` tool turns the server [mixed](/build/auth#mix-public-and-authenticated-tools): it serves anonymous callers, and every other tool stays sign-in-gated by default. Requiring sign-in (`{ scopes }`) needs the `oauth` provider and throws without it; `{ allowsAnonymous: true }` works either way. Omit `auth` entirely for the secure default (sign-in required whenever the server has auth).
+
 ### `securitySchemes`
 
-Declare which auth a tool supports so clients can label it public vs. requires-sign-in before invocation, and request the right scopes during sign-in.
+The low-level form behind `auth`, for cases it can't express (several alternative `oauth2` schemes, or pure `noauth` that never accepts a token). Mutually exclusive with `auth`.
 
 ```ts
 type SecurityScheme =
@@ -159,7 +173,7 @@ type SecurityScheme =
 - **`noauth` and `oauth2` together** means "works anonymously, but auth unlocks more."
 
 <Warning>
-`securitySchemes` is client-facing metadata, not self-enforcing. Pair it with an auth middleware ([`requireBearerAuth`](/api-reference/require-bearer-auth) or [`optionalBearerAuth`](/api-reference/optional-bearer-auth)) to authenticate requests, and enforce the tool's own requirements in the handler from `extra.authInfo`.
+With the [`oauth`](/api-reference/mcp-server#constructor) provider option, Skybridge enforces `securitySchemes` like `auth`. With hand-wired middleware ([`requireBearerAuth`](/api-reference/require-bearer-auth) or [`optionalBearerAuth`](/api-reference/optional-bearer-auth)) it stays client-facing metadata: enforce the tool's requirements in the handler from `extra.authInfo`.
 </Warning>
 
 ### `_meta`

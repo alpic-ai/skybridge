@@ -33,8 +33,14 @@ import express, {
   type RequestHandler,
 } from "express";
 import type { OAuthConfig } from "./auth/index.js";
-import { setupOAuth } from "./auth/setup.js";
+import {
+  authToSecuritySchemes,
+  evaluateSecuritySchemes,
+  inBandChallengeResult,
+} from "./auth/security-schemes.js";
+import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
 import { createApp } from "./express.js";
+import { hostFromUserAgent } from "./host.js";
 import { createMiddlewareEntry } from "./metric.js";
 import type {
   McpExtra,
@@ -162,6 +168,21 @@ export interface ViewConfig {
 export type SecurityScheme =
   | { type: "noauth" }
   | { type: "oauth2"; scopes?: string[] };
+
+/**
+ * Declarative per-tool auth. Enforced when the server has an `oauth` provider:
+ * anonymous or under-scoped calls are rejected before the handler runs. Omit
+ * `auth` entirely for the secure default (sign-in required, no specific scope).
+ */
+export type ToolAuth = {
+  /**
+   * When `true`, the tool is callable signed out; the token is still used when
+   * one is present. Omit (or `false`) to require sign-in.
+   */
+  allowsAnonymous?: boolean;
+  /** OAuth scopes the caller's token must carry to invoke the tool. */
+  scopes?: string[];
+};
 
 /**
  * Options forwarded to the built-in `express.json()` body parser. Derived
@@ -338,7 +359,7 @@ type AddTool<
   }
 >;
 
-interface ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> {
+interface ToolConfigBase<TInput extends ZodRawShapeCompat | AnySchema> {
   name: string;
   title?: string;
   description?: string;
@@ -346,16 +367,29 @@ interface ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> {
   outputSchema?: ZodRawShapeCompat | AnySchema;
   annotations?: ToolAnnotations;
   view?: ViewConfig;
-  /**
-   * Declares which auth schemes this tool supports (e.g. `noauth`, `oauth2`).
-   * Lets clients label tools that require sign-in before calling, and pass
-   * the right scopes through the OAuth flow. Listing both `noauth` and
-   * `oauth2` signals that the tool works for anonymous callers and gives
-   * enhanced behavior to authenticated ones.
-   */
-  securitySchemes?: SecurityScheme[];
   _meta?: ToolMeta;
 }
+
+/**
+ * The auth face of a tool config: either the high-level `auth` shorthand or the
+ * low-level `securitySchemes` escape hatch, never both.
+ */
+type ToolAuthConfig =
+  | { auth?: ToolAuth; securitySchemes?: never }
+  | {
+      auth?: never;
+      /**
+       * Declares which auth schemes this tool supports (e.g. `noauth`, `oauth2`).
+       * Lets clients label tools that require sign-in before calling, and pass
+       * the right scopes through the OAuth flow. Listing both `noauth` and
+       * `oauth2` signals that the tool works for anonymous callers and gives
+       * enhanced behavior to authenticated ones.
+       */
+      securitySchemes?: SecurityScheme[];
+    };
+
+type ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> =
+  ToolConfigBase<TInput> & ToolAuthConfig;
 
 /**
  * Optional client-supplied hints attached to `params._meta` on every tool call
@@ -523,6 +557,30 @@ function withSkillsCapability(
   };
 }
 
+// Collapses registerTool's two overloads into a single { config, cb } shape.
+//   registerTool("greet", { description }, handler)
+//     -> { config: { name: "greet", description }, cb: handler }
+//   registerTool({ name: "greet", description }, handler)
+//     -> { config: { name: "greet", description }, cb: handler }
+function normalizeRegisterToolArgs(args: unknown[]): {
+  config: ToolConfig<ZodRawShapeCompat>;
+  cb: ToolHandler<ZodRawShapeCompat>;
+} {
+  if (typeof args[0] === "string") {
+    return {
+      config: {
+        name: args[0],
+        ...(args[1] as object),
+      } as ToolConfig<ZodRawShapeCompat>,
+      cb: args[2] as ToolHandler<ZodRawShapeCompat>,
+    };
+  }
+  return {
+    config: args[0] as ToolConfig<ZodRawShapeCompat>,
+    cb: args[1] as ToolHandler<ZodRawShapeCompat>,
+  };
+}
+
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
 > extends McpServerBaseOmitted {
@@ -560,6 +618,12 @@ export class McpServer<
   private viteManifest: Record<string, ViteManifestEntry> | null = null;
   private readonly serverInfo: Implementation;
   private readonly serverOptions?: ServerOptions;
+  private oauthEnabled = false;
+  private resolveResourceMetadataUrl?: ResourceMetadataUrlResolver;
+  private securitySchemesByTool = new Map<
+    string,
+    SecurityScheme[] | undefined
+  >();
 
   constructor(
     serverInfo: Implementation,
@@ -573,7 +637,12 @@ export class McpServer<
     this.express = express();
     this.express.use(express.json(skybridgeOptions?.json));
     if (skybridgeOptions?.oauth) {
-      setupOAuth(this.express, skybridgeOptions.oauth);
+      this.oauthEnabled = true;
+      this.resolveResourceMetadataUrl = setupOAuth(
+        this.express,
+        skybridgeOptions.oauth,
+        this.securitySchemesByTool,
+      );
     }
     // Pick up the manifest if `dist/__entry.js` primed it before importing
     // user code. Consume-once: clear after the first construction so a
@@ -804,17 +873,38 @@ export class McpServer<
       },
     };
 
+    // ChatGPT reads `securitySchemes` at the tool descriptor top level (SEP-1488,
+    // still Draft), but the SDK's registerTool strips unknown top-level fields, so
+    // it's stashed in `_meta` at registration. This restores it to the top level
+    // on tools/list output. Remove once SEP-1488 lands and the SDK preserves it.
+    //   { name: "checkout", _meta: { securitySchemes: [{ type: "oauth2" }] } }
+    //     -> { name: "checkout", _meta: {…}, securitySchemes: [{ type: "oauth2" }] }
+    const toolsListSecuritySchemesEntry: McpMiddlewareEntry = {
+      filter: "tools/list",
+      handler: async (_req, _extra, next) => {
+        const result = (await next()) as {
+          tools: Array<
+            Record<string, unknown> & { _meta?: Record<string, unknown> }
+          >;
+        };
+        for (const tool of result.tools) {
+          const schemes = tool._meta?.securitySchemes;
+          if (schemes && !("securitySchemes" in tool)) {
+            tool.securitySchemes = schemes;
+          }
+        }
+        return result;
+      },
+    };
+
     const monitoringEntry = createMiddlewareEntry();
     const entries = [
       ...(monitoringEntry ? [monitoringEntry] : []),
       viewListMetaEntry,
       viewReadResolveEntry,
+      toolsListSecuritySchemesEntry,
       ...this.mcpMiddlewareEntries,
     ];
-
-    if (entries.length === 0) {
-      return;
-    }
 
     const { requestHandlers, notificationHandlers } = getHandlerMaps(
       this.server,
@@ -988,7 +1078,7 @@ export class McpServer<
       const val = headers[key];
       return Array.isArray(val) ? val[0] : val;
     };
-    const isClaude = header("user-agent") === "Claude-User";
+    const isClaude = hostFromUserAgent(header("user-agent")) === "claude";
 
     const serverUrl = resolveServerOrigin(header);
     // Path prefix the proxy routed this request under (e.g. `foo.com/v1`). Read
@@ -1187,11 +1277,31 @@ export class McpServer<
     );
   }
 
-  private wrapHandler<InputArgs extends ZodRawShapeCompat>(
+  private decorateToolHandler<InputArgs extends ZodRawShapeCompat>(
     cb: ToolHandler<InputArgs>,
-    { attachViewUUID }: { attachViewUUID: boolean },
+    {
+      attachViewUUID,
+      securitySchemes,
+    }: { attachViewUUID: boolean; securitySchemes?: SecurityScheme[] },
   ): ToolHandler<InputArgs> {
     return async (args, extra) => {
+      if (this.oauthEnabled) {
+        const failure = evaluateSecuritySchemes(
+          securitySchemes,
+          extra.authInfo,
+        );
+        if (failure) {
+          const headers = extra?.requestInfo?.headers ?? {};
+          const header = (key: string) => {
+            const value = headers[key];
+            return Array.isArray(value) ? value[0] : value;
+          };
+          return inBandChallengeResult(
+            failure,
+            this.resolveResourceMetadataUrl?.(header),
+          );
+        }
+      }
       const result = await cb(args, extra);
       return {
         ...result,
@@ -1318,23 +1428,37 @@ export class McpServer<
       ...args: unknown[]
     ) => unknown;
 
-    if (typeof args[0] === "string") {
-      baseFn.call(this, args[0], args[1], args[2]);
-      return this;
-    }
-
-    const config = args[0] as ToolConfig<ZodRawShapeCompat>;
-    const cb = args[1] as ToolHandler<ZodRawShapeCompat>;
+    const { config, cb } = normalizeRegisterToolArgs(args);
 
     const {
       name,
       view,
-      securitySchemes,
+      auth,
+      securitySchemes: rawSecuritySchemes,
       _meta: userToolMeta,
       ...toolFields
     } = config;
 
+    const authNeedsProvider =
+      auth !== undefined &&
+      (!auth.allowsAnonymous || Boolean(auth.scopes?.length));
+    if (
+      rawSecuritySchemes === undefined &&
+      authNeedsProvider &&
+      !this.oauthEnabled
+    ) {
+      throw new Error(
+        `Tool "${name}" sets \`auth: ${JSON.stringify(auth)}\` but the server has no \`oauth\` provider configured.`,
+      );
+    }
+
+    const securitySchemes =
+      rawSecuritySchemes ??
+      (auth && this.oauthEnabled ? authToSecuritySchemes(auth) : undefined);
+
     const toolMeta: InternalToolMeta = { ...userToolMeta };
+
+    this.securitySchemesByTool.set(name, securitySchemes);
 
     if (securitySchemes) {
       // SEP-1488 puts `securitySchemes` at the top level of the tool
@@ -1350,7 +1474,10 @@ export class McpServer<
       this.registerViewResources(name, view, toolMeta);
     }
 
-    const wrappedCb = this.wrapHandler(cb, { attachViewUUID: Boolean(view) });
+    const wrappedCb = this.decorateToolHandler(cb, {
+      attachViewUUID: Boolean(view),
+      securitySchemes,
+    });
 
     baseFn.call(this, name, { ...toolFields, _meta: toolMeta }, wrappedCb);
 
