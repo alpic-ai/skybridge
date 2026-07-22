@@ -22,7 +22,7 @@
     "react-dom": "^19.2.7",
     "skybridge": "^1.1.0",
     "tailwindcss": "^4.3.1",
-    "vite": "^7.3.5",
+    "vite": "^8.1.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {

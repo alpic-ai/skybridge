@@ -57,6 +57,12 @@ function staticHtmlPlugin(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    forwardConsole: {
+      unhandledErrors: true,
+      logLevels: ["error"],
+    },
+  },
   plugins: [skybridge(), react(), staticHtmlPlugin()],
   resolve: {
     alias: {

@@ -20,7 +20,7 @@
     "react-intl": "^8.1.4",
     "skybridge": "^1.1.0",
     "tailwindcss": "^4.3.1",
-    "vite": "^8.0.16",
+    "vite": "^8.1.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {
