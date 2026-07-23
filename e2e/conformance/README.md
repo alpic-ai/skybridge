@@ -71,11 +71,11 @@ notte/                   # Automated runs on real hosts (see E2E below)
 
 ## E2E
 
-`notte/conformance.py` runs the app end-to-end on a real host (ChatGPT or Claude), acting as the human tester: it presses Run/Close on the action tests and answers the Yes/No confirmations by verifying the side effects from outside the widget (modal overlay, new tab, follow-up message, host permission dialog). No LLM is involved (no scrape, no agent).
+`notte/conformance.py` runs the app end-to-end on a real host (ChatGPT, Claude, or the Alpic playground), acting as the human tester: it presses Run/Close on the action tests and answers the Yes/No confirmations by verifying the side effects from outside the widget (modal overlay, new tab, follow-up message, host permission dialog). No LLM is involved (no scrape, no agent).
 
 It's one plain [Playwright](https://playwright.dev) (sync) script, driven by [`uv`](https://docs.astral.sh/uv/) (inline script deps, no separate install). Two flags:
 
-- `--host chatgpt|claude`: which host to drive.
+- `--host chatgpt|claude|alpic`: which host to drive. `alpic` is the Skybridge "try this server" playground at `<server>/try`, which renders views inline in a chat; it needs no app connection and no login (the playground is already scoped to this server, and the page is public).
 - `--mode local|notte`: the browser backend. `local` is a persistent Chrome profile on your machine (`notte/.profiles/local`, gitignored) that you log into once by hand; `notte` connects to a [Notte](https://notte.cc) cloud browser over Chrome DevTools Protocol, which is what CI uses (no display needed, and the login persists in the Notte profile).
 
 The driver presses the widget's real buttons (Playwright reaches across the host's cross-origin iframes) and only falls back to the postMessage drive protocol when a button isn't reachable. Real clicks matter: ChatGPT gates the follow-up and open-external effects behind a genuine user gesture, which postMessage can't supply.
@@ -87,9 +87,11 @@ The `notte/` files:
 | `conformance.py`        | Entry point: the stepper loop, browser backends, baseline gate, and CLI       |
 | `chatgpt.py`            | ChatGPT host adapter (prompt, chrome, follow-up check, open-link dialog)       |
 | `claude.py`             | Claude host adapter (prompt, cookie banner, follow-up check, permission dialogs) |
+| `alpic.py`              | Alpic playground adapter (plain prompt, follow-up by reply count, window.open + host-dialog modal) |
 | `utils.py`              | Shared result models, `HostConfig`, and host-agnostic widget/overlay helpers   |
 | `chatgpt_expected.json` | Expected verdict per hook on ChatGPT: the CI baseline                          |
 | `claude_expected.json`  | Expected verdict per hook on Claude                                            |
+| `alpic_expected.json`   | Expected verdict per hook on the Alpic playground                             |
 | `create-profile.ts`     | Creates/reopens a Notte profile so you can log into the host account           |
 
 The driver talks to the app over postMessage (the widget iframes are cross-origin): the drive hook accepts `{type: "conformance:drive", action: run|skip|yes|no|close-modal|restore-inline}` and the app broadcasts `{type: "conformance:state", state}` to `window.top` on every change plus a 1.5s heartbeat. Both sides live in `src/automation.ts`.
@@ -99,6 +101,7 @@ The driver talks to the app over postMessage (the widget iframes are cross-origi
 ```bash
 uv run notte/conformance.py --host chatgpt --mode local            # local Chrome, logged-in profile
 uv run notte/conformance.py --host claude  --mode local
+uv run notte/conformance.py --host alpic   --mode local            # the /try playground, no login needed
 uv run notte/conformance.py --host chatgpt --mode notte            # Notte cloud browser (profile id from .env)
 pnpm notte:run --host claude --mode notte                          # same, via the npm script
 ```
@@ -109,7 +112,7 @@ Host quirks the driver handles: both hosts gate `openExternal` (and Claude also 
 
 ### Setup
 
-The app must be connected in the host account the profile is logged into:
+The `alpic` host needs none of this setup: the `/try` playground is public and already bound to this server, so skip straight to running it. Steps 1 and 2 below apply only to the ChatGPT and Claude hosts, which must be connected in the host account the profile is logged into:
 
 0. **Environment**: `cp .env.example .env` and fill in `NOTTE_API_KEY` and `NOTTE_PROFILE_ID`. `conformance.py` loads `.env` itself; `pnpm notte:profile` loads it via Node. CI passes real env vars instead; flags always override.
 1. **Connect the app** from any browser logged into the target account (connectors are account-level): enable developer mode, then connect the deployed conformance server as an app named `Conformance`. Both ChatGPT and Claude need the connection on their respective accounts.
