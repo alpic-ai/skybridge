@@ -14,13 +14,13 @@ ChatGPT apps are conversational experiences that extend ChatGPT through tools an
 
 SPEC.md keeps track of the app's requirements and design decisions. Keep it up to date as you work on the app.
 
+**Building an ecommerce app?** → Read [ecommerce.md](references/ecommerce.md) first.
+
 **No SPEC.md?** → Read [discover.md](references/discover.md) first. Nothing else until SPEC.md exists.
 
 **SPEC.md exists?** → Read SPEC.md, then follow [architecture.md](references/architecture.md) to design the change. Update SPEC.md, then read the relevant Implementation references below before writing code.
 
 **Migrating from Skybridge `< 0.36.x`?** → Read [migrate-to-v1.md](references/migrate-to-v1.md) first. Users may reference `skybridge >= 0.36.x` as v1.
-
-**Building an ecommerce app?** → Read [ecommerce.md](references/ecommerce.md) first.
 
 ## Setup
 
