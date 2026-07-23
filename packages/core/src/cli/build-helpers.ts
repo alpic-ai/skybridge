@@ -7,7 +7,45 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
+import type { Plugin } from "esbuild";
 import { discoverSkills } from "../server/skills.js";
+
+// `dtrace-provider` (pulled in by loggers like bunyan) can't be bundled: its
+// module does a dynamic native-binding require esbuild can't resolve. It's also
+// unsafe to externalize — the Vercel function ships no node_modules, so a bare
+// require would throw MODULE_NOT_FOUND at startup. Resolve it to a bundled no-op
+// stub instead, keeping the function self-contained. DTrace probes become no-ops,
+// which is correct on Linux/serverless where the native addon never loads anyway.
+const DTRACE_PROVIDER_STUB = `
+function DTraceProviderStub() {}
+DTraceProviderStub.prototype.addProbe = function (name) {
+  var probe = { fire: function () {} };
+  this[name] = probe;
+  return probe;
+};
+DTraceProviderStub.prototype.enable = function () {};
+DTraceProviderStub.prototype.fire = function () {};
+DTraceProviderStub.prototype.disable = function () {};
+module.exports = {
+  DTraceProvider: DTraceProviderStub,
+  createDTraceProvider: function () { return new DTraceProviderStub(); },
+};
+`;
+
+const dtraceProviderStubPlugin: Plugin = {
+  name: "dtrace-provider-stub",
+  setup(build) {
+    const namespace = "dtrace-provider-stub";
+    build.onResolve({ filter: /^dtrace-provider$/ }, () => ({
+      path: "dtrace-provider",
+      namespace,
+    }));
+    build.onLoad({ filter: /.*/, namespace }, () => ({
+      contents: DTRACE_PROVIDER_STUB,
+      loader: "js",
+    }));
+  },
+};
 
 // Primes the manifest and skills snapshot in skybridge's module scope, then
 // dynamically imports `./server.js` so user code runs *after* the side channels
@@ -109,6 +147,7 @@ export async function emitVercelBuildOutput(root: string): Promise<void> {
     // Dev-only deps reachable from re-exports; safe to leave unresolved since
     // the code paths that touch them are eliminated by the NODE_ENV define.
     external: ["vite", "@skybridge/devtools"],
+    plugins: [dtraceProviderStubPlugin],
     banner: {
       // ESM bundles miss CJS interop globals that some deps reach for.
       js: "import{createRequire}from'node:module';const require=createRequire(import.meta.url);",

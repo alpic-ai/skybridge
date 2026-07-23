@@ -159,6 +159,43 @@ describe("emitVercelBuildOutput", () => {
     ).toContain("bundled view");
   });
 
+  it("stubs dtrace-provider so its dynamic native require doesn't break the bundle", async () => {
+    const root = mkTmp();
+    mkdirSync(path.join(root, "dist"), { recursive: true });
+    // Stand in for dtrace-provider: a dep whose module does a computed require
+    // esbuild can't resolve. Bundling it as-is would fail; the stub plugin must
+    // intercept it before esbuild ever reads this file.
+    const dep = path.join(root, "node_modules", "dtrace-provider");
+    mkdirSync(dep, { recursive: true });
+    writeFileSync(
+      path.join(dep, "package.json"),
+      JSON.stringify({ name: "dtrace-provider", main: "index.js" }),
+    );
+    writeFileSync(
+      path.join(dep, "index.js"),
+      "const b = ['Release'];\nmodule.exports = require('./build/' + b[0] + '/bindings');\n",
+    );
+    writeFileSync(
+      path.join(root, "dist", "server.js"),
+      "const dt = require('dtrace-provider');\nexport default function handler(_req, res) { dt.createDTraceProvider('x').enable(); res.end('ok'); }\n",
+    );
+    writeFileSync(
+      path.join(root, "dist", "__entry.js"),
+      "const userMod = await import('./server.js');\nexport default userMod.default;\n",
+    );
+
+    await expect(emitVercelBuildOutput(root)).resolves.toBeUndefined();
+
+    const bundle = readFileSync(
+      path.join(root, ".vercel", "output", "functions", "mcp.func", "index.js"),
+      "utf-8",
+    );
+    // The no-op stub is bundled in (self-contained) rather than left as a bare
+    // external require that would MODULE_NOT_FOUND at runtime.
+    expect(bundle).toContain("DTraceProviderStub");
+    expect(bundle).not.toContain('require("dtrace-provider")');
+  });
+
   it("emits static assets directory when dist/assets is missing", async () => {
     const root = mkTmp();
     mkdirSync(path.join(root, "dist"), { recursive: true });
