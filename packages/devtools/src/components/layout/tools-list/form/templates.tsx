@@ -1,3 +1,8 @@
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@alpic-ai/ui/components/tooltip";
 import type {
   ArrayFieldItemTemplateProps,
   ArrayFieldTemplateProps,
@@ -11,7 +16,7 @@ import type {
 } from "@rjsf/utils";
 import { getInputProps } from "@rjsf/utils";
 import { Plus, X } from "lucide-react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/utils.js";
 import { TruncatedDescription } from "../truncated-description.js";
 import {
@@ -77,6 +82,55 @@ export function BaseInputTemplate(props: BaseInputTemplateProps) {
   );
 }
 
+// A field label whose param description is revealed in a tooltip on hover, so
+// descriptions stay accessible in the panel without opening a dialog. Falls
+// back to a plain label when the param has no description.
+function FieldLabel({
+  htmlFor,
+  label,
+  required,
+  description,
+  className,
+}: {
+  htmlFor?: string;
+  label: ReactNode;
+  required?: boolean;
+  description?: string;
+  className?: string;
+}) {
+  const content = (
+    <>
+      {label}
+      {required && <span className="ml-1 text-destructive">*</span>}
+    </>
+  );
+  const labelNode = htmlFor ? (
+    <label
+      htmlFor={htmlFor}
+      className={cn(className, description && "w-fit cursor-help")}
+    >
+      {content}
+    </label>
+  ) : (
+    <div className={cn(className, description && "w-fit cursor-help")}>
+      {content}
+    </div>
+  );
+
+  if (!description) {
+    return labelNode;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{labelNode}</TooltipTrigger>
+      <TooltipContent className="max-w-xs whitespace-pre-wrap text-left font-normal">
+        {description}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 export function FieldTemplate(props: FieldTemplateProps) {
   const {
     id,
@@ -112,18 +166,19 @@ export function FieldTemplate(props: FieldTemplateProps) {
       style={style as CSSProperties}
     >
       {showLabel && (
-        <label
+        <FieldLabel
           htmlFor={id}
+          label={label}
+          required={required}
+          description={rawDescription}
           className={cn(
             "font-mono text-xs text-muted-foreground",
             hasError && "text-destructive",
           )}
-        >
-          {label}
-          {required && <span className="ml-1 text-destructive">*</span>}
-        </label>
+        />
       )}
-      {!rendersOwnTitle && rawDescription ? (
+      {/* No label to hang the tooltip on (e.g. array items) — keep it inline. */}
+      {!rendersOwnTitle && !showLabel && rawDescription ? (
         <TruncatedDescription
           text={rawDescription}
           title={label}
@@ -173,10 +228,10 @@ export function TitleFieldTemplate(props: TitleFieldProps) {
 }
 
 export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
-  const { fieldPathId, properties, description, disabled, title, required } =
-    props;
+  const { fieldPathId, properties, disabled, title, required, schema } = props;
   // rjsf v6 passes `fieldPathId` (renamed from v5's `idSchema`).
   const isRoot = fieldPathId.$id === "root";
+  const description = schema.description;
 
   return (
     <div
@@ -186,12 +241,15 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
       )}
     >
       {!isRoot && title && (
-        <div className="font-mono text-xs text-muted-foreground">
-          {title}
-          {required && <span className="ml-1 text-destructive">*</span>}
-        </div>
+        <FieldLabel
+          label={title}
+          required={required}
+          description={description}
+          className="font-mono text-xs text-muted-foreground"
+        />
       )}
-      {!isRoot && description && (
+      {/* No title to hang the tooltip on — keep the description inline. */}
+      {!isRoot && !title && description && (
         <p className={descriptionTextClass}>{description}</p>
       )}
       {properties
@@ -220,12 +278,17 @@ export function ArrayFieldTemplate(props: ArrayFieldTemplateProps) {
   return (
     <div className="flex flex-col gap-1.5">
       {title && (
-        <div className="font-mono text-xs text-muted-foreground">
-          {title}
-          {required && <span className="ml-1 text-destructive">*</span>}
-        </div>
+        <FieldLabel
+          label={title}
+          required={required}
+          description={description}
+          className="font-mono text-xs text-muted-foreground"
+        />
       )}
-      {description && <p className={descriptionTextClass}>{description}</p>}
+      {/* No title to hang the tooltip on — keep the description inline. */}
+      {!title && description && (
+        <p className={descriptionTextClass}>{description}</p>
+      )}
       {/* rjsf v6: items is ReactElement[] (pre-rendered ArrayFieldItemTemplate). */}
       {items}
       {canAdd && (
