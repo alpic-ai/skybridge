@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        host: [chatgpt, claude]
+        host: [chatgpt, claude, alpic]
     steps:
       - uses: actions/checkout@v7
 

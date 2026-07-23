@@ -216,6 +216,12 @@ def install_state_listener(page: Page) -> None:
     every change plus a 1.5s heartbeat; stash the latest payload (a real
     object now, no JSON-string round trip needed) in a window variable that
     read_state polls. Zero LLM involved.
+
+    Also record window.open calls: the Alpic playground routes openExternal to
+    a top-page window.open (no permission dialog, no tab the driver can track),
+    so its adapter reads window.__externalOpens to verify the link opened. The
+    chat hosts pop a native dialog instead and never touch this, so recording
+    is a harmless no-op there.
     """
     page.evaluate(
         """() => {
@@ -226,6 +232,12 @@ def install_state_listener(page: Page) -> None:
                     window.__confState = event.data.state;
                 }
             });
+            window.__externalOpens = window.__externalOpens || [];
+            const nativeOpen = window.open;
+            window.open = function (url, ...rest) {
+                try { window.__externalOpens.push(String(url || '')); } catch (e) {}
+                return nativeOpen ? nativeOpen.apply(this, [url, ...rest]) : null;
+            };
             return 'installed';
         }"""
     )

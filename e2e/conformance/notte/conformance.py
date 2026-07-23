@@ -51,6 +51,7 @@ from dotenv import load_dotenv
 from playwright.sync_api import BrowserContext, Page, sync_playwright
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
+from alpic import ALPIC
 from chatgpt import CHATGPT
 from claude import CLAUDE
 from utils import (
@@ -71,7 +72,11 @@ from utils import (
     widget_present,
 )
 
-HOSTS: dict[str, HostConfig] = {CHATGPT.name: CHATGPT, CLAUDE.name: CLAUDE}
+HOSTS: dict[str, HostConfig] = {
+    CHATGPT.name: CHATGPT,
+    CLAUDE.name: CLAUDE,
+    ALPIC.name: ALPIC,
+}
 
 
 # ── Answering confirmations ──────────────────────────────────────────

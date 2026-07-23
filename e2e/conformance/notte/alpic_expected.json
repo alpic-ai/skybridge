@@ -1,0 +1,17 @@
+{
+  "useToolInfo": "supported",
+  "useLayout": "supported",
+  "useUser": "supported",
+  "useViewState": "supported",
+  "useCallTool": "supported",
+  "useSetOpenInAppUrl": "supported",
+  "useDisplayMode": "supported",
+  "useRequestSize": "unsupported",
+  "useRequestModal": "supported",
+  "useOpenExternal": "supported",
+  "useDownload": "unsupported",
+  "useFiles": "unsupported",
+  "useSendFollowUpMessage": "supported",
+  "useRegisterViewTool": "unsupported",
+  "useRequestClose": "unsupported"
+}
