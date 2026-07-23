@@ -33,7 +33,7 @@ jobs:
       # timeout would kill the runner before any of them could fire).
       - name: Run conformance on ${{ matrix.host }}
         timeout-minutes: 30
-        working-directory: examples/conformance
+        working-directory: e2e/conformance
         run: |
           uv run notte/conformance.py \
             --host ${{ matrix.host }} \
@@ -46,7 +46,7 @@ jobs:
       - name: Collect mismatches
         id: results
         if: always()
-        working-directory: examples/conformance
+        working-directory: e2e/conformance
         run: |
           FILE=conformance-results/results.json
           if [ -f "$FILE" ]; then
@@ -63,7 +63,7 @@ jobs:
         if: always()
         with:
           name: ${{ matrix.host }}-conformance-results
-          path: examples/conformance/conformance-results/
+          path: e2e/conformance/conformance-results/
 
       # Alert per host, inside the matrix job: matrix children collapse to one
       # shared job output, so a single downstream notify job would drop one
