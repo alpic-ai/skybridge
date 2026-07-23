@@ -20,6 +20,8 @@ SPEC.md keeps track of the app's requirements and design decisions. Keep it up t
 
 **Migrating from Skybridge `< 0.36.x`?** → Read [migrate-to-v1.md](references/migrate-to-v1.md) first. Users may reference `skybridge >= 0.36.x` as v1.
 
+**Building an ecommerce app?** → Read [ecommerce.md](references/ecommerce.md) first.
+
 ## Setup
 
 1. **Copy template** → [copy-template.md](references/copy-template.md): when starting a new project with ready SPEC.md

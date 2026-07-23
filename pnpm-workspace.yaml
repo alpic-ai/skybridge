@@ -5,6 +5,7 @@ packages:
   - "packages/*"
   - "packages/create-skybridge/templates/demo"
   - "packages/create-skybridge/templates/blank"
+  - "packages/create-skybridge/templates/ecom"
   - "examples/*"
 
 # Delay installing newly published versions by 3 days to reduce exposure to
