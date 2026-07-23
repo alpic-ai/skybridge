@@ -46,8 +46,12 @@ def rows_complete(rows: list[ResultRow]) -> bool:
     return bool(rows) and all(r.result.strip() not in _PENDING for r in rows)
 
 
-# Timeout (ms) for the first action after navigation (SPA hydration).
-PAGE_LOAD_TIMEOUT_MS = 30_000
+# Timeout (ms) for the first action after navigation (SPA hydration). Generous
+# on purpose: over Notte the host can serve a Cloudflare "verify you are human"
+# interstitial before the composer, and solve_captchas needs room to clear it.
+# If it never clears, the composer wait times out and the run retries in a fresh
+# conversation (the challenge is intermittent).
+PAGE_LOAD_TIMEOUT_MS = 90_000
 
 # Stepper safety rails: the app has 15 tests, and useRegisterViewTool waits a
 # full 60s for the host to invoke the view tool (it never does, so it times out

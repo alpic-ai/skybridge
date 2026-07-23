@@ -49,6 +49,7 @@ from typing import Any, Iterator
 
 from dotenv import load_dotenv
 from playwright.sync_api import BrowserContext, Page, sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 from chatgpt import CHATGPT
 from claude import CLAUDE
@@ -275,8 +276,11 @@ def run_conformance(
                 screenshot_bytes = take_screenshot(page, host.widget_iframe_selector) or screenshot_bytes
                 rows, final_screenshot = drive_stepper(page, host, unverifiable)
                 screenshot_bytes = final_screenshot or screenshot_bytes
-            except (TimeoutError, StallError) as exc:
-                print(f"[conformance] attempt {attempt + 1} aborted: {exc}", flush=True)
+            except (TimeoutError, PlaywrightTimeoutError, StallError) as exc:
+                # PlaywrightTimeoutError is a separate class from the builtin, so
+                # catch both: a Cloudflare-blocked composer (Page.fill timeout)
+                # should retry in a fresh conversation, not fall straight through.
+                print(f"[conformance] attempt {attempt + 1} aborted: {str(exc).splitlines()[0]}", flush=True)
                 continue
             if rows_complete(rows):
                 break
@@ -366,6 +370,12 @@ def notte_browser(profile_id: str) -> Iterator[BrowserContext]:
         # default during long waits (the 60s useRegisterViewTool timeout, the
         # ~2min follow-up poll). 15 is the max Notte allows.
         idle_timeout_minutes=15,
+        # Cloudflare (in front of the hosts) challenges Notte's datacenter IPs;
+        # let Notte solve the challenge when it appears. Residential proxies
+        # would dodge the challenge entirely but break the widget: its app JS
+        # loads from the tunnel, which the proxy can't reach (every run aborted
+        # with "no state"). So solver on, proxies off.
+        solve_captchas=True,
     ) as session:
         cdp_url = session.cdp_url()
         with sync_playwright() as playwright:
