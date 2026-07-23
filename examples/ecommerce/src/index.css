@@ -1,0 +1,9 @@
+@import "./design/fonts.css";
+
+/* The view mounts in a host iframe whose <body> keeps the user-agent default
+   margin (~8px). Zero it out so the surface paints edge to edge. */
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
