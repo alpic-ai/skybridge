@@ -130,6 +130,13 @@ The scheduled GitHub Actions workflow lives at `.github/workflows/conformance.ym
 - A full run takes several minutes (fifteen tests, waits between actions, the 60s `useRegisterViewTool` timeout, and the follow-up verification can wait up to 2 minutes for the host to commit the turn). Over Notte, real clicks cost ~7s each on top (CDP round-trip), so budget ~15 minutes per host.
 - `useOpenExternal` is gated on both hosts now that each pops an observable "Open link" confirmation dialog the driver accepts. (It used to be un-gated over `--mode notte`, when ChatGPT opened a new tab that never surfaced to Playwright over Notte's CDP.) `UNVERIFIABLE_BY_MODE` in `conformance.py` is the seam for re-excluding any hook that becomes unobservable in a given mode; excluded hooks are recorded under `not_gated` in `results.json`.
 
+## Known host issues
+
+Host bugs surfaced by the runs, not problems with this app:
+
+- **Alpic playground**: opening the view as a modal (`useRequestModal`) breaks view-side tool registration (`useRegisterViewTool`) — the modal remounts the view, and the re-registration doesn't take.
+- **ChatGPT**: `useRequestModal` is broken — the view blurs but no modal appears. (This is why its baseline verdict is `unsupported`.)
+
 ## Resources
 
 - [Skybridge Documentation](https://docs.skybridge.tech/)
