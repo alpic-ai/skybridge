@@ -2,7 +2,7 @@
   "name": "skybridge-openui-generative-ui-example",
   "version": "0.0.1",
   "private": true,
-  "description": "Generative UI with OpenUI Lang and Skybridge",
+  "description": "Generative UI - OpenUI with OpenUI Lang and Skybridge",
   "type": "module",
   "scripts": {
     "dev": "skybridge dev",
