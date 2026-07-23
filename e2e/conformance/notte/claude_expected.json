@@ -4,14 +4,14 @@
   "useUser": "supported",
   "useViewState": "supported",
   "useCallTool": "supported",
-  "useSetOpenInAppUrl": "supported",
+  "useSetOpenInAppUrl": "unsupported",
   "useDisplayMode": "supported",
   "useRequestSize": "unsupported",
-  "useRequestModal": "error",
+  "useRequestModal": "supported",
   "useOpenExternal": "supported",
-  "useDownload": "unsupported",
-  "useFiles": "supported",
+  "useDownload": "supported",
+  "useFiles": "unsupported",
   "useSendFollowUpMessage": "supported",
   "useRegisterViewTool": "unsupported",
-  "useRequestClose": "supported"
+  "useRequestClose": "unsupported"
 }

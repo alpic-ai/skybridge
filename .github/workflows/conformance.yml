@@ -1,41 +1,50 @@
 name: Hooks Conformance
 
 on:
-  #schedule:
-  #  - cron: "0 */6 * * *"
+  schedule:
+    - cron: "0 */6 * * *"
   workflow_dispatch:
-  #release:
-  #  types: [published]
+  release:
+    types: [published]
 
 permissions:
   contents: read
 
 jobs:
-  chatgpt:
-    name: ChatGPT
+  conformance:
+    name: ${{ matrix.host }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    outputs:
-      mismatches: ${{ steps.results.outputs.mismatches }}
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [chatgpt, claude]
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: ".nvmrc"
+      - uses: astral-sh/setup-uv@v6
 
-      - name: Run conformance on ChatGPT
+      # The driver connects to a Notte cloud browser over CDP (--mode notte),
+      # so no local browser is launched; uv resolves the script's inline deps.
+      # Step timeout sits below the job's, so a stuck run fails the step but
+      # still leaves the collect/upload/Slack steps room to report it (a job
+      # timeout would kill the runner before any of them could fire).
+      - name: Run conformance on ${{ matrix.host }}
+        timeout-minutes: 30
+        working-directory: e2e/conformance
         run: |
-          node examples/conformance/notte/run-conformance.ts \
-            --function-id ${{ vars.NOTTE_CHATGPT_FUNCTION_ID }} \
+          uv run notte/conformance.py \
+            --host ${{ matrix.host }} \
+            --mode notte \
             --profile-id ${{ vars.NOTTE_PROFILE_ID }} \
             --out conformance-results
         env:
           NOTTE_API_KEY: ${{ secrets.NOTTE_API_KEY }}
 
-      - name: Collect results for notifications
+      - name: Collect mismatches
         id: results
         if: always()
+        working-directory: e2e/conformance
         run: |
           FILE=conformance-results/results.json
           if [ -f "$FILE" ]; then
@@ -51,28 +60,25 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: chatgpt-conformance-results
-          path: conformance-results/
+          name: ${{ matrix.host }}-conformance-results
+          path: e2e/conformance/conformance-results/
 
-  notify-slack:
-    needs: [chatgpt]
-    if: always() && (needs.chatgpt.result == 'failure' || needs.chatgpt.result == 'timed_out')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
+      # Alert per host, inside the matrix job: matrix children collapse to one
+      # shared job output, so a single downstream notify job would drop one
+      # host's mismatches. Notifying here keeps each host's failure intact.
       - name: Slack Notification
+        if: failure()
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_USERNAME: GitHub Actions
-          SLACK_TITLE: ❌ Hooks conformance failed
+          SLACK_TITLE: "❌ Hooks conformance failed: ${{ matrix.host }}"
           SLACK_COLOR: failure
           SLACK_MESSAGE_ON_FAILURE: |
-            The scheduled hooks conformance run failed (chatgpt: ${{ needs.chatgpt.result }}).
+            The scheduled hooks conformance run failed on ${{ matrix.host }}.
 
             Baseline mismatches:
-            ${{ needs.chatgpt.outputs.mismatches }}
+            ${{ steps.results.outputs.mismatches }}
 
-            Full results (json + screenshot) in the chatgpt-conformance-results artifact.
+            Full results (json + screenshot) are in the ${{ matrix.host }}-conformance-results artifact.
           MSG_MINIMAL: actions url
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -5,7 +5,7 @@ packages:
   - "packages/*"
   - "packages/create-skybridge/templates/demo"
   - "packages/create-skybridge/templates/blank"
-  - "examples/*"
+  - "e2e/conformance"
 
 # Delay installing newly published versions by 3 days to reduce exposure to
 # supply-chain attacks via compromised releases.
