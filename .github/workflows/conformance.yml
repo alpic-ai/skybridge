@@ -1,11 +1,13 @@
 name: Hooks Conformance
 
 on:
-  #schedule:
-  #  - cron: "0 */6 * * *"
+  push:
+    branches: [sky-495-claude-conformance] # ponytail: temporary, drop before merge
+  schedule:
+    - cron: "0 */6 * * *"
   workflow_dispatch:
-  #release:
-  #  types: [published]
+  release:
+    types: [published]
 
 permissions:
   contents: read
