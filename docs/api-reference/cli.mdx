@@ -89,6 +89,26 @@ deno run -A npm:skybridge/skybridge build
 
 The output lands in `dist/`, ready for the `deploy` script or `skybridge start`.
 
+### Excluding packages from the server bundle
+
+The build's last step bundles your server into a single deployable function with esbuild. Bundling means every reachable dependency has to be resolved, including ones your code never runs.
+
+Some packages break that step. A common case is a logger with an optional native dependency, like [bunyan](https://github.com/trentm/node-bunyan), which does `require('dtrace-provider')` inside a `try/catch`. You never use DTrace, but esbuild still tries to resolve it and fails on the native binding.
+
+List those packages in the Vite plugin's `serverExternal` to leave them out of the bundle:
+
+```ts vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { skybridge } from "skybridge/vite";
+
+export default defineConfig({
+  plugins: [react(), skybridge({ serverExternal: ["dtrace-provider"] })],
+});
+```
+
+An external package stays a plain `import` in the output, resolved from `node_modules` at runtime. Only list packages your server doesn't need at runtime, or that your deployment target installs itself.
+
 ## `start`
 
 Run the production server from the build output. Run `skybridge build` first.

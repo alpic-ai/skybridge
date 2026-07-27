@@ -1,6 +1,11 @@
-export async function resolveViewsDir(
+export interface SkybridgeConfig {
+  viewsDir?: string;
+  serverExternal?: string[];
+}
+
+export async function resolveSkybridgeConfig(
   root: string,
-): Promise<string | undefined> {
+): Promise<SkybridgeConfig> {
   const { loadConfigFromFile } = await import("vite");
   const loaded = await loadConfigFromFile(
     { command: "build", mode: "production" },
@@ -10,10 +15,10 @@ export async function resolveViewsDir(
 
   const isPluginCandidate = (
     value: unknown,
-  ): value is { name?: string; api?: { viewsDir?: string } } =>
+  ): value is { name?: string; api?: SkybridgeConfig } =>
     typeof value === "object" && value !== null;
 
-  const plugins: Array<{ name?: string; api?: { viewsDir?: string } }> = [];
+  const plugins: Array<{ name?: string; api?: SkybridgeConfig }> = [];
   const walk = (value: unknown) => {
     if (Array.isArray(value)) {
       value.forEach(walk);
@@ -22,5 +27,6 @@ export async function resolveViewsDir(
     }
   };
   walk(loaded?.config.plugins ?? []);
-  return plugins.find((p) => p.name === "skybridge")?.api?.viewsDir;
+  const api = plugins.find((p) => p.name === "skybridge")?.api;
+  return { viewsDir: api?.viewsDir, serverExternal: api?.serverExternal };
 }

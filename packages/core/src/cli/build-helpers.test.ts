@@ -159,6 +159,28 @@ describe("emitVercelBuildOutput", () => {
     ).toContain("bundled view");
   });
 
+  it("leaves serverExternal packages unbundled", async () => {
+    const root = mkTmp();
+    mkdirSync(path.join(root, "dist"), { recursive: true });
+    // Unresolvable from the tmp root, so esbuild fails the build unless the
+    // package is marked external (bunyan → optional `dtrace-provider`).
+    writeFileSync(
+      path.join(root, "dist", "__entry.js"),
+      'import "dtrace-provider";\nexport default null;\n',
+    );
+
+    await expect(emitVercelBuildOutput(root)).rejects.toThrow(
+      /Could not resolve "dtrace-provider"/,
+    );
+    await emitVercelBuildOutput(root, ["dtrace-provider"]);
+
+    const bundle = readFileSync(
+      path.join(root, ".vercel", "output", "functions", "mcp.func", "index.js"),
+      "utf-8",
+    );
+    expect(bundle).toContain('import "dtrace-provider"');
+  });
+
   it("emits static assets directory when dist/assets is missing", async () => {
     const root = mkTmp();
     mkdirSync(path.join(root, "dist"), { recursive: true });
