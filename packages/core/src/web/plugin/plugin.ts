@@ -17,6 +17,12 @@ const VIRTUAL_MODULE_PREFIX = "\0skybridge:view:";
 export interface SkybridgePluginOptions {
   /** Directory scanned for view modules. Defaults to `"src/views"`. */
   viewsDir?: string;
+  /**
+   * Package names to leave unbundled when `skybridge build` bundles the server
+   * for deployment. Use it for dependencies esbuild can't resolve or load —
+   * typically optional native modules pulled in by a transitive dependency.
+   */
+  serverExternal?: string[];
 }
 
 function buildVirtualEntry(viewFilePath: string): string {
@@ -72,8 +78,9 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
   return {
     name: "skybridge",
     enforce: "pre",
-    // Read by `skybridge build` to resolve viewsDir before `tsc -b` runs.
-    api: { viewsDir: rawViewsDir },
+    // Read by `skybridge build` to resolve viewsDir before `tsc -b` runs, and
+    // to feed esbuild's external list when bundling the server.
+    api: { viewsDir: rawViewsDir, serverExternal: options?.serverExternal },
 
     config(config) {
       projectRoot = config.root || process.cwd();

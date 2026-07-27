@@ -2,7 +2,7 @@ import { Command, Flags } from "@oclif/core";
 import { Box, render, Text } from "ink";
 import { resolvePort } from "../cli/detect-port.js";
 import { Header } from "../cli/header.js";
-import { resolveViewsDir } from "../cli/resolve-views-dir.js";
+import { resolveSkybridgeConfig } from "../cli/resolve-skybridge-config.js";
 import { runPlain } from "../cli/run-plain.js";
 import { startTunnelControlServer } from "../cli/tunnel-control-server.js";
 import { useMessages } from "../cli/use-messages.js";
@@ -52,7 +52,7 @@ export default class Dev extends Command {
     // and the dev UI reports phantom TS errors forever.
     const root = process.cwd();
     try {
-      scanAndWriteViewsDts(root, await resolveViewsDir(root));
+      scanAndWriteViewsDts(root, (await resolveSkybridgeConfig(root)).viewsDir);
     } catch {
       // Best-effort: if the scan fails (e.g. broken vite config, duplicate
       // view names) tsc may show phantom errors, but the dev server should
