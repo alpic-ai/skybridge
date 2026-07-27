@@ -1,10 +1,14 @@
 // @vitest-environment node
 import http from "node:http";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { customProvider } from "./custom.js";
 
-let server: http.Server | undefined;
-afterEach(() => server?.close());
+const servers: http.Server[] = [];
+afterEach(() => {
+  for (const srv of servers.splice(0)) {
+    srv.close();
+  }
+});
 
 function doc(origin: string, extra: Record<string, unknown> = {}) {
   return {
@@ -31,7 +35,7 @@ async function serveDiscovery(extra: Record<string, unknown> = {}) {
     res.end(JSON.stringify(doc(origin, extra)));
   });
   await new Promise<void>((resolve) => srv.listen(0, resolve));
-  server = srv;
+  servers.push(srv);
   origin = `http://localhost:${(srv.address() as { port: number }).port}`;
   return origin;
 }
@@ -107,29 +111,58 @@ describe("customProvider", () => {
     expect(config.verify.issuer).toBe(base);
   });
 
-  it("authorizationServer advertises a distinct AS, keeping the discovered issuer for verification", async () => {
+  it("authorizationServer supplies the advertised metadata and the verified issuer", async () => {
     const base = await serveDiscovery();
+    const as = await serveDiscovery({ scopes_supported: ["checkout"] });
+
     const config = await customProvider({
       issuer: base,
       audience: "a",
-      authorizationServer: "https://as.example.test/agentic/P1/MS1/",
+      authorizationServer: `${as}/`,
     });
-    expect(config.oauthMetadata.issuer).toBe(
-      "https://as.example.test/agentic/P1/MS1",
+
+    expect(config.oauthMetadata.issuer).toBe(as);
+    expect(config.oauthMetadata.authorization_endpoint).toBe(`${as}/authorize`);
+    expect(config.oauthMetadata.registration_endpoint).toBe(`${as}/register`);
+    expect(config.scopesSupported).toEqual(["checkout"]);
+    expect(config.verify).toEqual({
+      issuer: as,
+      audience: "a",
+      jwksUri: `${as}/jwks`,
+    });
+  });
+
+  it("falls back to the issuer's metadata when the authorizationServer is undiscoverable", async () => {
+    const base = await serveDiscovery();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const config = await customProvider({
+      issuer: base,
+      audience: "a",
+      authorizationServer: `${base}/agentic/P1/MS1`,
+    });
+
+    expect(warn).toHaveBeenCalledOnce();
+    expect(config.oauthMetadata.issuer).toBe(`${base}/agentic/P1/MS1`);
+    expect(config.oauthMetadata.authorization_endpoint).toBe(
+      `${base}/authorize`,
     );
     expect(config.verify.issuer).toBe(base);
+    warn.mockRestore();
   });
 
   it("serverUrl takes precedence over authorizationServer", async () => {
     const base = await serveDiscovery();
+    const as = await serveDiscovery();
     const config = await customProvider({
       issuer: base,
       audience: "a",
       serverUrl: "https://app.example.test/",
-      authorizationServer: "https://as.example.test/agentic/P1/MS1",
+      authorizationServer: as,
     });
     expect(config.oauthMetadata.issuer).toBe("https://app.example.test");
-    expect(config.verify.issuer).toBe(base);
+    expect(config.oauthMetadata.token_endpoint).toBe(`${as}/token`);
+    expect(config.verify.issuer).toBe(as);
   });
 
   it("applies metadataOverrides over discovered values", async () => {
