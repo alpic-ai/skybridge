@@ -5,6 +5,7 @@
 @source "../node_modules/@alpic-ai/ui/src/**/*.{ts,tsx}";
 
 @theme {
+  --color-background: #ffffff;
   --color-border: #e3eaea;
   --color-light-gray: #f9fafa;
   --color-light-gray-foreground: #707e7e;
@@ -16,8 +17,10 @@
   --color-cta-accent: #e90060;
 }
 
-.dark {
-  --color-border: #162828;
+.dark,
+[data-theme="dark"] {
+  --color-background: #071718;
+  --color-border: #1f4449;
   --color-light-gray: #162828;
 
   --color-primary: #89f0ec;
@@ -28,6 +31,7 @@
 
 .preview-region {
   /* Figma “bg-secondary-subtle” / “border-tertiary” → @alpic-ai/ui @theme color tokens */
+  --preview-surface: var(--color-background);
   --preview-region-bg: var(--color-light-gray);
   --preview-region-grid: var(--color-border);
   background-color: var(--preview-region-bg);
