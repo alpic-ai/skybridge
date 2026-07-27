@@ -1,4 +1,10 @@
-import { type SetStateAction, useCallback, useEffect, useState } from "react";
+import {
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { getAdaptor, useHostContext } from "../bridges/index.js";
 import { filterViewContext, injectViewContext } from "../helpers/state.js";
 import type { UnknownObject } from "../types.js";
@@ -46,6 +52,9 @@ export function useViewState<T extends UnknownObject>(
       : (defaultState ?? null);
   });
 
+  const viewStateRef = useRef(viewState);
+  viewStateRef.current = viewState;
+
   useEffect(() => {
     if (viewStateFromBridge !== null) {
       _setViewState(filterViewContext(viewStateFromBridge));
@@ -54,16 +63,17 @@ export function useViewState<T extends UnknownObject>(
 
   const setViewState = useCallback(
     (state: SetStateAction<T | null>) => {
-      _setViewState((prevState) => {
-        const newState = typeof state === "function" ? state(prevState) : state;
-        const stateToSet = injectViewContext(newState);
+      const newState =
+        typeof state === "function" ? state(viewStateRef.current) : state;
+      const stateToSet = injectViewContext(newState);
+      const filteredState = filterViewContext(stateToSet);
 
-        if (stateToSet !== null) {
-          adaptor.setViewState(stateToSet);
-        }
+      viewStateRef.current = filteredState;
+      _setViewState(filteredState);
 
-        return filterViewContext(stateToSet);
-      });
+      if (stateToSet !== null) {
+        adaptor.setViewState(stateToSet);
+      }
     },
     [adaptor],
   );
