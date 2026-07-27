@@ -2,6 +2,15 @@ import type { OAuthConfig } from "../index.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
 
 /**
+ * Turns the console's Discovery URL into the authorization server's base URL:
+ * drops a `/.well-known/openid-configuration` (or `oauth-authorization-server`)
+ * suffix, since discovery appends that path itself, and any trailing slash.
+ */
+function toAuthorizationServerUrl(discoveryUrl: string): string {
+  return discoveryUrl.replace(/\/\.well-known\/[^?#]*$/, "").replace(/\/$/, "");
+}
+
+/**
  * Derives the Descope Project ID from an MCP Server URL
  * (`…/agentic/<projectId>/<mcpServerId>`). Descope binds the token `aud` to the
  * project id, so it doubles as the audience.
@@ -30,12 +39,13 @@ export function descopeProvider(
   opts: { url: string } & Omit<CustomProviderOptions, "issuer">,
 ): Promise<OAuthConfig> {
   const { url, audience, ...rest } = opts;
-  const projectId = projectIdFromUrl(url);
-  const issuer = `${url.slice(0, url.indexOf("/agentic/"))}/${projectId}`;
+  const asUrl = toAuthorizationServerUrl(url);
+  const projectId = projectIdFromUrl(asUrl);
+  const issuer = `${asUrl.slice(0, asUrl.indexOf("/agentic/"))}/${projectId}`;
   return customProvider({
     issuer,
     audience: audience ?? projectId,
-    authorizationServer: url,
+    authorizationServer: asUrl,
     ...rest,
   });
 }

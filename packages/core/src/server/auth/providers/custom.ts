@@ -22,9 +22,11 @@ export type CustomProviderOptions = {
    * stays the IdP (the token's real `iss`). */
   serverUrl?: string;
   /** Advertise this URL as the authorization server (served AS metadata `issuer`
-   * and PRM `authorization_servers`) while `verify.issuer` stays the IdP's `iss`.
-   * Use when DCR/authorize/token live at a different URL than the token issuer
-   * (e.g. Descope's agentic URL vs. its base-project issuer). `serverUrl` wins if
+   * and PRM `authorization_servers`). Its own discovery document supplies the
+   * advertised endpoints, DCR registration, scopes and the `iss` tokens are
+   * verified against; only `jwks_uri` still comes from `issuer`'s document. Use
+   * when DCR/authorize/token live at a different URL than the discovery issuer
+   * (e.g. Descope's agentic URL vs. its base-project URL). `serverUrl` wins if
    * both are set. */
   authorizationServer?: string;
   scopes?: string[];
@@ -54,12 +56,22 @@ export async function customProvider(
     jwks_uri: _jwks,
     ...overrides
   }: Partial<DiscoveredMetadata> = opts.metadataOverrides ?? {};
-  const base: DiscoveredMetadata = { ...discovered, ...overrides };
+  let advertised = discovered;
+  if (opts.authorizationServer) {
+    try {
+      advertised = await discoverAuthorizationServer(opts.authorizationServer);
+    } catch (err) {
+      console.warn(
+        `OAuth discovery failed for authorizationServer ${opts.authorizationServer}; advertising ${opts.issuer} metadata instead: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+  const base: DiscoveredMetadata = { ...advertised, ...overrides };
   const scopesSupported = opts.scopes ?? base.scopes_supported;
 
-  // serverUrl (skybridge-as-AS) or authorizationServer (a distinct AS URL)
-  // override the advertised issuer (and keep the served scopes in sync). The
-  // verifier still trusts the IdP's `iss`. serverUrl wins when both are set.
+  // serverUrl (skybridge-as-AS) overrides the advertised issuer, keeping the
+  // IdP as the token issuer. authorizationServer re-asserts its own URL so a
+  // failed AS discovery still points clients at the AS. serverUrl wins.
   const advertisedIssuer =
     opts.serverUrl?.replace(/\/$/, "") ??
     opts.authorizationServer?.replace(/\/$/, "");
@@ -75,9 +87,9 @@ export async function customProvider(
     baseUrl: opts.baseUrl,
     oauthMetadata,
     verify: {
-      issuer: discovered.issuer,
+      issuer: advertised.issuer,
       audience: opts.audience,
-      jwksUri: discovered.jwks_uri,
+      jwksUri: advertised.jwks_uri ?? discovered.jwks_uri,
     },
     scopesSupported,
     requiredScopes: opts.requiredScopes,
