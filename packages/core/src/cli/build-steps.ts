@@ -12,13 +12,13 @@ import {
   emitVercelBuildOutput,
   ensureAssetsDir,
 } from "./build-helpers.js";
-import { resolveViewsDir } from "./resolve-views-dir.js";
+import { resolveSkybridgeConfig } from "./resolve-skybridge-config.js";
 import type { CommandStep } from "./use-execute-steps.js";
 
 export async function getCommandSteps(
   root = process.cwd(),
 ): Promise<CommandStep[]> {
-  const viewsDir = await resolveViewsDir(root);
+  const { viewsDir, serverExternal } = await resolveSkybridgeConfig(root);
   const rawDir = viewsDir ?? "src/views";
   const resolvedDir = isAbsolute(rawDir) ? rawDir : resolve(root, rawDir);
   // Non-throwing pre-check: duplicate view names are validated in the
@@ -101,7 +101,7 @@ export async function getCommandSteps(
     },
     {
       label: "Emitting Vercel build output",
-      run: () => emitVercelBuildOutput(root),
+      run: () => emitVercelBuildOutput(root, serverExternal),
     },
   );
 

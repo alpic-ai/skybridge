@@ -84,7 +84,10 @@ export const VERCEL_VC_CONFIG: unknown = {
 // directly would skip that priming and 500 on view resource reads when the
 // function falls back to `readFileSync('dist/assets/.vite/manifest.json')`
 // (Vercel functions don't ship `dist/`).
-export async function emitVercelBuildOutput(root: string): Promise<void> {
+export async function emitVercelBuildOutput(
+  root: string,
+  serverExternal: string[] = [],
+): Promise<void> {
   const outputDir = path.join(root, ".vercel", "output");
   const funcDir = path.join(
     outputDir,
@@ -108,7 +111,12 @@ export async function emitVercelBuildOutput(root: string): Promise<void> {
     define: { "process.env.NODE_ENV": '"production"' },
     // Dev-only deps reachable from re-exports; safe to leave unresolved since
     // the code paths that touch them are eliminated by the NODE_ENV define.
-    external: ["vite", "@skybridge/devtools"],
+    // `serverExternal` comes from the vite plugin, for deps esbuild can't
+    // resolve or load (e.g. optional native modules pulled in transitively).
+    external: ["vite", "@skybridge/devtools", ...serverExternal],
+    // Native addons can't be inlined into the bundle; copy them next to the
+    // function and rewrite the require path to point at the copy.
+    loader: { ".node": "file" },
     banner: {
       // ESM bundles miss CJS interop globals that some deps reach for.
       js: "import{createRequire}from'node:module';const require=createRequire(import.meta.url);",
