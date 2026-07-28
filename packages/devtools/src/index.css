@@ -20,7 +20,7 @@
 .dark,
 [data-theme="dark"] {
   --color-background: #071718;
-  --color-border: #1f4449;
+  --color-border: #162828;
   --color-light-gray: #162828;
 
   --color-primary: #89f0ec;
@@ -64,4 +64,10 @@
     16px 16px,
     16px 16px;
   background-position: 0 0;
+}
+
+.preview-region.dark,
+.preview-region[data-theme="dark"] {
+  /* Keep the grid visible against the dark surface without recolouring global borders. */
+  --preview-region-grid: #1f4449;
 }
