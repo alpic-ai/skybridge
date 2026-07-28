@@ -17,19 +17,13 @@ import {
   type StandardSchemaV1,
   type ToolAnnotations,
 } from "@modelcontextprotocol/server";
-
-type AnySchema = StandardSchemaV1;
-type ZodRawShapeCompat = Record<string, StandardSchemaV1>;
-type SchemaOutput<S> = S extends StandardSchemaV1
-  ? StandardSchemaV1.InferOutput<S>
-  : never;
-
 import { mergeWith, union } from "es-toolkit";
 import express, {
   type ErrorRequestHandler,
   type Express,
   type RequestHandler,
 } from "express";
+import type { InferSchemaOutput, RawInputShape } from "../standard-schema.js";
 import type { OAuthConfig } from "./auth/index.js";
 import {
   authToSecuritySchemes,
@@ -323,15 +317,15 @@ export interface McpServerTypes<TTools extends Record<string, ToolDef>> {
 
 type Simplify<T> = { [K in keyof T]: T[K] };
 
-type ShapeOutput<Shape extends ZodRawShapeCompat> = Simplify<
+type ShapeOutput<Shape extends RawInputShape> = Simplify<
   {
-    [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
+    [K in keyof Shape as undefined extends InferSchemaOutput<Shape[K]>
       ? never
-      : K]: SchemaOutput<Shape[K]>;
+      : K]: InferSchemaOutput<Shape[K]>;
   } & {
-    [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
+    [K in keyof Shape as undefined extends InferSchemaOutput<Shape[K]>
       ? K
-      : never]?: SchemaOutput<Shape[K]>;
+      : never]?: InferSchemaOutput<Shape[K]>;
   }
 >;
 
@@ -348,7 +342,7 @@ type ExtractMeta<T> = [Extract<T, { _meta: unknown }>] extends [never]
 type AddTool<
   TTools,
   TName extends string,
-  TInput extends ZodRawShapeCompat,
+  TInput extends RawInputShape,
   TOutput,
   TResponseMetadata = unknown,
 > = McpServer<
@@ -357,12 +351,12 @@ type AddTool<
   }
 >;
 
-interface ToolConfigBase<TInput extends ZodRawShapeCompat | AnySchema> {
+interface ToolConfigBase<TInput extends RawInputShape | StandardSchemaV1> {
   name: string;
   title?: string;
   description?: string;
   inputSchema?: TInput;
-  outputSchema?: ZodRawShapeCompat | AnySchema;
+  outputSchema?: RawInputShape | StandardSchemaV1;
   annotations?: ToolAnnotations;
   view?: ViewConfig;
   _meta?: ToolMeta;
@@ -386,7 +380,7 @@ type ToolAuthConfig =
       securitySchemes?: SecurityScheme[];
     };
 
-type ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> =
+type ToolConfig<TInput extends RawInputShape | StandardSchemaV1> =
   ToolConfigBase<TInput> & ToolAuthConfig;
 
 /**
@@ -424,7 +418,7 @@ type ToolHandlerExtra = Omit<McpExtra, "_meta"> & {
 };
 
 type ToolHandler<
-  TInput extends ZodRawShapeCompat,
+  TInput extends RawInputShape,
   TReturn extends { content?: HandlerContent } = { content?: HandlerContent },
 > = (
   args: ShapeOutput<TInput>,
@@ -558,21 +552,21 @@ function withSkillsCapability(
 //   registerTool({ name: "greet", description }, handler)
 //     -> { config: { name: "greet", description }, cb: handler }
 function normalizeRegisterToolArgs(args: unknown[]): {
-  config: ToolConfig<ZodRawShapeCompat>;
-  cb: ToolHandler<ZodRawShapeCompat>;
+  config: ToolConfig<RawInputShape>;
+  cb: ToolHandler<RawInputShape>;
 } {
   if (typeof args[0] === "string") {
     return {
       config: {
         name: args[0],
         ...(args[1] as object),
-      } as ToolConfig<ZodRawShapeCompat>,
-      cb: args[2] as ToolHandler<ZodRawShapeCompat>,
+      } as ToolConfig<RawInputShape>,
+      cb: args[2] as ToolHandler<RawInputShape>,
     };
   }
   return {
-    config: args[0] as ToolConfig<ZodRawShapeCompat>,
-    cb: args[1] as ToolHandler<ZodRawShapeCompat>,
+    config: args[0] as ToolConfig<RawInputShape>,
+    cb: args[1] as ToolHandler<RawInputShape>,
   };
 }
 
@@ -1268,7 +1262,7 @@ export class McpServer<
     );
   }
 
-  private decorateToolHandler<InputArgs extends ZodRawShapeCompat>(
+  private decorateToolHandler<InputArgs extends RawInputShape>(
     cb: ToolHandler<InputArgs>,
     {
       attachViewUUID,
@@ -1395,7 +1389,7 @@ export class McpServer<
    */
   registerTool<
     TName extends string,
-    InputArgs extends ZodRawShapeCompat,
+    InputArgs extends RawInputShape,
     TReturn extends { content?: HandlerContent },
   >(
     config: ToolConfig<InputArgs> & { name: TName },
@@ -1407,7 +1401,7 @@ export class McpServer<
     ExtractStructuredContent<TReturn>,
     ExtractMeta<TReturn>
   >;
-  registerTool<InputArgs extends ZodRawShapeCompat>(
+  registerTool<InputArgs extends RawInputShape>(
     config: ToolConfig<InputArgs>,
     cb: ToolHandler<InputArgs>,
   ): this;
