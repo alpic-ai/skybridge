@@ -50,10 +50,6 @@
   "author": "Frédéric Barthelet",
   "license": "ISC",
   "peerDependencies": {
-    "@modelcontextprotocol/client": "2.0.0-beta.5",
-    "@modelcontextprotocol/core": "2.0.0-beta.5",
-    "@modelcontextprotocol/express": "2.0.0-beta.5",
-    "@modelcontextprotocol/server": "2.0.0-beta.5",
     "@skybridge/devtools": "^1.1.0",
     "nodemon": ">=3.0.0",
     "react": ">=18.0.0",
@@ -62,8 +58,12 @@
   },
   "dependencies": {
     "@babel/core": "^7.29.7",
+    "@modelcontextprotocol/client": "2.0.0-beta.5",
+    "@modelcontextprotocol/core": "2.0.0-beta.5",
     "@modelcontextprotocol/ext-apps": "^1.7.4",
+    "@modelcontextprotocol/express": "2.0.0-beta.5",
     "@modelcontextprotocol/node": "2.0.0-beta.5",
+    "@modelcontextprotocol/server": "2.0.0-beta.5",
     "@oclif/core": "^4.11.14",
     "ci-info": "^4.4.0",
     "cors": "^2.8.6",
@@ -82,11 +82,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
-    "@modelcontextprotocol/client": "2.0.0-beta.5",
-    "@modelcontextprotocol/core": "2.0.0-beta.5",
-    "@modelcontextprotocol/express": "2.0.0-beta.5",
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@modelcontextprotocol/server": "2.0.0-beta.5",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
     "@total-typescript/tsconfig": "^1.0.4",
