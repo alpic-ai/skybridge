@@ -95,6 +95,19 @@ describe("useViewState", () => {
     expect(OpenaiMock.setWidgetState).toHaveBeenCalledTimes(1);
   });
 
+  it("should not persist state when setViewState is called after unmount", () => {
+    const { result, unmount } = renderHook(() => useViewState(defaultState));
+    const setViewState = result.current[1];
+
+    unmount();
+
+    act(() => {
+      setViewState({ count: 10, name: "updated" });
+    });
+
+    expect(OpenaiMock.setWidgetState).not.toHaveBeenCalled();
+  });
+
   it("should update state when window.openai.widgetState changes", () => {
     OpenaiMock.widgetState = { modelContent: defaultState };
     const { result, rerender } = renderHook(() => useViewState(defaultState));

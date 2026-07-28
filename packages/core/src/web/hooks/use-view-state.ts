@@ -55,6 +55,15 @@ export function useViewState<T extends UnknownObject>(
   const viewStateRef = useRef(viewState);
   viewStateRef.current = viewState;
 
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   useEffect(() => {
     if (viewStateFromBridge !== null) {
       _setViewState(filterViewContext(viewStateFromBridge));
@@ -63,6 +72,10 @@ export function useViewState<T extends UnknownObject>(
 
   const setViewState = useCallback(
     (state: SetStateAction<T | null>) => {
+      if (!isMountedRef.current) {
+        return;
+      }
+
       const newState =
         typeof state === "function" ? state(viewStateRef.current) : state;
       const stateToSet = injectViewContext(newState);
