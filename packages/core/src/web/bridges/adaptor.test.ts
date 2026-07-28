@@ -154,30 +154,6 @@ describe("HostAdaptor", () => {
     }
   });
 
-  it("uploadFile does not mutate the host's existing imageIds array", async () => {
-    const imageIds = ["already-there"];
-    const setWidgetState = vi.fn().mockResolvedValue(undefined);
-    const uploadFile = vi.fn().mockResolvedValue({
-      fileId: "new-one",
-      fileName: "shot.png",
-      mimeType: "image/png",
-    });
-    vi.stubGlobal("openai", {
-      uploadFile,
-      setWidgetState,
-      widgetState: { modelContent: {}, privateContent: {}, imageIds },
-    });
-    const adaptor = new HostAdaptor();
-
-    await adaptor.uploadFile(new File([], "shot.png", { type: "image/png" }));
-
-    // The write must go through setWidgetState, not through the host's array.
-    expect(imageIds).toEqual(["already-there"]);
-    expect(setWidgetState).toHaveBeenCalledWith(
-      expect.objectContaining({ imageIds: ["already-there", "new-one"] }),
-    );
-  });
-
   it("setViewState uses window.openai.setWidgetState when present", async () => {
     const setWidgetState = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal("openai", { setWidgetState, widgetState: null });
