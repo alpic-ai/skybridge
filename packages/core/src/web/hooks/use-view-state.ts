@@ -52,8 +52,15 @@ export function useViewState<T extends UnknownObject>(
       : (defaultState ?? null);
   });
 
-  const viewStateRef = useRef(viewState);
-  viewStateRef.current = viewState;
+  const mountedStateRef = useRef<T | null | undefined>(viewState);
+
+  useEffect(() => {
+    mountedStateRef.current = viewState;
+
+    return () => {
+      mountedStateRef.current = undefined;
+    };
+  }, [viewState]);
 
   useEffect(() => {
     if (viewStateFromBridge !== null) {
@@ -63,12 +70,17 @@ export function useViewState<T extends UnknownObject>(
 
   const setViewState = useCallback(
     (state: SetStateAction<T | null>) => {
-      const newState =
-        typeof state === "function" ? state(viewStateRef.current) : state;
+      const prevState = mountedStateRef.current;
+
+      if (prevState === undefined) {
+        return;
+      }
+
+      const newState = typeof state === "function" ? state(prevState) : state;
       const stateToSet = injectViewContext(newState);
       const filteredState = filterViewContext(stateToSet);
 
-      viewStateRef.current = filteredState;
+      mountedStateRef.current = filteredState;
       _setViewState(filteredState);
 
       if (stateToSet !== null) {
