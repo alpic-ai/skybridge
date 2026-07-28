@@ -78,10 +78,9 @@ export function useViewState<T extends UnknownObject>(
 
       const newState = typeof state === "function" ? state(prevState) : state;
       const stateToSet = injectViewContext(newState);
-      const filteredState = filterViewContext(stateToSet);
 
-      mountedStateRef.current = filteredState;
-      _setViewState(filteredState);
+      mountedStateRef.current = newState;
+      _setViewState(newState);
 
       if (stateToSet !== null) {
         adaptor.setViewState(stateToSet);
