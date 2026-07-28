@@ -1,0 +1,85 @@
+---
+title: authplaneProvider
+sidebarTitle: "Authplane"
+description: "Wire OAuth from an Authplane authorization server"
+---
+
+`authplaneProvider` wires authentication through [Authplane](https://authplane.ai), so your tools receive a signed-in user.
+
+## Example
+
+```ts server.ts highlight={1,7-10}
+import { authplaneProvider, McpServer } from "skybridge/server";
+
+const server = new McpServer(
+  { name: "personal-shopper", version: "0.0.1" },
+  { capabilities: {} },
+  {
+    oauth: await authplaneProvider({
+      issuer: process.env.AUTHPLANE_ISSUER,
+      resource: process.env.SERVER_URL,
+    }),
+  },
+);
+```
+
+## Signature
+
+```ts
+authplaneProvider(opts: AuthplaneProviderOptions): Promise<OAuthConfig>;
+```
+
+## Parameters
+
+### `opts`
+
+- **`issuer`** is the authorization server's issuer identifier, for example `https://auth.acme.com`.
+
+- **`resource`** is this server's resource identifier: the public URL clients reach, advertised in its protected-resource metadata. Required, unlike the other providers — see below.
+
+- **`audience`** overrides the expected `aud`, which defaults to `resource`. Set it only when the resource is configured in Authplane with an explicit audience override.
+
+It also accepts the shared [`CustomProviderOptions`](/api-reference/custom-provider#parameters) options: `serverUrl`, `scopes`, `requiredScopes`, and `metadataOverrides`.
+
+Dynamic Client Registration is supported natively, so clients register directly with Authplane and this server stays out of the authorization path.
+
+## Why `resource` is required
+
+Authplane binds the access token's `aud` to the RFC 8707 resource indicator the client sends, and the client reads that value from the `resource` field of this server's protected-resource metadata. Setting `resource` gives the deployment one fixed identifier for both, so it is required rather than optional.
+
+Three values must therefore be identical, and OAuth compares identifiers by exact string match:
+
+1. the value this server advertises as its `resource` metadata;
+2. the resource registered in Authplane;
+3. the `aud` Authplane mints, which it takes from (2).
+
+A mismatch between 1 and 2 fails the authorization request with `invalid_target`, before any token exists; between 1 and 3, token verification fails. Register `resource` in Authplane character for character and all three agree.
+
+### Pathless origins
+
+The advertised resource is the URL-normalised form of `resource`, so a bare origin is advertised with a root path: `https://acme.example.com` is advertised as `https://acme.example.com/`. The provider asks for the advertised form up front, and names it if the two differ:
+
+```
+authplaneProvider: `resource` must be given in the form it will be advertised.
+"https://acme.example.com" is advertised as "https://acme.example.com/".
+Use "https://acme.example.com/", or a path-qualified URL such as
+"https://acme.example.com/mcp", and register the same value in Authplane.
+```
+
+So if your resource is a bare origin, register it in Authplane **with** the trailing slash. Uppercase hosts and explicit default ports normalise the same way. Path-qualified URLs are unchanged by normalisation, and are the most specific identifier available — which is what [RFC 8707 §2](https://www.rfc-editor.org/rfc/rfc8707#section-2) asks clients to send.
+
+## Returns
+
+A `Promise` for the [`OAuthConfig`](/api-reference/custom-provider#returns) you pass to the [`oauth`](/api-reference/mcp-server#constructor) constructor option.
+
+<CardGroup cols={3}>
+  <Card title="Connect an Identity Provider" icon="fingerprint" href="/guides/auth-providers">
+    Set up sign-in with a hosted provider
+  </Card>
+  <Card title="Authenticate Users" icon="key" href="/build/auth">
+    Add sign-in to your app end to end
+  </Card>
+  <Card title="customProvider" icon="key-round" href="/api-reference/custom-provider">
+    Wire OAuth from any IdP's discovery document
+  </Card>
+</CardGroup>

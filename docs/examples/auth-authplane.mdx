@@ -1,0 +1,22 @@
+---
+title: Authplane
+description: Full OAuth authentication with Authplane and personalized coffee shop search.
+---
+
+import { ChatExample } from "/components/chat-example.jsx";
+
+The Authplane example app demonstrates a full OAuth authentication flow using [Authplane](https://authplane.ai), with a personalized coffee shop finder view that displays user-specific favorites.
+
+<ChatExample
+  prompt="Find a latte near me."
+  app="Authplane"
+  src="/images/showcase-auth.png"
+  alt="Authplane showcase"
+  source="https://github.com/alpic-ai/skybridge/tree/main/examples/auth-authplane"
+/>
+
+## Skybridge APIs used
+
+- [`authplaneProvider`](/api-reference/authplane-provider)
+- [`registerTool`](/api-reference/register-tool)
+- [`useToolInfo`](/api-reference/use-tool-info)

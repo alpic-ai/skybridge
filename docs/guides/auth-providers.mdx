@@ -5,7 +5,7 @@ sidebarTitle: "Identity Providers"
 icon: "fingerprint"
 ---
 
-[Authenticating users](/build/auth) wires sign-in through a hosted identity provider in one constructor option, so your tools receive a signed-in user. ChatGPT and Claude drive the flow the same way; what varies is the provider. The sections below cover one each: [Auth0](#auth0), [Clerk](#clerk), [Descope](#descope), [Stytch](#stytch), and [WorkOS](#workos), plus a [custom provider](#any-other-provider) for any other.
+[Authenticating users](/build/auth) wires sign-in through a hosted identity provider in one constructor option, so your tools receive a signed-in user. ChatGPT and Claude drive the flow the same way; what varies is the provider. The sections below cover one each: [Auth0](#auth0), [Authplane](#authplane), [Clerk](#clerk), [Descope](#descope), [Stytch](#stytch), and [WorkOS](#workos), plus a [custom provider](#any-other-provider) for any other.
 
 <Info>
 These providers require sign-in on every request by default. Set [`auth: { allowsAnonymous: true }`](/api-reference/register-tool#auth) on any tool to [mix public and authenticated tools](/build/auth#mix-public-and-authenticated-tools): the server then serves anonymous requests and Skybridge enforces each tool's own auth declaration before the handler runs.
@@ -39,6 +39,26 @@ const server = new McpServer(
 ```
 
 See the runnable [`auth-auth0`](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-auth0) example.
+
+## Authplane
+
+[Authplane](https://authplane.ai) binds the token's `aud` to this server's resource identifier, so the provider takes both the advertised resource and the expected audience from `resource`. Dynamic Client Registration is supported natively, so clients register with Authplane directly and your server stays out of the authorization path.
+
+1. Deploy or point at an Authplane authorization server and note its URL, e.g. `https://auth.acme.com`.
+2. Register this MCP server as a protected resource, using the public URL clients will reach — the same value you pass as `resource`, character for character.
+
+Pass the authorization server URL and this server's public URL to [`authplaneProvider`](/api-reference/authplane-provider):
+
+```ts server.ts highlight={2-5}
+const server = new McpServer(serverInfo, capabilities, {
+  oauth: await authplaneProvider({
+    issuer: process.env.AUTHPLANE_ISSUER,
+    resource: process.env.SERVER_URL,
+  }),
+}).registerTool(/* search-products, requires oauth2 */);
+```
+
+See the runnable [`auth-authplane`](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-authplane) example.
 
 ## Clerk
 
