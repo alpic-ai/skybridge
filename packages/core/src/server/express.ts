@@ -1,6 +1,7 @@
 import type http from "node:http";
 import path from "node:path";
-import { type AuthInfo, createMcpHandler } from "@modelcontextprotocol/server";
+import { toNodeHandler } from "@modelcontextprotocol/node";
+import { createMcpHandler } from "@modelcontextprotocol/server";
 import cors from "cors";
 import express from "express";
 import type { McpServer } from "./server.js";
@@ -98,8 +99,8 @@ export async function createApp({
 }
 
 const mcpMiddleware = (server: McpServer): express.RequestHandler => {
-  const handler = createMcpHandler(() =>
-    server.createStatelessServerInstance(),
+  const handler = toNodeHandler(
+    createMcpHandler(() => server.createStatelessServerInstance()),
   );
 
   return async (
@@ -108,26 +109,7 @@ const mcpMiddleware = (server: McpServer): express.RequestHandler => {
     next: express.NextFunction,
   ) => {
     try {
-      const url = `${req.protocol}://${req.get("host")}${req.originalUrl}`;
-      const headers = new Headers();
-      for (const [key, value] of Object.entries(req.headers)) {
-        if (value === undefined) {
-          continue;
-        }
-        headers.set(key, Array.isArray(value) ? value.join(", ") : value);
-      }
-
-      const request = new Request(url, { method: req.method, headers });
-      const response = await handler.fetch(request, {
-        authInfo: (req as express.Request & { auth?: AuthInfo }).auth,
-        parsedBody: req.body,
-      });
-
-      res.status(response.status);
-      response.headers.forEach((value, key) => {
-        res.setHeader(key, value);
-      });
-      res.send(await response.text());
+      await handler(req, res, req.body);
     } catch (error) {
       next(error);
     }

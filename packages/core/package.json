@@ -60,6 +60,7 @@
   "dependencies": {
     "@babel/core": "^7.29.7",
     "@modelcontextprotocol/ext-apps": "^1.7.4",
+    "@modelcontextprotocol/node": "2.0.0-beta.5",
     "@oclif/core": "^4.11.14",
     "ci-info": "^4.4.0",
     "cors": "^2.8.6",
