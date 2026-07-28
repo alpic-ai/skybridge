@@ -121,18 +121,37 @@ describe("HostAdaptor", () => {
 
   it("uploadFile delegates to window.openai.uploadFile and tracks fileId in widgetState", async () => {
     const setWidgetState = vi.fn().mockResolvedValue(undefined);
-    const uploadFile = vi
-      .fn()
-      .mockResolvedValue({ fileId: "abc", fileName: "x" });
+    const uploadFile = vi.fn().mockResolvedValue({
+      fileId: "abc",
+      fileName: "x",
+      mimeType: "image/png",
+    });
     vi.stubGlobal("openai", { uploadFile, setWidgetState, widgetState: null });
     const adaptor = new HostAdaptor();
-    const file = new File([], "x");
+    const file = new File([], "x", { type: "image/png" });
     const r = await adaptor.uploadFile(file, { library: true });
     expect(uploadFile).toHaveBeenCalledWith(file, { library: true });
     expect(r.fileId).toBe("abc");
     expect(setWidgetState).toHaveBeenCalledWith(
       expect.objectContaining({ imageIds: ["abc"] }),
     );
+  });
+
+  it("uploadFile does not track a non-image fileId in widgetState.imageIds", async () => {
+    const setWidgetState = vi.fn().mockResolvedValue(undefined);
+    const uploadFile = vi.fn().mockResolvedValue({
+      fileId: "sediment://file_txt",
+      fileName: "notes.txt",
+      mimeType: "text/plain",
+    });
+    vi.stubGlobal("openai", { uploadFile, setWidgetState, widgetState: null });
+    const adaptor = new HostAdaptor();
+
+    await adaptor.uploadFile(new File([], "notes.txt", { type: "text/plain" }));
+
+    for (const call of setWidgetState.mock.calls) {
+      expect(call[0].imageIds ?? []).not.toContain("sediment://file_txt");
+    }
   });
 
   it("setViewState uses window.openai.setWidgetState when present", async () => {

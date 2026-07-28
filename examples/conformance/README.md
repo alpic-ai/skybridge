@@ -82,6 +82,8 @@ notte/                   # Automated runs on real hosts (see E2E below)
 
 The driver talks to the app over postMessage in both directions (the widget iframes are cross-origin, so it cannot click or read them): buttons are pressed through the drive hook (`{type: "conformance:drive", action: run|skip|yes|no|close-modal|restore-inline}`) and progress is read from the app's state broadcasts (`{type: "conformance:state", state}`, sent to `window.top` on every change plus a 1.5s heartbeat). Both sides live in `src/automation.ts`.
 
+The broadcast is off until a driver posts `{type: "conformance:attach"}`, which it repeats on every poll so a host-driven remount re-arms it. State messages are not JSON-RPC, and ChatGPT's sandbox proxy runs an `ext-apps` transport old enough to log `Failed to parse message` for every non-JSON-RPC message reaching its window: broadcasting unasked buries the host console under one error per heartbeat.
+
 ### Setup
 
 The function expects the conformance app to be already connected in the ChatGPT account/workspace the profile is logged into:

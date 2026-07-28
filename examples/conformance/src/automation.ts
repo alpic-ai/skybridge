@@ -11,6 +11,13 @@ import { useEffect, useRef } from "react";
  *   state}` to the embedding page (`window.top` is reachable cross-origin for
  *   postMessage) on every render plus a heartbeat, so a driver that attached
  *   late still gets a snapshot within a beat.
+ * - Handshake: the broadcast stays silent until a driver posts `{type:
+ *   "conformance:attach"}`. These state messages are not JSON-RPC, and
+ *   ChatGPT's sandbox proxy runs an `ext-apps` transport old enough to
+ *   `console.error("Failed to parse message", …)` on every non-JSON-RPC
+ *   message reaching its window — so an unsolicited heartbeat floods the host
+ *   console. Drivers re-announce on each poll, which also re-arms the app
+ *   after a host-driven remount.
  *
  * Neither hook knows anything about the conformance runner; the caller
  * supplies the dispatch and the state snapshot.
@@ -25,7 +32,19 @@ export type DriveAction =
 
 const DRIVE_MESSAGE = "conformance:drive";
 const STATE_MESSAGE = "conformance:state";
+const ATTACH_MESSAGE = "conformance:attach";
 const HEARTBEAT_MS = 1500;
+
+// Module scope, not a hook: the attach can land before the view mounts, and it
+// must outlive the remounts the host triggers (fullscreen, modal).
+let attached = false;
+if (typeof window !== "undefined") {
+  window.addEventListener("message", (event: MessageEvent) => {
+    if ((event.data as { type?: string } | null)?.type === ATTACH_MESSAGE) {
+      attached = true;
+    }
+  });
+}
 
 /** Dispatch `conformance:drive` messages to `onAction` (always the latest). */
 export function useDriveListener(onAction: (action: DriveAction) => void) {
@@ -44,6 +63,9 @@ export function useDriveListener(onAction: (action: DriveAction) => void) {
 }
 
 function post(state: Record<string, unknown>) {
+  if (!attached) {
+    return;
+  }
   const message = { type: STATE_MESSAGE, state };
   try {
     window.top?.postMessage(message, "*");
