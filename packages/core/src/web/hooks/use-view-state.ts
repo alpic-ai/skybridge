@@ -37,7 +37,7 @@ export function useViewState<T extends UnknownObject>(
   const adaptor = getAdaptor();
   const viewStateFromBridge = useHostContext("viewState") as T | null;
 
-  const [viewState, _setViewState] = useState<T | null>(() => {
+  const [viewState, setViewState] = useState<T | null>(() => {
     if (viewStateFromBridge !== null) {
       return filterViewContext(viewStateFromBridge);
     }
@@ -54,7 +54,7 @@ export function useViewState<T extends UnknownObject>(
       const stateFromBridge = filterViewContext(viewStateFromBridge);
 
       persistedStateRef.current = stateFromBridge;
-      _setViewState(stateFromBridge);
+      setViewState(stateFromBridge);
     }
   }, [viewStateFromBridge]);
 
@@ -73,5 +73,5 @@ export function useViewState<T extends UnknownObject>(
     adaptor.setViewState(stateToSet);
   }, [viewState, adaptor]);
 
-  return [viewState, _setViewState] as const;
+  return [viewState, setViewState] as const;
 }
