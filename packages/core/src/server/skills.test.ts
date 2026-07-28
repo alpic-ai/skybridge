@@ -2,7 +2,7 @@
 import { mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { ResourceTemplate } from "@modelcontextprotocol/server";
 import { describe, expect, it, vi } from "vitest";
 import {
   discoverSkills,
@@ -143,9 +143,11 @@ describe("registerSkills", () => {
         },
       ),
       server: {
-        setRequestHandler: vi.fn((_schema: unknown, handler: unknown) => {
-          dirHandler = handler as (req: unknown) => unknown;
-        }),
+        setRequestHandler: vi.fn(
+          (_method: unknown, _schemas: unknown, handler: unknown) => {
+            dirHandler = handler as (req: unknown) => unknown;
+          },
+        ),
       },
     };
     return { server, resources, getDirHandler: () => dirHandler };
@@ -186,7 +188,7 @@ describe("registerSkills", () => {
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
     registerSkills(on.server as any, manifest);
     const result = on.getDirHandler()?.({
-      params: { uri: "skill://refunds/templates" },
+      uri: "skill://refunds/templates",
     }) as { resources: { uri: string; name: string; mimeType: string }[] };
     expect(result.resources).toEqual([
       {
@@ -202,7 +204,7 @@ describe("registerSkills", () => {
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
     registerSkills(server as any, manifest);
     const result = getDirHandler()?.({
-      params: { uri: "skill://refunds" },
+      uri: "skill://refunds",
     }) as { resources: { name: string; mimeType: string }[] };
     expect(result.resources).toContainEqual({
       uri: "skill://refunds/templates",

@@ -1,5 +1,3 @@
-import type { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
   CallToolResult,
   CancelTaskResult,
@@ -17,15 +15,15 @@ import type {
   ListTasksResult,
   ListToolsResult,
   ReadResourceResult,
-  ServerNotification,
-  ServerRequest,
+  Server,
+  ServerContext,
   ServerResult,
-} from "@modelcontextprotocol/sdk/types.js";
+} from "@modelcontextprotocol/server";
 
 /**
- * The `extra` context object provided by the MCP SDK to request handlers.
+ * The per-request handler context provided by the MCP SDK to request handlers.
  */
-export type McpExtra = RequestHandlerExtra<ServerRequest, ServerNotification>;
+export type McpExtra = ServerContext;
 
 /**
  * A single MCP middleware function following the onion model.

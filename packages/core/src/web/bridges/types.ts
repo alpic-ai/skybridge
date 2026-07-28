@@ -1,7 +1,4 @@
-import type {
-  SchemaOutput,
-  ZodRawShapeCompat,
-} from "@modelcontextprotocol/sdk/server/zod-compat.js";
+import type { StandardSchemaV1 } from "@modelcontextprotocol/client";
 import type {
   CallToolResult,
   EmbeddedResource,
@@ -10,6 +7,11 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 import type { useSyncExternalStore } from "react";
 import type { ViewHostType } from "../../server/index.js";
+
+type ZodRawShapeCompat = Record<string, StandardSchemaV1>;
+type SchemaOutput<S> = S extends StandardSchemaV1
+  ? StandardSchemaV1.InferOutput<S>
+  : never;
 
 /**
  * Globals injected on `window.skybridge` by the host. Tells the view which

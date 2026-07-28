@@ -1,11 +1,5 @@
 import crypto from "node:crypto";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
-import type {
-  ServerNotification,
-  ServerRequest,
-} from "@modelcontextprotocol/sdk/types.js";
+import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import {
   afterEach,
   beforeEach,
@@ -15,6 +9,7 @@ import {
   type MockInstance,
   vi,
 } from "vitest";
+import type { McpExtra } from "../server/middleware.js";
 import type { McpServer, ViewName } from "../server/server.js";
 import { McpServer as McpServerClass } from "../server/server.js";
 import {
@@ -108,7 +103,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const appsSdkResourceCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+      extra: McpExtra,
     ) => Promise<{
       contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
     }>;
@@ -117,10 +112,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const host = "localhost:3000";
     const serverUrl = `http://${host}`;
     const hmrUrl = `ws://${host}`;
-    const mockExtra = createMockExtra(host) as unknown as RequestHandlerExtra<
-      ServerRequest,
-      ServerNotification
-    >;
+    const mockExtra = createMockExtra(host) as unknown as McpExtra;
     const result = await appsSdkResourceCallback(
       new URL("ui://views/ext-apps/my-view.html"),
       mockExtra,
@@ -176,7 +168,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const appsSdkResourceCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+      extra: McpExtra,
     ) => Promise<{
       contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
     }>;
@@ -184,10 +176,7 @@ describe("McpServer.registerTool (unified API)", () => {
 
     const host = "myapp.com";
     const serverUrl = `https://${host}`;
-    const mockExtra = createMockExtra(host) as unknown as RequestHandlerExtra<
-      ServerRequest,
-      ServerNotification
-    >;
+    const mockExtra = createMockExtra(host) as unknown as McpExtra;
     const versionedUri = `ui://views/ext-apps/my-view.html${expectedVersionParam("assets/my-view-abc123.js", "style.css")}`;
     const result = await appsSdkResourceCallback(
       new URL(versionedUri),
@@ -241,7 +230,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const extAppsResourceCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+      extra: McpExtra,
     ) => Promise<{
       contents: Array<{
         uri: URL | string;
@@ -270,7 +259,7 @@ describe("McpServer.registerTool (unified API)", () => {
           "x-alpic-forwarded-url": forwardedUrl,
         },
         url: "http://localhost:3000/mcp",
-      }) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>,
+      }) as unknown as McpExtra,
     );
 
     expect(result.contents[0]?._meta).toEqual({
@@ -306,7 +295,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const resourceCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+      extra: McpExtra,
     ) => Promise<{
       contents: Array<{
         uri: URL | string;
@@ -321,10 +310,7 @@ describe("McpServer.registerTool (unified API)", () => {
 
     const result = await resourceCallback(
       new URL("ui://views/ext-apps/my-view.html"),
-      createMockExtra(host) as unknown as RequestHandlerExtra<
-        ServerRequest,
-        ServerNotification
-      >,
+      createMockExtra(host) as unknown as McpExtra,
     );
 
     expect(result).toEqual({
@@ -720,7 +706,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const appsSdkCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+      extra: McpExtra,
     ) => Promise<{
       contents: Array<{
         uri: URL | string;
@@ -734,10 +720,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const hmrUrl = `ws://${host}`;
     const result = await appsSdkCallback(
       new URL("ui://views/ext-apps/csp-tool.html"),
-      createMockExtra(host) as unknown as RequestHandlerExtra<
-        ServerRequest,
-        ServerNotification
-      >,
+      createMockExtra(host) as unknown as McpExtra,
     );
 
     const meta = result.contents[0]?._meta as {
@@ -774,7 +757,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const appsSdkCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+      extra: McpExtra,
     ) => Promise<{
       contents: Array<{
         uri: URL | string;
@@ -785,10 +768,7 @@ describe("McpServer.registerTool (unified API)", () => {
 
     const result = await appsSdkCallback(
       new URL("ui://views/ext-apps/override-tool.html"),
-      createMockExtra("localhost:3000") as unknown as RequestHandlerExtra<
-        ServerRequest,
-        ServerNotification
-      >,
+      createMockExtra("localhost:3000") as unknown as McpExtra,
     );
 
     const meta = result.contents[0]?._meta as {

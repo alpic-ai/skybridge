@@ -7,25 +7,23 @@ import type {
   McpUiToolMeta,
 } from "@modelcontextprotocol/ext-apps";
 import {
+  type ContentBlock,
+  type Implementation,
+  McpServer as McpServerBase,
+  type RequestMeta,
   Server as SdkServer,
   type ServerOptions,
-} from "@modelcontextprotocol/sdk/server/index.js";
-import { McpServer as McpServerBase } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type {
-  AnySchema,
-  SchemaOutput,
-  ZodRawShapeCompat,
-} from "@modelcontextprotocol/sdk/server/zod-compat.js";
-import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
-import type {
-  ContentBlock,
-  Implementation,
-  RequestMeta,
-  ServerNotification,
-  ServerRequest,
-  ServerResult,
-  ToolAnnotations,
-} from "@modelcontextprotocol/sdk/types.js";
+  type ServerResult,
+  type StandardSchemaV1,
+  type ToolAnnotations,
+} from "@modelcontextprotocol/server";
+
+type AnySchema = StandardSchemaV1;
+type ZodRawShapeCompat = Record<string, StandardSchemaV1>;
+type SchemaOutput<S> = S extends StandardSchemaV1
+  ? StandardSchemaV1.InferOutput<S>
+  : never;
+
 import { mergeWith, union } from "es-toolkit";
 import express, {
   type ErrorRequestHandler,
@@ -421,10 +419,7 @@ export interface ClientHintsMeta {
   "openai/widgetSessionId"?: string;
 }
 
-type ToolHandlerExtra = Omit<
-  RequestHandlerExtra<ServerRequest, ServerNotification>,
-  "_meta"
-> & {
+type ToolHandlerExtra = Omit<McpExtra, "_meta"> & {
   _meta?: RequestMeta & ClientHintsMeta;
 };
 
@@ -951,18 +946,17 @@ export class McpServer<
   }
 
   /**
-   * Per-request stateless connect. The SDK's `Protocol` only allows one
-   * transport per instance, so we can't reuse this `McpServer` across
-   * concurrent requests. The SDK's idiomatic fix is a `() => McpServer`
-   * factory, but that would break Skybridge's singleton API — so instead
-   * we build a fresh underlying `Server` per request and share the main
-   * server's handler maps by reference. The cast is unavoidable: there's
-   * no public API to inject handler maps. `getHandlerMaps` validates the
-   * read side and fails fast on SDK field renames.
+   * Build a fresh underlying `Server` for one stateless HTTP request. The
+   * SDK's `Protocol` only allows one transport per instance, so we can't
+   * reuse this `McpServer` across concurrent requests. The SDK's idiomatic
+   * fix is a `() => Server` factory (passed to `createMcpHandler`), but a
+   * singleton API is Skybridge's contract — so the factory returns a fresh
+   * `Server` that shares the main server's handler maps by reference. The
+   * cast is unavoidable: there's no public API to inject handler maps.
+   * `getHandlerMaps` validates the read side and fails fast on SDK field
+   * renames.
    */
-  async connectStatelessTransport(
-    transport: Parameters<typeof McpServerBase.prototype.connect>[0],
-  ): Promise<void> {
+  createStatelessServerInstance(): SdkServer {
     this.applyMcpMiddleware();
 
     const { requestHandlers, notificationHandlers } = getHandlerMaps(
@@ -976,7 +970,7 @@ export class McpServer<
     target._requestHandlers = requestHandlers;
     target._notificationHandlers = notificationHandlers;
 
-    await fresh.connect(transport);
+    return fresh;
   }
 
   /**
@@ -1066,18 +1060,15 @@ export class McpServer<
     this.claimedViews.set(component, toolName);
   }
 
-  private resolveViewRequestContext(extra: McpExtra | undefined): {
+  private resolveViewRequestContext(ctx: McpExtra | undefined): {
     serverUrl: string;
     assetsBasePath: string;
     connectDomains: string[];
     contentMetaOverrides: { domain?: string };
   } {
     const isProduction = process.env.NODE_ENV === "production";
-    const headers = extra?.requestInfo?.headers || {};
-    const header = (key: string) => {
-      const val = headers[key];
-      return Array.isArray(val) ? val[0] : val;
-    };
+    const header = (key: string) =>
+      ctx?.http?.req?.headers.get(key) ?? undefined;
     const isClaude = hostFromUserAgent(header("user-agent")) === "claude";
 
     const serverUrl = resolveServerOrigin(header);
@@ -1098,7 +1089,7 @@ export class McpServer<
 
     let contentMetaOverrides: { domain?: string } = {};
     if (isClaude) {
-      const pathname = extra?.requestInfo?.url?.pathname ?? "";
+      const pathname = ctx?.http?.req ? new URL(ctx.http.req.url).pathname : "";
       const rawUrl =
         header("x-alpic-forwarded-url") ?? `${serverUrl}${pathname}`;
       // Strip a lone trailing slash so the hash matches the connector URL
@@ -1288,14 +1279,11 @@ export class McpServer<
       if (this.oauthEnabled) {
         const failure = evaluateSecuritySchemes(
           securitySchemes,
-          extra.authInfo,
+          extra.http?.authInfo,
         );
         if (failure) {
-          const headers = extra?.requestInfo?.headers ?? {};
-          const header = (key: string) => {
-            const value = headers[key];
-            return Array.isArray(value) ? value[0] : value;
-          };
+          const header = (key: string) =>
+            extra.http?.req?.headers.get(key) ?? undefined;
           return inBandChallengeResult(
             failure,
             this.resolveResourceMetadataUrl?.(header),

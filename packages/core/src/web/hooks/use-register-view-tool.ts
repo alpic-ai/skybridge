@@ -1,5 +1,8 @@
-import type { ZodRawShapeCompat } from "@modelcontextprotocol/sdk/server/zod-compat.js";
+import type { StandardSchemaV1 } from "@modelcontextprotocol/client";
 import { useEffect, useRef } from "react";
+
+type ZodRawShapeCompat = Record<string, StandardSchemaV1>;
+
 import { getAdaptor } from "../bridges/index.js";
 import type {
   AnyViewToolHandler,

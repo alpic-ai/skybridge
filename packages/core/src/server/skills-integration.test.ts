@@ -1,5 +1,4 @@
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import { describe, expect, it, vi } from "vitest";
 import {
   __setSkillsManifest,
@@ -76,7 +75,8 @@ describe("skills server option", () => {
     // The production HTTP path builds a fresh per-request server and copies
     // handler maps by reference; exercise it directly to lock that skills
     // (capability + resource reads) survive that hop.
-    await server.connectStatelessTransport(serverTransport);
+    const instance = server.createStatelessServerInstance();
+    await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
     expect(
@@ -94,7 +94,7 @@ describe("skills server option", () => {
     expect((skill.contents[0] as { text?: string }).text).toBe("# Demo");
 
     await client.close();
-    await server.close();
+    await instance.close();
   });
 
   it("warns when skills are enabled but none are found", () => {

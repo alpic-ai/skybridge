@@ -1,6 +1,8 @@
-import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
-import type { OAuthTokenVerifier } from "@modelcontextprotocol/sdk/server/auth/provider.js";
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
+import {
+  type AuthInfo,
+  OAuthError,
+  type OAuthTokenVerifier,
+} from "@modelcontextprotocol/server";
 import * as jose from "jose";
 
 export type JwksVerifyConfig = {
@@ -33,7 +35,10 @@ export function createJwksVerifier(
         }));
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        throw new InvalidTokenError(`Token verification failed: ${message}`);
+        throw new OAuthError(
+          "invalid_token",
+          `Token verification failed: ${message}`,
+        );
       }
 
       const { client_id, scope, exp, sub, ...rest } = payload as Record<

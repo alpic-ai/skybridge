@@ -1,14 +1,15 @@
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { extname, join } from "node:path";
-import type {
-  ReadResourceCallback,
-  ReadResourceTemplateCallback,
-  ResourceMetadata,
-  McpServer as SdkMcpServer,
-} from "@modelcontextprotocol/sdk/server/mcp.js";
-import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
+import {
+  INVALID_PARAMS,
+  ProtocolError,
+  type ReadResourceCallback,
+  type ReadResourceTemplateCallback,
+  type ResourceMetadata,
+  ResourceTemplate,
+  type McpServer as SdkMcpServer,
+} from "@modelcontextprotocol/server";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 
@@ -124,12 +125,12 @@ export function skillUriToRelPath(uri: string): {
 } {
   const match = /^skill:\/\/([^/]+)(?:\/(.*))?$/.exec(uri.replace(/\/+$/, ""));
   if (!match) {
-    throw new McpError(ErrorCode.InvalidParams, `Invalid skill uri: ${uri}`);
+    throw new ProtocolError(INVALID_PARAMS, `Invalid skill uri: ${uri}`);
   }
   const [, name = "", relPath = ""] = match;
   const segments = relPath.split("/").filter(Boolean);
   if (name === "" || segments.includes("..") || segments.includes(".")) {
-    throw new McpError(ErrorCode.InvalidParams, `Invalid skill uri: ${uri}`);
+    throw new ProtocolError(INVALID_PARAMS, `Invalid skill uri: ${uri}`);
   }
   return { name, relPath: segments.join("/") };
 }
@@ -176,9 +177,9 @@ interface SkillRegistrar {
   readonly server: SdkMcpServer["server"];
 }
 
-const DirectoryReadRequestSchema = z.object({
-  method: z.literal("resources/directory/read"),
-  params: z.object({ uri: z.string(), cursor: z.string().optional() }),
+const DirectoryReadParamsSchema = z.object({
+  uri: z.string(),
+  cursor: z.string().optional(),
 });
 
 export function registerSkills(
@@ -189,7 +190,7 @@ export function registerSkills(
   const serveFile = (name: string, relPath: string, href: string) => {
     const text = byName.get(name)?.files[relPath];
     if (text === undefined) {
-      throw new McpError(ErrorCode.InvalidParams, `Not found: ${href}`);
+      throw new ProtocolError(INVALID_PARAMS, `Not found: ${href}`);
     }
     return {
       contents: [{ uri: href, text, mimeType: "text/markdown" }],
@@ -241,23 +242,27 @@ export function registerSkills(
     }),
   );
 
-  server.server.setRequestHandler(DirectoryReadRequestSchema, ({ params }) => {
-    const { name, relPath } = skillUriToRelPath(params.uri);
-    const skill = byName.get(name);
-    const entries = skill ? listDir(skill, relPath) : null;
-    if (!entries) {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        `Not a directory: ${params.uri}`,
-      );
-    }
-    const base = params.uri.replace(/\/+$/, "");
-    return {
-      resources: entries.map((entry) => ({
-        uri: `${base}/${entry.name}`,
-        name: entry.name,
-        mimeType: entry.mimeType,
-      })),
-    };
-  });
+  server.server.setRequestHandler(
+    "resources/directory/read",
+    { params: DirectoryReadParamsSchema },
+    (params) => {
+      const { name, relPath } = skillUriToRelPath(params.uri);
+      const skill = byName.get(name);
+      const entries = skill ? listDir(skill, relPath) : null;
+      if (!entries) {
+        throw new ProtocolError(
+          INVALID_PARAMS,
+          `Not a directory: ${params.uri}`,
+        );
+      }
+      const base = params.uri.replace(/\/+$/, "");
+      return {
+        resources: entries.map((entry) => ({
+          uri: `${base}/${entry.name}`,
+          name: entry.name,
+          mimeType: entry.mimeType,
+        })),
+      };
+    },
+  );
 }

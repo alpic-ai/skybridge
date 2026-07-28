@@ -119,9 +119,9 @@ describe("McpServer.express", () => {
     });
 
     // Force the /mcp handler to throw so the error pipeline runs.
-    vi.spyOn(server, "connectStatelessTransport").mockRejectedValue(
-      new Error("boom"),
-    );
+    server.use("/mcp", () => {
+      throw new Error("boom");
+    });
 
     const httpServer = http.createServer();
     await createApp({
@@ -377,12 +377,11 @@ describe("createApp", () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const mcpServer = new McpServer({ name: "t", version: "0.0.0" });
-    // Force the express-level error path: make connectStatelessTransport
-    // reject so the request handler hits its try/catch and calls next(error),
-    // which lands in the default /mcp error handler.
-    vi.spyOn(mcpServer, "connectStatelessTransport").mockRejectedValue(
-      new Error("boom"),
-    );
+    // Force the express-level error path: make a /mcp middleware throw so the
+    // error pipeline runs and lands in the default /mcp error handler.
+    mcpServer.use("/mcp", () => {
+      throw new Error("boom");
+    });
 
     const httpServer = http.createServer();
     const app = await createApp({ mcpServer, httpServer });
@@ -413,9 +412,9 @@ describe("createApp", () => {
     };
 
     const mcpServer = new McpServer({ name: "t", version: "0.0.0" });
-    vi.spyOn(mcpServer, "connectStatelessTransport").mockRejectedValue(
-      new Error("boom"),
-    );
+    mcpServer.use("/mcp", () => {
+      throw new Error("boom");
+    });
 
     const httpServer = http.createServer();
     const app = await createApp({
@@ -446,9 +445,9 @@ describe("createApp", () => {
     };
 
     const mcpServer = new McpServer({ name: "t", version: "0.0.0" });
-    vi.spyOn(mcpServer, "connectStatelessTransport").mockRejectedValue(
-      new Error("boom"),
-    );
+    mcpServer.use("/mcp", () => {
+      throw new Error("boom");
+    });
     mcpServer.use("/api/test", throwingApiRoute);
 
     const httpServer = http.createServer();

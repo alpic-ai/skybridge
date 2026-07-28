@@ -1,6 +1,6 @@
 import type http from "node:http";
 import path from "node:path";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { type AuthInfo, createMcpHandler } from "@modelcontextprotocol/server";
 import cors from "cors";
 import express from "express";
 import type { McpServer } from "./server.js";
@@ -98,46 +98,36 @@ export async function createApp({
 }
 
 const mcpMiddleware = (server: McpServer): express.RequestHandler => {
+  const handler = createMcpHandler(() =>
+    server.createStatelessServerInstance(),
+  );
+
   return async (
     req: express.Request,
     res: express.Response,
     next: express.NextFunction,
   ) => {
-    if (req.method !== "POST") {
-      res.writeHead(405).end(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          error: {
-            code: -32000,
-            message: "Method not allowed.",
-          },
-          id: null,
-        }),
-      );
-      return;
-    }
-
     try {
-      const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined,
-        // Respond with a single JSON body instead of SSE. Skybridge's stateless
-        // transport never streams server-initiated messages, so SSE adds no
-        // capability — and on workerd specifically, `cloudflare:node`'s http
-        // bridge silently drops chunked writes that happen after the request
-        // handler awaits, which manifests as a 200 with empty body for any
-        // async tools/call.
-        enableJsonResponse: true,
+      const url = `${req.protocol}://${req.get("host")}${req.originalUrl}`;
+      const headers = new Headers();
+      for (const [key, value] of Object.entries(req.headers)) {
+        if (value === undefined) {
+          continue;
+        }
+        headers.set(key, Array.isArray(value) ? value.join(", ") : value);
+      }
+
+      const request = new Request(url, { method: req.method, headers });
+      const response = await handler.fetch(request, {
+        authInfo: (req as express.Request & { auth?: AuthInfo }).auth,
+        parsedBody: req.body,
       });
 
-      res.on("close", () => {
-        transport.close();
+      res.status(response.status);
+      response.headers.forEach((value, key) => {
+        res.setHeader(key, value);
       });
-
-      await server.connectStatelessTransport(transport);
-      // Express strips the mount path from req.url (e.g. "/mcp" becomes "/").
-      // Restore it so the SDK builds the correct requestInfo.url.
-      req.url = req.originalUrl;
-      await transport.handleRequest(req, res, req.body);
+      res.send(await response.text());
     } catch (error) {
       next(error);
     }
