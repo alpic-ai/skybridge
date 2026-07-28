@@ -357,11 +357,14 @@ export class HostAdaptor implements Adaptor {
     if (!this.openai) {
       return;
     }
-    const current = this.openai.widgetState;
-    const state: AppsSdkWidgetState = current
-      ? { ...current, imageIds: [...(current.imageIds ?? []), ...fileIds] }
-      : { modelContent: {}, privateContent: {}, imageIds: [...fileIds] };
-    await this.openai.setWidgetState(state);
+    const current: AppsSdkWidgetState = this.openai.widgetState ?? {
+      modelContent: {},
+      privateContent: {},
+    };
+    await this.openai.setWidgetState({
+      ...current,
+      imageIds: [...(current.imageIds ?? []), ...fileIds],
+    });
   }
 
   // ---- viewState persistence helpers ----
