@@ -101,6 +101,17 @@ describe("useViewState", () => {
     expect(OpenaiMock.setWidgetState).not.toHaveBeenCalled();
   });
 
+  it("should persist state when setViewState and unmount happen in the same tick", () => {
+    const { result, unmount } = renderHook(() => useViewState(defaultState));
+
+    act(() => {
+      result.current[1]({ count: 10, name: "updated" });
+      unmount();
+    });
+
+    expect(OpenaiMock.setWidgetState).toHaveBeenCalledTimes(1);
+  });
+
   it("should not persist state when setViewState is called after unmount", () => {
     const { result, unmount } = renderHook(() => useViewState(defaultState));
     const setViewState = result.current[1];

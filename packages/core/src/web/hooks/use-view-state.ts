@@ -1,5 +1,10 @@
-import { dequal } from "dequal/lite";
-import { type SetStateAction, useEffect, useRef, useState } from "react";
+import {
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { getAdaptor, useHostContext } from "../bridges/index.js";
 import { filterViewContext, injectViewContext } from "../helpers/state.js";
 import type { UnknownObject } from "../types.js";
@@ -37,7 +42,7 @@ export function useViewState<T extends UnknownObject>(
   const adaptor = getAdaptor();
   const viewStateFromBridge = useHostContext("viewState") as T | null;
 
-  const [viewState, setViewState] = useState<T | null>(() => {
+  const [viewState, _setViewState] = useState<T | null>(() => {
     if (viewStateFromBridge !== null) {
       return filterViewContext(viewStateFromBridge);
     }
@@ -47,31 +52,44 @@ export function useViewState<T extends UnknownObject>(
       : (defaultState ?? null);
   });
 
-  const persistedStateRef = useRef(viewState);
+  const viewStateRef = useRef(viewState);
+  viewStateRef.current = viewState;
+
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (viewStateFromBridge !== null) {
-      const stateFromBridge = filterViewContext(viewStateFromBridge);
-
-      persistedStateRef.current = stateFromBridge;
-      setViewState(stateFromBridge);
+      _setViewState(filterViewContext(viewStateFromBridge));
     }
   }, [viewStateFromBridge]);
 
-  useEffect(() => {
-    if (dequal(viewState, persistedStateRef.current)) {
-      return;
-    }
+  const setViewState = useCallback(
+    (state: SetStateAction<T | null>) => {
+      if (!isMountedRef.current) {
+        return;
+      }
 
-    const stateToSet = injectViewContext(viewState);
+      const newState =
+        typeof state === "function" ? state(viewStateRef.current) : state;
+      const stateToSet = injectViewContext(newState);
+      const filteredState = filterViewContext(stateToSet);
 
-    if (stateToSet === null) {
-      return;
-    }
+      viewStateRef.current = filteredState;
+      _setViewState(filteredState);
 
-    persistedStateRef.current = viewState;
-    adaptor.setViewState(stateToSet);
-  }, [viewState, adaptor]);
+      if (stateToSet !== null) {
+        adaptor.setViewState(stateToSet);
+      }
+    },
+    [adaptor],
+  );
 
   return [viewState, setViewState] as const;
 }
