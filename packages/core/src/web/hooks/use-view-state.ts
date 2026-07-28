@@ -1,10 +1,5 @@
-import {
-  type SetStateAction,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { dequal } from "dequal/lite";
+import { type SetStateAction, useEffect, useRef, useState } from "react";
 import { getAdaptor, useHostContext } from "../bridges/index.js";
 import { filterViewContext, injectViewContext } from "../helpers/state.js";
 import type { UnknownObject } from "../types.js";
@@ -52,44 +47,31 @@ export function useViewState<T extends UnknownObject>(
       : (defaultState ?? null);
   });
 
-  const viewStateRef = useRef(viewState);
-  viewStateRef.current = viewState;
-
-  const isMountedRef = useRef(true);
-  useEffect(() => {
-    isMountedRef.current = true;
-
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
+  const persistedStateRef = useRef(viewState);
 
   useEffect(() => {
     if (viewStateFromBridge !== null) {
-      _setViewState(filterViewContext(viewStateFromBridge));
+      const stateFromBridge = filterViewContext(viewStateFromBridge);
+
+      persistedStateRef.current = stateFromBridge;
+      _setViewState(stateFromBridge);
     }
   }, [viewStateFromBridge]);
 
-  const setViewState = useCallback(
-    (state: SetStateAction<T | null>) => {
-      if (!isMountedRef.current) {
-        return;
-      }
+  useEffect(() => {
+    if (dequal(viewState, persistedStateRef.current)) {
+      return;
+    }
 
-      const newState =
-        typeof state === "function" ? state(viewStateRef.current) : state;
-      const stateToSet = injectViewContext(newState);
-      const filteredState = filterViewContext(stateToSet);
+    const stateToSet = injectViewContext(viewState);
 
-      viewStateRef.current = filteredState;
-      _setViewState(filteredState);
+    if (stateToSet === null) {
+      return;
+    }
 
-      if (stateToSet !== null) {
-        adaptor.setViewState(stateToSet);
-      }
-    },
-    [adaptor],
-  );
+    persistedStateRef.current = viewState;
+    adaptor.setViewState(stateToSet);
+  }, [viewState, adaptor]);
 
-  return [viewState, setViewState] as const;
+  return [viewState, _setViewState] as const;
 }

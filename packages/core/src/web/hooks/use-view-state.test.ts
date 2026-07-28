@@ -95,6 +95,12 @@ describe("useViewState", () => {
     expect(OpenaiMock.setWidgetState).toHaveBeenCalledTimes(1);
   });
 
+  it("should not persist anything on mount", () => {
+    renderHook(() => useViewState(defaultState), { wrapper: StrictMode });
+
+    expect(OpenaiMock.setWidgetState).not.toHaveBeenCalled();
+  });
+
   it("should not persist state when setViewState is called after unmount", () => {
     const { result, unmount } = renderHook(() => useViewState(defaultState));
     const setViewState = result.current[1];
