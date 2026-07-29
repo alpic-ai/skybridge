@@ -21,6 +21,7 @@ const DEFAULT_CONTEXT: McpUiHostContext = {};
 export type McpAppHostMockOptions = {
   hostCapabilities?: McpUiHostCapabilities;
   downloadFileResult?: McpUiDownloadFileResult;
+  hostInfo?: McpUiInitializeResult["hostInfo"];
 };
 
 export const getMcpAppHostPostMessageMock = (
@@ -32,7 +33,7 @@ export const getMcpAppHostPostMessageMock = (
       case "ui/initialize": {
         const result: McpUiInitializeResult = {
           protocolVersion: "2025-06-18",
-          hostInfo: { name: "test-host", version: "1.0.0" },
+          hostInfo: options.hostInfo ?? { name: "test-host", version: "1.0.0" },
           hostCapabilities: options.hostCapabilities ?? {},
           hostContext: initialContext,
         };
