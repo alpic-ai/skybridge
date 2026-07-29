@@ -1,4 +1,9 @@
-import { App } from "@modelcontextprotocol/ext-apps";
+import {
+  App,
+  applyDocumentTheme,
+  applyHostFonts,
+  applyHostStyleVariables,
+} from "@modelcontextprotocol/ext-apps";
 import {
   type Implementation,
   ListToolsRequestSchema,
@@ -51,8 +56,10 @@ export class McpAppBridge implements Bridge<McpAppContext> {
   private listeners = new Map<McpAppContextKey, Set<() => void>>();
   private app: App;
   private connectPromise: Promise<void>;
+  private applyStylesEnabled: boolean;
 
-  constructor(options: { appInfo: Implementation }) {
+  constructor(options: { appInfo: Implementation; applyHostStyles?: boolean }) {
+    this.applyStylesEnabled = options.applyHostStyles ?? false;
     this.app = new App(options.appInfo, { tools: { listChanged: true } });
 
     this.app.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -126,7 +133,7 @@ export class McpAppBridge implements Bridge<McpAppContext> {
   }
 
   public static getInstance(
-    options?: Partial<{ appInfo: Implementation }>,
+    options?: Partial<{ appInfo: Implementation; applyHostStyles: boolean }>,
   ): McpAppBridge {
     if (McpAppBridge.instance && options) {
       console.warn(
@@ -259,7 +266,23 @@ export class McpAppBridge implements Bridge<McpAppContext> {
     });
   }
 
+  private applyHostStyles(context: Partial<McpAppContext>) {
+    if (!this.applyStylesEnabled || typeof document === "undefined") {
+      return;
+    }
+    if (context.theme) {
+      applyDocumentTheme(context.theme);
+    }
+    if (context.styles?.variables) {
+      applyHostStyleVariables(context.styles.variables);
+    }
+    if (context.styles?.css?.fonts) {
+      applyHostFonts(context.styles.css.fonts);
+    }
+  }
+
   private updateContext(context: Partial<McpAppContext>) {
+    this.applyHostStyles(context);
     this.context = { ...this.context, ...context };
     for (const key of Object.keys(context)) {
       this.emit(key);
