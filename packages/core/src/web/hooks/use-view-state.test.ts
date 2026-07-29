@@ -1,4 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { StrictMode } from "react";
 import {
   afterEach,
   beforeEach,
@@ -80,6 +81,48 @@ describe("useViewState", () => {
       privateContent: {},
     });
     expect(result.current[0]).toEqual({ count: 1, name: "test" });
+  });
+
+  it("should call window.openai.setWidgetState once per update under StrictMode", () => {
+    const { result } = renderHook(() => useViewState(defaultState), {
+      wrapper: StrictMode,
+    });
+
+    act(() => {
+      result.current[1]({ count: 10, name: "updated" });
+    });
+
+    expect(OpenaiMock.setWidgetState).toHaveBeenCalledTimes(1);
+  });
+
+  it("should not persist anything on mount", () => {
+    renderHook(() => useViewState(defaultState), { wrapper: StrictMode });
+
+    expect(OpenaiMock.setWidgetState).not.toHaveBeenCalled();
+  });
+
+  it("should persist state when setViewState and unmount happen in the same tick", () => {
+    const { result, unmount } = renderHook(() => useViewState(defaultState));
+
+    act(() => {
+      result.current[1]({ count: 10, name: "updated" });
+      unmount();
+    });
+
+    expect(OpenaiMock.setWidgetState).toHaveBeenCalledTimes(1);
+  });
+
+  it("should not persist state when setViewState is called after unmount", () => {
+    const { result, unmount } = renderHook(() => useViewState(defaultState));
+    const setViewState = result.current[1];
+
+    unmount();
+
+    act(() => {
+      setViewState({ count: 10, name: "updated" });
+    });
+
+    expect(OpenaiMock.setWidgetState).not.toHaveBeenCalled();
   });
 
   it("should update state when window.openai.widgetState changes", () => {

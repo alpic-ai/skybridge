@@ -42,6 +42,10 @@ function warnOnLargeViewState(value: unknown, source: string): void {
   }
 }
 
+function isImage(mimeType: string | undefined): boolean {
+  return mimeType?.startsWith("image/") ?? false;
+}
+
 function findStorageKey(viewUUID: string): string | undefined {
   const suffix = `:${viewUUID}`;
   for (let i = 0; i < localStorage.length; i++) {
@@ -280,7 +284,9 @@ export class HostAdaptor implements Adaptor {
       throw new NotSupportedError("uploadFile");
     }
     const metadata = await this.openai.uploadFile(file, options);
-    await this.trackFileIds(metadata.fileId);
+    if (isImage(metadata.mimeType ?? file.type)) {
+      await this.trackFileIds(metadata.fileId);
+    }
     return metadata;
   };
 
@@ -303,8 +309,14 @@ export class HostAdaptor implements Adaptor {
       );
     }
     const files = await this.openai.selectFiles();
-    if (files.length > 0) {
-      await this.trackFileIds(...files.map((f) => f.fileId));
+    const imageIds: string[] = [];
+    for (const file of files) {
+      if (isImage(file.mimeType)) {
+        imageIds.push(file.fileId);
+      }
+    }
+    if (imageIds.length > 0) {
+      await this.trackFileIds(...imageIds);
     }
     return files;
   };

@@ -209,6 +209,31 @@ def drive_widget(page: Page, selector: str, action: str, label: str | None = Non
     time.sleep(2)
 
 
+def attach_driver(page: Page) -> None:
+    """Announce the driver so the app starts broadcasting state.
+
+    The app stays silent until it hears {type: "conformance:attach"}: its state
+    messages are not JSON-RPC, and ChatGPT's sandbox proxy error-logs every
+    non-JSON-RPC message reaching its window, so an unsolicited heartbeat
+    floods the host console. Cheap enough to repeat on every poll, which also
+    re-arms the app after a host-driven remount. Fans out to every iframe and
+    its children, covering both nesting layouts without needing a selector.
+    """
+    page.evaluate(
+        """() => {
+            const message = { type: 'conformance:attach' };
+            for (const iframe of document.querySelectorAll('iframe')) {
+                const outer = iframe.contentWindow;
+                if (!outer) continue;
+                outer.postMessage(message, '*');
+                for (let i = 0; i < outer.frames.length; i++) {
+                    outer.frames[i].postMessage(message, '*');
+                }
+            }
+        }"""
+    )
+
+
 def install_state_listener(page: Page) -> None:
     """Capture the app's state broadcasts on the host page.
 
@@ -247,6 +272,7 @@ def read_state(page: Page, timeout_seconds: int = 20, poll_interval: int = 2) ->
     """Read the latest state broadcast (deterministic replacement for scraping)."""
     elapsed = 0
     while elapsed < timeout_seconds:
+        attach_driver(page)
         data = page.evaluate("() => window.__confState || null")
         if data:
             return StepperState(**data)

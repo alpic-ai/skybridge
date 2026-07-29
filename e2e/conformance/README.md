@@ -96,6 +96,8 @@ The `notte/` files:
 
 The driver talks to the app over postMessage (the widget iframes are cross-origin): the drive hook accepts `{type: "conformance:drive", action: run|skip|yes|no|close-modal|restore-inline}` and the app broadcasts `{type: "conformance:state", state}` to `window.top` on every change plus a 1.5s heartbeat. Both sides live in `src/automation.ts`.
 
+The broadcast is off until a driver posts `{type: "conformance:attach"}`, which it repeats on every poll so a host-driven remount re-arms it. State messages are not JSON-RPC, and ChatGPT's sandbox proxy runs an `ext-apps` transport old enough to log `Failed to parse message` for every non-JSON-RPC message reaching its window: broadcasting unasked buries the host console under one error per heartbeat.
+
 ### Running
 
 ```bash
