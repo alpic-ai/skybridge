@@ -56,6 +56,20 @@ export type Theme = "light" | "dark";
 /** Coarse device class reported by the host. `"unknown"` when unavailable. */
 export type DeviceType = "mobile" | "tablet" | "desktop" | "unknown";
 
+/** Best-effort host name inferred from runtime signals. */
+export type HostName =
+  | "chatgpt"
+  | "claude"
+  | "cursor"
+  | "goose"
+  | "alpic"
+  | "other";
+
+/** Current host the view is rendered in. */
+export type Host = {
+  name: HostName;
+};
+
 /** Pixel insets the view should keep clear of (notches, home indicators, etc.). */
 export type SafeAreaInsets = {
   top: number;
@@ -86,6 +100,7 @@ export type UserAgent = {
  * `useToolInfo`, etc.) — read this directly only for advanced cases.
  */
 export interface HostContext {
+  host: Host;
   theme: Theme;
   locale: string;
   displayMode: DisplayMode;
