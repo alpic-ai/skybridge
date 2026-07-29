@@ -47,6 +47,7 @@ export class McpAppBridge implements Bridge<McpAppContext> {
     toolInput: null,
     toolCancelled: null,
     toolResult: null,
+    hostInfo: null,
   };
   private listeners = new Map<McpAppContextKey, Set<() => void>>();
   private app: App;
@@ -86,9 +87,10 @@ export class McpAppBridge implements Bridge<McpAppContext> {
     try {
       await this.app.connect();
       const hostContext = this.app.getHostContext();
-      if (hostContext) {
-        this.updateContext(hostContext);
-      }
+      this.updateContext({
+        ...hostContext,
+        hostInfo: this.app.getHostVersion() ?? null,
+      });
     } catch (err) {
       console.error(err);
     }

@@ -133,6 +133,7 @@
               "api-reference/use-display-mode",
               "api-reference/use-download",
               "api-reference/use-files",
+              "api-reference/use-host-info",
               "api-reference/use-layout",
               "api-reference/use-open-external",
               "api-reference/use-register-view-tool",
