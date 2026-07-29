@@ -21,7 +21,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a p
 ### Prerequisites
 
 - Node.js 24+
-- An Authplane authorization server reachable from this app — or Docker, to run one locally with the optional helper below
+- An Authplane authorization server reachable from this app
 
 ### Local Development
 
@@ -39,17 +39,6 @@ bun install
 
 #### 2. Configure Authplane
 
-If you do not already have an authorization server to point at, an optional helper runs one locally in Docker and configures it for this example:
-
-```bash
-./dev-authserver.sh          # start and configure
-./dev-authserver.sh stop     # stop and remove
-```
-
-It starts [`authplane/authserver`](https://hub.docker.com/r/authplane/authserver), registers this server as a protected resource, creates a demo user, and writes `.env` if you do not have one. Re-running it is safe, and it never overwrites an existing `.env`. Skip it entirely if you have your own deployment — nothing else in the example depends on it.
-
-To configure by hand instead:
-
 1. Point `AUTHPLANE_ISSUER` at your authorization server. Its discovery document is read from `/.well-known/openid-configuration`, falling back to `/.well-known/oauth-authorization-server`.
 2. Register this MCP server as a protected resource, using the same URL you set as `SERVER_URL`, character for character.
 3. Create a `.env` file in the project root:
@@ -66,6 +55,9 @@ SERVER_URL=http://localhost:3000/mcp
 > **Bare origins are advertised with a root path.** The advertised resource is the URL-normalised form, so `https://example.com` is advertised as `https://example.com/`. The provider asks for the advertised form at startup and names it if the two differ — so if your resource is a bare origin, register it in Authplane **with** the trailing slash. A path such as `/mcp` is unchanged by normalisation, which is why this example uses one.
 >
 > If the resource is configured in Authplane with an explicit audience override, pass that value as `audience` rather than relying on the default.
+
+> **No Authplane deployment yet?** Authplane can also be self-hosted, including locally in Docker for
+> development — see the [Authplane documentation](https://authplane.ai) for setup.
 
 #### 3. Start your local server
 
@@ -95,7 +87,6 @@ This command starts:
 │   │   └── search-coffee-paris.tsx  # Coffee shop widget
 │   ├── helpers.ts      # Type-safe Skybridge hooks
 │   └── index.css       # Parisian theme styles
-├── dev-authserver.sh       # Optional: local Authplane server in Docker
 ├── nodemon.json            # Dev server config
 └── package.json
 ```
