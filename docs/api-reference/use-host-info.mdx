@@ -1,0 +1,81 @@
+---
+title: useHostInfo
+description: "Identify which host is rendering the view"
+---
+
+import { Compat } from "/components/compat.jsx";
+
+<Compat alpic claude cursor goose />
+
+The same [view](/build/view) runs inside every host — Claude, Cursor, Goose, and others. `useHostInfo` reports which one, taken from the MCP Apps `ui/initialize` handshake, so the view can adapt copy, shortcuts, or layout to the host it's rendering in. It runs only on MCP Apps hosts; the name is normalized to a [`Host`](#host) slug when recognized, otherwise passed through as a raw string.
+
+## Example
+
+An empty state suggests the next action using the wording that fits the host.
+
+```tsx highlight={4}
+import { useHostInfo } from "skybridge/web";
+
+function EmptyState() {
+  const { name } = useHostInfo();
+  const hint =
+    name === "claude"
+      ? "Ask Claude to add your first item."
+      : "Send a message to add your first item.";
+
+  return <p className="empty">{hint}</p>;
+}
+```
+
+## Returns
+
+### `name`
+
+```tsx
+name: Host | (string & {}) | undefined;
+```
+
+The host's reported name. It resolves to a [`Host`](#host) slug for recognized hosts, a raw string for hosts not yet mapped, and `undefined` until the handshake completes — the view renders first and re-renders once the host responds. The `(string & {})` keeps the known slugs in autocomplete while still accepting any string.
+
+### `version`
+
+```tsx
+version: string | undefined;
+```
+
+The host's version string, or `undefined` until the handshake completes.
+
+## Host
+
+The recognized hosts, as normalized slugs. An unrecognized host surfaces its raw reported name instead.
+
+```tsx
+type Host =
+  | "chatgpt"
+  | "claude"
+  | "cursor"
+  | "goose"
+  | "mistral-vibe"
+  | "alpic";
+```
+
+| Slug | Reported `hostInfo.name` |
+| --- | --- |
+| `chatgpt` | `chatgpt` |
+| `claude` | `Claude` |
+| `cursor` | `Cursor` |
+| `goose` | `MCP-UI Host` |
+| `mistral-vibe` | `Le Chat` |
+| `alpic` | `alpic-playground` |
+
+<CardGroup cols={3}>
+  <Card title="useUser" icon="user" href="/api-reference/use-user">
+    Read the host's locale and device capabilities
+  </Card>
+  <Card title="useMcpAppContext" icon="plug" href="/api-reference/use-mcp-app-context">
+    Read a raw MCP Apps context value by key
+  </Card>
+  <Card title="Design for the Host" icon="sparkles" href="/guides/ux">
+    Adapt the view to the host it runs in
+  </Card>
+</CardGroup>

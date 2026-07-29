@@ -4,6 +4,7 @@ import type {
   McpUiToolInputNotification,
   McpUiToolResultNotification,
 } from "@modelcontextprotocol/ext-apps";
+import type { Implementation } from "@modelcontextprotocol/sdk/types.js";
 
 export type McpToolState = {
   toolInput: NonNullable<
@@ -11,6 +12,7 @@ export type McpToolState = {
   > | null;
   toolResult: McpUiToolResultNotification["params"] | null;
   toolCancelled: McpUiToolCancelledNotification["params"] | null;
+  hostInfo: Implementation | null;
 };
 
 export type McpAppContext = McpUiHostContext & McpToolState;
