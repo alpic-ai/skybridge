@@ -144,6 +144,7 @@ Explore all our example templates in the [Examples](https://docs.skybridge.tech/
 | <img src="docs/images/showcase-workos.png" alt="Auth WorkOS AuthKit" width="160" /> | WorkOS AuthKit | Full OAuth authentication with WorkOS AuthKit and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-workos) |
 | <img src="docs/images/showcase-stytch.png" alt="Auth Stytch" width="160" /> | Stytch | Full OAuth authentication with Stytch and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-stytch) |
 | <img src="docs/images/showcase-auth0.png" alt="Auth Auth0" width="160" /> | Auth0 | Full OAuth authentication with Auth0 and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-auth0) |
+| <img src="docs/images/showcase-authplane.png" alt="Auth Authplane" width="160" /> | Authplane | Full OAuth authentication with Authplane and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-authplane) |
 
 ### UI and component libraries
 

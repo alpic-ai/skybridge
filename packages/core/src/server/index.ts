@@ -1,5 +1,6 @@
 export type { OAuthConfig } from "./auth/index.js";
 export { auth0Provider } from "./auth/providers/auth0.js";
+export { authplaneProvider } from "./auth/providers/authplane.js";
 export { clerkProvider } from "./auth/providers/clerk.js";
 export { customProvider } from "./auth/providers/custom.js";
 export { descopeProvider } from "./auth/providers/descope.js";

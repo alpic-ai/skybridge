@@ -166,6 +166,61 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  examples/auth-authplane:
+    dependencies:
+      '@alpic-ai/insights':
+        specifier: ^1.142.1
+        version: 1.158.0(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react@19.2.7)(skybridge@packages+core)
+      dotenv:
+        specifier: ^16.6.1
+        version: 16.6.1
+      react:
+        specifier: ^19.2.7
+        version: 19.2.7
+      react-dom:
+        specifier: ^19.2.7
+        version: 19.2.7(react@19.2.7)
+      skybridge:
+        specifier: workspace:*
+        version: link:../../packages/core
+      vite:
+        specifier: ^8.1.5
+        version: 8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0)
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
+    devDependencies:
+      '@skybridge/devtools':
+        specifier: ^1.2.3
+        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@types/express':
+        specifier: ^5.0.6
+        version: 5.0.6
+      '@types/node':
+        specifier: ^22.20.0
+        version: 22.20.1
+      '@types/react':
+        specifier: ^19.2.17
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: ^19.2.3
+        version: 19.2.3(@types/react@19.2.17)
+      '@vitejs/plugin-react':
+        specifier: ^6.0.2
+        version: 6.0.3(vite@8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
+      alpic:
+        specifier: ^1.142.1
+        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+      nodemon:
+        specifier: ^3.1.14
+        version: 3.1.14
+      tsx:
+        specifier: ^4.22.4
+        version: 4.23.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   examples/auth-clerk:
     dependencies:
       '@alpic-ai/insights':

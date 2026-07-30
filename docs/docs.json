@@ -118,6 +118,7 @@
             "icon": "fingerprint",
             "pages": [
               "api-reference/auth0-provider",
+              "api-reference/authplane-provider",
               "api-reference/clerk-provider",
               "api-reference/descope-provider",
               "api-reference/stytch-provider",
@@ -204,6 +205,7 @@
             "group": "Auth",
             "pages": [
               "examples/auth-auth0",
+              "examples/auth-authplane",
               "examples/auth-clerk",
               "examples/auth-descope",
               "examples/auth-stytch",
