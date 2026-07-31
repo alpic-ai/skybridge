@@ -8,6 +8,16 @@ const LONGEST_HOST = HOSTS.reduce((longest, host) =>
   longest.length >= host.length ? longest : host,
 );
 
+declare global {
+  interface Window {
+    gtag?: (
+      command: string,
+      event: string,
+      params?: Record<string, unknown>,
+    ) => void;
+  }
+}
+
 type InstallRowProps = {
   cmd: string;
   label?: string;
@@ -17,16 +27,16 @@ export function InstallRow({ cmd, label }: InstallRowProps) {
   const [copied, setCopied] = useState(false);
   const onCopy = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    navigator.clipboard?.writeText(cmd);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    navigator.clipboard?.writeText(cmd).then(() => {
+      window.gtag?.("event", "copy_install_command", { label: cmd });
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
   };
   return (
     <button
       type="button"
       className="sb-install"
-      data-ga="copy_install_command"
-      data-ga-label={cmd}
       aria-label={label ? `${label} copy ${cmd}` : `Copy ${cmd}`}
       onClick={onCopy}
     >
