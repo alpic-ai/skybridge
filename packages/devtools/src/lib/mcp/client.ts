@@ -15,11 +15,19 @@ export class McpClient {
 
     this.transport = new StreamableHTTPClientTransport(url, {
       authProvider,
-      requestInit: {
-        headers: {
-          "x-forwarded-host": url.host,
-          "x-forwarded-proto": url.protocol.replace(/:$/, ""),
-        },
+      // Forwarded headers let the MCP server recover its public origin in local
+      // dev. The transport uses this fetch for cross-origin discovery and DCR
+      // too, where they would trigger a CORS preflight the authorization server
+      // has no reason to allow, so they are scoped to the server's own origin.
+      fetch: (input, init) => {
+        const target = input instanceof Request ? input.url : String(input);
+        if (new URL(target).origin !== url.origin) {
+          return fetch(input, init);
+        }
+        const headers = new Headers(init?.headers);
+        headers.set("x-forwarded-host", url.host);
+        headers.set("x-forwarded-proto", url.protocol.replace(/:$/, ""));
+        return fetch(input, { ...init, headers });
       },
     });
 
