@@ -528,13 +528,6 @@ export const TESTS: TestDef[] = [
     Test: RequestSizeTest,
   },
   {
-    hook: "useDisplayMode",
-    name: "fullscreen request",
-    description:
-      "Requests fullscreen and checks the granted mode. Restore the initial mode yourself via the host controls.",
-    Test: DisplayModeTest,
-  },
-  {
     hook: "useRequestModal",
     name: "open the view as a modal",
     description: "Asks the host to render this view in modal mode.",
@@ -578,6 +571,13 @@ export const TESTS: TestDef[] = [
     description:
       "Registers a view tool, then asks the model (via follow-up) to call it and waits up to 60s for the invocation.",
     Test: RegisterViewToolTest,
+  },
+  {
+    hook: "useDisplayMode",
+    name: "fullscreen request",
+    description:
+      "Requests fullscreen and checks the granted mode. Restore the initial mode yourself via the host controls.",
+    Test: DisplayModeTest,
   },
   {
     hook: "useRequestClose",

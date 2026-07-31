@@ -7,6 +7,7 @@ import time
 from playwright.sync_api import Page
 
 from utils import (
+    CLICK_TIMEOUT_MS,
     FOLLOW_UP_MARKER,
     PAGE_LOAD_TIMEOUT_MS,
     HostConfig,
@@ -19,7 +20,12 @@ def send_prompt_chatgpt(page: Page, app_name: str) -> None:
 
     Typing @name pops ChatGPT's app-mention picker; the first Enter selects
     the app from the picker, the second sends the message.
+
+    Dismiss first: the account chooser leaves the composer fillable and the
+    message sendable, so a prompt sent under it fails much later and looks like
+    a broken widget rather than a blocked login.
     """
+    dismiss_modal_chatgpt(page)
     page.fill("#prompt-textarea", f"run @{app_name}", timeout=PAGE_LOAD_TIMEOUT_MS)
     time.sleep(3)  # mention picker
     page.keyboard.press("Enter")
@@ -39,7 +45,29 @@ def hide_sidebar_chatgpt(page: Page) -> None:
 
 
 def dismiss_modal_chatgpt(page: Page) -> None:
-    """Dismiss any blocking ChatGPT modal (e.g. rate-limit dialog)."""
+    """Clear whatever ChatGPT put in front of the composer.
+
+    Two things land here and they want opposite treatment:
+
+    - The "Welcome back / Choose an account to continue" chooser. The session is
+      still valid (/api/auth/session reports the account) but the page renders
+      the anonymous shell until an account is picked, and an anonymous ChatGPT
+      has no connectors: the prompt sends into a logged-out chat, the app is
+      never invoked, and every attempt dies on "widget iframe did not appear".
+      So pick the account -- closing this one looks like success and silently
+      costs the whole run. The row is not a <button> (only Close, Remove
+      account, Log in to another account and Create account are), so match on
+      role, keyed to the email it carries rather than ChatGPT's own wording.
+    - Ordinary interstitials (the rate-limit dialog), which just want "Got it".
+    """
+    account = page.locator('[role="dialog"] [role="button"]').filter(has_text="@")
+    try:
+        if account.count():
+            account.first.click(timeout=CLICK_TIMEOUT_MS)
+            time.sleep(3)  # the shell rehydrates as the logged-in app
+            return
+    except Exception as exc:
+        print(f"[conformance] account chooser: {str(exc).splitlines()[0]}", flush=True)
     page.evaluate(
         """() => {
             const btn = [...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Got it');
