@@ -154,7 +154,10 @@ const jwks = jose.createRemoteJWKSet(new URL("https://your-idp.com/.well-known/j
 
 export async function verifyAccessToken(token: string): Promise<AuthInfo> {
   try {
-    const { payload } = await jose.jwtVerify(token, jwks, { issuer: "https://your-idp.com" });
+    const { payload } = await jose.jwtVerify(token, jwks, {
+      issuer: "https://your-idp.com",
+      audience: "my-api", // omit only if the IdP binds no aud
+    });
     return {
       token,
       clientId: (payload.client_id ?? payload.azp ?? "") as string,

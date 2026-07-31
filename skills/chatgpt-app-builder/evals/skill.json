@@ -24,6 +24,10 @@
     "expected_behavior": "Must read oauth.md. Answer: keep the oauth provider and set auth: { allowsAnonymous: true } on that tool (auth: { scopes: [...] } for gated ones); skybridge enforces it before the handler. Must NOT say mixed auth requires manual wiring with optionalBearerAuth, nor that handlers must check authInfo themselves."
   },
   {
+    "query": "I want to serve the signed-in user's data from an /api/user-data route on my MCP server. It already uses the oauth field.",
+    "expected_behavior": "Must read oauth.md. Answer: the oauth field guards /mcp only, so mount your own verifier plus requireBearerAuth on the route via server.use(\"/api/user-data\", ...), using the same issuer/audience as the provider config. Must NOT claim the oauth field already covers custom routes, nor reuse the framework's internal JWKS verifier (it is not exported)."
+  },
+  {
     "query": "What CSP property triggers stricter review during publishing?",
     "expected_behavior": "Must read csp.md. Answer: frameDomains (for iframe embeds) triggers stricter review."
   },
