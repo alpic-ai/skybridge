@@ -211,10 +211,30 @@ server.registerTool(
     // No `oauth` provider means no framework enforcement: securitySchemes is
     // advertised to the host only, and optionalBearerAuth lets token-less
     // requests through. A gated handler MUST verify authInfo itself.
-    if (!extra.authInfo) throw new Error("Unauthorized");
+    if (!extra.authInfo) return signInChallenge();
     // ...
   },
 );
 ```
 
-For an all-or-nothing manual server, swap `optionalBearerAuth` for `requireBearerAuth` and drop the per-tool `securitySchemes` — then `authInfo` is guaranteed in every handler.
+### Reject from inside a handler
+
+Don't `throw` on missing auth. The handler runs after the transport, so it can't send a 401, and a thrown error reaches the host as an opaque tool failure — it never triggers the sign-in flow. Return the in-band challenge instead: `isError` plus a `mcp/www_authenticate` header array in `_meta`, pointing at your protected-resource metadata. This is the shape the `oauth` field emits for ChatGPT, and what ChatGPT acts on.
+
+```typescript
+const signInChallenge = (scopes: string[] = []) => ({
+  isError: true,
+  content: [{ type: "text" as const, text: "Sign in to use this tool." }],
+  _meta: {
+    "mcp/www_authenticate": [
+      `Bearer error="invalid_token", error_description="Sign in to use this tool."` +
+        (scopes.length ? `, scope="${scopes.join(" ")}"` : "") +
+        `, resource_metadata="${process.env.SERVER_URL}/.well-known/oauth-protected-resource"`,
+    ],
+  },
+});
+```
+
+Use `error="insufficient_scope"` when a token is present but under-scoped.
+
+For an all-or-nothing manual server, swap `optionalBearerAuth` for `requireBearerAuth` and drop the per-tool `securitySchemes` — then `authInfo` is guaranteed in every handler and no challenge is needed.
