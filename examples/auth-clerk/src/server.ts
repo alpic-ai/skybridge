@@ -1,5 +1,5 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type AuthInfo, clerkProvider, McpServer } from "skybridge/server";
+import { clerkProvider, McpServer } from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
@@ -19,6 +19,11 @@ import { env } from "./env.js";
  * via JWKS). Clerk tokens carry no `aud`, so verification is issuer + JWKS only.
  */
 
+type ClerkClaims = {
+  subject?: string;
+  email?: string;
+};
+
 const server = new McpServer(
   {
     name: "auth-coffee",
@@ -31,6 +36,7 @@ const server = new McpServer(
     }),
   },
 )
+  .withAuthExtra<ClerkClaims>()
   .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
@@ -68,15 +74,14 @@ const server = new McpServer(
       },
     },
     ({ query, minRating }, extra) => {
-      const auth = extra.authInfo as AuthInfo;
 
-      const email = auth.extra?.email as string | undefined;
-      const subject = auth.extra?.subject as string | undefined;
+      const email = extra.authInfo?.extra?.email;
+      const subject = extra.authInfo?.extra?.subject;
 
       const results = searchCoffeeShops({
         query,
         minRating,
-        userId: subject ?? auth.clientId,
+        userId: subject ?? extra.authInfo?.clientId ?? "anonymous",
       });
 
       const displayName = email?.split("@")[0] ?? subject ?? "User";

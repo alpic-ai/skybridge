@@ -1,5 +1,5 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type AuthInfo, McpServer, stytchProvider } from "skybridge/server";
+import { McpServer, stytchProvider } from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
@@ -22,6 +22,11 @@ import { env } from "./env.js";
  * advertises it as the authorization_endpoint.
  */
 
+type StytchClaims = {
+  subject?: string;
+  email?: string;
+};
+
 const server = new McpServer(
   {
     name: "auth-coffee",
@@ -35,6 +40,7 @@ const server = new McpServer(
     }),
   },
 )
+  .withAuthExtra<StytchClaims>()
   .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
@@ -72,15 +78,14 @@ const server = new McpServer(
       },
     },
     ({ query, minRating }, extra) => {
-      const auth = extra.authInfo as AuthInfo;
 
-      const email = auth.extra?.email as string | undefined;
-      const subject = auth.extra?.subject as string | undefined;
+      const email = extra.authInfo?.extra?.email;
+      const subject = extra.authInfo?.extra?.subject;
 
       const results = searchCoffeeShops({
         query,
         minRating,
-        userId: auth.clientId,
+        userId: extra.authInfo?.clientId ?? "anonymous",
       });
 
       const displayName = email?.split("@")[0] ?? subject ?? "User";

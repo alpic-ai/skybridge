@@ -39,6 +39,7 @@ import {
   inBandChallengeResult,
 } from "./auth/security-schemes.js";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
+import type { AuthInfo } from "./auth.js";
 import { createApp } from "./express.js";
 import { hostFromUserAgent } from "./host.js";
 import { createMiddlewareEntry } from "./metric.js";
@@ -353,10 +354,12 @@ type AddTool<
   TInput extends ZodRawShapeCompat,
   TOutput,
   TResponseMetadata = unknown,
+  TAuthExtra extends Record<string, unknown> = Record<string, unknown>,
 > = McpServer<
   TTools & {
     [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput, TResponseMetadata>;
-  }
+  },
+  TAuthExtra
 >;
 
 interface ToolConfigBase<TInput extends ZodRawShapeCompat | AnySchema> {
@@ -421,19 +424,23 @@ export interface ClientHintsMeta {
   "openai/widgetSessionId"?: string;
 }
 
-type ToolHandlerExtra = Omit<
+type ToolHandlerExtra<
+  TAuthExtra extends Record<string, unknown> = Record<string, unknown>,
+> = Omit<
   RequestHandlerExtra<ServerRequest, ServerNotification>,
-  "_meta"
+  "_meta" | "authInfo"
 > & {
   _meta?: RequestMeta & ClientHintsMeta;
+  authInfo?: AuthInfo<TAuthExtra>;
 };
 
 type ToolHandler<
   TInput extends ZodRawShapeCompat,
   TReturn extends { content?: HandlerContent } = { content?: HandlerContent },
+  TAuthExtra extends Record<string, unknown> = Record<string, unknown>,
 > = (
   args: ShapeOutput<TInput>,
-  extra: ToolHandlerExtra,
+  extra: ToolHandlerExtra<TAuthExtra>,
 ) => TReturn | Promise<TReturn>;
 
 type ErrorMiddlewareConfig = {
@@ -583,6 +590,7 @@ function normalizeRegisterToolArgs(args: unknown[]): {
 
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
+  TAuthExtra extends Record<string, unknown> = Record<string, unknown>,
 > extends McpServerBaseOmitted {
   declare readonly $types: McpServerTypes<TTools>;
   /**
@@ -674,6 +682,42 @@ export class McpServer<
   }
 
   /**
+   * Declare the shape of the verified token's `extra` claims. Type-only: the
+   * call returns the same instance and does nothing at runtime, it only carries
+   * `TExtra` so tool handlers and {@link McpServer.mcpMiddleware} read
+   * `extra.authInfo.extra` without casting. Chain it before the tools that
+   * depend on it.
+   *
+   * The shape is an assertion about what your verifier puts in `extra`, never a
+   * runtime check. A claim the provider omits reads as `undefined` whatever the
+   * type says, so keep optional claims optional.
+   *
+   * @typeParam TExtra - Claims the verifier resolves with, mirroring the
+   * `AuthInfo<TExtra>` returned by `verifyAccessToken`. Declare it as a type
+   * alias; an `interface` needs `extends Record<string, unknown>` to satisfy the
+   * constraint.
+   *
+   * @example
+   * ```ts
+   * type Claims = { subject?: string; email?: string };
+   *
+   * const server = new McpServer(info, {}, { oauth })
+   *   .withAuthExtra<Claims>()
+   *   .registerTool({ name: "orders", inputSchema: {} }, (_args, extra) => ({
+   *     content: `Orders for ${extra.authInfo?.extra?.email}`,
+   *   }));
+   * ```
+   *
+   * @see https://docs.skybridge.tech/api-reference/mcp-server#withauthextra
+   */
+  withAuthExtra<TExtra extends Record<string, unknown>>(): McpServer<
+    TTools,
+    TExtra
+  > {
+    return this as unknown as McpServer<TTools, TExtra>;
+  }
+
+  /**
    * Register Express middleware on the underlying app. Mirrors `app.use` —
    * pass handlers directly or a path-prefixed handler list. Register before
    * {@link McpServer.run}; ordering matches Express.
@@ -727,13 +771,13 @@ export class McpServer<
   }
 
   /** Register MCP protocol-level middleware (catch-all). */
-  mcpMiddleware(handler: McpMiddlewareFn): this;
+  mcpMiddleware(handler: McpMiddlewareFn<TAuthExtra>): this;
   /** Register MCP protocol-level middleware for all requests (`extra` is `McpExtra`). */
   mcpMiddleware(
     filter: "request",
     handler: (
       request: { method: string; params: Record<string, unknown> },
-      extra: McpExtra,
+      extra: McpExtra<TAuthExtra>,
       next: () => Promise<ServerResult>,
     ) => Promise<unknown> | unknown,
   ): this;
@@ -752,7 +796,7 @@ export class McpServer<
    */
   mcpMiddleware<M extends McpMethodString>(
     filter: M,
-    handler: McpTypedMiddlewareFn<M>,
+    handler: McpTypedMiddlewareFn<M, TAuthExtra>,
   ): this;
   /**
    * Register MCP protocol-level middleware for a wildcard pattern (e.g. `"tools/*"`).
@@ -762,7 +806,7 @@ export class McpServer<
     filter: W,
     handler: (
       request: { method: string; params: Record<string, unknown> },
-      extra: McpExtraFor<W>,
+      extra: McpExtraFor<W, TAuthExtra>,
       next: () => Promise<McpResultFor<W>>,
     ) => Promise<unknown> | unknown,
   ): this;
@@ -771,9 +815,12 @@ export class McpServer<
    * Filter can be an exact method (`"tools/call"`), wildcard (`"tools/*"`),
    * category (`"request"` | `"notification"`), or an array of those.
    */
-  mcpMiddleware(filter: McpMiddlewareFilter, handler: McpMiddlewareFn): this;
   mcpMiddleware(
-    filterOrHandler: McpMiddlewareFilter | McpMiddlewareFn,
+    filter: McpMiddlewareFilter,
+    handler: McpMiddlewareFn<TAuthExtra>,
+  ): this;
+  mcpMiddleware(
+    filterOrHandler: McpMiddlewareFilter | McpMiddlewareFn<TAuthExtra>,
     // biome-ignore lint/suspicious/noExplicitAny: overloads narrow the handler type at call sites; implementation must accept all variants
     maybeHandler?: any,
   ): this {
@@ -788,7 +835,7 @@ export class McpServer<
     if (typeof filterOrHandler === "function") {
       this.mcpMiddlewareEntries.push({
         filter: null,
-        handler: filterOrHandler,
+        handler: filterOrHandler as McpMiddlewareFn,
       });
     } else if (handler) {
       this.mcpMiddlewareEntries.push({
@@ -1411,17 +1458,18 @@ export class McpServer<
     TReturn extends { content?: HandlerContent },
   >(
     config: ToolConfig<InputArgs> & { name: TName },
-    cb: ToolHandler<InputArgs, TReturn>,
+    cb: ToolHandler<InputArgs, TReturn, TAuthExtra>,
   ): AddTool<
     TTools,
     TName,
     InputArgs,
     ExtractStructuredContent<TReturn>,
-    ExtractMeta<TReturn>
+    ExtractMeta<TReturn>,
+    TAuthExtra
   >;
   registerTool<InputArgs extends ZodRawShapeCompat>(
     config: ToolConfig<InputArgs>,
-    cb: ToolHandler<InputArgs>,
+    cb: ToolHandler<InputArgs, { content?: HandlerContent }, TAuthExtra>,
   ): this;
   registerTool(...args: unknown[]): unknown {
     const baseFn = McpServerBase.prototype.registerTool as (

@@ -135,6 +135,23 @@ The validation body is provider-specific: [JWKS](https://datatracker.ietf.org/do
 
 {/* @todo: link to full auth provider reference */}
 
+## Type the Claims You Read
+
+Whatever your verifier puts in `extra` reaches handlers as `authInfo.extra`, typed `Record<string, unknown>`, so every read needs a cast. Declare the shape once with [`withAuthExtra`](/api-reference/mcp-server#withauthextra) and the casts go away:
+
+```ts server.ts highlight={3}
+type Claims = { sub: string; email?: string };
+
+const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
+  .withAuthExtra<Claims>()
+  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
+  .registerTool({ name: "orders", inputSchema: {} }, async (_args, extra) => ({
+    structuredContent: { orders: await fetchOrders(extra.authInfo?.extra?.sub) },
+  }));
+```
+
+The shape is a claim about your verifier's output, not a runtime check, so type a claim the provider may omit as optional. Have `verifyAccessToken` return `Promise<AuthInfo<Claims>>` to keep both ends in sync.
+
 ## Mix Public and Authenticated Tools
 
 Serving both anonymous and signed-in callers from one server takes three changes to the fully authenticated setup.

@@ -75,6 +75,35 @@ server.registerTool(config, handler): this;
 
 Registers a tool, optionally bound to a view. See [registerTool](/api-reference/register-tool) for the full config and handler.
 
+### `withAuthExtra`
+
+```ts
+server.withAuthExtra<TExtra>(): McpServer;
+```
+
+Declares the shape of the verified token's `extra` claims. Nothing happens at runtime: the call exists only to carry the type, so tool [handlers](/api-reference/register-tool#handler) and [`mcpMiddleware`](#mcpmiddleware) read `extra.authInfo.extra` without casting.
+
+```ts
+type Claims = { subject?: string; email?: string };
+
+const server = new McpServer(
+  { name: "my-app", version: "1.0.0" },
+  {},
+  { oauth: await workosProvider({ domain, audience }) },
+)
+  .withAuthExtra<Claims>()
+  .registerTool({ name: "orders", inputSchema: {} }, (_args, extra) => {
+    const email = extra.authInfo?.extra?.email; // string | undefined
+    return { content: `Orders for ${email}` };
+  });
+```
+
+Chain it before `registerTool` so every handler sees the shape. Without it, `extra.authInfo.extra` stays `Record<string, unknown> | undefined`.
+
+<Warning>
+The declared shape is an assertion about what your verifier produces, not a runtime check. A claim your provider omits reads as `undefined` at runtime whatever the type says, so keep optional claims optional.
+</Warning>
+
 ### `use`
 
 ```ts

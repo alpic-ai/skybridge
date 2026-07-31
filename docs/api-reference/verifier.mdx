@@ -69,6 +69,18 @@ type AuthInfo = {
 | `expiresAt` | Expiry in unix seconds. Required: tokens with no expiration are rejected. |
 | `extra` | Anything else you want available to handlers, for example `sub` or `email`. |
 
+`extra` is an untyped bag by default. Pass the shape your verifier produces to type it, in the verifier and in every handler:
+
+```ts
+type Claims = { sub: string; email?: string };
+
+async function verifyAccessToken(token: string): Promise<AuthInfo<Claims>> {
+  // ...
+}
+```
+
+Handlers get the same shape once the server declares it with [`withAuthExtra`](/api-reference/mcp-server#withauthextra).
+
 <CardGroup cols={3}>
   <Card title="requireBearerAuth" icon="lock" href="/api-reference/require-bearer-auth">
     Require a token on every request

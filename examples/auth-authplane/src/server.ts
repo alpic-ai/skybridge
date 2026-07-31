@@ -1,5 +1,5 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type AuthInfo, authplaneProvider, McpServer } from "skybridge/server";
+import { authplaneProvider, McpServer } from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
@@ -25,6 +25,11 @@ import { env } from "./env.js";
  * for byte.
  */
 
+type AuthplaneClaims = {
+  subject?: string;
+  email?: string;
+};
+
 const server = new McpServer(
   {
     name: "auth-coffee",
@@ -38,6 +43,7 @@ const server = new McpServer(
     }),
   },
 )
+  .withAuthExtra<AuthplaneClaims>()
   .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
@@ -75,21 +81,20 @@ const server = new McpServer(
       },
     },
     ({ query, minRating }, extra) => {
-      const auth = extra.authInfo as AuthInfo;
 
       // `sub` identifies the signed-in user and is what favourites key off.
       // Access tokens carry no profile claims, so there is no display name to
       // show — `email` is read in case a deployment maps one in, and the view
       // falls back to a neutral label when it is absent rather than rendering
       // a raw identifier.
-      const subject = auth.extra?.subject as string | undefined;
-      const email = auth.extra?.email as string | undefined;
+      const subject = extra.authInfo?.extra?.subject;
+      const email = extra.authInfo?.extra?.email;
       const userName = email?.split("@")[0];
 
       const results = searchCoffeeShops({
         query,
         minRating,
-        userId: subject ?? auth.clientId,
+        userId: subject ?? extra.authInfo?.clientId ?? "anonymous",
       });
 
       return {
