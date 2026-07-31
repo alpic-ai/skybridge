@@ -99,6 +99,10 @@ export default function RootLayout({
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'G-0W0ZMXTSDZ');
+            document.addEventListener('click', function (event) {
+              var el = event.target && event.target.closest && event.target.closest('[data-ga]');
+              if (el) gtag('event', el.dataset.ga, { label: el.dataset.gaLabel });
+            });
           `}
         </Script>
         <script

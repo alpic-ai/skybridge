@@ -25,6 +25,8 @@ export function InstallRow({ cmd, label }: InstallRowProps) {
     <button
       type="button"
       className="sb-install"
+      data-ga="copy_install_command"
+      data-ga-label={cmd}
       aria-label={label ? `${label} copy ${cmd}` : `Copy ${cmd}`}
       onClick={onCopy}
     >
@@ -114,6 +116,8 @@ export function Hero() {
                 <a
                   className="sb-btn sb-btn-primary sb-btn-lg"
                   href="https://docs.skybridge.tech"
+                  data-ga="cta_click"
+                  data-ga-label="hero_read_docs"
                   style={{ borderColor: "rgb(166, 244, 241)" }}
                 >
                   Read the docs

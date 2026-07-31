@@ -65,6 +65,8 @@ export function FinalCtaSection() {
           <a
             className="sb-btn sb-btn-primary sb-btn-lg"
             href="https://docs.skybridge.tech"
+            data-ga="cta_click"
+            data-ga-label="final_read_docs"
           >
             Read the docs
             <Icon name="arrow" size={15} stroke={2} />
@@ -74,6 +76,8 @@ export function FinalCtaSection() {
             href="https://github.com/alpic-ai/skybridge"
             target="_blank"
             rel="noopener noreferrer"
+            data-ga="github_click"
+            data-ga-label="final_star"
             style={{ borderRadius: "10px", borderColor: "rgb(106, 177, 177)" }}
           >
             <Icon name="github" size={14} />
