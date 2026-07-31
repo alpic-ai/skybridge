@@ -1,3 +1,5 @@
+import { getDomain } from "tldts";
+
 /**
  * Resolves this server's public origin from request headers, in precedence
  * `x-forwarded-host` → `host` → localhost dev fallback. Shared by view serving
@@ -23,4 +25,10 @@ export function resolveServerOrigin(
     return `${proto}://${host}`;
   }
   return `http://localhost:${process.env.__PORT || "3000"}`;
+}
+
+/** Resolve the registrable host used as the default widget security domain. */
+export function resolveWidgetDomain(serverOrigin: string): string {
+  const hostname = new URL(serverOrigin).hostname;
+  return getDomain(hostname, { allowPrivateDomains: true }) ?? serverOrigin;
 }

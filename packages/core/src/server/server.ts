@@ -54,7 +54,7 @@ import type {
   McpWildcard,
 } from "./middleware.js";
 import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
-import { resolveServerOrigin } from "./requestOrigin.js";
+import { resolveServerOrigin, resolveWidgetDomain } from "./requestOrigin.js";
 import {
   discoverSkills,
   registerSkills,
@@ -1217,7 +1217,7 @@ export class McpServer<
         {
           resourceDomains: [serverUrl],
           connectDomains,
-          domain: serverUrl,
+          domain: resolveWidgetDomain(serverUrl),
           baseUriDomains: [serverUrl],
         },
         contentMetaOverrides,

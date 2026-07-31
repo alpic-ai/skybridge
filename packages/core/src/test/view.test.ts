@@ -182,7 +182,7 @@ describe("McpServer.registerTool (unified API)", () => {
     }>;
     expect(appsSdkResourceCallback).toBeDefined();
 
-    const host = "myapp.com";
+    const host = "capitals.skybridge.tech";
     const serverUrl = `https://${host}`;
     const mockExtra = createMockExtra(host) as unknown as RequestHandlerExtra<
       ServerRequest,
@@ -207,7 +207,7 @@ describe("McpServer.registerTool (unified API)", () => {
                 connectDomains: [serverUrl],
                 baseUriDomains: [serverUrl],
               },
-              domain: serverUrl,
+              domain: "skybridge.tech",
               description: "Test view",
             },
             "openai/widgetDescription": "Test view",
