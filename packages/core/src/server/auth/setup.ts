@@ -1,8 +1,8 @@
-import type { BearerAuthMiddlewareOptions } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
 import {
+  type BearerAuthMiddlewareOptions,
   getOAuthProtectedResourceMetadataUrl,
   mcpAuthMetadataRouter,
-} from "@modelcontextprotocol/sdk/server/auth/router.js";
+} from "@modelcontextprotocol/express";
 import cors from "cors";
 import type { Express, Request, RequestHandler } from "express";
 import type { AuthInfo } from "../auth.js";

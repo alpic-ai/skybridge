@@ -1,11 +1,9 @@
-name: Publish
+name: Publish v2 alpha
 
 on:
   push:
     branches:
-      - "**"
-  release:
-    types: [published]
+      - "v2"
 
 permissions:
   contents: write
@@ -32,36 +30,10 @@ jobs:
 
       - name: Set version
         id: version
-        env:
-          RELEASE_NAME: ${{ github.event.release.name }}
-          RELEASE_BODY: ${{ github.event.release.body }}
         run: |
-          if [ "${{ github.event_name }}" = "release" ]; then
-            # Remove 'v' prefix from release tag (e.g., v1.0.0 -> 1.0.0)
-            VERSION=${GITHUB_REF#refs/tags/v}
-
-            # Validate version format (strict X.Y.Z only)
-            if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "❌ Error: Invalid version format: '$VERSION'"
-              echo "Expected format: X.Y.Z (major.minor.patch)"
-              echo "Examples: 1.0.0, 1.2.3, 2.0.0"
-              exit 1
-            fi
-
-            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-            echo "tag=latest" >> "$GITHUB_OUTPUT"
-            echo "✅ Release version: $VERSION"
-            printf 'Release name: %s\n' "$RELEASE_NAME"
-            printf 'Release body:\n%s\n' "$RELEASE_BODY"
-          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            echo "version=0.0.0-next.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-            echo "tag=next" >> "$GITHUB_OUTPUT"
-            echo "✅ Next version: 0.0.0-next.${GITHUB_SHA::7}"
-          else
-            echo "version=0.0.0-dev.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-            echo "tag=dev" >> "$GITHUB_OUTPUT"
-            echo "✅ Dev version: 0.0.0-dev.${GITHUB_SHA::7}"
-          fi
+          echo "version=2.0.0-alpha.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "tag=alpha" >> "$GITHUB_OUTPUT"
+          echo "✅ Alpha version: 2.0.0-alpha.${GITHUB_SHA::7}"
 
       - name: Setting version for core
         working-directory: ./packages/core
@@ -98,53 +70,3 @@ jobs:
       - name: Publish devtools to npm
         working-directory: ./packages/devtools
         run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance --no-git-checks
-
-      - name: Restore templates workspace deps
-        if: github.event_name == 'release'
-        run: git checkout -- packages/create-skybridge/templates/demo/package.json packages/create-skybridge/templates/blank/package.json
-
-      - name: Deploy docs to Mintlify
-        if: github.event_name == 'release'
-        run: git push origin HEAD:mintlify --force
-
-      - name: Bump versions
-        if: github.event_name == 'release'
-        run: node scripts/bump.js ${{ steps.version.outputs.version }} && pnpm install --no-frozen-lockfile
-
-      # The prepublishOnly script in packages/core copies the root README into
-      # the package for npm. Clean it up so it doesn't leak into the bump PR.
-      - name: Clean up copied README
-        if: github.event_name == 'release'
-        run: rm -f packages/core/README.md
-
-      - name: Open bump PR
-        if: github.event_name == 'release'
-        uses: peter-evans/create-pull-request@v8
-        with:
-          commit-message: "chore: bump skybridge versions to ${{ steps.version.outputs.version }}"
-          title: "chore: bump skybridge versions to ${{ steps.version.outputs.version }}"
-          body: "Automated version bump of skybridge dependencies in templates and examples."
-          branch: chore/bump-versions
-          base: main
-          delete-branch: true
-
-  notify-discord:
-    if: github.event_name == 'release'
-    needs: publish
-    runs-on: ubuntu-latest
-    steps:
-      - name: Notify Discord
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          RELEASE_VERSION: ${{ github.event.release.tag_name }}
-          RELEASE_URL: ${{ github.event.release.html_url }}
-          RELEASE_BODY: ${{ github.event.release.body }}
-        run: |
-          BODY=${RELEASE_BODY:0:4000}
-          PAYLOAD=$(jq -n \
-            --arg title "Skybridge $RELEASE_VERSION released" \
-            --arg url "$RELEASE_URL" \
-            --arg description "$BODY" \
-            --argjson color 5814783 \
-            '{embeds: [{title: $title, url: $url, description: $description, color: $color}]}')
-          curl -f -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK_URL"

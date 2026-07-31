@@ -7,31 +7,23 @@ import type {
   McpUiToolMeta,
 } from "@modelcontextprotocol/ext-apps";
 import {
+  type ContentBlock,
+  type Implementation,
+  McpServer as McpServerBase,
+  type RequestMeta,
   Server as SdkServer,
   type ServerOptions,
-} from "@modelcontextprotocol/sdk/server/index.js";
-import { McpServer as McpServerBase } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type {
-  AnySchema,
-  SchemaOutput,
-  ZodRawShapeCompat,
-} from "@modelcontextprotocol/sdk/server/zod-compat.js";
-import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
-import type {
-  ContentBlock,
-  Implementation,
-  RequestMeta,
-  ServerNotification,
-  ServerRequest,
-  ServerResult,
-  ToolAnnotations,
-} from "@modelcontextprotocol/sdk/types.js";
+  type ServerResult,
+  type StandardSchemaV1,
+  type ToolAnnotations,
+} from "@modelcontextprotocol/server";
 import { mergeWith, union } from "es-toolkit";
 import express, {
   type ErrorRequestHandler,
   type Express,
   type RequestHandler,
 } from "express";
+import type { InferSchemaOutput, RawInputShape } from "../standard-schema.js";
 import type { OAuthConfig } from "./auth/index.js";
 import {
   authToSecuritySchemes,
@@ -325,15 +317,15 @@ export interface McpServerTypes<TTools extends Record<string, ToolDef>> {
 
 type Simplify<T> = { [K in keyof T]: T[K] };
 
-type ShapeOutput<Shape extends ZodRawShapeCompat> = Simplify<
+type ShapeOutput<Shape extends RawInputShape> = Simplify<
   {
-    [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
+    [K in keyof Shape as undefined extends InferSchemaOutput<Shape[K]>
       ? never
-      : K]: SchemaOutput<Shape[K]>;
+      : K]: InferSchemaOutput<Shape[K]>;
   } & {
-    [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
+    [K in keyof Shape as undefined extends InferSchemaOutput<Shape[K]>
       ? K
-      : never]?: SchemaOutput<Shape[K]>;
+      : never]?: InferSchemaOutput<Shape[K]>;
   }
 >;
 
@@ -350,7 +342,7 @@ type ExtractMeta<T> = [Extract<T, { _meta: unknown }>] extends [never]
 type AddTool<
   TTools,
   TName extends string,
-  TInput extends ZodRawShapeCompat,
+  TInput extends RawInputShape,
   TOutput,
   TResponseMetadata = unknown,
 > = McpServer<
@@ -359,12 +351,12 @@ type AddTool<
   }
 >;
 
-interface ToolConfigBase<TInput extends ZodRawShapeCompat | AnySchema> {
+interface ToolConfigBase<TInput extends RawInputShape | StandardSchemaV1> {
   name: string;
   title?: string;
   description?: string;
   inputSchema?: TInput;
-  outputSchema?: ZodRawShapeCompat | AnySchema;
+  outputSchema?: RawInputShape | StandardSchemaV1;
   annotations?: ToolAnnotations;
   view?: ViewConfig;
   _meta?: ToolMeta;
@@ -388,7 +380,7 @@ type ToolAuthConfig =
       securitySchemes?: SecurityScheme[];
     };
 
-type ToolConfig<TInput extends ZodRawShapeCompat | AnySchema> =
+type ToolConfig<TInput extends RawInputShape | StandardSchemaV1> =
   ToolConfigBase<TInput> & ToolAuthConfig;
 
 /**
@@ -421,15 +413,12 @@ export interface ClientHintsMeta {
   "openai/widgetSessionId"?: string;
 }
 
-type ToolHandlerExtra = Omit<
-  RequestHandlerExtra<ServerRequest, ServerNotification>,
-  "_meta"
-> & {
+type ToolHandlerExtra = Omit<McpExtra, "_meta"> & {
   _meta?: RequestMeta & ClientHintsMeta;
 };
 
 type ToolHandler<
-  TInput extends ZodRawShapeCompat,
+  TInput extends RawInputShape,
   TReturn extends { content?: HandlerContent } = { content?: HandlerContent },
 > = (
   args: ShapeOutput<TInput>,
@@ -563,21 +552,21 @@ function withSkillsCapability(
 //   registerTool({ name: "greet", description }, handler)
 //     -> { config: { name: "greet", description }, cb: handler }
 function normalizeRegisterToolArgs(args: unknown[]): {
-  config: ToolConfig<ZodRawShapeCompat>;
-  cb: ToolHandler<ZodRawShapeCompat>;
+  config: ToolConfig<RawInputShape>;
+  cb: ToolHandler<RawInputShape>;
 } {
   if (typeof args[0] === "string") {
     return {
       config: {
         name: args[0],
         ...(args[1] as object),
-      } as ToolConfig<ZodRawShapeCompat>,
-      cb: args[2] as ToolHandler<ZodRawShapeCompat>,
+      } as ToolConfig<RawInputShape>,
+      cb: args[2] as ToolHandler<RawInputShape>,
     };
   }
   return {
-    config: args[0] as ToolConfig<ZodRawShapeCompat>,
-    cb: args[1] as ToolHandler<ZodRawShapeCompat>,
+    config: args[0] as ToolConfig<RawInputShape>,
+    cb: args[1] as ToolHandler<RawInputShape>,
   };
 }
 
@@ -951,18 +940,17 @@ export class McpServer<
   }
 
   /**
-   * Per-request stateless connect. The SDK's `Protocol` only allows one
-   * transport per instance, so we can't reuse this `McpServer` across
-   * concurrent requests. The SDK's idiomatic fix is a `() => McpServer`
-   * factory, but that would break Skybridge's singleton API — so instead
-   * we build a fresh underlying `Server` per request and share the main
-   * server's handler maps by reference. The cast is unavoidable: there's
-   * no public API to inject handler maps. `getHandlerMaps` validates the
-   * read side and fails fast on SDK field renames.
+   * Build a fresh underlying `Server` for one stateless HTTP request. The
+   * SDK's `Protocol` only allows one transport per instance, so we can't
+   * reuse this `McpServer` across concurrent requests. The SDK's idiomatic
+   * fix is a `() => Server` factory (passed to `createMcpHandler`), but a
+   * singleton API is Skybridge's contract — so the factory returns a fresh
+   * `Server` that shares the main server's handler maps by reference. The
+   * cast is unavoidable: there's no public API to inject handler maps.
+   * `getHandlerMaps` validates the read side and fails fast on SDK field
+   * renames.
    */
-  async connectStatelessTransport(
-    transport: Parameters<typeof McpServerBase.prototype.connect>[0],
-  ): Promise<void> {
+  createStatelessServerInstance(): SdkServer {
     this.applyMcpMiddleware();
 
     const { requestHandlers, notificationHandlers } = getHandlerMaps(
@@ -976,7 +964,7 @@ export class McpServer<
     target._requestHandlers = requestHandlers;
     target._notificationHandlers = notificationHandlers;
 
-    await fresh.connect(transport);
+    return fresh;
   }
 
   /**
@@ -1066,18 +1054,15 @@ export class McpServer<
     this.claimedViews.set(component, toolName);
   }
 
-  private resolveViewRequestContext(extra: McpExtra | undefined): {
+  private resolveViewRequestContext(ctx: McpExtra | undefined): {
     serverUrl: string;
     assetsBasePath: string;
     connectDomains: string[];
     contentMetaOverrides: { domain?: string };
   } {
     const isProduction = process.env.NODE_ENV === "production";
-    const headers = extra?.requestInfo?.headers || {};
-    const header = (key: string) => {
-      const val = headers[key];
-      return Array.isArray(val) ? val[0] : val;
-    };
+    const header = (key: string) =>
+      ctx?.http?.req?.headers.get(key) ?? undefined;
     const isClaude = hostFromUserAgent(header("user-agent")) === "claude";
 
     const serverUrl = resolveServerOrigin(header);
@@ -1098,7 +1083,7 @@ export class McpServer<
 
     let contentMetaOverrides: { domain?: string } = {};
     if (isClaude) {
-      const pathname = extra?.requestInfo?.url?.pathname ?? "";
+      const pathname = ctx?.http?.req ? new URL(ctx.http.req.url).pathname : "";
       const rawUrl =
         header("x-alpic-forwarded-url") ?? `${serverUrl}${pathname}`;
       // Strip a lone trailing slash so the hash matches the connector URL
@@ -1277,7 +1262,7 @@ export class McpServer<
     );
   }
 
-  private decorateToolHandler<InputArgs extends ZodRawShapeCompat>(
+  private decorateToolHandler<InputArgs extends RawInputShape>(
     cb: ToolHandler<InputArgs>,
     {
       attachViewUUID,
@@ -1288,14 +1273,11 @@ export class McpServer<
       if (this.oauthEnabled) {
         const failure = evaluateSecuritySchemes(
           securitySchemes,
-          extra.authInfo,
+          extra.http?.authInfo,
         );
         if (failure) {
-          const headers = extra?.requestInfo?.headers ?? {};
-          const header = (key: string) => {
-            const value = headers[key];
-            return Array.isArray(value) ? value[0] : value;
-          };
+          const header = (key: string) =>
+            extra.http?.req?.headers.get(key) ?? undefined;
           return inBandChallengeResult(
             failure,
             this.resolveResourceMetadataUrl?.(header),
@@ -1407,7 +1389,7 @@ export class McpServer<
    */
   registerTool<
     TName extends string,
-    InputArgs extends ZodRawShapeCompat,
+    InputArgs extends RawInputShape,
     TReturn extends { content?: HandlerContent },
   >(
     config: ToolConfig<InputArgs> & { name: TName },
@@ -1419,7 +1401,7 @@ export class McpServer<
     ExtractStructuredContent<TReturn>,
     ExtractMeta<TReturn>
   >;
-  registerTool<InputArgs extends ZodRawShapeCompat>(
+  registerTool<InputArgs extends RawInputShape>(
     config: ToolConfig<InputArgs>,
     cb: ToolHandler<InputArgs>,
   ): this;

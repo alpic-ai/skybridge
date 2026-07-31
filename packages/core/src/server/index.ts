@@ -10,8 +10,8 @@ export {
   type AuthInfo,
   type AuthMetadataOptions,
   type BearerAuthMiddlewareOptions,
-  InvalidTokenError,
   mcpAuthMetadataRouter,
+  OAuthError,
   optionalBearerAuth,
   requireBearerAuth,
 } from "./auth.js";

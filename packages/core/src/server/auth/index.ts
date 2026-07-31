@@ -1,4 +1,4 @@
-import type { OAuthMetadata } from "@modelcontextprotocol/sdk/shared/auth.js";
+import type { OAuthMetadata } from "@modelcontextprotocol/server";
 import type { JwksVerifyConfig } from "./verify.js";
 
 /** Resource-server OAuth config for `SkybridgeServerOptions.oauth`. */

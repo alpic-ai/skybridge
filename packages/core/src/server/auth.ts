@@ -1,20 +1,18 @@
 import {
   type BearerAuthMiddlewareOptions,
   requireBearerAuth,
-} from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
+} from "@modelcontextprotocol/express";
 
 import type { RequestHandler } from "express";
 
-export { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
-export {
-  type BearerAuthMiddlewareOptions,
-  requireBearerAuth,
-} from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
 export {
   type AuthMetadataOptions,
+  type BearerAuthMiddlewareOptions,
   mcpAuthMetadataRouter,
-} from "@modelcontextprotocol/sdk/server/auth/router.js";
-export type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
+  requireBearerAuth,
+} from "@modelcontextprotocol/express";
+export type { AuthInfo } from "@modelcontextprotocol/server";
+export { OAuthError } from "@modelcontextprotocol/server";
 
 /**
  * Like `requireBearerAuth`, but lets requests through when no

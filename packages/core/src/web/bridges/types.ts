@@ -1,8 +1,4 @@
 import type {
-  SchemaOutput,
-  ZodRawShapeCompat,
-} from "@modelcontextprotocol/sdk/server/zod-compat.js";
-import type {
   CallToolResult,
   EmbeddedResource,
   ResourceLink,
@@ -10,6 +6,10 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 import type { useSyncExternalStore } from "react";
 import type { ViewHostType } from "../../server/index.js";
+import type {
+  InferSchemaOutput,
+  RawInputShape,
+} from "../../standard-schema.js";
 
 /**
  * Globals injected on `window.skybridge` by the host. Tells the view which
@@ -174,14 +174,14 @@ export type DownloadResult = {
  * Args passed to a {@link ViewToolHandler}, inferred from the tool's
  * `inputSchema` (optionality preserved). Mirrors the server's `registerTool`.
  */
-export type InferViewToolArgs<Shape extends ZodRawShapeCompat> = {
-  [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
+export type InferViewToolArgs<Shape extends RawInputShape> = {
+  [K in keyof Shape as undefined extends InferSchemaOutput<Shape[K]>
     ? never
-    : K]: SchemaOutput<Shape[K]>;
+    : K]: InferSchemaOutput<Shape[K]>;
 } & {
-  [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
+  [K in keyof Shape as undefined extends InferSchemaOutput<Shape[K]>
     ? K
-    : never]?: SchemaOutput<Shape[K]>;
+    : never]?: InferSchemaOutput<Shape[K]>;
 };
 
 /**
@@ -189,9 +189,7 @@ export type InferViewToolArgs<Shape extends ZodRawShapeCompat> = {
  * "app-provided tools" feature). Mirrors the server-side `registerTool` config.
  * Namespace `name` (e.g. `chess_make_move`) to avoid clashing with server tools.
  */
-export type ViewToolConfig<
-  TInput extends ZodRawShapeCompat = ZodRawShapeCompat,
-> = {
+export type ViewToolConfig<TInput extends RawInputShape = RawInputShape> = {
   name: string;
   title?: string;
   description?: string;
@@ -207,9 +205,7 @@ export type ViewToolConfig<
 export type ViewToolResult = CallToolResult;
 
 /** Handler run when the host calls a view tool. Receives validated, typed args. */
-export type ViewToolHandler<
-  TInput extends ZodRawShapeCompat = ZodRawShapeCompat,
-> = (
+export type ViewToolHandler<TInput extends RawInputShape = RawInputShape> = (
   args: InferViewToolArgs<TInput>,
 ) => ViewToolResult | Promise<ViewToolResult>;
 

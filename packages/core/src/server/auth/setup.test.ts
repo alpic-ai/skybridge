@@ -1,7 +1,9 @@
 // @vitest-environment node
 import http from "node:http";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import {
+  Client,
+  StreamableHTTPClientTransport,
+} from "@modelcontextprotocol/client";
 import type { RequestHandler } from "express";
 import * as jose from "jose";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -88,8 +90,10 @@ async function bootServer(
       inputSchema: {},
     },
     (_args, extra) => ({
-      structuredContent: { clientId: extra.authInfo?.clientId ?? null },
-      content: [{ type: "text", text: extra.authInfo?.clientId ?? "anon" }],
+      structuredContent: { clientId: extra.http?.authInfo?.clientId ?? null },
+      content: [
+        { type: "text", text: extra.http?.authInfo?.clientId ?? "anon" },
+      ],
     }),
   );
 
@@ -241,7 +245,9 @@ async function bootMixedServer(jwksUri: string) {
         auth: { allowsAnonymous: true },
       },
       (_args, extra) => ({
-        content: [{ type: "text", text: extra.authInfo?.clientId ?? "anon" }],
+        content: [
+          { type: "text", text: extra.http?.authInfo?.clientId ?? "anon" },
+        ],
       }),
     )
     .registerTool(
@@ -252,7 +258,9 @@ async function bootMixedServer(jwksUri: string) {
         auth: {},
       },
       (_args, extra) => ({
-        content: [{ type: "text", text: extra.authInfo?.clientId ?? "anon" }],
+        content: [
+          { type: "text", text: extra.http?.authInfo?.clientId ?? "anon" },
+        ],
       }),
     );
 
@@ -262,8 +270,13 @@ async function bootMixedServer(jwksUri: string) {
       description: "Registered via the legacy string overload.",
       inputSchema: {},
     },
-    (_args: unknown, extra: { authInfo?: { clientId?: string } }) => ({
-      content: [{ type: "text", text: extra.authInfo?.clientId ?? "anon" }],
+    (
+      _args: unknown,
+      extra: { http?: { authInfo?: { clientId?: string } } },
+    ) => ({
+      content: [
+        { type: "text", text: extra.http?.authInfo?.clientId ?? "anon" },
+      ],
     }),
   );
 
