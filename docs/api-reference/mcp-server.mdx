@@ -117,6 +117,29 @@ server.mcpMiddleware("request", (request, extra, next) => {
 });
 ```
 
+### `getToolError`
+
+```ts
+import { getToolError } from "skybridge/server";
+
+getToolError(extra: McpExtra | undefined): unknown;
+```
+
+The MCP SDK catches whatever a tool handler throws and turns it into an `isError` tool result, so `await next()` resolves normally and the middleware never sees the failure. `getToolError` returns the error the tool handler threw during the current request, with its stack and `cause` intact. It lives on `extra`, which is never serialized to the client.
+
+```ts
+server.mcpMiddleware("tools/call", async (request, extra, next) => {
+  const result = await next();
+  const error = getToolError(extra);
+  if (error) {
+    Sentry.captureException(error);
+  }
+  return result;
+});
+```
+
+A tool failure is a valid MCP response, so [`useOnError`](#useonerror) never runs for it — report tool errors from `mcpMiddleware`, and keep `useOnError` for transport-level failures. Errors raised by the SDK itself — unknown tool, input or output schema validation — never reach your handler and are not reported here.
+
 ### `run`
 
 ```ts

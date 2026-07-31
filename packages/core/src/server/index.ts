@@ -39,6 +39,7 @@ export type {
   McpTypedMiddlewareFn,
   McpWildcard,
 } from "./middleware.js";
+export { getToolError } from "./middleware.js";
 export type {
   HandlerContent,
   JsonOptions,
