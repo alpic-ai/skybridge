@@ -83,6 +83,62 @@ describe("createJwksVerifier", () => {
     );
   });
 
+  // jose quotes claim names — `"exp" claim timestamp check failed`, `unexpected
+  // "aud" claim value`. Those quotes would close `error_description="…"` early,
+  // dropping the `resource_metadata` that MCP clients start discovery from.
+  it.each([
+    [
+      "an expired token",
+      (key: CryptoKey) => sign(key, {}, { expiresAt: "-1h" }),
+      // jose: `"exp" claim timestamp check failed`
+      "Token verification failed: exp  claim timestamp check failed",
+    ],
+    [
+      "a token issued for another resource",
+      (key: CryptoKey) => sign(key, {}, { audience: "api://other" }),
+      // jose: `unexpected "aud" claim value`
+      "Token verification failed: unexpected  aud  claim value",
+    ],
+    [
+      "a token from another issuer",
+      (key: CryptoKey) => sign(key, {}, { issuer: "https://other.test" }),
+      // jose: `unexpected "iss" claim value`
+      "Token verification failed: unexpected  iss  claim value",
+    ],
+    [
+      "a token carrying no aud claim",
+      (key: CryptoKey) =>
+        new jose.SignJWT({})
+          .setProtectedHeader({ alg: "RS256", kid: "test-key" })
+          .setIssuer(ISSUER)
+          .setExpirationTime("1h")
+          .sign(key),
+      // jose: `missing required "aud" claim`
+      "Token verification failed: missing required  aud  claim",
+    ],
+  ])(
+    "keeps the message safe inside the challenge for %s",
+    async (_, mint, expected) => {
+      const { privateKey, jwksUri } = await startJwks();
+      const verifier = createJwksVerifier({
+        issuer: ISSUER,
+        audience: AUDIENCE,
+        jwksUri,
+      });
+
+      const error = await verifier
+        .verifyAccessToken(await mint(privateKey))
+        .then(
+          () => undefined,
+          (e: Error) => e,
+        );
+
+      expect(error?.message).toBe(expected);
+      // OAuth 2.1 §5.3.1: %x20-21 / %x23-5B / %x5D-7E and nothing else.
+      expect(error?.message).not.toMatch(/[^\x20-\x21\x23-\x5B\x5D-\x7E]/);
+    },
+  );
+
   it("skips the aud check when no audience is configured (e.g. Clerk)", async () => {
     const { privateKey, jwksUri } = await startJwks();
     const verifier = createJwksVerifier({ issuer: ISSUER, jwksUri });

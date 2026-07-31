@@ -33,7 +33,17 @@ export function createJwksVerifier(
         }));
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        throw new InvalidTokenError(`Token verification failed: ${message}`);
+        // This reaches the `error_description` of a `WWW-Authenticate`
+        // challenge, whose value must not include characters outside
+        // %x20-21 / %x23-5B / %x5D-7E (OAuth 2.1 §5.3.1, RFC 6750 §3). jose
+        // quotes claim names in its messages, and a quote would end the
+        // parameter early, dropping the `resource_metadata` that follows it.
+        // Each run becomes a space rather than being dropped, so removing one
+        // never runs two words together.
+        const safe = message
+          .replace(/[^\x20-\x21\x23-\x5B\x5D-\x7E]+/g, " ")
+          .trim();
+        throw new InvalidTokenError(`Token verification failed: ${safe}`);
       }
 
       const { client_id, scope, exp, sub, ...rest } = payload as Record<
