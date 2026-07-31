@@ -39,6 +39,7 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 - **Download file** → [download-file.md](references/download-file.md): when saving content to the user's filesystem
 - **OAuth** → [oauth.md](references/oauth.md): when tools need user authentication to access user-specific data
 - **CSP** → [csp.md](references/csp.md): when declaring allowed domains for fetch, assets, redirects, or iframes
+- **Monitoring** → [monitoring.md](references/monitoring.md): when the user asks to capture user intents, collect user feedback, or instrument product-learning loops
 
 ## Deploy
 
