@@ -7,7 +7,7 @@ Enable user authentication so tools can access user-specific data.
 1. Pass an `oauth` config as the third `McpServer` argument
 2. Skybridge auto-mounts the OAuth discovery endpoints (`/.well-known/oauth-authorization-server`, `/.well-known/oauth-protected-resource`) and Bearer JWT verification on `/mcp`
 3. The host reads the metadata, walks the user through OAuth, refreshes tokens, and calls `/mcp` with `Authorization: Bearer <token>`
-4. Unauthenticated/invalid requests **to `/mcp`** get HTTP 401 before any tool handler runs. The `oauth` field guards `/mcp` only — any custom route you mount yourself is unprotected; gate it explicitly (see [Manual wiring](#manual-wiring))
+4. Unauthenticated/invalid requests **to `/mcp`** get HTTP 401 before any tool handler runs. The `oauth` field guards `/mcp` only — see [Protect a custom route](#protect-a-custom-route) before serving user data anywhere else
 5. Tool handlers read user identity from `extra.authInfo`
 
 ## Which path?
@@ -120,6 +120,23 @@ Skybridge enforces this before the handler runs: as soon as one tool sets `allow
 `auth` compiles down to SEP-1488 `securitySchemes` (`{ type: "noauth" }` / `{ type: "oauth2", scopes }`) advertised on the tool descriptor. Setting `securitySchemes` by hand is the low-level escape hatch — it disables the `auth` shorthand for that tool (they're mutually exclusive) and skips no enforcement, but you own the mapping. `auth` without an `oauth` provider throws at registration.
 
 Working server: `examples/auth-descope-mixed`.
+
+## Protect a custom route
+
+Any route you mount with `.use()` sits outside the `oauth` field's middleware, and the internal JWKS verifier isn't exported — so gate the route with your own verifier plus `requireBearerAuth`:
+
+```typescript
+import { requireBearerAuth } from "skybridge/server";
+import { verifyAccessToken } from "./auth.js"; // see Write a verifier below
+
+server.use("/api/user-data", requireBearerAuth({ verifier: { verifyAccessToken } }));
+server.use("/api/user-data", (req, res) => {
+  const subject = (req as Request & { auth?: AuthInfo }).auth?.extra?.subject;
+  // ...
+});
+```
+
+Same `issuer`/`audience` as the provider config, or the route trusts tokens `/mcp` would reject.
 
 ## Manual wiring
 
