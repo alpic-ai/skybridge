@@ -12,23 +12,23 @@ Enable user authentication so tools can access user-specific data.
 
 ## Which path?
 
-The `oauth` field handles all-or-nothing auth; mixed auth or an unsupported IdP needs manual wiring.
+The `oauth` field covers all-or-nothing **and** mixed auth. Only an IdP the framework can't verify needs manual wiring.
 
 ```
-All tools require sign-in?
-├─ No — some public, some gated ──────────────────→ Manual wiring
-└─ Yes
-   ├─ A branded provider fits your IdP ────────────→ Pick a provider
-   │     (WorkOS · Auth0 · Clerk · Stytch · Descope)
-   ├─ No helper, but IdP has OAuth discovery + JWKS → customProvider
-   └─ No discovery doc, or opaque tokens ───────────→ Manual wiring
+Can the IdP be verified against a JWKS?
+├─ Yes
+│  ├─ A branded provider fits your IdP ─────────→ Pick a provider
+│  │    (WorkOS · Auth0 · Clerk · Stytch · Descope · Authplane)
+│  └─ No helper, but it has OAuth discovery ─────→ customProvider
+│     … then, if some tools must stay public ────→ add per-tool `auth`
+└─ No discovery doc, or opaque tokens ───────────→ Manual wiring
 ```
 
-- [Pick a provider](#1-pick-a-provider) · [`customProvider`](#2-any-other-idp--customprovider) · [Manual wiring](#manual-wiring)
+- [Pick a provider](#1-pick-a-provider) · [`customProvider`](#2-any-other-idp--customprovider) · [Per-tool auth](#4-mixed-auth-per-tool-auth) · [Manual wiring](#manual-wiring)
 
 ## 1. Pick a provider
 
-The branded providers discover the IdP's OAuth metadata and build the whole config. All require **Dynamic Client Registration (DCR)** enabled in the provider dashboard, and return a `Promise` — `await` it.
+The branded providers discover the IdP's OAuth metadata and build the whole config. All return a `Promise` — `await` it. Most need **Dynamic Client Registration (DCR)** enabled in the provider dashboard (Authplane has it natively; Descope without DCR goes through the Alpic proxy).
 
 ```typescript
 // src/server.ts
@@ -52,8 +52,9 @@ const server = new McpServer(
 | Clerk | `clerkProvider` | `domain` | `domain` = Frontend API URL. No `audience` (Clerk tokens carry no `aud`). The OAuth app must issue **JWT** access tokens, not opaque. |
 | Stytch | `stytchProvider` | `domain`, `audience` | `domain` = project domain; `audience` = Stytch Project ID. |
 | Descope | `descopeProvider` | `url` | `url` = MCP Server Discovery URL (Issuer). `audience` defaults to the Project ID derived from the URL. DCR disabled + Alpic DCR proxy → use `customProvider` with `serverUrl` (see `examples/auth-descope-alpic`). |
+| Authplane | `authplaneProvider` | `issuer`, `resource` | `resource` = this server's public URL, and it also supplies the expected `aud` (RFC 8707). Pass it exactly as Authplane advertises it — the provider throws if URL normalization would rewrite it (bare origin, uppercase host, explicit default port). |
 
-Working servers for each: `examples/auth-workos`, `auth-auth0`, `auth-clerk`, `auth-stytch`, `auth-descope`.
+Working servers for each: `examples/auth-workos`, `auth-auth0`, `auth-clerk`, `auth-stytch`, `auth-descope`, `auth-authplane`.
 
 ## 2. Any other IdP — `customProvider`
 
@@ -71,7 +72,7 @@ oauth: await customProvider({
 }),
 ```
 
-`customProvider` also accepts `baseUrl` (this server's public URL; inferred from request headers when omitted), `requiredScopes` (server-wide floor), and `metadataOverrides`.
+`customProvider` also accepts `baseUrl` (this server's public URL; inferred from request headers when omitted), `requiredScopes` (server-wide floor), `metadataOverrides`, and `authorizationServer` (advertise a different AS than the discovery issuer — `serverUrl` wins if both are set).
 
 ## 3. Read auth in handlers
 
@@ -94,9 +95,35 @@ server.registerTool(
 );
 ```
 
+## 4. Mixed auth: per-tool `auth`
+
+With an `oauth` provider set, each tool declares its own requirement. Omit `auth` for the secure default (sign-in required, no specific scope).
+
+```typescript
+server
+  .registerTool(
+    {
+      name: "browse-catalog",
+      description: "Browse the public catalog",
+      auth: { allowsAnonymous: true }, // callable signed out; token still read when present
+    },
+    (_input, extra) => ({ ...(extra.authInfo ? greet(extra.authInfo) : guest()) }),
+  )
+  .registerTool(
+    { name: "checkout", description: "Place an order", auth: { scopes: ["checkout"] } },
+    handler,
+  );
+```
+
+Skybridge enforces this before the handler runs: as soon as one tool sets `allowsAnonymous`, `/mcp` switches to optional Bearer, then each `tools/call` is checked against the calling tool's declaration — missing token → 401 `invalid_token`, missing scope → 403 `insufficient_scope` (ChatGPT gets the equivalent in-band `mcp/www_authenticate` challenge instead). So a gated handler can rely on `extra.authInfo` being present.
+
+`auth` compiles down to SEP-1488 `securitySchemes` (`{ type: "noauth" }` / `{ type: "oauth2", scopes }`) advertised on the tool descriptor. Setting `securitySchemes` by hand is the low-level escape hatch — it disables the `auth` shorthand for that tool (they're mutually exclusive) and skips no enforcement, but you own the mapping. `auth` without an `oauth` provider throws at registration.
+
+Working server: `examples/auth-descope-mixed`.
+
 ## Manual wiring
 
-Reach for this when the `oauth` field can't express your setup: **mixed auth** (some tools public, some gated), or an **IdP with no OAuth discovery / opaque tokens** (you verify by introspection instead of JWKS). The same primitives are exported from `skybridge/server`.
+Only needed when the framework can't verify the IdP's tokens: **no OAuth discovery document, or opaque tokens** (you verify by introspection instead of JWKS). Mixed auth does *not* require this — see [per-tool `auth`](#4-mixed-auth-per-tool-auth). The primitives are exported from `skybridge/server`.
 
 ### Write a verifier
 
@@ -126,7 +153,7 @@ export async function verifyAccessToken(token: string): Promise<AuthInfo> {
 
 ### Mount metadata + enforcement
 
-`mcpAuthMetadataRouter` serves the well-known endpoints. `requireBearerAuth` rejects every unauthenticated request; `optionalBearerAuth` lets unauthenticated requests through (validating a token only when one is sent) — this is the mixed-auth path.
+`mcpAuthMetadataRouter` serves the well-known endpoints. `requireBearerAuth` rejects every unauthenticated request; `optionalBearerAuth` lets unauthenticated requests through, validating a token only when one is sent.
 
 ```typescript
 import {
@@ -151,7 +178,7 @@ const server = new McpServer({ name: "my-app", version: "0.0.1" }, { capabilitie
   .use("/mcp", optionalBearerAuth({ verifier: { verifyAccessToken } }));
 ```
 
-Then declare each tool's requirement with `securitySchemes` (`{ type: "noauth" }` for public, `{ type: "oauth2", scopes? }` for gated):
+Without an `oauth` provider the `auth` shorthand is unavailable, so declare each tool's requirement with `securitySchemes` (`{ type: "noauth" }` for public, `{ type: "oauth2", scopes? }` for gated):
 
 ```typescript
 server.registerTool(
@@ -161,9 +188,9 @@ server.registerTool(
 server.registerTool(
   { name: "get-orders", description: "...", securitySchemes: [{ type: "oauth2" }] },
   async (_input, extra) => {
-    // securitySchemes is advertised to the host only — NOT enforced at runtime.
-    // optionalBearerAuth lets token-less requests through, so a gated handler
-    // MUST verify authInfo itself.
+    // No `oauth` provider means no framework enforcement: securitySchemes is
+    // advertised to the host only, and optionalBearerAuth lets token-less
+    // requests through. A gated handler MUST verify authInfo itself.
     if (!extra.authInfo) throw new Error("Unauthorized");
     // ...
   },
