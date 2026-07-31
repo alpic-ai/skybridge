@@ -27,11 +27,14 @@ export function InstallRow({ cmd, label }: InstallRowProps) {
   const [copied, setCopied] = useState(false);
   const onCopy = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    navigator.clipboard?.writeText(cmd).then(() => {
-      window.gtag?.("event", "copy_install_command", { label: cmd });
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    });
+    navigator.clipboard?.writeText(cmd).then(
+      () => {
+        window.gtag?.("event", "copy_install_command", { label: cmd });
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      },
+      () => {},
+    );
   };
   return (
     <button
