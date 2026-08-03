@@ -8,16 +8,6 @@ const LONGEST_HOST = HOSTS.reduce((longest, host) =>
   longest.length >= host.length ? longest : host,
 );
 
-declare global {
-  interface Window {
-    gtag?: (
-      command: string,
-      event: string,
-      params?: Record<string, unknown>,
-    ) => void;
-  }
-}
-
 type InstallRowProps = {
   cmd: string;
   label?: string;
