@@ -70,7 +70,7 @@ describe("create-skybridge", () => {
       path.join(process.cwd(), tempDirName, "project", "pnpm-workspace.yaml"),
       "utf-8",
     );
-    // onlyBuiltDependencies covers pnpm 10, allowBuilds covers pnpm 11+.
+    expect(workspaceRaw).toContain('packages:\n  - "."');
     expect(workspaceRaw).toContain("onlyBuiltDependencies:\n  - esbuild");
     expect(workspaceRaw).toContain("allowBuilds:\n  esbuild: true");
   });

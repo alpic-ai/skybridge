@@ -311,14 +311,11 @@ export async function init(args: string[] = process.argv.slice(2)) {
     pm = choice;
   }
 
-  // 8. pnpm ≥10 skips dependency build scripts unless allow-listed, and pnpm 11
-  // turns the skipped esbuild postinstall into a hard install error
-  // (ERR_PNPM_IGNORED_BUILDS). onlyBuiltDependencies is read by pnpm 10,
-  // allowBuilds by pnpm 11+; each version ignores the other's key.
+  // 8. pnpm ≥10 fails installs unless esbuild's build script is allow-listed
   if (pm === "pnpm") {
     fs.writeFileSync(
       path.join(root, "pnpm-workspace.yaml"),
-      "onlyBuiltDependencies:\n  - esbuild\nallowBuilds:\n  esbuild: true\n",
+      'packages:\n  - "."\nonlyBuiltDependencies:\n  - esbuild\nallowBuilds:\n  esbuild: true\n',
     );
   }
 
