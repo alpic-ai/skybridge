@@ -60,7 +60,12 @@ PAGE_LOAD_TIMEOUT_MS = 90_000
 MAX_LOOP_TURNS = 60
 STEPPER_DEADLINE_S = 10 * 60
 
-FOLLOW_UP_MARKER = "Skybridge conformance test"
+# The token the follow-up prompt asks the model to echo. The witness must look
+# for the REPLY, not the prompt: ChatGPT records the follow-up prompt as a
+# hidden tool-authored message (is_visually_hidden_from_conversation) that is
+# excluded from the conversation snapshot, so only the model's answer is
+# observable. On Claude the prompt is visible and contains the token too.
+FOLLOW_UP_MARKER = "conformance-follow-up-ack"
 
 # Button labels in the widget, per drive action (src/views/conformance.tsx).
 # The "run" action's label varies per test (Run/Close), so callers pass it.
@@ -145,15 +150,19 @@ def take_screenshot(page: Page, selector: str) -> bytes | None:
         return None
 
 
-def real_click(page: Page, label: str) -> bool:
-    """Click a widget button with a REAL, trusted mouse event.
+def real_press(page: Page, label: str) -> bool:
+    """Activate a widget button with a trusted, page-routed key press.
 
     The postMessage drive protocol carries no user activation, and ChatGPT
-    gates user-facing effects on a genuine gesture: a follow-up sent (or a
-    tab opened) from a synthetic click is silently dropped. Playwright can
-    click across the host's cross-origin iframes (something the Notte action
-    API could not), so prefer that and fall back to postMessage when the
-    button isn't reachable.
+    gates user-facing effects (the follow-up, the external tab) on a genuine
+    gesture reaching the host page. Since 2026-07-27 a synthesized mouse click
+    into the sandboxed cross-origin iframe no longer counts: the button's
+    handler still fires (the call resolves), but the host page sees no
+    activation and silently drops the effect. A key press does count — it is
+    dispatched through the page-level keyboard and routed by the browser to
+    the focused frame, granting activation to the whole frame tree — so focus
+    the button and press Enter instead of clicking. postMessage remains the
+    fallback when the button isn't reachable.
 
     The widget's cross-origin frames churn while the host (re)mounts them,
     especially over remote CDP, so a "Frame was detached" mid-scan is expected;
@@ -166,18 +175,19 @@ def real_click(page: Page, label: str) -> bool:
             try:
                 button = frame.get_by_role("button", name=label, exact=True)
                 if button.count():
-                    button.first.click(timeout=CLICK_TIMEOUT_MS)
+                    button.first.focus(timeout=CLICK_TIMEOUT_MS)
+                    page.keyboard.press("Enter")
                     return True
             except Exception as exc:
-                # First line only: Playwright's full click call-log is huge.
-                print(f"[conformance] real_click '{label}': {str(exc).splitlines()[0]}", flush=True)
+                # First line only: Playwright's full call-log is huge.
+                print(f"[conformance] real_press '{label}': {str(exc).splitlines()[0]}", flush=True)
                 continue
         time.sleep(1)  # let a detached/remounting frame settle, then rescan
     return False
 
 
 def drive_widget(page: Page, selector: str, action: str, label: str | None = None) -> None:
-    """Press a widget button: real click first, postMessage drive as fallback.
+    """Press a widget button: real key press first, postMessage drive as fallback.
 
     The widget lives behind cross-origin iframes (the host's sandboxed
     origin, with a nested #root frame on some hosts); the app also listens
@@ -187,8 +197,8 @@ def drive_widget(page: Page, selector: str, action: str, label: str | None = Non
     nesting layouts.
     """
     label = label or ACTION_LABELS.get(action)
-    if label and real_click(page, label):
-        print(f"[conformance] drive '{action}': clicked '{label}'", flush=True)
+    if label and real_press(page, label):
+        print(f"[conformance] drive '{action}': pressed '{label}'", flush=True)
         time.sleep(2)
         return
     result = page.evaluate(
@@ -338,7 +348,7 @@ def click_top_page_button(page: Page, label: str, timeout_seconds: int = 20) -> 
     Hosts render native permission dialogs (Open link / Download) as top-page
     portals that appear a beat after the triggering hook runs and block all
     other clicks until answered; poll for the control, then click it with the
-    same CDP-aware timeout as real_click (a 2s click times out over Notte's
+    same CDP-aware timeout as real_press (a 2s click times out over Notte's
     remote browser, which silently left the download unaccepted).
 
     The control's role varies by host: Claude's "Open link" is a <button>, but

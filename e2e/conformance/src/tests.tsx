@@ -396,7 +396,7 @@ function SendFollowUpTest({ onResult }: TestProps) {
   useProbe(onResult, async () => {
     try {
       await send(
-        "Skybridge conformance test: please reply with a short acknowledgement.",
+        "Skybridge conformance test: reply with exactly the text conformance-follow-up-ack.",
       );
       return supported("follow-up dispatched");
     } catch (e) {
