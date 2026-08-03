@@ -32,7 +32,7 @@ const server = new McpServer({ name: "shop", version: "1.0" }).registerTool(
     },
   },
   async ({ query, maxPrice }, { authInfo }) => {
-    const userId = authInfo.extra?.sub as string;
+    const userId = authInfo.extra?.subject as string;
     const products = await search(query, { maxPrice, userId });
     return {
       content: `Found ${products.length} products for "${query}".`,

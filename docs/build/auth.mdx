@@ -120,7 +120,7 @@ export async function verifyAccessToken(token: string): Promise<AuthInfo> {
       clientId: payload.clientId,
       scopes: payload.scopes,
       expiresAt: payload.expiresAt,
-      extra: { sub: payload.sub },
+      extra: { subject: payload.sub },
     };
   } catch (err) {
     throw new InvalidTokenError(
@@ -191,7 +191,9 @@ server.registerTool(
 
 With unauthenticated requests reaching [handlers](/api-reference/register-tool#handler), the scope check is no longer a formality: it's the only gate on protected tools.
 
-```ts server.ts highlight={8-10}
+Reject with a `mcp/www_authenticate` challenge rather than a plain error result. The handler runs after the transport, so it can't answer with a 401, and an error result carrying no challenge reaches the host as an opaque tool failure that never starts the sign-in flow.
+
+```ts server.ts highlight={8-19}
 server.registerTool(
   {
     name: "create-checkout",
@@ -200,7 +202,17 @@ server.registerTool(
   },
   async ({ productIds }, extra) => {
     if (!extra.authInfo?.scopes.includes("checkout")) {
-      return { content: "Sign in to check out.", isError: true };
+      const error = extra.authInfo ? "insufficient_scope" : "invalid_token";
+      return {
+        isError: true,
+        content: [{ type: "text", text: "Sign in to check out." }],
+        _meta: {
+          "mcp/www_authenticate": [
+            `Bearer error="${error}", error_description="Sign in to check out.", ` +
+              `scope="checkout", resource_metadata="${process.env.SERVER_URL}/.well-known/oauth-protected-resource"`,
+          ],
+        },
+      };
     }
     return {
       structuredContent: { url: await checkout(productIds, extra.authInfo) },
@@ -208,6 +220,8 @@ server.registerTool(
   },
 );
 ```
+
+This is the shape the [`oauth`](/api-reference/mcp-server#constructor) provider option emits for you; on the manual path you build it yourself.
 
 <Card title="All done!" type="tip" href="/test" horizontal icon="check">
     You now know how to authenticate users. Learn how to test your MCP App in the next chapter.
