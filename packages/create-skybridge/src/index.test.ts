@@ -62,6 +62,30 @@ describe("create-skybridge", () => {
     ).rejects.toThrow();
   });
 
+  it("writes pnpm-workspace.yaml allowing esbuild builds when using pnpm", async () => {
+    const name = `${tempDirName}/project`;
+    await init([name, "--yes", "--skip-skills", "--pm", "pnpm"]);
+
+    const workspaceRaw = await fs.readFile(
+      path.join(process.cwd(), tempDirName, "project", "pnpm-workspace.yaml"),
+      "utf-8",
+    );
+    expect(workspaceRaw).toContain('packages:\n  - "."');
+    expect(workspaceRaw).toContain("onlyBuiltDependencies:\n  - esbuild");
+    expect(workspaceRaw).toContain("allowBuilds:\n  esbuild: true");
+  });
+
+  it("does not write pnpm-workspace.yaml for other package managers", async () => {
+    const name = `${tempDirName}/project`;
+    await init([name, "--yes", "--skip-skills", "--pm", "npm"]);
+
+    await expect(
+      fs.access(
+        path.join(process.cwd(), tempDirName, "project", "pnpm-workspace.yaml"),
+      ),
+    ).rejects.toThrow();
+  });
+
   it("sets package.json name to the project directory basename", async () => {
     const name = `${tempDirName}/my-app`;
     await init([name, "--yes", "--skip-skills"]);

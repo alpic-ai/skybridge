@@ -311,7 +311,15 @@ export async function init(args: string[] = process.argv.slice(2)) {
     pm = choice;
   }
 
-  // 8. Always install dependencies
+  // 8. pnpm ≥10 fails installs unless esbuild's build script is allow-listed
+  if (pm === "pnpm") {
+    fs.writeFileSync(
+      path.join(root, "pnpm-workspace.yaml"),
+      'packages:\n  - "."\nonlyBuiltDependencies:\n  - esbuild\nallowBuilds:\n  esbuild: true\n',
+    );
+  }
+
+  // 9. Always install dependencies
   Spinner.start(`Installing dependencies with ${pm}`);
   const { status, output } = await spawnAsync(pm, ["install"]);
   if (status === 0) {
@@ -322,7 +330,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
     abort(`Try manually: cd ${targetDir} && ${pm} install`);
   }
 
-  // 9. Start dev server?
+  // 10. Start dev server?
   let start = false;
   if (argv.start) {
     start = true;
