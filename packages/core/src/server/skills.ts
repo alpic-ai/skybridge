@@ -13,7 +13,6 @@ import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 
 export const SKILLS_EXTENSION_KEY = "io.modelcontextprotocol/skills";
-export const SKILL_INDEX_URI = "skill://index.json";
 
 const SKILL_NAME_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -243,27 +242,6 @@ export function registerSkills(
       const { name, relPath } = skillUriToRelPath(readUri.href);
       return serveFile(name, relPath, readUri.href);
     },
-  );
-
-  server.registerResource(
-    "skill-index",
-    SKILL_INDEX_URI,
-    { mimeType: "application/json" },
-    () => ({
-      contents: [
-        {
-          uri: SKILL_INDEX_URI,
-          mimeType: "application/json",
-          text: JSON.stringify({
-            skills: manifest.map((skill) => ({
-              url: `skill://${skill.name}/SKILL.md`,
-              digest: skill.digest,
-              frontmatter: skill.frontmatter,
-            })),
-          }),
-        },
-      ],
-    }),
   );
 
   const entryByName = new Map(

@@ -8,7 +8,6 @@ import { describe, expect, it, vi } from "vitest";
 import {
   discoverSkills,
   registerSkills,
-  SKILL_INDEX_URI,
   type Skill,
   skillUriToRelPath,
 } from "./skills.js";
@@ -153,25 +152,6 @@ describe("registerSkills", () => {
     };
     return { server, resources, handlers };
   }
-
-  it("builds an index.json with url, digest, and verbatim frontmatter", () => {
-    const { server, resources } = fakeRegistrar();
-    // biome-ignore lint/suspicious/noExplicitAny: structural test double
-    registerSkills(server as any, manifest);
-    const index = resources.get("skill-index");
-    const result = index?.cb(new URL(SKILL_INDEX_URI)) as {
-      contents: { text: string }[];
-    };
-    expect(JSON.parse(result.contents[0]?.text ?? "")).toEqual({
-      skills: [
-        {
-          url: "skill://refunds/SKILL.md",
-          digest: "sha256:abc",
-          frontmatter: { name: "refunds", description: "Process refunds" },
-        },
-      ],
-    });
-  });
 
   it("serves supporting files through the template resource", () => {
     const { server, resources } = fakeRegistrar();

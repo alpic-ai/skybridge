@@ -47,10 +47,10 @@ describe("skills server option", () => {
     expect(extensionsOf(server)?.["io.modelcontextprotocol/skills"]).toEqual({
       directoryRead: true,
     });
-    // Resources are keyed by URI: the skill's SKILL.md plus the discovery
-    // index. Locks that the primed manifest was consumed and wired up.
+    // Resources are keyed by URI. Locks that the primed manifest was
+    // consumed and wired up.
     expect(registeredResourceNames(server)).toEqual(
-      expect.arrayContaining(["skill://demo/SKILL.md", "skill://index.json"]),
+      expect.arrayContaining(["skill://demo/SKILL.md"]),
     );
   });
 
@@ -61,7 +61,9 @@ describe("skills server option", () => {
     expect(
       extensionsOf(server)?.["io.modelcontextprotocol/skills"],
     ).toBeUndefined();
-    expect(registeredResourceNames(server)).not.toContain("skill://index.json");
+    expect(registeredResourceNames(server)).not.toContain(
+      "skill://demo/SKILL.md",
+    );
   });
 
   it("serves skills through the stateless transport (capability + reads)", async () => {
@@ -85,11 +87,6 @@ describe("skills server option", () => {
         "io.modelcontextprotocol/skills"
       ],
     ).toEqual({ directoryRead: true });
-
-    const index = await client.readResource({ uri: "skill://index.json" });
-    expect((index.contents[0] as { text?: string }).text).toContain(
-      "skill://demo/SKILL.md",
-    );
 
     const skill = await client.readResource({ uri: "skill://demo/SKILL.md" });
     expect((skill.contents[0] as { text?: string }).text).toBe("# Demo");
