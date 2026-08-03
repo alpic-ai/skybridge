@@ -7,22 +7,26 @@ Enable user authentication so tools can access user-specific data.
 1. Pass an `oauth` config as the third `McpServer` argument
 2. Skybridge auto-mounts the OAuth discovery endpoints (`/.well-known/oauth-authorization-server`, `/.well-known/oauth-protected-resource`) and Bearer JWT verification on `/mcp`
 3. The host reads the metadata, walks the user through OAuth, refreshes tokens, and calls `/mcp` with `Authorization: Bearer <token>`
-4. By default every tool requires sign-in: unauthenticated/invalid requests **to `/mcp`** get HTTP 401 before any tool handler runs. Opting one tool into anonymous access relaxes this per tool, never server-wide — see [per-tool `auth`](#4-mixed-auth-per-tool-auth)
+4. By default every tool requires sign-in: unauthenticated/invalid requests **to `/mcp`** get HTTP 401 before any tool handler runs
 5. The `oauth` field guards `/mcp` only — see [Protect a custom route](#protect-a-custom-route) before serving user data anywhere else
 6. Tool handlers read user identity from `extra.authInfo`
 
 ## Which path?
 
-The `oauth` field covers all-or-nothing **and** mixed auth. Only an IdP the framework can't verify needs manual wiring.
+The `oauth` field covers all-or-nothing **and** mixed auth. Manual wiring is only for an IdP whose tokens the framework can't verify.
 
 ```
-Can the IdP be verified against a JWKS?
+Does the IdP publish an OAuth discovery document with a jwks_uri?
 ├─ Yes
 │  ├─ A branded provider fits your IdP ─────────→ Pick a provider
 │  │    (WorkOS · Auth0 · Clerk · Stytch · Descope · Authplane)
-│  └─ No helper, but it has OAuth discovery ─────→ customProvider
+│  └─ No helper for it ──────────────────────────→ customProvider
 │     … then, if some tools must stay public ────→ add per-tool `auth`
-└─ No discovery doc, or opaque tokens ───────────→ Manual wiring
+└─ No ───────────────────────────────────────────→ Manual wiring
+      (no discovery doc, or opaque tokens you
+       verify by introspection — a JWKS alone
+       isn't enough: customProvider reads the
+       jwks_uri *out of* the discovery document)
 ```
 
 - [Pick a provider](#1-pick-a-provider) · [`customProvider`](#2-any-other-idp--customprovider) · [Per-tool auth](#4-mixed-auth-per-tool-auth) · [Manual wiring](#manual-wiring)
@@ -118,28 +122,61 @@ server
   );
 ```
 
-Skybridge enforces this before the handler runs: as soon as one tool sets `allowsAnonymous`, `/mcp` switches to optional Bearer, then each `tools/call` is checked against the calling tool's declaration — missing token → 401 `invalid_token`, missing scope → 403 `insufficient_scope` (ChatGPT gets the equivalent in-band `mcp/www_authenticate` challenge instead). So a gated handler can rely on `extra.authInfo` being present.
+Skybridge enforces this before the handler runs: each `tools/call` is checked against the calling tool's declaration — missing token → 401 `invalid_token`, missing scope → 403 `insufficient_scope` (a non-batched ChatGPT request gets the equivalent in-band `mcp/www_authenticate` challenge instead of the transport status). So a gated handler can rely on `extra.authInfo` being present.
 
-`auth` compiles down to SEP-1488 `securitySchemes` (`{ type: "noauth" }` / `{ type: "oauth2", scopes }`) advertised on the tool descriptor. Setting `securitySchemes` by hand is the low-level escape hatch — it disables the `auth` shorthand for that tool (they're mutually exclusive) and skips no enforcement, but you own the mapping. `auth` without an `oauth` provider throws at registration.
+⚠️ **One anonymous tool unlocks every non-`tools/call` method.** Declaring `allowsAnonymous` anywhere switches the whole `/mcp` route to optional Bearer, and only `tools/call` is checked per tool. So `initialize`, `tools/list`, `prompts/*` and `resources/read` — **including your view resources** — become reachable with no token at all. In a mixed server, never put user-specific data in a view resource or a prompt; return it from a gated tool's response instead.
+
+`auth` compiles down to SEP-1488 `securitySchemes` advertised on the tool descriptor: `{ scopes }` becomes `[{ type: "oauth2", scopes }]`, and `allowsAnonymous` emits **both** `[{ type: "noauth" }, { type: "oauth2" }]`. Setting `securitySchemes` by hand is the low-level escape hatch — it disables the `auth` shorthand for that tool (they're mutually exclusive) and skips no enforcement, but you own the mapping.
+
+Requiring sign-in (`auth: { scopes }`, or `auth: {}`) throws at registration when the server has no `oauth` provider. `auth: { allowsAnonymous: true }` is accepted either way, but without a provider it's silently dropped and no `noauth` scheme is advertised.
 
 Working server: `examples/auth-descope-mixed`.
 
 ## Protect a custom route
 
-Any route you mount with `.use()` sits outside the `oauth` field's middleware, and the internal JWKS verifier isn't exported — so gate the route with your own verifier plus `requireBearerAuth`:
+A route you mount outside `/mcp` sits outside the `oauth` field's middleware, and the internal JWKS verifier isn't exported — so gate it with your own verifier plus `requireBearerAuth`.
+
+Don't retype the IdP values: the providers *derive* what they verify against (`descopeProvider` turns its `url` into `issuer = <base>/<projectId>` and `audience = projectId`; `customProvider` uses the **discovered** issuer). Keep the provider result and read them off it, or the route rejects every valid token — or worse, accepts tokens `/mcp` would reject:
 
 ```typescript
-import { requireBearerAuth } from "skybridge/server";
-import { verifyAccessToken } from "./auth.js"; // see Write a verifier below
+import type { Request } from "express";
+import * as jose from "jose";
+import { type AuthInfo, InvalidTokenError, McpServer, requireBearerAuth } from "skybridge/server";
 
-server.use("/api/user-data", requireBearerAuth({ verifier: { verifyAccessToken } }));
-server.use("/api/user-data", (req, res) => {
-  const subject = (req as Request & { auth?: AuthInfo }).auth?.extra?.subject;
-  // ...
-});
+const oauth = await descopeProvider({ url: env.DESCOPE_MCP_SERVER_URL });
+const server = new McpServer(info, { capabilities: {} }, { oauth });
+
+const jwks = jose.createRemoteJWKSet(new URL(oauth.verify.jwksUri));
+const verifyAccessToken = async (token: string): Promise<AuthInfo> => {
+  try {
+    const { payload } = await jose.jwtVerify(token, jwks, {
+      issuer: oauth.verify.issuer,
+      audience: oauth.verify.audience,
+    });
+    return {
+      token,
+      clientId: (payload.client_id ?? payload.azp ?? "") as string,
+      scopes: typeof payload.scope === "string" ? payload.scope.split(" ") : [],
+      expiresAt: payload.exp,
+      extra: { subject: payload.sub },
+    };
+  } catch (err) {
+    throw new InvalidTokenError(err instanceof Error ? err.message : String(err));
+  }
+};
+
+server
+  .use("/api/user-data", requireBearerAuth({
+    verifier: { verifyAccessToken },
+    resourceMetadataUrl: `${env.SERVER_URL}/.well-known/oauth-protected-resource`,
+  }))
+  .use("/api/user-data", (req, res) => {
+    const subject = (req as Request & { auth?: AuthInfo }).auth?.extra?.subject as string;
+    // ...
+  });
 ```
 
-Same `issuer`/`audience` as the provider config, or the route trusts tokens `/mcp` would reject.
+`resourceMetadataUrl` is what puts `resource_metadata` in the 401 — without it a client can't discover how to authenticate against the route. Paths under `/mcp/…` are already covered by the `oauth` middleware.
 
 ## Manual wiring
 
@@ -209,35 +246,45 @@ server.registerTool(
   handler,
 );
 server.registerTool(
-  { name: "get-orders", description: "...", securitySchemes: [{ type: "oauth2" }] },
+  { name: "get-orders", description: "...", securitySchemes: [{ type: "oauth2", scopes: ["orders:read"] }] },
   async (_input, extra) => {
     // No `oauth` provider means no framework enforcement: securitySchemes is
     // advertised to the host only, and optionalBearerAuth lets token-less
-    // requests through. A gated handler MUST verify authInfo itself.
-    if (!extra.authInfo) return signInChallenge();
+    // requests through. A gated handler MUST do both checks itself.
+    if (!extra.authInfo) return signInChallenge(["orders:read"]);
+    if (!extra.authInfo.scopes.includes("orders:read")) {
+      return insufficientScope(["orders:read"]);
+    }
     // ...
   },
 );
 ```
+
+Declaring `scopes` in `securitySchemes` enforces nothing on its own — the framework only acts on it when an `oauth` provider is set. `optionalBearerAuth` verifies the token's signature, not what it's allowed to do, so without the `scopes.includes` check every signed-in user passes a scope-gated tool.
 
 ### Reject from inside a handler
 
 Don't `throw` on missing auth. The handler runs after the transport, so it can't send a 401, and a thrown error reaches the host as an opaque tool failure — it never triggers the sign-in flow. Return the in-band challenge instead: `isError` plus a `mcp/www_authenticate` header array in `_meta`, pointing at your protected-resource metadata. This is the shape the `oauth` field emits for ChatGPT, and what ChatGPT acts on.
 
 ```typescript
-const signInChallenge = (scopes: string[] = []) => ({
+const challenge = (error: "invalid_token" | "insufficient_scope", text: string, scopes: string[]) => ({
   isError: true,
-  content: [{ type: "text" as const, text: "Sign in to use this tool." }],
+  content: [{ type: "text" as const, text }],
   _meta: {
     "mcp/www_authenticate": [
-      `Bearer error="invalid_token", error_description="Sign in to use this tool."` +
+      `Bearer error="${error}", error_description="${text}"` +
         (scopes.length ? `, scope="${scopes.join(" ")}"` : "") +
-        `, resource_metadata="${process.env.SERVER_URL}/.well-known/oauth-protected-resource"`,
+        `, resource_metadata="${env.SERVER_URL}/.well-known/oauth-protected-resource"`,
     ],
   },
 });
+
+const signInChallenge = (scopes: string[] = []) =>
+  challenge("invalid_token", "Sign in to use this tool.", scopes);
+const insufficientScope = (scopes: string[]) =>
+  challenge("insufficient_scope", "Missing required scope for this tool.", scopes);
 ```
 
-Use `error="insufficient_scope"` when a token is present but under-scoped.
+`env.SERVER_URL` must be a validated value, not raw `process.env` — an unset var interpolates to `undefined/.well-known/...` and the host silently fails to start the sign-in flow instead of erroring. The examples define a `requireEnv` helper in `src/env.ts` for this.
 
 For an all-or-nothing manual server, swap `optionalBearerAuth` for `requireBearerAuth` and drop the per-tool `securitySchemes` — then `authInfo` is guaranteed in every handler and no challenge is needed.
