@@ -73,7 +73,7 @@ export async function SiteNav() {
             href="https://github.com/alpic-ai/skybridge"
             target="_blank"
             rel="noopener noreferrer"
-            data-ga="github_click"
+            data-ga="lp_github_click"
             data-ga-label="nav_stars"
           >
             <Icon name="github" size={13} />
@@ -84,7 +84,7 @@ export async function SiteNav() {
             href="https://docs.skybridge.tech"
             target="_blank"
             rel="noreferrer"
-            data-ga="cta_click"
+            data-ga="lp_cta_click"
             data-ga-label="nav_get_started"
           >
             Get started
