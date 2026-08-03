@@ -156,7 +156,7 @@ def finalize_close(page: Page, selector: str, rows: list[ResultRow]) -> list[Res
 
 
 def drive_stepper(
-    page: Page, host: HostConfig, unverifiable: frozenset[str]
+    page: Page, host: HostConfig, unverifiable: frozenset[str], foreground: bool = True
 ) -> tuple[list[ResultRow], bytes | None]:
     host.hide_sidebar(page)
     host.dismiss_modal(page)
@@ -181,11 +181,14 @@ def drive_stepper(
 
         # Keep the tab foregrounded: a backgrounded tab throttles timers, which
         # stalls the 60s useRegisterViewTool wait and slows setDisplayMode's
-        # fullscreen grant enough to trip the stall guard.
-        try:
-            page.bring_to_front()
-        except Exception:
-            pass
+        # fullscreen grant enough to trip the stall guard. Not in cdp mode:
+        # raising the hidden window would steal OS focus, and that Chrome runs
+        # with every background-throttling flag disabled instead.
+        if foreground:
+            try:
+                page.bring_to_front()
+            except Exception:
+                pass
 
         state = read_state(page)
         if state.rows:
@@ -260,6 +263,7 @@ def run_conformance(
     page: Page,
     app_name: str,
     unverifiable: frozenset[str],
+    foreground: bool = True,
 ) -> dict[str, Any]:
     rows: list[ResultRow] = []
     screenshot_bytes: bytes | None = None
@@ -279,7 +283,7 @@ def run_conformance(
                 time.sleep(12)  # let the app's automatic tests record
                 # Early capture, replaced by the pre-close one when the run gets there.
                 screenshot_bytes = take_screenshot(page, host.widget_iframe_selector) or screenshot_bytes
-                rows, final_screenshot = drive_stepper(page, host, unverifiable)
+                rows, final_screenshot = drive_stepper(page, host, unverifiable, foreground)
                 screenshot_bytes = final_screenshot or screenshot_bytes
             except (TimeoutError, PlaywrightTimeoutError, StallError) as exc:
                 # PlaywrightTimeoutError is a separate class from the builtin, so
@@ -346,6 +350,67 @@ def local_browser(profile_dir: Path) -> Iterator[BrowserContext]:
             yield context
         finally:
             context.close()
+
+
+@contextmanager
+def cdp_browser(profile_dir: Path, port: int) -> Iterator[BrowserContext]:
+    """A hidden local Chrome on the same persistent profile, attached over CDP.
+
+    Launched via `open -ngj` (new instance, no activation, hidden) so it never
+    steals OS focus while a run drives it, positioned off-screen as a backstop,
+    with Chrome's background throttling disabled since the window is never
+    frontmost. The instance is left running for the next run to reuse; it holds
+    the profile, so `--mode local` cannot run while it is up (kill it with
+    `pkill -f <profile_dir>`).
+    """
+    import subprocess
+    import urllib.request
+
+    url = f"http://127.0.0.1:{port}"
+
+    def cdp_up() -> bool:
+        try:
+            urllib.request.urlopen(f"{url}/json/version", timeout=1)
+            return True
+        except Exception:
+            return False
+
+    if not cdp_up():
+        subprocess.run(
+            [
+                "open", "-ngj", "-a", "Google Chrome", "--args",
+                f"--user-data-dir={profile_dir}",
+                f"--remote-debugging-port={port}",
+                "--no-first-run",
+                "--no-default-browser-check",
+                "--disable-session-crashed-bubble",
+                "--disable-background-timer-throttling",
+                "--disable-backgrounding-occluded-windows",
+                "--disable-renderer-backgrounding",
+                "--disable-blink-features=AutomationControlled",
+                "--disable-popup-blocking",
+                "--window-size=1440,1400",
+                "--window-position=-2400,-2400",
+                # No startup window: also suppresses session restore, which
+                # would reopen stale conversation tabs the driver could grab.
+                "--no-startup-window",
+            ],
+            check=True,
+        )
+        deadline = time.time() + 20
+        while not cdp_up():
+            if time.time() > deadline:
+                raise RuntimeError(f"hidden Chrome never exposed CDP on {url}")
+            time.sleep(0.5)
+
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.connect_over_cdp(url)
+        context = browser.contexts[0]
+        # A reused instance still holds the previous run's tabs; drop them so
+        # the caller starts from a fresh page.
+        for stale in list(context.pages):
+            stale.close()
+        yield context
 
 
 @contextmanager
@@ -432,7 +497,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description="Drive the Skybridge hooks conformance app end-to-end via Playwright.",
     )
     parser.add_argument("--host", required=True, choices=sorted(HOSTS), help="which host to drive")
-    parser.add_argument("--mode", choices=["local", "notte"], default="local", help="browser backend")
+    parser.add_argument(
+        "--mode",
+        choices=["local", "notte", "cdp"],
+        default="local",
+        help="browser backend (cdp: hidden local Chrome attached over CDP, never steals focus)",
+    )
+    parser.add_argument(
+        "--cdp-port",
+        type=int,
+        default=9223,
+        help="cdp mode: debugging port of the hidden Chrome (launched on demand)",
+    )
     parser.add_argument(
         "--profile-dir",
         type=Path,
@@ -444,7 +520,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=os.environ.get("NOTTE_PROFILE_ID"),
         help="notte mode: Notte profile id (default: env NOTTE_PROFILE_ID)",
     )
-    parser.add_argument("--app-name", default="Conformance", help="the connected app's display name")
+    parser.add_argument(
+        "--app-name",
+        default=os.environ.get("CONFORMANCE_APP_NAME", "Conformance"),
+        help="the connected app's display name (default: env CONFORMANCE_APP_NAME or Conformance)",
+    )
     parser.add_argument(
         "--out",
         type=Path,
@@ -488,18 +568,19 @@ def main(argv: list[str] | None = None) -> int:
     screenshot_bytes: bytes | None = None
     run_failed = False
 
-    browser_cm = (
-        local_browser(args.profile_dir)
-        if args.mode == "local"
-        else notte_browser(args.profile_id)
-    )
     if args.mode == "local":
+        browser_cm = local_browser(args.profile_dir)
+    elif args.mode == "cdp":
+        browser_cm = cdp_browser(args.profile_dir, args.cdp_port)
+    else:
+        browser_cm = notte_browser(args.profile_id)
+    if args.mode in ("local", "cdp"):
         args.profile_dir.mkdir(parents=True, exist_ok=True)
 
     try:
         with browser_cm as context:
             page = context.pages[0] if context.pages else context.new_page()
-            result = run_conformance(host, page, args.app_name, unverifiable)
+            result = run_conformance(host, page, args.app_name, unverifiable, foreground=args.mode != "cdp")
             rows = result["rows"]
             counts = result["counts"]
             screenshot_bytes = result["screenshot_bytes"]
