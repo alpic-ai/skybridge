@@ -7,8 +7,9 @@ Enable user authentication so tools can access user-specific data.
 1. Pass an `oauth` config as the third `McpServer` argument
 2. Skybridge auto-mounts the OAuth discovery endpoints (`/.well-known/oauth-authorization-server`, `/.well-known/oauth-protected-resource`) and Bearer JWT verification on `/mcp`
 3. The host reads the metadata, walks the user through OAuth, refreshes tokens, and calls `/mcp` with `Authorization: Bearer <token>`
-4. Unauthenticated/invalid requests **to `/mcp`** get HTTP 401 before any tool handler runs. The `oauth` field guards `/mcp` only — see [Protect a custom route](#protect-a-custom-route) before serving user data anywhere else
-5. Tool handlers read user identity from `extra.authInfo`
+4. By default every tool requires sign-in: unauthenticated/invalid requests **to `/mcp`** get HTTP 401 before any tool handler runs. Opting one tool into anonymous access relaxes this per tool, never server-wide — see [per-tool `auth`](#4-mixed-auth-per-tool-auth)
+5. The `oauth` field guards `/mcp` only — see [Protect a custom route](#protect-a-custom-route) before serving user data anywhere else
+6. Tool handlers read user identity from `extra.authInfo`
 
 ## Which path?
 
