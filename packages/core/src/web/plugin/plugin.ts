@@ -1,5 +1,6 @@
 import { isAbsolute, relative, resolve } from "node:path";
 import type { Plugin, ViteDevServer } from "vite";
+import { renderBuiltAssetUrl } from "./render-built-url.js";
 import {
   assertUniqueViewNames,
   type DiscoveredView,
@@ -131,11 +132,8 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
           include: ["react", "react-dom/client", "react/jsx-runtime"],
         },
         experimental: {
-          renderBuiltUrl: (filename) => {
-            return {
-              runtime: `window.skybridge.serverUrl + "/assets/${filename}"`,
-            };
-          },
+          renderBuiltUrl: (filename, { hostType }) =>
+            renderBuiltAssetUrl(filename, hostType),
         },
       };
     },
