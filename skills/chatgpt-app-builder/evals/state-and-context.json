@@ -18,5 +18,9 @@
   {
     "query": "Photo gallery for selecting images. Users can pick multiple photos to create an album. Sometimes they browse without selecting anything, and might ask 'help me pick the best ones'.",
     "expected_behavior": "useViewState for selections (persists, LLM sees picks). data-llm with fallback: shows selected photo names OR 'Browsing N photos, none selected' when empty."
+  },
+  {
+    "query": "A product search tool already returns the products to both the model and the view. The view must preserve selected products and let the user ask 'compare this one'. What belongs in view state and data-llm?",
+    "expected_behavior": "Keep only the persistent selection state, preferably selected product IDs, in useViewState. Use data-llm for a concise description of the currently focused product. Do not copy the complete product search output into view state or data-llm because the model already received it through structuredContent."
   }
 ]

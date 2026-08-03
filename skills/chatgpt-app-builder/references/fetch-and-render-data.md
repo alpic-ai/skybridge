@@ -24,8 +24,10 @@ my-app/
 
 Output:
 - **`structuredContent`**: concise JSON the view uses and the model reads. Include only what the model should see.
-- **`content`** (optional): narration (Markdown or plaintext) shown to LLM
-- **`_meta`** (optional): large or sensitive data exclusively for the view. _meta never reaches the model.
+- **`content`** (optional): concise narration (Markdown or plaintext) shown to the LLM.
+- **`_meta`** (optional): additional details or display-only content kept out of the model's direct context, such as large payloads or image URLs. The view can selectively expose relevant parts through `data-llm`. `_meta` is delivered to the client, so never put server secrets in it.
+
+Keep these channels complementary. Avoid copying the same payload into `content`, `structuredContent`, view state, and `data-llm`. A short status in `content` may summarize the result, while `structuredContent` carries the fields useful to the model immediately and `_meta` carries additional details or display-only content intentionally omitted from its direct context.
 
 Annotations (set `true` when):
 - **`readOnlyHint`**: only reads data, no side effects

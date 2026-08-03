@@ -5,7 +5,7 @@
   },
   {
     "query": "SPEC.md:\n# Plant Shop\n\n## Value Proposition\nBrowse houseplants, get care recommendations, and order plants.\n\n## Tools and Views\n**View: browse_plants**\n- Input: { category, lightLevel }\n- Output: { plants[] }\n- Views: plant grid, plant detail, cart\n\n**Tool: place_order**\n- Input: { items[], shippingAddress }\n- Output: { orderId, deliveryDate }\n\n---\nUser: I want to add a get_plant_info tool so the LLM can tell users about a specific plant's care needs.",
-    "expected_behavior": "REJECT per architecture.md: 'Don't duplicate - view output is returned to the LLM for conversation. Don't create a tool that duplicates what the view fetches.' The browse_plants view already returns plant data including details. Explain this and suggest the LLM re-invoke browse_plants instead."
+    "expected_behavior": "REJECT per architecture.md: don't create a tool that duplicates model-relevant data the view already returns through structuredContent. The browse_plants view already returns plant data including care details to the LLM. Explain this and suggest the LLM re-invoke browse_plants instead."
   },
   {
     "query": "SPEC.md:\n# Gym Class Booking\n\n## Value Proposition\nBrowse gym classes by schedule and book a spot.\n\n## Tools and Views\n**View: browse_classes**\n- Input: { date, classType }\n- Output: { classes[] }\n\n---\nUser: I want to add a save_favorite_class tool so users can bookmark classes they like.",
@@ -13,7 +13,7 @@
   },
   {
     "query": "SPEC.md:\n# Furniture Store\n\n## Value Proposition\nBrowse furniture catalog, see room previews, and purchase items.\n\n## Tools and Views\n**View: browse_furniture**\n- Input: { category, room }\n- Output: { items[] }\n- Views: item grid, item detail with room preview\n\n**Tool: create_checkout**\n- Input: { itemIds[] }\n- Output: { checkoutUrl }\n\n---\nUser: I want to add a load_room_preview tool that fetches the 3D room render when the user taps on an item.",
-    "expected_behavior": "REJECT per architecture.md: 'Don't lazy-load - tool calls are expensive. Return all needed data upfront.' The browse_furniture view should include room preview data in its output. Suggest returning preview URLs upfront in the view output instead."
+    "expected_behavior": "REJECT per architecture.md: don't add a tool whose only purpose is to hydrate the view. The browse_furniture view should return the room preview data needed for its initial interaction upfront, with additional preview details or display-only content such as image URLs in _meta rather than structuredContent."
   },
   {
     "query": "SPEC.md:\n# Vet Appointment\n\n## Value Proposition\nBook vet appointments for pets and view appointment history.\n\n## Tools and Views\n**View: find_vet**\n- Input: { location, specialty }\n- Output: { vets[], availability[] }\n\n**Tool: book_appointment**\n- Input: { vetId, petId, timeSlot }\n- Output: { appointmentId }\n\n---\nUser: I want to add the ability to cancel an appointment.",

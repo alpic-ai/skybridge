@@ -101,6 +101,17 @@ const [{ selected }, setState] = useViewState({ selected: null });
 <div data-llm={`Cart: ${cart.length} items, $${total}`}>
 ```
 
+## Avoid duplicated model context
+
+Model-visible context accumulates across tool `content`, `structuredContent`, persisted view state, and `data-llm`. Give each channel a distinct role instead of copying the same payload between them:
+
+- Keep tool `content` to a short status or summary.
+- Put model-relevant result fields in `structuredContent`.
+- Persist only UI state that must survive and help the conversation; don't copy the complete tool output into view state.
+- Use `data-llm` for a concise description of the user's current focus or action, not for data already available to the model.
+
+`_meta` is different: it is available to the view but not the model, so it can carry additional details or display-only content intentionally omitted from direct model context.
+
 ## Combined example
 
 Todo list. User checks off tasks, asks "what should I prioritize?"

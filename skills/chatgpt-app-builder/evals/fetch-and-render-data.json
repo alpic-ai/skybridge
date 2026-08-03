@@ -14,5 +14,9 @@
   {
     "query": "Building a job board. Users search jobs by keywords and location, see listings with salary info, and apply with one click. Show loading state while searching.",
     "expected_behavior": "Server: registerTool('search-jobs') with view.component 'search-jobs' and inputSchema {keywords, location}, registerTool('apply-job'). UI: useToolInfo<'search-jobs'>() with isPending for loading state, useCallTool('apply-job') with jobId on Apply button."
+  },
+  {
+    "query": "My product search returns 50 products that the view needs for a carousel, but sending every product directly to the model would use too much context. How should the tool divide its output?",
+    "expected_behavior": "Return a concise summary or immediately useful product fields in structuredContent, keep additional product details or display-only content such as the full carousel dataset in _meta, and use content only for a short status such as 'Found 50 products.' The view can selectively expose the currently relevant products through concise data-llm annotations instead of copying all 50 products into model-visible context."
   }
 ]
