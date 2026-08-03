@@ -152,6 +152,8 @@ const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
 
 The shape is a claim about your verifier's output, not a runtime check, so type a claim the provider may omit as optional. Have `verifyAccessToken` return `Promise<AuthInfo<Claims>>` to keep both ends in sync.
 
+Check what your provider actually puts in an access token before declaring it. Identity claims you might expect are often absent: WorkOS AuthKit issues `sub`, `sid`, `org_id`, `role` and `permissions` but no `email`, and Clerk and Descope only carry one through a JWT template or a custom-claim action. Anything the token omits reads as `undefined`, whatever the type says.
+
 ## Mix Public and Authenticated Tools
 
 Serving both anonymous and signed-in callers from one server takes three changes to the fully authenticated setup.
