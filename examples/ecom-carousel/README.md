@@ -135,7 +135,7 @@ The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 2. Connect your GitHub repository to automatically deploy at each commit.
 3. Use your remote App URL to connect it to MCP Clients, or use the Alpic Playground to easily test your App.
 
-[![Deploy it on Alpic](https://assets.alpic.ai/button.svg)](https://app.alpic.ai/new/clone?repositoryUrl=https://github.com/alpic-ai/skybridge&rootDir=examples/ecommerce)
+[![Deploy it on Alpic](https://assets.alpic.ai/button.svg)](https://app.alpic.ai/new/clone?repositoryUrl=https://github.com/alpic-ai/skybridge&rootDir=examples/ecom-carousel)
 
 ## Resources
 
