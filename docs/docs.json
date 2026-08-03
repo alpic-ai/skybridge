@@ -72,11 +72,12 @@
             "root": "guides/index",
             "pages": [
               "guides/csp",
-              "guides/ux",
+              "guides/ecommerce",
               "guides/files",
-              "guides/skills",
               "guides/auth-providers",
-              "guides/migrate"
+              "guides/migrate",
+              "guides/skills",
+              "guides/ux"
             ],
             "expanded": true
           },
