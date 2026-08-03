@@ -1,6 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { describe, expect, it, vi } from "vitest";
+import { z } from "zod";
 import {
   __setSkillsManifest,
   McpServer,
@@ -92,6 +93,28 @@ describe("skills server option", () => {
 
     const skill = await client.readResource({ uri: "skill://demo/SKILL.md" });
     expect((skill.contents[0] as { text?: string }).text).toBe("# Demo");
+
+    const SkillEntrySchema = z.object({
+      uri: z.string(),
+      frontmatter: z.record(z.string(), z.unknown()),
+      resources: z.array(z.object({ uri: z.string(), digest: z.string() })),
+    });
+
+    const list = await client.request(
+      { method: "skills/list", params: {} },
+      z.object({ skills: z.array(SkillEntrySchema) }),
+    );
+    expect(list.skills).toHaveLength(1);
+    expect(list.skills[0]?.uri).toBe("skill://demo/SKILL.md");
+    expect(list.skills[0]?.resources[0]?.digest).toMatch(
+      /^sha256:[a-f0-9]{64}$/,
+    );
+
+    const got = await client.request(
+      { method: "skills/get", params: { uri: "skill://demo/SKILL.md" } },
+      z.object({ skill: SkillEntrySchema }),
+    );
+    expect(got.skill).toEqual(list.skills[0]);
 
     await client.close();
     await server.close();

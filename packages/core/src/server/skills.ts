@@ -181,6 +181,31 @@ const DirectoryReadRequestSchema = z.object({
   params: z.object({ uri: z.string(), cursor: z.string().optional() }),
 });
 
+const SkillsListRequestSchema = z.object({
+  method: z.literal("skills/list"),
+  params: z.object({ cursor: z.string().optional() }).optional(),
+});
+
+const SkillsGetRequestSchema = z.object({
+  method: z.literal("skills/get"),
+  params: z.object({ uri: z.string() }),
+});
+
+const toSkillEntry = (skill: Skill) => ({
+  uri: `skill://${skill.name}/SKILL.md`,
+  frontmatter: skill.frontmatter,
+  resources: Object.entries(skill.files)
+    .sort(
+      ([a], [b]) =>
+        Number(b === "SKILL.md") - Number(a === "SKILL.md") ||
+        a.localeCompare(b),
+    )
+    .map(([path, content]) => ({
+      uri: `skill://${skill.name}/${path}`,
+      digest: sha256(content),
+    })),
+});
+
 export function registerSkills(
   server: SkillRegistrar,
   manifest: SkillsManifest,
@@ -240,6 +265,26 @@ export function registerSkills(
       ],
     }),
   );
+
+  const entryByName = new Map(
+    manifest.map((skill) => [skill.name, toSkillEntry(skill)]),
+  );
+
+  server.server.setRequestHandler(SkillsListRequestSchema, () => ({
+    skills: [...entryByName.values()],
+  }));
+
+  server.server.setRequestHandler(SkillsGetRequestSchema, ({ params }) => {
+    const { name, relPath } = skillUriToRelPath(params.uri);
+    const entry = relPath === "SKILL.md" ? entryByName.get(name) : undefined;
+    if (!entry) {
+      throw new McpError(
+        ErrorCode.InvalidParams,
+        `Unknown skill: ${params.uri}`,
+      );
+    }
+    return { skill: entry };
+  });
 
   server.server.setRequestHandler(DirectoryReadRequestSchema, ({ params }) => {
     const { name, relPath } = skillUriToRelPath(params.uri);

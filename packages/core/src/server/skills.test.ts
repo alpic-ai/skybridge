@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { createHash } from "node:crypto";
 import { mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -132,7 +133,7 @@ describe("registerSkills", () => {
       string,
       { uri: unknown; cb: (...args: unknown[]) => unknown }
     >();
-    let dirHandler: ((req: unknown) => unknown) | undefined;
+    const handlers = new Map<string, (req: unknown) => unknown>();
     const server = {
       registerResource: vi.fn(
         (name: string, uri: unknown, _cfg: unknown, cb: unknown) => {
@@ -143,12 +144,14 @@ describe("registerSkills", () => {
         },
       ),
       server: {
-        setRequestHandler: vi.fn((_schema: unknown, handler: unknown) => {
-          dirHandler = handler as (req: unknown) => unknown;
+        setRequestHandler: vi.fn((schema: unknown, handler: unknown) => {
+          const method = (schema as { shape: { method: { value: string } } })
+            .shape.method.value;
+          handlers.set(method, handler as (req: unknown) => unknown);
         }),
       },
     };
-    return { server, resources, getDirHandler: () => dirHandler };
+    return { server, resources, handlers };
   }
 
   it("builds an index.json with url, digest, and verbatim frontmatter", () => {
@@ -185,7 +188,7 @@ describe("registerSkills", () => {
     const on = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
     registerSkills(on.server as any, manifest);
-    const result = on.getDirHandler()?.({
+    const result = on.handlers.get("resources/directory/read")?.({
       params: { uri: "skill://refunds/templates" },
     }) as { resources: { uri: string; name: string; mimeType: string }[] };
     expect(result.resources).toEqual([
@@ -198,10 +201,10 @@ describe("registerSkills", () => {
   });
 
   it("lists a skill root and marks subdirectories as inode/directory", () => {
-    const { server, getDirHandler } = fakeRegistrar();
+    const { server, handlers } = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
     registerSkills(server as any, manifest);
-    const result = getDirHandler()?.({
+    const result = handlers.get("resources/directory/read")?.({
       params: { uri: "skill://refunds" },
     }) as { resources: { name: string; mimeType: string }[] };
     expect(result.resources).toContainEqual({
@@ -214,6 +217,49 @@ describe("registerSkills", () => {
       name: "SKILL.md",
       mimeType: "text/markdown",
     });
+  });
+
+  const digestOf = (content: string) =>
+    `sha256:${createHash("sha256").update(content, "utf8").digest("hex")}`;
+
+  it("lists entries with complete per-file resources via skills/list", () => {
+    const { server, handlers } = fakeRegistrar();
+    // biome-ignore lint/suspicious/noExplicitAny: structural test double
+    registerSkills(server as any, manifest);
+    const result = handlers.get("skills/list")?.({ params: {} });
+    expect(result).toEqual({
+      skills: [
+        {
+          uri: "skill://refunds/SKILL.md",
+          frontmatter: { name: "refunds", description: "Process refunds" },
+          resources: [
+            { uri: "skill://refunds/SKILL.md", digest: digestOf("# Refunds") },
+            {
+              uri: "skill://refunds/templates/email.md",
+              digest: digestOf("Hi"),
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("returns a single entry via skills/get and rejects non-skill URIs", () => {
+    const { server, handlers } = fakeRegistrar();
+    // biome-ignore lint/suspicious/noExplicitAny: structural test double
+    registerSkills(server as any, manifest);
+    const get = handlers.get("skills/get");
+    const result = get?.({
+      params: { uri: "skill://refunds/SKILL.md" },
+    }) as { skill: { uri: string; resources: unknown[] } };
+    expect(result.skill.uri).toBe("skill://refunds/SKILL.md");
+    expect(result.skill.resources).toHaveLength(2);
+    expect(() =>
+      get?.({ params: { uri: "skill://unknown/SKILL.md" } }),
+    ).toThrow(/Unknown skill/);
+    expect(() =>
+      get?.({ params: { uri: "skill://refunds/templates/email.md" } }),
+    ).toThrow(/Unknown skill/);
   });
 });
 
