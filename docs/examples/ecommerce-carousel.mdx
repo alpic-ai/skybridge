@@ -1,14 +1,14 @@
 ---
 title: Ecommerce Carousel
-description: Product carousel with persistent cart, localization, and modal checkout flow.
+description: Ecommerce with search results carousel and product detail view.
 ---
 
 import { ChatExample } from "/components/chat-example.jsx";
 
-Ecommerce Carousel highlights localization, modal dialogs, persistent state, and external checkout flows.
+Ask for something to buy and the model searches the catalog, curates the results, and renders its picks as a carousel. Tap a card to open a fullscreen detail with an image gallery, a variant picker, specs, and a link out to the store. Showcases a two-tool split: a viewless search tool the model curates from, then a render tool that carries the full product data to the view, where variants resolve in place and prices follow the user's locale.
 
 <ChatExample
-  prompt="Show me some jackets I can buy."
+  prompt="Show me the Skybridge merch."
   app="Ecommerce Carousel"
   src="/images/showcase-ecommerce.png"
   alt="Ecommerce Carousel"
@@ -18,9 +18,10 @@ Ecommerce Carousel highlights localization, modal dialogs, persistent state, and
 
 ## Skybridge APIs used
 
+- [`useDisplayMode`](/api-reference/use-display-mode)
 - [`useLayout`](/api-reference/use-layout)
 - [`useOpenExternal`](/api-reference/use-open-external)
-- [`useRequestModal`](/api-reference/use-request-modal)
+- [`useSetOpenInAppUrl`](/api-reference/use-set-open-in-app-url)
 - [`useToolInfo`](/api-reference/use-tool-info)
 - [`useUser`](/api-reference/use-user)
 - [`useViewState`](/api-reference/use-view-state)

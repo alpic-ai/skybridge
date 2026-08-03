@@ -709,64 +709,6 @@ importers:
 
   examples/ecom-carousel:
     dependencies:
-      '@alpic-ai/insights':
-        specifier: ^1.142.1
-        version: 1.142.1(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(skybridge@packages+core)
-      '@modelcontextprotocol/sdk':
-        specifier: ^1.29.0
-        version: 1.29.0(zod@4.4.3)
-      '@t3-oss/env-core':
-        specifier: ^0.13.11
-        version: 0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.4.3)
-      dotenv:
-        specifier: ^17.4.2
-        version: 17.4.2
-      react:
-        specifier: ^19.2.7
-        version: 19.2.7
-      react-dom:
-        specifier: ^19.2.7
-        version: 19.2.7(react@19.2.7)
-      skybridge:
-        specifier: workspace:*
-        version: link:../../packages/core
-      stripe:
-        specifier: ^18.5.0
-        version: 18.5.0(@types/node@22.20.0)
-      vite:
-        specifier: ^8.1.5
-        version: 8.1.5(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.22.4)(yaml@2.9.0)
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
-    devDependencies:
-      '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.3(arktype@2.1.27)(typescript@5.9.3)
-      '@types/node':
-        specifier: ^22.20.0
-        version: 22.20.0
-      '@types/react':
-        specifier: ^19.2.17
-        version: 19.2.17
-      '@types/react-dom':
-        specifier: ^19.2.3
-        version: 19.2.3(@types/react@19.2.17)
-      '@vitejs/plugin-react':
-        specifier: ^5.2.0
-        version: 5.2.0(vite@8.1.5(@types/node@22.20.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.22.4)(yaml@2.9.0))
-      alpic:
-        specifier: ^1.142.1
-        version: 1.142.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
-      tsx:
-        specifier: ^4.22.4
-        version: 4.22.4
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
-
-  examples/ecommerce:
-    dependencies:
       react:
         specifier: ^19.2.4
         version: 19.2.7
@@ -11604,15 +11546,6 @@ packages:
   strip-json-comments@2.0.1:
     resolution: {integrity: sha512-4gB8na07fecVVkOI6Rs4e7T6NOTki5EmL7TUduTs6bu3EdnSycntVJ4re8kgZA+wx9IueI2Y11bfbgwtzuE0KQ==}
     engines: {node: '>=0.10.0'}
-
-  stripe@18.5.0:
-    resolution: {integrity: sha512-Hp+wFiEQtCB0LlNgcFh5uVyKznpDjzyUZ+CNVEf+I3fhlYvh7rZruIg+jOwzJRCpy0ZTPMjlzm7J2/M2N6d+DA==}
-    engines: {node: '>=12.*'}
-    peerDependencies:
-      '@types/node': '>=12.x.x'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
 
   style-to-js@1.1.21:
     resolution: {integrity: sha512-RjQetxJrrUJLQPHbLku6U/ocGtzyjbJMP9lCNK7Ag0CNh690nSH8woqWH9u16nMjYBAok+i7JO1NP2pOy8IsPQ==}
@@ -24719,12 +24652,6 @@ snapshots:
 
   strip-json-comments@2.0.1:
     optional: true
-
-  stripe@18.5.0(@types/node@22.20.0):
-    dependencies:
-      qs: 6.15.0
-    optionalDependencies:
-      '@types/node': 22.20.0
 
   style-to-js@1.1.21:
     dependencies:
