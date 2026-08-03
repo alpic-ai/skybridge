@@ -29,7 +29,9 @@ Can the IdP be verified against a JWKS?
 
 ## 1. Pick a provider
 
-The branded providers discover the IdP's OAuth metadata and build the whole config. All return a `Promise` — `await` it. Most need **Dynamic Client Registration (DCR)** enabled in the provider dashboard (Authplane has it natively; Descope without DCR goes through the Alpic proxy).
+The branded providers discover the IdP's OAuth metadata and build the whole config. All return a `Promise` — `await` it. Most need **Dynamic Client Registration (DCR)** enabled on the IdP side (Authplane has it natively; Descope without DCR goes through the Alpic proxy).
+
+The table below covers what goes in the code. For the dashboard steps that produce those values, send the user to `docs/guides/auth-providers.mdx` — provider UIs change, and this file isn't the source of truth for them.
 
 ```typescript
 // src/server.ts
@@ -48,9 +50,9 @@ const server = new McpServer(
 
 | Provider | Import | Required options | Notes |
 |---|---|---|---|
-| WorkOS AuthKit | `workosProvider` | `domain`, `audience` | `domain` = AuthKit domain; `audience` = Resource Indicator (this server's URL). DCR under Connect → Configuration. |
+| WorkOS AuthKit | `workosProvider` | `domain`, `audience` | `domain` = AuthKit domain; `audience` = Resource Indicator (this server's URL). |
 | Auth0 | `auth0Provider` | `domain`, `audience`, `serverUrl` | `audience` = API Identifier. Runs skybridge-as-AS (`serverUrl`) and bakes `?audience=` into `/authorize`. Set `scopes` to what the app needs (e.g. `["openid","profile","email"]`) — Auth0 won't grant a DCR client its full OIDC set. |
-| Clerk | `clerkProvider` | `domain` | `domain` = Frontend API URL. No `audience` (Clerk tokens carry no `aud`). The OAuth app must issue **JWT** access tokens, not opaque. |
+| Clerk | `clerkProvider` | `domain` | `domain` = Frontend API URL. No `audience` (Clerk tokens carry no `aud`). Verification only works if the OAuth app issues **JWT** access tokens — opaque tokens fail. |
 | Stytch | `stytchProvider` | `domain`, `audience` | `domain` = project domain; `audience` = Stytch Project ID. |
 | Descope | `descopeProvider` | `url` | `url` = MCP Server Discovery URL (Issuer). `audience` defaults to the Project ID derived from the URL. DCR disabled + Alpic DCR proxy → use `customProvider` with `serverUrl` (see `examples/auth-descope-alpic`). |
 | Authplane | `authplaneProvider` | `issuer`, `resource` | `resource` = this server's public URL, and it also supplies the expected `aud` (RFC 8707). Pass it exactly as Authplane advertises it — the provider throws if URL normalization would rewrite it (bare origin, uppercase host, explicit default port). |
