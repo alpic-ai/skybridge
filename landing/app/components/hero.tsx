@@ -17,9 +17,14 @@ export function InstallRow({ cmd, label }: InstallRowProps) {
   const [copied, setCopied] = useState(false);
   const onCopy = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    navigator.clipboard?.writeText(cmd);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    navigator.clipboard?.writeText(cmd).then(
+      () => {
+        window.gtag?.("event", "lp_copy_install_command", { label: cmd });
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      },
+      () => {},
+    );
   };
   return (
     <button
@@ -114,6 +119,8 @@ export function Hero() {
                 <a
                   className="sb-btn sb-btn-primary sb-btn-lg"
                   href="https://docs.skybridge.tech"
+                  data-ga="lp_cta_click"
+                  data-ga-label="hero_read_docs"
                   style={{ borderColor: "rgb(166, 244, 241)" }}
                 >
                   Read the docs
