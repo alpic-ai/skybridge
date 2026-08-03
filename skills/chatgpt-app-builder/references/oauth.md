@@ -168,6 +168,7 @@ const verifyAccessToken = async (token: string): Promise<AuthInfo> => {
 server
   .use("/api/user-data", requireBearerAuth({
     verifier: { verifyAccessToken },
+    requiredScopes: oauth.requiredScopes,
     resourceMetadataUrl: `${env.SERVER_URL}/.well-known/oauth-protected-resource`,
   }))
   .use("/api/user-data", (req, res) => {
@@ -176,7 +177,7 @@ server
   });
 ```
 
-`resourceMetadataUrl` is what puts `resource_metadata` in the 401 — without it a client can't discover how to authenticate against the route. Paths under `/mcp/…` are already covered by the `oauth` middleware.
+Mirror `requiredScopes` too, or the route accepts under-scoped tokens that `/mcp` rejects. `resourceMetadataUrl` is what puts `resource_metadata` in the 401 — without it a client can't discover how to authenticate against the route. Paths under `/mcp/…` are already covered by the `oauth` middleware.
 
 ## Manual wiring
 
