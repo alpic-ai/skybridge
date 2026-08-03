@@ -10,6 +10,8 @@ Enable user authentication so tools can access user-specific data.
 4. By default every tool requires sign-in: unauthenticated/invalid requests **to `/mcp`** get HTTP 401 before any tool handler runs
 5. Tool handlers read user identity from `extra.authInfo`
 
+The `oauth` field guards `/mcp` and nothing else. A route you mount yourself outside `/mcp` is unauthenticated — gate it with `requireBearerAuth` and your own verifier, and note that Alpic Cloud only routes traffic to `/mcp` (custom paths work locally and self-hosted).
+
 ## Which path?
 
 The `oauth` field covers all-or-nothing **and** mixed auth. Manual wiring is only for an IdP whose tokens the framework can't verify.
