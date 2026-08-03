@@ -12,8 +12,20 @@
     "expected_behavior": "Must read state-and-context.md and answer: Zustand. createStore is a thin wrapper around Zustand."
   },
   {
-    "query": "How do I return an auth error that prompts the user to sign in?",
-    "expected_behavior": "Must read oauth.md. Answer: return isError: true with _meta containing 'mcp/www_authenticate' key pointing to oauth-protected-resource endpoint."
+    "query": "Add WorkOS sign-in to my MCP server so tools require auth.",
+    "expected_behavior": "Must read oauth.md. Answer: pass oauth: await workosProvider({ domain, audience }) as the third McpServer arg. Must NOT hand-mount requireBearerAuth / mcpAuthMetadataRouter or hand-write a JWKS verifier."
+  },
+  {
+    "query": "How does an authenticated server prompt the user to sign in when they haven't yet?",
+    "expected_behavior": "Must read oauth.md. Answer: the oauth field auto-mounts discovery + Bearer verification; unauthenticated requests to /mcp get HTTP 401 before any handler runs and the host walks the user through OAuth. Handlers do NOT return a custom auth error for this."
+  },
+  {
+    "query": "My server has an OAuth provider but I want one tool to stay usable without signing in.",
+    "expected_behavior": "Must read oauth.md. Answer: keep the oauth provider and set auth: { allowsAnonymous: true } on that tool (auth: { scopes: [...] } for gated ones); skybridge enforces it before the handler. Must NOT say mixed auth requires manual wiring with optionalBearerAuth, nor that handlers must check authInfo themselves."
+  },
+  {
+    "query": "I'm on the manual wiring path with optionalBearerAuth. What do I return from a gated tool handler when there's no token?",
+    "expected_behavior": "Must read oauth.md. Answer: return isError: true with a _meta['mcp/www_authenticate'] array holding a Bearer challenge whose resource_metadata points at /.well-known/oauth-protected-resource. Must NOT throw a plain Error, and must NOT claim the handler can send an HTTP 401."
   },
   {
     "query": "What CSP property triggers stricter review during publishing?",

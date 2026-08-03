@@ -20,7 +20,7 @@ async function verifyAccessToken(token: string): Promise<AuthInfo> {
       clientId: payload.client_id,
       scopes: payload.scope.split(" "),
       expiresAt: payload.exp,
-      extra: { sub: payload.sub },
+      extra: { subject: payload.sub },
     };
   } catch (err) {
     throw new InvalidTokenError(
