@@ -8,8 +8,7 @@ Enable user authentication so tools can access user-specific data.
 2. Skybridge auto-mounts the OAuth discovery endpoints (`/.well-known/oauth-authorization-server`, `/.well-known/oauth-protected-resource`) and Bearer JWT verification on `/mcp`
 3. The host reads the metadata, walks the user through OAuth, refreshes tokens, and calls `/mcp` with `Authorization: Bearer <token>`
 4. By default every tool requires sign-in: unauthenticated/invalid requests **to `/mcp`** get HTTP 401 before any tool handler runs
-5. The `oauth` field guards `/mcp` only — see [Protect a custom route](#protect-a-custom-route) before serving user data anywhere else
-6. Tool handlers read user identity from `extra.authInfo`
+5. Tool handlers read user identity from `extra.authInfo`
 
 ## Which path?
 
@@ -21,7 +20,7 @@ Does the IdP publish an OAuth discovery document with a jwks_uri?
 │  ├─ A branded provider fits your IdP ─────────→ Pick a provider
 │  │    (WorkOS · Auth0 · Clerk · Stytch · Descope · Authplane)
 │  └─ No helper for it ──────────────────────────→ customProvider
-│     … then, if some tools must stay public ────→ add per-tool `auth`
+│  (either way, if some tools stay public ──────→ add per-tool `auth`)
 └─ No ───────────────────────────────────────────→ Manual wiring
       (no discovery doc, or opaque tokens you
        verify by introspection — a JWKS alone
@@ -132,53 +131,6 @@ Requiring sign-in (`auth: { scopes }`, or `auth: {}`) throws at registration whe
 
 Working server: `examples/auth-descope-mixed`.
 
-## Protect a custom route
-
-A route you mount outside `/mcp` sits outside the `oauth` field's middleware, and the internal JWKS verifier isn't exported — so gate it with your own verifier plus `requireBearerAuth`.
-
-Don't retype the IdP values: the providers *derive* what they verify against (`descopeProvider` turns its `url` into `issuer = <base>/<projectId>` and `audience = projectId`; `customProvider` uses the **discovered** issuer). Keep the provider result and read them off it, or the route rejects every valid token — or worse, accepts tokens `/mcp` would reject:
-
-```typescript
-import type { Request } from "express";
-import * as jose from "jose";
-import { type AuthInfo, InvalidTokenError, McpServer, requireBearerAuth } from "skybridge/server";
-
-const oauth = await descopeProvider({ url: env.DESCOPE_MCP_SERVER_URL });
-const server = new McpServer(info, { capabilities: {} }, { oauth });
-
-const jwks = jose.createRemoteJWKSet(new URL(oauth.verify.jwksUri));
-const verifyAccessToken = async (token: string): Promise<AuthInfo> => {
-  try {
-    const { payload } = await jose.jwtVerify(token, jwks, {
-      issuer: oauth.verify.issuer,
-      audience: oauth.verify.audience,
-    });
-    return {
-      token,
-      clientId: (payload.client_id ?? payload.azp ?? "") as string,
-      scopes: typeof payload.scope === "string" ? payload.scope.split(" ") : [],
-      expiresAt: payload.exp,
-      extra: { subject: payload.sub },
-    };
-  } catch (err) {
-    throw new InvalidTokenError(err instanceof Error ? err.message : String(err));
-  }
-};
-
-server
-  .use("/api/user-data", requireBearerAuth({
-    verifier: { verifyAccessToken },
-    requiredScopes: oauth.requiredScopes,
-    resourceMetadataUrl: `${env.SERVER_URL}/.well-known/oauth-protected-resource`,
-  }))
-  .use("/api/user-data", (req, res) => {
-    const subject = (req as Request & { auth?: AuthInfo }).auth?.extra?.subject as string;
-    // ...
-  });
-```
-
-Mirror `requiredScopes` too, or the route accepts under-scoped tokens that `/mcp` rejects. `resourceMetadataUrl` is what puts `resource_metadata` in the 401 — without it a client can't discover how to authenticate against the route. Paths under `/mcp/…` are already covered by the `oauth` middleware.
-
 ## Manual wiring
 
 Only needed when the framework can't verify the IdP's tokens: **no OAuth discovery document, or opaque tokens** (you verify by introspection instead of JWKS). Mixed auth does *not* require this — see [per-tool `auth`](#4-mixed-auth-per-tool-auth). The primitives are exported from `skybridge/server`.
@@ -268,24 +220,25 @@ Declaring `scopes` in `securitySchemes` enforces nothing on its own — the fram
 Don't `throw` on missing auth. The handler runs after the transport, so it can't send a 401, and a thrown error reaches the host as an opaque tool failure — it never triggers the sign-in flow. Return the in-band challenge instead: `isError` plus a `mcp/www_authenticate` header array in `_meta`, pointing at your protected-resource metadata. This is the shape the `oauth` field emits for ChatGPT, and what ChatGPT acts on.
 
 ```typescript
-const challenge = (error: "invalid_token" | "insufficient_scope", text: string, scopes: string[]) => ({
+const challenge = (
+  error: "invalid_token" | "insufficient_scope",
+  text: string,
+  scopes: string[],
+) => ({
   isError: true,
   content: [{ type: "text" as const, text }],
   _meta: {
     "mcp/www_authenticate": [
-      `Bearer error="${error}", error_description="${text}"` +
-        (scopes.length ? `, scope="${scopes.join(" ")}"` : "") +
-        `, resource_metadata="${env.SERVER_URL}/.well-known/oauth-protected-resource"`,
+      `Bearer error="${error}", error_description="${text}", scope="${scopes.join(" ")}", ` +
+        `resource_metadata="${process.env.SERVER_URL}/.well-known/oauth-protected-resource"`,
     ],
   },
 });
 
-const signInChallenge = (scopes: string[] = []) =>
+const signInChallenge = (scopes: string[]) =>
   challenge("invalid_token", "Sign in to use this tool.", scopes);
 const insufficientScope = (scopes: string[]) =>
   challenge("insufficient_scope", "Missing required scope for this tool.", scopes);
 ```
-
-`env.SERVER_URL` must be a validated value, not raw `process.env` — an unset var interpolates to `undefined/.well-known/...` and the host silently fails to start the sign-in flow instead of erroring. The examples define a `requireEnv` helper in `src/env.ts` for this.
 
 For an all-or-nothing manual server, swap `optionalBearerAuth` for `requireBearerAuth` and drop the per-tool `securitySchemes` — then `authInfo` is guaranteed in every handler and no challenge is needed.
