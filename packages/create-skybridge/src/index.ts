@@ -311,7 +311,18 @@ export async function init(args: string[] = process.argv.slice(2)) {
     pm = choice;
   }
 
-  // 8. Always install dependencies
+  // 8. pnpm ≥10 skips dependency build scripts unless allow-listed, and pnpm 11
+  // turns the skipped esbuild postinstall into a hard install error
+  // (ERR_PNPM_IGNORED_BUILDS). onlyBuiltDependencies is read by pnpm 10,
+  // allowBuilds by pnpm 11+; each version ignores the other's key.
+  if (pm === "pnpm") {
+    fs.writeFileSync(
+      path.join(root, "pnpm-workspace.yaml"),
+      "onlyBuiltDependencies:\n  - esbuild\nallowBuilds:\n  esbuild: true\n",
+    );
+  }
+
+  // 9. Always install dependencies
   Spinner.start(`Installing dependencies with ${pm}`);
   const { status, output } = await spawnAsync(pm, ["install"]);
   if (status === 0) {
@@ -322,7 +333,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
     abort(`Try manually: cd ${targetDir} && ${pm} install`);
   }
 
-  // 9. Start dev server?
+  // 10. Start dev server?
   let start = false;
   if (argv.start) {
     start = true;
