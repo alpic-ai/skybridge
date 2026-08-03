@@ -7,6 +7,8 @@ const TWO_COLUMN_MIN_WIDTH = "560px";
 
 export const detail = style({
   containerType: "inline-size",
+  maxHeight: "100dvh",
+  overflowY: "auto",
   padding: primitives.space.s,
   // Clear the notch / home indicator when the page bleeds to the screen edge.
   paddingBottom: `calc(${primitives.space.s} + env(safe-area-inset-bottom))`,

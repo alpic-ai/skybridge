@@ -4,6 +4,7 @@ import {
   CAROUSEL_RANGE,
   MIN_SEARCH_ITERATIONS,
 } from "../config.js";
+import { MOCK_PRODUCTS } from "../mock.js";
 import { PriceSchema, SpecSchema } from "../types.js";
 
 // The `search-products` tool: keyword + filters in, matching products out as
@@ -88,10 +89,23 @@ type SearchOutput = z.infer<z.ZodObject<typeof outputSchema>>;
 function search(_input: SearchInput): SearchOutput {
   // @todo: plug in your product API / DB. Query it with the input params and map
   // each result into `products` below. `pages` and `totalHits` are optional.
+  // Until then: every mock product, projected from its card (the model curates
+  // on facts, so presentational fields like media stay out).
+  const products: SearchOutput["products"] = [];
+  for (const { id, card } of MOCK_PRODUCTS) {
+    products.push({
+      id,
+      title: card.title,
+      description: card.description,
+      price: card.price,
+      outOfStock: card.outOfStock,
+      specs: card.specs,
+    });
+  }
   return {
-    products: [], // { id: string; properties: { name: PropertyName; value: string[] }[] }[]
+    products,
     pages: { current: 1, total: 1 },
-    totalHits: 0,
+    totalHits: products.length,
   };
 }
 
