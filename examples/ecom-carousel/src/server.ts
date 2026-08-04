@@ -25,7 +25,7 @@ Stay silent while searching: emit NO text between calls. Speak only \
 once the carousel renders.
 
 RENDER: After curating, call render-carousel with the chosen product IDs (aim for ${CAROUSEL_RANGE}). \
-Speak only once it renders, then recommend in carousel order.`,
+Speak once it renders, then recommend products in carousel order.`,
   },
 )
   .registerTool(searchProductsDefinition, searchProductsHandler)
