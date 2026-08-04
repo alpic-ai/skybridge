@@ -19,6 +19,7 @@ import {
   securitySchemesAllowAnonymous,
   wwwAuthenticateHeader,
 } from "./security-schemes.js";
+import { createJwksVerifier } from "./verify.js";
 
 export type ResourceMetadataUrlResolver = (
   getHeader: (key: string) => string | undefined,
@@ -30,13 +31,13 @@ export function setupOAuth(
   config: OAuthConfig<Record<string, unknown>>,
   schemesByTool: Map<string, SecurityScheme[] | undefined>,
 ): ResourceMetadataUrlResolver {
-  if (!config.verifier) {
+  if (!config.verifier && !config.verify) {
     throw new Error("oauth requires a `verifier`");
   }
 
   const acceptsAnonymous = () =>
     [...schemesByTool.values()].some(securitySchemesAllowAnonymous);
-  const verifier = config.verifier;
+  const verifier = config.verifier ?? createJwksVerifier(config.verify);
   const bearer = (options: BearerAuthMiddlewareOptions): RequestHandler => {
     const required = requireBearerAuth(options);
     const optional = optionalBearerAuth(options);

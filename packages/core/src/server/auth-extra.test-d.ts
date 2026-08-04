@@ -1,5 +1,6 @@
 import { expectTypeOf, test } from "vitest";
 import { z } from "zod";
+import type { OAuthConfig } from "./auth/index.js";
 import { customProvider } from "./auth/providers/custom.js";
 import { workosProvider } from "./auth/providers/workos.js";
 import type { TokenVerifier } from "./auth.js";
@@ -67,17 +68,45 @@ test("a hand-written verifier carries its own claims", async () => {
       return { token, clientId: "c", scopes: [], expiresAt: 1, extra: {} };
     },
   };
-  const oauth = await customProvider({ issuer: "https://idp.example.com" });
+  const { oauthMetadata } = await customProvider({
+    issuer: "https://idp.example.com",
+  });
   new McpServer(
     { name: "t", version: "0" },
     {},
-    { oauth: { ...oauth, verifier } },
+    { oauth: { oauthMetadata, verifier } },
   ).registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
     expectTypeOf(extra.authInfo?.extra?.email).toEqualTypeOf<
       string | undefined
     >();
     return { content: "a" };
   });
+});
+
+test("the legacy verify config still works, with untyped claims", () => {
+  new McpServer(
+    { name: "t", version: "0" },
+    {},
+    {
+      oauth: {
+        oauthMetadata: workosOAuth.oauthMetadata,
+        verify: { issuer: "https://idp.example.com" },
+      },
+    },
+  ).registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
+    expectTypeOf(extra.authInfo?.extra).toEqualTypeOf<
+      Record<string, unknown> | undefined
+    >();
+    return { content: "a" };
+  });
+});
+
+test("a config must carry exactly one of verifier / verify", () => {
+  // @ts-expect-error one of verifier / verify is required
+  const neither: OAuthConfig = {
+    oauthMetadata: workosOAuth.oauthMetadata,
+  };
+  void neither;
 });
 
 test("a provider override adds claims without dropping the provider's", () => {
