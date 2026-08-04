@@ -32,6 +32,7 @@ import express, {
   type Express,
   type RequestHandler,
 } from "express";
+import { warnOnLargeToolOutput } from "../context-warnings.js";
 import type { OAuthConfig } from "./auth/index.js";
 import {
   authToSecuritySchemes,
@@ -1303,7 +1304,12 @@ export class McpServer<
     {
       attachViewUUID,
       securitySchemes,
-    }: { attachViewUUID: boolean; securitySchemes?: SecurityScheme[] },
+      toolName,
+    }: {
+      attachViewUUID: boolean;
+      securitySchemes?: SecurityScheme[];
+      toolName: string;
+    },
   ): ToolHandler<InputArgs> {
     return async (args, extra) => {
       const toolExtra = extra ?? (args as unknown as McpExtra);
@@ -1331,6 +1337,7 @@ export class McpServer<
         captureToolError(toolExtra, error);
         throw error;
       }
+      warnOnLargeToolOutput(result, toolName);
       return {
         ...result,
         content: normalizeContent(result.content),
@@ -1506,6 +1513,7 @@ export class McpServer<
     const wrappedCb = this.decorateToolHandler(cb, {
       attachViewUUID: Boolean(view),
       securitySchemes,
+      toolName: name,
     });
 
     baseFn.call(this, name, { ...toolFields, _meta: toolMeta }, wrappedCb);

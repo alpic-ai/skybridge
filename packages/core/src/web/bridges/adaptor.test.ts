@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { VIEW_STATE_WARNING_TOKENS } from "../../context-warnings.js";
 import { HostAdaptor } from "./adaptor.js";
 import { AppsSdkBridge } from "./apps-sdk/bridge.js";
 import { McpAppBridge } from "./mcp-app/bridge.js";
@@ -164,14 +165,14 @@ describe("HostAdaptor", () => {
     );
   });
 
-  it("warns when setViewState persists more than 4K tokens", async () => {
+  it("warns when setViewState reaches 20K tokens", async () => {
     const setWidgetState = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal("openai", { setWidgetState, widgetState: null });
     const adaptor = new HostAdaptor();
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     await adaptor.setViewState({
-      longText: "x".repeat(4096 * 4 + 50),
+      longText: "x".repeat(VIEW_STATE_WARNING_TOKENS * 4),
     });
 
     expect(warnSpy).toHaveBeenCalledWith(

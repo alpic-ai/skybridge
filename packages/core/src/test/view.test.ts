@@ -15,6 +15,7 @@ import {
   type MockInstance,
   vi,
 } from "vitest";
+import { TOOL_OUTPUT_WARNING_TOKENS } from "../context-warnings.js";
 import type { McpServer, ViewName } from "../server/server.js";
 import { McpServer as McpServerClass } from "../server/server.js";
 import {
@@ -538,6 +539,31 @@ describe("McpServer.registerTool (unified API)", () => {
     expect(result._meta?.viewUUID).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
     );
+  });
+
+  it("warns when a tool callback returns large model-visible output", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    server.registerTool(
+      { name: "large-output", description: "Test tool" },
+      vi.fn().mockResolvedValue({
+        content: [
+          {
+            type: "text",
+            text: "x".repeat(TOOL_OUTPUT_WARNING_TOKENS * 4),
+          },
+        ],
+      }),
+    );
+
+    const wrappedCallback = mockRegisterTool.mock.calls[0]?.[2] as (
+      ...args: unknown[]
+    ) => Promise<unknown>;
+    await wrappedCallback({}, {});
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Tool "large-output" returned'),
+    );
+    warnSpy.mockRestore();
   });
 
   it("should preserve existing _meta when injecting viewUUID", async () => {
