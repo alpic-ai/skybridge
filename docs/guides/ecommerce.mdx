@@ -9,6 +9,8 @@ Ecommerce inside a conversation is a hard UX problem. A storefront's job has to 
 
 The `ecom` template ships that architecture as a skeleton, with opinionated patterns refined by the [Alpic build team](https://alpic.ai/solutions/build/studio): an iterative search loop, an inline carousel opening into a fullscreen product detail, sparse variant selection, and a token-based design system. The wiring is in place, the data is not: a coding agent skill fills in your catalog and brand, pausing for your sign-off at each design decision.
 
+The template is backend-agnostic: it assumes a catalog you already run, on [Shopify](https://www.shopify.com), [PrestaShop](https://prestashop.com), [Medusa](https://medusajs.com), or a custom API or database, and builds the conversational storefront on top. It never stores products itself.
+
 ## Scaffold the Template
 
 Scaffold a project with the `--ecom` flag:
@@ -41,7 +43,9 @@ Four patterns carry the app. The fill workflow customizes their values, never th
 
 Two [tools](/build/tools) split the flow. `search-products` takes a keyword, filters, and a sort, and returns matching products as model-facing structured output. `render-carousel` takes the curated ids in display order and mounts the carousel [view](/build/view).
 
-Prompts drive an iterative loop: the model searches several times, varying keywords and filters, then curates a handful of ids. Raw search results never render: they ground the curation.
+The split [separates data processing from UI rendering](https://developers.openai.com/plugins/build/chatgpt-ui#separate-data-processing-from-ui-rendering): the model applies its intelligence to the results before the user sees any UI. Prompts drive an iterative loop: it searches several times, varying keywords and filters to capture intent that facets alone can't express, drops products the conversation already ruled out, then curates a handful of ids. Raw search results never render: they ground the curation.
+
+It also degrades gracefully: a host without view support still calls `search-products`, and the model answers in text.
 
 ```mermaid
 sequenceDiagram
@@ -94,7 +98,7 @@ flowchart LR
 Fill this ecom template following the chatgpt-app-builder skill's ecommerce reference. Start with phase 1 and ask me for everything you need.
 </Prompt>
 
-The agent asks for your inputs up front: the data source (API or database, docs, credentials), brand assets (Figma file, live site, or screenshots, plus fonts), and the live site for layout inspiration. Then it explores, proposes, and builds. You are pulled in at three gates:
+The agent asks for your inputs up front: the data source (a Shopify or Medusa API, your own database, docs, credentials), brand assets (Figma file, live site, or screenshots, plus fonts), and the live site for layout inspiration. Then it explores, proposes, and builds. You are pulled in at three gates:
 
 - **Wireframes.** Before any UI code, the agent plays back the carousel card and the product detail as ASCII wireframes populated with real catalog values.
 - **Retheme.** The extracted brand tokens, previewed on the Ladle stories.
