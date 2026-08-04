@@ -78,13 +78,17 @@ def dismiss_modal_chatgpt(page: Page) -> None:
 
 
 def check_follow_up_chatgpt(page: Page, timeout_seconds: int = 120, poll_interval: int = 8) -> bool:
-    """Detect the follow-up message in the conversation itself.
+    """Detect the follow-up by finding the model's reply in the conversation.
 
     The conversation DOM is not a reliable witness: the widget stays
     fullscreen after the displayMode test (ChatGPT ignores widget-initiated
     restore), hiding the transcript. Query ChatGPT's same-origin backend API
     for the conversation content instead. Plain Playwright can await the
     promise directly inside evaluate().
+
+    Only the reply is observable: ChatGPT sends the follow-up prompt as a
+    hidden tool-authored message that the conversation snapshot excludes, so
+    the marker is a token the prompt asks the model to echo back.
 
     The polling window is long on purpose: the snapshot endpoint only
     reflects a turn once it completes, which was observed to lag the
