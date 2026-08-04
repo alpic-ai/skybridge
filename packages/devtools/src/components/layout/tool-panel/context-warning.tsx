@@ -1,0 +1,52 @@
+import { WarningAlert } from "@alpic-ai/ui/components/alert";
+import { Badge } from "@alpic-ai/ui/components/badge";
+
+const tokenFormatter = new Intl.NumberFormat("en", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
+type ContextWarningKind = "tool-output" | "view-state";
+
+const warningCopy = {
+  "tool-output": {
+    badge: "Large response",
+    title: "Large model-visible output",
+    description:
+      "This can consume significant context or exceed limits in some clients and models. _meta is excluded from this warning.",
+  },
+  "view-state": {
+    badge: "Large context",
+    title: "Large model-visible view state",
+    description:
+      "Keep only content the model needs. Private view state and image IDs are excluded from this warning.",
+  },
+} satisfies Record<
+  ContextWarningKind,
+  { badge: string; title: string; description: string }
+>;
+
+export function ContextWarningBadge({ kind }: { kind: ContextWarningKind }) {
+  return (
+    <Badge size="sm" variant="warning">
+      {warningCopy[kind].badge}
+    </Badge>
+  );
+}
+
+export function ContextWarningAlert({
+  kind,
+  tokenCount,
+}: {
+  kind: ContextWarningKind;
+  tokenCount: number;
+}) {
+  const copy = warningCopy[kind];
+  return (
+    <WarningAlert
+      className="shrink-0 rounded-none border-x-0 border-t-0 px-3 py-2"
+      title={`${copy.title} (~${tokenFormatter.format(tokenCount)} tokens)`}
+      description={copy.description}
+    />
+  );
+}

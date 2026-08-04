@@ -7,12 +7,16 @@ import {
   Separator,
   useDefaultLayout,
 } from "react-resizable-panels";
-
+import {
+  getToolOutputTokenCount,
+  TOOL_OUTPUT_WARNING_TOKENS,
+} from "@/lib/context-warnings.js";
 import { CopyButton } from "@/lib/copy.js";
 import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
 import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { useCallToolResult } from "@/lib/store.js";
 import { cn, formatBytes } from "@/lib/utils.js";
+import { ContextWarningAlert, ContextWarningBadge } from "./context-warning.js";
 import { JsonSyntaxBlock } from "./json-syntax-block.js";
 import { LogsDrawer } from "./logs-drawer.js";
 import {
@@ -117,6 +121,9 @@ export const ToolPanel = () => {
     const response = data?.response;
     const responseJson = JSON.stringify(response ?? null, null, 2);
     const sizeBytes = new TextEncoder().encode(responseJson).length;
+    const toolOutputTokenCount = getToolOutputTokenCount(response);
+    const hasToolOutputWarning =
+      toolOutputTokenCount >= TOOL_OUTPUT_WARNING_TOKENS;
     const isError = response?.isError === true;
     const durationMs = data?.durationMs;
     return (
@@ -134,7 +141,12 @@ export const ToolPanel = () => {
           <Panel id={OUTPUT_PANEL_ID} minSize={320} className="min-h-0 min-w-0">
             <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
               <div className="flex h-9 w-full shrink-0 items-center border-b-2 border-border bg-white px-3 text-sm text-muted-foreground">
-                <div className="font-medium">Tool output</div>
+                <div className="flex items-center gap-2 font-medium">
+                  Tool output
+                  {hasToolOutputWarning && (
+                    <ContextWarningBadge kind="tool-output" />
+                  )}
+                </div>
                 <div className="ml-auto flex items-center gap-2 font-mono text-xs text-light-gray-foreground">
                   <span
                     className={isError ? "text-destructive" : "text-success"}
@@ -151,13 +163,21 @@ export const ToolPanel = () => {
                   <span>{formatBytes(sizeBytes)}</span>
                 </div>
               </div>
-              <section className="relative min-h-0 min-w-0 flex-1 overflow-auto bg-light-gray p-3">
-                <CopyButton
-                  value={responseJson}
-                  label="Copy tool output"
-                  className="absolute right-2 top-2 z-10"
-                />
-                <JsonSyntaxBlock code={responseJson} />
+              <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-light-gray">
+                {hasToolOutputWarning && (
+                  <ContextWarningAlert
+                    kind="tool-output"
+                    tokenCount={toolOutputTokenCount}
+                  />
+                )}
+                <div className="relative min-h-0 flex-1 overflow-auto p-3">
+                  <CopyButton
+                    value={responseJson}
+                    label="Copy tool output"
+                    className="absolute right-2 top-2 z-10"
+                  />
+                  <JsonSyntaxBlock code={responseJson} />
+                </div>
               </section>
             </div>
           </Panel>

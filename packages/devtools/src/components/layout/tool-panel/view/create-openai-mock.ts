@@ -12,26 +12,8 @@ import type {
 } from "skybridge/web";
 
 import { SET_GLOBALS_EVENT_TYPE, SetGlobalsEvent } from "skybridge/web";
+import { warnOnLargeViewState } from "@/lib/context-warnings.js";
 import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
-
-const VIEW_STATE_TOKEN_WARNING_THRESHOLD = 4000;
-
-function getApproximateTokenCount(value: unknown): number {
-  try {
-    return Math.max(1, Math.ceil(JSON.stringify(value).length / 4));
-  } catch {
-    return 0;
-  }
-}
-
-function warnOnLargeWidgetState(state: AppsSdkWidgetState): void {
-  const tokenCount = getApproximateTokenCount(state.modelContent);
-  if (tokenCount > VIEW_STATE_TOKEN_WARNING_THRESHOLD) {
-    console.warn(
-      `[skybridge] setWidgetState is persisting ${tokenCount} tokens in devtools preview view state; this exceeds the ${VIEW_STATE_TOKEN_WARNING_THRESHOLD}-token warning threshold.`,
-    );
-  }
-}
 
 function createOpenaiMethods(
   openai: AppsSdkContext & AppsSdkMethods,
@@ -80,7 +62,7 @@ function createOpenaiMethods(
       };
     },
     setWidgetState: async (state: AppsSdkWidgetState) => {
-      warnOnLargeWidgetState(state);
+      warnOnLargeViewState(state.modelContent, "setWidgetState");
       log("setWidgetState", state);
       openai.widgetState = state;
       setValue("widgetState", state);

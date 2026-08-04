@@ -8,6 +8,7 @@ import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { AppsSdkContext, CallToolArgs } from "skybridge/web";
 import { useAuthStore } from "@/lib/auth-store.js";
+import { warnOnLargeToolOutput } from "@/lib/context-warnings.js";
 import { env } from "@/lib/env.js";
 import { getInspectorPreferences } from "@/lib/inspector-preferences-store.js";
 import { useStore } from "@/lib/store.js";
@@ -208,6 +209,7 @@ export const useCallTool = () => {
       });
       const startedAt = performance.now();
       const response = await client.callTool(toolName, args);
+      warnOnLargeToolOutput(response, toolName);
       const durationMs = Math.round(performance.now() - startedAt);
       const completedAt = Date.now();
       setToolData(toolName, {
