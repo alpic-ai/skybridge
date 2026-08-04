@@ -69,7 +69,7 @@ Based on the UX flow:
 ❌ `search_flights` view + `view_flight` view (same flow → merge into one view)
 ✅ `search_flights` view + `manage_bookings` view (different flows)
 
-**Don't duplicate:** View output is returned to the LLM for conversation. View can be re-invoked. Don't create a tool that duplicates what the view fetches.
+**Don't duplicate:** The view's `structuredContent` and optional `content` are returned to the LLM for conversation, while `_meta` is delivered only to the view. The view can be re-invoked. Don't create a tool that duplicates what the view fetches.
 ❌ `search_flights` view + `get_flights` tool (same data → view already fetches this)
 ✅ unique `search_flights` view that can be re-invoked by LLM or user
 
@@ -79,9 +79,9 @@ Based on the UX flow:
 ❌ `update_quantity` tool (form input is view state)
 ✅ Tools are for backend operations only: `create_checkout`, `submit_order`, `make_reservation`
 
-**Don't lazy-load:** Tool calls are expensive. Return all needed data upfront.
+**Don't lazy-load:** Tool calls are expensive. Return all data needed for the view's initial interaction upfront in one tool result. Keep fields immediately useful to the model concise in `structuredContent`, and put additional details or display-only content not worth their full context cost in `_meta` rather than adding a tool whose only purpose is to hydrate the view.
 ❌ `search_flights` view + `get_flight_details` tool (lazy-loading details)
-✅ `search_flights` view returns full flight data including details
+✅ `search_flights` view returns immediately useful flight data in `structuredContent`, and additional flight details or display-only content in `_meta`
 
 --- 
 
