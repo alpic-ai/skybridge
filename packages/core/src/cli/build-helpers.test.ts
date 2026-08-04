@@ -65,7 +65,7 @@ describe("emitSkillsModule", () => {
     const skills = JSON.parse(literal);
     expect(skills).toHaveLength(1);
     expect(skills[0]).toMatchObject({
-      name: "refunds",
+      uri: "skill://refunds/SKILL.md",
       frontmatter: { name: "refunds", description: "Process refunds" },
     });
     expect(skills[0].resources).toHaveLength(1);

@@ -37,7 +37,7 @@ describe("discoverSkills", () => {
     });
     const [skill, ...rest] = discoverSkills(dir);
     expect(rest).toHaveLength(0);
-    expect(skill?.name).toBe("git-workflow");
+    expect(skill?.uri).toBe("skill://git-workflow/SKILL.md");
     expect(skill?.frontmatter).toMatchObject({
       name: "git-workflow",
       description: "Team git conventions",
@@ -128,7 +128,7 @@ describe("skillUriToRelPath", () => {
 describe("registerSkills", () => {
   const manifest: Skill[] = [
     {
-      name: "refunds",
+      uri: "skill://refunds/SKILL.md",
       frontmatter: { name: "refunds", description: "Process refunds" },
       resources: [
         {

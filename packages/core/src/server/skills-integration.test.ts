@@ -11,7 +11,7 @@ import {
 
 const MANIFEST: SkillsManifest = [
   {
-    name: "demo",
+    uri: "skill://demo/SKILL.md",
     frontmatter: { name: "demo", description: "A demo skill" },
     resources: [
       {

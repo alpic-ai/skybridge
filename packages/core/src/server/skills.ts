@@ -37,8 +37,8 @@ export interface SkillResource {
 }
 
 export interface Skill {
-  name: string;
-  frontmatter: Record<string, unknown>;
+  uri: string;
+  frontmatter: { name: string; description: string } & Record<string, unknown>;
   resources: SkillResource[];
 }
 
@@ -125,7 +125,7 @@ export function discoverSkills(dir: string): SkillsManifest {
       }));
 
     skills.push({
-      name: entry.name,
+      uri: `skill://${entry.name}/SKILL.md`,
       frontmatter: parsed.data,
       resources,
     });
@@ -154,7 +154,7 @@ function listDir(
   relPath: string,
 ): { name: string; mimeType: string }[] | null {
   const prefix = relPath === "" ? "" : `${relPath}/`;
-  const base = `skill://${skill.name}/`;
+  const base = skill.uri.slice(0, -"SKILL.md".length);
   const children = new Map<string, string>();
   let matched = relPath === "";
   for (const filePath of skill.resources.map((resource) =>
@@ -210,7 +210,7 @@ const SkillsGetRequestSchema = z.object({
 });
 
 const toWireEntry = (skill: Skill) => ({
-  uri: `skill://${skill.name}/SKILL.md`,
+  uri: skill.uri,
   frontmatter: skill.frontmatter,
   resources: skill.resources.map(({ uri, digest }) => ({ uri, digest })),
 });
@@ -219,13 +219,11 @@ export function registerSkills(
   server: SkillRegistrar,
   manifest: SkillsManifest,
 ): void {
-  const byName = new Map(manifest.map((s) => [s.name, s]));
-  const serveFile = (name: string, relPath: string, href: string) => {
-    const text = byName
-      .get(name)
-      ?.resources.find(
-        (resource) => resource.uri === `skill://${name}/${relPath}`,
-      )?.content;
+  const byUri = new Map(manifest.map((skill) => [skill.uri, skill]));
+  const serveFile = (skillUri: string, fileUri: string, href: string) => {
+    const text = byUri
+      .get(skillUri)
+      ?.resources.find((resource) => resource.uri === fileUri)?.content;
     if (text === undefined) {
       throw new McpError(ErrorCode.InvalidParams, `Not found: ${href}`);
     }
@@ -236,13 +234,13 @@ export function registerSkills(
 
   for (const skill of manifest) {
     server.registerResource(
-      skill.name,
-      `skill://${skill.name}/SKILL.md`,
+      skill.frontmatter.name,
+      skill.uri,
       {
-        description: String(skill.frontmatter.description),
+        description: skill.frontmatter.description,
         mimeType: "text/markdown",
       },
-      (readUri) => serveFile(skill.name, "SKILL.md", readUri.href),
+      (readUri) => serveFile(skill.uri, skill.uri, readUri.href),
     );
   }
 
@@ -254,7 +252,11 @@ export function registerSkills(
     {},
     (readUri) => {
       const { name, relPath } = skillUriToRelPath(readUri.href);
-      return serveFile(name, relPath, readUri.href);
+      return serveFile(
+        `skill://${name}/SKILL.md`,
+        `skill://${name}/${relPath}`,
+        readUri.href,
+      );
     },
   );
 
@@ -263,8 +265,7 @@ export function registerSkills(
   }));
 
   server.server.setRequestHandler(SkillsGetRequestSchema, ({ params }) => {
-    const { name, relPath } = skillUriToRelPath(params.uri);
-    const skill = relPath === "SKILL.md" ? byName.get(name) : undefined;
+    const skill = byUri.get(params.uri);
     if (!skill) {
       throw new McpError(
         ErrorCode.InvalidParams,
@@ -276,7 +277,7 @@ export function registerSkills(
 
   server.server.setRequestHandler(DirectoryReadRequestSchema, ({ params }) => {
     const { name, relPath } = skillUriToRelPath(params.uri);
-    const skill = byName.get(name);
+    const skill = byUri.get(`skill://${name}/SKILL.md`);
     const entries = skill ? listDir(skill, relPath) : null;
     if (!entries) {
       throw new McpError(
