@@ -65,10 +65,12 @@ describe("emitSkillsModule", () => {
     const skills = JSON.parse(literal);
     expect(skills).toHaveLength(1);
     expect(skills[0]).toMatchObject({
-      name: "refunds",
+      uri: "skill://refunds/SKILL.md",
       frontmatter: { name: "refunds", description: "Process refunds" },
     });
-    expect(skills[0].digest).toMatch(/^sha256:[a-f0-9]{64}$/);
+    expect(skills[0].resources).toHaveLength(1);
+    expect(skills[0].resources[0].uri).toBe("skill://refunds/SKILL.md");
+    expect(skills[0].resources[0].digest).toMatch(/^sha256:[a-f0-9]{64}$/);
   });
 
   it("emits an empty array when the skills directory is absent", () => {
