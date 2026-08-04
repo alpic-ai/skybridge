@@ -131,10 +131,21 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
           include: ["react", "react-dom/client", "react/jsx-runtime"],
         },
         experimental: {
-          renderBuiltUrl: (filename) => {
-            return {
-              runtime: `window.skybridge.serverUrl + "/assets/${filename}"`,
-            };
+          renderBuiltUrl: (filename, { hostType }) => {
+            // Views render inside a host sandbox iframe, so `import.meta.url`
+            // points at the sandbox domain rather than the Skybridge server.
+            // JS asset references have to be resolved at runtime against
+            // `window.skybridge.serverUrl` so they follow tunnels too.
+            if (hostType === "js") {
+              return {
+                runtime: `window.skybridge.serverUrl + "/assets/${filename}"`,
+              };
+            }
+            // CSS has nowhere to evaluate a runtime expression — `vite:css-post`
+            // throws on one. It doesn't need it either: the stylesheet is served
+            // from `${serverUrl}/assets/…` and a relative `url()` resolves
+            // against the stylesheet's own URL, tunnel origin included.
+            return { relative: true };
           },
         },
       };
