@@ -99,11 +99,7 @@ server.registerTool(
 );
 ```
 
-For a claim the provider does not ship by default, name it on the provider. No provider puts `email` in an access token unless a JWT template or claims action adds it:
-
-```typescript
-oauth: await workosProvider<{ email?: string }>({ domain, audience }),
-```
+For a claim the provider does not ship by default, name it on the provider: `workosProvider<{ email?: string }>({ ... })`. No provider puts `email` in an access token unless a JWT template or claims action adds it.
 
 ## 4. Mixed auth: per-tool `auth`
 

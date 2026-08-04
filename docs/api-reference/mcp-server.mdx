@@ -47,20 +47,7 @@ type SkybridgeServerOptions = {
 
 `oauth` is an [`OAuthConfig`](/api-reference/custom-provider#returns), usually from [`customProvider`](/api-reference/custom-provider) or a branded provider. When set, it mounts the well-known OAuth metadata and bearer-token verification on `/mcp`.
 
-The config also carries the claim shape its verifier produces, and the server picks it up from there. Tool [handlers](/api-reference/register-tool#handler) and [`mcpMiddleware`](#mcpmiddleware) then read `extra.authInfo?.extra` with no cast:
-
-```ts
-const server = new McpServer(
-  { name: "my-app", version: "1.0.0" },
-  {},
-  { oauth: await workosProvider({ domain, audience }) },
-).registerTool({ name: "orders", inputSchema: {} }, (_args, extra) => {
-  const org = extra.authInfo?.extra?.org_id; // string | undefined
-  return { content: `Orders for ${org}` };
-});
-```
-
-Each provider ships the claims its own docs promise, and a type argument adds your own: `workosProvider<{ tenant: string }>({ ... })`. See [Type the Claims You Read](/build/auth#type-the-claims-you-read).
+The config also carries the claim shape its verifier produces, so handlers read `extra.authInfo?.extra` typed, with no declaration of their own. See [Type the Claims You Read](/build/auth#type-the-claims-you-read).
 
 `skills` set to `true` serves [Agent Skills over MCP](/guides/skills) from `src/skills` and declares the `io.modelcontextprotocol/skills` capability. See the [Skills guide](/guides/skills).
 

@@ -137,41 +137,15 @@ The validation body is provider-specific: [JWKS](https://datatracker.ietf.org/do
 
 ## Type the Claims You Read
 
-Whatever the verifier puts in `extra` reaches handlers as `authInfo.extra`. The claim shape belongs to the verifier, so declaring it there is enough for every handler to see it.
-
-On the [provider path](/guides/auth-providers) you get it for free. Each provider ships the claims its own documentation promises:
+The claim shape belongs to the verifier, so handlers get it without declaring anything. On the [provider path](/guides/auth-providers) each provider ships the claims its own docs promise, and a type argument adds the ones your tenant sends:
 
 ```ts server.ts
-const server = new McpServer(
-  { name: "personal-shopper", version: "0.0.1" },
-  {},
-  { oauth: await workosProvider({ domain, audience }) },
-).registerTool({ name: "orders", inputSchema: {} }, async (_args, extra) => ({
-  structuredContent: { orders: await fetchOrders(extra.authInfo?.extra?.org_id) },
-}));
-```
-
-A type argument adds claims your tenant sends on top of the provider's, which is how you reach a custom claim:
-
-```ts
 oauth: await workosProvider<{ tenant: string }>({ domain, audience }),
 ```
 
-Writing the verifier yourself? Type its return and pass it in the config; the shape flows the same way:
+Writing the verifier yourself? Type it `TokenVerifier<Claims>` and the shape flows the same way.
 
-```ts auth.ts
-type Claims = { subject?: string; email?: string };
-
-export const verifier: TokenVerifier<Claims> = {
-  async verifyAccessToken(token) {
-    // ...
-  },
-};
-```
-
-None of this is a runtime check: nothing rejects a token whose claims differ from the declared shape, so keep anything the IdP may omit optional.
-
-Check what your provider actually puts in an access token before declaring extra claims. Identity claims you might expect are usually absent: no provider ships `email` in an access token by default. WorkOS, Clerk, Descope and Stytch can add one through a JWT template or a claims action, while Auth0 requires a namespaced claim such as `"https://yourapp.example.com/email"`, since it silently drops non-namespaced ones.
+None of this is checked at runtime, so keep anything the IdP may omit optional. No provider ships `email` in an access token by default: WorkOS, Clerk, Descope and Stytch can add one through a JWT template or claims action, and Auth0 needs a namespaced claim, since it drops non-namespaced ones.
 
 ## Mix Public and Authenticated Tools
 

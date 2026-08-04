@@ -50,27 +50,12 @@ Do not check scopes here: the middleware enforces `requiredScopes` against `auth
 ## `createJwksVerifier`
 
 ```ts
-createJwksVerifier<TExtra>(config: JwksVerifyConfig): JwksTokenVerifier<TExtra>;
+createJwksVerifier<TExtra>(config: { issuer: string; audience?: string; jwksUri?: string }): TokenVerifier<TExtra>;
 ```
 
-Builds a verifier that validates JWTs against a remote JWKS. The [providers](/guides/auth-providers) use it internally; call it yourself when hand-building an [`OAuthConfig`](/api-reference/custom-provider#returns) for an IdP whose metadata discovery can't reach.
+Builds a verifier that validates JWTs against a remote JWKS. The [providers](/guides/auth-providers) use it internally; call it yourself when hand-building an [`OAuthConfig`](/api-reference/custom-provider#returns). `jwksUri` defaults to `${issuer}/.well-known/jwks.json`, and omitting `audience` skips the audience check, for IdPs that bind none.
 
-```ts
-import { createJwksVerifier } from "skybridge/server";
-
-const verifier = createJwksVerifier<{ subject?: string; email?: string }>({
-  issuer: "https://auth.myshop.com",
-  audience: process.env.SERVER_URL,
-});
-```
-
-| Field | Description |
-| --- | --- |
-| `issuer` | Expected `iss`. Also derives the default JWKS URL. Required. |
-| `audience` | Expected `aud`. Omit to skip the audience check, for IdPs that bind none. |
-| `jwksUri` | Defaults to `${issuer}/.well-known/jwks.json`. |
-
-The returned verifier exposes the parameters it resolved as `verifier.config`, which is handy for checking what a provider derived from discovery. Verified claims land in `extra` with `sub` renamed to `subject`; `client_id`, `scope` and `exp` become `AuthInfo` fields instead, and the registered claims (`iss`, `aud`, `iat`, `nbf`, `jti`) stay in `extra`.
+Verified claims land in `extra` with `sub` renamed to `subject`, while `client_id`, `scope` and `exp` become `AuthInfo` fields.
 
 ## `AuthInfo`
 
@@ -94,17 +79,7 @@ type AuthInfo = {
 | `expiresAt` | Expiry in unix seconds. Required: tokens with no expiration are rejected. |
 | `extra` | Anything else you want available to handlers, for example `subject` or `email`. |
 
-`extra` is an untyped bag by default. Pass the shape your verifier produces to type it, in the verifier and in every handler:
-
-```ts
-type Claims = { subject?: string; email?: string };
-
-async function verifyAccessToken(token: string): Promise<AuthInfo<Claims>> {
-  // ...
-}
-```
-
-Handlers get the same shape automatically: the claim type travels with the verifier through [`OAuthConfig`](/api-reference/custom-provider#returns) into the server.
+`extra` is an untyped bag by default. Pass the claims your verifier resolves with (`Promise<AuthInfo<Claims>>`) and handlers receive that shape, since the type travels with the verifier into the server.
 
 <CardGroup cols={3}>
   <Card title="requireBearerAuth" icon="lock" href="/api-reference/require-bearer-auth">
