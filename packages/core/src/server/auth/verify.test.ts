@@ -122,23 +122,28 @@ describe("createJwksVerifier", () => {
       // jose: `missing required "aud" claim`
       "Token verification failed: missing required  aud  claim",
     ],
-  ])("keeps the message safe inside the challenge for %s", async (_, mint, expected) => {
-    const { privateKey, jwksUri } = await startJwks();
-    const verifier = createJwksVerifier({
-      issuer: ISSUER,
-      audience: AUDIENCE,
-      jwksUri,
-    });
+  ])(
+    "keeps the message safe inside the challenge for %s",
+    async (_, mint, expected) => {
+      const { privateKey, jwksUri } = await startJwks();
+      const verifier = createJwksVerifier({
+        issuer: ISSUER,
+        audience: AUDIENCE,
+        jwksUri,
+      });
 
-    const error = await verifier.verifyAccessToken(await mint(privateKey)).then(
-      () => undefined,
-      (e: Error) => e,
-    );
+      const error = await verifier
+        .verifyAccessToken(await mint(privateKey))
+        .then(
+          () => undefined,
+          (e: Error) => e,
+        );
 
-    expect(error?.message).toBe(expected);
-    // OAuth 2.1 §5.3.1: %x20-21 / %x23-5B / %x5D-7E and nothing else.
-    expect(error?.message).not.toMatch(/[^\x20-\x21\x23-\x5B\x5D-\x7E]/);
-  });
+      expect(error?.message).toBe(expected);
+      // OAuth 2.1 §5.3.1: %x20-21 / %x23-5B / %x5D-7E and nothing else.
+      expect(error?.message).not.toMatch(/[^\x20-\x21\x23-\x5B\x5D-\x7E]/);
+    },
+  );
 
   it("skips the aud check when no audience is configured (e.g. Clerk)", async () => {
     const { privateKey, jwksUri } = await startJwks();
