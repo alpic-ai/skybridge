@@ -26,13 +26,13 @@ const server = new McpServer(
     instructions: `\
 Two phases:
 
-SEARCH: Call search-products ${MIN_SEARCH_ITERATIONS}+ times before presenting—never off one call. \
-Vary the keyword, apply filters from a prior response, or page deeper. \
+SEARCH: Call search-products ${MIN_SEARCH_ITERATIONS}+ times before presenting, never off one call. \
+Vary the keywords or page deeper. \
 Stay silent while searching: emit NO text between calls. Speak only \
-once the carousel renders. Never call a category unavailable before searching.
+once the carousel renders.
 
 RENDER: After curating, call render-carousel with the chosen product IDs (aim for ${CAROUSEL_RANGE}). \
-Speak only once it renders, then recommend in carousel order.`,
+Speak once it renders, then recommend products in carousel order.`,
   },
 )
   .registerTool(searchProductsDefinition, searchProductsHandler)

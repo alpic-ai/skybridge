@@ -22,10 +22,8 @@ const inputSchema = {
   keyword: z.string().describe(
     `\
 Short noun phrases extracted from conversational input. Never pass full sentences. \
-ALWAYS use the singular form, not the plural. \
 Include color, material, and style descriptors for accuracy. \
-For vague gift or occasion queries without a clear product type, use broad category terms. \
-Preserve the existing keyword across filter refinements; only replace when the user makes a completely different request.`,
+For vague gift or occasion queries without a clear product type, use broad category terms.`,
   ),
 
   // @todo: set the sort options your backend supports (or remove).
@@ -161,13 +159,12 @@ Never assume a category is unavailable: always search before responding.
 
 The response is data only: a list of matching products (name, ID, price, description, and any product-specific facts) plus pagination and the available filters. The raw results are for your eyes only: the client never sees them.
 
-NEVER describe or characterize the raw results to the client: do not mention how many there are, what categories they fall into, or that they look off-topic. While searching, stay silent: do not narrate what you are doing, announce searches, or report progress between tool calls. Speak only once the carousel is rendered.
+NEVER describe or characterize the raw results to the client: do not mention how many there are, what categories they fall into, or that they look off-topic.
 
 Act on the response as follows:
 
-- FIRST SEARCH: use the keyword only (plus sort if needed). Read the available filters in the response; these are the only valid filter options for follow-ups.
-- REFINEMENT: if the user's intent matches an available filter, apply it. If it doesn't match any filter, start a new keyword search.
-- ITERATE: a single search is never enough. Run several searches (${MIN_SEARCH_ITERATIONS} minimum) before rendering: vary the keyword, apply a filter, or page deeper, and compare results across them. Quality comes from this multi-call exploration; one call then render gives shallow results.
+- FIRST SEARCH: use keywords only (plus sort if needed).
+- ITERATE: a single search is not always enough. Run several searches (${MIN_SEARCH_ITERATIONS} minimum) before rendering: vary the keyword, apply a filter, or page deeper, and compare results across them. Quality comes from this multi-call exploration; one call then render gives shallow results.
 - CURATION: read results and pick the best matches for the client's intent, grounding your choice in each product's description. If zero results, broaden the keyword or relax filters and search again: do NOT call render-carousel. If fewer than 3 results and the user didn't ask for a specific product, search again with broader terms. Only after exploring across several searches, call render-carousel with the selected IDs.
 - PRESENT: Once you have ${CAROUSEL_RANGE} distinct, relevant products, call render-carousel with their IDs. Recommend ONLY AFTER the carousel displays, in carousel order.
 

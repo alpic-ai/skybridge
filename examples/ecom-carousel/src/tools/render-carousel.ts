@@ -275,7 +275,7 @@ export const renderCarouselDefinition = {
 Display the Skybridge products you curated as an inline carousel for the client.
 
 ## When to call
-Call this AFTER searching and curating, and BEFORE writing your recommendation. Do not describe the products in text first; the carousel shows them. Stay silent until it has rendered, then speak.
+Call this AFTER searching and curating, and BEFORE writing your recommendation. Avoid describing the products in text first since the carousel shows them.
 
 ## What to pass
 Pass the IDs of the ${CAROUSEL_RANGE} products you chose, in display order (most relevant first). Order is significant: the carousel shows them in this exact order and your recommendation must follow the same sequence. Pass distinct products, not several variants of the same one; the detail view lets the client explore a product's variants (colors, sizes, and so on).

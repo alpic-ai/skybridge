@@ -22,10 +22,8 @@ const inputSchema = {
   keyword: z.string().describe(
     `\
 Short noun phrases extracted from conversational input, matched against product titles, descriptions, and SKUs. Never pass full sentences. \
-ALWAYS use the singular form, not the plural. \
 Include color or material descriptors when the user mentions them (e.g. "cyan skis", "fur hat"). \
-This is a small winter-sports catalog: skis, goggles, and cold-weather apparel. For vague or broad requests use a plain category term. \
-Preserve the existing keyword across refinements; only replace when the user asks for something different.`,
+This is a small winter-sports catalog: skis, goggles, and cold-weather apparel. For vague or broad requests use a plain category term.`,
   ),
 
   sort: z
@@ -165,14 +163,14 @@ export const searchProductsDefinition = {
   description: `\
 Search the Skybridge winter-sports catalog: skis, goggles, and cold-weather apparel. Handles any query: a specific product, a category, a gift, or open browsing. Never assume something is unavailable — always search before responding.
 
-The response is data only: matching products (title, ID, "from" price, rating, badges, description, facts). The raw results are for your eyes only; the client never sees them. NEVER characterize the raw results to the client (how many, what categories). While searching, stay silent: do not narrate or announce searches. Speak only once the carousel is rendered.
+The response is data only: matching products (title, ID, "from" price, rating, badges, description, facts). The raw results are for your eyes only; the client never sees them. Avoid characterizing the raw results to the client (how many, what categories).
 
 Act on the response as follows:
 
 - SEARCH: pass a keyword. Optionally scope with \`category\` (apparel, goggles, or skis) or \`sort\`. This is a small catalog — one focused search usually surfaces everything relevant (${MIN_SEARCH_ITERATIONS}+ calls).
 - REFINEMENT: if the user narrows to a category, re-search with that \`category\`. If they change intent, search with a new keyword.
 - CURATION: pick the best matches for the client's intent, grounding your choice in each product's description. If zero results, broaden the keyword and search again; do NOT call render-carousel on an empty set.
-- PRESENT: once you have ${CAROUSEL_RANGE} distinct, relevant products, call render-carousel with their IDs. Recommend ONLY AFTER the carousel displays, in carousel order.
+- PRESENT: once you have ${CAROUSEL_RANGE} distinct, relevant products, call render-carousel with their IDs. Recommend products ONLY AFTER the carousel displays, and in the same order as in the carousel.
 
 The sweet spot is ${CAROUSEL_RANGE} products.
 `,
