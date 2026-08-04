@@ -83,7 +83,7 @@ const server = new McpServer(
           _meta: {
             searchMeta: searchResponse.searchMeta,
             resultCount: allResults.length,
-            keylessMode: !client.apiKey,
+            keylessMode: !client.hasApiKey,
           },
           structuredContent: {
             query: searchResponse.query,
@@ -104,7 +104,7 @@ const server = new McpServer(
         return {
           _meta: {
             error: message,
-            keylessMode: !client.apiKey,
+            keylessMode: !client.hasApiKey,
           },
           structuredContent: {
             error: message,
