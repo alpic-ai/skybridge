@@ -13,7 +13,6 @@ import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 
 export const SKILLS_EXTENSION_KEY = "io.modelcontextprotocol/skills";
-export const SKILL_INDEX_URI = "skill://index.json";
 
 const SKILL_NAME_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -31,11 +30,16 @@ const SkillFrontmatterSchema = z
   })
   .loose();
 
-export interface Skill {
-  name: string;
-  frontmatter: Record<string, unknown>;
+export interface SkillResource {
+  uri: string;
   digest: string;
-  files: Record<string, string>;
+  content: string;
+}
+
+export interface Skill {
+  uri: string;
+  frontmatter: { name: string; description: string } & Record<string, unknown>;
+  resources: SkillResource[];
 }
 
 export type SkillsManifest = Skill[];
@@ -108,11 +112,22 @@ export function discoverSkills(dir: string): SkillsManifest {
       );
     }
 
+    const resources = Object.entries(files)
+      .sort(
+        ([a], [b]) =>
+          Number(b === "SKILL.md") - Number(a === "SKILL.md") ||
+          a.localeCompare(b),
+      )
+      .map(([relPath, content]) => ({
+        uri: `skill://${entry.name}/${relPath}`,
+        digest: sha256(content),
+        content,
+      }));
+
     skills.push({
-      name: entry.name,
+      uri: `skill://${entry.name}/SKILL.md`,
       frontmatter: parsed.data,
-      digest: sha256(skillMd),
-      files,
+      resources,
     });
   }
   return skills;
@@ -139,9 +154,12 @@ function listDir(
   relPath: string,
 ): { name: string; mimeType: string }[] | null {
   const prefix = relPath === "" ? "" : `${relPath}/`;
+  const base = skill.uri.slice(0, -"SKILL.md".length);
   const children = new Map<string, string>();
   let matched = relPath === "";
-  for (const filePath of Object.keys(skill.files)) {
+  for (const filePath of skill.resources.map((resource) =>
+    resource.uri.slice(base.length),
+  )) {
     if (!filePath.startsWith(prefix)) {
       continue;
     }
@@ -181,13 +199,31 @@ const DirectoryReadRequestSchema = z.object({
   params: z.object({ uri: z.string(), cursor: z.string().optional() }),
 });
 
+const SkillsListRequestSchema = z.object({
+  method: z.literal("skills/list"),
+  params: z.object({ cursor: z.string().optional() }).optional(),
+});
+
+const SkillsGetRequestSchema = z.object({
+  method: z.literal("skills/get"),
+  params: z.object({ uri: z.string() }),
+});
+
+const toWireEntry = (skill: Skill) => ({
+  uri: skill.uri,
+  frontmatter: skill.frontmatter,
+  resources: skill.resources.map(({ uri, digest }) => ({ uri, digest })),
+});
+
 export function registerSkills(
   server: SkillRegistrar,
   manifest: SkillsManifest,
 ): void {
-  const byName = new Map(manifest.map((s) => [s.name, s]));
-  const serveFile = (name: string, relPath: string, href: string) => {
-    const text = byName.get(name)?.files[relPath];
+  const byUri = new Map(manifest.map((skill) => [skill.uri, skill]));
+  const serveFile = (skillUri: string, fileUri: string, href: string) => {
+    const text = byUri
+      .get(skillUri)
+      ?.resources.find((resource) => resource.uri === fileUri)?.content;
     if (text === undefined) {
       throw new McpError(ErrorCode.InvalidParams, `Not found: ${href}`);
     }
@@ -198,13 +234,13 @@ export function registerSkills(
 
   for (const skill of manifest) {
     server.registerResource(
-      skill.name,
-      `skill://${skill.name}/SKILL.md`,
+      skill.frontmatter.name,
+      skill.uri,
       {
-        description: String(skill.frontmatter.description),
+        description: skill.frontmatter.description,
         mimeType: "text/markdown",
       },
-      (readUri) => serveFile(skill.name, "SKILL.md", readUri.href),
+      (readUri) => serveFile(skill.uri, skill.uri, readUri.href),
     );
   }
 
@@ -216,34 +252,32 @@ export function registerSkills(
     {},
     (readUri) => {
       const { name, relPath } = skillUriToRelPath(readUri.href);
-      return serveFile(name, relPath, readUri.href);
+      return serveFile(
+        `skill://${name}/SKILL.md`,
+        `skill://${name}/${relPath}`,
+        readUri.href,
+      );
     },
   );
 
-  server.registerResource(
-    "skill-index",
-    SKILL_INDEX_URI,
-    { mimeType: "application/json" },
-    () => ({
-      contents: [
-        {
-          uri: SKILL_INDEX_URI,
-          mimeType: "application/json",
-          text: JSON.stringify({
-            skills: manifest.map((skill) => ({
-              url: `skill://${skill.name}/SKILL.md`,
-              digest: skill.digest,
-              frontmatter: skill.frontmatter,
-            })),
-          }),
-        },
-      ],
-    }),
-  );
+  server.server.setRequestHandler(SkillsListRequestSchema, () => ({
+    skills: manifest.map(toWireEntry),
+  }));
+
+  server.server.setRequestHandler(SkillsGetRequestSchema, ({ params }) => {
+    const skill = byUri.get(params.uri);
+    if (!skill) {
+      throw new McpError(
+        ErrorCode.InvalidParams,
+        `Unknown skill: ${params.uri}`,
+      );
+    }
+    return { skill: toWireEntry(skill) };
+  });
 
   server.server.setRequestHandler(DirectoryReadRequestSchema, ({ params }) => {
     const { name, relPath } = skillUriToRelPath(params.uri);
-    const skill = byName.get(name);
+    const skill = byUri.get(`skill://${name}/SKILL.md`);
     const entries = skill ? listDir(skill, relPath) : null;
     if (!entries) {
       throw new McpError(

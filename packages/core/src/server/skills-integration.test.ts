@@ -1,6 +1,8 @@
+import { createHash } from "node:crypto";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { describe, expect, it, vi } from "vitest";
+import { z } from "zod";
 import {
   __setSkillsManifest,
   McpServer,
@@ -9,10 +11,15 @@ import {
 
 const MANIFEST: SkillsManifest = [
   {
-    name: "demo",
+    uri: "skill://demo/SKILL.md",
     frontmatter: { name: "demo", description: "A demo skill" },
-    digest: "sha256:deadbeef",
-    files: { "SKILL.md": "# Demo" },
+    resources: [
+      {
+        uri: "skill://demo/SKILL.md",
+        digest: `sha256:${createHash("sha256").update("# Demo", "utf8").digest("hex")}`,
+        content: "# Demo",
+      },
+    ],
   },
 ];
 
@@ -46,10 +53,10 @@ describe("skills server option", () => {
     expect(extensionsOf(server)?.["io.modelcontextprotocol/skills"]).toEqual({
       directoryRead: true,
     });
-    // Resources are keyed by URI: the skill's SKILL.md plus the discovery
-    // index. Locks that the primed manifest was consumed and wired up.
+    // Resources are keyed by URI. Locks that the primed manifest was
+    // consumed and wired up.
     expect(registeredResourceNames(server)).toEqual(
-      expect.arrayContaining(["skill://demo/SKILL.md", "skill://index.json"]),
+      expect.arrayContaining(["skill://demo/SKILL.md"]),
     );
   });
 
@@ -60,7 +67,9 @@ describe("skills server option", () => {
     expect(
       extensionsOf(server)?.["io.modelcontextprotocol/skills"],
     ).toBeUndefined();
-    expect(registeredResourceNames(server)).not.toContain("skill://index.json");
+    expect(registeredResourceNames(server)).not.toContain(
+      "skill://demo/SKILL.md",
+    );
   });
 
   it("serves skills through the stateless transport (capability + reads)", async () => {
@@ -85,13 +94,30 @@ describe("skills server option", () => {
       ],
     ).toEqual({ directoryRead: true });
 
-    const index = await client.readResource({ uri: "skill://index.json" });
-    expect((index.contents[0] as { text?: string }).text).toContain(
-      "skill://demo/SKILL.md",
-    );
-
     const skill = await client.readResource({ uri: "skill://demo/SKILL.md" });
     expect((skill.contents[0] as { text?: string }).text).toBe("# Demo");
+
+    const SkillEntrySchema = z.object({
+      uri: z.string(),
+      frontmatter: z.record(z.string(), z.unknown()),
+      resources: z.array(z.object({ uri: z.string(), digest: z.string() })),
+    });
+
+    const list = await client.request(
+      { method: "skills/list", params: {} },
+      z.object({ skills: z.array(SkillEntrySchema) }),
+    );
+    expect(list.skills).toHaveLength(1);
+    expect(list.skills[0]?.uri).toBe("skill://demo/SKILL.md");
+    expect(list.skills[0]?.resources[0]?.digest).toMatch(
+      /^sha256:[a-f0-9]{64}$/,
+    );
+
+    const got = await client.request(
+      { method: "skills/get", params: { uri: "skill://demo/SKILL.md" } },
+      z.object({ skill: SkillEntrySchema }),
+    );
+    expect(got.skill).toEqual(list.skills[0]);
 
     await client.close();
     await server.close();

@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { createHash } from "node:crypto";
 import { mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -7,7 +8,6 @@ import { describe, expect, it, vi } from "vitest";
 import {
   discoverSkills,
   registerSkills,
-  SKILL_INDEX_URI,
   type Skill,
   skillUriToRelPath,
 } from "./skills.js";
@@ -25,23 +25,34 @@ function mkSkillDir(files: Record<string, string>): string {
 const FM = (name: string, description: string) =>
   `---\nname: ${name}\ndescription: ${description}\n---\n`;
 
+const digestOf = (content: string) =>
+  `sha256:${createHash("sha256").update(content, "utf8").digest("hex")}`;
+
 describe("discoverSkills", () => {
-  it("discovers a skill with frontmatter, digest, and supporting files", () => {
+  it("discovers a skill with frontmatter and per-file resources", () => {
+    const skillMd = `${FM("git-workflow", "Team git conventions")}Body`;
     const dir = mkSkillDir({
-      "git-workflow/SKILL.md": `${FM("git-workflow", "Team git conventions")}Body`,
+      "git-workflow/SKILL.md": skillMd,
       "git-workflow/references/GUIDE.md": "# Guide",
     });
     const [skill, ...rest] = discoverSkills(dir);
     expect(rest).toHaveLength(0);
-    expect(skill?.name).toBe("git-workflow");
+    expect(skill?.uri).toBe("skill://git-workflow/SKILL.md");
     expect(skill?.frontmatter).toMatchObject({
       name: "git-workflow",
       description: "Team git conventions",
     });
-    expect(skill?.digest).toMatch(/^sha256:[a-f0-9]{64}$/);
-    expect(Object.keys(skill?.files ?? {}).sort()).toEqual([
-      "SKILL.md",
-      "references/GUIDE.md",
+    expect(skill?.resources).toEqual([
+      {
+        uri: "skill://git-workflow/SKILL.md",
+        digest: digestOf(skillMd),
+        content: skillMd,
+      },
+      {
+        uri: "skill://git-workflow/references/GUIDE.md",
+        digest: digestOf("# Guide"),
+        content: "# Guide",
+      },
     ]);
   });
 
@@ -117,13 +128,20 @@ describe("skillUriToRelPath", () => {
 describe("registerSkills", () => {
   const manifest: Skill[] = [
     {
-      name: "refunds",
+      uri: "skill://refunds/SKILL.md",
       frontmatter: { name: "refunds", description: "Process refunds" },
-      digest: "sha256:abc",
-      files: {
-        "SKILL.md": "# Refunds",
-        "templates/email.md": "Hi",
-      },
+      resources: [
+        {
+          uri: "skill://refunds/SKILL.md",
+          digest: digestOf("# Refunds"),
+          content: "# Refunds",
+        },
+        {
+          uri: "skill://refunds/templates/email.md",
+          digest: digestOf("Hi"),
+          content: "Hi",
+        },
+      ],
     },
   ];
 
@@ -132,7 +150,7 @@ describe("registerSkills", () => {
       string,
       { uri: unknown; cb: (...args: unknown[]) => unknown }
     >();
-    let dirHandler: ((req: unknown) => unknown) | undefined;
+    const handlers = new Map<string, (req: unknown) => unknown>();
     const server = {
       registerResource: vi.fn(
         (name: string, uri: unknown, _cfg: unknown, cb: unknown) => {
@@ -143,32 +161,15 @@ describe("registerSkills", () => {
         },
       ),
       server: {
-        setRequestHandler: vi.fn((_schema: unknown, handler: unknown) => {
-          dirHandler = handler as (req: unknown) => unknown;
+        setRequestHandler: vi.fn((schema: unknown, handler: unknown) => {
+          const method = (schema as { shape: { method: { value: string } } })
+            .shape.method.value;
+          handlers.set(method, handler as (req: unknown) => unknown);
         }),
       },
     };
-    return { server, resources, getDirHandler: () => dirHandler };
+    return { server, resources, handlers };
   }
-
-  it("builds an index.json with url, digest, and verbatim frontmatter", () => {
-    const { server, resources } = fakeRegistrar();
-    // biome-ignore lint/suspicious/noExplicitAny: structural test double
-    registerSkills(server as any, manifest);
-    const index = resources.get("skill-index");
-    const result = index?.cb(new URL(SKILL_INDEX_URI)) as {
-      contents: { text: string }[];
-    };
-    expect(JSON.parse(result.contents[0]?.text ?? "")).toEqual({
-      skills: [
-        {
-          url: "skill://refunds/SKILL.md",
-          digest: "sha256:abc",
-          frontmatter: { name: "refunds", description: "Process refunds" },
-        },
-      ],
-    });
-  });
 
   it("serves supporting files through the template resource", () => {
     const { server, resources } = fakeRegistrar();
@@ -185,7 +186,7 @@ describe("registerSkills", () => {
     const on = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
     registerSkills(on.server as any, manifest);
-    const result = on.getDirHandler()?.({
+    const result = on.handlers.get("resources/directory/read")?.({
       params: { uri: "skill://refunds/templates" },
     }) as { resources: { uri: string; name: string; mimeType: string }[] };
     expect(result.resources).toEqual([
@@ -198,10 +199,10 @@ describe("registerSkills", () => {
   });
 
   it("lists a skill root and marks subdirectories as inode/directory", () => {
-    const { server, getDirHandler } = fakeRegistrar();
+    const { server, handlers } = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
     registerSkills(server as any, manifest);
-    const result = getDirHandler()?.({
+    const result = handlers.get("resources/directory/read")?.({
       params: { uri: "skill://refunds" },
     }) as { resources: { name: string; mimeType: string }[] };
     expect(result.resources).toContainEqual({
@@ -214,6 +215,46 @@ describe("registerSkills", () => {
       name: "SKILL.md",
       mimeType: "text/markdown",
     });
+  });
+
+  it("lists entries with complete per-file resources via skills/list", () => {
+    const { server, handlers } = fakeRegistrar();
+    // biome-ignore lint/suspicious/noExplicitAny: structural test double
+    registerSkills(server as any, manifest);
+    const result = handlers.get("skills/list")?.({ params: {} });
+    expect(result).toEqual({
+      skills: [
+        {
+          uri: "skill://refunds/SKILL.md",
+          frontmatter: { name: "refunds", description: "Process refunds" },
+          resources: [
+            { uri: "skill://refunds/SKILL.md", digest: digestOf("# Refunds") },
+            {
+              uri: "skill://refunds/templates/email.md",
+              digest: digestOf("Hi"),
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("returns a single entry via skills/get and rejects non-skill URIs", () => {
+    const { server, handlers } = fakeRegistrar();
+    // biome-ignore lint/suspicious/noExplicitAny: structural test double
+    registerSkills(server as any, manifest);
+    const get = handlers.get("skills/get");
+    const result = get?.({
+      params: { uri: "skill://refunds/SKILL.md" },
+    }) as { skill: { uri: string; resources: unknown[] } };
+    expect(result.skill.uri).toBe("skill://refunds/SKILL.md");
+    expect(result.skill.resources).toHaveLength(2);
+    expect(() =>
+      get?.({ params: { uri: "skill://unknown/SKILL.md" } }),
+    ).toThrow(/Unknown skill/);
+    expect(() =>
+      get?.({ params: { uri: "skill://refunds/templates/email.md" } }),
+    ).toThrow(/Unknown skill/);
   });
 });
 
@@ -228,8 +269,8 @@ describe("discoverSkills symlink safety", () => {
     symlinkSync(join(outside, "secret.md"), join(dir, "demo", "leak.md"));
     symlinkSync(outside, join(dir, "demo", "escape"));
 
-    const files = discoverSkills(dir)[0]?.files ?? {};
-    expect(Object.keys(files).sort()).toEqual(["SKILL.md", "real.md"]);
+    const uris = discoverSkills(dir)[0]?.resources.map((r) => r.uri) ?? [];
+    expect(uris).toEqual(["skill://demo/SKILL.md", "skill://demo/real.md"]);
   });
 
   it("ignores non-markdown supporting files", () => {
@@ -239,7 +280,7 @@ describe("discoverSkills symlink safety", () => {
       "demo/data.json": "{}",
       "demo/scripts/run.py": "print(1)",
     });
-    const files = discoverSkills(dir)[0]?.files ?? {};
-    expect(Object.keys(files).sort()).toEqual(["SKILL.md", "notes.md"]);
+    const uris = discoverSkills(dir)[0]?.resources.map((r) => r.uri) ?? [];
+    expect(uris).toEqual(["skill://demo/SKILL.md", "skill://demo/notes.md"]);
   });
 });

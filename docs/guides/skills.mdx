@@ -45,6 +45,8 @@ description: Process customer refund requests per company policy.
 
 Skybridge validates every skill at build and dev startup: a bad `name`, a missing `description`, or a name that mismatches its directory fails loudly. Each valid skill is then served at `skill://<name>/SKILL.md`, with its supporting files alongside.
 
+Hosts discover skills through the `skills/list` method, which returns each skill's URI, its verbatim frontmatter, and the complete file set with per-file SHA-256 digests; `skills/get` returns the same entry for a single skill by URI. This is the surface [ChatGPT's skill importer](https://developers.openai.com/plugins/build/mcp-server#import-skills-from-the-mcp-server) consumes when you submit your app.
+
 <Info>
 Skills are markdown files only: `SKILL.md` and any supporting `.md` files are served as `text/markdown`, other formats and symlinks are ignored.
 </Info>
