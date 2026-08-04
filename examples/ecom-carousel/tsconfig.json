@@ -2,9 +2,9 @@
   "extends": "skybridge/tsconfig",
 
   "compilerOptions": {
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["node", "vite/client"]
   },
 
   "include": ["src", ".skybridge/**/*.d.ts"]

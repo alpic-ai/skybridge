@@ -1,16 +1,33 @@
-# Ecommerce Carousel Example
+# Ecommerce Example
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): an interactive product carousel with cart, localization, and Stripe Checkout integration.
+An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a winter-sports shop where the model searches a product catalog by keyword and filters, then renders a curated product carousel with a fullscreen product detail.
+
+This is the Skybridge **ecommerce template** — scaffold your own copy with:
+
+```bash
+npx skybridge create my-shop --ecom
+```
+
+The catalog is served from a [Medusa](https://medusajs.com/) store, but the data source is swappable: the whole integration lives in `src/lib/medusa.ts`.
 
 ## What This Example Showcases
 
-- **Stripe Checkout**: Real payment flow using Stripe-hosted Checkout (redirect mode) with session status polling
-- **Interactive Widget Rendering**: A React-based widget that displays an interactive product carousel directly in AI conversations
-- **Tool Calling from Widget**: Widget invokes `create-checkout` and `check-checkout-status` server tools via `useCallTool()`
-- **Theme Support**: Adapts to light/dark mode using the `useLayout()` hook
-- **Localization**: Translates UI based on user locale via `useUser()` hook (English, French, Spanish, German)
-- **Persistent State**: Maintains cart state across re-renders using `useWidgetState()` hook
-- **Hot Module Replacement**: Live reloading of widget components during development
+- **Two-tool search + render pattern**: A view-less `search-products` tool returns data-only grounding for the model to curate; a separate `render-carousel` tool draws the chosen products as an inline carousel — the classic "reason, then present" split
+- **Model context vs. view data**: `search-products` returns everything in `structuredContent` (never shown to the user); `render-carousel` puts full presentational data (images, variants, media) in `_meta` for the view, and only trimmed grounding in `structuredContent`
+- **Tool descriptions as behavior**: The server `instructions` and tool descriptions drive a two-phase flow — search silently, then speak only once the carousel renders
+- **Inline View Rendering**: A React carousel with a fullscreen product detail (image gallery, variant picker, specs, CTA) rendered directly in AI conversations via a tool `view`
+- **Variant-as-product model**: Products expose variation axes (color, size, length) with a sparse variant matrix; the detail view narrows availability per axis
+- **CSP Configuration**: Allows the product image host via `resourceDomains` and the storefront CTA via `redirectDomains`
+- **Vanilla Extract Design System**: Themed design tokens, sprinkles, and light/dark themes under `src/design/`
+- **Ladle Component Stories**: `*.stories.tsx` for every component, previewed with `pnpm ladle`
+- **Swappable Data Source**: The catalog integration is isolated in `src/lib/medusa.ts` — point it at any store by editing that one file
+- **Hot Module Replacement**: [Live reloading](https://docs.skybridge.tech/concepts/fast-iteration#hmr-with-vite-plugin) of view components during development
+
+## Example Prompts
+
+- Show me some skis
+- I need goggles for a bright day
+- What cold-weather apparel do you have?
 
 ## Live Demo
 
@@ -21,7 +38,6 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): an 
 ### Prerequisites
 
 - Node.js 24+
-- A Stripe account (sandbox mode works)
 
 ### Local Development
 
@@ -37,13 +53,9 @@ pnpm install
 bun install
 ```
 
-#### 2. Configure Stripe
+#### 2. Point at your own catalog (optional)
 
-```bash
-cp .env.example .env
-```
-
-Open `.env` and paste your Stripe **test** secret key (starts with `sk_test_`). You can find it in the [Stripe Dashboard > Developers > API keys](https://dashboard.stripe.com/test/apikeys).
+The example ships pointed at a demo store, so it runs as-is. To use your own catalog, copy `.env.template` to `.env` and fill in `MEDUSA_BASE_URL` and `MEDUSA_PUBLISHABLE_KEY`. Swapping to a different backend entirely is a matter of rewriting `src/lib/medusa.ts`.
 
 #### 3. Start your local server
 
@@ -67,32 +79,45 @@ This command starts:
 #### 4. Project structure
 
 ```
-│   ├── server.ts      # Server entry point
-│   └── products.ts   # Product data
-│   ├── src/
-│   │   ├── views/      # React components (one per widget)
-│   │   ├── helpers.ts    # Shared utilities
-│   │   └── index.css    # Global styles
-│   └── vite.config.ts
-├── alpic.json            # Deployment config
-├── nodemon.json          # Dev server config
+│   ├── server.ts        # Server entry point (registers both tools)
+│   ├── config.ts        # Search/carousel tuning constants
+│   ├── tools/
+│   │   ├── search-products.ts   # View-less search tool (data only)
+│   │   └── render-carousel.ts   # Carousel tool + product model
+│   ├── lib/
+│   │   └── medusa.ts    # Catalog data source (swap for your own backend)
+│   ├── design/          # Vanilla Extract tokens, sprinkles, themes
+│   ├── components/      # Carousel UI + Ladle stories
+│   ├── views/
+│   │   └── carousel/    # Carousel view + fullscreen product detail
+│   └── index.css        # Global styles
+├── alpic.json           # Deployment config
+├── .env.template        # Medusa credentials template
 └── package.json
 ```
 
-### Create your first widget
+### Component stories
 
-#### 1. Add a new widget
+Preview and develop the UI components in isolation with [Ladle](https://ladle.dev/):
 
-- Register a widget in `src/server.ts` with a unique name (e.g., `my-widget`) using [`registerTool`](https://docs.skybridge.tech/api-reference/register-tool)
-- Create a matching React component at `src/views/my-widget.tsx`. **The file name must match the widget name exactly**.
+```bash
+pnpm ladle
+```
 
-#### 2. Edit widgets with Hot Module Replacement (HMR)
+### Create your first view
+
+#### 1. Add a new view
+
+- Register a view in `src/server.ts` with a unique name (e.g., `my-view`) using [`registerTool`](https://docs.skybridge.tech/api-reference/register-tool)
+- Create a matching React component at `src/views/my-view.tsx`. **The file name must match the view name exactly**.
+
+#### 2. Edit views with Hot Module Replacement (HMR)
 
 Edit and save components in `src/views/` — changes will appear instantly inside your App.
 
 #### 3. Edit server code
 
-Modify files in `server/` and refresh the connection with your testing MCP Client to see the changes.
+Modify files in `src/` and refresh the connection with your testing MCP Client to see the changes.
 
 ### Testing your App
 
@@ -110,9 +135,13 @@ The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 2. Connect your GitHub repository to automatically deploy at each commit.
 3. Use your remote App URL to connect it to MCP Clients, or use the Alpic Playground to easily test your App.
 
+[![Deploy it on Alpic](https://assets.alpic.ai/button.svg)](https://app.alpic.ai/new/clone?repositoryUrl=https://github.com/alpic-ai/skybridge&rootDir=examples/ecom-carousel)
+
 ## Resources
 
 - [Skybridge Documentation](https://docs.skybridge.tech/)
+- [Medusa Documentation](https://docs.medusajs.com/)
 - [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
+- [MCP Apps Documentation](https://github.com/modelcontextprotocol/ext-apps/tree/main)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)

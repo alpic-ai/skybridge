@@ -1,9 +1,8 @@
-import path from "node:path";
+import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 import react from "@vitejs/plugin-react";
 import { skybridge } from "skybridge/vite";
-import { defineConfig } from "vite";
+import { defineConfig, type PluginOption } from "vite";
 
-// https://vite.dev/config/
 export default defineConfig({
   server: {
     forwardConsole: {
@@ -11,10 +10,5 @@ export default defineConfig({
       logLevels: ["error"],
     },
   },
-  plugins: [skybridge(), react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
+  plugins: [skybridge() as PluginOption, react(), vanillaExtractPlugin()],
 });
