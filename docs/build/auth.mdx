@@ -137,22 +137,41 @@ The validation body is provider-specific: [JWKS](https://datatracker.ietf.org/do
 
 ## Type the Claims You Read
 
-Whatever your verifier puts in `extra` reaches handlers as `authInfo.extra`, typed `Record<string, unknown>`, so every read needs a cast. Declare the shape once with [`withAuthExtra`](/api-reference/mcp-server#withauthextra) and the casts go away:
+Whatever the verifier puts in `extra` reaches handlers as `authInfo.extra`. The claim shape belongs to the verifier, so declaring it there is enough for every handler to see it.
 
-```ts server.ts highlight={3}
-type Claims = { sub: string; email?: string };
+On the [provider path](/guides/auth-providers) you get it for free. Each provider ships the claims its own documentation promises:
 
-const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
-  .withAuthExtra<Claims>()
-  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
-  .registerTool({ name: "orders", inputSchema: {} }, async (_args, extra) => ({
-    structuredContent: { orders: await fetchOrders(extra.authInfo?.extra?.sub) },
-  }));
+```ts server.ts
+const server = new McpServer(
+  { name: "personal-shopper", version: "0.0.1" },
+  {},
+  { oauth: await workosProvider({ domain, audience }) },
+).registerTool({ name: "orders", inputSchema: {} }, async (_args, extra) => ({
+  structuredContent: { orders: await fetchOrders(extra.authInfo?.extra?.org_id) },
+}));
 ```
 
-The shape is a claim about your verifier's output, not a runtime check, so type a claim the provider may omit as optional. Have `verifyAccessToken` return `Promise<AuthInfo<Claims>>` to keep both ends in sync.
+A type argument adds claims your tenant sends on top of the provider's, which is how you reach a custom claim:
 
-Check what your provider actually puts in an access token before declaring it. Identity claims you might expect are often absent: WorkOS AuthKit issues `sub`, `sid`, `org_id`, `role` and `permissions` but no `email`, and Clerk and Descope only carry one through a JWT template or a custom-claim action. Anything the token omits reads as `undefined`, whatever the type says.
+```ts
+oauth: await workosProvider<{ tenant: string }>({ domain, audience }),
+```
+
+Writing the verifier yourself? Type its return and pass it in the config; the shape flows the same way:
+
+```ts auth.ts
+type Claims = { subject?: string; email?: string };
+
+export const verifier: TokenVerifier<Claims> = {
+  async verifyAccessToken(token) {
+    // ...
+  },
+};
+```
+
+None of this is a runtime check: nothing rejects a token whose claims differ from the declared shape, so keep anything the IdP may omit optional.
+
+Check what your provider actually puts in an access token before declaring extra claims. Identity claims you might expect are usually absent: no provider ships `email` in an access token by default. WorkOS, Clerk, Descope and Stytch can add one through a JWT template or a claims action, while Auth0 requires a namespaced claim such as `"https://yourapp.example.com/email"`, since it silently drops non-namespaced ones.
 
 ## Mix Public and Authenticated Tools
 

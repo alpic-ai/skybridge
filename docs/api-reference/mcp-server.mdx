@@ -47,6 +47,21 @@ type SkybridgeServerOptions = {
 
 `oauth` is an [`OAuthConfig`](/api-reference/custom-provider#returns), usually from [`customProvider`](/api-reference/custom-provider) or a branded provider. When set, it mounts the well-known OAuth metadata and bearer-token verification on `/mcp`.
 
+The config also carries the claim shape its verifier produces, and the server picks it up from there. Tool [handlers](/api-reference/register-tool#handler) and [`mcpMiddleware`](#mcpmiddleware) then read `extra.authInfo?.extra` with no cast:
+
+```ts
+const server = new McpServer(
+  { name: "my-app", version: "1.0.0" },
+  {},
+  { oauth: await workosProvider({ domain, audience }) },
+).registerTool({ name: "orders", inputSchema: {} }, (_args, extra) => {
+  const org = extra.authInfo?.extra?.org_id; // string | undefined
+  return { content: `Orders for ${org}` };
+});
+```
+
+Each provider ships the claims its own docs promise, and a type argument adds your own: `workosProvider<{ tenant: string }>({ ... })`. See [Type the Claims You Read](/build/auth#type-the-claims-you-read).
+
 `skills` set to `true` serves [Agent Skills over MCP](/guides/skills) from `src/skills` and declares the `io.modelcontextprotocol/skills` capability. See the [Skills guide](/guides/skills).
 
 <Info>
@@ -74,35 +89,6 @@ server.registerTool(config, handler): this;
 ```
 
 Registers a tool, optionally bound to a view. See [registerTool](/api-reference/register-tool) for the full config and handler.
-
-### `withAuthExtra`
-
-```ts
-server.withAuthExtra<TExtra>(): McpServer;
-```
-
-Declares the shape of the verified token's `extra` claims. Nothing happens at runtime: the call exists only to carry the type, so tool [handlers](/api-reference/register-tool#handler) and [`mcpMiddleware`](#mcpmiddleware) read `extra.authInfo.extra` without casting.
-
-```ts
-type Claims = { subject?: string; email?: string };
-
-const server = new McpServer(
-  { name: "my-app", version: "1.0.0" },
-  {},
-  { oauth: await workosProvider({ domain, audience }) },
-)
-  .withAuthExtra<Claims>()
-  .registerTool({ name: "orders", inputSchema: {} }, (_args, extra) => {
-    const email = extra.authInfo?.extra?.email; // string | undefined
-    return { content: `Orders for ${email}` };
-  });
-```
-
-Chain it before `registerTool` so every handler sees the shape. Without it, `extra.authInfo.extra` stays `Record<string, unknown> | undefined`.
-
-<Warning>
-The declared shape is an assertion about what your verifier produces, not a runtime check. A claim your provider omits reads as `undefined` at runtime whatever the type says, so keep optional claims optional.
-</Warning>
 
 ### `use`
 

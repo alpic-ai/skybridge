@@ -1,6 +1,21 @@
 import type { OAuthConfig } from "../index.js";
+import type { RegisteredClaims } from "../verify.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
 import { toIssuerUrl } from "./shared.js";
+
+/**
+ * Claims a Stytch Connected Apps access token carries. Beyond the subject,
+ * everything is project-configured through the client's access-token template.
+ *
+ * @see https://stytch.com/docs/api-reference/consumer/api/connected-apps/tokens/connected-app-access-token-object
+ * @see https://stytch.com/docs/api/connected-apps-create
+ */
+export type StytchClaims = {
+  /** Id of the Stytch member or user that granted access (the token's `sub`). */
+  subject?: string;
+  /** Only when the client's access-token template adds it. */
+  email?: string;
+};
 
 /**
  * OAuth provider for Stytch Connected Apps. `domain` is the project domain,
@@ -8,12 +23,17 @@ import { toIssuerUrl } from "./shared.js";
  * DCR enabled in the Stytch dashboard. `audience` is the Stytch Project ID
  * (the default token audience).
  */
-export function stytchProvider(
+export function stytchProvider<
+  TCustom extends Record<string, unknown> = Record<never, never>,
+>(
   opts: { domain: string; audience: string } & Omit<
     CustomProviderOptions,
     "issuer" | "audience"
   >,
-): Promise<OAuthConfig> {
+): Promise<OAuthConfig<StytchClaims & TCustom & RegisteredClaims>> {
   const { domain, ...rest } = opts;
-  return customProvider({ issuer: toIssuerUrl(domain), ...rest });
+  return customProvider<StytchClaims & TCustom>({
+    issuer: toIssuerUrl(domain),
+    ...rest,
+  });
 }

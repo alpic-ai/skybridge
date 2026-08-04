@@ -6,6 +6,7 @@ import type { RequestHandler } from "express";
 import * as jose from "jose";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { McpServer } from "../server.js";
+import { createJwksVerifier } from "./verify.js";
 
 vi.mock("@skybridge/devtools", () => ({
   devtoolsStaticServer: () =>
@@ -76,7 +77,11 @@ async function bootServer(
           token_endpoint: `${ISSUER}/token`,
           response_types_supported: ["code"],
         },
-        verify: { issuer: ISSUER, audience: AUDIENCE, jwksUri },
+        verifier: createJwksVerifier({
+          issuer: ISSUER,
+          audience: AUDIENCE,
+          jwksUri,
+        }),
         scopesSupported: ["openid", "email"],
         requiredScopes: ["openid"],
       },
@@ -229,7 +234,11 @@ async function bootMixedServer(jwksUri: string) {
           token_endpoint: `${ISSUER}/token`,
           response_types_supported: ["code"],
         },
-        verify: { issuer: ISSUER, audience: AUDIENCE, jwksUri },
+        verifier: createJwksVerifier({
+          issuer: ISSUER,
+          audience: AUDIENCE,
+          jwksUri,
+        }),
       },
     },
   )
@@ -476,7 +485,11 @@ async function bootScopedServer(jwksUri: string) {
           token_endpoint: `${ISSUER}/token`,
           response_types_supported: ["code"],
         },
-        verify: { issuer: ISSUER, audience: AUDIENCE, jwksUri },
+        verifier: createJwksVerifier({
+          issuer: ISSUER,
+          audience: AUDIENCE,
+          jwksUri,
+        }),
       },
     },
   ).registerTool(
@@ -608,7 +621,10 @@ describe("oauth config validation", () => {
           oauth: {
             baseUrl: "not-a-url",
             oauthMetadata: validMetadata,
-            verify: { issuer: ISSUER, audience: AUDIENCE },
+            verifier: createJwksVerifier({
+              issuer: ISSUER,
+              audience: AUDIENCE,
+            }),
           },
         }),
     ).toThrow(/baseUrl must be a valid absolute URL/);

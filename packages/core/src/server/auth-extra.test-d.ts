@@ -1,14 +1,18 @@
 import { expectTypeOf, test } from "vitest";
 import { z } from "zod";
-import type { McpServer } from "./server.js";
+import { customProvider } from "./auth/providers/custom.js";
+import { workosProvider } from "./auth/providers/workos.js";
+import type { TokenVerifier } from "./auth.js";
+import { McpServer } from "./server.js";
 
-type Claims = { subject?: string; orgId: string };
+const workosOAuth = await workosProvider({ domain: "d", audience: "a" });
+const customOAuth = await workosProvider<{ tenant: string }>({
+  domain: "d",
+  audience: "a",
+});
 
-const server = null as unknown as McpServer;
-const typed = server.withAuthExtra<Claims>();
-
-test("default server keeps the SDK's untyped extra bag", () => {
-  server.registerTool(
+test("a server with no oauth keeps the untyped claim bag", () => {
+  new McpServer({ name: "t", version: "0" }).registerTool(
     { name: "plain", inputSchema: { q: z.string() } },
     (_args, extra) => {
       expectTypeOf(extra.authInfo?.extra).toEqualTypeOf<
@@ -19,39 +23,78 @@ test("default server keeps the SDK's untyped extra bag", () => {
   );
 });
 
-test("withAuthExtra types extra.authInfo.extra in tool handlers", () => {
-  typed.registerTool(
-    { name: "claims", inputSchema: { q: z.string() } },
-    (_args, extra) => {
-      expectTypeOf(extra.authInfo?.extra?.orgId).toEqualTypeOf<
+test("provider claims reach tool handlers", () => {
+  new McpServer({ name: "t", version: "0" }, {}, { oauth: workosOAuth })
+    .registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
+      expectTypeOf(extra.authInfo?.extra?.org_id).toEqualTypeOf<
         string | undefined
       >();
-      expectTypeOf(extra.authInfo?.extra?.subject).toEqualTypeOf<
-        string | undefined
+      expectTypeOf(extra.authInfo?.extra?.permissions).toEqualTypeOf<
+        string[] | undefined
       >();
-      // @ts-expect-error unknown claim
+      // @ts-expect-error not a WorkOS claim
       extra.authInfo?.extra?.nope;
-      return { content: "ok" };
-    },
-  );
-});
-
-test("the declared extra survives registerTool chaining", () => {
-  typed
-    .registerTool({ name: "a", inputSchema: {} }, () => ({ content: "a" }))
+      return { content: "a" };
+    })
     .registerTool({ name: "b", inputSchema: {} }, (_args, extra) => {
-      expectTypeOf(extra.authInfo?.extra?.orgId).toEqualTypeOf<
+      expectTypeOf(extra.authInfo?.extra?.sid).toEqualTypeOf<
         string | undefined
       >();
       return { content: "b" };
     });
 });
 
-test("withAuthExtra types extra.authInfo.extra in mcp middleware", () => {
-  typed.mcpMiddleware("tools/call", (_request, extra, next) => {
-    expectTypeOf(extra.authInfo?.extra?.orgId).toEqualTypeOf<
+test("registered claims survive the mapping into extra", () => {
+  new McpServer(
+    { name: "t", version: "0" },
+    {},
+    { oauth: workosOAuth },
+  ).registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
+    expectTypeOf(extra.authInfo?.extra?.iss).toEqualTypeOf<
       string | undefined
     >();
-    return next();
+    expectTypeOf(extra.authInfo?.extra?.iat).toEqualTypeOf<
+      number | undefined
+    >();
+    return { content: "a" };
   });
+});
+
+test("a hand-written verifier carries its own claims", async () => {
+  type Claims = { subject?: string; email?: string };
+  const verifier: TokenVerifier<Claims> = {
+    async verifyAccessToken(token) {
+      return { token, clientId: "c", scopes: [], expiresAt: 1, extra: {} };
+    },
+  };
+  const oauth = await customProvider({ issuer: "https://idp.example.com" });
+  new McpServer(
+    { name: "t", version: "0" },
+    {},
+    { oauth: { ...oauth, verifier } },
+  ).registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
+    expectTypeOf(extra.authInfo?.extra?.email).toEqualTypeOf<
+      string | undefined
+    >();
+    return { content: "a" };
+  });
+});
+
+test("a provider override adds claims without dropping the provider's", () => {
+  new McpServer({ name: "t", version: "0" }, {}, { oauth: customOAuth })
+    .registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
+      expectTypeOf(extra.authInfo?.extra?.tenant).toEqualTypeOf<
+        string | undefined
+      >();
+      expectTypeOf(extra.authInfo?.extra?.org_id).toEqualTypeOf<
+        string | undefined
+      >();
+      return { content: "a" };
+    })
+    .mcpMiddleware("tools/call", (_request, extra, next) => {
+      expectTypeOf(extra.authInfo?.extra?.tenant).toEqualTypeOf<
+        string | undefined
+      >();
+      return next();
+    });
 });

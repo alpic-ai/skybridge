@@ -191,12 +191,20 @@ export type ToolAuth = {
  */
 export type JsonOptions = NonNullable<Parameters<typeof express.json>[0]>;
 
-/** Skybridge-specific server options, passed as the third `McpServer` constructor argument. */
-export interface SkybridgeServerOptions {
+/**
+ * Skybridge-specific server options, passed as the third `McpServer` constructor
+ * argument.
+ *
+ * @typeParam TAuthExtra - Claims the `oauth` verifier populates. Inferred from
+ * the config a provider returns, and carried on to tool handlers.
+ */
+export interface SkybridgeServerOptions<
+  TAuthExtra extends Record<string, unknown> = Record<string, unknown>,
+> {
   /** Options for the built-in `express.json()` middleware, e.g. `{ limit: "10mb" }`. */
   json?: JsonOptions;
   /** Resource-server OAuth config. When set, mounts well-known metadata and bearer auth on `/mcp`. */
-  oauth?: OAuthConfig;
+  oauth?: OAuthConfig<TAuthExtra>;
   /**
    * @experimental Serve Agent Skills from `src/skills` over MCP (SEP-2640).
    * API may change.
@@ -636,7 +644,7 @@ export class McpServer<
   constructor(
     serverInfo: Implementation,
     options?: ServerOptions,
-    skybridgeOptions?: SkybridgeServerOptions,
+    skybridgeOptions?: SkybridgeServerOptions<TAuthExtra>,
   ) {
     const mergedOptions = withSkillsCapability(options, skybridgeOptions);
     super(serverInfo, mergedOptions);
@@ -679,42 +687,6 @@ export class McpServer<
     }
 
     registerSkills(this, skills);
-  }
-
-  /**
-   * Declare the shape of the verified token's `extra` claims. Type-only: the
-   * call returns the same instance and does nothing at runtime, it only carries
-   * `TExtra` so tool handlers and {@link McpServer.mcpMiddleware} read
-   * `extra.authInfo.extra` without casting. Chain it before the tools that
-   * depend on it.
-   *
-   * The shape is an assertion about what your verifier puts in `extra`, never a
-   * runtime check. A claim the provider omits reads as `undefined` whatever the
-   * type says, so keep optional claims optional.
-   *
-   * @typeParam TExtra - Claims the verifier resolves with, mirroring the
-   * `AuthInfo<TExtra>` returned by `verifyAccessToken`. Declare it as a type
-   * alias; an `interface` needs `extends Record<string, unknown>` to satisfy the
-   * constraint.
-   *
-   * @example
-   * ```ts
-   * type Claims = { subject?: string; email?: string };
-   *
-   * const server = new McpServer(info, {}, { oauth })
-   *   .withAuthExtra<Claims>()
-   *   .registerTool({ name: "orders", inputSchema: {} }, (_args, extra) => ({
-   *     content: `Orders for ${extra.authInfo?.extra?.email}`,
-   *   }));
-   * ```
-   *
-   * @see https://docs.skybridge.tech/api-reference/mcp-server#withauthextra
-   */
-  withAuthExtra<TExtra extends Record<string, unknown>>(): McpServer<
-    TTools,
-    TExtra
-  > {
-    return this as unknown as McpServer<TTools, TExtra>;
   }
 
   /**

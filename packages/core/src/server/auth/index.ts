@@ -1,8 +1,18 @@
 import type { OAuthMetadata } from "@modelcontextprotocol/sdk/shared/auth.js";
-import type { JwksVerifyConfig } from "./verify.js";
+import type { TokenVerifier } from "../auth.js";
 
-/** Resource-server OAuth config for `SkybridgeServerOptions.oauth`. */
-export type OAuthConfig = {
+/**
+ * Resource-server OAuth config for `SkybridgeServerOptions.oauth`.
+ *
+ * `TExtra` comes from the `verifier` and flows on to tool handlers and
+ * `mcpMiddleware`, so the claim shape is declared once by whoever checks the
+ * token. The branded providers set it from the claims their IdP documents.
+ *
+ * @typeParam TExtra - Claims the verifier populates in `AuthInfo["extra"]`.
+ */
+export type OAuthConfig<
+  TExtra extends Record<string, unknown> = Record<string, unknown>,
+> = {
   /**
    * Public URL of this server; sets `resourceServerUrl` and the
    * `resource_metadata` URL. When omitted, it is inferred per request from
@@ -11,7 +21,11 @@ export type OAuthConfig = {
   baseUrl?: string;
   /** AS metadata served at `/.well-known/oauth-authorization-server`. */
   oauthMetadata: OAuthMetadata;
-  verify: JwksVerifyConfig;
+  /**
+   * Checks each bearer token. Build one with `createJwksVerifier` for a
+   * JWT-issuing IdP, or supply your own for opaque tokens.
+   */
+  verifier: TokenVerifier<TExtra>;
   /** Scopes advertised in protected-resource metadata. */
   scopesSupported?: string[];
   /** Server-wide required-scope floor. */

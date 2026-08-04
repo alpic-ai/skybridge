@@ -1,6 +1,11 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { OAuthConfig } from "../index.js";
+import type { JwksTokenVerifier } from "../verify.js";
 import { authplaneProvider } from "./authplane.js";
+
+const jwks = (config: OAuthConfig) =>
+  (config.verifier as JwksTokenVerifier).config;
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -44,9 +49,9 @@ describe("authplaneProvider", () => {
       resource: "https://coffee.example.com/mcp",
     });
 
-    expect(config.verify.audience).toBe("https://coffee.example.com/mcp");
-    expect(config.verify.issuer).toBe(ISSUER);
-    expect(config.verify.jwksUri).toBe(`${ISSUER}/.well-known/jwks.json`);
+    expect(jwks(config).audience).toBe("https://coffee.example.com/mcp");
+    expect(jwks(config).issuer).toBe(ISSUER);
+    expect(jwks(config).jwksUri).toBe(`${ISSUER}/.well-known/jwks.json`);
     expect(config.baseUrl).toBe("https://coffee.example.com/mcp");
   });
 
@@ -62,7 +67,7 @@ describe("authplaneProvider", () => {
     const config = await authplaneProvider({ issuer: ISSUER, resource });
 
     expect(config.baseUrl).toBe(resource);
-    expect(config.verify.audience).toBe(resource);
+    expect(jwks(config).audience).toBe(resource);
   });
 
   // The metadata router serialises the resource identifier through `URL` before
@@ -94,7 +99,7 @@ describe("authplaneProvider", () => {
       audience: "urn:acme:coffee",
     });
 
-    expect(config.verify.audience).toBe("urn:acme:coffee");
+    expect(jwks(config).audience).toBe("urn:acme:coffee");
   });
 
   it.each([
@@ -132,7 +137,7 @@ describe("authplaneProvider", () => {
       resource: "https://coffee.example.com/mcp",
     });
 
-    expect(config.verify.issuer).toBe(ISSUER);
+    expect(jwks(config).issuer).toBe(ISSUER);
   });
 
   it("accepts a local http issuer for development", async () => {
@@ -144,8 +149,8 @@ describe("authplaneProvider", () => {
       resource: "http://localhost:3000/mcp",
     });
 
-    expect(config.verify.issuer).toBe(local);
-    expect(config.verify.audience).toBe("http://localhost:3000/mcp");
+    expect(jwks(config).issuer).toBe(local);
+    expect(jwks(config).audience).toBe("http://localhost:3000/mcp");
   });
 
   it("forwards scopes and the required-scope floor", async () => {

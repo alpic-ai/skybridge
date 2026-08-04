@@ -1,6 +1,11 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { OAuthConfig } from "../index.js";
+import type { JwksTokenVerifier } from "../verify.js";
 import { clerkProvider } from "./clerk.js";
+
+const jwks = (config: OAuthConfig) =>
+  (config.verifier as JwksTokenVerifier).config;
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -31,7 +36,7 @@ describe("clerkProvider", () => {
       `${issuer}/.well-known/openid-configuration`,
       expect.anything(),
     );
-    expect(config.verify.issuer).toBe(issuer);
-    expect(config.verify.audience).toBeUndefined();
+    expect(jwks(config).issuer).toBe(issuer);
+    expect(jwks(config).audience).toBeUndefined();
   });
 });

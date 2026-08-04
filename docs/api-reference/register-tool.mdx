@@ -32,7 +32,7 @@ const server = new McpServer({ name: "shop", version: "1.0" }).registerTool(
     },
   },
   async ({ query, maxPrice }, { authInfo }) => {
-    const userId = authInfo.extra?.subject as string;
+    const userId = authInfo?.extra?.subject;
     const products = await search(query, { maxPrice, userId });
     return {
       content: `Found ${products.length} products for "${query}".`,
@@ -220,7 +220,7 @@ The request context.
 
 | Field | Purpose |
 | --- | --- |
-| `authInfo` | Validated token from an auth middleware: `clientId`, `scopes`, `extra`. |
+| `authInfo` | Validated token from an auth middleware: `clientId`, `scopes`, `extra`. The [provider](/guides/auth-providers) types the claims in `extra`. |
 | `requestInfo` | The HTTP request: headers and URL. |
 | `signal` | An `AbortSignal`, aborted when the call is cancelled. |
 | `_meta` | Client hints (below). |

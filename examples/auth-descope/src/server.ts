@@ -18,10 +18,6 @@ import { env } from "./env.js";
  * `aud` to [DCR client id, project id], not the server URL.
  */
 
-type DescopeClaims = {
-  subject?: string;
-  email?: string;
-};
 
 const server = new McpServer(
   {
@@ -35,7 +31,6 @@ const server = new McpServer(
     }),
   },
 )
-  .withAuthExtra<DescopeClaims>()
   .mcpMiddleware(intentMiddleware())
   .registerTool(
     {

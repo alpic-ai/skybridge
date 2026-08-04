@@ -4,6 +4,7 @@ import {
   discoverAuthorizationServer,
 } from "../discovery.js";
 import type { OAuthConfig } from "../index.js";
+import { createJwksVerifier, type RegisteredClaims } from "../verify.js";
 
 /** Options accepted by {@link customProvider} and the branded providers. */
 export type CustomProviderOptions = {
@@ -34,10 +35,18 @@ export type CustomProviderOptions = {
   metadataOverrides?: Omit<Partial<OAuthMetadata>, "issuer">;
 };
 
-/** Builds a complete {@link OAuthConfig} from an IdP's OAuth discovery document. */
-export async function customProvider(
+/**
+ * Builds a complete {@link OAuthConfig} from an IdP's OAuth discovery document.
+ *
+ * @typeParam TExtra - Claims the IdP puts in the access token, reaching handlers
+ * as `extra.authInfo.extra`. The branded providers pass their documented claims;
+ * pass your own when wiring an IdP by hand.
+ */
+export async function customProvider<
+  TExtra extends Record<string, unknown> = Record<string, unknown>,
+>(
   opts: CustomProviderOptions,
-): Promise<OAuthConfig> {
+): Promise<OAuthConfig<TExtra & RegisteredClaims>> {
   const discovered = await discoverAuthorizationServer(opts.issuer);
 
   // JWKS verification needs a signing-key URL; without it the server can't verify
@@ -86,11 +95,11 @@ export async function customProvider(
   return {
     baseUrl: opts.baseUrl,
     oauthMetadata,
-    verify: {
+    verifier: createJwksVerifier<TExtra>({
       issuer: advertised.issuer,
       audience: opts.audience,
       jwksUri: advertised.jwks_uri ?? discovered.jwks_uri,
-    },
+    }),
     scopesSupported,
     requiredScopes: opts.requiredScopes,
   };

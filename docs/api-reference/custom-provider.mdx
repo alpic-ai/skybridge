@@ -64,10 +64,10 @@ type CustomProviderOptions = {
 A `Promise` (discovery is a boot-time network call) for the `OAuthConfig` you pass to the [`oauth`](/api-reference/mcp-server#constructor) constructor option.
 
 ```ts
-type OAuthConfig = {
+type OAuthConfig<TExtra = Record<string, unknown>> = {
   baseUrl?: string;
   oauthMetadata: OAuthMetadata;
-  verify: { issuer: string; audience?: string; jwksUri?: string };
+  verifier: TokenVerifier<TExtra>;
   scopesSupported?: string[];
   requiredScopes?: string[];
 };
@@ -77,11 +77,13 @@ type OAuthConfig = {
 | --- | --- |
 | `baseUrl` | Echoes the `baseUrl` option. |
 | `oauthMetadata` | AS metadata served at `/.well-known/oauth-authorization-server`. |
-| `verify` | JWKS token-verification config. |
+| `verifier` | Checks each bearer token, and carries the claim type handlers receive. |
 | `scopesSupported` | Scopes advertised in protected-resource metadata. |
 | `requiredScopes` | Server-wide required-scope floor. |
 
-Build this object by hand only to wire an IdP whose metadata `customProvider` can't discover: supply `verify.issuer` and `verify.jwksUri` yourself and the [`oauth`](/api-reference/mcp-server#constructor) option mounts the same endpoints.
+`TExtra` is the claim shape the verifier resolves with, and the server reads it from here, so handlers get `extra.authInfo?.extra` typed without declaring anything. Pass it as a type argument to name claims your IdP sends: `customProvider<{ subject?: string; email?: string }>({ ... })`.
+
+Build this object by hand only to wire an IdP whose metadata `customProvider` can't discover. Supply the verifier yourself — `createJwksVerifier({ issuer, jwksUri })` for JWTs, or your own [`TokenVerifier`](/api-reference/verifier) for opaque tokens — and the [`oauth`](/api-reference/mcp-server#constructor) option mounts the same endpoints.
 
 <CardGroup cols={3}>
   <Card title="Connect an Identity Provider" icon="fingerprint" href="/guides/auth-providers">

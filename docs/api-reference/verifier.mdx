@@ -47,6 +47,31 @@ The verifier's only required method.
 
 Do not check scopes here: the middleware enforces `requiredScopes` against `authInfo.scopes` and returns a 403 on a missing scope.
 
+## `createJwksVerifier`
+
+```ts
+createJwksVerifier<TExtra>(config: JwksVerifyConfig): JwksTokenVerifier<TExtra>;
+```
+
+Builds a verifier that validates JWTs against a remote JWKS. The [providers](/guides/auth-providers) use it internally; call it yourself when hand-building an [`OAuthConfig`](/api-reference/custom-provider#returns) for an IdP whose metadata discovery can't reach.
+
+```ts
+import { createJwksVerifier } from "skybridge/server";
+
+const verifier = createJwksVerifier<{ subject?: string; email?: string }>({
+  issuer: "https://auth.myshop.com",
+  audience: process.env.SERVER_URL,
+});
+```
+
+| Field | Description |
+| --- | --- |
+| `issuer` | Expected `iss`. Also derives the default JWKS URL. Required. |
+| `audience` | Expected `aud`. Omit to skip the audience check, for IdPs that bind none. |
+| `jwksUri` | Defaults to `${issuer}/.well-known/jwks.json`. |
+
+The returned verifier exposes the parameters it resolved as `verifier.config`, which is handy for checking what a provider derived from discovery. Verified claims land in `extra` with `sub` renamed to `subject`; `client_id`, `scope` and `exp` become `AuthInfo` fields instead, and the registered claims (`iss`, `aud`, `iat`, `nbf`, `jti`) stay in `extra`.
+
 ## `AuthInfo`
 
 What `verifyAccessToken` resolves with for a valid token.
@@ -67,19 +92,19 @@ type AuthInfo = {
 | `clientId` | The OAuth `client_id`, often the `azp` or `client_id` claim. |
 | `scopes` | The scopes granted, checked against `requiredScopes` and per-tool [`securitySchemes`](/api-reference/register-tool#securityschemes). |
 | `expiresAt` | Expiry in unix seconds. Required: tokens with no expiration are rejected. |
-| `extra` | Anything else you want available to handlers, for example `sub` or `email`. |
+| `extra` | Anything else you want available to handlers, for example `subject` or `email`. |
 
 `extra` is an untyped bag by default. Pass the shape your verifier produces to type it, in the verifier and in every handler:
 
 ```ts
-type Claims = { sub: string; email?: string };
+type Claims = { subject?: string; email?: string };
 
 async function verifyAccessToken(token: string): Promise<AuthInfo<Claims>> {
   // ...
 }
 ```
 
-Handlers get the same shape once the server declares it with [`withAuthExtra`](/api-reference/mcp-server#withauthextra).
+Handlers get the same shape automatically: the claim type travels with the verifier through [`OAuthConfig`](/api-reference/custom-provider#returns) into the server.
 
 <CardGroup cols={3}>
   <Card title="requireBearerAuth" icon="lock" href="/api-reference/require-bearer-auth">

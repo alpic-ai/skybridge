@@ -1,6 +1,11 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { OAuthConfig } from "../index.js";
+import type { JwksTokenVerifier } from "../verify.js";
 import { descopeProvider } from "./descope.js";
+
+const jwks = (config: OAuthConfig) =>
+  (config.verifier as JwksTokenVerifier).config;
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -49,8 +54,8 @@ describe("descopeProvider", () => {
       `${PROJECT}/.well-known/openid-configuration`,
       expect.anything(),
     );
-    expect(config.verify.issuer).toBe(AGENTIC);
-    expect(config.verify.audience).toBe("P123");
+    expect(jwks(config).issuer).toBe(AGENTIC);
+    expect(jwks(config).audience).toBe("P123");
     expect(config.oauthMetadata.issuer).toBe(AGENTIC);
     expect(config.oauthMetadata.registration_endpoint).toBe(
       `${AGENTIC}/register`,
@@ -74,6 +79,6 @@ describe("descopeProvider", () => {
 
     const config = await descopeProvider({ url: AGENTIC, audience: "custom" });
 
-    expect(config.verify.audience).toBe("custom");
+    expect(jwks(config).audience).toBe("custom");
   });
 });

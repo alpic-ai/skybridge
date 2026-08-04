@@ -25,10 +25,6 @@ import { env } from "./env.js";
  * for byte.
  */
 
-type AuthplaneClaims = {
-  subject?: string;
-  email?: string;
-};
 
 const server = new McpServer(
   {
@@ -37,13 +33,12 @@ const server = new McpServer(
   },
   { capabilities: {} },
   {
-    oauth: await authplaneProvider({
+    oauth: await authplaneProvider<{ email?: string }>({
       issuer: env.AUTHPLANE_ISSUER,
       resource: env.SERVER_URL,
     }),
   },
 )
-  .withAuthExtra<AuthplaneClaims>()
   .mcpMiddleware(intentMiddleware())
   .registerTool(
     {

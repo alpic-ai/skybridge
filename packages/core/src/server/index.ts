@@ -1,11 +1,21 @@
 export type { OAuthConfig } from "./auth/index.js";
-export { auth0Provider } from "./auth/providers/auth0.js";
-export { authplaneProvider } from "./auth/providers/authplane.js";
-export { clerkProvider } from "./auth/providers/clerk.js";
+export { type Auth0Claims, auth0Provider } from "./auth/providers/auth0.js";
+export {
+  type AuthplaneClaims,
+  authplaneProvider,
+} from "./auth/providers/authplane.js";
+export { type ClerkClaims, clerkProvider } from "./auth/providers/clerk.js";
 export { customProvider } from "./auth/providers/custom.js";
-export { descopeProvider } from "./auth/providers/descope.js";
-export { stytchProvider } from "./auth/providers/stytch.js";
-export { workosProvider } from "./auth/providers/workos.js";
+export {
+  type DescopeClaims,
+  descopeProvider,
+} from "./auth/providers/descope.js";
+export { type StytchClaims, stytchProvider } from "./auth/providers/stytch.js";
+export { type WorkosClaims, workosProvider } from "./auth/providers/workos.js";
+export {
+  createJwksVerifier,
+  type JwksVerifyConfig,
+} from "./auth/verify.js";
 export {
   type AuthInfo,
   type AuthMetadataOptions,
@@ -14,6 +24,7 @@ export {
   mcpAuthMetadataRouter,
   optionalBearerAuth,
   requireBearerAuth,
+  type TokenVerifier,
 } from "./auth.js";
 export {
   audio,

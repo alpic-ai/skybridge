@@ -36,10 +36,6 @@ function projectIdFromUrl(url: string): string {
 
 const projectId = projectIdFromUrl(env.DESCOPE_MCP_SERVER_URL);
 
-type DescopeClaims = {
-  subject?: string;
-  email?: string;
-};
 
 const server = new McpServer(
   {
@@ -48,14 +44,13 @@ const server = new McpServer(
   },
   { capabilities: {} },
   {
-    oauth: await customProvider({
+    oauth: await customProvider<{ subject?: string; email?: string }>({
       issuer: env.DESCOPE_MCP_SERVER_URL,
       audience: projectId,
       serverUrl: env.SERVER_URL,
     }),
   },
 )
-  .withAuthExtra<DescopeClaims>()
   .mcpMiddleware(intentMiddleware())
   .registerTool(
     {

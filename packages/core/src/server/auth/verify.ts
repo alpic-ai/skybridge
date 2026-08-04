@@ -1,7 +1,6 @@
 import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
-import type { OAuthTokenVerifier } from "@modelcontextprotocol/sdk/server/auth/provider.js";
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import * as jose from "jose";
+import type { AuthInfo, TokenVerifier } from "../auth.js";
 
 export type JwksVerifyConfig = {
   /** Expected `iss` claim. */
@@ -13,17 +12,63 @@ export type JwksVerifyConfig = {
   jwksUri?: string;
 };
 
-/** Builds an `OAuthTokenVerifier` validating JWTs against a remote JWKS. Internal, not exported. */
-export function createJwksVerifier(
-  config: JwksVerifyConfig,
-): OAuthTokenVerifier {
+/**
+ * Registered JWT claims a verified token always carries into `extra`, since only
+ * `client_id`, `scope`, `exp` and `sub` are lifted onto `AuthInfo` itself.
+ * Intersected into every claim shape a JWKS verifier resolves.
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
+ */
+export type RegisteredClaims = {
+  /** Issuer of the token. */
+  iss?: string;
+  /** Audience the token was minted for. */
+  aud?: string | string[];
+  /** Issued-at, in unix seconds. */
+  iat?: number;
+  /** Not-valid-before, in unix seconds. */
+  nbf?: number;
+  /** Unique token id. */
+  jti?: string;
+};
+
+/**
+ * A {@link TokenVerifier} backed by a remote JWKS, carrying the verification
+ * parameters it resolved. Read `config` to check what a provider derived from
+ * discovery: the issuer and JWKS URL are the trust anchor.
+ */
+export type JwksTokenVerifier<
+  TExtra extends Record<string, unknown> = Record<string, unknown>,
+> = TokenVerifier<TExtra> & { readonly config: Readonly<JwksVerifyConfig> };
+
+/**
+ * Builds a {@link TokenVerifier} that validates JWTs against a remote JWKS.
+ *
+ * `extra` receives the token's claims with `sub` renamed to `subject`, minus
+ * `client_id`, `scope` and `exp`, which map onto `AuthInfo` fields instead. Pass
+ * `TExtra` to declare what your IdP puts there; the branded providers do this
+ * for you. {@link RegisteredClaims} is always included, since those claims
+ * survive the mapping.
+ *
+ * @typeParam TExtra - Claims the verified token carries in `extra`. An
+ * assertion, not a runtime check: nothing rejects a token whose claims differ.
+ */
+export function createJwksVerifier<
+  TExtra extends Record<string, unknown> = Record<string, unknown>,
+>(config: JwksVerifyConfig): JwksTokenVerifier<TExtra & RegisteredClaims> {
+  if (!config.issuer) {
+    throw new Error("createJwksVerifier requires an `issuer`");
+  }
   const jwksUri =
     config.jwksUri ??
     `${config.issuer.replace(/\/$/, "")}/.well-known/jwks.json`;
   const jwks = jose.createRemoteJWKSet(new URL(jwksUri));
 
   return {
-    async verifyAccessToken(token: string): Promise<AuthInfo> {
+    config: { ...config, jwksUri },
+    async verifyAccessToken(
+      token: string,
+    ): Promise<AuthInfo<TExtra & RegisteredClaims>> {
       let payload: jose.JWTPayload;
       try {
         ({ payload } = await jose.jwtVerify(token, jwks, {
@@ -67,8 +112,9 @@ export function createJwksVerifier(
         clientId: client_id ?? "",
         scopes,
         expiresAt: exp,
-        extra: { subject: sub, ...rest },
-      } satisfies AuthInfo;
+        extra: { subject: sub, ...rest } as unknown as TExtra &
+          RegisteredClaims,
+      };
     },
   };
 }

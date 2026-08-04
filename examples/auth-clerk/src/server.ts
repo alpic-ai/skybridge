@@ -19,10 +19,6 @@ import { env } from "./env.js";
  * via JWKS). Clerk tokens carry no `aud`, so verification is issuer + JWKS only.
  */
 
-type ClerkClaims = {
-  subject?: string;
-  email?: string;
-};
 
 const server = new McpServer(
   {
@@ -36,7 +32,6 @@ const server = new McpServer(
     }),
   },
 )
-  .withAuthExtra<ClerkClaims>()
   .mcpMiddleware(intentMiddleware())
   .registerTool(
     {

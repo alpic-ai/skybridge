@@ -1,5 +1,18 @@
 import type { OAuthConfig } from "../index.js";
+import type { RegisteredClaims } from "../verify.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
+
+/**
+ * Claims an Authplane access token carries. It is an RFC 9068 `at+jwt` token, so
+ * only the subject reaches `extra` once the standard fields are mapped onto
+ * `AuthInfo`. Declare anything your deployment adds through the type parameter.
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc9068
+ */
+export type AuthplaneClaims = {
+  /** The Authplane user id (the token's `sub`). */
+  subject?: string;
+};
 
 /** Options accepted by {@link authplaneProvider}. */
 export type AuthplaneProviderOptions = {
@@ -78,9 +91,11 @@ function parseIdentifier(value: string, option: string): URL {
  * of the authorization path. Pass `serverUrl` to advertise this server as the
  * authorization server instead (see {@link customProvider}).
  */
-export function authplaneProvider(
+export function authplaneProvider<
+  TCustom extends Record<string, unknown> = Record<never, never>,
+>(
   opts: AuthplaneProviderOptions,
-): Promise<OAuthConfig> {
+): Promise<OAuthConfig<AuthplaneClaims & TCustom & RegisteredClaims>> {
   const { issuer, resource, audience, ...rest } = opts;
 
   parseIdentifier(issuer, "issuer");
@@ -99,7 +114,7 @@ export function authplaneProvider(
     );
   }
 
-  return customProvider({
+  return customProvider<AuthplaneClaims & TCustom>({
     issuer,
     audience: audience ?? resource,
     baseUrl: resource,

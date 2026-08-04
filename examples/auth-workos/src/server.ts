@@ -17,10 +17,6 @@ import { env } from "./env.js";
  * configured in the WorkOS dashboard — here, this server's public URL.
  */
 
-type AuthKitClaims = {
-  subject?: string;
-  email?: string;
-};
 
 const server = new McpServer(
   {
@@ -35,7 +31,6 @@ const server = new McpServer(
     }),
   },
 )
-  .withAuthExtra<AuthKitClaims>()
   .mcpMiddleware(intentMiddleware())
   .registerTool(
     {

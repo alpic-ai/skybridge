@@ -22,10 +22,6 @@ import { env } from "./env.js";
  * advertises it as the authorization_endpoint.
  */
 
-type StytchClaims = {
-  subject?: string;
-  email?: string;
-};
 
 const server = new McpServer(
   {
@@ -40,7 +36,6 @@ const server = new McpServer(
     }),
   },
 )
-  .withAuthExtra<StytchClaims>()
   .mcpMiddleware(intentMiddleware())
   .registerTool(
     {
