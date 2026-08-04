@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { describe, expect, it, vi } from "vitest";
@@ -12,8 +13,13 @@ const MANIFEST: SkillsManifest = [
   {
     name: "demo",
     frontmatter: { name: "demo", description: "A demo skill" },
-    digest: "sha256:deadbeef",
-    files: { "SKILL.md": "# Demo" },
+    resources: [
+      {
+        uri: "skill://demo/SKILL.md",
+        digest: `sha256:${createHash("sha256").update("# Demo", "utf8").digest("hex")}`,
+        content: "# Demo",
+      },
+    ],
   },
 ];
 

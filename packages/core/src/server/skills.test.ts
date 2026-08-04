@@ -25,10 +25,14 @@ function mkSkillDir(files: Record<string, string>): string {
 const FM = (name: string, description: string) =>
   `---\nname: ${name}\ndescription: ${description}\n---\n`;
 
+const digestOf = (content: string) =>
+  `sha256:${createHash("sha256").update(content, "utf8").digest("hex")}`;
+
 describe("discoverSkills", () => {
-  it("discovers a skill with frontmatter, digest, and supporting files", () => {
+  it("discovers a skill with frontmatter and per-file resources", () => {
+    const skillMd = `${FM("git-workflow", "Team git conventions")}Body`;
     const dir = mkSkillDir({
-      "git-workflow/SKILL.md": `${FM("git-workflow", "Team git conventions")}Body`,
+      "git-workflow/SKILL.md": skillMd,
       "git-workflow/references/GUIDE.md": "# Guide",
     });
     const [skill, ...rest] = discoverSkills(dir);
@@ -38,10 +42,17 @@ describe("discoverSkills", () => {
       name: "git-workflow",
       description: "Team git conventions",
     });
-    expect(skill?.digest).toMatch(/^sha256:[a-f0-9]{64}$/);
-    expect(Object.keys(skill?.files ?? {}).sort()).toEqual([
-      "SKILL.md",
-      "references/GUIDE.md",
+    expect(skill?.resources).toEqual([
+      {
+        uri: "skill://git-workflow/SKILL.md",
+        digest: digestOf(skillMd),
+        content: skillMd,
+      },
+      {
+        uri: "skill://git-workflow/references/GUIDE.md",
+        digest: digestOf("# Guide"),
+        content: "# Guide",
+      },
     ]);
   });
 
@@ -119,11 +130,18 @@ describe("registerSkills", () => {
     {
       name: "refunds",
       frontmatter: { name: "refunds", description: "Process refunds" },
-      digest: "sha256:abc",
-      files: {
-        "SKILL.md": "# Refunds",
-        "templates/email.md": "Hi",
-      },
+      resources: [
+        {
+          uri: "skill://refunds/SKILL.md",
+          digest: digestOf("# Refunds"),
+          content: "# Refunds",
+        },
+        {
+          uri: "skill://refunds/templates/email.md",
+          digest: digestOf("Hi"),
+          content: "Hi",
+        },
+      ],
     },
   ];
 
@@ -199,9 +217,6 @@ describe("registerSkills", () => {
     });
   });
 
-  const digestOf = (content: string) =>
-    `sha256:${createHash("sha256").update(content, "utf8").digest("hex")}`;
-
   it("lists entries with complete per-file resources via skills/list", () => {
     const { server, handlers } = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
@@ -254,8 +269,8 @@ describe("discoverSkills symlink safety", () => {
     symlinkSync(join(outside, "secret.md"), join(dir, "demo", "leak.md"));
     symlinkSync(outside, join(dir, "demo", "escape"));
 
-    const files = discoverSkills(dir)[0]?.files ?? {};
-    expect(Object.keys(files).sort()).toEqual(["SKILL.md", "real.md"]);
+    const uris = discoverSkills(dir)[0]?.resources.map((r) => r.uri) ?? [];
+    expect(uris).toEqual(["skill://demo/SKILL.md", "skill://demo/real.md"]);
   });
 
   it("ignores non-markdown supporting files", () => {
@@ -265,7 +280,7 @@ describe("discoverSkills symlink safety", () => {
       "demo/data.json": "{}",
       "demo/scripts/run.py": "print(1)",
     });
-    const files = discoverSkills(dir)[0]?.files ?? {};
-    expect(Object.keys(files).sort()).toEqual(["SKILL.md", "notes.md"]);
+    const uris = discoverSkills(dir)[0]?.resources.map((r) => r.uri) ?? [];
+    expect(uris).toEqual(["skill://demo/SKILL.md", "skill://demo/notes.md"]);
   });
 });
