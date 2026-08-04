@@ -56,7 +56,14 @@ function jacket(
     outOfStock,
     specs: [
       { label: "Material", value: "Water-repellent cotton" },
+      { label: "Lining", value: "Recycled polyester" },
       { label: "Fit", value: "Relaxed" },
+      { label: "Closure", value: "Two-way zip" },
+      { label: "Pockets", value: "Two zip front, one inside" },
+      { label: "Collar", value: "Stand-up" },
+      { label: "Cuffs", value: "Ribbed" },
+      { label: "Weight", value: "780 g" },
+      { label: "Origin", value: "Made in Portugal" },
       { value: "Machine washable" }, // label-less fact (renders value only)
     ],
   };

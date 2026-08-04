@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CAROUSEL_MAX_SIZE, CAROUSEL_RANGE } from "../config.js";
+import { MOCK_PRODUCTS } from "../mock.js";
 import { type Price, PriceSchema, type Spec, SpecSchema } from "../types.js";
 
 // The `render-carousel` tool: takes the IDs the model curated and returns the
@@ -119,9 +120,9 @@ type RenderOutput = z.infer<z.ZodObject<typeof outputSchema>>;
 // Data access
 // ---------------------------------------------------------------------------
 
-async function getProducts(_ids: string[]): Promise<Product[]> {
+async function getProducts(ids: string[]): Promise<Product[]> {
   // @todo: fetch each id from your product API / DB and map the results into
-  // `Product`s (rename `_ids` -> `ids` once you use it).
+  // `Product`s.
   //
   // First decide your mapping strategy — it depends on your catalog:
   //   - no variants (simple products): one `Product`, a single variant, card = that variant, options: [],
@@ -131,8 +132,17 @@ async function getProducts(_ids: string[]): Promise<Product[]> {
   // the detail view reads them so the client can switch variant. Order `options`
   // with the imagery-driving axis first (see the Product type: order is semantic).
   //
-  // Returns [] for now, so the carousel is empty.
-  return [];
+  // Requested order is the display order, so resolve by id, not by catalog order.
+  const products: Product[] = [];
+  for (const id of ids) {
+    for (const product of MOCK_PRODUCTS) {
+      if (product.id === id) {
+        products.push(product);
+        break;
+      }
+    }
+  }
+  return products;
 }
 
 // ---------------------------------------------------------------------------

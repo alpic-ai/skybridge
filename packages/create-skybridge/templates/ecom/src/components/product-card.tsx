@@ -30,8 +30,8 @@ export function ProductCard({
 }: ProductCardProps) {
   const { locale } = useUser();
   const labels = useLabels();
-  // Show the first image. @todo: the rest of `media` is available here, e.g.
-  // to cross-fade to media[1] on hover.
+  // Show the first image. @todo: the rest of `media` is available here, e.g. to
+  // swap in media[1] on hover (do not cross-fade, breaks with transparency)
   const cover = media?.[0];
   return (
     <article className={styles.card({ framed: FRAMED })}>
