@@ -13,13 +13,13 @@ const warningCopy = {
     badge: "Large response",
     title: "Large model-visible output",
     description:
-      "This can consume significant context or exceed limits in some clients and models. _meta is excluded from this warning.",
+      "Content and structured content count toward this estimate. Large responses can consume significant context or exceed limits in some clients and models.",
   },
   "view-state": {
     badge: "Large context",
     title: "Large model-visible view state",
     description:
-      "Keep only content the model needs. Private view state and image IDs are excluded from this warning.",
+      "Persisted view state and data-llm context count toward this estimate. Keep only content the model needs.",
   },
 } satisfies Record<
   ContextWarningKind,

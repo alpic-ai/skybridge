@@ -33,7 +33,7 @@ export function warnOnLargeToolOutput(
   const tokenCount = getToolOutputTokenCount(response);
   if (tokenCount >= TOOL_OUTPUT_WARNING_TOKENS) {
     console.warn(
-      `[skybridge] Tool "${toolName}" returned ${tokenCount} estimated model-visible tokens; this reaches the ${TOOL_OUTPUT_WARNING_TOKENS}-token warning threshold and may overload model context. _meta is excluded from this estimate.`,
+      `[skybridge] Tool "${toolName}" returned ${tokenCount} estimated model-visible tokens; this reaches the ${TOOL_OUTPUT_WARNING_TOKENS}-token warning threshold and may overload model context. Content and structured content are included in this estimate.`,
     );
   }
 }
@@ -42,7 +42,7 @@ export function warnOnLargeViewState(value: unknown, source: string): void {
   const tokenCount = estimateContextTokens(value);
   if (tokenCount >= VIEW_STATE_WARNING_TOKENS) {
     console.warn(
-      `[skybridge] ${source} is persisting ${tokenCount} estimated tokens in model-visible view state; this reaches the ${VIEW_STATE_WARNING_TOKENS}-token warning threshold and may overload model context.`,
+      `[skybridge] ${source} is persisting ${tokenCount} estimated tokens in model-visible view state; this reaches the ${VIEW_STATE_WARNING_TOKENS}-token warning threshold and may overload model context. Persisted view state and data-llm context are included in this estimate.`,
     );
   }
 }
