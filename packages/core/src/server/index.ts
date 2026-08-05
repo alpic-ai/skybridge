@@ -1,9 +1,6 @@
 export type { OAuthConfig } from "./auth/index.js";
 export { type Auth0Claims, auth0Provider } from "./auth/providers/auth0.js";
-export {
-  type AuthplaneClaims,
-  authplaneProvider,
-} from "./auth/providers/authplane.js";
+export { authplaneProvider } from "./auth/providers/authplane.js";
 export { type ClerkClaims, clerkProvider } from "./auth/providers/clerk.js";
 export { customProvider } from "./auth/providers/custom.js";
 export {

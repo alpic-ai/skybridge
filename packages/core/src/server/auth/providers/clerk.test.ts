@@ -1,11 +1,9 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OAuthConfig } from "../index.js";
-import type { JwksTokenVerifier } from "../verify.js";
 import { clerkProvider } from "./clerk.js";
+import { lastJwksConfig as jwks } from "./verify-spy.js";
 
-const jwks = (config: OAuthConfig) =>
-  (config.verifier as JwksTokenVerifier).config;
+vi.mock("../verify.js", () => import("./verify-spy.js"));
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -30,13 +28,13 @@ describe("clerkProvider", () => {
       }),
     );
 
-    const config = await clerkProvider({ domain: "acme.clerk.accounts.dev" });
+    await clerkProvider({ domain: "acme.clerk.accounts.dev" });
 
     expect(fetchSpy).toHaveBeenCalledWith(
       `${issuer}/.well-known/openid-configuration`,
       expect.anything(),
     );
-    expect(jwks(config).issuer).toBe(issuer);
-    expect(jwks(config).audience).toBeUndefined();
+    expect(jwks().issuer).toBe(issuer);
+    expect(jwks().audience).toBeUndefined();
   });
 });

@@ -11,8 +11,6 @@ import { type CustomProviderOptions, customProvider } from "./custom.js";
  * @see https://docs.descope.com/management/token/jwt-templates
  */
 export type DescopeClaims = {
-  /** The Descope user id (the token's `sub`). */
-  subject?: string;
   /** Authentication methods used, e.g. `["otp"]`. */
   amr?: string[];
   /** Descope Resource Name: where the token is stored. */

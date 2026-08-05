@@ -1,11 +1,9 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OAuthConfig } from "../index.js";
-import type { JwksTokenVerifier } from "../verify.js";
 import { auth0Provider } from "./auth0.js";
+import { lastJwksConfig as jwks } from "./verify-spy.js";
 
-const jwks = (config: OAuthConfig) =>
-  (config.verifier as JwksTokenVerifier).config;
+vi.mock("../verify.js", () => import("./verify-spy.js"));
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -53,7 +51,7 @@ describe("auth0Provider", () => {
     // baseUrl left unset so the PRM resource resolves per request (Alpic-safe).
     expect(config.baseUrl).toBeUndefined();
     // token verification still uses Auth0 as issuer + the API audience.
-    expect(jwks(config).issuer).toBe(issuer);
-    expect(jwks(config).audience).toBe("https://api.example.com/");
+    expect(jwks().issuer).toBe(issuer);
+    expect(jwks().audience).toBe("https://api.example.com/");
   });
 });

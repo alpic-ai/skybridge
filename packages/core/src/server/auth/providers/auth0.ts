@@ -14,8 +14,6 @@ import { toIssuerUrl } from "./shared.js";
  * @see https://auth0.com/docs/secure/tokens/json-web-tokens/create-custom-claims
  */
 export type Auth0Claims = {
-  /** The Auth0 user id (the token's `sub`). */
-  subject?: string;
   /** Authorized party: the client id the token was issued to. */
   azp?: string;
   /** Only when the API has RBAC and "Add Permissions in the Access Token" on. */

@@ -12,8 +12,6 @@ import { toIssuerUrl } from "./shared.js";
  * @see https://clerk.com/docs/backend-requests/jwt-templates
  */
 export type ClerkClaims = {
-  /** The Clerk user id (the token's `sub`). */
-  subject?: string;
   /** Session id. */
   sid?: string;
   /** Authorized party: the origin the token was issued to. */

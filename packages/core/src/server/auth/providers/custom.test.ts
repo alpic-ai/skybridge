@@ -1,12 +1,10 @@
 // @vitest-environment node
 import http from "node:http";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OAuthConfig } from "../index.js";
-import type { JwksTokenVerifier } from "../verify.js";
 import { customProvider } from "./custom.js";
+import { lastJwksConfig as jwks } from "./verify-spy.js";
 
-const jwks = (config: OAuthConfig) =>
-  (config.verifier as JwksTokenVerifier).config;
+vi.mock("../verify.js", () => import("./verify-spy.js"));
 
 const servers: http.Server[] = [];
 afterEach(() => {
@@ -57,7 +55,7 @@ describe("customProvider", () => {
     });
 
     expect(config.baseUrl).toBe("https://app.example.test");
-    expect(jwks(config)).toEqual({
+    expect(jwks()).toEqual({
       issuer: base,
       audience: "my-api",
       jwksUri: `${base}/jwks`,
@@ -73,25 +71,25 @@ describe("customProvider", () => {
       audience: "a",
       metadataOverrides: { issuer: "https://evil.test" } as never,
     });
-    expect(jwks(config).issuer).toBe(base);
+    expect(jwks().issuer).toBe(base);
     expect(config.oauthMetadata.issuer).toBe(base);
   });
 
   it("ignores a runtime jwks_uri override (keeps the discovered signing keys)", async () => {
     const base = await serveDiscovery();
-    const config = await customProvider({
+    await customProvider({
       issuer: base,
       audience: "a",
       metadataOverrides: { jwks_uri: "https://evil.test/keys" } as never,
     });
-    expect(jwks(config).jwksUri).toBe(`${base}/jwks`);
+    expect(jwks().jwksUri).toBe(`${base}/jwks`);
   });
 
   it("serves metadata without a registration_endpoint when the IdP has no DCR", async () => {
     const base = await serveDiscovery({ registration_endpoint: undefined });
     const config = await customProvider({ issuer: base, audience: "a" });
     expect(config.oauthMetadata.registration_endpoint).toBeUndefined();
-    expect(jwks(config).issuer).toBe(base);
+    expect(jwks().issuer).toBe(base);
   });
 
   it("throws when discovery has no jwks_uri (token verification needs it)", async () => {
@@ -113,7 +111,7 @@ describe("customProvider", () => {
     expect(config.oauthMetadata.issuer).toBe("https://app.example.test");
     expect(config.oauthMetadata.scopes_supported).toEqual(["openid"]);
     // but the token's issuer is still verified against the IdP.
-    expect(jwks(config).issuer).toBe(base);
+    expect(jwks().issuer).toBe(base);
   });
 
   it("authorizationServer supplies the advertised metadata and the verified issuer", async () => {
@@ -130,7 +128,7 @@ describe("customProvider", () => {
     expect(config.oauthMetadata.authorization_endpoint).toBe(`${as}/authorize`);
     expect(config.oauthMetadata.registration_endpoint).toBe(`${as}/register`);
     expect(config.scopesSupported).toEqual(["checkout"]);
-    expect(jwks(config)).toEqual({
+    expect(jwks()).toEqual({
       issuer: as,
       audience: "a",
       jwksUri: `${as}/jwks`,
@@ -152,7 +150,7 @@ describe("customProvider", () => {
     expect(config.oauthMetadata.authorization_endpoint).toBe(
       `${base}/authorize`,
     );
-    expect(jwks(config).issuer).toBe(base);
+    expect(jwks().issuer).toBe(base);
     warn.mockRestore();
   });
 
@@ -167,7 +165,7 @@ describe("customProvider", () => {
     });
     expect(config.oauthMetadata.issuer).toBe("https://app.example.test");
     expect(config.oauthMetadata.token_endpoint).toBe(`${as}/token`);
-    expect(jwks(config).issuer).toBe(as);
+    expect(jwks().issuer).toBe(as);
   });
 
   it("applies metadataOverrides over discovered values", async () => {

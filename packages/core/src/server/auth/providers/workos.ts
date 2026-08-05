@@ -12,8 +12,6 @@ import { toIssuerUrl } from "./shared.js";
  * @see https://workos.com/docs/authkit/jwt-templates
  */
 export type WorkosClaims = {
-  /** The WorkOS user id (the token's `sub`). */
-  subject?: string;
   /** Session id, used for signing out. */
   sid?: string;
   /** Organization selected at sign-in. */

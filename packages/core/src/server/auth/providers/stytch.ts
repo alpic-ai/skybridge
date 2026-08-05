@@ -11,8 +11,6 @@ import { toIssuerUrl } from "./shared.js";
  * @see https://stytch.com/docs/api/connected-apps-create
  */
 export type StytchClaims = {
-  /** Id of the Stytch member or user that granted access (the token's `sub`). */
-  subject?: string;
   /** Only when the client's access-token template adds it. */
   email?: string;
 };

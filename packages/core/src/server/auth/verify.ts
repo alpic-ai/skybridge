@@ -13,13 +13,17 @@ export type JwksVerifyConfig = {
 };
 
 /**
- * Registered JWT claims a verified token always carries into `extra`, since only
- * `client_id`, `scope`, `exp` and `sub` are lifted onto `AuthInfo` itself.
- * Intersected into every claim shape a JWKS verifier resolves.
+ * Claims a JWKS-verified token always carries into `extra`, whatever the IdP:
+ * `subject` (the renamed `sub`) plus the registered claims that survive the
+ * mapping. `client_id`, `scope` and `exp` do not appear here, since they become
+ * `AuthInfo` fields instead. Intersected into every claim shape a JWKS verifier
+ * resolves.
  *
  * @see https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
  */
 export type RegisteredClaims = {
+  /** The token's `sub`, renamed on the way into `extra`. */
+  subject?: string;
   /** Issuer of the token. */
   iss?: string;
   /** Audience the token was minted for. */
@@ -31,15 +35,6 @@ export type RegisteredClaims = {
   /** Unique token id. */
   jti?: string;
 };
-
-/**
- * A {@link TokenVerifier} backed by a remote JWKS, carrying the verification
- * parameters it resolved. Read `config` to check what a provider derived from
- * discovery: the issuer and JWKS URL are the trust anchor.
- */
-export type JwksTokenVerifier<
-  TExtra extends Record<string, unknown> = Record<string, unknown>,
-> = TokenVerifier<TExtra> & { readonly config: Readonly<JwksVerifyConfig> };
 
 /**
  * Builds a {@link TokenVerifier} that validates JWTs against a remote JWKS.
@@ -55,7 +50,7 @@ export type JwksTokenVerifier<
  */
 export function createJwksVerifier<
   TExtra extends Record<string, unknown> = Record<string, unknown>,
->(config: JwksVerifyConfig): JwksTokenVerifier<TExtra & RegisteredClaims> {
+>(config: JwksVerifyConfig): TokenVerifier<TExtra & RegisteredClaims> {
   if (!config.issuer) {
     throw new Error("createJwksVerifier requires an `issuer`");
   }
@@ -65,7 +60,6 @@ export function createJwksVerifier<
   const jwks = jose.createRemoteJWKSet(new URL(jwksUri));
 
   return {
-    config: { ...config, jwksUri },
     async verifyAccessToken(
       token: string,
     ): Promise<AuthInfo<TExtra & RegisteredClaims>> {

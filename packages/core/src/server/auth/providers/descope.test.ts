@@ -1,11 +1,9 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OAuthConfig } from "../index.js";
-import type { JwksTokenVerifier } from "../verify.js";
 import { descopeProvider } from "./descope.js";
+import { lastJwksConfig as jwks } from "./verify-spy.js";
 
-const jwks = (config: OAuthConfig) =>
-  (config.verifier as JwksTokenVerifier).config;
+vi.mock("../verify.js", () => import("./verify-spy.js"));
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -54,8 +52,8 @@ describe("descopeProvider", () => {
       `${PROJECT}/.well-known/openid-configuration`,
       expect.anything(),
     );
-    expect(jwks(config).issuer).toBe(AGENTIC);
-    expect(jwks(config).audience).toBe("P123");
+    expect(jwks().issuer).toBe(AGENTIC);
+    expect(jwks().audience).toBe("P123");
     expect(config.oauthMetadata.issuer).toBe(AGENTIC);
     expect(config.oauthMetadata.registration_endpoint).toBe(
       `${AGENTIC}/register`,
@@ -77,8 +75,8 @@ describe("descopeProvider", () => {
   it("lets an explicit audience override the derived project id", async () => {
     mockDiscovery({ [PROJECT]: ["openid"], [AGENTIC]: ["checkout"] });
 
-    const config = await descopeProvider({ url: AGENTIC, audience: "custom" });
+    await descopeProvider({ url: AGENTIC, audience: "custom" });
 
-    expect(jwks(config).audience).toBe("custom");
+    expect(jwks().audience).toBe("custom");
   });
 });
