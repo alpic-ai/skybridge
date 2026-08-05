@@ -135,6 +135,18 @@ The validation body is provider-specific: [JWKS](https://datatracker.ietf.org/do
 
 {/* @todo: link to full auth provider reference */}
 
+## Type the Claims You Read
+
+The claim shape belongs to the verifier, so handlers get it without declaring anything. On the [provider path](/guides/auth-providers) each provider ships the claims its own docs promise, and a type argument adds the ones your tenant sends:
+
+```ts server.ts
+oauth: await workosProvider<{ tenant: string }>({ domain, audience }),
+```
+
+Writing the verifier yourself? Type it `TokenVerifier<Claims>` and the shape flows the same way.
+
+None of this is checked at runtime, so keep anything the IdP may omit optional. No provider ships `email` in an access token by default: WorkOS, Clerk, Descope and Stytch can add one through a JWT template or claims action, and Auth0 needs a namespaced claim, since it drops non-namespaced ones.
+
 ## Mix Public and Authenticated Tools
 
 Serving both anonymous and signed-in callers from one server takes three changes to the fully authenticated setup.

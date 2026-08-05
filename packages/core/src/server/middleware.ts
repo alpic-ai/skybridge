@@ -21,11 +21,17 @@ import type {
   ServerRequest,
   ServerResult,
 } from "@modelcontextprotocol/sdk/types.js";
+import type { AuthInfo, ExtraClaims } from "./auth.js";
 
 /**
  * The `extra` context object provided by the MCP SDK to request handlers.
  */
-export type McpExtra = RequestHandlerExtra<ServerRequest, ServerNotification>;
+export type McpExtra<TAuthExtra extends ExtraClaims = ExtraClaims> = Omit<
+  RequestHandlerExtra<ServerRequest, ServerNotification>,
+  "authInfo"
+> & {
+  authInfo?: AuthInfo<TAuthExtra>;
+};
 
 /**
  * A single MCP middleware function following the onion model.
@@ -33,9 +39,9 @@ export type McpExtra = RequestHandlerExtra<ServerRequest, ServerNotification>;
  * For notifications, `extra` is `undefined` (SDK does not provide extra context)
  * and `next()` resolves to `undefined`.
  */
-export type McpMiddlewareFn = (
+export type McpMiddlewareFn<TAuthExtra extends ExtraClaims = ExtraClaims> = (
   request: { method: string; params: Record<string, unknown> },
-  extra: McpExtra | undefined,
+  extra: McpExtra<TAuthExtra> | undefined,
   next: () => Promise<unknown>,
 ) => Promise<unknown> | unknown;
 
@@ -64,11 +70,14 @@ export type McpRequestParams<M extends string> =
  * request methods, `undefined` for notification methods (the SDK does not
  * pass extra context for notifications).
  */
-export type McpExtraFor<M extends string> = M extends ClientRequest["method"]
-  ? McpExtra
+export type McpExtraFor<
+  M extends string,
+  TAuthExtra extends ExtraClaims = ExtraClaims,
+> = M extends ClientRequest["method"]
+  ? McpExtra<TAuthExtra>
   : M extends ClientNotification["method"]
     ? undefined
-    : McpExtra | undefined;
+    : McpExtra<TAuthExtra> | undefined;
 
 /** Maps each MCP request method to its SDK result type. */
 interface McpResultMap {
@@ -115,9 +124,12 @@ export type McpResultFor<M extends string> = M extends keyof McpResultMap
  * via {@link McpRequestParams}, `extra` via {@link McpExtraFor}, and the
  * resolved value of `next()` via {@link McpResultFor}.
  */
-export type McpTypedMiddlewareFn<M extends string> = (
+export type McpTypedMiddlewareFn<
+  M extends string,
+  TAuthExtra extends ExtraClaims = ExtraClaims,
+> = (
   request: { method: M; params: McpRequestParams<M> },
-  extra: McpExtraFor<M>,
+  extra: McpExtraFor<M, TAuthExtra>,
   next: () => Promise<McpResultFor<M>>,
 ) => Promise<unknown> | unknown;
 

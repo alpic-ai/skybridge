@@ -28,16 +28,16 @@ export type ResourceMetadataUrlResolver = (
 /** Mounts the well-known OAuth metadata and bearer auth on `/mcp`. */
 export function setupOAuth(
   app: Express,
-  config: OAuthConfig,
+  config: OAuthConfig<Record<string, unknown>>,
   schemesByTool: Map<string, SecurityScheme[] | undefined>,
 ): ResourceMetadataUrlResolver {
-  if (!config.verify?.issuer) {
-    throw new Error("oauth.verify requires an `issuer`");
+  if (!config.verifier && !config.verify) {
+    throw new Error("oauth requires a `verifier`");
   }
 
   const acceptsAnonymous = () =>
     [...schemesByTool.values()].some(securitySchemesAllowAnonymous);
-  const verifier = createJwksVerifier(config.verify);
+  const verifier = config.verifier ?? createJwksVerifier(config.verify);
   const bearer = (options: BearerAuthMiddlewareOptions): RequestHandler => {
     const required = requireBearerAuth(options);
     const optional = optionalBearerAuth(options);

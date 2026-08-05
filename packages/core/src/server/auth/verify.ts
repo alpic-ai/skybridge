@@ -1,7 +1,6 @@
 import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
-import type { OAuthTokenVerifier } from "@modelcontextprotocol/sdk/server/auth/provider.js";
-import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import * as jose from "jose";
+import type { AuthInfo, ExtraClaims, TokenVerifier } from "../auth.js";
 
 export type JwksVerifyConfig = {
   /** Expected `iss` claim. */
@@ -13,17 +12,57 @@ export type JwksVerifyConfig = {
   jwksUri?: string;
 };
 
-/** Builds an `OAuthTokenVerifier` validating JWTs against a remote JWKS. Internal, not exported. */
-export function createJwksVerifier(
+/**
+ * Claims a JWKS-verified token always carries into `extra`, whatever the IdP:
+ * `subject` (the renamed `sub`) plus the registered claims that survive the
+ * mapping. `client_id`, `scope` and `exp` do not appear here, since they become
+ * `AuthInfo` fields instead. Intersected into every claim shape a JWKS verifier
+ * resolves.
+ *
+ * @see https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
+ */
+export type RegisteredClaims = {
+  /** The token's `sub`, renamed on the way into `extra`. */
+  subject?: string;
+  /** Issuer of the token. */
+  iss?: string;
+  /** Audience the token was minted for. */
+  aud?: string | string[];
+  /** Issued-at, in unix seconds. */
+  iat?: number;
+  /** Not-valid-before, in unix seconds. */
+  nbf?: number;
+  /** Unique token id. */
+  jti?: string;
+};
+
+/**
+ * Builds a {@link TokenVerifier} that validates JWTs against a remote JWKS.
+ *
+ * `extra` receives the token's claims with `sub` renamed to `subject`, minus
+ * `client_id`, `scope` and `exp`, which map onto `AuthInfo` fields instead. Pass
+ * `TExtra` to declare what your IdP puts there; the branded providers do this
+ * for you. {@link RegisteredClaims} is always included, since those claims
+ * survive the mapping.
+ *
+ * @typeParam TExtra - Claims the verified token carries in `extra`. An
+ * assertion, not a runtime check: nothing rejects a token whose claims differ.
+ */
+export function createJwksVerifier<TExtra extends ExtraClaims = ExtraClaims>(
   config: JwksVerifyConfig,
-): OAuthTokenVerifier {
+): TokenVerifier<TExtra & RegisteredClaims> {
+  if (!config.issuer) {
+    throw new Error("createJwksVerifier requires an `issuer`");
+  }
   const jwksUri =
     config.jwksUri ??
     `${config.issuer.replace(/\/$/, "")}/.well-known/jwks.json`;
   const jwks = jose.createRemoteJWKSet(new URL(jwksUri));
 
   return {
-    async verifyAccessToken(token: string): Promise<AuthInfo> {
+    async verifyAccessToken(
+      token: string,
+    ): Promise<AuthInfo<TExtra & RegisteredClaims>> {
       let payload: jose.JWTPayload;
       try {
         ({ payload } = await jose.jwtVerify(token, jwks, {
@@ -67,8 +106,9 @@ export function createJwksVerifier(
         clientId: client_id ?? "",
         scopes,
         expiresAt: exp,
-        extra: { subject: sub, ...rest },
-      } satisfies AuthInfo;
+        extra: { subject: sub, ...rest } as unknown as TExtra &
+          RegisteredClaims,
+      };
     },
   };
 }

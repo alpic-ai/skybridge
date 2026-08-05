@@ -1,6 +1,9 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { authplaneProvider } from "./authplane.js";
+import { lastJwksConfig as jwks } from "./verify-spy.js";
+
+vi.mock("../verify.js", () => import("./verify-spy.js"));
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -44,9 +47,9 @@ describe("authplaneProvider", () => {
       resource: "https://coffee.example.com/mcp",
     });
 
-    expect(config.verify.audience).toBe("https://coffee.example.com/mcp");
-    expect(config.verify.issuer).toBe(ISSUER);
-    expect(config.verify.jwksUri).toBe(`${ISSUER}/.well-known/jwks.json`);
+    expect(jwks().audience).toBe("https://coffee.example.com/mcp");
+    expect(jwks().issuer).toBe(ISSUER);
+    expect(jwks().jwksUri).toBe(`${ISSUER}/.well-known/jwks.json`);
     expect(config.baseUrl).toBe("https://coffee.example.com/mcp");
   });
 
@@ -62,7 +65,7 @@ describe("authplaneProvider", () => {
     const config = await authplaneProvider({ issuer: ISSUER, resource });
 
     expect(config.baseUrl).toBe(resource);
-    expect(config.verify.audience).toBe(resource);
+    expect(jwks().audience).toBe(resource);
   });
 
   // The metadata router serialises the resource identifier through `URL` before
@@ -88,13 +91,13 @@ describe("authplaneProvider", () => {
   it("lets an explicit audience override the default", async () => {
     mockDiscovery({ [ISSUER]: ["checkout"] });
 
-    const config = await authplaneProvider({
+    await authplaneProvider({
       issuer: ISSUER,
       resource: "https://coffee.example.com/mcp",
       audience: "urn:acme:coffee",
     });
 
-    expect(config.verify.audience).toBe("urn:acme:coffee");
+    expect(jwks().audience).toBe("urn:acme:coffee");
   });
 
   it.each([
@@ -127,25 +130,25 @@ describe("authplaneProvider", () => {
     // rather than rewriting the operator's value.
     mockDiscovery({ [ISSUER]: ["checkout"] });
 
-    const config = await authplaneProvider({
+    await authplaneProvider({
       issuer: `${ISSUER}/`,
       resource: "https://coffee.example.com/mcp",
     });
 
-    expect(config.verify.issuer).toBe(ISSUER);
+    expect(jwks().issuer).toBe(ISSUER);
   });
 
   it("accepts a local http issuer for development", async () => {
     const local = "http://localhost:9000";
     mockDiscovery({ [local]: ["checkout"] });
 
-    const config = await authplaneProvider({
+    await authplaneProvider({
       issuer: local,
       resource: "http://localhost:3000/mcp",
     });
 
-    expect(config.verify.issuer).toBe(local);
-    expect(config.verify.audience).toBe("http://localhost:3000/mcp");
+    expect(jwks().issuer).toBe(local);
+    expect(jwks().audience).toBe("http://localhost:3000/mcp");
   });
 
   it("forwards scopes and the required-scope floor", async () => {

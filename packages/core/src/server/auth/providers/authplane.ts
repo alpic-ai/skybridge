@@ -1,4 +1,6 @@
+import type { ExtraClaims } from "../../auth.js";
 import type { OAuthConfig } from "../index.js";
+import type { RegisteredClaims } from "../verify.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
 
 /** Options accepted by {@link authplaneProvider}. */
@@ -78,9 +80,11 @@ function parseIdentifier(value: string, option: string): URL {
  * of the authorization path. Pass `serverUrl` to advertise this server as the
  * authorization server instead (see {@link customProvider}).
  */
-export function authplaneProvider(
+export function authplaneProvider<
+  TCustom extends ExtraClaims = Record<never, never>,
+>(
   opts: AuthplaneProviderOptions,
-): Promise<OAuthConfig> {
+): Promise<OAuthConfig<TCustom & RegisteredClaims>> {
   const { issuer, resource, audience, ...rest } = opts;
 
   parseIdentifier(issuer, "issuer");
@@ -99,7 +103,7 @@ export function authplaneProvider(
     );
   }
 
-  return customProvider({
+  return customProvider<TCustom>({
     issuer,
     audience: audience ?? resource,
     baseUrl: resource,

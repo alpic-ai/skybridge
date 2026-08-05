@@ -47,6 +47,8 @@ type SkybridgeServerOptions = {
 
 `oauth` is an [`OAuthConfig`](/api-reference/custom-provider#returns), usually from [`customProvider`](/api-reference/custom-provider) or a branded provider. When set, it mounts the well-known OAuth metadata and bearer-token verification on `/mcp`.
 
+The config also carries the claim shape its verifier produces, so handlers read `extra.authInfo?.extra` typed, with no declaration of their own. See [Type the Claims You Read](/build/auth#type-the-claims-you-read).
+
 `skills` set to `true` serves [Agent Skills over MCP](/guides/skills) from `src/skills` and declares the `io.modelcontextprotocol/skills` capability. See the [Skills guide](/guides/skills).
 
 <Info>

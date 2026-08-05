@@ -1,5 +1,5 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type AuthInfo, descopeProvider, McpServer } from "skybridge/server";
+import { descopeProvider, McpServer } from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
@@ -17,6 +17,7 @@ import { env } from "./env.js";
  * defaults to the Project ID derived from the URL — Descope binds the token
  * `aud` to [DCR client id, project id], not the server URL.
  */
+
 
 const server = new McpServer(
   {
@@ -67,15 +68,14 @@ const server = new McpServer(
       },
     },
     ({ query, minRating }, extra) => {
-      const auth = extra.authInfo as AuthInfo;
 
-      const email = auth.extra?.email as string | undefined;
-      const subject = auth.extra?.subject as string | undefined;
+      const email = extra.authInfo?.extra?.email;
+      const subject = extra.authInfo?.extra?.subject;
 
       const results = searchCoffeeShops({
         query,
         minRating,
-        userId: subject ?? auth.clientId,
+        userId: subject ?? extra.authInfo?.clientId ?? "anonymous",
       });
 
       const displayName = email?.split("@")[0] ?? subject ?? "User";

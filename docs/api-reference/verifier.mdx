@@ -47,6 +47,16 @@ The verifier's only required method.
 
 Do not check scopes here: the middleware enforces `requiredScopes` against `authInfo.scopes` and returns a 403 on a missing scope.
 
+## `createJwksVerifier`
+
+```ts
+createJwksVerifier<TExtra>(config: { issuer: string; audience?: string; jwksUri?: string }): TokenVerifier<TExtra>;
+```
+
+Builds a verifier that validates JWTs against a remote JWKS. The [providers](/guides/auth-providers) use it internally; call it yourself when hand-building an [`OAuthConfig`](/api-reference/custom-provider#returns). `jwksUri` defaults to `${issuer}/.well-known/jwks.json`, and omitting `audience` skips the audience check, for IdPs that bind none.
+
+Verified claims land in `extra` with `sub` renamed to `subject`, while `client_id`, `scope` and `exp` become `AuthInfo` fields.
+
 ## `AuthInfo`
 
 What `verifyAccessToken` resolves with for a valid token.
@@ -67,7 +77,9 @@ type AuthInfo = {
 | `clientId` | The OAuth `client_id`, often the `azp` or `client_id` claim. |
 | `scopes` | The scopes granted, checked against `requiredScopes` and per-tool [`securitySchemes`](/api-reference/register-tool#securityschemes). |
 | `expiresAt` | Expiry in unix seconds. Required: tokens with no expiration are rejected. |
-| `extra` | Anything else you want available to handlers, for example `sub` or `email`. |
+| `extra` | Anything else you want available to handlers, for example `subject` or `email`. |
+
+`extra` is an untyped bag by default. Pass the claims your verifier resolves with (`Promise<AuthInfo<Claims>>`) and handlers receive that shape, since the type travels with the verifier into the server.
 
 <CardGroup cols={3}>
   <Card title="requireBearerAuth" icon="lock" href="/api-reference/require-bearer-auth">

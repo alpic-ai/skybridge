@@ -41,6 +41,12 @@ function sign(
     .sign(key);
 }
 
+it("rejects a config with no issuer", () => {
+  expect(() => createJwksVerifier({ issuer: "" })).toThrow(
+    /requires an `issuer`/,
+  );
+});
+
 describe("createJwksVerifier", () => {
   it("verifies a valid token and maps claims to AuthInfo", async () => {
     const { privateKey, jwksUri } = await startJwks();

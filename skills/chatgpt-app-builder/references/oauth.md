@@ -84,17 +84,13 @@ oauth: await customProvider({
 
 ## 3. Read auth in handlers
 
-`extra.authInfo` carries the verified token. Its `extra.subject` holds the `sub` claim; all other JWT claims (e.g. `email`) are spread alongside it.
+`extra.authInfo` carries the verified token. Its `extra.subject` holds the `sub` claim; all other JWT claims are spread alongside it, typed from the claims the provider documents, so no cast is needed.
 
 ```typescript
-import type { AuthInfo } from "skybridge/server";
-
 server.registerTool(
   { name: "get-orders", description: "Get user orders" },
   async (_input, extra) => {
-    const auth = extra.authInfo as AuthInfo;
-    const subject = auth.extra?.subject as string;
-    const orders = await fetchOrders(subject);
+    const orders = await fetchOrders(extra.authInfo?.extra?.subject);
     return {
       structuredContent: { orders },
       content: [{ type: "text", text: `Found ${orders.length} orders` }],
@@ -102,6 +98,8 @@ server.registerTool(
   },
 );
 ```
+
+For a claim the provider does not ship by default, name it on the provider: `workosProvider<{ email?: string }>({ ... })`. No provider puts `email` in an access token unless a JWT template or claims action adds it.
 
 ## 4. Mixed auth: per-tool `auth`
 

@@ -1,5 +1,5 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type AuthInfo, auth0Provider, McpServer } from "skybridge/server";
+import { auth0Provider, McpServer } from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
@@ -75,11 +75,9 @@ const server = new McpServer(
       },
     },
     async ({ query, minRating }, extra) => {
-      const auth = extra.authInfo as AuthInfo;
-
       try {
         const userInfoResponse = await fetch(`${AUTH0_BASE_URL}/userinfo`, {
-          headers: { Authorization: `Bearer ${auth.token}` },
+          headers: { Authorization: `Bearer ${extra.authInfo?.token}` },
         });
 
         const userInfo = userInfoResponse.ok
@@ -93,7 +91,7 @@ const server = new McpServer(
         const results = searchCoffeeShops({
           query,
           minRating,
-          userId: auth?.extra?.subject as string,
+          userId: extra.authInfo?.extra?.subject ?? "anonymous",
         });
 
         return {

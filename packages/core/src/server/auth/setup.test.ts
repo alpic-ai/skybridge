@@ -6,6 +6,7 @@ import type { RequestHandler } from "express";
 import * as jose from "jose";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { McpServer } from "../server.js";
+import { createJwksVerifier } from "./verify.js";
 
 vi.mock("@skybridge/devtools", () => ({
   devtoolsStaticServer: () =>
@@ -61,7 +62,10 @@ function signToken(key: CryptoKey, scope = "openid email") {
 
 async function bootServer(
   jwksUri: string,
-  { baseUrl = "https://app.example.test" }: { baseUrl?: string | null } = {},
+  {
+    baseUrl = "https://app.example.test",
+    legacyVerify = false,
+  }: { baseUrl?: string | null; legacyVerify?: boolean } = {},
 ) {
   const { createApp } = await import("../express.js");
   const server = new McpServer(
@@ -76,7 +80,15 @@ async function bootServer(
           token_endpoint: `${ISSUER}/token`,
           response_types_supported: ["code"],
         },
-        verify: { issuer: ISSUER, audience: AUDIENCE, jwksUri },
+        ...(legacyVerify
+          ? { verify: { issuer: ISSUER, audience: AUDIENCE, jwksUri } }
+          : {
+              verifier: createJwksVerifier({
+                issuer: ISSUER,
+                audience: AUDIENCE,
+                jwksUri,
+              }),
+            }),
         scopesSupported: ["openid", "email"],
         requiredScopes: ["openid"],
       },
@@ -150,6 +162,26 @@ describe("setupOAuth wiring", () => {
     })) as unknown as {
       content: { type: string; text: string }[];
     };
+    expect(result.content[0]?.text).toBe("client-1");
+
+    await client.close();
+  });
+  it("builds the verifier from the legacy verify config", async () => {
+    const { privateKey, jwksUri } = await startJwks();
+    const base = await bootServer(jwksUri, { legacyVerify: true });
+    const token = await signToken(privateKey);
+
+    const client = new Client({ name: "test-client", version: "0.0.0" });
+    const transport = new StreamableHTTPClientTransport(
+      new URL(`${base}/mcp`),
+      { requestInit: { headers: { Authorization: `Bearer ${token}` } } },
+    );
+    await client.connect(transport);
+
+    const result = (await client.callTool({
+      name: "whoami",
+      arguments: {},
+    })) as unknown as { content: { type: string; text: string }[] };
     expect(result.content[0]?.text).toBe("client-1");
 
     await client.close();
@@ -229,7 +261,11 @@ async function bootMixedServer(jwksUri: string) {
           token_endpoint: `${ISSUER}/token`,
           response_types_supported: ["code"],
         },
-        verify: { issuer: ISSUER, audience: AUDIENCE, jwksUri },
+        verifier: createJwksVerifier({
+          issuer: ISSUER,
+          audience: AUDIENCE,
+          jwksUri,
+        }),
       },
     },
   )
@@ -476,7 +512,11 @@ async function bootScopedServer(jwksUri: string) {
           token_endpoint: `${ISSUER}/token`,
           response_types_supported: ["code"],
         },
-        verify: { issuer: ISSUER, audience: AUDIENCE, jwksUri },
+        verifier: createJwksVerifier({
+          issuer: ISSUER,
+          audience: AUDIENCE,
+          jwksUri,
+        }),
       },
     },
   ).registerTool(
@@ -608,7 +648,10 @@ describe("oauth config validation", () => {
           oauth: {
             baseUrl: "not-a-url",
             oauthMetadata: validMetadata,
-            verify: { issuer: ISSUER, audience: AUDIENCE },
+            verifier: createJwksVerifier({
+              issuer: ISSUER,
+              audience: AUDIENCE,
+            }),
           },
         }),
     ).toThrow(/baseUrl must be a valid absolute URL/);
