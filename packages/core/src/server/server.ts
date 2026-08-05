@@ -54,7 +54,11 @@ import type {
   McpTypedMiddlewareFn,
   McpWildcard,
 } from "./middleware.js";
-import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
+import {
+  buildMiddlewareChain,
+  captureToolError,
+  getHandlerMaps,
+} from "./middleware.js";
 import { resolveServerOrigin } from "./requestOrigin.js";
 import {
   discoverSkills,
@@ -1302,13 +1306,14 @@ export class McpServer<
     }: { attachViewUUID: boolean; securitySchemes?: SecurityScheme[] },
   ): ToolHandler<InputArgs> {
     return async (args, extra) => {
+      const toolExtra = extra ?? (args as unknown as McpExtra);
       if (this.oauthEnabled) {
         const failure = evaluateSecuritySchemes(
           securitySchemes,
-          extra.authInfo,
+          toolExtra?.authInfo,
         );
         if (failure) {
-          const headers = extra?.requestInfo?.headers ?? {};
+          const headers = toolExtra?.requestInfo?.headers ?? {};
           const header = (key: string) => {
             const value = headers[key];
             return Array.isArray(value) ? value[0] : value;
@@ -1319,7 +1324,13 @@ export class McpServer<
           );
         }
       }
-      const result = await cb(args, extra);
+      let result: Awaited<ReturnType<typeof cb>>;
+      try {
+        result = await cb(args, extra);
+      } catch (error) {
+        captureToolError(toolExtra, error);
+        throw error;
+      }
       return {
         ...result,
         content: normalizeContent(result.content),

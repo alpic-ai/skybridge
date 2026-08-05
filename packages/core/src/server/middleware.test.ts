@@ -5,6 +5,7 @@ import { z } from "zod";
 import {
   buildMiddlewareChain,
   getHandlerMaps,
+  getToolError,
   type McpExtra,
   type McpMiddlewareEntry,
   type McpMiddlewareFn,
@@ -561,6 +562,57 @@ describe("McpServer.mcpMiddleware()", () => {
     const result = await client.callTool({ name: "t1" });
     expect(result.content).toEqual([{ type: "text", text: "short-circuited" }]);
     expect(handlerCalled).not.toHaveBeenCalled();
+
+    await client.close();
+    await server.close();
+  });
+
+  it("exposes a thrown tool error to middleware via getToolError", async () => {
+    const schemaError = new Error("boom with schema");
+    const schemalessError = new Error("boom without schema");
+    let captured: unknown;
+
+    const server = new McpServer({ name: "test", version: "1.0.0" });
+
+    server.registerTool(
+      {
+        name: "withSchema",
+        description: "withSchema",
+        inputSchema: { name: z.string() },
+      },
+      () => {
+        throw schemaError;
+      },
+    );
+    server.registerTool(
+      { name: "withoutSchema", description: "withoutSchema" },
+      () => {
+        throw schemalessError;
+      },
+    );
+
+    server.mcpMiddleware("tools/call", async (_request, extra, next) => {
+      const result = await next();
+      captured = getToolError(extra);
+      return result;
+    });
+
+    const client = createClient();
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    await server.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    const withSchema = await client.callTool({
+      name: "withSchema",
+      arguments: { name: "World" },
+    });
+    expect(withSchema.isError).toBe(true);
+    expect(captured).toBe(schemaError);
+
+    const withoutSchema = await client.callTool({ name: "withoutSchema" });
+    expect(withoutSchema.isError).toBe(true);
+    expect(captured).toBe(schemalessError);
 
     await client.close();
     await server.close();

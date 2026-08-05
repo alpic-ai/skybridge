@@ -45,6 +45,48 @@ export type McpMiddlewareFn<TAuthExtra extends ExtraClaims = ExtraClaims> = (
   next: () => Promise<unknown>,
 ) => Promise<unknown> | unknown;
 
+const TOOL_ERROR = Symbol.for("skybridge.toolError");
+
+function toolErrorSlot(
+  extra: McpExtra | undefined,
+): Record<symbol, unknown> | undefined {
+  return extra as unknown as Record<symbol, unknown> | undefined;
+}
+
+export function captureToolError(
+  extra: McpExtra | undefined,
+  error: unknown,
+): void {
+  const slot = toolErrorSlot(extra);
+  if (slot) {
+    slot[TOOL_ERROR] = error;
+  }
+}
+
+/**
+ * Retrieve the error a tool handler threw during this request, if any.
+ *
+ * The MCP SDK catches anything a tool handler throws and turns it into an
+ * `isError` tool result, so `await next()` in middleware resolves normally and
+ * the original `Error` — stack, `cause` — is lost. Skybridge stores it on
+ * `extra` (never serialized to the client) so observability middleware can
+ * report it:
+ *
+ * ```ts
+ * server.mcpMiddleware("tools/call", async (request, extra, next) => {
+ *   const result = await next();
+ *   const error = getToolError(extra);
+ *   if (error) {
+ *     Sentry.captureException(error);
+ *   }
+ *   return result;
+ * });
+ * ```
+ */
+export function getToolError(extra: McpExtra | undefined): unknown {
+  return toolErrorSlot(extra)?.[TOOL_ERROR];
+}
+
 /**
  * MCP methods the server handles (incoming from client).
  */
