@@ -1331,15 +1331,20 @@ export class McpServer<
         captureToolError(toolExtra, error);
         throw error;
       }
+      // Hosts key view rendering off `viewUUID`, and a failed call has no data
+      // for the view to render, so errors stay text-only.
+      // @see https://github.com/modelcontextprotocol/ext-apps/issues/694
+      const isErrorResult = (result as { isError?: boolean }).isError === true;
       return {
         ...result,
         content: normalizeContent(result.content),
-        ...(attachViewUUID && {
-          _meta: {
-            ...(result as { _meta?: Record<string, unknown> })._meta,
-            viewUUID: crypto.randomUUID(),
-          },
-        }),
+        ...(attachViewUUID &&
+          !isErrorResult && {
+            _meta: {
+              ...(result as { _meta?: Record<string, unknown> })._meta,
+              viewUUID: crypto.randomUUID(),
+            },
+          }),
       };
     };
   }

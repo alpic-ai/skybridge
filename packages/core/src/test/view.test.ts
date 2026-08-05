@@ -566,6 +566,32 @@ describe("McpServer.registerTool (unified API)", () => {
     expect(result._meta?.viewUUID).toBeDefined();
   });
 
+  it("should not inject viewUUID when the tool result is an error", async () => {
+    const mockToolCallback = vi.fn().mockResolvedValue({
+      content: [{ type: "text", text: "boom" }],
+      isError: true,
+      _meta: { requestId: "req-123" },
+    });
+
+    server.registerTool(
+      {
+        name: "my-view",
+        description: "Test tool",
+        view: { component: "my-view" as ViewName, description: "Test view" },
+      },
+      mockToolCallback,
+    );
+
+    const wrappedCallback = mockRegisterTool.mock.calls[0]?.[2] as (
+      ...args: unknown[]
+    ) => Promise<{ _meta?: Record<string, unknown>; isError?: boolean }>;
+    const result = await wrappedCallback({}, {});
+
+    expect(result.isError).toBe(true);
+    expect(result._meta?.viewUUID).toBeUndefined();
+    expect(result._meta?.requestId).toBe("req-123");
+  });
+
   it("should generate unique viewUUIDs across calls", async () => {
     const mockToolCallback = vi.fn().mockResolvedValue({
       content: [{ type: "text", text: "result" }],

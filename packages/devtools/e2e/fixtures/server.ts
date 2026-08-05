@@ -88,6 +88,21 @@ const server = baseServer
   )
   .registerTool(
     {
+      name: "error-card",
+      description: "Fails on purpose to check that the view stays unrendered",
+      inputSchema: {},
+      view: {
+        component: "error-card",
+        description: "Error card widget",
+      },
+    },
+    async () => ({
+      content: [{ type: "text", text: "the tool failed" }],
+      isError: true,
+    }),
+  )
+  .registerTool(
+    {
       name: "every-input-type",
       description:
         "Exercises every common input type the form renderer handles.",

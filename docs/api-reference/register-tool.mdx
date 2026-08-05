@@ -231,11 +231,11 @@ The request context.
 | --- | --- |
 | `content` | Text for the model, shown in the conversation. A string, a `ContentBlock`, or an array. |
 | `structuredContent` | Typed data the model and the view read (via [`useToolInfo`](/api-reference/use-tool-info)). |
-| `isError` | Marks the call as failed. |
+| `isError` | Marks the call as failed. The host shows the `content` as text and skips the view. |
 | `_meta` | View-only response metadata, hidden from the model. |
 
 <Info>
-For a view tool, Skybridge adds a `viewUUID` to `_meta`, a reserved key used for state persistence.
+For a view tool, Skybridge adds a `viewUUID` to `_meta`, a reserved key used for state persistence. A failed call (`isError: true`, or a handler that throws) carries no `viewUUID`, so hosts render the error as text instead of the view. Return the failure as `content` the model can act on.
 </Info>
 
 ### Client hints

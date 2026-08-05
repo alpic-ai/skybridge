@@ -91,7 +91,11 @@ export const ToolPanel = () => {
   const templateUri = (tool?._meta?.ui as { resourceUri?: string } | undefined)
     ?.resourceUri;
   const hasResult = Boolean(tool && data?.response);
-  const hasView = Boolean(templateUri);
+  const isErrorResponse = data?.response?.isError === true;
+  // Hosts leave the view unrendered when a tool call fails, so DevTools shows
+  // the raw error the same way they do.
+  // @see https://github.com/modelcontextprotocol/ext-apps/issues/694
+  const hasView = Boolean(templateUri) && !isErrorResponse;
 
   if (!tool) {
     return (
@@ -117,7 +121,6 @@ export const ToolPanel = () => {
     const response = data?.response;
     const responseJson = JSON.stringify(response ?? null, null, 2);
     const sizeBytes = new TextEncoder().encode(responseJson).length;
-    const isError = response?.isError === true;
     const durationMs = data?.durationMs;
     return (
       <div
@@ -137,9 +140,11 @@ export const ToolPanel = () => {
                 <div className="font-medium">Tool output</div>
                 <div className="ml-auto flex items-center gap-2 font-mono text-xs text-light-gray-foreground">
                   <span
-                    className={isError ? "text-destructive" : "text-success"}
+                    className={
+                      isErrorResponse ? "text-destructive" : "text-success"
+                    }
                   >
-                    {isError ? "Error" : "OK"}
+                    {isErrorResponse ? "Error" : "OK"}
                   </span>
                   {durationMs != null ? (
                     <>
@@ -151,6 +156,15 @@ export const ToolPanel = () => {
                   <span>{formatBytes(sizeBytes)}</span>
                 </div>
               </div>
+              {templateUri && isErrorResponse ? (
+                <div
+                  data-testid="view-skipped-on-error"
+                  className="shrink-0 border-b border-border bg-white px-3 py-2 text-xs text-muted-foreground"
+                >
+                  The view is not rendered because the tool returned an error.
+                  Hosts behave the same way.
+                </div>
+              ) : null}
               <section className="relative min-h-0 min-w-0 flex-1 overflow-auto bg-light-gray p-3">
                 <CopyButton
                   value={responseJson}
