@@ -1,4 +1,5 @@
 import type { OAuthMetadata } from "@modelcontextprotocol/sdk/shared/auth.js";
+import type { ExtraClaims } from "../../auth.js";
 import {
   type DiscoveredMetadata,
   discoverAuthorizationServer,
@@ -42,9 +43,7 @@ export type CustomProviderOptions = {
  * as `extra.authInfo.extra`. The branded providers pass their documented claims;
  * pass your own when wiring an IdP by hand.
  */
-export async function customProvider<
-  TExtra extends Record<string, unknown> = Record<string, unknown>,
->(
+export async function customProvider<TExtra extends ExtraClaims = ExtraClaims>(
   opts: CustomProviderOptions,
 ): Promise<OAuthConfig<TExtra & RegisteredClaims>> {
   const discovered = await discoverAuthorizationServer(opts.issuer);

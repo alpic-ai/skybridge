@@ -1,3 +1,4 @@
+import type { ExtraClaims } from "../../auth.js";
 import type { OAuthConfig } from "../index.js";
 import type { RegisteredClaims } from "../verify.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
@@ -80,7 +81,7 @@ function parseIdentifier(value: string, option: string): URL {
  * authorization server instead (see {@link customProvider}).
  */
 export function authplaneProvider<
-  TCustom extends Record<string, unknown> = Record<never, never>,
+  TCustom extends ExtraClaims = Record<never, never>,
 >(
   opts: AuthplaneProviderOptions,
 ): Promise<OAuthConfig<TCustom & RegisteredClaims>> {

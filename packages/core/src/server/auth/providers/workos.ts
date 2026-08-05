@@ -1,3 +1,4 @@
+import type { ExtraClaims } from "../../auth.js";
 import type { OAuthConfig } from "../index.js";
 import type { RegisteredClaims } from "../verify.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
@@ -30,7 +31,7 @@ export type WorkosClaims = {
  * (Connect → Configuration). `audience` is the MCP server's Resource Indicator.
  */
 export function workosProvider<
-  TCustom extends Record<string, unknown> = Record<never, never>,
+  TCustom extends ExtraClaims = Record<never, never>,
 >(
   opts: { domain: string; audience: string } & Omit<
     CustomProviderOptions,

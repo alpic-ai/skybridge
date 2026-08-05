@@ -21,14 +21,15 @@ import type {
   ServerRequest,
   ServerResult,
 } from "@modelcontextprotocol/sdk/types.js";
-import type { AuthInfo } from "./auth.js";
+import type { AuthInfo, ExtraClaims } from "./auth.js";
 
 /**
  * The `extra` context object provided by the MCP SDK to request handlers.
  */
-export type McpExtra<
-  TAuthExtra extends Record<string, unknown> = Record<string, unknown>,
-> = Omit<RequestHandlerExtra<ServerRequest, ServerNotification>, "authInfo"> & {
+export type McpExtra<TAuthExtra extends ExtraClaims = ExtraClaims> = Omit<
+  RequestHandlerExtra<ServerRequest, ServerNotification>,
+  "authInfo"
+> & {
   authInfo?: AuthInfo<TAuthExtra>;
 };
 
@@ -38,9 +39,7 @@ export type McpExtra<
  * For notifications, `extra` is `undefined` (SDK does not provide extra context)
  * and `next()` resolves to `undefined`.
  */
-export type McpMiddlewareFn<
-  TAuthExtra extends Record<string, unknown> = Record<string, unknown>,
-> = (
+export type McpMiddlewareFn<TAuthExtra extends ExtraClaims = ExtraClaims> = (
   request: { method: string; params: Record<string, unknown> },
   extra: McpExtra<TAuthExtra> | undefined,
   next: () => Promise<unknown>,
@@ -73,7 +72,7 @@ export type McpRequestParams<M extends string> =
  */
 export type McpExtraFor<
   M extends string,
-  TAuthExtra extends Record<string, unknown> = Record<string, unknown>,
+  TAuthExtra extends ExtraClaims = ExtraClaims,
 > = M extends ClientRequest["method"]
   ? McpExtra<TAuthExtra>
   : M extends ClientNotification["method"]
@@ -127,7 +126,7 @@ export type McpResultFor<M extends string> = M extends keyof McpResultMap
  */
 export type McpTypedMiddlewareFn<
   M extends string,
-  TAuthExtra extends Record<string, unknown> = Record<string, unknown>,
+  TAuthExtra extends ExtraClaims = ExtraClaims,
 > = (
   request: { method: M; params: McpRequestParams<M> },
   extra: McpExtraFor<M, TAuthExtra>,

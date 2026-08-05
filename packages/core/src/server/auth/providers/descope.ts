@@ -1,3 +1,4 @@
+import type { ExtraClaims } from "../../auth.js";
 import type { OAuthConfig } from "../index.js";
 import type { RegisteredClaims } from "../verify.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
@@ -62,7 +63,7 @@ function projectIdFromUrl(url: string): string {
  * id, project id], not the server URL; pass `audience` to override.
  */
 export function descopeProvider<
-  TCustom extends Record<string, unknown> = Record<never, never>,
+  TCustom extends ExtraClaims = Record<never, never>,
 >(
   opts: { url: string } & Omit<CustomProviderOptions, "issuer">,
 ): Promise<OAuthConfig<DescopeClaims & TCustom & RegisteredClaims>> {

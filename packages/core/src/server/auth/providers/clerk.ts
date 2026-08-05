@@ -1,3 +1,4 @@
+import type { ExtraClaims } from "../../auth.js";
 import type { OAuthConfig } from "../index.js";
 import type { RegisteredClaims } from "../verify.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
@@ -49,7 +50,7 @@ export type ClerkClaims = {
  * verification is issuer + JWKS only (matching Clerk's own `mcpAuthClerk`).
  */
 export function clerkProvider<
-  TCustom extends Record<string, unknown> = Record<never, never>,
+  TCustom extends ExtraClaims = Record<never, never>,
 >(
   opts: { domain: string } & Omit<CustomProviderOptions, "issuer" | "audience">,
 ): Promise<OAuthConfig<ClerkClaims & TCustom & RegisteredClaims>> {

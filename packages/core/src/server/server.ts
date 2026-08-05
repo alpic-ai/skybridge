@@ -39,7 +39,7 @@ import {
   inBandChallengeResult,
 } from "./auth/security-schemes.js";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
-import type { AuthInfo } from "./auth.js";
+import type { AuthInfo, ExtraClaims } from "./auth.js";
 import { createApp } from "./express.js";
 import { hostFromUserAgent } from "./host.js";
 import { createMiddlewareEntry } from "./metric.js";
@@ -199,7 +199,7 @@ export type JsonOptions = NonNullable<Parameters<typeof express.json>[0]>;
  * the config a provider returns, and carried on to tool handlers.
  */
 export interface SkybridgeServerOptions<
-  TAuthExtra extends Record<string, unknown> = Record<string, unknown>,
+  TAuthExtra extends ExtraClaims = ExtraClaims,
 > {
   /** Options for the built-in `express.json()` middleware, e.g. `{ limit: "10mb" }`. */
   json?: JsonOptions;
@@ -362,7 +362,7 @@ type AddTool<
   TInput extends ZodRawShapeCompat,
   TOutput,
   TResponseMetadata = unknown,
-  TAuthExtra extends Record<string, unknown> = Record<string, unknown>,
+  TAuthExtra extends ExtraClaims = ExtraClaims,
 > = McpServer<
   TTools & {
     [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput, TResponseMetadata>;
@@ -432,9 +432,7 @@ export interface ClientHintsMeta {
   "openai/widgetSessionId"?: string;
 }
 
-type ToolHandlerExtra<
-  TAuthExtra extends Record<string, unknown> = Record<string, unknown>,
-> = Omit<
+type ToolHandlerExtra<TAuthExtra extends ExtraClaims = ExtraClaims> = Omit<
   RequestHandlerExtra<ServerRequest, ServerNotification>,
   "_meta" | "authInfo"
 > & {
@@ -445,7 +443,7 @@ type ToolHandlerExtra<
 type ToolHandler<
   TInput extends ZodRawShapeCompat,
   TReturn extends { content?: HandlerContent } = { content?: HandlerContent },
-  TAuthExtra extends Record<string, unknown> = Record<string, unknown>,
+  TAuthExtra extends ExtraClaims = ExtraClaims,
 > = (
   args: ShapeOutput<TInput>,
   extra: ToolHandlerExtra<TAuthExtra>,
@@ -598,7 +596,7 @@ function normalizeRegisterToolArgs(args: unknown[]): {
 
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
-  TAuthExtra extends Record<string, unknown> = Record<string, unknown>,
+  TAuthExtra extends ExtraClaims = ExtraClaims,
 > extends McpServerBaseOmitted {
   declare readonly $types: McpServerTypes<TTools>;
   /**

@@ -1,6 +1,6 @@
 import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
 import * as jose from "jose";
-import type { AuthInfo, TokenVerifier } from "../auth.js";
+import type { AuthInfo, ExtraClaims, TokenVerifier } from "../auth.js";
 
 export type JwksVerifyConfig = {
   /** Expected `iss` claim. */
@@ -48,9 +48,9 @@ export type RegisteredClaims = {
  * @typeParam TExtra - Claims the verified token carries in `extra`. An
  * assertion, not a runtime check: nothing rejects a token whose claims differ.
  */
-export function createJwksVerifier<
-  TExtra extends Record<string, unknown> = Record<string, unknown>,
->(config: JwksVerifyConfig): TokenVerifier<TExtra & RegisteredClaims> {
+export function createJwksVerifier<TExtra extends ExtraClaims = ExtraClaims>(
+  config: JwksVerifyConfig,
+): TokenVerifier<TExtra & RegisteredClaims> {
   if (!config.issuer) {
     throw new Error("createJwksVerifier requires an `issuer`");
   }

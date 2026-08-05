@@ -17,6 +17,7 @@ export {
   type AuthInfo,
   type AuthMetadataOptions,
   type BearerAuthMiddlewareOptions,
+  type ExtraClaims,
   InvalidTokenError,
   mcpAuthMetadataRouter,
   optionalBearerAuth,

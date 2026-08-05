@@ -1,3 +1,4 @@
+import type { ExtraClaims } from "../../auth.js";
 import type { OAuthConfig } from "../index.js";
 import type { RegisteredClaims } from "../verify.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
@@ -36,7 +37,7 @@ export type Auth0Claims = {
  * Auth0 (the token's real `iss`).
  */
 export async function auth0Provider<
-  TCustom extends Record<string, unknown> = Record<never, never>,
+  TCustom extends ExtraClaims = Record<never, never>,
 >(
   opts: { domain: string; audience: string; serverUrl: string } & Omit<
     CustomProviderOptions,

@@ -15,6 +15,9 @@ export {
   type AuthMetadataOptions,
   mcpAuthMetadataRouter,
 } from "@modelcontextprotocol/sdk/server/auth/router.js";
+/** Claims a verifier puts in `AuthInfo["extra"]`: any JSON-ish bag of them. */
+export type ExtraClaims = Record<string, unknown>;
+
 /**
  * A validated access token, as resolved by a
  * [verifier](https://docs.skybridge.tech/api-reference/verifier) and handed to
@@ -35,9 +38,10 @@ export {
  * }
  * ```
  */
-export type AuthInfo<
-  TExtra extends Record<string, unknown> = Record<string, unknown>,
-> = Omit<SdkAuthInfo, "extra"> & { extra?: TExtra };
+export type AuthInfo<TExtra extends ExtraClaims = ExtraClaims> = Omit<
+  SdkAuthInfo,
+  "extra"
+> & { extra?: TExtra };
 
 /**
  * Checks a bearer token and resolves the claims it carries. The type parameter
@@ -49,9 +53,7 @@ export type AuthInfo<
  *
  * @typeParam TExtra - Claims this verifier populates in `AuthInfo["extra"]`.
  */
-export type TokenVerifier<
-  TExtra extends Record<string, unknown> = Record<string, unknown>,
-> = {
+export type TokenVerifier<TExtra extends ExtraClaims = ExtraClaims> = {
   verifyAccessToken(token: string): Promise<AuthInfo<TExtra>>;
 };
 

@@ -1,5 +1,5 @@
 import type { OAuthMetadata } from "@modelcontextprotocol/sdk/shared/auth.js";
-import type { TokenVerifier } from "../auth.js";
+import type { ExtraClaims, TokenVerifier } from "../auth.js";
 import type { JwksVerifyConfig } from "./verify.js";
 
 /**
@@ -12,9 +12,7 @@ import type { JwksVerifyConfig } from "./verify.js";
  *
  * @typeParam TExtra - Claims the verifier populates in `AuthInfo["extra"]`.
  */
-export type OAuthConfig<
-  TExtra extends Record<string, unknown> = Record<string, unknown>,
-> = {
+export type OAuthConfig<TExtra extends ExtraClaims = ExtraClaims> = {
   /**
    * Public URL of this server; sets `resourceServerUrl` and the
    * `resource_metadata` URL. When omitted, it is inferred per request from
