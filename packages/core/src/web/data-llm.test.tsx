@@ -8,6 +8,7 @@ import {
   type Mock,
   vi,
 } from "vitest";
+import { VIEW_STATE_WARNING_TOKENS } from "../context-warnings.js";
 import { HostAdaptor } from "./bridges/adaptor.js";
 import { getAdaptor } from "./bridges/get-adaptor.js";
 import { McpAppBridge } from "./bridges/mcp-app/index.js";
@@ -90,11 +91,11 @@ describe("DataLLM", () => {
       expect(callArgs).toHaveProperty("__view_context");
     });
 
-    it("warns when DataLLM content exceeds the 4K token warning threshold", async () => {
+    it("warns when DataLLM content reaches the 20K token warning threshold", async () => {
       const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
       render(
-        <DataLLM content={"x".repeat(4096 * 4 + 50)}>
+        <DataLLM content={"x".repeat(VIEW_STATE_WARNING_TOKENS * 4)}>
           <div>Child</div>
         </DataLLM>,
       );

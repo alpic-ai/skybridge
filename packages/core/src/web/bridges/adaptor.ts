@@ -1,3 +1,4 @@
+import { warnOnLargeViewState } from "../../context-warnings.js";
 import { AppsSdkBridge } from "./apps-sdk/bridge.js";
 import type { AppsSdkWidgetState } from "./apps-sdk/types.js";
 import { McpAppBridge } from "./mcp-app/bridge.js";
@@ -23,24 +24,6 @@ import { NotSupportedError } from "./types.js";
 
 const STORAGE_PREFIX = "sb:";
 const MAX_STORAGE_ENTRIES = 200;
-const VIEW_STATE_TOKEN_WARNING_THRESHOLD = 4000;
-
-function getApproximateTokenCount(value: unknown): number {
-  try {
-    return Math.max(1, Math.ceil(JSON.stringify(value).length / 4));
-  } catch {
-    return 0;
-  }
-}
-
-function warnOnLargeViewState(value: unknown, source: string): void {
-  const tokenCount = getApproximateTokenCount(value);
-  if (tokenCount > VIEW_STATE_TOKEN_WARNING_THRESHOLD) {
-    console.warn(
-      `[skybridge] ${source} is persisting ${tokenCount} tokens in view state; this exceeds the ${VIEW_STATE_TOKEN_WARNING_THRESHOLD}-token warning threshold and may overload model context.`,
-    );
-  }
-}
 
 function isImage(mimeType: string | undefined): boolean {
   return mimeType?.startsWith("image/") ?? false;
