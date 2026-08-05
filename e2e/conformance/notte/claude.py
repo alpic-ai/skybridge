@@ -1,5 +1,6 @@
-"""Claude (MCP Apps) host adapter: how to send the prompt, dismiss the cookie
-banner, verify the follow-up message, and accept the native permission dialogs."""
+"""Claude (MCP Apps) host adapter: how to send the prompt, clear the overlays in
+front of the composer, verify the follow-up message, and accept the native
+permission dialogs."""
 
 import time
 
@@ -10,6 +11,8 @@ from utils import (
     PAGE_LOAD_TIMEOUT_MS,
     HostConfig,
     click_top_page_button,
+    dismiss_host_overlay,
+    host_modal_present,
 )
 
 
@@ -19,7 +22,14 @@ def hide_sidebar_claude(page: Page) -> None:
 
 
 def dismiss_modal_claude(page: Page) -> None:
-    """Accept the cookie banner: its overlay swallows clicks near the composer."""
+    """Clear whatever Claude put in front of the composer.
+
+    Two kinds land here: the cookie banner (no dialog role, Escape does
+    nothing, wants its Accept button) and the announcement dialogs Claude
+    greets a fresh session with (the plan upsell), which blur the page and
+    intercept every click until Escape closes them. Either one left standing
+    swallows the click aimed at the composer and costs the whole attempt.
+    """
     page.evaluate(
         """() => {
             const btn = [...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Accept All Cookies');
@@ -27,6 +37,8 @@ def dismiss_modal_claude(page: Page) -> None:
         }"""
     )
     time.sleep(1)
+    if host_modal_present(page):
+        dismiss_host_overlay(page)
 
 
 def send_prompt_claude(page: Page, app_name: str) -> None:
@@ -38,7 +50,7 @@ def send_prompt_claude(page: Page, app_name: str) -> None:
     typing and the Enter get silently swallowed sometimes (cookie banner /
     onboarding popovers stealing focus), so verify each and retry.
     """
-    dismiss_modal_claude(page)  # the cookie banner overlay steals the first click
+    dismiss_modal_claude(page)  # an overlay would swallow the click aimed at the composer
     prompt = f"run {app_name}"
     composer = page.locator('div[contenteditable="true"]').first
     composer.click(timeout=PAGE_LOAD_TIMEOUT_MS)
