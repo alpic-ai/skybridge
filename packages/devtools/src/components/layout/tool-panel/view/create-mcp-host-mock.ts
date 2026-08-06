@@ -1,5 +1,9 @@
 import type { CallToolResponse } from "skybridge/web";
 import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
+import {
+  chatgptHostContextExtras,
+  chatgptStyleVariables,
+} from "./chatgpt-host-context.js";
 
 type PostFn = (msg: unknown) => void;
 
@@ -28,6 +32,9 @@ function respondError(post: PostFn, id: number, code: number, message: string) {
 function buildHostContext(): HostContext {
   const preferences = useInspectorPreferencesStore.getState();
   return {
+    ...(preferences.previewClient === "chatgpt"
+      ? chatgptHostContextExtras(preferences.theme)
+      : {}),
     theme: preferences.theme,
     locale: preferences.locale,
     displayMode: preferences.displayMode,
@@ -38,7 +45,10 @@ function buildHostContext(): HostContext {
       left: 0,
     },
     platform:
-      preferences.userAgent?.device?.type === "mobile" ? "mobile" : "web",
+      preferences.previewClient === null &&
+      preferences.userAgent?.device?.type === "mobile"
+        ? "mobile"
+        : "web",
     deviceCapabilities: preferences.userAgent?.capabilities,
   };
 }
@@ -203,6 +213,11 @@ export function createMcpHostMock(
       const changed: HostContext = {};
       if (preferences.theme !== previous.theme) {
         changed.theme = preferences.theme;
+        if (preferences.previewClient === "chatgpt") {
+          changed.styles = {
+            variables: chatgptStyleVariables(preferences.theme),
+          };
+        }
       }
       if (preferences.locale !== previous.locale) {
         changed.locale = preferences.locale;

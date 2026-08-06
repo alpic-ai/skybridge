@@ -8,8 +8,10 @@ import {
   useDefaultLayout,
 } from "react-resizable-panels";
 import { useAuthStore } from "@/lib/auth-store.js";
+import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
 import { connectToServer } from "@/lib/mcp/index.js";
 import { Header } from "./header.js";
+import { Preview } from "./preview/index.js";
 import { ToolPanel } from "./tool-panel/index.js";
 import ToolsList from "./tools-list/index.js";
 
@@ -19,6 +21,7 @@ const TOOL_PANEL_ID = "tool-panel";
 
 function AppLayout() {
   const { status, requiresAuth } = useAuthStore();
+  const previewClient = useInspectorPreferencesStore((s) => s.previewClient);
 
   const isConnected = status === "authenticated";
 
@@ -31,7 +34,11 @@ function AppLayout() {
   return (
     <div className="grid h-screen grid-rows-[auto_1fr] overflow-hidden bg-background text-foreground">
       <Header />
-      {isConnected ? (
+      {isConnected && previewClient ? (
+        <Suspense fallback={null}>
+          <Preview />
+        </Suspense>
+      ) : isConnected ? (
         <div
           id="devtools-card-body"
           className="relative flex min-h-0 min-w-0 flex-1"
