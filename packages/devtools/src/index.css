@@ -5,6 +5,7 @@
 @source "../node_modules/@alpic-ai/ui/src/**/*.{ts,tsx}";
 
 @theme {
+  --color-background: #ffffff;
   --color-border: #e3eaea;
   --color-light-gray: #f9fafa;
   --color-light-gray-foreground: #707e7e;
@@ -16,7 +17,9 @@
   --color-cta-accent: #e90060;
 }
 
-.dark {
+.dark,
+[data-theme="dark"] {
+  --color-background: #071718;
   --color-border: #162828;
   --color-light-gray: #162828;
 
@@ -28,6 +31,7 @@
 
 .preview-region {
   /* Figma “bg-secondary-subtle” / “border-tertiary” → @alpic-ai/ui @theme color tokens */
+  --preview-surface: var(--color-background);
   --preview-region-bg: var(--color-light-gray);
   --preview-region-grid: var(--color-border);
   background-color: var(--preview-region-bg);
@@ -60,4 +64,10 @@
     16px 16px,
     16px 16px;
   background-position: 0 0;
+}
+
+.preview-region.dark,
+.preview-region[data-theme="dark"] {
+  /* Keep the grid visible against the dark surface without recolouring global borders. */
+  --preview-region-grid: #1f4449;
 }

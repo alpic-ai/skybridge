@@ -206,7 +206,7 @@ export const View = () => {
       ref={containerRef}
       className={cn(
         "relative transition-[width] duration-150 ease-out",
-        isFullscreenDesktop ? "h-full w-full bg-background" : "mx-auto",
+        isFullscreenDesktop ? "h-full w-full" : "mx-auto",
       )}
       style={{
         width: isFullscreenDesktop ? undefined : width,
@@ -216,6 +216,7 @@ export const View = () => {
             ? `${isPip ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`
             : "auto",
         opacity: mounted ? 1 : 0,
+        background: "var(--preview-surface)",
       }}
     >
       <iframe
