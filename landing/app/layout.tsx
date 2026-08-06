@@ -106,6 +106,20 @@ export default function RootLayout({
             });
           `}
         </Script>
+        <Script id="openai-ads-pixel" strategy="afterInteractive">
+          {`
+            if (!/^(localhost|127\\.0\\.0\\.1|\\[::1\\])$/.test(location.hostname)) {
+              window.oaiq = window.oaiq || function () {
+                (window.oaiq.q = window.oaiq.q || []).push(arguments);
+              };
+              oaiq('init', { pixelId: 'RpPGaGGhiF5XPRk8txqwoZ' });
+            }
+          `}
+        </Script>
+        <Script
+          src="https://bzrcdn.openai.com/sdk/oaiq.min.js"
+          strategy="afterInteractive"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
