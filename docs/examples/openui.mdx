@@ -1,0 +1,32 @@
+---
+title: Generative UI - OpenUI
+description: LLM-generated dynamic UIs with OpenUI Lang and the standard OpenUI component library.
+---
+
+import { ChatExample } from "/components/chat-example.jsx";
+
+Generative UI - OpenUI lets the LLM compose rich interfaces on the fly using [OpenUI Lang](https://www.openui.com/docs/openui-lang) and the standard OpenUI React component library. The server exposes a prompt tool so the model learns the syntax and available components, then a `render` tool streams OpenUI Lang into a Skybridge view that parses and displays it with OpenUI's `<Renderer />`.
+
+<ChatExample
+  prompt="Generate a dashboard UI for me."
+  app="Generative UI - OpenUI"
+  src="/images/showcase-openui.png"
+  alt="Generative UI - OpenUI showcase"
+  demo="https://openui.skybridge.tech/try"
+  source="https://github.com/alpic-ai/skybridge/tree/main/examples/openui-generative-ui"
+/>
+
+## How it works
+
+The MCP server exposes `get-openui-prompt`, which returns OpenUI Lang instructions generated from `openuiLibrary.prompt()` — component signatures, Skybridge-specific rules, and an example program. The model then calls `render` with an OpenUI Lang program. The view reads the streaming tool input and renders it with `@openuidev/react-lang`'s `<Renderer />` against `@openuidev/react-ui`'s standard library.
+
+OpenUI Lang is compact and stream-friendly: the first line defines `root`, while later lines can fill in forward references as the model generates details.
+
+## Skybridge APIs used
+
+- [`useToolInfo`](/api-reference/use-tool-info)
+
+## Third-party integrations
+
+- [`@openuidev/react-lang`](https://www.openui.com/docs/openui-lang/renderer) — OpenUI Lang parser and React `<Renderer />`
+- [`@openuidev/react-ui`](https://www.openui.com/docs/openui-lang/standard-library) — standard OpenUI component library

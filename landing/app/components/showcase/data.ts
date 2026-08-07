@@ -492,7 +492,7 @@ export const SHOWCASE: ShowcaseApp[] = [
   {
     id: "generative-ui",
     slug: "generative-ui",
-    name: "Generative UI",
+    name: "Generative UI - JSON Renderer",
     tagline: "LLM-composed interfaces",
     blurb:
       "LLM-generated dynamic UIs with json-render and 36 pre-built shadcn/ui components. The AI composes the interface, the widget renders it.",
@@ -514,6 +514,33 @@ export const SHOWCASE: ShowcaseApp[] = [
       demo: "https://generative-ui.skybridge.tech/try",
       github:
         "https://github.com/alpic-ai/skybridge/tree/main/examples/generative-ui",
+    },
+  },
+  {
+    id: "openui",
+    slug: "openui",
+    name: "Generative UI - OpenUI",
+    tagline: "OpenUI Lang generative UI",
+    blurb:
+      "LLM-generated dynamic UIs with OpenUI Lang and the standard OpenUI component library. The AI streams OpenUI Lang; the view renders it.",
+    category: "Example",
+    host: "ChatGPT · Claude",
+    accent: "#C4B5FD",
+    img: "/assets/showcase/openui.webp",
+    chat: {
+      user: "Build me a launch readiness dashboard",
+      assistant: "Streaming OpenUI Lang now…",
+    },
+    tags: ["OpenUI", "Dynamic"],
+    highlights: [
+      "The AI streams compact OpenUI Lang into the widget as it generates.",
+      "Standard OpenUI library: Cards, Charts, Tables, Steps, and Callouts.",
+      "get-openui-prompt teaches the model syntax and available components first.",
+    ],
+    links: {
+      demo: "https://openui.skybridge.tech/try",
+      github:
+        "https://github.com/alpic-ai/skybridge/tree/main/examples/openui-generative-ui",
     },
   },
   {

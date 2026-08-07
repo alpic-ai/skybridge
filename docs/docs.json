@@ -215,6 +215,7 @@
           {
             "group": "UI and Component libraries",
             "pages": [
+              "examples/openui",
               "examples/generative-ui",
               "examples/manifest-ui"
             ]
