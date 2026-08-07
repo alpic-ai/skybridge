@@ -18,7 +18,7 @@ jobs:
 
     concurrency:
       group: publish-${{ github.sha }}
-      cancel-in-progress: true
+      cancel-in-progress: false
 
     steps:
       - uses: actions/checkout@v7
