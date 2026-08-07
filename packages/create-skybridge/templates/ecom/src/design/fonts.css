@@ -1,0 +1,15 @@
+/* @todo: add your brand's @font-face rules here, then point
+   primitives.font.family.primary at the family name. Drop the font files in
+   public/fonts/ so they are served under /assets/fonts/.
+
+   The template ships with the system font stack, which needs no @font-face,
+   so this file is empty by default. Example:
+
+   @font-face {
+     font-family: "My Brand";
+     font-style: normal;
+     font-weight: 400;
+     font-display: block;
+     src: url("/assets/fonts/MyBrand-Regular.woff2") format("woff2");
+   }
+*/
