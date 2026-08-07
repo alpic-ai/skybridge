@@ -1,16 +1,17 @@
 import { z } from "zod";
+import { search } from "../catalog/index.js";
 import {
   CAROUSEL_MAX_SIZE,
   CAROUSEL_RANGE,
   MIN_SEARCH_ITERATIONS,
 } from "../config.js";
-import { MOCK_PRODUCTS } from "../mock.js";
-import { PriceSchema, SpecSchema } from "../types.js";
+import { PriceSchema, type SearchResult, SpecSchema } from "../types.js";
 
 // The `search-products` tool: keyword + filters in, matching products out as
 // structured output for the model. It has NO view — include only what the model
 // needs to curate (ids + properties), never presentational data (images, media);
-// render-carousel handles that. Everything this tool needs lives in this file.
+// render-carousel handles that. Data access lives in `src/catalog/`; everything
+// else this tool needs lives in this file.
 
 // ---------------------------------------------------------------------------
 // Input
@@ -40,7 +41,7 @@ For vague gift or occasion queries without a clear product type, use broad categ
     ),
 };
 
-type SearchInput = z.infer<z.ZodObject<typeof inputSchema>>;
+export type SearchInput = z.infer<z.ZodObject<typeof inputSchema>>;
 
 // ---------------------------------------------------------------------------
 // Output — model-facing grounding, returned in structuredContent.
@@ -81,17 +82,20 @@ const outputSchema = {
 type SearchOutput = z.infer<z.ZodObject<typeof outputSchema>>;
 
 // ---------------------------------------------------------------------------
-// Data access
+// Mapping: project each product's `card` into the model-facing grounding
+// (outputSchema), dropping presentational fields (media, url).
+// @todo: choose what the model sees per product. Grounding only: the model
+// curates on facts, so presentational data never belongs here.
 // ---------------------------------------------------------------------------
 
-function search(_input: SearchInput): SearchOutput {
-  // @todo: plug in your product API / DB. Query it with the input params and map
-  // each result into `products` below. `pages` and `totalHits` are optional.
-  // Until then: every mock product, projected from its card (the model curates
-  // on facts, so presentational fields like media stay out).
-  const products: SearchOutput["products"] = [];
-  for (const { id, card } of MOCK_PRODUCTS) {
-    products.push({
+function toStructuredContent({
+  products,
+  pages,
+  totalHits,
+}: SearchResult): SearchOutput {
+  const results: SearchOutput["products"] = [];
+  for (const { id, card } of products) {
+    results.push({
       id,
       title: card.title,
       description: card.description,
@@ -100,11 +104,7 @@ function search(_input: SearchInput): SearchOutput {
       specs: card.specs,
     });
   }
-  return {
-    products,
-    pages: { current: 1, total: 1 },
-    totalHits: products.length,
-  };
+  return { products: results, pages, totalHits };
 }
 
 // ---------------------------------------------------------------------------
@@ -186,8 +186,8 @@ The sweet spot is ${CAROUSEL_RANGE} products.
   outputSchema,
 };
 
-export function searchProductsHandler(input: SearchInput) {
-  const results = search(input);
+export async function searchProductsHandler(input: SearchInput) {
+  const results = toStructuredContent(await search(input));
   return {
     structuredContent: results,
     content: [{ type: "text" as const, text: narrate(results) }],

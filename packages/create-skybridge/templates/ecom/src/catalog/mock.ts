@@ -1,10 +1,9 @@
-import type { Product } from "./tools/render-carousel.js";
-import type { Spec } from "./types.js";
+import type { SearchInput } from "../tools/search-products.js";
+import type { Product, SearchResult, Spec } from "../types.js";
 
-// Placeholder catalog, so both tools answer before a backend exists: search
-// projects its model-facing results from it, render-carousel resolves ids
-// against it. Images are inline SVG placeholders, so no CSP domain is needed.
-// @todo: delete this module once the tools query your product API / DB.
+// Placeholder catalog provider, so both tools answer before a backend exists.
+// Images are inline SVG placeholders, so no CSP domain is needed.
+// @todo: delete this module once you point `./index.js` at a real provider.
 
 function shot(fill: string): string {
   return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='400' height='400' fill='%23${fill}'/%3E%3C/svg%3E`;
@@ -18,7 +17,7 @@ const JACKET_SPECS: Spec[] = [
 // Deliberately long, to exercise the detail page's scroll and "read more".
 const JACKET_DESCRIPTION = "Relaxed-fit jacket in water-repellent cotton.";
 
-export const MOCK_PRODUCTS: Product[] = [
+const MOCK_PRODUCTS: Product[] = [
   {
     id: "field-jacket",
     options: [
@@ -110,3 +109,26 @@ export const MOCK_PRODUCTS: Product[] = [
     },
   },
 ];
+
+// Ignores the input: every mock product matches every query.
+export async function search(_input: SearchInput): Promise<SearchResult> {
+  return {
+    products: MOCK_PRODUCTS,
+    pages: { current: 1, total: 1 },
+    totalHits: MOCK_PRODUCTS.length,
+  };
+}
+
+// Requested order is the display order, so resolve by id, not catalog order.
+export async function getProducts(ids: string[]): Promise<Product[]> {
+  const products: Product[] = [];
+  for (const id of ids) {
+    for (const product of MOCK_PRODUCTS) {
+      if (product.id === id) {
+        products.push(product);
+        break;
+      }
+    }
+  }
+  return products;
+}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { initialSelection, type Selection } from "../lib/variants.js";
-import type { Product } from "../tools/render-carousel.js";
+import type { Product } from "../types.js";
 import { VariantPicker } from "./variant-picker";
 
 // A sparse catalog: {white,42} does not exist, so "42" is hard-disabled under
