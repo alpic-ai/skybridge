@@ -14,6 +14,7 @@ import {
   pushToolResultNotification,
 } from "./create-mcp-host-mock.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
+import { useSyncOpenaiDisplayMode } from "./use-sync-openai-display-mode.js";
 import { useSyncOpenaiLocale } from "./use-sync-openai-locale.js";
 import { useSyncOpenaiTheme } from "./use-sync-openai-theme.js";
 
@@ -35,10 +36,13 @@ export const View = () => {
   const openaiObjectRef = useRef(openaiObject);
   openaiObjectRef.current = openaiObject;
   const [contentHeight, setContentHeight] = useState<number | null>(null);
+  const inPreview = useInspectorPreferencesStore(
+    (s) => s.previewClient !== null,
+  );
   const isMobile =
     useInspectorPreferencesStore(
       (s) => s.userAgent?.device?.type ?? "desktop",
-    ) === "mobile";
+    ) === "mobile" && !inPreview;
   const previousIsMobileRef = useRef(isMobile);
   useEffect(() => {
     if (previousIsMobileRef.current === isMobile) {
@@ -54,9 +58,10 @@ export const View = () => {
   // Mobile preview in fullscreen keeps the inline-mobile layout (centered 345px
   // widget with body-driven height) on top of the fullscreen overlay.
   const isFullscreenDesktop = isFullscreen && !isMobile;
-  const width = isFullscreenDesktop
-    ? "100%"
-    : `${isMobile ? MOBILE_WIDTH_PX : DESKTOP_WIDTH_PX}px`;
+  const width =
+    isFullscreenDesktop || inPreview
+      ? "100%"
+      : `${isMobile ? MOBILE_WIDTH_PX : DESKTOP_WIDTH_PX}px`;
   const theme = useInspectorPreferencesStore((s) => s.theme);
   const locale = useInspectorPreferencesStore((s) => s.locale);
 
@@ -152,6 +157,7 @@ export const View = () => {
     enabled: Boolean(html) && !isFullscreenDesktop,
     onHeightChange: setContentHeight,
     documentKey: html,
+    clampToContainer: !inPreview,
   });
 
   const mounted = useIframeMounted({ iframeRef, documentKey: html });
@@ -167,6 +173,13 @@ export const View = () => {
     iframeRef,
     toolName: tool.name,
     locale,
+    updateOpenaiObject,
+  });
+
+  useSyncOpenaiDisplayMode({
+    iframeRef,
+    toolName: tool.name,
+    displayMode,
     updateOpenaiObject,
   });
 
@@ -206,14 +219,15 @@ export const View = () => {
       ref={containerRef}
       className={cn(
         "relative transition-[width] duration-150 ease-out",
-        isFullscreenDesktop ? "h-full w-full bg-background" : "mx-auto",
+        isFullscreenDesktop ? "h-full w-full" : "mx-auto",
+        isFullscreenDesktop && !inPreview && "bg-background",
       )}
       style={{
         width: isFullscreenDesktop ? undefined : width,
         height: isFullscreenDesktop
           ? "100%"
           : contentHeight != null
-            ? `${isPip ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`
+            ? `${isPip && !inPreview ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`
             : "auto",
         opacity: mounted ? 1 : 0,
       }}
@@ -226,7 +240,7 @@ export const View = () => {
           height: isFullscreenDesktop
             ? "100%"
             : contentHeight != null
-              ? `${isPip ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`
+              ? `${isPip && !inPreview ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`
               : "100%",
           border: "none",
           display: "block",

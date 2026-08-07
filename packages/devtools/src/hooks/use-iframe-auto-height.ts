@@ -7,12 +7,14 @@ export const useIframeAutoHeight = ({
   enabled,
   onHeightChange,
   documentKey,
+  clampToContainer = true,
 }: {
   iframeRef: React.RefObject<HTMLIFrameElement | null>;
   containerRef: React.RefObject<HTMLDivElement | null>;
   enabled: boolean;
   onHeightChange: (height: number) => void;
   documentKey: string;
+  clampToContainer?: boolean;
 }) => {
   useEffect(() => {
     if (!enabled || !documentKey) {
@@ -25,9 +27,15 @@ export const useIframeAutoHeight = ({
     }
 
     const measure = () => {
-      const measured = measureIframeHeight(iframe, containerRef.current);
-      if (measured > 0) {
-        onHeightChange(measured);
+      const measured = measureIframeHeight(
+        iframe,
+        clampToContainer ? containerRef.current : null,
+      );
+      const capped = clampToContainer
+        ? measured
+        : Math.min(measured, window.innerHeight);
+      if (capped > 0) {
+        onHeightChange(capped);
       }
     };
 
@@ -47,5 +55,12 @@ export const useIframeAutoHeight = ({
     return () => {
       observer.disconnect();
     };
-  }, [containerRef, enabled, iframeRef, onHeightChange, documentKey]);
+  }, [
+    containerRef,
+    enabled,
+    iframeRef,
+    onHeightChange,
+    documentKey,
+    clampToContainer,
+  ]);
 };

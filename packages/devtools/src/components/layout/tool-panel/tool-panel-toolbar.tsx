@@ -13,6 +13,7 @@ import {
 } from "@alpic-ai/ui/components/popover";
 import {
   Check,
+  Eye,
   Languages,
   Logs,
   type LucideIcon,
@@ -23,6 +24,7 @@ import {
   Smartphone,
   SquareSplitVertical,
   Sun,
+  X,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import type { RequestDisplayMode } from "skybridge/web";
@@ -40,7 +42,7 @@ const displayModes: { mode: RequestDisplayMode; icon: LucideIcon }[] = [
 
 // Applies the form's current values to the preferences store and returns a
 // human-readable summary for the agent.
-function applyViewOptions(data: FormData): string {
+function applyViewOptions(data: FormData, variant: ToolbarVariant): string {
   const { userAgent, setPreference } = useInspectorPreferencesStore.getState();
 
   const mode = data.get("displayMode");
@@ -56,13 +58,15 @@ function applyViewOptions(data: FormData): string {
   // Checkboxes are absent from FormData when unchecked, so absence is
   // meaningful (false) — apply unconditionally.
   setPreference("theme", data.has("darkTheme") ? "dark" : "light");
-  setPreference("userAgent", {
-    ...userAgent,
-    device: {
-      ...userAgent?.device,
-      type: data.has("mobileDevice") ? "mobile" : "desktop",
-    },
-  });
+  if (variant === "panel") {
+    setPreference("userAgent", {
+      ...userAgent,
+      device: {
+        ...userAgent?.device,
+        type: data.has("mobileDevice") ? "mobile" : "desktop",
+      },
+    });
+  }
 
   const locale = data.get("locale");
   if (
@@ -184,12 +188,16 @@ function ToolbarToggle({
   );
 }
 
+type ToolbarVariant = "panel" | "preview";
+
 type ToolPanelToolbarProps = {
-  logsOpen: boolean;
-  onOpenLogs: () => void;
+  variant?: ToolbarVariant;
+  logsOpen?: boolean;
+  onOpenLogs?: () => void;
 };
 
 export const ToolPanelToolbar = ({
+  variant = "panel",
   logsOpen,
   onOpenLogs,
 }: ToolPanelToolbarProps) => {
@@ -197,6 +205,10 @@ export const ToolPanelToolbar = ({
   const theme = useInspectorPreferencesStore((s) => s.theme);
   const locale = useInspectorPreferencesStore((s) => s.locale);
   const userAgent = useInspectorPreferencesStore((s) => s.userAgent);
+  const setPreviewClient = useInspectorPreferencesStore(
+    (s) => s.setPreviewClient,
+  );
+  const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
 
   const formRef = useRef<HTMLFormElement>(null);
   const [localeOpen, setLocaleOpen] = useState(false);
@@ -219,11 +231,18 @@ export const ToolPanelToolbar = ({
     <form
       ref={formRef}
       toolname="devtools_set_view_options"
-      tooldescription="Set the Skybridge devtools view preview options. Any subset of fields can be changed: display mode, theme, locale, and device type."
+      tooldescription={
+        variant === "panel"
+          ? "Set the Skybridge devtools view preview options. Any subset of fields can be changed: display mode, theme, locale, and device type."
+          : "Set the Skybridge devtools preview options. Any subset of fields can be changed: theme and locale."
+      }
       toolautosubmit=""
       onSubmit={(event) => {
         event.preventDefault();
-        const summary = applyViewOptions(new FormData(event.currentTarget));
+        const summary = applyViewOptions(
+          new FormData(event.currentTarget),
+          variant,
+        );
         const native = event.nativeEvent;
         if (
           native instanceof SubmitEvent &&
@@ -235,36 +254,41 @@ export const ToolPanelToolbar = ({
           );
         }
       }}
-      className="mt-3 flex w-full shrink-0 items-center gap-1.5 px-3"
+      className={cn(
+        "flex w-full shrink-0 items-center gap-1.5",
+        variant === "panel" ? "mt-3 px-3" : "justify-end",
+      )}
     >
-      <fieldset className="inline-flex h-7 items-center rounded-md border border-border bg-background p-0.5">
-        <legend className="sr-only">Display mode</legend>
-        {displayModes.map(({ mode, icon: Icon }) => {
-          const selected = displayMode === mode;
-          return (
-            <label
-              key={mode}
-              className={cn(
-                "inline-flex h-full cursor-pointer items-center gap-1.5 rounded px-2 text-xs font-medium transition-colors",
-                "has-focus-visible:ring-1 has-focus-visible:ring-ring",
-                selected ? buttonSelectedClass : buttonIdleClass,
-              )}
-            >
-              <input
-                type="radio"
-                name="displayMode"
-                value={mode}
-                checked={selected}
-                onChange={(e) => e.currentTarget.form?.requestSubmit()}
-                toolparamdescription="How the host lays out the rendered view."
-                className="sr-only"
-              />
-              <Icon className="size-3.5" />
-              <span>{mode}</span>
-            </label>
-          );
-        })}
-      </fieldset>
+      {variant === "panel" && (
+        <fieldset className="inline-flex h-7 items-center rounded-md border border-border bg-background p-0.5">
+          <legend className="sr-only">Display mode</legend>
+          {displayModes.map(({ mode, icon: Icon }) => {
+            const selected = displayMode === mode;
+            return (
+              <label
+                key={mode}
+                className={cn(
+                  "inline-flex h-full cursor-pointer items-center gap-1.5 rounded px-2 text-xs font-medium transition-colors",
+                  "has-focus-visible:ring-1 has-focus-visible:ring-ring",
+                  selected ? buttonSelectedClass : buttonIdleClass,
+                )}
+              >
+                <input
+                  type="radio"
+                  name="displayMode"
+                  value={mode}
+                  checked={selected}
+                  onChange={(e) => e.currentTarget.form?.requestSubmit()}
+                  toolparamdescription="How the host lays out the rendered view."
+                  className="sr-only"
+                />
+                <Icon className="size-3.5" />
+                <span>{mode}</span>
+              </label>
+            );
+          })}
+        </fieldset>
+      )}
 
       <ToolbarToggle
         icon={isDark ? Moon : Sun}
@@ -336,20 +360,37 @@ export const ToolPanelToolbar = ({
         />
       </div>
 
-      <ToolbarToggle
-        icon={isMobile ? Smartphone : Monitor}
-        label={isMobile ? "mobile" : "desktop"}
-        name="mobileDevice"
-        description="Preview the view on a mobile device (true) or desktop (false)."
-        checked={isMobile}
-      />
+      {variant === "panel" && (
+        <ToolbarToggle
+          icon={isMobile ? Smartphone : Monitor}
+          label={isMobile ? "mobile" : "desktop"}
+          name="mobileDevice"
+          description="Preview the view on a mobile device (true) or desktop (false)."
+          checked={isMobile}
+        />
+      )}
 
-      {!logsOpen && displayMode !== "fullscreen" && (
+      {variant === "panel" && displayMode !== "fullscreen" && (
+        <div className="ml-auto flex items-center gap-1.5">
+          <ToolbarButton
+            icon={Eye}
+            label="preview"
+            onClick={() => setPreviewClient("chatgpt")}
+          />
+          {!logsOpen && (
+            <ToolbarButton icon={Logs} label="logs" onClick={onOpenLogs} />
+          )}
+        </div>
+      )}
+
+      {variant === "preview" && (
         <ToolbarButton
-          icon={Logs}
-          label="logs"
-          className="ml-auto"
-          onClick={onOpenLogs}
+          icon={X}
+          label="quit preview"
+          onClick={() => {
+            setPreviewClient(null);
+            setPreference("displayMode", "inline");
+          }}
         />
       )}
     </form>

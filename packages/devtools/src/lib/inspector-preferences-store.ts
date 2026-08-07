@@ -7,11 +7,15 @@ export type InspectorPreferences = Pick<
   "theme" | "locale" | "displayMode" | "maxHeight" | "safeArea" | "userAgent"
 >;
 
+export type PreviewClient = "chatgpt";
+
 type InspectorPreferencesStore = InspectorPreferences & {
+  previewClient: PreviewClient | null;
   setPreference: <K extends keyof InspectorPreferences>(
     key: K,
     value: InspectorPreferences[K],
   ) => void;
+  setPreviewClient: (previewClient: PreviewClient | null) => void;
 };
 
 export const defaultInspectorPreferences: InspectorPreferences = {
@@ -37,18 +41,30 @@ export const useInspectorPreferencesStore = create<InspectorPreferencesStore>()(
   persist(
     (set) => ({
       ...defaultInspectorPreferences,
+      previewClient: null,
       setPreference: (key, value) =>
         set({ [key]: value } as Partial<InspectorPreferences>),
+      setPreviewClient: (previewClient) => set({ previewClient }),
     }),
     {
       name: "skybridge-devtools-inspector-preferences",
       version: 1,
+      partialize: ({
+        previewClient: _previewClient,
+        setPreference: _setPreference,
+        setPreviewClient: _setPreviewClient,
+        ...state
+      }) => state,
     },
   ),
 );
 
 export const getInspectorPreferences = (): InspectorPreferences => {
-  const { setPreference: _setPreference, ...preferences } =
-    useInspectorPreferencesStore.getState();
+  const {
+    setPreference: _setPreference,
+    setPreviewClient: _setPreviewClient,
+    previewClient: _previewClient,
+    ...preferences
+  } = useInspectorPreferencesStore.getState();
   return preferences;
 };
