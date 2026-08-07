@@ -23,7 +23,7 @@ The devtools page exposes WebMCP tools, powering faster interactions than with t
 1. `navigate_page` to the devtools URL output by the dev server
 2. `list_webmcp_tools` to discover the page's tools:
    - one tool per app tool — executes it on the local MCP server, returns its result, and renders its view in the preview pane
-   - `devtools_set_view_options` — sets any subset of `displayMode` (`inline`|`pip`|`fullscreen`), `darkTheme` (boolean), `mobileDevice` (boolean), `locale` (BCP 47 code)
+   - `devtools_set_view_options` — sets any subset of `darkTheme` (boolean), `mobileDevice` (boolean), `locale` (BCP 47 code); the display mode is driven by the view itself
 3. `execute_webmcp_tool` with `toolName` and JSON-stringified `input`
 
 Interactions inside the rendered view itself are not WebMCP tools, use regular DOM understanding and interactions. Use `take_screenshot` only to visually verify rendering — screenshot the preview iframe (accessible name `html-preview` in the page snapshot) rather than the full page.

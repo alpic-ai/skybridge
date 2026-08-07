@@ -198,7 +198,7 @@ export const ToolPanel = () => {
 
   return (
     <div
-      className="flex h-full min-h-0 w-full flex-col overflow-hidden preview-region transition-colors duration-150 ease-out"
+      className="relative flex h-full min-h-0 w-full flex-col overflow-hidden preview-region transition-colors duration-150 ease-out"
       data-theme={theme}
     >
       <ToolPanelHeader

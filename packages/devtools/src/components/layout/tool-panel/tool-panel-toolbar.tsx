@@ -46,16 +46,6 @@ const displayModes: { mode: RequestDisplayMode; icon: LucideIcon }[] = [
 function applyViewOptions(data: FormData, variant: ToolbarVariant): string {
   const { userAgent, setPreference } = useInspectorPreferencesStore.getState();
 
-  const mode = data.get("displayMode");
-  if (
-    isOneOf(
-      mode,
-      displayModes.map((d) => d.mode),
-    )
-  ) {
-    setPreference("displayMode", mode);
-  }
-
   // Checkboxes are absent from FormData when unchecked, so absence is
   // meaningful (false) — apply unconditionally.
   setPreference("theme", data.has("darkTheme") ? "dark" : "light");
@@ -228,6 +218,9 @@ export const ToolPanelToolbar = ({
   const isMobile = (userAgent?.device?.type ?? "desktop") === "mobile";
   const localeLabel =
     locales.find((l) => l.code === locale)?.englishName ?? locale;
+  const DisplayModeIcon =
+    displayModes.find((d) => d.mode === displayMode)?.icon ??
+    SquareSplitVertical;
 
   return (
     <form
@@ -235,7 +228,7 @@ export const ToolPanelToolbar = ({
       toolname="devtools_set_view_options"
       tooldescription={
         variant === "panel"
-          ? "Set the Skybridge devtools view preview options. Any subset of fields can be changed: display mode, theme, locale, and device type."
+          ? "Set the Skybridge devtools view preview options. Any subset of fields can be changed: theme, locale, and device type."
           : "Set the Skybridge devtools preview options: theme."
       }
       toolautosubmit=""
@@ -262,34 +255,13 @@ export const ToolPanelToolbar = ({
       )}
     >
       {variant === "panel" && (
-        <fieldset className="inline-flex h-7 items-center rounded-md border border-border bg-background p-0.5">
-          <legend className="sr-only">Display mode</legend>
-          {displayModes.map(({ mode, icon: Icon }) => {
-            const selected = displayMode === mode;
-            return (
-              <label
-                key={mode}
-                className={cn(
-                  "inline-flex h-full cursor-pointer items-center gap-1.5 rounded px-2 text-xs font-medium transition-colors",
-                  "has-focus-visible:ring-1 has-focus-visible:ring-ring",
-                  selected ? buttonSelectedClass : buttonIdleClass,
-                )}
-              >
-                <input
-                  type="radio"
-                  name="displayMode"
-                  value={mode}
-                  checked={selected}
-                  onChange={(e) => e.currentTarget.form?.requestSubmit()}
-                  toolparamdescription="How the host lays out the rendered view."
-                  className="sr-only"
-                />
-                <Icon className="size-3.5" />
-                <span>{mode}</span>
-              </label>
-            );
-          })}
-        </fieldset>
+        <div
+          title="Display mode (driven by the view)"
+          className="inline-flex h-7 cursor-default items-center gap-1.5 rounded-md bg-muted px-2.5 text-xs font-medium text-muted-foreground"
+        >
+          <DisplayModeIcon className="size-3.5" />
+          <span>{displayMode}</span>
+        </div>
       )}
 
       <ToolbarToggle
