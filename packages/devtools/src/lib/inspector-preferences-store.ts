@@ -48,8 +48,18 @@ export const useInspectorPreferencesStore = create<InspectorPreferencesStore>()(
     }),
     {
       name: "skybridge-devtools-inspector-preferences",
-      version: 1,
+      version: 2,
+      migrate: (persisted, version) => {
+        const state = persisted as Omit<InspectorPreferences, "displayMode"> & {
+          displayMode?: InspectorPreferences["displayMode"];
+        };
+        if (version < 2) {
+          delete state.displayMode;
+        }
+        return state;
+      },
       partialize: ({
+        displayMode: _displayMode,
         previewClient: _previewClient,
         setPreference: _setPreference,
         setPreviewClient: _setPreviewClient,
