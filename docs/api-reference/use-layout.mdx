@@ -53,6 +53,10 @@ theme: Theme;
 
 The host's active color theme, `"light"` or `"dark"`. Mirror it in the view's styling for a native feel. It updates when the user toggles the host theme.
 
+<Tip>
+To match the host automatically, without branching on `theme` yourself, enable [host styles](/build/view#match-the-host-styles): Skybridge then applies the host's theme, palette, and fonts to your view as CSS variables.
+</Tip>
+
 ### `maxHeight`
 
 ```tsx

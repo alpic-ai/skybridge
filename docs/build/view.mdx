@@ -68,7 +68,7 @@ server
 ```
 </CodeGroup>
 
-The sections below walk through it: the component itself, reading the tool, calling tools back, the typed helpers binding views to the server, and opening the sandbox to external domains.
+The sections below walk through it: the component itself, reading the tool, calling tools back, the typed helpers binding views to the server, matching the host's styles, and opening the sandbox to external domains.
 
 ## The Component
 
@@ -169,6 +169,53 @@ export const { useToolInfo, useCallTool } = generateHelpers<AppType>();
 Import `useToolInfo` and `useCallTool` from `helpers.ts` everywhere, and you get autocomplete on tool names, plus typed inputs, outputs, and metadata on both hooks.
 
 Type-safe hooks are generated using [generateHelpers](/api-reference/generate-helpers).
+
+## Match the Host Styles
+
+A view feels native when it borrows the host's own look: its palette, typography, and light or dark theme. On the [MCP Apps](/fundamentals/mcp-apps) runtime, hosts like Claude can hand your view a set of design tokens for exactly this. Opt in with the `hostStyles` option on the Vite plugin:
+
+```ts vite.config.ts highlight={7}
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { skybridge } from "skybridge/vite";
+
+export default defineConfig({
+  plugins: [react(), skybridge({ hostStyles: true })],
+});
+```
+
+With it on, Skybridge applies whatever the host provides, and keeps it in sync when the user toggles their theme:
+
+- **CSS variables** on `:root`, a standardized set you reference with `var(…)`, covering colors (`--color-background-primary`, `--color-text-primary`, `--color-border-primary`, and `info` / `danger` / `success` / `warning` variants), typography (`--font-sans`, `--font-mono`, `--font-weight-medium`, `--font-text-md-size`…), radii (`--border-radius-sm` … `--border-radius-full`), and shadows (`--shadow-sm` … `--shadow-lg`).
+- **`color-scheme`** on the document, so the host's `light-dark()` color values resolve to the right branch and native controls (scrollbars, form fields) match the theme.
+- **Fonts** the host ships, injected so `var(--font-sans)` renders in the host's typeface.
+
+```tsx views/carousel.tsx
+export default function ProductCard({ product }) {
+  return (
+    <div
+      style={{
+        background: "var(--color-background-primary)",
+        color: "var(--color-text-primary)",
+        border: "1px solid var(--color-border-primary)",
+        borderRadius: "var(--border-radius-lg)",
+        boxShadow: "var(--shadow-md)",
+        fontFamily: "var(--font-sans)",
+      }}
+    >
+      {product.name}
+    </div>
+  );
+}
+```
+
+<Note>
+`hostStyles` is **off by default**. Turning it on lets the host set those variables on `:root` and flip `color-scheme`, restyling your view. Because the variables are applied inline on the document root, a `:root { --color-text-primary: … }` of your own is **overridden** by the host's value; scope your overrides below the root (on a wrapper element) if you need them to win. Opt in once your view is ready to inherit the host's styling.
+</Note>
+
+<Info>
+Host styles are an MCP Apps feature. Under the ChatGPT [Apps SDK](/fundamentals/apps-sdk) runtime the host sends no tokens, so the option is a no-op there, and not every MCP host provides a full set. Read the current theme directly with [`useLayout`](/api-reference/use-layout#theme) when you need to branch in code.
+</Info>
 
 ## Open the Sandbox
 

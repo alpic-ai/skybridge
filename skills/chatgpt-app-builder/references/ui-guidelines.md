@@ -153,6 +153,8 @@ function Container({ children }) {
 }
 ```
 
+To match the host automatically instead of branching on `theme`, enable host styles with `skybridge({ hostStyles: true })` in `vite.config.ts` (MCP Apps only; no-op under the ChatGPT Apps SDK). Skybridge then applies the host's theme, palette, and fonts as CSS variables on `:root` — reference them with `var(--color-background-primary)`, `var(--color-text-primary)`, `var(--font-sans)`, `var(--border-radius-lg)`, etc. It is off by default because enabling it lets the host override same-named `:root` variables and flip `color-scheme`.
+
 ## Adapting to User
 
 Use `useUser` to read user context.

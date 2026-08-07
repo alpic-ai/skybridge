@@ -6,6 +6,18 @@ import { installOpenAILoggingProxy } from "./proxy.js";
 
 let rootInstance: Root | null = null;
 
+/** Options for {@link mountView}. */
+export type MountViewOptions = {
+  /**
+   * Apply the host's theme, CSS variables and fonts to the view automatically
+   * (MCP Apps runtime only). Off by default: enabling it lets the host restyle
+   * the view — including flipping `color-scheme` — so opt in once the view is
+   * ready to inherit host styling. No-op under the ChatGPT Apps SDK runtime.
+   * Usually set via the `skybridge({ hostStyles: true })` Vite plugin option.
+   */
+  hostStyles?: boolean;
+};
+
 /**
  * Mount a view's root React component into `#root`. Each view file's entry
  * point should call this exactly once.
@@ -25,7 +37,10 @@ let rootInstance: Root | null = null;
  * mountView(<App />);
  * ```
  */
-export const mountView = (component: React.ReactNode) => {
+export const mountView = (
+  component: React.ReactNode,
+  options?: MountViewOptions,
+) => {
   const rootElement = document.getElementById("root");
   if (!rootElement) {
     throw new Error("Root element not found");
@@ -44,6 +59,10 @@ export const mountView = (component: React.ReactNode) => {
   (async () => {
     let app = component;
     if (hostType === "mcp-app") {
+      const { McpAppBridge } = await import("./bridges/mcp-app/bridge.js");
+      McpAppBridge.getInstance({
+        applyHostStyles: options?.hostStyles ?? false,
+      });
       const { ModalProvider } = await import("./components/modal-provider.js");
       app = createElement(ModalProvider, null, component);
     }
