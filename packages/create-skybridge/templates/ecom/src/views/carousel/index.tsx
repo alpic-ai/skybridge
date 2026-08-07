@@ -20,8 +20,7 @@ import { sprinkles } from "../../design/tokens";
 import { useToolInfo } from "../../helpers.js";
 import { useLabels } from "../../i18n";
 import { formatPrice } from "../../lib/format";
-import type { Product } from "../../tools/render-carousel.js";
-import type { Price, Spec } from "../../types.js";
+import type { Price, Product, Spec } from "../../types.js";
 import { DetailView } from "./detail";
 
 const SKELETON_COUNT = 4;
