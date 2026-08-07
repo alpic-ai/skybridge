@@ -12,6 +12,7 @@ import {
   PopoverTrigger,
 } from "@alpic-ai/ui/components/popover";
 import {
+  ArrowLeftRight,
   Check,
   Eye,
   Languages,
@@ -205,6 +206,7 @@ export const ToolPanelToolbar = ({
   const theme = useInspectorPreferencesStore((s) => s.theme);
   const locale = useInspectorPreferencesStore((s) => s.locale);
   const userAgent = useInspectorPreferencesStore((s) => s.userAgent);
+  const previewClient = useInspectorPreferencesStore((s) => s.previewClient);
   const setPreviewClient = useInspectorPreferencesStore(
     (s) => s.setPreviewClient,
   );
@@ -234,7 +236,7 @@ export const ToolPanelToolbar = ({
       tooldescription={
         variant === "panel"
           ? "Set the Skybridge devtools view preview options. Any subset of fields can be changed: display mode, theme, locale, and device type."
-          : "Set the Skybridge devtools preview options. Any subset of fields can be changed: theme and locale."
+          : "Set the Skybridge devtools preview options: theme."
       }
       toolautosubmit=""
       onSubmit={(event) => {
@@ -298,67 +300,71 @@ export const ToolPanelToolbar = ({
         checked={isDark}
       />
 
-      <Popover open={localeOpen} onOpenChange={setLocaleOpen}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            aria-label="Locale"
-            className={cn(
-              buttonBaseClass,
-              "border border-border bg-background",
-              buttonIdleClass,
-              "aria-expanded:bg-muted aria-expanded:text-foreground",
-            )}
-          >
-            <Languages className="size-3.5" />
-            <span>{localeLabel}</span>
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[260px] p-0" align="start">
-          <Command>
-            <CommandInput placeholder="Search locale..." />
-            <CommandList>
-              <CommandEmpty>No locale found.</CommandEmpty>
-              <CommandGroup>
-                {locales.map((l) => (
-                  <CommandItem
-                    key={l.code}
-                    value={l.code}
-                    keywords={[l.englishName, l.localeName]}
-                    onSelect={(v) => {
-                      submitLocale(v);
-                      setLocaleOpen(false);
-                    }}
-                  >
-                    <span className="truncate">
-                      {l.englishName}
-                      {l.localeName !== l.englishName ? (
-                        <span className="ml-1.5 text-muted-foreground">
-                          {l.localeName}
+      {variant === "panel" && (
+        <>
+          <Popover open={localeOpen} onOpenChange={setLocaleOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                aria-label="Locale"
+                className={cn(
+                  buttonBaseClass,
+                  "border border-border bg-background",
+                  buttonIdleClass,
+                  "aria-expanded:bg-muted aria-expanded:text-foreground",
+                )}
+              >
+                <Languages className="size-3.5" />
+                <span>{localeLabel}</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[260px] p-0" align="start">
+              <Command>
+                <CommandInput placeholder="Search locale..." />
+                <CommandList>
+                  <CommandEmpty>No locale found.</CommandEmpty>
+                  <CommandGroup>
+                    {locales.map((l) => (
+                      <CommandItem
+                        key={l.code}
+                        value={l.code}
+                        keywords={[l.englishName, l.localeName]}
+                        onSelect={(v) => {
+                          submitLocale(v);
+                          setLocaleOpen(false);
+                        }}
+                      >
+                        <span className="truncate">
+                          {l.englishName}
+                          {l.localeName !== l.englishName ? (
+                            <span className="ml-1.5 text-muted-foreground">
+                              {l.localeName}
+                            </span>
+                          ) : null}
                         </span>
-                      ) : null}
-                    </span>
-                    <Check
-                      className={cn(
-                        "ml-auto h-4 w-4",
-                        locale === l.code ? "opacity-100" : "opacity-0",
-                      )}
-                    />
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-      <div className="sr-only" aria-hidden>
-        <ViewOptionSelect
-          name="locale"
-          description="The BCP 47 locale code to preview the view in."
-          value={locale}
-          options={locales.map((l) => l.code)}
-        />
-      </div>
+                        <Check
+                          className={cn(
+                            "ml-auto h-4 w-4",
+                            locale === l.code ? "opacity-100" : "opacity-0",
+                          )}
+                        />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+          <div className="sr-only" aria-hidden>
+            <ViewOptionSelect
+              name="locale"
+              description="The BCP 47 locale code to preview the view in."
+              value={locale}
+              options={locales.map((l) => l.code)}
+            />
+          </div>
+        </>
+      )}
 
       {variant === "panel" && (
         <ToolbarToggle
@@ -384,14 +390,30 @@ export const ToolPanelToolbar = ({
       )}
 
       {variant === "preview" && (
-        <ToolbarButton
-          icon={X}
-          label="quit preview"
-          onClick={() => {
-            setPreviewClient(null);
-            setPreference("displayMode", "inline");
-          }}
-        />
+        <>
+          <ToolbarButton
+            icon={ArrowLeftRight}
+            label={
+              previewClient === "claude"
+                ? "switch to ChatGPT"
+                : "switch to Claude"
+            }
+            onClick={() => {
+              setPreviewClient(
+                previewClient === "claude" ? "chatgpt" : "claude",
+              );
+              setPreference("displayMode", "inline");
+            }}
+          />
+          <ToolbarButton
+            icon={X}
+            label="quit preview"
+            onClick={() => {
+              setPreviewClient(null);
+              setPreference("displayMode", "inline");
+            }}
+          />
+        </>
       )}
     </form>
   );

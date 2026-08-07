@@ -14,6 +14,7 @@ import {
   pushToolResultNotification,
 } from "./create-mcp-host-mock.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
+import { useSyncHostStyles } from "./use-sync-host-styles.js";
 import { useSyncOpenaiDisplayMode } from "./use-sync-openai-display-mode.js";
 import { useSyncOpenaiLocale } from "./use-sync-openai-locale.js";
 import { useSyncOpenaiTheme } from "./use-sync-openai-theme.js";
@@ -36,9 +37,8 @@ export const View = () => {
   const openaiObjectRef = useRef(openaiObject);
   openaiObjectRef.current = openaiObject;
   const [contentHeight, setContentHeight] = useState<number | null>(null);
-  const inPreview = useInspectorPreferencesStore(
-    (s) => s.previewClient !== null,
-  );
+  const previewClient = useInspectorPreferencesStore((s) => s.previewClient);
+  const inPreview = previewClient !== null;
   const isMobile =
     useInspectorPreferencesStore(
       (s) => s.userAgent?.device?.type ?? "desktop",
@@ -181,6 +181,13 @@ export const View = () => {
     toolName: tool.name,
     displayMode,
     updateOpenaiObject,
+  });
+
+  useSyncHostStyles({
+    iframeRef,
+    theme,
+    previewClient,
+    documentKey: html,
   });
 
   // Push MCP ext-apps tool notifications whenever the openaiObject is populated.

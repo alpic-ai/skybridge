@@ -7,7 +7,7 @@ export type InspectorPreferences = Pick<
   "theme" | "locale" | "displayMode" | "maxHeight" | "safeArea" | "userAgent"
 >;
 
-export type PreviewClient = "chatgpt";
+export type PreviewClient = "chatgpt" | "claude";
 
 type InspectorPreferencesStore = InspectorPreferences & {
   previewClient: PreviewClient | null;
