@@ -1,9 +1,13 @@
-import type { CallToolResponse } from "skybridge/web";
-import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
+import type { CallToolResponse, Theme } from "skybridge/web";
+import {
+  type PreviewClient,
+  useInspectorPreferencesStore,
+} from "@/lib/inspector-preferences-store.js";
 import {
   chatgptHostContextExtras,
   chatgptStyleVariables,
 } from "./chatgpt-host-context.js";
+import { claudeHostContextExtras } from "./claude-host-context.js";
 
 type PostFn = (msg: unknown) => void;
 
@@ -29,12 +33,24 @@ function respondError(post: PostFn, id: number, code: number, message: string) {
   post({ jsonrpc: "2.0", id, error: { code, message } });
 }
 
+function previewHostContextExtras(
+  previewClient: PreviewClient | null,
+  theme: Theme,
+): Partial<HostContext> {
+  switch (previewClient) {
+    case "chatgpt":
+      return chatgptHostContextExtras(theme);
+    case "claude":
+      return claudeHostContextExtras();
+    case null:
+      return {};
+  }
+}
+
 function buildHostContext(): HostContext {
   const preferences = useInspectorPreferencesStore.getState();
   return {
-    ...(preferences.previewClient === "chatgpt"
-      ? chatgptHostContextExtras(preferences.theme)
-      : {}),
+    ...previewHostContextExtras(preferences.previewClient, preferences.theme),
     theme: preferences.theme,
     locale: preferences.locale,
     displayMode: preferences.displayMode,
@@ -151,13 +167,18 @@ export function createMcpHostMock(
         break;
       }
       case "ui/request-display-mode": {
-        const mode = (params as { mode?: string })?.mode ?? "inline";
-        useInspectorPreferencesStore
-          .getState()
-          .setPreference(
-            "displayMode",
-            mode as "inline" | "fullscreen" | "pip",
-          );
+        const requested = (params as { mode?: string })?.mode ?? "inline";
+        const state = useInspectorPreferencesStore.getState();
+        const mode =
+          state.previewClient === "claude" && requested === "pip"
+            ? state.displayMode === "modal"
+              ? "inline"
+              : state.displayMode
+            : requested;
+        state.setPreference(
+          "displayMode",
+          mode as "inline" | "fullscreen" | "pip",
+        );
         respond(post, id, { mode });
         break;
       }
@@ -218,6 +239,15 @@ export function createMcpHostMock(
             variables: chatgptStyleVariables(preferences.theme),
           };
         }
+      }
+      if (preferences.previewClient !== previous.previewClient) {
+        Object.assign(
+          changed,
+          previewHostContextExtras(
+            preferences.previewClient,
+            preferences.theme,
+          ),
+        );
       }
       if (preferences.locale !== previous.locale) {
         changed.locale = preferences.locale;

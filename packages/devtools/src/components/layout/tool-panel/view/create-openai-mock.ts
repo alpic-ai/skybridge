@@ -52,13 +52,18 @@ function createOpenaiMethods(
     },
     requestDisplayMode: async (args: { mode: RequestDisplayMode }) => {
       log("requestDisplayMode", args);
-      openai.displayMode = args.mode;
-      setValue("displayMode", args.mode);
-      useInspectorPreferencesStore
-        .getState()
-        .setPreference("displayMode", args.mode);
+      const state = useInspectorPreferencesStore.getState();
+      const mode =
+        state.previewClient === "claude" && args.mode === "pip"
+          ? state.displayMode === "modal"
+            ? "inline"
+            : state.displayMode
+          : args.mode;
+      openai.displayMode = mode;
+      setValue("displayMode", mode);
+      state.setPreference("displayMode", mode);
       return {
-        mode: args.mode,
+        mode,
       };
     },
     setWidgetState: async (state: AppsSdkWidgetState) => {
