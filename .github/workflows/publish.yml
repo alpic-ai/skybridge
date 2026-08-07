@@ -16,6 +16,10 @@ jobs:
   publish:
     runs-on: ubuntu-latest
 
+    concurrency:
+      group: publish-${{ github.sha }}
+      cancel-in-progress: true
+
     steps:
       - uses: actions/checkout@v7
 
@@ -77,7 +81,7 @@ jobs:
 
       - name: Publish core to npm
         working-directory: ./packages/core
-        run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance --no-git-checks
+        run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
 
       # Templates use `skybridge: workspace:*` so dev/CI build against the
       # local package. pnpm doesn't rewrite that when bundling the templates
@@ -93,11 +97,11 @@ jobs:
 
       - name: Publish create-skybridge to npm
         working-directory: ./packages/create-skybridge
-        run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance --no-git-checks
+        run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
 
       - name: Publish devtools to npm
         working-directory: ./packages/devtools
-        run: pnpm publish --tag ${{ steps.version.outputs.tag }} --access public --provenance --no-git-checks
+        run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
 
       - name: Restore templates workspace deps
         if: github.event_name == 'release'
