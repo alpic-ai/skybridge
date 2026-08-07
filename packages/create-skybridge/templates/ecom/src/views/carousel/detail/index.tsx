@@ -12,7 +12,7 @@ import {
   resolveVariant,
   type Selection,
 } from "../../../lib/variants.js";
-import type { Product, Variant } from "../../../tools/render-carousel.js";
+import type { Product, Variant } from "../../../types.js";
 import * as styles from "./detail.css";
 
 // Price to show: the resolved variant's price, else the range across variants

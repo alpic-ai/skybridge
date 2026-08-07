@@ -1,4 +1,4 @@
-import type { Product, Variant } from "../tools/render-carousel.js";
+import type { Product, Variant } from "../types.js";
 
 // Pure helpers that turn the client's option choices into a concrete variant.
 // The `variants` list is SPARSE: only combinations that exist are present, and

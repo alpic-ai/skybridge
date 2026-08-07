@@ -1,4 +1,4 @@
-import type { Product } from "../../../tools/render-carousel.js";
+import type { Product } from "../../../types.js";
 import { DetailView } from "./index";
 
 function shot(fill: string) {

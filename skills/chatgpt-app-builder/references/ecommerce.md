@@ -26,8 +26,12 @@ Orientation map (curated; each phase details its own files):
 ```
 src/
   config.ts                    shared tuning (carousel size, search iterations)
-  types.ts                     shared Price / Attribute schemas
+  types.ts                     Price / Spec schemas, Product / Variant / Option model
   server.ts                    name, version, prompt, tool registration
+  catalog/                     the data seam: search + getProducts
+    index.ts                     picks the provider (one re-export line)
+    mock.ts                      placeholder catalog, no backend
+    shopify.ts                   Shopify Storefront API
   tools/
     search-products.ts         keyword + filters -> matching products (no view)
     render-carousel.ts         curated ids -> products for the carousel view
@@ -43,7 +47,7 @@ src/
 
 Prompt the user for the resources below, in one turn, and wait for their answer. Do not research the catalog or brand on your own yet. For whatever they say they lack, write a short complementary research plan (what you would look up, where, and why) and get the user to sign off on it before running any of it.
 
-**Data source.** API or database, base URL or connection string, auth method, the product schema (fields and types), the filters and sort options it supports, the image and price fields, and how it paginates. Request any reference docs and save them under `docs/` (create it if missing); read them before writing code.
+**Data source.** API or database, base URL or connection string, auth method, the product schema (fields and types), the filters and sort options it supports, the image and price fields, and how it paginates. Request any reference docs and save them under `docs/` (create it if missing); read them before writing code. Shopify store? `src/catalog/shopify.ts` already implements it: ask only for the store domain and a Storefront access token.
 
 **Brand assets.** A Figma link if the brand has one (a design system, or the design of an existing web / mobile / desktop app). Otherwise the web app URL and/or screenshots. Either way, the brand's font files. No brand at all (internal tool, prototype)? Note that and move on.
 
@@ -72,7 +76,7 @@ The subagent's brief:
 - **Sample the imagery.** A handful of real image URLs from different categories: aspect ratios, cutout vs in-context photography, transparent or white backgrounds, resolution, and any URL-based resizing params. Phase 6 chooses the card and gallery aspect ratio / fit by looking at these, never by guessing.
 - **Note the sharp edges.** Rate limits, auth quirks, encoding oddities, slow endpoints, fields whose content is HTML rather than text.
 
-Have it return the findings mapped onto the template's shapes (`productSchema` in search-products, `Product`/`Variant`/`Option` in render-carousel), a full raw JSON sample of one representative product, plus one variant-rich and one edge-case example (out of stock, single image, or missing description).
+Have it return the findings mapped onto the template's shapes (`Product`/`Variant`/`Option` in `src/types.ts`, `productSchema` in search-products), a full raw JSON sample of one representative product, plus one variant-rich and one edge-case example (out of stock, single image, or missing description).
 
 **Gate 2:**
 
@@ -146,7 +150,7 @@ gallery sticky on desktop; CTA follows the selected variant's url
 
 ## Phase 4: server
 
-Fill `config.ts`, `types.ts`, `server.ts`, and the two tools. Start the dev server and keep it running:
+Fill `config.ts`, `types.ts`, `server.ts`, the catalog provider, and the two tools. Start the dev server and keep it running:
 
 ```bash
 {pm} run dev   # prints the local MCP URL (default http://localhost:3000/mcp)
@@ -160,6 +164,23 @@ Fill `config.ts`, `types.ts`, `server.ts`, and the two tools. Start the dev serv
 - [ ] `src/config.ts` `CAROUSEL_MAX_SIZE`: max products the carousel shows.
 - [ ] `src/config.ts` `MIN_SEARCH_ITERATIONS`: minimum searches before rendering.
 
+### Catalog (`src/catalog/`)
+
+The app's only data seam: both tools read products through `search()` and `getProducts()`, re-exported from `src/catalog/index.ts`. Providers return domain types (`Product`, `SearchResult` from `src/types.ts`), never tool-shaped output; each tool projects its own.
+
+- [ ] Product model (`Product`, `Variant`, `Option`, `Meta` in `src/types.ts`): match your catalog. A `Product` groups sibling `Variant`s and declares the `Option` axes. `variants` is sparse (list only the combinations that exist; a missing one encodes a contingent variation). `card` (required) is what the carousel shows for the product, surfaced both to the view and to the model (`structuredContent` is projected from it).
+- [ ] Provider: point `index.ts` at `./shopify.js` for a Shopify store, or write your own module next to it with the same two exports. Delete `mock.ts` once you do.
+- [ ] `search()`: query the data source with the input params and map each hit into a `Product`; set `pages` and `totalHits` if the backend reports them.
+- [ ] `getProducts()`: fetch each id and map results into `Product[]` (mapping strategy below).
+
+**Mapping ids to products (`getProducts`).** Whatever `search()` put in each `id` is what arrives here; the two must stay consistent. Preserve the `ids` order, and decide how to handle ids with no match (skip, or surface them).
+
+- **No variants (simple products):** one `Product` per id with a single variant, `card` set to that variant, `options: []`. Nothing else to decide.
+- **Variants, grouped (one card per product):** all queried variants of a product collapse into one carousel item. `card` is the union of the available variants (a "from" price, in stock if any variant is), and `card.media` holds one picture per requested variant.
+- **Variants, one card per requested variant:** each requested variant is its own carousel item, `card` set to that variant.
+
+Either way, each item's `Product` must hold ALL the variants the data source returned in `variants` (only `card` differs): the detail view reads `variants` so the client can switch to any of them.
+
 ### `search-products` (`src/tools/search-products.ts`)
 
 Keyword/filter search returning model-facing grounding. No view, so keep the output to what the model needs to curate (ids + facts), never presentational data (images, media): render-carousel handles that.
@@ -171,28 +192,18 @@ Keyword/filter search returning model-facing grounding. No view, so keep the out
 - [ ] `inputSchema` filters: replace `priceRange` with one optional param per real facet.
 - [ ] `productSchema` / `outputSchema`: adjust the model-facing fields (`id`, `title`, `description`, `price`, `outOfStock`, `specs`).
 - [ ] `productSchema` custom fields (optional): add any typed field the model should curate on (e.g. `rating`, `discountPct`).
-- [ ] `search()`: query the data source with the input params and map each hit into `productSchema`; set `pages` and `totalHits`.
+- [ ] `toStructuredContent()`: project each product's `card` into the model-facing grounding, dropping presentational fields (media, url).
 - [ ] `narrate()` NEXT STEPS: adapt the post-search guidance to your flow (framing only; it carries no result data).
 
 ### `render-carousel` (`src/tools/render-carousel.ts`)
 
 Takes the curated ids and returns the products for the carousel. The full product data (variants, media, options) rides in `_meta` for the view; a trimmed grounding subset goes to `structuredContent` for the model.
 
-- [ ] Product model (`Product`, `Variant`, `Option`, `Meta`): match your catalog. A `Product` groups sibling `Variant`s and declares the `Option` axes. `variants` is sparse (list only the combinations that exist; a missing one encodes a contingent variation). `card` (required) is what the carousel shows for the product, surfaced both to the view and to the model (`structuredContent` is projected from it).
-- [ ] `getProducts()`: fetch each id and map results into `Product[]` (mapping strategy below).
 - [ ] `toStructuredContent()`: trim each product's `card` and `options` into the model-facing grounding, dropping presentational fields (media, url). The view reads the full products from `_meta`.
 - [ ] `Meta` custom fields (optional): add any typed field the view renders (e.g. `rating`, `discountPct`).
 - [ ] `description`: adapt the wording and brand voice; the behavioral rules (order, no-repeat, accuracy) apply to any catalog.
 - [ ] `_meta`: the invoking and invoked status messages.
-- [ ] `view.csp`: add your image host to `resourceDomains` (product images) and the product site to `redirectDomains` (the detail CTA and the host "open in app" URL). `view` itself is already wired to the `carousel` view.
-
-**Mapping ids to products (`getProducts`).** Whatever `search-products` put in each `id` is what arrives here; keep the two tools consistent. Preserve the `ids` order, and decide how to handle ids with no match (skip, or surface them).
-
-- **No variants (simple products):** one `Product` per id with a single variant, `card` set to that variant, `options: []`. Nothing else to decide.
-- **Variants, grouped (one card per product):** all queried variants of a product collapse into one carousel item. `card` is the union of the available variants (a "from" price, in stock if any variant is), and `card.media` holds one picture per requested variant.
-- **Variants, one card per requested variant:** each requested variant is its own carousel item, `card` set to that variant.
-
-Either way, each item's `Product` must hold ALL the variants the data source returned in `variants` (only `card` differs): the detail view reads `variants` so the client can switch to any of them.
+- [ ] `view.csp`: add your image host to `resourceDomains` (product images) and the product site to `redirectDomains` (the detail CTA and the host "open in app" URL). Shopify: `https://cdn.shopify.com` and your store domain. `view` itself is already wired to the `carousel` view.
 
 **Gate 4: verify both tools with curl** against the running server. `Accept` must include `text/event-stream` or the SDK rejects the request. (`"method":"tools/list"` with no `params` lists the registered schemas.)
 
