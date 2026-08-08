@@ -1,0 +1,6 @@
+{
+  "extends": "../../packages/core/tsconfig.base.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true
+  }
+}
