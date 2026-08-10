@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     concurrency:
-      group: publish-${{ github.sha }}
+      group: publish-${{ github.event_name }}-${{ github.sha }}
       cancel-in-progress: false
 
     steps:
