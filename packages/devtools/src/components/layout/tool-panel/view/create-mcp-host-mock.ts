@@ -1,6 +1,12 @@
-import type { CallToolResponse, Theme } from "skybridge/web";
+import type {
+  CallToolResponse,
+  RequestDisplayMode,
+  Theme,
+} from "skybridge/web";
 import {
+  isMobileDevice,
   type PreviewClient,
+  resolveDisplayModeRequest,
   useInspectorPreferencesStore,
 } from "@/lib/inspector-preferences-store.js";
 import {
@@ -46,14 +52,6 @@ function previewHostContextExtras(
     case null:
       return {};
   }
-}
-
-function isMobileDevice(
-  userAgent: ReturnType<
-    typeof useInspectorPreferencesStore.getState
-  >["userAgent"],
-): boolean {
-  return userAgent?.device?.type === "mobile";
 }
 
 function buildHostContext(): HostContext {
@@ -179,20 +177,11 @@ export function createMcpHostMock(
       case "ui/request-display-mode": {
         const requested = (params as { mode?: string })?.mode ?? "inline";
         const state = useInspectorPreferencesStore.getState();
-        const mode =
-          state.previewClient === "claude" && requested === "pip"
-            ? state.displayMode === "modal"
-              ? "inline"
-              : state.displayMode
-            : state.previewClient === "chatgpt" &&
-                requested === "pip" &&
-                isMobileDevice(state.userAgent)
-              ? "fullscreen"
-              : requested;
-        state.setPreference(
-          "displayMode",
-          mode as "inline" | "fullscreen" | "pip",
+        const mode = resolveDisplayModeRequest(
+          requested as RequestDisplayMode,
+          state,
         );
+        state.setPreference("displayMode", mode);
         respond(post, id, { mode });
         break;
       }

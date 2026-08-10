@@ -7,7 +7,10 @@ import {
   useRef,
 } from "react";
 import type { Theme } from "skybridge/web";
-import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
+import {
+  useInspectorPreferencesStore,
+  useIsMobile,
+} from "@/lib/inspector-preferences-store.js";
 import { cn } from "@/lib/utils.js";
 import {
   AgentRobotIcon,
@@ -95,6 +98,56 @@ const historyRowWidths = [
   "w-[60%]",
 ];
 
+function MobileHeader() {
+  return (
+    <div
+      aria-hidden
+      className="absolute inset-x-0 top-0 z-10 flex h-[52px] cursor-not-allowed items-center justify-between px-3"
+    >
+      <div className="flex size-10 items-center justify-center rounded-xl bg-[color-mix(in_oklab,var(--text-primary)_4%,transparent)] backdrop-blur-sm">
+        <MenuIcon className="size-6" />
+      </div>
+      <div className="flex h-10 items-center gap-5 rounded-xl bg-[color-mix(in_oklab,var(--text-primary)_4%,transparent)] px-4 backdrop-blur-sm">
+        <ComposeIcon className="size-6" />
+        <DotsIcon className="size-6" />
+      </div>
+    </div>
+  );
+}
+
+function MobileComposer() {
+  return (
+    <div className="rounded-[28px] bg-(--composer-surface-primary) p-2 shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+      <div className="px-2.5 pt-1.5 pb-3 text-(--text-tertiary)">
+        Ask ChatGPT
+      </div>
+      <div className="flex items-center gap-3 px-1.5 pb-0.5">
+        <PlusIcon className="size-5 shrink-0" />
+        <Bar className="h-4 w-16" />
+        <div className="flex-1" />
+        <Bar className="h-4 w-14" />
+        <MicrophoneIcon className="size-6 shrink-0" />
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-(--text-primary) text-(--main-surface-primary)">
+          <VoiceIcon className="size-5" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DesktopComposer() {
+  return (
+    <div className="flex h-[52px] items-center gap-3 rounded-full border border-(--border-default) bg-(--composer-surface-primary) px-4 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+      <PlusIcon className="size-5 shrink-0" />
+      <span className="flex-1 text-(--text-tertiary)">Ask ChatGPT</span>
+      <MicrophoneIcon className="size-6 shrink-0" />
+      <div className="flex size-9.5 shrink-0 items-center justify-center rounded-full bg-(--text-primary) text-(--main-surface-primary)">
+        <VoiceIcon className="size-5.5" />
+      </div>
+    </div>
+  );
+}
+
 function UserPill({ className }: { className?: string }) {
   return (
     <div
@@ -110,10 +163,7 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
   const theme = useInspectorPreferencesStore((s) => s.theme);
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
   const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
-  const isMobile =
-    useInspectorPreferencesStore(
-      (s) => s.userAgent?.device?.type ?? "desktop",
-    ) === "mobile";
+  const isMobile = useIsMobile();
   const isPip = displayMode === "pip";
   const isFullscreen = displayMode === "fullscreen";
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -208,20 +258,7 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
       <div className="relative flex h-full min-w-0 flex-1 flex-col">
-        {isMobile && !isFullscreen && (
-          <div
-            aria-hidden
-            className="absolute inset-x-0 top-0 z-10 flex h-[52px] cursor-not-allowed items-center justify-between px-3"
-          >
-            <div className="flex size-10 items-center justify-center rounded-xl bg-[color-mix(in_oklab,var(--text-primary)_4%,transparent)] backdrop-blur-sm">
-              <MenuIcon className="size-6" />
-            </div>
-            <div className="flex h-10 items-center gap-5 rounded-xl bg-[color-mix(in_oklab,var(--text-primary)_4%,transparent)] px-4 backdrop-blur-sm">
-              <ComposeIcon className="size-6" />
-              <DotsIcon className="size-6" />
-            </div>
-          </div>
-        )}
+        {isMobile && !isFullscreen && <MobileHeader />}
         <div
           className={cn(
             "h-[52px] shrink-0 items-center px-4",
@@ -363,34 +400,7 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
           )}
         >
           <div className="mx-auto w-full max-w-[768px]">
-            {isMobile ? (
-              <div className="rounded-[28px] bg-(--composer-surface-primary) p-2 shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
-                <div className="px-2.5 pt-1.5 pb-3 text-(--text-tertiary)">
-                  Ask ChatGPT
-                </div>
-                <div className="flex items-center gap-3 px-1.5 pb-0.5">
-                  <PlusIcon className="size-5 shrink-0" />
-                  <Bar className="h-4 w-16" />
-                  <div className="flex-1" />
-                  <Bar className="h-4 w-14" />
-                  <MicrophoneIcon className="size-6 shrink-0" />
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-(--text-primary) text-(--main-surface-primary)">
-                    <VoiceIcon className="size-5" />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex h-[52px] items-center gap-3 rounded-full border border-(--border-default) bg-(--composer-surface-primary) px-4 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-                <PlusIcon className="size-5 shrink-0" />
-                <span className="flex-1 text-(--text-tertiary)">
-                  Ask ChatGPT
-                </span>
-                <MicrophoneIcon className="size-6 shrink-0" />
-                <div className="flex size-9.5 shrink-0 items-center justify-center rounded-full bg-(--text-primary) text-(--main-surface-primary)">
-                  <VoiceIcon className="size-5.5" />
-                </div>
-              </div>
-            )}
+            {isMobile ? <MobileComposer /> : <DesktopComposer />}
           </div>
         </div>
       </div>

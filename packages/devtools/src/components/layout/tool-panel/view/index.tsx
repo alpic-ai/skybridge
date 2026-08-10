@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useIframeAutoHeight } from "@/hooks/use-iframe-auto-height.js";
 import { useIframeMounted } from "@/hooks/use-iframe-mounted.js";
-import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
+import {
+  useInspectorPreferencesStore,
+  useIsMobile,
+} from "@/lib/inspector-preferences-store.js";
 import mcpClient, {
   useSelectedTool,
   useSuspenseResource,
@@ -15,10 +18,7 @@ import {
 } from "./create-mcp-host-mock.js";
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
 import { useSyncHostStyles } from "./use-sync-host-styles.js";
-import { useSyncOpenaiDisplayMode } from "./use-sync-openai-display-mode.js";
-import { useSyncOpenaiLocale } from "./use-sync-openai-locale.js";
-import { useSyncOpenaiTheme } from "./use-sync-openai-theme.js";
-import { useSyncOpenaiUserAgent } from "./use-sync-openai-user-agent.js";
+import { useSyncOpenai } from "./use-sync-openai.js";
 
 const MOBILE_WIDTH_PX = 345;
 const DESKTOP_WIDTH_PX = 770;
@@ -40,10 +40,7 @@ export const View = () => {
   const [contentHeight, setContentHeight] = useState<number | null>(null);
   const previewClient = useInspectorPreferencesStore((s) => s.previewClient);
   const inPreview = previewClient !== null;
-  const isMobile =
-    useInspectorPreferencesStore(
-      (s) => s.userAgent?.device?.type ?? "desktop",
-    ) === "mobile" && !inPreview;
+  const isMobile = useIsMobile() && !inPreview;
   const previousIsMobileRef = useRef(isMobile);
   useEffect(() => {
     if (previousIsMobileRef.current === isMobile) {
@@ -164,31 +161,35 @@ export const View = () => {
 
   const mounted = useIframeMounted({ iframeRef, documentKey: html });
 
-  useSyncOpenaiTheme({
+  useSyncOpenai({
     iframeRef,
     toolName: tool.name,
-    theme,
+    globalKey: "theme",
+    value: theme,
     updateOpenaiObject,
   });
 
-  useSyncOpenaiLocale({
+  useSyncOpenai({
     iframeRef,
     toolName: tool.name,
-    locale,
+    globalKey: "locale",
+    value: locale,
     updateOpenaiObject,
   });
 
-  useSyncOpenaiDisplayMode({
+  useSyncOpenai({
     iframeRef,
     toolName: tool.name,
-    displayMode,
+    globalKey: "displayMode",
+    value: displayMode,
     updateOpenaiObject,
   });
 
-  useSyncOpenaiUserAgent({
+  useSyncOpenai({
     iframeRef,
     toolName: tool.name,
-    userAgent,
+    globalKey: "userAgent",
+    value: userAgent,
     updateOpenaiObject,
   });
 

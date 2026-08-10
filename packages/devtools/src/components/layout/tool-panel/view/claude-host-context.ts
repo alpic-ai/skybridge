@@ -1,5 +1,7 @@
 import { PHONE_VIEWPORT } from "@/lib/utils.js";
 
+const MOBILE_THREAD_MARGINS = 32;
+
 export const claudeStyleVariables: Record<string, string> = {
   "--color-background-primary":
     "light-dark(rgba(255, 255, 255, 1), rgba(48, 48, 46, 1))",
@@ -182,7 +184,7 @@ export function claudeHostContextExtras(isMobile: boolean) {
   return {
     styles: { variables: claudeStyleVariables, css: { fonts: claudeFontsCss } },
     containerDimensions: {
-      width: isMobile ? PHONE_VIEWPORT.width - 32 : 720,
+      width: isMobile ? PHONE_VIEWPORT.width - MOBILE_THREAD_MARGINS : 720,
       maxHeight: 5000,
     },
     availableDisplayModes: ["inline", "fullscreen"],

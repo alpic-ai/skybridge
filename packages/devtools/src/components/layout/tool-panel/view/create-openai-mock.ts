@@ -13,7 +13,10 @@ import type {
 
 import { SET_GLOBALS_EVENT_TYPE, SetGlobalsEvent } from "skybridge/web";
 import { warnOnLargeViewState } from "@/lib/context-warnings.js";
-import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
+import {
+  resolveDisplayModeRequest,
+  useInspectorPreferencesStore,
+} from "@/lib/inspector-preferences-store.js";
 
 function createOpenaiMethods(
   openai: AppsSdkContext & AppsSdkMethods,
@@ -53,16 +56,7 @@ function createOpenaiMethods(
     requestDisplayMode: async (args: { mode: RequestDisplayMode }) => {
       log("requestDisplayMode", args);
       const state = useInspectorPreferencesStore.getState();
-      const mode =
-        state.previewClient === "claude" && args.mode === "pip"
-          ? state.displayMode === "modal"
-            ? "inline"
-            : state.displayMode
-          : state.previewClient === "chatgpt" &&
-              args.mode === "pip" &&
-              state.userAgent?.device?.type === "mobile"
-            ? "fullscreen"
-            : args.mode;
+      const mode = resolveDisplayModeRequest(args.mode, state);
       openai.displayMode = mode;
       setValue("displayMode", mode);
       state.setPreference("displayMode", mode);

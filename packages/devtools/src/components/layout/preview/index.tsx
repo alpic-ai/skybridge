@@ -5,7 +5,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
+import {
+  useInspectorPreferencesStore,
+  useIsMobile,
+} from "@/lib/inspector-preferences-store.js";
 import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { useCallToolResult } from "@/lib/store.js";
 import { PHONE_VIEWPORT } from "@/lib/utils.js";
@@ -13,6 +16,14 @@ import { ToolPanelToolbar } from "../tool-panel/tool-panel-toolbar.js";
 import { View } from "../tool-panel/view/index.js";
 import { ChatgptShell } from "./chatgpt-shell.js";
 import { ClaudeShell } from "./claude-shell.js";
+
+const FRAME_MARGIN_X = 24;
+const FRAME_MARGIN_Y = 44;
+
+const frameColors = {
+  light: { backdrop: "#e8e8e6", label: "#6f6f6f" },
+  dark: { backdrop: "#111110", label: "#8f8f8f" },
+};
 
 const PhoneFrame = ({
   theme,
@@ -34,8 +45,8 @@ const PhoneFrame = ({
       setScale(
         Math.min(
           1,
-          (width - 24) / PHONE_VIEWPORT.width,
-          (height - 44) / PHONE_VIEWPORT.height,
+          (width - FRAME_MARGIN_X) / PHONE_VIEWPORT.width,
+          (height - FRAME_MARGIN_Y) / PHONE_VIEWPORT.height,
         ),
       );
     };
@@ -49,11 +60,11 @@ const PhoneFrame = ({
     <div
       ref={wrapperRef}
       className="flex h-full min-h-0 w-full flex-col items-center justify-center overflow-hidden"
-      style={{ backgroundColor: theme === "dark" ? "#111110" : "#e8e8e6" }}
+      style={{ backgroundColor: frameColors[theme].backdrop }}
     >
       <div
         className="pb-1.5 font-mono text-xs"
-        style={{ color: theme === "dark" ? "#8f8f8f" : "#6f6f6f" }}
+        style={{ color: frameColors[theme].label }}
       >
         {PHONE_VIEWPORT.width} × {PHONE_VIEWPORT.height}
       </div>
@@ -84,10 +95,7 @@ export const Preview = () => {
   const data = useCallToolResult(tool?.name ?? "");
   const previewClient = useInspectorPreferencesStore((s) => s.previewClient);
   const theme = useInspectorPreferencesStore((s) => s.theme);
-  const isMobile =
-    useInspectorPreferencesStore(
-      (s) => s.userAgent?.device?.type ?? "desktop",
-    ) === "mobile";
+  const isMobile = useIsMobile();
   const templateUri = (tool?._meta?.ui as { resourceUri?: string } | undefined)
     ?.resourceUri;
   const hasWidget = Boolean(tool && data?.response && templateUri);

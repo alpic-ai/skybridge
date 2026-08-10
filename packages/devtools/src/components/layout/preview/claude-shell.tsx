@@ -1,6 +1,9 @@
 import { ArrowUp, SlidersVertical } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
+import {
+  useInspectorPreferencesStore,
+  useIsMobile,
+} from "@/lib/inspector-preferences-store.js";
 import { cn } from "@/lib/utils.js";
 import { claudeFontsCss } from "../tool-panel/view/claude-host-context.js";
 import { CrossIcon } from "./chatgpt-icons.js";
@@ -73,6 +76,75 @@ function Bar({ className }: { className?: string }) {
   );
 }
 
+function MobileHeader() {
+  return (
+    <div
+      aria-hidden
+      className="flex h-12 shrink-0 cursor-not-allowed items-center gap-2.5 px-3"
+    >
+      <SidebarToggleIcon className="size-4.5 text-[#7b7974]" />
+      <div className="flex items-center gap-1.5">
+        <Bar className="h-3.5 w-24" />
+        <ChevronDownIcon className="size-2.5 text-(--shell-text-tertiary)" />
+      </div>
+      <div className="ml-auto flex h-7 items-center rounded-[7px] bg-(--shell-btn-bg) px-3 text-(--shell-text) text-sm">
+        Share
+      </div>
+    </div>
+  );
+}
+
+function MobileComposer() {
+  return (
+    <>
+      <div className="flex min-h-[100px] flex-col justify-between rounded-[20px] bg-(--shell-card) p-3 shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+        <span className="px-1.5 pt-1 text-[15px] text-(--shell-text-tertiary)">
+          Write a message...
+        </span>
+        <div className="flex items-center px-1 pb-0.5 text-(--shell-text-secondary)">
+          <PlusIcon className="size-5" />
+          <div className="flex-1" />
+          <div className="flex items-center gap-1.5">
+            <Bar className="h-3.5 w-14" />
+            <Bar className="h-3.5 w-9" />
+            <ChevronDownIcon className="size-3" />
+          </div>
+          <div className="flex-1" />
+          <div className="flex items-center gap-2">
+            <MicIcon className="size-5" />
+            <div className="flex size-8 items-center justify-center rounded-lg bg-(--shell-accent) text-white">
+              <ArrowUp className="size-4.5" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="pt-1.5 pb-1 text-center text-(--shell-text-tertiary) text-xs">
+        Claude can make mistakes. Please double-check responses.
+      </div>
+    </>
+  );
+}
+
+function DesktopComposer() {
+  return (
+    <div className="flex min-h-[100px] flex-col justify-between rounded-[20px] border border-(--shell-composer-border) bg-(--shell-card) p-4 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
+      <span className="text-(--shell-text-tertiary)">Reply to Claude...</span>
+      <div className="flex items-center justify-between">
+        <PlusIcon className="size-5 text-(--shell-text-secondary)" />
+        <div className="flex items-center gap-4 text-(--shell-text-secondary)">
+          <div className="flex items-center gap-1.5">
+            <Bar className="h-3.5 w-14" />
+            <Bar className="h-3.5 w-9" />
+            <ChevronDownIcon className="size-3" />
+          </div>
+          <MicIcon className="size-5" />
+          <ClaudeWaveformIcon className="size-5" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const recentRowWidths = [
   "w-[80%]",
   "w-[65%]",
@@ -86,10 +158,7 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
   const theme = useInspectorPreferencesStore((s) => s.theme);
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
   const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
-  const isMobile =
-    useInspectorPreferencesStore(
-      (s) => s.userAgent?.device?.type ?? "desktop",
-    ) === "mobile";
+  const isMobile = useIsMobile();
   const isFullscreen = displayMode === "fullscreen";
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -214,21 +283,7 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
       <div className="relative flex h-full min-w-0 flex-1 flex-col">
-        {isMobile && !isFullscreen && (
-          <div
-            aria-hidden
-            className="flex h-12 shrink-0 cursor-not-allowed items-center gap-2.5 px-3"
-          >
-            <SidebarToggleIcon className="size-4.5 text-[#7b7974]" />
-            <div className="flex items-center gap-1.5">
-              <Bar className="h-3.5 w-24" />
-              <ChevronDownIcon className="size-2.5 text-(--shell-text-tertiary)" />
-            </div>
-            <div className="ml-auto flex h-7 items-center rounded-[7px] bg-(--shell-btn-bg) px-3 text-(--shell-text) text-sm">
-              Share
-            </div>
-          </div>
-        )}
+        {isMobile && !isFullscreen && <MobileHeader />}
         {sidebarCollapsed && !isMobile && (
           <button
             type="button"
@@ -346,52 +401,7 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
           )}
         >
           <div className="mx-auto w-full max-w-[768px]">
-            {isMobile ? (
-              <>
-                <div className="flex min-h-[100px] flex-col justify-between rounded-[20px] bg-(--shell-card) p-3 shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
-                  <span className="px-1.5 pt-1 text-[15px] text-(--shell-text-tertiary)">
-                    Write a message...
-                  </span>
-                  <div className="flex items-center px-1 pb-0.5 text-(--shell-text-secondary)">
-                    <PlusIcon className="size-5" />
-                    <div className="flex-1" />
-                    <div className="flex items-center gap-1.5">
-                      <Bar className="h-3.5 w-14" />
-                      <Bar className="h-3.5 w-9" />
-                      <ChevronDownIcon className="size-3" />
-                    </div>
-                    <div className="flex-1" />
-                    <div className="flex items-center gap-2">
-                      <MicIcon className="size-5" />
-                      <div className="flex size-8 items-center justify-center rounded-lg bg-(--shell-accent) text-white">
-                        <ArrowUp className="size-4.5" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="pt-1.5 pb-1 text-center text-(--shell-text-tertiary) text-xs">
-                  Claude can make mistakes. Please double-check responses.
-                </div>
-              </>
-            ) : (
-              <div className="flex min-h-[100px] flex-col justify-between rounded-[20px] border border-(--shell-composer-border) bg-(--shell-card) p-4 shadow-[0_4px_16px_rgba(0,0,0,0.04)]">
-                <span className="text-(--shell-text-tertiary)">
-                  Reply to Claude...
-                </span>
-                <div className="flex items-center justify-between">
-                  <PlusIcon className="size-5 text-(--shell-text-secondary)" />
-                  <div className="flex items-center gap-4 text-(--shell-text-secondary)">
-                    <div className="flex items-center gap-1.5">
-                      <Bar className="h-3.5 w-14" />
-                      <Bar className="h-3.5 w-9" />
-                      <ChevronDownIcon className="size-3" />
-                    </div>
-                    <MicIcon className="size-5" />
-                    <ClaudeWaveformIcon className="size-5" />
-                  </div>
-                </div>
-              </div>
-            )}
+            {isMobile ? <MobileComposer /> : <DesktopComposer />}
           </div>
         </div>
       </div>

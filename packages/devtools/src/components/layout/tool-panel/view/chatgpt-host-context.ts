@@ -1,6 +1,9 @@
 import type { Theme } from "skybridge/web";
 import { PHONE_VIEWPORT } from "@/lib/utils.js";
 
+const MOBILE_THREAD_MARGINS = 32;
+const MOBILE_CARD_BORDERS = 2;
+
 const lightStyleVariables: Record<string, string> = {
   "--color-background-primary": "#fff",
   "--color-background-secondary": "#f9f9f9",
@@ -104,7 +107,9 @@ export function chatgptHostContextExtras(theme: Theme, isMobile: boolean) {
   return {
     styles: { variables: chatgptStyleVariables(theme) },
     containerDimensions: {
-      maxWidth: isMobile ? PHONE_VIEWPORT.width - 34 : 768,
+      maxWidth: isMobile
+        ? PHONE_VIEWPORT.width - MOBILE_THREAD_MARGINS - MOBILE_CARD_BORDERS
+        : 768,
     },
     availableDisplayModes: isMobile
       ? ["inline", "fullscreen"]
