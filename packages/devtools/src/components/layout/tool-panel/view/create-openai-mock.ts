@@ -58,7 +58,11 @@ function createOpenaiMethods(
           ? state.displayMode === "modal"
             ? "inline"
             : state.displayMode
-          : args.mode;
+          : state.previewClient === "chatgpt" &&
+              args.mode === "pip" &&
+              state.userAgent?.device?.type === "mobile"
+            ? "fullscreen"
+            : args.mode;
       openai.displayMode = mode;
       setValue("displayMode", mode);
       state.setPreference("displayMode", mode);

@@ -43,20 +43,21 @@ const displayModes: { mode: RequestDisplayMode; icon: LucideIcon }[] = [
 
 // Applies the form's current values to the preferences store and returns a
 // human-readable summary for the agent.
-function applyViewOptions(data: FormData, variant: ToolbarVariant): string {
-  const { userAgent, setPreference } = useInspectorPreferencesStore.getState();
+function applyViewOptions(data: FormData): string {
+  const { userAgent, displayMode, previewClient, setPreference } =
+    useInspectorPreferencesStore.getState();
 
   // Checkboxes are absent from FormData when unchecked, so absence is
   // meaningful (false) — apply unconditionally.
   setPreference("theme", data.has("darkTheme") ? "dark" : "light");
-  if (variant === "panel") {
-    setPreference("userAgent", {
-      ...userAgent,
-      device: {
-        ...userAgent?.device,
-        type: data.has("mobileDevice") ? "mobile" : "desktop",
-      },
-    });
+  const mobile = data.has("mobileDevice");
+  setPreference("userAgent", {
+    ...userAgent,
+    device: { ...userAgent?.device, type: mobile ? "mobile" : "desktop" },
+    capabilities: { hover: !mobile, touch: mobile },
+  });
+  if (mobile && displayMode === "pip" && previewClient === "chatgpt") {
+    setPreference("displayMode", "fullscreen");
   }
 
   const locale = data.get("locale");
@@ -229,15 +230,12 @@ export const ToolPanelToolbar = ({
       tooldescription={
         variant === "panel"
           ? "Set the Skybridge devtools view preview options. Any subset of fields can be changed: theme, locale, and device type."
-          : "Set the Skybridge devtools preview options: theme."
+          : "Set the Skybridge devtools preview options: theme and device type."
       }
       toolautosubmit=""
       onSubmit={(event) => {
         event.preventDefault();
-        const summary = applyViewOptions(
-          new FormData(event.currentTarget),
-          variant,
-        );
+        const summary = applyViewOptions(new FormData(event.currentTarget));
         const native = event.nativeEvent;
         if (
           native instanceof SubmitEvent &&
@@ -338,15 +336,13 @@ export const ToolPanelToolbar = ({
         </>
       )}
 
-      {variant === "panel" && (
-        <ToolbarToggle
-          icon={isMobile ? Smartphone : Monitor}
-          label={isMobile ? "mobile" : "desktop"}
-          name="mobileDevice"
-          description="Preview the view on a mobile device (true) or desktop (false)."
-          checked={isMobile}
-        />
-      )}
+      <ToolbarToggle
+        icon={isMobile ? Smartphone : Monitor}
+        label={isMobile ? "mobile" : "desktop"}
+        name="mobileDevice"
+        description="Preview the view on a mobile device (true) or desktop (false)."
+        checked={isMobile}
+      />
 
       {variant === "panel" && displayMode !== "fullscreen" && (
         <div className="ml-auto flex items-center gap-1.5">

@@ -17,7 +17,9 @@ import {
   CodexIcon,
   ComposeIcon,
   CrossIcon,
+  DotsIcon,
   FolderIcon,
+  MenuIcon,
   MicrophoneIcon,
   PluginsIcon,
   PlusIcon,
@@ -108,6 +110,10 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
   const theme = useInspectorPreferencesStore((s) => s.theme);
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
   const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
+  const isMobile =
+    useInspectorPreferencesStore(
+      (s) => s.userAgent?.device?.type ?? "desktop",
+    ) === "mobile";
   const isPip = displayMode === "pip";
   const isFullscreen = displayMode === "fullscreen";
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -148,6 +154,7 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
         className={cn(
           "h-full shrink-0 cursor-not-allowed border-(--border-default) border-r bg-(--sidebar-surface) @max-[640px]/shell:hidden",
           isFullscreen ? "w-[52px]" : "w-[260px]",
+          isMobile && "hidden",
         )}
       >
         <div
@@ -201,6 +208,20 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
       <div className="relative flex h-full min-w-0 flex-1 flex-col">
+        {isMobile && !isFullscreen && (
+          <div
+            aria-hidden
+            className="absolute inset-x-0 top-0 z-10 flex h-[52px] cursor-not-allowed items-center justify-between px-3"
+          >
+            <div className="flex size-10 items-center justify-center rounded-xl bg-[color-mix(in_oklab,var(--text-primary)_4%,transparent)] backdrop-blur-sm">
+              <MenuIcon className="size-6" />
+            </div>
+            <div className="flex h-10 items-center gap-5 rounded-xl bg-[color-mix(in_oklab,var(--text-primary)_4%,transparent)] px-4 backdrop-blur-sm">
+              <ComposeIcon className="size-6" />
+              <DotsIcon className="size-6" />
+            </div>
+          </div>
+        )}
         <div
           className={cn(
             "h-[52px] shrink-0 items-center px-4",
@@ -232,6 +253,7 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
             ref={threadRef}
             className={cn(
               "mx-auto flex w-full max-w-[768px] flex-col px-4 py-6",
+              isMobile && !isFullscreen && "pt-16",
               isFullscreen && "h-full max-w-none p-0",
             )}
           >
@@ -270,7 +292,10 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
             <div
               className={cn(
                 "relative mt-3 w-full",
-                !isPip && !isFullscreen && "-mx-4 w-[calc(100%+2rem)]",
+                !isPip &&
+                  !isFullscreen &&
+                  !isMobile &&
+                  "-mx-4 w-[calc(100%+2rem)]",
                 isPip &&
                   "absolute top-4 left-1/2 z-30 mt-0 w-[min(768px,calc(100%-32px))] translate-x-[calc(-50%-8px)] rounded-3xl border border-(--border-default) bg-(--main-surface-primary) shadow-[0_8px_32px_rgba(0,0,0,0.12)]",
                 isFullscreen && "mt-0 min-h-0 flex-1",
@@ -291,6 +316,10 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
                   "w-full",
                   isPip && "max-h-[80cqh] overflow-y-auto rounded-3xl",
                   isFullscreen && "h-full min-h-0",
+                  isMobile &&
+                    !isPip &&
+                    !isFullscreen &&
+                    "overflow-hidden rounded-xl border border-(--border-default)",
                 )}
               >
                 {children ?? <Bar className="h-96 w-full rounded-2xl" />}
@@ -328,19 +357,40 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
         <div
           aria-hidden
           className={cn(
-            "w-full shrink-0 cursor-not-allowed px-4 pb-6",
+            "w-full shrink-0 cursor-not-allowed px-4",
+            isMobile ? "pb-4" : "pb-6",
             isFullscreen && "hidden",
           )}
         >
           <div className="mx-auto w-full max-w-[768px]">
-            <div className="flex h-[52px] items-center gap-3 rounded-full border border-(--border-default) bg-(--composer-surface-primary) px-4 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-              <PlusIcon className="size-5 shrink-0" />
-              <span className="flex-1 text-(--text-tertiary)">Ask ChatGPT</span>
-              <MicrophoneIcon className="size-6 shrink-0" />
-              <div className="flex size-9.5 shrink-0 items-center justify-center rounded-full bg-(--text-primary) text-(--main-surface-primary)">
-                <VoiceIcon className="size-5.5" />
+            {isMobile ? (
+              <div className="rounded-[28px] bg-(--composer-surface-primary) p-2 shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+                <div className="px-2.5 pt-1.5 pb-3 text-(--text-tertiary)">
+                  Ask ChatGPT
+                </div>
+                <div className="flex items-center gap-3 px-1.5 pb-0.5">
+                  <PlusIcon className="size-5 shrink-0" />
+                  <Bar className="h-4 w-16" />
+                  <div className="flex-1" />
+                  <Bar className="h-4 w-14" />
+                  <MicrophoneIcon className="size-6 shrink-0" />
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-(--text-primary) text-(--main-surface-primary)">
+                    <VoiceIcon className="size-5" />
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex h-[52px] items-center gap-3 rounded-full border border-(--border-default) bg-(--composer-surface-primary) px-4 shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+                <PlusIcon className="size-5 shrink-0" />
+                <span className="flex-1 text-(--text-tertiary)">
+                  Ask ChatGPT
+                </span>
+                <MicrophoneIcon className="size-6 shrink-0" />
+                <div className="flex size-9.5 shrink-0 items-center justify-center rounded-full bg-(--text-primary) text-(--main-surface-primary)">
+                  <VoiceIcon className="size-5.5" />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

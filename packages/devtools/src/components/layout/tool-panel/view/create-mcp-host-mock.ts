@@ -36,21 +36,35 @@ function respondError(post: PostFn, id: number, code: number, message: string) {
 function previewHostContextExtras(
   previewClient: PreviewClient | null,
   theme: Theme,
+  isMobile: boolean,
 ): Partial<HostContext> {
   switch (previewClient) {
     case "chatgpt":
-      return chatgptHostContextExtras(theme);
+      return chatgptHostContextExtras(theme, isMobile);
     case "claude":
-      return claudeHostContextExtras();
+      return claudeHostContextExtras(isMobile);
     case null:
       return {};
   }
 }
 
+function isMobileDevice(
+  userAgent: ReturnType<
+    typeof useInspectorPreferencesStore.getState
+  >["userAgent"],
+): boolean {
+  return userAgent?.device?.type === "mobile";
+}
+
 function buildHostContext(): HostContext {
   const preferences = useInspectorPreferencesStore.getState();
+  const isMobile = isMobileDevice(preferences.userAgent);
   return {
-    ...previewHostContextExtras(preferences.previewClient, preferences.theme),
+    ...previewHostContextExtras(
+      preferences.previewClient,
+      preferences.theme,
+      isMobile,
+    ),
     theme: preferences.theme,
     locale: preferences.locale,
     displayMode: preferences.displayMode,
@@ -60,11 +74,7 @@ function buildHostContext(): HostContext {
       bottom: 0,
       left: 0,
     },
-    platform:
-      preferences.previewClient === null &&
-      preferences.userAgent?.device?.type === "mobile"
-        ? "mobile"
-        : "web",
+    platform: isMobile ? "mobile" : "web",
     deviceCapabilities: preferences.userAgent?.capabilities,
   };
 }
@@ -174,7 +184,11 @@ export function createMcpHostMock(
             ? state.displayMode === "modal"
               ? "inline"
               : state.displayMode
-            : requested;
+            : state.previewClient === "chatgpt" &&
+                requested === "pip" &&
+                isMobileDevice(state.userAgent)
+              ? "fullscreen"
+              : requested;
         state.setPreference(
           "displayMode",
           mode as "inline" | "fullscreen" | "pip",
@@ -240,12 +254,17 @@ export function createMcpHostMock(
           };
         }
       }
-      if (preferences.previewClient !== previous.previewClient) {
+      if (
+        preferences.previewClient !== previous.previewClient ||
+        (preferences.previewClient !== null &&
+          preferences.userAgent !== previous.userAgent)
+      ) {
         Object.assign(
           changed,
           previewHostContextExtras(
             preferences.previewClient,
             preferences.theme,
+            isMobileDevice(preferences.userAgent),
           ),
         );
       }

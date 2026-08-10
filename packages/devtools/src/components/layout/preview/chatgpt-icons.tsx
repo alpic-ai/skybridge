@@ -187,3 +187,19 @@ export function ChatBubbleIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function MenuIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true" fill="currentColor" {...props}>
+      <path d="M2.5 6.25h15a.75.75 0 0 1 0 1.5h-15a.75.75 0 0 1 0-1.5m0 5.25h10a.75.75 0 0 1 0 1.5h-10a.75.75 0 0 1 0-1.5" />
+    </svg>
+  );
+}
+
+export function DotsIcon(props: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" aria-hidden="true" fill="currentColor" {...props}>
+      <path d="M5.5 10a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0m6.1 0a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0m6.1 0a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0" />
+    </svg>
+  );
+}

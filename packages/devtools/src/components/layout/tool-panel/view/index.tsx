@@ -18,6 +18,7 @@ import { useSyncHostStyles } from "./use-sync-host-styles.js";
 import { useSyncOpenaiDisplayMode } from "./use-sync-openai-display-mode.js";
 import { useSyncOpenaiLocale } from "./use-sync-openai-locale.js";
 import { useSyncOpenaiTheme } from "./use-sync-openai-theme.js";
+import { useSyncOpenaiUserAgent } from "./use-sync-openai-user-agent.js";
 
 const MOBILE_WIDTH_PX = 345;
 const DESKTOP_WIDTH_PX = 770;
@@ -64,6 +65,7 @@ export const View = () => {
       : `${isMobile ? MOBILE_WIDTH_PX : DESKTOP_WIDTH_PX}px`;
   const theme = useInspectorPreferencesStore((s) => s.theme);
   const locale = useInspectorPreferencesStore((s) => s.locale);
+  const userAgent = useInspectorPreferencesStore((s) => s.userAgent);
 
   const resourceEntry = resource.contents[0] as {
     text: string;
@@ -180,6 +182,13 @@ export const View = () => {
     iframeRef,
     toolName: tool.name,
     displayMode,
+    updateOpenaiObject,
+  });
+
+  useSyncOpenaiUserAgent({
+    iframeRef,
+    toolName: tool.name,
+    userAgent,
     updateOpenaiObject,
   });
 
