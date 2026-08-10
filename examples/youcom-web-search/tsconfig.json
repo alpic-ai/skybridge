@@ -1,6 +1,11 @@
 {
-  "extends": "../../packages/core/tsconfig.base.json",
+  "extends": "skybridge/tsconfig",
+
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true
-  }
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+
+  "include": ["src", ".skybridge/**/*.d.ts"]
 }

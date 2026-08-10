@@ -1,4 +1,4 @@
-import { env } from \"./env.js\";
+import { env } from "./env.js";
 
 export interface YouComSearchResult {
   title: string;
@@ -29,7 +29,7 @@ export interface YouComSearchOptions {
 }
 
 export class YouComSearchClient {
-  private readonly baseUrl = \"https://api.you.com/v1/agents/search\";
+  private readonly baseUrl = "https://api.you.com/v1/agents/search";
   private readonly apiKey?: string;
 
   constructor() {
@@ -38,7 +38,7 @@ export class YouComSearchClient {
 
   // Public getter for checking if API key is available
   get hasApiKey(): boolean {
-    return this.apiKey !== undefined && this.apiKey.trim() !== \"\";
+    return this.apiKey !== undefined && this.apiKey.trim() !== "";
   }
 
   async search(options: YouComSearchOptions): Promise<YouComSearchResponse> {
@@ -50,46 +50,46 @@ export class YouComSearchClient {
     });
 
     if (domains && domains.length > 0) {
-      searchParams.set(\"domains\", domains.join(\",\"));
+      searchParams.set("domains", domains.join(","));
     }
     
     if (freshness) {
-      searchParams.set(\"freshness\", freshness);
+      searchParams.set("freshness", freshness);
     }
     
     if (safeSearch !== undefined) {
-      searchParams.set(\"safesearch\", safeSearch.toString());
+      searchParams.set("safesearch", safeSearch.toString());
     }
 
     const url = `${this.baseUrl}?${searchParams.toString()}`;
     
     const headers: Record<string, string> = {
-      \"Accept\": \"application/json\",
-      \"User-Agent\": \"Skybridge-YouCom-Integration/1.0\",
+      "Accept": "application/json",
+      "User-Agent": "Skybridge-YouCom-Integration/1.0",
     };
 
     // Add API key if available for authenticated requests
     if (this.hasApiKey) {
-      headers[\"Authorization\"] = `Bearer ${this.apiKey}`;
+      headers["Authorization"] = `Bearer ${this.apiKey}`;
     }
 
     try {
       const response = await fetch(url, {
-        method: \"GET\",
+        method: "GET",
         headers,
       });
 
       if (!response.ok) {
         // Handle specific error cases
         if (response.status === 401) {
-          throw new Error(\"Invalid You.com API key. Check your YDC_API_KEY environment variable.\");
+          throw new Error("Invalid You.com API key. Check your YDC_API_KEY environment variable.");
         } else if (response.status === 429) {
           const message = this.hasApiKey
-            ? \"You.com API rate limit exceeded. Please try again later.\"
-            : \"You.com rate limit exceeded. Consider setting YDC_API_KEY for higher quotas.\";
+            ? "You.com API rate limit exceeded. Please try again later."
+            : "You.com rate limit exceeded. Consider setting YDC_API_KEY for higher quotas.";
           throw new Error(message);
         } else if (response.status >= 500) {
-          throw new Error(\"You.com service is temporarily unavailable. Please try again later.\");
+          throw new Error("You.com service is temporarily unavailable. Please try again later.");
         } else {
           throw new Error(`Search failed: ${response.status} ${response.statusText}`);
         }
@@ -103,7 +103,7 @@ export class YouComSearchClient {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error(\"Unexpected error occurred while searching\");
+      throw new Error("Unexpected error occurred while searching");
     }
   }
 
@@ -128,11 +128,11 @@ export class YouComSearchClient {
     if (!Array.isArray(results)) return [];
     
     return results.map((result) => ({
-      title: result.title || result.name || \"Untitled\",
-      url: result.url || result.link || \"\",
-      snippet: result.snippet || result.description || \"\",
+      title: result.title || result.name || "Untitled",
+      url: result.url || result.link || "",
+      snippet: result.snippet || result.description || "",
       favicon: result.favicon,
-      domain: result.domain || this.extractDomain(result.url || result.link || \"\"),
+      domain: result.domain || this.extractDomain(result.url || result.link || ""),
     }));
   }
 
@@ -140,7 +140,7 @@ export class YouComSearchClient {
     try {
       return new URL(url).hostname;
     } catch {
-      return \"\";
+      return "";
     }
   }
 }
