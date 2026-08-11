@@ -1,0 +1,196 @@
+import { z } from "zod";
+import { search } from "../catalog/index.js";
+import {
+  CAROUSEL_MAX_SIZE,
+  CAROUSEL_RANGE,
+  MIN_SEARCH_ITERATIONS,
+} from "../config.js";
+import { PriceSchema, type SearchResult, SpecSchema } from "../types.js";
+
+// The `search-products` tool: keyword + filters in, matching products out as
+// structured output for the model. It has NO view — include only what the model
+// needs to curate (ids + properties), never presentational data (images, media);
+// render-carousel handles that. Data access lives in `src/catalog/`; everything
+// else this tool needs lives in this file.
+
+// ---------------------------------------------------------------------------
+// Input
+// ---------------------------------------------------------------------------
+
+const inputSchema = {
+  // @todo: tune this guidance to your catalog's vocabulary. The model reads
+  // it to turn conversational input into a good keyword.
+  keyword: z.string().describe(
+    `\
+Short noun phrases extracted from conversational input. Never pass full sentences. \
+Include color, material, and style descriptors for accuracy. \
+For vague gift or occasion queries without a clear product type, use broad category terms.`,
+  ),
+
+  // @todo: set the sort options your backend supports (or remove).
+  sort: z.enum(["price-asc", "price-desc"]).optional().describe("Sort order."),
+
+  // @todo: declare the filters your catalog supports. Add one param per
+  // facet (category, color, size...), each optional so the model only sends
+  // what the user asked for. `priceRange` below is just an example, remove it.
+  priceRange: z
+    .string()
+    .optional()
+    .describe(
+      "Price range in dollars. Format: 'min-max' e.g. '0-500', '1000-2000'.",
+    ),
+};
+
+export type SearchInput = z.infer<z.ZodObject<typeof inputSchema>>;
+
+// ---------------------------------------------------------------------------
+// Output — model-facing grounding, returned in structuredContent.
+// ---------------------------------------------------------------------------
+
+const productSchema = z.object({
+  id: z.string().describe("Stable product ID; pass to render-carousel."),
+  title: z.string(),
+  description: z.string().optional(),
+  price: PriceSchema.optional(),
+  outOfStock: z
+    .boolean()
+    .optional()
+    .describe("True when the product is not purchasable."),
+  specs: z
+    .array(SpecSchema)
+    .describe("Product-specific facts to curate on (material, dimensions…)."),
+
+  // @todo: Add whatever custom fields the model should curate on as real types,
+  // not `specs` strings (e.g. `rating`, `discountPct`, `badges`).
+});
+
+const outputSchema = {
+  products: z.array(productSchema).describe("Matching products, sorted."),
+  pages: z
+    .object({
+      current: z.number(),
+      total: z.number(),
+    })
+    .optional()
+    .describe("Pagination: current page and total page count."),
+  totalHits: z
+    .number()
+    .optional()
+    .describe("Total matching products across all pages."),
+};
+
+type SearchOutput = z.infer<z.ZodObject<typeof outputSchema>>;
+
+// ---------------------------------------------------------------------------
+// Mapping: project each product's `card` into the model-facing grounding
+// (outputSchema), dropping presentational fields (media, url).
+// @todo: choose what the model sees per product. Grounding only: the model
+// curates on facts, so presentational data never belongs here.
+// ---------------------------------------------------------------------------
+
+function toStructuredContent({
+  products,
+  pages,
+  totalHits,
+}: SearchResult): SearchOutput {
+  const results: SearchOutput["products"] = [];
+  for (const { id, card } of products) {
+    results.push({
+      id,
+      title: card.title,
+      description: card.description,
+      price: card.price,
+      outOfStock: card.outOfStock,
+      specs: card.specs,
+    });
+  }
+  return { products: results, pages, totalHits };
+}
+
+// ---------------------------------------------------------------------------
+// Narration — framing + next-step instructions for the model. The products
+// themselves ride in structuredContent; this text carries NO result data.
+// @todo: customize the NEXT STEPS guidance below for your flow (keep searching
+// vs. curate and render). Remind the model to ground claims in the structured
+// results and never invent facts.
+// ---------------------------------------------------------------------------
+
+function narrate({ products }: SearchOutput): string {
+  const size = products.length;
+
+  if (size === 0) {
+    return `\
+No products found.
+
+NEXT STEP: Broaden the keyword or relax filters, then search again.`;
+  }
+
+  if (size < CAROUSEL_MAX_SIZE) {
+    return `\
+Only a few results.
+
+NEXT STEPS:
+1. If the client asked for a specific product by name, these are fine: curate and call render-carousel with the selected IDs.
+2. Otherwise, search again with broader terms before rendering.`;
+  }
+
+  return `\
+Enough results to present.
+
+NEXT STEPS:
+1. Curate the best matches for the client's intent from the structured results.
+2. Write your recommendation mentioning the selected products.
+3. Call render-carousel with the selected IDs.`;
+}
+
+// ---------------------------------------------------------------------------
+// Tool (registered from server.ts to keep the typed tool chain intact)
+// ---------------------------------------------------------------------------
+
+export const searchProductsDefinition = {
+  name: "search-products" as const,
+
+  // @todo: describe YOUR catalog and how the agent should search and curate
+  // it. This is the model's main guide: be specific about your categories,
+  // the multi-call search loop, and when to render vs. keep searching.
+  description: `\
+Search the product catalog. Handles any query: specific products, broad categories, gifts, occasions, or open discovery.
+Never assume a category is unavailable: always search before responding.
+
+The response is data only: a list of matching products (name, ID, price, description, and any product-specific facts) plus pagination and the available filters. The raw results are for your eyes only: the client never sees them.
+
+NEVER describe or characterize the raw results to the client: do not mention how many there are, what categories they fall into, or that they look off-topic.
+
+Act on the response as follows:
+
+- FIRST SEARCH: use keywords only (plus sort if needed).
+- ITERATE: a single search is not always enough. Run several searches (${MIN_SEARCH_ITERATIONS} minimum) before rendering: vary the keyword, apply a filter, or page deeper, and compare results across them. Quality comes from this multi-call exploration; one call then render gives shallow results.
+- CURATION: read results and pick the best matches for the client's intent, grounding your choice in each product's description. If zero results, broaden the keyword or relax filters and search again: do NOT call render-carousel. If fewer than 3 results and the user didn't ask for a specific product, search again with broader terms. Only after exploring across several searches, call render-carousel with the selected IDs.
+- PRESENT: Once you have ${CAROUSEL_RANGE} distinct, relevant products, call render-carousel with their IDs. Recommend ONLY AFTER the carousel displays, in carousel order.
+
+The sweet spot is ${CAROUSEL_RANGE} products.
+`,
+  annotations: {
+    readOnlyHint: true,
+    openWorldHint: false,
+    destructiveHint: false,
+  },
+
+  // @todo: customize the status messages shown in ChatGPT while the tool runs.
+  _meta: {
+    "openai/toolInvocation/invoking": "Searching the catalog",
+    "openai/toolInvocation/invoked": "Searched the catalog",
+  },
+
+  inputSchema,
+  outputSchema,
+};
+
+export async function searchProductsHandler(input: SearchInput) {
+  const results = toStructuredContent(await search(input));
+  return {
+    structuredContent: results,
+    content: [{ type: "text" as const, text: narrate(results) }],
+    isError: false,
+  };
+}

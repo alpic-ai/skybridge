@@ -1,81 +1,34 @@
 import { useUser } from "skybridge/web";
 
-const translations: Record<string, Record<string, string>> = {
+// Centralized UI labels. The active locale comes from the host via useUser();
+// useLabels matches on the language subtag ("en-US" -> "en") and falls back to
+// English for anything unlisted. English only for now; add a locale key (e.g.
+// `fr`) with the same shape to support another language.
+const LABELS = {
   en: {
-    loading: "Loading products...",
-    noProducts: "No product found",
-    addToCart: "Add to cart",
-    removeFromCart: "Remove",
-    checkout: "Checkout",
-    orderSummary: "Order summary",
-    total: "Total",
-    payWithStripe: "Pay with Stripe",
-    creatingSession: "Redirecting to checkout...",
-    waitingForPayment: "Waiting for payment...",
-    paymentSuccess: "Payment successful!",
-    itemCount_one: "1 item",
-    itemCount_other: "{count} items",
-    paymentExpired: "Checkout session expired",
-    backToProducts: "Back to products",
+    outOfStock: "Out of stock",
+    combinationUnavailable: "Combination unavailable",
+    noProducts: "No products to show.",
+    carousel: "carousel",
+    products: "Products",
+    previous: "Previous",
+    next: "Next",
+    // Detail view.
+    reference: "Ref.",
+    viewOnSite: "View on Skybridge",
+    priceOnRequest: "Price on request",
+    specifications: "Specifications",
+    readMore: "Read more",
+    readLess: "Read less",
   },
-  fr: {
-    loading: "Chargement des produits...",
-    noProducts: "Aucun produit trouvé",
-    addToCart: "Ajouter",
-    removeFromCart: "Retirer",
-    checkout: "Payer",
-    orderSummary: "Récapitulatif de commande",
-    total: "Total",
-    payWithStripe: "Payer avec Stripe",
-    creatingSession: "Redirection vers le paiement...",
-    waitingForPayment: "En attente du paiement...",
-    paymentSuccess: "Paiement réussi !",
-    itemCount_one: "1 article",
-    itemCount_other: "{count} articles",
-    paymentExpired: "Session de paiement expirée",
-    backToProducts: "Retour aux produits",
-  },
-  es: {
-    loading: "Cargando productos...",
-    noProducts: "No se encontraron productos",
-    addToCart: "Añadir",
-    removeFromCart: "Quitar",
-    checkout: "Pagar",
-    orderSummary: "Resumen del pedido",
-    total: "Total",
-    payWithStripe: "Pagar con Stripe",
-    creatingSession: "Redirigiendo al pago...",
-    waitingForPayment: "Esperando el pago...",
-    paymentSuccess: "Pago exitoso!",
-    itemCount_one: "1 artículo",
-    itemCount_other: "{count} artículos",
-    paymentExpired: "Sesión de pago expirada",
-    backToProducts: "Volver a productos",
-  },
-  de: {
-    loading: "Produkte werden geladen...",
-    noProducts: "Keine Produkte gefunden",
-    addToCart: "Hinzufügen",
-    removeFromCart: "Entfernen",
-    checkout: "Zur Kasse",
-    orderSummary: "Bestellübersicht",
-    total: "Gesamt",
-    payWithStripe: "Mit Stripe bezahlen",
-    creatingSession: "Weiterleitung zur Kasse...",
-    waitingForPayment: "Warte auf Zahlung...",
-    paymentSuccess: "Zahlung erfolgreich!",
-    itemCount_one: "1 Artikel",
-    itemCount_other: "{count} Artikel",
-    paymentExpired: "Zahlungssitzung abgelaufen",
-    backToProducts: "Zurück zu Produkten",
-  },
-};
+} as const;
 
-export function useTranslate() {
+const DEFAULT_LOCALE = "en";
+
+export type Labels = (typeof LABELS)[typeof DEFAULT_LOCALE];
+
+export function useLabels(): Labels {
   const { locale } = useUser();
-  const lang = locale?.split("-")[0] ?? "en";
-
-  return function t(key: string) {
-    return translations[lang]?.[key] ?? translations.en[key];
-  };
+  const lang = locale.split("-")[0] ?? DEFAULT_LOCALE;
+  return lang in LABELS ? LABELS[lang as keyof typeof LABELS] : LABELS.en;
 }
