@@ -1,4 +1,4 @@
-import type { AppsSdkContext } from "skybridge/web";
+import type { AppsSdkContext, RequestDisplayMode } from "skybridge/web";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -77,4 +77,29 @@ export const getInspectorPreferences = (): InspectorPreferences => {
     ...preferences
   } = useInspectorPreferencesStore.getState();
   return preferences;
+};
+
+export const isMobileDevice = (
+  userAgent: InspectorPreferences["userAgent"],
+): boolean => userAgent?.device?.type === "mobile";
+
+export const useIsMobile = (): boolean =>
+  useInspectorPreferencesStore((s) => isMobileDevice(s.userAgent));
+
+export const resolveDisplayModeRequest = (
+  requested: RequestDisplayMode,
+  state: Pick<InspectorPreferences, "displayMode" | "userAgent"> & {
+    previewClient: PreviewClient | null;
+  },
+): RequestDisplayMode => {
+  if (requested !== "pip") {
+    return requested;
+  }
+  if (state.previewClient === "claude") {
+    return state.displayMode === "modal" ? "inline" : state.displayMode;
+  }
+  if (state.previewClient === "chatgpt" && isMobileDevice(state.userAgent)) {
+    return "fullscreen";
+  }
+  return requested;
 };

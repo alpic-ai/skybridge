@@ -1,6 +1,12 @@
-import type { CallToolResponse, Theme } from "skybridge/web";
+import type {
+  CallToolResponse,
+  RequestDisplayMode,
+  Theme,
+} from "skybridge/web";
 import {
+  isMobileDevice,
   type PreviewClient,
+  resolveDisplayModeRequest,
   useInspectorPreferencesStore,
 } from "@/lib/inspector-preferences-store.js";
 import {
@@ -36,12 +42,13 @@ function respondError(post: PostFn, id: number, code: number, message: string) {
 function previewHostContextExtras(
   previewClient: PreviewClient | null,
   theme: Theme,
+  isMobile: boolean,
 ): Partial<HostContext> {
   switch (previewClient) {
     case "chatgpt":
-      return chatgptHostContextExtras(theme);
+      return chatgptHostContextExtras(theme, isMobile);
     case "claude":
-      return claudeHostContextExtras();
+      return claudeHostContextExtras(isMobile);
     case null:
       return {};
   }
@@ -49,8 +56,13 @@ function previewHostContextExtras(
 
 function buildHostContext(): HostContext {
   const preferences = useInspectorPreferencesStore.getState();
+  const isMobile = isMobileDevice(preferences.userAgent);
   return {
-    ...previewHostContextExtras(preferences.previewClient, preferences.theme),
+    ...previewHostContextExtras(
+      preferences.previewClient,
+      preferences.theme,
+      isMobile,
+    ),
     theme: preferences.theme,
     locale: preferences.locale,
     displayMode: preferences.displayMode,
@@ -60,11 +72,7 @@ function buildHostContext(): HostContext {
       bottom: 0,
       left: 0,
     },
-    platform:
-      preferences.previewClient === null &&
-      preferences.userAgent?.device?.type === "mobile"
-        ? "mobile"
-        : "web",
+    platform: isMobile ? "mobile" : "web",
     deviceCapabilities: preferences.userAgent?.capabilities,
   };
 }
@@ -169,16 +177,11 @@ export function createMcpHostMock(
       case "ui/request-display-mode": {
         const requested = (params as { mode?: string })?.mode ?? "inline";
         const state = useInspectorPreferencesStore.getState();
-        const mode =
-          state.previewClient === "claude" && requested === "pip"
-            ? state.displayMode === "modal"
-              ? "inline"
-              : state.displayMode
-            : requested;
-        state.setPreference(
-          "displayMode",
-          mode as "inline" | "fullscreen" | "pip",
+        const mode = resolveDisplayModeRequest(
+          requested as RequestDisplayMode,
+          state,
         );
+        state.setPreference("displayMode", mode);
         respond(post, id, { mode });
         break;
       }
@@ -240,12 +243,17 @@ export function createMcpHostMock(
           };
         }
       }
-      if (preferences.previewClient !== previous.previewClient) {
+      if (
+        preferences.previewClient !== previous.previewClient ||
+        (preferences.previewClient !== null &&
+          preferences.userAgent !== previous.userAgent)
+      ) {
         Object.assign(
           changed,
           previewHostContextExtras(
             preferences.previewClient,
             preferences.theme,
+            isMobileDevice(preferences.userAgent),
           ),
         );
       }

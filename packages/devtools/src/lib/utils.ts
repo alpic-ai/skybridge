@@ -80,3 +80,5 @@ export function formatBytes(bytes: number): string {
   const mb = kb / 1024;
   return `${mb < 10 ? mb.toFixed(1) : Math.round(mb)}mb`;
 }
+
+export const PHONE_VIEWPORT = { width: 390, height: 844 };
