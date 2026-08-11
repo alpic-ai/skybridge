@@ -45,8 +45,28 @@ Select a tool in the sidebar and DevTools gives you the full exchange:
 - **Tool controls**: generated from the tool's [input schema](/api-reference/register-tool#inputschema-outputschema). Inputs can be saved and re-run from the tool header.
 - **Tool output**: the raw server [response](/api-reference/register-tool#return) (`content`, `structuredContent`, `_meta`), with status, latency, and payload size.
 - **State inspector**: the view [state](/build/state) as a JSON tree, updated as the view mutates it.
-- **View preview**: the rendered [View](/build/view), with live controls to switch [display mode](/api-reference/use-display-mode#displaymode), theme, locale, and device type; the preview updates immediately.
+- **View preview**: the rendered [View](/build/view), with live controls to switch theme, locale, and device type; the preview updates immediately. The [display mode](/api-reference/use-display-mode#displaymode) is shown as a badge rather than a control, because only the view changes it, through [`setDisplayMode`](/api-reference/use-display-mode#setdisplaymode).
+- **Context warnings**: a badge on the tool output and the view state when either grows large enough to crowd the model's context, at 5,000 estimated tokens for tool output and 20,000 for view state. The same warning prints in the browser and dev server consoles. Nothing is blocked or truncated, and the full payload stays inspectable.
 - **Call logs**: every runtime API call the view makes (`setViewState`, `callTool`, `requestDisplayMode`) with its arguments and responses.
+
+## Preview in a Host Conversation
+
+The panel tells you whether a view works. It does not tell you how the view looks once a host puts it in a conversation, next to a sidebar and under a thread of messages, which is where most layout surprises come from.
+
+Click **preview** in the toolbar and the panel becomes a mock conversation with your real view inside it. Everything around the view is a skeleton: sidebar, message thread, and a composer that does nothing.
+
+<Frame caption="A view previewed in the ChatGPT conversation shell">
+<img src="/images/devtools-preview-screenshot.png" alt="DevTools Preview Illustration" />
+</Frame>
+
+- **Switch client** between ChatGPT and Claude. Each shell is measured against the real app, in light and dark, and the mode resets to inline when you switch.
+- **Toggle device** to render the shell inside a 390 x 844 phone frame, with the mobile layout that client uses.
+- **Display modes** follow what the selected client supports. Inline and fullscreen work everywhere, pip only on ChatGPT desktop, where it renders as a floating card. A `pip` request becomes fullscreen on ChatGPT mobile, and Claude keeps the current mode.
+- **Quit preview** returns to the panel with your tool state intact.
+
+While preview is active, the `ui/initialize` handshake carries that client's own style variables, container dimensions, and available display modes, so a view that reads the host's [theme tokens](/api-reference/use-mcp-app-context) themes itself the way it will in production.
+
+The preview client is not persisted: reloading DevTools brings you back to the panel.
 
 ## Drive DevTools from a Coding Agent
 
@@ -54,7 +74,7 @@ DevTools exposes its actions as [WebMCP](https://github.com/webmachinelearning/w
 
 - **Run any registered tool** and render its view in the preview.
 - **Read the rendered view** by screenshotting the preview, then drive it as a real page.
-- **Switch the preview controls**: display mode, theme, locale, and device.
+- **Switch the preview controls**: theme, locale, and device. The display mode is not among them, since the view owns it.
 
 ### Set It Up
 
@@ -130,7 +150,7 @@ DevTools caches the authorization within the browser, so later sessions reconnec
 DevTools emulates, and three gaps separate the emulation from production:
 
 - **No model**: you pick the [tool](/build/tools) and type the arguments yourself. Tool selection, the prompt surface (names, descriptions, schemas), and follow-up messages are never exercised.
-- **One runtime**: as of today the preview mocks the [Apps SDK runtime](/resources/apps-sdk-and-mcp-apps#apps-sdk). [MCP Apps](/resources/apps-sdk-and-mcp-apps#mcp-apps)-specific features are not yet supported.
+- **Mocked runtimes**: DevTools mocks the [MCP Apps](/resources/apps-sdk-and-mcp-apps#mcp-apps) runtime and also injects a `window.openai` shim for the [Apps SDK](/resources/apps-sdk-and-mcp-apps#apps-sdk), so an Apps SDK call that works here can still be host-specific in production. Host behaviour outside those mocks is not reproduced, and the conversation around a preview is a skeleton, not a working client.
 - **Loose [CSP](/guides/csp)**: external resources blocked by hosts in production may load locally.
 
 <Info>
