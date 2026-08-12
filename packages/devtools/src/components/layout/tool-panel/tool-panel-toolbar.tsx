@@ -21,6 +21,7 @@ import {
   Maximize2,
   Monitor,
   Moon,
+  PanelRight,
   PictureInPicture2,
   Smartphone,
   SquareSplitVertical,
@@ -186,12 +187,16 @@ type ToolPanelToolbarProps = {
   variant?: ToolbarVariant;
   logsOpen?: boolean;
   onOpenLogs?: () => void;
+  showDevTools?: boolean;
+  onToggleDevTools?: () => void;
 };
 
 export const ToolPanelToolbar = ({
   variant = "panel",
   logsOpen,
   onOpenLogs,
+  showDevTools,
+  onToggleDevTools,
 }: ToolPanelToolbarProps) => {
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
   const theme = useInspectorPreferencesStore((s) => s.theme);
@@ -359,6 +364,12 @@ export const ToolPanelToolbar = ({
 
       {variant === "preview" && (
         <>
+          <ToolbarButton
+            icon={PanelRight}
+            label="inspect"
+            selected={showDevTools}
+            onClick={onToggleDevTools}
+          />
           <ToolbarButton
             icon={ArrowLeftRight}
             label={
