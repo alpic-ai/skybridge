@@ -2,7 +2,7 @@
   "name": "skybridge-mcpcn",
   "version": "0.0.1",
   "private": true,
-  "description": "Alpic MCP Server Template",
+  "description": "mcpcn starter example for Skybridge",
   "type": "module",
   "scripts": {
     "dev": "skybridge dev",
@@ -13,6 +13,9 @@
   },
   "dependencies": {
     "@alpic-ai/insights": "^1.142.1",
+    "@json-render/core": "^0.14.1",
+    "@json-render/react": "^0.14.1",
+    "@json-render/shadcn": "^0.14.1",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@radix-ui/react-slot": "^1.3.0",
     "@tailwindcss/vite": "^4.3.1",

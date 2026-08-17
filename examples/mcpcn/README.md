@@ -1,4 +1,4 @@
-# mcpcn UI Starter
+# mcpcn Starter
 
 An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a starter template combining Skybridge with [mcpcn](https://mcpcn.dev) agentic component library for building rich, interactive widgets.
 
@@ -25,7 +25,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a s
 
 ## Live Demo
 
-[Try it in Alpic's Playground](https://mcpcn-ui.skybridge.tech/try) to launch the live widget experience, or use the MCP URL with your client of choice: `https://mcpcn-ui.skybridge.tech/mcp`.
+[Try it in Alpic's Playground](https://mcpcn.skybridge.tech/try) to launch the live widget experience, or use the MCP URL with your client of choice: `https://mcpcn.skybridge.tech/mcp`.
 
 ## Getting Started
 
@@ -72,11 +72,12 @@ This command starts:
 ├── src/
 │   ├── server.ts           # Server entry point
 │   ├── components/
-│   │   └── ui/             # mcpcn UI components (hero, button, …)
+│   │   └── ui/             # mcpcn components (hero, button, …)
 │   ├── lib/
 │   │   └── utils.ts        # Shared utilities
 │   ├── views/
-│   │   └── hello-world.tsx # Example widget
+│   │   ├── hello-world.tsx # Example widget
+│   │   └── render.tsx      # Generative UI renderer (json-render)
 │   └── index.css           # Global styles
 ├── components.json         # shadcn/ui config
 └── vite.config.ts
@@ -138,7 +139,34 @@ return (
 );
 ```
 
-#### 4. Edit server code
+#### 4. Generative UI with json-render
+
+This example also includes a generative UI renderer powered by [json-render](https://github.com/vercel-labs/json-render). The model can dynamically compose UI from the mcpcn component catalog at runtime.
+
+The server exposes two tools:
+- **`get-ui-catalog`**: Returns the full mcpcn component catalog so the model knows available components, props, and the spec format
+- **`render`**: Takes a json-render spec and renders it as live React components
+
+```mermaid
+sequenceDiagram
+    participant Host as Host (ChatGPT, Claude…)
+    participant Server as MCP Server
+    participant View as View (iframe)
+
+    Host->>Server: call get-ui-catalog
+    Server-->>Host: mcpcn component definitions, props & spec format
+
+    Host->>Server: call render({ spec })
+    Server->>Server: autoFix + validate spec
+    Server-->>Host: structuredContent: { spec }
+
+    Host->>View: render iframe with tool output
+    View->>View: json-render turns spec into mcpcn React components
+```
+
+To use it, ask the MCP client to call `get-ui-catalog` first, then `render` with a generated spec.
+
+#### 5. Edit server code
 
 Modify files in `server/` and refresh the connection with your testing MCP Client to see the changes.
 
