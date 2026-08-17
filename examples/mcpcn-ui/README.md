@@ -97,11 +97,9 @@ Edit and save components in `src/views/` — changes will appear instantly insid
 
 #### 3. Install new components (mcpcn)
 
-Choose your component from [mcpcn website](https://mcpcn.dev) and copy the CLI Command and run it in the `/web` folder:
+Choose your component from [mcpcn website](https://mcpcn.dev) and copy the CLI Command and run it in the project root:
 
 ```bash
-cd web
-
 # Install the hero component with npx
 npx shadcn@latest add @mcpcn/hero
 ```
