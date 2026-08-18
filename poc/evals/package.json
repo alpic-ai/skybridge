@@ -9,12 +9,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "ai": "^5.0.0",
     "skybridge": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.20.0",
     "typescript": "^5.9.3",
+    "vite": "^8.1.5",
     "vitest": "^4.1.10"
   }
 }

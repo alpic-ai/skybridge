@@ -1,98 +1,132 @@
-# Evals POC
+# Evals runner POC
 
-Throwaway spike for the Evals PRD. Not meant to be merged. It answers the two "todos before
-build" spikes and runs the PRD's proposed API end to end against a real server and a real model.
+**Proof of concept, not for merge.** It exists to de-risk the [Evals PRD](https://app.notion.com/p/Evals-3b21e5ce535b803594e6f71bf6dc914e)
+and to give the API something concrete to be discussed against. Everything
+lives under `poc/evals/`, plus one line in `pnpm-workspace.yaml` and one biome
+override. Nothing in `packages/` is touched.
+
+## What changed since the first spike
+
+Following the PRD review, this version does the opposite of the first spike: it
+stays out of vitest's way and augments it, the way `@vitest/browser` does.
+
+- It is a real Vite/Vitest plugin. `evals()` goes in `vitest.config.ts` and
+  contributes `setupFiles`, `globalSetup`, `provide` and `testTimeout`. There
+  is no second config file.
+- `it` and `expect` are vitest's own, untouched. Scenarios import two
+  functions: `start<AppType>()` opens a fresh MCP session and returns the
+  conversation (the browser plugin's `render()` shape), and `repeat` runs a
+  scenario several times against a pass threshold. The type parameter on
+  `start` is what pins the matchers to the project's registry, one mention per
+  test.
+- Teardown is automatic: every chat opened during a test is closed by an
+  `afterEach` the plugin's setup file registers, the way testing-library's
+  auto cleanup works. Scenarios never write lifecycle code. The registry
+  assumes tests in a file run sequentially, vitest's default; `it.concurrent`
+  would need it keyed per test.
+- `repeat({ runs, threshold }, fn)` takes per-scenario overrides; defaults come
+  from the plugin config, so CI can raise `runs` without touching a test.
+- `expect.chat(chat)` returns a narrowed assertion carrying only the tool-call
+  matchers. It deliberately does not extend vitest's global `Matchers`, so the
+  helpers never surface on unrelated `expect()` calls, and it is the one place
+  later tool-call helpers get added.
+- The model is either a descriptor the runner constructs
+  (`{ provider, name }`) or, for a provider we cannot build such as a company
+  gateway, a file that calls `defineEvalModel`. A live provider instance cannot
+  be a plugin option, because vitest serializes config to the workers, so it
+  has to be constructed worker-side either way. The API key is named by env var
+  and never appears in config.
+
+## Running it
 
 ```bash
-cp .env.example .env   # then put an ANTHROPIC_API_KEY in it
+cp .env.example .env   # then set ANTHROPIC_API_KEY
 pnpm eval
-pnpm typecheck
 ```
 
-`pnpm eval` starts `examples/flight-booking` on an ephemeral port, runs four scenarios against
-it, and shuts it down. Three pass. The fourth is red by design, see the clock finding below.
+`pnpm test` only typechecks, so CI never spends money here.
 
-## What it does
+**Temperature 0 is not deterministic, and one scenario proves it.** "carries
+the category forward when a later turn omits it" passed on four consecutive
+runs and then failed, with the second turn re-searching as
+`{"keyword":"goggles"}`: it dropped both the category it had just used and the
+`sort` the user asked for. Nothing in the harness changed between those runs.
+So the PRD's load-bearing assumption, that a single run at temperature 0 is
+stable enough for green to mean green, does not hold even on a five-scenario
+suite. That scenario is left asserting the behaviour we want rather than the
+behaviour we get, now under `repeat({ runs: 3, threshold: 0.66 })`, and it is
+red more often than not (a later session measured 1 of 3). The failure output
+shows each run's outcome individually. It is a real signal that
+`search-products` does not lead the model to carry refinement context or to
+use `sort`, which is exactly the class of problem evals exist to surface.
 
-`skybridge.eval.config.ts` names the model (an OpenAI-compatible base URL, so Anthropic and a
-local model are the same config) and the project to evaluate. `src/global-setup.ts` starts the
-server once for the run. Each scenario opens its own MCP session. `src/chat.ts` is the whole
-agent: `tools/list` becomes the model's tool list, the model runs at temperature 0, and every
-call it makes is recorded and forwarded to the server as a real `tools/call`. Assertions are
-plain vitest against `chat.toolCalls`.
+## Deliberately out of this POC
+
+Suite-level repetition (run everything N times, aggregate in a reporter). It
+would also produce the stored artifact the run-over-run comparison needs, so
+the two should be designed together rather than guessed at now. The
+per-scenario `repeat` here is the complementary tool for scenarios known to be
+non-deterministic, not a replacement for it.
 
 ## Findings
 
-**Spike 1, starting the server from library code: works, but not from inside the process.**
-`server.run()` reads `process.env.__PORT` and never returns the port it bound, so the runner
-cannot ask the server where it landed. The POC works around it by picking a free port itself
-(bind `:0`, read it, close) and passing it in as `__PORT`. That leaves a race: another process
-can take the port between the probe closing and the server binding. `run()` should return the
-bound address, at which point `__PORT=0` becomes usable and the race disappears.
+**Typed assertions need to live in the matcher.** Vitest types `toEqual` as
+`<E>(expected: E) => void`, so asserting on the raw `toolCalls` array pins
+nothing: a wrong tool name, a misspelled argument and a wrong value type all
+typecheck. Moving the assertion into `expect.chat(...).toHaveCalledToolOnce()`
+pins both the tool name and the argument shape to the project's registry.
+`src/typing-probe.ts` is the evidence, and it is covered by `pnpm test`.
 
-Readiness is a real signal, not a sleep: the harness polls `POST /mcp` with an `initialize`
-request until it answers, about 1.5s here. Spawning is `tsx src/server.ts` with
-`NODE_ENV=production`, which skips the devtools and Vite middleware. How the runner should learn
-that command is still the PRD's open question; here it is spelled out in config.
+**Subset matching has to be the default.** `intentMiddleware()` injects a
+`user_intent` argument into every tool schema, so equality against the whole
+arguments object can never hold. Every matcher compares a subset.
 
-Teardown works over SIGTERM, which the server already handles. Worth noting that `run()`
-installs its own SIGINT/SIGTERM handlers and calls `process.exit`, fine for a child process and
-something to unpick if the server ever runs inside the vitest worker.
+**`ToolInput` is the parsed input**, so a zod `.default()` reads as required
+even though the model never sends it. Expected arguments are `Partial<>` for
+that reason.
 
-**Spike 2, deriving tool names and arguments as types: already there, and it crosses package
-boundaries.** `InferTools`/`ToolNames`/`ToolInput` in `packages/core/src/server/inferUtilityTypes.ts`
-work off the `AppType` an example already exports.
+**The server still cannot report its own port.** `server.run()` does not return
+what it bound, so the runner picks a free port and passes it in as `__PORT`,
+which leaves a bind race. Fixing that belongs in `packages/core`, not here.
 
-**But the PRD's typed-assertion claim does not hold as written.** Vitest types `toEqual` as
-`<E>(expected: E) => void`, so the expected value is never checked against what it is compared
-to. `expect(chat.toolCalls).toEqual([{ name: 'flight-bookings', ... }])` typechecks happily with
-a tool that does not exist, and so does a misspelled argument or a wrong value type. The typing
-only bites if the expectation passes through something that pins it, which is what
-`expectedCalls<App>()` in `src/chat.ts` does. Every scenario here goes through it, and
-`src/typing-probe.ts` shows the three cases that a bare `toEqual` lets through and
-`expectedCalls` rejects. That file is deliberately outside the eval glob, so it typechecks
-(under `pnpm test`) but never runs. Cost: one wrapper at every call site, which weakens the
-"nothing in the assertions is ours" line a little.
+## Where the typing question landed
 
-**Middleware rewrites the tool surface, and the registry types do not know.** The example uses
-`intentMiddleware()` from `@alpic-ai/insights`, which injects a `user_intent` argument into every
-tool schema. The model sends `{ origin: 'LHR', ..., user_intent: 'Looking for round-trip
-flights...' }` while `ToolInput` says only the declared fields exist. Exact equality on the whole
-arguments object therefore cannot be the default on any project using that middleware.
-`expectedCalls` handles it by relaxing each arguments object to `objectContaining` while keeping
-the type pinned, so the eval file still reads as an exact expectation. Worth seeing the injected
-schema in the failure output below: its description is roughly forty lines and dwarfs the tool's
-own arguments, which is its own question for the tool surface.
+Earlier iterations threaded the app type through a `createEvalTest<AppType>()`
+factory returning an extended `it`. Review feedback (rightly) called out that
+the API contract should not change to satisfy a typing need, and that an
+explicit `start` reads more naturally than fixture plumbing for deciding when
+a conversation begins. `start<AppType>()` settles it: `it` stays vitest's, and
+the one generic per test is what keeps a wrong tool name or argument failing
+to typecheck before it costs a model call. Options rejected along the way,
+with reasons: module augmentation (silently degrades to accepting any tool
+name if the declaration file is not picked up, and allows one app per
+project), custom keys on `it`'s second argument (vitest discards unknown keys,
+verified), and a global `chat` (leaks conversation state between scenarios,
+which the PRD forbids).
 
-**`ToolInput` is the parsed input, not the wire input.** `directOnly` is declared
-`z.boolean().optional().default(false)`, so it is optional on the wire and required in
-`ToolInput`. An expectation typed on `ToolInput` therefore demands an argument the model never
-has to send. The POC works around it with `Partial`, which also loses the required/optional
-distinction. The real fix is deriving expectations from the input side of the schema.
+## Known rough edges
 
-**Relative dates are irreproducible, and nothing in the eval file can fix it.** The red scenario
-asks for "next Friday". The model has no current date, so it does not resolve one and calls
-nothing at all, and any expected date hardcoded in the eval would rot the following week anyway.
-This is the PRD's deferred frozen-clock candidate showing up on the first realistic prompt, and
-it needs both a fixed clock and that date reaching the model.
+Kept deliberately, listed so review does not have to find them:
 
-**Vague refinements do not re-search, and that is a tool-surface finding.** "Only direct ones,
-and nothing over 900 euros" after a first search produces no second call: the model answers in
-prose over the results it already has. Rephrasing to "search again, direct flights only..." makes
-it call the tool. The scenario here uses the explicit phrasing so the suite is green; changing
-that one line reproduces the failure. This is exactly the class of thing evals are meant to
-catch, and the fix belongs in the tool description, not in the eval.
-
-**Determinism is unmeasured.** A handful of back-to-back runs gave identical results, but the
-PRD's 20x count is not something a POC should spend on. It stays a todo, and it is the
-load-bearing assumption of the must-pass criterion.
-
-**Failure output.** `defineEval` catches the assertion error and appends the name, description
-and argument schema of every tool the model was looking at, on top of vitest's expected-versus-
-received diff. Server output is dumped once at the end of the run, not per scenario: that needs
-the correlation id the PRD describes, and a real reporter rather than a `catch`.
-
-## Not built
-
-Run-to-run comparison, the JSON artifact for coding agents, the reporter, config discovery,
-handler stubbing, spend ceiling. All deferred in the PRD.
+- The server command is hardcoded in the plugin options rather than derived
+  from the project. How the runner should learn it is still open in the PRD.
+- The eval file imports `AppType` from `examples/ecom-carousel` by relative
+  path and spawns that package's `tsx`, neither declared as a dependency.
+- `search-products` reaches the real catalog, so these scenarios depend on data
+  the runner does not control. That is the stubbing the PRD defers.
+- `DEFAULT_MAX_STEPS` is a runaway guard, not the spend ceiling the PRD defers.
+- `systemPrompt`, `maxSteps` and the `server` option (evaluate a server you
+  started yourself) are wired through but no scenario sets them. The
+  descriptor covers Anthropic only; another provider is a case in
+  `resolveModel`, or the `defineEvalModel` file, which is verified working.
+- No run-over-run comparison. The PRD asks for it, but it needs a stored
+  baseline artifact, which is the same artifact the devtools test tab would
+  read, so both should be designed together rather than guessed at here.
+- `repeat` classifies errors to rethrow infrastructure failures instead of
+  counting them as failed runs. Custom-matcher failures are `JestExtendError`
+  with `name: "Error"` and no `matcherResult`, only `actual`/`expected`, so
+  matcher-aware code cannot rely on the error name.
+- Every matcher subset-matches, so asserting one argument out of five reads the
+  same as asserting all five. The PRD wanted looseness opted into visibly, but
+  `intentMiddleware` injects `user_intent` into every schema, so strict
+  equality can never hold. Worth resolving before the API is fixed.

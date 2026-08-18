@@ -1,16 +1,21 @@
-import { fileURLToPath } from "node:url";
 import type { TestProject } from "vitest/node";
-import config from "../skybridge.eval.config.js";
+import type { ProvidedEvalsOptions } from "./config.js";
 import { startServer } from "./server-harness.js";
 
 export default async function setup(project: TestProject) {
-  const server = await startServer({
-    cwd: fileURLToPath(new URL(`../${config.project.cwd}`, import.meta.url)),
-    command: config.project.command,
-    env: config.project.env,
-  });
+  const options = project.config.provide
+    ?.skybridgeEvals as ProvidedEvalsOptions;
 
-  project.provide("mcpUrl", server.url);
+  if (options.server !== undefined) {
+    project.provide("skybridgeEvalsUrl", options.server);
+    return;
+  }
+  if (options.project === undefined) {
+    throw new Error("The evals plugin needs either `server` or `project`");
+  }
+
+  const server = await startServer(options.project);
+  project.provide("skybridgeEvalsUrl", server.url);
 
   return async () => {
     const output = server.output().trim();
@@ -19,10 +24,4 @@ export default async function setup(project: TestProject) {
       console.log(`\n--- server output ---\n${output}\n---`);
     }
   };
-}
-
-declare module "vitest" {
-  interface ProvidedContext {
-    mcpUrl: string;
-  }
 }
