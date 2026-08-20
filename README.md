@@ -146,11 +146,16 @@ Explore all our example templates in the [Examples](https://docs.skybridge.tech/
 | <img src="docs/images/showcase-auth0.png" alt="Auth Auth0" width="160" /> | Auth0 | Full OAuth authentication with Auth0 and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-auth0) |
 | <img src="docs/images/showcase-authplane.png" alt="Auth Authplane" width="160" /> | Authplane | Full OAuth authentication with Authplane and personalized coffee shop search. | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-authplane) |
 
-### UI and component libraries
+### Generative UI
+
+| Preview | App | Description | Demo | Code |
+| --- | --- | --- | --- | --- |
+| <img src="docs/images/showcase-generative-ui.png" alt="JSON Renderer" width="160" /> | JSON Renderer | LLM-generated dynamic UIs with json-render and 36 pre-built shadcn/ui components. | [Try Demo](https://generative-ui.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/generative-ui) |
+| <img src="docs/images/showcase-openui.png" alt="OpenUI" width="160" /> | OpenUI | LLM-generated dynamic UIs with OpenUI Lang and the standard OpenUI component library. | [Try Demo](https://openui.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/openui-generative-ui) |
+
+### Component libraries
 
 | Preview | App | Description | Demo | Code |
 | --- | --- | --- | --- | --- |
 | <img src="docs/images/showcase-manifest-ui.png" alt="Manifest UI" width="160" /> | Manifest UI | Agentic component library example for rich AI-powered experiences. | [Try Demo](https://manifest-ui.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/manifest-ui) |
-| <img src="docs/images/showcase-generative-ui.png" alt="Generative UI - JSON Renderer" width="160" /> | Generative UI - JSON Renderer | LLM-generated dynamic UIs with json-render and 36 pre-built shadcn/ui components. | [Try Demo](https://generative-ui.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/generative-ui) |
-| <img src="docs/images/showcase-openui.png" alt="Generative UI - OpenUI" width="160" /> | Generative UI - OpenUI | LLM-generated dynamic UIs with OpenUI Lang and the standard OpenUI component library. | [Try Demo](https://openui.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/openui-generative-ui) |
 | <img src="docs/images/showcase-mcpcn.png" alt="mcpcn" width="160" /> | mcpcn | Agentic component library starter with pre-built mcpcn components and generative UI via json-render. | [Try Demo](https://mcpcn.skybridge.tech/try) | [View code](https://github.com/alpic-ai/skybridge/tree/main/examples/mcpcn) |

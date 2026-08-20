@@ -216,23 +216,43 @@ OAuth examples showing how to connect common authentication providers to Skybrid
 </CardGroup>
 </div>
 
-## UI and component libraries
+## Generative UI
 
-Examples for building rich interfaces and reusable components in MCP Apps.
+The model composes the interface at runtime. Each example uses a different rendering approach — JSON specs, streaming markup, and more later.
 
 <CardGroup cols={2}>
 
 <ChatExample
   card
   href="/examples/generative-ui"
-  title="Generative UI - JSON Renderer"
+  title="JSON Renderer"
   prompt="Generate a feedback UI for me."
   src="/images/showcase-generative-ui.png"
-  alt="Generative UI - JSON Renderer showcase"
+  alt="JSON Renderer showcase"
   description="LLM-generated dynamic UIs with json-render and 36 pre-built shadcn/ui components. The AI composes the interface, the view renders it."
   demo="https://generative-ui.skybridge.tech/try"
   source="https://github.com/alpic-ai/skybridge/tree/main/examples/generative-ui"
 />
+
+<ChatExample
+  card
+  href="/examples/openui"
+  title="OpenUI"
+  prompt="Generate a summary of my last ski trip."
+  src="/images/showcase-openui.png"
+  alt="OpenUI showcase"
+  description="LLM-generated dynamic UIs with OpenUI Lang and the standard OpenUI component library. The AI streams OpenUI Lang; the view renders it progressively."
+  demo="https://openui.skybridge.tech/try"
+  source="https://github.com/alpic-ai/skybridge/tree/main/examples/openui-generative-ui"
+/>
+
+</CardGroup>
+
+## Component libraries
+
+Ready-made component kits you drop into a Skybridge view.
+
+<CardGroup cols={2}>
 
 <ChatExample
   card
@@ -244,18 +264,6 @@ Examples for building rich interfaces and reusable components in MCP Apps.
   description="Agentic component library example for rich AI-powered experiences."
   demo="https://manifest-ui.skybridge.tech/try"
   source="https://github.com/alpic-ai/skybridge/tree/main/examples/manifest-ui"
-/>
-
-<ChatExample
-  card
-  href="/examples/openui"
-  title="Generative UI - OpenUI"
-  prompt="Generate a summary of my last ski trip."
-  src="/images/showcase-openui.png"
-  alt="Generative UI - OpenUI showcase"
-  description="LLM-generated dynamic UIs with OpenUI Lang and the standard OpenUI component library. The AI streams OpenUI Lang; the view renders it."
-  demo="https://openui.skybridge.tech/try"
-  source="https://github.com/alpic-ai/skybridge/tree/main/examples/openui-generative-ui"
 />
 
 </CardGroup>

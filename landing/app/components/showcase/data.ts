@@ -492,7 +492,7 @@ export const SHOWCASE: ShowcaseApp[] = [
   {
     id: "generative-ui",
     slug: "generative-ui",
-    name: "Generative UI - JSON Renderer",
+    name: "JSON Renderer",
     tagline: "LLM-composed interfaces",
     blurb:
       "LLM-generated dynamic UIs with json-render and 36 pre-built shadcn/ui components. The AI composes the interface, the widget renders it.",
@@ -519,7 +519,7 @@ export const SHOWCASE: ShowcaseApp[] = [
   {
     id: "openui",
     slug: "openui",
-    name: "Generative UI - OpenUI",
+    name: "OpenUI",
     tagline: "OpenUI Lang generative UI",
     blurb:
       "LLM-generated dynamic UIs with OpenUI Lang and the standard OpenUI component library. The AI streams OpenUI Lang; the view renders it.",
