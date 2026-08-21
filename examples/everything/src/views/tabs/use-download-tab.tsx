@@ -4,7 +4,7 @@ import { useDownload } from "skybridge/web";
 import { Code, Description, TabBody } from "../components/ui.js";
 
 export function UseDownloadTab() {
-  const { download } = useDownload();
+  const download = useDownload();
   const [status, setStatus] = useState<string | null>(null);
 
   const downloadJson = async () => {

@@ -64,10 +64,7 @@ function signToken(key: CryptoKey, scope = "openid email") {
 
 async function bootServer(
   jwksUri: string,
-  {
-    baseUrl = "https://app.example.test",
-    legacyVerify = false,
-  }: { baseUrl?: string | null; legacyVerify?: boolean } = {},
+  { baseUrl = "https://app.example.test" }: { baseUrl?: string | null } = {},
 ) {
   const { createApp } = await import("../express.js");
   const server = new McpServer(
@@ -82,15 +79,11 @@ async function bootServer(
           token_endpoint: `${ISSUER}/token`,
           response_types_supported: ["code"],
         },
-        ...(legacyVerify
-          ? { verify: { issuer: ISSUER, audience: AUDIENCE, jwksUri } }
-          : {
-              verifier: createJwksVerifier({
-                issuer: ISSUER,
-                audience: AUDIENCE,
-                jwksUri,
-              }),
-            }),
+        verifier: createJwksVerifier({
+          issuer: ISSUER,
+          audience: AUDIENCE,
+          jwksUri,
+        }),
         scopesSupported: ["openid", "email"],
         requiredScopes: ["openid"],
       },
@@ -166,26 +159,6 @@ describe("setupOAuth wiring", () => {
     })) as unknown as {
       content: { type: string; text: string }[];
     };
-    expect(result.content[0]?.text).toBe("client-1");
-
-    await client.close();
-  });
-  it("builds the verifier from the legacy verify config", async () => {
-    const { privateKey, jwksUri } = await startJwks();
-    const base = await bootServer(jwksUri, { legacyVerify: true });
-    const token = await signToken(privateKey);
-
-    const client = new Client({ name: "test-client", version: "0.0.0" });
-    const transport = new StreamableHTTPClientTransport(
-      new URL(`${base}/mcp`),
-      { requestInit: { headers: { Authorization: `Bearer ${token}` } } },
-    );
-    await client.connect(transport);
-
-    const result = (await client.callTool({
-      name: "whoami",
-      arguments: {},
-    })) as unknown as { content: { type: string; text: string }[] };
     expect(result.content[0]?.text).toBe("client-1");
 
     await client.close();
@@ -300,16 +273,13 @@ async function bootMixedServer(jwksUri: string) {
       }),
     );
 
-  (server.registerTool as (...a: unknown[]) => unknown)(
-    "legacy-whoami",
+  server.registerTool(
     {
-      description: "Registered via the legacy string overload.",
+      name: "undeclared-whoami",
+      description: "Registered without auth or securitySchemes.",
       inputSchema: {},
     },
-    (
-      _args: unknown,
-      extra: { http?: { authInfo?: { clientId?: string } } },
-    ) => ({
+    (_args, extra) => ({
       content: [
         { type: "text", text: extra.http?.authInfo?.clientId ?? "anon" },
       ],
@@ -405,7 +375,7 @@ describe("mixed-auth door", () => {
     expect(text).not.toContain("client-1");
   });
 
-  it("gates a tool registered via the legacy string overload (secure default)", async () => {
+  it("gates a tool with no declared schemes (secure default)", async () => {
     const { jwksUri } = await startJwks();
     const base = await bootMixedServer(jwksUri);
 
@@ -419,7 +389,7 @@ describe("mixed-auth door", () => {
         jsonrpc: "2.0",
         id: 1,
         method: "tools/call",
-        params: { name: "legacy-whoami", arguments: {} },
+        params: { name: "undeclared-whoami", arguments: {} },
       }),
     });
     expect(res.status).toBe(401);
