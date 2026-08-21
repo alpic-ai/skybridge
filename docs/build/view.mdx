@@ -4,6 +4,10 @@ description: "Craft interactive UIs rendered in conversation"
 icon: "palette"
 ---
 
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/view.webp" alt="Create Views" />
+
 Views are the face of your app: UI components the host mounts inline when the [tool](/build/tools) they're bound to returns. A view reads what the tool produced, calls tools back when the user acts, and manages the [state](/build/state) shared with the model. It's plain [React](https://react.dev/), running in a sandboxed iframe inside the host.
 
 Here's a complete view, the `carousel` mounted by `search-products`, next to a minimal version of the tools it talks to:
