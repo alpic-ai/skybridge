@@ -83,6 +83,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.2(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.0)(yaml@2.9.0))
@@ -138,6 +141,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -193,6 +199,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -248,6 +257,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -303,6 +315,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -358,6 +373,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -410,6 +428,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.1.0
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -465,6 +486,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -520,6 +544,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -602,6 +629,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.3(vite@8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -675,6 +705,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.1.0
         version: 1.2.7(arktype@2.1.27)(typescript@6.0.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@tailwindcss/vite':
         specifier: ^4.2.4
         version: 4.3.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -739,6 +772,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -788,6 +824,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.4
         version: 1.2.7(arktype@2.1.27)(typescript@6.0.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/node':
         specifier: ^24.13.2
         version: 24.13.3
@@ -861,6 +900,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -916,6 +958,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/node':
         specifier: ^22.20.0
         version: 22.20.1
@@ -980,6 +1025,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/node':
         specifier: ^25.9.4
         version: 25.9.5
@@ -1041,6 +1089,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -1120,6 +1171,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/node':
         specifier: ^25.9.4
         version: 25.9.5
@@ -1205,6 +1259,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/node':
         specifier: ^25.9.4
         version: 25.9.5
@@ -1269,6 +1326,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/node':
         specifier: ^25.9.4
         version: 25.9.5
@@ -1315,6 +1375,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/node':
         specifier: ^25.9.4
         version: 25.9.5
@@ -1373,6 +1436,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@types/node':
         specifier: ^22.20.0
         version: 22.20.1
@@ -1431,6 +1497,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.3
         version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -1694,6 +1763,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.7
         version: 1.2.7(arktype@2.1.27)(typescript@6.0.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../../vite-plugin
       '@types/node':
         specifier: ^24.13.3
         version: 24.13.3
@@ -1743,6 +1815,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.7
         version: 1.2.7(arktype@2.1.27)(typescript@6.0.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../../vite-plugin
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -1795,6 +1870,9 @@ importers:
       '@skybridge/devtools':
         specifier: ^1.2.4
         version: 1.2.7(arktype@2.1.27)(typescript@6.0.3)
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../../../vite-plugin
       '@types/node':
         specifier: ^24.13.2
         version: 24.13.3
@@ -1880,6 +1958,9 @@ importers:
       '@rjsf/validator-ajv8':
         specifier: ^6.7.0
         version: 6.7.0(@rjsf/utils@6.7.0(react@19.2.7))
+      '@skybridge/vite-plugin':
+        specifier: workspace:*
+        version: link:../vite-plugin
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.1.5(@types/node@25.9.5)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))

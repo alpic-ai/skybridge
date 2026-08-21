@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
+import { skybridge } from "@skybridge/vite-plugin";
 import react from "@vitejs/plugin-react";
-import { skybridge } from "skybridge/vite";
 import { defineConfig, type Plugin } from "vite";
 
 /**
