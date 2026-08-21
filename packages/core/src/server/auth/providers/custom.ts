@@ -1,4 +1,4 @@
-import type { OAuthMetadata } from "@modelcontextprotocol/sdk/shared/auth.js";
+import type { OAuthMetadata } from "@modelcontextprotocol/server";
 import type { ExtraClaims } from "../../auth.js";
 import {
   type DiscoveredMetadata,

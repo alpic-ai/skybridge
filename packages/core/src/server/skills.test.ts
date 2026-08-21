@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { ResourceTemplate } from "@modelcontextprotocol/server";
 import { describe, expect, it, vi } from "vitest";
 import {
   discoverSkills,
@@ -161,11 +161,14 @@ describe("registerSkills", () => {
         },
       ),
       server: {
-        setRequestHandler: vi.fn((schema: unknown, handler: unknown) => {
-          const method = (schema as { shape: { method: { value: string } } })
-            .shape.method.value;
-          handlers.set(method, handler as (req: unknown) => unknown);
-        }),
+        setRequestHandler: vi.fn(
+          (method: unknown, _schemas: unknown, handler: unknown) => {
+            handlers.set(
+              method as string,
+              handler as (req: unknown) => unknown,
+            );
+          },
+        ),
       },
     };
     return { server, resources, handlers };
@@ -187,7 +190,7 @@ describe("registerSkills", () => {
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
     registerSkills(on.server as any, manifest);
     const result = on.handlers.get("resources/directory/read")?.({
-      params: { uri: "skill://refunds/templates" },
+      uri: "skill://refunds/templates",
     }) as { resources: { uri: string; name: string; mimeType: string }[] };
     expect(result.resources).toEqual([
       {
@@ -203,7 +206,7 @@ describe("registerSkills", () => {
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
     registerSkills(server as any, manifest);
     const result = handlers.get("resources/directory/read")?.({
-      params: { uri: "skill://refunds" },
+      uri: "skill://refunds",
     }) as { resources: { name: string; mimeType: string }[] };
     expect(result.resources).toContainEqual({
       uri: "skill://refunds/templates",
@@ -221,7 +224,7 @@ describe("registerSkills", () => {
     const { server, handlers } = fakeRegistrar();
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
     registerSkills(server as any, manifest);
-    const result = handlers.get("skills/list")?.({ params: {} });
+    const result = handlers.get("skills/list")?.({});
     expect(result).toEqual({
       skills: [
         {
@@ -244,17 +247,17 @@ describe("registerSkills", () => {
     // biome-ignore lint/suspicious/noExplicitAny: structural test double
     registerSkills(server as any, manifest);
     const get = handlers.get("skills/get");
-    const result = get?.({
-      params: { uri: "skill://refunds/SKILL.md" },
-    }) as { skill: { uri: string; resources: unknown[] } };
+    const result = get?.({ uri: "skill://refunds/SKILL.md" }) as {
+      skill: { uri: string; resources: unknown[] };
+    };
     expect(result.skill.uri).toBe("skill://refunds/SKILL.md");
     expect(result.skill.resources).toHaveLength(2);
-    expect(() =>
-      get?.({ params: { uri: "skill://unknown/SKILL.md" } }),
-    ).toThrow(/Unknown skill/);
-    expect(() =>
-      get?.({ params: { uri: "skill://refunds/templates/email.md" } }),
-    ).toThrow(/Unknown skill/);
+    expect(() => get?.({ uri: "skill://unknown/SKILL.md" })).toThrow(
+      /Unknown skill/,
+    );
+    expect(() => get?.({ uri: "skill://refunds/templates/email.md" })).toThrow(
+      /Unknown skill/,
+    );
   });
 });
 

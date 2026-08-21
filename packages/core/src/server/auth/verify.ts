@@ -1,4 +1,4 @@
-import { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
+import { OAuthError } from "@modelcontextprotocol/server";
 import * as jose from "jose";
 import type { AuthInfo, ExtraClaims, TokenVerifier } from "../auth.js";
 
@@ -82,7 +82,10 @@ export function createJwksVerifier<TExtra extends ExtraClaims = ExtraClaims>(
         const safe = message
           .replace(/[^\x20-\x21\x23-\x5B\x5D-\x7E]+/g, " ")
           .trim();
-        throw new InvalidTokenError(`Token verification failed: ${safe}`);
+        throw new OAuthError(
+          "invalid_token",
+          `Token verification failed: ${safe}`,
+        );
       }
 
       const { client_id, scope, exp, sub, ...rest } = payload as Record<

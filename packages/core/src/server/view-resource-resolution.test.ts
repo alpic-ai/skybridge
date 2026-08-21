@@ -1,7 +1,9 @@
 import http from "node:http";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import {
+  Client,
+  InMemoryTransport,
+  StreamableHTTPClientTransport,
+} from "@modelcontextprotocol/client";
 import type { RequestHandler } from "express";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { __setBuildManifest, McpServer } from "./index.js";

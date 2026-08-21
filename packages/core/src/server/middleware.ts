@@ -1,5 +1,3 @@
-import type { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
   CallToolResult,
   CancelTaskResult,
@@ -17,20 +15,22 @@ import type {
   ListTasksResult,
   ListToolsResult,
   ReadResourceResult,
-  ServerNotification,
-  ServerRequest,
+  Server,
+  ServerContext,
   ServerResult,
-} from "@modelcontextprotocol/sdk/types.js";
+} from "@modelcontextprotocol/server";
 import type { AuthInfo, ExtraClaims } from "./auth.js";
 
 /**
- * The `extra` context object provided by the MCP SDK to request handlers.
+ * The per-request handler context provided by the MCP SDK to request handlers.
  */
 export type McpExtra<TAuthExtra extends ExtraClaims = ExtraClaims> = Omit<
-  RequestHandlerExtra<ServerRequest, ServerNotification>,
-  "authInfo"
+  ServerContext,
+  "http"
 > & {
-  authInfo?: AuthInfo<TAuthExtra>;
+  http?: Omit<NonNullable<ServerContext["http"]>, "authInfo"> & {
+    authInfo?: AuthInfo<TAuthExtra>;
+  };
 };
 
 /**

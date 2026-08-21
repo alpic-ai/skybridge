@@ -1,4 +1,4 @@
-import { OAuthMetadataSchema } from "@modelcontextprotocol/sdk/shared/auth.js";
+import { OAuthMetadataSchema } from "@modelcontextprotocol/core";
 import { z } from "zod";
 
 /**

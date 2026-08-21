@@ -1,4 +1,8 @@
 import http from "node:http";
+import {
+  Client,
+  StreamableHTTPClientTransport,
+} from "@modelcontextprotocol/client";
 import type { ErrorRequestHandler, RequestHandler } from "express";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { McpServer } from "./server.js";
@@ -119,9 +123,9 @@ describe("McpServer.express", () => {
     });
 
     // Force the /mcp handler to throw so the error pipeline runs.
-    vi.spyOn(server, "connectStatelessTransport").mockRejectedValue(
-      new Error("boom"),
-    );
+    server.use("/mcp", () => {
+      throw new Error("boom");
+    });
 
     const httpServer = http.createServer();
     await createApp({
@@ -377,12 +381,11 @@ describe("createApp", () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const mcpServer = new McpServer({ name: "t", version: "0.0.0" });
-    // Force the express-level error path: make connectStatelessTransport
-    // reject so the request handler hits its try/catch and calls next(error),
-    // which lands in the default /mcp error handler.
-    vi.spyOn(mcpServer, "connectStatelessTransport").mockRejectedValue(
-      new Error("boom"),
-    );
+    // Force the express-level error path: make a /mcp middleware throw so the
+    // error pipeline runs and lands in the default /mcp error handler.
+    mcpServer.use("/mcp", () => {
+      throw new Error("boom");
+    });
 
     const httpServer = http.createServer();
     const app = await createApp({ mcpServer, httpServer });
@@ -413,9 +416,9 @@ describe("createApp", () => {
     };
 
     const mcpServer = new McpServer({ name: "t", version: "0.0.0" });
-    vi.spyOn(mcpServer, "connectStatelessTransport").mockRejectedValue(
-      new Error("boom"),
-    );
+    mcpServer.use("/mcp", () => {
+      throw new Error("boom");
+    });
 
     const httpServer = http.createServer();
     const app = await createApp({
@@ -446,9 +449,9 @@ describe("createApp", () => {
     };
 
     const mcpServer = new McpServer({ name: "t", version: "0.0.0" });
-    vi.spyOn(mcpServer, "connectStatelessTransport").mockRejectedValue(
-      new Error("boom"),
-    );
+    mcpServer.use("/mcp", () => {
+      throw new Error("boom");
+    });
     mcpServer.use("/api/test", throwingApiRoute);
 
     const httpServer = http.createServer();
@@ -616,5 +619,43 @@ describe("createApp tunnel routes", () => {
       process.env.NODE_ENV = prevEnv;
       vi.resetModules();
     }
+  });
+});
+
+describe("createApp mount path", () => {
+  it("serves /mcp with the mount path intact on the request URL", async () => {
+    const { createApp } = await import("./express.js");
+    const mcpServer = new McpServer({
+      name: "t",
+      version: "0.0.0",
+    }).registerTool(
+      {
+        name: "echo-url",
+        description: "Echoes the request URL.",
+        inputSchema: {},
+      },
+      (_args, extra) => ({
+        content: [{ type: "text", text: extra.http?.req?.url ?? "" }],
+      }),
+    );
+
+    const httpServer = http.createServer();
+    const app = await createApp({ mcpServer, httpServer });
+    const { port, server } = await listen(app);
+    openServer = server;
+
+    const client = new Client({ name: "test-client", version: "0.0.0" });
+    await client.connect(
+      new StreamableHTTPClientTransport(
+        new URL(`http://localhost:${port}/mcp`),
+      ),
+    );
+    const result = (await client.callTool({
+      name: "echo-url",
+      arguments: {},
+    })) as unknown as { content: { text: string }[] };
+    await client.close();
+
+    expect(new URL(result.content[0]?.text ?? "").pathname).toBe("/mcp");
   });
 });
