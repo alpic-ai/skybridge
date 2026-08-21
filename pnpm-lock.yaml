@@ -1497,23 +1497,23 @@ importers:
         specifier: ^7.29.7
         version: 7.29.7
       '@modelcontextprotocol/core':
-        specifier: 2.0.0-beta.5
-        version: 2.0.0-beta.5
+        specifier: ^2.0.0
+        version: 2.0.0
       '@modelcontextprotocol/express':
-        specifier: 2.0.0-beta.5
-        version: 2.0.0-beta.5(@modelcontextprotocol/server@2.0.0-beta.5)(express@5.2.1)
+        specifier: ^2.0.0
+        version: 2.0.0(@modelcontextprotocol/server@2.0.0)(express@5.2.1)
       '@modelcontextprotocol/ext-apps':
         specifier: ^1.7.4
         version: 1.7.4(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(zod@4.4.3)
       '@modelcontextprotocol/node':
-        specifier: 2.0.0-beta.5
-        version: 2.0.0-beta.5(@modelcontextprotocol/server@2.0.0-beta.5)(hono@4.12.8)
+        specifier: ^2.0.0
+        version: 2.0.0(@modelcontextprotocol/server@2.0.0)(hono@4.12.8)
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@4.4.3)
       '@modelcontextprotocol/server':
-        specifier: 2.0.0-beta.5
-        version: 2.0.0-beta.5
+        specifier: ^2.0.0
+        version: 2.0.0
       '@oclif/core':
         specifier: ^4.11.14
         version: 4.11.14
@@ -1579,8 +1579,8 @@ importers:
         version: 5.0.14(@types/react@19.2.17)(immer@11.1.11)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7))
     devDependencies:
       '@modelcontextprotocol/client':
-        specifier: 2.0.0-beta.5
-        version: 2.0.0-beta.5
+        specifier: ^2.0.0
+        version: 2.0.0
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -1830,8 +1830,8 @@ importers:
         specifier: ^5.3.0
         version: 5.3.0
       '@modelcontextprotocol/client':
-        specifier: 2.0.0-beta.5
-        version: 2.0.0-beta.5
+        specifier: ^2.0.0
+        version: 2.0.0
       '@playwright/test':
         specifier: ^1.61.1
         version: 1.61.1
@@ -3368,19 +3368,19 @@ packages:
   '@mintlify/validation@0.1.789':
     resolution: {integrity: sha512-gI7cUbj7u6aoSxGlrbn4keIypLLXkeJk/8+GvwW43u/LFFqQDhpTfBmcYWQzQ21steRUtoLmMnYFjljByo8obQ==}
 
-  '@modelcontextprotocol/client@2.0.0-beta.5':
-    resolution: {integrity: sha512-YuuNm5f2TMoFQRje1UqVP8TJRjijCXMz4ckvoVpx1cUXuBEmykWQ2d8R536pek6UKcXT41T5nWc4qR1JFIbEmg==}
+  '@modelcontextprotocol/client@2.0.0':
+    resolution: {integrity: sha512-8f1OghQ2rjzIOfqgUCP+8GiUWqRs89njoWLNqAe8kWmDePv3s1fZXseej+QXemssEuuOvLLmLO/kqM3IQHtISw==}
     engines: {node: '>=20'}
 
-  '@modelcontextprotocol/core@2.0.0-beta.5':
-    resolution: {integrity: sha512-HKbY9XTbsDy1Y6r2I55TGE3JEapM0vg96e1MUmBIF9LGjos5gjhcIrTz1yvBPLg2aFKHjwhUAQfRdrCEnPxNew==}
+  '@modelcontextprotocol/core@2.0.0':
+    resolution: {integrity: sha512-pJCEwGG7Lfr/+PQp9ZTwKXNeO5wzbfKL7H3MYpCorM4oFBoQrdjnBgEoqG+RjhsvS1FKrDbKux+M1HhlnGWqcA==}
     engines: {node: '>=20'}
 
-  '@modelcontextprotocol/express@2.0.0-beta.5':
-    resolution: {integrity: sha512-SDHAAKCOkHrxuBRyh6fRQJpjWBt5vrRCmvV7OIyWdmIksQzmTYsw7oEX1p9Kje6PSDqKJHpmqLJzZNUnOhrfCQ==}
+  '@modelcontextprotocol/express@2.0.0':
+    resolution: {integrity: sha512-Snlr8j9FR9LcVvEJPF7qJ7d5zTL4Bes2dk7RcacN9eSZ7OLohwxqhEvWu1+UxELyScgLbLLOdeVEGdwKI1iwVQ==}
     engines: {node: '>=20'}
     peerDependencies:
-      '@modelcontextprotocol/server': ^2.0.0-beta.5
+      '@modelcontextprotocol/server': ^2.0.0
       express: ^4.18.0 || ^5.0.0
 
   '@modelcontextprotocol/ext-apps@1.7.4':
@@ -3397,11 +3397,11 @@ packages:
       react-dom:
         optional: true
 
-  '@modelcontextprotocol/node@2.0.0-beta.5':
-    resolution: {integrity: sha512-flrOzx5qFLBM9I8IYRGfYUY02erFmxOvYQ9sEE6iSj/ZZpRYKorXWscM/qrfW9rwlcGLyymHhnP2AaDbMB1lIA==}
+  '@modelcontextprotocol/node@2.0.0':
+    resolution: {integrity: sha512-Y4hAC2XdGDUdDOCbLDOCA4+aL3NUldjsOWlDL/YwpAxrPhRm1xHd7lZ+mLacvZ9t3PaH28wgNoaLQGrIk1P2pg==}
     engines: {node: '>=20'}
     peerDependencies:
-      '@modelcontextprotocol/server': ^2.0.0-beta.5
+      '@modelcontextprotocol/server': ^2.0.0
       hono: ^4.11.4
     peerDependenciesMeta:
       hono:
@@ -3417,8 +3417,8 @@ packages:
       '@cfworker/json-schema':
         optional: true
 
-  '@modelcontextprotocol/server@2.0.0-beta.5':
-    resolution: {integrity: sha512-i1E5l75rQKsgY/AKAIspgMBH1vEL7dqiK7tHr0L+raYcb0SWOziqNGJXGIG6NY4AlXDWIKGJQGB7Nqfs3oUi5g==}
+  '@modelcontextprotocol/server@2.0.0':
+    resolution: {integrity: sha512-YhHWdHfpFMQfd0prsEnxKeS3Qz3ytIGmsS0sth4KDjnacIT7hxk6hXHkJ9KysxlkvTM+WZAtQbbcUhdoP4Hvtw==}
     engines: {node: '>=20'}
 
   '@mswjs/interceptors@0.40.0':
@@ -13874,9 +13874,9 @@ snapshots:
       - supports-color
       - typescript
 
-  '@modelcontextprotocol/client@2.0.0-beta.5':
+  '@modelcontextprotocol/client@2.0.0':
     dependencies:
-      '@modelcontextprotocol/core': 2.0.0-beta.5
+      '@modelcontextprotocol/core': 2.0.0
       cross-spawn: 7.0.6
       eventsource: 3.0.7
       eventsource-parser: 3.0.6
@@ -13884,13 +13884,13 @@ snapshots:
       pkce-challenge: 5.0.1
       zod: 4.4.3
 
-  '@modelcontextprotocol/core@2.0.0-beta.5':
+  '@modelcontextprotocol/core@2.0.0':
     dependencies:
       zod: 4.4.3
 
-  '@modelcontextprotocol/express@2.0.0-beta.5(@modelcontextprotocol/server@2.0.0-beta.5)(express@5.2.1)':
+  '@modelcontextprotocol/express@2.0.0(@modelcontextprotocol/server@2.0.0)(express@5.2.1)':
     dependencies:
-      '@modelcontextprotocol/server': 2.0.0-beta.5
+      '@modelcontextprotocol/server': 2.0.0
       cors: 2.8.6
       express: 5.2.1
 
@@ -13903,10 +13903,10 @@ snapshots:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
 
-  '@modelcontextprotocol/node@2.0.0-beta.5(@modelcontextprotocol/server@2.0.0-beta.5)(hono@4.12.8)':
+  '@modelcontextprotocol/node@2.0.0(@modelcontextprotocol/server@2.0.0)(hono@4.12.8)':
     dependencies:
       '@hono/node-server': 1.19.11(hono@4.12.8)
-      '@modelcontextprotocol/server': 2.0.0-beta.5
+      '@modelcontextprotocol/server': 2.0.0
     optionalDependencies:
       hono: 4.12.8
 
@@ -13954,9 +13954,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@modelcontextprotocol/server@2.0.0-beta.5':
+  '@modelcontextprotocol/server@2.0.0':
     dependencies:
-      '@modelcontextprotocol/core': 2.0.0-beta.5
+      '@modelcontextprotocol/core': 2.0.0
       zod: 4.4.3
 
   '@mswjs/interceptors@0.40.0':
