@@ -30,7 +30,6 @@
     "test:unit": "vitest run"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "^2.0.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@skybridge/vite-plugin": "workspace:*",
     "ai": "^5.0.0"

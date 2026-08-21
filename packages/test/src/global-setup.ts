@@ -1,10 +1,10 @@
 import type { TestProject } from "vitest/node";
-import type { ProvidedEvalsOptions } from "./config.js";
+import type { EvalsOptions } from "./config.js";
 import { startServer } from "./server-harness.js";
 
 export default async function setup(project: TestProject) {
   const options = project.config.provide?.skybridgeEvals as
-    | ProvidedEvalsOptions
+    | EvalsOptions
     | undefined;
   if (options === undefined) {
     throw new Error(

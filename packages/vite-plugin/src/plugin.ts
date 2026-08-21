@@ -20,18 +20,8 @@ const VIRTUAL_MODULE_PREFIX = "\0skybridge:view:";
  * consumed by `@skybridge/test`. Defined here so the runtime package can
  * import the shape while this package keeps no dependency on it.
  */
-export interface ModelDescriptor {
-  provider: "anthropic";
-  name: string;
-  apiKeyEnv?: string;
-}
-
-export interface ModelFile {
-  file: string;
-}
-
 export interface EvalsOptions {
-  model: ModelDescriptor | ModelFile;
+  model: string;
   temperature?: number;
   systemPrompt?: string;
   maxSteps?: number;

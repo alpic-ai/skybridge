@@ -1,6 +1,5 @@
 import { inject, onTestFinished } from "vitest";
 import { Chat } from "./chat.js";
-import { resolveModel } from "./model.js";
 
 /**
  * Opens a fresh MCP session and conversation against the server the plugin
@@ -18,7 +17,7 @@ export async function start<App>(overrides?: {
 }): Promise<Chat<App>> {
   const config = inject("skybridgeEvals");
   const chat = await Chat.open<App>(inject("skybridgeEvalsUrl"), {
-    model: resolveModel(config.model),
+    model: config.model,
     temperature: overrides?.temperature ?? config.temperature,
     systemPrompt: overrides?.systemPrompt ?? config.systemPrompt,
     maxSteps: config.maxSteps,

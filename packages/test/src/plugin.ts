@@ -1,6 +1,6 @@
 import { fileURLToPath } from "node:url";
 import type { Plugin } from "vitest/config";
-import type { EvalsOptions, ProvidedEvalsOptions } from "./config.js";
+import type { EvalsOptions } from "./config.js";
 
 function here(file: string): string {
   return fileURLToPath(new URL(file, import.meta.url));
@@ -13,24 +13,15 @@ function here(file: string): string {
  * nothing but `start` and its own `AppType`.
  */
 export function evals(options: EvalsOptions): Plugin {
-  const { model, ...rest } = options;
-  const provided: ProvidedEvalsOptions =
-    "file" in model ? rest : { ...rest, model };
-
-  const setupFiles = [here("./matchers.js")];
-  if ("file" in model) {
-    setupFiles.push(model.file);
-  }
-
   return {
     name: "skybridge-evals",
     config() {
       return {
         test: {
           testTimeout: 120_000,
-          setupFiles,
+          setupFiles: [here("./matchers.js")],
           globalSetup: [here("./global-setup.js")],
-          provide: { skybridgeEvals: provided },
+          provide: { skybridgeEvals: options },
         },
       };
     },
