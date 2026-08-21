@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@alpic-ai/insights": "^1.142.1",
-    "@modelcontextprotocol/sdk": "^1.29.0",
     "@t3-oss/env-core": "^0.13.11",
     "clsx": "^2.1.1",
     "dotenv": "^17.4.2",
