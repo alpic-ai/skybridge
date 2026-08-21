@@ -21,7 +21,7 @@ const VIRTUAL_MODULE_PREFIX = "\0skybridge:view:";
  * import the shape while this package keeps no dependency on it.
  */
 export interface EvalsOptions {
-  model: string;
+  model?: string;
   temperature?: number;
   systemPrompt?: string;
   maxSteps?: number;

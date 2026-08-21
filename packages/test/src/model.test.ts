@@ -35,3 +35,12 @@ describe("resolveModel", () => {
     );
   });
 });
+
+describe("resolveModel without configuration", () => {
+  it("explains that neither a model string nor a registration was provided", async () => {
+    const { resolveModel } = await freshModel();
+    await expect(resolveModel(undefined)).rejects.toThrow(
+      /No model configured/,
+    );
+  });
+});

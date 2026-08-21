@@ -26,9 +26,16 @@ export function defineEvalModel(model: LanguageModel): void {
  * variable, so no key configuration is needed. An unrecognised prefix is
  * returned untouched for the AI SDK's default provider to resolve.
  */
-export async function resolveModel(spec: string): Promise<LanguageModel> {
+export async function resolveModel(
+  spec: string | undefined,
+): Promise<LanguageModel> {
   if (registered !== undefined) {
     return registered;
+  }
+  if (spec === undefined) {
+    throw new Error(
+      "No model configured. Set `model` on the evals plugin, or call defineEvalModel() from a setup file.",
+    );
   }
   const separator = spec.indexOf("/");
   if (separator === -1) {
