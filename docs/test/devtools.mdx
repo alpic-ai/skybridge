@@ -4,6 +4,10 @@ description: "Call tools and render views locally, without a host"
 icon: "square-dashed-mouse-pointer"
 ---
 
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/devtools.webp" alt="DevTools" />
+
 Testing through a real host means exposing a public URL, registering a connector, starting a conversation, and prompting the model until it calls the right [tool](/build/tools). DevTools cuts that loop down to a file save: it runs locally, emulates the host runtime, and lets you call tools directly, no model or host involved.
 
 ## Start the Emulator

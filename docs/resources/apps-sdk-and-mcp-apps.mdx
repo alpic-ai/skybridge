@@ -4,6 +4,10 @@ description: "How ChatGPT and other hosts run your views, and what Skybridge uni
 icon: layers
 ---
 
+import { Hero } from "/components/hero.jsx";
+
+<Hero src="/images/mcp-apps.webp" alt="Apps SDK and MCP Apps" />
+
 MCP Apps is the open contract for rendering interactive views inside an AI client. ChatGPT also exposes the Apps SDK: an optional layer of `window.openai` APIs for its own capabilities, on top of that same contract. Skybridge targets the MCP Apps baseline and reaches the Apps SDK only where you opt into a ChatGPT feature, so one server and one set of views run on both.
 
 ## MCP Apps

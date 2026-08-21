@@ -7,9 +7,9 @@ export const Hero = ({ src, alt }) => (
     alt={alt}
     style={{
       width: "100%",
-      maxHeight: "30vh",
+      height: "auto",
+      display: "block",
       marginTop: "-0.75rem",
-      objectFit: "cover",
       borderRadius: "15px",
     }}
   />
