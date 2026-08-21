@@ -77,7 +77,7 @@ const server = new McpServer(
     async ({ query, minRating }, extra) => {
       try {
         const userInfoResponse = await fetch(`${AUTH0_BASE_URL}/userinfo`, {
-          headers: { Authorization: `Bearer ${extra.authInfo?.token}` },
+          headers: { Authorization: `Bearer ${extra.http?.authInfo?.token}` },
         });
 
         const userInfo = userInfoResponse.ok
@@ -91,7 +91,7 @@ const server = new McpServer(
         const results = searchCoffeeShops({
           query,
           minRating,
-          userId: extra.authInfo?.extra?.subject ?? "anonymous",
+          userId: extra.http?.authInfo?.extra?.subject ?? "anonymous",
         });
 
         return {

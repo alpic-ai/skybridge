@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@alpic-ai/ui": "^1.122.0",
-    "@modelcontextprotocol/sdk": "^1.29.0",
     "aws4fetch": "^1.0.20",
     "fflate": "^0.8.2",
     "lucide-react": "^1.14.0",

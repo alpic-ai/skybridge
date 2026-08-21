@@ -82,14 +82,14 @@ const server = new McpServer(
       // show — `email` is read in case a deployment maps one in, and the view
       // falls back to a neutral label when it is absent rather than rendering
       // a raw identifier.
-      const subject = extra.authInfo?.extra?.subject;
-      const email = extra.authInfo?.extra?.email;
+      const subject = extra.http?.authInfo?.extra?.subject;
+      const email = extra.http?.authInfo?.extra?.email;
       const userName = email?.split("@")[0];
 
       const results = searchCoffeeShops({
         query,
         minRating,
-        userId: subject ?? extra.authInfo?.clientId ?? "anonymous",
+        userId: subject ?? extra.http?.authInfo?.clientId ?? "anonymous",
       });
 
       return {

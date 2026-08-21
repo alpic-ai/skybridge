@@ -12,7 +12,6 @@
     "deploy": "alpic deploy"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
     "chess.js": "^1.4.0",
     "react": "^19.2.7",
     "react-chessboard": "^5.10.0",
