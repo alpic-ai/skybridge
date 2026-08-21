@@ -1,10 +1,10 @@
-import type { ZodRawShapeCompat } from "@modelcontextprotocol/sdk/server/zod-compat.js";
 import { useEffect, useRef } from "react";
 import { getAdaptor } from "../bridges/index.js";
 import type {
   AnyViewToolHandler,
   ViewToolConfig,
   ViewToolHandler,
+  ViewToolInputShape,
 } from "../bridges/types.js";
 
 /**
@@ -43,7 +43,7 @@ import type {
  * @see https://docs.skybridge.tech/api-reference/use-register-view-tool
  */
 export const useRegisterViewTool = <
-  TInput extends ZodRawShapeCompat = ZodRawShapeCompat,
+  TInput extends ViewToolInputShape = ViewToolInputShape,
 >(
   config: ViewToolConfig<TInput>,
   handler: ViewToolHandler<TInput>,

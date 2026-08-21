@@ -16,7 +16,7 @@ test("a server with no oauth keeps the untyped claim bag", () => {
   new McpServer({ name: "t", version: "0" }).registerTool(
     { name: "plain", inputSchema: { q: z.string() } },
     (_args, extra) => {
-      expectTypeOf(extra.authInfo?.extra).toEqualTypeOf<
+      expectTypeOf(extra.http?.authInfo?.extra).toEqualTypeOf<
         Record<string, unknown> | undefined
       >();
       return { content: "ok" };
@@ -27,18 +27,18 @@ test("a server with no oauth keeps the untyped claim bag", () => {
 test("provider claims reach tool handlers", () => {
   new McpServer({ name: "t", version: "0" }, {}, { oauth: workosOAuth })
     .registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
-      expectTypeOf(extra.authInfo?.extra?.org_id).toEqualTypeOf<
+      expectTypeOf(extra.http?.authInfo?.extra?.org_id).toEqualTypeOf<
         string | undefined
       >();
-      expectTypeOf(extra.authInfo?.extra?.permissions).toEqualTypeOf<
+      expectTypeOf(extra.http?.authInfo?.extra?.permissions).toEqualTypeOf<
         string[] | undefined
       >();
       // @ts-expect-error not a WorkOS claim
-      extra.authInfo?.extra?.nope;
+      extra.http?.authInfo?.extra?.nope;
       return { content: "a" };
     })
     .registerTool({ name: "b", inputSchema: {} }, (_args, extra) => {
-      expectTypeOf(extra.authInfo?.extra?.sid).toEqualTypeOf<
+      expectTypeOf(extra.http?.authInfo?.extra?.sid).toEqualTypeOf<
         string | undefined
       >();
       return { content: "b" };
@@ -51,10 +51,10 @@ test("registered claims survive the mapping into extra", () => {
     {},
     { oauth: workosOAuth },
   ).registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
-    expectTypeOf(extra.authInfo?.extra?.iss).toEqualTypeOf<
+    expectTypeOf(extra.http?.authInfo?.extra?.iss).toEqualTypeOf<
       string | undefined
     >();
-    expectTypeOf(extra.authInfo?.extra?.iat).toEqualTypeOf<
+    expectTypeOf(extra.http?.authInfo?.extra?.iat).toEqualTypeOf<
       number | undefined
     >();
     return { content: "a" };
@@ -76,7 +76,7 @@ test("a hand-written verifier carries its own claims", async () => {
     {},
     { oauth: { oauthMetadata, verifier } },
   ).registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
-    expectTypeOf(extra.authInfo?.extra?.email).toEqualTypeOf<
+    expectTypeOf(extra.http?.authInfo?.extra?.email).toEqualTypeOf<
       string | undefined
     >();
     return { content: "a" };
@@ -94,7 +94,7 @@ test("the legacy verify config still works, with untyped claims", () => {
       },
     },
   ).registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
-    expectTypeOf(extra.authInfo?.extra).toEqualTypeOf<
+    expectTypeOf(extra.http?.authInfo?.extra).toEqualTypeOf<
       Record<string, unknown> | undefined
     >();
     return { content: "a" };
@@ -112,16 +112,16 @@ test("a config must carry exactly one of verifier / verify", () => {
 test("a provider override adds claims without dropping the provider's", () => {
   new McpServer({ name: "t", version: "0" }, {}, { oauth: customOAuth })
     .registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
-      expectTypeOf(extra.authInfo?.extra?.tenant).toEqualTypeOf<
+      expectTypeOf(extra.http?.authInfo?.extra?.tenant).toEqualTypeOf<
         string | undefined
       >();
-      expectTypeOf(extra.authInfo?.extra?.org_id).toEqualTypeOf<
+      expectTypeOf(extra.http?.authInfo?.extra?.org_id).toEqualTypeOf<
         string | undefined
       >();
       return { content: "a" };
     })
     .mcpMiddleware("tools/call", (_request, extra, next) => {
-      expectTypeOf(extra.authInfo?.extra?.tenant).toEqualTypeOf<
+      expectTypeOf(extra.http?.authInfo?.extra?.tenant).toEqualTypeOf<
         string | undefined
       >();
       return next();
