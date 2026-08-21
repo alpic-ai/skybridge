@@ -1,4 +1,4 @@
-import type { Tool } from "@modelcontextprotocol/sdk/types.js";
+import type { Tool } from "@modelcontextprotocol/client";
 import { useEffect, useRef } from "react";
 import type { CallToolResponse } from "skybridge/web";
 

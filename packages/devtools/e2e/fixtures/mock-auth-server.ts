@@ -15,7 +15,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import express, { type Router } from "express";
-import { type AuthInfo, InvalidTokenError } from "skybridge/server";
+import { type AuthInfo, OAuthError } from "skybridge/server";
 
 export interface MockAuthServerOptions {
   /** Base URL of the fixture (e.g. `http://localhost:4102`). */
@@ -59,7 +59,7 @@ export function createMockAuthServer(
     async verifyAccessToken(token: string): Promise<AuthInfo> {
       const info = stores.tokens.get(token);
       if (!info) {
-        throw new InvalidTokenError("invalid token");
+        throw new OAuthError("invalid_token", "invalid token");
       }
       return {
         token,
