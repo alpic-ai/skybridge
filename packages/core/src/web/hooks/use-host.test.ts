@@ -6,7 +6,7 @@ import {
   getMcpAppHostPostMessageMock,
   MockResizeObserver,
 } from "./test/utils.js";
-import { type Host, useHostInfo } from "./use-host-info.js";
+import { type Host, useHost } from "./use-host.js";
 
 const stubHost = (hostInfo?: { name: string; version: string }) => {
   vi.stubGlobal("parent", {
@@ -14,7 +14,7 @@ const stubHost = (hostInfo?: { name: string; version: string }) => {
   });
 };
 
-describe("useHostInfo", () => {
+describe("useHost", () => {
   beforeEach(() => {
     HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
@@ -32,7 +32,7 @@ describe("useHostInfo", () => {
 
   it("is undefined before the handshake resolves, then populated after", async () => {
     stubHost({ name: "Claude", version: "1.2.3" });
-    const { result } = renderHook(() => useHostInfo());
+    const { result } = renderHook(() => useHost());
 
     expect(result.current.name).toBeUndefined();
     expect(result.current.version).toBeUndefined();
@@ -52,7 +52,7 @@ describe("useHostInfo", () => {
     ["alpic-playground", "alpic"],
   ])("normalizes reported name %j to slug %j", async (reported, slug) => {
     stubHost({ name: reported, version: "1.0.0" });
-    const { result } = renderHook(() => useHostInfo());
+    const { result } = renderHook(() => useHost());
 
     await waitFor(() => {
       expect(result.current.name).toBe(slug);
@@ -61,7 +61,7 @@ describe("useHostInfo", () => {
 
   it("preserves an unrecognized reported name as-is", async () => {
     stubHost({ name: "Some Future Host", version: "9.9.9" });
-    const { result } = renderHook(() => useHostInfo());
+    const { result } = renderHook(() => useHost());
 
     await waitFor(() => {
       expect(result.current.name).toBe("Some Future Host");

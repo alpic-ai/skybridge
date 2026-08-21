@@ -68,13 +68,13 @@ const server = new McpServer(
       },
     },
     ({ query, minRating }, extra) => {
-      const email = extra.authInfo?.extra?.email;
-      const subject = extra.authInfo?.extra?.subject;
+      const email = extra.http?.authInfo?.extra?.email;
+      const subject = extra.http?.authInfo?.extra?.subject;
 
       const results = searchCoffeeShops({
         query,
         minRating,
-        userId: subject ?? extra.authInfo?.clientId ?? "anonymous",
+        userId: subject ?? extra.http?.authInfo?.clientId ?? "anonymous",
       });
 
       const displayName = email?.split("@")[0] ?? subject ?? "User";

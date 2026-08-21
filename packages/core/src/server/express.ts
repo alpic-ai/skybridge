@@ -1,6 +1,7 @@
 import type http from "node:http";
 import path from "node:path";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { toNodeHandler } from "@modelcontextprotocol/node";
+import { createMcpHandler } from "@modelcontextprotocol/server";
 import cors from "cors";
 import express from "express";
 import type { McpServer } from "./server.js";
@@ -98,46 +99,24 @@ export async function createApp({
 }
 
 const mcpMiddleware = (server: McpServer): express.RequestHandler => {
+  const handler = toNodeHandler(
+    createMcpHandler(() => server.createStatelessServerInstance(), {
+      onerror: (error) => {
+        console.error("Error handling MCP request:", error);
+      },
+    }),
+  );
+
   return async (
     req: express.Request,
     res: express.Response,
     next: express.NextFunction,
   ) => {
-    if (req.method !== "POST") {
-      res.writeHead(405).end(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          error: {
-            code: -32000,
-            message: "Method not allowed.",
-          },
-          id: null,
-        }),
-      );
-      return;
-    }
-
     try {
-      const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined,
-        // Respond with a single JSON body instead of SSE. Skybridge's stateless
-        // transport never streams server-initiated messages, so SSE adds no
-        // capability — and on workerd specifically, `cloudflare:node`'s http
-        // bridge silently drops chunked writes that happen after the request
-        // handler awaits, which manifests as a 200 with empty body for any
-        // async tools/call.
-        enableJsonResponse: true,
-      });
-
-      res.on("close", () => {
-        transport.close();
-      });
-
-      await server.connectStatelessTransport(transport);
       // Express strips the mount path from req.url (e.g. "/mcp" becomes "/").
-      // Restore it so the SDK builds the correct requestInfo.url.
+      // Restore it so the SDK builds the correct request URL.
       req.url = req.originalUrl;
-      await transport.handleRequest(req, res, req.body);
+      await handler(req, res, req.body);
     } catch (error) {
       next(error);
     }

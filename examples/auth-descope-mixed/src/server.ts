@@ -32,7 +32,7 @@ const server = new McpServer(
       view: { component: "catalog", description: "The coffee catalog" },
     },
     (_args, extra) => {
-      const user = who(extra.authInfo);
+      const user = who(extra.http?.authInfo);
       const items = ["Espresso", "Latte", "Flat White", "Cold Brew"];
       return {
         structuredContent: { user, items },
@@ -49,7 +49,7 @@ const server = new McpServer(
         "Return the signed-in user. No auth declared, so it falls back to the secure default (sign-in required).",
       inputSchema: {},
     },
-    (_args, extra) => text(`You are ${who(extra.authInfo)}.`),
+    (_args, extra) => text(`You are ${who(extra.http?.authInfo)}.`),
   )
   .registerTool(
     {
@@ -58,7 +58,7 @@ const server = new McpServer(
       inputSchema: { item: z.string().describe("The catalog item to order") },
       auth: { scopes: ["checkout"] },
     },
-    ({ item }, extra) => text(`Order placed for ${who(extra.authInfo)}: ${item}.`),
+    ({ item }, extra) => text(`Order placed for ${who(extra.http?.authInfo)}: ${item}.`),
   );
 
 export default await server.run();

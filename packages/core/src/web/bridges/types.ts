@@ -1,15 +1,13 @@
 import type {
-  SchemaOutput,
-  ZodRawShapeCompat,
-} from "@modelcontextprotocol/sdk/server/zod-compat.js";
-import type {
   CallToolResult,
   EmbeddedResource,
   ResourceLink,
   ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
 import type { useSyncExternalStore } from "react";
-import type { ViewHostType } from "../../server/index.js";
+import type { ZodType } from "zod";
+import type { ViewHostType } from "../../server/server.js";
+import type { InferSchemaOutput } from "../../standard-schema.js";
 
 /**
  * Globals injected on `window.skybridge` by the host. Tells the view which
@@ -64,7 +62,7 @@ export type SafeAreaInsets = {
   left: number;
 };
 
-/** Wrapper around {@link SafeAreaInsets} exposed via {@link useLayout}. */
+/** Wrapper around {@link SafeAreaInsets} exposed via {@link useViewport}. */
 export type SafeArea = {
   insets: SafeAreaInsets;
 };
@@ -82,7 +80,7 @@ export type UserAgent = {
 
 /**
  * Full snapshot of state the host exposes to the view. Most fields are
- * better accessed through their dedicated hooks (`useLayout`, `useUser`,
+ * better accessed through their dedicated hooks (`useViewport`, `useUser`,
  * `useToolInfo`, etc.) — read this directly only for advanced cases.
  */
 export interface HostContext {
@@ -171,17 +169,25 @@ export type DownloadResult = {
 };
 
 /**
+ * Shape of a view tool's `inputSchema`: a map of zod schemas. Narrower than
+ * the server's `RawInputShape` because the MCP Apps bridge validates with
+ * `z.object()` at runtime — other Standard Schema libraries would type-check
+ * but throw on the first call.
+ */
+export type ViewToolInputShape = Record<string, ZodType>;
+
+/**
  * Args passed to a {@link ViewToolHandler}, inferred from the tool's
  * `inputSchema` (optionality preserved). Mirrors the server's `registerTool`.
  */
-export type InferViewToolArgs<Shape extends ZodRawShapeCompat> = {
-  [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
+export type InferViewToolArgs<Shape extends ViewToolInputShape> = {
+  [K in keyof Shape as undefined extends InferSchemaOutput<Shape[K]>
     ? never
-    : K]: SchemaOutput<Shape[K]>;
+    : K]: InferSchemaOutput<Shape[K]>;
 } & {
-  [K in keyof Shape as undefined extends SchemaOutput<Shape[K]>
+  [K in keyof Shape as undefined extends InferSchemaOutput<Shape[K]>
     ? K
-    : never]?: SchemaOutput<Shape[K]>;
+    : never]?: InferSchemaOutput<Shape[K]>;
 };
 
 /**
@@ -190,7 +196,7 @@ export type InferViewToolArgs<Shape extends ZodRawShapeCompat> = {
  * Namespace `name` (e.g. `chess_make_move`) to avoid clashing with server tools.
  */
 export type ViewToolConfig<
-  TInput extends ZodRawShapeCompat = ZodRawShapeCompat,
+  TInput extends ViewToolInputShape = ViewToolInputShape,
 > = {
   name: string;
   title?: string;
@@ -208,7 +214,7 @@ export type ViewToolResult = CallToolResult;
 
 /** Handler run when the host calls a view tool. Receives validated, typed args. */
 export type ViewToolHandler<
-  TInput extends ZodRawShapeCompat = ZodRawShapeCompat,
+  TInput extends ViewToolInputShape = ViewToolInputShape,
 > = (
   args: InferViewToolArgs<TInput>,
 ) => ViewToolResult | Promise<ViewToolResult>;

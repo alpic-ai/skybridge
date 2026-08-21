@@ -10,7 +10,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@alpic-ai/ui/components/tooltip";
-import type { Tool } from "@modelcontextprotocol/sdk/types.js";
+import type { Tool } from "@modelcontextprotocol/client";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import type Form from "@rjsf/core";
 import { Form as FormComponent } from "@rjsf/shadcn";
