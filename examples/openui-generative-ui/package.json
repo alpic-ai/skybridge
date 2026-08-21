@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@skybridge/devtools": "^1.2.3",
+    "@skybridge/vite-plugin": "workspace:*",
     "@types/node": "^25.9.4",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

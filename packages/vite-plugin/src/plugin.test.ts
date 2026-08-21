@@ -10,7 +10,7 @@ type RenderBuiltUrl = NonNullable<
 >;
 
 function getRenderBuiltUrl(root: string): RenderBuiltUrl {
-  const plugin = skybridge({ viewsDir: join(root, "views") });
+  const [plugin] = skybridge({ viewsDir: join(root, "views") });
   const hook = plugin.config;
   if (!hook) {
     throw new Error("plugin.config is not defined");

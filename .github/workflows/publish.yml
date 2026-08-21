@@ -53,19 +53,26 @@ jobs:
             fi
 
             echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            echo "beta_version=$VERSION-beta" >> "$GITHUB_OUTPUT"
             echo "tag=latest" >> "$GITHUB_OUTPUT"
             echo "✅ Release version: $VERSION"
             printf 'Release name: %s\n' "$RELEASE_NAME"
             printf 'Release body:\n%s\n' "$RELEASE_BODY"
           elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
             echo "version=0.0.0-next.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            echo "beta_version=0.0.0-next.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
             echo "tag=next" >> "$GITHUB_OUTPUT"
             echo "✅ Next version: 0.0.0-next.${GITHUB_SHA::7}"
           else
             echo "version=0.0.0-dev.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            echo "beta_version=0.0.0-dev.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
             echo "tag=dev" >> "$GITHUB_OUTPUT"
             echo "✅ Dev version: 0.0.0-dev.${GITHUB_SHA::7}"
           fi
+
+      - name: Setting version for vite-plugin
+        working-directory: ./packages/vite-plugin
+        run: pnpm version ${{ steps.version.outputs.version }} --no-git-tag-version
 
       - name: Setting version for core
         working-directory: ./packages/core
@@ -79,6 +86,14 @@ jobs:
         working-directory: ./packages/devtools
         run: pnpm version ${{ steps.version.outputs.version }} --no-git-tag-version
 
+      - name: Setting version for test
+        working-directory: ./packages/test
+        run: pnpm version ${{ steps.version.outputs.beta_version }} --no-git-tag-version
+
+      - name: Publish vite-plugin to npm
+        working-directory: ./packages/vite-plugin
+        run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
+
       - name: Publish core to npm
         working-directory: ./packages/core
         run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
@@ -89,15 +104,21 @@ jobs:
       # publishing create-skybridge.
       - name: Pin demo template skybridge dep for publish
         working-directory: ./packages/create-skybridge/templates/demo
-        run: pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
+        run: |
+          pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
+          pnpm pkg set 'devDependencies.@skybridge/vite-plugin=^${{ steps.version.outputs.version }}'
 
       - name: Pin blank template skybridge dep for publish
         working-directory: ./packages/create-skybridge/templates/blank
-        run: pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
+        run: |
+          pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
+          pnpm pkg set 'devDependencies.@skybridge/vite-plugin=^${{ steps.version.outputs.version }}'
 
       - name: Pin ecom template skybridge dep for publish
         working-directory: ./packages/create-skybridge/templates/ecom
-        run: pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
+        run: |
+          pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
+          pnpm pkg set 'devDependencies.@skybridge/vite-plugin=^${{ steps.version.outputs.version }}'
 
       - name: Publish create-skybridge to npm
         working-directory: ./packages/create-skybridge
@@ -106,6 +127,10 @@ jobs:
       - name: Publish devtools to npm
         working-directory: ./packages/devtools
         run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
+
+      - name: Publish test to npm
+        working-directory: ./packages/test
+        run: ../../scripts/publish-if-new.sh ${{ github.event_name == 'release' && 'beta' || steps.version.outputs.tag }}
 
       - name: Restore templates workspace deps
         if: github.event_name == 'release'

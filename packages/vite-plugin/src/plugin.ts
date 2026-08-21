@@ -1,5 +1,7 @@
+import { createRequire } from "node:module";
 import { isAbsolute, relative, resolve } from "node:path";
-import type { Plugin, ViteDevServer } from "vite";
+import { pathToFileURL } from "node:url";
+import type { Plugin, PluginOption, ViteDevServer } from "vite";
 import {
   assertUniqueViewNames,
   type DiscoveredView,
@@ -13,6 +15,24 @@ import { hasDefaultExport } from "./validate-view.js";
 const VIRTUAL_PREFIX = "/_skybridge/view/";
 const VIRTUAL_MODULE_PREFIX = "\0skybridge:view:";
 
+/**
+ * Options for the eval runner, wired in through the `evals` plugin option and
+ * consumed by `@skybridge/test`. Defined here so the runtime package can
+ * import the shape while this package keeps no dependency on it.
+ */
+export interface EvalsOptions {
+  model?: string;
+  temperature?: number;
+  systemPrompt?: string;
+  maxSteps?: number;
+  server?: string;
+  project?: {
+    cwd: string;
+    command: string[];
+    env?: Record<string, string>;
+  };
+}
+
 /** Options for the {@link skybridge} Vite plugin. */
 export interface SkybridgePluginOptions {
   /** Directory scanned for view modules. Defaults to `"src/views"`. */
@@ -23,6 +43,15 @@ export interface SkybridgePluginOptions {
    * typically optional native modules pulled in by a transitive dependency.
    */
   serverExternal?: string[];
+  /**
+   * Wires the eval runner into vitest: contributes `setupFiles`,
+   * `globalSetup`, `provide` and `testTimeout` from `@skybridge/test`, loaded
+   * lazily so production builds never touch it. Set it only in the config
+   * vitest uses for evals; when omitted, no test config is contributed and
+   * ordinary unit tests are unaffected. Requires `@skybridge/test` as a dev
+   * dependency.
+   */
+  evals?: EvalsOptions;
 }
 
 function buildVirtualEntry(viewFilePath: string): string {
@@ -61,14 +90,46 @@ function getViewEntryPattern(viewsDir: string): RegExp {
  * // vite.config.ts
  * import { defineConfig } from "vite";
  * import react from "@vitejs/plugin-react";
- * import { skybridge } from "skybridge/vite";
+ * import { skybridge } from "@skybridge/vite-plugin";
  *
  * export default defineConfig({
  *   plugins: [react(), skybridge({ viewsDir: "src/views" })],
  * });
  * ```
  */
-export function skybridge(options?: SkybridgePluginOptions): Plugin {
+export function skybridge(
+  options?: SkybridgePluginOptions,
+): [Plugin, ...PluginOption[]] {
+  const plugins: [Plugin, ...PluginOption[]] = [viewsPlugin(options)];
+  const evals = options?.evals;
+  if (evals !== undefined) {
+    plugins.push(loadEvalsPlugin(evals));
+  }
+  return plugins;
+}
+
+/**
+ * Resolves `@skybridge/test/plugin` from the user's project rather than from
+ * this package, which never depends on it: the eval runtime is an optional
+ * dev dependency of the app.
+ */
+async function loadEvalsPlugin(evals: EvalsOptions): Promise<Plugin> {
+  const projectRequire = createRequire(resolve(process.cwd(), "package.json"));
+  let resolved: string;
+  try {
+    resolved = projectRequire.resolve("@skybridge/test/plugin");
+  } catch {
+    throw new Error(
+      "The `evals` option requires the @skybridge/test package. Install it as a dev dependency.",
+    );
+  }
+  const module = (await import(pathToFileURL(resolved).href)) as {
+    evals: (options: EvalsOptions) => Plugin;
+  };
+  return module.evals(evals);
+}
+
+function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
   const rawViewsDir = options?.viewsDir ?? "src/views";
   let resolvedViewsDir: string;
   let projectRoot: string;
@@ -233,7 +294,7 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
     },
 
     async transform(code, id) {
-      if (viewEntryPattern?.test(id) && !hasDefaultExport(code, id)) {
+      if (viewEntryPattern?.test(id) && !hasDefaultExport(code)) {
         this.warn(
           `View file "${id.split("/").pop()}" is missing a default export.`,
         );

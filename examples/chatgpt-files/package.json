@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@skybridge/devtools": "^1.1.0",
+    "@skybridge/vite-plugin": "workspace:*",
     "@tailwindcss/vite": "^4.2.4",
     "@types/node": "^24.12.0",
     "@types/react": "^19.2.14",
