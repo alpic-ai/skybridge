@@ -62,7 +62,7 @@ export type SafeAreaInsets = {
   left: number;
 };
 
-/** Wrapper around {@link SafeAreaInsets} exposed via {@link useLayout}. */
+/** Wrapper around {@link SafeAreaInsets} exposed via {@link useViewport}. */
 export type SafeArea = {
   insets: SafeAreaInsets;
 };
@@ -80,7 +80,7 @@ export type UserAgent = {
 
 /**
  * Full snapshot of state the host exposes to the view. Most fields are
- * better accessed through their dedicated hooks (`useLayout`, `useUser`,
+ * better accessed through their dedicated hooks (`useViewport`, `useUser`,
  * `useToolInfo`, etc.) — read this directly only for advanced cases.
  */
 export interface HostContext {

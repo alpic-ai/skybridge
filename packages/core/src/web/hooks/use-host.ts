@@ -34,11 +34,11 @@ export type HostInfo = {
  *
  * @example
  * ```tsx
- * const { name } = useHostInfo();
+ * const { name } = useHost();
  * if (name === "claude") return <ClaudeLayout />;
  * ```
  */
-export function useHostInfo(): HostInfo {
+export function useHost(): HostInfo {
   const hostInfo = useMcpAppContext("hostInfo");
   const name = hostInfo?.name;
 

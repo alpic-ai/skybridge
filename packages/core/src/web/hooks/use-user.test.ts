@@ -25,10 +25,11 @@ describe("useUser", () => {
       HostAdaptor.resetInstance();
     });
 
-    it("should return locale and userAgent from mcp host context", async () => {
+    it("should return locale, theme and userAgent from mcp host context", async () => {
       vi.stubGlobal("parent", {
         postMessage: getMcpAppHostPostMessageMock({
           locale: "en-US",
+          theme: "dark",
           platform: "web",
           deviceCapabilities: { hover: true, touch: false },
         }),
@@ -37,6 +38,7 @@ describe("useUser", () => {
 
       await waitFor(() => {
         expect(result.current.locale).toBe("en-US");
+        expect(result.current.theme).toBe("dark");
         expect(result.current.userAgent).toEqual({
           device: { type: "desktop" },
           capabilities: { hover: true, touch: false },

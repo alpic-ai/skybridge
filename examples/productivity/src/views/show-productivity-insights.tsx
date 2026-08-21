@@ -3,9 +3,9 @@ import "@/index.css";
 import { useEffect, useRef } from "react";
 import {
   useDisplayMode,
-  useLayout,
   useOpenExternal,
   useSendFollowUpMessage,
+  useUser,
   useViewState,
 } from "skybridge/web";
 import { BarChart } from "../components/BarChart.js";
@@ -31,11 +31,14 @@ function ShowProductivityInsights() {
 
   const [displayMode, setDisplayMode] = useDisplayMode();
 
-  const { theme } = useLayout();
+  const { theme } = useUser();
 
   const sendFollowUpMessage = useSendFollowUpMessage();
   const openExternal = useOpenExternal();
-  const lastSyncedInput = useRef<{ weekOffset: number; duration: number } | null>(null);
+  const lastSyncedInput = useRef<{
+    weekOffset: number;
+    duration: number;
+  } | null>(null);
 
   const { t } = useIntl();
 
@@ -70,7 +73,11 @@ function ShowProductivityInsights() {
       { weekOffset: newOffset, duration },
       {
         onSuccess: ({ structuredContent }) => {
-          setWidgetState({ weekOffset: newOffset, duration, ...structuredContent });
+          setWidgetState({
+            weekOffset: newOffset,
+            duration,
+            ...structuredContent,
+          });
         },
       },
     );
@@ -99,7 +106,10 @@ function ShowProductivityInsights() {
             className="duration-select"
             value={widgetState.duration}
             onChange={(e) =>
-              goToWeek(widgetState.weekOffset, Number(e.target.value) as Duration)
+              goToWeek(
+                widgetState.weekOffset,
+                Number(e.target.value) as Duration,
+              )
             }
           >
             {DURATION_OPTIONS.map((d) => (

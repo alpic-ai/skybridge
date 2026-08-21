@@ -1,12 +1,12 @@
 import "@/index.css";
 
-import { useLayout, useOpenExternal } from "skybridge/web";
+import { useOpenExternal, useUser } from "skybridge/web";
 import { useToolInfo } from "../helpers.js";
 
 const BOOK_URL = "https://docs.skybridge.tech";
 
 function FlightBooking() {
-  const { theme } = useLayout();
+  const { theme } = useUser();
   const openExternal = useOpenExternal();
   const { output, isPending } = useToolInfo<"flight-booking">();
 
