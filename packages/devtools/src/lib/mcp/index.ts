@@ -1,10 +1,10 @@
 import {
   auth,
   discoverOAuthProtectedResourceMetadata,
+  SdkHttpError,
+  type Tool,
   UnauthorizedError,
-} from "@modelcontextprotocol/sdk/client/auth.js";
-import { StreamableHTTPError } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import type { Tool } from "@modelcontextprotocol/sdk/types.js";
+} from "@modelcontextprotocol/client";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { AppsSdkContext, CallToolArgs } from "skybridge/web";
 import { useAuthStore } from "@/lib/auth-store.js";
@@ -36,7 +36,7 @@ export function toolRequiresAuth(tool: Tool): boolean {
 function isUnauthorized(error: unknown): boolean {
   return (
     error instanceof UnauthorizedError ||
-    (error instanceof StreamableHTTPError && error.code === 401)
+    (error instanceof SdkHttpError && error.status === 401)
   );
 }
 
@@ -141,13 +141,26 @@ export async function signIn(): Promise<void> {
   await auth(provider, { serverUrl });
 }
 
-export async function finishOAuthCallback(code: string): Promise<void> {
+export async function finishOAuthCallback(
+  code: string,
+  iss?: string,
+  state?: string,
+): Promise<void> {
   const serverUrl = getServerUrl();
   const provider = new BrowserOAuthProvider();
+  const expectedState = provider.expectedState();
+  if (!expectedState || state !== expectedState) {
+    provider.invalidateCredentials("verifier");
+    throw new Error(
+      "OAuth callback state mismatch: the response does not match the sign-in this browser started. Retry signing in.",
+    );
+  }
   await auth(provider, {
     serverUrl: serverUrl,
     authorizationCode: code,
+    iss,
   });
+  provider.invalidateCredentials("verifier");
   await connectToServer();
 }
 

@@ -10,15 +10,36 @@ async function init() {
 
   if (params.get("oauth_callback") === "true") {
     const code = params.get("code");
+    const iss = params.get("iss") ?? undefined;
+    const state = params.get("state") ?? undefined;
+    const oauthError = params.get("error");
+    const oauthErrorDescription = params.get("error_description");
     const cleanUrl = new URL(window.location.href);
-    cleanUrl.searchParams.delete("oauth_callback");
-    cleanUrl.searchParams.delete("code");
-    cleanUrl.searchParams.delete("state");
+    for (const key of [
+      "oauth_callback",
+      "code",
+      "state",
+      "iss",
+      "error",
+      "error_description",
+      "error_uri",
+    ]) {
+      cleanUrl.searchParams.delete(key);
+    }
     window.history.replaceState({}, "", cleanUrl.toString());
 
-    if (code) {
+    if (oauthError) {
+      useAuthStore.getState().setStatus("error");
+      useAuthStore
+        .getState()
+        .setError(
+          oauthErrorDescription
+            ? `${oauthError}: ${oauthErrorDescription}`
+            : oauthError,
+        );
+    } else if (code) {
       try {
-        await finishOAuthCallback(code);
+        await finishOAuthCallback(code, iss, state);
       } catch (e) {
         console.error("OAuth callback failed:", e);
         useAuthStore.getState().setStatus("error");

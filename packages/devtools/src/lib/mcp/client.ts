@@ -1,6 +1,10 @@
-import type { OAuthClientProvider } from "@modelcontextprotocol/sdk/client/auth.js";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import {
+  Client,
+  METHOD_NOT_FOUND,
+  type OAuthClientProvider,
+  ProtocolError,
+  StreamableHTTPClientTransport,
+} from "@modelcontextprotocol/client";
 import type { CallToolArgs, CallToolResponse } from "skybridge/web";
 
 export class McpClient {
@@ -60,10 +64,7 @@ export class McpClient {
       return response.tools;
     } catch (error) {
       // A server without any tool throws a "Method not found" error for listTools
-      if (
-        error instanceof Error &&
-        error.message.includes("MCP error -32601: Method not found")
-      ) {
+      if (error instanceof ProtocolError && error.code === METHOD_NOT_FOUND) {
         return [];
       }
 
@@ -136,10 +137,7 @@ export class McpClient {
       throw new Error("Client not connected. Call connect() first.");
     }
 
-    // biome-ignore lint/suspicious/noExplicitAny: We choose to rely on _serverVersion private property for now.
-    return (this.client as any)._serverVersion as
-      | { name: string; version: string }
-      | undefined;
+    return this.client.getServerVersion();
   }
 
   async finishAuth(authorizationCode: string): Promise<void> {
