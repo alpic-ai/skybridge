@@ -1067,7 +1067,7 @@ export class McpServer<
     ) {
       const cloudflareNode = "cloudflare:node";
       const { httpServerHandler } = await import(cloudflareNode);
-      return httpServerHandler({ port });
+      return httpServerHandler({ port: boundPort });
     }
 
     const shutdown = () => {
