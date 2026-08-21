@@ -97,8 +97,10 @@ function getViewEntryPattern(viewsDir: string): RegExp {
  * });
  * ```
  */
-export function skybridge(options?: SkybridgePluginOptions): PluginOption[] {
-  const plugins: PluginOption[] = [viewsPlugin(options)];
+export function skybridge(
+  options?: SkybridgePluginOptions,
+): [Plugin, ...PluginOption[]] {
+  const plugins: [Plugin, ...PluginOption[]] = [viewsPlugin(options)];
   const evals = options?.evals;
   if (evals !== undefined) {
     plugins.push(loadEvalsPlugin(evals));
