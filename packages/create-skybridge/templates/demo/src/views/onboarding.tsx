@@ -1,7 +1,7 @@
 import "@/index.css";
 
 import { useState } from "react";
-import { useLayout } from "skybridge/web";
+import { useUser } from "skybridge/web";
 import Nav from "./components/nav.js";
 import Progress from "./components/progress.js";
 import Outro from "./components/steps/outro.js";
@@ -18,8 +18,8 @@ const STEPS = [
 ] as const;
 
 export default function Onboarding() {
-  // useLayout: read host layout info (theme, display mode, locale, ...).
-  const { theme } = useLayout();
+  // useUser: read user environment info (theme, locale, user agent).
+  const { theme } = useUser();
 
   const [step, setStep] = useState(0);
   const { img } = useMascot();
