@@ -1,4 +1,4 @@
-import type { Tool } from "@modelcontextprotocol/sdk/types";
+import type { Tool } from "@modelcontextprotocol/client";
 import { useMemo } from "react";
 
 export function ToolFormTag({

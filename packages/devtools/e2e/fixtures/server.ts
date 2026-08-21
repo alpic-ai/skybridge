@@ -191,7 +191,7 @@ const server = baseServer
       securitySchemes: [{ type: "noauth" }, { type: "oauth2" }],
     },
     async (_args, extra) => {
-      const clientId = extra.authInfo?.clientId ?? "anonymous";
+      const clientId = extra.http?.authInfo?.clientId ?? "anonymous";
       return {
         structuredContent: { clientId },
         content: [{ type: "text", text: clientId }],
@@ -208,12 +208,12 @@ const server = baseServer
       securitySchemes: [{ type: "oauth2" }],
     },
     async (_args, extra) => {
-      if (!extra.authInfo) {
+      if (!extra.http?.authInfo) {
         throw new Error("authentication required");
       }
       return {
-        structuredContent: { clientId: extra.authInfo.clientId },
-        content: [{ type: "text", text: extra.authInfo.clientId }],
+        structuredContent: { clientId: extra.http?.authInfo.clientId },
+        content: [{ type: "text", text: extra.http?.authInfo.clientId }],
         isError: false,
       };
     },

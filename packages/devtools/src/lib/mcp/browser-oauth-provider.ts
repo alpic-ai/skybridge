@@ -1,9 +1,10 @@
-import type { OAuthClientProvider } from "@modelcontextprotocol/sdk/client/auth.js";
 import type {
-  OAuthClientInformationMixed,
   OAuthClientMetadata,
-  OAuthTokens,
-} from "@modelcontextprotocol/sdk/shared/auth.js";
+  OAuthClientProvider,
+  OAuthDiscoveryState,
+  StoredOAuthClientInformation,
+  StoredOAuthTokens,
+} from "@modelcontextprotocol/client";
 
 const PREFIX = "skybridge-devtools-oauth";
 
@@ -12,6 +13,7 @@ const KEYS = {
   tokens: `${PREFIX}:tokens`,
   codeVerifier: `${PREFIX}:code-verifier`,
   state: `${PREFIX}:state`,
+  discovery: `${PREFIX}:discovery`,
 } as const;
 
 export class BrowserOAuthProvider implements OAuthClientProvider {
@@ -32,21 +34,21 @@ export class BrowserOAuthProvider implements OAuthClientProvider {
     };
   }
 
-  clientInformation(): OAuthClientInformationMixed | undefined {
+  clientInformation(): StoredOAuthClientInformation | undefined {
     const raw = localStorage.getItem(KEYS.clientInfo);
     return raw ? JSON.parse(raw) : undefined;
   }
 
-  saveClientInformation(info: OAuthClientInformationMixed): void {
+  saveClientInformation(info: StoredOAuthClientInformation): void {
     localStorage.setItem(KEYS.clientInfo, JSON.stringify(info));
   }
 
-  tokens(): OAuthTokens | undefined {
+  tokens(): StoredOAuthTokens | undefined {
     const raw = localStorage.getItem(KEYS.tokens);
     return raw ? JSON.parse(raw) : undefined;
   }
 
-  saveTokens(tokens: OAuthTokens): void {
+  saveTokens(tokens: StoredOAuthTokens): void {
     localStorage.setItem(KEYS.tokens, JSON.stringify(tokens));
   }
 
@@ -60,6 +62,10 @@ export class BrowserOAuthProvider implements OAuthClientProvider {
     return generated;
   }
 
+  expectedState(): string | undefined {
+    return localStorage.getItem(KEYS.state) ?? undefined;
+  }
+
   redirectToAuthorization(authorizationUrl: URL): void {
     window.location.href = authorizationUrl.toString();
   }
@@ -69,10 +75,27 @@ export class BrowserOAuthProvider implements OAuthClientProvider {
   }
 
   codeVerifier(): string {
-    return localStorage.getItem(KEYS.codeVerifier) ?? "";
+    const stored = localStorage.getItem(KEYS.codeVerifier);
+    if (!stored) {
+      throw new Error(
+        "Missing PKCE code verifier: the sign-in flow was not started in this browser, or its storage was cleared. Retry signing in.",
+      );
+    }
+    return stored;
   }
 
-  invalidateCredentials(scope: "all" | "client" | "tokens" | "verifier"): void {
+  saveDiscoveryState(state: OAuthDiscoveryState): void {
+    localStorage.setItem(KEYS.discovery, JSON.stringify(state));
+  }
+
+  discoveryState(): OAuthDiscoveryState | undefined {
+    const raw = localStorage.getItem(KEYS.discovery);
+    return raw ? JSON.parse(raw) : undefined;
+  }
+
+  invalidateCredentials(
+    scope: "all" | "client" | "tokens" | "verifier" | "discovery",
+  ): void {
     if (scope === "all" || scope === "tokens") {
       localStorage.removeItem(KEYS.tokens);
     }
@@ -82,6 +105,9 @@ export class BrowserOAuthProvider implements OAuthClientProvider {
     if (scope === "all" || scope === "verifier") {
       localStorage.removeItem(KEYS.codeVerifier);
       localStorage.removeItem(KEYS.state);
+    }
+    if (scope === "all" || scope === "discovery") {
+      localStorage.removeItem(KEYS.discovery);
     }
   }
 }
