@@ -361,30 +361,6 @@ describe("McpServer.registerTool (unified API)", () => {
     expect(toolConfig._meta?.["openai/outputTemplate"]).toBeUndefined();
   });
 
-  it("treats the deprecated hosts option as a no-op (always the single resource)", async () => {
-    server.registerTool(
-      {
-        name: "my-view",
-        description: "Test tool",
-        view: {
-          component: "my-view" as ViewName,
-          description: "Test view",
-          hosts: ["apps-sdk"],
-        },
-      },
-      vi.fn(),
-    );
-
-    expect(mockRegisterResource).toHaveBeenCalledTimes(1);
-    const toolConfig = mockRegisterTool.mock.calls[0]?.[1] as {
-      _meta?: Record<string, unknown> & { ui?: { resourceUri?: string } };
-    };
-    expect(toolConfig._meta?.ui?.resourceUri).toBe(
-      "ui://views/ext-apps/my-view.html",
-    );
-    expect(toolConfig._meta?.["openai/outputTemplate"]).toBeUndefined();
-  });
-
   it("should not version view URIs in development", () => {
     server.registerTool(
       {

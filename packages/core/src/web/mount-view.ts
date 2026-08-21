@@ -7,8 +7,9 @@ import { installOpenAILoggingProxy } from "./proxy.js";
 let rootInstance: Root | null = null;
 
 /**
- * Mount a view's root React component into `#root`. Each view file's entry
- * point should call this exactly once.
+ * Mount a view's root React component into `#root`. The Vite plugin
+ * auto-mounts every view, so apps normally never call this themselves —
+ * it is the entry point the generated view wrappers use.
  *
  * Wraps the component in `StrictMode`, applies host-specific providers
  * automatically (e.g. modal support for MCP Apps), and installs the dev-mode

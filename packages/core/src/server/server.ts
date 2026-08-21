@@ -7,14 +7,25 @@ import type {
   McpUiToolMeta,
 } from "@modelcontextprotocol/ext-apps";
 import {
+  type CacheHint,
   type ContentBlock,
+  type Icon,
   type Implementation,
   McpServer as McpServerBase,
+  type PromptCallback,
+  type ReadResourceCallback,
+  type ReadResourceTemplateCallback,
+  type RegisteredPrompt,
+  type RegisteredResource,
+  type RegisteredResourceTemplate,
   type RequestMeta,
+  type ResourceMetadata,
+  type ResourceTemplate,
   type Server as SdkServer,
   type ServerOptions,
   type ServerResult,
   type StandardSchemaV1,
+  type StandardSchemaWithJSON,
   type ToolAnnotations,
 } from "@modelcontextprotocol/server";
 import { mergeWith, union } from "es-toolkit";
@@ -149,11 +160,6 @@ export interface ViewConfig {
   component: ViewName;
   /** Human-readable label the host may show alongside the view. */
   description?: string;
-  /**
-   * @deprecated No-op. Every view emits a single ext-apps resource regardless
-   * of this value. Will be removed in a future major.
-   */
-  hosts?: ViewHostType[];
   /** Request a visible border around the view (forwarded as `ui.prefersBorder`). */
   prefersBorder?: boolean;
   /** Override the iframe's served domain (advanced; forwarded as `ui.domain`). */
@@ -243,7 +249,6 @@ export interface KnownToolMeta {
   "openai/fileParams"?: string[];
   /** MCP Apps: control whether the tool is exposed to the model, the app, or both. */
   ui?: Pick<McpUiToolMeta, "visibility">;
-  securitySchemes?: SecurityScheme[];
 }
 
 /** {@link KnownToolMeta} merged with arbitrary string-keyed metadata for custom flags. */
@@ -491,7 +496,10 @@ type RegistrationTarget = { readonly server: SdkServer };
 // unified 2-arg signature can replace the SDK's 3-arg one without an
 // incompatible override.  The runtime prototype chain is unaffected.
 interface McpServerBaseOmitted
-  extends Omit<McpServerBase, "registerTool" | "connect"> {}
+  extends Omit<
+    McpServerBase,
+    "registerTool" | "registerResource" | "registerPrompt" | "connect"
+  > {}
 const McpServerBaseOmitted = McpServerBase as unknown as new (
   ...args: ConstructorParameters<typeof McpServerBase>
 ) => McpServerBaseOmitted;
@@ -572,30 +580,6 @@ function withSkillsCapability(
   };
 }
 
-// Collapses registerTool's two overloads into a single { config, cb } shape.
-//   registerTool("greet", { description }, handler)
-//     -> { config: { name: "greet", description }, cb: handler }
-//   registerTool({ name: "greet", description }, handler)
-//     -> { config: { name: "greet", description }, cb: handler }
-function normalizeRegisterToolArgs(args: unknown[]): {
-  config: ToolConfig<RawInputShape>;
-  cb: ToolHandler<RawInputShape>;
-} {
-  if (typeof args[0] === "string") {
-    return {
-      config: {
-        name: args[0],
-        ...(args[1] as object),
-      } as ToolConfig<RawInputShape>,
-      cb: args[2] as ToolHandler<RawInputShape>,
-    };
-  }
-  return {
-    config: args[0] as ToolConfig<RawInputShape>,
-    cb: args[1] as ToolHandler<RawInputShape>,
-  };
-}
-
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
   TAuthExtra extends ExtraClaims = ExtraClaims,
@@ -672,33 +656,68 @@ export class McpServer<
       this.setViteManifest(pendingBuildManifest);
       pendingBuildManifest = null;
     }
-    this.interceptInheritedRegistrations();
     this.setupSkills(Boolean(skybridgeOptions?.skills));
   }
 
   /**
-   * Routes the SDK's own registration methods through the ledger so anything
-   * registered on this server is also present on every per-request instance.
+   * Register a resource, recorded so every per-request instance carries it.
+   * Signature owned by Skybridge (not inherited) so a typed wrapper can land
+   * in a minor without a type-level break.
    */
-  private interceptInheritedRegistrations(): void {
-    const methods = ["registerResource", "registerPrompt"] as const;
-    for (const method of methods) {
-      const base = McpServerBase.prototype[method] as (
-        ...args: unknown[]
-      ) => unknown;
-      (this as unknown as Record<string, unknown>)[method] = (
-        ...args: unknown[]
-      ): unknown => {
-        let registered: unknown;
-        this.record((target) => {
-          const result = base.apply(target, args);
-          if ((target as unknown) === (this as unknown)) {
-            registered = result;
-          }
-        });
-        return registered;
-      };
-    }
+  registerResource(
+    name: string,
+    uri: string,
+    config: ResourceMetadata & { cacheHint?: CacheHint },
+    readCallback: ReadResourceCallback,
+  ): RegisteredResource;
+  registerResource(
+    name: string,
+    template: ResourceTemplate,
+    config: ResourceMetadata & { cacheHint?: CacheHint },
+    readCallback: ReadResourceTemplateCallback,
+  ): RegisteredResourceTemplate;
+  registerResource(...args: unknown[]): unknown {
+    return this.recordInherited("registerResource", args);
+  }
+
+  /**
+   * Register a prompt, recorded so every per-request instance carries it.
+   * Signature owned by Skybridge (not inherited) so a typed wrapper can land
+   * in a minor without a type-level break.
+   */
+  registerPrompt<Args extends StandardSchemaWithJSON>(
+    name: string,
+    config: {
+      title?: string;
+      description?: string;
+      argsSchema?: Args;
+      icons?: Icon[];
+      _meta?: Record<string, unknown>;
+    },
+    cb: PromptCallback<Args>,
+  ): RegisteredPrompt {
+    return this.recordInherited("registerPrompt", [
+      name,
+      config,
+      cb,
+    ]) as RegisteredPrompt;
+  }
+
+  private recordInherited(
+    method: "registerResource" | "registerPrompt",
+    args: unknown[],
+  ): unknown {
+    const base = McpServerBase.prototype[method] as (
+      ...a: unknown[]
+    ) => unknown;
+    let registered: unknown;
+    this.record((target) => {
+      const result = base.apply(target, args);
+      if ((target as unknown) === (this as unknown)) {
+        registered = result;
+      }
+    });
+    return registered;
   }
 
   private skillRegistrar(): SkillRegistrar {
@@ -1507,12 +1526,13 @@ export class McpServer<
     config: ToolConfig<InputArgs>,
     cb: ToolHandler<InputArgs, { content?: HandlerContent }, TAuthExtra>,
   ): this;
-  registerTool(...args: unknown[]): unknown {
+  registerTool(rawConfig: unknown, rawCb: unknown): unknown {
     const baseFn = McpServerBase.prototype.registerTool as (
       ...args: unknown[]
     ) => unknown;
 
-    const { config, cb } = normalizeRegisterToolArgs(args);
+    const config = rawConfig as ToolConfig<RawInputShape>;
+    const cb = rawCb as ToolHandler<RawInputShape>;
 
     const {
       name,
