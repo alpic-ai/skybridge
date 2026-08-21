@@ -302,7 +302,7 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
     },
 
     async transform(code, id) {
-      if (viewEntryPattern?.test(id) && !hasDefaultExport(code, id)) {
+      if (viewEntryPattern?.test(id) && !hasDefaultExport(code)) {
         this.warn(
           `View file "${id.split("/").pop()}" is missing a default export.`,
         );
