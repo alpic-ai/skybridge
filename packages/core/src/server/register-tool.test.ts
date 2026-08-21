@@ -1,5 +1,4 @@
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import { describe, expect, it } from "vitest";
 import { McpServer } from "./server.js";
 
@@ -26,7 +25,7 @@ describe("registerTool handler invocation", () => {
     await client.callTool({ name: "no-input" });
 
     expect(received?.args).toEqual({});
-    expect(received?.extra).toHaveProperty("sendRequest");
+    expect(received?.extra).toHaveProperty("mcpReq.send");
 
     await client.close();
     await server.close();

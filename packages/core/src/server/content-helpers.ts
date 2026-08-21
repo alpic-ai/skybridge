@@ -4,7 +4,7 @@ import type {
   ImageContent,
   ResourceLink,
   TextContent,
-} from "@modelcontextprotocol/sdk/types.js";
+} from "@modelcontextprotocol/server";
 
 /**
  * MCP content annotations applied to any returned block.

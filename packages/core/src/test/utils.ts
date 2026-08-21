@@ -1,4 +1,4 @@
-import { McpServer as McpServerBase } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer as McpServerBase } from "@modelcontextprotocol/server";
 import { type MockInstance, vi } from "vitest";
 import * as z from "zod";
 import { McpServer, type ViewName } from "../server/server.js";
@@ -306,10 +306,14 @@ export function createMockExtra(
     url?: URL | string;
   },
 ) {
+  const headers = new Headers();
+  headers.set("host", host);
+  for (const [key, value] of Object.entries(options?.headers ?? {})) {
+    headers.set(key, Array.isArray(value) ? value.join(", ") : value);
+  }
   return {
-    requestInfo: {
-      headers: { host, ...(options?.headers ?? {}) },
-      ...(options?.url ? { url: options.url } : {}),
+    http: {
+      req: new Request(String(options?.url ?? `https://${host}`), { headers }),
     },
   };
 }
