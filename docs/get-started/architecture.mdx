@@ -4,10 +4,6 @@ description: "Design conversational experiences leveraging model intelligence"
 icon: route
 ---
 
-import { Hero } from "/components/hero.jsx";
-
-<Hero src="/images/architecture.webp" alt="Architecture" />
-
 MCP Apps have three actors involved: the app, the user, and the model. This creates context asymmetry: each actor holds a partial picture of the system. The model is blind to the UI: it can’t see visuals or user interactions unless you explicitly sync them back. The user can’t see the tool output flowing underneath. Building well means understanding these blind spots and designing the information flow between all three.
 
 The core design challenge isn’t layout or styling: it’s deciding who sees what, and when. What does the model need to know? What should stay hidden from it? Where should natural language replace traditional UI?
