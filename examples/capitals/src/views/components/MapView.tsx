@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import type { MapRef } from "react-map-gl";
 import { Map as MapboxMap, Marker, NavigationControl } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { useLayout } from "skybridge/web";
+import { useUser } from "skybridge/web";
 
 // By default mapbox-gl spawns its workers by stringifying its own bundled
 // code into a classic (non-module) blob worker. Vite's build rewrites the
@@ -51,7 +51,7 @@ export function MapView({
     }
   }, [center.lat, center.lng, zoom]);
 
-  const { theme } = useLayout();
+  const { theme } = useUser();
 
   return (
     <MapboxMap

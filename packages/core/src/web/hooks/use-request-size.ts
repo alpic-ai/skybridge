@@ -7,7 +7,7 @@ export type RequestSizeFn = (size: RequestSizeOptions) => Promise<void>;
 
 /**
  * Ask the host to resize the view iframe. The applied size is host-driven —
- * the host decides whether and how to honor the request, and {@link useLayout}
+ * the host decides whether and how to honor the request, and {@link useViewport}
  * still reports the final `maxHeight` it allows.
  *
  * Pair with a `ResizeObserver` on your root element to react to content size

@@ -14,8 +14,8 @@ import { type ReactNode, useRef, useState } from "react";
 import {
   type FileMetadata,
   useFiles,
-  useLayout,
   useOpenExternal,
+  useUser,
 } from "skybridge/web";
 import { useCallTool, useToolInfo } from "../helpers.js";
 
@@ -215,7 +215,7 @@ function Result({
 }
 
 export default function ZipFile() {
-  const { theme } = useLayout();
+  const { theme } = useUser();
   const { upload, selectFiles, getDownloadUrl } = useFiles();
   const openExternal = useOpenExternal();
   const {
