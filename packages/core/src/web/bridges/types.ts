@@ -6,7 +6,7 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 import type { useSyncExternalStore } from "react";
 import type { ZodType } from "zod";
-import type { ViewHostType } from "../../server/index.js";
+import type { ViewHostType } from "../../server/server.js";
 import type { InferSchemaOutput } from "../../standard-schema.js";
 
 /**

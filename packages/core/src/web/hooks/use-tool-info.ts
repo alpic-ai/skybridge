@@ -2,24 +2,6 @@ import { useHostContext } from "../bridges/index.js";
 import type { UnknownObject } from "../types.js";
 
 /**
- * {@link useToolInfo} state before the tool has been invoked.
- *
- * @deprecated `useToolInfo` no longer returns the idle state — it starts in
- * `"pending"` and transitions to `"success"`, so `isIdle` is always `false` at
- * runtime. This type is retained in {@link ToolState} for backwards
- * compatibility and will be removed in the next major.
- */
-export type ToolIdleState = {
-  status: "idle";
-  isIdle: true;
-  isPending: false;
-  isSuccess: false;
-  input: undefined;
-  output: undefined;
-  responseMetadata: undefined;
-};
-
-/**
  * {@link useToolInfo} state while the tool is executing — `output` is not yet
  * available.
  *
@@ -28,7 +10,6 @@ export type ToolIdleState = {
  */
 export type ToolPendingState<ToolInput extends UnknownObject> = {
   status: "pending";
-  isIdle: false;
   isPending: true;
   isSuccess: false;
   input: ToolInput | undefined;
@@ -48,7 +29,6 @@ export type ToolSuccessState<
   ToolResponseMetadata extends UnknownObject,
 > = {
   status: "success";
-  isIdle: false;
   isPending: false;
   isSuccess: true;
   input: ToolInput | undefined;
@@ -65,7 +45,6 @@ export type ToolState<
   ToolOutput extends UnknownObject,
   ToolResponseMetadata extends UnknownObject,
 > =
-  | ToolIdleState
   | ToolPendingState<ToolInput>
   | ToolSuccessState<ToolInput, ToolOutput, ToolResponseMetadata>;
 
@@ -127,7 +106,6 @@ export function useToolInfo<
   return {
     input: input ?? undefined,
     status,
-    isIdle: false,
     isPending: status === "pending",
     isSuccess: status === "success",
     output,

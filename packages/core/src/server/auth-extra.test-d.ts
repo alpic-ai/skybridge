@@ -83,30 +83,12 @@ test("a hand-written verifier carries its own claims", async () => {
   });
 });
 
-test("the legacy verify config still works, with untyped claims", () => {
-  new McpServer(
-    { name: "t", version: "0" },
-    {},
-    {
-      oauth: {
-        oauthMetadata: workosOAuth.oauthMetadata,
-        verify: { issuer: "https://idp.example.com" },
-      },
-    },
-  ).registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
-    expectTypeOf(extra.http?.authInfo?.extra).toEqualTypeOf<
-      Record<string, unknown> | undefined
-    >();
-    return { content: "a" };
-  });
-});
-
-test("a config must carry exactly one of verifier / verify", () => {
-  // @ts-expect-error one of verifier / verify is required
-  const neither: OAuthConfig = {
+test("a config must carry a verifier", () => {
+  // @ts-expect-error a verifier is required
+  const missing: OAuthConfig = {
     oauthMetadata: workosOAuth.oauthMetadata,
   };
-  void neither;
+  void missing;
 });
 
 test("a provider override adds claims without dropping the provider's", () => {
