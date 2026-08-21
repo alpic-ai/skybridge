@@ -72,7 +72,7 @@ export class Chat<App = unknown> {
     const chat = new Chat<App>(client, transport, host);
     try {
       const { tools } = await client.listTools();
-      chat.tools = tools as unknown as McpToolDefinition[];
+      chat.tools = tools;
     } catch (error) {
       await transport.close();
       throw error;

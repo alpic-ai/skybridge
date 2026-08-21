@@ -135,5 +135,5 @@ expect.extend({
   },
 });
 
-expect.chat = (<App>(chat: Chat<App>) =>
-  expect(chat)) as unknown as typeof expect.chat;
+expect.chat = <App>(chat: Chat<App>): ChatAssertion<App> =>
+  expect(chat) as unknown as ChatAssertion<App>;

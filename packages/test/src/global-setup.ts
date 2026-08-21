@@ -1,11 +1,8 @@
 import type { TestProject } from "vitest/node";
-import type { EvalsOptions } from "./config.js";
 import { startServer } from "./server-harness.js";
 
 export default async function setup(project: TestProject) {
-  const options = project.config.provide?.skybridgeEvals as
-    | EvalsOptions
-    | undefined;
+  const options = project.config.provide?.skybridgeEvals;
   if (options === undefined) {
     throw new Error(
       "The evals plugin is not registered. Add `skybridge({ evals: {...} })` to the vitest config.",
