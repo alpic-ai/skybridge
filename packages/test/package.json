@@ -1,0 +1,54 @@
+{
+  "name": "@skybridge/test",
+  "version": "0.0.0",
+  "description": "Eval runner for Skybridge MCP apps: does a prompt reach the right tool with the right arguments",
+  "license": "ISC",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alpic-ai/skybridge.git"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      "default": "./dist/plugin.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "format": "biome check --write --error-on-warnings",
+    "test": "pnpm run test:format && pnpm run test:types && pnpm run test:unit",
+    "test:format": "biome ci",
+    "test:types": "tsc --noEmit -p tsconfig.test.json",
+    "test:unit": "vitest run"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@skybridge/vite-plugin": "workspace:*",
+    "ai": "^5.0.0"
+  },
+  "peerDependencies": {
+    "skybridge": "^2.0.0",
+    "vitest": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "skybridge": "workspace:*",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=22.23.1"
+  },
+  "publishConfig": {
+    "tag": "beta"
+  }
+}

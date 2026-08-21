@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { UserConfig } from "vite";
+import type { Plugin, UserConfig } from "vite";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { skybridge } from "./plugin.js";
 
@@ -10,7 +10,7 @@ type RenderBuiltUrl = NonNullable<
 >;
 
 function getRenderBuiltUrl(root: string): RenderBuiltUrl {
-  const plugin = skybridge({ viewsDir: join(root, "views") });
+  const [plugin] = skybridge({ viewsDir: join(root, "views") }) as [Plugin];
   const hook = plugin.config;
   if (!hook) {
     throw new Error("plugin.config is not defined");

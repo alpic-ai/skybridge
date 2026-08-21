@@ -1,4 +1,5 @@
 import { Command, Flags } from "@oclif/core";
+import { scanAndWriteViewsDts } from "@skybridge/vite-plugin";
 import { Box, render, Text } from "ink";
 import { resolvePort } from "../cli/detect-port.js";
 import { Header } from "../cli/header.js";
@@ -10,7 +11,6 @@ import { useNodemon } from "../cli/use-nodemon.js";
 import { useOpenBrowser } from "../cli/use-open-browser.js";
 import { useTunnel } from "../cli/use-tunnel.js";
 import { useTypeScriptCheck } from "../cli/use-typescript-check.js";
-import { scanAndWriteViewsDts } from "../web/plugin/scan-views.js";
 
 export default class Dev extends Command {
   static override description = "Start development server";

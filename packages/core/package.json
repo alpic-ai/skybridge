@@ -58,9 +58,9 @@
     "vite": ">=7.3.1"
   },
   "dependencies": {
-    "@babel/core": "^7.29.7",
     "@modelcontextprotocol/ext-apps": "^1.7.4",
     "@oclif/core": "^4.11.14",
+    "@skybridge/vite-plugin": "workspace:*",
     "ci-info": "^4.4.0",
     "cors": "^2.8.6",
     "cross-spawn": "^7.0.6",
@@ -82,7 +82,6 @@
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
     "@total-typescript/tsconfig": "^1.0.4",
-    "@types/babel__core": "^7.20.5",
     "@types/cors": "^2.8.19",
     "@types/cross-spawn": "^6.0.6",
     "@types/express": "^5.0.6",
