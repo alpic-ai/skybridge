@@ -22,11 +22,6 @@ export type ToolCall<App> = {
   };
 }[ToolNames<App>];
 
-/**
- * How the host is configured. `model` is an AI SDK model instance, so the
- * provider and its credentials are chosen by the project rather than by a
- * base URL the runner has to know about.
- */
 interface HostConfig {
   model: LanguageModel;
   temperature?: number;

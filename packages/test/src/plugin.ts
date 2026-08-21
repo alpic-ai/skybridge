@@ -17,7 +17,7 @@ export function evals(options: EvalsOptions): Plugin {
   const provided: ProvidedEvalsOptions =
     "file" in model ? rest : { ...rest, model };
 
-  const setupFiles = [here("./setup.js")];
+  const setupFiles = [here("./matchers.js")];
   if ("file" in model) {
     setupFiles.push(model.file);
   }
