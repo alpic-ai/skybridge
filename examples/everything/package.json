@@ -14,7 +14,6 @@
   "dependencies": {
     "@alpic-ai/insights": "^1.142.1",
     "@alpic-ai/ui": "^1.134.0",
-    "@modelcontextprotocol/sdk": "^1.29.0",
     "lucide-react": "^1.21.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
