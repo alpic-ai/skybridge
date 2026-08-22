@@ -214,9 +214,15 @@
             ]
           },
           {
-            "group": "UI and Component libraries",
+            "group": "Generative UI",
             "pages": [
               "examples/generative-ui",
+              "examples/openui"
+            ]
+          },
+          {
+            "group": "Component libraries",
+            "pages": [
               "examples/manifest-ui"
             ]
           }
