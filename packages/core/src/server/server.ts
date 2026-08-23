@@ -1312,14 +1312,13 @@ export class McpServer<
     },
   ): ToolHandler<InputArgs> {
     return async (args, extra) => {
-      const toolExtra = extra ?? (args as unknown as McpExtra);
       if (this.oauthEnabled) {
         const failure = evaluateSecuritySchemes(
           securitySchemes,
-          toolExtra?.authInfo,
+          extra.authInfo,
         );
         if (failure) {
-          const headers = toolExtra?.requestInfo?.headers ?? {};
+          const headers = extra.requestInfo?.headers ?? {};
           const header = (key: string) => {
             const value = headers[key];
             return Array.isArray(value) ? value[0] : value;
@@ -1334,7 +1333,7 @@ export class McpServer<
       try {
         result = await cb(args, extra);
       } catch (error) {
-        captureToolError(toolExtra, error);
+        captureToolError(extra, error);
         throw error;
       }
       warnOnLargeToolOutput(result, toolName);
@@ -1516,7 +1515,15 @@ export class McpServer<
       toolName: name,
     });
 
-    baseFn.call(this, name, { ...toolFields, _meta: toolMeta }, wrappedCb);
+    baseFn.call(
+      this,
+      name,
+      { ...toolFields, _meta: toolMeta },
+      toolFields.inputSchema === undefined
+        ? (extra: ToolHandlerExtra) =>
+            wrappedCb({} as ShapeOutput<ZodRawShapeCompat>, extra)
+        : wrappedCb,
+    );
 
     return this;
   }
