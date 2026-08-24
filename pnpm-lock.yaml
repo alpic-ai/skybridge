@@ -136,8 +136,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -154,8 +154,8 @@ importers:
         specifier: ^5.2.0
         version: 5.2.0(vite@8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
@@ -191,8 +191,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -209,8 +209,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.3(vite@8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
@@ -246,8 +246,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -264,8 +264,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.3(vite@8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
@@ -301,8 +301,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -319,8 +319,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.3(vite@8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
@@ -356,8 +356,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -374,8 +374,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.3(vite@8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
@@ -408,8 +408,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.1.0
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -426,8 +426,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.3(vite@8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.136.3
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.11
         version: 3.1.14
@@ -463,8 +463,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -481,8 +481,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.3(vite@8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
@@ -518,8 +518,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -536,8 +536,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.3(vite@8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
@@ -600,8 +600,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.3(vite@8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -621,8 +621,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.3(vite@8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.22.4
         version: 4.23.1
@@ -673,8 +673,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.1.0
-        version: 1.2.7(arktype@2.1.27)(typescript@6.0.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)
       '@tailwindcss/vite':
         specifier: ^4.2.4
         version: 4.3.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -691,8 +691,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.104.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.3)
       tailwindcss:
         specifier: ^4.2.4
         version: 4.3.3
@@ -737,8 +737,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -755,8 +755,8 @@ importers:
         specifier: ^5.2.0
         version: 5.2.0(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.22.4
         version: 4.23.1
@@ -786,8 +786,8 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1(@types/node@24.13.3)(@types/react@19.2.17)(jiti@2.7.0)(lightningcss@1.32.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(terser@5.44.1)(tsx@4.23.1)(typescript@6.0.3)(yaml@2.9.0)
       '@skybridge/devtools':
-        specifier: ^1.2.4
-        version: 1.2.7(arktype@2.1.27)(typescript@6.0.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)
       '@types/node':
         specifier: ^24.13.2
         version: 24.13.3
@@ -813,8 +813,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.147.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.3)
       tsx:
         specifier: ^4.23.0
         version: 4.23.1
@@ -859,8 +859,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -877,8 +877,8 @@ importers:
         specifier: ^5.2.0
         version: 5.2.0(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tailwindcss:
         specifier: ^4.3.1
         version: 4.3.3
@@ -914,8 +914,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@types/node':
         specifier: ^22.20.0
         version: 22.20.1
@@ -929,8 +929,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.3(vite@8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.22.4
         version: 4.23.1
@@ -978,8 +978,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@types/node':
         specifier: ^25.9.4
         version: 25.9.5
@@ -993,8 +993,8 @@ importers:
         specifier: ^5.2.0
         version: 5.2.0(vite@8.1.5(@types/node@25.9.5)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.22.4
         version: 4.23.1
@@ -1039,8 +1039,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -1057,8 +1057,8 @@ importers:
         specifier: ^5.2.0
         version: 5.2.0(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.22.4
         version: 4.23.1
@@ -1118,8 +1118,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@types/node':
         specifier: ^25.9.4
         version: 25.9.5
@@ -1133,8 +1133,8 @@ importers:
         specifier: ^5.2.0
         version: 5.2.0(vite@8.1.5(@types/node@25.9.5)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.22.4
         version: 4.23.1
@@ -1267,8 +1267,8 @@ importers:
         version: 4.5.7(@types/react@19.2.17)(immer@11.1.11)(react@19.2.7)
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(arktype@2.1.27)(typescript@5.9.3)
       '@types/node':
         specifier: ^25.9.4
         version: 25.9.5
@@ -1313,8 +1313,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@types/node':
         specifier: ^25.9.4
         version: 25.9.5
@@ -1328,8 +1328,8 @@ importers:
         specifier: ^5.2.0
         version: 5.2.0(vite@8.1.5(@types/node@25.9.5)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.22.4
         version: 4.23.1
@@ -1371,8 +1371,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@types/node':
         specifier: ^22.20.0
         version: 22.20.1
@@ -1386,8 +1386,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.3(vite@8.1.5(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.22.4
         version: 4.23.1
@@ -1429,8 +1429,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.3
-        version: 1.2.7(arktype@2.1.27)(typescript@5.9.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -1447,8 +1447,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.142.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3)
       tsx:
         specifier: ^4.22.4
         version: 4.23.1
@@ -1542,8 +1542,8 @@ importers:
         specifier: ^4.11.14
         version: 4.11.14
       '@skybridge/devtools':
-        specifier: ^1.1.0
-        version: 1.2.3(arktype@2.1.27)(typescript@6.0.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)
       ci-info:
         specifier: ^4.4.0
         version: 4.4.0
@@ -1695,14 +1695,14 @@ importers:
         version: 8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0)
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.7
-        version: 1.2.7(arktype@2.1.27)(typescript@6.0.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)
       '@types/node':
         specifier: ^24.13.3
         version: 24.13.3
       alpic:
-        specifier: ^1.155.0
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.3)
       tsx:
         specifier: ^4.23.1
         version: 4.23.1
@@ -1744,8 +1744,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.7
-        version: 1.2.7(arktype@2.1.27)(typescript@6.0.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)
       '@tailwindcss/vite':
         specifier: ^4.3.3
         version: 4.3.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
@@ -1762,8 +1762,8 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
       alpic:
-        specifier: ^1.155.0
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.3)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -1796,8 +1796,8 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1(@types/node@24.13.3)(@types/react@19.2.17)(jiti@2.7.0)(lightningcss@1.32.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(terser@5.44.1)(tsx@4.23.0)(typescript@6.0.3)(yaml@2.9.0)
       '@skybridge/devtools':
-        specifier: ^1.2.4
-        version: 1.2.7(arktype@2.1.27)(typescript@6.0.3)
+        specifier: ^1.4.1
+        version: 1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)
       '@types/node':
         specifier: ^24.13.2
         version: 24.13.3
@@ -1823,8 +1823,8 @@ importers:
         specifier: ^6.0.1
         version: 6.0.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.0)(yaml@2.9.0))
       alpic:
-        specifier: ^1.147.1
-        version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.3)
+        specifier: ^1.169.0
+        version: 1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.3)
       tsx:
         specifier: ^4.23.0
         version: 4.23.0
@@ -2015,6 +2015,9 @@ packages:
   '@alpic-ai/api@1.157.0':
     resolution: {integrity: sha512-zTkBQAj0gEnbcMCxLbsSk7t28/Fr6WwW1wEXEF/DfpgfuZK7WN2GU80Be/jySRKPdWq4bnGxj7Nf5fxRNg0SbA==}
 
+  '@alpic-ai/api@1.169.0':
+    resolution: {integrity: sha512-W3oYOCxKV9ajxYnjgJbydVw/ZUXMBm+m+z0+UjTSVP23IdW805R5zfOejm3gFsfcPOfv6uCaHSXwak+pzN8mZA==}
+
   '@alpic-ai/insights@1.158.0':
     resolution: {integrity: sha512-Z2nH+Vw9OKIq7ZIiHEDjJ+JE65cz84RfslfFW2Q3dpkvvOoNdmE9TvP3TPDmyV0k9reOwsYjhakH7KHqXC3H3Q==}
     peerDependencies:
@@ -2033,6 +2036,10 @@ packages:
 
   '@alpic-ai/sdk@1.157.0':
     resolution: {integrity: sha512-LQn3CM4TzhzDtqNaTH3ZrwIJEYQxtvML/sBPbxXiLi0TUQTyRaQuzffJTP4D1EMKQ0CEtVHjAwOg/enyp3XK+Q==}
+    engines: {node: '>= 18.20.8'}
+
+  '@alpic-ai/sdk@1.169.0':
+    resolution: {integrity: sha512-1/hNTEiqtPQtD5EsGvIXvlf+qOUE37Hu3BfOPlv0RczJYF3BJvGdiy3qcHId0/Q8Mp3i8VzkI45C8RSe7HA+Aw==}
     engines: {node: '>= 18.20.8'}
 
   '@alpic-ai/ui@1.152.0':
@@ -2061,8 +2068,8 @@ packages:
     resolution: {integrity: sha512-YxLBY5nGlurL7QeJLq6e5g0ouBpAp0pwgyA/5rHXEXwhiPLn9ZHbT+Y2LlP90GT872cSocfjWRYu/fnpuBudNQ==}
     engines: {node: '>=18.0.0'}
 
-  '@apm-js-collab/code-transformer-bundler-plugins@0.6.2':
-    resolution: {integrity: sha512-5vBrtIEL+UVbO0YWWoyYG4QMgR+ZfnIL3xlteIkAmU7YaAPhc28k3md/NM14tnkfXKjKOn9yUzEA9AYUmNpvJg==}
+  '@apm-js-collab/code-transformer-bundler-plugins@0.7.4':
+    resolution: {integrity: sha512-nAfOeZPSUAQvJa1iFT/5oCrTm5YQhMMrfCNthNnaXHZiOQhu1KGuLoIx7HtbAi3wfwaBYLaICPIeenIaEwcXIg==}
     engines: {node: '>=18.0.0'}
 
   '@apm-js-collab/code-transformer@0.15.0':
@@ -2071,6 +2078,10 @@ packages:
 
   '@apm-js-collab/code-transformer@0.18.0':
     resolution: {integrity: sha512-aN3Oq8r1J3gPJtCwErP664gM0+HhM1I1lujPr9TMTCcEl/joQQbpGpeMdts9B1+W2wHMsvioDMv5F4PvMWE6gw==}
+    hasBin: true
+
+  '@apm-js-collab/code-transformer@0.18.1':
+    resolution: {integrity: sha512-u1Hb6bHjWtkSpiprwVP6YaHC1DTN4RAU3zYkUDUe7WMnJwdyU1pwTL9dFKiSJB9IiLue/EQovmyx6xhU7FFtAQ==}
     hasBin: true
 
   '@apm-js-collab/tracing-hooks@0.10.1':
@@ -3515,6 +3526,10 @@ packages:
     resolution: {integrity: sha512-cZ5Ktd+rT0PO+o7KBH4vRFTgg+xMLf8F41WK39p8MkXEViZA/Qqe+4lzZT6102zgUxMORET1HtF9t5w8CB3tnQ==}
     engines: {node: '>=18.0.0'}
 
+  '@oclif/core@4.14.0':
+    resolution: {integrity: sha512-QCJIZoVJxV7jywgVAUlsQwl3dr3Sa21kfi5z9KrYolbexWJUtFSEtMoNiBWojD05mYycLnB50gp/VxlGdaOCRA==}
+    engines: {node: '>=18.0.0'}
+
   '@open-draft/deferred-promise@2.2.0':
     resolution: {integrity: sha512-CecwLWx3rhxVQF6V4bAgPS5t+So2sTbPgAzafKkVizyi7tlwpcFpdFqq+wqF2OwNBmqFuu6tOyouTuxgpMfzmA==}
 
@@ -3644,17 +3659,26 @@ packages:
   '@orpc/client@1.14.8':
     resolution: {integrity: sha512-Gu9pttl8BvOdU0skSwsYWWL31e+qpLXmHTHTy990vEbrWncVFulOtWJtwY/rV1nX7AfWnSyJZJwCFZvMcFnQgA==}
 
+  '@orpc/client@1.15.0':
+    resolution: {integrity: sha512-Qt0FdPSGySdQwy83iUWOq+Iqhw2gM9qHtyxfBbcw1mwOz1s4O2BwUFA3ymVTLIRRNYRgPrQLaBZhp8CacqeePg==}
+
   '@orpc/contract@1.14.6':
     resolution: {integrity: sha512-o4i2ciYWtALidF969S8yj/VFk7ZUmHHKaYGRVitX5K2uMaSB8lJM6TMyBKzRC5Clo99VPjCb9mcl6jMLEAgmKw==}
 
   '@orpc/contract@1.14.8':
     resolution: {integrity: sha512-Z+CnA6z6mBUUgHjfdMk82QvOocADgVxz5ZoS13BmqLsWuEO8dFm9eVTHRJ0NJDJ2KEHApR+1vshA0bXBQRuClw==}
 
+  '@orpc/contract@1.15.0':
+    resolution: {integrity: sha512-zo8+x+5iqnIMrFdcj+ibVgn6dJneWzLNcD3kZQxrJFGFNAFoxvZbwryR5wOdcHkaSCeS3N7Ib2NydU6pihSYmg==}
+
   '@orpc/openapi-client@1.14.6':
     resolution: {integrity: sha512-Z0rdO+oVJTASat3fIQmLEjKnqRsjg4QsjRFwFamZ5W+Y076I3Lbp8XhVcMoHbKyfgm/TKnZu3y41b4NFfPBYiA==}
 
   '@orpc/openapi-client@1.14.8':
     resolution: {integrity: sha512-d1eaL8H67Lz/OpNx02cWKu3w3zmqDwCCAZRVjerG4wC2MmbbBGliS1PYVPTvAeetAk81JnyD8i6w13Qf8SNpwA==}
+
+  '@orpc/openapi-client@1.15.0':
+    resolution: {integrity: sha512-MGyMAC6dvQ/YoUARpTN4L1MAnK4L2T3+Z7LA8PVva2rZ8XpKABZRcfqufyPfAC0nu/0uPeebnxHaXZ/OeUIOFg==}
 
   '@orpc/shared@1.14.6':
     resolution: {integrity: sha512-P2W+DdrUq18kUiF7nIw5wDOA0SR41mM/NsVKDVRsdyhdHk9V9KDuW1JRymyMl+7Wo5SDeSr1Rm/VjA5v08+PHw==}
@@ -3672,11 +3696,22 @@ packages:
       '@opentelemetry/api':
         optional: true
 
+  '@orpc/shared@1.15.0':
+    resolution: {integrity: sha512-A3/JE7pQYSrrRm6/WYJxV3GBhpMdJRPM3h47slQtWBUZe9Sao5En5WBc4tISGQNP2emcez6qIvDziSgD2T+img==}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.9.0'
+    peerDependenciesMeta:
+      '@opentelemetry/api':
+        optional: true
+
   '@orpc/standard-server-fetch@1.14.6':
     resolution: {integrity: sha512-XnwEnHaKMMBoilK0QVwgMsUvDbCXyz6CDoLgMN51v+p3VSnwjIkrMdOwbc/sj43z6T4irQDu9Zm8T1pxxh1L8w==}
 
   '@orpc/standard-server-fetch@1.14.8':
     resolution: {integrity: sha512-iuYb+x+zJzdhzLI15bBliQ0wGNJQUXOHiDCJF2EcvjCmEMXRM0dfEFP9UdV7aK4Fz13xxzba26vOnlwlDrj3qg==}
+
+  '@orpc/standard-server-fetch@1.15.0':
+    resolution: {integrity: sha512-XYVfgmIt71YrPJSI7RKRiNWjcyktPYHpevkjeohGNBP5aSMAUL95quZArAWr+XOPp4U56XRao54I6wFMZa4How==}
 
   '@orpc/standard-server-peer@1.14.6':
     resolution: {integrity: sha512-jwVGc5yRA5hk1F/W4yw45P2H4fbu4Tfsk62XijJBXRvtlSNKvvPAuwAd6jFv/fxnq2SH/uskgi91Ja9wgfnYDQ==}
@@ -3684,11 +3719,17 @@ packages:
   '@orpc/standard-server-peer@1.14.8':
     resolution: {integrity: sha512-zWRV5eOoJR01pDya9H3xLZag5Bao5rfB60H+E+UlmfCC8TJANI8xl41sCWYu4WaYxQbvfom0T7TsTadLxMGszA==}
 
+  '@orpc/standard-server-peer@1.15.0':
+    resolution: {integrity: sha512-fsTN+FrdPkseVx99yRenGJYSp0xOrEk9fODk8oh3zzricNYzlZ8GGgCYtDNgt9vFIR/J05dc+Nk76KhcPBQpLw==}
+
   '@orpc/standard-server@1.14.6':
     resolution: {integrity: sha512-75Oh4rAZb8K7P46d6v7R2JhjqjLLEo7Qs4+ABdF+f0m0uKM1oaykJWy7leqTJ+WaYm+uDbsZl/3nyWie9aeJTg==}
 
   '@orpc/standard-server@1.14.8':
     resolution: {integrity: sha512-v0iqvzJ6NzoVRYhk/GJl3/SqC124hSwcDOjPotZbILvx8XwfBlG4V/uhyaZ8baj+l5h79afrhia6Dq9QzFomEQ==}
+
+  '@orpc/standard-server@1.15.0':
+    resolution: {integrity: sha512-bje/xn6thDqJY/JQ7xoOjmD1KWE4FsyZOPgnPxwqTZLx/r00stRhLuFvk1hDEGj9UlG7NLZEijDVx0wqvcyDzA==}
 
   '@oxc-project/types@0.139.0':
     resolution: {integrity: sha512-r9gHphtCs+1M7J0pw6Sn/hh/Wpa/iQrOOkrNAlVLF/gHq+/CJmHIWKKUUhdWjcD6CIa8idarspCsASiXCXvFUw==}
@@ -3707,6 +3748,9 @@ packages:
   '@posthog/core@1.43.1':
     resolution: {integrity: sha512-hGM8f5sp3we6Em/RQHXbmyYm554hUx9+9jhf92ZQgDS4/xW72KHyZiO9wcFye+qAx2cJAOhOCDIznmO1FV8IbA==}
 
+  '@posthog/core@1.48.8':
+    resolution: {integrity: sha512-LAOBOjMQrQmgcbZxnubl74l2GQd5OWqxCJJ8mzcWdZRWbfO6Y/A6E3fqWjDtm68hY4LxC/bbopG60cxZW8cfWw==}
+
   '@posthog/core@1.7.1':
     resolution: {integrity: sha512-kjK0eFMIpKo9GXIbts8VtAknsoZ18oZorANdtuTj1CbgS28t4ZVq//HAWhnxEuXRTrtkd+SUJ6Ux3j2Af8NCuA==}
 
@@ -3715,6 +3759,9 @@ packages:
 
   '@posthog/types@1.397.0':
     resolution: {integrity: sha512-Pa7FtsBo3V0XrhY4y8Xquwp8U07syuZ2IGQdlsRyxhz0yejQLceFjI58UssCXE5zDCDj3km5l7H3ufD6rHChCg==}
+
+  '@posthog/types@1.405.1':
+    resolution: {integrity: sha512-JvaR4ChUKUk7qSTG58vKN2Br6es9riFF5mvlu7YGcwbB476vfyTO0o/TBh+zE88QhsfxnE5Tr/jKxI+e1v3Q5A==}
 
   '@puppeteer/browsers@2.7.1':
     resolution: {integrity: sha512-MK7rtm8JjaxPN7Mf1JdZIZKPD2Z+W7osvrC1vjpvfOX1K0awDIHYbNi89f7eotp7eMUn2shWnt03HwVbriXtKQ==}
@@ -5813,8 +5860,8 @@ packages:
     resolution: {integrity: sha512-OtUbsrnbEHffOF2S2+M5zXa3HIM0U2b4CDVLKMY1dgS0J3ivRF8XvkjvyIcEG/y8JXnwXbnprLyjhG+AqMdUZQ==}
     engines: {node: '>=18'}
 
-  '@sentry/core@10.66.0':
-    resolution: {integrity: sha512-9UbgSvds7bMJsP561eWmeyMLcfOmnwxtnx2QuW3yLobzP2Ob7CyJCOzP4tGzlTAGDrzShkFEZhiyuBUKiEK2oQ==}
+  '@sentry/core@10.70.0':
+    resolution: {integrity: sha512-ozhCTDqg89oB4XmWfAwuHshABpvT7AkRpaPnogopPfMAaI61G1t8EKCJ4W7aum8JSBonlfyjPCyW5oYZFm0KvA==}
     engines: {node: '>=18'}
 
   '@sentry/node-core@10.63.0':
@@ -5838,8 +5885,8 @@ packages:
       '@opentelemetry/sdk-trace-base':
         optional: true
 
-  '@sentry/node-core@10.66.0':
-    resolution: {integrity: sha512-SUnXHROqSdSetKgZC1goDEKCuMz3OmQ1h4rxzWeexLyqan+pensZXfLouP6jzZXlA8e/HP7uQg78LnfqYDcZlQ==}
+  '@sentry/node-core@10.70.0':
+    resolution: {integrity: sha512-oPOEVVNxv5WHtckx2i06Wi9FLWyvOg/1DUeX732jZ4iqT2nupINaMH4nF4f4kSvUThFnxkFSRQxwqOxgzMKhKA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
@@ -5863,8 +5910,8 @@ packages:
     resolution: {integrity: sha512-E+JfDTdUDGQPRsAfCTR2YgmQgxYdoxk4ks6niHN+ByW8alEZL+nXlcN9vI57qj1LsS4v2jjfLxJf1/cMMt84YA==}
     engines: {node: '>=18'}
 
-  '@sentry/node@10.66.0':
-    resolution: {integrity: sha512-5Ow7iQiRjaSaEOmqEIkYV368hFFzShIZCXPoj+wX3JtOmKFrsNu6lr8/VJlQs7cyjFS6tzE50PrLrD8iAPS/8w==}
+  '@sentry/node@10.70.0':
+    resolution: {integrity: sha512-SPOOVxmKTVIEtqvOKkQT163e/pOwucjS7OPsCHyRs8sFR4nfBNu0EThplyqnvqd5BWBMTPH6WTBQfo+QWHV+HA==}
     engines: {node: '>=18'}
 
   '@sentry/opentelemetry@10.63.0':
@@ -5875,8 +5922,8 @@ packages:
       '@opentelemetry/core': ^1.30.1 || ^2.1.0
       '@opentelemetry/sdk-trace-base': ^1.30.1 || ^2.1.0
 
-  '@sentry/opentelemetry@10.66.0':
-    resolution: {integrity: sha512-K5Y9IettN9yIOnpqCs40HRLGqaGUoaQ50+ZsLqX2kPCk3TzJVpKZ9icKwaJ4Nxm72QgGVT5Ovfr/9FXbgd3b/Q==}
+  '@sentry/opentelemetry@10.70.0':
+    resolution: {integrity: sha512-UNV/2tqypcUK6FDzerAsFJn1Km/c4VZCYkUZDNbnV5S0cwAq2BYKMo4M5vovaLDBQlxA+Wk9ovbxi5wYjjl9fw==}
     engines: {node: '>=18'}
     peerDependencies:
       '@opentelemetry/api': ^1.9.0
@@ -5887,8 +5934,8 @@ packages:
     resolution: {integrity: sha512-7NN//DG9Yak8t2+6WiEcNmN269iHRVdtZtZIwucEd0OXyZ3FEBBDaBF+bT9V6H/kPtUvVMkHQ72Bn2Xs5JYGxg==}
     engines: {node: '>=18'}
 
-  '@sentry/server-utils@10.66.0':
-    resolution: {integrity: sha512-h9EM9Wz9Mc6w2Vn7Fyh6ozjy4JC2UbUvWf9Ra1HYA4KMeYqjFA5/o0oB4pg4w/TF+rb+9OF/HNqxjuczxpudpA==}
+  '@sentry/server-utils@10.70.0':
+    resolution: {integrity: sha512-rzegZjMFFgCp3o+N8+XU13rfSvz4B+f8rU0ijBGrQcHdMNyfsFDTu1UTm262JofmrV2u+s+D0u0vFTnqtOGkbA==}
     engines: {node: '>=18'}
 
   '@shikijs/core@3.21.0':
@@ -5978,11 +6025,11 @@ packages:
     resolution: {integrity: sha512-doH1gimEu3A46VX6aVxpHTeHrytJAG6HgdxntYnCFiIFHEM/ZGpG8KiZGBChchjQmG0XFIBL552kBTjVcMZXwQ==}
     engines: {node: '>=12'}
 
-  '@skybridge/devtools@1.2.3':
-    resolution: {integrity: sha512-15yRJzylede0+CKW4hRpyjLtm6tf5zZPNXlEvVWLMM9UQ4XrO0ZHyN3LKJKFS0X1L2DvtxTerMgPbba7F+cNmw==}
-
   '@skybridge/devtools@1.2.7':
     resolution: {integrity: sha512-Xt9pfR9bl+n/0Cqq3BgzY3xmL0PYYEQQV5zJdFkzfns20PydG8nrKe0V6yyj2fEBPpsyekxHI+bXqp05/6g3yA==}
+
+  '@skybridge/devtools@1.4.1':
+    resolution: {integrity: sha512-eGC9dOH7Csj0BTYVVxGxs7WgtzKXrNaHo09XItUVWbTP9RbFgNEnVNx+bx1hx2EvoSQkVpWv//u1Vexb4ID8wQ==}
 
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
@@ -6684,6 +6731,10 @@ packages:
     resolution: {integrity: sha512-VYNCgUc0nOmC4WJmWw9GkrKdfr8Zl4/rxhC5SvgacBgxiW9W/9NRttUoHHXV8xdII3MaRgkZZVX8Ikzc/Jmjag==}
     engines: {node: '>=14'}
 
+  '@vercel/detect-agent@1.2.5':
+    resolution: {integrity: sha512-0krENrjuitlW8s6TJu0MlqCevyCU7K7JK63jZAf7xZ6n17tx+vUEwzHT3sTxawtwZxaW21hu+oFUpoOrm49FsQ==}
+    engines: {node: '>=14'}
+
   '@vitejs/plugin-react-swc@3.11.0':
     resolution: {integrity: sha512-YTJCGFdNMHCMfjODYtxRNVAYmTWQ1Lb8PulP/2/f/oEEtglw8oKxKIZmmRkyXrVrHfsKOaVkAc3NT9/dMutO5w==}
     peerDependencies:
@@ -6851,9 +6902,9 @@ packages:
     engines: {node: '>= 18.20.8'}
     hasBin: true
 
-  alpic@1.157.0:
-    resolution: {integrity: sha512-6fXjsLF1pLF36KIFK4g71Nn9vPWJHjjWSbmpdR2mGW3AvgAQIPPDw8LtzgBHKcOPuimU/9CR7VNR5UblqbCyMw==}
-    engines: {node: '>= 18.20.8'}
+  alpic@1.169.0:
+    resolution: {integrity: sha512-GaMvXlRl+fxOdCE0p1xW6yUkTFZtdQ9cF6tSTSL5mfh2Yd477Yo8GFP0LR3buj+iGNQSQajw3LB/H/5bnDJflQ==}
+    engines: {node: '>= 22.23.2'}
     hasBin: true
 
   ansi-align@3.0.1:
@@ -7244,6 +7295,10 @@ packages:
   chalk@5.6.2:
     resolution: {integrity: sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA==}
     engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
+
+  chalk@6.0.0:
+    resolution: {integrity: sha512-2uNTXIuTTxk7ciZgAU1BQcgnchcG0xXnrs6jzkQfj9SsRa9M2s5zE8WT96hS6KmG4MzWHSrvH43DF1m4XRkrFg==}
+    engines: {node: '>=22'}
 
   char-regex@1.0.2:
     resolution: {integrity: sha512-kWWXztvZ5SBQV+eRgKFeh8q5sLuZY2+8WUIzlxWVTg+oGwY14qylx1KbKzHd8P6ZYkAg0xyIDU9JMHhyJMZ1jw==}
@@ -7808,6 +7863,11 @@ packages:
   ejs@3.1.10:
     resolution: {integrity: sha512-UeJmFfOrAQS8OJWPZ4qtgHyWExa088/MtK5UEyoJGFH67cDEXkZSviOiKRCZ4Xij0zxI3JECgYs3oKx+AizQBA==}
     engines: {node: '>=0.10.0'}
+    hasBin: true
+
+  ejs@6.0.1:
+    resolution: {integrity: sha512-UaaM14yby8U3k02ihS1Bmj5Kz2d7CCQM1scxpgs4Mhkq8F1wR2gl3+Ts4h5Ne4Mnt7M9m4Dw7jsuMr3+xO4vZA==}
+    engines: {node: '>=0.12.18'}
     hasBin: true
 
   electron-to-chromium@1.5.376:
@@ -10183,6 +10243,15 @@ packages:
       rxjs:
         optional: true
 
+  posthog-node@5.49.4:
+    resolution: {integrity: sha512-zoIEQ5kdJTh2eXn3y4c6EMoOGKiuAP7XCWD4bLzPyQboB1g3wRqvCNgA4h7i4nirGDPRDKUiscwU9sNBfvf35Q==}
+    engines: {node: ^20.20.0 || >=22.22.0}
+    peerDependencies:
+      rxjs: ^7.0.0
+    peerDependenciesMeta:
+      rxjs:
+        optional: true
+
   powershell-utils@0.1.0:
     resolution: {integrity: sha512-dM0jVuXJPsDN6DvRpea484tCUaMiXWjuCn++HGTqUWzGDjv5tZkEZldAJ/UMlqRYGFrD/etByo4/xOuC/snX2A==}
     engines: {node: '>=20'}
@@ -11297,6 +11366,10 @@ packages:
     resolution: {integrity: sha512-XdhtCvlMywwxpCW8YEq3lOXBJpUPTR2OHHcwLPO3HwsJqOHa2Ok/oJ7ruGzp+JrKoRPVCzJwAdEjqLW/vNRPHA==}
     engines: {node: '>=18'}
 
+  tar@7.5.22:
+    resolution: {integrity: sha512-MFO/QzvtAOmJbkhOaCTvbGcFN9L9b+JunIsDwaKljSOdcLMea3NJ1k9Usz/rjdfSXTq4dfzfeS7W4p4YOAAHeA==}
+    engines: {node: '>=18'}
+
   terminal-size@4.0.1:
     resolution: {integrity: sha512-avMLDQpUI9I5XFrklECw1ZEUPJhqzcwSWsyyI8blhRLT+8N1jLJWLWWYQpB2q2xthq8xDvjZPISVh53T/+CLYQ==}
     engines: {node: '>=18'}
@@ -11973,6 +12046,10 @@ packages:
     resolution: {integrity: sha512-3sFIGLiaDP7rTO4xh3g+b3AzhYDIUGGywE/WsmqzJWDxus5aJXVnPTNC/6L+r2WzrwXqVOdD262OaO+cEyPMSQ==}
     engines: {node: '>=20'}
 
+  wsl-utils@0.4.0:
+    resolution: {integrity: sha512-9YmF+2sFEd+T7TkwlmE337F0IVzfDvDknhtpBQxxXzEOfgPphGlFYpyx0cTuCIFj8/p+sqwBYAeGxOMNSzPPDA==}
+    engines: {node: '>=20'}
+
   xml-name-validator@5.0.0:
     resolution: {integrity: sha512-EvGK8EJ3DhaHfbRlETOWAS5pO9MZITeauHKJyb8wyajUfQUenkIg2MvLDTZ4T/TgIcm3HU0TFBgWWboAZ30UHg==}
     engines: {node: '>=18'}
@@ -12144,6 +12221,14 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
+  '@alpic-ai/api@1.169.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@orpc/contract': 1.15.0(@opentelemetry/api@1.9.1)
+      ms: 2.1.3
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
   '@alpic-ai/insights@1.158.0(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react@19.2.7)(skybridge@packages+core)':
     dependencies:
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.4.3)
@@ -12198,6 +12283,60 @@ snapshots:
       open: 11.0.0
       openid-client: 6.8.4
       tar: 7.5.21
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+      - arktype
+      - typescript
+      - valibot
+
+  '@alpic-ai/sdk@1.157.0(arktype@2.1.27)(typescript@5.9.3)':
+    dependencies:
+      '@alpic-ai/api': 1.157.0(@opentelemetry/api@1.9.1)
+      '@orpc/client': 1.14.8(@opentelemetry/api@1.9.1)
+      '@orpc/contract': 1.14.8(@opentelemetry/api@1.9.1)
+      '@orpc/openapi-client': 1.14.8(@opentelemetry/api@1.9.1)
+      '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.4.3)
+      env-paths: 4.0.0
+      open: 11.0.0
+      openid-client: 6.8.4
+      tar: 7.5.21
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+      - arktype
+      - typescript
+      - valibot
+
+  '@alpic-ai/sdk@1.169.0(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)':
+    dependencies:
+      '@alpic-ai/api': 1.169.0(@opentelemetry/api@1.9.1)
+      '@orpc/client': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/contract': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/openapi-client': 1.15.0(@opentelemetry/api@1.9.1)
+      '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.4.3)
+      env-paths: 4.0.0
+      open: 11.0.0
+      openid-client: 6.8.4
+      tar: 7.5.22
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+      - arktype
+      - typescript
+      - valibot
+
+  '@alpic-ai/sdk@1.169.0(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)':
+    dependencies:
+      '@alpic-ai/api': 1.169.0(@opentelemetry/api@1.9.1)
+      '@orpc/client': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/contract': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/openapi-client': 1.15.0(@opentelemetry/api@1.9.1)
+      '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@6.0.3)(zod@4.4.3)
+      env-paths: 4.0.0
+      open: 11.0.0
+      openid-client: 6.8.4
+      tar: 7.5.22
       zod: 4.4.3
     transitivePeerDependencies:
       - '@opentelemetry/api'
@@ -12286,9 +12425,9 @@ snapshots:
       magic-string: 0.30.21
       module-details-from-path: 1.0.4
 
-  '@apm-js-collab/code-transformer-bundler-plugins@0.6.2':
+  '@apm-js-collab/code-transformer-bundler-plugins@0.7.4':
     dependencies:
-      '@apm-js-collab/code-transformer': 0.18.0
+      '@apm-js-collab/code-transformer': 0.18.1
       es-module-lexer: 2.3.0
       magic-string: 0.30.21
       module-details-from-path: 1.0.4
@@ -12303,6 +12442,15 @@ snapshots:
       source-map: 0.6.1
 
   '@apm-js-collab/code-transformer@0.18.0':
+    dependencies:
+      '@types/estree': 1.0.9
+      astring: 1.9.0
+      esquery: 1.7.0
+      meriyah: 6.1.4
+      semifies: 1.0.0
+      source-map: 0.6.1
+
+  '@apm-js-collab/code-transformer@0.18.1':
     dependencies:
       '@types/estree': 1.0.9
       astring: 1.9.0
@@ -14023,6 +14171,27 @@ snapshots:
       wordwrap: 1.0.0
       wrap-ansi: 7.0.0
 
+  '@oclif/core@4.14.0':
+    dependencies:
+      ansi-escapes: 4.3.2
+      ansis: 3.17.0
+      clean-stack: 3.0.1
+      cli-spinners: 2.9.2
+      debug: 4.4.3(supports-color@8.1.1)
+      ejs: 6.0.1
+      get-package-type: 0.1.0
+      indent-string: 4.0.0
+      lilconfig: 3.1.3
+      minimatch: 10.2.5
+      semver: 7.8.5
+      string-width: 4.2.3
+      supports-color: 8.1.1
+      tinyglobby: 0.2.17
+      widest-line: 3.1.0
+      wordwrap: 1.0.0
+      wrap-ansi: 7.0.0
+      wsl-utils: 0.4.0
+
   '@open-draft/deferred-promise@2.2.0': {}
 
   '@open-draft/logger@0.3.0':
@@ -14214,6 +14383,15 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
+  '@orpc/client@1.15.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@orpc/shared': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server-fetch': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server-peer': 1.15.0(@opentelemetry/api@1.9.1)
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
   '@orpc/contract@1.14.6(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/client': 1.14.6(@opentelemetry/api@1.9.1)
@@ -14227,6 +14405,15 @@ snapshots:
     dependencies:
       '@orpc/client': 1.14.8(@opentelemetry/api@1.9.1)
       '@orpc/shared': 1.14.8(@opentelemetry/api@1.9.1)
+      '@standard-schema/spec': 1.1.0
+      openapi-types: 12.1.3
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
+  '@orpc/contract@1.15.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@orpc/client': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/shared': 1.15.0(@opentelemetry/api@1.9.1)
       '@standard-schema/spec': 1.1.0
       openapi-types: 12.1.3
     transitivePeerDependencies:
@@ -14250,6 +14437,15 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
+  '@orpc/openapi-client@1.15.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@orpc/client': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/contract': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/shared': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server': 1.15.0(@opentelemetry/api@1.9.1)
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
   '@orpc/shared@1.14.6(@opentelemetry/api@1.9.1)':
     dependencies:
       radash: 12.1.1
@@ -14258,6 +14454,13 @@ snapshots:
       '@opentelemetry/api': 1.9.1
 
   '@orpc/shared@1.14.8(@opentelemetry/api@1.9.1)':
+    dependencies:
+      radash: 12.1.1
+      type-fest: 5.5.0
+    optionalDependencies:
+      '@opentelemetry/api': 1.9.1
+
+  '@orpc/shared@1.15.0(@opentelemetry/api@1.9.1)':
     dependencies:
       radash: 12.1.1
       type-fest: 5.5.0
@@ -14278,6 +14481,13 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
+  '@orpc/standard-server-fetch@1.15.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@orpc/shared': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server': 1.15.0(@opentelemetry/api@1.9.1)
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
   '@orpc/standard-server-peer@1.14.6(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/shared': 1.14.6(@opentelemetry/api@1.9.1)
@@ -14292,6 +14502,13 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
+  '@orpc/standard-server-peer@1.15.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@orpc/shared': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server': 1.15.0(@opentelemetry/api@1.9.1)
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
   '@orpc/standard-server@1.14.6(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/shared': 1.14.6(@opentelemetry/api@1.9.1)
@@ -14301,6 +14518,12 @@ snapshots:
   '@orpc/standard-server@1.14.8(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/shared': 1.14.8(@opentelemetry/api@1.9.1)
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
+  '@orpc/standard-server@1.15.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@orpc/shared': 1.15.0(@opentelemetry/api@1.9.1)
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
@@ -14320,6 +14543,10 @@ snapshots:
     dependencies:
       '@posthog/types': 1.397.0
 
+  '@posthog/core@1.48.8':
+    dependencies:
+      '@posthog/types': 1.405.1
+
   '@posthog/core@1.7.1':
     dependencies:
       cross-spawn: 7.0.6
@@ -14327,6 +14554,8 @@ snapshots:
   '@posthog/types@1.392.1': {}
 
   '@posthog/types@1.397.0': {}
+
+  '@posthog/types@1.405.1': {}
 
   '@puppeteer/browsers@2.7.1':
     dependencies:
@@ -16629,7 +16858,7 @@ snapshots:
 
   '@sentry/core@10.63.0': {}
 
-  '@sentry/core@10.66.0':
+  '@sentry/core@10.70.0':
     dependencies:
       '@sentry/conventions': 0.16.0
 
@@ -16645,11 +16874,11 @@ snapshots:
       '@opentelemetry/instrumentation': 0.214.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace-base': 2.8.0(@opentelemetry/api@1.9.1)
 
-  '@sentry/node-core@10.66.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.220.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.1))':
+  '@sentry/node-core@10.70.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.220.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.1))':
     dependencies:
       '@sentry/conventions': 0.16.0
-      '@sentry/core': 10.66.0
-      '@sentry/opentelemetry': 10.66.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.1))
+      '@sentry/core': 10.70.0
+      '@sentry/opentelemetry': 10.70.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.1))
       import-in-the-middle: 3.0.2
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
@@ -16674,16 +16903,16 @@ snapshots:
       - '@opentelemetry/exporter-trace-otlp-http'
       - supports-color
 
-  '@sentry/node@10.66.0(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))':
+  '@sentry/node@10.70.0(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/instrumentation': 0.220.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace-base': 2.9.0(@opentelemetry/api@1.9.1)
       '@sentry/conventions': 0.16.0
-      '@sentry/core': 10.66.0
-      '@sentry/node-core': 10.66.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.220.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.1))
-      '@sentry/opentelemetry': 10.66.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.1))
-      '@sentry/server-utils': 10.66.0
+      '@sentry/core': 10.70.0
+      '@sentry/node-core': 10.70.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.220.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.1))
+      '@sentry/opentelemetry': 10.70.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.1))
+      '@sentry/server-utils': 10.70.0
       import-in-the-middle: 3.0.2
     transitivePeerDependencies:
       - '@opentelemetry/core'
@@ -16698,13 +16927,13 @@ snapshots:
       '@sentry/conventions': 0.12.0
       '@sentry/core': 10.63.0
 
-  '@sentry/opentelemetry@10.66.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.1))':
+  '@sentry/opentelemetry@10.70.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.9.0(@opentelemetry/api@1.9.1))':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/core': 2.9.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace-base': 2.9.0(@opentelemetry/api@1.9.1)
       '@sentry/conventions': 0.16.0
-      '@sentry/core': 10.66.0
+      '@sentry/core': 10.70.0
 
   '@sentry/server-utils@10.63.0':
     dependencies:
@@ -16717,13 +16946,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@sentry/server-utils@10.66.0':
+  '@sentry/server-utils@10.70.0':
     dependencies:
-      '@apm-js-collab/code-transformer': 0.18.0
-      '@apm-js-collab/code-transformer-bundler-plugins': 0.6.2
+      '@apm-js-collab/code-transformer-bundler-plugins': 0.7.4
       '@apm-js-collab/tracing-hooks': 0.13.0
       '@sentry/conventions': 0.16.0
-      '@sentry/core': 10.66.0
+      '@sentry/core': 10.70.0
+      meriyah: 6.1.4
     transitivePeerDependencies:
       - supports-color
 
@@ -16841,18 +17070,6 @@ snapshots:
     dependencies:
       escape-string-regexp: 5.0.0
 
-  '@skybridge/devtools@1.2.3(arktype@2.1.27)(typescript@6.0.3)':
-    dependencies:
-      '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@6.0.3)(zod@4.4.3)
-      cors: 2.8.6
-      express: 5.2.1
-      zod: 4.4.3
-    transitivePeerDependencies:
-      - arktype
-      - supports-color
-      - typescript
-      - valibot
-
   '@skybridge/devtools@1.2.7(arktype@2.1.27)(typescript@5.9.3)':
     dependencies:
       '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.4.3)
@@ -16865,13 +17082,43 @@ snapshots:
       - typescript
       - valibot
 
-  '@skybridge/devtools@1.2.7(arktype@2.1.27)(typescript@6.0.3)':
+  '@skybridge/devtools@1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)':
     dependencies:
+      '@alpic-ai/sdk': 1.157.0(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
+      '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.4.3)
+      cors: 2.8.6
+      express: 5.2.1
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+      - arktype
+      - supports-color
+      - typescript
+      - valibot
+
+  '@skybridge/devtools@1.4.1(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)':
+    dependencies:
+      '@alpic-ai/sdk': 1.157.0(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)
       '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@6.0.3)(zod@4.4.3)
       cors: 2.8.6
       express: 5.2.1
       zod: 4.4.3
     transitivePeerDependencies:
+      - '@opentelemetry/api'
+      - arktype
+      - supports-color
+      - typescript
+      - valibot
+
+  '@skybridge/devtools@1.4.1(arktype@2.1.27)(typescript@5.9.3)':
+    dependencies:
+      '@alpic-ai/sdk': 1.157.0(arktype@2.1.27)(typescript@5.9.3)
+      '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.4.3)
+      cors: 2.8.6
+      express: 5.2.1
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
       - arktype
       - supports-color
       - typescript
@@ -17699,6 +17946,8 @@ snapshots:
 
   '@vercel/detect-agent@1.2.3': {}
 
+  '@vercel/detect-agent@1.2.5': {}
+
   '@vitejs/plugin-react-swc@3.11.0(vite@6.4.3(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.23.0)(yaml@2.9.0))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-beta.27
@@ -17861,7 +18110,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.0
-      vitest: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@25.9.5)(@vitest/ui@4.1.10)(jsdom@29.1.1(@noble/hashes@1.8.0))(msw@2.12.4(@types/node@25.9.5)(typescript@6.0.3))(vite@8.1.5(@types/node@25.9.5)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
+      vitest: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/ui@4.1.10)(jsdom@29.1.1(@noble/hashes@1.8.0))(msw@2.12.4(@types/node@24.13.3)(typescript@6.0.3))(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
 
   '@vitest/utils@4.1.10':
     dependencies:
@@ -17989,24 +18238,24 @@ snapshots:
       - typescript
       - valibot
 
-  alpic@1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3):
+  alpic@1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@5.9.3):
     dependencies:
-      '@alpic-ai/api': 1.157.0(@opentelemetry/api@1.9.1)
-      '@alpic-ai/sdk': 1.157.0(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
+      '@alpic-ai/api': 1.169.0(@opentelemetry/api@1.9.1)
+      '@alpic-ai/sdk': 1.169.0(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@5.9.3)
       '@clack/prompts': 1.7.0
-      '@oclif/core': 4.11.14
-      '@orpc/client': 1.14.8(@opentelemetry/api@1.9.1)
-      '@orpc/contract': 1.14.8(@opentelemetry/api@1.9.1)
-      '@orpc/openapi-client': 1.14.8(@opentelemetry/api@1.9.1)
-      '@sentry/node': 10.66.0(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))
+      '@oclif/core': 4.14.0
+      '@orpc/client': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/contract': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/openapi-client': 1.15.0(@opentelemetry/api@1.9.1)
+      '@sentry/node': 10.70.0(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))
       '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@5.9.3)(zod@4.4.3)
-      '@vercel/detect-agent': 1.2.3
-      chalk: 5.6.2
+      '@vercel/detect-agent': 1.2.5
+      chalk: 6.0.0
       ci-info: 4.4.0
       envfile: 7.1.0
       jwt-decode: 4.0.0
       open: 11.0.0
-      posthog-node: 5.45.2(rxjs@7.8.2)
+      posthog-node: 5.49.4(rxjs@7.8.2)
       semver: 7.8.5
       undici: 6.27.0
       zod: 4.4.3
@@ -18020,24 +18269,24 @@ snapshots:
       - typescript
       - valibot
 
-  alpic@1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.3):
+  alpic@1.169.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.3):
     dependencies:
-      '@alpic-ai/api': 1.157.0(@opentelemetry/api@1.9.1)
-      '@alpic-ai/sdk': 1.157.0(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)
+      '@alpic-ai/api': 1.169.0(@opentelemetry/api@1.9.1)
+      '@alpic-ai/sdk': 1.169.0(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)
       '@clack/prompts': 1.7.0
-      '@oclif/core': 4.11.14
-      '@orpc/client': 1.14.8(@opentelemetry/api@1.9.1)
-      '@orpc/contract': 1.14.8(@opentelemetry/api@1.9.1)
-      '@orpc/openapi-client': 1.14.8(@opentelemetry/api@1.9.1)
-      '@sentry/node': 10.66.0(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))
+      '@oclif/core': 4.14.0
+      '@orpc/client': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/contract': 1.15.0(@opentelemetry/api@1.9.1)
+      '@orpc/openapi-client': 1.15.0(@opentelemetry/api@1.9.1)
+      '@sentry/node': 10.70.0(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))
       '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@6.0.3)(zod@4.4.3)
-      '@vercel/detect-agent': 1.2.3
-      chalk: 5.6.2
+      '@vercel/detect-agent': 1.2.5
+      chalk: 6.0.0
       ci-info: 4.4.0
       envfile: 7.1.0
       jwt-decode: 4.0.0
       open: 11.0.0
-      posthog-node: 5.45.2(rxjs@7.8.2)
+      posthog-node: 5.49.4(rxjs@7.8.2)
       semver: 7.8.5
       undici: 6.27.0
       zod: 4.4.3
@@ -18424,6 +18673,8 @@ snapshots:
   chalk@5.3.0: {}
 
   chalk@5.6.2: {}
+
+  chalk@6.0.0: {}
 
   char-regex@1.0.2: {}
 
@@ -18916,6 +19167,8 @@ snapshots:
   ejs@3.1.10:
     dependencies:
       jake: 10.9.4
+
+  ejs@6.0.1: {}
 
   electron-to-chromium@1.5.376: {}
 
@@ -21970,6 +22223,12 @@ snapshots:
     optionalDependencies:
       rxjs: 7.8.2
 
+  posthog-node@5.49.4(rxjs@7.8.2):
+    dependencies:
+      '@posthog/core': 1.48.8
+    optionalDependencies:
+      rxjs: 7.8.2
+
   powershell-utils@0.1.0: {}
 
   prebuild-install@7.1.3:
@@ -23661,6 +23920,14 @@ snapshots:
       minizlib: 3.1.0
       yallist: 5.0.0
 
+  tar@7.5.22:
+    dependencies:
+      '@isaacs/fs-minipass': 4.0.1
+      chownr: 3.0.0
+      minipass: 7.1.2
+      minizlib: 3.1.0
+      yallist: 5.0.0
+
   terminal-size@4.0.1: {}
 
   terser@5.44.1:
@@ -24512,6 +24779,11 @@ snapshots:
       is-wsl: 3.1.0
 
   wsl-utils@0.3.0:
+    dependencies:
+      is-wsl: 3.1.0
+      powershell-utils: 0.1.0
+
+  wsl-utils@0.4.0:
     dependencies:
       is-wsl: 3.1.0
       powershell-utils: 0.1.0
