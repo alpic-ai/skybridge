@@ -12,7 +12,7 @@ describe("McpAppBridge.getInstance", () => {
   });
 
   it("instantiates regardless of injected hostType", () => {
-    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     expect(() => McpAppBridge.getInstance()).not.toThrow();
   });
 });

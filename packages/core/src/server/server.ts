@@ -102,11 +102,11 @@ export type ToolDef<
 };
 
 /**
- * @deprecated Views now always emit a single ext-apps resource; host targeting
- * no longer applies. Retained for backwards compatibility; will be removed in a
- * future major.
+ * The runtime a served view page declares on `window.skybridge`. Every view
+ * emits a single ext-apps resource, so this is always `"mcp-app"`; the Apps
+ * SDK runtime is detected at load time via `window.openai` instead.
  */
-export type ViewHostType = "apps-sdk" | "mcp-app";
+export type ViewHostType = "mcp-app";
 
 /**
  * Content Security Policy origins attached to a view's resource. Each list is

@@ -14,7 +14,7 @@ describe("useUser", () => {
       HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
       vi.stubGlobal("openai", { locale: "en-US" });
-      vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+      vi.stubGlobal("skybridge", { hostType: "mcp-app" });
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 

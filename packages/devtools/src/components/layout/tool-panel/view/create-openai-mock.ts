@@ -5,7 +5,6 @@ import type {
   AppsSdkWidgetState,
   CallToolArgs,
   CallToolResponse,
-  DisplayMode,
   RequestDisplayMode,
   RequestModalOptions,
   UnknownObject,
@@ -72,7 +71,6 @@ function createOpenaiMethods(
     },
     requestModal: async (args: RequestModalOptions) => {
       log("requestModal", args);
-      openai.displayMode = "modal" as DisplayMode; // TODO: To remove once https://github.com/alpic-ai/skybridge/pull/92 is merged
       openai.view = { mode: "modal", params: args.params };
       setValue("displayMode", "modal");
     },

@@ -13,7 +13,7 @@ describe("useViewport", () => {
     beforeEach(() => {
       HostAdaptor.resetInstance();
       McpAppBridge.resetInstance();
-      vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+      vi.stubGlobal("skybridge", { hostType: "mcp-app" });
       vi.stubGlobal("openai", { view: { mode: "inline" } });
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });

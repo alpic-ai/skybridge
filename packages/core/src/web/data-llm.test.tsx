@@ -50,7 +50,7 @@ describe("DataLLM", () => {
         });
       }
       vi.stubGlobal("openai", OpenaiMock);
-      vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+      vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     });
 
     afterEach(() => {
