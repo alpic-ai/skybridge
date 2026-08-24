@@ -81,8 +81,8 @@ describe("skills server option", () => {
     const client = new Client({ name: "c", version: "0.0.1" });
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    // The production HTTP path builds a fresh per-request server and copies
-    // handler maps by reference; exercise it directly to lock that skills
+    // The production HTTP path builds a fresh per-request server by replaying
+    // the registration ledger; exercise it directly to lock that skills
     // (capability + resource reads) survive that hop.
     const instance = server.createStatelessServerInstance();
     await instance.connect(serverTransport);

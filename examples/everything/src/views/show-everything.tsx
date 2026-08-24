@@ -19,7 +19,6 @@ import { UseCallToolTab } from "./tabs/use-call-tool-tab.js";
 import { UseDisplayModeTab } from "./tabs/use-display-mode-tab.js";
 import { UseDownloadTab } from "./tabs/use-download-tab.js";
 import { UseFilesTab } from "./tabs/use-files-tab.js";
-
 import { UseOpenExternalTab } from "./tabs/use-open-external-tab.js";
 import { UseRequestModalTab } from "./tabs/use-request-modal-tab.js";
 import { UseSendFollowUpMessageTab } from "./tabs/use-send-follow-up-message-tab.js";
@@ -37,7 +36,6 @@ const TABS = {
   useDisplayMode: { docPath: "use-display-mode", Component: UseDisplayModeTab },
   useDownload: { docPath: "use-download", Component: UseDownloadTab },
   useFiles: { docPath: "use-files", Component: UseFilesTab },
-
   useOpenExternal: {
     docPath: "use-open-external",
     Component: UseOpenExternalTab,
