@@ -32,8 +32,8 @@ const server = new McpServer(
       audience: env.AUTH0_AUDIENCE, // Auth0 API Identifier
       serverUrl: env.SERVER_URL, // public URL (skybridge-as-AS)
       // Narrow to what the app needs: Auth0 won't grant a third-party (DCR) client
-      // its full OIDC scope set, so advertising it yields "not all authorizations
-      // granted".
+      // its full OIDC scope set, so advertising it yields "Not all requested
+      // permissions were granted".
       scopes: ["openid", "profile", "email"],
     }),
   },
