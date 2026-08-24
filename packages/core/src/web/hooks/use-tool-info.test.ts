@@ -19,7 +19,7 @@ describe("useToolInfo", () => {
         toolOutput: null,
         toolResponseMetadata: null,
       });
-      vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+      vi.stubGlobal("skybridge", { hostType: "mcp-app" });
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 

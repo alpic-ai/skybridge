@@ -140,20 +140,11 @@ export class McpClient {
     return this.client.getServerVersion();
   }
 
-  async finishAuth(authorizationCode: string): Promise<void> {
-    if (!this.transport) {
-      throw new Error("Transport not available. Call connect() first.");
-    }
-    await this.transport.finishAuth(authorizationCode);
-  }
-
   async close(): Promise<void> {
     if (this.client) {
       await this.client.close();
       this.client = null;
     }
-    if (this.transport) {
-      this.transport = null;
-    }
+    this.transport = null;
   }
 }

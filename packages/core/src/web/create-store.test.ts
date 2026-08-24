@@ -38,7 +38,7 @@ describe("createStore", () => {
         setWidgetState: vi.fn().mockResolvedValue(undefined),
       };
       vi.stubGlobal("openai", OpenaiMock);
-      vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+      vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     });
 
     it("should create a store without default state", () => {
