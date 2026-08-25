@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { AppsSdkContext } from "skybridge/web";
 import { useIframeAutoHeight } from "@/hooks/use-iframe-auto-height.js";
 import { useIframeMounted } from "@/hooks/use-iframe-mounted.js";
 import {
@@ -51,13 +52,16 @@ export const View = () => {
     setContentHeight(null);
   }, [isMobile]);
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
+  const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
   const isFullscreen = displayMode === "fullscreen";
   const isPip = displayMode === "pip";
+  const isModal = displayMode === "modal";
   // Mobile preview in fullscreen keeps the inline-mobile layout (centered 345px
   // widget with body-driven height) on top of the fullscreen overlay.
   const isFullscreenDesktop = isFullscreen && !isMobile;
+  const fillsPane = isFullscreenDesktop || isModal;
   const width =
-    isFullscreenDesktop || inPreview
+    fillsPane || inPreview
       ? "100%"
       : `${isMobile ? MOBILE_WIDTH_PX : DESKTOP_WIDTH_PX}px`;
   const theme = useInspectorPreferencesStore((s) => s.theme);
@@ -153,7 +157,7 @@ export const View = () => {
   useIframeAutoHeight({
     iframeRef,
     containerRef,
-    enabled: Boolean(html) && !isFullscreenDesktop,
+    enabled: Boolean(html) && !fillsPane,
     onHeightChange: setContentHeight,
     documentKey: html,
     clampToContainer: !inPreview,
@@ -184,6 +188,36 @@ export const View = () => {
     value: displayMode,
     updateOpenaiObject,
   });
+
+  useEffect(() => {
+    const iframeDocument = iframeRef.current?.contentDocument;
+    if (!isModal || !mounted || !iframeDocument) {
+      return;
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setPreference("displayMode", "inline");
+      }
+    };
+    iframeDocument.addEventListener("keydown", closeOnEscape);
+    return () => iframeDocument.removeEventListener("keydown", closeOnEscape);
+  }, [isModal, mounted, setPreference]);
+
+  useEffect(() => {
+    if (isModal) {
+      return;
+    }
+    const openai = (
+      iframeRef.current?.contentWindow as {
+        openai?: AppsSdkContext;
+      } | null
+    )?.openai;
+    if (openai?.view?.mode !== "modal") {
+      return;
+    }
+    openai.view = { mode: displayMode };
+    updateOpenaiObject(tool.name, "view", openai.view);
+  }, [isModal, displayMode, tool.name, updateOpenaiObject]);
 
   useSyncOpenai({
     iframeRef,
@@ -236,12 +270,12 @@ export const View = () => {
       ref={containerRef}
       className={cn(
         "relative transition-[width] duration-150 ease-out",
-        isFullscreenDesktop ? "h-full w-full" : "mx-auto",
+        fillsPane ? "h-full w-full" : "mx-auto",
         isFullscreenDesktop && !inPreview && "bg-background",
       )}
       style={{
-        width: isFullscreenDesktop ? undefined : width,
-        height: isFullscreenDesktop
+        width: fillsPane ? undefined : width,
+        height: fillsPane
           ? "100%"
           : contentHeight != null
             ? `${isPip && !inPreview ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`
@@ -254,7 +288,7 @@ export const View = () => {
         src="about:blank"
         style={{
           width: "100%",
-          height: isFullscreenDesktop
+          height: fillsPane
             ? "100%"
             : contentHeight != null
               ? `${isPip && !inPreview ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`
