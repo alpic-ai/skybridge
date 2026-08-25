@@ -9,7 +9,7 @@ import { defineConfig, type Plugin } from "vite";
  * Vite env vars, and emits them into the build output.
  */
 function staticHtmlPlugin(): Plugin {
-  const assetsDir = path.resolve(__dirname, "./assets");
+  const assetsDir = path.resolve(import.meta.dirname, "./assets");
   let resolvedEnv: Record<string, string>;
 
   return {
@@ -66,7 +66,7 @@ export default defineConfig({
   plugins: [skybridge(), react(), staticHtmlPlugin()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
 });
