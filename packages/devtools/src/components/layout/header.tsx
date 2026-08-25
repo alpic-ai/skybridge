@@ -1,6 +1,7 @@
 import { Button } from "@alpic-ai/ui/components/button";
 import { Separator } from "@alpic-ai/ui/components/separator";
 import { LogIn, LogOut } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { logout, signIn, useServerInfo } from "@/lib/mcp/index.js";
 import { StatusBadge } from "./status-badge.js";
@@ -26,19 +27,36 @@ function Chip({ children }: { children: React.ReactNode }) {
   );
 }
 
+function useSkybridgeVersion(): string | null {
+  const [version, setVersion] = useState<string | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/__skybridge/devtools/project", { signal: controller.signal })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((project: { skybridgeVersion?: string } | null) => {
+        setVersion(project?.skybridgeVersion ?? null);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
+  return version;
+}
+
 function BrandChip() {
   const serverInfo = useServerInfo();
   const name = serverInfo?.name ?? "skybridge";
-  const version = serverInfo?.version;
+  const skybridgeVersion = useSkybridgeVersion();
   return (
     <Chip>
       <img src="/skybridge.svg" alt="" aria-hidden className="size-3.5" />
       <span>{name}</span>
-      <Separator orientation="vertical" className="h-4 self-center!" />
-      {version && (
-        <span className="font-mono text-xs text-quaternary-foreground">
-          {version}
-        </span>
+      {skybridgeVersion && (
+        <>
+          <Separator orientation="vertical" className="h-4 self-center!" />
+          <span className="font-mono text-xs text-quaternary-foreground">
+            skybridge {skybridgeVersion}
+          </span>
+        </>
       )}
     </Chip>
   );
