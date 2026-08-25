@@ -255,7 +255,7 @@ export const ToolPanel = () => {
                 />
                 <div
                   className={cn(
-                    "flex min-h-0 flex-1 items-center justify-center",
+                    "relative flex min-h-0 flex-1 items-center justify-center",
                     isFullscreenDesktop || isModal
                       ? "overflow-hidden pt-3"
                       : isFullscreen
@@ -266,17 +266,17 @@ export const ToolPanel = () => {
                   <Suspense fallback={<Placeholder text="Loading view…" />}>
                     <View />
                   </Suspense>
+                  {isOverlay && (
+                    <button
+                      type="button"
+                      aria-label={isModal ? "Close modal" : "Exit fullscreen"}
+                      onClick={() => setPreference("displayMode", "inline")}
+                      className="absolute right-4 top-4 z-10 inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-light-gray-foreground shadow-md transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  )}
                 </div>
-                {isOverlay && (
-                  <button
-                    type="button"
-                    aria-label={isModal ? "Close modal" : "Exit fullscreen"}
-                    onClick={() => setPreference("displayMode", "inline")}
-                    className="absolute right-4 top-4 inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-light-gray-foreground shadow-md transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  >
-                    <X className="size-4" />
-                  </button>
-                )}
               </div>
             </Panel>
             {logsOpen && !isFullscreen && (
