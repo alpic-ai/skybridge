@@ -45,11 +45,17 @@ function useSkybridgeVersion(): string | null {
 function BrandChip() {
   const serverInfo = useServerInfo();
   const name = serverInfo?.name ?? "skybridge";
+  const appVersion = serverInfo?.version;
   const skybridgeVersion = useSkybridgeVersion();
   return (
     <Chip>
       <img src="/skybridge.svg" alt="" aria-hidden className="size-3.5" />
       <span>{name}</span>
+      {appVersion && (
+        <span className="font-mono text-xs text-quaternary-foreground">
+          {appVersion}
+        </span>
+      )}
       {skybridgeVersion && (
         <>
           <Separator orientation="vertical" className="h-4 self-center!" />
