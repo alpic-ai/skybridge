@@ -13,7 +13,7 @@ export default defineConfig({
   plugins: [skybridge(), react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
 });
