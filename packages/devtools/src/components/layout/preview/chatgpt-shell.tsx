@@ -67,7 +67,7 @@ function Bar({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "rounded-md bg-[color-mix(in_oklab,var(--text-primary)_10%,transparent)] motion-safe:animate-pulse",
+        "rounded-md bg-[color-mix(in_oklab,var(--text-primary)_10%,transparent)]",
         className,
       )}
     />
@@ -152,7 +152,7 @@ function UserPill({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "h-11 w-2/5 self-end rounded-3xl bg-(--message-surface) motion-safe:animate-pulse",
+        "h-11 w-2/5 self-end rounded-3xl bg-(--message-surface)",
         className,
       )}
     />
@@ -172,7 +172,7 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     const scroller = scrollerRef.current;
     const thread = threadRef.current;
-    if (!scroller || !thread) {
+    if (!scroller || !thread || isFullscreen) {
       return;
     }
     const pinToBottom = () => {
@@ -192,7 +192,7 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
         scroller.removeEventListener(event, unpin);
       }
     };
-  }, []);
+  }, [isFullscreen]);
 
   return (
     <div
