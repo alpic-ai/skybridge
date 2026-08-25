@@ -69,7 +69,7 @@ function Bar({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "rounded-md bg-[color-mix(in_oklab,var(--shell-text)_10%,transparent)] motion-safe:animate-pulse",
+        "rounded-md bg-[color-mix(in_oklab,var(--shell-text)_10%,transparent)]",
         className,
       )}
     />
@@ -167,7 +167,7 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     const scroller = scrollerRef.current;
     const thread = threadRef.current;
-    if (!scroller || !thread) {
+    if (!scroller || !thread || isFullscreen) {
       return;
     }
     const pinToBottom = () => {
@@ -187,7 +187,7 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
         scroller.removeEventListener(event, unpin);
       }
     };
-  }, []);
+  }, [isFullscreen]);
 
   return (
     <div
@@ -318,7 +318,7 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
                   index > 0 && "mt-10",
                 )}
               >
-                <div className="h-16 w-[55%] self-end rounded-xl bg-[color-mix(in_oklab,var(--shell-text)_5%,transparent)] motion-safe:animate-pulse" />
+                <div className="h-16 w-[55%] self-end rounded-xl bg-[color-mix(in_oklab,var(--shell-text)_5%,transparent)]" />
                 <div className="mt-6 flex flex-col gap-3">
                   {widths.map((width) => (
                     <Bar key={width} className={cn("h-4", width)} />
@@ -328,7 +328,7 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
             ))}
             <div
               className={cn(
-                "mt-10 h-12 w-[45%] self-end rounded-xl bg-[color-mix(in_oklab,var(--shell-text)_5%,transparent)] motion-safe:animate-pulse",
+                "mt-10 h-12 w-[45%] self-end rounded-xl bg-[color-mix(in_oklab,var(--shell-text)_5%,transparent)]",
                 isFullscreen && "hidden",
               )}
             />
