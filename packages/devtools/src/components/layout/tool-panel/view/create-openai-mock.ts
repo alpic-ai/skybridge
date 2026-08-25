@@ -73,6 +73,9 @@ function createOpenaiMethods(
       log("requestModal", args);
       openai.view = { mode: "modal", params: args.params };
       setValue("displayMode", "modal");
+      useInspectorPreferencesStore
+        .getState()
+        .setPreference("displayMode", "modal");
     },
     uploadFile: async (file: File) => {
       log("uploadFile", { name: file.name, size: file.size });

@@ -166,6 +166,7 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile();
   const isPip = displayMode === "pip";
   const isFullscreen = displayMode === "fullscreen";
+  const isModal = displayMode === "modal";
   const scrollerRef = useRef<HTMLDivElement>(null);
   const threadRef = useRef<HTMLDivElement>(null);
 
@@ -331,11 +332,13 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
                 "relative mt-3 w-full",
                 !isPip &&
                   !isFullscreen &&
+                  !isModal &&
                   !isMobile &&
                   "-mx-4 w-[calc(100%+2rem)]",
                 isPip &&
                   "absolute top-4 left-1/2 z-30 mt-0 w-[min(768px,calc(100%-32px))] translate-x-[calc(-50%-8px)] rounded-3xl border border-(--border-default) bg-(--main-surface-primary) shadow-[0_8px_32px_rgba(0,0,0,0.12)]",
                 isFullscreen && "mt-0 min-h-0 flex-1",
+                isModal && "absolute inset-0 z-30 mt-0",
               )}
             >
               {isPip ? (
@@ -348,14 +351,25 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
                   <CrossIcon className="size-4.5" />
                 </button>
               ) : null}
+              {isModal ? (
+                <button
+                  type="button"
+                  aria-label="Close modal"
+                  onClick={() => setPreference("displayMode", "inline")}
+                  className="absolute top-4 right-4 z-40 flex size-8 cursor-pointer items-center justify-center rounded-full bg-[#414141] text-white"
+                >
+                  <CrossIcon className="size-4.5" />
+                </button>
+              ) : null}
               <div
                 className={cn(
                   "w-full",
                   isPip && "max-h-[80cqh] overflow-y-auto rounded-3xl",
-                  isFullscreen && "h-full min-h-0",
+                  (isFullscreen || isModal) && "h-full min-h-0",
                   isMobile &&
                     !isPip &&
                     !isFullscreen &&
+                    !isModal &&
                     "overflow-hidden rounded-xl border border-(--border-default)",
                 )}
               >

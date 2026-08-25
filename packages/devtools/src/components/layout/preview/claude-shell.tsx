@@ -160,6 +160,7 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
   const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
   const isMobile = useIsMobile();
   const isFullscreen = displayMode === "fullscreen";
+  const isModal = displayMode === "modal";
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const threadRef = useRef<HTMLDivElement>(null);
@@ -336,11 +337,25 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
             <div
               className={cn(
                 "relative mt-3 w-full",
-                !isFullscreen && !isMobile && "-mx-4 w-[calc(100%+2rem)]",
+                !isFullscreen &&
+                  !isModal &&
+                  !isMobile &&
+                  "-mx-4 w-[calc(100%+2rem)]",
                 isFullscreen &&
                   "mt-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-(--shell-border) bg-(--shell-panel)",
+                isModal && "absolute inset-0 z-30 mt-0",
               )}
             >
+              {isModal ? (
+                <button
+                  type="button"
+                  aria-label="Close modal"
+                  onClick={() => setPreference("displayMode", "inline")}
+                  className="absolute top-4 right-4 z-40 flex size-8 cursor-pointer items-center justify-center rounded-lg bg-(--shell-btn-bg) text-(--shell-text) transition-colors hover:bg-[color-mix(in_oklab,var(--shell-text)_10%,transparent)]"
+                >
+                  <CrossIcon className="size-4.5" />
+                </button>
+              ) : null}
               {isFullscreen ? (
                 <div className="flex h-14 shrink-0 items-center gap-2.5 border-(--shell-border) border-b px-4">
                   <div className="flex size-7 items-center justify-center rounded-lg border border-(--shell-border) bg-(--shell-segment-active)">
@@ -357,7 +372,13 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
                   </button>
                 </div>
               ) : null}
-              <div className={cn("w-full", isFullscreen && "min-h-0 flex-1")}>
+              <div
+                className={cn(
+                  "w-full",
+                  isFullscreen && "min-h-0 flex-1",
+                  isModal && "h-full min-h-0",
+                )}
+              >
                 {children ?? <Bar className="h-96 w-full rounded-2xl" />}
               </div>
               {isFullscreen && !isMobile ? (
