@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -25,13 +25,24 @@ const detectPackageManager = (): PackageManager => {
 const detectSkybridgeVersion = (): string | undefined => {
   try {
     const require = createRequire(path.join(process.cwd(), "package.json"));
-    const entry = require.resolve("skybridge/server");
-    const packageRoot = entry.slice(0, entry.lastIndexOf(`${path.sep}dist`));
-    const manifest = readFileSync(
-      path.join(packageRoot, "package.json"),
-      "utf8",
-    );
-    return (JSON.parse(manifest) as { version?: string }).version;
+    let directory = path.dirname(require.resolve("skybridge/server"));
+    for (;;) {
+      const manifestPath = path.join(directory, "package.json");
+      if (existsSync(manifestPath)) {
+        const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as {
+          name?: string;
+          version?: string;
+        };
+        if (manifest.name === "skybridge") {
+          return manifest.version;
+        }
+      }
+      const parent = path.dirname(directory);
+      if (parent === directory) {
+        return undefined;
+      }
+      directory = parent;
+    }
   } catch {
     return undefined;
   }
