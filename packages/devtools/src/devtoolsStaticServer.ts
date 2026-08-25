@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import cors from "cors";
@@ -20,6 +22,21 @@ const detectPackageManager = (): PackageManager => {
   return "npm";
 };
 
+const detectSkybridgeVersion = (): string | undefined => {
+  try {
+    const require = createRequire(path.join(process.cwd(), "package.json"));
+    const entry = require.resolve("skybridge/server");
+    const packageRoot = entry.slice(0, entry.lastIndexOf(`${path.sep}dist`));
+    const manifest = readFileSync(
+      path.join(packageRoot, "package.json"),
+      "utf8",
+    );
+    return (JSON.parse(manifest) as { version?: string }).version;
+  } catch {
+    return undefined;
+  }
+};
+
 /**
  * Serve the built devtools React app
  * This router serves static files from the devtools's dist directory.
@@ -36,12 +53,13 @@ const detectPackageManager = (): PackageManager => {
  */
 export const devtoolsStaticServer = async (): Promise<Router> => {
   const router = express.Router();
+  const skybridgeVersion = detectSkybridgeVersion();
 
   const distDir = path.dirname(fileURLToPath(import.meta.url));
 
   router.use(cors());
   router.get("/__skybridge/devtools/project", (_req, res) => {
-    res.json({ packageManager: detectPackageManager() });
+    res.json({ packageManager: detectPackageManager(), skybridgeVersion });
   });
   router.use(createDeployRouter());
   router.use(express.static(distDir));
