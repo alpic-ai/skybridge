@@ -87,6 +87,10 @@ jobs:
         working-directory: ./packages/devtools
         run: pnpm version ${{ steps.version.outputs.version }} --no-git-tag-version
 
+      - name: Setting version for test
+        working-directory: ./packages/test
+        run: pnpm version ${{ steps.version.outputs.version }} --no-git-tag-version
+
       - name: Publish core to npm
         working-directory: ./packages/core
         run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
@@ -123,6 +127,10 @@ jobs:
 
       - name: Publish devtools to npm
         working-directory: ./packages/devtools
+        run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
+
+      - name: Publish test to npm
+        working-directory: ./packages/test
         run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
 
       - name: Restore templates workspace deps

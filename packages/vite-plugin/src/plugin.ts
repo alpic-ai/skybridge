@@ -1,4 +1,5 @@
 import { isAbsolute, relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   assertUniqueViewNames,
   type DiscoveredView,
@@ -7,11 +8,29 @@ import {
   scanViewsSync,
   writeViewsDts,
 } from "skybridge/views";
-import type { Plugin, UserConfig, ViteDevServer } from "vite";
+import type { Plugin, ViteDevServer } from "vite";
+import type { ViteUserConfig } from "vitest/config";
 import { transform as dataLlmTransform } from "./transform-data-llm.js";
 
 const VIRTUAL_PREFIX = "/_skybridge/view/";
 const VIRTUAL_MODULE_PREFIX = "\0skybridge:view:";
+
+/**
+ * Options for the eval runner, wired in through the `evals` plugin option and
+ * consumed by `@skybridge/test`. Defined here so the runtime package can
+ * import the shape while this package keeps no dependency on it.
+ */
+export interface EvalsOptions {
+  temperature?: number;
+  systemPrompt?: string;
+  maxSteps?: number;
+  server?: string;
+  project?: {
+    cwd: string;
+    command: string[];
+    env?: Record<string, string>;
+  };
+}
 
 /** Options for the {@link skybridge} Vite plugin. */
 export interface SkybridgePluginOptions {
@@ -23,6 +42,12 @@ export interface SkybridgePluginOptions {
    * typically optional native modules pulled in by a transitive dependency.
    */
   serverExternal?: string[];
+  /**
+   * Runs the app's eval scenarios against a real model: how to boot the server
+   * they talk to, plus defaults for the conversation. Point vitest at this
+   * config to run them. Requires `@skybridge/test` as a dev dependency.
+   */
+  evals?: EvalsOptions;
 }
 
 function buildVirtualEntry(viewFilePath: string): string {
@@ -72,6 +97,10 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
   return viewsPlugin(options);
 }
 
+function here(file: string): string {
+  return fileURLToPath(new URL(file, import.meta.url));
+}
+
 function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
   const rawViewsDir = options?.viewsDir ?? "src/views";
   let resolvedViewsDir: string;
@@ -102,7 +131,7 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
         input[view.name] = `${VIRTUAL_PREFIX}${view.name}`;
       }
 
-      const base: UserConfig = {
+      const base: ViteUserConfig = {
         base: "/assets",
         // Fixes "Invalid hook call" on createStore by forcing a single
         // copy of React. Under pnpm's isolated node_modules, zustand
@@ -154,7 +183,14 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
         },
       };
 
-      return base;
+      return {
+        ...base,
+        test: {
+          setupFiles: [here("./evals/matchers.js")],
+          globalSetup: [here("./evals/global-setup.js")],
+          provide: { skybridgeEvals: options?.evals },
+        },
+      };
     },
 
     resolveId(id) {
