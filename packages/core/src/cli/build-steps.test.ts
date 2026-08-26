@@ -22,7 +22,7 @@ describe("getCommandSteps", () => {
     writeFileSync(
       path.join(root, "vite.config.ts"),
       `import { defineConfig } from "vite";
-import { skybridge } from "skybridge/vite";
+import { skybridge } from "@skybridge/vite-plugin";
 export default defineConfig({ plugins: [skybridge()] });`,
     );
     writeFileSync(
@@ -48,7 +48,7 @@ export default defineConfig({ plugins: [skybridge()] });`,
     writeFileSync(
       path.join(root, "vite.config.ts"),
       `import { defineConfig } from "vite";
-import { skybridge } from "skybridge/vite";
+import { skybridge } from "@skybridge/vite-plugin";
 export default defineConfig({ plugins: [skybridge()] });`,
     );
     writeFileSync(
@@ -68,7 +68,7 @@ export default defineConfig({ plugins: [skybridge()] });`,
     writeFileSync(
       path.join(root, "vite.config.ts"),
       `import { defineConfig } from "vite";
-import { skybridge } from "skybridge/vite";
+import { skybridge } from "@skybridge/vite-plugin";
 export default defineConfig({ plugins: [skybridge()] });`,
     );
 

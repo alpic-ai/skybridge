@@ -48,6 +48,7 @@
     "@rjsf/shadcn": "^6.7.0",
     "@rjsf/utils": "^6.7.0",
     "@rjsf/validator-ajv8": "^6.7.0",
+    "@skybridge/vite-plugin": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query": "^5.101.2",
     "@total-typescript/tsconfig": "^1.0.4",

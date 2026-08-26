@@ -1,14 +1,14 @@
 import { isAbsolute, relative, resolve } from "node:path";
-import type { Plugin, ViteDevServer } from "vite";
 import {
   assertUniqueViewNames,
   type DiscoveredView,
   discoverViewsSync,
+  hasDefaultExport,
   scanViewsSync,
   writeViewsDts,
-} from "./scan-views.js";
+} from "skybridge/views";
+import type { Plugin, UserConfig, ViteDevServer } from "vite";
 import { transform as dataLlmTransform } from "./transform-data-llm.js";
-import { hasDefaultExport } from "./validate-view.js";
 
 const VIRTUAL_PREFIX = "/_skybridge/view/";
 const VIRTUAL_MODULE_PREFIX = "\0skybridge:view:";
@@ -61,7 +61,7 @@ function getViewEntryPattern(viewsDir: string): RegExp {
  * // vite.config.ts
  * import { defineConfig } from "vite";
  * import react from "@vitejs/plugin-react";
- * import { skybridge } from "skybridge/vite";
+ * import { skybridge } from "@skybridge/vite-plugin";
  *
  * export default defineConfig({
  *   plugins: [react(), skybridge({ viewsDir: "src/views" })],
@@ -69,6 +69,10 @@ function getViewEntryPattern(viewsDir: string): RegExp {
  * ```
  */
 export function skybridge(options?: SkybridgePluginOptions): Plugin {
+  return viewsPlugin(options);
+}
+
+function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
   const rawViewsDir = options?.viewsDir ?? "src/views";
   let resolvedViewsDir: string;
   let projectRoot: string;
@@ -98,7 +102,7 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
         input[view.name] = `${VIRTUAL_PREFIX}${view.name}`;
       }
 
-      return {
+      const base: UserConfig = {
         base: "/assets",
         // Fixes "Invalid hook call" on createStore by forcing a single
         // copy of React. Under pnpm's isolated node_modules, zustand
@@ -149,6 +153,8 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
           },
         },
       };
+
+      return base;
     },
 
     resolveId(id) {
@@ -233,7 +239,7 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
     },
 
     async transform(code, id) {
-      if (viewEntryPattern?.test(id) && !hasDefaultExport(code, id)) {
+      if (viewEntryPattern?.test(id) && !hasDefaultExport(code)) {
         this.warn(
           `View file "${id.split("/").pop()}" is missing a default export.`,
         );
