@@ -65,9 +65,7 @@ Click **preview** in the toolbar and the panel becomes a mock conversation with 
 
 - **Switch client** between ChatGPT and Claude. Each shell is measured against the real app, in light and dark, and the mode resets to inline when you switch.
 - **Toggle device** to render the shell inside a 390 x 844 phone frame, with the mobile layout that client uses.
-- **Display modes** follow what the selected client supports. Inline and fullscreen work everywhere, pip only on ChatGPT desktop, where it renders as a floating card. A `pip` request becomes fullscreen on ChatGPT mobile, and Claude keeps the current mode.
-- **Modals** are host-driven: when a view calls [`useRequestModal`](/api-reference/use-request-modal), DevTools plays the host and renders it over the conversation with a close button. Closing it, or pressing Escape, returns the view to inline.
-- **Quit preview** returns to the panel with your tool state intact.
+- **Display modes** follow what the selected client supports. Inline and fullscreen work everywhere, pip only on ChatGPT desktop, where it renders as a floating card. A `pip` request becomes fullscreen on ChatGPT mobile, and Claude keeps the current mode.- **Quit preview** returns to the panel with your tool state intact.
 
 While preview is active, the `ui/initialize` handshake carries that client's own style variables, container dimensions, and available display modes, so a view that reads the host's [theme tokens](/api-reference/use-mcp-app-context) themes itself the way it will in production.
 

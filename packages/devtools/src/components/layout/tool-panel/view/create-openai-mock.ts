@@ -143,7 +143,7 @@ export function createAndInjectOpenAi(
   setValue: (key: keyof AppsSdkContext, value: unknown) => void,
   callToolFn: (name: string, args: CallToolArgs) => Promise<CallToolResponse>,
   setOpenInAppUrlFn: (href: string) => void,
-): void {
+): () => void {
   const openaiObject = cloneDeep(initialValues);
   const openai = createOpenaiObject(openaiObject, iframeWindow);
   const functions = createOpenaiMethods(
@@ -155,4 +155,13 @@ export function createAndInjectOpenAi(
   );
   assign(openai, functions);
   iframeWindow.openai = openai as unknown as typeof iframeWindow.openai;
+
+  return useInspectorPreferencesStore.subscribe(({ displayMode }) => {
+    const view = (openai as AppsSdkContext).view;
+    if (displayMode === "modal" || view?.mode !== "modal") {
+      return;
+    }
+    (openai as AppsSdkContext).view = { mode: displayMode };
+    setValue("view", { mode: displayMode });
+  });
 }
