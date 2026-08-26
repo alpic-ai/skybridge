@@ -408,9 +408,11 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
         <div
           aria-hidden
           className={cn(
-            "w-full shrink-0 cursor-not-allowed px-4",
+            "w-full cursor-not-allowed px-4",
             isMobile ? "pb-4" : "pb-6",
-            isFullscreen && "hidden",
+            isFullscreen
+              ? "pointer-events-none absolute inset-x-0 bottom-0 z-30"
+              : "shrink-0",
           )}
         >
           <div className="mx-auto w-full max-w-[768px]">

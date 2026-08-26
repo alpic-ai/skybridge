@@ -54,6 +54,41 @@ export function ChevronDownIcon(props: IconProps) {
   );
 }
 
+const BURST_SPOKES = [
+  { angle: 0, length: 7.4, width: 2.1 },
+  { angle: 36, length: 6.2, width: 1.7 },
+  { angle: 72, length: 7.4, width: 2.1 },
+  { angle: 108, length: 6.2, width: 1.7 },
+  { angle: 144, length: 7.4, width: 2.1 },
+  { angle: 180, length: 6.2, width: 1.7 },
+  { angle: 216, length: 7.4, width: 2.1 },
+  { angle: 252, length: 6.2, width: 1.7 },
+  { angle: 288, length: 7.4, width: 2.1 },
+  { angle: 324, length: 6.2, width: 1.7 },
+];
+
+export function ClaudeLogomark(props: IconProps) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" {...props}>
+      {BURST_SPOKES.map(({ angle, length, width }) => {
+        const radians = (angle * Math.PI) / 180;
+        return (
+          <line
+            key={angle}
+            x1={10}
+            y1={10}
+            x2={10 + Math.cos(radians) * length}
+            y2={10 + Math.sin(radians) * length}
+            stroke="currentColor"
+            strokeWidth={width}
+            strokeLinecap="round"
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
 export function ClaudeWaveformIcon(props: IconProps) {
   return (
     <svg viewBox="0 0 21.2 21.2" fill="none" aria-hidden="true" {...props}>
