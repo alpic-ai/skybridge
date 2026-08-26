@@ -50,7 +50,7 @@
   "author": "Frédéric Barthelet",
   "license": "ISC",
   "peerDependencies": {
-    "@skybridge/devtools": "^1.1.0 || ^2.0.0-alpha.0",
+    "@skybridge/devtools": "^2.0.0-alpha.0",
     "nodemon": ">=3.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
