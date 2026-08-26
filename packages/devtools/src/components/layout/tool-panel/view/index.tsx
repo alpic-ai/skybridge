@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import type { AppsSdkContext } from "skybridge/web";
 import { useIframeAutoHeight } from "@/hooks/use-iframe-auto-height.js";
 import { useIframeMounted } from "@/hooks/use-iframe-mounted.js";
 import {
@@ -52,7 +51,6 @@ export const View = () => {
     setContentHeight(null);
   }, [isMobile]);
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
-  const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
   const isFullscreen = displayMode === "fullscreen";
   const isPip = displayMode === "pip";
   const isModal = displayMode === "modal";
@@ -102,7 +100,7 @@ export const View = () => {
       });
     };
 
-    createAndInjectOpenAi(
+    const cleanupOpenaiMock = createAndInjectOpenAi(
       iframe.contentWindow,
       openaiObjectRef.current,
       logFn,
@@ -143,7 +141,10 @@ export const View = () => {
       openaiRef: iframeRef as React.RefObject<HTMLIFrameElement>,
     });
 
-    return cleanupMcpMock;
+    return () => {
+      cleanupOpenaiMock();
+      cleanupMcpMock();
+    };
   }, [
     html,
     viewDomain,
@@ -188,36 +189,6 @@ export const View = () => {
     value: displayMode,
     updateOpenaiObject,
   });
-
-  useEffect(() => {
-    const iframeDocument = iframeRef.current?.contentDocument;
-    if (!isModal || !mounted || !iframeDocument) {
-      return;
-    }
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setPreference("displayMode", "inline");
-      }
-    };
-    iframeDocument.addEventListener("keydown", closeOnEscape);
-    return () => iframeDocument.removeEventListener("keydown", closeOnEscape);
-  }, [isModal, mounted, setPreference]);
-
-  useEffect(() => {
-    if (isModal) {
-      return;
-    }
-    const openai = (
-      iframeRef.current?.contentWindow as {
-        openai?: AppsSdkContext;
-      } | null
-    )?.openai;
-    if (openai?.view?.mode !== "modal") {
-      return;
-    }
-    openai.view = { mode: displayMode };
-    updateOpenaiObject(tool.name, "view", openai.view);
-  }, [isModal, displayMode, tool.name, updateOpenaiObject]);
 
   useSyncOpenai({
     iframeRef,

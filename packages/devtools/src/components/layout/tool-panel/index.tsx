@@ -256,11 +256,13 @@ export const ToolPanel = () => {
                 <div
                   className={cn(
                     "relative flex min-h-0 flex-1 items-center justify-center",
-                    isFullscreenDesktop || isModal
-                      ? "overflow-hidden pt-3"
-                      : isFullscreen
-                        ? "overflow-y-auto pt-3"
-                        : "mx-3 overflow-y-auto py-3",
+                    isModal
+                      ? "overflow-hidden"
+                      : isFullscreenDesktop
+                        ? "overflow-hidden pt-3"
+                        : isFullscreen
+                          ? "overflow-y-auto pt-3"
+                          : "mx-3 overflow-y-auto py-3",
                   )}
                 >
                   <Suspense fallback={<Placeholder text="Loading view…" />}>
