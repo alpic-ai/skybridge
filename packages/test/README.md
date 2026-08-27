@@ -52,7 +52,7 @@ const chat = await start<AppType>({ model: ollama("llama3.1") });
 
 ```ts
 skybridge({
-  evals: { project: { cwd: ".", command: ["node", "dist/server.js"] } },
+  evals: { project: { cwd: ".", command: ["node", "dist/index.js"] } },
 });
 ```
 
