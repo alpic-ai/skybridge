@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { McpServer } from "skybridge/server";
+import { Skybridge } from "skybridge/server";
 import { CAROUSEL_RANGE, MIN_SEARCH_ITERATIONS } from "./config.js";
 import {
   renderCarouselDefinition,
@@ -15,13 +15,11 @@ if (existsSync(".env")) {
   process.loadEnvFile();
 }
 
-const server = new McpServer(
+export const app = new Skybridge(
   {
     // @todo: name and version your app.
     name: "skybridge-ecom",
     version: "0.0.1",
-  },
-  {
     // @todo: adapt this server-wide prompt to your catalog.
     instructions: `\
 Two phases:
@@ -34,10 +32,10 @@ once the carousel renders.
 RENDER: After curating, call render-carousel with the chosen product IDs (aim for ${CAROUSEL_RANGE}). \
 Speak once it renders, then recommend products in carousel order.`,
   },
-)
-  .registerTool(searchProductsDefinition, searchProductsHandler)
-  .registerTool(renderCarouselDefinition, renderCarouselHandler);
+  (server) =>
+    server
+      .registerTool(searchProductsDefinition, searchProductsHandler)
+      .registerTool(renderCarouselDefinition, renderCarouselHandler),
+);
 
-export default await server.run();
-
-export type AppType = typeof server;
+export type AppType = typeof app;
