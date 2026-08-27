@@ -43,9 +43,16 @@ export interface SkybridgePluginOptions {
    */
   serverExternal?: string[];
   /**
-   * Runs the app's eval scenarios against a real model: how to boot the server
-   * they talk to, plus defaults for the conversation. Point vitest at this
-   * config to run them. Requires `@skybridge/test` as a dev dependency.
+   * Registers the `expect.chat` matchers and the defaults every conversation
+   * starts from, and says where the app under eval lives. Point vitest at this
+   * config to run the scenarios. Requires `@skybridge/test` as a dev
+   * dependency.
+   *
+   * Three modes, picked by which of `project` and `server` is set:
+   * - `project` spawns the app as a child process and evals it over HTTP,
+   * - `server` attaches to an app already running at that URL,
+   * - neither (`evals: {}`) wires up the matchers and the shared defaults only,
+   *   for scenarios that pass `app` to `start` and run it in-process.
    */
   evals?: EvalsOptions;
 }

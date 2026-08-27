@@ -13,7 +13,7 @@ export default async function setup(project: TestProject) {
     return;
   }
   if (options.project === undefined) {
-    throw new Error("The evals plugin needs either `server` or `project`");
+    return;
   }
 
   const server = await startServer(options.project);
