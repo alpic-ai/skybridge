@@ -356,6 +356,7 @@ export class Skybridge<
   async run(): Promise<
     { fetch: (...args: unknown[]) => unknown } | Express | undefined
   > {
+    this.middlewareLocked = true;
     if (process.env.VERCEL === "1") {
       // createApp only reads httpServer inside its dev-only branch
       // (viewsDevServer); under VERCEL=1 + NODE_ENV=production it's a
