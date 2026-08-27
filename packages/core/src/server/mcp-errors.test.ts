@@ -2,7 +2,7 @@
 import http from "node:http";
 import type { RequestHandler } from "express";
 import { afterEach, expect, it, vi } from "vitest";
-import { McpServer } from "./server.js";
+import { Skybridge } from "./app.js";
 
 vi.mock("@skybridge/devtools", () => ({
   devtoolsStaticServer: () =>
@@ -21,15 +21,18 @@ afterEach(() => {
 
 it("reports a failure inside the MCP leg instead of swallowing it", async () => {
   const { createApp } = await import("./express.js");
-  const server = new McpServer({ name: "t", version: "0.0.0" });
-  vi.spyOn(server, "createStatelessServerInstance").mockImplementation(() => {
+  const app = new Skybridge(
+    { name: "t", version: "0.0.0" },
+    (server) => server,
+  );
+  vi.spyOn(app, "createServerInstance").mockImplementation(() => {
     throw new Error("boom");
   });
   const errors = vi.spyOn(console, "error").mockImplementation(() => {});
 
   const httpServer = http.createServer();
-  const app = await createApp({ mcpServer: server, httpServer });
-  const listening = http.createServer(app);
+  const expressApp = await createApp({ app, httpServer });
+  const listening = http.createServer(expressApp);
   await new Promise<void>((r) => listening.listen(0, r));
   openServer = listening;
   const port = (listening.address() as { port: number }).port;

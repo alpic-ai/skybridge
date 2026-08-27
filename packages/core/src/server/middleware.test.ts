@@ -1,6 +1,7 @@
 import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
+import { Skybridge } from "./app.js";
 import {
   buildMiddlewareChain,
   getHandlerMaps,
@@ -10,7 +11,6 @@ import {
   type McpMiddlewareFn,
   matchesFilter,
 } from "./middleware.js";
-import { McpServer } from "./server.js";
 
 // ---------------------------------------------------------------------------
 // matchesFilter
@@ -276,37 +276,41 @@ describe("buildMiddlewareChain", () => {
 });
 
 // ---------------------------------------------------------------------------
-// McpServer.mcpMiddleware() integration tests
+// Skybridge.mcpMiddleware() integration tests
 // ---------------------------------------------------------------------------
-describe("McpServer.mcpMiddleware()", () => {
+describe("Skybridge.mcpMiddleware()", () => {
   function createClient() {
     return new Client({ name: "test-client", version: "1.0.0" });
   }
 
   it("returns this for chaining", () => {
-    const server = new McpServer({ name: "test", version: "1.0.0" });
-    const result = server.mcpMiddleware(async (_req, _extra, next) => next());
-    expect(result).toBe(server);
+    const app = new Skybridge(
+      { name: "test", version: "1.0.0" },
+      (server) => server,
+    );
+    const result = app.mcpMiddleware(async (_req, _extra, next) => next());
+    expect(result).toBe(app);
   });
 
   it("intercepts tools/call and exposes request params", async () => {
     let capturedMethod = "";
     let capturedParams: Record<string, unknown> = {};
 
-    const server = new McpServer({ name: "test", version: "1.0.0" });
+    const app = new Skybridge({ name: "test", version: "1.0.0" }, (server) => {
+      server.registerTool(
+        {
+          name: "greet",
+          description: "greet",
+          inputSchema: { name: z.string() },
+        },
+        (args) => ({
+          content: [{ type: "text" as const, text: `hi ${args.name}` }],
+        }),
+      );
+      return server;
+    });
 
-    server.registerTool(
-      {
-        name: "greet",
-        description: "greet",
-        inputSchema: { name: z.string() },
-      },
-      (args) => ({
-        content: [{ type: "text" as const, text: `hi ${args.name}` }],
-      }),
-    );
-
-    server.mcpMiddleware("tools/call", async (request, _extra, next) => {
+    app.mcpMiddleware("tools/call", async (request, _extra, next) => {
       capturedMethod = request.method;
       capturedParams = request.params;
       return next();
@@ -315,7 +319,8 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    await server.connect(serverTransport);
+    const instance = app.createServerInstance();
+    await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
     const result = await client.callTool({
@@ -330,19 +335,20 @@ describe("McpServer.mcpMiddleware()", () => {
     expect(result.content).toEqual([{ type: "text", text: "hi World" }]);
 
     await client.close();
-    await server.close();
+    await instance.close();
   });
 
   it("array filter works", async () => {
     const matchedMethods: string[] = [];
 
-    const server = new McpServer({ name: "test", version: "1.0.0" });
+    const app = new Skybridge({ name: "test", version: "1.0.0" }, (server) => {
+      server.registerTool({ name: "t1", description: "t1" }, () => ({
+        content: [{ type: "text" as const, text: "ok" }],
+      }));
+      return server;
+    });
 
-    server.registerTool({ name: "t1", description: "t1" }, () => ({
-      content: [{ type: "text" as const, text: "ok" }],
-    }));
-
-    server.mcpMiddleware(
+    app.mcpMiddleware(
       ["tools/call", "tools/list"],
       async (request, _extra, next) => {
         matchedMethods.push(request.method);
@@ -353,7 +359,8 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    await server.connect(serverTransport);
+    const instance = app.createServerInstance();
+    await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
     await client.listTools();
@@ -362,41 +369,49 @@ describe("McpServer.mcpMiddleware()", () => {
     expect(matchedMethods).toEqual(["tools/list", "tools/call"]);
 
     await client.close();
-    await server.close();
+    await instance.close();
   });
 
   it("throws if registered after connect()", async () => {
-    const server = new McpServer({ name: "test", version: "1.0.0" });
+    const app = new Skybridge(
+      { name: "test", version: "1.0.0" },
+      (server) => server,
+    );
 
     const [_clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    await server.connect(serverTransport);
+    const instance = app.createServerInstance();
+    await instance.connect(serverTransport);
 
     expect(() =>
-      server.mcpMiddleware(async (_req, _extra, next) => next()),
+      app.mcpMiddleware(async (_req, _extra, next) => next()),
     ).toThrow("Cannot register MCP middleware after run() or connect()");
 
-    await server.close();
+    await instance.close();
   });
 
   it("throws when filter provided without handler", () => {
-    const server = new McpServer({ name: "test", version: "1.0.0" });
+    const app = new Skybridge(
+      { name: "test", version: "1.0.0" },
+      (server) => server,
+    );
     expect(() =>
       // @ts-expect-error intentionally passing filter without handler
-      server.mcpMiddleware("tools/call"),
+      app.mcpMiddleware("tools/call"),
     ).toThrow("mcpMiddleware requires a handler function");
   });
 
   it("catch-all middleware + filtered middleware stack correctly", async () => {
     const calls: string[] = [];
 
-    const server = new McpServer({ name: "test", version: "1.0.0" });
+    const app = new Skybridge({ name: "test", version: "1.0.0" }, (server) => {
+      server.registerTool({ name: "t1", description: "t1" }, () => ({
+        content: [{ type: "text" as const, text: "ok" }],
+      }));
+      return server;
+    });
 
-    server.registerTool({ name: "t1", description: "t1" }, () => ({
-      content: [{ type: "text" as const, text: "ok" }],
-    }));
-
-    server
+    app
       .mcpMiddleware(async (request, _extra, next) => {
         calls.push(`global:${request.method}`);
         return next();
@@ -409,7 +424,8 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    await server.connect(serverTransport);
+    const instance = app.createServerInstance();
+    await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
     await client.listTools();
@@ -426,19 +442,20 @@ describe("McpServer.mcpMiddleware()", () => {
     expect(calls[toolsCallIdx + 1]).toBe("tools-only");
 
     await client.close();
-    await server.close();
+    await instance.close();
   });
 
   it("notification middleware receives extra as undefined", async () => {
     let capturedExtra: unknown = "sentinel";
 
-    const server = new McpServer({ name: "test", version: "1.0.0" });
+    const app = new Skybridge({ name: "test", version: "1.0.0" }, (server) => {
+      server.registerTool({ name: "t1", description: "t1" }, () => ({
+        content: [{ type: "text" as const, text: "ok" }],
+      }));
+      return server;
+    });
 
-    server.registerTool({ name: "t1", description: "t1" }, () => ({
-      content: [{ type: "text" as const, text: "ok" }],
-    }));
-
-    server.mcpMiddleware("notification", async (_request, extra, next) => {
+    app.mcpMiddleware("notification", async (_request, extra, next) => {
       capturedExtra = extra;
       return next();
     });
@@ -446,7 +463,8 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    await server.connect(serverTransport);
+    const instance = app.createServerInstance();
+    await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
     // The client sends notifications/initialized automatically on connect.
@@ -454,19 +472,20 @@ describe("McpServer.mcpMiddleware()", () => {
     expect(capturedExtra).toBeUndefined();
 
     await client.close();
-    await server.close();
+    await instance.close();
   });
 
   it("wildcard filter intercepts matching methods only", async () => {
     const matchedMethods: string[] = [];
 
-    const server = new McpServer({ name: "test", version: "1.0.0" });
+    const app = new Skybridge({ name: "test", version: "1.0.0" }, (server) => {
+      server.registerTool({ name: "t1", description: "t1" }, () => ({
+        content: [{ type: "text" as const, text: "ok" }],
+      }));
+      return server;
+    });
 
-    server.registerTool({ name: "t1", description: "t1" }, () => ({
-      content: [{ type: "text" as const, text: "ok" }],
-    }));
-
-    server.mcpMiddleware("tools/*", async (request, _extra, next) => {
+    app.mcpMiddleware("tools/*", async (request, _extra, next) => {
       matchedMethods.push(request.method);
       return next();
     });
@@ -474,7 +493,8 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    await server.connect(serverTransport);
+    const instance = app.createServerInstance();
+    await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
     await client.listTools();
@@ -487,24 +507,25 @@ describe("McpServer.mcpMiddleware()", () => {
     expect(matchedMethods).not.toContain("notifications/initialized");
 
     await client.close();
-    await server.close();
+    await instance.close();
   });
 
-  it("middleware can modify tool result via McpServer integration", async () => {
-    const server = new McpServer({ name: "test", version: "1.0.0" });
+  it("middleware can modify tool result via Skybridge integration", async () => {
+    const app = new Skybridge({ name: "test", version: "1.0.0" }, (server) => {
+      server.registerTool(
+        {
+          name: "greet",
+          description: "greet",
+          inputSchema: { name: z.string() },
+        },
+        (args) => ({
+          content: [{ type: "text" as const, text: `hi ${args.name}` }],
+        }),
+      );
+      return server;
+    });
 
-    server.registerTool(
-      {
-        name: "greet",
-        description: "greet",
-        inputSchema: { name: z.string() },
-      },
-      (args) => ({
-        content: [{ type: "text" as const, text: `hi ${args.name}` }],
-      }),
-    );
-
-    server.mcpMiddleware("tools/call", async (_req, _extra, next) => {
+    app.mcpMiddleware("tools/call", async (_req, _extra, next) => {
       const result = (await next()) as {
         content: { type: string; text: string }[];
       };
@@ -520,7 +541,8 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    await server.connect(serverTransport);
+    const instance = app.createServerInstance();
+    await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
     const result = await client.callTool({
@@ -533,29 +555,31 @@ describe("McpServer.mcpMiddleware()", () => {
     ]);
 
     await client.close();
-    await server.close();
+    await instance.close();
   });
 
-  it("middleware can short-circuit via McpServer integration", async () => {
+  it("middleware can short-circuit via Skybridge integration", async () => {
     const handlerCalled = vi.fn();
 
-    const server = new McpServer({ name: "test", version: "1.0.0" });
-
-    server.registerTool({ name: "t1", description: "t1" }, () => {
-      handlerCalled();
-      return {
-        content: [{ type: "text" as const, text: "original" }],
-      };
+    const app = new Skybridge({ name: "test", version: "1.0.0" }, (server) => {
+      server.registerTool({ name: "t1", description: "t1" }, () => {
+        handlerCalled();
+        return {
+          content: [{ type: "text" as const, text: "original" }],
+        };
+      });
+      return server;
     });
 
-    server.mcpMiddleware("tools/call", async () => ({
+    app.mcpMiddleware("tools/call", async () => ({
       content: [{ type: "text" as const, text: "short-circuited" }],
     }));
 
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    await server.connect(serverTransport);
+    const instance = app.createServerInstance();
+    await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
     const result = await client.callTool({ name: "t1" });
@@ -563,7 +587,7 @@ describe("McpServer.mcpMiddleware()", () => {
     expect(handlerCalled).not.toHaveBeenCalled();
 
     await client.close();
-    await server.close();
+    await instance.close();
   });
 
   it("exposes a thrown tool error to middleware via getToolError", async () => {
@@ -571,26 +595,27 @@ describe("McpServer.mcpMiddleware()", () => {
     const schemalessError = new Error("boom without schema");
     let captured: unknown;
 
-    const server = new McpServer({ name: "test", version: "1.0.0" });
+    const app = new Skybridge({ name: "test", version: "1.0.0" }, (server) => {
+      server.registerTool(
+        {
+          name: "withSchema",
+          description: "withSchema",
+          inputSchema: { name: z.string() },
+        },
+        () => {
+          throw schemaError;
+        },
+      );
+      server.registerTool(
+        { name: "withoutSchema", description: "withoutSchema" },
+        () => {
+          throw schemalessError;
+        },
+      );
+      return server;
+    });
 
-    server.registerTool(
-      {
-        name: "withSchema",
-        description: "withSchema",
-        inputSchema: { name: z.string() },
-      },
-      () => {
-        throw schemaError;
-      },
-    );
-    server.registerTool(
-      { name: "withoutSchema", description: "withoutSchema" },
-      () => {
-        throw schemalessError;
-      },
-    );
-
-    server.mcpMiddleware("tools/call", async (_request, extra, next) => {
+    app.mcpMiddleware("tools/call", async (_request, extra, next) => {
       const result = await next();
       captured = getToolError(extra);
       return result;
@@ -599,7 +624,8 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    await server.connect(serverTransport);
+    const instance = app.createServerInstance();
+    await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
     const withSchema = await client.callTool({
@@ -614,29 +640,30 @@ describe("McpServer.mcpMiddleware()", () => {
     expect(captured).toBe(schemalessError);
 
     await client.close();
-    await server.close();
+    await instance.close();
   });
 
-  it("middleware can mutate tool call params via McpServer integration", async () => {
+  it("middleware can mutate tool call params via Skybridge integration", async () => {
     let receivedName = "";
 
-    const server = new McpServer({ name: "test", version: "1.0.0" });
+    const app = new Skybridge({ name: "test", version: "1.0.0" }, (server) => {
+      server.registerTool(
+        {
+          name: "greet",
+          description: "greet",
+          inputSchema: { name: z.string() },
+        },
+        (args) => {
+          receivedName = args.name;
+          return {
+            content: [{ type: "text" as const, text: `hi ${args.name}` }],
+          };
+        },
+      );
+      return server;
+    });
 
-    server.registerTool(
-      {
-        name: "greet",
-        description: "greet",
-        inputSchema: { name: z.string() },
-      },
-      (args) => {
-        receivedName = args.name;
-        return {
-          content: [{ type: "text" as const, text: `hi ${args.name}` }],
-        };
-      },
-    );
-
-    server.mcpMiddleware("tools/call", async (request, _extra, next) => {
+    app.mcpMiddleware("tools/call", async (request, _extra, next) => {
       request.params.arguments = { name: "Overridden" };
       return next();
     });
@@ -644,7 +671,8 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    await server.connect(serverTransport);
+    const instance = app.createServerInstance();
+    await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
     await client.callTool({
@@ -654,19 +682,20 @@ describe("McpServer.mcpMiddleware()", () => {
     expect(receivedName).toBe("Overridden");
 
     await client.close();
-    await server.close();
+    await instance.close();
   });
 
   it("category 'request' filter matches requests but not notifications", async () => {
     const matchedMethods: string[] = [];
 
-    const server = new McpServer({ name: "test", version: "1.0.0" });
+    const app = new Skybridge({ name: "test", version: "1.0.0" }, (server) => {
+      server.registerTool({ name: "t1", description: "t1" }, () => ({
+        content: [{ type: "text" as const, text: "ok" }],
+      }));
+      return server;
+    });
 
-    server.registerTool({ name: "t1", description: "t1" }, () => ({
-      content: [{ type: "text" as const, text: "ok" }],
-    }));
-
-    server.mcpMiddleware("request", async (request, _extra, next) => {
+    app.mcpMiddleware("request", async (request, _extra, next) => {
       matchedMethods.push(request.method);
       return next();
     });
@@ -674,7 +703,8 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    await server.connect(serverTransport);
+    const instance = app.createServerInstance();
+    await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
     await client.listTools();
@@ -685,7 +715,7 @@ describe("McpServer.mcpMiddleware()", () => {
     expect(matchedMethods).not.toContain("notifications/initialized");
 
     await client.close();
-    await server.close();
+    await instance.close();
   });
 });
 
