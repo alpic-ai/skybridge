@@ -1584,8 +1584,8 @@ importers:
         specifier: ^4.11.14
         version: 4.11.14
       '@skybridge/devtools':
-        specifier: ^1.1.0 || ^2.0.0-alpha.0
-        version: 1.2.7(arktype@2.1.27)(typescript@6.0.3)
+        specifier: ^2.0.0-alpha.0
+        version: 2.0.0-alpha.ff0caf0(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)
       ci-info:
         specifier: ^4.4.0
         version: 4.4.0
@@ -6105,6 +6105,9 @@ packages:
 
   '@skybridge/devtools@1.2.7':
     resolution: {integrity: sha512-Xt9pfR9bl+n/0Cqq3BgzY3xmL0PYYEQQV5zJdFkzfns20PydG8nrKe0V6yyj2fEBPpsyekxHI+bXqp05/6g3yA==}
+
+  '@skybridge/devtools@2.0.0-alpha.ff0caf0':
+    resolution: {integrity: sha512-2qaWB44au89OsptR7Ggjg4J7S5zlqqPimAimtd9b5wQVxpTkMi1xKD8prmVH6dF6VoL7f1/W1roVfZ8q/6ITEg==}
 
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
@@ -17027,6 +17030,20 @@ snapshots:
       express: 5.2.1
       zod: 4.4.3
     transitivePeerDependencies:
+      - arktype
+      - supports-color
+      - typescript
+      - valibot
+
+  '@skybridge/devtools@2.0.0-alpha.ff0caf0(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)':
+    dependencies:
+      '@alpic-ai/sdk': 1.157.0(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)
+      '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@6.0.3)(zod@4.4.3)
+      cors: 2.8.6
+      express: 5.2.1
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
       - arktype
       - supports-color
       - typescript
