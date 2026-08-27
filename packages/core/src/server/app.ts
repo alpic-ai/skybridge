@@ -419,7 +419,7 @@ export class Skybridge<
     return undefined;
   }
 
-  private buildServer(): McpServer<Record<never, ToolDef>, TAuthExtra> {
+  private buildServer(): McpServer<TTools, TAuthExtra> {
     const server = new McpServer<Record<never, ToolDef>, TAuthExtra>(
       this.serverInfo,
       this.serverOptions,
@@ -428,8 +428,7 @@ export class Skybridge<
     if (this.resolveResourceMetadataUrl) {
       server.setResourceMetadataUrlResolver(this.resolveResourceMetadataUrl);
     }
-    this.setup(server);
-    return server;
+    return this.setup(server);
   }
 
   private middlewareEntries(
