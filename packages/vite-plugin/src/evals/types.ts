@@ -16,6 +16,8 @@ export type ToolCall<App> = {
 
 /** The part of a conversation the matchers assert on. */
 export interface ChatLike<App> {
+  /** Type-only anchor so `expect.chat` infers `App` from the conversation. */
+  readonly $app?: App;
   readonly toolCalls: ToolCall<App>[];
   readonly assistantTurns: string[];
 }

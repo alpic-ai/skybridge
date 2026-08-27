@@ -36,6 +36,9 @@ export type TransportFetch = (
  * {@link Chat.toolCalls}, the sequence of calls the model made.
  */
 export class Chat<App = unknown> {
+  /** Type-only anchor so `expect.chat` infers `App` from the conversation. */
+  declare readonly $app: App;
+
   /** Every call the model made, in order, as it crossed the wire. */
   readonly toolCalls: ToolCall<App>[] = [];
 

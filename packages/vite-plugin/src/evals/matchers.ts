@@ -1,3 +1,4 @@
+import "vitest";
 import type { ToolInput, ToolNames } from "skybridge/server";
 import { expect } from "vitest";
 import type { ChatLike, ToolCall } from "./types.js";
