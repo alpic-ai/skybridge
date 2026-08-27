@@ -38,24 +38,25 @@ type TypedToolInfoReturn<TInput, TOutput, TResponseMetadata> = ToolState<
  * This is the recommended way to use skybridge hooks in your views.
  * Set this up once in a dedicated file and export the typed hooks for use across your app.
  *
- * @typeParam ServerType - The type of your McpServer instance (use `typeof server`).
- *                         Must be a server instance created with method chaining.
- *                         TypeScript will validate that tools can be inferred from this type.
+ * @typeParam AppType - The type of your Skybridge app (use `typeof app`). The
+ *                      setup callback must return the chained server so the
+ *                      tool types are carried on the app type.
  *
  * @example
  * ```typescript
  * // src/server.ts
- * const server = new McpServer({ name: "my-app", version: "1.0" }, {})
- *   .registerTool({
+ * export const app = new Skybridge({ name: "my-app", version: "1.0" }, (server) =>
+ *   server.registerTool({
  *     name: "search-trip",
  *     inputSchema: { destination: z.string() },
  *     outputSchema: { results: z.array(z.string()) },
  *     view: { component: "search-trip", description: "Search trips" },
  *   }, async ({ destination }) => {
  *     return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
- *   });
+ *   }),
+ * );
  *
- * export type AppType = typeof server;
+ * export type AppType = typeof app;
  * ```
  *
  * @example
@@ -87,8 +88,8 @@ type TypedToolInfoReturn<TInput, TOutput, TResponseMetadata> = ToolState<
  *
  * @see https://docs.skybridge.tech/api-reference/generate-helpers
  */
-export function generateHelpers<ServerType = never>() {
-  type Tools = InferTools<ServerType>;
+export function generateHelpers<AppType = never>() {
+  type Tools = InferTools<AppType>;
   type ToolNames = keyof Tools & string;
 
   return {
@@ -96,7 +97,7 @@ export function generateHelpers<ServerType = never>() {
      * Typed version of `useCallTool` that provides autocomplete for tool names
      * and type inference for inputs and outputs.
      *
-     * @param name - The name of the tool to call. Autocompletes based on your server's tool registry.
+     * @param name - The name of the tool to call. Autocompletes based on your app's tool registry.
      * @returns A hook with typed `callTool` function and `data` property.
      *
      * @example
@@ -114,12 +115,12 @@ export function generateHelpers<ServerType = never>() {
     useCallTool: <ToolName extends ToolNames>(
       name: ToolName,
     ): TypedCallToolReturn<
-      ToolInput<ServerType, ToolName>,
-      ToolOutput<ServerType, ToolName>
+      ToolInput<AppType, ToolName>,
+      ToolOutput<AppType, ToolName>
     > => {
       return useCallTool(name) as TypedCallToolReturn<
-        ToolInput<ServerType, ToolName>,
-        ToolOutput<ServerType, ToolName>
+        ToolInput<AppType, ToolName>,
+        ToolOutput<AppType, ToolName>
       >;
     },
 
@@ -127,7 +128,7 @@ export function generateHelpers<ServerType = never>() {
      * Typed version of `useToolInfo` that provides autocomplete for tool names
      * and type inference for inputs, outputs, and responseMetadata.
      *
-     * @typeParam K - The name of the tool. Autocompletes based on your server's tool registry.
+     * @typeParam K - The name of the tool. Autocompletes based on your app's tool registry.
      * @returns A discriminated union with `status: "pending" | "success"` that narrows correctly.
      *
      * @example
@@ -151,14 +152,14 @@ export function generateHelpers<ServerType = never>() {
      * ```
      */
     useToolInfo: <ToolName extends ToolNames>(): TypedToolInfoReturn<
-      ToolInput<ServerType, ToolName>,
-      ToolOutput<ServerType, ToolName>,
-      ToolResponseMetadata<ServerType, ToolName>
+      ToolInput<AppType, ToolName>,
+      ToolOutput<AppType, ToolName>,
+      ToolResponseMetadata<AppType, ToolName>
     > => {
       return useToolInfo() as TypedToolInfoReturn<
-        ToolInput<ServerType, ToolName>,
-        ToolOutput<ServerType, ToolName>,
-        ToolResponseMetadata<ServerType, ToolName>
+        ToolInput<AppType, ToolName>,
+        ToolOutput<AppType, ToolName>,
+        ToolResponseMetadata<AppType, ToolName>
       >;
     },
   };
