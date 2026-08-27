@@ -11,8 +11,25 @@ import { Chat } from "./chat.js";
 export interface EvalApp {
   readonly $types: { readonly tools: object };
   readonly fetchHandler: {
-    fetch: (request: Request) => Promise<Response>;
+    fetch: (
+      request: Request,
+      options?: { authInfo?: EvalIdentity },
+    ) => Promise<Response>;
   };
+}
+
+/**
+ * The identity an in-process session claims, handed to the app as the
+ * request's `authInfo`. Mirrors the SDK's `AuthInfo` structurally; `extra`
+ * carries whatever claims the app's verifier would have produced.
+ */
+export interface EvalIdentity {
+  token: string;
+  clientId: string;
+  scopes: string[];
+  expiresAt?: number;
+  resource?: URL;
+  extra?: Record<string, unknown>;
 }
 
 interface StartOptions {
@@ -44,18 +61,25 @@ function sharedDefaults() {
  * `expect.chat` gets the project's tool names and argument shapes with no type
  * parameter. It talks straight to `app.fetchHandler`, which never closes: the
  * handler is memoized on the app and shared by every test.
+ *
+ * `authInfo` claims an identity for the session: the app's per-tool scheme and
+ * scope enforcement runs against it for real, only token verification is
+ * skipped. Omit it to exercise the anonymous path, challenges included. It is
+ * in-process only, since a server reached over HTTP takes real tokens instead.
  */
 export async function start<App extends EvalApp>(
-  options: StartOptions & { app: App },
+  options: StartOptions & { app: App; authInfo?: EvalIdentity },
 ): Promise<Chat<App>>;
 /**
  * The type parameter pins the assertions to the project's registry:
  * `start<AppType>()` returns a `Chat<AppType>`, and `expect.chat` infers the
  * tool names and argument shapes from it.
  */
-export async function start<App>(options: StartOptions): Promise<Chat<App>>;
 export async function start<App>(
-  options: StartOptions & { app?: EvalApp },
+  options: StartOptions & { app?: never; authInfo?: never },
+): Promise<Chat<App>>;
+export async function start<App>(
+  options: StartOptions & { app?: EvalApp; authInfo?: EvalIdentity },
 ): Promise<Chat<App>> {
   const config = sharedDefaults();
   const host = {
@@ -67,7 +91,7 @@ export async function start<App>(
 
   const chat = await (options.app === undefined
     ? Chat.open<App>(urlFromPlugin(), host)
-    : inProcessChat<App>(options.app, host));
+    : inProcessChat<App>(options.app, host, options.authInfo));
 
   onTestFinished(() => chat.close());
   return chat;
@@ -86,8 +110,12 @@ function urlFromPlugin(): string {
 function inProcessChat<App>(
   app: EvalApp,
   host: Parameters<typeof Chat.open>[1],
+  authInfo: EvalIdentity | undefined,
 ): Promise<Chat<App>> {
   return Chat.open<App>(IN_PROCESS_URL, host, (url, init) =>
-    app.fetchHandler.fetch(new Request(url, init)),
+    app.fetchHandler.fetch(
+      new Request(url, init),
+      authInfo === undefined ? undefined : { authInfo },
+    ),
   );
 }

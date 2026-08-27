@@ -47,8 +47,28 @@ it("finds products by category", async () => {
 
 Prefer it whenever you can: there is no child process and no plugin config, so
 it runs anywhere vitest does. The caveat is that it bypasses the Express layer,
-so bearer auth is absent and tools see no `authInfo`; use the process mode above
-for auth-realistic evals.
+so nothing verifies a bearer token; pass `authInfo` to claim an identity, or use
+the process mode above when the evals must go through real tokens.
+
+### Authenticated evals
+
+```ts
+const chat = await start({
+  app,
+  model: anthropic("claude-sonnet-4-5"),
+  authInfo: {
+    token: "eval-token",
+    clientId: "eval-client",
+    scopes: ["checkout"],
+    extra: { sub: "user_123", email: "ada@example.com" },
+  },
+});
+```
+
+`authInfo` injects a claimed identity: the app's own scheme and scope
+enforcement runs for real, in-band challenges included, and only token
+signature verification is skipped. Omit it to eval the anonymous path, which is
+how you assert that a protected tool challenges instead of running.
 
 ## Choosing a model
 
