@@ -28,7 +28,7 @@ export type ResourceMetadataUrlResolver = (
 export function setupOAuth(
   app: Express,
   config: OAuthConfig<Record<string, unknown>>,
-  schemesByTool: Map<string, SecurityScheme[] | undefined>,
+  schemesByTool: ReadonlyMap<string, SecurityScheme[] | undefined>,
 ): ResourceMetadataUrlResolver {
   if (!config.verifier) {
     throw new Error("oauth requires a `verifier`");
