@@ -8,7 +8,7 @@ import {
 } from "@json-render/core";
 import { schema } from "@json-render/react/schema";
 import { shadcnComponentDefinitions } from "@json-render/shadcn/catalog";
-import { McpServer } from "skybridge/server";
+import { Skybridge } from "skybridge/server";
 import { z } from "zod";
 
 const catalog = defineCatalog(schema, {
@@ -19,101 +19,105 @@ const catalog = defineCatalog(schema, {
 const catalogPrompt = catalog.prompt();
 const specSchema = catalog.zodSchema();
 
-const server = new McpServer(
+export const app = new Skybridge(
   {
     name: "mcpcn",
     version: "0.0.1",
+    capabilities: {},
   },
-  { capabilities: {} },
-)
-  .mcpMiddleware(intentMiddleware())
-  .registerTool(
-    {
-      name: "hello-world",
-      description: "A hero widget with customizable title and subtitle.",
-      inputSchema: {
-        title: z.string().optional().describe("The main title to display."),
-        subtitle: z.string().optional().describe("The subtitle to display."),
-      },
-      view: {
-        component: "hello-world",
-        description: "Hello World widget",
-        csp: {
-          resourceDomains: ["https://avatars.githubusercontent.com"],
-        },
-      },
-    },
-    async ({ title, subtitle }) => {
-      return {
-        structuredContent: { title, subtitle },
-        content: [],
-        isError: false,
-      };
-    },
-  )
-  .registerTool(
-    {
-      name: "get-ui-catalog",
-      description:
-        "Returns the full mcpcn UI component catalog. Call this before render to learn available components, their props, and the spec format.",
-      annotations: {
-        readOnlyHint: true,
-        openWorldHint: false,
-        destructiveHint: false,
-      },
-    },
-    async () => ({
-      content: [{ type: "text" as const, text: catalogPrompt }],
-    }),
-  )
-  .registerTool(
-    {
-      name: "render",
-      description:
-        "Render a dynamic UI from a json-render spec using mcpcn components. Call get-ui-catalog first to learn available components and the spec format.",
-      inputSchema: {
-        spec: specSchema.describe("The json-render UI spec to render"),
-      },
-      annotations: {
-        readOnlyHint: true,
-        openWorldHint: false,
-        destructiveHint: false,
-      },
-      view: {
-        component: "render",
-        description: "Renders a json-render UI spec using mcpcn components",
-      },
-    },
-    async ({ spec: rawSpec }) => {
-      const { spec: fixedSpec } = autoFixSpec(rawSpec as Spec);
-
-      const structural = validateSpec(fixedSpec);
-      if (!structural.valid) {
-        return {
-          structuredContent: {},
-          content: [
-            {
-              type: "text" as const,
-              text: `Spec structural errors:\n${formatSpecIssues(structural.issues)}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-
-      return {
-        structuredContent: { spec: fixedSpec },
-        content: [
-          {
-            type: "text" as const,
-            text: "UI rendered successfully.",
+  (server) =>
+    server
+      .registerTool(
+        {
+          name: "hello-world",
+          description: "A hero widget with customizable title and subtitle.",
+          inputSchema: {
+            title: z.string().optional().describe("The main title to display."),
+            subtitle: z
+              .string()
+              .optional()
+              .describe("The subtitle to display."),
           },
-        ],
-        isError: false,
-      };
-    },
-  );
+          view: {
+            component: "hello-world",
+            description: "Hello World widget",
+            csp: {
+              resourceDomains: ["https://avatars.githubusercontent.com"],
+            },
+          },
+        },
+        async ({ title, subtitle }) => {
+          return {
+            structuredContent: { title, subtitle },
+            content: [],
+            isError: false,
+          };
+        },
+      )
+      .registerTool(
+        {
+          name: "get-ui-catalog",
+          description:
+            "Returns the full mcpcn UI component catalog. Call this before render to learn available components, their props, and the spec format.",
+          annotations: {
+            readOnlyHint: true,
+            openWorldHint: false,
+            destructiveHint: false,
+          },
+        },
+        async () => ({
+          content: [{ type: "text" as const, text: catalogPrompt }],
+        }),
+      )
+      .registerTool(
+        {
+          name: "render",
+          description:
+            "Render a dynamic UI from a json-render spec using mcpcn components. Call get-ui-catalog first to learn available components and the spec format.",
+          inputSchema: {
+            spec: specSchema.describe("The json-render UI spec to render"),
+          },
+          annotations: {
+            readOnlyHint: true,
+            openWorldHint: false,
+            destructiveHint: false,
+          },
+          view: {
+            component: "render",
+            description: "Renders a json-render UI spec using mcpcn components",
+          },
+        },
+        async ({ spec: rawSpec }) => {
+          const { spec: fixedSpec } = autoFixSpec(rawSpec as Spec);
 
-export default await server.run();
+          const structural = validateSpec(fixedSpec);
+          if (!structural.valid) {
+            return {
+              structuredContent: {},
+              content: [
+                {
+                  type: "text" as const,
+                  text: `Spec structural errors:\n${formatSpecIssues(structural.issues)}`,
+                },
+              ],
+              isError: true,
+            };
+          }
 
-export type AppType = typeof server;
+          return {
+            structuredContent: { spec: fixedSpec },
+            content: [
+              {
+                type: "text" as const,
+                text: "UI rendered successfully.",
+              },
+            ],
+            isError: false,
+          };
+        },
+      ),
+);
+
+app.mcpMiddleware(intentMiddleware());
+
+export type AppType = typeof app;

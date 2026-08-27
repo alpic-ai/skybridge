@@ -1,5 +1,5 @@
 import "./lib/load-env.js"; // must run before the tool modules read process.env
-import { McpServer } from "skybridge/server";
+import { Skybridge } from "skybridge/server";
 import { CAROUSEL_RANGE, MIN_SEARCH_ITERATIONS } from "./config.js";
 import {
   renderCarouselDefinition,
@@ -10,12 +10,10 @@ import {
   searchProductsHandler,
 } from "./tools/search-products.js";
 
-const server = new McpServer(
+export const app = new Skybridge(
   {
     name: "skybridge-shop",
     version: "0.0.1",
-  },
-  {
     instructions: `\
 Skybridge is a winter-sports shop: skis, goggles, and cold-weather apparel. Two phases:
 
@@ -27,10 +25,10 @@ once the carousel renders.
 RENDER: After curating, call render-carousel with the chosen product IDs (aim for ${CAROUSEL_RANGE}). \
 Speak once it renders, then recommend products in carousel order.`,
   },
-)
-  .registerTool(searchProductsDefinition, searchProductsHandler)
-  .registerTool(renderCarouselDefinition, renderCarouselHandler);
+  (server) =>
+    server
+      .registerTool(searchProductsDefinition, searchProductsHandler)
+      .registerTool(renderCarouselDefinition, renderCarouselHandler),
+);
 
-export default await server.run();
-
-export type AppType = typeof server;
+export type AppType = typeof app;

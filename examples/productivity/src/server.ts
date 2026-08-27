@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { intentMiddleware } from "@alpic-ai/insights";
-import { McpServer } from "skybridge/server";
+import { Skybridge } from "skybridge/server";
 import { z } from "zod";
 
 const ActivityTypes = ["meetings", "work", "learning"] as const;
@@ -80,60 +80,60 @@ function getWeek(weekOffset: number): Week {
   };
 }
 
-const server = new McpServer(
+export const app = new Skybridge(
   {
     name: "productivity-charts-example-server",
     version: "0.0.1",
+    capabilities: {},
   },
-  { capabilities: {} },
-)
-  .mcpMiddleware(intentMiddleware())
-  .registerTool(
-    {
-      name: "show-productivity-insights",
-      description: "Display user's weekly productivity charts",
-      inputSchema: {
-        weekOffset: z
-          .number()
-          .max(0)
-          .optional()
-          .default(0)
-          .describe(
-            "Week offset from current week (0 = this week, -1 = last week)",
-          ),
-        duration: z
-          .number()
-          .min(1)
-          .max(4)
-          .optional()
-          .default(1)
-          .describe(
-            "Number of weeks to aggregate (1 = one week, 2 = two weeks, 4 = four weeks)",
-          ),
+  (server) =>
+    server.registerTool(
+      {
+        name: "show-productivity-insights",
+        description: "Display user's weekly productivity charts",
+        inputSchema: {
+          weekOffset: z
+            .number()
+            .max(0)
+            .optional()
+            .default(0)
+            .describe(
+              "Week offset from current week (0 = this week, -1 = last week)",
+            ),
+          duration: z
+            .number()
+            .min(1)
+            .max(4)
+            .optional()
+            .default(1)
+            .describe(
+              "Number of weeks to aggregate (1 = one week, 2 = two weeks, 4 = four weeks)",
+            ),
+        },
+        view: {
+          component: "show-productivity-insights",
+          description: "Weekly Productivity Chart",
+        },
+        _meta: {
+          "openai/widgetAccessible": true,
+        },
       },
-      view: {
-        component: "show-productivity-insights",
-        description: "Weekly Productivity Chart",
+      async ({ weekOffset, duration }) => {
+        const structuredContent = getWeeks(weekOffset, duration);
+        return {
+          structuredContent,
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(structuredContent),
+            },
+          ],
+          isError: false,
+        };
       },
-      _meta: {
-        "openai/widgetAccessible": true,
-      },
-    },
-    async ({ weekOffset, duration }) => {
-      const structuredContent = getWeeks(weekOffset, duration);
-      return {
-        structuredContent,
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(structuredContent),
-          },
-        ],
-        isError: false,
-      };
-    },
-  );
+    ),
+);
 
-export default await server.run();
+app.mcpMiddleware(intentMiddleware());
 
-export type AppType = typeof server;
+export type AppType = typeof app;
