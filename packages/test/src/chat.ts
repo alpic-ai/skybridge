@@ -23,6 +23,15 @@ interface HostConfig {
 const DEFAULT_MAX_STEPS = 8;
 
 /**
+ * A `fetch` replacement the transport dials instead of the network. Mirrors the
+ * MCP client's own `fetch` option so an in-process app can serve the session.
+ */
+export type TransportFetch = (
+  url: string | URL,
+  init?: RequestInit,
+) => Promise<Response>;
+
+/**
  * One conversation against one MCP session. A scenario asserts on
  * {@link Chat.toolCalls}, the sequence of calls the model made.
  */
@@ -53,9 +62,13 @@ export class Chat<App = unknown> {
   static async open<App>(
     serverUrl: string,
     host: HostConfig,
+    fetchImpl?: TransportFetch,
   ): Promise<Chat<App>> {
     const client = new Client({ name: "skybridge-eval", version: "0" });
-    const transport = new StreamableHTTPClientTransport(new URL(serverUrl));
+    const transport = new StreamableHTTPClientTransport(
+      new URL(serverUrl),
+      fetchImpl === undefined ? undefined : { fetch: fetchImpl },
+    );
     await client.connect(transport);
     const chat = new Chat<App>(client, transport, host);
     try {

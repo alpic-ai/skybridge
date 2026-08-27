@@ -23,6 +23,33 @@ it("finds products by category", async () => {
 });
 ```
 
+## In-process mode
+
+Pass the app itself instead of booting a server. `start` then dials
+`app.fetchHandler` directly, and the tool names and argument shapes come from
+the app value, so no type parameter is needed.
+
+```ts
+import { anthropic } from "@ai-sdk/anthropic";
+import { expect, it } from "vitest";
+import { start } from "@skybridge/test";
+import { app } from "../src/server.js";
+
+it("finds products by category", async () => {
+  const chat = await start({ app, model: anthropic("claude-sonnet-4-5") });
+  await chat.send("I am looking for ski goggles");
+
+  expect.chat(chat).toHaveCalledToolWith("search-products", {
+    category: "goggles",
+  });
+});
+```
+
+Prefer it whenever you can: there is no child process and no plugin config, so
+it runs anywhere vitest does. The caveat is that it bypasses the Express layer,
+so bearer auth is absent and tools see no `authInfo`; use the process mode above
+for auth-realistic evals.
+
 ## Choosing a model
 
 `start` takes any AI SDK model instance, so the provider and its credentials
