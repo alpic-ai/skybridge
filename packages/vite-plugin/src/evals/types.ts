@@ -25,6 +25,5 @@ export interface ChatLike<App> {
 declare module "vitest" {
   interface ProvidedContext {
     skybridgeEvals: EvalsOptions | undefined;
-    skybridgeEvalsUrl: string | undefined;
   }
 }

@@ -4,8 +4,22 @@ import { toNodeHandler } from "@modelcontextprotocol/node";
 import cors from "cors";
 import express from "express";
 import type { Skybridge } from "./app.js";
+import type { JsonOptions } from "./server.js";
 
 type SkybridgeApp = Pick<Skybridge, "express" | "fetchHandler">;
+
+/**
+ * Build the bare Express app a {@link Skybridge} instance owns: the instance
+ * plus the built-in `express.json()` body parser, tuned by the `json` config
+ * field.
+ *
+ * @internal
+ */
+export function createBaseApp(json?: JsonOptions): express.Express {
+  const app = express();
+  app.use(express.json(json));
+  return app;
+}
 
 function parseControlPort(raw: string | undefined): number | null {
   if (raw === undefined) {

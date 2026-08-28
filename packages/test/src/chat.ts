@@ -22,6 +22,8 @@ interface HostConfig {
 
 const DEFAULT_MAX_STEPS = 8;
 
+const IN_PROCESS_URL = "http://in-process.skybridge.test/mcp";
+
 /**
  * A `fetch` replacement the transport dials instead of the network. Mirrors the
  * MCP client's own `fetch` option so an in-process app can serve the session.
@@ -63,14 +65,13 @@ export class Chat<App = unknown> {
   }
 
   static async open<App>(
-    serverUrl: string,
     host: HostConfig,
-    fetchImpl?: TransportFetch,
+    fetchImpl: TransportFetch,
   ): Promise<Chat<App>> {
     const client = new Client({ name: "skybridge-eval", version: "0" });
     const transport = new StreamableHTTPClientTransport(
-      new URL(serverUrl),
-      fetchImpl === undefined ? undefined : { fetch: fetchImpl },
+      new URL(IN_PROCESS_URL),
+      { fetch: fetchImpl },
     );
     await client.connect(transport);
     const chat = new Chat<App>(client, transport, host);

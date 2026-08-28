@@ -126,9 +126,8 @@ export const app = new Skybridge(
             ],
           };
         },
-      ),
+      )
+      .mcpMiddleware(intentMiddleware()),
 );
-
-app.mcpMiddleware(intentMiddleware());
 
 export type AppType = typeof app;

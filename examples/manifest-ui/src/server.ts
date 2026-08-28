@@ -9,32 +9,35 @@ export const app = new Skybridge(
     capabilities: {},
   },
   (server) =>
-    server.registerTool(
-      {
-        name: "hello-world",
-        description: "A hero widget with customizable title and subtitle.",
-        inputSchema: {
-          title: z.string().optional().describe("The main title to display."),
-          subtitle: z.string().optional().describe("The subtitle to display."),
-        },
-        view: {
-          component: "hello-world",
-          description: "Hello World widget",
-          csp: {
-            resourceDomains: ["https://avatars.githubusercontent.com"],
+    server
+      .registerTool(
+        {
+          name: "hello-world",
+          description: "A hero widget with customizable title and subtitle.",
+          inputSchema: {
+            title: z.string().optional().describe("The main title to display."),
+            subtitle: z
+              .string()
+              .optional()
+              .describe("The subtitle to display."),
+          },
+          view: {
+            component: "hello-world",
+            description: "Hello World widget",
+            csp: {
+              resourceDomains: ["https://avatars.githubusercontent.com"],
+            },
           },
         },
-      },
-      async ({ title, subtitle }) => {
-        return {
-          structuredContent: { title, subtitle },
-          content: [],
-          isError: false,
-        };
-      },
-    ),
+        async ({ title, subtitle }) => {
+          return {
+            structuredContent: { title, subtitle },
+            content: [],
+            isError: false,
+          };
+        },
+      )
+      .mcpMiddleware(intentMiddleware()),
 );
-
-app.mcpMiddleware(intentMiddleware());
 
 export type AppType = typeof app;

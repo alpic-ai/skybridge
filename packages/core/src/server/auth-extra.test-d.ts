@@ -94,10 +94,9 @@ test("a config must carry a verifier", () => {
 });
 
 test("a provider override adds claims without dropping the provider's", () => {
-  const app = new Skybridge(
-    { name: "t", version: "0", oauth: customOAuth },
-    (server) =>
-      server.registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
+  new Skybridge({ name: "t", version: "0", oauth: customOAuth }, (server) =>
+    server
+      .registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
         expectTypeOf(extra.http?.authInfo?.extra?.tenant).toEqualTypeOf<
           string | undefined
         >();
@@ -105,13 +104,12 @@ test("a provider override adds claims without dropping the provider's", () => {
           string | undefined
         >();
         return { content: "a" };
+      })
+      .mcpMiddleware("tools/call", (_request, extra, next) => {
+        expectTypeOf(extra.http?.authInfo?.extra?.tenant).toEqualTypeOf<
+          string | undefined
+        >();
+        return next();
       }),
   );
-
-  app.mcpMiddleware("tools/call", (_request, extra, next) => {
-    expectTypeOf(extra.http?.authInfo?.extra?.tenant).toEqualTypeOf<
-      string | undefined
-    >();
-    return next();
-  });
 });

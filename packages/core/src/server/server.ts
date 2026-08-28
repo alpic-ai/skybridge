@@ -21,6 +21,7 @@ import {
   type ResourceMetadata,
   type ResourceTemplate,
   type ServerOptions,
+  type ServerResult,
   type StandardSchemaV1,
   type StandardSchemaWithJSON,
   type ToolAnnotations,
@@ -38,7 +39,17 @@ import {
 import type { ResourceMetadataUrlResolver } from "./auth/setup.js";
 import type { ExtraClaims } from "./auth.js";
 import { hostFromUserAgent } from "./host.js";
-import type { McpExtra, McpMiddlewareEntry } from "./middleware.js";
+import type {
+  McpExtra,
+  McpExtraFor,
+  McpMethodString,
+  McpMiddlewareEntry,
+  McpMiddlewareFilter,
+  McpMiddlewareFn,
+  McpResultFor,
+  McpTypedMiddlewareFn,
+  McpWildcard,
+} from "./middleware.js";
 import { captureToolError } from "./middleware.js";
 import { resolveServerOrigin } from "./requestOrigin.js";
 import {
@@ -575,6 +586,7 @@ export class McpServer<
     string,
     SecurityScheme[] | undefined
   >();
+  private readonly userMiddlewareEntries: McpMiddlewareEntry[] = [];
 
   constructor(
     serverInfo: Implementation,
@@ -692,11 +704,86 @@ export class McpServer<
     registerSkills(this.skillRegistrar(), discoveredSkills);
   }
 
+  /** Register MCP protocol-level middleware (catch-all). */
+  mcpMiddleware(handler: McpMiddlewareFn<TAuthExtra>): this;
+  /** Register MCP protocol-level middleware for all requests (`extra` is `McpExtra`). */
+  mcpMiddleware(
+    filter: "request",
+    handler: (
+      request: { method: string; params: Record<string, unknown> },
+      extra: McpExtra<TAuthExtra>,
+      next: () => Promise<ServerResult>,
+    ) => Promise<unknown> | unknown,
+  ): this;
+  /** Register MCP protocol-level middleware for all notifications (`extra` is `undefined`). */
+  mcpMiddleware(
+    filter: "notification",
+    handler: (
+      request: { method: string; params: Record<string, unknown> },
+      extra: undefined,
+      next: () => Promise<undefined>,
+    ) => Promise<unknown> | unknown,
+  ): this;
   /**
-   * The framework's own protocol-level middleware for this instance: view
-   * `_meta` on `resources/list`, version-agnostic view resolution on
-   * `resources/read`, and the top-level `securitySchemes` mirror on
-   * `tools/list`. Composed by {@link Skybridge} around user middleware.
+   * Register MCP protocol-level middleware for an exact method.
+   * Narrows `params`, `extra`, and `next()` result based on the method string.
+   */
+  mcpMiddleware<M extends McpMethodString>(
+    filter: M,
+    handler: McpTypedMiddlewareFn<M, TAuthExtra>,
+  ): this;
+  /**
+   * Register MCP protocol-level middleware for a wildcard pattern (e.g. `"tools/*"`).
+   * `next()` returns the union of result types for matching methods.
+   */
+  mcpMiddleware<W extends McpWildcard>(
+    filter: W,
+    handler: (
+      request: { method: string; params: Record<string, unknown> },
+      extra: McpExtraFor<W, TAuthExtra>,
+      next: () => Promise<McpResultFor<W>>,
+    ) => Promise<unknown> | unknown,
+  ): this;
+  /**
+   * Register MCP protocol-level middleware with a method filter.
+   * Filter can be an exact method (`"tools/call"`), wildcard (`"tools/*"`),
+   * category (`"request"` | `"notification"`), or an array of those.
+   */
+  mcpMiddleware(
+    filter: McpMiddlewareFilter,
+    handler: McpMiddlewareFn<TAuthExtra>,
+  ): this;
+  mcpMiddleware(
+    filterOrHandler: McpMiddlewareFilter | McpMiddlewareFn<TAuthExtra>,
+    // biome-ignore lint/suspicious/noExplicitAny: overloads narrow the handler type at call sites; implementation must accept all variants
+    maybeHandler?: any,
+  ): this {
+    const handler = maybeHandler as McpMiddlewareFn | undefined;
+
+    if (typeof filterOrHandler === "function") {
+      this.userMiddlewareEntries.push({
+        filter: null,
+        handler: filterOrHandler as McpMiddlewareFn,
+      });
+    } else if (handler) {
+      this.userMiddlewareEntries.push({
+        filter: filterOrHandler,
+        handler,
+      });
+    } else {
+      throw new Error(
+        "mcpMiddleware requires a handler function when a filter is provided",
+      );
+    }
+
+    return this;
+  }
+
+  /**
+   * This instance's protocol-level middleware: the framework's own entries
+   * (view `_meta` on `resources/list`, version-agnostic view resolution on
+   * `resources/read`, the top-level `securitySchemes` mirror on `tools/list`)
+   * followed by the ones registered via {@link McpServer.mcpMiddleware}.
    *
    * @internal
    */
@@ -792,6 +879,7 @@ export class McpServer<
       viewListMetaEntry,
       viewReadResolveEntry,
       toolsListSecuritySchemesEntry,
+      ...this.userMiddlewareEntries,
     ];
   }
 

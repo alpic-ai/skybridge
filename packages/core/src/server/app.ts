@@ -6,28 +6,13 @@ import {
   type McpHttpHandler,
   type Server as SdkServer,
   type ServerOptions,
-  type ServerResult,
 } from "@modelcontextprotocol/server";
-import express, {
-  type ErrorRequestHandler,
-  type Express,
-  type RequestHandler,
-} from "express";
+import type { ErrorRequestHandler, Express, RequestHandler } from "express";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
 import type { ExtraClaims } from "./auth.js";
-import { createApp } from "./express.js";
+import { createApp, createBaseApp } from "./express.js";
 import { createMiddlewareEntry } from "./metric.js";
-import type {
-  McpExtra,
-  McpExtraFor,
-  McpMethodString,
-  McpMiddlewareEntry,
-  McpMiddlewareFilter,
-  McpMiddlewareFn,
-  McpResultFor,
-  McpTypedMiddlewareFn,
-  McpWildcard,
-} from "./middleware.js";
+import type { McpMiddlewareEntry } from "./middleware.js";
 import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
 import {
   McpServer,
@@ -105,9 +90,8 @@ export class Skybridge<
   private readonly setup: SkybridgeSetup<TTools, TAuthExtra>;
   private readonly expressApp: Express;
   private readonly errorMiddleware: ErrorMiddlewareConfig[] = [];
-  private readonly mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
-  private middlewareLocked = false;
-  private monitoringEntry: McpMiddlewareEntry | null = null;
+  private readonly monitoringEntry: McpMiddlewareEntry | null =
+    createMiddlewareEntry();
   private resolveResourceMetadataUrl?: ResourceMetadataUrlResolver;
   private cachedFetchHandler?: McpHttpHandler;
 
@@ -135,8 +119,7 @@ export class Skybridge<
 
     const sample = this.buildServer();
 
-    this.expressApp = express();
-    this.expressApp.use(express.json(json));
+    this.expressApp = createBaseApp(json);
     if (oauth) {
       this.resolveResourceMetadataUrl = setupOAuth(
         this.expressApp,
@@ -198,9 +181,7 @@ export class Skybridge<
    * Connect a Skybridge app to an MCP transport. Use this when you're
    * embedding Skybridge in a host that already manages its own transport
    * (e.g. stdio for desktop apps); for HTTP, prefer {@link Skybridge.run}
-   * which sets the transport up for you. Locks in any middleware registered
-   * via {@link Skybridge.mcpMiddleware} — further calls to that method will
-   * throw afterwards.
+   * which sets the transport up for you.
    */
   async connect(transport: Parameters<SdkServer["connect"]>[0]): Promise<void> {
     await this.createServerInstance().connect(transport);
@@ -257,92 +238,10 @@ export class Skybridge<
     return this;
   }
 
-  /** Register MCP protocol-level middleware (catch-all). */
-  mcpMiddleware(handler: McpMiddlewareFn<TAuthExtra>): this;
-  /** Register MCP protocol-level middleware for all requests (`extra` is `McpExtra`). */
-  mcpMiddleware(
-    filter: "request",
-    handler: (
-      request: { method: string; params: Record<string, unknown> },
-      extra: McpExtra<TAuthExtra>,
-      next: () => Promise<ServerResult>,
-    ) => Promise<unknown> | unknown,
-  ): this;
-  /** Register MCP protocol-level middleware for all notifications (`extra` is `undefined`). */
-  mcpMiddleware(
-    filter: "notification",
-    handler: (
-      request: { method: string; params: Record<string, unknown> },
-      extra: undefined,
-      next: () => Promise<undefined>,
-    ) => Promise<unknown> | unknown,
-  ): this;
-  /**
-   * Register MCP protocol-level middleware for an exact method.
-   * Narrows `params`, `extra`, and `next()` result based on the method string.
-   */
-  mcpMiddleware<M extends McpMethodString>(
-    filter: M,
-    handler: McpTypedMiddlewareFn<M, TAuthExtra>,
-  ): this;
-  /**
-   * Register MCP protocol-level middleware for a wildcard pattern (e.g. `"tools/*"`).
-   * `next()` returns the union of result types for matching methods.
-   */
-  mcpMiddleware<W extends McpWildcard>(
-    filter: W,
-    handler: (
-      request: { method: string; params: Record<string, unknown> },
-      extra: McpExtraFor<W, TAuthExtra>,
-      next: () => Promise<McpResultFor<W>>,
-    ) => Promise<unknown> | unknown,
-  ): this;
-  /**
-   * Register MCP protocol-level middleware with a method filter.
-   * Filter can be an exact method (`"tools/call"`), wildcard (`"tools/*"`),
-   * category (`"request"` | `"notification"`), or an array of those.
-   */
-  mcpMiddleware(
-    filter: McpMiddlewareFilter,
-    handler: McpMiddlewareFn<TAuthExtra>,
-  ): this;
-  mcpMiddleware(
-    filterOrHandler: McpMiddlewareFilter | McpMiddlewareFn<TAuthExtra>,
-    // biome-ignore lint/suspicious/noExplicitAny: overloads narrow the handler type at call sites; implementation must accept all variants
-    maybeHandler?: any,
-  ): this {
-    if (this.middlewareLocked) {
-      throw new Error(
-        "Cannot register MCP middleware after run() or connect() has been called",
-      );
-    }
-
-    const handler = maybeHandler as McpMiddlewareFn | undefined;
-
-    if (typeof filterOrHandler === "function") {
-      this.mcpMiddlewareEntries.push({
-        filter: null,
-        handler: filterOrHandler as McpMiddlewareFn,
-      });
-    } else if (handler) {
-      this.mcpMiddlewareEntries.push({
-        filter: filterOrHandler,
-        handler,
-      });
-    } else {
-      throw new Error(
-        "mcpMiddleware requires a handler function when a filter is provided",
-      );
-    }
-
-    return this;
-  }
-
   /**
    * Start the HTTP server. Listens on `process.env.__PORT` (default `3000`),
-   * mounts the `/mcp` route, applies any custom Express middleware registered
-   * via {@link Skybridge.use} / {@link Skybridge.useOnError}, and locks in
-   * any MCP middleware registered via {@link Skybridge.mcpMiddleware}.
+   * mounts the `/mcp` route, and applies any custom Express middleware
+   * registered via {@link Skybridge.use} / {@link Skybridge.useOnError}.
    *
    * On Cloudflare Workers / workerd, returns an object exposing `fetch` so
    * the runtime can bridge incoming requests to the Node HTTP server. On
@@ -356,7 +255,6 @@ export class Skybridge<
   async run(): Promise<
     { fetch: (...args: unknown[]) => unknown } | Express | undefined
   > {
-    this.middlewareLocked = true;
     if (process.env.VERCEL === "1") {
       // createApp only reads httpServer inside its dev-only branch
       // (viewsDevServer); under VERCEL=1 + NODE_ENV=production it's a
@@ -435,14 +333,9 @@ export class Skybridge<
   private middlewareEntries(
     server: McpServer<Record<never, ToolDef>, TAuthExtra>,
   ): McpMiddlewareEntry[] {
-    if (!this.middlewareLocked) {
-      this.middlewareLocked = true;
-      this.monitoringEntry = createMiddlewareEntry();
-    }
     return [
       ...(this.monitoringEntry ? [this.monitoringEntry] : []),
       ...server.protocolMiddlewareEntries(),
-      ...this.mcpMiddlewareEntries,
     ];
   }
 

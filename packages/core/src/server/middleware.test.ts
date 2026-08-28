@@ -276,20 +276,19 @@ describe("buildMiddlewareChain", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Skybridge.mcpMiddleware() integration tests
+// McpServer.mcpMiddleware() integration tests
 // ---------------------------------------------------------------------------
-describe("Skybridge.mcpMiddleware()", () => {
+describe("McpServer.mcpMiddleware()", () => {
   function createClient() {
     return new Client({ name: "test-client", version: "1.0.0" });
   }
 
   it("returns this for chaining", () => {
-    const app = new Skybridge(
-      { name: "test", version: "1.0.0" },
-      (server) => server,
-    );
-    const result = app.mcpMiddleware(async (_req, _extra, next) => next());
-    expect(result).toBe(app);
+    new Skybridge({ name: "test", version: "1.0.0" }, (server) => {
+      const result = server.mcpMiddleware(async (_req, _extra, next) => next());
+      expect(result).toBe(server);
+      return server;
+    });
   });
 
   it("intercepts tools/call and exposes request params", async () => {
@@ -307,13 +306,13 @@ describe("Skybridge.mcpMiddleware()", () => {
           content: [{ type: "text" as const, text: `hi ${args.name}` }],
         }),
       );
-      return server;
-    });
+      server.mcpMiddleware("tools/call", async (request, _extra, next) => {
+        capturedMethod = request.method;
+        capturedParams = request.params;
+        return next();
+      });
 
-    app.mcpMiddleware("tools/call", async (request, _extra, next) => {
-      capturedMethod = request.method;
-      capturedParams = request.params;
-      return next();
+      return server;
     });
 
     const client = createClient();
@@ -345,16 +344,16 @@ describe("Skybridge.mcpMiddleware()", () => {
       server.registerTool({ name: "t1", description: "t1" }, () => ({
         content: [{ type: "text" as const, text: "ok" }],
       }));
+      server.mcpMiddleware(
+        ["tools/call", "tools/list"],
+        async (request, _extra, next) => {
+          matchedMethods.push(request.method);
+          return next();
+        },
+      );
+
       return server;
     });
-
-    app.mcpMiddleware(
-      ["tools/call", "tools/list"],
-      async (request, _extra, next) => {
-        matchedMethods.push(request.method);
-        return next();
-      },
-    );
 
     const client = createClient();
     const [clientTransport, serverTransport] =
@@ -372,32 +371,13 @@ describe("Skybridge.mcpMiddleware()", () => {
     await instance.close();
   });
 
-  it("throws if registered after connect()", async () => {
-    const app = new Skybridge(
-      { name: "test", version: "1.0.0" },
-      (server) => server,
-    );
-
-    const [_clientTransport, serverTransport] =
-      InMemoryTransport.createLinkedPair();
-    const instance = app.createServerInstance();
-    await instance.connect(serverTransport);
-
-    expect(() =>
-      app.mcpMiddleware(async (_req, _extra, next) => next()),
-    ).toThrow("Cannot register MCP middleware after run() or connect()");
-
-    await instance.close();
-  });
-
   it("throws when filter provided without handler", () => {
-    const app = new Skybridge(
-      { name: "test", version: "1.0.0" },
-      (server) => server,
-    );
-    expect(() =>
-      // @ts-expect-error intentionally passing filter without handler
-      app.mcpMiddleware("tools/call"),
+    expect(
+      () =>
+        new Skybridge({ name: "test", version: "1.0.0" }, (server) =>
+          // @ts-expect-error intentionally passing filter without handler
+          server.mcpMiddleware("tools/call"),
+        ),
     ).toThrow("mcpMiddleware requires a handler function");
   });
 
@@ -408,18 +388,18 @@ describe("Skybridge.mcpMiddleware()", () => {
       server.registerTool({ name: "t1", description: "t1" }, () => ({
         content: [{ type: "text" as const, text: "ok" }],
       }));
+      server
+        .mcpMiddleware(async (request, _extra, next) => {
+          calls.push(`global:${request.method}`);
+          return next();
+        })
+        .mcpMiddleware("tools/call", async (_req, _extra, next) => {
+          calls.push("tools-only");
+          return next();
+        });
+
       return server;
     });
-
-    app
-      .mcpMiddleware(async (request, _extra, next) => {
-        calls.push(`global:${request.method}`);
-        return next();
-      })
-      .mcpMiddleware("tools/call", async (_req, _extra, next) => {
-        calls.push("tools-only");
-        return next();
-      });
 
     const client = createClient();
     const [clientTransport, serverTransport] =
@@ -452,12 +432,12 @@ describe("Skybridge.mcpMiddleware()", () => {
       server.registerTool({ name: "t1", description: "t1" }, () => ({
         content: [{ type: "text" as const, text: "ok" }],
       }));
-      return server;
-    });
+      server.mcpMiddleware("notification", async (_request, extra, next) => {
+        capturedExtra = extra;
+        return next();
+      });
 
-    app.mcpMiddleware("notification", async (_request, extra, next) => {
-      capturedExtra = extra;
-      return next();
+      return server;
     });
 
     const client = createClient();
@@ -482,12 +462,12 @@ describe("Skybridge.mcpMiddleware()", () => {
       server.registerTool({ name: "t1", description: "t1" }, () => ({
         content: [{ type: "text" as const, text: "ok" }],
       }));
-      return server;
-    });
+      server.mcpMiddleware("tools/*", async (request, _extra, next) => {
+        matchedMethods.push(request.method);
+        return next();
+      });
 
-    app.mcpMiddleware("tools/*", async (request, _extra, next) => {
-      matchedMethods.push(request.method);
-      return next();
+      return server;
     });
 
     const client = createClient();
@@ -522,20 +502,20 @@ describe("Skybridge.mcpMiddleware()", () => {
           content: [{ type: "text" as const, text: `hi ${args.name}` }],
         }),
       );
-      return server;
-    });
+      server.mcpMiddleware("tools/call", async (_req, _extra, next) => {
+        const result = (await next()) as {
+          content: { type: string; text: string }[];
+        };
+        return {
+          ...result,
+          content: [
+            ...result.content,
+            { type: "text" as const, text: " (modified)" },
+          ],
+        };
+      });
 
-    app.mcpMiddleware("tools/call", async (_req, _extra, next) => {
-      const result = (await next()) as {
-        content: { type: string; text: string }[];
-      };
-      return {
-        ...result,
-        content: [
-          ...result.content,
-          { type: "text" as const, text: " (modified)" },
-        ],
-      };
+      return server;
     });
 
     const client = createClient();
@@ -568,12 +548,12 @@ describe("Skybridge.mcpMiddleware()", () => {
           content: [{ type: "text" as const, text: "original" }],
         };
       });
+      server.mcpMiddleware("tools/call", async () => ({
+        content: [{ type: "text" as const, text: "short-circuited" }],
+      }));
+
       return server;
     });
-
-    app.mcpMiddleware("tools/call", async () => ({
-      content: [{ type: "text" as const, text: "short-circuited" }],
-    }));
 
     const client = createClient();
     const [clientTransport, serverTransport] =
@@ -612,13 +592,13 @@ describe("Skybridge.mcpMiddleware()", () => {
           throw schemalessError;
         },
       );
-      return server;
-    });
+      server.mcpMiddleware("tools/call", async (_request, extra, next) => {
+        const result = await next();
+        captured = getToolError(extra);
+        return result;
+      });
 
-    app.mcpMiddleware("tools/call", async (_request, extra, next) => {
-      const result = await next();
-      captured = getToolError(extra);
-      return result;
+      return server;
     });
 
     const client = createClient();
@@ -660,12 +640,12 @@ describe("Skybridge.mcpMiddleware()", () => {
           };
         },
       );
-      return server;
-    });
+      server.mcpMiddleware("tools/call", async (request, _extra, next) => {
+        request.params.arguments = { name: "Overridden" };
+        return next();
+      });
 
-    app.mcpMiddleware("tools/call", async (request, _extra, next) => {
-      request.params.arguments = { name: "Overridden" };
-      return next();
+      return server;
     });
 
     const client = createClient();
@@ -692,12 +672,12 @@ describe("Skybridge.mcpMiddleware()", () => {
       server.registerTool({ name: "t1", description: "t1" }, () => ({
         content: [{ type: "text" as const, text: "ok" }],
       }));
-      return server;
-    });
+      server.mcpMiddleware("request", async (request, _extra, next) => {
+        matchedMethods.push(request.method);
+        return next();
+      });
 
-    app.mcpMiddleware("request", async (request, _extra, next) => {
-      matchedMethods.push(request.method);
-      return next();
+      return server;
     });
 
     const client = createClient();
