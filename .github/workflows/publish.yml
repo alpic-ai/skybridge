@@ -62,9 +62,9 @@ jobs:
             echo "tag=next" >> "$GITHUB_OUTPUT"
             echo "✅ Next version: 0.0.0-next.${GITHUB_SHA::7}"
           elif [ "${{ github.ref }}" = "refs/heads/v2" ]; then
-            echo "version=2.0.0-alpha.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-            echo "tag=alpha" >> "$GITHUB_OUTPUT"
-            echo "✅ Alpha version: 2.0.0-alpha.${GITHUB_SHA::7}"
+            echo "version=2.0.0-beta.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            echo "tag=beta" >> "$GITHUB_OUTPUT"
+            echo "✅ Beta version: 2.0.0-beta.${GITHUB_SHA::7}"
           else
             echo "version=0.0.0-dev.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
             echo "tag=dev" >> "$GITHUB_OUTPUT"
