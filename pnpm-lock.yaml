@@ -1596,8 +1596,8 @@ importers:
         specifier: ^4.11.14
         version: 4.11.14
       '@skybridge/devtools':
-        specifier: ^2.0.0-alpha.0
-        version: 2.0.0-alpha.ff0caf0(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)
+        specifier: ^2.0.0-beta.0
+        version: 2.0.0-beta.68a71cb(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)
       ci-info:
         specifier: ^4.4.0
         version: 4.4.0
@@ -1743,8 +1743,8 @@ importers:
         version: 8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0)
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.7
-        version: 1.2.7(arktype@2.1.27)(typescript@6.0.3)
+        specifier: workspace:*
+        version: link:../../../devtools
       '@skybridge/vite-plugin':
         specifier: workspace:*
         version: link:../../../vite-plugin
@@ -1792,8 +1792,8 @@ importers:
         version: 4.4.3
     devDependencies:
       '@skybridge/devtools':
-        specifier: ^1.2.7
-        version: 1.2.7(arktype@2.1.27)(typescript@6.0.3)
+        specifier: workspace:*
+        version: link:../../../devtools
       '@skybridge/vite-plugin':
         specifier: workspace:*
         version: link:../../../vite-plugin
@@ -1847,8 +1847,8 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1(@types/node@24.13.3)(@types/react@19.2.17)(jiti@2.7.0)(lightningcss@1.32.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(terser@5.44.1)(tsx@4.23.0)(typescript@6.0.3)(yaml@2.9.0)
       '@skybridge/devtools':
-        specifier: ^1.2.4
-        version: 1.2.7(arktype@2.1.27)(typescript@6.0.3)
+        specifier: workspace:*
+        version: link:../../../devtools
       '@skybridge/vite-plugin':
         specifier: workspace:*
         version: link:../../../vite-plugin
@@ -2054,10 +2054,10 @@ importers:
       '@modelcontextprotocol/client':
         specifier: ^2.0.0
         version: 2.0.0
+    devDependencies:
       '@skybridge/vite-plugin':
         specifier: workspace:*
         version: link:../vite-plugin
-    devDependencies:
       '@types/node':
         specifier: ^24.13.3
         version: 24.13.3
@@ -6127,8 +6127,8 @@ packages:
   '@skybridge/devtools@1.2.7':
     resolution: {integrity: sha512-Xt9pfR9bl+n/0Cqq3BgzY3xmL0PYYEQQV5zJdFkzfns20PydG8nrKe0V6yyj2fEBPpsyekxHI+bXqp05/6g3yA==}
 
-  '@skybridge/devtools@2.0.0-alpha.ff0caf0':
-    resolution: {integrity: sha512-2qaWB44au89OsptR7Ggjg4J7S5zlqqPimAimtd9b5wQVxpTkMi1xKD8prmVH6dF6VoL7f1/W1roVfZ8q/6ITEg==}
+  '@skybridge/devtools@2.0.0-beta.68a71cb':
+    resolution: {integrity: sha512-kjc5c21mXfOFkzod+KQ6p9Q1o+yoInM7FCmp8yUybyX6/iheBbCdP9dedIOWqnHi1cvEslB9W8+gAUaCfsLGMQ==}
 
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
@@ -17062,7 +17062,7 @@ snapshots:
       - typescript
       - valibot
 
-  '@skybridge/devtools@2.0.0-alpha.ff0caf0(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)':
+  '@skybridge/devtools@2.0.0-beta.68a71cb(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)':
     dependencies:
       '@alpic-ai/sdk': 1.157.0(@opentelemetry/api@1.9.1)(arktype@2.1.27)(typescript@6.0.3)
       '@t3-oss/env-core': 0.13.11(arktype@2.1.27)(typescript@6.0.3)(zod@4.4.3)

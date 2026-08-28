@@ -16,7 +16,7 @@
     "vite": "^8.1.5"
   },
   "devDependencies": {
-    "@skybridge/devtools": "^1.2.7",
+    "@skybridge/devtools": "workspace:*",
     "@skybridge/vite-plugin": "workspace:*",
     "@types/node": "^24.13.3",
     "alpic": "^1.155.0",

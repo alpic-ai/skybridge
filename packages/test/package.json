@@ -26,15 +26,16 @@
     "test:unit": "vitest run"
   },
   "dependencies": {
-    "@modelcontextprotocol/client": "^2.0.0",
-    "@skybridge/vite-plugin": "workspace:*"
+    "@modelcontextprotocol/client": "^2.0.0"
   },
   "peerDependencies": {
+    "@skybridge/vite-plugin": "^2.0.0-beta.0",
     "ai": "^5.0.0",
-    "skybridge": "^2.0.0",
+    "skybridge": "^2.0.0-beta.0",
     "vitest": "^4.1.0"
   },
   "devDependencies": {
+    "@skybridge/vite-plugin": "workspace:*",
     "@types/node": "^24.13.3",
     "ai": "^5.0.0",
     "skybridge": "workspace:*",

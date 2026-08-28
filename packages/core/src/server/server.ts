@@ -505,6 +505,7 @@ export function __setBuildManifest(
 }
 
 let pendingSkillsManifest: SkillsManifest | null = null;
+let cachedDiskManifest: Record<string, ViteManifestEntry> | null = null;
 let discoveredSkills: SkillsManifest | null = null;
 let warnedOnMissingSkills = false;
 
@@ -579,7 +580,6 @@ export class McpServer<
    */
   private viewUriByPath = new Map<string, string>();
   private viteManifest: Record<string, ViteManifestEntry> | null = null;
-  private diskManifest: Record<string, ViteManifestEntry> | null = null;
   private oauthEnabled = false;
   private resolveResourceMetadataUrl?: ResourceMetadataUrlResolver;
   private readonly toolSecuritySchemes = new Map<
@@ -1201,13 +1201,13 @@ export class McpServer<
     if (this.viteManifest) {
       return this.viteManifest;
     }
-    this.diskManifest ??= JSON.parse(
+    cachedDiskManifest ??= JSON.parse(
       readFileSync(
         path.join(process.cwd(), "dist", "assets", ".vite", "manifest.json"),
         "utf-8",
       ),
     );
-    return this.diskManifest ?? {};
+    return cachedDiskManifest ?? {};
   }
 
   /**

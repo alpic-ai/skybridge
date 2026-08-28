@@ -20,6 +20,8 @@ SPEC.md keeps track of the app's requirements and design decisions. Keep it up t
 
 **Migrating from Skybridge `< 0.36.x`?** → Read [migrate-to-v1.md](references/migrate-to-v1.md) first. Users may reference `skybridge >= 0.36.x` as v1.
 
+**Migrating from Skybridge `1.x` to `2.x`?** → Read [migrate-to-v2.md](references/migrate-to-v2.md) first. v2 replaces the `McpServer` singleton with the `Skybridge` app class and a per-request factory.
+
 **Building an ecommerce app?** → Read [ecommerce.md](references/ecommerce.md) first.
 
 ## Setup

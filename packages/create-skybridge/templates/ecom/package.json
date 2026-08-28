@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@ladle/react": "^5.1.1",
-    "@skybridge/devtools": "^1.2.4",
+    "@skybridge/devtools": "workspace:*",
     "@skybridge/vite-plugin": "workspace:*",
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.14",

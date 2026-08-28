@@ -23,7 +23,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@skybridge/devtools": "^1.2.7",
+    "@skybridge/devtools": "workspace:*",
     "@skybridge/vite-plugin": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.3",

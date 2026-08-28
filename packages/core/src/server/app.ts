@@ -6,6 +6,7 @@ import {
   type McpHttpHandler,
   type Server as SdkServer,
   type ServerOptions,
+  UnsupportedProtocolVersionError,
 } from "@modelcontextprotocol/server";
 import type { ErrorRequestHandler, Express, RequestHandler } from "express";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
@@ -36,11 +37,14 @@ export type SkybridgeConfig<TAuthExtra extends ExtraClaims = ExtraClaims> =
   Implementation & ServerOptions & SkybridgeServerOptions<TAuthExtra>;
 
 /**
- * The factory that declares an app's MCP surface. Called with a fresh
- * {@link McpServer} for every request, it must **return** the chained server so
- * `typeof app` carries the registered tool types.
+ * Builds an app's MCP surface. Runs again for **every incoming request**, on a
+ * fresh {@link McpServer}, so keep it to registration: hoist pools, timers,
+ * clients and any other side effect to module scope and close over them.
+ *
+ * It must **return** the chained server so `typeof app` carries the registered
+ * tool types.
  */
-export type SkybridgeSetup<
+export type SkybridgeFactory<
   TTools extends Record<string, ToolDef>,
   TAuthExtra extends ExtraClaims,
 > = (
@@ -51,10 +55,11 @@ export type SkybridgeSetup<
  * A Skybridge app: the HTTP surface (Express, OAuth metadata, the `/mcp`
  * route) plus a factory that builds the MCP server for each request.
  *
- * The factory runs once per request, so tools, resources, prompts and views
- * are always registered on the instance that serves the request. It also runs
- * once at construction time, which surfaces registration errors at boot and
- * gives the OAuth layer the set of per-tool security schemes.
+ * The factory runs for every request, so tools, resources, prompts and views
+ * are always registered on the instance that serves the request. Anything in
+ * the factory body other than registration therefore runs per request too.
+ * It also runs once at construction, which surfaces registration errors at
+ * boot and gives the OAuth layer the set of per-tool security schemes.
  *
  * @typeParam TTools - Accumulated tool registry, inferred from the server the
  * factory returns. You almost never set this manually.
@@ -87,7 +92,7 @@ export class Skybridge<
   private readonly serverInfo: Implementation;
   private readonly serverOptions: ServerOptions;
   private readonly skybridgeOptions: SkybridgeServerOptions<TAuthExtra>;
-  private readonly setup: SkybridgeSetup<TTools, TAuthExtra>;
+  private readonly factory: SkybridgeFactory<TTools, TAuthExtra>;
   private readonly expressApp: Express;
   private readonly errorMiddleware: ErrorMiddlewareConfig[] = [];
   private readonly monitoringEntry: McpMiddlewareEntry | null =
@@ -97,7 +102,7 @@ export class Skybridge<
 
   constructor(
     config: SkybridgeConfig<TAuthExtra>,
-    setup: SkybridgeSetup<TTools, TAuthExtra>,
+    factory: SkybridgeFactory<TTools, TAuthExtra>,
   ) {
     const {
       name,
@@ -115,7 +120,7 @@ export class Skybridge<
     this.serverInfo = { name, title, version, description, icons, websiteUrl };
     this.serverOptions = serverOptions;
     this.skybridgeOptions = { json, oauth, skills };
-    this.setup = setup;
+    this.factory = factory;
 
     const sample = this.buildServer();
 
@@ -156,6 +161,9 @@ export class Skybridge<
       () => this.createServerInstance(),
       {
         onerror: (error) => {
+          if (error instanceof UnsupportedProtocolVersionError) {
+            return;
+          }
           console.error("Error handling MCP request:", error);
         },
       },
@@ -308,6 +316,7 @@ export class Skybridge<
       // (force-quit on a second Ctrl+C while drain is hanging).
       process.off("SIGTERM", shutdown);
       process.off("SIGINT", shutdown);
+      this.cachedFetchHandler?.close().catch(() => {});
       httpServer.close(() => process.exit(0));
       // Force exit if connections don't drain in time so the port is still
       // released promptly (e.g. for nodemon restarts).
@@ -327,7 +336,7 @@ export class Skybridge<
     if (this.resolveResourceMetadataUrl) {
       server.setResourceMetadataUrlResolver(this.resolveResourceMetadataUrl);
     }
-    return this.setup(server);
+    return this.factory(server);
   }
 
   private middlewareEntries(

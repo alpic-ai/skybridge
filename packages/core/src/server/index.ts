@@ -4,7 +4,7 @@ export type {
 } from "../standard-schema.js";
 export type {
   SkybridgeConfig,
-  SkybridgeSetup,
+  SkybridgeFactory,
 } from "./app.js";
 export { Skybridge } from "./app.js";
 export type { OAuthConfig } from "./auth/index.js";
