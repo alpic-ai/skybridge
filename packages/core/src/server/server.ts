@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { readFileSync } from "node:fs";
 import http from "node:http";
+import type { AddressInfo } from "node:net";
 import path from "node:path";
 import type {
   McpUiResourceMeta,
@@ -1085,7 +1086,10 @@ export class McpServer<
    * the runtime can bridge incoming requests to the Node HTTP server. On
    * Vercel (`VERCEL === "1"`), returns the Express app directly so the
    * serverless function entry can call it as a `(req, res)` handler. On
-   * Node, returns `undefined` once listening.
+   * Node, returns `undefined` once listening. When the process was spawned
+   * with an IPC channel, the bound port is reported to the parent as
+   * `{ type: "skybridge:listening", port }`, the readiness signal test runners
+   * wait on instead of polling.
    */
   async run(): Promise<
     { fetch: (...args: unknown[]) => unknown } | Express | undefined
@@ -1114,16 +1118,19 @@ export class McpServer<
     });
 
     httpServer.on("request", this.express);
-    const port = parseInt(process.env.__PORT ?? "3000", 10);
+    const intendedPort = parseInt(process.env.__PORT ?? "3000", 10);
     await new Promise<void>((resolve, reject) => {
       httpServer.on("error", (error: Error) => {
         console.error("Failed to start server:", error);
         reject(error);
       });
-      httpServer.listen(port, () => {
+      httpServer.listen(intendedPort, () => {
         resolve();
       });
     });
+
+    const { port } = httpServer.address() as AddressInfo;
+    process.send?.({ type: "skybridge:listening", port });
 
     // On workerd, bridge the Node http server to a Workers fetch handler.
     // The specifier is held in a variable to sidestep tsc's module resolution

@@ -75,6 +75,10 @@ jobs:
         working-directory: ./packages/core
         run: pnpm version ${{ steps.version.outputs.version }} --no-git-tag-version
 
+      - name: Setting version for vite-plugin
+        working-directory: ./packages/vite-plugin
+        run: pnpm version ${{ steps.version.outputs.version }} --no-git-tag-version
+
       - name: Setting version for create-skybridge
         working-directory: ./packages/create-skybridge
         run: pnpm version ${{ steps.version.outputs.version }} --no-git-tag-version
@@ -83,8 +87,16 @@ jobs:
         working-directory: ./packages/devtools
         run: pnpm version ${{ steps.version.outputs.version }} --no-git-tag-version
 
+      - name: Setting version for test
+        working-directory: ./packages/test
+        run: pnpm version ${{ steps.version.outputs.version }} --no-git-tag-version
+
       - name: Publish core to npm
         working-directory: ./packages/core
+        run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
+
+      - name: Publish vite-plugin to npm
+        working-directory: ./packages/vite-plugin
         run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
 
       # Templates use `skybridge: workspace:*` so dev/CI build against the
@@ -93,15 +105,21 @@ jobs:
       # publishing create-skybridge.
       - name: Pin demo template skybridge dep for publish
         working-directory: ./packages/create-skybridge/templates/demo
-        run: pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
+        run: |
+          pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
+          pnpm pkg set 'devDependencies.@skybridge/vite-plugin=^${{ steps.version.outputs.version }}'
 
       - name: Pin blank template skybridge dep for publish
         working-directory: ./packages/create-skybridge/templates/blank
-        run: pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
+        run: |
+          pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
+          pnpm pkg set 'devDependencies.@skybridge/vite-plugin=^${{ steps.version.outputs.version }}'
 
       - name: Pin ecom template skybridge dep for publish
         working-directory: ./packages/create-skybridge/templates/ecom
-        run: pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
+        run: |
+          pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
+          pnpm pkg set 'devDependencies.@skybridge/vite-plugin=^${{ steps.version.outputs.version }}'
 
       - name: Publish create-skybridge to npm
         working-directory: ./packages/create-skybridge
@@ -109,6 +127,10 @@ jobs:
 
       - name: Publish devtools to npm
         working-directory: ./packages/devtools
+        run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
+
+      - name: Publish test to npm
+        working-directory: ./packages/test
         run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
 
       - name: Restore templates workspace deps

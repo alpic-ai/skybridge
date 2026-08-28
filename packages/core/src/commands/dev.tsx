@@ -10,7 +10,7 @@ import { useNodemon } from "../cli/use-nodemon.js";
 import { useOpenBrowser } from "../cli/use-open-browser.js";
 import { useTunnel } from "../cli/use-tunnel.js";
 import { useTypeScriptCheck } from "../cli/use-typescript-check.js";
-import { scanAndWriteViewsDts } from "../web/plugin/scan-views.js";
+import { scanAndWriteViewsDts } from "../views/index.js";
 
 export default class Dev extends Command {
   static override description = "Start development server";
