@@ -1791,9 +1791,15 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@ai-sdk/anthropic':
+        specifier: ^2.0.90
+        version: 2.0.95(zod@4.4.3)
       '@skybridge/devtools':
         specifier: workspace:*
         version: link:../../../devtools
+      '@skybridge/test':
+        specifier: workspace:*
+        version: link:../../../test
       '@skybridge/vite-plugin':
         specifier: workspace:*
         version: link:../../../vite-plugin
@@ -1812,6 +1818,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^6.0.3
         version: 6.0.3(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
+      ai:
+        specifier: ^5.0.0
+        version: 5.0.244(zod@4.4.3)
       alpic:
         specifier: ^1.155.0
         version: 1.157.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.9.0(@opentelemetry/api@1.9.1))(arktype@2.1.27)(rxjs@7.8.2)(typescript@6.0.3)
@@ -1824,6 +1833,9 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+      vitest:
+        specifier: ^4.1.10
+        version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/ui@4.1.10)(jsdom@29.1.1(@noble/hashes@1.8.0))(msw@2.12.4(@types/node@24.13.3)(typescript@6.0.3))(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
 
   packages/create-skybridge/templates/ecom:
     dependencies:

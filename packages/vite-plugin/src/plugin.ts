@@ -8,7 +8,7 @@ import {
   scanViewsSync,
   writeViewsDts,
 } from "skybridge/views";
-import type { Plugin, ViteDevServer } from "vite";
+import { loadEnv, type Plugin, type ViteDevServer } from "vite";
 import type { ViteUserConfig } from "vitest/config";
 import { transform as dataLlmTransform } from "./transform-data-llm.js";
 
@@ -24,6 +24,12 @@ export interface EvalsOptions {
   temperature?: number;
   systemPrompt?: string;
   maxSteps?: number;
+  /**
+   * Per-scenario timeout in milliseconds. Defaults to two minutes, because
+   * every turn in a scenario is a live model call and vitest's own 5s default
+   * expires mid-conversation.
+   */
+  timeout?: number;
 }
 
 /** Options for the {@link skybridge} Vite plugin. */
@@ -95,6 +101,9 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
   return viewsPlugin(options);
 }
 
+const EVALS_DIR = "evals";
+const DEFAULT_EVAL_TIMEOUT_MS = 120_000;
+
 function here(file: string): string {
   return fileURLToPath(new URL(file, import.meta.url));
 }
@@ -113,7 +122,7 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
     // to feed esbuild's external list when bundling the server.
     api: { viewsDir: rawViewsDir, serverExternal: options?.serverExternal },
 
-    config(config) {
+    config(config, { mode }) {
       projectRoot = config.root || process.cwd();
       resolvedViewsDir = isAbsolute(rawViewsDir)
         ? rawViewsDir
@@ -181,11 +190,21 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
         },
       };
 
+      if (!options?.evals) {
+        return base;
+      }
+
       return {
         ...base,
         test: {
           setupFiles: [here("./evals/matchers.js")],
-          provide: { skybridgeEvals: options?.evals },
+          provide: { skybridgeEvals: options.evals },
+          include: [
+            "**/*.{test,spec}.?(c|m)[jt]s?(x)",
+            `${EVALS_DIR}/**/*.eval.?(c|m)ts`,
+          ],
+          testTimeout: options.evals.timeout ?? DEFAULT_EVAL_TIMEOUT_MS,
+          env: loadEnv(mode, projectRoot, ""),
         },
       };
     },

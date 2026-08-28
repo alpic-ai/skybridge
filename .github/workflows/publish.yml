@@ -103,6 +103,10 @@ jobs:
         working-directory: ./packages/devtools
         run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
 
+      - name: Publish test to npm
+        working-directory: ./packages/test
+        run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
+
       # Templates use `skybridge: workspace:*` so dev/CI build against the
       # local package. pnpm doesn't rewrite that when bundling the templates
       # into create-skybridge, so pin it to the just-published version before
@@ -113,6 +117,7 @@ jobs:
           pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
           pnpm pkg set 'devDependencies.@skybridge/vite-plugin=^${{ steps.version.outputs.version }}'
           pnpm pkg set 'devDependencies.@skybridge/devtools=^${{ steps.version.outputs.version }}'
+          pnpm pkg set 'devDependencies.@skybridge/test=^${{ steps.version.outputs.version }}'
 
       - name: Pin blank template skybridge dep for publish
         working-directory: ./packages/create-skybridge/templates/blank
@@ -130,10 +135,6 @@ jobs:
 
       - name: Publish create-skybridge to npm
         working-directory: ./packages/create-skybridge
-        run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
-
-      - name: Publish test to npm
-        working-directory: ./packages/test
         run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
 
       - name: Restore templates workspace deps
