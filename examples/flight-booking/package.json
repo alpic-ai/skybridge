@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@alpic-ai/insights": "^1.142.1",
-    "@modelcontextprotocol/sdk": "^1.29.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "skybridge": "^1.1.0",
@@ -22,6 +21,7 @@
   },
   "devDependencies": {
     "@skybridge/devtools": "^1.2.3",
+    "@skybridge/vite-plugin": "workspace:*",
     "@types/node": "^22.20.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

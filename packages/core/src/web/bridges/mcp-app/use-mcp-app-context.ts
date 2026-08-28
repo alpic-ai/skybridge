@@ -12,7 +12,7 @@ type McpAppInitializationOptions = {
  * Read a single key from the raw MCP Apps (`ext-apps`) bridge context.
  *
  * Advanced escape hatch — prefer the cross-host hooks (`useToolInfo`,
- * `useLayout`, etc.) which work in both MCP Apps and Apps SDK. Reach for this
+ * `useViewport`, etc.) which work in both MCP Apps and Apps SDK. Reach for this
  * when you need protocol-level fields not surfaced by the public hooks.
  *
  * `options.appInfo` is honored only on the first call that creates the

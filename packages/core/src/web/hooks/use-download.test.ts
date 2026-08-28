@@ -26,7 +26,7 @@ describe("useDownload", () => {
   describe("apps-sdk host", () => {
     beforeEach(() => {
       vi.stubGlobal("openai", {});
-      vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+      vi.stubGlobal("skybridge", { hostType: "mcp-app" });
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
       vi.stubGlobal("parent", { postMessage: getMcpAppHostPostMessageMock() });
     });
@@ -42,7 +42,7 @@ describe("useDownload", () => {
       const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const { result } = renderHook(() => useDownload());
 
-      const res = await result.current.download(params);
+      const res = await result.current(params);
 
       expect(res).toEqual({ isError: true });
       expect(errorSpy).toHaveBeenCalledWith(
@@ -70,7 +70,7 @@ describe("useDownload", () => {
       const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const { result } = renderHook(() => useDownload());
 
-      const res = await result.current.download(params);
+      const res = await result.current(params);
 
       expect(res).toEqual({ isError: true });
       expect(errorSpy).toHaveBeenCalledWith(
@@ -103,7 +103,7 @@ describe("useDownload", () => {
     it("sends ui/download-file with the provided contents", async () => {
       const { result } = renderHook(() => useDownload());
 
-      const res = await result.current.download(params);
+      const res = await result.current(params);
 
       expect(res).toEqual({});
       await waitFor(() => {
@@ -132,7 +132,7 @@ describe("useDownload", () => {
 
       const { result } = renderHook(() => useDownload());
 
-      const res = await result.current.download(params);
+      const res = await result.current(params);
 
       expect(res).toEqual({ isError: true });
     });

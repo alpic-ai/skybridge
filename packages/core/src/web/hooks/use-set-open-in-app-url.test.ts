@@ -24,7 +24,7 @@ describe("useSetOpenInAppUrl", () => {
         setOpenInAppUrl: setOpenInAppUrlMock,
       });
       vi.stubGlobal("skybridge", {
-        hostType: "apps-sdk",
+        hostType: "mcp-app",
         serverUrl: "https://example.com",
       });
       vi.stubGlobal("parent", { postMessage: vi.fn() });

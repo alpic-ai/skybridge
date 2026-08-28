@@ -14,15 +14,13 @@ const mock = vi.hoisted(() => ({
   transportOptions: undefined as TransportOptions | undefined,
 }));
 
-vi.mock("@modelcontextprotocol/sdk/client/streamableHttp.js", () => ({
+vi.mock("@modelcontextprotocol/client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@modelcontextprotocol/client")>()),
   StreamableHTTPClientTransport: class {
     constructor(_url: URL, options: TransportOptions) {
       mock.transportOptions = options;
     }
   },
-}));
-
-vi.mock("@modelcontextprotocol/sdk/client/index.js", () => ({
   Client: class {
     connect = vi.fn().mockResolvedValue(undefined);
   },

@@ -1,16 +1,15 @@
-import { McpServer } from "skybridge/server";
-
-const server = new McpServer(
-  {
-    name: "skybridge-blank",
-    version: "0.0.1",
-  },
-  { capabilities: {} },
-);
+import { Skybridge } from "skybridge/server";
 
 // Register tools with `server.registerTool(...)`.
 // Docs: https://docs.skybridge.tech/api-reference/register-tool
 
-export default await server.run();
+export const app = new Skybridge(
+  {
+    name: "skybridge-blank",
+    version: "0.0.1",
+    capabilities: {},
+  },
+  (server) => server,
+);
 
-export type AppType = typeof server;
+export type AppType = typeof app;

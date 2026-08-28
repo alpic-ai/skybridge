@@ -19,7 +19,7 @@ describe("useToolInfo", () => {
         toolOutput: null,
         toolResponseMetadata: null,
       });
-      vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+      vi.stubGlobal("skybridge", { hostType: "mcp-app" });
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
@@ -44,7 +44,6 @@ describe("useToolInfo", () => {
         expect(result.current).toMatchObject({
           input: { name: "pokemon", args: { name: "pikachu" } },
           status: "pending",
-          isIdle: false,
           isPending: true,
           isSuccess: false,
         });
@@ -76,7 +75,6 @@ describe("useToolInfo", () => {
       await waitFor(() => {
         expect(result.current).toMatchObject({
           status: "success",
-          isIdle: false,
           isPending: false,
           isSuccess: true,
           output: toolOutput,
@@ -107,7 +105,6 @@ describe("useToolInfo", () => {
       await waitFor(() => {
         expect(result.current).toMatchObject({
           status: "pending",
-          isIdle: false,
           isPending: true,
           isSuccess: false,
           input: undefined,
@@ -127,7 +124,6 @@ describe("useToolInfo", () => {
       await waitFor(() => {
         expect(result.current).toMatchObject({
           status: "pending",
-          isIdle: false,
           isPending: true,
           isSuccess: false,
           input: { name: "pokemon", query: "pikachu" },
@@ -150,7 +146,6 @@ describe("useToolInfo", () => {
       await waitFor(() => {
         expect(result.current).toMatchObject({
           status: "success",
-          isIdle: false,
           isPending: false,
           isSuccess: true,
           input: { name: "pokemon", query: "pikachu" },

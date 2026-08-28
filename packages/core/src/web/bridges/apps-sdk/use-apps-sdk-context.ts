@@ -5,7 +5,7 @@ import type { AppsSdkContext } from "./types.js";
 /**
  * Read a single key from the raw Apps SDK (`window.openai`) context.
  *
- * Advanced escape hatch — prefer the cross-host hooks (`useLayout`, `useUser`,
+ * Advanced escape hatch — prefer the cross-host hooks (`useViewport`, `useUser`,
  * `useToolInfo`, etc.) which work in both Apps SDK and MCP Apps. Reach for
  * this when you need ChatGPT-only fields not surfaced by the public hooks.
  *

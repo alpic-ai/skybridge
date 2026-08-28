@@ -24,12 +24,12 @@ export default class Start extends Command {
 
     console.clear();
 
-    // `dist/server.js` is the natural entry (the user's `await server.run()`
+    // `dist/index.js` is the natural entry (the user's `await app.run()`
     // binds the port). Prefer `dist/__entry.js` when present because it
     // primes the Vite manifest first — without it, hashed asset URLs in
     // views won't resolve.
     const entryPath = resolve(process.cwd(), "dist/__entry.js");
-    const fallbackPath = resolve(process.cwd(), "dist/server.js");
+    const fallbackPath = resolve(process.cwd(), "dist/index.js");
     const indexPath = existsSync(entryPath) ? entryPath : fallbackPath;
 
     if (!existsSync(indexPath)) {

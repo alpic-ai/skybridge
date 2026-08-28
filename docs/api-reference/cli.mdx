@@ -100,7 +100,7 @@ List those packages in the Vite plugin's `serverExternal` to leave them out of t
 ```ts vite.config.ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { skybridge } from "skybridge/vite";
+import { skybridge } from "@skybridge/vite-plugin";
 
 export default defineConfig({
   plugins: [react(), skybridge({ serverExternal: ["dtrace-provider"] })],

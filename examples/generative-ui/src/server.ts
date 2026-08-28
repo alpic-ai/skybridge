@@ -8,7 +8,7 @@ import {
 } from "@json-render/core";
 import { schema } from "@json-render/react/schema";
 import { shadcnComponentDefinitions } from "@json-render/shadcn/catalog";
-import { McpServer } from "skybridge/server";
+import { Skybridge } from "skybridge/server";
 
 const catalog = defineCatalog(schema, {
   components: shadcnComponentDefinitions,
@@ -18,78 +18,79 @@ const catalog = defineCatalog(schema, {
 const catalogPrompt = catalog.prompt();
 const specSchema = catalog.zodSchema();
 
-const server = new McpServer(
+export const app = new Skybridge(
   {
     name: "generative-ui",
     version: "0.0.1",
+    capabilities: {},
   },
-  { capabilities: {} },
-)
-  .mcpMiddleware(intentMiddleware())
-  .registerTool(
-    {
-      name: "get-ui-catalog",
-      description:
-        "Returns the full UI component catalog. Call this before render to learn available components, their props, and the spec format.",
-      annotations: {
-        readOnlyHint: true,
-        openWorldHint: false,
-        destructiveHint: false,
-      },
-    },
-    async () => ({
-      content: [{ type: "text" as const, text: catalogPrompt }],
-    }),
-  )
-  .registerTool(
-    {
-      name: "render",
-      description:
-        "Render a dynamic UI from a json-render spec. Call get-ui-catalog first to learn available components and the spec format.",
-      inputSchema: {
-        spec: specSchema.describe("The json-render UI spec to render"),
-      },
-      annotations: {
-        readOnlyHint: true,
-        openWorldHint: false,
-        destructiveHint: false,
-      },
-      view: {
-        component: "render",
-        description: "Renders a json-render UI spec using shadcn/ui components",
-      },
-    },
-    async ({ spec: rawSpec }) => {
-      const { spec: fixedSpec } = autoFixSpec(rawSpec as Spec);
-
-      // Structural validation (missing root, dangling children, etc.)
-      const structural = validateSpec(fixedSpec);
-      if (!structural.valid) {
-        return {
-          structuredContent: {},
-          content: [
-            {
-              type: "text" as const,
-              text: `Spec structural errors:\n${formatSpecIssues(structural.issues)}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-
-      return {
-        structuredContent: { spec: fixedSpec },
-        content: [
-          {
-            type: "text" as const,
-            text: "UI rendered successfully.",
+  (server) =>
+    server
+      .registerTool(
+        {
+          name: "get-ui-catalog",
+          description:
+            "Returns the full UI component catalog. Call this before render to learn available components, their props, and the spec format.",
+          annotations: {
+            readOnlyHint: true,
+            openWorldHint: false,
+            destructiveHint: false,
           },
-        ],
-        isError: false,
-      };
-    },
-  );
+        },
+        async () => ({
+          content: [{ type: "text" as const, text: catalogPrompt }],
+        }),
+      )
+      .registerTool(
+        {
+          name: "render",
+          description:
+            "Render a dynamic UI from a json-render spec. Call get-ui-catalog first to learn available components and the spec format.",
+          inputSchema: {
+            spec: specSchema.describe("The json-render UI spec to render"),
+          },
+          annotations: {
+            readOnlyHint: true,
+            openWorldHint: false,
+            destructiveHint: false,
+          },
+          view: {
+            component: "render",
+            description:
+              "Renders a json-render UI spec using shadcn/ui components",
+          },
+        },
+        async ({ spec: rawSpec }) => {
+          const { spec: fixedSpec } = autoFixSpec(rawSpec as Spec);
 
-export default await server.run();
+          // Structural validation (missing root, dangling children, etc.)
+          const structural = validateSpec(fixedSpec);
+          if (!structural.valid) {
+            return {
+              structuredContent: {},
+              content: [
+                {
+                  type: "text" as const,
+                  text: `Spec structural errors:\n${formatSpecIssues(structural.issues)}`,
+                },
+              ],
+              isError: true,
+            };
+          }
 
-export type AppType = typeof server;
+          return {
+            structuredContent: { spec: fixedSpec },
+            content: [
+              {
+                type: "text" as const,
+                text: "UI rendered successfully.",
+              },
+            ],
+            isError: false,
+          };
+        },
+      )
+      .mcpMiddleware(intentMiddleware()),
+);
+
+export type AppType = typeof app;

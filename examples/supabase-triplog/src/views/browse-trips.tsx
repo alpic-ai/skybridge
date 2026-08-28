@@ -1,7 +1,7 @@
 import "@/index.css";
 
 import { type Dispatch, type SetStateAction, useState } from "react";
-import { useLayout } from "skybridge/web";
+import { useUser } from "skybridge/web";
 import { TripCarousel } from "../components/trip-carousel.js";
 import { TripDetail } from "../components/trip-detail.js";
 import {
@@ -29,7 +29,7 @@ function Header({ count }: { count?: number }) {
 }
 
 function BrowseTrips() {
-  const { theme } = useLayout();
+  const { theme } = useUser();
   const { output, isPending, input } = useToolInfo<"browse-trips">();
 
   const [focusDismissed, setFocusDismissed] = useState(false);

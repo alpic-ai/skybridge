@@ -2,7 +2,7 @@ import type {
   CallToolResult,
   ListToolsResult,
   ServerResult,
-} from "@modelcontextprotocol/sdk/types.js";
+} from "@modelcontextprotocol/server";
 import { expectTypeOf, test } from "vitest";
 import type {
   McpExtra,
@@ -16,7 +16,7 @@ const server = null as unknown as McpServer;
 test("request category narrows extra and next() result", () => {
   server.mcpMiddleware("request", async (_request, extra, next) => {
     expectTypeOf(extra).toEqualTypeOf<McpExtra>();
-    extra.signal;
+    extra.mcpReq.signal;
     const result = await next();
     expectTypeOf(result).toEqualTypeOf<ServerResult>();
     return result;

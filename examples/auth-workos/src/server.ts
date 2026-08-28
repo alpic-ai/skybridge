@@ -1,5 +1,5 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { McpServer, workosProvider } from "skybridge/server";
+import { Skybridge, workosProvider } from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
@@ -17,85 +17,82 @@ import { env } from "./env.js";
  * configured in the WorkOS dashboard — here, this server's public URL.
  */
 
-
-const server = new McpServer(
+export const app = new Skybridge(
   {
     name: "auth-coffee",
     version: "0.0.1",
-  },
-  { capabilities: {} },
-  {
+    capabilities: {},
     oauth: await workosProvider({
       domain: env.AUTHKIT_DOMAIN,
       audience: env.SERVER_URL,
     }),
   },
-)
-  .mcpMiddleware(intentMiddleware())
-  .registerTool(
-    {
-      name: "search-coffee-paris",
-      description:
-        "Search for coffee shops in Paris. Shows personalized results with your favorites highlighted and sorted first. Requires authentication.",
-      inputSchema: {
-        query: z
-          .string()
-          .optional()
-          .describe(
-            "Search query (name or specialty, e.g., 'latte', 'espresso')",
-          ),
-        minRating: z
-          .number()
-          .min(1)
-          .max(5)
-          .optional()
-          .describe("Minimum rating (1-5)"),
-      },
-      annotations: {
-        readOnlyHint: true,
-        openWorldHint: true,
-        destructiveHint: false,
-      },
-      view: {
-        component: "search-coffee-paris",
-        description: "Search for coffee shops in Paris",
-        csp: {
-          resourceDomains: ["https://images.unsplash.com"],
-        },
-      },
-      _meta: {
-        "openai/widgetAccessible": true,
-      },
-    },
-    ({ query, minRating }, extra) => {
-      const email = extra.authInfo?.extra?.email;
-      const subject = extra.authInfo?.extra?.subject;
-
-      const results = searchCoffeeShops({
-        query,
-        minRating,
-        userId: subject ?? extra.authInfo?.clientId ?? "anonymous",
-      });
-
-      const displayName = email?.split("@")[0] ?? subject ?? "User";
-
-      return {
-        structuredContent: {
-          shops: results.shops,
-          totalCount: results.totalCount,
-          userName: displayName,
-        },
-        content: [
-          {
-            type: "text",
-            text: `Found ${results.totalCount} coffee shops in Paris for ${displayName}`,
+  (server) =>
+    server
+      .registerTool(
+        {
+          name: "search-coffee-paris",
+          description:
+            "Search for coffee shops in Paris. Shows personalized results with your favorites highlighted and sorted first. Requires authentication.",
+          inputSchema: {
+            query: z
+              .string()
+              .optional()
+              .describe(
+                "Search query (name or specialty, e.g., 'latte', 'espresso')",
+              ),
+            minRating: z
+              .number()
+              .min(1)
+              .max(5)
+              .optional()
+              .describe("Minimum rating (1-5)"),
           },
-        ],
-        isError: false,
-      };
-    },
-  );
+          annotations: {
+            readOnlyHint: true,
+            openWorldHint: true,
+            destructiveHint: false,
+          },
+          view: {
+            component: "search-coffee-paris",
+            description: "Search for coffee shops in Paris",
+            csp: {
+              resourceDomains: ["https://images.unsplash.com"],
+            },
+          },
+          _meta: {
+            "openai/widgetAccessible": true,
+          },
+        },
+        ({ query, minRating }, extra) => {
+          const email = extra.http?.authInfo?.extra?.email;
+          const subject = extra.http?.authInfo?.extra?.subject;
 
-export default await server.run();
+          const results = searchCoffeeShops({
+            query,
+            minRating,
+            userId: subject ?? extra.http?.authInfo?.clientId ?? "anonymous",
+          });
 
-export type AppType = typeof server;
+          const displayName = email?.split("@")[0] ?? subject ?? "User";
+
+          return {
+            structuredContent: {
+              shops: results.shops,
+              totalCount: results.totalCount,
+              userName: displayName,
+            },
+            content: [
+              {
+                type: "text",
+                text: `Found ${results.totalCount} coffee shops in Paris for ${displayName}`,
+              },
+            ],
+            isError: false,
+          };
+        },
+      )
+      .mcpMiddleware(intentMiddleware()),
+);
+
+export type AppType = typeof app;

@@ -48,7 +48,8 @@ This command starts:
 
 ```
 ├── src/
-│   ├── server.ts         # Server entry point
+│   ├── index.ts          # Entry point (starts the app)
+│   ├── server.ts         # App definition (tools, views)
 │   ├── views/            # React components (one per view)
 │   ├── components/       # Shared UI components
 │   ├── helpers.ts        # Shared utilities

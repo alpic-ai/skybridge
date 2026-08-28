@@ -1,9 +1,25 @@
 import type http from "node:http";
 import path from "node:path";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { toNodeHandler } from "@modelcontextprotocol/node";
 import cors from "cors";
 import express from "express";
-import type { McpServer } from "./server.js";
+import type { Skybridge } from "./app.js";
+import type { JsonOptions } from "./server.js";
+
+type SkybridgeApp = Pick<Skybridge, "express" | "fetchHandler">;
+
+/**
+ * Build the bare Express app a {@link Skybridge} instance owns: the instance
+ * plus the built-in `express.json()` body parser, tuned by the `json` config
+ * field.
+ *
+ * @internal
+ */
+export function createBaseApp(json?: JsonOptions): express.Express {
+  const app = express();
+  app.use(express.json(json));
+  return app;
+}
 
 function parseControlPort(raw: string | undefined): number | null {
   if (raw === undefined) {
@@ -49,18 +65,18 @@ function defaultErrorHandler(
 }
 
 export async function createApp({
-  mcpServer,
+  app: skybridgeApp,
   httpServer,
   errorMiddleware = [],
 }: {
-  mcpServer: McpServer;
+  app: SkybridgeApp;
   httpServer: http.Server;
   errorMiddleware?: {
     path?: string;
     handlers: express.ErrorRequestHandler[];
   }[];
 }): Promise<express.Express> {
-  const app = mcpServer.express;
+  const app = skybridgeApp.express;
 
   // Read `process.env.NODE_ENV` inline: wrangler/esbuild only substitute the literal expression,
   // so a local const would defeat dead-code elimination of the dev-only imports below.
@@ -88,7 +104,7 @@ export async function createApp({
     app.use("/assets", express.static(assetsPath));
   }
 
-  app.use("/mcp", mcpMiddleware(mcpServer));
+  app.use("/mcp", mcpMiddleware(skybridgeApp));
 
   applyMiddlewares(app, errorMiddleware);
 
@@ -97,47 +113,19 @@ export async function createApp({
   return app;
 }
 
-const mcpMiddleware = (server: McpServer): express.RequestHandler => {
+const mcpMiddleware = (skybridgeApp: SkybridgeApp): express.RequestHandler => {
+  const handler = toNodeHandler(skybridgeApp.fetchHandler);
+
   return async (
     req: express.Request,
     res: express.Response,
     next: express.NextFunction,
   ) => {
-    if (req.method !== "POST") {
-      res.writeHead(405).end(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          error: {
-            code: -32000,
-            message: "Method not allowed.",
-          },
-          id: null,
-        }),
-      );
-      return;
-    }
-
     try {
-      const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined,
-        // Respond with a single JSON body instead of SSE. Skybridge's stateless
-        // transport never streams server-initiated messages, so SSE adds no
-        // capability — and on workerd specifically, `cloudflare:node`'s http
-        // bridge silently drops chunked writes that happen after the request
-        // handler awaits, which manifests as a 200 with empty body for any
-        // async tools/call.
-        enableJsonResponse: true,
-      });
-
-      res.on("close", () => {
-        transport.close();
-      });
-
-      await server.connectStatelessTransport(transport);
       // Express strips the mount path from req.url (e.g. "/mcp" becomes "/").
-      // Restore it so the SDK builds the correct requestInfo.url.
+      // Restore it so the SDK builds the correct request URL.
       req.url = req.originalUrl;
-      await transport.handleRequest(req, res, req.body);
+      await handler(req, res, req.body);
     } catch (error) {
       next(error);
     }

@@ -1,3 +1,12 @@
+export type {
+  InferSchemaOutput,
+  RawInputShape,
+} from "../standard-schema.js";
+export type {
+  SkybridgeConfig,
+  SkybridgeSetup,
+} from "./app.js";
+export { Skybridge } from "./app.js";
 export type { OAuthConfig } from "./auth/index.js";
 export { type Auth0Claims, auth0Provider } from "./auth/providers/auth0.js";
 export { authplaneProvider } from "./auth/providers/authplane.js";
@@ -18,8 +27,8 @@ export {
   type AuthMetadataOptions,
   type BearerAuthMiddlewareOptions,
   type ExtraClaims,
-  InvalidTokenError,
   mcpAuthMetadataRouter,
+  OAuthError,
   optionalBearerAuth,
   requireBearerAuth,
   type TokenVerifier,
@@ -61,7 +70,6 @@ export type {
   ToolMeta,
   ViewConfig,
   ViewCsp,
-  ViewHostType,
   ViewName,
   ViewNameRegistry,
 } from "./server.js";

@@ -16,7 +16,6 @@
     "@json-render/core": "^0.14.1",
     "@json-render/react": "^0.14.1",
     "@json-render/shadcn": "^0.14.1",
-    "@modelcontextprotocol/sdk": "^1.29.0",
     "@tailwindcss/vite": "^4.3.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -27,6 +26,7 @@
   },
   "devDependencies": {
     "@skybridge/devtools": "^1.2.3",
+    "@skybridge/vite-plugin": "workspace:*",
     "@types/node": "^25.9.4",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

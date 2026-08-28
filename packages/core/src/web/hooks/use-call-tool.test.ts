@@ -24,7 +24,7 @@ describe("useCallTool - onSuccess callback", () => {
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
     vi.stubGlobal("parent", { postMessage: vi.fn() });
-    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     vi.stubGlobal("openai", { callTool: vi.fn() });
     callToolMock = vi.spyOn(getAdaptor(), "callTool") as unknown as Mock;
   });
@@ -217,7 +217,7 @@ describe("useCallTool - TypeScript typing", () => {
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
     vi.stubGlobal("parent", { postMessage: vi.fn() });
-    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
     vi.stubGlobal("openai", { callTool: vi.fn() });
     callToolMock = vi.spyOn(getAdaptor(), "callTool") as unknown as Mock;
   });

@@ -12,7 +12,6 @@
     "deploy": "alpic deploy"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
     "chess.js": "^1.4.0",
     "react": "^19.2.7",
     "react-chessboard": "^5.10.0",
@@ -25,6 +24,7 @@
   },
   "devDependencies": {
     "@skybridge/devtools": "^1.2.3",
+    "@skybridge/vite-plugin": "workspace:*",
     "@tailwindcss/vite": "^4.3.1",
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",

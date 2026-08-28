@@ -8,8 +8,7 @@ export {
 export { useDisplayMode } from "./use-display-mode.js";
 export { type DownloadFn, useDownload } from "./use-download.js";
 export { useFiles } from "./use-files.js";
-export { type Host, type HostInfo, useHostInfo } from "./use-host-info.js";
-export { type LayoutState, useLayout } from "./use-layout.js";
+export { type Host, type HostInfo, useHost } from "./use-host.js";
 export { type OpenExternalFn, useOpenExternal } from "./use-open-external.js";
 export { useRegisterViewTool } from "./use-register-view-tool.js";
 export { type RequestCloseFn, useRequestClose } from "./use-request-close.js";
@@ -20,3 +19,4 @@ export { useSetOpenInAppUrl } from "./use-set-open-in-app-url.js";
 export { useToolInfo } from "./use-tool-info.js";
 export { type UserState, useUser } from "./use-user.js";
 export { useViewState } from "./use-view-state.js";
+export { useViewport, type ViewportState } from "./use-viewport.js";

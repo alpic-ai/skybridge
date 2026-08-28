@@ -1,3 +1,4 @@
+export type { InferSchemaOutput } from "../standard-schema.js";
 export * from "./bridges/index.js";
 export { createStore } from "./create-store.js";
 export * from "./data-llm.js";

@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@alpic-ai/ui": "^1.155.0",
-    "@modelcontextprotocol/sdk": "^1.29.0",
     "lucide-react": "^1.25.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -25,6 +24,7 @@
   },
   "devDependencies": {
     "@skybridge/devtools": "^1.2.7",
+    "@skybridge/vite-plugin": "workspace:*",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
