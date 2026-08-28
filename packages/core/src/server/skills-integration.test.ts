@@ -6,6 +6,7 @@ import {
   __setSkillsManifest,
   McpServer,
   type SkillsManifest,
+  Skybridge,
 } from "./index.js";
 
 const MANIFEST: SkillsManifest = [
@@ -73,18 +74,17 @@ describe("skills server option", () => {
 
   it("serves skills through the stateless transport (capability + reads)", async () => {
     __setSkillsManifest(MANIFEST);
-    const server = new McpServer(
-      { name: "t", version: "0.0.1" },
-      {},
-      { skills: true },
+    const app = new Skybridge(
+      { name: "t", version: "0.0.1", skills: true },
+      (server) => server,
     );
     const client = new Client({ name: "c", version: "0.0.1" });
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    // The production HTTP path builds a fresh per-request server by replaying
-    // the registration ledger; exercise it directly to lock that skills
-    // (capability + resource reads) survive that hop.
-    const instance = server.createStatelessServerInstance();
+    // The production HTTP path builds a fresh per-request server; exercise it
+    // directly to lock that skills (capability + resource reads) survive that
+    // hop.
+    const instance = app.createServerInstance();
     await instance.connect(serverTransport);
     await client.connect(clientTransport);
 

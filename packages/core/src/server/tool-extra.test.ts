@@ -7,7 +7,7 @@ import {
 import type { RequestHandler } from "express";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { McpServer } from "./server.js";
+import { Skybridge } from "./app.js";
 
 vi.mock("@skybridge/devtools", () => ({
   devtoolsStaticServer: () =>
@@ -25,17 +25,19 @@ describe("tool handler extra", () => {
   it("exposes the client hints the host sent on the request", async () => {
     const { createApp } = await import("./express.js");
     let seenLocale: unknown;
-    const server = new McpServer({ name: "t", version: "0.0.0" }).registerTool(
-      { name: "hints", description: "Reads client hints.", inputSchema: {} },
-      (_args, extra) => {
-        seenLocale = extra.mcpReq._meta?.["openai/locale"];
-        return { content: [{ type: "text", text: "ok" }] };
-      },
+    const app = new Skybridge({ name: "t", version: "0.0.0" }, (server) =>
+      server.registerTool(
+        { name: "hints", description: "Reads client hints.", inputSchema: {} },
+        (_args, extra) => {
+          seenLocale = extra.mcpReq._meta?.["openai/locale"];
+          return { content: [{ type: "text", text: "ok" }] };
+        },
+      ),
     );
 
     const httpServer = http.createServer();
-    const app = await createApp({ mcpServer: server, httpServer });
-    const listening = http.createServer(app);
+    const expressApp = await createApp({ app, httpServer });
+    const listening = http.createServer(expressApp);
     await new Promise<void>((r) => listening.listen(0, r));
     openServer = listening;
     const port = (listening.address() as { port: number }).port;
@@ -59,34 +61,38 @@ describe("tool handler extra", () => {
 
 describe("stateless server instances", () => {
   it("carries the registered capabilities onto each per-request instance", () => {
-    const server = new McpServer({ name: "t", version: "0.0.0" }).registerTool(
-      { name: "a-tool", description: "d", inputSchema: {} },
-      () => ({ content: [{ type: "text", text: "ok" }] }),
+    const app = new Skybridge({ name: "t", version: "0.0.0" }, (server) =>
+      server.registerTool(
+        { name: "a-tool", description: "d", inputSchema: {} },
+        () => ({ content: [{ type: "text", text: "ok" }] }),
+      ),
     );
 
-    const fresh = server.createStatelessServerInstance();
+    const fresh = app.createServerInstance();
 
     expect(fresh.getCapabilities().tools).toBeDefined();
   });
 
   it("serves a 2026-era caller with that era's result shape", async () => {
     const { createApp } = await import("./express.js");
-    const server = new McpServer({ name: "t", version: "0.0.0" }).registerTool(
-      {
-        name: "scalar",
-        description: "Returns a scalar structuredContent.",
-        inputSchema: {},
-        outputSchema: z.number(),
-      },
-      () => ({
-        structuredContent: 42,
-        content: [{ type: "text", text: "42" }],
-      }),
+    const app = new Skybridge({ name: "t", version: "0.0.0" }, (server) =>
+      server.registerTool(
+        {
+          name: "scalar",
+          description: "Returns a scalar structuredContent.",
+          inputSchema: {},
+          outputSchema: z.number(),
+        },
+        () => ({
+          structuredContent: 42,
+          content: [{ type: "text", text: "42" }],
+        }),
+      ),
     );
 
     const httpServer = http.createServer();
-    const app = await createApp({ mcpServer: server, httpServer });
-    const listening = http.createServer(app);
+    const expressApp = await createApp({ app, httpServer });
+    const listening = http.createServer(expressApp);
     await new Promise<void>((r) => listening.listen(0, r));
     openServer = listening;
     const port = (listening.address() as { port: number }).port;

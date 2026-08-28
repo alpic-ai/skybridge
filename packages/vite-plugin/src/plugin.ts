@@ -24,12 +24,6 @@ export interface EvalsOptions {
   temperature?: number;
   systemPrompt?: string;
   maxSteps?: number;
-  server?: string;
-  project?: {
-    cwd: string;
-    command: string[];
-    env?: Record<string, string>;
-  };
 }
 
 /** Options for the {@link skybridge} Vite plugin. */
@@ -43,9 +37,13 @@ export interface SkybridgePluginOptions {
    */
   serverExternal?: string[];
   /**
-   * Runs the app's eval scenarios against a real model: how to boot the server
-   * they talk to, plus defaults for the conversation. Point vitest at this
-   * config to run them. Requires `@skybridge/test` as a dev dependency.
+   * Registers the `expect.chat` matchers and, optionally, the defaults every
+   * conversation starts from (`temperature`, `systemPrompt`, `maxSteps`).
+   * Point vitest at this config to run the scenarios. Requires
+   * `@skybridge/test` as a dev dependency.
+   *
+   * Scenarios always run the app in-process via `start({ app })`, so
+   * `evals: {}` is enough to wire the matchers up.
    */
   evals?: EvalsOptions;
 }
@@ -187,7 +185,6 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
         ...base,
         test: {
           setupFiles: [here("./evals/matchers.js")],
-          globalSetup: [here("./evals/global-setup.js")],
           provide: { skybridgeEvals: options?.evals },
         },
       };

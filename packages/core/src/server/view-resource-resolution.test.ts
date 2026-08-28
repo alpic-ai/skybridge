@@ -6,7 +6,7 @@ import {
 } from "@modelcontextprotocol/client";
 import type { RequestHandler } from "express";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { __setBuildManifest, McpServer } from "./index.js";
+import { __setBuildManifest, type McpServer, Skybridge } from "./index.js";
 
 vi.mock("@skybridge/devtools", () => ({
   devtoolsStaticServer: () =>
@@ -33,19 +33,25 @@ declare module "./server.js" {
 // resource's identity, so a stale, absent, or arbitrary param must still serve
 // the underlying asset.
 
+function buildApp(register: (server: McpServer) => void) {
+  return new Skybridge({ name: "test", version: "1.0.0" }, (server) => {
+    register(server);
+    return server;
+  });
+}
+
 async function connect(register: (server: McpServer) => void) {
-  const server = new McpServer({ name: "test", version: "1.0.0" });
-  register(server);
+  const instance = buildApp(register).createServerInstance();
   const client = new Client({ name: "test-client", version: "1.0.0" });
   const [clientTransport, serverTransport] =
     InMemoryTransport.createLinkedPair();
-  await server.connect(serverTransport);
+  await instance.connect(serverTransport);
   await client.connect(clientTransport);
   return {
     client,
     teardown: async () => {
       await client.close();
-      await server.close();
+      await instance.close();
     },
   };
 }
@@ -59,11 +65,10 @@ async function connectHttp(
   headers: Record<string, string>,
 ) {
   const { createApp } = await import("./express.js");
-  const server = new McpServer({ name: "test", version: "1.0.0" });
-  register(server);
+  const app = buildApp(register);
   const httpServer = http.createServer();
-  await createApp({ mcpServer: server, httpServer });
-  const listening = http.createServer(server.express);
+  await createApp({ app, httpServer });
+  const listening = http.createServer(app.express);
   await new Promise<void>((resolve) => listening.listen(0, resolve));
   openHttpServer = listening;
   const port = (listening.address() as { port: number }).port;
@@ -78,7 +83,6 @@ async function connectHttp(
     client,
     teardown: async () => {
       await client.close();
-      await server.close();
     },
   };
 }

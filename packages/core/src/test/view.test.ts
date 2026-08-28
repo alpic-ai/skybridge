@@ -10,9 +10,9 @@ import {
   vi,
 } from "vitest";
 import { TOOL_OUTPUT_WARNING_TOKENS } from "../context-warnings.js";
+import { Skybridge } from "../server/app.js";
 import type { McpExtra } from "../server/middleware.js";
 import type { McpServer, ViewName } from "../server/server.js";
-import { McpServer as McpServerClass } from "../server/server.js";
 import {
   createMockExtra,
   createMockMcpServer,
@@ -812,39 +812,40 @@ describe("resources/list view _meta injection", () => {
   it("attaches CSP, domain, and connectDomains _meta to view resources at list time", async () => {
     setTestEnv({ NODE_ENV: "production" });
 
-    const server = new McpServerClass(
-      { name: "test", version: "1.0.0" },
-      { capabilities: {} },
-    );
-    server.registerTool(
-      {
-        name: "start",
-        description: "Start",
-        view: {
-          component: "my-view" as ViewName,
-          description: "Onboarding deck",
-          domain: "skybridge.tech",
-          csp: {
-            resourceDomains: ["https://fonts.googleapis.com"],
-            redirectDomains: ["https://docs.skybridge.tech"],
+    const app = new Skybridge(
+      { name: "test", version: "1.0.0", capabilities: {} },
+      (server) =>
+        server.registerTool(
+          {
+            name: "start",
+            description: "Start",
+            view: {
+              component: "my-view" as ViewName,
+              description: "Onboarding deck",
+              domain: "skybridge.tech",
+              csp: {
+                resourceDomains: ["https://fonts.googleapis.com"],
+                redirectDomains: ["https://docs.skybridge.tech"],
+              },
+            },
           },
-        },
-      },
-      vi.fn().mockResolvedValue({
-        content: [{ type: "text", text: "ok" }],
-        structuredContent: {},
-      }),
+          vi.fn().mockResolvedValue({
+            content: [{ type: "text", text: "ok" }],
+            structuredContent: {},
+          }),
+        ),
     );
+    const instance = app.createServerInstance();
 
     const client = new Client({ name: "test-client", version: "1.0.0" });
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    await server.connect(serverTransport);
+    await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
     const { resources } = await client.listResources();
     await client.close();
-    await server.close();
+    await instance.close();
 
     const appsSdk = resources.find((r) => r.uri.includes("apps-sdk"));
     const extApps = resources.find((r) => r.uri.includes("ext-apps"));

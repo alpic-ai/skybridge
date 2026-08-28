@@ -5,7 +5,7 @@ import {
 } from "@modelcontextprotocol/client";
 import type { ErrorRequestHandler, RequestHandler } from "express";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { McpServer } from "./server.js";
+import { Skybridge } from "./app.js";
 
 vi.mock("@skybridge/devtools", () => ({
   devtoolsStaticServer: () =>
@@ -41,24 +41,30 @@ async function postApi(port: number) {
   return fetch(`http://localhost:${port}/api/test`, { method: "POST" });
 }
 
-describe("McpServer.express", () => {
+describe("Skybridge.express", () => {
   it("exposes a ready Express app immediately after construction", () => {
-    const server = new McpServer({ name: "t", version: "0.0.0" });
-    expect(server.express).toBeDefined();
-    expect(typeof server.express.use).toBe("function");
-    expect(typeof server.express.get).toBe("function");
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
+    expect(app.express).toBeDefined();
+    expect(typeof app.express.use).toBe("function");
+    expect(typeof app.express.get).toBe("function");
   });
 
-  it("server.express.get registers a route reachable alongside /mcp", async () => {
+  it("app.express.get registers a route reachable alongside /mcp", async () => {
     const { createApp } = await import("./express.js");
-    const server = new McpServer({ name: "t", version: "0.0.0" });
-    server.express.get("/health", (_req, res) => {
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
+    app.express.get("/health", (_req, res) => {
       res.json({ status: "ok" });
     });
 
     const httpServer = http.createServer();
-    await createApp({ mcpServer: server, httpServer });
-    const { port, server: listening } = await listen(server.express);
+    await createApp({ app, httpServer });
+    const { port, server: listening } = await listen(app.express);
     openServer = listening;
 
     const health = await fetch(`http://localhost:${port}/health`);
@@ -70,14 +76,15 @@ describe("McpServer.express", () => {
     expect(mcp.status).not.toBe(404);
   });
 
-  it("server.use and server.express.use produce the same registration order", async () => {
+  it("app.use and app.express.use produce the same registration order", async () => {
     const { createApp } = await import("./express.js");
     const callsA: string[] = [];
     const callsB: string[] = [];
 
-    const buildServer = () => new McpServer({ name: "t", version: "0.0.0" });
+    const buildApp = () =>
+      new Skybridge({ name: "t", version: "0.0.0" }, (server) => server);
 
-    const sA = buildServer();
+    const sA = buildApp();
     sA.use((_req, _res, next) => {
       callsA.push("first");
       next();
@@ -87,7 +94,7 @@ describe("McpServer.express", () => {
       next();
     });
 
-    const sB = buildServer();
+    const sB = buildApp();
     sB.express.use((_req, _res, next) => {
       callsB.push("first");
       next();
@@ -100,7 +107,7 @@ describe("McpServer.express", () => {
     for (const s of [sA, sB]) {
       s.express.get("/probe", (_req, res) => res.json({ ok: true }));
       const httpServer = http.createServer();
-      await createApp({ mcpServer: s, httpServer });
+      await createApp({ app: s, httpServer });
       const { port, server: listening } = await listen(s.express);
       openServer = listening;
       await fetch(`http://localhost:${port}/probe`);
@@ -113,30 +120,33 @@ describe("McpServer.express", () => {
 
   it("useOnError still wraps thrown /mcp errors after the route is mounted", async () => {
     const { createApp } = await import("./express.js");
-    const server = new McpServer({ name: "t", version: "0.0.0" });
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
     // Register the error handler BEFORE createApp — useOnError should still
     // apply it after /mcp, so /mcp errors hit it.
     const seen: string[] = [];
-    server.useOnError((_err, _req, res, _next) => {
+    app.useOnError((_err, _req, res, _next) => {
       seen.push("useOnError");
       res.status(503).json({ from: "useOnError" });
     });
 
     // Force the /mcp handler to throw so the error pipeline runs.
-    server.use("/mcp", () => {
+    app.use("/mcp", () => {
       throw new Error("boom");
     });
 
     const httpServer = http.createServer();
     await createApp({
-      mcpServer: server,
+      app,
       httpServer,
-      // Mirror what run() does: forward the McpServer's useOnError handlers
+      // Mirror what run() does: forward the app's useOnError handlers
       // to createApp so they get applied after /mcp.
       // biome-ignore lint/complexity/useLiteralKeys: test mirrors run() internals to verify useOnError ordering
-      errorMiddleware: server["customErrorMiddleware"],
+      errorMiddleware: app["errorMiddleware"],
     });
-    const { port, server: listening } = await listen(server.express);
+    const { port, server: listening } = await listen(app.express);
     openServer = listening;
 
     const res = await postMcp(port);
@@ -146,7 +156,7 @@ describe("McpServer.express", () => {
   });
 });
 
-describe("McpServer JSON body parser options", () => {
+describe("Skybridge JSON body parser options", () => {
   const largeBody = JSON.stringify({ data: "x".repeat(200 * 1024) });
 
   async function postEcho(port: number, body: string) {
@@ -158,15 +168,14 @@ describe("McpServer JSON body parser options", () => {
   }
 
   it("forwards json options to express.json", async () => {
-    const server = new McpServer(
-      { name: "t", version: "0.0.0" },
-      {},
-      { json: { limit: "10mb" } },
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0", json: { limit: "10mb" } },
+      (server) => server,
     );
-    server.express.post("/echo", (req, res) => {
+    app.express.post("/echo", (req, res) => {
       res.json({ received: req.body.data.length });
     });
-    const { port, server: listening } = await listen(server.express);
+    const { port, server: listening } = await listen(app.express);
     openServer = listening;
 
     const res = await postEcho(port, largeBody);
@@ -175,11 +184,14 @@ describe("McpServer JSON body parser options", () => {
   });
 
   it("keeps the default 100kb limit when no options are passed", async () => {
-    const server = new McpServer({ name: "t", version: "0.0.0" });
-    server.express.post("/echo", (_req, res) => {
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
+    app.express.post("/echo", (_req, res) => {
       res.json({ ok: true });
     });
-    const { port, server: listening } = await listen(server.express);
+    const { port, server: listening } = await listen(app.express);
     openServer = listening;
 
     const res = await postEcho(port, largeBody);
@@ -197,13 +209,16 @@ describe("createApp", () => {
       next();
     };
 
-    const server = new McpServer({ name: "t", version: "0.0.0" });
-    server.use(mw);
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
+    app.use(mw);
 
     const httpServer = http.createServer();
-    const app = await createApp({ mcpServer: server, httpServer });
+    const expressApp = await createApp({ app, httpServer });
 
-    const { port, server: httpListening } = await listen(app);
+    const { port, server: httpListening } = await listen(expressApp);
     openServer = httpListening;
 
     await postMcp(port);
@@ -219,13 +234,16 @@ describe("createApp", () => {
       next();
     };
 
-    const server = new McpServer({ name: "t", version: "0.0.0" });
-    server.use("/mcp", mw);
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
+    app.use("/mcp", mw);
 
     const httpServer = http.createServer();
-    const app = await createApp({ mcpServer: server, httpServer });
+    const expressApp = await createApp({ app, httpServer });
 
-    const { port, server: httpListening } = await listen(app);
+    const { port, server: httpListening } = await listen(expressApp);
     openServer = httpListening;
 
     await postMcp(port);
@@ -241,13 +259,16 @@ describe("createApp", () => {
       res.status(401).json({ error: "Unauthorized" });
     };
 
-    const server = new McpServer({ name: "t", version: "0.0.0" });
-    server.use("/mcp", reject);
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
+    app.use("/mcp", reject);
 
     const httpServer = http.createServer();
-    const app = await createApp({ mcpServer: server, httpServer });
+    const expressApp = await createApp({ app, httpServer });
 
-    const { port, server: httpListening } = await listen(app);
+    const { port, server: httpListening } = await listen(expressApp);
     openServer = httpListening;
 
     const res = await postMcp(port);
@@ -269,14 +290,17 @@ describe("createApp", () => {
       next();
     };
 
-    const server = new McpServer({ name: "t", version: "0.0.0" });
-    server.use(mwA);
-    server.use(mwB);
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
+    app.use(mwA);
+    app.use(mwB);
 
     const httpServer = http.createServer();
-    const app = await createApp({ mcpServer: server, httpServer });
+    const expressApp = await createApp({ app, httpServer });
 
-    const { port, server: httpListening } = await listen(app);
+    const { port, server: httpListening } = await listen(expressApp);
     openServer = httpListening;
 
     await postMcp(port);
@@ -292,13 +316,16 @@ describe("createApp", () => {
       next();
     };
 
-    const server = new McpServer({ name: "t", version: "0.0.0" });
-    server.use("/api", apiMw);
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
+    app.use("/api", apiMw);
 
     const httpServer = http.createServer();
-    const app = await createApp({ mcpServer: server, httpServer });
+    const expressApp = await createApp({ app, httpServer });
 
-    const { port, server: httpListening } = await listen(app);
+    const { port, server: httpListening } = await listen(expressApp);
     openServer = httpListening;
 
     // Hit /mcp — the /api middleware should NOT fire
@@ -315,13 +342,16 @@ describe("createApp", () => {
       res.json({ status: "ok" });
     });
 
-    const server = new McpServer({ name: "t", version: "0.0.0" });
-    server.use(router as RequestHandler);
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
+    app.use(router as RequestHandler);
 
     const httpServer = http.createServer();
-    const app = await createApp({ mcpServer: server, httpServer });
+    const expressApp = await createApp({ app, httpServer });
 
-    const { port, server: httpListening } = await listen(app);
+    const { port, server: httpListening } = await listen(expressApp);
     openServer = httpListening;
 
     const res = await fetch(`http://localhost:${port}/health`);
@@ -338,13 +368,16 @@ describe("createApp", () => {
       res.json({ value: 42 });
     });
 
-    const server = new McpServer({ name: "t", version: "0.0.0" });
-    server.use("/api", router as RequestHandler);
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
+    app.use("/api", router as RequestHandler);
 
     const httpServer = http.createServer();
-    const app = await createApp({ mcpServer: server, httpServer });
+    const expressApp = await createApp({ app, httpServer });
 
-    const { port, server: httpListening } = await listen(app);
+    const { port, server: httpListening } = await listen(expressApp);
     openServer = httpListening;
 
     const res = await fetch(`http://localhost:${port}/api/data`);
@@ -359,13 +392,16 @@ describe("createApp", () => {
       throw new Error("boom");
     };
 
-    const server = new McpServer({ name: "t", version: "0.0.0" });
-    server.use("/explode", throwing);
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
+    app.use("/explode", throwing);
 
     const httpServer = http.createServer();
-    const app = await createApp({ mcpServer: server, httpServer });
+    const expressApp = await createApp({ app, httpServer });
 
-    const { port, server: httpListening } = await listen(app);
+    const { port, server: httpListening } = await listen(expressApp);
     openServer = httpListening;
 
     const res = await fetch(`http://localhost:${port}/explode`);
@@ -380,16 +416,19 @@ describe("createApp", () => {
     const { createApp } = await import("./express.js");
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    const mcpServer = new McpServer({ name: "t", version: "0.0.0" });
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
     // Force the express-level error path: make a /mcp middleware throw so the
     // error pipeline runs and lands in the default /mcp error handler.
-    mcpServer.use("/mcp", () => {
+    app.use("/mcp", () => {
       throw new Error("boom");
     });
 
     const httpServer = http.createServer();
-    const app = await createApp({ mcpServer, httpServer });
-    const { port, server: httpListening } = await listen(app);
+    const expressApp = await createApp({ app, httpServer });
+    const { port, server: httpListening } = await listen(expressApp);
     openServer = httpListening;
 
     const res = await postMcp(port);
@@ -415,18 +454,21 @@ describe("createApp", () => {
       res.status(503).json({ custom: true });
     };
 
-    const mcpServer = new McpServer({ name: "t", version: "0.0.0" });
-    mcpServer.use("/mcp", () => {
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
+    app.use("/mcp", () => {
       throw new Error("boom");
     });
 
     const httpServer = http.createServer();
-    const app = await createApp({
-      mcpServer,
+    const expressApp = await createApp({
+      app,
       httpServer,
       errorMiddleware: [{ handlers: [errorHandler] }],
     });
-    const { port, server: httpListening } = await listen(app);
+    const { port, server: httpListening } = await listen(expressApp);
     openServer = httpListening;
 
     const res = await postMcp(port);
@@ -448,19 +490,22 @@ describe("createApp", () => {
       next(new Error("api error"));
     };
 
-    const mcpServer = new McpServer({ name: "t", version: "0.0.0" });
-    mcpServer.use("/mcp", () => {
+    const app = new Skybridge(
+      { name: "t", version: "0.0.0" },
+      (server) => server,
+    );
+    app.use("/mcp", () => {
       throw new Error("boom");
     });
-    mcpServer.use("/api/test", throwingApiRoute);
+    app.use("/api/test", throwingApiRoute);
 
     const httpServer = http.createServer();
-    const app = await createApp({
-      mcpServer,
+    const expressApp = await createApp({
+      app,
       httpServer,
       errorMiddleware: [{ path: "/mcp", handlers: [mcpErrorHandler] }],
     });
-    const { port, server: httpListening } = await listen(app);
+    const { port, server: httpListening } = await listen(expressApp);
     openServer = httpListening;
 
     const mcpRes = await postMcp(port);
@@ -478,22 +523,22 @@ describe("createApp", () => {
   it("handles concurrent /mcp requests without 'Already connected to a transport'", async () => {
     const { createApp } = await import("./express.js");
 
-    const mcpServer = new McpServer({
-      name: "concurrent-test",
-      version: "0.0.0",
-    });
     // Slow tool: keeps the underlying transport bound long enough to overlap
     // with concurrent requests, exposing the shared-McpServer race.
-    mcpServer.registerTool({ name: "slow", description: "slow" }, async () => {
-      await new Promise((r) => setTimeout(r, 50));
-      return { content: [{ type: "text" as const, text: "done" }] };
-    });
+    const app = new Skybridge(
+      { name: "concurrent-test", version: "0.0.0" },
+      (server) =>
+        server.registerTool({ name: "slow", description: "slow" }, async () => {
+          await new Promise((r) => setTimeout(r, 50));
+          return { content: [{ type: "text" as const, text: "done" }] };
+        }),
+    );
 
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const httpServer = http.createServer();
-    const app = await createApp({ mcpServer, httpServer });
-    const { port, server } = await listen(app);
+    const expressApp = await createApp({ app, httpServer });
+    const { port, server } = await listen(expressApp);
     openServer = server;
 
     const callBody = (id: number) =>
@@ -528,19 +573,22 @@ describe("createApp", () => {
 });
 
 describe("createApp Vercel mode", () => {
-  it("server.run() returns the Express app without binding a port when VERCEL=1", async () => {
+  it("app.run() returns the Express app without binding a port when VERCEL=1", async () => {
     const prevVercel = process.env.VERCEL;
     const prevEnv = process.env.NODE_ENV;
     process.env.VERCEL = "1";
     process.env.NODE_ENV = "production";
     try {
       vi.resetModules();
-      const { McpServer: Reloaded } = await import("./server.js");
-      const server = new Reloaded({ name: "t", version: "0.0.0" });
-      const result = await server.run();
+      const { Skybridge: Reloaded } = await import("./app.js");
+      const app = new Reloaded(
+        { name: "t", version: "0.0.0" },
+        (server) => server,
+      );
+      const result = await app.run();
       expect(typeof result).toBe("function");
-      expect(result).toBe(server.express);
-      const { port, server: listening } = await listen(server.express);
+      expect(result).toBe(app.express);
+      const { port, server: listening } = await listen(app.express);
       openServer = listening;
       const res = await postMcp(port);
       expect(res.status).not.toBe(404);
@@ -577,10 +625,13 @@ describe("createApp tunnel routes", () => {
     process.env.__TUNNEL_CONTROL_PORT = String(controlPort);
     try {
       const { createApp } = await import("./express.js");
-      const mcpServer = new McpServer({ name: "t", version: "0.0.0" });
+      const app = new Skybridge(
+        { name: "t", version: "0.0.0" },
+        (server) => server,
+      );
       const httpServer = http.createServer();
-      const app = await createApp({ mcpServer, httpServer });
-      const { port, server } = await listen(app);
+      const expressApp = await createApp({ app, httpServer });
+      const { port, server } = await listen(expressApp);
       openServer = server;
 
       const res = await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
@@ -604,11 +655,14 @@ describe("createApp tunnel routes", () => {
     try {
       vi.resetModules();
       const { createApp } = await import("./express.js");
-      const { McpServer: ReloadedMcpServer } = await import("./server.js");
-      const mcpServer = new ReloadedMcpServer({ name: "t", version: "0.0.0" });
+      const { Skybridge: ReloadedSkybridge } = await import("./app.js");
+      const app = new ReloadedSkybridge(
+        { name: "t", version: "0.0.0" },
+        (server) => server,
+      );
       const httpServer = http.createServer();
-      const app = await createApp({ mcpServer, httpServer });
-      const { port, server } = await listen(app);
+      const expressApp = await createApp({ app, httpServer });
+      const { port, server } = await listen(expressApp);
       openServer = server;
 
       const res = await fetch(`http://localhost:${port}/__skybridge/tunnel`, {
@@ -625,23 +679,22 @@ describe("createApp tunnel routes", () => {
 describe("createApp mount path", () => {
   it("serves /mcp with the mount path intact on the request URL", async () => {
     const { createApp } = await import("./express.js");
-    const mcpServer = new McpServer({
-      name: "t",
-      version: "0.0.0",
-    }).registerTool(
-      {
-        name: "echo-url",
-        description: "Echoes the request URL.",
-        inputSchema: {},
-      },
-      (_args, extra) => ({
-        content: [{ type: "text", text: extra.http?.req?.url ?? "" }],
-      }),
+    const app = new Skybridge({ name: "t", version: "0.0.0" }, (server) =>
+      server.registerTool(
+        {
+          name: "echo-url",
+          description: "Echoes the request URL.",
+          inputSchema: {},
+        },
+        (_args, extra) => ({
+          content: [{ type: "text", text: extra.http?.req?.url ?? "" }],
+        }),
+      ),
     );
 
     const httpServer = http.createServer();
-    const app = await createApp({ mcpServer, httpServer });
-    const { port, server } = await listen(app);
+    const expressApp = await createApp({ app, httpServer });
+    const { port, server } = await listen(expressApp);
     openServer = server;
 
     const client = new Client({ name: "test-client", version: "0.0.0" });

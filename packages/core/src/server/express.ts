@@ -1,10 +1,25 @@
 import type http from "node:http";
 import path from "node:path";
 import { toNodeHandler } from "@modelcontextprotocol/node";
-import { createMcpHandler } from "@modelcontextprotocol/server";
 import cors from "cors";
 import express from "express";
-import type { McpServer } from "./server.js";
+import type { Skybridge } from "./app.js";
+import type { JsonOptions } from "./server.js";
+
+type SkybridgeApp = Pick<Skybridge, "express" | "fetchHandler">;
+
+/**
+ * Build the bare Express app a {@link Skybridge} instance owns: the instance
+ * plus the built-in `express.json()` body parser, tuned by the `json` config
+ * field.
+ *
+ * @internal
+ */
+export function createBaseApp(json?: JsonOptions): express.Express {
+  const app = express();
+  app.use(express.json(json));
+  return app;
+}
 
 function parseControlPort(raw: string | undefined): number | null {
   if (raw === undefined) {
@@ -50,18 +65,18 @@ function defaultErrorHandler(
 }
 
 export async function createApp({
-  mcpServer,
+  app: skybridgeApp,
   httpServer,
   errorMiddleware = [],
 }: {
-  mcpServer: McpServer;
+  app: SkybridgeApp;
   httpServer: http.Server;
   errorMiddleware?: {
     path?: string;
     handlers: express.ErrorRequestHandler[];
   }[];
 }): Promise<express.Express> {
-  const app = mcpServer.express;
+  const app = skybridgeApp.express;
 
   // Read `process.env.NODE_ENV` inline: wrangler/esbuild only substitute the literal expression,
   // so a local const would defeat dead-code elimination of the dev-only imports below.
@@ -89,7 +104,7 @@ export async function createApp({
     app.use("/assets", express.static(assetsPath));
   }
 
-  app.use("/mcp", mcpMiddleware(mcpServer));
+  app.use("/mcp", mcpMiddleware(skybridgeApp));
 
   applyMiddlewares(app, errorMiddleware);
 
@@ -98,14 +113,8 @@ export async function createApp({
   return app;
 }
 
-const mcpMiddleware = (server: McpServer): express.RequestHandler => {
-  const handler = toNodeHandler(
-    createMcpHandler(() => server.createStatelessServerInstance(), {
-      onerror: (error) => {
-        console.error("Error handling MCP request:", error);
-      },
-    }),
-  );
+const mcpMiddleware = (skybridgeApp: SkybridgeApp): express.RequestHandler => {
+  const handler = toNodeHandler(skybridgeApp.fetchHandler);
 
   return async (
     req: express.Request,

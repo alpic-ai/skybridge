@@ -1,7 +1,5 @@
 import crypto from "node:crypto";
 import { readFileSync } from "node:fs";
-import http from "node:http";
-import type { AddressInfo } from "node:net";
 import path from "node:path";
 import type {
   McpUiResourceMeta,
@@ -22,7 +20,6 @@ import {
   type RequestMeta,
   type ResourceMetadata,
   type ResourceTemplate,
-  type Server as SdkServer,
   type ServerOptions,
   type ServerResult,
   type StandardSchemaV1,
@@ -30,11 +27,7 @@ import {
   type ToolAnnotations,
 } from "@modelcontextprotocol/server";
 import { mergeWith, union } from "es-toolkit";
-import express, {
-  type ErrorRequestHandler,
-  type Express,
-  type RequestHandler,
-} from "express";
+import type express from "express";
 import { warnOnLargeToolOutput } from "../context-warnings.js";
 import type { InferSchemaOutput, RawInputShape } from "../standard-schema.js";
 import type { OAuthConfig } from "./auth/index.js";
@@ -43,11 +36,9 @@ import {
   evaluateSecuritySchemes,
   inBandChallengeResult,
 } from "./auth/security-schemes.js";
-import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
+import type { ResourceMetadataUrlResolver } from "./auth/setup.js";
 import type { ExtraClaims } from "./auth.js";
-import { createApp } from "./express.js";
 import { hostFromUserAgent } from "./host.js";
-import { createMiddlewareEntry } from "./metric.js";
 import type {
   McpExtra,
   McpExtraFor,
@@ -59,11 +50,7 @@ import type {
   McpTypedMiddlewareFn,
   McpWildcard,
 } from "./middleware.js";
-import {
-  buildMiddlewareChain,
-  captureToolError,
-  getHandlerMaps,
-} from "./middleware.js";
+import { captureToolError } from "./middleware.js";
 import { resolveServerOrigin } from "./requestOrigin.js";
 import {
   discoverSkills,
@@ -197,8 +184,8 @@ export type ToolAuth = {
 export type JsonOptions = NonNullable<Parameters<typeof express.json>[0]>;
 
 /**
- * Skybridge-specific server options, passed as the third `McpServer` constructor
- * argument.
+ * Skybridge-specific options, part of the {@link SkybridgeConfig} bag passed to
+ * the `Skybridge` constructor.
  *
  * @typeParam TAuthExtra - Claims the `oauth` verifier populates. Inferred from
  * the config a provider returns, and carried on to tool handlers.
@@ -454,11 +441,6 @@ type ToolHandler<
   extra: ToolHandlerExtra<TAuthExtra>,
 ) => TReturn | Promise<TReturn>;
 
-type ErrorMiddlewareConfig = {
-  path?: string;
-  handlers: ErrorRequestHandler[];
-};
-
 /**
  * Drop the query string from a `ui://` view URI, leaving the bare path. The
  * `?v=` cache key is the only query we append, so a plain split is enough and
@@ -490,9 +472,6 @@ export function normalizeContent(
   return [content];
 }
 
-/** What a ledger replay needs from a target instance. */
-type RegistrationTarget = { readonly server: SdkServer };
-
 // We Omit `registerTool` from the base class at the type level so our
 // unified 2-arg signature can replace the SDK's 3-arg one without an
 // incompatible override.  The runtime prototype chain is unaffected.
@@ -505,35 +484,6 @@ const McpServerBaseOmitted = McpServerBase as unknown as new (
   ...args: ConstructorParameters<typeof McpServerBase>
 ) => McpServerBaseOmitted;
 
-/**
- * The Skybridge server. Extends the MCP SDK's `McpServer` with a typed tool
- * registry, view resources, an embedded Express app, and protocol-level
- * middleware. Construct it with the same `Implementation` info you would pass
- * to the SDK, chain {@link McpServer.registerTool} calls to declare tools,
- * then call {@link McpServer.run} to start the HTTP server.
- *
- * The `TTools` generic accumulates each registered tool's input/output/meta
- * shape, so `typeof server` carries enough information for view-side helpers
- * like {@link generateHelpers} to produce fully-typed hooks.
- *
- * @typeParam TTools - Accumulated tool registry. Filled in by `registerTool`
- * chaining; you almost never set this manually.
- *
- * @example
- * ```ts
- * const server = new McpServer({ name: "my-app", version: "1.0.0" }, {})
- *   .registerTool({
- *     name: "search",
- *     inputSchema: { query: z.string() },
- *     view: { component: "search" },
- *   }, async ({ query }) => ({ content: `Results for ${query}` }));
- *
- * await server.run();
- * export type AppType = typeof server;
- * ```
- *
- * @see https://docs.skybridge.tech/api-reference/mcp-server
- */
 // Side channel populated by `dist/__entry.js` before user code is imported.
 // Set at module scope rather than passed through the constructor because the
 // wrapper has the manifest before the user's `new McpServer(...)` runs, and
@@ -555,9 +505,12 @@ export function __setBuildManifest(
 }
 
 let pendingSkillsManifest: SkillsManifest | null = null;
+let discoveredSkills: SkillsManifest | null = null;
+let warnedOnMissingSkills = false;
 
 export function __setSkillsManifest(manifest: SkillsManifest): void {
   pendingSkillsManifest = manifest;
+  discoveredSkills = null;
 }
 
 // Pure and `this`-free so it can run inside the `super(...)` call, before `this`
@@ -581,32 +534,38 @@ function withSkillsCapability(
   };
 }
 
+/**
+ * Typed registration sugar over the MCP SDK's `McpServer`: a tool registry
+ * that carries input/output/meta shapes, view resources, per-tool security
+ * schemes, and prompt/resource registration. A {@link Skybridge} app builds
+ * one of these per request and hands it to your setup factory; chain
+ * {@link McpServer.registerTool} calls on it and return the result.
+ *
+ * The `TTools` generic accumulates each registered tool's input/output/meta
+ * shape, so `typeof app` carries enough information for view-side helpers
+ * like {@link generateHelpers} to produce fully-typed hooks.
+ *
+ * @typeParam TTools - Accumulated tool registry. Filled in by `registerTool`
+ * chaining; you almost never set this manually.
+ *
+ * @example
+ * ```ts
+ * export const app = new Skybridge({ name: "my-app", version: "1.0.0" }, (server) =>
+ *   server.registerTool({
+ *     name: "search",
+ *     inputSchema: { query: z.string() },
+ *     view: { component: "search" },
+ *   }, async ({ query }) => ({ content: `Results for ${query}` })),
+ * );
+ * ```
+ *
+ * @see https://docs.skybridge.tech/api-reference/mcp-server
+ */
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
   TAuthExtra extends ExtraClaims = ExtraClaims,
 > extends McpServerBaseOmitted {
   declare readonly $types: McpServerTypes<TTools>;
-  /**
-   * The underlying Express app. Use this to extend the HTTP server with
-   * custom routes, middleware, or settings — e.g.
-   * `server.express.get("/health", ...)`.
-   *
-   * `express.json()` is pre-applied — tune it via the constructor's third
-   * argument, e.g. `new McpServer(info, {}, { json: { limit: "10mb" } })`.
-   * Register your handlers before `run()`;
-   * after `run()`, dev-mode middleware, the `/mcp` route, and the default
-   * error handler are appended in that order.
-   *
-   * Note: Alpic Cloud only routes traffic to `/mcp` — custom routes work
-   * locally and on self-hosted deployments.
-   */
-  readonly express: Express;
-  private customErrorMiddleware: ErrorMiddlewareConfig[] = [];
-  private mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
-  private mcpMiddlewareApplied = false;
-  private middlewareEntriesCache: McpMiddlewareEntry[] | null = null;
-  private readonly registrations: Array<(target: RegistrationTarget) => void> =
-    [];
   private claimedViews = new Map<string, string>();
   private viewMetaBuilders = new Map<
     string,
@@ -620,50 +579,59 @@ export class McpServer<
    */
   private viewUriByPath = new Map<string, string>();
   private viteManifest: Record<string, ViteManifestEntry> | null = null;
-  private readonly serverInfo: Implementation;
-  private readonly serverOptions?: ServerOptions;
+  private diskManifest: Record<string, ViteManifestEntry> | null = null;
   private oauthEnabled = false;
   private resolveResourceMetadataUrl?: ResourceMetadataUrlResolver;
-  private securitySchemesByTool = new Map<
+  private readonly toolSecuritySchemes = new Map<
     string,
     SecurityScheme[] | undefined
   >();
+  private readonly userMiddlewareEntries: McpMiddlewareEntry[] = [];
 
   constructor(
     serverInfo: Implementation,
     options?: ServerOptions,
     skybridgeOptions?: SkybridgeServerOptions<TAuthExtra>,
   ) {
-    const mergedOptions = withSkillsCapability(options, skybridgeOptions);
-    super(serverInfo, mergedOptions);
-    this.serverInfo = serverInfo;
-    this.serverOptions = mergedOptions;
-    this.express = express();
-    this.express.use(express.json(skybridgeOptions?.json));
-    if (skybridgeOptions?.oauth) {
-      this.oauthEnabled = true;
-      this.resolveResourceMetadataUrl = setupOAuth(
-        this.express,
-        skybridgeOptions.oauth,
-        this.securitySchemesByTool,
-      );
-    }
+    super(serverInfo, withSkillsCapability(options, skybridgeOptions));
+    this.oauthEnabled = Boolean(skybridgeOptions?.oauth);
     // Pick up the manifest if `dist/__entry.js` primed it before importing
-    // user code. Consume-once: clear after the first construction so a
-    // subsequent test that doesn't prime can't inherit stale state.
-    // Explicit `setViteManifest` calls still win because they happen after
-    // construction.
+    // user code. Explicit `setViteManifest` calls still win because they
+    // happen after construction.
     if (pendingBuildManifest) {
       this.setViteManifest(pendingBuildManifest);
-      pendingBuildManifest = null;
     }
     this.setupSkills(Boolean(skybridgeOptions?.skills));
   }
 
   /**
-   * Register a resource, recorded so every per-request instance carries it.
-   * Signature owned by Skybridge (not inherited) so a typed wrapper can land
-   * in a minor without a type-level break.
+   * The per-tool security schemes collected during registration, keyed by tool
+   * name. Read by the OAuth layer to decide whether anonymous requests are
+   * allowed and which schemes gate a given `tools/call`.
+   *
+   * @internal
+   */
+  get securitySchemesByTool(): ReadonlyMap<
+    string,
+    SecurityScheme[] | undefined
+  > {
+    return this.toolSecuritySchemes;
+  }
+
+  /**
+   * Inject the resolver the app uses to build the protected-resource metadata
+   * URL, so tool handlers can emit in-band auth challenges.
+   *
+   * @internal
+   */
+  setResourceMetadataUrlResolver(resolve: ResourceMetadataUrlResolver): this {
+    this.resolveResourceMetadataUrl = resolve;
+    return this;
+  }
+
+  /**
+   * Register a resource. Signature owned by Skybridge (not inherited) so a
+   * typed wrapper can land in a minor without a type-level break.
    */
   registerResource(
     name: string,
@@ -678,13 +646,12 @@ export class McpServer<
     readCallback: ReadResourceTemplateCallback,
   ): RegisteredResourceTemplate;
   registerResource(...args: unknown[]): unknown {
-    return this.recordInherited("registerResource", args);
+    return this.applyInherited("registerResource", args);
   }
 
   /**
-   * Register a prompt, recorded so every per-request instance carries it.
-   * Signature owned by Skybridge (not inherited) so a typed wrapper can land
-   * in a minor without a type-level break.
+   * Register a prompt. Signature owned by Skybridge (not inherited) so a
+   * typed wrapper can land in a minor without a type-level break.
    */
   registerPrompt<Args extends StandardSchemaWithJSON>(
     name: string,
@@ -697,114 +664,44 @@ export class McpServer<
     },
     cb: PromptCallback<Args>,
   ): RegisteredPrompt {
-    return this.recordInherited("registerPrompt", [
+    return this.applyInherited("registerPrompt", [
       name,
       config,
       cb,
     ]) as RegisteredPrompt;
   }
 
-  private recordInherited(
+  private applyInherited(
     method: "registerResource" | "registerPrompt",
     args: unknown[],
   ): unknown {
     const base = McpServerBase.prototype[method] as (
       ...a: unknown[]
     ) => unknown;
-    let registered: unknown;
-    this.record((target) => {
-      const result = base.apply(target, args);
-      if ((target as unknown) === (this as unknown)) {
-        registered = result;
-      }
-    });
-    return registered;
+    return base.apply(this, args);
   }
 
   private skillRegistrar(): SkillRegistrar {
     const registerResource = (
       this as unknown as { registerResource: (...a: unknown[]) => unknown }
     ).registerResource.bind(this) as SkillRegistrar["registerResource"];
-    return {
-      registerResource,
-      server: {
-        setRequestHandler: ((...args: unknown[]) => {
-          this.recordRequestHandler(
-            ...(args as Parameters<SdkServer["setRequestHandler"]>),
-          );
-        }) as SdkServer["setRequestHandler"],
-      },
-    };
+    return { registerResource, server: this.server };
   }
 
   private setupSkills(enabled: boolean): void {
-    const manifest = pendingSkillsManifest;
-    pendingSkillsManifest = null;
     if (!enabled) {
       return;
     }
 
-    const skills = manifest ?? discoverSkills(SKILLS_DIR);
-    if (skills.length === 0) {
+    discoveredSkills ??= pendingSkillsManifest ?? discoverSkills(SKILLS_DIR);
+    if (discoveredSkills.length === 0 && !warnedOnMissingSkills) {
+      warnedOnMissingSkills = true;
       console.warn(
         `skybridge: the "skills" option is enabled but no skills were found in "${SKILLS_DIR}". Add a <name>/SKILL.md there, or remove the option.`,
       );
     }
 
-    registerSkills(this.skillRegistrar(), skills);
-  }
-
-  /**
-   * Register Express middleware on the underlying app. Mirrors `app.use` —
-   * pass handlers directly or a path-prefixed handler list. Register before
-   * {@link McpServer.run}; ordering matches Express.
-   *
-   * Note: Alpic Cloud only routes traffic to `/mcp`. Custom paths work
-   * locally and on self-hosted deployments.
-   */
-  use(...handlers: RequestHandler[]): this;
-  use(path: string, ...handlers: RequestHandler[]): this;
-  use(
-    pathOrHandler: string | RequestHandler,
-    ...handlers: RequestHandler[]
-  ): this {
-    // Branching is load-bearing: Express's `app.use` overloads can't be
-    // resolved against a `string | RequestHandler` union, so we narrow.
-    if (typeof pathOrHandler === "string") {
-      this.express.use(pathOrHandler, ...handlers);
-    } else {
-      this.express.use(pathOrHandler, ...handlers);
-    }
-    return this;
-  }
-
-  /**
-   * Register Express error-handling middleware to run after the built-in
-   * `/mcp` route (or your custom route). Use this to log or transform errors
-   * thrown by tool handlers before the default error handler responds.
-   *
-   * @example
-   * ```ts
-   * server.useOnError((err, _req, _res, next) => {
-   *   logger.error(err);
-   *   next(err);
-   * });
-   * ```
-   */
-  useOnError(...handlers: ErrorRequestHandler[]): this;
-  useOnError(path: string, ...handlers: ErrorRequestHandler[]): this;
-  useOnError(
-    pathOrHandler: string | ErrorRequestHandler,
-    ...handlers: ErrorRequestHandler[]
-  ): this {
-    if (typeof pathOrHandler === "string") {
-      this.customErrorMiddleware.push({ path: pathOrHandler, handlers });
-    } else {
-      this.customErrorMiddleware.push({
-        handlers: [pathOrHandler, ...handlers],
-      });
-    }
-    return this;
+    registerSkills(this.skillRegistrar(), discoveredSkills);
   }
 
   /** Register MCP protocol-level middleware (catch-all). */
@@ -861,21 +758,15 @@ export class McpServer<
     // biome-ignore lint/suspicious/noExplicitAny: overloads narrow the handler type at call sites; implementation must accept all variants
     maybeHandler?: any,
   ): this {
-    if (this.mcpMiddlewareApplied) {
-      throw new Error(
-        "Cannot register MCP middleware after run() or connect() has been called",
-      );
-    }
-
     const handler = maybeHandler as McpMiddlewareFn | undefined;
 
     if (typeof filterOrHandler === "function") {
-      this.mcpMiddlewareEntries.push({
+      this.userMiddlewareEntries.push({
         filter: null,
         handler: filterOrHandler as McpMiddlewareFn,
       });
     } else if (handler) {
-      this.mcpMiddlewareEntries.push({
+      this.userMiddlewareEntries.push({
         filter: filterOrHandler,
         handler,
       });
@@ -888,12 +779,15 @@ export class McpServer<
     return this;
   }
 
-  private applyMcpMiddleware(): void {
-    if (this.mcpMiddlewareApplied) {
-      return;
-    }
-    this.mcpMiddlewareApplied = true;
-
+  /**
+   * This instance's protocol-level middleware: the framework's own entries
+   * (view `_meta` on `resources/list`, version-agnostic view resolution on
+   * `resources/read`, the top-level `securitySchemes` mirror on `tools/list`)
+   * followed by the ones registered via {@link McpServer.mcpMiddleware}.
+   *
+   * @internal
+   */
+  protocolMiddlewareEntries(): McpMiddlewareEntry[] {
     // Surface view-resource _meta on `resources/list` (per ext-apps spec:
     // hosts/checkers read CSP & domain at list time before fetching content).
     const viewListMetaEntry: McpMiddlewareEntry = {
@@ -981,182 +875,12 @@ export class McpServer<
       },
     };
 
-    const monitoringEntry = createMiddlewareEntry();
-    const entries = [
-      ...(monitoringEntry ? [monitoringEntry] : []),
+    return [
       viewListMetaEntry,
       viewReadResolveEntry,
       toolsListSecuritySchemesEntry,
-      ...this.mcpMiddlewareEntries,
+      ...this.userMiddlewareEntries,
     ];
-    this.middlewareEntriesCache = entries;
-    this.instrumentHandlers(this.server);
-  }
-
-  private instrumentHandlers(server: SdkServer): void {
-    const entries = this.middlewareEntriesCache ?? [];
-    const { requestHandlers, notificationHandlers } = getHandlerMaps(server);
-
-    const instrumentMap = (
-      map: Map<string, (...args: unknown[]) => Promise<unknown>>,
-      isNotification: boolean,
-    ) => {
-      for (const [method, handler] of map) {
-        map.set(
-          method,
-          buildMiddlewareChain(method, isNotification, handler, entries),
-        );
-      }
-      const originalSet = map.set.bind(map);
-      map.set = (
-        method: string,
-        handler: (...args: unknown[]) => Promise<unknown>,
-      ) =>
-        originalSet(
-          method,
-          buildMiddlewareChain(method, isNotification, handler, entries),
-        );
-    };
-
-    instrumentMap(requestHandlers, false);
-    instrumentMap(notificationHandlers, true);
-  }
-
-  /**
-   * Connect to an MCP transport (override of the SDK's `connect`). Use this
-   * when you're embedding Skybridge in a host that already manages its own
-   * transport (e.g. stdio for desktop apps); for HTTP, prefer {@link McpServer.run}
-   * which sets the transport up for you. Locks in any middleware registered
-   * via {@link McpServer.mcpMiddleware} — further calls to that method will
-   * throw afterwards.
-   */
-  async connect(
-    transport: Parameters<typeof McpServerBase.prototype.connect>[0],
-  ): Promise<void> {
-    this.applyMcpMiddleware();
-    return McpServerBase.prototype.connect.call(this, transport);
-  }
-
-  /**
-   * Build a fresh server for one stateless HTTP request, as
-   * `createMcpHandler`'s factory contract requires: every registration is
-   * replayed onto the new instance so the SDK's handler closures belong to
-   * the instance whose protocol era it stamps. Sharing the singleton's
-   * handler maps instead would bind them to an instance that is never
-   * marked, pinning every request to the 2025 codec and letting concurrent
-   * callers overwrite each other's negotiated version.
-   */
-  createStatelessServerInstance(): SdkServer {
-    this.applyMcpMiddleware();
-
-    const fresh = new McpServerBase(this.serverInfo, this.serverOptions);
-    for (const apply of this.registrations) {
-      apply(fresh);
-    }
-    this.instrumentHandlers(fresh.server);
-
-    return fresh.server;
-  }
-
-  /**
-   * Apply an SDK registration to the singleton and remember it, so each
-   * per-request instance can be built with the same surface.
-   */
-  private record(apply: (target: RegistrationTarget) => void): void {
-    this.registrations.push(apply);
-    apply(this);
-  }
-
-  /** Records a raw request handler (used for methods the SDK has no sugar for). */
-  private recordRequestHandler(
-    ...args: Parameters<SdkServer["setRequestHandler"]>
-  ): void {
-    this.record((target) => {
-      target.server.setRequestHandler(...args);
-    });
-  }
-
-  /**
-   * Start the HTTP server. Listens on `process.env.__PORT` (default `3000`),
-   * mounts the `/mcp` route, applies any custom Express middleware registered
-   * via {@link McpServer.use} / {@link McpServer.useOnError}, and locks in
-   * any MCP middleware registered via {@link McpServer.mcpMiddleware}.
-   *
-   * On Cloudflare Workers / workerd, returns an object exposing `fetch` so
-   * the runtime can bridge incoming requests to the Node HTTP server. On
-   * Vercel (`VERCEL === "1"`), returns the Express app directly so the
-   * serverless function entry can call it as a `(req, res)` handler. On
-   * Node, returns `undefined` once listening. When the process was spawned
-   * with an IPC channel, the bound port is reported to the parent as
-   * `{ type: "skybridge:listening", port }`, the readiness signal test runners
-   * wait on instead of polling.
-   */
-  async run(): Promise<
-    { fetch: (...args: unknown[]) => unknown } | Express | undefined
-  > {
-    this.applyMcpMiddleware();
-
-    if (process.env.VERCEL === "1") {
-      // createApp only reads httpServer inside its dev-only branch
-      // (viewsDevServer); under VERCEL=1 + NODE_ENV=production it's a
-      // bare object passed to satisfy the required parameter.
-      const httpServer = http.createServer();
-      await createApp({
-        mcpServer: this,
-        httpServer,
-        errorMiddleware: this.customErrorMiddleware,
-      });
-      return this.express;
-    }
-
-    const httpServer = http.createServer();
-
-    await createApp({
-      mcpServer: this,
-      httpServer,
-      errorMiddleware: this.customErrorMiddleware,
-    });
-
-    httpServer.on("request", this.express);
-    const intendedPort = parseInt(process.env.__PORT ?? "3000", 10);
-    await new Promise<void>((resolve, reject) => {
-      httpServer.on("error", (error: Error) => {
-        console.error("Failed to start server:", error);
-        reject(error);
-      });
-      httpServer.listen(intendedPort, () => {
-        resolve();
-      });
-    });
-
-    const { port } = httpServer.address() as AddressInfo;
-    process.send?.({ type: "skybridge:listening", port });
-
-    // On workerd, bridge the Node http server to a Workers fetch handler.
-    // The specifier is held in a variable to sidestep tsc's module resolution
-    // (`cloudflare:node` only exists under wrangler/workerd).
-    if (
-      typeof navigator !== "undefined" &&
-      navigator.userAgent === "Cloudflare-Workers"
-    ) {
-      const cloudflareNode = "cloudflare:node";
-      const { httpServerHandler } = await import(cloudflareNode);
-      return httpServerHandler({ port });
-    }
-
-    const shutdown = () => {
-      // Drop both handlers so a second signal falls through to Node's default
-      // (force-quit on a second Ctrl+C while drain is hanging).
-      process.off("SIGTERM", shutdown);
-      process.off("SIGINT", shutdown);
-      httpServer.close(() => process.exit(0));
-      // Force exit if connections don't drain in time so the port is still
-      // released promptly (e.g. for nodemon restarts).
-      setTimeout(() => process.exit(0), 3000).unref();
-    };
-    process.on("SIGTERM", shutdown);
-    process.on("SIGINT", shutdown);
-    return undefined;
   }
 
   private enforceOneToolPerView(component: string, toolName: string): void {
@@ -1477,12 +1201,13 @@ export class McpServer<
     if (this.viteManifest) {
       return this.viteManifest;
     }
-    return JSON.parse(
+    this.diskManifest ??= JSON.parse(
       readFileSync(
         path.join(process.cwd(), "dist", "assets", ".vite", "manifest.json"),
         "utf-8",
       ),
     );
+    return this.diskManifest ?? {};
   }
 
   /**
@@ -1569,7 +1294,7 @@ export class McpServer<
 
     const toolMeta: InternalToolMeta = { ...userToolMeta };
 
-    this.securitySchemesByTool.set(name, securitySchemes);
+    this.toolSecuritySchemes.set(name, securitySchemes);
 
     if (securitySchemes) {
       // SEP-1488 puts `securitySchemes` at the top level of the tool
@@ -1591,17 +1316,15 @@ export class McpServer<
       toolName: name,
     });
 
-    this.record((target) => {
-      baseFn.call(
-        target,
-        name,
-        { ...toolFields, _meta: toolMeta },
-        toolFields.inputSchema === undefined
-          ? (extra: ToolHandlerExtra) =>
-              wrappedCb({} as ShapeOutput<RawInputShape>, extra)
-          : wrappedCb,
-      );
-    });
+    baseFn.call(
+      this,
+      name,
+      { ...toolFields, _meta: toolMeta },
+      toolFields.inputSchema === undefined
+        ? (extra: ToolHandlerExtra) =>
+            wrappedCb({} as ShapeOutput<RawInputShape>, extra)
+        : wrappedCb,
+    );
 
     return this;
   }
