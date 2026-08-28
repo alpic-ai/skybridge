@@ -1,8 +1,8 @@
 function stripComments(code: string): string {
-  return code.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
+  return code.replace(/\/\/[^\n]*/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
 }
 
-export function hasDefaultExport(code: string, _filePath?: string): boolean {
+export function hasDefaultExport(code: string): boolean {
   const stripped = stripComments(code);
   return (
     /export\s+default\s/.test(stripped) ||
