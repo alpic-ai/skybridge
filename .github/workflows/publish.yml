@@ -71,6 +71,17 @@ jobs:
             echo "✅ Dev version: 0.0.0-dev.${GITHUB_SHA::7}"
           fi
 
+      - name: Set test package version
+        id: test-version
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "version=${{ steps.version.outputs.version }}-beta.${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+            echo "tag=beta" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ steps.version.outputs.version }}" >> "$GITHUB_OUTPUT"
+            echo "tag=${{ steps.version.outputs.tag }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setting version for core
         working-directory: ./packages/core
         run: pnpm version ${{ steps.version.outputs.version }} --no-git-tag-version
@@ -89,7 +100,7 @@ jobs:
 
       - name: Setting version for test
         working-directory: ./packages/test
-        run: pnpm version ${{ steps.version.outputs.version }} --no-git-tag-version
+        run: pnpm version ${{ steps.test-version.outputs.version }} --no-git-tag-version
 
       - name: Publish core to npm
         working-directory: ./packages/core
@@ -105,7 +116,7 @@ jobs:
 
       - name: Publish test to npm
         working-directory: ./packages/test
-        run: ../../scripts/publish-if-new.sh ${{ steps.version.outputs.tag }}
+        run: ../../scripts/publish-if-new.sh ${{ steps.test-version.outputs.tag }}
 
       # Templates use `skybridge: workspace:*` so dev/CI build against the
       # local package. pnpm doesn't rewrite that when bundling the templates
@@ -117,7 +128,7 @@ jobs:
           pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
           pnpm pkg set 'devDependencies.@skybridge/vite-plugin=^${{ steps.version.outputs.version }}'
           pnpm pkg set 'devDependencies.@skybridge/devtools=^${{ steps.version.outputs.version }}'
-          pnpm pkg set 'devDependencies.@skybridge/test=^${{ steps.version.outputs.version }}'
+          pnpm pkg set 'devDependencies.@skybridge/test=beta'
 
       - name: Pin blank template skybridge dep for publish
         working-directory: ./packages/create-skybridge/templates/blank
