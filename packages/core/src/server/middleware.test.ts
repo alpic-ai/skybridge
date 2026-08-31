@@ -318,7 +318,7 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    const instance = app.createServerInstance();
+    const instance = await app.createServerInstance();
     await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
@@ -358,7 +358,7 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    const instance = app.createServerInstance();
+    const instance = await app.createServerInstance();
     await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
@@ -404,7 +404,7 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    const instance = app.createServerInstance();
+    const instance = await app.createServerInstance();
     await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
@@ -443,7 +443,7 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    const instance = app.createServerInstance();
+    const instance = await app.createServerInstance();
     await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
@@ -473,7 +473,7 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    const instance = app.createServerInstance();
+    const instance = await app.createServerInstance();
     await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
@@ -521,7 +521,7 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    const instance = app.createServerInstance();
+    const instance = await app.createServerInstance();
     await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
@@ -558,7 +558,7 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    const instance = app.createServerInstance();
+    const instance = await app.createServerInstance();
     await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
@@ -604,7 +604,7 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    const instance = app.createServerInstance();
+    const instance = await app.createServerInstance();
     await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
@@ -651,7 +651,7 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    const instance = app.createServerInstance();
+    const instance = await app.createServerInstance();
     await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
@@ -683,7 +683,7 @@ describe("McpServer.mcpMiddleware()", () => {
     const client = createClient();
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    const instance = app.createServerInstance();
+    const instance = await app.createServerInstance();
     await instance.connect(serverTransport);
     await client.connect(clientTransport);
 

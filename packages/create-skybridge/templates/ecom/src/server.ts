@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { type McpServer, Skybridge } from "skybridge/server";
+import { Skybridge, type SkybridgeServer } from "skybridge/server";
 import { CAROUSEL_RANGE, MIN_SEARCH_ITERATIONS } from "./config.js";
 import {
   renderCarouselDefinition,
@@ -15,7 +15,7 @@ if (existsSync(".env")) {
   process.loadEnvFile();
 }
 
-export const serverFactory = (server: McpServer) =>
+export const serverFactory = (server: SkybridgeServer) =>
   server
     .registerTool(searchProductsDefinition, searchProductsHandler)
     .registerTool(renderCarouselDefinition, renderCarouselHandler);

@@ -60,7 +60,7 @@ describe("tool handler extra", () => {
 });
 
 describe("stateless server instances", () => {
-  it("carries the registered capabilities onto each per-request instance", () => {
+  it("carries the registered capabilities onto each per-request instance", async () => {
     const app = new Skybridge({ name: "t", version: "0.0.0" }, (server) =>
       server.registerTool(
         { name: "a-tool", description: "d", inputSchema: {} },
@@ -68,7 +68,7 @@ describe("stateless server instances", () => {
       ),
     );
 
-    const fresh = app.createServerInstance();
+    const fresh = await app.createServerInstance();
 
     expect(fresh.getCapabilities().tools).toBeDefined();
   });

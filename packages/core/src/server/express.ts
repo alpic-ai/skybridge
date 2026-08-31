@@ -1,12 +1,42 @@
 import type http from "node:http";
 import path from "node:path";
 import { toNodeHandler } from "@modelcontextprotocol/node";
+import {
+  createMcpHandler,
+  type McpHttpHandler,
+  UnsupportedProtocolVersionError,
+} from "@modelcontextprotocol/server";
 import cors from "cors";
 import express from "express";
 import type { Skybridge } from "./app.js";
 import type { JsonOptions } from "./server.js";
 
-type SkybridgeApp = Pick<Skybridge, "express" | "fetchHandler">;
+type SkybridgeApp = Pick<Skybridge, "express" | "createServerInstance">;
+
+const mcpHandlers = new WeakMap<SkybridgeApp, McpHttpHandler>();
+
+/**
+ * The memoized `/mcp` fetch handler for a {@link Skybridge} app: a `Request` →
+ * `Response` function that builds a fresh MCP server per request. One handler
+ * per app, shared by the Express middleware and the shutdown drain.
+ *
+ * @internal
+ */
+export function getMcpHandler(skybridgeApp: SkybridgeApp): McpHttpHandler {
+  let handler = mcpHandlers.get(skybridgeApp);
+  if (!handler) {
+    handler = createMcpHandler(() => skybridgeApp.createServerInstance(), {
+      onerror: (error) => {
+        if (error instanceof UnsupportedProtocolVersionError) {
+          return;
+        }
+        console.error("Error handling MCP request:", error);
+      },
+    });
+    mcpHandlers.set(skybridgeApp, handler);
+  }
+  return handler;
+}
 
 /**
  * Build the bare Express app a {@link Skybridge} instance owns: the instance
@@ -114,7 +144,7 @@ export async function createApp({
 }
 
 const mcpMiddleware = (skybridgeApp: SkybridgeApp): express.RequestHandler => {
-  const handler = toNodeHandler(skybridgeApp.fetchHandler);
+  const handler = toNodeHandler(getMcpHandler(skybridgeApp));
 
   return async (
     req: express.Request,

@@ -6,7 +6,7 @@ check.
 
 Add the `evals` option to the Skybridge Vite plugin so `expect.chat` exists,
 then write scenarios with vitest's own `it` and `expect`. Pass the app itself
-to `start`: it is served in-process, dialing `app.fetchHandler` directly, and
+to `start`: it is served in-process, dialing an in-process handler built on `app.createServerInstance()`, and
 the tool names and argument shapes come from the app value, so no type
 parameter is needed.
 

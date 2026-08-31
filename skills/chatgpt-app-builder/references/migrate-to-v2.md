@@ -52,7 +52,18 @@ export const app = new Skybridge(
 export type AppType = typeof app;
 ```
 
-Write the factory as an expression body (`(server) => server.registerTool(...)`) so the return is structural and cannot be forgotten. With a block body, a missing `return` typechecks: the factory returns `void`, `TTools` infers as empty, and `generateHelpers<AppType>()` produces hooks whose tool names are `never`. The symptom appears in your views, far from the cause: `Argument of type '"search"' is not assignable to parameter of type 'never'`.
+Write the factory as an expression body (`(server) => server.registerTool(...)`) so the return is structural and cannot be forgotten. With a block body, a missing `return` fails to compile at the `new Skybridge(...)` call (`Type 'void' is not assignable to type 'McpServer<…>'`).
+
+Prefer extracting the factory into its own exported declaration, annotated with `SkybridgeServer` from `skybridge/server` — the bare server a factory receives. It takes the claims your OAuth verifier produces, which types `extra.http.authInfo.extra` in handlers:
+
+```ts
+export const serverFactory = (server: SkybridgeServer<{ email?: string }>) =>
+  server.registerTool({ name: "search", ... }, handler);
+
+export const app = new Skybridge(config, serverFactory);
+```
+
+Leave the factory's return type inferred: the returned chain is what carries the tool registry into `typeof app`.
 
 ### 2.2 The factory runs on every request, so it must be pure
 
@@ -205,6 +216,10 @@ One exception runs the other way: tools registered from inside a view via `useRe
 ### 2.11 `ViewConfig.hosts` and `ViewHostType` are gone
 
 `hosts` was already a no-op in 1.x, since every view emits a single ext-apps resource. Delete the field. `ViewHostType` is gone, and the served view page no longer declares `hostType` on `window.skybridge`. The runtime is detected at load time via `window.openai`, so a view reading `window.skybridge.hostType` should drop the check.
+
+### 2.12 `app.fetchHandler` is gone; `createServerInstance()` is async
+
+The HTTP surface an app exposes is the Express listener (`app.run()` / `app.express`). Code that dialed `app.fetchHandler` directly builds its own handler instead: `createMcpHandler(() => app.createServerInstance())` from `@modelcontextprotocol/server`. `createServerInstance()` now returns a promise — it resolves the async factory loader and lazy OAuth config on first use — so `await` it where v2 alphas called it synchronously.
 
 ## Step 3: Version strategy
 

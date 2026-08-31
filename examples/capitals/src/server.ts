@@ -1,6 +1,6 @@
 import { intentMiddleware } from "@alpic-ai/insights";
 import { type Request, type Response, Router } from "express";
-import { Skybridge } from "skybridge/server";
+import { type SkybridgeServer, Skybridge } from "skybridge/server";
 import * as z from "zod";
 import {
   type Capital,
@@ -10,83 +10,85 @@ import {
   getCapitalSlug,
 } from "./capitals.js";
 
+export const serverFactory = (server: SkybridgeServer) =>
+  server
+    .registerTool(
+      {
+        name: "explore-capitals",
+        description:
+          "Use this tool to explore world capitals. Displays an interactive map with detailed information about capital cities including population, currencies, and beautiful photos. Always use it when users ask about capitals, countries, or want to explore geography.",
+        inputSchema: {
+          name: z
+            .string()
+            .describe(
+              "Capital city name in English (e.g., 'Paris', 'Tokyo', 'Washington, D.C.', 'London', 'New Delhi')",
+            ),
+        },
+        annotations: {
+          readOnlyHint: true,
+          openWorldHint: true,
+          destructiveHint: false,
+        },
+        view: {
+          component: "explore-capitals",
+          description:
+            "Interactive world capitals explorer with map visualization",
+          csp: {
+            resourceDomains: [
+              "https://upload.wikimedia.org",
+              "https://flagcdn.com",
+              "blob:",
+            ],
+            connectDomains: ["https://*.mapbox.com"],
+          },
+        },
+        _meta: {
+          "openai/widgetAccessible": true,
+        },
+      },
+      async ({ name }) => {
+        try {
+          const allCapitals = await getAllCapitals();
+          const capital = await getCapitalByName(name);
+
+          return {
+            _meta: {
+              slug: getCapitalSlug(capital.name),
+              allCapitals, // In meta to avoid flooding the model
+            },
+            structuredContent: {
+              capital, // Initial capital details
+            },
+            content: [
+              {
+                type: "text",
+                text: formatCapitalForModel(capital),
+              },
+            ],
+            isError: false,
+          };
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : "Unknown error";
+          const allCapitals = await getAllCapitals().catch(() => []);
+          return {
+            _meta: { allCapitals },
+            structuredContent: { error: message },
+            content: [{ type: "text", text: message }],
+            isError: true,
+          };
+        }
+      },
+    )
+    .mcpMiddleware(intentMiddleware());
+
 export const app = new Skybridge(
   {
     name: "world-capitals-explorer",
     version: "0.0.1",
     capabilities: {},
   },
-  (server) =>
-    server
-      .registerTool(
-        {
-          name: "explore-capitals",
-          description:
-            "Use this tool to explore world capitals. Displays an interactive map with detailed information about capital cities including population, currencies, and beautiful photos. Always use it when users ask about capitals, countries, or want to explore geography.",
-          inputSchema: {
-            name: z
-              .string()
-              .describe(
-                "Capital city name in English (e.g., 'Paris', 'Tokyo', 'Washington, D.C.', 'London', 'New Delhi')",
-              ),
-          },
-          annotations: {
-            readOnlyHint: true,
-            openWorldHint: true,
-            destructiveHint: false,
-          },
-          view: {
-            component: "explore-capitals",
-            description:
-              "Interactive world capitals explorer with map visualization",
-            csp: {
-              resourceDomains: [
-                "https://upload.wikimedia.org",
-                "https://flagcdn.com",
-                "blob:",
-              ],
-              connectDomains: ["https://*.mapbox.com"],
-            },
-          },
-          _meta: {
-            "openai/widgetAccessible": true,
-          },
-        },
-        async ({ name }) => {
-          try {
-            const allCapitals = await getAllCapitals();
-            const capital = await getCapitalByName(name);
-
-            return {
-              _meta: {
-                slug: getCapitalSlug(capital.name),
-                allCapitals, // In meta to avoid flooding the model
-              },
-              structuredContent: {
-                capital, // Initial capital details
-              },
-              content: [
-                {
-                  type: "text",
-                  text: formatCapitalForModel(capital),
-                },
-              ],
-              isError: false,
-            };
-          } catch (error) {
-            const message =
-              error instanceof Error ? error.message : "Unknown error";
-            const allCapitals = await getAllCapitals().catch(() => []);
-            return {
-              _meta: { allCapitals },
-              structuredContent: { error: message },
-              content: [{ type: "text", text: message }],
-              isError: true,
-            };
-          }
-        },
-      )
-      .mcpMiddleware(intentMiddleware()),
+  serverFactory,
 );
 
 function formatCapitalForModel(capital: Capital): string {

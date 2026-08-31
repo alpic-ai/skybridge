@@ -1,4 +1,4 @@
-import { type AuthInfo, descopeProvider, Skybridge } from "skybridge/server";
+import { type SkybridgeServer, type AuthInfo, descopeProvider, Skybridge } from "skybridge/server";
 import * as z from "zod";
 import { env } from "./env.js";
 
@@ -8,6 +8,54 @@ const text = (value: string) => ({
 
 const who = (auth?: AuthInfo) =>
   auth ? ((auth.extra?.email as string | undefined) ?? auth.clientId) : "guest";
+
+export const serverFactory = (server: SkybridgeServer) =>
+  server
+    .registerTool(
+      {
+        name: "browse-catalog",
+        description:
+          "Browse the public coffee catalog. Works signed out, and greets you by name when a token is present.",
+        inputSchema: {},
+        auth: { allowsAnonymous: true },
+        view: { component: "catalog", description: "The coffee catalog" },
+      },
+      (_args, extra) => {
+        const user = who(extra.http?.authInfo);
+        const items = ["Espresso", "Latte", "Flat White", "Cold Brew"];
+        return {
+          structuredContent: { user, items },
+          content: [
+            {
+              type: "text" as const,
+              text: `Catalog for ${user}: ${items.join(", ")}.`,
+            },
+          ],
+        };
+      },
+    )
+    .registerTool(
+      {
+        name: "whoami",
+        description:
+          "Return the signed-in user. No auth declared, so it falls back to the secure default (sign-in required).",
+        inputSchema: {},
+      },
+      (_args, extra) => text(`You are ${who(extra.http?.authInfo)}.`),
+    )
+    .registerTool(
+      {
+        name: "checkout",
+        description:
+          "Place an order. Requires sign-in with the `checkout` scope.",
+        inputSchema: {
+          item: z.string().describe("The catalog item to order"),
+        },
+        auth: { scopes: ["checkout"] },
+      },
+      ({ item }, extra) =>
+        text(`Order placed for ${who(extra.http?.authInfo)}: ${item}.`),
+    );
 
 export const app = new Skybridge(
   {
@@ -19,53 +67,7 @@ export const app = new Skybridge(
       baseUrl: env.SERVER_URL,
     }),
   },
-  (server) =>
-    server
-      .registerTool(
-        {
-          name: "browse-catalog",
-          description:
-            "Browse the public coffee catalog. Works signed out, and greets you by name when a token is present.",
-          inputSchema: {},
-          auth: { allowsAnonymous: true },
-          view: { component: "catalog", description: "The coffee catalog" },
-        },
-        (_args, extra) => {
-          const user = who(extra.http?.authInfo);
-          const items = ["Espresso", "Latte", "Flat White", "Cold Brew"];
-          return {
-            structuredContent: { user, items },
-            content: [
-              {
-                type: "text" as const,
-                text: `Catalog for ${user}: ${items.join(", ")}.`,
-              },
-            ],
-          };
-        },
-      )
-      .registerTool(
-        {
-          name: "whoami",
-          description:
-            "Return the signed-in user. No auth declared, so it falls back to the secure default (sign-in required).",
-          inputSchema: {},
-        },
-        (_args, extra) => text(`You are ${who(extra.http?.authInfo)}.`),
-      )
-      .registerTool(
-        {
-          name: "checkout",
-          description:
-            "Place an order. Requires sign-in with the `checkout` scope.",
-          inputSchema: {
-            item: z.string().describe("The catalog item to order"),
-          },
-          auth: { scopes: ["checkout"] },
-        },
-        ({ item }, extra) =>
-          text(`Order placed for ${who(extra.http?.authInfo)}: ${item}.`),
-      ),
+  serverFactory,
 );
 
 export type AppType = typeof app;

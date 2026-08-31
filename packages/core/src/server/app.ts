@@ -1,17 +1,14 @@
 import http from "node:http";
 import type { AddressInfo } from "node:net";
-import {
-  createMcpHandler,
-  type Implementation,
-  type McpHttpHandler,
-  type Server as SdkServer,
-  type ServerOptions,
-  UnsupportedProtocolVersionError,
+import type {
+  Implementation,
+  Server as SdkServer,
+  ServerOptions,
 } from "@modelcontextprotocol/server";
 import type { ErrorRequestHandler, Express, RequestHandler } from "express";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
 import type { ExtraClaims } from "./auth.js";
-import { createApp, createBaseApp } from "./express.js";
+import { createApp, createBaseApp, getMcpHandler } from "./express.js";
 import { createMiddlewareEntry } from "./metric.js";
 import type { McpMiddlewareEntry } from "./middleware.js";
 import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
@@ -21,6 +18,8 @@ import {
   type SkybridgeServerOptions,
   type ToolDef,
 } from "./server.js";
+
+const SLOW_FACTORY_THRESHOLD_MS = 50;
 
 type ErrorMiddlewareConfig = {
   path?: string;
@@ -35,6 +34,18 @@ type ErrorMiddlewareConfig = {
  */
 export type SkybridgeConfig<TAuthExtra extends ExtraClaims = ExtraClaims> =
   Implementation & ServerOptions & SkybridgeServerOptions<TAuthExtra>;
+
+/**
+ * The bare {@link McpServer} a {@link SkybridgeFactory} receives: no tools
+ * registered yet. Use it to annotate a factory extracted into its own
+ * declaration — `(server: SkybridgeServer) => server.registerTool(…)` — and
+ * pass the claims your OAuth verifier produces to type
+ * `extra.http.authInfo.extra` in handlers. Leave the factory's return type
+ * inferred: the returned chain is what carries the tool registry into
+ * `typeof app`.
+ */
+export type SkybridgeServer<TAuthExtra extends ExtraClaims = ExtraClaims> =
+  McpServer<Record<never, ToolDef>, TAuthExtra>;
 
 /**
  * Builds an app's MCP surface. Runs again for **every incoming request**, on a
@@ -117,8 +128,8 @@ export class Skybridge<
   private readonly monitoringEntry: McpMiddlewareEntry | null =
     createMiddlewareEntry();
   private resolveResourceMetadataUrl?: ResourceMetadataUrlResolver;
-  private cachedFetchHandler?: McpHttpHandler;
   private ready?: Promise<void>;
+  private slowFactoryWarned = false;
 
   constructor(
     config: SkybridgeConfig<TAuthExtra>,
@@ -188,7 +199,10 @@ export class Skybridge<
           sample.securitySchemesByTool,
         );
       }
-    })();
+    })().catch((error) => {
+      this.ready = undefined;
+      throw error;
+    });
     return this.ready;
   }
 
@@ -210,37 +224,17 @@ export class Skybridge<
   }
 
   /**
-   * The app's fetch handler for `/mcp`: a `Request` → `Response` function that
-   * builds a fresh MCP server per request. Memoized, so the same handler is
-   * reused across requests.
-   */
-  get fetchHandler(): McpHttpHandler {
-    this.cachedFetchHandler ??= createMcpHandler(
-      async () => {
-        await this.ensureReady();
-        return this.createServerInstance();
-      },
-      {
-        onerror: (error) => {
-          if (error instanceof UnsupportedProtocolVersionError) {
-            return;
-          }
-          console.error("Error handling MCP request:", error);
-        },
-      },
-    );
-    return this.cachedFetchHandler;
-  }
-
-  /**
    * Build a fresh server for one stateless HTTP request, as
    * `createMcpHandler`'s factory contract requires: the factory runs again so
    * the SDK's handler closures belong to the instance whose protocol era it
    * stamps. Sharing one instance's handler maps instead would bind them to an
    * instance that is never marked, pinning every request to the 2025 codec and
    * letting concurrent callers overwrite each other's negotiated version.
+   *
+   * Awaits the async factory loader and the lazy OAuth config on first use.
    */
-  createServerInstance(): SdkServer {
+  async createServerInstance(): Promise<SdkServer> {
+    await this.ensureReady();
     const server = this.buildServer();
     this.instrumentHandlers(server);
     return server.server;
@@ -253,8 +247,8 @@ export class Skybridge<
    * which sets the transport up for you.
    */
   async connect(transport: Parameters<SdkServer["connect"]>[0]): Promise<void> {
-    await this.ensureReady();
-    await this.createServerInstance().connect(transport);
+    const instance = await this.createServerInstance();
+    await instance.connect(transport);
   }
 
   /**
@@ -380,7 +374,9 @@ export class Skybridge<
       // (force-quit on a second Ctrl+C while drain is hanging).
       process.off("SIGTERM", shutdown);
       process.off("SIGINT", shutdown);
-      this.cachedFetchHandler?.close().catch(() => {});
+      getMcpHandler(this)
+        .close()
+        .catch(() => {});
       httpServer.close(() => process.exit(0));
       // Force exit if connections don't drain in time so the port is still
       // released promptly (e.g. for nodemon restarts).
@@ -394,7 +390,7 @@ export class Skybridge<
   private buildServer(): McpServer<TTools, TAuthExtra> {
     if (!this.factory) {
       throw new Error(
-        "Skybridge factory not loaded yet: this app was constructed with an async factory loader. Await run(), connect(), or serve requests through fetchHandler.",
+        "Skybridge factory not loaded yet: this app was constructed with an async factory loader. Await run(), connect(), or createServerInstance().",
       );
     }
     const server = new McpServer<Record<never, ToolDef>, TAuthExtra>(
@@ -405,10 +401,18 @@ export class Skybridge<
     if (this.resolveResourceMetadataUrl) {
       server.setResourceMetadataUrlResolver(this.resolveResourceMetadataUrl);
     }
+    const startedAt = performance.now();
     const built = this.factory(server);
+    const elapsed = performance.now() - startedAt;
     if (typeof (built as { then?: unknown }).then === "function") {
       throw new Error(
         "The Skybridge factory must be synchronous — it runs on every request. To load config or secrets asynchronously, pass a loader instead: new Skybridge(config, async () => factory).",
+      );
+    }
+    if (elapsed > SLOW_FACTORY_THRESHOLD_MS && !this.slowFactoryWarned) {
+      this.slowFactoryWarned = true;
+      console.warn(
+        `The Skybridge factory took ${Math.round(elapsed)}ms — it runs on every request, so this cost is paid per request. Hoist expensive work to module scope, or move awaited setup into an async loader: new Skybridge(config, async () => factory).`,
       );
     }
     return built;

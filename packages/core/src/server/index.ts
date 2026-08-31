@@ -2,6 +2,7 @@ export type {
   SkybridgeConfig,
   SkybridgeFactory,
   SkybridgeFactoryLoader,
+  SkybridgeServer,
 } from "./app.js";
 export { Skybridge } from "./app.js";
 export type { OAuthConfig } from "./auth/index.js";

@@ -1,21 +1,32 @@
+import {
+  createMcpHandler,
+  type McpHttpHandler,
+  type Server,
+} from "@modelcontextprotocol/server";
 import type { LanguageModel } from "ai";
 import { inject, onTestFinished } from "vitest";
 import { Chat } from "./chat.js";
 
 /**
  * The minimum a Skybridge app has to expose to be served in-process: the
- * `$types` marker the assertions infer tool names from, and the fetch handler
- * the session is dialed through. Structural on purpose, so this package needs
- * no runtime dependency on `skybridge`.
+ * `$types` marker the assertions infer tool names from, and the per-request
+ * server builder the session's handler is built on. Structural on purpose, so
+ * this package needs no runtime dependency on `skybridge`.
  */
 export interface EvalApp {
   readonly $types: { readonly tools: object };
-  readonly fetchHandler: {
-    fetch: (
-      request: Request,
-      options?: { authInfo?: EvalIdentity },
-    ) => Promise<Response>;
-  };
+  createServerInstance(): Promise<Server>;
+}
+
+const handlers = new WeakMap<EvalApp, McpHttpHandler>();
+
+function getHandler(app: EvalApp): McpHttpHandler {
+  let handler = handlers.get(app);
+  if (!handler) {
+    handler = createMcpHandler(() => app.createServerInstance());
+    handlers.set(app, handler);
+  }
+  return handler;
 }
 
 /**
@@ -56,8 +67,8 @@ function sharedDefaults() {
  *
  * The assertions are inferred from the app value itself, so `expect.chat` gets
  * the project's tool names and argument shapes with no type parameter. The
- * session talks straight to `app.fetchHandler`, which never closes: the
- * handler is memoized on the app and shared by every test.
+ * session talks to an in-process handler built on `app.createServerInstance`,
+ * which never closes: it is memoized per app and shared by every test.
  *
  * `authInfo` claims an identity for the session: the app's per-tool scheme and
  * scope enforcement runs against it for real, only token verification is
@@ -77,7 +88,7 @@ export async function start<App extends EvalApp>(
       maxSteps: options.maxSteps ?? config?.maxSteps,
     },
     (url, init) =>
-      app.fetchHandler.fetch(
+      getHandler(app).fetch(
         new Request(url, init),
         authInfo === undefined ? undefined : { authInfo },
       ),

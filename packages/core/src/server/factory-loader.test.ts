@@ -17,7 +17,6 @@ describe("async factory loader", () => {
     });
 
     expect(loads).toBe(0);
-    expect(() => app.createServerInstance()).toThrow(/async factory loader/);
 
     const call = async () => {
       const client = new Client({ name: "client", version: "1.0.0" });
@@ -37,6 +36,24 @@ describe("async factory loader", () => {
       content: [{ type: "text", text: "hello" }],
     });
     expect(loads).toBe(1);
+  });
+
+  it("retries the loader after a failed first resolution", async () => {
+    let attempts = 0;
+    const app = new Skybridge({ name: "test", version: "1.0.0" }, async () => {
+      attempts++;
+      if (attempts === 1) {
+        throw new Error("transient");
+      }
+      return (server: McpServer) => server;
+    });
+
+    const [, first] = InMemoryTransport.createLinkedPair();
+    await expect(app.connect(first)).rejects.toThrow("transient");
+
+    const [, second] = InMemoryTransport.createLinkedPair();
+    await expect(app.connect(second)).resolves.toBeUndefined();
+    expect(attempts).toBe(2);
   });
 
   it("rejects a factory that returns a promise at construction", () => {

@@ -84,7 +84,7 @@ describe("skills server option", () => {
     // The production HTTP path builds a fresh per-request server; exercise it
     // directly to lock that skills (capability + resource reads) survive that
     // hop.
-    const instance = app.createServerInstance();
+    const instance = await app.createServerInstance();
     await instance.connect(serverTransport);
     await client.connect(clientTransport);
 

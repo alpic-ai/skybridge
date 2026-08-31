@@ -1,7 +1,7 @@
-import { type McpServer, Skybridge } from "skybridge/server";
+import { Skybridge, type SkybridgeServer } from "skybridge/server";
 import { z } from "zod";
 
-export const serverFactory = (server: McpServer) =>
+export const serverFactory = (server: SkybridgeServer) =>
   server
     .registerTool(
       {

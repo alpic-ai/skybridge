@@ -835,7 +835,7 @@ describe("resources/list view _meta injection", () => {
           }),
         ),
     );
-    const instance = app.createServerInstance();
+    const instance = await app.createServerInstance();
 
     const client = new Client({ name: "test-client", version: "1.0.0" });
     const [clientTransport, serverTransport] =

@@ -41,7 +41,7 @@ function buildApp(register: (server: McpServer) => void) {
 }
 
 async function connect(register: (server: McpServer) => void) {
-  const instance = buildApp(register).createServerInstance();
+  const instance = await buildApp(register).createServerInstance();
   const client = new Client({ name: "test-client", version: "1.0.0" });
   const [clientTransport, serverTransport] =
     InMemoryTransport.createLinkedPair();

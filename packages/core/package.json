@@ -47,7 +47,7 @@
     "ai",
     "skybridge"
   ],
-  "author": "Fr\u00e9d\u00e9ric Barthelet",
+  "author": "Frédéric Barthelet",
   "license": "ISC",
   "peerDependencies": {
     "@skybridge/devtools": "^2.0.0-beta.0",
