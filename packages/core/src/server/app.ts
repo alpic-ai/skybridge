@@ -52,14 +52,32 @@ export type SkybridgeFactory<
 ) => McpServer<TTools, TAuthExtra>;
 
 /**
+ * Async alternative to passing a {@link SkybridgeFactory} directly: a zero-arg
+ * function that loads whatever the factory needs (remote config, secrets, …)
+ * and resolves to it. It runs once — at {@link Skybridge.run} or on the first
+ * request, never at module import — so importing `server.ts` from tests and
+ * evals stays free of side effects. The factory it returns is still
+ * synchronous and still runs per request.
+ */
+export type SkybridgeFactoryLoader<
+  TTools extends Record<string, ToolDef>,
+  TAuthExtra extends ExtraClaims,
+> = () => Promise<SkybridgeFactory<TTools, TAuthExtra>>;
+
+/**
  * A Skybridge app: the HTTP surface (Express, OAuth metadata, the `/mcp`
  * route) plus a factory that builds the MCP server for each request.
  *
  * The factory runs for every request, so tools, resources, prompts and views
  * are always registered on the instance that serves the request. Anything in
  * the factory body other than registration therefore runs per request too.
- * It also runs once at construction, which surfaces registration errors at
- * boot and gives the OAuth layer the set of per-tool security schemes.
+ * It also runs once up front — at construction, or as soon as an async
+ * loader resolves — which surfaces registration errors at boot and gives the
+ * OAuth layer the set of per-tool security schemes.
+ *
+ * Anything asynchronous the factory needs (remote config, secrets, …) goes in
+ * a {@link SkybridgeFactoryLoader} passed in its place:
+ * `new Skybridge(config, async () => { const cfg = await load(); return (server) => …; })`.
  *
  * @typeParam TTools - Accumulated tool registry, inferred from the server the
  * factory returns. You almost never set this manually.
@@ -92,17 +110,21 @@ export class Skybridge<
   private readonly serverInfo: Implementation;
   private readonly serverOptions: ServerOptions;
   private readonly skybridgeOptions: SkybridgeServerOptions<TAuthExtra>;
-  private readonly factory: SkybridgeFactory<TTools, TAuthExtra>;
+  private factory?: SkybridgeFactory<TTools, TAuthExtra>;
+  private readonly factoryLoader?: SkybridgeFactoryLoader<TTools, TAuthExtra>;
   private readonly expressApp: Express;
   private readonly errorMiddleware: ErrorMiddlewareConfig[] = [];
   private readonly monitoringEntry: McpMiddlewareEntry | null =
     createMiddlewareEntry();
   private resolveResourceMetadataUrl?: ResourceMetadataUrlResolver;
   private cachedFetchHandler?: McpHttpHandler;
+  private ready?: Promise<void>;
 
   constructor(
     config: SkybridgeConfig<TAuthExtra>,
-    factory: SkybridgeFactory<TTools, TAuthExtra>,
+    factory:
+      | SkybridgeFactory<TTools, TAuthExtra>
+      | SkybridgeFactoryLoader<TTools, TAuthExtra>,
   ) {
     const {
       name,
@@ -120,11 +142,22 @@ export class Skybridge<
     this.serverInfo = { name, title, version, description, icons, websiteUrl };
     this.serverOptions = serverOptions;
     this.skybridgeOptions = { json, oauth, skills };
-    this.factory = factory;
+    this.expressApp = createBaseApp(json);
+
+    if (factory.length === 0) {
+      this.factoryLoader = factory as SkybridgeFactoryLoader<
+        TTools,
+        TAuthExtra
+      >;
+      return;
+    }
+    this.factory = factory as SkybridgeFactory<TTools, TAuthExtra>;
+
+    if (typeof oauth === "function") {
+      return;
+    }
 
     const sample = this.buildServer();
-
-    this.expressApp = createBaseApp(json);
     if (oauth) {
       this.resolveResourceMetadataUrl = setupOAuth(
         this.expressApp,
@@ -132,6 +165,31 @@ export class Skybridge<
         sample.securitySchemesByTool,
       );
     }
+    this.ready = Promise.resolve();
+  }
+
+  /**
+   * Resolve the factory loader and the OAuth config thunk, then wire OAuth
+   * onto the Express app. Runs once; every entry point that needs a built
+   * server awaits it. Immediate no-op when both were passed synchronously.
+   */
+  private ensureReady(): Promise<void> {
+    this.ready ??= (async () => {
+      if (this.factoryLoader) {
+        this.factory = await this.factoryLoader();
+      }
+      const { oauth } = this.skybridgeOptions;
+      const resolvedOauth = typeof oauth === "function" ? await oauth() : oauth;
+      const sample = this.buildServer();
+      if (resolvedOauth) {
+        this.resolveResourceMetadataUrl = setupOAuth(
+          this.expressApp,
+          resolvedOauth,
+          sample.securitySchemesByTool,
+        );
+      }
+    })();
+    return this.ready;
   }
 
   /**
@@ -158,7 +216,10 @@ export class Skybridge<
    */
   get fetchHandler(): McpHttpHandler {
     this.cachedFetchHandler ??= createMcpHandler(
-      () => this.createServerInstance(),
+      async () => {
+        await this.ensureReady();
+        return this.createServerInstance();
+      },
       {
         onerror: (error) => {
           if (error instanceof UnsupportedProtocolVersionError) {
@@ -192,6 +253,7 @@ export class Skybridge<
    * which sets the transport up for you.
    */
   async connect(transport: Parameters<SdkServer["connect"]>[0]): Promise<void> {
+    await this.ensureReady();
     await this.createServerInstance().connect(transport);
   }
 
@@ -263,6 +325,8 @@ export class Skybridge<
   async run(): Promise<
     { fetch: (...args: unknown[]) => unknown } | Express | undefined
   > {
+    await this.ensureReady();
+
     if (process.env.VERCEL === "1") {
       // createApp only reads httpServer inside its dev-only branch
       // (viewsDevServer); under VERCEL=1 + NODE_ENV=production it's a
@@ -328,6 +392,11 @@ export class Skybridge<
   }
 
   private buildServer(): McpServer<TTools, TAuthExtra> {
+    if (!this.factory) {
+      throw new Error(
+        "Skybridge factory not loaded yet: this app was constructed with an async factory loader. Await run(), connect(), or serve requests through fetchHandler.",
+      );
+    }
     const server = new McpServer<Record<never, ToolDef>, TAuthExtra>(
       this.serverInfo,
       this.serverOptions,
@@ -336,7 +405,13 @@ export class Skybridge<
     if (this.resolveResourceMetadataUrl) {
       server.setResourceMetadataUrlResolver(this.resolveResourceMetadataUrl);
     }
-    return this.factory(server);
+    const built = this.factory(server);
+    if (typeof (built as { then?: unknown }).then === "function") {
+      throw new Error(
+        "The Skybridge factory must be synchronous — it runs on every request. To load config or secrets asynchronously, pass a loader instead: new Skybridge(config, async () => factory).",
+      );
+    }
+    return built;
   }
 
   private middlewareEntries(

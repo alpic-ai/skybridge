@@ -29,7 +29,6 @@ import {
 import { mergeWith, union } from "es-toolkit";
 import type express from "express";
 import { warnOnLargeToolOutput } from "../context-warnings.js";
-import type { InferSchemaOutput, RawInputShape } from "../standard-schema.js";
 import type { OAuthConfig } from "./auth/index.js";
 import {
   authToSecuritySchemes,
@@ -88,13 +87,6 @@ export type ToolDef<
   output: TOutput;
   responseMetadata: TResponseMetadata;
 };
-
-/**
- * The runtime a served view page declares on `window.skybridge`. Every view
- * emits a single ext-apps resource, so this is always `"mcp-app"`; the Apps
- * SDK runtime is detected at load time via `window.openai` instead.
- */
-export type ViewHostType = "mcp-app";
 
 /**
  * Content Security Policy origins attached to a view's resource. Each list is
@@ -195,8 +187,8 @@ export interface SkybridgeServerOptions<
 > {
   /** Options for the built-in `express.json()` middleware, e.g. `{ limit: "10mb" }`. */
   json?: JsonOptions;
-  /** Resource-server OAuth config. When set, mounts well-known metadata and bearer auth on `/mcp`. */
-  oauth?: OAuthConfig<TAuthExtra>;
+  /** Resource-server OAuth config. When set, mounts well-known metadata and bearer auth on `/mcp`. Pass a zero-arg async function to load it lazily — it resolves once, at `run()` or on the first request, never at module import. */
+  oauth?: OAuthConfig<TAuthExtra> | (() => Promise<OAuthConfig<TAuthExtra>>);
   /**
    * @experimental Serve Agent Skills from `src/skills` over MCP (SEP-2640).
    * API may change.
@@ -295,7 +287,6 @@ type OpenaiResourceMeta = {
 type ResourceMeta = McpAppsResourceMeta & OpenaiResourceMeta;
 
 type ViewResourceConfig = {
-  hostType: ViewHostType;
   uri: string;
   mimeType: string;
   buildContentMeta: (
@@ -325,17 +316,22 @@ export interface McpServerTypes<TTools extends Record<string, ToolDef>> {
 
 type Simplify<T> = { [K in keyof T]: T[K] };
 
-type ShapeOutput<Shape extends RawInputShape> = Simplify<
-  {
-    [K in keyof Shape as undefined extends InferSchemaOutput<Shape[K]>
-      ? never
-      : K]: InferSchemaOutput<Shape[K]>;
-  } & {
-    [K in keyof Shape as undefined extends InferSchemaOutput<Shape[K]>
-      ? K
-      : never]?: InferSchemaOutput<Shape[K]>;
-  }
->;
+type ShapeOutput<Shape extends Record<string, StandardSchemaWithJSON>> =
+  Simplify<
+    {
+      [K in keyof Shape as undefined extends StandardSchemaV1.InferOutput<
+        Shape[K]
+      >
+        ? never
+        : K]: StandardSchemaV1.InferOutput<Shape[K]>;
+    } & {
+      [K in keyof Shape as undefined extends StandardSchemaV1.InferOutput<
+        Shape[K]
+      >
+        ? K
+        : never]?: StandardSchemaV1.InferOutput<Shape[K]>;
+    }
+  >;
 
 type ExtractStructuredContent<T> = T extends { structuredContent: infer SC }
   ? Simplify<SC>
@@ -350,7 +346,7 @@ type ExtractMeta<T> = [Extract<T, { _meta: unknown }>] extends [never]
 type AddTool<
   TTools,
   TName extends string,
-  TInput extends RawInputShape,
+  TInput extends Record<string, StandardSchemaWithJSON>,
   TOutput,
   TResponseMetadata = unknown,
   TAuthExtra extends ExtraClaims = ExtraClaims,
@@ -361,12 +357,18 @@ type AddTool<
   TAuthExtra
 >;
 
-interface ToolConfigBase<TInput extends RawInputShape | StandardSchemaV1> {
+interface ToolConfigBase<
+  TInput extends
+    | Record<string, StandardSchemaWithJSON>
+    | StandardSchemaWithJSON,
+> {
   name: string;
   title?: string;
   description?: string;
   inputSchema?: TInput;
-  outputSchema?: RawInputShape | StandardSchemaV1;
+  outputSchema?:
+    | Record<string, StandardSchemaWithJSON>
+    | StandardSchemaWithJSON;
   annotations?: ToolAnnotations;
   view?: ViewConfig;
   _meta?: ToolMeta;
@@ -390,8 +392,11 @@ type ToolAuthConfig =
       securitySchemes?: SecurityScheme[];
     };
 
-type ToolConfig<TInput extends RawInputShape | StandardSchemaV1> =
-  ToolConfigBase<TInput> & ToolAuthConfig;
+type ToolConfig<
+  TInput extends
+    | Record<string, StandardSchemaWithJSON>
+    | StandardSchemaWithJSON,
+> = ToolConfigBase<TInput> & ToolAuthConfig;
 
 /**
  * Optional client-supplied hints attached to `params._meta` on every tool call
@@ -433,7 +438,7 @@ type ToolHandlerExtra<TAuthExtra extends ExtraClaims = ExtraClaims> = Omit<
 };
 
 type ToolHandler<
-  TInput extends RawInputShape,
+  TInput extends Record<string, StandardSchemaWithJSON>,
   TReturn extends { content?: HandlerContent } = { content?: HandlerContent },
   TAuthExtra extends ExtraClaims = ExtraClaims,
 > = (
@@ -950,7 +955,6 @@ export class McpServer<
     const versionParam = this.computeViewVersionParam(view.component);
 
     const viewResource: ViewResourceConfig = {
-      hostType: "mcp-app",
       uri: `ui://views/ext-apps/${view.component}.html${versionParam}`,
       mimeType: "text/html;profile=mcp-app",
       buildContentMeta: (
@@ -1032,7 +1036,7 @@ export class McpServer<
     viewResource: ViewResourceConfig;
     view: ViewConfig;
   }): void {
-    const { hostType, uri: viewUri, mimeType, buildContentMeta } = viewResource;
+    const { uri: viewUri, mimeType, buildContentMeta } = viewResource;
 
     const buildMeta = (extra: McpExtra | undefined): ResourceMeta => {
       const { serverUrl, connectDomains, contentMetaOverrides } =
@@ -1066,13 +1070,11 @@ export class McpServer<
 
         const html = isProduction
           ? templateHelper.renderProduction({
-              hostType,
               serverUrl: viewBase,
               viewFile: this.lookupViewFile(view.component),
               styleFile: this.lookupDistFile("style.css") ?? "",
             })
           : templateHelper.renderDevelopment({
-              hostType,
               serverUrl: viewBase,
               viewName: view.component,
             });
@@ -1101,7 +1103,9 @@ export class McpServer<
     );
   }
 
-  private decorateToolHandler<InputArgs extends RawInputShape>(
+  private decorateToolHandler<
+    InputArgs extends Record<string, StandardSchemaWithJSON>,
+  >(
     cb: ToolHandler<InputArgs>,
     {
       attachViewUUID,
@@ -1241,7 +1245,7 @@ export class McpServer<
    */
   registerTool<
     TName extends string,
-    InputArgs extends RawInputShape,
+    InputArgs extends Record<string, StandardSchemaWithJSON>,
     TReturn extends { content?: HandlerContent },
   >(
     config: ToolConfig<InputArgs> & { name: TName },
@@ -1254,7 +1258,7 @@ export class McpServer<
     ExtractMeta<TReturn>,
     TAuthExtra
   >;
-  registerTool<InputArgs extends RawInputShape>(
+  registerTool<InputArgs extends Record<string, StandardSchemaWithJSON>>(
     config: ToolConfig<InputArgs>,
     cb: ToolHandler<InputArgs, { content?: HandlerContent }, TAuthExtra>,
   ): this;
@@ -1263,8 +1267,10 @@ export class McpServer<
       ...args: unknown[]
     ) => unknown;
 
-    const config = rawConfig as ToolConfig<RawInputShape>;
-    const cb = rawCb as ToolHandler<RawInputShape>;
+    const config = rawConfig as ToolConfig<
+      Record<string, StandardSchemaWithJSON>
+    >;
+    const cb = rawCb as ToolHandler<Record<string, StandardSchemaWithJSON>>;
 
     const {
       name,
@@ -1322,7 +1328,10 @@ export class McpServer<
       { ...toolFields, _meta: toolMeta },
       toolFields.inputSchema === undefined
         ? (extra: ToolHandlerExtra) =>
-            wrappedCb({} as ShapeOutput<RawInputShape>, extra)
+            wrappedCb(
+              {} as ShapeOutput<Record<string, StandardSchemaWithJSON>>,
+              extra,
+            )
         : wrappedCb,
     );
 

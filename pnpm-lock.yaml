@@ -1651,9 +1651,6 @@ importers:
       yaml:
         specifier: ^2.9.0
         version: 2.9.0
-      zod:
-        specifier: ^4.4.3
-        version: 4.4.3
       zustand:
         specifier: ^5.0.14
         version: 5.0.14(@types/react@19.2.17)(immer@11.1.11)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
@@ -1712,6 +1709,9 @@ importers:
       vitest:
         specifier: ^4.1.10
         version: 4.1.10(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@vitest/ui@4.1.10)(jsdom@29.1.1(@noble/hashes@1.8.0))(msw@2.12.4(@types/node@24.13.3)(typescript@6.0.3))(vite@8.1.5(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.44.1)(tsx@4.23.1)(yaml@2.9.0))
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
 
   packages/create-skybridge:
     dependencies:

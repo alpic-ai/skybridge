@@ -1,5 +1,5 @@
 import { OAuthMetadataSchema } from "@modelcontextprotocol/core";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /**
  * Discovery doc validated as OAuth AS metadata + `jwks_uri`. The SDK's

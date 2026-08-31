@@ -1,4 +1,3 @@
-import type { ViewHostType } from "./server.js";
 import {
   developmentTemplate,
   productionTemplate,
@@ -6,7 +5,6 @@ import {
 
 class TemplateHelper {
   renderProduction(data: {
-    hostType: ViewHostType;
     serverUrl: string;
     viewFile: string;
     styleFile: string;
@@ -14,11 +12,7 @@ class TemplateHelper {
     return productionTemplate(data);
   }
 
-  renderDevelopment(data: {
-    hostType: ViewHostType;
-    serverUrl: string;
-    viewName: string;
-  }): string {
+  renderDevelopment(data: { serverUrl: string; viewName: string }): string {
     return developmentTemplate(data);
   }
 }

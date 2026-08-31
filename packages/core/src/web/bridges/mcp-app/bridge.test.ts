@@ -11,8 +11,8 @@ describe("McpAppBridge.getInstance", () => {
     McpAppBridge.resetInstance();
   });
 
-  it("instantiates regardless of injected hostType", () => {
-    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+  it("instantiates without injected globals", () => {
+    vi.stubGlobal("skybridge", {});
     expect(() => McpAppBridge.getInstance()).not.toThrow();
   });
 });

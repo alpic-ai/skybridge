@@ -83,6 +83,17 @@ export const app = new Skybridge(config, (server) => server.registerTool(...));
 
 The same applies to anything expensive but harmless: file reads, config parsing, client construction, `await`ed setup. Registration is the only work that belongs inside.
 
+When registration itself depends on `await`ed data (remote config, secrets), pass an async loader in place of the factory. It runs once — at `run()` or on the first request, never at module import, so importing `server.ts` from tests and evals stays side-effect free — and resolves to the ordinary synchronous factory:
+
+```ts
+export const app = new Skybridge(config, async () => {
+  const cfg = await loadConfig();
+  return (server) => server.registerTool({ name: cfg.toolName, ... }, handler);
+});
+```
+
+The `oauth` config field accepts the same shape: an `OAuthConfig` or a zero-arg async function resolving to one.
+
 **If you are an agent performing this migration**, this is the one step you cannot do by shape-preserving edit. The mechanical move is to wrap the old file's contents in the factory, and that is exactly what produces the bug, because in v1 those statements ran once at module scope.
 
 Go through the v1 server file statement by statement before you move anything. Only `registerTool`, `registerResource`, `registerPrompt` and `mcpMiddleware` calls belong inside the factory. Everything else stays at module scope, above the `new Skybridge(...)` call:
@@ -159,7 +170,7 @@ The v1 split still holds: `@skybridge/vite-plugin` is build-time Node code for y
 
 ### 2.7 Drop `@modelcontextprotocol/sdk` from your dependencies
 
-SDK v1 is no longer a peer dependency of `skybridge`. Remove it from your app's `package.json`. Anything you imported from it comes from `skybridge/server` now, including the types v2 added for schema work: `RawInputShape`, `InferSchemaOutput`, `McpExtra`.
+SDK v1 is no longer a peer dependency of `skybridge`. Remove it from your app's `package.json`. Anything you imported from it comes from `skybridge/server` now, e.g. `McpExtra` for typing extracted handlers. For schema types, use the SDK's `StandardSchemaWithJSON` / `StandardSchemaV1.InferOutput` directly: earlier v2 alphas exported `RawInputShape` and `InferSchemaOutput` aliases, which are gone.
 
 Leaving the old dependency installed is worse than harmless. Your app resolves SDK v1 types while `skybridge` is built against v2, and the resulting mismatch surfaces as structurally-identical types that refuse to unify.
 
@@ -193,7 +204,7 @@ One exception runs the other way: tools registered from inside a view via `useRe
 
 ### 2.11 `ViewConfig.hosts` and `ViewHostType` are gone
 
-`hosts` was already a no-op in 1.x, since every view emits a single ext-apps resource. Delete the field. `ViewHostType` is no longer exported; if you imported it, the value it described is now always `"mcp-app"`.
+`hosts` was already a no-op in 1.x, since every view emits a single ext-apps resource. Delete the field. `ViewHostType` is gone, and the served view page no longer declares `hostType` on `window.skybridge`. The runtime is detected at load time via `window.openai`, so a view reading `window.skybridge.hostType` should drop the check.
 
 ## Step 3: Version strategy
 

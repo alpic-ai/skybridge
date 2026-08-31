@@ -337,7 +337,7 @@ describe("McpServer.registerTool (unified API)", () => {
       ],
     });
     expect(result.contents[0]?.text).toContain(
-      'window.skybridge = { hostType: "mcp-app", serverUrl: "http://localhost:3000" };',
+      'window.skybridge = { serverUrl: "http://localhost:3000" };',
     );
   });
 

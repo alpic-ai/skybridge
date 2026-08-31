@@ -5,16 +5,13 @@ import type {
   ToolAnnotations,
 } from "@modelcontextprotocol/sdk/types.js";
 import type { useSyncExternalStore } from "react";
-import type { ZodType } from "zod";
-import type { ViewHostType } from "../../server/server.js";
-import type { InferSchemaOutput } from "../../standard-schema.js";
+import type { output as ZodOutput, ZodType } from "zod/v4";
 
 /**
- * Globals injected on `window.skybridge` by the host. Tells the view which
- * runtime it's running under and where to reach the MCP server.
+ * Globals injected on `window.skybridge` by the host. Tells the view where to
+ * reach the MCP server.
  */
 export type SkybridgeProperties = {
-  hostType: ViewHostType;
   serverUrl: string;
 };
 
@@ -170,7 +167,7 @@ export type DownloadResult = {
 
 /**
  * Shape of a view tool's `inputSchema`: a map of zod schemas. Narrower than
- * the server's `RawInputShape` because the MCP Apps bridge validates with
+ * the server's `Record<string, StandardSchemaWithJSON>` input shape because the MCP Apps bridge validates with
  * `z.object()` at runtime — other Standard Schema libraries would type-check
  * but throw on the first call.
  */
@@ -181,13 +178,13 @@ export type ViewToolInputShape = Record<string, ZodType>;
  * `inputSchema` (optionality preserved). Mirrors the server's `registerTool`.
  */
 export type InferViewToolArgs<Shape extends ViewToolInputShape> = {
-  [K in keyof Shape as undefined extends InferSchemaOutput<Shape[K]>
+  [K in keyof Shape as undefined extends ZodOutput<Shape[K]>
     ? never
-    : K]: InferSchemaOutput<Shape[K]>;
+    : K]: ZodOutput<Shape[K]>;
 } & {
-  [K in keyof Shape as undefined extends InferSchemaOutput<Shape[K]>
+  [K in keyof Shape as undefined extends ZodOutput<Shape[K]>
     ? K
-    : never]?: InferSchemaOutput<Shape[K]>;
+    : never]?: ZodOutput<Shape[K]>;
 };
 
 /**

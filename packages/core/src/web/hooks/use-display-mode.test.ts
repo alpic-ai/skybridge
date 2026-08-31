@@ -15,7 +15,7 @@ describe("useDisplayMode", () => {
     HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
-    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    vi.stubGlobal("skybridge", {});
     vi.stubGlobal("openai", { view: { mode: "inline" } });
     vi.stubGlobal("ResizeObserver", MockResizeObserver);
   });

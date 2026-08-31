@@ -19,7 +19,7 @@ describe("useHost", () => {
     HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
     vi.stubGlobal("openai", undefined);
-    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    vi.stubGlobal("skybridge", {});
     vi.stubGlobal("ResizeObserver", MockResizeObserver);
   });
 

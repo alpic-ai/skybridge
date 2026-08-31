@@ -11,7 +11,7 @@ import {
   type McpServer as SdkMcpServer,
 } from "@modelcontextprotocol/server";
 import { parse as parseYaml } from "yaml";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const SKILLS_EXTENSION_KEY = "io.modelcontextprotocol/skills";
 

@@ -69,7 +69,7 @@ async function callHost(method: string, params: Record<string, unknown> = {}) {
 
 describe("McpApp view tools", () => {
   beforeEach(() => {
-    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    vi.stubGlobal("skybridge", {});
     vi.stubGlobal("ResizeObserver", MockResizeObserver);
     McpAppBridge.resetInstance();
     installHostMock();

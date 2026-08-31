@@ -27,7 +27,7 @@ describe("useViewState", () => {
       setWidgetState: vi.fn().mockResolvedValue(undefined),
     };
     vi.stubGlobal("openai", OpenaiMock);
-    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    vi.stubGlobal("skybridge", {});
   });
 
   afterEach(() => {
@@ -143,7 +143,7 @@ describe("useViewState", () => {
 describe("useViewState (mcp-app host — localStorage persistence)", () => {
   beforeEach(() => {
     vi.stubGlobal("parent", { postMessage: getMcpAppHostPostMessageMock() });
-    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    vi.stubGlobal("skybridge", {});
     vi.stubGlobal("openai", undefined);
     vi.stubGlobal("ResizeObserver", MockResizeObserver);
     localStorage.clear();

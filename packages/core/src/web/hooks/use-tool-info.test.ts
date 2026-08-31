@@ -19,7 +19,7 @@ describe("useToolInfo", () => {
         toolOutput: null,
         toolResponseMetadata: null,
       });
-      vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+      vi.stubGlobal("skybridge", {});
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });
 
@@ -87,7 +87,7 @@ describe("useToolInfo", () => {
   describe("mcp-app host", () => {
     beforeEach(() => {
       vi.stubGlobal("parent", { postMessage: getMcpAppHostPostMessageMock() });
-      vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+      vi.stubGlobal("skybridge", {});
       vi.stubGlobal("openai", undefined);
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
     });

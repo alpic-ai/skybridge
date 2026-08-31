@@ -23,10 +23,7 @@ describe("useSetOpenInAppUrl", () => {
       vi.stubGlobal("openai", {
         setOpenInAppUrl: setOpenInAppUrlMock,
       });
-      vi.stubGlobal("skybridge", {
-        hostType: "mcp-app",
-        serverUrl: "https://example.com",
-      });
+      vi.stubGlobal("skybridge", { serverUrl: "https://example.com" });
       vi.stubGlobal("parent", { postMessage: vi.fn() });
     });
 
@@ -62,10 +59,7 @@ describe("useSetOpenInAppUrl", () => {
   describe("mcp-app host", () => {
     beforeEach(() => {
       vi.stubGlobal("openai", undefined);
-      vi.stubGlobal("skybridge", {
-        hostType: "mcp-app",
-        serverUrl: "https://example.com",
-      });
+      vi.stubGlobal("skybridge", { serverUrl: "https://example.com" });
       vi.stubGlobal("parent", { postMessage: vi.fn() });
     });
 

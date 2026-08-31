@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { Skybridge } from "skybridge/server";
+import { type McpServer, Skybridge } from "skybridge/server";
 import { CAROUSEL_RANGE, MIN_SEARCH_ITERATIONS } from "./config.js";
 import {
   renderCarouselDefinition,
@@ -14,6 +14,11 @@ import {
 if (existsSync(".env")) {
   process.loadEnvFile();
 }
+
+export const serverFactory = (server: McpServer) =>
+  server
+    .registerTool(searchProductsDefinition, searchProductsHandler)
+    .registerTool(renderCarouselDefinition, renderCarouselHandler);
 
 export const app = new Skybridge(
   {
@@ -32,10 +37,7 @@ once the carousel renders.
 RENDER: After curating, call render-carousel with the chosen product IDs (aim for ${CAROUSEL_RANGE}). \
 Speak once it renders, then recommend products in carousel order.`,
   },
-  (server) =>
-    server
-      .registerTool(searchProductsDefinition, searchProductsHandler)
-      .registerTool(renderCarouselDefinition, renderCarouselHandler),
+  serverFactory,
 );
 
 export type AppType = typeof app;

@@ -1,7 +1,9 @@
-import { Skybridge } from "skybridge/server";
+import { type McpServer, Skybridge } from "skybridge/server";
 
 // Register tools with `server.registerTool(...)`.
 // Docs: https://docs.skybridge.tech/api-reference/register-tool
+
+export const serverFactory = (server: McpServer) => server;
 
 export const app = new Skybridge(
   {
@@ -9,7 +11,7 @@ export const app = new Skybridge(
     version: "0.0.1",
     capabilities: {},
   },
-  (server) => server,
+  serverFactory,
 );
 
 export type AppType = typeof app;
