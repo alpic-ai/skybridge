@@ -13,29 +13,21 @@ import type { JsonOptions } from "./server.js";
 
 type SkybridgeApp = Pick<Skybridge, "express" | "createServerInstance">;
 
-const mcpHandlers = new WeakMap<SkybridgeApp, McpHttpHandler>();
-
 /**
- * The memoized `/mcp` fetch handler for a {@link Skybridge} app: a `Request` →
- * `Response` function that builds a fresh MCP server per request. One handler
- * per app, shared by the Express middleware and the shutdown drain.
+ * The `/mcp` fetch handler for a {@link Skybridge} app: a `Request` →
+ * `Response` function that builds a fresh MCP server per request.
  *
  * @internal
  */
-export function getMcpHandler(skybridgeApp: SkybridgeApp): McpHttpHandler {
-  let handler = mcpHandlers.get(skybridgeApp);
-  if (!handler) {
-    handler = createMcpHandler(() => skybridgeApp.createServerInstance(), {
-      onerror: (error) => {
-        if (error instanceof UnsupportedProtocolVersionError) {
-          return;
-        }
-        console.error("Error handling MCP request:", error);
-      },
-    });
-    mcpHandlers.set(skybridgeApp, handler);
-  }
-  return handler;
+export function buildMcpHandler(skybridgeApp: SkybridgeApp): McpHttpHandler {
+  return createMcpHandler(() => skybridgeApp.createServerInstance(), {
+    onerror: (error) => {
+      if (error instanceof UnsupportedProtocolVersionError) {
+        return;
+      }
+      console.error("Error handling MCP request:", error);
+    },
+  });
 }
 
 /**
@@ -97,10 +89,12 @@ function defaultErrorHandler(
 export async function createApp({
   app: skybridgeApp,
   httpServer,
+  mcpHandler,
   errorMiddleware = [],
 }: {
   app: SkybridgeApp;
   httpServer: http.Server;
+  mcpHandler?: McpHttpHandler;
   errorMiddleware?: {
     path?: string;
     handlers: express.ErrorRequestHandler[];
@@ -134,7 +128,7 @@ export async function createApp({
     app.use("/assets", express.static(assetsPath));
   }
 
-  app.use("/mcp", mcpMiddleware(skybridgeApp));
+  app.use("/mcp", mcpMiddleware(mcpHandler ?? buildMcpHandler(skybridgeApp)));
 
   applyMiddlewares(app, errorMiddleware);
 
@@ -143,8 +137,8 @@ export async function createApp({
   return app;
 }
 
-const mcpMiddleware = (skybridgeApp: SkybridgeApp): express.RequestHandler => {
-  const handler = toNodeHandler(getMcpHandler(skybridgeApp));
+const mcpMiddleware = (mcpHandler: McpHttpHandler): express.RequestHandler => {
+  const handler = toNodeHandler(mcpHandler);
 
   return async (
     req: express.Request,

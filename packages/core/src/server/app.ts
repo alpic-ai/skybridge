@@ -8,7 +8,7 @@ import type {
 import type { ErrorRequestHandler, Express, RequestHandler } from "express";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
 import type { ExtraClaims } from "./auth.js";
-import { createApp, createBaseApp, getMcpHandler } from "./express.js";
+import { buildMcpHandler, createApp, createBaseApp } from "./express.js";
 import { createMiddlewareEntry } from "./metric.js";
 import type { McpMiddlewareEntry } from "./middleware.js";
 import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
@@ -335,10 +335,12 @@ export class Skybridge<
     }
 
     const httpServer = http.createServer();
+    const mcpHandler = buildMcpHandler(this);
 
     await createApp({
       app: this,
       httpServer,
+      mcpHandler,
       errorMiddleware: this.errorMiddleware,
     });
 
@@ -374,9 +376,7 @@ export class Skybridge<
       // (force-quit on a second Ctrl+C while drain is hanging).
       process.off("SIGTERM", shutdown);
       process.off("SIGINT", shutdown);
-      getMcpHandler(this)
-        .close()
-        .catch(() => {});
+      mcpHandler.close().catch(() => {});
       httpServer.close(() => process.exit(0));
       // Force exit if connections don't drain in time so the port is still
       // released promptly (e.g. for nodemon restarts).
