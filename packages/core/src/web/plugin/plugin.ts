@@ -23,15 +23,24 @@ export interface SkybridgePluginOptions {
    * typically optional native modules pulled in by a transitive dependency.
    */
   serverExternal?: string[];
+  /**
+   * Apply the host's theme, CSS variables and fonts to your views
+   * automatically (MCP Apps runtime only). Off by default: enabling it lets the
+   * host restyle your views — including flipping `color-scheme`, which changes
+   * native control/scrollbar/background defaults — so opt in once your views
+   * are ready to inherit host styling. No-op under the ChatGPT Apps SDK runtime.
+   */
+  hostStyles?: boolean;
 }
 
-function buildVirtualEntry(viewFilePath: string): string {
+function buildVirtualEntry(viewFilePath: string, hostStyles: boolean): string {
   const normalized = viewFilePath.replace(/\\/g, "/");
+  const mountOptions = hostStyles ? ", { hostStyles: true }" : "";
   return [
     `import { mountView } from "skybridge/web";`,
     `import Component from "${normalized}";`,
     `import { createElement } from "react";`,
-    `mountView(createElement(Component));`,
+    `mountView(createElement(Component)${mountOptions});`,
   ].join("\n");
 }
 
@@ -166,7 +175,7 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
         const name = id.slice(VIRTUAL_MODULE_PREFIX.length);
         const view = viewMap.get(name);
         if (view) {
-          return buildVirtualEntry(view.filePath);
+          return buildVirtualEntry(view.filePath, options?.hostStyles ?? false);
         }
       }
       return null;
