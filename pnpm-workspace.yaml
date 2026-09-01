@@ -7,6 +7,7 @@ packages:
   - "packages/create-skybridge/templates/blank"
   - "packages/create-skybridge/templates/ecom"
   - "examples/*"
+  - "poc/evals"
   - "e2e/conformance"
 
 # Delay installing newly published versions by 3 days to reduce exposure to

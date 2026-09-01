@@ -1,0 +1,140 @@
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import {
+  dynamicTool,
+  generateText,
+  jsonSchema,
+  type LanguageModel,
+  type ModelMessage,
+  stepCountIs,
+} from "ai";
+import type { ToolInput, ToolNames } from "skybridge/server";
+
+/**
+ * One recorded call, typed against the project's own registry: `name` is a
+ * union of the project's tool names and `arguments` is discriminated on it.
+ */
+export type ToolCall<App> = {
+  [Name in ToolNames<App>]: {
+    name: Name;
+    arguments: ToolInput<App, Name>;
+    invalid?: boolean;
+  };
+}[ToolNames<App>];
+
+/**
+ * How the host is configured. `model` is an AI SDK model instance, so the
+ * provider and its credentials are chosen by the project rather than by a
+ * base URL the runner has to know about.
+ */
+export interface HostConfig {
+  model: LanguageModel;
+  temperature?: number;
+  systemPrompt?: string;
+  maxSteps?: number;
+}
+
+interface McpToolDefinition {
+  name: string;
+  description?: string;
+  inputSchema: Record<string, unknown>;
+}
+
+const DEFAULT_MAX_STEPS = 8;
+
+/**
+ * One conversation against one MCP session. A scenario asserts on
+ * {@link Chat.toolCalls}, the sequence of calls the model made.
+ */
+export class Chat<App = unknown> {
+  /** Every call the model made, in order, as it crossed the wire. */
+  readonly toolCalls: ToolCall<App>[] = [];
+
+  private readonly messages: ModelMessage[] = [];
+  private readonly client: Client;
+  private readonly transport: StreamableHTTPClientTransport;
+  private readonly host: HostConfig;
+  private tools: McpToolDefinition[] = [];
+
+  private constructor(
+    client: Client,
+    transport: StreamableHTTPClientTransport,
+    host: HostConfig,
+  ) {
+    this.client = client;
+    this.transport = transport;
+    this.host = host;
+  }
+
+  static async open<App>(
+    serverUrl: string,
+    host: HostConfig,
+  ): Promise<Chat<App>> {
+    const client = new Client({ name: "skybridge-eval", version: "0" });
+    const transport = new StreamableHTTPClientTransport(new URL(serverUrl));
+    await client.connect(transport);
+    const chat = new Chat<App>(client, transport, host);
+    const { tools } = await client.listTools();
+    chat.tools = tools as unknown as McpToolDefinition[];
+    return chat;
+  }
+
+  /** The tool definitions the model was looking at, for failure reports. */
+  get toolDefinitions(): McpToolDefinition[] {
+    return this.tools;
+  }
+
+  /** Takes a turn and returns the model's answer. */
+  async send(prompt: string): Promise<string> {
+    this.messages.push({ role: "user", content: prompt });
+
+    const result = await generateText({
+      model: this.host.model,
+      temperature: this.host.temperature ?? 0,
+      ...(this.host.systemPrompt === undefined
+        ? {}
+        : { system: this.host.systemPrompt }),
+      messages: this.messages,
+      tools: this.toolSet(),
+      stopWhen: stepCountIs(this.host.maxSteps ?? DEFAULT_MAX_STEPS),
+    });
+
+    for (const step of result.steps) {
+      for (const call of step.toolCalls) {
+        this.toolCalls.push({
+          name: call.toolName,
+          arguments: (call.input ?? {}) as Record<string, unknown>,
+          ...(call.invalid === true ? { invalid: true } : {}),
+        } as ToolCall<App>);
+      }
+    }
+
+    this.messages.push(...result.response.messages);
+    return result.text;
+  }
+
+  async close(): Promise<void> {
+    await this.transport.close();
+  }
+
+  private toolSet() {
+    const entries = this.tools.map((definition) => {
+      const { $schema: _ignored, ...parameters } = definition.inputSchema;
+      return [
+        definition.name,
+        dynamicTool({
+          description: definition.description ?? "",
+          inputSchema: jsonSchema(parameters),
+          execute: async (input) => {
+            const result = await this.client.callTool({
+              name: definition.name,
+              arguments: (input ?? {}) as Record<string, unknown>,
+            });
+            return result.content ?? result;
+          },
+        }),
+      ] as const;
+    });
+    return Object.fromEntries(entries);
+  }
+}

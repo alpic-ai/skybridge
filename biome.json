@@ -11,7 +11,7 @@
       "!!**/node_modules",
       "!!**/dist",
       "!!docs",
-      "!!**/nextImageExportOptimizer/**",
+      "!!**/nextImageExportOptimizer",
       "!!landing/public/assets/next-image-export-optimizer-hashes.json",
       "!!landing/public/assets/customer-logos"
     ]
