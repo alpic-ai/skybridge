@@ -1,9 +1,5 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import {
-  auth0Provider,
-  Skybridge,
-  type SkybridgeServer,
-} from "skybridge/server";
+import { auth0Provider, Skybridge } from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
@@ -24,94 +20,6 @@ const AUTH0_BASE_URL = `https://${env.AUTH0_DOMAIN}`;
  * Dynamic Client Registration and register an API whose Identifier is `audience`.
  */
 
-export const handler = (server: SkybridgeServer<{ subject?: string }>) =>
-  server
-    .registerTool(
-      {
-        name: "search-coffee-paris",
-        description:
-          "Search for coffee shops in Paris. Shows personalized results with your favorites highlighted and sorted first. Requires authentication.",
-        inputSchema: {
-          query: z
-            .string()
-            .optional()
-            .describe(
-              "Search query (name or specialty, e.g., 'latte', 'espresso')",
-            ),
-          minRating: z
-            .number()
-            .min(1)
-            .max(5)
-            .optional()
-            .describe("Minimum rating (1-5)"),
-        },
-        annotations: {
-          readOnlyHint: true,
-          openWorldHint: true,
-          destructiveHint: false,
-        },
-        view: {
-          component: "search-coffee-paris",
-          description: "Search for coffee shops in Paris",
-          csp: {
-            resourceDomains: ["https://images.unsplash.com"],
-          },
-        },
-        _meta: {
-          "openai/widgetAccessible": true,
-        },
-      },
-      async ({ query, minRating }, extra) => {
-        try {
-          const userInfoResponse = await fetch(`${AUTH0_BASE_URL}/userinfo`, {
-            headers: {
-              Authorization: `Bearer ${extra.http?.authInfo?.token}`,
-            },
-          });
-
-          const userInfo = userInfoResponse.ok
-            ? ((await userInfoResponse.json()) as {
-                name?: string;
-                email?: string;
-              })
-            : null;
-
-          const displayName = userInfo?.name ?? "User";
-          const results = searchCoffeeShops({
-            query,
-            minRating,
-            userId: extra.http?.authInfo?.extra?.subject ?? "anonymous",
-          });
-
-          return {
-            structuredContent: {
-              shops: results.shops,
-              totalCount: results.totalCount,
-              userName: displayName,
-            },
-            content: [
-              {
-                type: "text",
-                text: `Found ${results.totalCount} coffee shops in Paris for ${displayName}`,
-              },
-            ],
-            isError: false,
-          };
-        } catch (error) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Failed to search coffee shops: ${error instanceof Error ? error.message : "Unknown error"}`,
-              },
-            ],
-            isError: true,
-          };
-        }
-      },
-    )
-    .mcpMiddleware(intentMiddleware());
-
 export const app = new Skybridge({
   name: "auth-coffee",
   version: "0.0.1",
@@ -126,7 +34,93 @@ export const app = new Skybridge({
       // permissions were granted".
       scopes: ["openid", "profile", "email"],
     }),
-  handler,
+  handler: (server) =>
+    server
+      .registerTool(
+        {
+          name: "search-coffee-paris",
+          description:
+            "Search for coffee shops in Paris. Shows personalized results with your favorites highlighted and sorted first. Requires authentication.",
+          inputSchema: {
+            query: z
+              .string()
+              .optional()
+              .describe(
+                "Search query (name or specialty, e.g., 'latte', 'espresso')",
+              ),
+            minRating: z
+              .number()
+              .min(1)
+              .max(5)
+              .optional()
+              .describe("Minimum rating (1-5)"),
+          },
+          annotations: {
+            readOnlyHint: true,
+            openWorldHint: true,
+            destructiveHint: false,
+          },
+          view: {
+            component: "search-coffee-paris",
+            description: "Search for coffee shops in Paris",
+            csp: {
+              resourceDomains: ["https://images.unsplash.com"],
+            },
+          },
+          _meta: {
+            "openai/widgetAccessible": true,
+          },
+        },
+        async ({ query, minRating }, extra) => {
+          try {
+            const userInfoResponse = await fetch(`${AUTH0_BASE_URL}/userinfo`, {
+              headers: {
+                Authorization: `Bearer ${extra.http?.authInfo?.token}`,
+              },
+            });
+
+            const userInfo = userInfoResponse.ok
+              ? ((await userInfoResponse.json()) as {
+                  name?: string;
+                  email?: string;
+                })
+              : null;
+
+            const displayName = userInfo?.name ?? "User";
+            const results = searchCoffeeShops({
+              query,
+              minRating,
+              userId: extra.http?.authInfo?.extra?.subject ?? "anonymous",
+            });
+
+            return {
+              structuredContent: {
+                shops: results.shops,
+                totalCount: results.totalCount,
+                userName: displayName,
+              },
+              content: [
+                {
+                  type: "text",
+                  text: `Found ${results.totalCount} coffee shops in Paris for ${displayName}`,
+                },
+              ],
+              isError: false,
+            };
+          } catch (error) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Failed to search coffee shops: ${error instanceof Error ? error.message : "Unknown error"}`,
+                },
+              ],
+              isError: true,
+            };
+          }
+        },
+      )
+      .mcpMiddleware(intentMiddleware()),
 });
 
 export type AppType = typeof app;
