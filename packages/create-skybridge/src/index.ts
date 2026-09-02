@@ -122,6 +122,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
   if (argv.example && (argv.blank || argv.ecom)) {
     abort("Cannot combine --example with --blank or --ecom.");
   }
+  const example = argv.example;
 
   let pm = parsePackageManager(argv.pm || "");
   if (argv.pm && !pm) {
@@ -153,6 +154,17 @@ export async function init(args: string[] = process.argv.slice(2)) {
   }
 
   // 2. Existing-directory handling
+  let downloaded: Awaited<ReturnType<typeof downloadExample>> | undefined;
+  if (example) {
+    Spinner.start(`Downloading ${example} example`);
+    try {
+      downloaded = await downloadExample(example);
+      Spinner.stop(`Downloaded ${example} example`);
+    } catch (error) {
+      Spinner.error(`Failed to download ${example} example`);
+      abort(error instanceof Error ? error.message : String(error));
+    }
+  }
   if (fs.existsSync(targetDir) && !isEmpty(targetDir)) {
     if (argv.overwrite) {
       emptyDir(targetDir);
@@ -177,7 +189,6 @@ export async function init(args: string[] = process.argv.slice(2)) {
 
   // 3. Template
   let template: Template | undefined;
-  const example = argv.example;
   if (argv.blank) {
     template = "blank";
   }
@@ -222,18 +233,8 @@ export async function init(args: string[] = process.argv.slice(2)) {
   // 4. Copy template
   const root = path.resolve(targetDir);
   const templatesDir = fileURLToPath(new URL("../templates", import.meta.url));
-  let source = path.join(templatesDir, template ?? "demo");
-  let cleanup = () => {};
-  if (example) {
-    Spinner.start(`Downloading ${example} example`);
-    try {
-      ({ source, cleanup } = await downloadExample(example));
-      Spinner.stop(`Downloaded ${example} example`);
-    } catch (error) {
-      Spinner.error(`Failed to download ${example} example`);
-      abort(error instanceof Error ? error.message : String(error));
-    }
-  }
+  const source =
+    downloaded?.source ?? path.join(templatesDir, template ?? "demo");
   Spinner.start(`Copying ${example ?? template} template`);
   try {
     fs.cpSync(source, root, {
@@ -252,7 +253,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
     Spinner.error("Failed to copy template");
     abort(String(error));
   } finally {
-    cleanup();
+    downloaded?.cleanup();
   }
 
   // 5. Set package.json name to the project dir basename
@@ -440,7 +441,13 @@ async function downloadExample(name: string) {
       stderr += chunk.toString();
     });
     const exit = new Promise<void>((resolve, reject) => {
-      tar.on("error", reject);
+      tar.on("error", (error: NodeJS.ErrnoException) =>
+        reject(
+          error.code === "ENOENT"
+            ? new Error("`tar` is required to extract the example.")
+            : error,
+        ),
+      );
       tar.on("close", (status) =>
         status === 0
           ? resolve()
