@@ -12,11 +12,10 @@ const who = (auth?: AuthInfo) =>
 export const app = new Skybridge({
   name: "auth-coffee-mixed",
   version: "0.0.1",
-  oauth: () =>
-    descopeProvider({
-      url: env.DESCOPE_MCP_SERVER_URL,
-      baseUrl: env.SERVER_URL,
-    }),
+  oauth: descopeProvider({
+    url: env.DESCOPE_MCP_SERVER_URL,
+    baseUrl: env.SERVER_URL,
+  }),
   handler: (server) =>
     server
       .registerTool(

@@ -8,19 +8,18 @@ description: "Wire OAuth from any IdP's discovery document"
 
 ## Example
 
-```ts server.ts highlight={1,6-12}
+```ts server.ts highlight={1,6-11}
 import { Skybridge, customProvider } from "skybridge/server";
 
 export const app = new Skybridge({
   name: "personal-shopper",
   version: "0.0.1",
-  oauth: () =>
-    customProvider({
-      issuer: "https://auth.myshop.com",
-      audience: process.env.SERVER_URL,
-      scopes: ["openid", "profile", "checkout"],
-      requiredScopes: ["openid"],
-    }),
+  oauth: customProvider({
+    issuer: "https://auth.myshop.com",
+    audience: process.env.SERVER_URL,
+    scopes: ["openid", "profile", "checkout"],
+    requiredScopes: ["openid"],
+  }),
   handler,
 });
 ```
@@ -61,7 +60,13 @@ type CustomProviderOptions = {
 
 ## Returns
 
-A `Promise` (discovery is a network call) for the `OAuthConfig` you pass to the [`oauth`](/api-reference/skybridge#oauth) field, as a value or from a function.
+An `OAuthProvider`: a deferred `OAuthConfig` you pass to the [`oauth`](/api-reference/skybridge#oauth) field. Discovery is a network call, so it runs in `resolve()` at `run()`, not when your module is imported. Call `resolve()` yourself when wiring [`requireBearerAuth`](/api-reference/require-bearer-auth) by hand.
+
+```ts
+type OAuthProvider<TExtra = Record<string, unknown>> = {
+  resolve: () => Promise<OAuthConfig<TExtra>>;
+};
+```
 
 ```ts
 type OAuthConfig<TExtra = Record<string, unknown>> = {

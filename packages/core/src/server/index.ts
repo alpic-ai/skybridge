@@ -8,7 +8,7 @@ export type {
   SkybridgeOAuthInput,
 } from "./app.js";
 export { Skybridge } from "./app.js";
-export type { OAuthConfig } from "./auth/index.js";
+export type { OAuthConfig, OAuthProvider } from "./auth/index.js";
 export { type Auth0Claims, auth0Provider } from "./auth/providers/auth0.js";
 export { authplaneProvider } from "./auth/providers/authplane.js";
 export { type ClerkClaims, clerkProvider } from "./auth/providers/clerk.js";

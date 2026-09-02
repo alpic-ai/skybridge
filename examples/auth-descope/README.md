@@ -6,7 +6,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a p
 
 - **Transport-Level Auth**: Auth is enforced at the `/mcp` transport level — unauthenticated requests receive HTTP 401 before reaching any tool handler
 - **Descope OAuth**: One-line setup with `descopeProvider`, which discovers the MCP Server's OAuth metadata and verifies JWTs against Descope's JWKS
-- **Branded provider via `oauth:`**: Passing `oauth: await descopeProvider(...)` auto-mounts the well-known metadata endpoints and Bearer verification — no manual router
+- **Branded provider via `oauth:`**: Passing `oauth: descopeProvider(...)` auto-mounts the well-known metadata endpoints and Bearer verification — no manual router
 - **Personalized Results**: Authenticated users see favorites highlighted and sorted first
 - **User Identity in Widgets**: Displays the signed-in user's name directly in the widget UI
 - **Simplified Server Setup**: Uses [`app.run()`](https://docs.skybridge.tech/api-reference/run) and `.use()` for a single-file server with no manual Express boilerplate

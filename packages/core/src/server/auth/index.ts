@@ -29,3 +29,13 @@ export type OAuthConfig<TExtra extends ExtraClaims = ExtraClaims> = {
    */
   verifier: TokenVerifier<TExtra>;
 };
+
+/**
+ * What the branded providers return: a deferred {@link OAuthConfig}. Discovery
+ * runs in `resolve`, so `oauth: auth0Provider(...)` at module scope performs
+ * no network access until `Skybridge.run`. Call `resolve` yourself
+ * (`await customProvider(...).resolve()`) when wiring the middleware by hand.
+ */
+export type OAuthProvider<TExtra extends ExtraClaims = ExtraClaims> = {
+  resolve: () => Promise<OAuthConfig<TExtra>>;
+};

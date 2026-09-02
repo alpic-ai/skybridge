@@ -8,18 +8,17 @@ description: "Wire OAuth from an Auth0 tenant"
 
 ## Example
 
-```ts server.ts highlight={1,6-11}
+```ts server.ts highlight={1,6-10}
 import { auth0Provider, Skybridge } from "skybridge/server";
 
 export const app = new Skybridge({
   name: "personal-shopper",
   version: "0.0.1",
-  oauth: () =>
-    auth0Provider({
-        domain: process.env.AUTH0_DOMAIN,
-        audience: process.env.AUTH0_API_IDENTIFIER,
-        serverUrl: process.env.SERVER_URL,
-    }),
+  oauth: auth0Provider({
+    domain: process.env.AUTH0_DOMAIN,
+    audience: process.env.AUTH0_API_IDENTIFIER,
+    serverUrl: process.env.SERVER_URL,
+  }),
   handler,
 });
 ```

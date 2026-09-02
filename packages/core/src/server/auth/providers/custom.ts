@@ -4,7 +4,7 @@ import {
   type DiscoveredMetadata,
   discoverAuthorizationServer,
 } from "../discovery.js";
-import type { OAuthConfig } from "../index.js";
+import type { OAuthConfig, OAuthProvider } from "../index.js";
 import { createJwksVerifier, type RegisteredClaims } from "../verify.js";
 
 /** Options accepted by {@link customProvider} and the branded providers. */
@@ -43,7 +43,13 @@ export type CustomProviderOptions = {
  * as `extra.authInfo.extra`. The branded providers pass their documented claims;
  * pass your own when wiring an IdP by hand.
  */
-export async function customProvider<TExtra extends ExtraClaims = ExtraClaims>(
+export function customProvider<TExtra extends ExtraClaims = ExtraClaims>(
+  opts: CustomProviderOptions,
+): OAuthProvider<TExtra & RegisteredClaims> {
+  return { resolve: () => resolveCustomProvider<TExtra>(opts) };
+}
+
+async function resolveCustomProvider<TExtra extends ExtraClaims>(
   opts: CustomProviderOptions,
 ): Promise<OAuthConfig<TExtra & RegisteredClaims>> {
   const discovered = await discoverAuthorizationServer(opts.issuer);

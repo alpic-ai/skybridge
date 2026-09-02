@@ -514,7 +514,7 @@ function withSkillsCapability(
  * Typed registration sugar over the MCP SDK's `McpServer`: a tool registry
  * that carries input/output/meta shapes, view resources, per-tool security
  * schemes, and prompt/resource registration. A {@link Skybridge} app builds
- * one of these per request and hands it to your setup factory; chain
+ * one of these per request and hands it to your `handler`; chain
  * {@link McpServer.registerTool} calls on it and return the result.
  *
  * The `TTools` generic accumulates each registered tool's input/output/meta

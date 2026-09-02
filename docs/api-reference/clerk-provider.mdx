@@ -8,16 +8,15 @@ description: "Wire OAuth from a Clerk instance"
 
 ## Example
 
-```ts server.ts highlight={1,6-9}
+```ts server.ts highlight={1,6-8}
 import { clerkProvider, Skybridge } from "skybridge/server";
 
 export const app = new Skybridge({
   name: "personal-shopper",
   version: "0.0.1",
-  oauth: () =>
-    clerkProvider({
-        domain: process.env.CLERK_FRONTEND_API,
-    }),
+  oauth: clerkProvider({
+    domain: process.env.CLERK_FRONTEND_API,
+  }),
   handler,
 });
 ```

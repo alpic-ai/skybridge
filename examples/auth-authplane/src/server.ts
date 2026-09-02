@@ -28,11 +28,10 @@ import { env } from "./env.js";
 export const app = new Skybridge({
   name: "auth-coffee",
   version: "0.0.1",
-  oauth: () =>
-    authplaneProvider<{ email?: string }>({
-      issuer: env.AUTHPLANE_ISSUER,
-      resource: env.SERVER_URL,
-    }),
+  oauth: authplaneProvider<{ email?: string }>({
+    issuer: env.AUTHPLANE_ISSUER,
+    resource: env.SERVER_URL,
+  }),
   handler: (server) =>
     server
       .registerTool(

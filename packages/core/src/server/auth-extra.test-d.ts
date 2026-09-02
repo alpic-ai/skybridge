@@ -7,11 +7,14 @@ import { workosProvider } from "./auth/providers/workos.js";
 import type { TokenVerifier } from "./auth.js";
 import type { ToolNames } from "./inferUtilityTypes.js";
 
-const workosOAuth = await workosProvider({ domain: "d", audience: "a" });
+const workosOAuth = await workosProvider({
+  domain: "d",
+  audience: "a",
+}).resolve();
 const customOAuth = await workosProvider<{ tenant: string }>({
   domain: "d",
   audience: "a",
-});
+}).resolve();
 
 test("a server with no oauth keeps the untyped claim bag", () => {
   new Skybridge({
@@ -84,7 +87,7 @@ test("a hand-written verifier carries its own claims", async () => {
   };
   const { oauthMetadata } = await customProvider({
     issuer: "https://idp.example.com",
-  });
+  }).resolve();
   new Skybridge({
     name: "t",
     version: "0",
@@ -136,7 +139,7 @@ test("bag oauth claims reach tool handlers through the function form", () => {
   new Skybridge({
     name: "t",
     version: "0",
-    oauth: () => workosProvider({ domain: "d", audience: "a" }),
+    oauth: workosProvider({ domain: "d", audience: "a" }),
     handler: (server) =>
       server.registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
         expectTypeOf(extra.http?.authInfo?.extra?.org_id).toEqualTypeOf<

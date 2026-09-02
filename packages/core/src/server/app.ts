@@ -6,7 +6,7 @@ import type {
   ServerOptions,
 } from "@modelcontextprotocol/server";
 import type { ErrorRequestHandler, Express, RequestHandler } from "express";
-import type { OAuthConfig } from "./auth/index.js";
+import type { OAuthConfig, OAuthProvider } from "./auth/index.js";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
 import type { ExtraClaims } from "./auth.js";
 import { buildMcpHandler, createApp, createBaseApp } from "./express.js";
@@ -47,14 +47,30 @@ export type SkybridgeHandler<
 ) => McpServer<TTools, TAuthExtra>;
 
 /**
- * What the `oauth` field accepts: a resolved {@link OAuthConfig}, or a function
- * of the `setup` result returning one (the branded providers are async, so wrap
- * them: `oauth: () => auth0Provider(...)`). The function runs once, at
- * {@link Skybridge.run} or on the first request, never at module import.
+ * What the `oauth` field accepts: an {@link OAuthConfig}, a provider
+ * (`oauth: auth0Provider(...)`), or a function of the `setup` result returning
+ * either. Providers and functions resolve once, at {@link Skybridge.run} or on
+ * the first request, never at module import.
  */
 export type SkybridgeOAuthInput<TConfig, TExtra extends ExtraClaims> =
   | OAuthConfig<TExtra>
-  | ((config: TConfig) => OAuthConfig<TExtra> | Promise<OAuthConfig<TExtra>>);
+  | OAuthProvider<TExtra>
+  | ((
+      config: TConfig,
+    ) =>
+      | OAuthConfig<TExtra>
+      | OAuthProvider<TExtra>
+      | Promise<OAuthConfig<TExtra> | OAuthProvider<TExtra>>);
+
+async function resolveOAuthInput<TConfig, TExtra extends ExtraClaims>(
+  input: SkybridgeOAuthInput<TConfig, TExtra> | undefined,
+  config: TConfig,
+): Promise<OAuthConfig<TExtra> | undefined> {
+  const resolved = typeof input === "function" ? await input(config) : input;
+  return resolved && "resolve" in resolved
+    ? await resolved.resolve()
+    : resolved;
+}
 
 /**
  * Everything a Skybridge app needs in one bag: the MCP implementation info
@@ -81,15 +97,15 @@ export type SkybridgeConfig<
     skills?: boolean;
     /**
      * Loads whatever the app needs up front (remote config, secrets, datasets,
-     * …). Runs **once** — at {@link Skybridge.run} or on the first request,
-     * never at module import — and its awaited return value is passed to an
-     * `oauth` function and to `handler` as the second argument.
+     * …). Runs **once**, at {@link Skybridge.run} or on the first request and
+     * never at module import. Its awaited return value is passed to an `oauth`
+     * function and to `handler` as the second argument.
      */
     setup?: () => TConfig;
     /**
      * Resource-server OAuth. When set, mounts the well-known metadata routes
-     * and bearer auth on `/mcp`, and the verifier's claims type
-     * `extra.http.authInfo.extra` in tool handlers.
+     * and bearer auth on `/mcp`, and types `extra.http.authInfo.extra` in tool
+     * handlers from the verifier's claims.
      */
     oauth?: SkybridgeOAuthInput<Awaited<TConfig>, TAuthExtra>;
     /** Registers the MCP surface, per request. See {@link SkybridgeHandler}. */
@@ -193,10 +209,10 @@ export class Skybridge<
       if (this.setup) {
         this.config = await this.setup();
       }
-      const oauth =
-        typeof this.oauthInput === "function"
-          ? await this.oauthInput(this.config as Awaited<TConfig>)
-          : this.oauthInput;
+      const oauth = await resolveOAuthInput(
+        this.oauthInput,
+        this.config as Awaited<TConfig>,
+      );
       this.oauthEnabled = Boolean(oauth);
       const sample = this.buildServer();
       if (oauth) {
@@ -406,13 +422,13 @@ export class Skybridge<
     const elapsed = performance.now() - startedAt;
     if (typeof (built as { then?: unknown }).then === "function") {
       throw new Error(
-        "The Skybridge handler must be synchronous — it runs on every request. Load config or secrets in `setup` instead and read them from the handler's second argument.",
+        "The Skybridge handler must be synchronous: it runs on every request. Load config or secrets in `setup` instead and read them from the handler's second argument.",
       );
     }
     if (elapsed > SLOW_HANDLER_THRESHOLD_MS && !this.slowHandlerWarned) {
       this.slowHandlerWarned = true;
       console.warn(
-        `The Skybridge handler took ${Math.round(elapsed)}ms — it runs on every request, so this cost is paid per request. Move expensive work into \`setup\`, whose result is passed to the handler.`,
+        `The Skybridge handler took ${Math.round(elapsed)}ms. It runs on every request, so this cost is paid per request. Move expensive work into \`setup\`, whose result is passed to the handler.`,
       );
     }
     return built;

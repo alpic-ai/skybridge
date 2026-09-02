@@ -6,7 +6,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a p
 
 - **Transport-Level Auth**: Auth is enforced at the `/mcp` transport level — unauthenticated requests receive HTTP 401 before reaching any tool handler
 - **Stytch Connected Apps**: One-line setup with `stytchProvider`, which discovers the Connected App's OAuth metadata and verifies JWTs against the project's JWKS — no network round-trip per request
-- **Branded provider via `oauth:`**: Passing `oauth: await stytchProvider(...)` auto-mounts the well-known metadata endpoints and Bearer verification — no manual router
+- **Branded provider via `oauth:`**: Passing `oauth: stytchProvider(...)` auto-mounts the well-known metadata endpoints and Bearer verification — no manual router
 - **Self-hosted consent page**: Stytch ships consent only as a React component, so login/consent/callback are plain HTML served from the MCP server; the Connected App's Authorization URL points clients here
 - **Personalized Results**: Authenticated users see favorites highlighted and sorted first
 - **User Identity in Widgets**: Displays the signed-in user's name directly in the widget UI

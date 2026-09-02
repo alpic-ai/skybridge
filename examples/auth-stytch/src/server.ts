@@ -25,11 +25,10 @@ import { env } from "./env.js";
 export const app = new Skybridge({
   name: "auth-coffee",
   version: "0.0.1",
-  oauth: () =>
-    stytchProvider({
-      domain: env.STYTCH_DOMAIN,
-      audience: env.STYTCH_PROJECT_ID,
-    }),
+  oauth: stytchProvider({
+    domain: env.STYTCH_DOMAIN,
+    audience: env.STYTCH_PROJECT_ID,
+  }),
   handler: (server) =>
     server
       .registerTool(

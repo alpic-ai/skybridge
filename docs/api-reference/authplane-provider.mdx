@@ -8,17 +8,16 @@ description: "Wire OAuth from an Authplane authorization server"
 
 ## Example
 
-```ts server.ts highlight={1,6-10}
+```ts server.ts highlight={1,6-9}
 import { authplaneProvider, Skybridge } from "skybridge/server";
 
 export const app = new Skybridge({
   name: "personal-shopper",
   version: "0.0.1",
-  oauth: () =>
-    authplaneProvider({
-        issuer: process.env.AUTHPLANE_ISSUER,
-        resource: process.env.SERVER_URL,
-    }),
+  oauth: authplaneProvider({
+    issuer: process.env.AUTHPLANE_ISSUER,
+    resource: process.env.SERVER_URL,
+  }),
   handler,
 });
 ```

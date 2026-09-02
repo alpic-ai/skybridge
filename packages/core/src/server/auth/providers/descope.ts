@@ -1,5 +1,5 @@
 import type { ExtraClaims } from "../../auth.js";
-import type { OAuthConfig } from "../index.js";
+import type { OAuthProvider } from "../index.js";
 import type { RegisteredClaims } from "../verify.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
 
@@ -66,7 +66,7 @@ export function descopeProvider<
   TCustom extends ExtraClaims = Record<never, never>,
 >(
   opts: { url: string } & Omit<CustomProviderOptions, "issuer">,
-): Promise<OAuthConfig<DescopeClaims & TCustom & RegisteredClaims>> {
+): OAuthProvider<DescopeClaims & TCustom & RegisteredClaims> {
   const { url, audience, ...rest } = opts;
   const asUrl = toAuthorizationServerUrl(url);
   const projectId = projectIdFromUrl(asUrl);

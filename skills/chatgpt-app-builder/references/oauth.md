@@ -4,7 +4,7 @@ Enable user authentication so tools can access user-specific data.
 
 ## How it works
 
-1. Pass an `oauth` config as the third `McpServer` argument
+1. Set the `oauth` field on the `Skybridge` config
 2. Skybridge auto-mounts the OAuth discovery endpoints (`/.well-known/oauth-authorization-server`, `/.well-known/oauth-protected-resource`) and Bearer JWT verification on `/mcp`
 3. The host reads the metadata, walks the user through OAuth, refreshes tokens, and calls `/mcp` with `Authorization: Bearer <token>`
 4. By default every tool requires sign-in: unauthenticated/invalid requests **to `/mcp`** get HTTP 401 before any tool handler runs
@@ -34,7 +34,7 @@ Does the IdP publish an OAuth discovery document with a jwks_uri?
 
 ## 1. Pick a provider
 
-The branded providers discover the IdP's OAuth metadata and build the whole config. All return a `Promise`, so `oauth` takes them as a function (`oauth: () => descopeProvider(...)`) and discovery runs when the app starts, not when `server.ts` is imported. Most need **Dynamic Client Registration (DCR)** enabled on the IdP side (Authplane has it natively; Descope without DCR goes through the Alpic proxy).
+The branded providers discover the IdP's OAuth metadata and build the whole config. Pass the result straight to `oauth` (`oauth: descopeProvider(...)`); discovery runs when the app starts, not when `server.ts` is imported. Most need **Dynamic Client Registration (DCR)** enabled on the IdP side (Authplane has it natively; Descope without DCR goes through the Alpic proxy).
 
 The table below covers what goes in the code. For the dashboard steps that produce those values, send the user to `docs/guides/auth-providers.mdx` — provider UIs change, and this file isn't the source of truth for them.
 
@@ -45,10 +45,9 @@ import { Skybridge, descopeProvider } from "skybridge/server";
 export const app = new Skybridge({
   name: "my-app",
   version: "0.0.1",
-  oauth: () =>
-    descopeProvider({
-      url: env.DESCOPE_MCP_SERVER_URL, // MCP Server Discovery URL (Issuer)
-    }),
+  oauth: descopeProvider({
+    url: env.DESCOPE_MCP_SERVER_URL, // MCP Server Discovery URL (Issuer)
+  }),
   handler: (server) => server.registerTool(/* ... */),
 });
 ```
@@ -73,7 +72,7 @@ For an IdP without a branded helper, point `customProvider` at its issuer; it re
 ```typescript
 import { customProvider } from "skybridge/server";
 
-oauth: await customProvider({
+oauth: customProvider({
   issuer: "https://your-idp.com",
   audience: "my-api",            // omit only if the IdP binds no aud
   scopes: ["openid", "email", "profile"],

@@ -23,16 +23,15 @@ const AUTH0_BASE_URL = `https://${env.AUTH0_DOMAIN}`;
 export const app = new Skybridge({
   name: "auth-coffee",
   version: "0.0.1",
-  oauth: () =>
-    auth0Provider({
-      domain: env.AUTH0_DOMAIN,
-      audience: env.AUTH0_AUDIENCE, // Auth0 API Identifier
-      serverUrl: env.SERVER_URL, // public URL (skybridge-as-AS)
-      // Narrow to what the app needs: Auth0 won't grant a third-party (DCR) client
-      // its full OIDC scope set, so advertising it yields "Not all requested
-      // permissions were granted".
-      scopes: ["openid", "profile", "email"],
-    }),
+  oauth: auth0Provider({
+    domain: env.AUTH0_DOMAIN,
+    audience: env.AUTH0_AUDIENCE, // Auth0 API Identifier
+    serverUrl: env.SERVER_URL, // public URL (skybridge-as-AS)
+    // Narrow to what the app needs: Auth0 won't grant a third-party (DCR) client
+    // its full OIDC scope set, so advertising it yields "Not all requested
+    // permissions were granted".
+    scopes: ["openid", "profile", "email"],
+  }),
   handler: (server) =>
     server
       .registerTool(

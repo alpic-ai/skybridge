@@ -22,10 +22,9 @@ import { env } from "./env.js";
 export const app = new Skybridge({
   name: "auth-coffee",
   version: "0.0.1",
-  oauth: () =>
-    clerkProvider({
-      domain: env.CLERK_DOMAIN,
-    }),
+  oauth: clerkProvider({
+    domain: env.CLERK_DOMAIN,
+  }),
   handler: (server) =>
     server
       .registerTool(

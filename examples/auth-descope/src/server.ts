@@ -21,7 +21,7 @@ import { env } from "./env.js";
 export const app = new Skybridge({
   name: "auth-coffee",
   version: "0.0.1",
-  oauth: () => descopeProvider({ url: env.DESCOPE_MCP_SERVER_URL }),
+  oauth: descopeProvider({ url: env.DESCOPE_MCP_SERVER_URL }),
   handler: (server) =>
     server
       .registerTool(

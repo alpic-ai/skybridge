@@ -146,7 +146,7 @@ The validation body is provider-specific: [JWKS](https://datatracker.ietf.org/do
 The claim shape belongs to the verifier, so handlers get it without declaring anything. On the [provider path](/guides/auth-providers) each provider ships the claims its own docs promise, and a type argument adds the ones your tenant sends:
 
 ```ts server.ts
-oauth: () => workosProvider<{ tenant: string }>({ domain, audience }),
+oauth: workosProvider<{ tenant: string }>({ domain, audience }),
 ```
 
 Writing the verifier yourself? Type it `TokenVerifier<Claims>` and the shape flows the same way.

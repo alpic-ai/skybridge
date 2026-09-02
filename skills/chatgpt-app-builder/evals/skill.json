@@ -13,7 +13,7 @@
   },
   {
     "query": "Add WorkOS sign-in to my MCP server so tools require auth.",
-    "expected_behavior": "Must read oauth.md. Answer: pass oauth: await workosProvider({ domain, audience }) as the third McpServer arg. Must NOT hand-mount requireBearerAuth / mcpAuthMetadataRouter or hand-write a JWKS verifier."
+    "expected_behavior": "Must read oauth.md. Answer: set oauth: workosProvider({ domain, audience }) on the Skybridge config. Must NOT hand-mount requireBearerAuth / mcpAuthMetadataRouter or hand-write a JWKS verifier."
   },
   {
     "query": "How does an authenticated server prompt the user to sign in when they haven't yet?",

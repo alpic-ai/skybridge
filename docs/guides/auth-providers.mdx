@@ -22,18 +22,17 @@ These providers require sign-in on every request by default. Set [`auth: { allow
 
 Pass the tenant domain, the API Identifier as `audience`, and this server's public URL as `serverUrl` to [`auth0Provider`](/api-reference/auth0-provider):
 
-```ts server.ts highlight={1,6-11}
+```ts server.ts highlight={1,6-10}
 import { Skybridge, auth0Provider } from "skybridge/server";
 
 export const app = new Skybridge({
   name: "personal-shopper",
   version: "0.0.1",
-  oauth: () =>
-    auth0Provider({
-      domain: process.env.AUTH0_DOMAIN,
-      audience: process.env.AUTH0_API_IDENTIFIER,
-      serverUrl: process.env.SERVER_URL,
-    }),
+  oauth: auth0Provider({
+    domain: process.env.AUTH0_DOMAIN,
+    audience: process.env.AUTH0_API_IDENTIFIER,
+    serverUrl: process.env.SERVER_URL,
+  }),
   handler, // search-products, requires oauth2
 });
 ```
@@ -49,14 +48,13 @@ See the runnable [`auth-auth0`](https://github.com/alpic-ai/skybridge/tree/main/
 
 Pass the authorization server URL and this server's public URL to [`authplaneProvider`](/api-reference/authplane-provider):
 
-```ts server.ts highlight={3-7}
+```ts server.ts highlight={3-6}
 export const app = new Skybridge({
   ...config,
-  oauth: () =>
-    authplaneProvider({
-      issuer: process.env.AUTHPLANE_ISSUER,
-      resource: process.env.SERVER_URL,
-    }),
+  oauth: authplaneProvider({
+    issuer: process.env.AUTHPLANE_ISSUER,
+    resource: process.env.SERVER_URL,
+  }),
   handler, // search-products, requires oauth2
 });
 ```
@@ -73,13 +71,12 @@ See the runnable [`auth-authplane`](https://github.com/alpic-ai/skybridge/tree/m
 
 Pass the domain alone to [`clerkProvider`](/api-reference/clerk-provider), no audience:
 
-```ts server.ts highlight={3-6}
+```ts server.ts highlight={3-5}
 export const app = new Skybridge({
   ...config,
-  oauth: () =>
-    clerkProvider({
-      domain: process.env.CLERK_FRONTEND_API,
-    }),
+  oauth: clerkProvider({
+    domain: process.env.CLERK_FRONTEND_API,
+  }),
   handler, // search-products, requires oauth2
 });
 ```
@@ -96,13 +93,12 @@ A [Descope](https://docs.descope.com/mcp) MCP Server binds the token's `aud` to 
 
 Pass that URL to [`descopeProvider`](/api-reference/descope-provider); the audience defaults to the Project ID derived from it:
 
-```ts server.ts highlight={3-6}
+```ts server.ts highlight={3-5}
 export const app = new Skybridge({
   ...config,
-  oauth: () =>
-    descopeProvider({
-      url: process.env.DESCOPE_MCP_SERVER_URL,
-    }),
+  oauth: descopeProvider({
+    url: process.env.DESCOPE_MCP_SERVER_URL,
+  }),
   handler, // search-products, requires oauth2
 });
 ```
@@ -120,14 +116,13 @@ See the [`auth-descope`](https://github.com/alpic-ai/skybridge/tree/main/example
 
 Pass the project domain and the Project ID as the audience to [`stytchProvider`](/api-reference/stytch-provider):
 
-```ts server.ts highlight={3-7}
+```ts server.ts highlight={3-6}
 export const app = new Skybridge({
   ...config,
-  oauth: () =>
-    stytchProvider({
-      domain: process.env.STYTCH_DOMAIN,
-      audience: process.env.STYTCH_PROJECT_ID,
-    }),
+  oauth: stytchProvider({
+    domain: process.env.STYTCH_DOMAIN,
+    audience: process.env.STYTCH_PROJECT_ID,
+  }),
   handler, // search-products, requires oauth2
 });
 ```
@@ -143,14 +138,13 @@ export const app = new Skybridge({
 
 Pass the domain and your server URL as the audience to [`workosProvider`](/api-reference/workos-provider):
 
-```ts server.ts highlight={3-7}
+```ts server.ts highlight={3-6}
 export const app = new Skybridge({
   ...config,
-  oauth: () =>
-    workosProvider({
-      domain: process.env.AUTHKIT_DOMAIN,
-      audience: process.env.SERVER_URL,
-    }),
+  oauth: workosProvider({
+    domain: process.env.AUTHKIT_DOMAIN,
+    audience: process.env.SERVER_URL,
+  }),
   handler, // search-products, requires oauth2
 });
 ```
@@ -167,14 +161,13 @@ For an identity provider without a branded wrapper, [`customProvider`](/api-refe
 
 Pass the issuer and the audience it binds:
 
-```ts server.ts highlight={3-7}
+```ts server.ts highlight={3-6}
 export const app = new Skybridge({
   ...config,
-  oauth: () =>
-    customProvider({
-      issuer: "https://auth.example.com",
-      audience: process.env.SERVER_URL,
-    }),
+  oauth: customProvider({
+    issuer: "https://auth.example.com",
+    audience: process.env.SERVER_URL,
+  }),
   handler, // search-products, requires oauth2
 });
 ```
