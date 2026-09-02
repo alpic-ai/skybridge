@@ -17,7 +17,6 @@ const TEMPLATES = ["demo", "blank", "ecom"] as const;
 type Template = (typeof TEMPLATES)[number];
 
 const REPO = "alpic-ai/skybridge";
-const REPO_REF = "main";
 
 const pkg = JSON.parse(
   fs.readFileSync(
@@ -37,7 +36,7 @@ Arguments:
 Options:
   --blank           scaffold a minimal project without demo tools and views
   --ecom            scaffold the ecommerce template (search products, render carousel)
-  --example <name>  scaffold a copy of github.com/${REPO}/tree/${REPO_REF}/examples/<name>
+  --example <name>  scaffold a copy of examples/<name> from the latest Skybridge release
   --overwrite       remove existing files if target directory is not empty
   --pm <choice>     package manager to use (choices: ${PACKAGE_MANAGERS.join(", ")}. default to npm when none is provided or infered)
   --skip-skills     skip installing coding agent skills
@@ -422,10 +421,33 @@ ${scriptCommand(pm, "deploy")}`);
    Docs: https://docs.skybridge.tech`);
 }
 
+async function fetchJson<T>(url: string): Promise<T> {
+  const res = await fetch(url, {
+    headers: { accept: "application/vnd.github+json" },
+  });
+  if (!res.ok) {
+    throw new Error(`GitHub returned ${res.status} for ${url}.`);
+  }
+  return res.json() as Promise<T>;
+}
+
 async function downloadExample(name: string) {
-  const res = await fetch(
-    `https://codeload.github.com/${REPO}/tar.gz/${REPO_REF}`,
+  const api = `https://api.github.com/repos/${REPO}`;
+  const { tag_name: tag } = await fetchJson<{ tag_name: string }>(
+    `${api}/releases/latest`,
   );
+  const entries = await fetchJson<{ name: string; type: string }[]>(
+    `${api}/contents/examples?ref=${tag}`,
+  );
+  const available = entries
+    .filter((entry) => entry.type === "dir")
+    .map((entry) => entry.name);
+  if (!available.includes(name)) {
+    throw new Error(
+      `Unknown example "${name}". Available examples:\n  ${available.join("\n  ")}`,
+    );
+  }
+  const res = await fetch(`https://codeload.github.com/${REPO}/tar.gz/${tag}`);
   if (!res.ok) {
     throw new Error(`GitHub returned ${res.status} while fetching ${REPO}.`);
   }
@@ -461,21 +483,7 @@ async function downloadExample(name: string) {
     if (!extracted) {
       throw new Error("Downloaded archive is empty.");
     }
-    const examplesDir = path.join(tmp, extracted, "examples");
-    const available = fs
-      .readdirSync(examplesDir, { withFileTypes: true })
-      .filter(
-        (entry) =>
-          entry.isDirectory() &&
-          fs.existsSync(path.join(examplesDir, entry.name, "package.json")),
-      )
-      .map((entry) => entry.name);
-    if (!available.includes(name)) {
-      throw new Error(
-        `Unknown example "${name}". Available examples:\n  ${available.join("\n  ")}`,
-      );
-    }
-    return { source: path.join(examplesDir, name), cleanup };
+    return { source: path.join(tmp, extracted, "examples", name), cleanup };
   } catch (error) {
     cleanup();
     throw error;

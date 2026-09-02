@@ -106,14 +106,14 @@ describe("create-skybridge", () => {
 
     beforeAll(async () => {
       const repo = await fs.mkdtemp(path.join(os.tmpdir(), "sky-repo-"));
-      const example = path.join(repo, "skybridge-main", "examples", "coffee");
+      const example = path.join(repo, "skybridge-9.9.9", "examples", "coffee");
       await fs.mkdir(path.join(example, "src"), { recursive: true });
       await fs.writeFile(
         path.join(example, "package.json"),
         '{"name":"skybridge-coffee-example"}',
       );
       await fs.writeFile(path.join(example, "src", "server.ts"), "");
-      execFileSync("tar", ["-czf", "repo.tgz", "skybridge-main"], {
+      execFileSync("tar", ["-czf", "repo.tgz", "skybridge-9.9.9"], {
         cwd: repo,
       });
       tarball = await fs.readFile(path.join(repo, "repo.tgz"));
@@ -123,7 +123,18 @@ describe("create-skybridge", () => {
     beforeEach(() => {
       vi.stubGlobal(
         "fetch",
-        vi.fn(async () => new Response(tarball)),
+        vi.fn(async (url: string) => {
+          if (url.endsWith("/releases/latest")) {
+            return Response.json({ tag_name: "v9.9.9" });
+          }
+          if (url.includes("/contents/examples")) {
+            return Response.json([
+              { name: "coffee", type: "dir" },
+              { name: "README.md", type: "file" },
+            ]);
+          }
+          return new Response(tarball);
+        }),
       );
     });
 
