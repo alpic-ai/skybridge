@@ -1,4 +1,4 @@
-import { Skybridge, type SkybridgeServer } from "skybridge/server";
+import { Skybridge } from "skybridge/server";
 import { z } from "zod";
 import { openuiPrompt } from "./openui/library.js";
 
@@ -24,45 +24,43 @@ async function renderOpenui() {
   };
 }
 
-export const handler = (server: SkybridgeServer) =>
-  server
-    .registerTool(
-      {
-        name: "get-openui-prompt",
-        description:
-          "Returns the OpenUI Lang component prompt and an example program. Call this before render to learn the available components and syntax.",
-        annotations: {
-          readOnlyHint: true,
-          openWorldHint: false,
-          destructiveHint: false,
-        },
-      },
-      getOpenuiPrompt,
-    )
-    .registerTool(
-      {
-        name: "render",
-        description:
-          "Render a dynamic UI from an OpenUI Lang program. Call get-openui-prompt first, then pass only valid OpenUI Lang code.",
-        inputSchema: renderInputSchema,
-        annotations: {
-          readOnlyHint: true,
-          openWorldHint: false,
-          destructiveHint: false,
-        },
-        view: {
-          component: "render",
-          description:
-            "Renders an OpenUI Lang program with the standard OpenUI component library",
-        },
-      },
-      renderOpenui,
-    );
-
 export const app = new Skybridge({
   name: "openui-generative-ui",
   version: "0.0.1",
-  handler,
+  handler: (server) =>
+    server
+      .registerTool(
+        {
+          name: "get-openui-prompt",
+          description:
+            "Returns the OpenUI Lang component prompt and an example program. Call this before render to learn the available components and syntax.",
+          annotations: {
+            readOnlyHint: true,
+            openWorldHint: false,
+            destructiveHint: false,
+          },
+        },
+        getOpenuiPrompt,
+      )
+      .registerTool(
+        {
+          name: "render",
+          description:
+            "Render a dynamic UI from an OpenUI Lang program. Call get-openui-prompt first, then pass only valid OpenUI Lang code.",
+          inputSchema: renderInputSchema,
+          annotations: {
+            readOnlyHint: true,
+            openWorldHint: false,
+            destructiveHint: false,
+          },
+          view: {
+            component: "render",
+            description:
+              "Renders an OpenUI Lang program with the standard OpenUI component library",
+          },
+        },
+        renderOpenui,
+      ),
 });
 
 export type AppType = typeof app;

@@ -21,6 +21,7 @@ v2 is built on MCP SDK v2 and the `2026-07-28` protocol revision. The single lar
 | `throw new InvalidTokenError(msg)` | `throw new OAuthError("invalid_token", msg)` |
 | `oauth: { verify: { jwksUri, issuer, audience } }` | `oauth: { verifier: createJwksVerifier({ jwksUri, issuer, audience }) }` |
 | `registerTool("name", config, handler)` | `registerTool({ name: "name", ...config }, handler)` |
+| `(server: SkybridgeServer) => …` (v2 betas) | inline `handler: (server) => …`; annotate with `McpServer` only if you must extract |
 
 Three of these are not pure 1:1 renames:
 
@@ -56,16 +57,7 @@ export type AppType = typeof app;
 
 Write the handler as an expression body (`(server) => server.registerTool(...)`) so the return is structural and cannot be forgotten. With a block body, a missing `return` fails to compile at the `new Skybridge(...)` call (`Type 'void' is not assignable to type 'McpServer<…>'`).
 
-When the handler is extracted into its own declaration, annotate its parameter with `SkybridgeServer` from `skybridge/server`, the bare server it receives. It takes the claims your OAuth verifier produces, which types `extra.http.authInfo.extra` in tool handlers. When `oauth` is set on the same config, the claims are inferred from the provider and the annotation is unnecessary:
-
-```ts
-export const handler = (server: SkybridgeServer<{ email?: string }>) =>
-  server.registerTool({ name: "search", ... }, searchHandler);
-
-export const app = new Skybridge({ ...config, handler });
-```
-
-Leave the handler's return type inferred: the returned chain is what carries the tool registry into `typeof app`.
+Define the handler inline in the config rather than as a separate declaration. Inline, TypeScript infers the claims your `oauth` provider produces into `extra.http.authInfo.extra` and the tool registry into `typeof app`; extracted, the parameter needs a hand-written `McpServer<…>` annotation that the compiler never checks against the provider. The `SkybridgeServer` alias that earlier v2 betas exported for that purpose is gone. To split a large server across files, export the individual `registerTool` callbacks and import them into the one handler.
 
 ### 2.2 The handler runs on every request, so it must be pure
 
@@ -198,7 +190,7 @@ The v1 split still holds: `@skybridge/vite-plugin` is build-time Node code for y
 
 ### 2.7 Drop `@modelcontextprotocol/sdk` from your dependencies
 
-SDK v1 is no longer a peer dependency of `skybridge`. Remove it from your app's `package.json`. Anything you imported from it comes from `skybridge/server` now, e.g. `McpExtra` for typing extracted handlers. For schema types, use the SDK's `StandardSchemaWithJSON` / `StandardSchemaV1.InferOutput` directly: earlier v2 alphas exported `RawInputShape` and `InferSchemaOutput` aliases, which are gone.
+SDK v1 is no longer a peer dependency of `skybridge`. Remove it from your app's `package.json`. Anything you imported from it comes from `skybridge/server` now: `McpExtra` for typing extracted handlers, `ProtocolError` and `ProtocolErrorCode` for errors thrown from tool handlers, `OAuthError` and `OAuthErrorCode` for verifiers. For schema types, use the SDK's `StandardSchemaWithJSON` / `StandardSchemaV1.InferOutput` directly: earlier v2 alphas exported `RawInputShape` and `InferSchemaOutput` aliases, which are gone.
 
 Leaving the old dependency installed is worse than harmless. Your app resolves SDK v1 types while `skybridge` is built against v2, and the resulting mismatch surfaces as structurally-identical types that refuse to unify.
 
@@ -234,7 +226,31 @@ One exception runs the other way: tools registered from inside a view via `useRe
 
 `hosts` was already a no-op in 1.x, since every view emits a single ext-apps resource. Delete the field. `ViewHostType` is gone, and the served view page no longer declares `hostType` on `window.skybridge`. The runtime is detected at load time via `window.openai`, so a view reading `window.skybridge.hostType` should drop the check.
 
-### 2.12 `app.fetchHandler` is gone; `createServerInstance()` is async
+### 2.12 SDK v2 changes that reach your handlers
+
+Skybridge sits on MCP SDK v2, and a few of its renames surface inside tool handlers. The SDK's own [upgrade guide](https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/migration/upgrade-to-v2.md) has the long tail; these are the ones a Skybridge app hits.
+
+| v1 | v2 |
+|----|----|
+| `throw new McpError(ErrorCode.InvalidParams, msg)` | `throw new ProtocolError(ProtocolErrorCode.InvalidParams, msg)`, both from `skybridge/server` |
+| `extra.requestInfo?.headers["x-foo"]` | `extra.http?.req?.headers.get("x-foo")`: `req` is a Web `Request` |
+| `extra.sendRequest({ method: "elicitation/create", ... }, ElicitResultSchema)` | `extra.mcpReq.elicitInput(params)`, or `extra.mcpReq.send({ method, params })` with no schema argument for spec methods |
+| `server.prompt(name, argsShape, cb)` / `server.resource(name, uri, cb)` | `registerPrompt(name, { argsSchema: z.object(shape) }, cb)` / `registerResource(name, uri, {}, cb)`: the variadic forms are gone and `registerResource` requires a metadata argument |
+| `completable(z.string().optional(), cb)` | `completable(z.string(), cb).optional()` |
+| `server.server.setRequestHandler(SomeRequestSchema, cb)` | `server.server.setRequestHandler("some/method", cb)` |
+| `instanceof InsufficientScopeError` (and the other OAuth error classes) | `error instanceof OAuthError && error.code === OAuthErrorCode.InsufficientScope` |
+
+Behavior changes without a rename, which mostly show up in tests:
+
+- Calling an unknown or disabled tool rejects with `ProtocolError` (`-32602`) instead of resolving a result with `isError: true`.
+- Error messages no longer carry the `MCP error <code>:` prefix; match on `error.code`.
+- A declared `capabilities: { tools: {} }` is advertised with `listChanged: true` and answers `tools/list` with `[]` even before any tool is registered.
+- Advertised tool schemas are emitted as JSON Schema 2020-12.
+- Sampling, roots, and logging (`createMessage`, `sendLoggingMessage`, `extra.mcpReq.log`) still work but are deprecated by the 2026-07-28 revision.
+
+Pin zod to `^4.2.0` or later. Zod 4.0 and 4.1 lack `~standard.jsonSchema`, so the SDK falls back to its bundled converter and silently drops `.describe()` descriptions from the schema the model sees.
+
+### 2.13 `app.fetchHandler` is gone; `createServerInstance()` is async
 
 The HTTP surface an app exposes is the Express listener (`app.run()` / `app.express`). Code that dialed `app.fetchHandler` directly builds its own handler instead: `createMcpHandler(() => app.createServerInstance())` from `@modelcontextprotocol/server`. `createServerInstance()` now returns a promise, since it resolves `setup` and the `oauth` input on first use, so `await` it where v2 alphas called it synchronously.
 

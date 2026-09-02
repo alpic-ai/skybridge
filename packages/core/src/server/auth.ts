@@ -12,7 +12,7 @@ export {
   mcpAuthMetadataRouter,
   requireBearerAuth,
 } from "@modelcontextprotocol/express";
-export { OAuthError } from "@modelcontextprotocol/server";
+export { OAuthError, OAuthErrorCode } from "@modelcontextprotocol/server";
 /** Claims a verifier puts in `AuthInfo["extra"]`: any JSON-ish bag of them. */
 export type ExtraClaims = Record<string, unknown>;
 

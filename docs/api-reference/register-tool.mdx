@@ -10,37 +10,41 @@ description: "Register a tool, with or without a view"
 `search-products` searches the store catalog for the signed-in user and renders the matches in the `carousel` view.
 
 ```ts server.ts
-import { type SkybridgeServer } from "skybridge/server";
+import { Skybridge } from "skybridge/server";
 import { z } from "zod";
 
-export const handler = (server: SkybridgeServer) =>
-  server.registerTool(
-    {
-      name: "search-products",
-      title: "Search products",
-      description: "Search the store catalog by keyword and optional price ceiling.",
-      inputSchema: {
-        query: z.string().describe("What the shopper is looking for"),
+export const app = new Skybridge({
+  name: "shop",
+  version: "1.0",
+  handler: (server) =>
+    server.registerTool(
+      {
+        name: "search-products",
+        title: "Search products",
+        description: "Search the store catalog by keyword and optional price ceiling.",
+        inputSchema: {
+          query: z.string().describe("What the shopper is looking for"),
+        },
+        outputSchema: {
+          productIds: z.array(z.string()).describe("The IDs of products matching the query."),
+        },
+        annotations: { readOnlyHint: true },
+        securitySchemes: [{ type: "oauth2", scopes: ["catalog.read"] }],
+        view: {
+          component: "carousel",
+          csp: { connectDomains: ["https://api.myshop.com"] },
+        },
       },
-      outputSchema: {
-        productIds: z.array(z.string()).describe("The IDs of products matching the query."),
+      async ({ query, maxPrice }, extra) => {
+        const userId = extra.http?.authInfo?.extra?.subject;
+        const products = await search(query, { maxPrice, userId });
+        return {
+          content: `Found ${products.length} products for "${query}".`,
+          structuredContent: { products },
+        };
       },
-      annotations: { readOnlyHint: true },
-      securitySchemes: [{ type: "oauth2", scopes: ["catalog.read"] }],
-      view: {
-        component: "carousel",
-        csp: { connectDomains: ["https://api.myshop.com"] },
-      },
-    },
-    async ({ query, maxPrice }, extra) => {
-      const userId = extra.http?.authInfo?.extra?.subject;
-      const products = await search(query, { maxPrice, userId });
-      return {
-        content: `Found ${products.length} products for "${query}".`,
-        structuredContent: { products },
-      };
-    },
-  );
+    ),
+});
 ```
 
 ## Signature
@@ -74,7 +78,7 @@ All three are the tool's prompt surface: the model reads them to decide when to 
 
 ### `inputSchema`, `outputSchema`
 
-Shapes of [Standard Schema](https://standardschema.dev) validators that can emit JSON Schema: [Zod](https://zod.dev/) 4 and ArkType out of the box, valibot through `@valibot/to-json-schema`. `inputSchema` validates the call arguments and types the handler's `input`. Add `.describe()` to a field to tell the model what it's for. `outputSchema` tells the model the shape to expect back, it does not type the returned value.
+Shapes of [Standard Schema](https://standardschema.dev) validators that can emit JSON Schema: [Zod](https://zod.dev/) 4.2+ and ArkType out of the box, valibot through `@valibot/to-json-schema`. `inputSchema` validates the call arguments and types the handler's `input`. Add `.describe()` to a field to tell the model what it's for. `outputSchema` tells the model the shape to expect back, it does not type the returned value.
 
 ### `annotations`
 

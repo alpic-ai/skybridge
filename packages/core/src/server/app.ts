@@ -28,18 +28,6 @@ type ErrorMiddlewareConfig = {
 };
 
 /**
- * The bare {@link McpServer} a {@link SkybridgeHandler} receives: no tools
- * registered yet. Use it to annotate a handler extracted into its own
- * declaration — `(server: SkybridgeServer) => server.registerTool(…)` — and
- * pass the claims your OAuth verifier produces to type
- * `extra.http.authInfo.extra` in handlers. Leave the handler's return type
- * inferred: the returned chain is what carries the tool registry into
- * `typeof app`.
- */
-export type SkybridgeServer<TAuthExtra extends ExtraClaims = ExtraClaims> =
-  McpServer<Record<never, ToolDef>, TAuthExtra>;
-
-/**
  * The `handler` field of {@link SkybridgeConfig}: builds the app's MCP
  * surface. Runs again for **every incoming request**, on a fresh
  * {@link McpServer}, so keep it to registration: hoist pools, timers, clients

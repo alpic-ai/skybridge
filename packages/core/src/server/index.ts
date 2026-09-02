@@ -1,8 +1,11 @@
+export {
+  ProtocolError,
+  ProtocolErrorCode,
+} from "@modelcontextprotocol/server";
 export type {
   SkybridgeConfig,
   SkybridgeHandler,
   SkybridgeOAuthInput,
-  SkybridgeServer,
 } from "./app.js";
 export { Skybridge } from "./app.js";
 export type { OAuthConfig } from "./auth/index.js";
@@ -27,6 +30,7 @@ export {
   type ExtraClaims,
   mcpAuthMetadataRouter,
   OAuthError,
+  OAuthErrorCode,
   optionalBearerAuth,
   requireBearerAuth,
   type TokenVerifier,

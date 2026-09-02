@@ -18,23 +18,27 @@ File params are a **ChatGPT** feature. Other hosts don't pass files through [too
 
 `summarize-document` takes a file in, fetches its bytes from `download_url`, and returns a summary file back.
 
-```ts server.ts highlight={6-7}
-import { FileRef, type SkybridgeServer } from "skybridge/server";
+```ts server.ts highlight={10-11}
+import { FileRef, Skybridge } from "skybridge/server";
 
-export const handler = (server: SkybridgeServer) =>
-  server.registerTool(
-    {
-      name: "summarize-document",
-      inputSchema: { document: FileRef },
-      outputSchema: { summary: FileRef },
-      _meta: { "openai/fileParams": ["document"] },
-    },
-    async ({ document }) => {
-      const bytes = await fetch(document.download_url).then((r) => r.blob());
-      const summary = await summarize(bytes); // returns a FileRef
-      return { structuredContent: { summary } };
-    },
-  );
+export const app = new Skybridge({
+  name: "docs",
+  version: "1.0",
+  handler: (server) =>
+    server.registerTool(
+      {
+        name: "summarize-document",
+        inputSchema: { document: FileRef },
+        outputSchema: { summary: FileRef },
+        _meta: { "openai/fileParams": ["document"] },
+      },
+      async ({ document }) => {
+        const bytes = await fetch(document.download_url).then((r) => r.blob());
+        const summary = await summarize(bytes); // returns a FileRef
+        return { structuredContent: { summary } };
+      },
+    ),
+});
 ```
 
 ## Shape

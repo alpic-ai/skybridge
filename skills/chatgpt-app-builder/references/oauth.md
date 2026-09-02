@@ -54,7 +54,7 @@ export const app = new Skybridge({
 });
 ```
 
-The provider's claims type `extra.http.authInfo.extra` in every tool handler; no `SkybridgeServer<...>` annotation is needed when `oauth` and `handler` sit on the same config.
+The provider's claims type `extra.http.authInfo.extra` in every tool handler. Keep `handler` inline in the config: an extracted handler needs a hand-written server type and loses that inference.
 
 | Provider | Import | Required options | Notes |
 |---|---|---|---|

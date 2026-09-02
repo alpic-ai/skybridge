@@ -26,16 +26,7 @@ export const app = new Skybridge({
 });
 ```
 
-To extract the handler into its own declaration, annotate its parameter with `SkybridgeServer`, the bare server before any registration. It takes the claims your OAuth verifier produces, which types `extra.http.authInfo.extra` in tool handlers; when `oauth` is set on the same config, the claims are inferred and the annotation is unnecessary.
-
-```ts
-import { Skybridge, type SkybridgeServer } from "skybridge/server";
-
-export const handler = (server: SkybridgeServer) =>
-  server.registerTool(/* ... */);
-
-export const app = new Skybridge({ name: "shop", version: "1.0", handler });
-```
+Define the handler inline, as above: that is what lets TypeScript infer the claims your `oauth` verifier produces into `extra.http.authInfo.extra`, and the tool registry into `typeof app`. Splitting the tool definitions across files is still easy, since each `registerTool` callback is an ordinary function you can import.
 
 <Warning>
 The handler runs for every request, so anything in it other than registration runs per request too. Hoist side effects to module scope or into [`setup`](/api-reference/skybridge#setup).
