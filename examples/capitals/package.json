@@ -25,15 +25,15 @@
     "react-dom": "^19.2.7",
     "react-map-gl": "^7.1.9",
     "react-router-dom": "^7.18.0",
-    "skybridge": "^1.1.0",
+    "skybridge": "^2.0.0-beta.0",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "^2.0.90",
-    "@skybridge/devtools": "^1.2.3",
-    "@skybridge/test": "beta",
+    "@skybridge/devtools": "^2.0.0-beta.0",
+    "@skybridge/test": "^2.0.0-beta.0",
     "@skybridge/vite-plugin": "^2.0.0-beta.0",
     "@tailwindcss/vite": "^4.3.1",
     "@types/express": "^5.0.6",

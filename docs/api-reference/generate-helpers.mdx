@@ -46,7 +46,7 @@ ServerType extends McpServer<AnyToolRegistry>;
 Your app's type, `typeof app`. Export it from `src/server.ts` with `export type AppType = typeof app`, then pass it here.
 
 <Info>
-Inference works only when the server is built by chaining `.registerTool()` calls off the constructor, so the tool types accumulate on the server type.
+Inference works only when `handler` chains `.registerTool()` calls on the server it receives and returns the result, so the tool types accumulate on `typeof app`.
 </Info>
 
 ## Returns

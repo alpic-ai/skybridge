@@ -54,6 +54,7 @@ This command starts:
 │   ├── components/       # Shared UI components
 │   ├── helpers.ts        # Shared utilities
 │   └── index.css         # Global styles
+├── evals/                # Model-driven scenarios (pnpm evals, needs ANTHROPIC_API_KEY)
 ├── vite.config.ts
 ├── alpic.json            # Deployment config
 └── package.json

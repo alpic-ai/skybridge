@@ -63,7 +63,7 @@ Omit `authInfo` to test the anonymous path: a gated tool then shows up as `toHav
 
 ## Defaults
 
-`evals: { temperature, systemPrompt, maxSteps, timeout }` in the Vite plugin sets what every scenario starts from (temperature `0`, `maxSteps` 8, timeout 120s). Any of them can be overridden per `start`.
+`evals: { temperature, systemPrompt, maxSteps, timeout }` in the Vite plugin sets what every scenario starts from (temperature `0`, `maxSteps` 8, timeout 120s). `temperature`, `systemPrompt` and `maxSteps` can be overridden per `start`.
 
 ## Pitfalls
 

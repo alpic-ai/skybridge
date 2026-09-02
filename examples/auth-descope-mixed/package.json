@@ -20,7 +20,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@skybridge/devtools": "^1.1.0",
+    "@skybridge/devtools": "^2.0.0-beta.0",
     "@skybridge/vite-plugin": "^2.0.0-beta.0",
     "@types/express": "^5.0.6",
     "@types/node": "^22.15.30",

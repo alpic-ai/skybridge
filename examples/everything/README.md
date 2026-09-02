@@ -7,8 +7,8 @@ A playground MCP app built with [Skybridge](https://docs.skybridge.tech/home) th
 This example demonstrates every major Skybridge capability in a single widget with tabs:
 
 - **useToolInfo** — Tool input, output, and metadata
-- **useLayout** — Theme (light/dark) and layout
-- **useUser** — User locale and profile
+- **useUser** — Theme (light/dark), locale and profile
+- **useViewport** — Max height and safe area
 - **useDisplayMode** — Inline vs fullscreen
 - **useWidgetState** — Persistent widget state
 - **useCallTool** — Calling server tools from the widget

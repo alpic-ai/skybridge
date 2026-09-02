@@ -211,7 +211,7 @@ A view can save a file to the user's device, whether content it built itself or 
 import { useDownload } from "skybridge/web";
 
 export default function ReceiptSummary({ items }: { items: LineItem[] }) {
-  const { download } = useDownload();
+  const download = useDownload();
 
   const exportCsv = async () => {
     const csv = items.map((i) => `${i.label},${i.amount}`).join("\n");
