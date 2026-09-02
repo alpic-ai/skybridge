@@ -10,7 +10,6 @@ import { readPosition, STARTING_FEN } from "./lib/engine.js";
 export const app = new Skybridge({
   name: "skybridge-chess",
   version: "0.0.1",
-  capabilities: {},
   handler: (server) =>
     server.registerTool(
       {

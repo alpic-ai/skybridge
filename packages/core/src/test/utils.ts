@@ -9,13 +9,10 @@ export function createMockMcpServer(): {
   mockRegisterResource: MockInstance<McpServer["registerResource"]>;
   mockRegisterTool: MockInstance;
 } {
-  const server = new McpServer(
-    {
-      name: "alpic-openai-app",
-      version: "0.0.1",
-    },
-    { capabilities: {} },
-  );
+  const server = new McpServer({
+    name: "alpic-openai-app",
+    version: "0.0.1",
+  });
 
   const mockRegisterResource = vi.spyOn(server, "registerResource");
   const mockRegisterTool = vi.spyOn(McpServerBase.prototype, "registerTool");

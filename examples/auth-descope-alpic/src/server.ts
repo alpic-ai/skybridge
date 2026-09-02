@@ -37,7 +37,6 @@ function projectIdFromUrl(url: string): string {
 export const app = new Skybridge({
   name: "auth-coffee",
   version: "0.0.1",
-  capabilities: {},
   setup: () => ({
     issuer: env.DESCOPE_MCP_SERVER_URL,
     audience: projectIdFromUrl(env.DESCOPE_MCP_SERVER_URL),

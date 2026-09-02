@@ -815,7 +815,6 @@ describe("resources/list view _meta injection", () => {
     const app = new Skybridge({
       name: "test",
       version: "1.0.0",
-      capabilities: {},
       handler: (server) =>
         server.registerTool(
           {

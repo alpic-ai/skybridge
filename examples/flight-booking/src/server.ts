@@ -13,7 +13,6 @@ const AIRPORT_CODE = z
 export const app = new Skybridge({
   name: "flight-booking-app",
   version: "0.0.1",
-  capabilities: {},
   handler: (server) =>
     server
       .registerTool(

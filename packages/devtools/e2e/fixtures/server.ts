@@ -30,7 +30,6 @@ const serverName = REQUIRES_AUTH
 const app = new Skybridge({
   name: serverName,
   version: "0.0.0",
-  capabilities: {},
   handler: (server) =>
     server
       .registerTool(

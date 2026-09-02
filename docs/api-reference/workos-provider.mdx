@@ -8,13 +8,12 @@ description: "Wire OAuth from WorkOS AuthKit"
 
 ## Example
 
-```ts server.ts highlight={1,7-11}
+```ts server.ts highlight={1,6-10}
 import { Skybridge, workosProvider } from "skybridge/server";
 
 export const app = new Skybridge({
   name: "personal-shopper",
   version: "0.0.1",
-  capabilities: {},
   oauth: () =>
     workosProvider({
         domain: process.env.AUTHKIT_DOMAIN,

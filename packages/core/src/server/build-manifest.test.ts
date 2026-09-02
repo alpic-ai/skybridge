@@ -12,10 +12,7 @@ function manifestOf(
 }
 
 function makeServer(): McpServer {
-  return new McpServer(
-    { name: "test", version: "0.0.1" },
-    { capabilities: {} },
-  );
+  return new McpServer({ name: "test", version: "0.0.1" });
 }
 
 describe("__setBuildManifest", () => {

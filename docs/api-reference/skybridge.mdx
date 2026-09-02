@@ -53,9 +53,9 @@ type SkybridgeConfig = Implementation &
   };
 ```
 
-### `name`, `version`, `capabilities`
+### `name`, `version`
 
-The MCP implementation info (`name`, `version`, and optionally `title`, `description`, `icons`, `websiteUrl`) and the SDK `ServerOptions` (`capabilities`, `instructions`, …), forwarded to the server.
+The MCP implementation info (`name`, `version`, and optionally `title`, `description`, `icons`, `websiteUrl`). SDK `ServerOptions` such as `instructions` or `capabilities` are forwarded when you set them; registering tools and views advertises those capabilities for you.
 
 ### `handler`
 

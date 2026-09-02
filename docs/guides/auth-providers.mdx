@@ -22,13 +22,12 @@ These providers require sign-in on every request by default. Set [`auth: { allow
 
 Pass the tenant domain, the API Identifier as `audience`, and this server's public URL as `serverUrl` to [`auth0Provider`](/api-reference/auth0-provider):
 
-```ts server.ts highlight={1,7-12}
+```ts server.ts highlight={1,6-11}
 import { Skybridge, auth0Provider } from "skybridge/server";
 
 export const app = new Skybridge({
   name: "personal-shopper",
   version: "0.0.1",
-  capabilities: {},
   oauth: () =>
     auth0Provider({
       domain: process.env.AUTH0_DOMAIN,

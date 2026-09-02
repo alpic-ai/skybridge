@@ -10,8 +10,7 @@
     "build": "skybridge build",
     "start": "skybridge start",
     "deploy": "alpic deploy",
-    "evals": "vitest run evals",
-    "evals:types": "tsc --noEmit -p tsconfig.evals.json"
+    "evals": "vitest run evals"
   },
   "dependencies": {
     "@alpic-ai/insights": "^1.142.1",

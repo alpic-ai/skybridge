@@ -35,15 +35,15 @@ type ErrorMiddlewareConfig = {
  * them. It must **return** the chained server so `typeof app` carries the
  * registered tool types.
  *
- * @typeParam TContext - What `setup` resolved to, passed as the second argument.
+ * @typeParam TConfig - What `setup` resolved to, passed as the second argument.
  */
 export type SkybridgeHandler<
   TTools extends Record<string, ToolDef>,
-  TContext,
+  TConfig,
   TAuthExtra extends ExtraClaims,
 > = (
   server: McpServer<Record<never, ToolDef>, TAuthExtra>,
-  context: TContext,
+  config: TConfig,
 ) => McpServer<TTools, TAuthExtra>;
 
 /**
@@ -53,10 +53,10 @@ export type SkybridgeHandler<
  * first request, never at module import — so prefer a function when building
  * the config has side effects (network discovery, secrets).
  */
-export type SkybridgeOAuthInput<TContext, TExtra extends ExtraClaims> =
+export type SkybridgeOAuthInput<TConfig, TExtra extends ExtraClaims> =
   | OAuthConfig<TExtra>
   | Promise<OAuthConfig<TExtra>>
-  | ((context: TContext) => OAuthConfig<TExtra> | Promise<OAuthConfig<TExtra>>);
+  | ((config: TConfig) => OAuthConfig<TExtra> | Promise<OAuthConfig<TExtra>>);
 
 /**
  * Everything a Skybridge app needs in one bag: the MCP implementation info
@@ -64,13 +64,13 @@ export type SkybridgeOAuthInput<TContext, TExtra extends ExtraClaims> =
  * `instructions`, …), the Express and skills options, and the app's behavior
  * (`setup`, `oauth`, `handler`).
  *
- * All type parameters are inferred from the value: the context from `setup`,
+ * All type parameters are inferred from the value: the config from `setup`,
  * the auth claims from `oauth`, and the tool registry from the server
  * `handler` returns.
  */
 export type SkybridgeConfig<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
-  TContext = undefined,
+  TConfig = undefined,
   TAuthExtra extends ExtraClaims = ExtraClaims,
 > = Implementation &
   ServerOptions & {
@@ -87,15 +87,15 @@ export type SkybridgeConfig<
      * never at module import — and its awaited return value is passed to an
      * `oauth` function and to `handler` as the second argument.
      */
-    setup?: () => TContext;
+    setup?: () => TConfig;
     /**
      * Resource-server OAuth. When set, mounts the well-known metadata routes
      * and bearer auth on `/mcp`, and the verifier's claims type
      * `extra.http.authInfo.extra` in tool handlers.
      */
-    oauth?: SkybridgeOAuthInput<Awaited<TContext>, TAuthExtra>;
+    oauth?: SkybridgeOAuthInput<Awaited<TConfig>, TAuthExtra>;
     /** Registers the MCP surface, per request. See {@link SkybridgeHandler}. */
-    handler: SkybridgeHandler<TTools, Awaited<TContext>, TAuthExtra>;
+    handler: SkybridgeHandler<TTools, Awaited<TConfig>, TAuthExtra>;
   };
 
 /**
@@ -133,7 +133,7 @@ export type SkybridgeConfig<
  */
 export class Skybridge<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
-  TContext = undefined,
+  TConfig = undefined,
   TAuthExtra extends ExtraClaims = ExtraClaims,
 > {
   declare readonly $types: McpServerTypes<TTools>;
@@ -143,15 +143,15 @@ export class Skybridge<
   private oauthEnabled = false;
   private readonly handler: SkybridgeHandler<
     TTools,
-    Awaited<TContext>,
+    Awaited<TConfig>,
     TAuthExtra
   >;
-  private readonly setup?: () => TContext;
+  private readonly setup?: () => TConfig;
   private readonly oauthInput?: SkybridgeOAuthInput<
-    Awaited<TContext>,
+    Awaited<TConfig>,
     TAuthExtra
   >;
-  private context?: Awaited<TContext>;
+  private config?: Awaited<TConfig>;
   private readonly expressApp: Express;
   private readonly errorMiddleware: ErrorMiddlewareConfig[] = [];
   private readonly monitoringEntry: McpMiddlewareEntry | null =
@@ -160,22 +160,20 @@ export class Skybridge<
   private readyPromise?: Promise<void>;
   private slowHandlerWarned = false;
 
-  constructor(config: SkybridgeConfig<TTools, TContext, TAuthExtra>) {
-    const {
-      name,
-      title,
-      version,
-      description,
-      icons,
-      websiteUrl,
-      json,
-      skills,
-      setup,
-      oauth,
-      handler,
-      ...serverOptions
-    } = config;
-
+  constructor({
+    name,
+    title,
+    version,
+    description,
+    icons,
+    websiteUrl,
+    json,
+    skills,
+    setup,
+    oauth,
+    handler,
+    ...serverOptions
+  }: SkybridgeConfig<TTools, TConfig, TAuthExtra>) {
     this.serverInfo = { name, title, version, description, icons, websiteUrl };
     this.serverOptions = serverOptions;
     this.skills = skills;
@@ -195,11 +193,11 @@ export class Skybridge<
   ready(): Promise<void> {
     this.readyPromise ??= (async () => {
       if (this.setup) {
-        this.context = await this.setup();
+        this.config = await this.setup();
       }
       const oauth =
         typeof this.oauthInput === "function"
-          ? await this.oauthInput(this.context as Awaited<TContext>)
+          ? await this.oauthInput(this.config as Awaited<TConfig>)
           : await this.oauthInput;
       this.oauthEnabled = Boolean(oauth);
       const sample = this.buildServer();
@@ -406,7 +404,7 @@ export class Skybridge<
       server.setResourceMetadataUrlResolver(this.resolveResourceMetadataUrl);
     }
     const startedAt = performance.now();
-    const built = this.handler(server, this.context as Awaited<TContext>);
+    const built = this.handler(server, this.config as Awaited<TConfig>);
     const elapsed = performance.now() - startedAt;
     if (typeof (built as { then?: unknown }).then === "function") {
       throw new Error(

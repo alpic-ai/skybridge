@@ -149,17 +149,17 @@ test("bag oauth claims reach tool handlers, promise form included", () => {
   });
 });
 
-test("the setup context flows into oauth and handler, and the app carries the registry", () => {
+test("the setup config flows into oauth and handler, and the app carries the registry", () => {
   const app = new Skybridge({
     name: "t",
     version: "0",
     setup: async () => ({ apiKey: "k" }),
-    oauth: (context) => {
-      expectTypeOf(context).toEqualTypeOf<{ apiKey: string }>();
+    oauth: (config) => {
+      expectTypeOf(config).toEqualTypeOf<{ apiKey: string }>();
       return workosOAuth;
     },
-    handler: (server, context) => {
-      expectTypeOf(context).toEqualTypeOf<{ apiKey: string }>();
+    handler: (server, config) => {
+      expectTypeOf(config).toEqualTypeOf<{ apiKey: string }>();
       return server.registerTool(
         { name: "a", inputSchema: {} },
         (_args, extra) => {

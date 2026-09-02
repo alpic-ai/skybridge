@@ -6,7 +6,6 @@ import { drawCard, getCard } from "./cards.js";
 export const app = new Skybridge({
   name: "times-up",
   version: "0.0.1",
-  capabilities: {},
   instructions: `You are playing Time's Up with the user.
 
 - At the start of a new conversation, immediately draw the first card by invoking the play tool—do *not* wait for the user to request it.

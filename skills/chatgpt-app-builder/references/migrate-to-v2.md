@@ -45,7 +45,6 @@ import * as z from "zod";
 export const app = new Skybridge({
   name: "my-app",
   version: "1.0.0",
-  capabilities: {},
   handler: (server) =>
     server
       .registerTool({ name: "search", inputSchema: { query: z.string() } }, searchHandler)

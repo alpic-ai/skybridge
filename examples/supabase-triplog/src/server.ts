@@ -35,7 +35,6 @@ function errorResult(context: string, error: unknown) {
 export const app = new Skybridge({
   name: "triplog-app",
   version: "0.0.1",
-  capabilities: {},
   setup: () => createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY),
   handler: (server, supabase) =>
     server

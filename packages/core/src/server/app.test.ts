@@ -93,14 +93,14 @@ describe("Skybridge setup and handler", () => {
     );
   });
 
-  it("resolves an oauth function with the setup context before wiring the routes", async () => {
+  it("resolves an oauth function with the setup config before wiring the routes", async () => {
     let seen: unknown;
     const app = new Skybridge({
       name: "test",
       version: "1.0.0",
       setup: () => ({ issuer: "https://issuer.example.com" }),
-      oauth: (context) => {
-        seen = context;
+      oauth: (config) => {
+        seen = config;
         return oauthConfig;
       },
       handler: (server) => server,

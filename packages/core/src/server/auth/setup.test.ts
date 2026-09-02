@@ -71,7 +71,6 @@ async function bootServer(
   const app = new Skybridge({
     name: "auth-test",
     version: "0.0.0",
-    capabilities: {},
     oauth: {
       ...(baseUrl === null ? {} : { baseUrl }),
       oauthMetadata: {
@@ -233,7 +232,6 @@ async function bootMixedServer(jwksUri: string) {
   const app = new Skybridge({
     name: "mixed-auth-test",
     version: "0.0.0",
-    capabilities: {},
     oauth: {
       baseUrl: "https://app.example.test",
       oauthMetadata: {
@@ -490,7 +488,6 @@ async function bootScopedServer(jwksUri: string) {
   const app = new Skybridge({
     name: "scoped-auth-test",
     version: "0.0.0",
-    capabilities: {},
     oauth: {
       baseUrl: "https://app.example.test",
       oauthMetadata: {

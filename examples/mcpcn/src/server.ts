@@ -22,7 +22,6 @@ const specSchema = catalog.zodSchema();
 export const app = new Skybridge({
   name: "mcpcn",
   version: "0.0.1",
-  capabilities: {},
   handler: (server) =>
     server
       .registerTool(

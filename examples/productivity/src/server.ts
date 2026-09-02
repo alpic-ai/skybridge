@@ -83,7 +83,6 @@ function getWeek(weekOffset: number): Week {
 export const app = new Skybridge({
   name: "productivity-charts-example-server",
   version: "0.0.1",
-  capabilities: {},
   handler: (server) =>
     server
       .registerTool(

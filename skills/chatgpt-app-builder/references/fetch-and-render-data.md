@@ -45,7 +45,6 @@ import { z } from "zod";
 export const app = new Skybridge({
   name: "my-app",
   version: "0.0.1",
-  capabilities: {},
   handler: (server) =>
     server
       .registerTool(

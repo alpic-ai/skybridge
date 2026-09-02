@@ -8,13 +8,12 @@ description: "Wire OAuth from any IdP's discovery document"
 
 ## Example
 
-```ts server.ts highlight={1,7-13}
+```ts server.ts highlight={1,6-12}
 import { Skybridge, customProvider } from "skybridge/server";
 
 export const app = new Skybridge({
   name: "personal-shopper",
   version: "0.0.1",
-  capabilities: {},
   oauth: () =>
     customProvider({
       issuer: "https://auth.myshop.com",

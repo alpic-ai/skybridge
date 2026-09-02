@@ -46,7 +46,7 @@ describe("skills server option", () => {
     __setSkillsManifest(MANIFEST);
     const server = new McpServer(
       { name: "t", version: "0.0.1" },
-      { capabilities: {} },
+      undefined,
       { skills: true },
     );
 

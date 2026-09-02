@@ -12,7 +12,6 @@ const who = (auth?: AuthInfo) =>
 export const app = new Skybridge({
   name: "auth-coffee-mixed",
   version: "0.0.1",
-  capabilities: {},
   oauth: () =>
     descopeProvider({
       url: env.DESCOPE_MCP_SERVER_URL,

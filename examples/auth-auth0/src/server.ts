@@ -23,7 +23,6 @@ const AUTH0_BASE_URL = `https://${env.AUTH0_DOMAIN}`;
 export const app = new Skybridge({
   name: "auth-coffee",
   version: "0.0.1",
-  capabilities: {},
   oauth: () =>
     auth0Provider({
       domain: env.AUTH0_DOMAIN,

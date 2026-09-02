@@ -41,7 +41,6 @@ function entryNameFor(file: FileRef): string {
 export const app = new Skybridge({
   name: "zip",
   version: "0.0.1",
-  capabilities: {},
   handler: (server) =>
     server.registerTool(
       {

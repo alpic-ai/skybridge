@@ -45,7 +45,6 @@ import { Skybridge, descopeProvider } from "skybridge/server";
 export const app = new Skybridge({
   name: "my-app",
   version: "0.0.1",
-  capabilities: {},
   oauth: () =>
     descopeProvider({
       url: env.DESCOPE_MCP_SERVER_URL, // MCP Server Discovery URL (Issuer)
@@ -179,7 +178,7 @@ import {
 } from "skybridge/server";
 import { verifyAccessToken } from "./auth.js";
 
-export const app = new Skybridge({ name: "my-app", version: "0.0.1", capabilities: {}, handler })
+export const app = new Skybridge({ name: "my-app", version: "0.0.1", handler })
   .use(
     mcpAuthMetadataRouter({
       oauthMetadata: {

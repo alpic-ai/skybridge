@@ -6,7 +6,6 @@ import { Skybridge } from "skybridge/server";
 export const app = new Skybridge({
   name: "skybridge-blank",
   version: "0.0.1",
-  capabilities: {},
   handler: (server) => server,
 });
 

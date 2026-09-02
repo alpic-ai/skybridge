@@ -13,7 +13,6 @@ import {
 export const app = new Skybridge({
   name: "world-capitals-explorer",
   version: "0.0.1",
-  capabilities: {},
   handler: (server) =>
     server
       .registerTool(
