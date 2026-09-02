@@ -116,7 +116,7 @@ function SettingsView() {
 
 ## Adapting to Host
 
-Use `useLayout` to read host environment constraints.
+Use `useViewport` to read host environment constraints. It re-renders on every resize, so keep it in the components that size themselves.
 
 ### Layout Constraints
 
@@ -124,10 +124,10 @@ Use `useLayout` to read host environment constraints.
 - `safeArea.insets`: Padding to avoid device notches, composer overlay, and navigation bars
 
 ```tsx
-import { useLayout } from "skybridge/web";
+import { useViewport } from "skybridge/web";
 
 function Container({ children }) {
-  const { maxHeight, safeArea } = useLayout();
+  const { maxHeight, safeArea } = useViewport();
   const { top, right, bottom, left } = safeArea.insets;
 
   return (
@@ -140,13 +140,13 @@ function Container({ children }) {
 
 ### Theme
 
-Match the host color scheme using `theme` from `useLayout`.
+Match the host color scheme using `theme` from `useUser`.
 
 ```tsx
-import { useLayout } from "skybridge/web";
+import { useUser } from "skybridge/web";
 
 function Container({ children }) {
-  const { theme } = useLayout();
+  const { theme } = useUser();
   const isDark = theme === "dark";
 
   return <div className={isDark ? "bg-surface-dark" : "bg-surface-light"}>{children}</div>;

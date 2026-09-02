@@ -13,7 +13,7 @@
   },
   {
     "query": "My view looks jarring when ChatGPT is in dark mode. How do I make the colors match?",
-    "expected_behavior": "Uses useLayout hook from skybridge/web. Destructures theme ('light' | 'dark'). Shows conditional styling based on theme value."
+    "expected_behavior": "Uses useUser hook from skybridge/web. Destructures theme ('light' | 'dark'). Shows conditional styling based on theme value."
   },
   {
     "query": "I want to show dates and numbers formatted for the user's language. Like if they're French, dates should be DD/MM/YYYY.",
@@ -29,11 +29,11 @@
   },
   {
     "query": "My fullscreen view content is getting cut off at the bottom on phones with notches.",
-    "expected_behavior": "Uses useLayout hook from skybridge/web. Destructures safeArea.insets (top, right, bottom, left). Applies insets as padding to avoid device notches, composer overlay, and navigation bars."
+    "expected_behavior": "Uses useViewport hook from skybridge/web. Destructures safeArea.insets (top, right, bottom, left). Applies insets as padding to avoid device notches, composer overlay, and navigation bars."
   },
   {
     "query": "My view content is too tall and causes awkward scrolling in the chat. How do I constrain its height?",
-    "expected_behavior": "Uses useLayout hook from skybridge/web. Destructures maxHeight. Applies maxHeight to container style. Content should auto-fit without nested scrolling in inline mode."
+    "expected_behavior": "Uses useViewport hook from skybridge/web. Destructures maxHeight. Applies maxHeight to container style. Content should auto-fit without nested scrolling in inline mode."
   },
   {
     "query": "I need a confirmation dialog before deleting items. User clicks delete, sees 'Are you sure?', then confirms or cancels.",
