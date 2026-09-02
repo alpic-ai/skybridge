@@ -1,5 +1,5 @@
 import { useKeyPress, useLocalStorageState } from "ahooks";
-import { X } from "lucide-react";
+import { Braces, X } from "lucide-react";
 import { Suspense } from "react";
 import {
   Group,
@@ -17,6 +17,7 @@ import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { useCallToolResult } from "@/lib/store.js";
 import { cn, formatBytes } from "@/lib/utils.js";
 import { ContextWarningAlert, ContextWarningBadge } from "./context-warning.js";
+import { FullscreenInspector } from "./fullscreen-inspector.js";
 import { JsonSyntaxBlock } from "./json-syntax-block.js";
 import { LogsDrawer } from "./logs-drawer.js";
 import {
@@ -54,6 +55,10 @@ export const ToolPanel = () => {
     "devtools-tool-panel-header-expanded",
     { defaultValue: false },
   );
+  const [fullscreenInspectorOpen, setFullscreenInspectorOpen] =
+    useLocalStorageState("devtools-tool-panel-fullscreen-inspector-open", {
+      defaultValue: false,
+    });
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: VIEW_LOGS_GROUP_ID,
     panelIds: [VIEW_PANEL_ID, LOGS_PANEL_ID],
@@ -266,14 +271,38 @@ export const ToolPanel = () => {
                   </Suspense>
                 </div>
                 {isFullscreen && (
-                  <button
-                    type="button"
-                    aria-label="Exit fullscreen"
-                    onClick={() => setPreference("displayMode", "inline")}
-                    className="absolute right-4 top-4 inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-light-gray-foreground shadow-md transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  >
-                    <X className="size-4" />
-                  </button>
+                  <>
+                    {fullscreenInspectorOpen && (
+                      <FullscreenInspector
+                        onClose={() => setFullscreenInspectorOpen(false)}
+                      />
+                    )}
+                    <div className="absolute right-4 top-4 z-[60] flex items-center gap-2">
+                      <button
+                        type="button"
+                        aria-label={
+                          fullscreenInspectorOpen
+                            ? "Close DevTools inspector"
+                            : "Open DevTools inspector"
+                        }
+                        aria-pressed={fullscreenInspectorOpen ?? false}
+                        onClick={() =>
+                          setFullscreenInspectorOpen(!fullscreenInspectorOpen)
+                        }
+                        className="inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-light-gray-foreground shadow-md transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      >
+                        <Braces className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Exit fullscreen"
+                        onClick={() => setPreference("displayMode", "inline")}
+                        className="inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-light-gray-foreground shadow-md transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      >
+                        <X className="size-4" />
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
             </Panel>
