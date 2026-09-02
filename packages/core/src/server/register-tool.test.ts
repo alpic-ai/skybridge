@@ -5,15 +5,18 @@ import { Skybridge } from "./app.js";
 describe("registerTool handler invocation", () => {
   it("passes empty args and a usable extra to a schema-less tool handler", async () => {
     let received: { args: unknown; extra: unknown } | undefined;
-    const app = new Skybridge({ name: "test", version: "1.0.0" }, (server) =>
-      server.registerTool(
-        { name: "no-input", description: "no-input" },
-        async (args, extra) => {
-          received = { args, extra };
-          return { content: [{ type: "text", text: "ok" }] };
-        },
-      ),
-    );
+    const app = new Skybridge({
+      name: "test",
+      version: "1.0.0",
+      handler: (server) =>
+        server.registerTool(
+          { name: "no-input", description: "no-input" },
+          async (args, extra) => {
+            received = { args, extra };
+            return { content: [{ type: "text", text: "ok" }] };
+          },
+        ),
+    });
     const instance = await app.createServerInstance();
 
     const client = new Client({ name: "client", version: "1.0.0" });

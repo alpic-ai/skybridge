@@ -29,7 +29,6 @@ import {
 import { mergeWith, union } from "es-toolkit";
 import type express from "express";
 import { warnOnLargeToolOutput } from "../context-warnings.js";
-import type { OAuthConfig } from "./auth/index.js";
 import {
   authToSecuritySchemes,
   evaluateSecuritySchemes,
@@ -176,19 +175,13 @@ export type ToolAuth = {
 export type JsonOptions = NonNullable<Parameters<typeof express.json>[0]>;
 
 /**
- * Skybridge-specific options, part of the {@link SkybridgeConfig} bag passed to
- * the `Skybridge` constructor.
- *
- * @typeParam TAuthExtra - Claims the `oauth` verifier populates. Inferred from
- * the config a provider returns, and carried on to tool handlers.
+ * The Skybridge-specific options an {@link McpServer} is built with. A
+ * {@link Skybridge} app derives them from its config; pass them directly only
+ * when constructing an `McpServer` by hand.
  */
-export interface SkybridgeServerOptions<
-  TAuthExtra extends ExtraClaims = ExtraClaims,
-> {
-  /** Options for the built-in `express.json()` middleware, e.g. `{ limit: "10mb" }`. */
-  json?: JsonOptions;
-  /** Resource-server OAuth config. When set, mounts well-known metadata and bearer auth on `/mcp`. Pass a zero-arg async function to load it lazily — it resolves once, at `run()` or on the first request, never at module import. */
-  oauth?: OAuthConfig<TAuthExtra> | (() => Promise<OAuthConfig<TAuthExtra>>);
+export interface SkybridgeServerOptions {
+  /** Whether an OAuth provider guards `/mcp`; enables per-tool scheme enforcement. */
+  oauth?: boolean;
   /**
    * @experimental Serve Agent Skills from `src/skills` over MCP (SEP-2640).
    * API may change.
@@ -556,13 +549,16 @@ function withSkillsCapability(
  *
  * @example
  * ```ts
- * export const app = new Skybridge({ name: "my-app", version: "1.0.0" }, (server) =>
- *   server.registerTool({
- *     name: "search",
- *     inputSchema: { query: z.string() },
- *     view: { component: "search" },
- *   }, async ({ query }) => ({ content: `Results for ${query}` })),
- * );
+ * export const app = new Skybridge({
+ *   name: "my-app",
+ *   version: "1.0.0",
+ *   handler: (server) =>
+ *     server.registerTool({
+ *       name: "search",
+ *       inputSchema: { query: z.string() },
+ *       view: { component: "search" },
+ *     }, async ({ query }) => ({ content: `Results for ${query}` })),
+ * });
  * ```
  *
  * @see https://docs.skybridge.tech/api-reference/mcp-server
@@ -596,7 +592,7 @@ export class McpServer<
   constructor(
     serverInfo: Implementation,
     options?: ServerOptions,
-    skybridgeOptions?: SkybridgeServerOptions<TAuthExtra>,
+    skybridgeOptions?: SkybridgeServerOptions,
   ) {
     super(serverInfo, withSkillsCapability(options, skybridgeOptions));
     this.oauthEnabled = Boolean(skybridgeOptions?.oauth);

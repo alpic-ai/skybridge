@@ -1,8 +1,5 @@
 export type {
-  SkybridgeAppConfig,
   SkybridgeConfig,
-  SkybridgeFactory,
-  SkybridgeFactoryLoader,
   SkybridgeHandler,
   SkybridgeOAuthInput,
   SkybridgeServer,

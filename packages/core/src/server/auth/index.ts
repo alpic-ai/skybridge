@@ -2,7 +2,7 @@ import type { OAuthMetadata } from "@modelcontextprotocol/server";
 import type { ExtraClaims, TokenVerifier } from "../auth.js";
 
 /**
- * Resource-server OAuth config for `SkybridgeServerOptions.oauth`.
+ * Resource-server OAuth config for the `oauth` field of `SkybridgeConfig`.
  *
  * `TExtra` comes from the `verifier` and flows on to tool handlers and
  * `mcpMiddleware`, so the claim shape is declared once by whoever checks the

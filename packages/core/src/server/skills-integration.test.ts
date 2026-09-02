@@ -74,10 +74,12 @@ describe("skills server option", () => {
 
   it("serves skills through the stateless transport (capability + reads)", async () => {
     __setSkillsManifest(MANIFEST);
-    const app = new Skybridge(
-      { name: "t", version: "0.0.1", skills: true },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.1",
+      skills: true,
+      handler: (server) => server,
+    });
     const client = new Client({ name: "c", version: "0.0.1" });
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();

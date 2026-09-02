@@ -43,10 +43,11 @@ async function postApi(port: number) {
 
 describe("Skybridge.express", () => {
   it("exposes a ready Express app immediately after construction", () => {
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     expect(app.express).toBeDefined();
     expect(typeof app.express.use).toBe("function");
     expect(typeof app.express.get).toBe("function");
@@ -54,10 +55,11 @@ describe("Skybridge.express", () => {
 
   it("app.express.get registers a route reachable alongside /mcp", async () => {
     const { createApp } = await import("./express.js");
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     app.express.get("/health", (_req, res) => {
       res.json({ status: "ok" });
     });
@@ -82,7 +84,11 @@ describe("Skybridge.express", () => {
     const callsB: string[] = [];
 
     const buildApp = () =>
-      new Skybridge({ name: "t", version: "0.0.0" }, (server) => server);
+      new Skybridge({
+        name: "t",
+        version: "0.0.0",
+        handler: (server) => server,
+      });
 
     const sA = buildApp();
     sA.use((_req, _res, next) => {
@@ -120,10 +126,11 @@ describe("Skybridge.express", () => {
 
   it("useOnError still wraps thrown /mcp errors after the route is mounted", async () => {
     const { createApp } = await import("./express.js");
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     // Register the error handler BEFORE createApp — useOnError should still
     // apply it after /mcp, so /mcp errors hit it.
     const seen: string[] = [];
@@ -168,10 +175,12 @@ describe("Skybridge JSON body parser options", () => {
   }
 
   it("forwards json options to express.json", async () => {
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0", json: { limit: "10mb" } },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      json: { limit: "10mb" },
+      handler: (server) => server,
+    });
     app.express.post("/echo", (req, res) => {
       res.json({ received: req.body.data.length });
     });
@@ -184,10 +193,11 @@ describe("Skybridge JSON body parser options", () => {
   });
 
   it("keeps the default 100kb limit when no options are passed", async () => {
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     app.express.post("/echo", (_req, res) => {
       res.json({ ok: true });
     });
@@ -209,10 +219,11 @@ describe("createApp", () => {
       next();
     };
 
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     app.use(mw);
 
     const httpServer = http.createServer();
@@ -234,10 +245,11 @@ describe("createApp", () => {
       next();
     };
 
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     app.use("/mcp", mw);
 
     const httpServer = http.createServer();
@@ -259,10 +271,11 @@ describe("createApp", () => {
       res.status(401).json({ error: "Unauthorized" });
     };
 
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     app.use("/mcp", reject);
 
     const httpServer = http.createServer();
@@ -290,10 +303,11 @@ describe("createApp", () => {
       next();
     };
 
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     app.use(mwA);
     app.use(mwB);
 
@@ -316,10 +330,11 @@ describe("createApp", () => {
       next();
     };
 
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     app.use("/api", apiMw);
 
     const httpServer = http.createServer();
@@ -342,10 +357,11 @@ describe("createApp", () => {
       res.json({ status: "ok" });
     });
 
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     app.use(router as RequestHandler);
 
     const httpServer = http.createServer();
@@ -368,10 +384,11 @@ describe("createApp", () => {
       res.json({ value: 42 });
     });
 
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     app.use("/api", router as RequestHandler);
 
     const httpServer = http.createServer();
@@ -392,10 +409,11 @@ describe("createApp", () => {
       throw new Error("boom");
     };
 
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     app.use("/explode", throwing);
 
     const httpServer = http.createServer();
@@ -416,10 +434,11 @@ describe("createApp", () => {
     const { createApp } = await import("./express.js");
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     // Force the express-level error path: make a /mcp middleware throw so the
     // error pipeline runs and lands in the default /mcp error handler.
     app.use("/mcp", () => {
@@ -454,10 +473,11 @@ describe("createApp", () => {
       res.status(503).json({ custom: true });
     };
 
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     app.use("/mcp", () => {
       throw new Error("boom");
     });
@@ -490,10 +510,11 @@ describe("createApp", () => {
       next(new Error("api error"));
     };
 
-    const app = new Skybridge(
-      { name: "t", version: "0.0.0" },
-      (server) => server,
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) => server,
+    });
     app.use("/mcp", () => {
       throw new Error("boom");
     });
@@ -525,14 +546,15 @@ describe("createApp", () => {
 
     // Slow tool: keeps the underlying transport bound long enough to overlap
     // with concurrent requests, exposing the shared-McpServer race.
-    const app = new Skybridge(
-      { name: "concurrent-test", version: "0.0.0" },
-      (server) =>
+    const app = new Skybridge({
+      name: "concurrent-test",
+      version: "0.0.0",
+      handler: (server) =>
         server.registerTool({ name: "slow", description: "slow" }, async () => {
           await new Promise((r) => setTimeout(r, 50));
           return { content: [{ type: "text" as const, text: "done" }] };
         }),
-    );
+    });
 
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -581,10 +603,11 @@ describe("createApp Vercel mode", () => {
     try {
       vi.resetModules();
       const { Skybridge: Reloaded } = await import("./app.js");
-      const app = new Reloaded(
-        { name: "t", version: "0.0.0" },
-        (server) => server,
-      );
+      const app = new Reloaded({
+        name: "t",
+        version: "0.0.0",
+        handler: (server) => server,
+      });
       const result = await app.run();
       expect(typeof result).toBe("function");
       expect(result).toBe(app.express);
@@ -625,10 +648,11 @@ describe("createApp tunnel routes", () => {
     process.env.__TUNNEL_CONTROL_PORT = String(controlPort);
     try {
       const { createApp } = await import("./express.js");
-      const app = new Skybridge(
-        { name: "t", version: "0.0.0" },
-        (server) => server,
-      );
+      const app = new Skybridge({
+        name: "t",
+        version: "0.0.0",
+        handler: (server) => server,
+      });
       const httpServer = http.createServer();
       const expressApp = await createApp({ app, httpServer });
       const { port, server } = await listen(expressApp);
@@ -656,10 +680,11 @@ describe("createApp tunnel routes", () => {
       vi.resetModules();
       const { createApp } = await import("./express.js");
       const { Skybridge: ReloadedSkybridge } = await import("./app.js");
-      const app = new ReloadedSkybridge(
-        { name: "t", version: "0.0.0" },
-        (server) => server,
-      );
+      const app = new ReloadedSkybridge({
+        name: "t",
+        version: "0.0.0",
+        handler: (server) => server,
+      });
       const httpServer = http.createServer();
       const expressApp = await createApp({ app, httpServer });
       const { port, server } = await listen(expressApp);
@@ -679,18 +704,21 @@ describe("createApp tunnel routes", () => {
 describe("createApp mount path", () => {
   it("serves /mcp with the mount path intact on the request URL", async () => {
     const { createApp } = await import("./express.js");
-    const app = new Skybridge({ name: "t", version: "0.0.0" }, (server) =>
-      server.registerTool(
-        {
-          name: "echo-url",
-          description: "Echoes the request URL.",
-          inputSchema: {},
-        },
-        (_args, extra) => ({
-          content: [{ type: "text", text: extra.http?.req?.url ?? "" }],
-        }),
-      ),
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) =>
+        server.registerTool(
+          {
+            name: "echo-url",
+            description: "Echoes the request URL.",
+            inputSchema: {},
+          },
+          (_args, extra) => ({
+            content: [{ type: "text", text: extra.http?.req?.url ?? "" }],
+          }),
+        ),
+    });
 
     const httpServer = http.createServer();
     const expressApp = await createApp({ app, httpServer });

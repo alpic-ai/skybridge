@@ -39,22 +39,25 @@ type TypedToolInfoReturn<TInput, TOutput, TResponseMetadata> = ToolState<
  * Set this up once in a dedicated file and export the typed hooks for use across your app.
  *
  * @typeParam AppType - The type of your Skybridge app (use `typeof app`). The
- *                      setup callback must return the chained server so the
- *                      tool types are carried on the app type.
+ *                      handler must return the chained server so the tool
+ *                      types are carried on the app type.
  *
  * @example
  * ```typescript
  * // src/server.ts
- * export const app = new Skybridge({ name: "my-app", version: "1.0" }, (server) =>
- *   server.registerTool({
- *     name: "search-trip",
- *     inputSchema: { destination: z.string() },
- *     outputSchema: { results: z.array(z.string()) },
- *     view: { component: "search-trip", description: "Search trips" },
- *   }, async ({ destination }) => {
- *     return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
- *   }),
- * );
+ * export const app = new Skybridge({
+ *   name: "my-app",
+ *   version: "1.0",
+ *   handler: (server) =>
+ *     server.registerTool({
+ *       name: "search-trip",
+ *       inputSchema: { destination: z.string() },
+ *       outputSchema: { results: z.array(z.string()) },
+ *       view: { component: "search-trip", description: "Search trips" },
+ *     }, async ({ destination }) => {
+ *       return { content: [{ type: "text", text: `Found trips to ${destination}` }] };
+ *     }),
+ * });
  *
  * export type AppType = typeof app;
  * ```

@@ -68,29 +68,27 @@ async function bootServer(
   { baseUrl = "https://app.example.test" }: { baseUrl?: string | null } = {},
 ) {
   const { createApp } = await import("../express.js");
-  const app = new Skybridge(
-    {
-      name: "auth-test",
-      version: "0.0.0",
-      capabilities: {},
-      oauth: {
-        ...(baseUrl === null ? {} : { baseUrl }),
-        oauthMetadata: {
-          issuer: ISSUER,
-          authorization_endpoint: `${ISSUER}/authorize`,
-          token_endpoint: `${ISSUER}/token`,
-          response_types_supported: ["code"],
-        },
-        verifier: createJwksVerifier({
-          issuer: ISSUER,
-          audience: AUDIENCE,
-          jwksUri,
-        }),
-        scopesSupported: ["openid", "email"],
-        requiredScopes: ["openid"],
+  const app = new Skybridge({
+    name: "auth-test",
+    version: "0.0.0",
+    capabilities: {},
+    oauth: {
+      ...(baseUrl === null ? {} : { baseUrl }),
+      oauthMetadata: {
+        issuer: ISSUER,
+        authorization_endpoint: `${ISSUER}/authorize`,
+        token_endpoint: `${ISSUER}/token`,
+        response_types_supported: ["code"],
       },
+      verifier: createJwksVerifier({
+        issuer: ISSUER,
+        audience: AUDIENCE,
+        jwksUri,
+      }),
+      scopesSupported: ["openid", "email"],
+      requiredScopes: ["openid"],
     },
-    (server) =>
+    handler: (server) =>
       server.registerTool(
         {
           name: "whoami",
@@ -106,7 +104,7 @@ async function bootServer(
           ],
         }),
       ),
-  );
+  });
 
   const httpServer = http.createServer();
   await createApp({ app, httpServer });
@@ -232,27 +230,25 @@ describe("baseUrl inferred from headers", () => {
 
 async function bootMixedServer(jwksUri: string) {
   const { createApp } = await import("../express.js");
-  const app = new Skybridge(
-    {
-      name: "mixed-auth-test",
-      version: "0.0.0",
-      capabilities: {},
-      oauth: {
-        baseUrl: "https://app.example.test",
-        oauthMetadata: {
-          issuer: ISSUER,
-          authorization_endpoint: `${ISSUER}/authorize`,
-          token_endpoint: `${ISSUER}/token`,
-          response_types_supported: ["code"],
-        },
-        verifier: createJwksVerifier({
-          issuer: ISSUER,
-          audience: AUDIENCE,
-          jwksUri,
-        }),
+  const app = new Skybridge({
+    name: "mixed-auth-test",
+    version: "0.0.0",
+    capabilities: {},
+    oauth: {
+      baseUrl: "https://app.example.test",
+      oauthMetadata: {
+        issuer: ISSUER,
+        authorization_endpoint: `${ISSUER}/authorize`,
+        token_endpoint: `${ISSUER}/token`,
+        response_types_supported: ["code"],
       },
+      verifier: createJwksVerifier({
+        issuer: ISSUER,
+        audience: AUDIENCE,
+        jwksUri,
+      }),
     },
-    (server) =>
+    handler: (server) =>
       server
         .registerTool(
           {
@@ -292,7 +288,7 @@ async function bootMixedServer(jwksUri: string) {
             ],
           }),
         ),
-  );
+  });
 
   const httpServer = http.createServer();
   await createApp({ app, httpServer });
@@ -491,27 +487,25 @@ describe("mixed-auth door", () => {
 
 async function bootScopedServer(jwksUri: string) {
   const { createApp } = await import("../express.js");
-  const app = new Skybridge(
-    {
-      name: "scoped-auth-test",
-      version: "0.0.0",
-      capabilities: {},
-      oauth: {
-        baseUrl: "https://app.example.test",
-        oauthMetadata: {
-          issuer: ISSUER,
-          authorization_endpoint: `${ISSUER}/authorize`,
-          token_endpoint: `${ISSUER}/token`,
-          response_types_supported: ["code"],
-        },
-        verifier: createJwksVerifier({
-          issuer: ISSUER,
-          audience: AUDIENCE,
-          jwksUri,
-        }),
+  const app = new Skybridge({
+    name: "scoped-auth-test",
+    version: "0.0.0",
+    capabilities: {},
+    oauth: {
+      baseUrl: "https://app.example.test",
+      oauthMetadata: {
+        issuer: ISSUER,
+        authorization_endpoint: `${ISSUER}/authorize`,
+        token_endpoint: `${ISSUER}/token`,
+        response_types_supported: ["code"],
       },
+      verifier: createJwksVerifier({
+        issuer: ISSUER,
+        audience: AUDIENCE,
+        jwksUri,
+      }),
     },
-    (server) =>
+    handler: (server) =>
       server.registerTool(
         {
           name: "checkout",
@@ -521,7 +515,7 @@ async function bootScopedServer(jwksUri: string) {
         },
         () => ({ content: [{ type: "text", text: "ok" }] }),
       ),
-  );
+  });
 
   const httpServer = http.createServer();
   await createApp({ app, httpServer });
@@ -635,24 +629,22 @@ describe("oauth config validation", () => {
     response_types_supported: ["code"],
   };
 
-  it("throws on a non-absolute baseUrl", () => {
-    expect(
-      () =>
-        new Skybridge(
-          {
-            name: "t",
-            version: "0",
-            oauth: {
-              baseUrl: "not-a-url",
-              oauthMetadata: validMetadata,
-              verifier: createJwksVerifier({
-                issuer: ISSUER,
-                audience: AUDIENCE,
-              }),
-            },
-          },
-          (server) => server,
-        ),
-    ).toThrow(/baseUrl must be a valid absolute URL/);
+  it("rejects a non-absolute baseUrl when the app is first used", async () => {
+    const app = new Skybridge({
+      name: "t",
+      version: "0",
+      oauth: {
+        baseUrl: "not-a-url",
+        oauthMetadata: validMetadata,
+        verifier: createJwksVerifier({
+          issuer: ISSUER,
+          audience: AUDIENCE,
+        }),
+      },
+      handler: (server) => server,
+    });
+    await expect(app.createServerInstance()).rejects.toThrow(
+      /baseUrl must be a valid absolute URL/,
+    );
   });
 });

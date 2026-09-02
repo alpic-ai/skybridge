@@ -34,9 +34,13 @@ declare module "./server.js" {
 // the underlying asset.
 
 function buildApp(register: (server: McpServer) => void) {
-  return new Skybridge({ name: "test", version: "1.0.0" }, (server) => {
-    register(server);
-    return server;
+  return new Skybridge({
+    name: "test",
+    version: "1.0.0",
+    handler: (server) => {
+      register(server);
+      return server;
+    },
   });
 }
 

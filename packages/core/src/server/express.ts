@@ -11,7 +11,10 @@ import express from "express";
 import type { Skybridge } from "./app.js";
 import type { JsonOptions } from "./server.js";
 
-type SkybridgeApp = Pick<Skybridge, "express" | "createServerInstance">;
+type SkybridgeApp = Pick<
+  Skybridge,
+  "express" | "createServerInstance" | "ready"
+>;
 
 /**
  * The `/mcp` fetch handler for a {@link Skybridge} app: a `Request` →
@@ -100,6 +103,7 @@ export async function createApp({
     handlers: express.ErrorRequestHandler[];
   }[];
 }): Promise<express.Express> {
+  await skybridgeApp.ready();
   const app = skybridgeApp.express;
 
   // Read `process.env.NODE_ENV` inline: wrangler/esbuild only substitute the literal expression,

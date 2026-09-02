@@ -812,9 +812,11 @@ describe("resources/list view _meta injection", () => {
   it("attaches CSP, domain, and connectDomains _meta to view resources at list time", async () => {
     setTestEnv({ NODE_ENV: "production" });
 
-    const app = new Skybridge(
-      { name: "test", version: "1.0.0", capabilities: {} },
-      (server) =>
+    const app = new Skybridge({
+      name: "test",
+      version: "1.0.0",
+      capabilities: {},
+      handler: (server) =>
         server.registerTool(
           {
             name: "start",
@@ -834,7 +836,7 @@ describe("resources/list view _meta injection", () => {
             structuredContent: {},
           }),
         ),
-    );
+    });
     const instance = await app.createServerInstance();
 
     const client = new Client({ name: "test-client", version: "1.0.0" });

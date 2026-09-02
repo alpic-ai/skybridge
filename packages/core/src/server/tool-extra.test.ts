@@ -25,15 +25,22 @@ describe("tool handler extra", () => {
   it("exposes the client hints the host sent on the request", async () => {
     const { createApp } = await import("./express.js");
     let seenLocale: unknown;
-    const app = new Skybridge({ name: "t", version: "0.0.0" }, (server) =>
-      server.registerTool(
-        { name: "hints", description: "Reads client hints.", inputSchema: {} },
-        (_args, extra) => {
-          seenLocale = extra.mcpReq._meta?.["openai/locale"];
-          return { content: [{ type: "text", text: "ok" }] };
-        },
-      ),
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) =>
+        server.registerTool(
+          {
+            name: "hints",
+            description: "Reads client hints.",
+            inputSchema: {},
+          },
+          (_args, extra) => {
+            seenLocale = extra.mcpReq._meta?.["openai/locale"];
+            return { content: [{ type: "text", text: "ok" }] };
+          },
+        ),
+    });
 
     const httpServer = http.createServer();
     const expressApp = await createApp({ app, httpServer });
@@ -61,12 +68,15 @@ describe("tool handler extra", () => {
 
 describe("stateless server instances", () => {
   it("carries the registered capabilities onto each per-request instance", async () => {
-    const app = new Skybridge({ name: "t", version: "0.0.0" }, (server) =>
-      server.registerTool(
-        { name: "a-tool", description: "d", inputSchema: {} },
-        () => ({ content: [{ type: "text", text: "ok" }] }),
-      ),
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) =>
+        server.registerTool(
+          { name: "a-tool", description: "d", inputSchema: {} },
+          () => ({ content: [{ type: "text", text: "ok" }] }),
+        ),
+    });
 
     const fresh = await app.createServerInstance();
 
@@ -75,20 +85,23 @@ describe("stateless server instances", () => {
 
   it("serves a 2026-era caller with that era's result shape", async () => {
     const { createApp } = await import("./express.js");
-    const app = new Skybridge({ name: "t", version: "0.0.0" }, (server) =>
-      server.registerTool(
-        {
-          name: "scalar",
-          description: "Returns a scalar structuredContent.",
-          inputSchema: {},
-          outputSchema: z.number(),
-        },
-        () => ({
-          structuredContent: 42,
-          content: [{ type: "text", text: "42" }],
-        }),
-      ),
-    );
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) =>
+        server.registerTool(
+          {
+            name: "scalar",
+            description: "Returns a scalar structuredContent.",
+            inputSchema: {},
+            outputSchema: z.number(),
+          },
+          () => ({
+            structuredContent: 42,
+            content: [{ type: "text", text: "42" }],
+          }),
+        ),
+    });
 
     const httpServer = http.createServer();
     const expressApp = await createApp({ app, httpServer });

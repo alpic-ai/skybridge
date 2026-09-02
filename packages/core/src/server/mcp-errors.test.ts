@@ -21,10 +21,11 @@ afterEach(() => {
 
 it("reports a failure inside the MCP leg instead of swallowing it", async () => {
   const { createApp } = await import("./express.js");
-  const app = new Skybridge(
-    { name: "t", version: "0.0.0" },
-    (server) => server,
-  );
+  const app = new Skybridge({
+    name: "t",
+    version: "0.0.0",
+    handler: (server) => server,
+  });
   vi.spyOn(app, "createServerInstance").mockImplementation(() => {
     throw new Error("boom");
   });

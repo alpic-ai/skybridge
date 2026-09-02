@@ -28,235 +28,243 @@ export function createMockMcpServer(): {
 }
 
 export function createTestApp() {
-  return new Skybridge({ name: "test-app", version: "1.0.0" }, (server) =>
-    server
-      .registerTool(
+  return new Skybridge({
+    name: "test-app",
+    version: "1.0.0",
+    handler: (server) =>
+      server
+        .registerTool(
+          {
+            name: "search-trip",
+            description: "Search for trips",
+            inputSchema: {
+              destination: z.string(),
+              departureDate: z.string().optional(),
+              maxPrice: z.number().optional(),
+            },
+            outputSchema: {
+              results: z.array(
+                z.object({
+                  id: z.string(),
+                  name: z.string(),
+                  price: z.number(),
+                }),
+              ),
+              totalCount: z.number(),
+            },
+            view: { component: "search-trip" as ViewName },
+          },
+          async ({ destination }) => {
+            return {
+              content: [
+                { type: "text", text: `Found trips to ${destination}` },
+              ],
+              structuredContent: {
+                results: [{ id: "1", name: "Trip", price: 1000 }],
+                totalCount: 1,
+              },
+            };
+          },
+        )
+        .registerTool(
+          {
+            name: "get-trip-details",
+            description: "Get trip details",
+            inputSchema: {
+              tripId: z.string(),
+            },
+            outputSchema: {
+              name: z.string(),
+              description: z.string(),
+              images: z.array(z.string()),
+            },
+            view: { component: "get-trip-details" as ViewName },
+          },
+          async ({ tripId }) => {
+            return {
+              content: [{ type: "text", text: `Details for ${tripId}` }],
+              structuredContent: {
+                name: "Trip",
+                description: "A great trip",
+                images: ["image1.jpg"],
+              },
+            };
+          },
+        )
+        .registerTool(
+          {
+            name: "no-input-view",
+            description: "View with no input",
+            inputSchema: {},
+            outputSchema: {},
+            view: { component: "no-input-view" as ViewName },
+          },
+          async () => {
+            return {
+              content: [{ type: "text", text: "No input needed" }],
+              structuredContent: {},
+            };
+          },
+        )
+        .registerTool(
+          {
+            name: "inferred-output-view",
+            description: "View with output inferred from callback",
+            inputSchema: {
+              query: z.string(),
+            },
+            view: { component: "inferred-output-view" as ViewName },
+          },
+          async ({ query }) => {
+            return {
+              content: [{ type: "text", text: `Query: ${query}` }],
+              structuredContent: {
+                inferredResults: [{ id: "inferred-1", score: 0.95 }],
+                inferredCount: 1,
+              },
+            };
+          },
+        )
+        .registerTool(
+          {
+            name: "calculate-price",
+            description: "Calculate trip price",
+            inputSchema: {
+              tripId: z.string(),
+              passengers: z.number(),
+            },
+            outputSchema: {
+              totalPrice: z.number(),
+              currency: z.string(),
+            },
+          },
+          async ({ tripId, passengers }) => {
+            return {
+              content: [{ type: "text", text: `Price for ${tripId}` }],
+              structuredContent: {
+                totalPrice: 1000 * passengers,
+                currency: "USD",
+              },
+            };
+          },
+        )
+        .registerTool(
+          {
+            name: "inferred-tool",
+            description: "Tool with output inferred from callback",
+            inputSchema: {
+              itemId: z.string(),
+            },
+          },
+          async ({ itemId }) => {
+            return {
+              content: [{ type: "text", text: `Item: ${itemId}` }],
+              structuredContent: {
+                itemDetails: { name: "Inferred Item", available: true },
+                fetchedAt: "2024-01-01",
+              },
+            };
+          },
+        )
+        .registerTool(
+          {
+            name: "view-with-metadata",
+            description: "View that returns response metadata",
+            inputSchema: {
+              resourceId: z.string(),
+            },
+            view: { component: "view-with-metadata" as ViewName },
+          },
+          async ({ resourceId }) => {
+            return {
+              content: [{ type: "text", text: `Resource: ${resourceId}` }],
+              structuredContent: {
+                data: { id: resourceId, loaded: true },
+              },
+              _meta: {
+                requestId: "req-123",
+                timestamp: 1704067200000,
+                cached: false,
+              },
+            };
+          },
+        )
+        .registerTool(
+          {
+            name: "tool-with-metadata",
+            description: "Tool that returns response metadata",
+            inputSchema: {
+              query: z.string(),
+            },
+          },
+          async ({ query }) => {
+            return {
+              content: [{ type: "text", text: `Query: ${query}` }],
+              structuredContent: {
+                results: [query],
+              },
+              _meta: {
+                executionTime: 150,
+                source: "cache",
+              },
+            };
+          },
+        )
+        .registerTool(
+          {
+            name: "view-with-mixed-returns",
+            description:
+              "View with mixed return paths (some with _meta, some without)",
+            inputSchema: {
+              shouldSucceed: z.boolean(),
+            },
+            view: { component: "view-with-mixed-returns" as ViewName },
+          },
+          async ({ shouldSucceed }) => {
+            if (!shouldSucceed) {
+              return {
+                content: [{ type: "text", text: "Error occurred" }],
+                structuredContent: { error: "Something went wrong" },
+              };
+            }
+            return {
+              content: [{ type: "text", text: "Success" }],
+              structuredContent: { data: "result" },
+              _meta: {
+                processedAt: 1704067200000,
+                region: "eu-west-1",
+              },
+            };
+          },
+        ),
+  });
+}
+
+export function createMinimalTestApp() {
+  return new Skybridge({
+    name: "test-app",
+    version: "1.0.0",
+    handler: (server) =>
+      server.registerTool(
         {
           name: "search-trip",
           description: "Search for trips",
           inputSchema: {
             destination: z.string(),
-            departureDate: z.string().optional(),
-            maxPrice: z.number().optional(),
           },
           outputSchema: {
-            results: z.array(
-              z.object({
-                id: z.string(),
-                name: z.string(),
-                price: z.number(),
-              }),
-            ),
-            totalCount: z.number(),
+            results: z.array(z.object({ id: z.string() })),
           },
           view: { component: "search-trip" as ViewName },
         },
         async ({ destination }) => {
           return {
             content: [{ type: "text", text: `Found trips to ${destination}` }],
-            structuredContent: {
-              results: [{ id: "1", name: "Trip", price: 1000 }],
-              totalCount: 1,
-            },
-          };
-        },
-      )
-      .registerTool(
-        {
-          name: "get-trip-details",
-          description: "Get trip details",
-          inputSchema: {
-            tripId: z.string(),
-          },
-          outputSchema: {
-            name: z.string(),
-            description: z.string(),
-            images: z.array(z.string()),
-          },
-          view: { component: "get-trip-details" as ViewName },
-        },
-        async ({ tripId }) => {
-          return {
-            content: [{ type: "text", text: `Details for ${tripId}` }],
-            structuredContent: {
-              name: "Trip",
-              description: "A great trip",
-              images: ["image1.jpg"],
-            },
-          };
-        },
-      )
-      .registerTool(
-        {
-          name: "no-input-view",
-          description: "View with no input",
-          inputSchema: {},
-          outputSchema: {},
-          view: { component: "no-input-view" as ViewName },
-        },
-        async () => {
-          return {
-            content: [{ type: "text", text: "No input needed" }],
-            structuredContent: {},
-          };
-        },
-      )
-      .registerTool(
-        {
-          name: "inferred-output-view",
-          description: "View with output inferred from callback",
-          inputSchema: {
-            query: z.string(),
-          },
-          view: { component: "inferred-output-view" as ViewName },
-        },
-        async ({ query }) => {
-          return {
-            content: [{ type: "text", text: `Query: ${query}` }],
-            structuredContent: {
-              inferredResults: [{ id: "inferred-1", score: 0.95 }],
-              inferredCount: 1,
-            },
-          };
-        },
-      )
-      .registerTool(
-        {
-          name: "calculate-price",
-          description: "Calculate trip price",
-          inputSchema: {
-            tripId: z.string(),
-            passengers: z.number(),
-          },
-          outputSchema: {
-            totalPrice: z.number(),
-            currency: z.string(),
-          },
-        },
-        async ({ tripId, passengers }) => {
-          return {
-            content: [{ type: "text", text: `Price for ${tripId}` }],
-            structuredContent: {
-              totalPrice: 1000 * passengers,
-              currency: "USD",
-            },
-          };
-        },
-      )
-      .registerTool(
-        {
-          name: "inferred-tool",
-          description: "Tool with output inferred from callback",
-          inputSchema: {
-            itemId: z.string(),
-          },
-        },
-        async ({ itemId }) => {
-          return {
-            content: [{ type: "text", text: `Item: ${itemId}` }],
-            structuredContent: {
-              itemDetails: { name: "Inferred Item", available: true },
-              fetchedAt: "2024-01-01",
-            },
-          };
-        },
-      )
-      .registerTool(
-        {
-          name: "view-with-metadata",
-          description: "View that returns response metadata",
-          inputSchema: {
-            resourceId: z.string(),
-          },
-          view: { component: "view-with-metadata" as ViewName },
-        },
-        async ({ resourceId }) => {
-          return {
-            content: [{ type: "text", text: `Resource: ${resourceId}` }],
-            structuredContent: {
-              data: { id: resourceId, loaded: true },
-            },
-            _meta: {
-              requestId: "req-123",
-              timestamp: 1704067200000,
-              cached: false,
-            },
-          };
-        },
-      )
-      .registerTool(
-        {
-          name: "tool-with-metadata",
-          description: "Tool that returns response metadata",
-          inputSchema: {
-            query: z.string(),
-          },
-        },
-        async ({ query }) => {
-          return {
-            content: [{ type: "text", text: `Query: ${query}` }],
-            structuredContent: {
-              results: [query],
-            },
-            _meta: {
-              executionTime: 150,
-              source: "cache",
-            },
-          };
-        },
-      )
-      .registerTool(
-        {
-          name: "view-with-mixed-returns",
-          description:
-            "View with mixed return paths (some with _meta, some without)",
-          inputSchema: {
-            shouldSucceed: z.boolean(),
-          },
-          view: { component: "view-with-mixed-returns" as ViewName },
-        },
-        async ({ shouldSucceed }) => {
-          if (!shouldSucceed) {
-            return {
-              content: [{ type: "text", text: "Error occurred" }],
-              structuredContent: { error: "Something went wrong" },
-            };
-          }
-          return {
-            content: [{ type: "text", text: "Success" }],
-            structuredContent: { data: "result" },
-            _meta: {
-              processedAt: 1704067200000,
-              region: "eu-west-1",
-            },
+            structuredContent: { results: [{ id: "1" }] },
           };
         },
       ),
-  );
-}
-
-export function createMinimalTestApp() {
-  return new Skybridge({ name: "test-app", version: "1.0.0" }, (server) =>
-    server.registerTool(
-      {
-        name: "search-trip",
-        description: "Search for trips",
-        inputSchema: {
-          destination: z.string(),
-        },
-        outputSchema: {
-          results: z.array(z.object({ id: z.string() })),
-        },
-        view: { component: "search-trip" as ViewName },
-      },
-      async ({ destination }) => {
-        return {
-          content: [{ type: "text", text: `Found trips to ${destination}` }],
-          structuredContent: { results: [{ id: "1" }] },
-        };
-      },
-    ),
-  );
+  });
 }
 
 interface InterfaceOutput {
@@ -276,9 +284,10 @@ interface InterfaceReturnType {
 }
 
 export function createInterfaceTestApp() {
-  return new Skybridge(
-    { name: "interface-test-app", version: "1.0.0" },
-    (server) =>
+  return new Skybridge({
+    name: "interface-test-app",
+    version: "1.0.0",
+    handler: (server) =>
       server.registerTool(
         {
           name: "interface-view" as const,
@@ -302,7 +311,7 @@ export function createInterfaceTestApp() {
           };
         },
       ),
-  );
+  });
 }
 
 export function createMockExtra(

@@ -7,9 +7,11 @@ import { start } from "./session-registry.js";
 const usage = { inputTokens: 1, outputTokens: 1, totalTokens: 2 };
 
 function buildApp(seen: string[]) {
-  return new Skybridge(
-    { name: "in-process-eval", version: "0.0.0", capabilities: {} },
-    (server) =>
+  return new Skybridge({
+    name: "in-process-eval",
+    version: "0.0.0",
+    capabilities: {},
+    handler: (server) =>
       server.registerTool(
         {
           name: "search-products",
@@ -21,31 +23,29 @@ function buildApp(seen: string[]) {
           return { content: `1 pair of ${category}` };
         },
       ),
-  );
+  });
 }
 
 function buildProtectedApp(seen: string[]) {
-  return new Skybridge(
-    {
-      name: "in-process-auth-eval",
-      version: "0.0.0",
-      capabilities: {},
-      oauth: {
-        baseUrl: "http://in-process.skybridge.test",
-        oauthMetadata: {
-          issuer: "https://issuer.skybridge.test",
-          authorization_endpoint: "https://issuer.skybridge.test/authorize",
-          token_endpoint: "https://issuer.skybridge.test/token",
-          response_types_supported: ["code"],
-        },
-        verifier: {
-          verifyAccessToken: async () => {
-            throw new Error("in-process evals never verify a token");
-          },
+  return new Skybridge({
+    name: "in-process-auth-eval",
+    version: "0.0.0",
+    capabilities: {},
+    oauth: {
+      baseUrl: "http://in-process.skybridge.test",
+      oauthMetadata: {
+        issuer: "https://issuer.skybridge.test",
+        authorization_endpoint: "https://issuer.skybridge.test/authorize",
+        token_endpoint: "https://issuer.skybridge.test/token",
+        response_types_supported: ["code"],
+      },
+      verifier: {
+        verifyAccessToken: async () => {
+          throw new Error("in-process evals never verify a token");
         },
       },
     },
-    (server) =>
+    handler: (server) =>
       server.registerTool(
         {
           name: "create-checkout",
@@ -58,7 +58,7 @@ function buildProtectedApp(seen: string[]) {
           return { content: `checkout for ${productId}` };
         },
       ),
-  );
+  });
 }
 
 function mockModel(call: {
