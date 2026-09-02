@@ -6,27 +6,16 @@ import type {
   McpUiToolMeta,
 } from "@modelcontextprotocol/ext-apps";
 import {
-  type CacheHint,
   type ContentBlock,
-  type Icon,
   type Implementation,
   McpServer as McpServerBase,
-  type PromptCallback,
-  type ReadResourceCallback,
-  type ReadResourceTemplateCallback,
-  type RegisteredPrompt,
-  type RegisteredResource,
-  type RegisteredResourceTemplate,
   type RequestMeta,
-  type ResourceMetadata,
-  type ResourceTemplate,
   type ServerOptions,
   type ServerResult,
   type StandardSchemaV1,
   type StandardSchemaWithJSON,
   type ToolAnnotations,
 } from "@modelcontextprotocol/server";
-import { mergeWith, union } from "es-toolkit";
 import type express from "express";
 import { warnOnLargeToolOutput } from "../context-warnings.js";
 import {
@@ -54,21 +43,12 @@ import {
   discoverSkills,
   registerSkills,
   SKILLS_EXTENSION_KEY,
-  type SkillRegistrar,
   type SkillsManifest,
 } from "./skills.js";
 import { templateHelper } from "./templateHelper.js";
 
-const mergeWithUnion = <T extends object, S extends object>(
-  target: T,
-  source: S,
-): T & S => {
-  return mergeWith(target, source, (targetVal, sourceVal) => {
-    if (Array.isArray(targetVal) && Array.isArray(sourceVal)) {
-      return union(targetVal, sourceVal);
-    }
-  });
-};
+const unionOf = (base: string[], extra: string[] | undefined): string[] =>
+  extra ? [...new Set([...base, ...extra])] : base;
 
 /**
  * Type marker for a registered tool — carries its input, output, and response
@@ -474,10 +454,7 @@ export function normalizeContent(
 // unified 2-arg signature can replace the SDK's 3-arg one without an
 // incompatible override.  The runtime prototype chain is unaffected.
 interface McpServerBaseOmitted
-  extends Omit<
-    McpServerBase,
-    "registerTool" | "registerResource" | "registerPrompt" | "connect"
-  > {}
+  extends Omit<McpServerBase, "registerTool" | "connect"> {}
 const McpServerBaseOmitted = McpServerBase as unknown as new (
   ...args: ConstructorParameters<typeof McpServerBase>
 ) => McpServerBaseOmitted;
@@ -630,65 +607,6 @@ export class McpServer<
     return this;
   }
 
-  /**
-   * Register a resource. Signature owned by Skybridge (not inherited) so a
-   * typed wrapper can land in a minor without a type-level break.
-   */
-  registerResource(
-    name: string,
-    uri: string,
-    config: ResourceMetadata & { cacheHint?: CacheHint },
-    readCallback: ReadResourceCallback,
-  ): RegisteredResource;
-  registerResource(
-    name: string,
-    template: ResourceTemplate,
-    config: ResourceMetadata & { cacheHint?: CacheHint },
-    readCallback: ReadResourceTemplateCallback,
-  ): RegisteredResourceTemplate;
-  registerResource(...args: unknown[]): unknown {
-    return this.applyInherited("registerResource", args);
-  }
-
-  /**
-   * Register a prompt. Signature owned by Skybridge (not inherited) so a
-   * typed wrapper can land in a minor without a type-level break.
-   */
-  registerPrompt<Args extends StandardSchemaWithJSON>(
-    name: string,
-    config: {
-      title?: string;
-      description?: string;
-      argsSchema?: Args;
-      icons?: Icon[];
-      _meta?: Record<string, unknown>;
-    },
-    cb: PromptCallback<Args>,
-  ): RegisteredPrompt {
-    return this.applyInherited("registerPrompt", [
-      name,
-      config,
-      cb,
-    ]) as RegisteredPrompt;
-  }
-
-  private applyInherited(
-    method: "registerResource" | "registerPrompt",
-    args: unknown[],
-  ): unknown {
-    const base = McpServerBase.prototype[method] as (
-      ...a: unknown[]
-    ) => unknown;
-    return base.apply(this, args);
-  }
-
-  private skillRegistrar(): SkillRegistrar {
-    const registerResource = (
-      this as unknown as { registerResource: (...a: unknown[]) => unknown }
-    ).registerResource.bind(this) as SkillRegistrar["registerResource"];
-    return { registerResource, server: this.server };
-  }
-
   private setupSkills(enabled: boolean): void {
     if (!enabled) {
       return;
@@ -702,7 +620,7 @@ export class McpServer<
       );
     }
 
-    registerSkills(this.skillRegistrar(), discoveredSkills);
+    registerSkills(this, discoveredSkills);
   }
 
   /** Register MCP protocol-level middleware (catch-all). */
@@ -957,44 +875,26 @@ export class McpServer<
         { resourceDomains, connectDomains, domain, baseUriDomains },
         overrides,
       ) => {
-        const defaults: McpAppsResourceMeta = {
-          ui: {
-            csp: {
-              resourceDomains,
-              connectDomains,
-              baseUriDomains,
-            },
-            domain,
-          },
-        };
-
-        const fromView: McpAppsResourceMeta = {
+        const ui: McpAppsResourceMeta = {
           ui: {
             ...(view.description && { description: view.description }),
             ...(view.prefersBorder !== undefined && {
               prefersBorder: view.prefersBorder,
             }),
-            ...(view.domain && { domain: view.domain }),
+            domain: overrides.domain ?? view.domain ?? domain,
             csp: {
-              ...(view.csp?.resourceDomains && {
-                resourceDomains: view.csp.resourceDomains,
-              }),
-              ...(view.csp?.connectDomains && {
-                connectDomains: view.csp.connectDomains,
-              }),
+              resourceDomains: unionOf(
+                resourceDomains,
+                view.csp?.resourceDomains,
+              ),
+              connectDomains: unionOf(connectDomains, view.csp?.connectDomains),
+              baseUriDomains: unionOf(baseUriDomains, view.csp?.baseUriDomains),
               ...(view.csp?.frameDomains && {
                 frameDomains: view.csp.frameDomains,
-              }),
-              ...(view.csp?.baseUriDomains && {
-                baseUriDomains: view.csp.baseUriDomains,
               }),
             },
           },
         };
-
-        const ui = mergeWithUnion(mergeWithUnion(defaults, fromView), {
-          ui: overrides,
-        });
 
         const base: ResourceMeta = {
           ...ui,

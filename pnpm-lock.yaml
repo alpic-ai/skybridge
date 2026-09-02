@@ -1624,9 +1624,6 @@ importers:
       dequal:
         specifier: ^2.0.3
         version: 2.0.3
-      es-toolkit:
-        specifier: ^1.49.0
-        version: 1.49.0
       esbuild:
         specifier: ^0.28.1
         version: 0.28.1
