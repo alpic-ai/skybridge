@@ -5,6 +5,7 @@ import type { OAuthConfig } from "./auth/index.js";
 import { customProvider } from "./auth/providers/custom.js";
 import { workosProvider } from "./auth/providers/workos.js";
 import type { TokenVerifier } from "./auth.js";
+import type { ToolNames } from "./inferUtilityTypes.js";
 
 const workosOAuth = await workosProvider({ domain: "d", audience: "a" });
 const customOAuth = await workosProvider<{ tenant: string }>({
@@ -112,4 +113,46 @@ test("a provider override adds claims without dropping the provider's", () => {
         return next();
       }),
   );
+});
+
+test("bag oauth claims reach tool handlers, promise form included", () => {
+  new Skybridge({
+    name: "t",
+    version: "0",
+    oauth: workosProvider({ domain: "d", audience: "a" }),
+    handler: (server) =>
+      server.registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
+        expectTypeOf(extra.http?.authInfo?.extra?.org_id).toEqualTypeOf<
+          string | undefined
+        >();
+        // @ts-expect-error not a WorkOS claim
+        extra.http?.authInfo?.extra?.nope;
+        return { content: "a" };
+      }),
+  });
+});
+
+test("the setup context flows into oauth and handler, and the app carries the registry", () => {
+  const app = new Skybridge({
+    name: "t",
+    version: "0",
+    setup: async () => ({ apiKey: "k" }),
+    oauth: (context) => {
+      expectTypeOf(context).toEqualTypeOf<{ apiKey: string }>();
+      return workosOAuth;
+    },
+    handler: (server, context) => {
+      expectTypeOf(context).toEqualTypeOf<{ apiKey: string }>();
+      return server.registerTool(
+        { name: "a", inputSchema: {} },
+        (_args, extra) => {
+          expectTypeOf(extra.http?.authInfo?.extra?.org_id).toEqualTypeOf<
+            string | undefined
+          >();
+          return { content: "a" };
+        },
+      );
+    },
+  });
+  expectTypeOf<ToolNames<typeof app>>().toEqualTypeOf<"a">();
 });

@@ -8,9 +8,11 @@ function requireEnv(name: string): string {
   return value;
 }
 
-export const env = {
-  NODE_ENV:
-    (process.env.NODE_ENV as "development" | "production") || "development",
-  // MCP Server Discovery URL from the Descope console's Connection Information.
-  DESCOPE_MCP_SERVER_URL: requireEnv("DESCOPE_MCP_SERVER_URL"),
-};
+export function loadEnv() {
+  return {
+    NODE_ENV:
+      (process.env.NODE_ENV as "development" | "production") || "development",
+    // MCP Server Discovery URL from the Descope console's Connection Information.
+    DESCOPE_MCP_SERVER_URL: requireEnv("DESCOPE_MCP_SERVER_URL"),
+  };
+}

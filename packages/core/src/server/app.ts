@@ -6,6 +6,7 @@ import type {
   ServerOptions,
 } from "@modelcontextprotocol/server";
 import type { ErrorRequestHandler, Express, RequestHandler } from "express";
+import type { OAuthConfig } from "./auth/index.js";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
 import type { ExtraClaims } from "./auth.js";
 import { buildMcpHandler, createApp, createBaseApp } from "./express.js";
@@ -36,11 +37,11 @@ export type SkybridgeConfig<TAuthExtra extends ExtraClaims = ExtraClaims> =
   Implementation & ServerOptions & SkybridgeServerOptions<TAuthExtra>;
 
 /**
- * The bare {@link McpServer} a {@link SkybridgeFactory} receives: no tools
- * registered yet. Use it to annotate a factory extracted into its own
+ * The bare {@link McpServer} a {@link SkybridgeHandler} receives: no tools
+ * registered yet. Use it to annotate a handler extracted into its own
  * declaration — `(server: SkybridgeServer) => server.registerTool(…)` — and
  * pass the claims your OAuth verifier produces to type
- * `extra.http.authInfo.extra` in handlers. Leave the factory's return type
+ * `extra.http.authInfo.extra` in handlers. Leave the handler's return type
  * inferred: the returned chain is what carries the tool registry into
  * `typeof app`.
  */
@@ -76,28 +77,81 @@ export type SkybridgeFactoryLoader<
 > = () => Promise<SkybridgeFactory<TTools, TAuthExtra>>;
 
 /**
+ * The `handler` field of {@link SkybridgeAppConfig}: builds the app's MCP
+ * surface, with the config `setup` produced as its second argument. Same
+ * contract as {@link SkybridgeFactory} otherwise — it runs again for every
+ * incoming request, must stay synchronous, and must **return** the chained
+ * server so `typeof app` carries the registered tool types.
+ */
+export type SkybridgeHandler<
+  TTools extends Record<string, ToolDef>,
+  TContext,
+  TAuthExtra extends ExtraClaims,
+> = (
+  server: McpServer<Record<never, ToolDef>, TAuthExtra>,
+  context: TContext,
+) => McpServer<TTools, TAuthExtra>;
+
+/**
+ * What the `oauth` field accepts: a resolved {@link OAuthConfig}, a promise of
+ * one (the branded providers are async), or a function of the `setup` result.
+ * A function or promise is resolved once — at {@link Skybridge.run} or on the
+ * first request, never at module import — so prefer a function when building
+ * the config has side effects (network discovery, secrets).
+ */
+export type SkybridgeOAuthInput<TContext, TExtra extends ExtraClaims> =
+  | OAuthConfig<TExtra>
+  | Promise<OAuthConfig<TExtra>>
+  | ((context: TContext) => OAuthConfig<TExtra> | Promise<OAuthConfig<TExtra>>);
+
+/**
+ * The all-in-one configuration for {@link Skybridge}: everything in
+ * {@link SkybridgeConfig} plus the app's behavior.
+ *
+ * - `setup` loads whatever the app needs up front (remote config, secrets,
+ *   datasets, …). It runs **once** — at {@link Skybridge.run} or on the first
+ *   request, never at module import — and its awaited return value is passed
+ *   to an `oauth` function and to `handler` as the second argument.
+ * - `oauth` configures resource-server OAuth: it mounts the well-known
+ *   metadata routes and bearer auth on `/mcp`, and its verifier's claims type
+ *   `extra.http.authInfo.extra` in tool handlers.
+ * - `handler` registers the MCP surface and runs for **every incoming
+ *   request** on a fresh {@link McpServer}, so keep it to registration and
+ *   **return** the chained server — its return type is what carries the tool
+ *   registry into `typeof app`.
+ */
+export type SkybridgeAppConfig<
+  TTools extends Record<string, ToolDef>,
+  TContext,
+  TAuthExtra extends ExtraClaims,
+> = Omit<SkybridgeConfig<TAuthExtra>, "oauth"> & {
+  setup?: () => TContext;
+  oauth?: SkybridgeOAuthInput<Awaited<TContext>, TAuthExtra>;
+  handler: SkybridgeHandler<TTools, Awaited<TContext>, TAuthExtra>;
+};
+
+/**
  * A Skybridge app: the HTTP surface (Express, OAuth metadata, the `/mcp`
- * route) plus a factory that builds the MCP server for each request.
+ * route) plus a handler that builds the MCP server for each request.
  *
- * The factory runs for every request, so tools, resources, prompts and views
+ * The handler runs for every request, so tools, resources, prompts and views
  * are always registered on the instance that serves the request. Anything in
- * the factory body other than registration therefore runs per request too.
- * It also runs once up front — at construction, or as soon as an async
- * loader resolves — which surfaces registration errors at boot and gives the
- * OAuth layer the set of per-tool security schemes.
+ * the handler body other than registration therefore runs per request too.
+ * Anything asynchronous the app needs (remote config, secrets, …) goes in
+ * `setup`, which runs once and feeds the handler's second argument.
  *
- * Anything asynchronous the factory needs (remote config, secrets, …) goes in
- * a {@link SkybridgeFactoryLoader} passed in its place:
- * `new Skybridge(config, async () => { const cfg = await load(); return (server) => …; })`.
- *
- * @typeParam TTools - Accumulated tool registry, inferred from the server the
- * factory returns. You almost never set this manually.
+ * All type parameters are inferred from the config: the context from `setup`,
+ * the auth claims from `oauth`, and the tool registry from the server the
+ * handler returns. You almost never set them manually.
  *
  * @example
  * ```ts
- * export const app = new Skybridge(
- *   { name: "my-app", version: "1.0.0", capabilities: {} },
- *   (server) =>
+ * export const app = new Skybridge({
+ *   name: "my-app",
+ *   version: "1.0.0",
+ *   setup: async () => loadConfig(),
+ *   oauth: (config) => descopeProvider({ url: config.mcpServerUrl }),
+ *   handler: (server, config) =>
  *     server.registerTool(
  *       {
  *         name: "search",
@@ -106,7 +160,7 @@ export type SkybridgeFactoryLoader<
  *       },
  *       async ({ query }) => ({ content: `Results for ${query}` }),
  *     ),
- * );
+ * });
  *
  * export type AppType = typeof app;
  * ```
@@ -115,6 +169,7 @@ export type SkybridgeFactoryLoader<
  */
 export class Skybridge<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
+  TContext = undefined,
   TAuthExtra extends ExtraClaims = ExtraClaims,
 > {
   declare readonly $types: McpServerTypes<TTools>;
@@ -123,6 +178,14 @@ export class Skybridge<
   private readonly skybridgeOptions: SkybridgeServerOptions<TAuthExtra>;
   private factory?: SkybridgeFactory<TTools, TAuthExtra>;
   private readonly factoryLoader?: SkybridgeFactoryLoader<TTools, TAuthExtra>;
+  private readonly contextLoader?: () => TContext;
+  private context?: Awaited<TContext>;
+  private readonly oauthInput?:
+    | OAuthConfig<TAuthExtra>
+    | Promise<OAuthConfig<TAuthExtra>>
+    | ((
+        context: unknown,
+      ) => OAuthConfig<TAuthExtra> | Promise<OAuthConfig<TAuthExtra>>);
   private readonly expressApp: Express;
   private readonly errorMiddleware: ErrorMiddlewareConfig[] = [];
   private readonly monitoringEntry: McpMiddlewareEntry | null =
@@ -131,9 +194,23 @@ export class Skybridge<
   private ready?: Promise<void>;
   private slowFactoryWarned = false;
 
+  constructor(config: SkybridgeAppConfig<TTools, TContext, TAuthExtra>);
+  /**
+   * Construct with a {@link SkybridgeFactory} — or a
+   * {@link SkybridgeFactoryLoader} when the factory needs async setup —
+   * passed separately from the config.
+   */
   constructor(
     config: SkybridgeConfig<TAuthExtra>,
     factory:
+      | SkybridgeFactory<TTools, TAuthExtra>
+      | SkybridgeFactoryLoader<TTools, TAuthExtra>,
+  );
+  constructor(
+    config:
+      | SkybridgeAppConfig<TTools, TContext, TAuthExtra>
+      | SkybridgeConfig<TAuthExtra>,
+    factory?:
       | SkybridgeFactory<TTools, TAuthExtra>
       | SkybridgeFactoryLoader<TTools, TAuthExtra>,
   ) {
@@ -147,32 +224,46 @@ export class Skybridge<
       json,
       oauth,
       skills,
+      setup,
+      handler,
       ...serverOptions
-    } = config;
+    } = config as SkybridgeAppConfig<TTools, TContext, TAuthExtra>;
 
     this.serverInfo = { name, title, version, description, icons, websiteUrl };
     this.serverOptions = serverOptions;
-    this.skybridgeOptions = { json, oauth, skills };
+    this.skybridgeOptions = { json, skills };
+    this.oauthInput = oauth as typeof this.oauthInput;
     this.expressApp = createBaseApp(json);
 
-    if (factory.length === 0) {
-      this.factoryLoader = factory as SkybridgeFactoryLoader<
-        TTools,
-        TAuthExtra
-      >;
+    if (factory) {
+      if (factory.length === 0) {
+        this.factoryLoader = factory as SkybridgeFactoryLoader<
+          TTools,
+          TAuthExtra
+        >;
+        return;
+      }
+      this.factory = factory as SkybridgeFactory<TTools, TAuthExtra>;
+    } else if (handler) {
+      this.factory = (server) =>
+        handler(server, this.context as Awaited<TContext>);
+      this.contextLoader = setup;
+    }
+
+    const oauthNeedsResolution =
+      typeof oauth === "function" ||
+      typeof (oauth as { then?: unknown } | undefined)?.then === "function";
+    if (!this.factory || this.contextLoader || oauthNeedsResolution) {
       return;
     }
-    this.factory = factory as SkybridgeFactory<TTools, TAuthExtra>;
 
-    if (typeof oauth === "function") {
-      return;
-    }
-
+    const resolvedOauth = oauth as OAuthConfig<TAuthExtra> | undefined;
+    this.skybridgeOptions.oauth = resolvedOauth;
     const sample = this.buildServer();
-    if (oauth) {
+    if (resolvedOauth) {
       this.resolveResourceMetadataUrl = setupOAuth(
         this.expressApp,
-        oauth,
+        resolvedOauth,
         sample.securitySchemesByTool,
       );
     }
@@ -180,17 +271,25 @@ export class Skybridge<
   }
 
   /**
-   * Resolve the factory loader and the OAuth config thunk, then wire OAuth
-   * onto the Express app. Runs once; every entry point that needs a built
-   * server awaits it. Immediate no-op when both were passed synchronously.
+   * Resolve the factory loader, the `setup` context, and the `oauth` input,
+   * then wire OAuth onto the Express app. Runs once; every entry point that
+   * needs a built server awaits it. Immediate no-op when everything was
+   * resolvable synchronously at construction.
    */
   private ensureReady(): Promise<void> {
     this.ready ??= (async () => {
       if (this.factoryLoader) {
         this.factory = await this.factoryLoader();
       }
-      const { oauth } = this.skybridgeOptions;
-      const resolvedOauth = typeof oauth === "function" ? await oauth() : oauth;
+      if (this.contextLoader) {
+        this.context = await this.contextLoader();
+      }
+      const source = this.oauthInput;
+      const resolvedOauth =
+        typeof source === "function"
+          ? await source(this.context)
+          : await source;
+      this.skybridgeOptions.oauth = resolvedOauth;
       const sample = this.buildServer();
       if (resolvedOauth) {
         this.resolveResourceMetadataUrl = setupOAuth(
@@ -212,7 +311,7 @@ export class Skybridge<
    * `app.express.get("/health", ...)`.
    *
    * `express.json()` is pre-applied — tune it via the `json` config field,
-   * e.g. `new Skybridge({ name, version, json: { limit: "10mb" } }, setup)`.
+   * e.g. `new Skybridge({ name, version, json: { limit: "10mb" }, handler })`.
    * Register your handlers before `run()`; after `run()`, dev-mode middleware,
    * the `/mcp` route, and the default error handler are appended in that order.
    *
@@ -225,13 +324,14 @@ export class Skybridge<
 
   /**
    * Build a fresh server for one stateless HTTP request, as
-   * `createMcpHandler`'s factory contract requires: the factory runs again so
+   * `createMcpHandler`'s factory contract requires: the handler runs again so
    * the SDK's handler closures belong to the instance whose protocol era it
    * stamps. Sharing one instance's handler maps instead would bind them to an
    * instance that is never marked, pinning every request to the 2025 codec and
    * letting concurrent callers overwrite each other's negotiated version.
    *
-   * Awaits the async factory loader and the lazy OAuth config on first use.
+   * Awaits the `setup` context, the async factory loader, and the `oauth`
+   * input on first use.
    */
   async createServerInstance(): Promise<SdkServer> {
     await this.ensureReady();
@@ -390,7 +490,7 @@ export class Skybridge<
   private buildServer(): McpServer<TTools, TAuthExtra> {
     if (!this.factory) {
       throw new Error(
-        "Skybridge factory not loaded yet: this app was constructed with an async factory loader. Await run(), connect(), or createServerInstance().",
+        "No handler registered on this Skybridge app: pass `handler` in the config (or a factory as the second constructor argument), then await run(), connect(), or createServerInstance().",
       );
     }
     const server = new McpServer<Record<never, ToolDef>, TAuthExtra>(
@@ -406,13 +506,13 @@ export class Skybridge<
     const elapsed = performance.now() - startedAt;
     if (typeof (built as { then?: unknown }).then === "function") {
       throw new Error(
-        "The Skybridge factory must be synchronous — it runs on every request. To load config or secrets asynchronously, pass a loader instead: new Skybridge(config, async () => factory).",
+        "The Skybridge handler must be synchronous — it runs on every request. Load config or secrets in `setup` instead and read them from the handler's second argument.",
       );
     }
     if (elapsed > SLOW_FACTORY_THRESHOLD_MS && !this.slowFactoryWarned) {
       this.slowFactoryWarned = true;
       console.warn(
-        `The Skybridge factory took ${Math.round(elapsed)}ms — it runs on every request, so this cost is paid per request. Hoist expensive work to module scope, or move awaited setup into an async loader: new Skybridge(config, async () => factory).`,
+        `The Skybridge handler took ${Math.round(elapsed)}ms — it runs on every request, so this cost is paid per request. Hoist expensive work to module scope or into \`setup\`, whose result is passed to the handler.`,
       );
     }
     return built;

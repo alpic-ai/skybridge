@@ -1,8 +1,8 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type SkybridgeServer, descopeProvider, Skybridge } from "skybridge/server";
+import { descopeProvider, Skybridge } from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
-import { env } from "./env.js";
+import { loadEnv } from "./env.js";
 
 /**
  * Auth Example - Full OAuth Authentication with Descope
@@ -18,85 +18,81 @@ import { env } from "./env.js";
  * `aud` to [DCR client id, project id], not the server URL.
  */
 
-export const serverFactory = (
-  server: SkybridgeServer<{ email?: string; subject?: string }>,
-) =>
-  server
-    .registerTool(
-      {
-        name: "search-coffee-paris",
-        description:
-          "Search for coffee shops in Paris. Shows personalized results with your favorites highlighted and sorted first. Requires authentication.",
-        inputSchema: {
-          query: z
-            .string()
-            .optional()
-            .describe(
-              "Search query (name or specialty, e.g., 'latte', 'espresso')",
-            ),
-          minRating: z
-            .number()
-            .min(1)
-            .max(5)
-            .optional()
-            .describe("Minimum rating (1-5)"),
-        },
-        annotations: {
-          readOnlyHint: true,
-          openWorldHint: true,
-          destructiveHint: false,
-        },
-        view: {
-          component: "search-coffee-paris",
-          description: "Search for coffee shops in Paris",
-          csp: {
-            resourceDomains: ["https://images.unsplash.com"],
-          },
-        },
-        _meta: {
-          "openai/widgetAccessible": true,
-        },
-      },
-      ({ query, minRating }, extra) => {
-        const email = extra.http?.authInfo?.extra?.email;
-        const subject = extra.http?.authInfo?.extra?.subject;
-
-        const results = searchCoffeeShops({
-          query,
-          minRating,
-          userId: subject ?? extra.http?.authInfo?.clientId ?? "anonymous",
-        });
-
-        const displayName = email?.split("@")[0] ?? subject ?? "User";
-
-        return {
-          structuredContent: {
-            shops: results.shops,
-            totalCount: results.totalCount,
-            userName: displayName,
-          },
-          content: [
-            {
-              type: "text",
-              text: `Found ${results.totalCount} coffee shops in Paris for ${displayName}`,
-            },
-          ],
-          isError: false,
-        };
-      },
-    )
-    .mcpMiddleware(intentMiddleware());
-
-export const app = new Skybridge(
-  {
-    name: "auth-coffee",
-    version: "0.0.1",
-    capabilities: {},
-    oauth: await descopeProvider({
+export const app = new Skybridge({
+  name: "auth-coffee",
+  version: "0.0.1",
+  capabilities: {},
+  setup: () => loadEnv(),
+  oauth: (env) =>
+    descopeProvider({
       url: env.DESCOPE_MCP_SERVER_URL,
     }),
-  },
-  serverFactory,
-);
+  handler: (server) =>
+    server
+      .registerTool(
+        {
+          name: "search-coffee-paris",
+          description:
+            "Search for coffee shops in Paris. Shows personalized results with your favorites highlighted and sorted first. Requires authentication.",
+          inputSchema: {
+            query: z
+              .string()
+              .optional()
+              .describe(
+                "Search query (name or specialty, e.g., 'latte', 'espresso')",
+              ),
+            minRating: z
+              .number()
+              .min(1)
+              .max(5)
+              .optional()
+              .describe("Minimum rating (1-5)"),
+          },
+          annotations: {
+            readOnlyHint: true,
+            openWorldHint: true,
+            destructiveHint: false,
+          },
+          view: {
+            component: "search-coffee-paris",
+            description: "Search for coffee shops in Paris",
+            csp: {
+              resourceDomains: ["https://images.unsplash.com"],
+            },
+          },
+          _meta: {
+            "openai/widgetAccessible": true,
+          },
+        },
+        ({ query, minRating }, extra) => {
+          const email = extra.http?.authInfo?.extra?.email;
+          const subject = extra.http?.authInfo?.extra?.subject;
+
+          const results = searchCoffeeShops({
+            query,
+            minRating,
+            userId: subject ?? extra.http?.authInfo?.clientId ?? "anonymous",
+          });
+
+          const displayName = email?.split("@")[0] ?? subject ?? "User";
+
+          return {
+            structuredContent: {
+              shops: results.shops,
+              totalCount: results.totalCount,
+              userName: displayName,
+            },
+            content: [
+              {
+                type: "text",
+                text: `Found ${results.totalCount} coffee shops in Paris for ${displayName}`,
+              },
+            ],
+            isError: false,
+          };
+        },
+      )
+      .mcpMiddleware(intentMiddleware()),
+});
 
 export type AppType = typeof app;

@@ -1,7 +1,10 @@
 export type {
+  SkybridgeAppConfig,
   SkybridgeConfig,
   SkybridgeFactory,
   SkybridgeFactoryLoader,
+  SkybridgeHandler,
+  SkybridgeOAuthInput,
   SkybridgeServer,
 } from "./app.js";
 export { Skybridge } from "./app.js";

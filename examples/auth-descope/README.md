@@ -99,6 +99,15 @@ You can test your App locally by using our DevTools UI on `http://localhost:3000
 
 To test your app with other MCP Clients like ChatGPT, Claude or VSCode, see [Testing Your App](https://docs.skybridge.tech/quickstart/test-your-app).
 
+### Evals
+
+The `evals/` folder contains model-in-the-loop scenarios that run the app in-process and assert on the tool calls a real model makes. They need your `.env` (the OAuth provider is resolved for real) plus an `ANTHROPIC_API_KEY` in the environment.
+
+```bash
+pnpm evals        # run the scenarios
+pnpm evals:types  # typecheck them
+```
+
 ## Deploy to Production
 
 Skybridge is infrastructure vendor agnostic, and your app can be deployed on any cloud platform supporting MCP.

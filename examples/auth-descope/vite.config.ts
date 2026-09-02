@@ -11,7 +11,7 @@ export default defineConfig({
       logLevels: ["error"],
     },
   },
-  plugins: [skybridge(), react()],
+  plugins: [skybridge({ evals: {} }), react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
