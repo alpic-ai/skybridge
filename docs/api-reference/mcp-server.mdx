@@ -1,69 +1,45 @@
 ---
 title: McpServer
-description: "Build and run a Skybridge MCP server"
+description: "The server your handler registers tools on"
 ---
 
-`McpServer` is the root of your app: an [Express](https://expressjs.com/)-backed server whose methods return the server itself, so you chain your [tool](/build/tools) registrations off it and export the resulting type for [`generateHelpers`](/api-reference/generate-helpers).
+`McpServer` is the server instance a [`Skybridge`](/api-reference/skybridge) app hands to its `handler`, once per request. Its registration methods return the server itself, so you chain them and return the chain: that return value is what carries your tool types into `typeof app`.
 
 ## Example
 
-A server registers one tool, exports its type for the typed client hooks, and starts listening.
+The handler registers two tools and a middleware, and returns the chain.
 
-```ts server.ts
-import { McpServer } from "skybridge/server";
+```ts src/server.ts
+import { Skybridge } from "skybridge/server";
 
-const server = new McpServer({ name: "shop", version: "1.0" }).registerTool(
-  /* ... */
-);
-
-export type AppType = typeof server; // generateHelpers reads your tools from this
-
-await server.run();
+export const app = new Skybridge({
+  name: "shop",
+  version: "1.0",
+  handler: (server) =>
+    server
+      .registerTool(/* search-products */)
+      .registerTool(/* create-checkout */)
+      .mcpMiddleware("request", (request, extra, next) => {
+        console.log(`[MCP] ${request.method}`);
+        return next();
+      }),
+});
 ```
 
-## Constructor
+To extract the handler into its own declaration, annotate its parameter with `SkybridgeServer`, the bare server before any registration. It takes the claims your OAuth verifier produces, which types `extra.http.authInfo.extra` in tool handlers; when `oauth` is set on the same config, the claims are inferred and the annotation is unnecessary.
 
 ```ts
-new McpServer(
-  serverInfo: { name: string; version: string },
-  options?: ServerOptions,
-  skybridgeOptions?: SkybridgeServerOptions,
-);
+import { Skybridge, type SkybridgeServer } from "skybridge/server";
+
+export const handler = (server: SkybridgeServer) =>
+  server.registerTool(/* ... */);
+
+export const app = new Skybridge({ name: "shop", version: "1.0", handler });
 ```
 
-- **`serverInfo`** your server's `name` and `version`.
-- **`options`** forwarded to the MCP SDK server.
-- **`skybridgeOptions`** Skybridge-specific configuration:
-
-```ts
-type SkybridgeServerOptions = {
-  json?: JsonOptions;
-  oauth?: OAuthConfig;
-  skills?: boolean;
-};
-```
-
-`json` tunes the [`express.json()`](https://expressjs.com/en/5x/api/express/#expressjsonoptions) parser Skybridge pre-applies, for example to raise the default 100kb body-size limit.
-
-`oauth` is an [`OAuthConfig`](/api-reference/custom-provider#returns), usually from [`customProvider`](/api-reference/custom-provider) or a branded provider. When set, it mounts the well-known OAuth metadata and bearer-token verification on `/mcp`.
-
-The config also carries the claim shape its verifier produces, so handlers read `extra.authInfo?.extra` typed, with no declaration of their own. See [Type the Claims You Read](/build/auth#type-the-claims-you-read).
-
-`skills` set to `true` serves [Agent Skills over MCP](/guides/skills) from `src/skills` and declares the `io.modelcontextprotocol/skills` capability. See the [Skills guide](/guides/skills).
-
-<Info>
-Skills over MCP tracks [SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640), which is still under review. The feature is **experimental** and may change with the spec.
-</Info>
-
-## Properties
-
-### `express`
-
-The underlying Express app, for custom routes, middleware, and settings. Register handlers before `run()`.
-
-<Info>
-[Alpic Cloud](https://alpic.ai/solutions/cloud) routes traffic only to `/mcp`. Custom routes work locally and on self-hosted deployments.
-</Info>
+<Warning>
+The handler runs for every request, so anything in it other than registration runs per request too. Hoist side effects to module scope or into [`setup`](/api-reference/skybridge#setup).
+</Warning>
 
 ## Methods
 
@@ -77,23 +53,9 @@ server.registerTool(config, handler): this;
 
 Registers a tool, optionally bound to a view. See [registerTool](/api-reference/register-tool) for the full config and handler.
 
-### `use`
+### `registerResource`, `registerPrompt`
 
-```ts
-server.use(...handlers: RequestHandler[]): this;
-server.use(path: string, ...handlers: RequestHandler[]): this;
-```
-
-Registers [Express middleware](https://expressjs.com/en/guide/using-middleware/) on the underlying app, optionally scoped to a path. Mirrors `app.use`.
-
-### `useOnError`
-
-```ts
-server.useOnError(...handlers: ErrorRequestHandler[]): this;
-server.useOnError(path: string, ...handlers: ErrorRequestHandler[]): this;
-```
-
-Registers an [Express error handler](https://expressjs.com/en/guide/error-handling.html), optionally path-scoped, to run after the `/mcp` route. A default handler runs last, responding with a 500 [JSON-RPC](https://www.jsonrpc.org/) error when nothing else has sent a response.
+Inherited from the MCP SDK's [`McpServer`](https://github.com/modelcontextprotocol/typescript-sdk), with the same signatures. Views register their own resources, so you only need `registerResource` for data you expose directly.
 
 ### `mcpMiddleware`
 
@@ -102,7 +64,7 @@ server.mcpMiddleware(handler: McpMiddlewareFn): this;
 server.mcpMiddleware(filter: McpMiddlewareFilter, handler: McpMiddlewareFn): this;
 ```
 
-Wraps MCP requests and notifications: each middleware runs `(request, extra, next)`, can inspect or short-circuit the call, and invokes `next()` to continue. Register it before `run()` or `connect()`; middleware runs in registration order, outermost first. An optional `filter` scopes which methods it runs for.
+Wraps MCP requests and notifications: each middleware runs `(request, extra, next)`, can inspect or short-circuit the call, and invokes `next()` to continue. Middleware runs in registration order, outermost first. An optional `filter` scopes which methods it runs for.
 
 | Filter | Matches |
 | --- | --- |
@@ -140,24 +102,16 @@ server.mcpMiddleware("tools/call", async (request, extra, next) => {
 });
 ```
 
-A tool failure is a valid MCP response, so [`useOnError`](#useonerror) never runs for it — report tool errors from `mcpMiddleware`, and keep `useOnError` for transport-level failures. Errors raised by the SDK itself — unknown tool, input or output schema validation — never reach your handler and are not reported here.
-
-### `run`
-
-```ts
-server.run(): Promise<{ fetch: (...args: unknown[]) => unknown } | Express | undefined>;
-```
-
-Starts the HTTP server: applies your middleware, mounts `/mcp`, and listens (default port `3000`). On serverless platforms, export what it returns so the platform can route requests to it. See [Deploy](/ship/deploy) for the per-platform setup.
+A tool failure is a valid MCP response, so [`useOnError`](/api-reference/skybridge#useonerror) never runs for it: report tool errors from `mcpMiddleware`, and keep `useOnError` for transport-level failures. Errors raised by the SDK itself (unknown tool, input or output schema validation) never reach your handler and are not reported here.
 
 <CardGroup cols={3}>
+  <Card title="Skybridge" icon="server" href="/api-reference/skybridge">
+    Configure and run the app that builds this server
+  </Card>
   <Card title="registerTool" icon="wrench" href="/api-reference/register-tool">
     Define the tools and views the server exposes
   </Card>
   <Card title="generateHelpers" icon="wand-sparkles" href="/api-reference/generate-helpers">
     Turn `AppType` into typed client hooks
-  </Card>
-  <Card title="requireBearerAuth" icon="lock" href="/api-reference/require-bearer-auth">
-    Require or optionally accept a signed-in user
   </Card>
 </CardGroup>

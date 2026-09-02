@@ -1,0 +1,131 @@
+---
+title: "Evals"
+description: "Check what the model does with your app, in a test"
+icon: "flask-conical"
+---
+
+A tool that works is not the same as a tool the model decides to call. [DevTools](/test/devtools) and the [playground](/test/playground) let you check that by hand; evals check it in a test. `@skybridge/test` runs a real conversation against your app, in process, and hands you the tool calls the model made so you can assert on them.
+
+## Set Up
+
+Add the test runtime, vitest, the AI SDK, and the provider you want to drive the conversation:
+
+<CodeGroup>
+```bash npm
+npm install -D @skybridge/test vitest ai @ai-sdk/anthropic
+```
+```bash pnpm
+pnpm add -D @skybridge/test vitest ai @ai-sdk/anthropic
+```
+```bash yarn
+yarn add -D @skybridge/test vitest ai @ai-sdk/anthropic
+```
+```bash bun
+bun add -d @skybridge/test vitest ai @ai-sdk/anthropic
+```
+</CodeGroup>
+
+Turn on `evals` in the Vite plugin. It registers the `expect.chat` matchers, picks up `evals/**/*.eval.ts`, raises the per-scenario timeout to two minutes, and loads your `.env` so the provider key is available:
+
+```ts vite.config.ts highlight={7}
+import { skybridge } from "@skybridge/vite-plugin";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [
+    skybridge({ evals: {} }),
+    react(),
+  ],
+});
+```
+
+Then add a script to run them:
+
+```json package.json
+"evals": "vitest run evals"
+```
+
+## Write a Scenario
+
+A scenario opens a conversation against your [app](/api-reference/skybridge), sends a prompt, and asserts on the tools the model called:
+
+```ts evals/search.eval.ts
+import { anthropic } from "@ai-sdk/anthropic";
+import { start } from "@skybridge/test";
+import { expect, it } from "vitest";
+import { app } from "../src/server.js";
+
+it("reaches the search tool from a natural prompt", async () => {
+  const chat = await start({ app, model: anthropic("claude-sonnet-4-5") });
+  await chat.send("Find me running shoes under 100 dollars");
+
+  expect.chat(chat).toHaveCalledToolWith("search-products", { query: "running shoes" });
+});
+```
+
+`start` serves the app in process: no port, no fixture. Each `send` is one turn, during which the model can call several tools before it answers. The session closes when the test finishes.
+
+This is why the app lives in `src/server.ts` and `run()` in `src/index.ts`: importing the app starts nothing.
+
+## Assert on Tool Calls
+
+`expect.chat(chat)` is typed against your app, so tool names autocomplete and arguments are checked against each tool's input schema.
+
+| Matcher | Passes when |
+| --- | --- |
+| `toHaveCalledToolOnce(name, args?)` | exactly one successful call to `name`, optionally matching `args` |
+| `toHaveCalledToolWith(name, args)` | some successful call to `name` matched `args` |
+| `toNeverHaveCalledTool(name)` | `name` was never attempted |
+| `toHaveFailedToolCall(name)` | a call to `name` was refused or threw |
+| `toHaveSaid(text)` | an assistant turn contains `text` (string or `RegExp`) |
+
+Every matcher supports `.not`. On failure, the message lists the calls the model actually made, arguments included. `chat.toolCalls` and `chat.assistantTurns` are also available for custom assertions.
+
+## Test Authenticated Tools
+
+For an app behind [OAuth](/build/auth), claim an identity for the session:
+
+```ts evals/checkout.eval.ts highlight={4}
+const chat = await start({
+  app,
+  model: anthropic("claude-sonnet-4-5"),
+  authInfo: { token: "eval", clientId: "evals", scopes: ["checkout"], extra: { email: "ada@example.com" } },
+});
+```
+
+Only token verification is skipped. Per-tool schemes and scope checks run for real against those claims, and `extra` reaches your handlers as `extra.http.authInfo.extra`. Omit `authInfo` to exercise the anonymous path, auth challenges included.
+
+<Info>
+`setup` and `oauth` still resolve on the first request, so an app wired to an identity provider needs its `.env` to run evals, the same as `dev`.
+</Info>
+
+## Tune the Run
+
+Defaults every scenario starts from go in the plugin option, and any of them can be overridden per `start`:
+
+```ts vite.config.ts
+skybridge({
+  evals: {
+    temperature: 0,          // default
+    systemPrompt: "You are a shopping assistant.",
+    maxSteps: 8,             // tool-call rounds per turn, default
+    timeout: 120_000,        // per scenario, default
+  },
+})
+```
+
+Evals are live model calls: they cost money and the wording varies from run to run. Keep the temperature at `0`, assert on the calls rather than on exact phrasing, and reach for `toHaveSaid` with a loose pattern when the answer itself matters.
+
+## Go Further
+<Columns cols={3}>
+    <Card title="Skybridge" icon="server" href="/api-reference/skybridge">
+        The app your scenarios import
+    </Card>
+    <Card title="Playground" icon="message-circle" href="/test/playground">
+        Chat with a real model running your app
+    </Card>
+    <Card title="Register Tools" icon="wrench" href="/build/tools">
+        Write descriptions the model can act on
+    </Card>
+</Columns>

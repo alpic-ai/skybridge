@@ -8,7 +8,7 @@ Common Skybridge errors, grouped by symptom, each with its cause and fix.
 
 ## Typed hooks report "Property does not exist on type"
 
-The hooks came from `skybridge/web` instead of the [generated `helpers.ts`](/api-reference/generate-helpers). The bare [hooks](/api-reference/overview#hooks) aren't typed against your [server](/api-reference/mcp-server); only the generated ones carry your [tool names, inputs, and outputs](/api-reference/register-tool).
+The hooks came from `skybridge/web` instead of the [generated `helpers.ts`](/api-reference/generate-helpers). The bare [hooks](/api-reference/overview#hooks) aren't typed against your [app](/api-reference/skybridge); only the generated ones carry your [tool names, inputs, and outputs](/api-reference/register-tool).
 
 ```ts
 import { useCallTool } from "skybridge/web"; // [!code --]
@@ -17,17 +17,22 @@ import { useCallTool } from "../helpers.js"; // [!code ++]
 
 ## Tool names don't autocomplete
 
-Type inference needs the [server](/api-reference/mcp-server) to export its type and `helpers.ts` to consume it, with every tool registered by method chaining so it lands in `AppType`.
+Type inference needs the [app](/api-reference/skybridge) to export its type and `helpers.ts` to consume it, with every tool registered by method chaining so it lands in `AppType`.
 
 <CodeGroup>
-```ts server.ts highlight={4-5,7}
-import { McpServer } from "skybridge/server";
+```ts server.ts highlight={6-8,11}
+import { Skybridge } from "skybridge/server";
 
-const server = new McpServer({ name: "shop", version: "0.0.1" })
-  .registerTool(/* search-products */)
-  .registerTool(/* create-checkout */); // chained, so AppType captures both
+export const app = new Skybridge({
+  name: "shop",
+  version: "0.0.1",
+  handler: (server) =>
+    server
+      .registerTool(/* search-products */)
+      .registerTool(/* create-checkout */), // chained, so AppType captures both
+});
 
-export type AppType = typeof server;
+export type AppType = typeof app;
 ```
 
 ```ts helpers.ts highlight={2,4}

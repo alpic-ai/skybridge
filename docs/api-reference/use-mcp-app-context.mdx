@@ -69,16 +69,16 @@ The requested key's current value, empty until the host provides it: host-contex
 
 | Key | Value | Also via |
 | --- | --- | --- |
-| `theme` | `"light"` or `"dark"` | [`useLayout`](/api-reference/use-layout) |
+| `theme` | `"light"` or `"dark"` | [`useUser`](/api-reference/use-user) |
 | `locale` | BCP-47 locale | [`useUser`](/api-reference/use-user) |
 | `timeZone` | IANA time zone | — |
 | `displayMode` | current layout (`inline` / `fullscreen` / `pip`) | [`useDisplayMode`](/api-reference/use-display-mode) |
 | `availableDisplayModes` | layouts the host supports | — |
-| `containerDimensions` | the view's available size (height and width) | [`useLayout`](/api-reference/use-layout) |
+| `containerDimensions` | the view's available size (height and width) | [`useViewport`](/api-reference/use-viewport) |
 | `userAgent` | raw host user-agent string | — |
 | `platform` | `web` / `desktop` / `mobile` | [`useUser`](/api-reference/use-user) |
 | `deviceCapabilities` | touch and hover support | [`useUser`](/api-reference/use-user) |
-| `safeAreaInsets` | insets to keep clear of host chrome | [`useLayout`](/api-reference/use-layout) |
+| `safeAreaInsets` | insets to keep clear of host chrome | [`useViewport`](/api-reference/use-viewport) |
 | `styles` | host theme tokens | — |
 | `toolInfo` | the tool definition that rendered the view | — |
 | `toolInput` | the tool call's arguments | [`useToolInfo`](/api-reference/use-tool-info) |

@@ -20,11 +20,11 @@ ChatGPT manages files for you: it stores each one and hands your code a referenc
 A tool can take a file the user added to the conversation. The model only passes files already there, so the user adds one first, from their device or library; the handler receives a reference and fetches the contents.
 
 ```ts server.ts highlight={9,11,14}
-import { FileRef, McpServer } from "skybridge/server";
+import { FileRef, type SkybridgeServer } from "skybridge/server";
 import { z } from "zod";
 
-const server = new McpServer({ name: "expenses", version: "0.0.1" })
-  .registerTool(
+export const handler = (server: SkybridgeServer) =>
+  server.registerTool(
     {
       name: "scan-receipt",
       description: "Extract line items from a receipt.",
@@ -46,11 +46,11 @@ Each file input is a [`FileRef`](/api-reference/file-ref) listed in `_meta["open
 A tool can also hand a file back. The host surfaces it in the conversation, so the user can download it and the model can see it.
 
 ```ts server.ts highlight={10,15}
-import { FileRef, McpServer } from "skybridge/server";
+import { FileRef, type SkybridgeServer } from "skybridge/server";
 import { z } from "zod";
 
-const server = new McpServer({ name: "expenses", version: "0.0.1" })
-  .registerTool(
+export const handler = (server: SkybridgeServer) =>
+  server.registerTool(
     {
       name: "scan-receipt",
       description: "Extract line items from a receipt.",

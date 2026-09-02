@@ -43,7 +43,7 @@ const { useCallTool, useToolInfo } = generateHelpers<ServerType>();
 ServerType extends McpServer<AnyToolRegistry>;
 ```
 
-Your server's type, `typeof server`. Export it from your server file with `export type AppType = typeof server`, then pass it here.
+Your app's type, `typeof app`. Export it from `src/server.ts` with `export type AppType = typeof app`, then pass it here.
 
 <Info>
 Inference works only when the server is built by chaining `.registerTool()` calls off the constructor, so the tool types accumulate on the server type.

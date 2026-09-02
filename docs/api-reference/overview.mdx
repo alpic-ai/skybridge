@@ -13,10 +13,11 @@ Every Skybridge export. Server APIs run in your MCP server and work with any hos
 | API | Description |
 | --- | --- |
 | [`mcpAuthMetadataRouter`](/api-reference/mcp-auth-metadata-router) | Serve OAuth metadata for client discovery. |
-| [`McpServer`](/api-reference/mcp-server) | The server you register tools and views on. |
+| [`McpServer`](/api-reference/mcp-server) | The per-request server your handler registers tools on. |
 | [`optionalBearerAuth`](/api-reference/optional-bearer-auth) | Attach a verified identity when a token is present. |
 | [`registerTool`](/api-reference/register-tool) | Register a tool, its schemas, and the view it renders. |
 | [`requireBearerAuth`](/api-reference/require-bearer-auth) | Gate a server behind a verified bearer token. |
+| [`Skybridge`](/api-reference/skybridge) | The app: its config, OAuth, and the handler that registers tools. |
 
 ## Hooks
 
@@ -26,8 +27,7 @@ Every Skybridge export. Server APIs run in your MCP server and work with any hos
 | [`useDisplayMode`](/api-reference/use-display-mode) | Read and request inline, pip, or fullscreen. | <Compat compact alpic chatgpt claude goose /> |
 | [`useDownload`](/api-reference/use-download) | Save files to the user's device. | <Compat compact claude /> |
 | [`useFiles`](/api-reference/use-files) | Upload and pick host-managed files. | <Compat compact chatgpt /> |
-| [`useHostInfo`](/api-reference/use-host-info) | Identify which host is rendering the view. | <Compat compact alpic claude cursor goose /> |
-| [`useLayout`](/api-reference/use-layout) | Read theme, max height, and safe-area insets. | <Compat compact alpic chatgpt claude cursor goose /> |
+| [`useHost`](/api-reference/use-host) | Identify which host is rendering the view. | <Compat compact alpic claude cursor goose /> |
 | [`useOpenExternal`](/api-reference/use-open-external) | Open a URL outside the view iframe. | <Compat compact alpic chatgpt claude cursor goose /> |
 | [`useRegisterViewTool`](/api-reference/use-register-view-tool) | Expose a tool that runs inside the view. | <Compat compact alpic /> |
 | [`useRequestClose`](/api-reference/use-request-close) | Ask the host to dismiss the view. | <Compat compact chatgpt claude /> |
@@ -36,8 +36,9 @@ Every Skybridge export. Server APIs run in your MCP server and work with any hos
 | [`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message) | Send a follow-up turn to the model. | <Compat compact alpic chatgpt claude cursor goose /> |
 | [`useSetOpenInAppUrl`](/api-reference/use-set-open-in-app-url) | Override the fullscreen open-in-app URL. | <Compat compact chatgpt /> |
 | [`useToolInfo`](/api-reference/use-tool-info) | Read the tool input, output, and metadata that rendered the view. | <Compat compact alpic chatgpt claude cursor /> |
-| [`useUser`](/api-reference/use-user) | Read locale and device capabilities. | <Compat compact alpic chatgpt claude cursor goose /> |
+| [`useUser`](/api-reference/use-user) | Read locale, theme, and device capabilities. | <Compat compact alpic chatgpt claude cursor goose /> |
 | [`useViewState`](/api-reference/use-view-state) | Persist UI state on the host across renders. | <Compat compact alpic chatgpt claude cursor goose /> |
+| [`useViewport`](/api-reference/use-viewport) | Read the max height and safe-area insets. | <Compat compact alpic chatgpt claude cursor goose /> |
 
 ## Utilities
 

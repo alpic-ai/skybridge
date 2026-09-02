@@ -10,36 +10,37 @@ description: "Register a tool, with or without a view"
 `search-products` searches the store catalog for the signed-in user and renders the matches in the `carousel` view.
 
 ```ts server.ts
-import { McpServer } from "skybridge/server";
+import { type SkybridgeServer } from "skybridge/server";
 import { z } from "zod";
 
-const server = new McpServer({ name: "shop", version: "1.0" }).registerTool(
-  {
-    name: "search-products",
-    title: "Search products",
-    description: "Search the store catalog by keyword and optional price ceiling.",
-    inputSchema: {
-      query: z.string().describe("What the shopper is looking for"),
+export const handler = (server: SkybridgeServer) =>
+  server.registerTool(
+    {
+      name: "search-products",
+      title: "Search products",
+      description: "Search the store catalog by keyword and optional price ceiling.",
+      inputSchema: {
+        query: z.string().describe("What the shopper is looking for"),
+      },
+      outputSchema: {
+        productIds: z.array(z.string()).describe("The IDs of products matching the query."),
+      },
+      annotations: { readOnlyHint: true },
+      securitySchemes: [{ type: "oauth2", scopes: ["catalog.read"] }],
+      view: {
+        component: "carousel",
+        csp: { connectDomains: ["https://api.myshop.com"] },
+      },
     },
-    outputSchema: {
-      productIds: z.array(z.string()).describe("The IDs of products matching the query."),
+    async ({ query, maxPrice }, extra) => {
+      const userId = extra.http?.authInfo?.extra?.subject;
+      const products = await search(query, { maxPrice, userId });
+      return {
+        content: `Found ${products.length} products for "${query}".`,
+        structuredContent: { products },
+      };
     },
-    annotations: { readOnlyHint: true },
-    securitySchemes: [{ type: "oauth2", scopes: ["catalog.read"] }],
-    view: {
-      component: "carousel",
-      csp: { connectDomains: ["https://api.myshop.com"] },
-    },
-  },
-  async ({ query, maxPrice }, { authInfo }) => {
-    const userId = authInfo?.extra?.subject;
-    const products = await search(query, { maxPrice, userId });
-    return {
-      content: `Found ${products.length} products for "${query}".`,
-      structuredContent: { products },
-    };
-  },
-);
+  );
 ```
 
 ## Signature
@@ -57,8 +58,8 @@ type ToolConfig = {
   name: string;
   title?: string; // human-readable label
   description?: string; // model-facing: decides when the model calls the tool
-  inputSchema?: ZodRawShape; // Zod shape; validates the call and types the handler input
-  outputSchema?: ZodRawShape; // Zod shape; types structuredContent
+  inputSchema?: Record<string, StandardSchemaWithJSON>; // validates the call and types the handler input
+  outputSchema?: Record<string, StandardSchemaWithJSON>; // types structuredContent
   annotations?: ToolAnnotations; // standard MCP hints
   view?: ViewConfig; // bind a view to render the result
   auth?: { allowsAnonymous?: boolean; scopes?: string[] }; // per-tool auth
@@ -73,7 +74,7 @@ All three are the tool's prompt surface: the model reads them to decide when to 
 
 ### `inputSchema`, `outputSchema`
 
-[Zod](https://zod.dev/) raw shapes. `inputSchema` validates the call arguments and types the handler's `input`. Add `.describe()` to a field to tell the model what it's for. `outputSchema` tells the model the shape to expect back, it does not type the returned value.
+Shapes of [Standard Schema](https://standardschema.dev) validators that can emit JSON Schema: [Zod](https://zod.dev/) 4 and ArkType out of the box, valibot through `@valibot/to-json-schema`. `inputSchema` validates the call arguments and types the handler's `input`. Add `.describe()` to a field to tell the model what it's for. `outputSchema` tells the model the shape to expect back, it does not type the returned value.
 
 ### `annotations`
 
@@ -147,7 +148,7 @@ type ViewCsp = {
 
 ### `auth`
 
-The recommended way to declare a tool's auth. With the [`oauth`](/api-reference/mcp-server#constructor) provider option set, Skybridge enforces the declaration for you (anonymous or under-scoped calls are rejected before the handler runs).
+The recommended way to declare a tool's auth. With the [`oauth`](/api-reference/skybridge#oauth) field set, Skybridge enforces the declaration for you (anonymous or under-scoped calls are rejected before the handler runs).
 
 | Value | Meaning |
 | --- | --- |
@@ -173,7 +174,7 @@ type SecurityScheme =
 - **`noauth` and `oauth2` together** means "works anonymously, but auth unlocks more."
 
 <Warning>
-With the [`oauth`](/api-reference/mcp-server#constructor) provider option, Skybridge enforces `securitySchemes` like `auth`. With hand-wired middleware ([`requireBearerAuth`](/api-reference/require-bearer-auth) or [`optionalBearerAuth`](/api-reference/optional-bearer-auth)) it stays client-facing metadata: enforce the tool's requirements in the handler from `extra.authInfo`.
+With the [`oauth`](/api-reference/skybridge#oauth) field, Skybridge enforces `securitySchemes` like `auth`. With hand-wired middleware ([`requireBearerAuth`](/api-reference/require-bearer-auth) or [`optionalBearerAuth`](/api-reference/optional-bearer-auth)) it stays client-facing metadata: enforce the tool's requirements in the handler from `extra.http?.authInfo`.
 </Warning>
 
 ### `_meta`

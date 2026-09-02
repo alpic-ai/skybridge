@@ -7,10 +7,10 @@ A verifier is the provider-specific token check you implement and pass to [`requ
 
 ## Example
 
-`verifyAccessToken` validates the token however your provider requires, returns an `AuthInfo` for a valid token, and throws `InvalidTokenError` otherwise. Pass it to the middleware as `verifier: { verifyAccessToken }`.
+`verifyAccessToken` validates the token however your provider requires, returns an `AuthInfo` for a valid token, and throws `OAuthError` otherwise. Pass it to the middleware as `verifier: { verifyAccessToken }`.
 
 ```ts
-import { type AuthInfo, InvalidTokenError } from "skybridge/server";
+import { type AuthInfo, OAuthError } from "skybridge/server";
 
 async function verifyAccessToken(token: string): Promise<AuthInfo> {
   try {
@@ -23,7 +23,8 @@ async function verifyAccessToken(token: string): Promise<AuthInfo> {
       extra: { subject: payload.sub },
     };
   } catch (err) {
-    throw new InvalidTokenError(
+    throw new OAuthError(
+      "invalid_token",
       err instanceof Error ? err.message : "Token validation failed",
     );
   }
@@ -42,8 +43,8 @@ verifyAccessToken(token: string): Promise<AuthInfo>;
 
 The verifier's only required method.
 
-- Resolve with an `AuthInfo` for a valid token. The middleware puts it on `extra.authInfo` for tool [handlers](/api-reference/register-tool#handler).
-- Throw `InvalidTokenError` for a malformed, badly signed, or expired token. The middleware returns a 401 with the right `WWW-Authenticate` header.
+- Resolve with an `AuthInfo` for a valid token. The middleware puts it on `extra.http?.authInfo` for tool [handlers](/api-reference/register-tool#handler).
+- Throw `OAuthError("invalid_token", message)` for a malformed, badly signed, or expired token. The middleware returns a 401 with the right `WWW-Authenticate` header.
 
 Do not check scopes here: the middleware enforces `requiredScopes` against `authInfo.scopes` and returns a 403 on a missing scope.
 

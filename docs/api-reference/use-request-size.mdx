@@ -14,12 +14,12 @@ A [view](/build/view) renders at a size the host sets. `useRequestSize` lets the
 The carousel grows to fit its product grid as items load, and widens to show the full catalog when the shopper expands it.
 
 ```tsx highlight={1,5,15,25}
-import { useRequestSize, useLayout } from "skybridge/web";
+import { useRequestSize, useViewport } from "skybridge/web";
 import { useEffect, useRef } from "react";
 
 function Carousel({ products }: { products: Product[] }) {
   const requestSize = useRequestSize();
-  const { maxHeight } = useLayout();
+  const { maxHeight } = useViewport();
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,7 +47,7 @@ function Carousel({ products }: { products: Product[] }) {
 }
 ```
 
-The host applies what it can, so read the height actually granted from [`useLayout`](/api-reference/use-layout) rather than assuming the request took.
+The host applies what it can, so read the height actually granted from [`useViewport`](/api-reference/use-viewport) rather than assuming the request took.
 
 ## Returns
 
@@ -62,7 +62,7 @@ requestSize(size: { width?: number; height?: number }): Promise<void>;
 Asks the host to resize the view, `width` and `height` in pixels; omit a dimension to leave it unchanged. The promise resolves once the request is sent, not once the host applies it: the host is free to clamp, ignore, or partially honor the size.
 
 <CardGroup cols={3}>
-  <Card title="useLayout" icon="layout" href="/api-reference/use-layout">
+  <Card title="useViewport" icon="layout" href="/api-reference/use-viewport">
     Read the height the host actually grants the view
   </Card>
   <Card title="useDisplayMode" icon="maximize" href="/api-reference/use-display-mode">

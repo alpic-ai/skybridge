@@ -8,24 +8,25 @@ description: "Wire OAuth from any IdP's discovery document"
 
 ## Example
 
-```ts server.ts highlight={1,7-12}
-import { McpServer, customProvider } from "skybridge/server";
+```ts server.ts highlight={1,7-13}
+import { Skybridge, customProvider } from "skybridge/server";
 
-const server = new McpServer(
-  { name: "personal-shopper", version: "0.0.1" },
-  { capabilities: {} },
-  {
-    oauth: await customProvider({
+export const app = new Skybridge({
+  name: "personal-shopper",
+  version: "0.0.1",
+  capabilities: {},
+  oauth: () =>
+    customProvider({
       issuer: "https://auth.myshop.com",
       audience: process.env.SERVER_URL,
       scopes: ["openid", "profile", "checkout"],
       requiredScopes: ["openid"],
     }),
-  },
-);
+  handler,
+});
 ```
 
-`customProvider` fetches `https://auth.myshop.com`'s discovery document at boot, then the [`oauth`](/api-reference/mcp-server#constructor) option mounts the well-known metadata and JWKS bearer verification on `/mcp`. `audience` is the value the IdP binds into the token's `aud` claim, here this server's public URL.
+`customProvider` fetches `https://auth.myshop.com`'s discovery document when the app starts, then the [`oauth`](/api-reference/skybridge#oauth) field mounts the well-known metadata and JWKS bearer verification on `/mcp`. `audience` is the value the IdP binds into the token's `aud` claim, here this server's public URL.
 
 ## Signature
 
@@ -61,7 +62,7 @@ type CustomProviderOptions = {
 
 ## Returns
 
-A `Promise` (discovery is a boot-time network call) for the `OAuthConfig` you pass to the [`oauth`](/api-reference/mcp-server#constructor) constructor option.
+A `Promise` (discovery is a network call) for the `OAuthConfig` you pass to the [`oauth`](/api-reference/skybridge#oauth) field, as a value or from a function.
 
 ```ts
 type OAuthConfig<TExtra = Record<string, unknown>> = {
@@ -69,7 +70,8 @@ type OAuthConfig<TExtra = Record<string, unknown>> = {
   oauthMetadata: OAuthMetadata;
   scopesSupported?: string[];
   requiredScopes?: string[];
-} & ({ verifier: TokenVerifier<TExtra> } | { verify: JwksVerifyConfig });
+  verifier: TokenVerifier<TExtra>;
+};
 ```
 
 | Field | Description |
@@ -77,13 +79,12 @@ type OAuthConfig<TExtra = Record<string, unknown>> = {
 | `baseUrl` | Echoes the `baseUrl` option. |
 | `oauthMetadata` | AS metadata served at `/.well-known/oauth-authorization-server`. |
 | `verifier` | Checks each bearer token, and carries the claim type handlers receive. |
-| `verify` | Deprecated. JWKS parameters (`issuer`, `audience`, `jwksUri`) used to build the verifier; claims stay `Record<string, unknown>`. |
 | `scopesSupported` | Scopes advertised in protected-resource metadata. |
 | `requiredScopes` | Server-wide required-scope floor. |
 
-`TExtra` is the claim shape the verifier resolves with, and the server reads it from here, so handlers get `extra.authInfo?.extra` typed without declaring anything. Pass it as a type argument to name claims your IdP sends: `customProvider<{ subject?: string; email?: string }>({ ... })`.
+`TExtra` is the claim shape the verifier resolves with, and the server reads it from here, so handlers get `extra.http?.authInfo?.extra` typed without declaring anything. Pass it as a type argument to name claims your IdP sends: `customProvider<{ subject?: string; email?: string }>({ ... })`.
 
-Build this object by hand only to wire an IdP whose metadata `customProvider` can't discover. Supply exactly one of the two: `verifier`, from `createJwksVerifier({ issuer, jwksUri })` for JWTs or your own [`TokenVerifier`](/api-reference/verifier) for opaque tokens, or the deprecated `verify` parameters. Either way the [`oauth`](/api-reference/mcp-server#constructor) option mounts the same endpoints.
+Build this object by hand only to wire an IdP whose metadata `customProvider` can't discover. Supply a `verifier`, from `createJwksVerifier({ issuer, jwksUri })` for JWTs or your own [`TokenVerifier`](/api-reference/verifier) for opaque tokens. Either way the [`oauth`](/api-reference/skybridge#oauth) field mounts the same endpoints.
 
 <CardGroup cols={3}>
   <Card title="Connect an Identity Provider" icon="fingerprint" href="/guides/auth-providers">
@@ -92,7 +93,7 @@ Build this object by hand only to wire an IdP whose metadata `customProvider` ca
   <Card title="Authenticate Users" icon="key" href="/build/auth">
     Add sign-in to your app end to end
   </Card>
-  <Card title="McpServer" icon="server" href="/api-reference/mcp-server">
-    Pass the config to the oauth option
+  <Card title="Skybridge" icon="server" href="/api-reference/skybridge">
+    Pass the config to the oauth field
   </Card>
 </CardGroup>

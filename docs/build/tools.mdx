@@ -13,54 +13,69 @@ Tools are the entry point of your app: the model reads their metadata and trigge
 Here's a complete tool definition:
 
 ```ts server.ts
-import { McpServer } from "skybridge/server";
+import { Skybridge } from "skybridge/server";
 import { z } from "zod";
 
-const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
-  .registerTool(
-    {
-      name: "search-products",
-      title: "Search Products",
-      description: "Show products matching a query in a carousel.",
-      inputSchema: { query: z.string().describe("Full-text product search") },
-      outputSchema: {
-        products: z.array(
-          z.object({ id: z.string(), name: z.string(), price: z.number() }),
-        ),
-      },
-      annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
-      view: { component: "carousel" },
-    },
-    async ({ query }) => {
-      const products = await search(query);
-      return {
-        content: `Found ${products.length} products for "${query}".`,
-        structuredContent: {
-          products: products.map(({ id, name, price }) => ({ id, name, price })),
+export const app = new Skybridge({
+  name: "personal-shopper",
+  version: "0.0.1",
+  handler: (server) =>
+    server.registerTool(
+      {
+        name: "search-products",
+        title: "Search Products",
+        description: "Show products matching a query in a carousel.",
+        inputSchema: { query: z.string().describe("Full-text product search") },
+        outputSchema: {
+          products: z.array(
+            z.object({ id: z.string(), name: z.string(), price: z.number() }),
+          ),
         },
-        _meta: { images: products.map((p) => p.imageUrl) },
-      };
-    },
-  );
+        annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
+        view: { component: "carousel" },
+      },
+      async ({ query }) => {
+        const products = await search(query);
+        return {
+          content: `Found ${products.length} products for "${query}".`,
+          structuredContent: {
+            products: products.map(({ id, name, price }) => ({ id, name, price })),
+          },
+          _meta: { images: products.map((p) => p.imageUrl) },
+        };
+      },
+    ),
+});
 ```
 
 The sections below build this definition up piece by piece: the server it lives on, the metadata and schemas the model reads, the handler, the behavior annotations, host-specific tuning, and the view binding.
 
-## Create the Server
+## Create the App
 
-[`McpServer`](/api-reference/mcp-server) takes your app's identity and returns a chainable server. Chain every [`registerTool`](/api-reference/register-tool) call, then `run()`:
+[`Skybridge`](/api-reference/skybridge) takes your app's identity and a `handler`. The handler receives a fresh [`McpServer`](/api-reference/mcp-server) for every request: chain every [`registerTool`](/api-reference/register-tool) call on it and return the chain.
 
+<CodeGroup>
 ```ts server.ts
-const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
-  .registerTool(/* … */)
-  .registerTool(/* … */);
+export const app = new Skybridge({
+  name: "personal-shopper",
+  version: "0.0.1",
+  handler: (server) =>
+    server
+      .registerTool(/* … */)
+      .registerTool(/* … */),
+});
 
-server.run();
-
-export type AppType = typeof server;
+export type AppType = typeof app;
 ```
 
-Chaining accumulates your tool signatures into one type. Exporting `AppType` is what makes the generated view hooks type-safe end to end.
+```ts index.ts
+import { app } from "./server.js";
+
+export default await app.run();
+```
+</CodeGroup>
+
+Chaining accumulates your tool signatures into one type, and returning the chain is what carries it into `AppType`. Exporting `AppType` is what makes the generated view hooks type-safe end to end. Keep the handler to registration: it runs on every request, so anything expensive belongs at module scope or in [`setup`](/api-reference/skybridge#setup).
 
 ## Describe It to the Model
 
@@ -93,7 +108,7 @@ These are prompt engineering. Write them for the model: state what the tool does
 
 ## Type the Contract
 
-Schemas are plain [Zod](https://zod.dev/) shapes. [`inputSchema`](/api-reference/register-tool#inputschema-outputschema) declares what the model must provide. [`outputSchema`](/api-reference/register-tool#inputschema-outputschema) is optional and declares the shape of the [structured content returned](/api-reference/register-tool#return) to the model.
+Schemas are plain [Zod](https://zod.dev/) shapes, or any other [Standard Schema](https://standardschema.dev) validator that can emit JSON Schema. [`inputSchema`](/api-reference/register-tool#inputschema-outputschema) declares what the model must provide. [`outputSchema`](/api-reference/register-tool#inputschema-outputschema) is optional and declares the shape of the [structured content returned](/api-reference/register-tool#return) to the model.
 
 ```ts server.ts highlight={6-11}
 server.registerTool(
@@ -162,7 +177,7 @@ server.registerTool(
 
 Choosing the recipient is a design decision: it controls what context each actor sees. Keep `content` and `structuredContent` concise, since they're model context. Use `_meta` for data the model has no use for or isn't supposed to know (image URLs, sensitive record fields): the view still accesses it, the model never sees it.
 
-Handlers also receive an `extra` argument carrying additional data such as auth info or [client hints](/api-reference/register-tool#client-hints).
+Handlers also receive an `extra` argument carrying additional data such as `extra.http?.authInfo` or [client hints](/api-reference/register-tool#client-hints).
 
 ## Annotate Behavior
 

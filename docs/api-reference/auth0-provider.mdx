@@ -8,20 +8,21 @@ description: "Wire OAuth from an Auth0 tenant"
 
 ## Example
 
-```ts server.ts highlight={1,7-11}
-import { McpServer, auth0Provider } from "skybridge/server";
+```ts server.ts highlight={1,7-12}
+import { auth0Provider, Skybridge } from "skybridge/server";
 
-const server = new McpServer(
-  { name: "personal-shopper", version: "0.0.1" },
-  { capabilities: {} },
-  {
-    oauth: await auth0Provider({
-      domain: process.env.AUTH0_DOMAIN,
-      audience: process.env.AUTH0_API_IDENTIFIER,
-      serverUrl: process.env.SERVER_URL,
+export const app = new Skybridge({
+  name: "personal-shopper",
+  version: "0.0.1",
+  capabilities: {},
+  oauth: () =>
+    auth0Provider({
+        domain: process.env.AUTH0_DOMAIN,
+        audience: process.env.AUTH0_API_IDENTIFIER,
+        serverUrl: process.env.SERVER_URL,
     }),
-  },
-);
+  handler,
+});
 ```
 
 ## Signature
@@ -46,7 +47,7 @@ Requires Dynamic Client Registration enabled on the tenant.
 
 ## Returns
 
-A `Promise` for the [`OAuthConfig`](/api-reference/custom-provider#returns) you pass to the [`oauth`](/api-reference/mcp-server#constructor) constructor option.
+A `Promise` for the [`OAuthConfig`](/api-reference/custom-provider#returns) you pass to the [`oauth`](/api-reference/skybridge#oauth) field, as a value or from a function.
 
 <CardGroup cols={3}>
   <Card title="Connect an Identity Provider" icon="fingerprint" href="/guides/auth-providers">

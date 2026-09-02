@@ -8,19 +8,20 @@ description: "Wire OAuth from WorkOS AuthKit"
 
 ## Example
 
-```ts server.ts highlight={1,7-10}
-import { McpServer, workosProvider } from "skybridge/server";
+```ts server.ts highlight={1,7-11}
+import { Skybridge, workosProvider } from "skybridge/server";
 
-const server = new McpServer(
-  { name: "personal-shopper", version: "0.0.1" },
-  { capabilities: {} },
-  {
-    oauth: await workosProvider({
-      domain: process.env.AUTHKIT_DOMAIN,
-      audience: process.env.SERVER_URL,
+export const app = new Skybridge({
+  name: "personal-shopper",
+  version: "0.0.1",
+  capabilities: {},
+  oauth: () =>
+    workosProvider({
+        domain: process.env.AUTHKIT_DOMAIN,
+        audience: process.env.SERVER_URL,
     }),
-  },
-);
+  handler,
+});
 ```
 
 ## Signature
@@ -43,7 +44,7 @@ Requires Dynamic Client Registration enabled in the WorkOS dashboard (Connect â†
 
 ## Returns
 
-A `Promise` for the [`OAuthConfig`](/api-reference/custom-provider#returns) you pass to the [`oauth`](/api-reference/mcp-server#constructor) constructor option.
+A `Promise` for the [`OAuthConfig`](/api-reference/custom-provider#returns) you pass to the [`oauth`](/api-reference/skybridge#oauth) field, as a value or from a function.
 
 <CardGroup cols={3}>
   <Card title="Connect an Identity Provider" icon="fingerprint" href="/guides/auth-providers">

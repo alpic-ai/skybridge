@@ -53,12 +53,12 @@ The requested key's current value, read live from `window.openai`. It is un-norm
 
 | Key | Value | Also via |
 | --- | --- | --- |
-| `theme` | `"light"` or `"dark"` | [`useLayout`](/api-reference/use-layout) |
+| `theme` | `"light"` or `"dark"` | [`useUser`](/api-reference/use-user) |
 | `locale` | locale string, not canonicalized | [`useUser`](/api-reference/use-user) |
 | `userAgent` | device type and input capabilities | [`useUser`](/api-reference/use-user) |
-| `maxHeight` | max view height in pixels | [`useLayout`](/api-reference/use-layout) |
+| `maxHeight` | max view height in pixels | [`useViewport`](/api-reference/use-viewport) |
 | `displayMode` | current layout (`pip` / `inline` / `fullscreen` / `modal`) | [`useDisplayMode`](/api-reference/use-display-mode) |
-| `safeArea` | insets to keep clear of host chrome | [`useLayout`](/api-reference/use-layout) |
+| `safeArea` | insets to keep clear of host chrome | [`useViewport`](/api-reference/use-viewport) |
 | `view` | current mode and modal params | [`useRequestModal`](/api-reference/use-request-modal) |
 | `toolInput` | the tool call's arguments | [`useToolInfo`](/api-reference/use-tool-info) |
 | `toolOutput` | the tool's structured output | [`useToolInfo`](/api-reference/use-tool-info) |

@@ -17,12 +17,40 @@ Using [Auth0](/guides/auth-providers#auth0), [Clerk](/guides/auth-providers#cler
 Here's a complete server where every tool requires sign-in:
 
 ```ts server.ts
-import { McpServer, mcpAuthMetadataRouter, requireBearerAuth } from "skybridge/server";
+import { Skybridge, mcpAuthMetadataRouter, requireBearerAuth } from "skybridge/server";
 import { z } from "zod";
 
 import { verifyAccessToken } from "./auth.js";
 
-const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
+export const app = new Skybridge({
+  name: "personal-shopper",
+  version: "0.0.1",
+  handler: (server) =>
+    server
+      .registerTool(
+        {
+          name: "search-products",
+          description: "Show products matching a query in a carousel.",
+          inputSchema: { query: z.string() },
+          securitySchemes: [{ type: "oauth2" }],
+          view: { component: "carousel" },
+        },
+        async ({ query }, extra) => ({
+          structuredContent: { products: await search(query, extra.http?.authInfo) },
+        }),
+      )
+      .registerTool(
+        {
+          name: "create-checkout",
+          description: "Create a checkout session for the given products.",
+          inputSchema: { productIds: z.array(z.string()) },
+          securitySchemes: [{ type: "oauth2", scopes: ["checkout"] }],
+        },
+        async ({ productIds }, extra) => ({
+          structuredContent: { url: await checkout(productIds, extra.http?.authInfo) },
+        }),
+      ),
+})
   .use(
     mcpAuthMetadataRouter({
       oauthMetadata: {
@@ -34,30 +62,7 @@ const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
       resourceServerUrl: new URL(process.env.SERVER_URL),
     }),
   )
-  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
-  .registerTool(
-    {
-      name: "search-products",
-      description: "Show products matching a query in a carousel.",
-      inputSchema: { query: z.string() },
-      securitySchemes: [{ type: "oauth2" }],
-      view: { component: "carousel" },
-    },
-    async ({ query }, extra) => ({
-      structuredContent: { products: await search(query, extra.authInfo) },
-    }),
-  )
-  .registerTool(
-    {
-      name: "create-checkout",
-      description: "Create a checkout session for the given products.",
-      inputSchema: { productIds: z.array(z.string()) },
-      securitySchemes: [{ type: "oauth2", scopes: ["checkout"] }],
-    },
-    async ({ productIds }, extra) => ({
-      structuredContent: { url: await checkout(productIds, extra.authInfo) },
-    }),
-  );
+  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }));
 ```
 
 The sections below cover publishing the discovery metadata, verifying tokens with a middleware, declaring auth per tool, reading the user in handlers, and mixing public and authenticated tools.
@@ -67,7 +72,7 @@ The sections below cover publishing the discovery metadata, verifying tokens wit
 Hosts find your authorization server through standard metadata documents ([RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728)). [`mcpAuthMetadataRouter`](/api-reference/mcp-auth-metadata-router) serves them at `/.well-known/oauth-protected-resource`, so the host can perform the authentication flow.
 
 ```ts server.ts highlight={2-12}
-const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
+export const app = new Skybridge({ name: "personal-shopper", version: "0.0.1", handler })
   .use(
     mcpAuthMetadataRouter({
       oauthMetadata: {
@@ -79,9 +84,7 @@ const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
       resourceServerUrl: new URL(process.env.SERVER_URL),
     }),
   )
-  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
-  .registerTool(/* search-products … */)
-  .registerTool(/* create-checkout … */);
+  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }));
 ```
 
 The endpoint values come from your OAuth provider's documentation. `resourceServerUrl` is this server's public URL: localhost in development, the [tunnel](/test/tunnel) URL when testing in a host, your domain in production.
@@ -90,11 +93,11 @@ The endpoint values come from your OAuth provider's documentation. `resourceServ
 
 Once the user is signed in, every request carries `Authorization: Bearer <token>`. [`requireBearerAuth`](/api-reference/require-bearer-auth) validates it before any handler runs: missing, invalid, or expired tokens get a 401, insufficient scopes a 403.
 
-It takes a [verifier](/api-reference/verifier) you write, with one method: `verifyAccessToken(token)` resolves with an [`AuthInfo`](/api-reference/verifier#authinfo) (handlers receive it as `extra.authInfo`) or throws `InvalidTokenError` (the middleware answers 401).
+It takes a [verifier](/api-reference/verifier) you write, with one method: `verifyAccessToken(token)` resolves with an [`AuthInfo`](/api-reference/verifier#authinfo) (handlers receive it as `extra.http?.authInfo`) or throws `OAuthError` (the middleware answers 401).
 
 <CodeGroup>
 ```ts server.ts highlight={13}
-const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
+export const app = new Skybridge({ name: "personal-shopper", version: "0.0.1", handler })
   .use(
     mcpAuthMetadataRouter({
       oauthMetadata: {
@@ -106,13 +109,11 @@ const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
       resourceServerUrl: new URL(process.env.SERVER_URL),
     }),
   )
-  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }))
-  .registerTool(/* search-products … */)
-  .registerTool(/* create-checkout … */);
+  .use("/mcp", requireBearerAuth({ verifier: { verifyAccessToken } }));
 ```
 
 ```ts auth.ts
-import { type AuthInfo, InvalidTokenError } from "skybridge/server";
+import { type AuthInfo, OAuthError } from "skybridge/server";
 
 export async function verifyAccessToken(token: string): Promise<AuthInfo> {
   try {
@@ -127,7 +128,8 @@ export async function verifyAccessToken(token: string): Promise<AuthInfo> {
       extra: { subject: payload.sub },
     };
   } catch (err) {
-    throw new InvalidTokenError(
+    throw new OAuthError(
+      "invalid_token",
       err instanceof Error ? err.message : "Token validation failed",
     );
   }
@@ -144,7 +146,7 @@ The validation body is provider-specific: [JWKS](https://datatracker.ietf.org/do
 The claim shape belongs to the verifier, so handlers get it without declaring anything. On the [provider path](/guides/auth-providers) each provider ships the claims its own docs promise, and a type argument adds the ones your tenant sends:
 
 ```ts server.ts
-oauth: await workosProvider<{ tenant: string }>({ domain, audience }),
+oauth: () => workosProvider<{ tenant: string }>({ domain, audience }),
 ```
 
 Writing the verifier yourself? Type it `TokenVerifier<Claims>` and the shape flows the same way.
@@ -156,7 +158,7 @@ None of this is checked at runtime, so keep anything the IdP may omit optional. 
 Serving both anonymous and signed-in callers from one server takes three changes to the fully authenticated setup.
 
 <Tip>
-On the [provider path](/guides/auth-providers) (the `oauth` constructor option), these three steps collapse into one `auth` declaration per tool, and Skybridge enforces it for you:
+On the [provider path](/guides/auth-providers) (the `oauth` config field), these three steps collapse into one `auth` declaration per tool, and Skybridge enforces it for you:
 
 ```ts
 server
@@ -172,10 +174,8 @@ Any `auth: { allowsAnonymous: true }` tool makes the server serve anonymous call
 [`optionalBearerAuth`](/api-reference/optional-bearer-auth) validates the token when present, lets the request through when absent, and still rejects invalid tokens with a 401. Unauthenticated requests now reach your handlers.
 
 ```ts server.ts highlight={2}
-server
-  .use("/mcp", optionalBearerAuth({ verifier: { verifyAccessToken } }))
-  .registerTool(/* search-products … */)
-  .registerTool(/* create-checkout … */);
+export const app = new Skybridge({ name: "personal-shopper", version: "0.0.1", handler })
+  .use("/mcp", optionalBearerAuth({ verifier: { verifyAccessToken } }));
 ```
 
 ### Declare Tool Visibility
@@ -196,12 +196,12 @@ server.registerTool(
     securitySchemes: [{ type: "noauth" }, { type: "oauth2" }],
   },
   async ({ query }, extra) => ({
-    structuredContent: { products: await search(query, extra.authInfo) },
+    structuredContent: { products: await search(query, extra.http?.authInfo) },
   }),
 );
 ```
 
-`search-products` lists both schemes: anonymous callers browse the public catalog, signed-in callers get results scoped to their account. `extra.authInfo` is set or `undefined` accordingly.
+`search-products` lists both schemes: anonymous callers browse the public catalog, signed-in callers get results scoped to their account. `extra.http?.authInfo` is set or `undefined` accordingly.
 
 ### Guard the Handler
 
@@ -215,11 +215,11 @@ server.registerTool(
     securitySchemes: [{ type: "oauth2", scopes: ["checkout"] }],
   },
   async ({ productIds }, extra) => {
-    if (!extra.authInfo?.scopes.includes("checkout")) {
+    if (!extra.http?.authInfo?.scopes.includes("checkout")) {
       return { content: "Sign in to check out.", isError: true };
     }
     return {
-      structuredContent: { url: await checkout(productIds, extra.authInfo) },
+      structuredContent: { url: await checkout(productIds, extra.http?.authInfo) },
     };
   },
 );
