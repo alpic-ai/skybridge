@@ -1,8 +1,13 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type SkybridgeServer, FileRef, Skybridge, text } from "skybridge/server";
+import {
+  FileRef,
+  Skybridge,
+  type SkybridgeServer,
+  text,
+} from "skybridge/server";
 import { z } from "zod";
 
-export const serverFactory = (server: SkybridgeServer) =>
+export const handler = (server: SkybridgeServer) =>
   server
     .registerTool(
       {
@@ -32,9 +37,7 @@ export const serverFactory = (server: SkybridgeServer) =>
         };
         return {
           structuredContent,
-          content: [
-            { type: "text", text: JSON.stringify(structuredContent) },
-          ],
+          content: [{ type: "text", text: JSON.stringify(structuredContent) }],
           isError: false,
           _meta: {
             secret: "But _meta is only visible to you",
@@ -116,13 +119,11 @@ export const serverFactory = (server: SkybridgeServer) =>
     )
     .mcpMiddleware(intentMiddleware());
 
-export const app = new Skybridge(
-  {
-    name: "alpic-openai-app",
-    version: "0.0.1",
-    capabilities: {},
-  },
-  serverFactory,
-);
+export const app = new Skybridge({
+  name: "alpic-openai-app",
+  version: "0.0.1",
+  capabilities: {},
+  handler,
+});
 
 export type AppType = typeof app;

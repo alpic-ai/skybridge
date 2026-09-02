@@ -1,6 +1,6 @@
 import { intentMiddleware } from "@alpic-ai/insights";
 import { type Request, type Response, Router } from "express";
-import { type SkybridgeServer, Skybridge } from "skybridge/server";
+import { Skybridge, type SkybridgeServer } from "skybridge/server";
 import * as z from "zod";
 import {
   type Capital,
@@ -10,7 +10,7 @@ import {
   getCapitalSlug,
 } from "./capitals.js";
 
-export const serverFactory = (server: SkybridgeServer) =>
+export const handler = (server: SkybridgeServer) =>
   server
     .registerTool(
       {
@@ -82,14 +82,12 @@ export const serverFactory = (server: SkybridgeServer) =>
     )
     .mcpMiddleware(intentMiddleware());
 
-export const app = new Skybridge(
-  {
-    name: "world-capitals-explorer",
-    version: "0.0.1",
-    capabilities: {},
-  },
-  serverFactory,
-);
+export const app = new Skybridge({
+  name: "world-capitals-explorer",
+  version: "0.0.1",
+  capabilities: {},
+  handler,
+});
 
 function formatCapitalForModel(capital: Capital): string {
   const parts = [`${capital.name} is the capital of ${capital.country.name}.`];

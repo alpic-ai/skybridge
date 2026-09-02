@@ -1,7 +1,7 @@
 import { Skybridge, type SkybridgeServer } from "skybridge/server";
 import { z } from "zod";
 
-export const serverFactory = (server: SkybridgeServer) =>
+export const handler = (server: SkybridgeServer) =>
   server
     .registerTool(
       {
@@ -85,13 +85,11 @@ export const serverFactory = (server: SkybridgeServer) =>
       },
     );
 
-export const app = new Skybridge(
-  {
-    name: "alpic-openai-app",
-    version: "0.0.1",
-    capabilities: {},
-  },
-  serverFactory,
-);
+export const app = new Skybridge({
+  name: "alpic-openai-app",
+  version: "0.0.1",
+  capabilities: {},
+  handler,
+});
 
 export type AppType = typeof app;

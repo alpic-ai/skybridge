@@ -1,5 +1,9 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type SkybridgeServer, clerkProvider, Skybridge } from "skybridge/server";
+import {
+  clerkProvider,
+  Skybridge,
+  type SkybridgeServer,
+} from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
@@ -19,7 +23,7 @@ import { env } from "./env.js";
  * via JWKS). Clerk tokens carry no `aud`, so verification is issuer + JWKS only.
  */
 
-export const serverFactory = (
+export const handler = (
   server: SkybridgeServer<{ email?: string; subject?: string }>,
 ) =>
   server
@@ -88,16 +92,15 @@ export const serverFactory = (
     )
     .mcpMiddleware(intentMiddleware());
 
-export const app = new Skybridge(
-  {
-    name: "auth-coffee",
-    version: "0.0.1",
-    capabilities: {},
-    oauth: await clerkProvider({
+export const app = new Skybridge({
+  name: "auth-coffee",
+  version: "0.0.1",
+  capabilities: {},
+  oauth: () =>
+    clerkProvider({
       domain: env.CLERK_DOMAIN,
     }),
-  },
-  serverFactory,
-);
+  handler,
+});
 
 export type AppType = typeof app;

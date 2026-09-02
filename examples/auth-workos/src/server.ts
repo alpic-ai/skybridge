@@ -1,5 +1,9 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type SkybridgeServer, Skybridge, workosProvider } from "skybridge/server";
+import {
+  Skybridge,
+  type SkybridgeServer,
+  workosProvider,
+} from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
@@ -17,7 +21,7 @@ import { env } from "./env.js";
  * configured in the WorkOS dashboard — here, this server's public URL.
  */
 
-export const serverFactory = (
+export const handler = (
   server: SkybridgeServer<{ email?: string; subject?: string }>,
 ) =>
   server
@@ -86,17 +90,16 @@ export const serverFactory = (
     )
     .mcpMiddleware(intentMiddleware());
 
-export const app = new Skybridge(
-  {
-    name: "auth-coffee",
-    version: "0.0.1",
-    capabilities: {},
-    oauth: await workosProvider({
+export const app = new Skybridge({
+  name: "auth-coffee",
+  version: "0.0.1",
+  capabilities: {},
+  oauth: () =>
+    workosProvider({
       domain: env.AUTHKIT_DOMAIN,
       audience: env.SERVER_URL,
     }),
-  },
-  serverFactory,
-);
+  handler,
+});
 
 export type AppType = typeof app;

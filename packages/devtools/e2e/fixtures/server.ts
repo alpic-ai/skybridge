@@ -27,9 +27,11 @@ const serverName = REQUIRES_AUTH
     : "e2e-auth-fixture"
   : "e2e-fixture";
 
-const app = new Skybridge(
-  { name: serverName, version: "0.0.0", capabilities: {} },
-  (server) =>
+const app = new Skybridge({
+  name: serverName,
+  version: "0.0.0",
+  capabilities: {},
+  handler: (server) =>
     server
       .registerTool(
         {
@@ -194,7 +196,7 @@ const app = new Skybridge(
           };
         },
       ),
-);
+});
 
 if (REQUIRES_AUTH) {
   const serverUrl = `http://localhost:${process.env.__PORT}`;

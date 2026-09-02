@@ -1,5 +1,9 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type SkybridgeServer, Skybridge, stytchProvider } from "skybridge/server";
+import {
+  Skybridge,
+  type SkybridgeServer,
+  stytchProvider,
+} from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
@@ -22,7 +26,7 @@ import { env } from "./env.js";
  * advertises it as the authorization_endpoint.
  */
 
-export const serverFactory = (
+export const handler = (
   server: SkybridgeServer<{ email?: string; subject?: string }>,
 ) =>
   server
@@ -91,17 +95,16 @@ export const serverFactory = (
     )
     .mcpMiddleware(intentMiddleware());
 
-export const app = new Skybridge(
-  {
-    name: "auth-coffee",
-    version: "0.0.1",
-    capabilities: {},
-    oauth: await stytchProvider({
+export const app = new Skybridge({
+  name: "auth-coffee",
+  version: "0.0.1",
+  capabilities: {},
+  oauth: () =>
+    stytchProvider({
       domain: env.STYTCH_DOMAIN,
       audience: env.STYTCH_PROJECT_ID,
     }),
-  },
-  serverFactory,
-);
+  handler,
+});
 
 export type AppType = typeof app;

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type SkybridgeServer, Skybridge } from "skybridge/server";
+import { Skybridge, type SkybridgeServer } from "skybridge/server";
 import { z } from "zod";
 
 const ActivityTypes = ["meetings", "work", "learning"] as const;
@@ -80,7 +80,7 @@ function getWeek(weekOffset: number): Week {
   };
 }
 
-export const serverFactory = (server: SkybridgeServer) =>
+export const handler = (server: SkybridgeServer) =>
   server
     .registerTool(
       {
@@ -129,13 +129,11 @@ export const serverFactory = (server: SkybridgeServer) =>
     )
     .mcpMiddleware(intentMiddleware());
 
-export const app = new Skybridge(
-  {
-    name: "productivity-charts-example-server",
-    version: "0.0.1",
-    capabilities: {},
-  },
-  serverFactory,
-);
+export const app = new Skybridge({
+  name: "productivity-charts-example-server",
+  version: "0.0.1",
+  capabilities: {},
+  handler,
+});
 
 export type AppType = typeof app;

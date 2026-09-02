@@ -1,9 +1,9 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type SkybridgeServer, Skybridge } from "skybridge/server";
+import { Skybridge, type SkybridgeServer } from "skybridge/server";
 import { z } from "zod";
 import { drawCard, getCard } from "./cards.js";
 
-export const serverFactory = (server: SkybridgeServer) =>
+export const handler = (server: SkybridgeServer) =>
   server
     .registerTool(
       {
@@ -116,20 +116,18 @@ export const serverFactory = (server: SkybridgeServer) =>
     )
     .mcpMiddleware(intentMiddleware());
 
-export const app = new Skybridge(
-  {
-    name: "times-up",
-    version: "0.0.1",
-    capabilities: {},
-    instructions: `You are playing Time's Up with the user.
+export const app = new Skybridge({
+  name: "times-up",
+  version: "0.0.1",
+  capabilities: {},
+  instructions: `You are playing Time's Up with the user.
 
 - At the start of a new conversation, immediately draw the first card by invoking the play tool—do *not* wait for the user to request it.
 - The user sees the word on the card and will provide you with hints.
 - Listen attentively and make lively, conversational guesses based on the clues the user provides.
 - Whenever you think you know the answer, *say your guess clearly to the user first* (for example: "Is it [your guess]?") before using the guess tool.
 - Always keep the tone energetic and encouraging—never silently invoke a tool or leave the user waiting without a spoken response.`,
-  },
-  serverFactory,
-);
+  handler,
+});
 
 export type AppType = typeof app;

@@ -2,7 +2,12 @@ import "./env.js";
 import { randomUUID } from "node:crypto";
 import { extname } from "node:path";
 import { zipSync } from "fflate";
-import { type SkybridgeServer, FileRef, Skybridge, text } from "skybridge/server";
+import {
+  FileRef,
+  Skybridge,
+  type SkybridgeServer,
+  text,
+} from "skybridge/server";
 import { z } from "zod";
 import { uploadToR2 } from "./r2.js";
 
@@ -38,7 +43,7 @@ function entryNameFor(file: FileRef): string {
   return ext ? `${base}.${ext}` : base;
 }
 
-export const serverFactory = (server: SkybridgeServer) =>
+export const handler = (server: SkybridgeServer) =>
   server.registerTool(
     {
       name: "zip-file",
@@ -120,13 +125,11 @@ export const serverFactory = (server: SkybridgeServer) =>
     },
   );
 
-export const app = new Skybridge(
-  {
-    name: "zip",
-    version: "0.0.1",
-    capabilities: {},
-  },
-  serverFactory,
-);
+export const app = new Skybridge({
+  name: "zip",
+  version: "0.0.1",
+  capabilities: {},
+  handler,
+});
 
 export type AppType = typeof app;

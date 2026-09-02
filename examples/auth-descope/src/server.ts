@@ -2,7 +2,7 @@ import { intentMiddleware } from "@alpic-ai/insights";
 import { descopeProvider, Skybridge } from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
-import { loadEnv } from "./env.js";
+import { env } from "./env.js";
 
 /**
  * Auth Example - Full OAuth Authentication with Descope
@@ -22,11 +22,7 @@ export const app = new Skybridge({
   name: "auth-coffee",
   version: "0.0.1",
   capabilities: {},
-  setup: () => loadEnv(),
-  oauth: (env) =>
-    descopeProvider({
-      url: env.DESCOPE_MCP_SERVER_URL,
-    }),
+  oauth: () => descopeProvider({ url: env.DESCOPE_MCP_SERVER_URL }),
   handler: (server) =>
     server
       .registerTool(

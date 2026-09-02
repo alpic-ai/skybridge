@@ -1,4 +1,4 @@
-import { type SkybridgeServer, Skybridge } from "skybridge/server";
+import { Skybridge, type SkybridgeServer } from "skybridge/server";
 import { z } from "zod";
 import { openuiPrompt } from "./openui/library.js";
 
@@ -24,7 +24,7 @@ async function renderOpenui() {
   };
 }
 
-export const serverFactory = (server: SkybridgeServer) =>
+export const handler = (server: SkybridgeServer) =>
   server
     .registerTool(
       {
@@ -59,12 +59,10 @@ export const serverFactory = (server: SkybridgeServer) =>
       renderOpenui,
     );
 
-export const app = new Skybridge(
-  {
-    name: "openui-generative-ui",
-    version: "0.0.1",
-  },
-  serverFactory,
-);
+export const app = new Skybridge({
+  name: "openui-generative-ui",
+  version: "0.0.1",
+  handler,
+});
 
 export type AppType = typeof app;

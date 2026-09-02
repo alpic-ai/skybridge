@@ -1,5 +1,9 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type SkybridgeServer, authplaneProvider, Skybridge } from "skybridge/server";
+import {
+  authplaneProvider,
+  Skybridge,
+  type SkybridgeServer,
+} from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
@@ -25,7 +29,7 @@ import { env } from "./env.js";
  * for byte.
  */
 
-export const serverFactory = (
+export const handler = (
   server: SkybridgeServer<{ email?: string; subject?: string }>,
 ) =>
   server
@@ -100,17 +104,16 @@ export const serverFactory = (
     )
     .mcpMiddleware(intentMiddleware());
 
-export const app = new Skybridge(
-  {
-    name: "auth-coffee",
-    version: "0.0.1",
-    capabilities: {},
-    oauth: await authplaneProvider<{ email?: string }>({
+export const app = new Skybridge({
+  name: "auth-coffee",
+  version: "0.0.1",
+  capabilities: {},
+  oauth: () =>
+    authplaneProvider<{ email?: string }>({
       issuer: env.AUTHPLANE_ISSUER,
       resource: env.SERVER_URL,
     }),
-  },
-  serverFactory,
-);
+  handler,
+});
 
 export type AppType = typeof app;

@@ -1,5 +1,9 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type SkybridgeServer, auth0Provider, Skybridge } from "skybridge/server";
+import {
+  auth0Provider,
+  Skybridge,
+  type SkybridgeServer,
+} from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
@@ -20,9 +24,7 @@ const AUTH0_BASE_URL = `https://${env.AUTH0_DOMAIN}`;
  * Dynamic Client Registration and register an API whose Identifier is `audience`.
  */
 
-export const serverFactory = (
-  server: SkybridgeServer<{ subject?: string }>,
-) =>
+export const handler = (server: SkybridgeServer<{ subject?: string }>) =>
   server
     .registerTool(
       {
@@ -110,12 +112,12 @@ export const serverFactory = (
     )
     .mcpMiddleware(intentMiddleware());
 
-export const app = new Skybridge(
-  {
-    name: "auth-coffee",
-    version: "0.0.1",
-    capabilities: {},
-    oauth: await auth0Provider({
+export const app = new Skybridge({
+  name: "auth-coffee",
+  version: "0.0.1",
+  capabilities: {},
+  oauth: () =>
+    auth0Provider({
       domain: env.AUTH0_DOMAIN,
       audience: env.AUTH0_AUDIENCE, // Auth0 API Identifier
       serverUrl: env.SERVER_URL, // public URL (skybridge-as-AS)
@@ -124,8 +126,7 @@ export const app = new Skybridge(
       // permissions were granted".
       scopes: ["openid", "profile", "email"],
     }),
-  },
-  serverFactory,
-);
+  handler,
+});
 
 export type AppType = typeof app;

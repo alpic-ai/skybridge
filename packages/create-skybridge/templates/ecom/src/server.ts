@@ -15,18 +15,17 @@ if (existsSync(".env")) {
   process.loadEnvFile();
 }
 
-export const serverFactory = (server: SkybridgeServer) =>
+export const handler = (server: SkybridgeServer) =>
   server
     .registerTool(searchProductsDefinition, searchProductsHandler)
     .registerTool(renderCarouselDefinition, renderCarouselHandler);
 
-export const app = new Skybridge(
-  {
-    // @todo: name and version your app.
-    name: "skybridge-ecom",
-    version: "0.0.1",
-    // @todo: adapt this server-wide prompt to your catalog.
-    instructions: `\
+export const app = new Skybridge({
+  // @todo: name and version your app.
+  name: "skybridge-ecom",
+  version: "0.0.1",
+  // @todo: adapt this server-wide prompt to your catalog.
+  instructions: `\
 Two phases:
 
 SEARCH: Call search-products ${MIN_SEARCH_ITERATIONS}+ times before presenting, never off one call. \
@@ -36,8 +35,7 @@ once the carousel renders.
 
 RENDER: After curating, call render-carousel with the chosen product IDs (aim for ${CAROUSEL_RANGE}). \
 Speak once it renders, then recommend products in carousel order.`,
-  },
-  serverFactory,
-);
+  handler,
+});
 
 export type AppType = typeof app;

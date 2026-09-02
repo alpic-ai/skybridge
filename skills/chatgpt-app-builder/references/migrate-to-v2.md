@@ -4,13 +4,13 @@ Use this when upgrading from Skybridge `1.x`. The breaking changes landed in [v2
 
 Read the release notes first: they say what changed and why. This guide says how to change it and how to know it worked, so it carries the failure symptoms, the order of operations and the traps that only show up mid-migration. Verify against the installed package rather than guessing when something does not match: grep its dist types (`node_modules/skybridge/dist/server/app.d.ts`, `dist/server/server.d.ts`, `dist/web/index.d.ts`), or run `npm pack skybridge@<version>` to read them before installing.
 
-v2 is built on MCP SDK v2 and the `2026-07-28` protocol revision. The single largest change is structural: the long-lived `McpServer` singleton is gone, replaced by a `Skybridge` app whose factory runs for every request.
+v2 is built on MCP SDK v2 and the `2026-07-28` protocol revision. The single largest change is structural: the long-lived `McpServer` singleton is gone, replaced by a `Skybridge` app whose `handler` runs for every request.
 
 ## Step 1: Mechanical renames
 
 | v1 | v2 |
 |----|----|
-| `new McpServer(info, options, skybridgeOptions)` | `new Skybridge({ ...info, ...options, ...skybridgeOptions }, factory)` |
+| `new McpServer(info, options, skybridgeOptions)` | `new Skybridge({ ...info, ...options, ...skybridgeOptions, handler })` |
 | `import { skybridge } from "skybridge/vite"` | `import { skybridge } from "@skybridge/vite-plugin"` |
 | `export default await server.run()` in `src/server.ts` | `export default await app.run()` in a new `src/index.ts` |
 | `export type AppType = typeof server` | `export type AppType = typeof app` |
@@ -26,88 +26,103 @@ Three of these are not pure 1:1 renames:
 
 - `useLayout` split along how often values change, not arbitrarily. `theme` is a user preference that rarely changes and now sits in `useUser` next to `locale` and `userAgent`; `maxHeight` and `safeArea` are viewport geometry that changes on every resize and now sit in `useViewport`. A view that only needs `theme` no longer re-renders on resize.
 - The `registerTool` 3-argument overload was already deprecated in 1.x and is now deleted, so tools you never touched during the v1 migration can still be on the old form.
-- `oauth`, `json` and `skills` move **into** the single config object. There is no third constructor argument any more.
+- `oauth`, `json` and `skills` move **into** the single config object, next to the new `setup` and `handler` fields. The constructor takes exactly one argument.
 
 ## Step 2: The parts that go wrong
 
 Each of these either blocks a working build or silently changes runtime behaviour, and most of them fail with a symptom that points away from the cause.
 
-### 2.1 The factory must return the chained server
+### 2.1 The handler must return the chained server
 
-`Skybridge` takes two arguments: a config bag and a factory (`SkybridgeFactory`). The factory receives a fresh `McpServer` and must **return** the result of the `registerTool` chain. That return value is what carries your tool types into `typeof app`.
+`Skybridge` takes one config object. Its required `handler` field receives a fresh `McpServer` and must **return** the result of the `registerTool` chain. That return value is what carries your tool types into `typeof app`.
 
 ```ts
 // src/server.ts
 import { Skybridge } from "skybridge/server";
 import * as z from "zod";
 
-export const app = new Skybridge(
-  { name: "my-app", version: "1.0.0", capabilities: {} },
-  (server) =>
+export const app = new Skybridge({
+  name: "my-app",
+  version: "1.0.0",
+  capabilities: {},
+  handler: (server) =>
     server
-      .registerTool({ name: "search", inputSchema: { query: z.string() } }, handler)
+      .registerTool({ name: "search", inputSchema: { query: z.string() } }, searchHandler)
       .registerTool({ name: "book", inputSchema: { id: z.string() } }, bookHandler),
-);
+});
 
 export type AppType = typeof app;
 ```
 
-Write the factory as an expression body (`(server) => server.registerTool(...)`) so the return is structural and cannot be forgotten. With a block body, a missing `return` fails to compile at the `new Skybridge(...)` call (`Type 'void' is not assignable to type 'McpServer<…>'`).
+Write the handler as an expression body (`(server) => server.registerTool(...)`) so the return is structural and cannot be forgotten. With a block body, a missing `return` fails to compile at the `new Skybridge(...)` call (`Type 'void' is not assignable to type 'McpServer<…>'`).
 
-Prefer extracting the factory into its own exported declaration, annotated with `SkybridgeServer` from `skybridge/server` — the bare server a factory receives. It takes the claims your OAuth verifier produces, which types `extra.http.authInfo.extra` in handlers:
+When the handler is extracted into its own declaration, annotate its parameter with `SkybridgeServer` from `skybridge/server`, the bare server it receives. It takes the claims your OAuth verifier produces, which types `extra.http.authInfo.extra` in tool handlers. When `oauth` is set on the same config, the claims are inferred from the provider and the annotation is unnecessary:
 
 ```ts
-export const serverFactory = (server: SkybridgeServer<{ email?: string }>) =>
-  server.registerTool({ name: "search", ... }, handler);
+export const handler = (server: SkybridgeServer<{ email?: string }>) =>
+  server.registerTool({ name: "search", ... }, searchHandler);
 
-export const app = new Skybridge(config, serverFactory);
+export const app = new Skybridge({ ...config, handler });
 ```
 
-Leave the factory's return type inferred: the returned chain is what carries the tool registry into `typeof app`.
+Leave the handler's return type inferred: the returned chain is what carries the tool registry into `typeof app`.
 
-### 2.2 The factory runs on every request, so it must be pure
+### 2.2 The handler runs on every request, so it must be pure
 
 The release notes cover this too. It is repeated here because it is the change most likely to take down a migrated app in production, and neither the compiler nor a manual test through devtools will catch it.
 
-The factory runs once at construction (so registration errors surface at boot and OAuth learns each tool's security schemes) and then **again for every single HTTP request**, because the per-request server instance is what the SDK stamps with the negotiated protocol version.
+The handler runs once when the app is first used (at `run()` or on the first request, so registration errors surface at boot and OAuth learns each tool's security schemes) and then **again for every single HTTP request**, because the per-request server instance is what the SDK stamps with the negotiated protocol version. Skybridge warns on the console when a handler takes more than 50ms.
 
-Anything in the factory body other than registration therefore executes per request:
+Anything in the handler body other than registration therefore executes per request:
 
 ```ts
 // WRONG: one pool and one timer per request
-export const app = new Skybridge(config, (server) => {
-  const pool = new pg.Pool();
-  setInterval(refreshCache, 60_000);
-  return server.registerTool(...);
+export const app = new Skybridge({
+  ...config,
+  handler: (server) => {
+    const pool = new pg.Pool();
+    setInterval(refreshCache, 60_000);
+    return server.registerTool(...);
+  },
 });
 ```
 
-Under load this opens connection pools and accumulates timers until the process dies. Hoist every side effect to module scope, above the `new Skybridge(...)` call, and let the factory close over it:
+Under load this opens connection pools and accumulates timers until the process dies. Hoist every side effect to module scope, above the `new Skybridge(...)` call, and let the handler close over it:
 
 ```ts
 // RIGHT
 const pool = new pg.Pool();
 setInterval(refreshCache, 60_000);
 
-export const app = new Skybridge(config, (server) => server.registerTool(...));
+export const app = new Skybridge({ ...config, handler: (server) => server.registerTool(...) });
 ```
 
 The same applies to anything expensive but harmless: file reads, config parsing, client construction, `await`ed setup. Registration is the only work that belongs inside.
 
-When registration itself depends on `await`ed data (remote config, secrets), pass an async loader in place of the factory. It runs once — at `run()` or on the first request, never at module import, so importing `server.ts` from tests and evals stays side-effect free — and resolves to the ordinary synchronous factory:
+When registration itself depends on `await`ed data (remote config, secrets), put that work in `setup`. It runs once, at `run()` or on the first request and never at module import, so importing `server.ts` from tests and evals stays side-effect free. Its awaited result is passed to the handler as the second argument. The handler itself stays synchronous:
 
 ```ts
-export const app = new Skybridge(config, async () => {
-  const cfg = await loadConfig();
-  return (server) => server.registerTool({ name: cfg.toolName, ... }, handler);
+export const app = new Skybridge({
+  ...config,
+  setup: async () => loadConfig(),
+  handler: (server, cfg) => server.registerTool({ name: cfg.toolName, ... }, handler),
 });
 ```
 
-The `oauth` config field accepts the same shape: an `OAuthConfig` or a zero-arg async function resolving to one.
+The `oauth` field accepts an `OAuthConfig`, a promise of one, or a function of the `setup` result. Prefer the function form when building the config has side effects (the branded providers perform network discovery):
 
-**If you are an agent performing this migration**, this is the one step you cannot do by shape-preserving edit. The mechanical move is to wrap the old file's contents in the factory, and that is exactly what produces the bug, because in v1 those statements ran once at module scope.
+```ts
+export const app = new Skybridge({
+  ...config,
+  setup: async () => loadConfig(),
+  oauth: (cfg) => descopeProvider({ url: cfg.mcpServerUrl }),
+  handler: (server, cfg) => server.registerTool(...),
+});
+```
 
-Go through the v1 server file statement by statement before you move anything. Only `registerTool`, `registerResource`, `registerPrompt` and `mcpMiddleware` calls belong inside the factory. Everything else stays at module scope, above the `new Skybridge(...)` call:
+**If you are an agent performing this migration**, this is the one step you cannot do by shape-preserving edit. The mechanical move is to wrap the old file's contents in the handler, and that is exactly what produces the bug, because in v1 those statements ran once at module scope.
+
+Go through the v1 server file statement by statement before you move anything. Only `registerTool`, `registerResource`, `registerPrompt` and `mcpMiddleware` calls belong inside the handler. Everything else stays at module scope (or in `setup`), above the `new Skybridge(...)` call:
 
 - database pools, HTTP clients, SDK clients, caches
 - `setInterval` / `setTimeout`
@@ -131,19 +146,21 @@ export default await app.run();
 
 `src/server.ts` must now export `app` rather than default-exporting the result of `run()`. `tsc`, `skybridge build` and `skybridge dev` all pass whatever you do here; only `skybridge start` fails, and only in production, with a missing-entry error that does not mention the filename convention.
 
-### 2.4 `mcpMiddleware` chains inside the factory
+### 2.4 `mcpMiddleware` chains inside the handler
 
-Middleware was registered on the singleton in v1. It is per-instance state now, so it belongs in the chain the factory returns:
+Middleware was registered on the singleton in v1. It is per-instance state now, so it belongs in the chain the handler returns:
 
 ```ts
-export const app = new Skybridge(config, (server) =>
-  server
-    .mcpMiddleware(intentMiddleware())
-    .registerTool(...),
-);
+export const app = new Skybridge({
+  ...config,
+  handler: (server) =>
+    server
+      .mcpMiddleware(intentMiddleware())
+      .registerTool(...),
+});
 ```
 
-Registering it outside the factory is a compile error, since there is no server object at module scope to call it on. Ordering within the chain is unchanged.
+Registering it outside the handler is a compile error, since there is no server object at module scope to call it on. Ordering within the chain is unchanged.
 
 ### 2.5 Tool handler `extra` is the SDK's `ServerContext`
 
@@ -219,7 +236,7 @@ One exception runs the other way: tools registered from inside a view via `useRe
 
 ### 2.12 `app.fetchHandler` is gone; `createServerInstance()` is async
 
-The HTTP surface an app exposes is the Express listener (`app.run()` / `app.express`). Code that dialed `app.fetchHandler` directly builds its own handler instead: `createMcpHandler(() => app.createServerInstance())` from `@modelcontextprotocol/server`. `createServerInstance()` now returns a promise — it resolves the async factory loader and lazy OAuth config on first use — so `await` it where v2 alphas called it synchronously.
+The HTTP surface an app exposes is the Express listener (`app.run()` / `app.express`). Code that dialed `app.fetchHandler` directly builds its own handler instead: `createMcpHandler(() => app.createServerInstance())` from `@modelcontextprotocol/server`. `createServerInstance()` now returns a promise, since it resolves `setup` and the `oauth` input on first use, so `await` it where v2 alphas called it synchronously.
 
 ## Step 3: Version strategy
 
@@ -242,9 +259,9 @@ Once 2.0.0 is released, switch all three to `^2.0.0` and re-validate.
 Using the project's configured package manager, run in order:
 
 1. Install dependencies, and confirm no unmet peer warnings for `@skybridge/devtools` or `@skybridge/vite-plugin`.
-2. `tsc --noEmit`. This catches the factory return, the `extra` reshape, and every removed export.
+2. `tsc --noEmit`. This catches the handler return, the `extra` reshape, and every removed export.
 3. `skybridge build`.
 4. `skybridge start`, not just `skybridge dev`. This is the only step that exercises the `dist/index.js` entry from 2.3.
 5. `skybridge dev`, then **open the view in devtools** and confirm it renders.
 
-Two failure modes here are invisible to a typecheck. A missing `src/index.ts` passes every check except `skybridge start`. An impure factory (2.2) passes everything, including a manual click through devtools, and only fails under sustained traffic. If your factory does anything beyond registration, re-read 2.2 before shipping.
+Two failure modes here are invisible to a typecheck. A missing `src/index.ts` passes every check except `skybridge start`. An impure handler (2.2) passes everything, including a manual click through devtools, and only fails under sustained traffic. If your handler does anything beyond registration, re-read 2.2 before shipping.

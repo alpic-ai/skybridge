@@ -1,4 +1,4 @@
-import { type SkybridgeServer, Skybridge } from "skybridge/server";
+import { Skybridge, type SkybridgeServer } from "skybridge/server";
 import { readPosition, STARTING_FEN } from "./lib/engine.js";
 
 // Deliberately tiny server. The only thing it does is open the board — all of
@@ -7,7 +7,7 @@ import { readPosition, STARTING_FEN } from "./lib/engine.js";
 // widget. The view opens on a pick-a-side lobby; once the user chooses a color
 // (which also pops the board into fullscreen), the assistant plays the
 // other side.
-export const serverFactory = (server: SkybridgeServer) =>
+export const handler = (server: SkybridgeServer) =>
   server.registerTool(
     {
       name: "start_game",
@@ -48,13 +48,11 @@ export const serverFactory = (server: SkybridgeServer) =>
     },
   );
 
-export const app = new Skybridge(
-  {
-    name: "skybridge-chess",
-    version: "0.0.1",
-    capabilities: {},
-  },
-  serverFactory,
-);
+export const app = new Skybridge({
+  name: "skybridge-chess",
+  version: "0.0.1",
+  capabilities: {},
+  handler,
+});
 
 export type AppType = typeof app;

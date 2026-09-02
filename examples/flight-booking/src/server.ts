@@ -1,5 +1,5 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type SkybridgeServer, Skybridge } from "skybridge/server";
+import { Skybridge, type SkybridgeServer } from "skybridge/server";
 import { z } from "zod";
 import { generateFlights } from "./flights.js";
 import { IATA_AIRPORTS } from "./iata-codes.js";
@@ -10,7 +10,7 @@ const AIRPORT_CODE = z
   .refine((v) => IATA_AIRPORTS.has(v), { message: "Invalid IATA airport code" })
   .describe("3-letter IATA airport code (e.g. CDG, JFK, NRT)");
 
-export const serverFactory = (server: SkybridgeServer) =>
+export const handler = (server: SkybridgeServer) =>
   server
     .registerTool(
       {
@@ -22,9 +22,7 @@ export const serverFactory = (server: SkybridgeServer) =>
           destination: AIRPORT_CODE,
           departureDate: z
             .string()
-            .describe(
-              "Departure date in YYYY-MM-DD format (e.g. 2026-08-16)",
-            ),
+            .describe("Departure date in YYYY-MM-DD format (e.g. 2026-08-16)"),
           returnDate: z
             .string()
             .describe("Return date in YYYY-MM-DD format (e.g. 2026-08-29)"),
@@ -79,9 +77,7 @@ export const serverFactory = (server: SkybridgeServer) =>
 
           return {
             structuredContent: result,
-            content: [
-              { type: "text" as const, text: JSON.stringify(result) },
-            ],
+            content: [{ type: "text" as const, text: JSON.stringify(result) }],
             isError: false,
           };
         } catch (error) {
@@ -94,13 +90,11 @@ export const serverFactory = (server: SkybridgeServer) =>
     )
     .mcpMiddleware(intentMiddleware());
 
-export const app = new Skybridge(
-  {
-    name: "flight-booking-app",
-    version: "0.0.1",
-    capabilities: {},
-  },
-  serverFactory,
-);
+export const app = new Skybridge({
+  name: "flight-booking-app",
+  version: "0.0.1",
+  capabilities: {},
+  handler,
+});
 
 export type AppType = typeof app;

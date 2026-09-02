@@ -1,4 +1,4 @@
-import { type SkybridgeServer, Skybridge } from "skybridge/server";
+import { Skybridge, type SkybridgeServer } from "skybridge/server";
 import { z } from "zod";
 import {
   CATEGORIES,
@@ -31,7 +31,7 @@ function errorResult(context: string, error: unknown) {
   };
 }
 
-export const serverFactory = (server: SkybridgeServer) =>
+export const handler = (server: SkybridgeServer) =>
   server
     .registerTool(
       {
@@ -94,10 +94,7 @@ export const serverFactory = (server: SkybridgeServer) =>
         description:
           "Add a new trip to the personal trip log. Use this when the user wants to log a trip. Infer country from place if not explicitly provided. Date defaults to today if not mentioned.",
         inputSchema: {
-          place: z
-            .string()
-            .min(1)
-            .describe("City or location name (required)"),
+          place: z.string().min(1).describe("City or location name (required)"),
           category: z.enum(CATEGORIES).describe("Trip category (required)"),
           status: z.enum(STATUSES).describe("Trip status (required)"),
           country: z
@@ -214,9 +211,7 @@ export const serverFactory = (server: SkybridgeServer) =>
           }
           if (!data || data.length === 0) {
             return {
-              content: [
-                { type: "text", text: `No trip found with ID ${id}.` },
-              ],
+              content: [{ type: "text", text: `No trip found with ID ${id}.` }],
               isError: true,
             };
           }
@@ -276,13 +271,11 @@ export const serverFactory = (server: SkybridgeServer) =>
       },
     );
 
-export const app = new Skybridge(
-  {
-    name: "triplog-app",
-    version: "0.0.1",
-    capabilities: {},
-  },
-  serverFactory,
-);
+export const app = new Skybridge({
+  name: "triplog-app",
+  version: "0.0.1",
+  capabilities: {},
+  handler,
+});
 
 export type AppType = typeof app;

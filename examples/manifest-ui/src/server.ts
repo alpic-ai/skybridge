@@ -1,8 +1,8 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { type SkybridgeServer, Skybridge } from "skybridge/server";
+import { Skybridge, type SkybridgeServer } from "skybridge/server";
 import { z } from "zod";
 
-export const serverFactory = (server: SkybridgeServer) =>
+export const handler = (server: SkybridgeServer) =>
   server
     .registerTool(
       {
@@ -10,10 +10,7 @@ export const serverFactory = (server: SkybridgeServer) =>
         description: "A hero widget with customizable title and subtitle.",
         inputSchema: {
           title: z.string().optional().describe("The main title to display."),
-          subtitle: z
-            .string()
-            .optional()
-            .describe("The subtitle to display."),
+          subtitle: z.string().optional().describe("The subtitle to display."),
         },
         view: {
           component: "hello-world",
@@ -33,13 +30,11 @@ export const serverFactory = (server: SkybridgeServer) =>
     )
     .mcpMiddleware(intentMiddleware());
 
-export const app = new Skybridge(
-  {
-    name: "alpic-openai-app",
-    version: "0.0.1",
-    capabilities: {},
-  },
-  serverFactory,
-);
+export const app = new Skybridge({
+  name: "alpic-openai-app",
+  version: "0.0.1",
+  capabilities: {},
+  handler,
+});
 
 export type AppType = typeof app;
