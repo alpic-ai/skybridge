@@ -1,8 +1,4 @@
-import {
-  createMcpHandler,
-  type McpHttpHandler,
-  type Server,
-} from "@modelcontextprotocol/server";
+import { createMcpHandler, type Server } from "@modelcontextprotocol/server";
 import type { LanguageModel } from "ai";
 import { inject, onTestFinished } from "vitest";
 import { Chat } from "./chat.js";
@@ -16,17 +12,6 @@ import { Chat } from "./chat.js";
 export interface EvalApp {
   readonly $types: { readonly tools: object };
   createServerInstance(): Promise<Server>;
-}
-
-const handlers = new WeakMap<EvalApp, McpHttpHandler>();
-
-function getHandler(app: EvalApp): McpHttpHandler {
-  let handler = handlers.get(app);
-  if (!handler) {
-    handler = createMcpHandler(() => app.createServerInstance());
-    handlers.set(app, handler);
-  }
-  return handler;
 }
 
 /**
@@ -61,14 +46,13 @@ function sharedDefaults() {
 
 /**
  * Opens a fresh MCP session and conversation against the app under test. The
- * app is served in-process, and the session is closed when the current test
+ * app is served in-process by a handler built on `app.createServerInstance`
+ * for this conversation alone, and both are closed when the current test
  * finishes, so scenarios never leak sessions and never write teardown, and
  * tests that run concurrently cannot close each other's sessions.
  *
  * The assertions are inferred from the app value itself, so `expect.chat` gets
- * the project's tool names and argument shapes with no type parameter. The
- * session talks to an in-process handler built on `app.createServerInstance`,
- * which never closes: it is memoized per app and shared by every test.
+ * the project's tool names and argument shapes with no type parameter.
  *
  * `authInfo` claims an identity for the session: the app's per-tool scheme and
  * scope enforcement runs against it for real, only token verification is
@@ -79,6 +63,7 @@ export async function start<App extends EvalApp>(
 ): Promise<Chat<App>> {
   const config = sharedDefaults();
   const { app, authInfo } = options;
+  const handler = createMcpHandler(() => app.createServerInstance());
 
   const chat = await Chat.open<App>(
     {
@@ -88,12 +73,15 @@ export async function start<App extends EvalApp>(
       maxSteps: options.maxSteps ?? config?.maxSteps,
     },
     (url, init) =>
-      getHandler(app).fetch(
+      handler.fetch(
         new Request(url, init),
         authInfo === undefined ? undefined : { authInfo },
       ),
   );
 
-  onTestFinished(() => chat.close());
+  onTestFinished(async () => {
+    await chat.close();
+    await handler.close();
+  });
   return chat;
 }
