@@ -35,6 +35,15 @@ export type OAuthConfig<TExtra extends ExtraClaims = ExtraClaims> = {
  * runs in `resolve`, so `oauth: auth0Provider(...)` at module scope performs
  * no network access until `Skybridge.run`. Call `resolve` yourself
  * (`await customProvider(...).resolve()`) when wiring the middleware by hand.
+ *
+ * This is an object rather than a bare `() => Promise<OAuthConfig>` on
+ * purpose. TypeScript defers, during the first inference pass, any argument
+ * that is a call to a generic function returning a function type. The
+ * providers are generic (`workosProvider<TCustom>`), so a function-shaped
+ * return written inline in `new Skybridge({ oauth: workosProvider(...) })`
+ * would be skipped and `TAuthExtra` would fall back to `ExtraClaims`, losing
+ * the claims typing in tool handlers. A non-function shape is inferred
+ * eagerly.
  */
 export type OAuthProvider<TExtra extends ExtraClaims = ExtraClaims> = {
   resolve: () => Promise<OAuthConfig<TExtra>>;

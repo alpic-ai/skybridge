@@ -44,7 +44,7 @@ type SkybridgeConfig = Implementation &
   ServerOptions & {
     handler: (server: McpServer, config: Config) => McpServer;
     setup?: () => Config | Promise<Config>;
-    oauth?: OAuthConfig | OAuthProvider | ((config: Config) => OAuthConfig | OAuthProvider | Promise<OAuthConfig | OAuthProvider>);
+    oauth?: OAuthConfig | OAuthProvider | ((config: Config) => OAuthConfig | OAuthProvider);
     json?: JsonOptions;
     skills?: boolean;
   };
