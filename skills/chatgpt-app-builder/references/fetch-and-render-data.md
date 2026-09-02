@@ -100,7 +100,7 @@ import { app } from "./server.js";
 export default await app.run();
 ```
 
-The `handler` runs on every request: keep it to registration and return the chain (that return carries the tool types into `AppType`). Anything expensive goes at module scope or in the `setup` field, whose awaited result is the handler's second argument.
+The `handler` runs on every request: keep it to registration and return the chain (that return carries the tool types into `AppType`). Anything expensive goes in the `setup` field, whose awaited result is the handler's second argument.
 
 ## UI Components
 

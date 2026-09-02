@@ -61,11 +61,11 @@ The MCP implementation info (`name`, `version`, and optionally `title`, `descrip
 
 Receives a fresh [`McpServer`](/api-reference/mcp-server) and must **return** the chain of registrations. That return value is what carries your tool types into `typeof app`.
 
-The handler runs for **every request**, so keep it to registration. Anything else in its body (a connection pool, a timer, a file read) runs per request too: hoist it to module scope or into `setup`, and let the handler close over it. Skybridge warns once in the console when a handler takes more than 50ms. The handler must stay synchronous.
+The handler runs for **every request**, so keep it to registration. Anything else in its body (a connection pool, a timer, a file read) runs per request too: move it into [`setup`](#setup), whose result is the handler's second argument. Skybridge warns once in the console when a handler takes more than 50ms. The handler must stay synchronous.
 
 ### `setup`
 
-Loads what the app needs before it serves: remote config, secrets, a dataset. It runs **once**, at `run()` or on the first request, never when the module is imported. Its awaited result is passed to `handler` as the second argument, and to `oauth` when `oauth` is a function.
+Loads what the app needs before it serves: a connection pool, a client, remote config, secrets. It runs **once**, at `run()` or on the first request, never when the module is imported. Its awaited result is passed to `handler` as the second argument, and to `oauth` when `oauth` is a function.
 
 ```ts src/server.ts
 export const app = new Skybridge({

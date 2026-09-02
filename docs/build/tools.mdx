@@ -75,7 +75,7 @@ export default await app.run();
 ```
 </CodeGroup>
 
-Chaining accumulates your tool signatures into one type, and returning the chain is what carries it into `AppType`. Exporting `AppType` is what makes the generated view hooks type-safe end to end. Keep the handler to registration: it runs on every request, so anything expensive belongs at module scope or in [`setup`](/api-reference/skybridge#setup).
+Chaining accumulates your tool signatures into one type, and returning the chain is what carries it into `AppType`. Exporting `AppType` is what makes the generated view hooks type-safe end to end. Keep the handler to registration: it runs on every request, so anything expensive belongs in [`setup`](/api-reference/skybridge#setup), whose result is the handler's second argument.
 
 ## Describe It to the Model
 

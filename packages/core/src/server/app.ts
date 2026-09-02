@@ -30,10 +30,10 @@ type ErrorMiddlewareConfig = {
 /**
  * The `handler` field of {@link SkybridgeConfig}: builds the app's MCP
  * surface. Runs again for **every incoming request**, on a fresh
- * {@link McpServer}, so keep it to registration: hoist pools, timers, clients
- * and any other side effect to module scope (or into `setup`) and close over
- * them. It must **return** the chained server so `typeof app` carries the
- * registered tool types.
+ * {@link McpServer}, so keep it to registration: pools, clients and any other
+ * one-time work belong in `setup`, whose result is the second argument. It
+ * must **return** the chained server so `typeof app` carries the registered
+ * tool types.
  *
  * @typeParam TConfig - What `setup` resolved to, passed as the second argument.
  */
@@ -414,7 +414,7 @@ export class Skybridge<
     if (elapsed > SLOW_HANDLER_THRESHOLD_MS && !this.slowHandlerWarned) {
       this.slowHandlerWarned = true;
       console.warn(
-        `The Skybridge handler took ${Math.round(elapsed)}ms — it runs on every request, so this cost is paid per request. Hoist expensive work to module scope or into \`setup\`, whose result is passed to the handler.`,
+        `The Skybridge handler took ${Math.round(elapsed)}ms — it runs on every request, so this cost is paid per request. Move expensive work into \`setup\`, whose result is passed to the handler.`,
       );
     }
     return built;

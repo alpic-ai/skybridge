@@ -29,7 +29,7 @@ export const app = new Skybridge({
 Define the handler inline, as above: that is what lets TypeScript infer the claims your `oauth` verifier produces into `extra.http.authInfo.extra`, and the tool registry into `typeof app`. Splitting the tool definitions across files is still easy, since each `registerTool` callback is an ordinary function you can import.
 
 <Warning>
-The handler runs for every request, so anything in it other than registration runs per request too. Hoist side effects to module scope or into [`setup`](/api-reference/skybridge#setup).
+The handler runs for every request, so anything in it other than registration runs per request too. Move one-time work (a pool, a client, a file read) into [`setup`](/api-reference/skybridge#setup), whose result is the handler's second argument.
 </Warning>
 
 ## Methods
