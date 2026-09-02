@@ -1,5 +1,4 @@
 import { useKeyPress, useLocalStorageState } from "ahooks";
-import { Braces, X } from "lucide-react";
 import { Suspense } from "react";
 import {
   Group,
@@ -255,6 +254,10 @@ export const ToolPanel = () => {
                 <ToolPanelToolbar
                   logsOpen={logsOpen ?? false}
                   onOpenLogs={() => setLogsOpen(true)}
+                  fullscreenInspectorOpen={fullscreenInspectorOpen ?? false}
+                  onToggleFullscreenInspector={() =>
+                    setFullscreenInspectorOpen(!fullscreenInspectorOpen)
+                  }
                 />
                 <div
                   className={cn(
@@ -270,39 +273,10 @@ export const ToolPanel = () => {
                     <View />
                   </Suspense>
                 </div>
-                {isFullscreen && (
-                  <>
-                    {fullscreenInspectorOpen && (
-                      <FullscreenInspector
-                        onClose={() => setFullscreenInspectorOpen(false)}
-                      />
-                    )}
-                    <div className="absolute right-4 top-4 z-[60] flex items-center gap-2">
-                      <button
-                        type="button"
-                        aria-label={
-                          fullscreenInspectorOpen
-                            ? "Close DevTools inspector"
-                            : "Open DevTools inspector"
-                        }
-                        aria-pressed={fullscreenInspectorOpen ?? false}
-                        onClick={() =>
-                          setFullscreenInspectorOpen(!fullscreenInspectorOpen)
-                        }
-                        className="inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-light-gray-foreground shadow-md transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                      >
-                        <Braces className="size-4" />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="Exit fullscreen"
-                        onClick={() => setPreference("displayMode", "inline")}
-                        className="inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-light-gray-foreground shadow-md transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                      >
-                        <X className="size-4" />
-                      </button>
-                    </div>
-                  </>
+                {isFullscreen && fullscreenInspectorOpen && (
+                  <FullscreenInspector
+                    onClose={() => setFullscreenInspectorOpen(false)}
+                  />
                 )}
               </div>
             </Panel>

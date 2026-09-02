@@ -13,6 +13,7 @@ import {
 } from "@alpic-ai/ui/components/popover";
 import {
   ArrowLeftRight,
+  Braces,
   Check,
   Eye,
   Languages,
@@ -119,18 +120,21 @@ function ToolbarButton({
   selected,
   onClick,
   className,
+  ariaLabel,
 }: {
   icon: LucideIcon;
   label: string;
   selected?: boolean;
   onClick?: () => void;
   className?: string;
+  ariaLabel?: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={selected}
+      aria-label={ariaLabel}
       className={cn(
         buttonBaseClass,
         "border border-border bg-background",
@@ -186,12 +190,16 @@ type ToolPanelToolbarProps = {
   variant?: ToolbarVariant;
   logsOpen?: boolean;
   onOpenLogs?: () => void;
+  fullscreenInspectorOpen?: boolean;
+  onToggleFullscreenInspector?: () => void;
 };
 
 export const ToolPanelToolbar = ({
   variant = "panel",
   logsOpen,
   onOpenLogs,
+  fullscreenInspectorOpen,
+  onToggleFullscreenInspector,
 }: ToolPanelToolbarProps) => {
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
   const theme = useInspectorPreferencesStore((s) => s.theme);
@@ -354,6 +362,28 @@ export const ToolPanelToolbar = ({
           {!logsOpen && (
             <ToolbarButton icon={Logs} label="logs" onClick={onOpenLogs} />
           )}
+        </div>
+      )}
+
+      {variant === "panel" && displayMode === "fullscreen" && (
+        <div className="ml-auto flex items-center gap-1.5">
+          <ToolbarButton
+            icon={Braces}
+            label="inspector"
+            ariaLabel={
+              fullscreenInspectorOpen
+                ? "Close DevTools inspector"
+                : "Open DevTools inspector"
+            }
+            selected={fullscreenInspectorOpen}
+            onClick={onToggleFullscreenInspector}
+          />
+          <ToolbarButton
+            icon={X}
+            label="exit"
+            ariaLabel="Exit fullscreen"
+            onClick={() => setPreference("displayMode", "inline")}
+          />
         </div>
       )}
 
