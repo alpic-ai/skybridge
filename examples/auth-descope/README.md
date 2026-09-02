@@ -105,6 +105,7 @@ The `evals/` folder contains model-in-the-loop scenarios that run the app in-pro
 
 ```bash
 pnpm evals        # run the scenarios
+pnpm evals:types  # typecheck them
 ```
 
 ## Deploy to Production
