@@ -44,11 +44,9 @@ function registeredResourceNames(server: McpServer): string[] {
 describe("skills server option", () => {
   it("declares the extension capability and registers skill resources from the primed manifest", () => {
     __setSkillsManifest(MANIFEST);
-    const server = new McpServer(
-      { name: "t", version: "0.0.1" },
-      undefined,
-      { skills: true },
-    );
+    const server = new McpServer({ name: "t", version: "0.0.1" }, undefined, {
+      skills: true,
+    });
 
     expect(extensionsOf(server)?.["io.modelcontextprotocol/skills"]).toEqual({
       directoryRead: true,
@@ -62,7 +60,7 @@ describe("skills server option", () => {
 
   it("does nothing when the skills option is absent", () => {
     __setSkillsManifest(MANIFEST);
-    const server = new McpServer({ name: "t", version: "0.0.1" }, {});
+    const server = new McpServer({ name: "t", version: "0.0.1" });
 
     expect(
       extensionsOf(server)?.["io.modelcontextprotocol/skills"],
@@ -128,7 +126,7 @@ describe("skills server option", () => {
   it("warns when skills are enabled but none are found", () => {
     __setSkillsManifest([]);
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    new McpServer({ name: "t", version: "0.0.1" }, {}, { skills: true });
+    new McpServer({ name: "t", version: "0.0.1" }, undefined, { skills: true });
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining("no skills were found"),
     );

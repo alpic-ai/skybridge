@@ -10,7 +10,6 @@ function buildApp(seen: string[]) {
   return new Skybridge({
     name: "in-process-eval",
     version: "0.0.0",
-    capabilities: {},
     handler: (server) =>
       server.registerTool(
         {
@@ -30,7 +29,6 @@ function buildProtectedApp(seen: string[]) {
   return new Skybridge({
     name: "in-process-auth-eval",
     version: "0.0.0",
-    capabilities: {},
     oauth: {
       baseUrl: "http://in-process.skybridge.test",
       oauthMetadata: {
