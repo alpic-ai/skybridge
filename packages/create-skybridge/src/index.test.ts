@@ -1,11 +1,26 @@
+import { execFileSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
+const { default: realSpawn } =
+  await vi.importActual<typeof import("cross-spawn")>("cross-spawn");
 vi.mock("cross-spawn", () => ({
-  default: vi.fn(() => {
+  default: vi.fn((command: string, ...rest: unknown[]) => {
+    if (command === "tar") {
+      return (realSpawn as (...args: unknown[]) => unknown)(command, ...rest);
+    }
     const child = new EventEmitter();
     setImmediate(() => child.emit("close", 0));
     return child;
@@ -84,6 +99,95 @@ describe("create-skybridge", () => {
         path.join(process.cwd(), tempDirName, "project", "pnpm-workspace.yaml"),
       ),
     ).rejects.toThrow();
+  });
+
+  describe("--example", () => {
+    let tarball: Buffer;
+
+    beforeAll(async () => {
+      const repo = await fs.mkdtemp(path.join(os.tmpdir(), "sky-repo-"));
+      const example = path.join(repo, "skybridge-main", "examples", "coffee");
+      await fs.mkdir(path.join(example, "src"), { recursive: true });
+      await fs.writeFile(
+        path.join(example, "package.json"),
+        '{"name":"skybridge-coffee-example"}',
+      );
+      await fs.writeFile(path.join(example, "src", "server.ts"), "");
+      execFileSync("tar", ["-czf", "repo.tgz", "skybridge-main"], {
+        cwd: repo,
+      });
+      tarball = await fs.readFile(path.join(repo, "repo.tgz"));
+      await fs.rm(repo, { recursive: true, force: true });
+    });
+
+    beforeEach(() => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => new Response(tarball)),
+      );
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    it("scaffolds a repo example from the GitHub tarball", async () => {
+      const name = `${tempDirName}/coffee-app`;
+      await init([name, "--yes", "--skip-skills", "--example", "coffee"]);
+
+      const projectDir = path.join(process.cwd(), tempDirName, "coffee-app");
+      await fs.access(path.join(projectDir, "src", "server.ts"));
+      const gitignore = await fs.readFile(
+        path.join(projectDir, ".gitignore"),
+        "utf-8",
+      );
+      expect(gitignore).toContain("node_modules");
+      const pkgRaw = await fs.readFile(
+        path.join(projectDir, "package.json"),
+        "utf-8",
+      );
+      expect(JSON.parse(pkgRaw).name).toBe("coffee-app");
+    });
+
+    it("rejects an unknown example with the available names", async () => {
+      const exit = vi.spyOn(process, "exit").mockImplementation((() => {
+        throw new Error("exit");
+      }) as never);
+      const errors: string[] = [];
+      vi.spyOn(console, "error").mockImplementation((msg) => {
+        errors.push(String(msg));
+      });
+      vi.spyOn(process.stdout, "write").mockImplementation(((
+        chunk: unknown,
+      ) => {
+        errors.push(String(chunk));
+        return true;
+      }) as never);
+
+      await expect(
+        init([
+          `${tempDirName}/x`,
+          "--yes",
+          "--skip-skills",
+          "--example",
+          "nope",
+        ]),
+      ).rejects.toThrow("exit");
+
+      expect(exit).toHaveBeenCalledWith(1);
+      expect(errors.join("\n")).toContain('Unknown example "nope"');
+      expect(errors.join("\n")).toContain("coffee");
+    });
+
+    it("refuses --example combined with a bundled template", async () => {
+      vi.spyOn(process, "exit").mockImplementation((() => {
+        throw new Error("exit");
+      }) as never);
+      await expect(
+        init([`${tempDirName}/x`, "--yes", "--blank", "--example", "coffee"]),
+      ).rejects.toThrow("exit");
+    });
   });
 
   it("sets package.json name to the project directory basename", async () => {

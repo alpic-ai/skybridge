@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as prompts from "@clack/prompts";
@@ -14,6 +15,9 @@ type PackageManager = (typeof PACKAGE_MANAGERS)[number];
 
 const TEMPLATES = ["demo", "blank", "ecom"] as const;
 type Template = (typeof TEMPLATES)[number];
+
+const REPO = "alpic-ai/skybridge";
+const REPO_REF = "main";
 
 const pkg = JSON.parse(
   fs.readFileSync(
@@ -31,14 +35,15 @@ Arguments:
   path           Where the project will be created. Prompted when omitted.
 
 Options:
-  --blank        scaffold a minimal project without demo tools and views
-  --ecom         scaffold the ecommerce template (search products, render carousel)
-  --overwrite    remove existing files if target directory is not empty
-  --pm <choice>  package manager to use (choices: ${PACKAGE_MANAGERS.join(", ")}. default to npm when none is provided or infered)
-  --skip-skills  skip installing coding agent skills
-  --start        start dev server
-  --yes          skip prompts and use default values for unprovided options
-  --help         display this help message
+  --blank           scaffold a minimal project without demo tools and views
+  --ecom            scaffold the ecommerce template (search products, render carousel)
+  --example <name>  scaffold a copy of github.com/${REPO}/tree/${REPO_REF}/examples/<name>
+  --overwrite       remove existing files if target directory is not empty
+  --pm <choice>     package manager to use (choices: ${PACKAGE_MANAGERS.join(", ")}. default to npm when none is provided or infered)
+  --skip-skills     skip installing coding agent skills
+  --start           start dev server
+  --yes             skip prompts and use default values for unprovided options
+  --help            display this help message
 
 Non-interactive usage:
   Mandatory: path argument and --yes option
@@ -76,6 +81,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
     help?: boolean;
     blank?: boolean;
     ecom?: boolean;
+    example?: string;
     overwrite?: boolean;
     pm?: string;
     "skip-skills"?: boolean;
@@ -91,7 +97,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
       "start",
       "yes",
     ],
-    string: ["pm"],
+    string: ["pm", "example"],
     alias: { h: "help" },
   });
 
@@ -108,6 +114,13 @@ export async function init(args: string[] = process.argv.slice(2)) {
       "The target directory is required in non-interactive mode.",
       "Example: skybridge create my-app --yes",
     );
+  }
+
+  if (argv.example !== undefined && !/^[\w.-]+$/.test(argv.example)) {
+    abort("--example requires a name, e.g. --example auth-descope.");
+  }
+  if (argv.example && (argv.blank || argv.ecom)) {
+    abort("Cannot combine --example with --blank or --ecom.");
   }
 
   let pm = parsePackageManager(argv.pm || "");
@@ -164,6 +177,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
 
   // 3. Template
   let template: Template | undefined;
+  const example = argv.example;
   if (argv.blank) {
     template = "blank";
   }
@@ -173,7 +187,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
     }
     template = "ecom";
   }
-  if (!template) {
+  if (!template && !example) {
     if (yes) {
       template = "demo";
     } else {
@@ -207,23 +221,38 @@ export async function init(args: string[] = process.argv.slice(2)) {
 
   // 4. Copy template
   const root = path.resolve(targetDir);
-  Spinner.start(`Copying ${template} template`);
+  const templatesDir = fileURLToPath(new URL("../templates", import.meta.url));
+  let source = path.join(templatesDir, template ?? "demo");
+  let cleanup = () => {};
+  if (example) {
+    Spinner.start(`Downloading ${example} example`);
+    try {
+      ({ source, cleanup } = await downloadExample(example));
+      Spinner.stop(`Downloaded ${example} example`);
+    } catch (error) {
+      Spinner.error(`Failed to download ${example} example`);
+      abort(error instanceof Error ? error.message : String(error));
+    }
+  }
+  Spinner.start(`Copying ${example ?? template} template`);
   try {
-    const templateDir = fileURLToPath(
-      new URL(`../templates/${template}`, import.meta.url),
-    );
-    fs.cpSync(templateDir, root, {
+    fs.cpSync(source, root, {
       recursive: true,
       filter: (src: string) => [".npmrc"].every((file) => !src.endsWith(file)),
     });
+    const gitignore = path.join(root, ".gitignore");
     const gitignoreSource = path.join(root, "_gitignore");
     if (fs.existsSync(gitignoreSource)) {
-      fs.renameSync(gitignoreSource, path.join(root, ".gitignore"));
+      fs.renameSync(gitignoreSource, gitignore);
+    } else if (!fs.existsSync(gitignore)) {
+      fs.copyFileSync(path.join(templatesDir, "demo", "_gitignore"), gitignore);
     }
-    Spinner.stop(`Copied ${template} template`);
+    Spinner.stop(`Copied ${example ?? template} template`);
   } catch (error) {
     Spinner.error("Failed to copy template");
     abort(String(error));
+  } finally {
+    cleanup();
   }
 
   // 5. Set package.json name to the project dir basename
@@ -390,6 +419,60 @@ ${scriptCommand(pm, "deploy")}`);
   prompts.outro(`🛟  Need help?
    Chat: https://discord.alpic.ai
    Docs: https://docs.skybridge.tech`);
+}
+
+async function downloadExample(name: string) {
+  const res = await fetch(
+    `https://codeload.github.com/${REPO}/tar.gz/${REPO_REF}`,
+  );
+  if (!res.ok) {
+    throw new Error(`GitHub returned ${res.status} while fetching ${REPO}.`);
+  }
+  const archive = Buffer.from(await res.arrayBuffer());
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "skybridge-example-"));
+  const cleanup = () => fs.rmSync(tmp, { recursive: true, force: true });
+  try {
+    const tar = spawn("tar", ["-xz", "-C", tmp], {
+      stdio: ["pipe", "ignore", "pipe"],
+    });
+    let stderr = "";
+    tar.stderr?.on("data", (chunk) => {
+      stderr += chunk.toString();
+    });
+    const exit = new Promise<void>((resolve, reject) => {
+      tar.on("error", reject);
+      tar.on("close", (status) =>
+        status === 0
+          ? resolve()
+          : reject(new Error(`tar exited with ${status}: ${stderr.trim()}`)),
+      );
+    });
+    tar.stdin?.on("error", () => {});
+    tar.stdin?.end(archive);
+    await exit;
+    const [extracted] = fs.readdirSync(tmp);
+    if (!extracted) {
+      throw new Error("Downloaded archive is empty.");
+    }
+    const examplesDir = path.join(tmp, extracted, "examples");
+    const available = fs
+      .readdirSync(examplesDir, { withFileTypes: true })
+      .filter(
+        (entry) =>
+          entry.isDirectory() &&
+          fs.existsSync(path.join(examplesDir, entry.name, "package.json")),
+      )
+      .map((entry) => entry.name);
+    if (!available.includes(name)) {
+      throw new Error(
+        `Unknown example "${name}". Available examples:\n  ${available.join("\n  ")}`,
+      );
+    }
+    return { source: path.join(examplesDir, name), cleanup };
+  } catch (error) {
+    cleanup();
+    throw error;
+  }
 }
 
 function cancel() {
