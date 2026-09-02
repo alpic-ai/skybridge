@@ -34,7 +34,7 @@ Does the IdP publish an OAuth discovery document with a jwks_uri?
 
 ## 1. Pick a provider
 
-The branded providers discover the IdP's OAuth metadata and build the whole config. All return a `Promise`; pass them to `oauth` as a function so discovery runs when the app starts, not when `server.ts` is imported. Most need **Dynamic Client Registration (DCR)** enabled on the IdP side (Authplane has it natively; Descope without DCR goes through the Alpic proxy).
+The branded providers discover the IdP's OAuth metadata and build the whole config. All return a `Promise`, so `oauth` takes them as a function (`oauth: () => descopeProvider(...)`) and discovery runs when the app starts, not when `server.ts` is imported. Most need **Dynamic Client Registration (DCR)** enabled on the IdP side (Authplane has it natively; Descope without DCR goes through the Alpic proxy).
 
 The table below covers what goes in the code. For the dashboard steps that produce those values, send the user to `docs/guides/auth-providers.mdx` — provider UIs change, and this file isn't the source of truth for them.
 

@@ -132,11 +132,11 @@ test("a provider override adds claims without dropping the provider's", () => {
   });
 });
 
-test("bag oauth claims reach tool handlers, promise form included", () => {
+test("bag oauth claims reach tool handlers through the function form", () => {
   new Skybridge({
     name: "t",
     version: "0",
-    oauth: workosProvider({ domain: "d", audience: "a" }),
+    oauth: () => workosProvider({ domain: "d", audience: "a" }),
     handler: (server) =>
       server.registerTool({ name: "a", inputSchema: {} }, (_args, extra) => {
         expectTypeOf(extra.http?.authInfo?.extra?.org_id).toEqualTypeOf<

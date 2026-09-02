@@ -44,10 +44,7 @@ type SkybridgeConfig = Implementation &
   ServerOptions & {
     handler: (server: McpServer, config: Config) => McpServer;
     setup?: () => Config | Promise<Config>;
-    oauth?:
-      | OAuthConfig
-      | Promise<OAuthConfig>
-      | ((config: Config) => OAuthConfig | Promise<OAuthConfig>);
+    oauth?: OAuthConfig | ((config: Config) => OAuthConfig | Promise<OAuthConfig>);
     json?: JsonOptions;
     skills?: boolean;
   };
@@ -79,7 +76,7 @@ export const app = new Skybridge({
 
 ### `oauth`
 
-An [`OAuthConfig`](/api-reference/custom-provider#returns), usually from an [identity provider](/guides/auth-providers), as a value, a promise, or a function of the `setup` result. Prefer the function form: the branded providers perform network discovery, and a function keeps that out of module import. When set, it mounts the well-known OAuth metadata and bearer-token verification on `/mcp`.
+An [`OAuthConfig`](/api-reference/custom-provider#returns), usually from an [identity provider](/guides/auth-providers), as a value or as a function of the `setup` result. The branded providers are async and perform network discovery, so pass them as a function: it runs once at `run()`, never at module import. When set, it mounts the well-known OAuth metadata and bearer-token verification on `/mcp`.
 
 The config also carries the claim shape its verifier produces, so handlers read `extra.http.authInfo.extra` typed, with no declaration of their own. See [Type the Claims You Read](/build/auth#type-the-claims-you-read).
 

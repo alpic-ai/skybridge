@@ -47,15 +47,13 @@ export type SkybridgeHandler<
 ) => McpServer<TTools, TAuthExtra>;
 
 /**
- * What the `oauth` field accepts: a resolved {@link OAuthConfig}, a promise of
- * one (the branded providers are async), or a function of the `setup` result.
- * A function or promise is resolved once — at {@link Skybridge.run} or on the
- * first request, never at module import — so prefer a function when building
- * the config has side effects (network discovery, secrets).
+ * What the `oauth` field accepts: a resolved {@link OAuthConfig}, or a function
+ * of the `setup` result returning one (the branded providers are async, so wrap
+ * them: `oauth: () => auth0Provider(...)`). The function runs once, at
+ * {@link Skybridge.run} or on the first request, never at module import.
  */
 export type SkybridgeOAuthInput<TConfig, TExtra extends ExtraClaims> =
   | OAuthConfig<TExtra>
-  | Promise<OAuthConfig<TExtra>>
   | ((config: TConfig) => OAuthConfig<TExtra> | Promise<OAuthConfig<TExtra>>);
 
 /**
@@ -198,7 +196,7 @@ export class Skybridge<
       const oauth =
         typeof this.oauthInput === "function"
           ? await this.oauthInput(this.config as Awaited<TConfig>)
-          : await this.oauthInput;
+          : this.oauthInput;
       this.oauthEnabled = Boolean(oauth);
       const sample = this.buildServer();
       if (oauth) {
