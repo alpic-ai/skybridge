@@ -83,12 +83,14 @@ export const ToolPanel = () => {
       (s) => s.userAgent?.device?.type ?? "desktop",
     ) === "mobile";
   const isFullscreen = displayMode === "fullscreen";
+  const isModal = displayMode === "modal";
   const isFullscreenDesktop = isFullscreen && !isMobile;
+  const isOverlay = isFullscreen || isModal;
   useKeyPress("esc", (e) => {
     if (e.defaultPrevented) {
       return;
     }
-    if (isFullscreen) {
+    if (isOverlay) {
       setPreference("displayMode", "inline");
     }
   });
@@ -242,7 +244,7 @@ export const ToolPanel = () => {
               <div
                 className={cn(
                   "flex flex-col overflow-hidden",
-                  isFullscreen
+                  isOverlay
                     ? "absolute inset-0 z-50 bg-background"
                     : "relative h-full min-h-0",
                 )}
@@ -253,28 +255,30 @@ export const ToolPanel = () => {
                 />
                 <div
                   className={cn(
-                    "flex min-h-0 flex-1 items-center justify-center",
-                    isFullscreenDesktop
-                      ? "overflow-hidden pt-3"
-                      : isFullscreen
-                        ? "overflow-y-auto pt-3"
-                        : "mx-3 overflow-y-auto py-3",
+                    "relative flex min-h-0 flex-1 items-center justify-center",
+                    isModal
+                      ? "overflow-hidden"
+                      : isFullscreenDesktop
+                        ? "overflow-hidden pt-3"
+                        : isFullscreen
+                          ? "overflow-y-auto pt-3"
+                          : "mx-3 overflow-y-auto py-3",
                   )}
                 >
                   <Suspense fallback={<Placeholder text="Loading view…" />}>
                     <View />
                   </Suspense>
+                  {isOverlay && (
+                    <button
+                      type="button"
+                      aria-label={isModal ? "Close modal" : "Exit fullscreen"}
+                      onClick={() => setPreference("displayMode", "inline")}
+                      className="absolute right-4 top-4 z-10 inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-light-gray-foreground shadow-md transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    >
+                      <X className="size-4" />
+                    </button>
+                  )}
                 </div>
-                {isFullscreen && (
-                  <button
-                    type="button"
-                    aria-label="Exit fullscreen"
-                    onClick={() => setPreference("displayMode", "inline")}
-                    className="absolute right-4 top-4 inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-light-gray-foreground shadow-md transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  >
-                    <X className="size-4" />
-                  </button>
-                )}
               </div>
             </Panel>
             {logsOpen && !isFullscreen && (

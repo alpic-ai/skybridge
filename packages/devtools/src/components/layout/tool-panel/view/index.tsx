@@ -53,11 +53,13 @@ export const View = () => {
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
   const isFullscreen = displayMode === "fullscreen";
   const isPip = displayMode === "pip";
+  const isModal = displayMode === "modal";
   // Mobile preview in fullscreen keeps the inline-mobile layout (centered 345px
   // widget with body-driven height) on top of the fullscreen overlay.
   const isFullscreenDesktop = isFullscreen && !isMobile;
+  const fillsPane = isFullscreenDesktop || isModal;
   const width =
-    isFullscreenDesktop || inPreview
+    fillsPane || inPreview
       ? "100%"
       : `${isMobile ? MOBILE_WIDTH_PX : DESKTOP_WIDTH_PX}px`;
   const theme = useInspectorPreferencesStore((s) => s.theme);
@@ -98,7 +100,7 @@ export const View = () => {
       });
     };
 
-    createAndInjectOpenAi(
+    const cleanupOpenaiMock = createAndInjectOpenAi(
       iframe.contentWindow,
       openaiObjectRef.current,
       logFn,
@@ -139,7 +141,10 @@ export const View = () => {
       openaiRef: iframeRef as React.RefObject<HTMLIFrameElement>,
     });
 
-    return cleanupMcpMock;
+    return () => {
+      cleanupOpenaiMock();
+      cleanupMcpMock();
+    };
   }, [
     html,
     viewDomain,
@@ -153,7 +158,7 @@ export const View = () => {
   useIframeAutoHeight({
     iframeRef,
     containerRef,
-    enabled: Boolean(html) && !isFullscreenDesktop,
+    enabled: Boolean(html) && !fillsPane,
     onHeightChange: setContentHeight,
     documentKey: html,
     clampToContainer: !inPreview,
@@ -236,12 +241,12 @@ export const View = () => {
       ref={containerRef}
       className={cn(
         "relative transition-[width] duration-150 ease-out",
-        isFullscreenDesktop ? "h-full w-full" : "mx-auto",
+        fillsPane ? "h-full w-full" : "mx-auto",
         isFullscreenDesktop && !inPreview && "bg-background",
       )}
       style={{
-        width: isFullscreenDesktop ? undefined : width,
-        height: isFullscreenDesktop
+        width: fillsPane ? undefined : width,
+        height: fillsPane
           ? "100%"
           : contentHeight != null
             ? `${isPip && !inPreview ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`
@@ -254,7 +259,7 @@ export const View = () => {
         src="about:blank"
         style={{
           width: "100%",
-          height: isFullscreenDesktop
+          height: fillsPane
             ? "100%"
             : contentHeight != null
               ? `${isPip && !inPreview ? Math.min(contentHeight, PIP_MAX_HEIGHT_PX) : contentHeight}px`

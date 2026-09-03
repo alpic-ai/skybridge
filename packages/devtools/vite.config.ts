@@ -9,7 +9,7 @@ export default defineConfig({
   cacheDir: process.env.DEVTOOLS_VITE_CACHE_DIR,
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
   server: {
