@@ -162,7 +162,7 @@ export default class Dev extends Command {
               <Text color="yellow">{tunnelState.message}</Text>
             </Box>
           )}
-          {tunnelState.status === "connected" && (
+          {tunnelState.status === "connected" && !crashed && (
             <Box flexDirection="column" marginBottom={1}>
               <Box>
                 <Text>🌍{"  "}</Text>
