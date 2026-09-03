@@ -9,7 +9,7 @@ import { useMcpAppContext } from "./use-mcp-app-context.js";
 
 describe("useMcpAppContext", () => {
   beforeEach(async () => {
-    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    vi.stubGlobal("skybridge", {});
     vi.stubGlobal("ResizeObserver", MockResizeObserver);
     McpAppBridge.resetInstance();
   });

@@ -88,7 +88,7 @@ Never assume the reader is already an expert in Skybridge or MCP Apps. When you 
      - **registerTool**: registers a tool — optionally with a `view` config that binds the tool to a React view.
    - **Hooks**: React hooks for view UIs, including data, layout, and actions.
      - **useToolInfo, useCallTool**: initial tool data and calling tools from the view.
-     - **useLayout, useUser, useDisplayMode**: host layout, user or session, and display mode.
+     - **useViewport, useUser, useDisplayMode**: host viewport, user or session, and display mode.
      - **useOpenExternal, useSetOpenInAppUrl**: opening URLs and in-app links.
      - **useSendFollowUpMessage**: sending follow-up messages to the conversation.
      - **useViewState**: persistent view state across renders.

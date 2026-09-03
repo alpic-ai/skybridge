@@ -51,7 +51,6 @@ export function LazyChanges({ slug, count }: { slug: string; count: number }) {
       </summary>
       <div className="sx-cl-body sx-cl-changes-body">
         {html !== null ? (
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: html is generated at build time from our own repo
           <div dangerouslySetInnerHTML={{ __html: html }} />
         ) : status === "error" ? (
           <p className="sx-cl-empty-body">Couldn&apos;t load this list.</p>

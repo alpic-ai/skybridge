@@ -1,11 +1,9 @@
-import type { OAuthMetadata } from "@modelcontextprotocol/sdk/shared/auth.js";
+import type { OAuthMetadata } from "@modelcontextprotocol/server";
 import type { ExtraClaims, TokenVerifier } from "../auth.js";
-import type { JwksVerifyConfig } from "./verify.js";
 
 /**
- * Resource-server OAuth config for `SkybridgeServerOptions.oauth`.
+ * Resource-server OAuth config for the `oauth` field of `SkybridgeConfig`.
  *
- * Supply either a `verifier` or the legacy `verify` parameters, never both.
  * `TExtra` comes from the `verifier` and flows on to tool handlers and
  * `mcpMiddleware`, so the claim shape is declared once by whoever checks the
  * token. The branded providers set it from the claims their IdP documents.
@@ -25,24 +23,28 @@ export type OAuthConfig<TExtra extends ExtraClaims = ExtraClaims> = {
   scopesSupported?: string[];
   /** Server-wide required-scope floor. */
   requiredScopes?: string[];
-} & (
-  | {
-      /**
-       * Checks each bearer token. Build one with `createJwksVerifier` for a
-       * JWT-issuing IdP, or supply your own for opaque tokens.
-       */
-      verifier: TokenVerifier<TExtra>;
-      verify?: never;
-    }
-  | {
-      /**
-       * JWKS verification parameters, used to build the verifier.
-       *
-       * @deprecated Pass `verifier: createJwksVerifier({ … })` instead, which
-       * also types the claims handlers receive. Claims stay
-       * `Record<string, unknown>` on this path.
-       */
-      verify: JwksVerifyConfig;
-      verifier?: never;
-    }
-);
+  /**
+   * Checks each bearer token. Build one with `createJwksVerifier` for a
+   * JWT-issuing IdP, or supply your own for opaque tokens.
+   */
+  verifier: TokenVerifier<TExtra>;
+};
+
+/**
+ * What the branded providers return: a deferred {@link OAuthConfig}. Discovery
+ * runs in `resolve`, so `oauth: auth0Provider(...)` at module scope performs
+ * no network access until `Skybridge.run`. Call `resolve` yourself
+ * (`await customProvider(...).resolve()`) when wiring the middleware by hand.
+ *
+ * This is an object rather than a bare `() => Promise<OAuthConfig>` on
+ * purpose. TypeScript defers, during the first inference pass, any argument
+ * that is a call to a generic function returning a function type. The
+ * providers are generic (`workosProvider<TCustom>`), so a function-shaped
+ * return written inline in `new Skybridge({ oauth: workosProvider(...) })`
+ * would be skipped and `TAuthExtra` would fall back to `ExtraClaims`, losing
+ * the claims typing in tool handlers. A non-function shape is inferred
+ * eagerly.
+ */
+export type OAuthProvider<TExtra extends ExtraClaims = ExtraClaims> = {
+  resolve: () => Promise<OAuthConfig<TExtra>>;
+};

@@ -45,7 +45,7 @@ describe("authplaneProvider", () => {
     const config = await authplaneProvider({
       issuer: ISSUER,
       resource: "https://coffee.example.com/mcp",
-    });
+    }).resolve();
 
     expect(jwks().audience).toBe("https://coffee.example.com/mcp");
     expect(jwks().issuer).toBe(ISSUER);
@@ -62,7 +62,10 @@ describe("authplaneProvider", () => {
   ])("passes %s through as both resource and audience", async (resource) => {
     mockDiscovery({ [ISSUER]: ["checkout"] });
 
-    const config = await authplaneProvider({ issuer: ISSUER, resource });
+    const config = await authplaneProvider({
+      issuer: ISSUER,
+      resource,
+    }).resolve();
 
     expect(config.baseUrl).toBe(resource);
     expect(jwks().audience).toBe(resource);
@@ -95,7 +98,7 @@ describe("authplaneProvider", () => {
       issuer: ISSUER,
       resource: "https://coffee.example.com/mcp",
       audience: "urn:acme:coffee",
-    });
+    }).resolve();
 
     expect(jwks().audience).toBe("urn:acme:coffee");
   });
@@ -133,7 +136,7 @@ describe("authplaneProvider", () => {
     await authplaneProvider({
       issuer: `${ISSUER}/`,
       resource: "https://coffee.example.com/mcp",
-    });
+    }).resolve();
 
     expect(jwks().issuer).toBe(ISSUER);
   });
@@ -145,7 +148,7 @@ describe("authplaneProvider", () => {
     await authplaneProvider({
       issuer: local,
       resource: "http://localhost:3000/mcp",
-    });
+    }).resolve();
 
     expect(jwks().issuer).toBe(local);
     expect(jwks().audience).toBe("http://localhost:3000/mcp");
@@ -159,7 +162,7 @@ describe("authplaneProvider", () => {
       resource: "https://coffee.example.com/mcp",
       scopes: ["checkout"],
       requiredScopes: ["checkout"],
-    });
+    }).resolve();
 
     expect(config.scopesSupported).toEqual(["checkout"]);
     expect(config.requiredScopes).toEqual(["checkout"]);
@@ -171,7 +174,7 @@ describe("authplaneProvider", () => {
     const config = await authplaneProvider({
       issuer: ISSUER,
       resource: "https://coffee.example.com/mcp",
-    });
+    }).resolve();
 
     expect(config.oauthMetadata.issuer).toBe(ISSUER);
     expect(config.oauthMetadata.registration_endpoint).toBe(

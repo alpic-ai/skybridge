@@ -5,7 +5,7 @@ sidebarTitle: "Identity Providers"
 icon: "fingerprint"
 ---
 
-[Authenticating users](/build/auth) wires sign-in through a hosted identity provider in one constructor option, so your tools receive a signed-in user. ChatGPT and Claude drive the flow the same way; what varies is the provider. The sections below cover one each: [Auth0](#auth0), [Authplane](#authplane), [Clerk](#clerk), [Descope](#descope), [Stytch](#stytch), and [WorkOS](#workos), plus a [custom provider](#any-other-provider) for any other.
+[Authenticating users](/build/auth) wires sign-in through a hosted identity provider in one config field, so your tools receive a signed-in user. ChatGPT and Claude drive the flow the same way; what varies is the provider. The sections below cover one each: [Auth0](#auth0), [Authplane](#authplane), [Clerk](#clerk), [Descope](#descope), [Stytch](#stytch), and [WorkOS](#workos), plus a [custom provider](#any-other-provider) for any other.
 
 <Info>
 These providers require sign-in on every request by default. Set [`auth: { allowsAnonymous: true }`](/api-reference/register-tool#auth) on any tool to [mix public and authenticated tools](/build/auth#mix-public-and-authenticated-tools): the server then serves anonymous requests and Skybridge enforces each tool's own auth declaration before the handler runs.
@@ -22,20 +22,19 @@ These providers require sign-in on every request by default. Set [`auth: { allow
 
 Pass the tenant domain, the API Identifier as `audience`, and this server's public URL as `serverUrl` to [`auth0Provider`](/api-reference/auth0-provider):
 
-```ts server.ts highlight={1,7-11}
-import { McpServer, auth0Provider } from "skybridge/server";
+```ts server.ts highlight={1,6-10}
+import { Skybridge, auth0Provider } from "skybridge/server";
 
-const server = new McpServer(
-  { name: "personal-shopper", version: "0.0.1" },
-  { capabilities: {} },
-  {
-    oauth: await auth0Provider({
-      domain: process.env.AUTH0_DOMAIN,
-      audience: process.env.AUTH0_API_IDENTIFIER,
-      serverUrl: process.env.SERVER_URL,
-    }),
-  },
-).registerTool(/* search-products, requires oauth2 */);
+export const app = new Skybridge({
+  name: "personal-shopper",
+  version: "0.0.1",
+  oauth: auth0Provider({
+    domain: process.env.AUTH0_DOMAIN,
+    audience: process.env.AUTH0_API_IDENTIFIER,
+    serverUrl: process.env.SERVER_URL,
+  }),
+  handler, // search-products, requires oauth2
+});
 ```
 
 See the runnable [`auth-auth0`](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-auth0) example.
@@ -49,13 +48,15 @@ See the runnable [`auth-auth0`](https://github.com/alpic-ai/skybridge/tree/main/
 
 Pass the authorization server URL and this server's public URL to [`authplaneProvider`](/api-reference/authplane-provider):
 
-```ts server.ts highlight={2-5}
-const server = new McpServer(serverInfo, capabilities, {
-  oauth: await authplaneProvider({
+```ts server.ts highlight={3-6}
+export const app = new Skybridge({
+  ...config,
+  oauth: authplaneProvider({
     issuer: process.env.AUTHPLANE_ISSUER,
     resource: process.env.SERVER_URL,
   }),
-}).registerTool(/* search-products, requires oauth2 */);
+  handler, // search-products, requires oauth2
+});
 ```
 
 See the runnable [`auth-authplane`](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-authplane) example.
@@ -70,12 +71,14 @@ See the runnable [`auth-authplane`](https://github.com/alpic-ai/skybridge/tree/m
 
 Pass the domain alone to [`clerkProvider`](/api-reference/clerk-provider), no audience:
 
-```ts server.ts highlight={2-4}
-const server = new McpServer(serverInfo, capabilities, {
-  oauth: await clerkProvider({
+```ts server.ts highlight={3-5}
+export const app = new Skybridge({
+  ...config,
+  oauth: clerkProvider({
     domain: process.env.CLERK_FRONTEND_API,
   }),
-}).registerTool(/* search-products, requires oauth2 */);
+  handler, // search-products, requires oauth2
+});
 ```
 
 See the [`auth-clerk`](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-clerk) example.
@@ -90,12 +93,14 @@ A [Descope](https://docs.descope.com/mcp) MCP Server binds the token's `aud` to 
 
 Pass that URL to [`descopeProvider`](/api-reference/descope-provider); the audience defaults to the Project ID derived from it:
 
-```ts server.ts highlight={2-4}
-const server = new McpServer(serverInfo, capabilities, {
-  oauth: await descopeProvider({
+```ts server.ts highlight={3-5}
+export const app = new Skybridge({
+  ...config,
+  oauth: descopeProvider({
     url: process.env.DESCOPE_MCP_SERVER_URL,
   }),
-}).registerTool(/* search-products, requires oauth2 */);
+  handler, // search-products, requires oauth2
+});
 ```
 
 See the [`auth-descope`](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-descope) example.
@@ -111,13 +116,15 @@ See the [`auth-descope`](https://github.com/alpic-ai/skybridge/tree/main/example
 
 Pass the project domain and the Project ID as the audience to [`stytchProvider`](/api-reference/stytch-provider):
 
-```ts server.ts highlight={2-5}
-const server = new McpServer(serverInfo, capabilities, {
-  oauth: await stytchProvider({
+```ts server.ts highlight={3-6}
+export const app = new Skybridge({
+  ...config,
+  oauth: stytchProvider({
     domain: process.env.STYTCH_DOMAIN,
     audience: process.env.STYTCH_PROJECT_ID,
   }),
-}).registerTool(/* search-products, requires oauth2 */);
+  handler, // search-products, requires oauth2
+});
 ```
 
 ## WorkOS
@@ -131,13 +138,15 @@ const server = new McpServer(serverInfo, capabilities, {
 
 Pass the domain and your server URL as the audience to [`workosProvider`](/api-reference/workos-provider):
 
-```ts server.ts highlight={2-5}
-const server = new McpServer(serverInfo, capabilities, {
-  oauth: await workosProvider({
+```ts server.ts highlight={3-6}
+export const app = new Skybridge({
+  ...config,
+  oauth: workosProvider({
     domain: process.env.AUTHKIT_DOMAIN,
     audience: process.env.SERVER_URL,
   }),
-}).registerTool(/* search-products, requires oauth2 */);
+  handler, // search-products, requires oauth2
+});
 ```
 
 See the runnable [`auth-workos`](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-workos) example.
@@ -152,20 +161,22 @@ For an identity provider without a branded wrapper, [`customProvider`](/api-refe
 
 Pass the issuer and the audience it binds:
 
-```ts server.ts highlight={2-5}
-const server = new McpServer(serverInfo, capabilities, {
-  oauth: await customProvider({
+```ts server.ts highlight={3-6}
+export const app = new Skybridge({
+  ...config,
+  oauth: customProvider({
     issuer: "https://auth.example.com",
     audience: process.env.SERVER_URL,
   }),
-}).registerTool(/* search-products, requires oauth2 */);
+  handler, // search-products, requires oauth2
+});
 ```
 
 Omit `audience` for a provider that binds none, and set `serverUrl` when Skybridge must advertise itself as the authorization server, as Auth0 and the Alpic DCR proxy require.
 
 [Google](https://developers.google.com/identity/protocols/oauth2) and [GitHub](https://docs.github.com/en/apps/oauth-apps) don't support DCR, so `customProvider` can't wire them directly. To offer Google or GitHub sign-in, configure a branded provider (Auth0, Clerk, Stytch, or WorkOS) with them as an upstream social connection.
 
-After sign-in, [reading the user and scoping data to them](/build/auth) is the same across every provider: handlers read `extra.authInfo`, and a tool declaring [`securitySchemes`](/api-reference/register-tool#securityschemes) with scopes gates access to them.
+After sign-in, [reading the user and scoping data to them](/build/auth) is the same across every provider: handlers read `extra.http?.authInfo`, and a tool declaring [`securitySchemes`](/api-reference/register-tool#securityschemes) with scopes gates access to them.
 
 <Columns cols={3}>
     <Card title="Authenticate Users" icon="key" href="/build/auth">

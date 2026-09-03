@@ -9,7 +9,8 @@
 ```
 my-app/
 ├── src/
-│   ├── server.ts         # McpServer with tool + view registration
+│   ├── server.ts         # Skybridge app: tool + view registration in `handler`
+│   ├── index.ts          # runs the app
 │   ├── helpers.ts        # Type-safe hooks via generateHelpers
 │   ├── index.css         # Global CSS, must be imported in every view
 │   └── views/            # React components (filename = view component name)
@@ -38,59 +39,68 @@ Annotations (set `true` when):
 
 - src/server.ts
 ```typescript
-import { McpServer } from "skybridge/server";
+import { Skybridge } from "skybridge/server";
 import { z } from "zod";
 
-const server = new McpServer(
-  { name: "my-app", version: "0.0.1" },
-  { capabilities: {} },
-)
-  .registerTool(
-    {
-      name: "search-flights",
-      description: "Search for flights",
-      inputSchema: { destination: z.string(), dates: z.string() },
-      annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
-      view: {
-        component: "search-flights",
-        description: "Flight results",
-      },
-    },
-    async ({ destination, dates }) => {
-      const flights = await fetchFlights(destination, dates);
-      const structuredContent = { flights: [] };
-      const _meta = { images: [] }
-      for (const { id, departureTime, price, airlineLogo } of flights) {
-        structuredContent.flights.push({ id, departureTime, price });
-        _meta.images.push(airlineLogo);
-      }
-      return {
-        structuredContent,
-        content: [{ type: "text", text: `Found ${flights.length} flights.` }],
-        _meta // mind the underscore prefix
-      };
-    }
-  )
-  .registerTool(
-    {
-      name: "book-flight",
-      description: "Book a flight",
-      inputSchema: { flightId: z.string() },
-      annotations: { readOnlyHint: false, openWorldHint: false, destructiveHint: false },
-    },
-    async ({ flightId }) => {
-      const confirmationId = await bookFlight(flightId);
-      return {
-        structuredContent: { confirmationId },
-        content: [{ type: "text", text: `Flight booked. Confirmation: ${confirmationId}` }],
-      };
-    }
-  );
+export const app = new Skybridge({
+  name: "my-app",
+  version: "0.0.1",
+  handler: (server) =>
+    server
+      .registerTool(
+        {
+          name: "search-flights",
+          description: "Search for flights",
+          inputSchema: { destination: z.string(), dates: z.string() },
+          annotations: { readOnlyHint: true, openWorldHint: false, destructiveHint: false },
+          view: {
+            component: "search-flights",
+            description: "Flight results",
+          },
+        },
+        async ({ destination, dates }) => {
+          const flights = await fetchFlights(destination, dates);
+          const structuredContent = { flights: [] };
+          const _meta = { images: [] }
+          for (const { id, departureTime, price, airlineLogo } of flights) {
+            structuredContent.flights.push({ id, departureTime, price });
+            _meta.images.push(airlineLogo);
+          }
+          return {
+            structuredContent,
+            content: [{ type: "text", text: `Found ${flights.length} flights.` }],
+            _meta // mind the underscore prefix
+          };
+        }
+      )
+      .registerTool(
+        {
+          name: "book-flight",
+          description: "Book a flight",
+          inputSchema: { flightId: z.string() },
+          annotations: { readOnlyHint: false, openWorldHint: false, destructiveHint: false },
+        },
+        async ({ flightId }) => {
+          const confirmationId = await bookFlight(flightId);
+          return {
+            structuredContent: { confirmationId },
+            content: [{ type: "text", text: `Flight booked. Confirmation: ${confirmationId}` }],
+          };
+        }
+      ),
+});
 
-server.run();
-
-export type AppType = typeof server;
+export type AppType = typeof app;
 ```
+
+- src/index.ts
+```typescript
+import { app } from "./server.js";
+
+export default await app.run();
+```
+
+The `handler` runs on every request: keep it to registration and return the chain (that return carries the tool types into `AppType`). Anything expensive goes in the `setup` field, whose awaited result is the handler's second argument.
 
 ## UI Components
 

@@ -1,4 +1,4 @@
-import { type AuthInfo, descopeProvider, McpServer } from "skybridge/server";
+import { type AuthInfo, descopeProvider, Skybridge } from "skybridge/server";
 import * as z from "zod";
 import { env } from "./env.js";
 
@@ -9,58 +9,60 @@ const text = (value: string) => ({
 const who = (auth?: AuthInfo) =>
   auth ? ((auth.extra?.email as string | undefined) ?? auth.clientId) : "guest";
 
-const server = new McpServer(
-  {
-    name: "auth-coffee-mixed",
-    version: "0.0.1",
-  },
-  { capabilities: {} },
-  {
-    oauth: await descopeProvider({
-      url: env.DESCOPE_MCP_SERVER_URL,
-      baseUrl: env.SERVER_URL,
-    }),
-  },
-)
-  .registerTool(
-    {
-      name: "browse-catalog",
-      description:
-        "Browse the public coffee catalog. Works signed out, and greets you by name when a token is present.",
-      inputSchema: {},
-      auth: { allowsAnonymous: true },
-      view: { component: "catalog", description: "The coffee catalog" },
-    },
-    (_args, extra) => {
-      const user = who(extra.authInfo);
-      const items = ["Espresso", "Latte", "Flat White", "Cold Brew"];
-      return {
-        structuredContent: { user, items },
-        content: [
-          { type: "text" as const, text: `Catalog for ${user}: ${items.join(", ")}.` },
-        ],
-      };
-    },
-  )
-  .registerTool(
-    {
-      name: "whoami",
-      description:
-        "Return the signed-in user. No auth declared, so it falls back to the secure default (sign-in required).",
-      inputSchema: {},
-    },
-    (_args, extra) => text(`You are ${who(extra.authInfo)}.`),
-  )
-  .registerTool(
-    {
-      name: "checkout",
-      description: "Place an order. Requires sign-in with the `checkout` scope.",
-      inputSchema: { item: z.string().describe("The catalog item to order") },
-      auth: { scopes: ["checkout"] },
-    },
-    ({ item }, extra) => text(`Order placed for ${who(extra.authInfo)}: ${item}.`),
-  );
+export const app = new Skybridge({
+  name: "auth-coffee-mixed",
+  version: "0.0.1",
+  oauth: descopeProvider({
+    url: env.DESCOPE_MCP_SERVER_URL,
+    baseUrl: env.SERVER_URL,
+  }),
+  handler: (server) =>
+    server
+      .registerTool(
+        {
+          name: "browse-catalog",
+          description:
+            "Browse the public coffee catalog. Works signed out, and greets you by name when a token is present.",
+          inputSchema: {},
+          auth: { allowsAnonymous: true },
+          view: { component: "catalog", description: "The coffee catalog" },
+        },
+        (_args, extra) => {
+          const user = who(extra.http?.authInfo);
+          const items = ["Espresso", "Latte", "Flat White", "Cold Brew"];
+          return {
+            structuredContent: { user, items },
+            content: [
+              {
+                type: "text" as const,
+                text: `Catalog for ${user}: ${items.join(", ")}.`,
+              },
+            ],
+          };
+        },
+      )
+      .registerTool(
+        {
+          name: "whoami",
+          description:
+            "Return the signed-in user. No auth declared, so it falls back to the secure default (sign-in required).",
+          inputSchema: {},
+        },
+        (_args, extra) => text(`You are ${who(extra.http?.authInfo)}.`),
+      )
+      .registerTool(
+        {
+          name: "checkout",
+          description:
+            "Place an order. Requires sign-in with the `checkout` scope.",
+          inputSchema: {
+            item: z.string().describe("The catalog item to order"),
+          },
+          auth: { scopes: ["checkout"] },
+        },
+        ({ item }, extra) =>
+          text(`Order placed for ${who(extra.http?.authInfo)}: ${item}.`),
+      ),
+});
 
-export default await server.run();
-
-export type AppType = typeof server;
+export type AppType = typeof app;

@@ -12,7 +12,7 @@ import type { RequestDisplayMode } from "../bridges/types.js";
  *
  * `"modal"` is reachable via {@link useRequestModal}, not this hook. To react
  * to layout changes that come with display-mode switches (e.g. `maxHeight`),
- * pair with {@link useLayout}.
+ * pair with {@link useViewport}.
  *
  * @example
  * ```tsx

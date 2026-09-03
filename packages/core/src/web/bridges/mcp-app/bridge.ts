@@ -4,7 +4,7 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { dequal } from "dequal/lite";
-import * as z from "zod";
+import * as z from "zod/v4";
 import type {
   AnyViewToolHandler,
   Bridge,

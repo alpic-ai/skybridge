@@ -5,10 +5,9 @@ test("useToolInfo - TypeScript typing", () => {
   test("should have correct types when no generic parameter is provided", () => {
     const result = useToolInfo();
 
-    expectTypeOf<"idle" | "pending" | "success">(result.status);
+    expectTypeOf<"pending" | "success">(result.status);
     expectTypeOf<boolean>(result.isPending);
     expectTypeOf<boolean>(result.isSuccess);
-    expectTypeOf<boolean>(result.isIdle);
     expectTypeOf<Record<string, unknown> | undefined>(result.input);
   });
 
@@ -54,7 +53,6 @@ test("useToolInfo - TypeScript typing", () => {
     // Test type narrowing for pending
     if (result.isPending) {
       expectTypeOf<"pending">(result.status);
-      expectTypeOf<false>(result.isIdle);
       expectTypeOf<true>(result.isPending);
       expectTypeOf<false>(result.isSuccess);
       expectTypeOf<TestInput | undefined>(result.input);
@@ -64,7 +62,6 @@ test("useToolInfo - TypeScript typing", () => {
 
     if (result.isSuccess) {
       expectTypeOf<"success">(result.status);
-      expectTypeOf<false>(result.isIdle);
       expectTypeOf<false>(result.isPending);
       expectTypeOf<true>(result.isSuccess);
       expectTypeOf<TestInput | undefined>(result.input);
@@ -74,7 +71,6 @@ test("useToolInfo - TypeScript typing", () => {
 
     if (result.status === "pending") {
       expectTypeOf<TestInput | undefined>(result.input);
-      expectTypeOf<false>(result.isIdle);
       expectTypeOf<true>(result.isPending);
       expectTypeOf<false>(result.isSuccess);
       expectTypeOf<undefined>(result.output);
@@ -83,7 +79,6 @@ test("useToolInfo - TypeScript typing", () => {
 
     if (result.status === "success") {
       expectTypeOf<TestInput | undefined>(result.input);
-      expectTypeOf<false>(result.isIdle);
       expectTypeOf<false>(result.isPending);
       expectTypeOf<true>(result.isSuccess);
       expectTypeOf<TestOutput>(result.output);

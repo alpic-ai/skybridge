@@ -52,7 +52,7 @@ describe("customProvider", () => {
       audience: "my-api",
       baseUrl: "https://app.example.test",
       scopes: ["openid"],
-    });
+    }).resolve();
 
     expect(config.baseUrl).toBe("https://app.example.test");
     expect(jwks()).toEqual({
@@ -70,7 +70,7 @@ describe("customProvider", () => {
       issuer: base,
       audience: "a",
       metadataOverrides: { issuer: "https://evil.test" } as never,
-    });
+    }).resolve();
     expect(jwks().issuer).toBe(base);
     expect(config.oauthMetadata.issuer).toBe(base);
   });
@@ -81,13 +81,16 @@ describe("customProvider", () => {
       issuer: base,
       audience: "a",
       metadataOverrides: { jwks_uri: "https://evil.test/keys" } as never,
-    });
+    }).resolve();
     expect(jwks().jwksUri).toBe(`${base}/jwks`);
   });
 
   it("serves metadata without a registration_endpoint when the IdP has no DCR", async () => {
     const base = await serveDiscovery({ registration_endpoint: undefined });
-    const config = await customProvider({ issuer: base, audience: "a" });
+    const config = await customProvider({
+      issuer: base,
+      audience: "a",
+    }).resolve();
     expect(config.oauthMetadata.registration_endpoint).toBeUndefined();
     expect(jwks().issuer).toBe(base);
   });
@@ -95,7 +98,7 @@ describe("customProvider", () => {
   it("throws when discovery has no jwks_uri (token verification needs it)", async () => {
     const base = await serveDiscovery({ jwks_uri: undefined });
     await expect(
-      customProvider({ issuer: base, audience: "a" }),
+      customProvider({ issuer: base, audience: "a" }).resolve(),
     ).rejects.toThrow(/jwks_uri/);
   });
 
@@ -106,7 +109,7 @@ describe("customProvider", () => {
       audience: "a",
       serverUrl: "https://app.example.test/",
       scopes: ["openid"],
-    });
+    }).resolve();
     // AS metadata + advertised scopes reflect this server.
     expect(config.oauthMetadata.issuer).toBe("https://app.example.test");
     expect(config.oauthMetadata.scopes_supported).toEqual(["openid"]);
@@ -122,7 +125,7 @@ describe("customProvider", () => {
       issuer: base,
       audience: "a",
       authorizationServer: `${as}/`,
-    });
+    }).resolve();
 
     expect(config.oauthMetadata.issuer).toBe(as);
     expect(config.oauthMetadata.authorization_endpoint).toBe(`${as}/authorize`);
@@ -143,7 +146,7 @@ describe("customProvider", () => {
       issuer: base,
       audience: "a",
       authorizationServer: `${base}/agentic/P1/MS1`,
-    });
+    }).resolve();
 
     expect(warn).toHaveBeenCalledOnce();
     expect(config.oauthMetadata.issuer).toBe(`${base}/agentic/P1/MS1`);
@@ -162,7 +165,7 @@ describe("customProvider", () => {
       audience: "a",
       serverUrl: "https://app.example.test/",
       authorizationServer: as,
-    });
+    }).resolve();
     expect(config.oauthMetadata.issuer).toBe("https://app.example.test");
     expect(config.oauthMetadata.token_endpoint).toBe(`${as}/token`);
     expect(jwks().issuer).toBe(as);
@@ -175,7 +178,7 @@ describe("customProvider", () => {
       audience: "a",
       baseUrl: "https://app.example.test",
       metadataOverrides: { token_endpoint: "https://override/token" },
-    });
+    }).resolve();
     expect(config.oauthMetadata.token_endpoint).toBe("https://override/token");
   });
 });

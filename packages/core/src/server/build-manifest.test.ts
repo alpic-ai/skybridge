@@ -12,10 +12,7 @@ function manifestOf(
 }
 
 function makeServer(): McpServer {
-  return new McpServer(
-    { name: "test", version: "0.0.1" },
-    { capabilities: {} },
-  );
+  return new McpServer({ name: "test", version: "0.0.1" });
 }
 
 describe("__setBuildManifest", () => {
@@ -30,12 +27,13 @@ describe("__setBuildManifest", () => {
     expect(manifestOf(makeServer())).toEqual(manifest);
   });
 
-  it("is consume-once: a second McpServer built without re-priming gets no manifest", () => {
-    __setBuildManifest({
+  it("keeps priming every McpServer the app factory builds per request", () => {
+    const manifest = {
       "src/views/index.tsx": { file: "assets/index-CAFEBABE.js" },
-    });
+    };
+    __setBuildManifest(manifest);
 
-    makeServer(); // consumes the primed manifest
-    expect(manifestOf(makeServer())).toBeNull();
+    makeServer();
+    expect(manifestOf(makeServer())).toEqual(manifest);
   });
 });

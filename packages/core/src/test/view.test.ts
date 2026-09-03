@@ -1,11 +1,5 @@
 import crypto from "node:crypto";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
-import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
-import type {
-  ServerNotification,
-  ServerRequest,
-} from "@modelcontextprotocol/sdk/types.js";
+import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import {
   afterEach,
   beforeEach,
@@ -16,8 +10,9 @@ import {
   vi,
 } from "vitest";
 import { TOOL_OUTPUT_WARNING_TOKENS } from "../context-warnings.js";
+import { Skybridge } from "../server/app.js";
+import type { McpExtra } from "../server/middleware.js";
 import type { McpServer, ViewName } from "../server/server.js";
-import { McpServer as McpServerClass } from "../server/server.js";
 import {
   createMockExtra,
   createMockMcpServer,
@@ -109,7 +104,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const appsSdkResourceCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+      extra: McpExtra,
     ) => Promise<{
       contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
     }>;
@@ -118,10 +113,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const host = "localhost:3000";
     const serverUrl = `http://${host}`;
     const hmrUrl = `ws://${host}`;
-    const mockExtra = createMockExtra(host) as unknown as RequestHandlerExtra<
-      ServerRequest,
-      ServerNotification
-    >;
+    const mockExtra = createMockExtra(host) as unknown as McpExtra;
     const result = await appsSdkResourceCallback(
       new URL("ui://views/ext-apps/my-view.html"),
       mockExtra,
@@ -177,7 +169,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const appsSdkResourceCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+      extra: McpExtra,
     ) => Promise<{
       contents: Array<{ uri: URL | string; mimeType: string; text?: string }>;
     }>;
@@ -185,10 +177,7 @@ describe("McpServer.registerTool (unified API)", () => {
 
     const host = "myapp.com";
     const serverUrl = `https://${host}`;
-    const mockExtra = createMockExtra(host) as unknown as RequestHandlerExtra<
-      ServerRequest,
-      ServerNotification
-    >;
+    const mockExtra = createMockExtra(host) as unknown as McpExtra;
     const versionedUri = `ui://views/ext-apps/my-view.html${expectedVersionParam("assets/my-view-abc123.js", "style.css")}`;
     const result = await appsSdkResourceCallback(
       new URL(versionedUri),
@@ -242,7 +231,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const extAppsResourceCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+      extra: McpExtra,
     ) => Promise<{
       contents: Array<{
         uri: URL | string;
@@ -271,7 +260,7 @@ describe("McpServer.registerTool (unified API)", () => {
           "x-alpic-forwarded-url": forwardedUrl,
         },
         url: "http://localhost:3000/mcp",
-      }) as unknown as RequestHandlerExtra<ServerRequest, ServerNotification>,
+      }) as unknown as McpExtra,
     );
 
     expect(result.contents[0]?._meta).toEqual({
@@ -307,7 +296,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const resourceCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+      extra: McpExtra,
     ) => Promise<{
       contents: Array<{
         uri: URL | string;
@@ -322,10 +311,7 @@ describe("McpServer.registerTool (unified API)", () => {
 
     const result = await resourceCallback(
       new URL("ui://views/ext-apps/my-view.html"),
-      createMockExtra(host) as unknown as RequestHandlerExtra<
-        ServerRequest,
-        ServerNotification
-      >,
+      createMockExtra(host) as unknown as McpExtra,
     );
 
     expect(result).toEqual({
@@ -351,7 +337,7 @@ describe("McpServer.registerTool (unified API)", () => {
       ],
     });
     expect(result.contents[0]?.text).toContain(
-      'window.skybridge = { hostType: "mcp-app", serverUrl: "http://localhost:3000" };',
+      'window.skybridge = { serverUrl: "http://localhost:3000" };',
     );
   });
 
@@ -372,30 +358,6 @@ describe("McpServer.registerTool (unified API)", () => {
 
     expect(toolConfig._meta?.ui?.resourceUri).toBe(uri);
     expect(toolConfig._meta?.["ui/resourceUri"]).toBe(uri);
-    expect(toolConfig._meta?.["openai/outputTemplate"]).toBeUndefined();
-  });
-
-  it("treats the deprecated hosts option as a no-op (always the single resource)", async () => {
-    server.registerTool(
-      {
-        name: "my-view",
-        description: "Test tool",
-        view: {
-          component: "my-view" as ViewName,
-          description: "Test view",
-          hosts: ["apps-sdk"],
-        },
-      },
-      vi.fn(),
-    );
-
-    expect(mockRegisterResource).toHaveBeenCalledTimes(1);
-    const toolConfig = mockRegisterTool.mock.calls[0]?.[1] as {
-      _meta?: Record<string, unknown> & { ui?: { resourceUri?: string } };
-    };
-    expect(toolConfig._meta?.ui?.resourceUri).toBe(
-      "ui://views/ext-apps/my-view.html",
-    );
     expect(toolConfig._meta?.["openai/outputTemplate"]).toBeUndefined();
   });
 
@@ -746,7 +708,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const appsSdkCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+      extra: McpExtra,
     ) => Promise<{
       contents: Array<{
         uri: URL | string;
@@ -760,10 +722,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const hmrUrl = `ws://${host}`;
     const result = await appsSdkCallback(
       new URL("ui://views/ext-apps/csp-tool.html"),
-      createMockExtra(host) as unknown as RequestHandlerExtra<
-        ServerRequest,
-        ServerNotification
-      >,
+      createMockExtra(host) as unknown as McpExtra,
     );
 
     const meta = result.contents[0]?._meta as {
@@ -800,7 +759,7 @@ describe("McpServer.registerTool (unified API)", () => {
     const appsSdkCallback = mockRegisterResource.mock
       .calls[0]?.[3] as unknown as (
       uri: URL,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+      extra: McpExtra,
     ) => Promise<{
       contents: Array<{
         uri: URL | string;
@@ -811,10 +770,7 @@ describe("McpServer.registerTool (unified API)", () => {
 
     const result = await appsSdkCallback(
       new URL("ui://views/ext-apps/override-tool.html"),
-      createMockExtra("localhost:3000") as unknown as RequestHandlerExtra<
-        ServerRequest,
-        ServerNotification
-      >,
+      createMockExtra("localhost:3000") as unknown as McpExtra,
     );
 
     const meta = result.contents[0]?._meta as {
@@ -856,39 +812,41 @@ describe("resources/list view _meta injection", () => {
   it("attaches CSP, domain, and connectDomains _meta to view resources at list time", async () => {
     setTestEnv({ NODE_ENV: "production" });
 
-    const server = new McpServerClass(
-      { name: "test", version: "1.0.0" },
-      { capabilities: {} },
-    );
-    server.registerTool(
-      {
-        name: "start",
-        description: "Start",
-        view: {
-          component: "my-view" as ViewName,
-          description: "Onboarding deck",
-          domain: "skybridge.tech",
-          csp: {
-            resourceDomains: ["https://fonts.googleapis.com"],
-            redirectDomains: ["https://docs.skybridge.tech"],
+    const app = new Skybridge({
+      name: "test",
+      version: "1.0.0",
+      handler: (server) =>
+        server.registerTool(
+          {
+            name: "start",
+            description: "Start",
+            view: {
+              component: "my-view" as ViewName,
+              description: "Onboarding deck",
+              domain: "skybridge.tech",
+              csp: {
+                resourceDomains: ["https://fonts.googleapis.com"],
+                redirectDomains: ["https://docs.skybridge.tech"],
+              },
+            },
           },
-        },
-      },
-      vi.fn().mockResolvedValue({
-        content: [{ type: "text", text: "ok" }],
-        structuredContent: {},
-      }),
-    );
+          vi.fn().mockResolvedValue({
+            content: [{ type: "text", text: "ok" }],
+            structuredContent: {},
+          }),
+        ),
+    });
+    const instance = await app.createServerInstance();
 
     const client = new Client({ name: "test-client", version: "1.0.0" });
     const [clientTransport, serverTransport] =
       InMemoryTransport.createLinkedPair();
-    await server.connect(serverTransport);
+    await instance.connect(serverTransport);
     await client.connect(clientTransport);
 
     const { resources } = await client.listResources();
     await client.close();
-    await server.close();
+    await instance.close();
 
     const appsSdk = resources.find((r) => r.uri.includes("apps-sdk"));
     const extApps = resources.find((r) => r.uri.includes("ext-apps"));

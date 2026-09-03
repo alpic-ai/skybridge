@@ -1,8 +1,8 @@
-import type { BearerAuthMiddlewareOptions } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
 import {
+  type BearerAuthMiddlewareOptions,
   getOAuthProtectedResourceMetadataUrl,
   mcpAuthMetadataRouter,
-} from "@modelcontextprotocol/sdk/server/auth/router.js";
+} from "@modelcontextprotocol/express";
 import cors from "cors";
 import type { Express, Request, RequestHandler } from "express";
 import type { AuthInfo } from "../auth.js";
@@ -19,7 +19,6 @@ import {
   securitySchemesAllowAnonymous,
   wwwAuthenticateHeader,
 } from "./security-schemes.js";
-import { createJwksVerifier } from "./verify.js";
 
 export type ResourceMetadataUrlResolver = (
   getHeader: (key: string) => string | undefined,
@@ -29,15 +28,15 @@ export type ResourceMetadataUrlResolver = (
 export function setupOAuth(
   app: Express,
   config: OAuthConfig<Record<string, unknown>>,
-  schemesByTool: Map<string, SecurityScheme[] | undefined>,
+  schemesByTool: ReadonlyMap<string, SecurityScheme[] | undefined>,
 ): ResourceMetadataUrlResolver {
-  if (!config.verifier && !config.verify) {
+  if (!config.verifier) {
     throw new Error("oauth requires a `verifier`");
   }
 
   const acceptsAnonymous = () =>
     [...schemesByTool.values()].some(securitySchemesAllowAnonymous);
-  const verifier = config.verifier ?? createJwksVerifier(config.verify);
+  const verifier = config.verifier;
   const bearer = (options: BearerAuthMiddlewareOptions): RequestHandler => {
     const required = requireBearerAuth(options);
     const optional = optionalBearerAuth(options);

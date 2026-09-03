@@ -19,24 +19,27 @@ ChatGPT manages files for you: it stores each one and hands your code a referenc
 
 A tool can take a file the user added to the conversation. The model only passes files already there, so the user adds one first, from their device or library; the handler receives a reference and fetches the contents.
 
-```ts server.ts highlight={9,11,14}
-import { FileRef, McpServer } from "skybridge/server";
-import { z } from "zod";
+```ts server.ts highlight={11,13,16}
+import { FileRef, Skybridge } from "skybridge/server";
 
-const server = new McpServer({ name: "expenses", version: "0.0.1" })
-  .registerTool(
-    {
-      name: "scan-receipt",
-      description: "Extract line items from a receipt.",
-      inputSchema: { receipt: FileRef },
-      outputSchema: { summary: FileRef },
-      _meta: { "openai/fileParams": ["receipt"] },
-    },
-    async ({ receipt }) => {
-      const bytes = await fetch(receipt.download_url).then((r) => r.blob());
-      return { structuredContent: { summary: await summarize(bytes) } };
-    },
-  );
+export const app = new Skybridge({
+  name: "expenses",
+  version: "0.0.1",
+  handler: (server) =>
+    server.registerTool(
+      {
+        name: "scan-receipt",
+        description: "Extract line items from a receipt.",
+        inputSchema: { receipt: FileRef },
+        outputSchema: { summary: FileRef },
+        _meta: { "openai/fileParams": ["receipt"] },
+      },
+      async ({ receipt }) => {
+        const bytes = await fetch(receipt.download_url).then((r) => r.blob());
+        return { structuredContent: { summary: await summarize(bytes) } };
+      },
+    ),
+});
 ```
 
 Each file input is a [`FileRef`](/api-reference/file-ref) listed in `_meta["openai/fileParams"]` (top-level fields only), which tells ChatGPT to route the attachment to it. The host fills `download_url`, so `scan-receipt` reads the bytes straight from `receipt.download_url`.
@@ -45,24 +48,27 @@ Each file input is a [`FileRef`](/api-reference/file-ref) listed in `_meta["open
 
 A tool can also hand a file back. The host surfaces it in the conversation, so the user can download it and the model can see it.
 
-```ts server.ts highlight={10,15}
-import { FileRef, McpServer } from "skybridge/server";
-import { z } from "zod";
+```ts server.ts highlight={12,17}
+import { FileRef, Skybridge } from "skybridge/server";
 
-const server = new McpServer({ name: "expenses", version: "0.0.1" })
-  .registerTool(
-    {
-      name: "scan-receipt",
-      description: "Extract line items from a receipt.",
-      inputSchema: { receipt: FileRef },
-      outputSchema: { summary: FileRef },
-      _meta: { "openai/fileParams": ["receipt"] },
-    },
-    async ({ receipt }) => {
-      const bytes = await fetch(receipt.download_url).then((r) => r.blob());
-      return { structuredContent: { summary: await summarize(bytes) } };
-    },
-  );
+export const app = new Skybridge({
+  name: "expenses",
+  version: "0.0.1",
+  handler: (server) =>
+    server.registerTool(
+      {
+        name: "scan-receipt",
+        description: "Extract line items from a receipt.",
+        inputSchema: { receipt: FileRef },
+        outputSchema: { summary: FileRef },
+        _meta: { "openai/fileParams": ["receipt"] },
+      },
+      async ({ receipt }) => {
+        const bytes = await fetch(receipt.download_url).then((r) => r.blob());
+        return { structuredContent: { summary: await summarize(bytes) } };
+      },
+    ),
+});
 ```
 
 `scan-receipt` declares `summary` as a [`FileRef`](/api-reference/file-ref) in its `outputSchema` and returns it in `structuredContent`; `summarize` produces the ref: a `file_id` and a `download_url` the host uses to fetch and cache the file.
@@ -205,7 +211,7 @@ A view can save a file to the user's device, whether content it built itself or 
 import { useDownload } from "skybridge/web";
 
 export default function ReceiptSummary({ items }: { items: LineItem[] }) {
-  const { download } = useDownload();
+  const download = useDownload();
 
   const exportCsv = async () => {
     const csv = items.map((i) => `${i.label},${i.amount}`).join("\n");

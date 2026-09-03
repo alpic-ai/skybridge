@@ -19,13 +19,13 @@ describe("getAdaptor", () => {
   });
 
   it("returns a HostAdaptor instance", () => {
-    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    vi.stubGlobal("skybridge", {});
     vi.stubGlobal("openai", undefined);
     expect(getAdaptor()).toBeInstanceOf(HostAdaptor);
   });
 
   it("memoizes the instance", () => {
-    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    vi.stubGlobal("skybridge", {});
     vi.stubGlobal("openai", undefined);
     const a = getAdaptor();
     const b = getAdaptor();

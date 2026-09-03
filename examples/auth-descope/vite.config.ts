@@ -1,6 +1,6 @@
 import path from "node:path";
+import { skybridge } from "@skybridge/vite-plugin";
 import react from "@vitejs/plugin-react";
-import { skybridge } from "skybridge/vite";
 import { defineConfig } from "vite";
 
 // https://vite.dev/config/
@@ -11,7 +11,7 @@ export default defineConfig({
       logLevels: ["error"],
     },
   },
-  plugins: [skybridge(), react()],
+  plugins: [skybridge({ evals: {} }), react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

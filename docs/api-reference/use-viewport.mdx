@@ -1,30 +1,27 @@
 ---
-title: useLayout
-description: "Fit the view to the host's surface"
+title: useViewport
+description: "Fit the view to the space the host gives it"
 ---
 
 import { Compat } from "/components/compat.jsx";
 
 <Compat alpic chatgpt claude cursor goose />
 
-Your [view](/build/view) renders inside the host's surface, on its terms: a theme to match, a bounded height to fit, edges to keep clear of device chrome. `useLayout` reports those constraints so the view can style and size itself to the space the host actually gives it.
+Your [view](/build/view) renders inside the host's surface, on its terms: a bounded height to fit and edges to keep clear of device chrome. `useViewport` reports those constraints so the view can size itself to the space the host actually gives it. It re-renders on every resize, so read the host theme from [`useUser`](/api-reference/use-user) instead.
 
 ## Example
 
-The carousel matches the host's light or dark theme, fits its scroll area to the height the host offers, and keeps content clear of notches and home indicators.
+The carousel fits its scroll area to the height the host offers and keeps content clear of notches and home indicators.
 
-```tsx highlight={4,5,12,14-17}
-import { useLayout } from "skybridge/web";
+```tsx highlight={4,9,11-14}
+import { useViewport } from "skybridge/web";
 
 function Carousel({ products }: { products: Product[] }) {
-  const { theme, maxHeight, safeArea } = useLayout();
-  const isDark = theme === "dark";
+  const { maxHeight, safeArea } = useViewport();
 
   return (
     <div
       style={{
-        backgroundColor: isDark ? "#1a1a1a" : "#ffffff",
-        color: isDark ? "#ffffff" : "#111111",
         maxHeight,
         overflowY: "auto",
         paddingTop: safeArea.insets.top,
@@ -34,7 +31,7 @@ function Carousel({ products }: { products: Product[] }) {
       }}
     >
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} dark={isDark} />
+        <ProductCard key={product.id} product={product} />
       ))}
     </div>
   );
@@ -43,15 +40,7 @@ function Carousel({ products }: { products: Product[] }) {
 
 ## Returns
 
-`useLayout` returns the host's current layout for the view.
-
-### `theme`
-
-```tsx
-theme: Theme;
-```
-
-The host's active color theme, `"light"` or `"dark"`. Mirror it in the view's styling for a native feel. It updates when the user toggles the host theme.
+`useViewport` returns the host's current viewport for the view, as a `ViewportState`.
 
 ### `maxHeight`
 
@@ -84,7 +73,7 @@ type SafeAreaInsets = {
 
 <CardGroup cols={3}>
   <Card title="useUser" icon="user" href="/api-reference/use-user">
-    Read the locale and device capabilities of the host
+    Read the host's theme, locale, and device capabilities
   </Card>
   <Card title="useRequestSize" icon="expand" href="/api-reference/use-request-size">
     Ask the host to resize the view

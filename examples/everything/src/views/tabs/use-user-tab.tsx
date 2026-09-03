@@ -15,7 +15,7 @@ function localeToFlag(locale: string): string {
 }
 
 export function UseUserTab() {
-  const { locale, userAgent } = useUser();
+  const { locale, theme, userAgent } = useUser();
   let flag: string | undefined;
   try {
     flag = localeToFlag(locale);
@@ -31,6 +31,12 @@ export function UseUserTab() {
       <div className="flex flex-wrap gap-4">
         <Field label="Locale">
           <Code>{locale}</Code>
+        </Field>
+
+        <Field label="Theme">
+          <Code>
+            {theme} {theme === "light" ? "☀️" : "🌙"}
+          </Code>
         </Field>
 
         <Field label="Device">

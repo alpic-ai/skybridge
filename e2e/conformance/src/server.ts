@@ -11,13 +11,10 @@ import { z } from "zod";
  * so the `useCallTool` check can call it from the view and read the echoed
  * `label` back.
  */
-const server = new McpServer(
-  {
-    name: "skybridge-conformance",
-    version: "0.0.1",
-  },
-  { capabilities: {} },
-).registerTool(
+const server = new McpServer({
+  name: "skybridge-conformance",
+  version: "0.0.1",
+}).registerTool(
   {
     name: "conformance",
     title: "Skybridge Conformance",

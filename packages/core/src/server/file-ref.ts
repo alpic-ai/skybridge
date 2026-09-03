@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /**
  * Zod schema for a host-managed file reference passed between tools and views.

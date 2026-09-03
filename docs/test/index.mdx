@@ -11,6 +11,7 @@ Testing an MCP App means assessing how well it integrates with the host, interac
 | Iterate on [tools](/build/tools) and [views](/build/view) | [DevTools](/test/devtools) | <Icon icon="x" color="#EF4444" /> | <Icon icon="x" color="#EF4444" /> | <Icon icon="check" color="#22C55E" /> |
 | Verify behavior in ChatGPT and Claude | [Tunnel](/test/tunnel) | <Icon icon="check" color="#22C55E" /> | <Icon icon="check" color="#22C55E" /> | <Icon icon="check" color="#22C55E" /> |
 | Check what the model does with your app | [Playground](/test/playground) | <Icon icon="check" color="#22C55E" /> | <Icon icon="x" color="#EF4444" /> | <Icon icon="check" color="#22C55E" /> |
+| Assert on the tools the model calls, in CI | [Evals](/test/evals) | <Icon icon="check" color="#22C55E" /> | <Icon icon="x" color="#EF4444" /> | <Icon icon="x" color="#EF4444" /> |
 | Validate before submission | [Audit](/test/audit) | <Icon icon="check" color="#22C55E" /> | <Icon icon="check" color="#22C55E" /> | <Icon icon="x" color="#EF4444" /> |
 
 <Columns cols={2}>
@@ -22,6 +23,9 @@ Testing an MCP App means assessing how well it integrates with the host, interac
     </Card>
     <Card title="Playground" icon="message-circle" href="/test/playground">
         Chat with a real model running your app
+    </Card>
+    <Card title="Evals" icon="flask-conical" href="/test/evals">
+        Assert on the tool calls a real model makes
     </Card>
     <Card title="Audit" icon="clipboard-check" href="/test/audit">
         Catch spec and platform issues before submission

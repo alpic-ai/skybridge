@@ -10,10 +10,10 @@ description: "Require a signed-in user on every request"
 Every tool requires a signed-in user with the `shop.read` scope: the middleware validates the token before any handler runs.
 
 ```ts server.ts highlight={6-9}
-import { McpServer, requireBearerAuth } from "skybridge/server";
+import { Skybridge, requireBearerAuth } from "skybridge/server";
 import { verifyAccessToken } from "./verify-access-token.js"; // the verifier you implement
 
-const server = new McpServer({ name: "shop", version: "1.0" }).use(
+export const app = new Skybridge({ name: "shop", version: "1.0", handler }).use(
   "/mcp",
   requireBearerAuth({
     verifier: { verifyAccessToken },
@@ -50,11 +50,11 @@ type BearerAuthMiddlewareOptions = {
 
 An Express `RequestHandler` to pass to [`server.use`](/api-reference/mcp-server#use), typically on `/mcp`.
 
-- A valid token: the request proceeds, and handlers read it from `extra.authInfo`.
+- A valid token: the request proceeds, and handlers read it from `extra.http?.authInfo`.
 - A missing, invalid, or expired token: a 401 with a `WWW-Authenticate` header. A token missing a required scope: a 403.
 
 <Info>
-A valid token only proves who the caller is. Authorizing what they can do, and scoping data to them, stays the handler's job: read `extra.authInfo` and never trust a client-supplied identifier.
+A valid token only proves who the caller is. Authorizing what they can do, and scoping data to them, stays the handler's job: read `extra.http?.authInfo` and never trust a client-supplied identifier.
 </Info>
 
 <CardGroup cols={3}>

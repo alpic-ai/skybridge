@@ -1,9 +1,6 @@
 import { rmSync, writeFileSync } from "node:fs";
 import path, { isAbsolute, resolve } from "node:path";
-import {
-  scanAndWriteViewsDts,
-  scanViewsSync,
-} from "../web/plugin/scan-views.js";
+import { scanAndWriteViewsDts, scanViewsSync } from "../views/index.js";
 import {
   emitEmptyManifestModule,
   emitEntryWrapper,

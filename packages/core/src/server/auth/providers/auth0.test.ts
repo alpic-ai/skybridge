@@ -33,7 +33,7 @@ describe("auth0Provider", () => {
       audience: "https://api.example.com/",
       serverUrl: "https://app.example.com/",
       scopes: ["openid", "profile", "email"],
-    });
+    }).resolve();
 
     // skybridge is the advertised AS: static issuer = serverUrl (trailing slash stripped).
     expect(config.oauthMetadata.issuer).toBe("https://app.example.com");

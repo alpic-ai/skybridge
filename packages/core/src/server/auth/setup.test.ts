@@ -1,10 +1,13 @@
 // @vitest-environment node
 import http from "node:http";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import {
+  Client,
+  StreamableHTTPClientTransport,
+} from "@modelcontextprotocol/client";
 import type { RequestHandler } from "express";
 import * as jose from "jose";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { Skybridge } from "../app.js";
 import { McpServer } from "../server.js";
 import { createJwksVerifier } from "./verify.js";
 
@@ -62,52 +65,49 @@ function signToken(key: CryptoKey, scope = "openid email") {
 
 async function bootServer(
   jwksUri: string,
-  {
-    baseUrl = "https://app.example.test",
-    legacyVerify = false,
-  }: { baseUrl?: string | null; legacyVerify?: boolean } = {},
+  { baseUrl = "https://app.example.test" }: { baseUrl?: string | null } = {},
 ) {
   const { createApp } = await import("../express.js");
-  const server = new McpServer(
-    { name: "auth-test", version: "0.0.0" },
-    { capabilities: {} },
-    {
-      oauth: {
-        ...(baseUrl === null ? {} : { baseUrl }),
-        oauthMetadata: {
-          issuer: ISSUER,
-          authorization_endpoint: `${ISSUER}/authorize`,
-          token_endpoint: `${ISSUER}/token`,
-          response_types_supported: ["code"],
-        },
-        ...(legacyVerify
-          ? { verify: { issuer: ISSUER, audience: AUDIENCE, jwksUri } }
-          : {
-              verifier: createJwksVerifier({
-                issuer: ISSUER,
-                audience: AUDIENCE,
-                jwksUri,
-              }),
-            }),
-        scopesSupported: ["openid", "email"],
-        requiredScopes: ["openid"],
+  const app = new Skybridge({
+    name: "auth-test",
+    version: "0.0.0",
+    oauth: {
+      ...(baseUrl === null ? {} : { baseUrl }),
+      oauthMetadata: {
+        issuer: ISSUER,
+        authorization_endpoint: `${ISSUER}/authorize`,
+        token_endpoint: `${ISSUER}/token`,
+        response_types_supported: ["code"],
       },
+      verifier: createJwksVerifier({
+        issuer: ISSUER,
+        audience: AUDIENCE,
+        jwksUri,
+      }),
+      scopesSupported: ["openid", "email"],
+      requiredScopes: ["openid"],
     },
-  ).registerTool(
-    {
-      name: "whoami",
-      description: "Returns the caller identity.",
-      inputSchema: {},
-    },
-    (_args, extra) => ({
-      structuredContent: { clientId: extra.authInfo?.clientId ?? null },
-      content: [{ type: "text", text: extra.authInfo?.clientId ?? "anon" }],
-    }),
-  );
+    handler: (server) =>
+      server.registerTool(
+        {
+          name: "whoami",
+          description: "Returns the caller identity.",
+          inputSchema: {},
+        },
+        (_args, extra) => ({
+          structuredContent: {
+            clientId: extra.http?.authInfo?.clientId ?? null,
+          },
+          content: [
+            { type: "text", text: extra.http?.authInfo?.clientId ?? "anon" },
+          ],
+        }),
+      ),
+  });
 
   const httpServer = http.createServer();
-  await createApp({ mcpServer: server, httpServer });
-  const listening = http.createServer(server.express);
+  await createApp({ app, httpServer });
+  const listening = http.createServer(app.express);
   await new Promise<void>((resolve) => listening.listen(0, resolve));
   appServer = listening;
   const port = (listening.address() as { port: number }).port;
@@ -162,26 +162,6 @@ describe("setupOAuth wiring", () => {
     })) as unknown as {
       content: { type: string; text: string }[];
     };
-    expect(result.content[0]?.text).toBe("client-1");
-
-    await client.close();
-  });
-  it("builds the verifier from the legacy verify config", async () => {
-    const { privateKey, jwksUri } = await startJwks();
-    const base = await bootServer(jwksUri, { legacyVerify: true });
-    const token = await signToken(privateKey);
-
-    const client = new Client({ name: "test-client", version: "0.0.0" });
-    const transport = new StreamableHTTPClientTransport(
-      new URL(`${base}/mcp`),
-      { requestInit: { headers: { Authorization: `Bearer ${token}` } } },
-    );
-    await client.connect(transport);
-
-    const result = (await client.callTool({
-      name: "whoami",
-      arguments: {},
-    })) as unknown as { content: { type: string; text: string }[] };
     expect(result.content[0]?.text).toBe("client-1");
 
     await client.close();
@@ -249,63 +229,68 @@ describe("baseUrl inferred from headers", () => {
 
 async function bootMixedServer(jwksUri: string) {
   const { createApp } = await import("../express.js");
-  const server = new McpServer(
-    { name: "mixed-auth-test", version: "0.0.0" },
-    { capabilities: {} },
-    {
-      oauth: {
-        baseUrl: "https://app.example.test",
-        oauthMetadata: {
-          issuer: ISSUER,
-          authorization_endpoint: `${ISSUER}/authorize`,
-          token_endpoint: `${ISSUER}/token`,
-          response_types_supported: ["code"],
-        },
-        verifier: createJwksVerifier({
-          issuer: ISSUER,
-          audience: AUDIENCE,
-          jwksUri,
-        }),
+  const app = new Skybridge({
+    name: "mixed-auth-test",
+    version: "0.0.0",
+    oauth: {
+      baseUrl: "https://app.example.test",
+      oauthMetadata: {
+        issuer: ISSUER,
+        authorization_endpoint: `${ISSUER}/authorize`,
+        token_endpoint: `${ISSUER}/token`,
+        response_types_supported: ["code"],
       },
-    },
-  )
-    .registerTool(
-      {
-        name: "public-whoami",
-        description: "Public.",
-        inputSchema: {},
-        auth: { allowsAnonymous: true },
-      },
-      (_args, extra) => ({
-        content: [{ type: "text", text: extra.authInfo?.clientId ?? "anon" }],
+      verifier: createJwksVerifier({
+        issuer: ISSUER,
+        audience: AUDIENCE,
+        jwksUri,
       }),
-    )
-    .registerTool(
-      {
-        name: "private-whoami",
-        description: "Private.",
-        inputSchema: {},
-        auth: {},
-      },
-      (_args, extra) => ({
-        content: [{ type: "text", text: extra.authInfo?.clientId ?? "anon" }],
-      }),
-    );
-
-  (server.registerTool as (...a: unknown[]) => unknown)(
-    "legacy-whoami",
-    {
-      description: "Registered via the legacy string overload.",
-      inputSchema: {},
     },
-    (_args: unknown, extra: { authInfo?: { clientId?: string } }) => ({
-      content: [{ type: "text", text: extra.authInfo?.clientId ?? "anon" }],
-    }),
-  );
+    handler: (server) =>
+      server
+        .registerTool(
+          {
+            name: "public-whoami",
+            description: "Public.",
+            inputSchema: {},
+            auth: { allowsAnonymous: true },
+          },
+          (_args, extra) => ({
+            content: [
+              { type: "text", text: extra.http?.authInfo?.clientId ?? "anon" },
+            ],
+          }),
+        )
+        .registerTool(
+          {
+            name: "private-whoami",
+            description: "Private.",
+            inputSchema: {},
+            auth: {},
+          },
+          (_args, extra) => ({
+            content: [
+              { type: "text", text: extra.http?.authInfo?.clientId ?? "anon" },
+            ],
+          }),
+        )
+        .registerTool(
+          {
+            name: "undeclared-whoami",
+            description: "Registered without auth or securitySchemes.",
+            inputSchema: {},
+          },
+          (_args, extra) => ({
+            content: [
+              { type: "text", text: extra.http?.authInfo?.clientId ?? "anon" },
+            ],
+          }),
+        ),
+  });
 
   const httpServer = http.createServer();
-  await createApp({ mcpServer: server, httpServer });
-  const listening = http.createServer(server.express);
+  await createApp({ app, httpServer });
+  const listening = http.createServer(app.express);
   await new Promise<void>((resolve) => listening.listen(0, resolve));
   appServer = listening;
   const port = (listening.address() as { port: number }).port;
@@ -392,7 +377,7 @@ describe("mixed-auth door", () => {
     expect(text).not.toContain("client-1");
   });
 
-  it("gates a tool registered via the legacy string overload (secure default)", async () => {
+  it("gates a tool with no declared schemes (secure default)", async () => {
     const { jwksUri } = await startJwks();
     const base = await bootMixedServer(jwksUri);
 
@@ -406,7 +391,7 @@ describe("mixed-auth door", () => {
         jsonrpc: "2.0",
         id: 1,
         method: "tools/call",
-        params: { name: "legacy-whoami", arguments: {} },
+        params: { name: "undeclared-whoami", arguments: {} },
       }),
     });
     expect(res.status).toBe(401);
@@ -500,38 +485,38 @@ describe("mixed-auth door", () => {
 
 async function bootScopedServer(jwksUri: string) {
   const { createApp } = await import("../express.js");
-  const server = new McpServer(
-    { name: "scoped-auth-test", version: "0.0.0" },
-    { capabilities: {} },
-    {
-      oauth: {
-        baseUrl: "https://app.example.test",
-        oauthMetadata: {
-          issuer: ISSUER,
-          authorization_endpoint: `${ISSUER}/authorize`,
-          token_endpoint: `${ISSUER}/token`,
-          response_types_supported: ["code"],
-        },
-        verifier: createJwksVerifier({
-          issuer: ISSUER,
-          audience: AUDIENCE,
-          jwksUri,
-        }),
+  const app = new Skybridge({
+    name: "scoped-auth-test",
+    version: "0.0.0",
+    oauth: {
+      baseUrl: "https://app.example.test",
+      oauthMetadata: {
+        issuer: ISSUER,
+        authorization_endpoint: `${ISSUER}/authorize`,
+        token_endpoint: `${ISSUER}/token`,
+        response_types_supported: ["code"],
       },
+      verifier: createJwksVerifier({
+        issuer: ISSUER,
+        audience: AUDIENCE,
+        jwksUri,
+      }),
     },
-  ).registerTool(
-    {
-      name: "checkout",
-      description: "Needs the checkout scope.",
-      inputSchema: {},
-      auth: { scopes: ["checkout"] },
-    },
-    () => ({ content: [{ type: "text", text: "ok" }] }),
-  );
+    handler: (server) =>
+      server.registerTool(
+        {
+          name: "checkout",
+          description: "Needs the checkout scope.",
+          inputSchema: {},
+          auth: { scopes: ["checkout"] },
+        },
+        () => ({ content: [{ type: "text", text: "ok" }] }),
+      ),
+  });
 
   const httpServer = http.createServer();
-  await createApp({ mcpServer: server, httpServer });
-  const listening = http.createServer(server.express);
+  await createApp({ app, httpServer });
+  const listening = http.createServer(app.express);
   await new Promise<void>((resolve) => listening.listen(0, resolve));
   appServer = listening;
   const port = (listening.address() as { port: number }).port;
@@ -641,19 +626,22 @@ describe("oauth config validation", () => {
     response_types_supported: ["code"],
   };
 
-  it("throws on a non-absolute baseUrl", () => {
-    expect(
-      () =>
-        new McpServer({ name: "t", version: "0" }, undefined, {
-          oauth: {
-            baseUrl: "not-a-url",
-            oauthMetadata: validMetadata,
-            verifier: createJwksVerifier({
-              issuer: ISSUER,
-              audience: AUDIENCE,
-            }),
-          },
+  it("rejects a non-absolute baseUrl when the app is first used", async () => {
+    const app = new Skybridge({
+      name: "t",
+      version: "0",
+      oauth: {
+        baseUrl: "not-a-url",
+        oauthMetadata: validMetadata,
+        verifier: createJwksVerifier({
+          issuer: ISSUER,
+          audience: AUDIENCE,
         }),
-    ).toThrow(/baseUrl must be a valid absolute URL/);
+      },
+      handler: (server) => server,
+    });
+    await expect(app.createServerInstance()).rejects.toThrow(
+      /baseUrl must be a valid absolute URL/,
+    );
   });
 });

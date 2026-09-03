@@ -1,20 +1,18 @@
 import {
   type BearerAuthMiddlewareOptions,
   requireBearerAuth,
-} from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
-import type { AuthInfo as SdkAuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
+} from "@modelcontextprotocol/express";
+import type { AuthInfo as SdkAuthInfo } from "@modelcontextprotocol/server";
 
 import type { RequestHandler } from "express";
 
-export { InvalidTokenError } from "@modelcontextprotocol/sdk/server/auth/errors.js";
-export {
-  type BearerAuthMiddlewareOptions,
-  requireBearerAuth,
-} from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
 export {
   type AuthMetadataOptions,
+  type BearerAuthMiddlewareOptions,
   mcpAuthMetadataRouter,
-} from "@modelcontextprotocol/sdk/server/auth/router.js";
+  requireBearerAuth,
+} from "@modelcontextprotocol/express";
+export { OAuthError, OAuthErrorCode } from "@modelcontextprotocol/server";
 /** Claims a verifier puts in `AuthInfo["extra"]`: any JSON-ish bag of them. */
 export type ExtraClaims = Record<string, unknown>;
 

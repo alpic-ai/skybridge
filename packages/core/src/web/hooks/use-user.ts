@@ -1,7 +1,12 @@
-import { type UserAgent, useHostContext } from "../bridges/index.js";
+import {
+  type Theme,
+  type UserAgent,
+  useHostContext,
+} from "../bridges/index.js";
 
 export type UserState = {
   locale: string;
+  theme: Theme;
   userAgent: UserAgent;
 };
 
@@ -28,7 +33,7 @@ function normalizeLocale(locale: string): string {
  *
  * @example
  * ```tsx
- * const { locale, userAgent } = useUser();
+ * const { locale, theme, userAgent } = useUser();
  *
  * // Access device type
  * const isMobile = userAgent.device.type === "mobile";
@@ -38,7 +43,8 @@ function normalizeLocale(locale: string): string {
  */
 export function useUser(): UserState {
   const rawLocale = useHostContext("locale");
+  const theme = useHostContext("theme");
   const userAgent = useHostContext("userAgent");
 
-  return { locale: normalizeLocale(rawLocale), userAgent };
+  return { locale: normalizeLocale(rawLocale), theme, userAgent };
 }

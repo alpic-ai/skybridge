@@ -9,7 +9,7 @@ import {
 } from "@alpic-ai/ui/components/tabs";
 import { SquareArrowOutUpRight } from "lucide-react";
 import { useState } from "react";
-import { useLayout, useOpenExternal, useRequestModal } from "skybridge/web";
+import { useOpenExternal, useRequestModal, useUser } from "skybridge/web";
 import { CreateStoreTab } from "./tabs/create-store-tab.js";
 import { DataLlmTab } from "./tabs/data-llm-tab.js";
 import { HomeTab } from "./tabs/home-tab.js";
@@ -19,13 +19,13 @@ import { UseCallToolTab } from "./tabs/use-call-tool-tab.js";
 import { UseDisplayModeTab } from "./tabs/use-display-mode-tab.js";
 import { UseDownloadTab } from "./tabs/use-download-tab.js";
 import { UseFilesTab } from "./tabs/use-files-tab.js";
-import { UseLayoutTab } from "./tabs/use-layout-tab.js";
 import { UseOpenExternalTab } from "./tabs/use-open-external-tab.js";
 import { UseRequestModalTab } from "./tabs/use-request-modal-tab.js";
 import { UseSendFollowUpMessageTab } from "./tabs/use-send-follow-up-message-tab.js";
 import { UseSetOpenInAppUrlTab } from "./tabs/use-set-open-in-app-url.js";
 import { UseUserTab } from "./tabs/use-user-tab.js";
 import { UseViewStateTab } from "./tabs/use-view-state-tab.js";
+import { UseViewportTab } from "./tabs/use-viewport-tab.js";
 
 const TABS = {
   Home: { docPath: "", Component: HomeTab },
@@ -36,7 +36,6 @@ const TABS = {
   useDisplayMode: { docPath: "use-display-mode", Component: UseDisplayModeTab },
   useDownload: { docPath: "use-download", Component: UseDownloadTab },
   useFiles: { docPath: "use-files", Component: UseFilesTab },
-  useLayout: { docPath: "use-layout", Component: UseLayoutTab },
   useOpenExternal: {
     docPath: "use-open-external",
     Component: UseOpenExternalTab,
@@ -55,6 +54,7 @@ const TABS = {
   },
   useToolInfo: { docPath: "use-tool-info", Component: ToolInfoTab },
   useUser: { docPath: "use-user", Component: UseUserTab },
+  useViewport: { docPath: "use-viewport", Component: UseViewportTab },
   useViewState: { docPath: "use-view-state", Component: UseViewStateTab },
 };
 
@@ -62,7 +62,7 @@ type Tab = keyof typeof TABS;
 
 function Widget() {
   const [tab, setTab] = useState<Tab>("Home");
-  const { theme } = useLayout();
+  const { theme } = useUser();
   const openExternal = useOpenExternal();
   const { isOpen, params } = useRequestModal();
 

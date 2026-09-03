@@ -118,6 +118,21 @@ You can test your App locally by using our DevTools UI on `http://localhost:3000
 
 To test your app with other MCP Clients like ChatGPT, Claude or VSCode, see [Testing Your App](https://docs.skybridge.tech/quickstart/test-your-app).
 
+#### Evals
+
+`evals/explore.eval.ts` checks that a natural prompt actually reaches the
+`explore-capitals` tool with the right city. It runs the app in-process, so
+there is no server to boot, but it does call a real model: export
+`ANTHROPIC_API_KEY` first.
+
+```bash
+pnpm evals
+```
+
+Evals are not part of `pnpm test` on purpose. They cost tokens and their result
+depends on the model, so you run them when you change a tool's name,
+description or input schema.
+
 ## Deploy to Production
 
 Skybridge is infrastructure vendor agnostic, and your app can be deployed on any cloud platform supporting MCP.

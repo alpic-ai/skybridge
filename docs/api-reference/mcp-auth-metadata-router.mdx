@@ -10,9 +10,9 @@ When a client reaches your server without a token, it needs to know where the us
 The server publishes where to authorize, so a client hitting a 401 can find the authorization server on its own.
 
 ```ts server.ts highlight={4-13}
-import { McpServer, mcpAuthMetadataRouter } from "skybridge/server";
+import { Skybridge, mcpAuthMetadataRouter } from "skybridge/server";
 
-const server = new McpServer({ name: "shop", version: "1.0" }).use(
+export const app = new Skybridge({ name: "shop", version: "1.0", handler }).use(
   mcpAuthMetadataRouter({
     oauthMetadata: {
       issuer: "https://auth.example.com",

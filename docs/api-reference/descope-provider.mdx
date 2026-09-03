@@ -8,18 +8,17 @@ description: "Wire OAuth from a Descope MCP Server"
 
 ## Example
 
-```ts server.ts highlight={1,7-9}
-import { McpServer, descopeProvider } from "skybridge/server";
+```ts server.ts highlight={1,6-8}
+import { Skybridge, descopeProvider } from "skybridge/server";
 
-const server = new McpServer(
-  { name: "personal-shopper", version: "0.0.1" },
-  { capabilities: {} },
-  {
-    oauth: await descopeProvider({
-      url: process.env.DESCOPE_DISCOVERY_URL,
-    }),
-  },
-);
+export const app = new Skybridge({
+  name: "personal-shopper",
+  version: "0.0.1",
+  oauth: descopeProvider({
+    url: process.env.DESCOPE_DISCOVERY_URL,
+  }),
+  handler,
+});
 ```
 
 ## Signature
@@ -42,7 +41,7 @@ Requires Dynamic Client Registration enabled on the MCP Server. With DCR disable
 
 ## Returns
 
-A `Promise` for the [`OAuthConfig`](/api-reference/custom-provider#returns) you pass to the [`oauth`](/api-reference/mcp-server#constructor) constructor option.
+A `Promise` for the [`OAuthConfig`](/api-reference/custom-provider#returns) you pass to the [`oauth`](/api-reference/skybridge#oauth) field, as a value or from a function.
 
 <CardGroup cols={3}>
   <Card title="Connect an Identity Provider" icon="fingerprint" href="/guides/auth-providers">

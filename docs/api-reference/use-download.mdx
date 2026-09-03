@@ -17,7 +17,7 @@ The view builds a CSV from the carousel's products and hands the host an inline 
 import { useDownload } from "skybridge/web";
 
 function Carousel({ products }: { products: Product[] }) {
-  const { download } = useDownload();
+  const download = useDownload();
 
   const exportCsv = async () => {
     const csv = products
@@ -72,7 +72,7 @@ function Carousel({ products }: { products: Product[] }) {
 
 ## Returns
 
-`useDownload` returns a single function.
+`useDownload` returns the function directly.
 
 ### `download`
 

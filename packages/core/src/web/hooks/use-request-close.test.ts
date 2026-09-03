@@ -9,7 +9,7 @@ describe("useRequestClose", () => {
   beforeEach(() => {
     HostAdaptor.resetInstance();
     McpAppBridge.resetInstance();
-    vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+    vi.stubGlobal("skybridge", {});
     vi.stubGlobal("openai", undefined);
     vi.stubGlobal("parent", { postMessage: vi.fn() });
   });
