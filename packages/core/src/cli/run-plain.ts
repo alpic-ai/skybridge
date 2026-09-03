@@ -1,5 +1,5 @@
 import type { TunnelManager, TunnelState } from "./tunnel.js";
-import { startNodemon } from "./use-nodemon.js";
+import { CRASH_MESSAGE, startNodemon } from "./use-nodemon.js";
 import { startTypeScriptCheck, type TsError } from "./use-typescript-check.js";
 
 export interface RunPlainOptions {
@@ -67,6 +67,7 @@ export function runPlain(options: RunPlainOptions): () => void {
     onStderr: (message) => info(message),
     onRestart: (files) =>
       info(`✓  Server restarted due to file changes: ${files.join(", ")}`),
+    onCrash: () => info(CRASH_MESSAGE),
   });
 
   let lastTsErrorKey = "";
