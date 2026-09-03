@@ -16,7 +16,7 @@ function loadNodemon(): ExtendedNodemon {
 }
 
 export const CRASH_MESSAGE =
-  "💥  Server crashed. Fix the error, then save a file under src/ to restart it.";
+  "💥  Server crashed. Fix the error, then save a watched file to restart it.";
 
 const SOURCEMAP_WARNING = /^Sourcemap for ".*" points to missing source files$/;
 
