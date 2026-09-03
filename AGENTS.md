@@ -19,7 +19,7 @@ For deep understanding, read `docs/get-started/` and `docs/api-reference/`.
 ```
 packages/
   core/             # npm: `skybridge` — the framework
-    src/server/     #   MCP server (extends @modelcontextprotocol/sdk), view registration, Express
+    src/server/     #   MCP server (extends @modelcontextprotocol/server), view registration, Express
     src/web/        #   React hooks, runtime adaptors, data-llm, Vite plugin, createStore
     src/cli/        #   CLI entry (oclif)
     src/commands/   #   dev / build / start commands
