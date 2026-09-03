@@ -17,6 +17,7 @@ import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { useCallToolResult } from "@/lib/store.js";
 import { cn, formatBytes } from "@/lib/utils.js";
 import { ContextWarningAlert, ContextWarningBadge } from "./context-warning.js";
+import { FullscreenInspector } from "./fullscreen-inspector.js";
 import { JsonSyntaxBlock } from "./json-syntax-block.js";
 import { LogsDrawer } from "./logs-drawer.js";
 import {
@@ -54,6 +55,10 @@ export const ToolPanel = () => {
     "devtools-tool-panel-header-expanded",
     { defaultValue: false },
   );
+  const [fullscreenInspectorOpen, setFullscreenInspectorOpen] =
+    useLocalStorageState("devtools-tool-panel-fullscreen-inspector-open", {
+      defaultValue: false,
+    });
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: VIEW_LOGS_GROUP_ID,
     panelIds: [VIEW_PANEL_ID, LOGS_PANEL_ID],
@@ -252,6 +257,10 @@ export const ToolPanel = () => {
                 <ToolPanelToolbar
                   logsOpen={logsOpen ?? false}
                   onOpenLogs={() => setLogsOpen(true)}
+                  fullscreenInspectorOpen={fullscreenInspectorOpen ?? false}
+                  onToggleFullscreenInspector={() =>
+                    setFullscreenInspectorOpen(!fullscreenInspectorOpen)
+                  }
                 />
                 <div
                   className={cn(
@@ -268,10 +277,10 @@ export const ToolPanel = () => {
                   <Suspense fallback={<Placeholder text="Loading view…" />}>
                     <View />
                   </Suspense>
-                  {isOverlay && (
+                  {isModal && (
                     <button
                       type="button"
-                      aria-label={isModal ? "Close modal" : "Exit fullscreen"}
+                      aria-label="Close modal"
                       onClick={() => setPreference("displayMode", "inline")}
                       className="absolute right-4 top-4 z-10 inline-flex size-8 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-light-gray-foreground shadow-md transition-colors hover:bg-light-gray hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     >
@@ -279,6 +288,11 @@ export const ToolPanel = () => {
                     </button>
                   )}
                 </div>
+                {isFullscreen && fullscreenInspectorOpen && (
+                  <FullscreenInspector
+                    onClose={() => setFullscreenInspectorOpen(false)}
+                  />
+                )}
               </div>
             </Panel>
             {logsOpen && !isFullscreen && (
