@@ -19,7 +19,7 @@ export type ExtraClaims = Record<string, unknown>;
 /**
  * A validated access token, as resolved by a
  * [verifier](https://docs.skybridge.tech/api-reference/verifier) and handed to
- * handlers on `extra.authInfo`.
+ * handlers on `extra.http?.authInfo`.
  *
  * Unparameterized, `extra` stays the SDK's `Record<string, unknown>` bag. The
  * claims are owned by whoever verifies the token: parameterize the verifier and
@@ -43,7 +43,7 @@ export type AuthInfo<TExtra extends ExtraClaims = ExtraClaims> = Omit<
 
 /**
  * Checks a bearer token and resolves the claims it carries. The type parameter
- * is what makes `extra.authInfo.extra` typed downstream, so a verifier is the
+ * is what makes `extra.http?.authInfo.extra` typed downstream, so a verifier is the
  * single source for the claim shape.
  *
  * Pass one to {@link requireBearerAuth} or {@link optionalBearerAuth} directly,
@@ -59,7 +59,7 @@ export type TokenVerifier<TExtra extends ExtraClaims = ExtraClaims> = {
  * Like `requireBearerAuth`, but lets requests through when no
  * `Authorization` header is present. Used for mixed-auth servers where some
  * tools are public and others require sign-in: each tool enforces its own
- * `securitySchemes` against `extra.authInfo`.
+ * `securitySchemes` against `extra.http?.authInfo`.
  *
  * Behavior:
  * - No `Authorization` header → `next()` without `req.auth`.

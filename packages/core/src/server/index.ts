@@ -1,6 +1,7 @@
 export {
   ProtocolError,
   ProtocolErrorCode,
+  type StandardSchemaWithJSON,
 } from "@modelcontextprotocol/server";
 export type {
   SkybridgeConfig,

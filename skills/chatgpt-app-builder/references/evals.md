@@ -6,7 +6,7 @@ DevTools proves a tool works when called. An eval proves the model *calls* it, w
 
 ## Setup
 
-1. Dev dependencies: `@skybridge/test`, `vitest`, `ai`, and an AI SDK provider (`@ai-sdk/anthropic`, `@ai-sdk/openai`, ...).
+1. Dev dependencies: `@skybridge/test@beta` (published on the `beta` dist-tag only), `vitest`, `ai`, and an AI SDK provider (`@ai-sdk/anthropic`, `@ai-sdk/openai`, ...).
 2. `vite.config.ts`: `skybridge({ evals: {} })`. This registers the `expect.chat` matchers, picks up `evals/**/*.eval.ts`, raises the per-scenario timeout to two minutes, and loads `.env`.
 3. `package.json`: `"evals": "vitest run evals"`.
 4. The provider key in `.env` (`ANTHROPIC_API_KEY` for `@ai-sdk/anthropic`). If the app has `oauth`, its provider env is needed too: `setup` and `oauth` resolve on the first request.

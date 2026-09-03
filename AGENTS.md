@@ -12,7 +12,7 @@ Skybridge wraps two host runtimes behind one API:
 
 Developers write one server (backend) and view(s) (frontend). Skybridge detects the runtime at load time.
 
-For deep understanding, read `docs/home.mdx`, `docs/fundamentals/`, and `docs/concepts/`.
+For deep understanding, read `docs/get-started/` and `docs/api-reference/`.
 
 ## Monorepo layout
 
@@ -35,7 +35,7 @@ When you need to understand a concept, read the corresponding `docs/` page or th
 
 ## Development
 
-**Prerequisites:** Node.js >= 24.14.0, pnpm 10+ (`corepack enable`).
+**Prerequisites:** Node.js >= 24.18.0, pnpm 10+ (`corepack enable`).
 
 ```bash
 pnpm install        # setup
