@@ -7,4 +7,5 @@ export type ExtendedNodemon = import("nodemon").default & {
     event: "restart",
     listener: (files: string[]) => void,
   ): import("nodemon").Nodemon;
+  on(event: "crash", listener: () => void): import("nodemon").Nodemon;
 };
