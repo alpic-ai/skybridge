@@ -9,7 +9,7 @@ describe("HostAdaptor", () => {
   beforeEach(() => {
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
-    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+    vi.stubGlobal("skybridge", {});
     vi.stubGlobal("parent", { postMessage: vi.fn() });
     localStorage.clear();
   });

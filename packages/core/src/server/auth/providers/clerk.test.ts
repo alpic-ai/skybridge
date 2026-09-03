@@ -28,7 +28,7 @@ describe("clerkProvider", () => {
       }),
     );
 
-    await clerkProvider({ domain: "acme.clerk.accounts.dev" });
+    await clerkProvider({ domain: "acme.clerk.accounts.dev" }).resolve();
 
     expect(fetchSpy).toHaveBeenCalledWith(
       `${issuer}/.well-known/openid-configuration`,

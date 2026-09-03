@@ -4,11 +4,11 @@ Enable user authentication so tools can access user-specific data.
 
 ## How it works
 
-1. Pass an `oauth` config as the third `McpServer` argument
+1. Set the `oauth` field on the `Skybridge` config
 2. Skybridge auto-mounts the OAuth discovery endpoints (`/.well-known/oauth-authorization-server`, `/.well-known/oauth-protected-resource`) and Bearer JWT verification on `/mcp`
 3. The host reads the metadata, walks the user through OAuth, refreshes tokens, and calls `/mcp` with `Authorization: Bearer <token>`
 4. By default every tool requires sign-in: unauthenticated/invalid requests **to `/mcp`** get HTTP 401 before any tool handler runs
-5. Tool handlers read user identity from `extra.authInfo`
+5. Tool handlers read user identity from `extra.http?.authInfo`
 
 The `oauth` field guards `/mcp` and nothing else. A route you mount yourself outside `/mcp` is unauthenticated — gate it with `requireBearerAuth`, your own verifier, and the same `requiredScopes` the `oauth` config sets, or it accepts under-scoped tokens `/mcp` rejects. Note that Alpic Cloud only routes traffic to `/mcp` (custom paths work locally and self-hosted).
 
@@ -34,24 +34,25 @@ Does the IdP publish an OAuth discovery document with a jwks_uri?
 
 ## 1. Pick a provider
 
-The branded providers discover the IdP's OAuth metadata and build the whole config. All return a `Promise` — `await` it. Most need **Dynamic Client Registration (DCR)** enabled on the IdP side (Authplane has it natively; Descope without DCR goes through the Alpic proxy).
+The branded providers discover the IdP's OAuth metadata and build the whole config. Pass the result straight to `oauth` (`oauth: descopeProvider(...)`); discovery runs when the app starts, not when `server.ts` is imported. Most need **Dynamic Client Registration (DCR)** enabled on the IdP side (Authplane has it natively; Descope without DCR goes through the Alpic proxy).
 
 The table below covers what goes in the code. For the dashboard steps that produce those values, send the user to `docs/guides/auth-providers.mdx` — provider UIs change, and this file isn't the source of truth for them.
 
 ```typescript
 // src/server.ts
-import { McpServer, descopeProvider } from "skybridge/server";
+import { Skybridge, descopeProvider } from "skybridge/server";
 
-const server = new McpServer(
-  { name: "my-app", version: "0.0.1" },
-  { capabilities: {} },
-  {
-    oauth: await descopeProvider({
-      url: env.DESCOPE_MCP_SERVER_URL, // MCP Server Discovery URL (Issuer)
-    }),
-  },
-);
+export const app = new Skybridge({
+  name: "my-app",
+  version: "0.0.1",
+  oauth: descopeProvider({
+    url: env.DESCOPE_MCP_SERVER_URL, // MCP Server Discovery URL (Issuer)
+  }),
+  handler: (server) => server.registerTool(/* ... */),
+});
 ```
+
+The provider's claims type `extra.http.authInfo.extra` in every tool handler. Keep `handler` inline in the config: an extracted handler needs a hand-written server type and loses that inference.
 
 | Provider | Import | Required options | Notes |
 |---|---|---|---|
@@ -71,7 +72,7 @@ For an IdP without a branded helper, point `customProvider` at its issuer; it re
 ```typescript
 import { customProvider } from "skybridge/server";
 
-oauth: await customProvider({
+oauth: customProvider({
   issuer: "https://your-idp.com",
   audience: "my-api",            // omit only if the IdP binds no aud
   scopes: ["openid", "email", "profile"],
@@ -84,13 +85,13 @@ oauth: await customProvider({
 
 ## 3. Read auth in handlers
 
-`extra.authInfo` carries the verified token. Its `extra.subject` holds the `sub` claim; all other JWT claims are spread alongside it, typed from the claims the provider documents, so no cast is needed.
+`extra.http?.authInfo` carries the verified token. Its `extra.subject` holds the `sub` claim; all other JWT claims are spread alongside it, typed from the claims the provider documents, so no cast is needed.
 
 ```typescript
 server.registerTool(
   { name: "get-orders", description: "Get user orders" },
   async (_input, extra) => {
-    const orders = await fetchOrders(extra.authInfo?.extra?.subject);
+    const orders = await fetchOrders(extra.http?.authInfo?.extra?.subject);
     return {
       structuredContent: { orders },
       content: [{ type: "text", text: `Found ${orders.length} orders` }],
@@ -113,7 +114,7 @@ server
       description: "Browse the public catalog",
       auth: { allowsAnonymous: true }, // callable signed out; token still read when present
     },
-    (_input, extra) => ({ ...(extra.authInfo ? greet(extra.authInfo) : guest()) }),
+    (_input, extra) => ({ ...(extra.http?.authInfo ? greet(extra.http.authInfo) : guest()) }),
   )
   .registerTool(
     { name: "checkout", description: "Place an order", auth: { scopes: ["checkout"] } },
@@ -121,7 +122,7 @@ server
   );
 ```
 
-Skybridge enforces this before the handler runs: each `tools/call` is checked against the calling tool's declaration — missing token → 401 `invalid_token`, missing scope → 403 `insufficient_scope` (a non-batched ChatGPT request gets the equivalent in-band `mcp/www_authenticate` challenge instead of the transport status). So a gated handler can rely on `extra.authInfo` being present.
+Skybridge enforces this before the handler runs: each `tools/call` is checked against the calling tool's declaration: a missing token gets a 401 `invalid_token`, a missing scope a 403 `insufficient_scope` (a non-batched ChatGPT request gets the equivalent in-band `mcp/www_authenticate` challenge instead of the transport status). So a gated handler can rely on `extra.http?.authInfo` being present.
 
 ⚠️ **One anonymous tool unlocks every non-`tools/call` method.** Declaring `allowsAnonymous` anywhere switches the whole `/mcp` route to optional Bearer, and only `tools/call` is checked per tool. So `initialize`, `tools/list`, `prompts/*` and `resources/read` — **including your view resources** — become reachable with no token at all. In a mixed server, never put user-specific data in a view resource or a prompt; return it from a gated tool's response instead.
 
@@ -137,10 +138,10 @@ Only needed when the framework can't verify the IdP's tokens: **no OAuth discove
 
 ### Write a verifier
 
-`verifyAccessToken` resolves with `AuthInfo` for a good token, or throws `InvalidTokenError`. For a JWT IdP, verify against its JWKS:
+`verifyAccessToken` resolves with `AuthInfo` for a good token, or throws `OAuthError("invalid_token", message)`. For a JWT IdP, verify against its JWKS:
 
 ```typescript
-import { type AuthInfo, InvalidTokenError } from "skybridge/server";
+import { type AuthInfo, OAuthError } from "skybridge/server";
 import * as jose from "jose";
 
 const jwks = jose.createRemoteJWKSet(new URL("https://your-idp.com/.well-known/jwks.json"));
@@ -159,7 +160,7 @@ export async function verifyAccessToken(token: string): Promise<AuthInfo> {
       extra: { subject: payload.sub },
     };
   } catch (err) {
-    throw new InvalidTokenError(err instanceof Error ? err.message : String(err));
+    throw new OAuthError("invalid_token", err instanceof Error ? err.message : String(err));
   }
 }
 ```
@@ -172,10 +173,11 @@ export async function verifyAccessToken(token: string): Promise<AuthInfo> {
 import {
   mcpAuthMetadataRouter,
   optionalBearerAuth,
+  Skybridge,
 } from "skybridge/server";
 import { verifyAccessToken } from "./auth.js";
 
-const server = new McpServer({ name: "my-app", version: "0.0.1" }, { capabilities: {} })
+export const app = new Skybridge({ name: "my-app", version: "0.0.1", handler })
   .use(
     mcpAuthMetadataRouter({
       oauthMetadata: {
@@ -204,8 +206,8 @@ server.registerTool(
     // No `oauth` provider means no framework enforcement: securitySchemes is
     // advertised to the host only, and optionalBearerAuth lets token-less
     // requests through. A gated handler MUST do both checks itself.
-    if (!extra.authInfo) return signInChallenge(["orders:read"]);
-    if (!extra.authInfo.scopes.includes("orders:read")) {
+    if (!extra.http?.authInfo) return signInChallenge(["orders:read"]);
+    if (!extra.http.authInfo.scopes.includes("orders:read")) {
       return insufficientScope(["orders:read"]);
     }
     // ...

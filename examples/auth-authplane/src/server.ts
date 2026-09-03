@@ -1,5 +1,5 @@
 import { intentMiddleware } from "@alpic-ai/insights";
-import { authplaneProvider, McpServer } from "skybridge/server";
+import { authplaneProvider, Skybridge } from "skybridge/server";
 import * as z from "zod";
 import { searchCoffeeShops } from "./coffee-data.js";
 import { env } from "./env.js";
@@ -25,92 +25,85 @@ import { env } from "./env.js";
  * for byte.
  */
 
-
-const server = new McpServer(
-  {
-    name: "auth-coffee",
-    version: "0.0.1",
-  },
-  { capabilities: {} },
-  {
-    oauth: await authplaneProvider<{ email?: string }>({
-      issuer: env.AUTHPLANE_ISSUER,
-      resource: env.SERVER_URL,
-    }),
-  },
-)
-  .mcpMiddleware(intentMiddleware())
-  .registerTool(
-    {
-      name: "search-coffee-paris",
-      description:
-        "Search for coffee shops in Paris. Shows personalized results with your favorites highlighted and sorted first. Requires authentication.",
-      inputSchema: {
-        query: z
-          .string()
-          .optional()
-          .describe(
-            "Search query (name or specialty, e.g., 'latte', 'espresso')",
-          ),
-        minRating: z
-          .number()
-          .min(1)
-          .max(5)
-          .optional()
-          .describe("Minimum rating (1-5)"),
-      },
-      annotations: {
-        readOnlyHint: true,
-        openWorldHint: true,
-        destructiveHint: false,
-      },
-      view: {
-        component: "search-coffee-paris",
-        description: "Search for coffee shops in Paris",
-        csp: {
-          resourceDomains: ["https://images.unsplash.com"],
-        },
-      },
-      _meta: {
-        "openai/widgetAccessible": true,
-      },
-    },
-    ({ query, minRating }, extra) => {
-
-      // `sub` identifies the signed-in user and is what favourites key off.
-      // Access tokens carry no profile claims, so there is no display name to
-      // show — `email` is read in case a deployment maps one in, and the view
-      // falls back to a neutral label when it is absent rather than rendering
-      // a raw identifier.
-      const subject = extra.authInfo?.extra?.subject;
-      const email = extra.authInfo?.extra?.email;
-      const userName = email?.split("@")[0];
-
-      const results = searchCoffeeShops({
-        query,
-        minRating,
-        userId: subject ?? extra.authInfo?.clientId ?? "anonymous",
-      });
-
-      return {
-        structuredContent: {
-          shops: results.shops,
-          totalCount: results.totalCount,
-          userName,
-        },
-        content: [
-          {
-            type: "text",
-            text: userName
-              ? `Found ${results.totalCount} coffee shops in Paris for ${userName}`
-              : `Found ${results.totalCount} coffee shops in Paris, with your favourites first`,
+export const app = new Skybridge({
+  name: "auth-coffee",
+  version: "0.0.1",
+  oauth: authplaneProvider<{ email?: string }>({
+    issuer: env.AUTHPLANE_ISSUER,
+    resource: env.SERVER_URL,
+  }),
+  handler: (server) =>
+    server
+      .registerTool(
+        {
+          name: "search-coffee-paris",
+          description:
+            "Search for coffee shops in Paris. Shows personalized results with your favorites highlighted and sorted first. Requires authentication.",
+          inputSchema: {
+            query: z
+              .string()
+              .optional()
+              .describe(
+                "Search query (name or specialty, e.g., 'latte', 'espresso')",
+              ),
+            minRating: z
+              .number()
+              .min(1)
+              .max(5)
+              .optional()
+              .describe("Minimum rating (1-5)"),
           },
-        ],
-        isError: false,
-      };
-    },
-  );
+          annotations: {
+            readOnlyHint: true,
+            openWorldHint: true,
+            destructiveHint: false,
+          },
+          view: {
+            component: "search-coffee-paris",
+            description: "Search for coffee shops in Paris",
+            csp: {
+              resourceDomains: ["https://images.unsplash.com"],
+            },
+          },
+          _meta: {
+            "openai/widgetAccessible": true,
+          },
+        },
+        ({ query, minRating }, extra) => {
+          // `sub` identifies the signed-in user and is what favourites key off.
+          // Access tokens carry no profile claims, so there is no display name to
+          // show — `email` is read in case a deployment maps one in, and the view
+          // falls back to a neutral label when it is absent rather than rendering
+          // a raw identifier.
+          const subject = extra.http?.authInfo?.extra?.subject;
+          const email = extra.http?.authInfo?.extra?.email;
+          const userName = email?.split("@")[0];
 
-export default await server.run();
+          const results = searchCoffeeShops({
+            query,
+            minRating,
+            userId: subject ?? extra.http?.authInfo?.clientId ?? "anonymous",
+          });
 
-export type AppType = typeof server;
+          return {
+            structuredContent: {
+              shops: results.shops,
+              totalCount: results.totalCount,
+              userName,
+            },
+            content: [
+              {
+                type: "text",
+                text: userName
+                  ? `Found ${results.totalCount} coffee shops in Paris for ${userName}`
+                  : `Found ${results.totalCount} coffee shops in Paris, with your favourites first`,
+              },
+            ],
+            isError: false,
+          };
+        },
+      )
+      .mcpMiddleware(intentMiddleware()),
+});
+
+export type AppType = typeof app;

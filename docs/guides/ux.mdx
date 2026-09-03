@@ -12,14 +12,14 @@ import { Hero } from "/components/hero.jsx";
 An MCP App is a new kind of surface with its own UX principles. The [view](/build/view) shares the screen with an ongoing conversation, in a frame the host controls. Skybridge surfaces that environment through [hooks](/api-reference/overview#hooks), so the view can read its context and adapt.
 
 ```tsx views/carousel.tsx
-import { useDisplayMode, useLayout, useUser } from "skybridge/web";
+import { useDisplayMode, useUser, useViewport } from "skybridge/web";
 import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
 
 export default function Carousel() {
   const { output } = useToolInfo<"search-products">();
-  const { theme, maxHeight, safeArea } = useLayout();
+  const { theme, userAgent } = useUser();
+  const { maxHeight, safeArea } = useViewport();
   const [mode, setMode] = useDisplayMode();
-  const { userAgent } = useUser();
 
   return (
     <div
@@ -43,17 +43,17 @@ The sections below cover fitting the space the host gives you, matching its them
 
 ## Fit the Available Space
 
-[`useLayout`](/api-reference/use-layout) reports the room the host gives the view: `maxHeight`, and the `safeArea` insets that keep content clear of device notches and the chat composer.
+[`useViewport`](/api-reference/use-viewport) reports the room the host gives the view: `maxHeight`, and the `safeArea` insets that keep content clear of device notches and the chat composer.
 
-```tsx views/carousel.tsx highlight={6,13}
-import { useDisplayMode, useLayout, useUser } from "skybridge/web";
+```tsx views/carousel.tsx highlight={7,13}
+import { useDisplayMode, useUser, useViewport } from "skybridge/web";
 import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
 
 export default function Carousel() {
   const { output } = useToolInfo<"search-products">();
-  const { theme, maxHeight, safeArea } = useLayout();
+  const { theme, userAgent } = useUser();
+  const { maxHeight, safeArea } = useViewport();
   const [mode, setMode] = useDisplayMode();
-  const { userAgent } = useUser();
 
   return (
     <div
@@ -77,17 +77,17 @@ The carousel caps its height at `maxHeight` and pads its bottom by `safeArea.ins
 
 ## Match the Theme
 
-[`useLayout`](/api-reference/use-layout) reports the host's color scheme as `theme`, `"light"` or `"dark"`. A view on its own palette looks pasted into the conversation; read `theme` and follow it.
+[`useUser`](/api-reference/use-user) reports the host's color scheme as `theme`, `"light"` or `"dark"`. A view on its own palette looks pasted into the conversation; read `theme` and follow it.
 
 ```tsx views/carousel.tsx highlight={6,12}
-import { useDisplayMode, useLayout, useUser } from "skybridge/web";
+import { useDisplayMode, useUser, useViewport } from "skybridge/web";
 import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
 
 export default function Carousel() {
   const { output } = useToolInfo<"search-products">();
-  const { theme, maxHeight, safeArea } = useLayout();
+  const { theme, userAgent } = useUser();
+  const { maxHeight, safeArea } = useViewport();
   const [mode, setMode] = useDisplayMode();
-  const { userAgent } = useUser();
 
   return (
     <div
@@ -119,15 +119,15 @@ The carousel adds a `dark` class when the host is dark, the convention Tailwind'
 
 Switching is user-triggered, and the host can decline the request.
 
-```tsx views/carousel.tsx highlight={7,17,20-22}
-import { useDisplayMode, useLayout, useUser } from "skybridge/web";
+```tsx views/carousel.tsx highlight={8,17,20-22}
+import { useDisplayMode, useUser, useViewport } from "skybridge/web";
 import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
 
 export default function Carousel() {
   const { output } = useToolInfo<"search-products">();
-  const { theme, maxHeight, safeArea } = useLayout();
+  const { theme, userAgent } = useUser();
+  const { maxHeight, safeArea } = useViewport();
   const [mode, setMode] = useDisplayMode();
-  const { userAgent } = useUser();
 
   return (
     <div
@@ -151,17 +151,17 @@ The carousel shows two columns inline and four in fullscreen, with a "See all" b
 
 ## Adapt to the User
 
-[`useUser`](/api-reference/use-user) reports the `locale` and the `userAgent`: the device type, and whether it supports `hover` and `touch`.
+[`useUser`](/api-reference/use-user) also reports the `locale` and the `userAgent`: the device type, and whether it supports `hover` and `touch`.
 
-```tsx views/carousel.tsx highlight={8,18}
-import { useDisplayMode, useLayout, useUser } from "skybridge/web";
+```tsx views/carousel.tsx highlight={6,18}
+import { useDisplayMode, useUser, useViewport } from "skybridge/web";
 import { useToolInfo } from "../helpers.js"; // generated, type-safe from server schema
 
 export default function Carousel() {
   const { output } = useToolInfo<"search-products">();
-  const { theme, maxHeight, safeArea } = useLayout();
+  const { theme, userAgent } = useUser();
+  const { maxHeight, safeArea } = useViewport();
   const [mode, setMode] = useDisplayMode();
-  const { userAgent } = useUser();
 
   return (
     <div

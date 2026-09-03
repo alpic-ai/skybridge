@@ -1,5 +1,5 @@
 ---
-title: useHostInfo
+title: useHost
 description: "Identify which host is rendering the view"
 ---
 
@@ -7,17 +7,17 @@ import { Compat } from "/components/compat.jsx";
 
 <Compat alpic claude cursor goose />
 
-The same [view](/build/view) runs inside every host — Claude, Cursor, Goose, and others. `useHostInfo` reports which one, taken from the MCP Apps `ui/initialize` handshake, so the view can adapt copy, shortcuts, or layout to the host it's rendering in. It runs only on MCP Apps hosts; the name is normalized to a [`Host`](#host) slug when recognized, otherwise passed through as a raw string.
+The same [view](/build/view) runs inside every host: Claude, Cursor, Goose, and others. `useHost` reports which one, taken from the MCP Apps `ui/initialize` handshake, so the view can adapt copy, shortcuts, or layout to the host it's rendering in. It runs only on MCP Apps hosts; the name is normalized to a [`Host`](#host) slug when recognized, otherwise passed through as a raw string.
 
 ## Example
 
 An empty state suggests the next action using the wording that fits the host.
 
 ```tsx highlight={4}
-import { useHostInfo } from "skybridge/web";
+import { useHost } from "skybridge/web";
 
 function EmptyState() {
-  const { name } = useHostInfo();
+  const { name } = useHost();
   const hint =
     name === "claude"
       ? "Ask Claude to add your first item."

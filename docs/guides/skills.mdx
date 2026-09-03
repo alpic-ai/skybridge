@@ -16,11 +16,12 @@ A [tool](/build/tools) description tells the model *what* a tool does. A **skill
 Drop your skills under `src/skills/`, one directory per skill, and turn the option on:
 
 ```ts server.ts
-const server = new McpServer(
-  { name: "shop", version: "1.0" },
-  {},
-  { skills: true },
-);
+export const app = new Skybridge({
+  name: "shop",
+  version: "1.0",
+  skills: true,
+  handler,
+});
 ```
 
 ```

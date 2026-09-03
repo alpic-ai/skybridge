@@ -131,31 +131,36 @@ And the implementation:
 
 <CodeGroup>
 ```ts server.ts
-import { McpServer } from "skybridge/server";
+import { Skybridge } from "skybridge/server";
 import { z } from "zod";
 
-const server = new McpServer({ name: "personal-shopper", version: "0.0.1" }, {})
-  .registerTool(
-    {
-      name: "search-products",
-      description: "Show products matching a query in a carousel.",
-      inputSchema: { query: z.string() },
-      view: { component: "carousel" },
-    },
-    async ({ query }) => {
-      return { structuredContent: { products: await search(query) } };
-    },
-  )
-  .registerTool(
-    {
-      name: "create-checkout",
-      description: "Create a checkout session for the cart.",
-      inputSchema: { productIds: z.array(z.string()) },
-    },
-    async ({ productIds }) => {
-      return { structuredContent: { url: await checkout(productIds) } };
-    },
-  );
+export const app = new Skybridge({
+  name: "personal-shopper",
+  version: "0.0.1",
+  handler: (server) =>
+    server
+      .registerTool(
+        {
+          name: "search-products",
+          description: "Show products matching a query in a carousel.",
+          inputSchema: { query: z.string() },
+          view: { component: "carousel" },
+        },
+        async ({ query }) => {
+          return { structuredContent: { products: await search(query) } };
+        },
+      )
+      .registerTool(
+        {
+          name: "create-checkout",
+          description: "Create a checkout session for the cart.",
+          inputSchema: { productIds: z.array(z.string()) },
+        },
+        async ({ productIds }) => {
+          return { structuredContent: { url: await checkout(productIds) } };
+        },
+      ),
+});
 ```
 
 ```tsx views/carousel.tsx

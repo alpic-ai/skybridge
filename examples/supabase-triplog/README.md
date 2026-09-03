@@ -10,7 +10,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): an 
 - **Rich Detail Panel**: Cover image, place, country, date, status badge, category chip, expenses, and notes
 - **Client-side Filtering**: `status` (Completed / Ongoing / Up Next) and `category` filters applied in the UI
 - **Focus Feature**: Pass `focusPlace` to auto-scroll and highlight a specific trip
-- **Theme Support**: Adapts to light/dark mode via `useLayout()`
+- **Theme Support**: Adapts to light/dark mode via `useUser()`
 - **Env Validation**: Uses `@t3-oss/env-core` + Zod to validate env vars at startup
 
 ## Example Prompts

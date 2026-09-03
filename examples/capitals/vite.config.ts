@@ -1,8 +1,9 @@
 import path from "node:path";
+import { skybridge } from "@skybridge/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { skybridge } from "skybridge/vite";
-import { defineConfig, type PluginOption } from "vite";
+import type { PluginOption } from "vite";
+import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -12,10 +13,10 @@ export default defineConfig({
       logLevels: ["error"],
     },
   },
-  plugins: [skybridge() as PluginOption, react(), tailwindcss()],
+  plugins: [skybridge({ evals: {} }) as PluginOption, react(), tailwindcss()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
 });

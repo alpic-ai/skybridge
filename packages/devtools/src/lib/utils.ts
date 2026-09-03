@@ -60,13 +60,38 @@ export const measureIframeHeight = (
   // Before layout, the scroll parent can report 0 — do not clamp to 0 or we never commit height.
   const maxH = parentH > 0 ? parentH : Number.POSITIVE_INFINITY;
 
-  // Prefer the mount node so body/html stretching (e.g. min-h-screen) doesn't pin us tall.
   const root = doc.getElementById("root");
-  const innerScroll = root
-    ? root.getBoundingClientRect().height
-    : Math.max(doc.body.scrollHeight, doc.documentElement.scrollHeight);
+  const contentWindow = doc.defaultView;
+  if (!root || !contentWindow) {
+    return 0;
+  }
 
-  return Math.min(innerScroll, maxH);
+  // Measure from #root rather than the document: a body stretched to the
+  // viewport (min-h-screen, height: 100%) reports the iframe's own height back
+  // and the widget can never shrink. `bottom` is viewport-relative, so it already
+  // includes whatever margin and padding html/body put above #root; scrollY
+  // corrects it if the document happens to be scrolled during measurement.
+  const rootBottom =
+    root.getBoundingClientRect().bottom + contentWindow.scrollY;
+
+  // #root's box stops at its own edge. Add the margin, padding and border that
+  // html/body reserve below it (the UA default body margin, or an app's own
+  // body padding), otherwise that space overflows and the iframe scrolls.
+  const spaceBelowRoot =
+    spaceBelow(contentWindow, doc.body) +
+    spaceBelow(contentWindow, doc.documentElement);
+
+  return Math.min(rootBottom + spaceBelowRoot, maxH);
+};
+
+const spaceBelow = (contentWindow: Window, element: Element) => {
+  const { paddingBottom, borderBottomWidth, marginBottom } =
+    contentWindow.getComputedStyle(element);
+  return (
+    parseFloat(paddingBottom) +
+    parseFloat(borderBottomWidth) +
+    parseFloat(marginBottom)
+  );
 };
 
 export function formatBytes(bytes: number): string {

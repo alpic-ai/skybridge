@@ -28,6 +28,8 @@ import {
 
 const FONT_STACK = '"Anthropic Sans", ui-sans-serif, system-ui, sans-serif';
 
+const SCROLL_ARROW_THRESHOLD_PX = 24;
+
 const shellColors = {
   light: {
     "--shell-surface": "#faf9f5",
@@ -69,7 +71,7 @@ function Bar({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "rounded-md bg-[color-mix(in_oklab,var(--shell-text)_10%,transparent)] motion-safe:animate-pulse",
+        "rounded-md bg-[color-mix(in_oklab,var(--shell-text)_10%,transparent)]",
         className,
       )}
     />
@@ -160,14 +162,32 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
   const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
   const isMobile = useIsMobile();
   const isFullscreen = displayMode === "fullscreen";
+  const isModal = displayMode === "modal";
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [scrolledUp, setScrolledUp] = useState(false);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const threadRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const scroller = scrollerRef.current;
+    if (!scroller || isFullscreen) {
+      setScrolledUp(false);
+      return;
+    }
+    const update = () => {
+      const distanceToBottom =
+        scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight;
+      setScrolledUp(distanceToBottom > SCROLL_ARROW_THRESHOLD_PX);
+    };
+    update();
+    scroller.addEventListener("scroll", update, { passive: true });
+    return () => scroller.removeEventListener("scroll", update);
+  }, [isFullscreen]);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
     const thread = threadRef.current;
-    if (!scroller || !thread) {
+    if (!scroller || !thread || isFullscreen) {
       return;
     }
     const pinToBottom = () => {
@@ -187,7 +207,7 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
         scroller.removeEventListener(event, unpin);
       }
     };
-  }, []);
+  }, [isFullscreen]);
 
   return (
     <div
@@ -318,7 +338,7 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
                   index > 0 && "mt-10",
                 )}
               >
-                <div className="h-16 w-[55%] self-end rounded-xl bg-[color-mix(in_oklab,var(--shell-text)_5%,transparent)] motion-safe:animate-pulse" />
+                <div className="h-16 w-[55%] self-end rounded-xl bg-[color-mix(in_oklab,var(--shell-text)_5%,transparent)]" />
                 <div className="mt-6 flex flex-col gap-3">
                   {widths.map((width) => (
                     <Bar key={width} className={cn("h-4", width)} />
@@ -328,7 +348,7 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
             ))}
             <div
               className={cn(
-                "mt-10 h-12 w-[45%] self-end rounded-xl bg-[color-mix(in_oklab,var(--shell-text)_5%,transparent)] motion-safe:animate-pulse",
+                "mt-10 h-12 w-[45%] self-end rounded-xl bg-[color-mix(in_oklab,var(--shell-text)_5%,transparent)]",
                 isFullscreen && "hidden",
               )}
             />
@@ -336,11 +356,25 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
             <div
               className={cn(
                 "relative mt-3 w-full",
-                !isFullscreen && !isMobile && "-mx-4 w-[calc(100%+2rem)]",
+                !isFullscreen &&
+                  !isModal &&
+                  !isMobile &&
+                  "-mx-4 w-[calc(100%+2rem)]",
                 isFullscreen &&
                   "mt-0 flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-(--shell-border) bg-(--shell-panel)",
+                isModal && "absolute inset-0 z-30 mt-0",
               )}
             >
+              {isModal ? (
+                <button
+                  type="button"
+                  aria-label="Close modal"
+                  onClick={() => setPreference("displayMode", "inline")}
+                  className="absolute top-4 right-4 z-40 flex size-8 cursor-pointer items-center justify-center rounded-lg bg-(--shell-btn-bg) text-(--shell-text) transition-colors hover:bg-[color-mix(in_oklab,var(--shell-text)_10%,transparent)]"
+                >
+                  <CrossIcon className="size-4.5" />
+                </button>
+              ) : null}
               {isFullscreen ? (
                 <div className="flex h-14 shrink-0 items-center gap-2.5 border-(--shell-border) border-b px-4">
                   <div className="flex size-7 items-center justify-center rounded-lg border border-(--shell-border) bg-(--shell-segment-active)">
@@ -357,10 +391,16 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
                   </button>
                 </div>
               ) : null}
-              <div className={cn("w-full", isFullscreen && "min-h-0 flex-1")}>
+              <div
+                className={cn(
+                  "w-full",
+                  isFullscreen && "min-h-0 flex-1",
+                  isModal && "h-full min-h-0",
+                )}
+              >
                 {children ?? <Bar className="h-96 w-full rounded-2xl" />}
               </div>
-              {isFullscreen && !isMobile ? (
+              {isFullscreen ? (
                 <div className="pointer-events-none absolute inset-x-0 bottom-4 mx-auto w-[min(680px,85%)]">
                   <div className="flex min-h-[100px] flex-col justify-between rounded-[20px] border border-(--shell-composer-border) bg-(--shell-card) p-4 shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
                     <span className="text-(--shell-text-tertiary)">
@@ -393,6 +433,27 @@ export function ClaudeShell({ children }: { children: ReactNode }) {
             </div>
           </div>
         </div>
+        {scrolledUp && (
+          <button
+            type="button"
+            aria-label="Scroll to bottom"
+            onClick={() => {
+              const scroller = scrollerRef.current;
+              if (scroller) {
+                scroller.scrollTo({
+                  top: scroller.scrollHeight,
+                  behavior: "smooth",
+                });
+              }
+            }}
+            className={cn(
+              "absolute left-1/2 z-20 flex size-8 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full border border-(--shell-border) bg-(--shell-card) text-(--shell-text-secondary) shadow-[0_2px_8px_rgba(0,0,0,0.12)]",
+              isMobile ? "bottom-24" : "bottom-32",
+            )}
+          >
+            <ChevronDownIcon className="size-3.5" />
+          </button>
+        )}
         <div
           className={cn(
             "w-full shrink-0 cursor-not-allowed",

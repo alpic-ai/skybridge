@@ -12,7 +12,7 @@ Views run in sandboxed iframes where `<a download>` and `URL.createObjectURL` ar
 import { useDownload } from "skybridge/web";
 
 function ExportButton({ rows }: { rows: Row[] }) {
-  const { download } = useDownload();
+  const download = useDownload();
 
   const handleClick = async () => {
     const csv = rows.map((r) => `${r.id},${r.name}`).join("\n");

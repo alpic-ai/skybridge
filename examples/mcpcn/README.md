@@ -8,7 +8,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a s
 
 - **Interactive Widget Rendering**: A React-based widget that displays an interactive product carousel directly in AI conversations
 - **Tool Info Access**: Widgets access tool input, output, and metadata via `useToolInfo()` hook
-- **Theme Support**: Adapts to light/dark mode using the `useLayout()` hook
+- **Theme Support**: Adapts to light/dark mode using the `useUser()` hook
 - **Localization**: Translates UI based on user locale via `useUser()` hook
 - **Persistent State**: Maintains cart state across re-renders using `useWidgetState()` hook
 - **Modal Dialogs**: Opens checkout modal via `useRequestModal()` hook

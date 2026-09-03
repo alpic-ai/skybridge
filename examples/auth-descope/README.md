@@ -6,10 +6,10 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a p
 
 - **Transport-Level Auth**: Auth is enforced at the `/mcp` transport level — unauthenticated requests receive HTTP 401 before reaching any tool handler
 - **Descope OAuth**: One-line setup with `descopeProvider`, which discovers the MCP Server's OAuth metadata and verifies JWTs against Descope's JWKS
-- **Branded provider via `oauth:`**: Passing `oauth: await descopeProvider(...)` auto-mounts the well-known metadata endpoints and Bearer verification — no manual router
+- **Branded provider via `oauth:`**: Passing `oauth: descopeProvider(...)` auto-mounts the well-known metadata endpoints and Bearer verification — no manual router
 - **Personalized Results**: Authenticated users see favorites highlighted and sorted first
 - **User Identity in Widgets**: Displays the signed-in user's name directly in the widget UI
-- **Simplified Server Setup**: Uses [`server.run()`](https://docs.skybridge.tech/api-reference/run) and `.use()` for a single-file server with no manual Express boilerplate
+- **Simplified Server Setup**: Uses [`app.run()`](https://docs.skybridge.tech/api-reference/run) and `.use()` for a single-file server with no manual Express boilerplate
 - **Structured Content & Metadata**: Server passes structured data to widgets via `structuredContent`
 - **Hot Module Replacement**: [Live reloading](https://docs.skybridge.tech/concepts/fast-iteration#hmr-with-vite-plugin) of widget components during development
 - **Local DevTools**: [DevTools](https://docs.skybridge.tech/devtools) at `http://localhost:3000` for local testing
@@ -67,7 +67,7 @@ This command starts:
 
 ```
 ├── src/
-│   ├── server.ts        # Server entry: McpServer + descopeProvider auth + widget + run()
+│   ├── server.ts        # Skybridge app: descopeProvider auth + widget
 │   ├── env.ts          # Env validation
 │   └── coffee-data.ts  # Mock coffee shop data & search
 │   ├── views/
@@ -98,6 +98,15 @@ Modify files in `server/` and refresh the connection with your testing MCP Clien
 You can test your App locally by using our DevTools UI on `http://localhost:3000` while running the dev command.
 
 To test your app with other MCP Clients like ChatGPT, Claude or VSCode, see [Testing Your App](https://docs.skybridge.tech/quickstart/test-your-app).
+
+### Evals
+
+The `evals/` folder contains model-in-the-loop scenarios that run the app in-process and assert on the tool calls a real model makes. They need your `.env` (the OAuth provider is resolved for real) plus an `ANTHROPIC_API_KEY` in the environment.
+
+```bash
+pnpm evals        # run the scenarios
+pnpm evals:types  # typecheck them
+```
 
 ## Deploy to Production
 

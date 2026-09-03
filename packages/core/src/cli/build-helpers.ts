@@ -10,10 +10,10 @@ import path from "node:path";
 import { discoverSkills } from "../server/skills.js";
 
 // Primes the manifest and skills snapshot in skybridge's module scope, then
-// dynamically imports `./server.js` so user code runs *after* the side channels
+// dynamically imports `./index.js` so user code runs *after* the side channels
 // are set. The dynamic import is load-bearing: a static
 // `export { default } from ...` is hoisted with the rest of the static graph
-// and would evaluate `server.js` before the primers run. Both `skills.js` and
+// and would evaluate `index.js` before the primers run. Both `skills.js` and
 // the manifest are imported (not read from disk) so they ride the bundle on
 // filesystem-less targets like Cloudflare Workers.
 export const ENTRY_WRAPPER_CONTENT = `import { __setBuildManifest, __setSkillsManifest } from "skybridge/server";
@@ -23,7 +23,7 @@ import skills from "./skills.js";
 __setBuildManifest(manifest);
 __setSkillsManifest(skills);
 
-const userMod = await import("./server.js");
+const userMod = await import("./index.js");
 export default userMod.default;
 `;
 
@@ -80,7 +80,7 @@ export const VERCEL_VC_CONFIG: unknown = {
 // `node_modules` and don't touch tracked paths like `api/` or `public/`.
 //
 // Entry is `dist/__entry.js` — the wrapper that primes the Vite manifest via
-// `__setBuildManifest` before importing user code. Bundling `dist/server.js`
+// `__setBuildManifest` before importing user code. Bundling `dist/index.js`
 // directly would skip that priming and 500 on view resource reads when the
 // function falls back to `readFileSync('dist/assets/.vite/manifest.json')`
 // (Vercel functions don't ship `dist/`).

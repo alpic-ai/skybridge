@@ -50,7 +50,7 @@ describe("DataLLM", () => {
         });
       }
       vi.stubGlobal("openai", OpenaiMock);
-      vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+      vi.stubGlobal("skybridge", {});
     });
 
     afterEach(() => {
@@ -183,7 +183,7 @@ describe("DataLLM", () => {
     let postMessageMock: ReturnType<typeof getMcpAppHostPostMessageMock>;
 
     beforeEach(() => {
-      vi.stubGlobal("skybridge", { hostType: "mcp-app" });
+      vi.stubGlobal("skybridge", {});
       vi.stubGlobal("openai", undefined);
       vi.stubGlobal("ResizeObserver", MockResizeObserver);
       postMessageMock = getMcpAppHostPostMessageMock();

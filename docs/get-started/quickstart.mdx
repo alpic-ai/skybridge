@@ -5,7 +5,7 @@ icon: "zap"
 ---
 
 To get a running codebase right away, you can scaffold a project from our templates. They come pre-configured with:
-- a working [MCP server](/api-reference/mcp-server)
+- a working [MCP server](/api-reference/skybridge)
 - a complete development environment with a [local emulator](/test/devtools), file watching, and hot module reload
 
 <Info>
@@ -24,11 +24,17 @@ The default `demo` template comes with two tools:
 - `start`: mounts the `onboarding` view
 - `get-fortune-cookie`: with no view
 
-[Tools](/build/tools) are defined in `server.ts`, [UI components](/build/view) in the `views` directory. Tools are bound to views in the tool definition.
+[Tools](/build/tools) are defined in `src/server.ts`, which `src/index.ts` runs, and [UI components](/build/view) live in the `views` directory. Tools are bound to views in the tool definition.
 
 <Info>
 To scaffold a bare-bones project without tools or view placeholders, select the `blank` template.
 </Info>
+
+You can also start from any app in the [examples](/examples) folder of the Skybridge repository:
+
+```bash
+npx skybridge create my-app --example auth-descope
+```
 
 ## Run Locally
 

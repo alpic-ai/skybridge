@@ -1,5 +1,5 @@
 import type { ExtraClaims } from "../../auth.js";
-import type { OAuthConfig } from "../index.js";
+import type { OAuthProvider } from "../index.js";
 import type { RegisteredClaims } from "../verify.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
 import { toIssuerUrl } from "./shared.js";
@@ -29,7 +29,7 @@ export function stytchProvider<
     CustomProviderOptions,
     "issuer" | "audience"
   >,
-): Promise<OAuthConfig<StytchClaims & TCustom & RegisteredClaims>> {
+): OAuthProvider<StytchClaims & TCustom & RegisteredClaims> {
   const { domain, ...rest } = opts;
   return customProvider<StytchClaims & TCustom>({
     issuer: toIssuerUrl(domain),

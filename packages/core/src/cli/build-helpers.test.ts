@@ -39,9 +39,9 @@ describe("emitEntryWrapper", () => {
     expect(out).toContain('import skills from "./skills.js"');
     expect(out).toContain("__setBuildManifest(manifest)");
     expect(out).toContain("__setSkillsManifest(skills)");
-    // Dynamic import is load-bearing: `server.js` must evaluate after the
+    // Dynamic import is load-bearing: `index.js` must evaluate after the
     // setters run, so a static re-export wouldn't work.
-    expect(out).toContain('await import("./server.js")');
+    expect(out).toContain('await import("./index.js")');
     expect(out).toContain("export default userMod.default");
   });
 });

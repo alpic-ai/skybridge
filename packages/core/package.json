@@ -27,9 +27,9 @@
       "types": "./dist/web/index.d.ts",
       "default": "./dist/web/index.js"
     },
-    "./vite": {
-      "types": "./dist/web/plugin/plugin.d.ts",
-      "default": "./dist/web/plugin/plugin.js"
+    "./views": {
+      "types": "./dist/views/index.d.ts",
+      "default": "./dist/views/index.js"
     }
   },
   "scripts": {
@@ -50,22 +50,25 @@
   "author": "Frédéric Barthelet",
   "license": "ISC",
   "peerDependencies": {
-    "@modelcontextprotocol/sdk": ">=1.27.0",
-    "@skybridge/devtools": "^1.1.0",
+    "@skybridge/devtools": "^2.0.0-beta.0",
     "nodemon": ">=3.0.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0",
-    "vite": ">=7.3.1"
+    "vite": ">=7.3.1",
+    "zod": "^4.2.0"
   },
   "dependencies": {
-    "@babel/core": "^7.29.7",
+    "@modelcontextprotocol/core": "^2.0.0",
     "@modelcontextprotocol/ext-apps": "^1.7.4",
+    "@modelcontextprotocol/express": "^2.0.0",
+    "@modelcontextprotocol/node": "^2.0.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@modelcontextprotocol/server": "^2.0.0",
     "@oclif/core": "^4.11.14",
     "ci-info": "^4.4.0",
     "cors": "^2.8.6",
     "cross-spawn": "^7.0.6",
     "dequal": "^2.0.3",
-    "es-toolkit": "^1.49.0",
     "esbuild": "^0.28.1",
     "express": "^5.2.1",
     "handlebars": "^4.7.9",
@@ -78,11 +81,10 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@modelcontextprotocol/client": "^2.0.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
     "@total-typescript/tsconfig": "^1.0.4",
-    "@types/babel__core": "^7.20.5",
     "@types/cors": "^2.8.19",
     "@types/cross-spawn": "^6.0.6",
     "@types/express": "^5.0.6",

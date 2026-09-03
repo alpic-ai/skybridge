@@ -14,7 +14,7 @@ Scaffold a project by setting up the Skybridge template starter. Skybridge is a 
 deno init --npm skybridge {target-dir}
 ```
 
-Template flags: `--blank` (minimal, no tools) or `--ecom` (ecommerce starter). With npm, separate flags: `npm create skybridge@latest {target-dir} -- --ecom`.
+Template flags: `--blank` (minimal, no tools), `--ecom` (ecommerce starter) or `--example <name>` (a copy of `examples/<name>` from the Skybridge repo, downloaded from GitHub). With npm, separate flags: `npm create skybridge@latest {target-dir} -- --ecom`.
 Scaffolding with `--ecom`? → follow [ecommerce.md](ecommerce.md) to fill it.
 
 3. [Start the dev server](run-locally.md). Read logs to assess readiness/health; fix any errors (TypeScript, etc.) before proceeding.

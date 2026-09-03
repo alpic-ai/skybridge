@@ -1,7 +1,7 @@
 import path from "node:path";
+import { skybridge } from "@skybridge/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { skybridge } from "skybridge/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -14,7 +14,7 @@ export default defineConfig({
   plugins: [skybridge(), react(), tailwindcss()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
 });

@@ -22,10 +22,13 @@ SPEC.md keeps track of the app's requirements and design decisions. Keep it up t
 
 **Migrating from Skybridge `< 0.36.x`?** → Read [migrate-to-v1.md](references/migrate-to-v1.md) first. Users may reference `skybridge >= 0.36.x` as v1.
 
+**Migrating from Skybridge `1.x` to `2.x`?** → Fetch the [v2.0.0 release notes](https://github.com/alpic-ai/skybridge/releases/tag/v2.0.0) first and follow them.
+
 ## Setup
 
 1. **Copy template** → [copy-template.md](references/copy-template.md): when starting a new project with ready SPEC.md
 2. **Run locally** → [run-locally.md](references/run-locally.md): when ready to test, need dev server or ChatGPT connection
+3. **Evals** → [evals.md](references/evals.md): when checking that a real model reaches the right tools from natural prompts, in a test
 
 ## Architecture
 

@@ -4,12 +4,10 @@ import type { DownloadParams, DownloadResult } from "../bridges/types.js";
 
 export type DownloadFn = (params: DownloadParams) => Promise<DownloadResult>;
 
-export function useDownload(): { download: DownloadFn } {
+export function useDownload(): DownloadFn {
   const adaptor = getAdaptor();
-  const download = useCallback<DownloadFn>(
+  return useCallback<DownloadFn>(
     (params) => adaptor.download(params),
     [adaptor],
   );
-
-  return { download };
 }

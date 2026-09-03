@@ -13,7 +13,7 @@ describe("useRequestModal", () => {
     McpAppBridge.resetInstance();
     AppsSdkBridge.resetInstance();
     requestModalMock = vi.fn();
-    vi.stubGlobal("skybridge", { hostType: "apps-sdk" });
+    vi.stubGlobal("skybridge", {});
     vi.stubGlobal("parent", { postMessage: vi.fn() });
     vi.stubGlobal("openai", {
       requestModal: requestModalMock,

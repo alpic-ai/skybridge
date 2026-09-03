@@ -6,10 +6,10 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a p
 
 - **Transport-Level Auth**: Auth is enforced at the `/mcp` transport level — unauthenticated requests receive HTTP 401 before reaching any tool handler
 - **Auth0 OAuth**: One-line setup with `auth0Provider`, which discovers Auth0's OIDC metadata and verifies JWTs against its JWKS
-- **Branded provider via `oauth:`**: Passing `oauth: await auth0Provider(...)` auto-mounts the well-known metadata endpoints and Bearer verification — no manual router
+- **Branded provider via `oauth:`**: Passing `oauth: auth0Provider(...)` auto-mounts the well-known metadata endpoints and Bearer verification — no manual router
 - **Personalized Results**: Authenticated users see favorites highlighted and sorted first
 - **User Identity in Widgets**: Displays the signed-in user's name directly in the widget UI
-- **Simplified Server Setup**: Uses [`server.run()`](https://docs.skybridge.tech/api-reference/run) and `.use()` for a single-file server with no manual Express boilerplate
+- **Simplified Server Setup**: Uses [`app.run()`](https://docs.skybridge.tech/api-reference/run) and `.use()` for a single-file server with no manual Express boilerplate
 - **Structured Content & Metadata**: Server passes structured data to widgets via `structuredContent`
 - **Hot Module Replacement**: [Live reloading](https://docs.skybridge.tech/concepts/fast-iteration#hmr-with-vite-plugin) of widget components during development
 - **Local DevTools**: [DevTools](https://docs.skybridge.tech/devtools) at `http://localhost:3000` for local testing
@@ -100,7 +100,7 @@ This command starts:
 
 ```
 ├── src/
-│   ├── server.ts        # Server entry: McpServer + auth0Provider auth + widget + run()
+│   ├── server.ts        # Skybridge app: auth0Provider auth + widget
 │   ├── env.ts          # Env validation
 │   └── coffee-data.ts  # Mock coffee shop data & search
 │   ├── views/

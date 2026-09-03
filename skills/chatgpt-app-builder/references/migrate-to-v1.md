@@ -27,6 +27,8 @@ Each of these blocks a working build, and several fail with error messages that 
 
 ### 2.1 The `skybridge/web` → `skybridge/vite` rename is only the Vite plugin
 
+On Skybridge 2.x the plugin lives in its own package: install `@skybridge/vite-plugin` and read `@skybridge/vite-plugin` wherever this section says `skybridge/vite`.
+
 The notes show `import { skybridge } from "skybridge/web"` → `"skybridge/vite"` and read like a blanket rename. It is not. **Only the Vite plugin moved.** Every React hook still lives in `skybridge/web`. The split is by runtime: `skybridge/vite` is build-time Node code (the plugin runs in your Vite config), while `skybridge/web` is browser code that ships to the view — so a blanket rename moves browser hooks into a module the browser bundle can't resolve.
 
 ```ts
@@ -66,7 +68,7 @@ import { defineConfig, type PluginOption } from "vite";
 
 export default defineConfig({
   plugins: [skybridge() as PluginOption, react()],
-  resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
+  resolve: { alias: { "@": path.resolve(import.meta.dirname, "./src") } },
 });
 ```
 

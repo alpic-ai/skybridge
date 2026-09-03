@@ -1,5 +1,5 @@
 import type { ExtraClaims } from "../../auth.js";
-import type { OAuthConfig } from "../index.js";
+import type { OAuthProvider } from "../index.js";
 import type { RegisteredClaims } from "../verify.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
 
@@ -82,9 +82,7 @@ function parseIdentifier(value: string, option: string): URL {
  */
 export function authplaneProvider<
   TCustom extends ExtraClaims = Record<never, never>,
->(
-  opts: AuthplaneProviderOptions,
-): Promise<OAuthConfig<TCustom & RegisteredClaims>> {
+>(opts: AuthplaneProviderOptions): OAuthProvider<TCustom & RegisteredClaims> {
   const { issuer, resource, audience, ...rest } = opts;
 
   parseIdentifier(issuer, "issuer");

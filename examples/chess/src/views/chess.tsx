@@ -4,9 +4,9 @@ import type { PieceDropHandlerArgs } from "react-chessboard";
 import { Chessboard } from "react-chessboard";
 import {
   useDisplayMode,
-  useLayout,
   useRegisterViewTool,
   useSendFollowUpMessage,
+  useUser,
 } from "skybridge/web";
 import * as z from "zod";
 import {
@@ -211,7 +211,7 @@ function formatLog(log: string[]): string {
 }
 
 export default function ChessView() {
-  const { theme: hostTheme } = useLayout();
+  const { theme: hostTheme } = useUser();
   const [themeOverride, setThemeOverride] = useState<Theme | null>(null);
   const theme: Theme = themeOverride ?? hostTheme;
 
@@ -264,7 +264,9 @@ export default function ChessView() {
             aria-label={
               theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
             }
-            onClick={() => setThemeOverride(theme === "dark" ? "light" : "dark")}
+            onClick={() =>
+              setThemeOverride(theme === "dark" ? "light" : "dark")
+            }
           >
             {theme === "dark" ? "☀" : "☾"}
           </button>
@@ -272,8 +274,8 @@ export default function ChessView() {
 
         <div className="chess-lobby">
           <p className="chess-lobby-text">
-            Choose your color. The game opens fullscreen so you can focus on
-            the board.
+            Choose your color. The game opens fullscreen so you can focus on the
+            board.
           </p>
           <div className="chess-lobby-choices">
             <button

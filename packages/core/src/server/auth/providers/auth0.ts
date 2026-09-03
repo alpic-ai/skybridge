@@ -1,5 +1,5 @@
 import type { ExtraClaims } from "../../auth.js";
-import type { OAuthConfig } from "../index.js";
+import type { OAuthProvider } from "../index.js";
 import type { RegisteredClaims } from "../verify.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
 import { toIssuerUrl } from "./shared.js";
@@ -36,27 +36,32 @@ export type Auth0Claims = {
  * `authorization_endpoint`. The token's `aud` is the API; `verify.issuer` stays
  * Auth0 (the token's real `iss`).
  */
-export async function auth0Provider<
+export function auth0Provider<
   TCustom extends ExtraClaims = Record<never, never>,
 >(
   opts: { domain: string; audience: string; serverUrl: string } & Omit<
     CustomProviderOptions,
     "issuer" | "audience" | "baseUrl" | "serverUrl"
   >,
-): Promise<OAuthConfig<Auth0Claims & TCustom & RegisteredClaims>> {
+): OAuthProvider<Auth0Claims & TCustom & RegisteredClaims> {
   const { domain, audience, ...rest } = opts;
-  const config = await customProvider<Auth0Claims & TCustom>({
+  const provider = customProvider<Auth0Claims & TCustom>({
     issuer: toIssuerUrl(domain),
     audience,
     ...rest,
   });
-  const authUrl = new URL(config.oauthMetadata.authorization_endpoint);
-  authUrl.searchParams.set("audience", audience);
   return {
-    ...config,
-    oauthMetadata: {
-      ...config.oauthMetadata,
-      authorization_endpoint: authUrl.href,
+    resolve: async () => {
+      const config = await provider.resolve();
+      const authUrl = new URL(config.oauthMetadata.authorization_endpoint);
+      authUrl.searchParams.set("audience", audience);
+      return {
+        ...config,
+        oauthMetadata: {
+          ...config.oauthMetadata,
+          authorization_endpoint: authUrl.href,
+        },
+      };
     },
   };
 }

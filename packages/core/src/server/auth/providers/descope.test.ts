@@ -46,7 +46,7 @@ describe("descopeProvider", () => {
       [AGENTIC]: ["checkout"],
     });
 
-    const config = await descopeProvider({ url: AGENTIC });
+    const config = await descopeProvider({ url: AGENTIC }).resolve();
 
     expect(fetchSpy).toHaveBeenCalledWith(
       `${PROJECT}/.well-known/openid-configuration`,
@@ -66,7 +66,7 @@ describe("descopeProvider", () => {
 
     const config = await descopeProvider({
       url: `${AGENTIC}/.well-known/openid-configuration`,
-    });
+    }).resolve();
 
     expect(config.oauthMetadata.issuer).toBe(AGENTIC);
     expect(config.scopesSupported).toEqual(["checkout"]);
@@ -75,7 +75,7 @@ describe("descopeProvider", () => {
   it("lets an explicit audience override the derived project id", async () => {
     mockDiscovery({ [PROJECT]: ["openid"], [AGENTIC]: ["checkout"] });
 
-    await descopeProvider({ url: AGENTIC, audience: "custom" });
+    await descopeProvider({ url: AGENTIC, audience: "custom" }).resolve();
 
     expect(jwks().audience).toBe("custom");
   });

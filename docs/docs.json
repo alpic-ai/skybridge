@@ -52,6 +52,7 @@
               "test/devtools",
               "test/tunnel",
               "test/playground",
+              "test/evals",
               "test/audit"
             ],
             "expanded": true
@@ -100,6 +101,7 @@
             "group": "Server",
             "icon": "server",
             "pages": [
+              "api-reference/skybridge",
               "api-reference/mcp-server",
               "api-reference/register-tool"
             ]
@@ -135,8 +137,7 @@
               "api-reference/use-display-mode",
               "api-reference/use-download",
               "api-reference/use-files",
-              "api-reference/use-host-info",
-              "api-reference/use-layout",
+              "api-reference/use-host",
               "api-reference/use-open-external",
               "api-reference/use-register-view-tool",
               "api-reference/use-request-close",
@@ -146,7 +147,8 @@
               "api-reference/use-set-open-in-app-url",
               "api-reference/use-tool-info",
               "api-reference/use-user",
-              "api-reference/use-view-state"
+              "api-reference/use-view-state",
+              "api-reference/use-viewport"
             ]
           },
           {
@@ -252,6 +254,14 @@
     {
       "source": "/examples/lumo",
       "destination": "https://skybridge.tech/showcase"
+    },
+    {
+      "source": "/api-reference/use-host-info",
+      "destination": "/api-reference/use-host"
+    },
+    {
+      "source": "/api-reference/use-layout",
+      "destination": "/api-reference/use-viewport"
     }
   ],
   "navbar": {

@@ -32,7 +32,7 @@ export async function GET(
   const { slug } = await params;
   const releases = await getReleases();
   const release = releases.find((r) => slugifyTag(r.tag_name) === slug);
-  if (!release || !release.body) {
+  if (!release?.body) {
     return new Response("", {
       status: 404,
       headers: { "Content-Type": "text/html; charset=utf-8" },

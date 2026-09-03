@@ -1,7 +1,7 @@
 import { Maximize2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { useDisplayMode, useLayout } from "skybridge/web";
+import { useDisplayMode, useUser } from "skybridge/web";
 import { Spinner } from "@/components/ui/shadcn-io/spinner/index.js";
 import { useCallTool, useToolInfo } from "../helpers.js";
 import { CapitalDetail } from "./components/CapitalDetail.js";
@@ -13,7 +13,7 @@ import "@/index.css";
 function CapitalExplorer() {
   const [displayMode, setDisplayMode] = useDisplayMode();
   const isFullscreen = displayMode === "fullscreen";
-  const { theme } = useLayout();
+  const { theme } = useUser();
 
   const { output, responseMetadata, isPending } =
     useToolInfo<"explore-capitals">();
@@ -48,9 +48,7 @@ function CapitalExplorer() {
   const mapCenter = capitalLight?.coordinates || { lat: 48, lng: 2 };
   const capital = data?.structuredContent?.capital || output?.capital;
   const errorMessage =
-    data !== undefined
-      ? data?.structuredContent?.error
-      : output?.error;
+    data !== undefined ? data?.structuredContent?.error : output?.error;
 
   const handleCapitalClick = (capitalName: string) => {
     setPendingCapital(capitalName);

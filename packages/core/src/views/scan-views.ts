@@ -39,7 +39,7 @@ export function scanViewsSync(viewsDir: string): {
   const invalid: InvalidView[] = [];
   for (const candidate of candidates) {
     const code = readFileSync(candidate.filePath, "utf-8");
-    if (hasDefaultExport(code, candidate.filePath)) {
+    if (hasDefaultExport(code)) {
       valid.push(candidate);
     } else {
       invalid.push({

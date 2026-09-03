@@ -1,5 +1,5 @@
 import type { ExtraClaims } from "../../auth.js";
-import type { OAuthConfig } from "../index.js";
+import type { OAuthProvider } from "../index.js";
 import type { RegisteredClaims } from "../verify.js";
 import { type CustomProviderOptions, customProvider } from "./custom.js";
 import { toIssuerUrl } from "./shared.js";
@@ -37,7 +37,7 @@ export function workosProvider<
     CustomProviderOptions,
     "issuer" | "audience"
   >,
-): Promise<OAuthConfig<WorkosClaims & TCustom & RegisteredClaims>> {
+): OAuthProvider<WorkosClaims & TCustom & RegisteredClaims> {
   const { domain, ...rest } = opts;
   return customProvider<WorkosClaims & TCustom>({
     issuer: toIssuerUrl(domain),

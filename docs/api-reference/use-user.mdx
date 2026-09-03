@@ -1,23 +1,23 @@
 ---
 title: useUser
-description: "Read the host's locale and device capabilities"
+description: "Read the host's theme, locale, and device capabilities"
 ---
 
 import { Compat } from "/components/compat.jsx";
 
 <Compat alpic chatgpt claude cursor goose />
 
-Your [view](/build/view) runs for users on different devices and in different [locales](https://developer.mozilla.org/en-US/docs/Glossary/Locale). `useUser` reports the user's locale and device capabilities, so the view can format values and size controls for them.
+Your [view](/build/view) runs for users on different devices, in different [locales](https://developer.mozilla.org/en-US/docs/Glossary/Locale), and under the theme they picked in the host. `useUser` reports the user's locale, theme, and device capabilities, so the view can format values, match the host's palette, and size controls for them.
 
 ## Example
 
-The carousel formats prices in the host locale and adapts its controls to the device: a touch device gets larger tap targets, and hover styles apply only when the device reports hover.
+The carousel follows the host theme, formats prices in the host locale, and adapts its controls to the device: a touch device gets larger tap targets, and hover styles apply only when the device reports hover.
 
-```tsx highlight={4-8,10}
+```tsx highlight={4-8,10,18}
 import { useUser } from "skybridge/web";
 
 function Carousel({ products }: { products: Product[] }) {
-  const { locale, userAgent } = useUser();
+  const { locale, theme, userAgent } = useUser();
   const isMobile = userAgent.device.type === "mobile";
   const canHover = userAgent.capabilities.hover;
   const isTouch = userAgent.capabilities.touch;
@@ -30,7 +30,7 @@ function Carousel({ products }: { products: Product[] }) {
   };
 
   return (
-    <div className={isMobile ? "grid-mobile" : "grid-desktop"}>
+    <div className={`${isMobile ? "grid-mobile" : "grid-desktop"} ${theme}`}>
       {products.map((product) => (
         <article
           key={product.id}
@@ -59,6 +59,14 @@ locale: string;
 
 The user's language and region, canonical [BCP 47](https://developer.mozilla.org/en-US/docs/Glossary/BCP_47_language_tag). The hook canonicalizes what the host reports (underscores to hyphens, casing corrected, subtags preserved) and falls back to `"en-US"` when the value is not a valid locale. It is safe to pass straight to [`Intl`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl) APIs.
 
+### `theme`
+
+```tsx
+theme: "light" | "dark";
+```
+
+The host's active color theme. Mirror it in the view's styling for a native feel. It updates when the user toggles the host theme.
+
 ### `userAgent`
 
 ```tsx
@@ -81,8 +89,8 @@ type UserAgent = {
 ```
 
 <CardGroup cols={3}>
-  <Card title="useLayout" icon="layout" href="/api-reference/use-layout">
-    Read the host's theme, available height, and safe-area insets
+  <Card title="useViewport" icon="layout" href="/api-reference/use-viewport">
+    Read the available height and safe-area insets
   </Card>
   <Card title="useDisplayMode" icon="maximize" href="/api-reference/use-display-mode">
     Read and request the view's display mode

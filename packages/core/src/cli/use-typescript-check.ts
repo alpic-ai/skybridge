@@ -41,14 +41,10 @@ function extractBestMessage(
 export function startTypeScriptCheck(
   onErrors: (errors: Array<TsError>) => void,
 ): () => void {
-  const tsProcess = spawn(
-    "npx",
-    ["tsc", "--noEmit", "--watch", "--pretty", "false"],
-    {
-      stdio: ["ignore", "pipe", "pipe"],
-      shell: true,
-    },
-  );
+  const tsProcess = spawn("npx tsc --noEmit --watch --pretty false", {
+    stdio: ["ignore", "pipe", "pipe"],
+    shell: true,
+  });
 
   let outputBuffer = "";
   let currentErrors: Array<TsError> = [];

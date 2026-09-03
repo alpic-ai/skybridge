@@ -1,11 +1,19 @@
 import { existsSync } from "node:fs";
+import { createRequire } from "node:module";
 import { resolve } from "node:path";
-import nodemonOriginal from "nodemon";
 import { useEffect } from "react";
 import type { ExtendedNodemon } from "./nodemon.d.ts";
 import type { PushMessage } from "./use-messages.js";
 
-const nodemon = nodemonOriginal as ExtendedNodemon;
+function loadNodemon(): ExtendedNodemon {
+  try {
+    return createRequire(import.meta.url)("nodemon") as ExtendedNodemon;
+  } catch {
+    throw new Error(
+      'skybridge dev needs the "nodemon" peer dependency. Install it with `npm install -D nodemon`.',
+    );
+  }
+}
 
 const SOURCEMAP_WARNING = /^Sourcemap for ".*" points to missing source files$/;
 
@@ -27,6 +35,7 @@ export function startNodemon(
   env: NodeJS.ProcessEnv,
   handlers: NodemonHandlers,
 ): () => void {
+  const nodemon = loadNodemon();
   const configFile = resolve(process.cwd(), "nodemon.json");
 
   const config = existsSync(configFile)
@@ -36,7 +45,7 @@ export function startNodemon(
     : {
         watch: ["src"],
         ext: "ts,json,md",
-        exec: "tsx src/server.ts",
+        exec: "tsx src/index.ts",
       };
 
   nodemon({ ...config, env, stdout: false });

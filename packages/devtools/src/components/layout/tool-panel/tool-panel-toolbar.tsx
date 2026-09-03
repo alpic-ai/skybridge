@@ -12,7 +12,6 @@ import {
   PopoverTrigger,
 } from "@alpic-ai/ui/components/popover";
 import {
-  ArrowLeftRight,
   Braces,
   Check,
   Eye,
@@ -28,11 +27,13 @@ import {
   Sun,
   X,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { type ComponentType, useRef, useState } from "react";
 import type { RequestDisplayMode } from "skybridge/web";
 
 import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
 import { cn } from "@/lib/utils.js";
+import { BlossomIcon } from "../preview/chatgpt-icons.js";
+import { ClaudeLogomark } from "../preview/claude-icons.js";
 import { locales } from "./locales.js";
 import { isOneOf } from "./utils.js";
 
@@ -122,7 +123,7 @@ function ToolbarButton({
   className,
   ariaLabel,
 }: {
-  icon: LucideIcon;
+  icon: ComponentType<{ className?: string }>;
   label: string;
   selected?: boolean;
   onClick?: () => void;
@@ -390,7 +391,7 @@ export const ToolPanelToolbar = ({
       {variant === "preview" && (
         <>
           <ToolbarButton
-            icon={ArrowLeftRight}
+            icon={previewClient === "claude" ? BlossomIcon : ClaudeLogomark}
             label={
               previewClient === "claude"
                 ? "switch to ChatGPT"
