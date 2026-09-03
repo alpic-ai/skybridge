@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 520" role="img" aria-label="Icône ampoule sans rayons">
+  <!-- Ampoule -->
+  <path
+    d="M210 40
+       C136 40 85 92 85 164
+       C85 209 105 236 125 266
+       C141 290 151 315 156 347
+       C158 357 164 364 173 364
+       H247
+       C256 364 262 357 264 347
+       C269 315 279 290 295 266
+       C315 236 335 209 335 164
+       C335 92 284 40 210 40 Z"
+    fill="#FFD23F"
+    stroke="#231F20"
+    stroke-width="8"
+    stroke-linejoin="round"/>
+
+  <!-- Reflets -->
+  <ellipse cx="165" cy="97" rx="33" ry="25" fill="#FFE98A" transform="rotate(-35 165 97)"/>
+  <ellipse cx="198" cy="130" rx="15" ry="12" fill="#FFE98A" transform="rotate(-30 198 130)"/>
+
+  <!-- Culot -->
+  <rect x="145" y="378" width="130" height="16" rx="8" fill="#231F20"/>
+  <rect x="153" y="406" width="114" height="16" rx="8" fill="#231F20"/>
+  <path d="M162 434 H258 C255 459 236 472 210 472 C184 472 165 459 162 434 Z" fill="#231F20"/>
+</svg>

@@ -4,6 +4,7 @@ import { LogIn, LogOut } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { logout, signIn, useServerInfo } from "@/lib/mcp/index.js";
 import { StatusBadge } from "./status-badge.js";
+import { TipsButton } from "./tips-dialog.js";
 import {
   AuditButton,
   DeployButton,
@@ -87,6 +88,7 @@ export const Header = () => {
             Sign out
           </Button>
         )}
+        <TipsButton />
         <nav className="flex items-center gap-1 text-xs">
           {EXTERNAL_LINKS.map((link, i) => (
             <span key={link.label} className="inline-flex items-center gap-1">
