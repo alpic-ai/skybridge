@@ -121,7 +121,6 @@ function ToolbarButton({
   onClick,
   className,
   ariaLabel,
-  iconOnly,
 }: {
   icon: LucideIcon;
   label: string;
@@ -129,7 +128,6 @@ function ToolbarButton({
   onClick?: () => void;
   className?: string;
   ariaLabel?: string;
-  iconOnly?: boolean;
 }) {
   return (
     <button
@@ -137,17 +135,15 @@ function ToolbarButton({
       onClick={onClick}
       aria-pressed={selected}
       aria-label={ariaLabel}
-      title={iconOnly ? label : undefined}
       className={cn(
         buttonBaseClass,
         "border border-border bg-background",
-        iconOnly && "size-7 justify-center px-0",
         selected ? buttonSelectedClass : buttonIdleClass,
         className,
       )}
     >
       <Icon className="size-3.5" />
-      {!iconOnly && <span>{label}</span>}
+      <span>{label}</span>
     </button>
   );
 }
@@ -379,7 +375,6 @@ export const ToolPanelToolbar = ({
                 ? "Close DevTools inspector"
                 : "Open DevTools inspector"
             }
-            iconOnly
             selected={fullscreenInspectorOpen}
             onClick={onToggleFullscreenInspector}
           />
@@ -387,7 +382,6 @@ export const ToolPanelToolbar = ({
             icon={X}
             label="exit"
             ariaLabel="Exit fullscreen"
-            iconOnly
             onClick={() => setPreference("displayMode", "inline")}
           />
         </div>
