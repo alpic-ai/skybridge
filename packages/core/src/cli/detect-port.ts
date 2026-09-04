@@ -14,9 +14,12 @@ export async function resolvePort(flagPort?: number) {
     if (Number.isInteger(parsed) && parsed > 0) {
       return { port: parsed, fallback: false };
     }
+    const detected = await detectAvailablePort(DEFAULT_PORT);
     return {
-      port: await detectAvailablePort(DEFAULT_PORT),
-      fallback: false,
+      port: detected,
+      // The default can still be taken, in which case this is a fallback just
+      // like the branch below - otherwise the CLI omits the "3000 in use" note.
+      fallback: detected !== DEFAULT_PORT,
       envWarning: `Invalid PORT="${rawEnv}", ignoring and using default`,
     };
   }
