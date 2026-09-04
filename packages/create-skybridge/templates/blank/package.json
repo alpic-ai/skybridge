@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "skybridge": "workspace:*",
-    "vite": "^8.1.5"
+    "vite": "^8.1.5",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@skybridge/devtools": "workspace:*",

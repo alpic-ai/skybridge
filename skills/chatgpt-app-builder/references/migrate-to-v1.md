@@ -27,7 +27,7 @@ Each of these blocks a working build, and several fail with error messages that 
 
 ### 2.1 The `skybridge/web` → `skybridge/vite` rename is only the Vite plugin
 
-On Skybridge 2.x the plugin lives in its own package: install `@skybridge/vite-plugin` and read `@skybridge/vite-plugin` wherever this section says `skybridge/vite`.
+On Skybridge 2.x the plugin lives in its own package: install `@skybridge/vite-plugin` and read `@skybridge/vite-plugin` wherever this guide says `skybridge/vite`.
 
 The notes show `import { skybridge } from "skybridge/web"` → `"skybridge/vite"` and read like a blanket rename. It is not. **Only the Vite plugin moved.** Every React hook still lives in `skybridge/web`. The split is by runtime: `skybridge/vite` is build-time Node code (the plugin runs in your Vite config), while `skybridge/web` is browser code that ships to the view — so a blanket rename moves browser hooks into a module the browser bundle can't resolve.
 
@@ -129,11 +129,7 @@ The old `include` and `@/*` path pointed at the split layout. Repoint both at `s
 
 If `include` still names the deleted `server/src` / `web/src`, `tsc` reports `No inputs were found` and silently typechecks nothing — a passing build that verified zero files.
 
-### 2.8 The server entry file must be `src/server.ts`
-
-The flatten in Step 1 collapses `server/` + `web/` into `src/`, and the entry filename matters: v1's production runtime runs `dist/server.js`, so the entry must be `src/server.ts`, not `src/index.ts`. `tsc`, `skybridge build`, and `skybridge dev` pass with any name; only `skybridge start` fails to find the entry. The `start` command's target (`dist/server.js`) is visible in the installed CLI.
-
-### 2.9 Move view providers into the default export
+### 2.8 Move view providers into the default export
 
 Step 1 removes `mountWidget`. If `mountWidget(<Provider><View /></Provider>)` wrapped the view in a context provider (theme, host detection, store, i18n), auto-mount has no slot for it — it renders the view's default export directly. Move the provider into the default export:
 
@@ -145,7 +141,7 @@ export default function MyView() {
 
 There is no error if the wrapper is dropped: the provider never mounts and its context falls back to defaults (for example, host detection always reports the default host).
 
-### 2.10 Views can be directories; loose `.tsx` files in `src/views/` are scanned as views
+### 2.9 Views can be directories; loose `.tsx` files in `src/views/` are scanned as views
 
 The scanner globs both `src/views/*.{tsx,jsx}` and `src/views/*/index.{tsx,jsx}`, and the view name is the file or directory basename. Two consequences:
 - A multi-file view can stay a directory: `src/views/my-view/index.tsx` plus its helper components in the same folder. Siblings of `index.tsx` are not scanned as views, so flattening is not required.
@@ -153,14 +149,15 @@ The scanner globs both `src/views/*.{tsx,jsx}` and `src/views/*/index.{tsx,jsx}`
 
 ## Step 3 — Version strategy
 
-Migrate against a **fixed v1 floor first**, so a failure means "my migration is wrong," not "a later 1.x release changed something":
+The steps above land you on the v1 surface. Skybridge 2.x is the current major, so continue with the [v2.0.0 release notes](https://github.com/alpic-ai/skybridge/releases/tag/v2.0.0) before validating, and migrate against a **fixed floor first**, so a failure means "my migration is wrong," not "a later release changed something":
 
 ```json
-"skybridge": "1.0.0",
-"@skybridge/devtools": "1.0.0"
+"skybridge": "2.0.0",
+"@skybridge/devtools": "2.0.0",
+"@skybridge/vite-plugin": "2.0.0"
 ```
 
-Get this fully working and validated (Step 4). Only then bump to the latest `1.x` and re-validate. A 1.x bump is non-breaking by semver but can still change generated output or defaults; re-running Step 4 catches a regression introduced by the bump rather than by your migration. Revert to `1.0.0` if the bump breaks anything — that cleanly separates migration bugs from version-drift bugs.
+Get this fully working and validated (Step 4). Only then bump to the latest `2.x` and re-validate. A minor bump is non-breaking by semver but can still change generated output or defaults; re-running Step 4 catches a regression introduced by the bump rather than by your migration. Revert to `2.0.0` if the bump breaks anything, which cleanly separates migration bugs from version-drift bugs.
 
 ## Step 4 — Validate (a green build is not enough)
 

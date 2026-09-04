@@ -211,7 +211,7 @@ The `openai/*` keys are read only on **ChatGPT**. `openai/widgetAccessible`is de
 Runs when the tool is called. It receives the validated `input` (typed from [`inputSchema`](#inputschema-outputschema)) and the request context `extra`:
 
 ```ts
-type ToolHandler = (input: Input, extra: RequestHandlerExtra) => Promise<{
+type ToolHandler = (input: Input, extra: Extra) => Promise<{
   content?: string | ContentBlock | ContentBlock[];
   structuredContent?: Record<string, unknown>;
   isError?: boolean;
@@ -225,10 +225,10 @@ The request context.
 
 | Field | Purpose |
 | --- | --- |
-| `authInfo` | Validated token from an auth middleware: `clientId`, `scopes`, `extra`. The [provider](/guides/auth-providers) types the claims in `extra`. |
-| `requestInfo` | The HTTP request: headers and URL. |
-| `signal` | An `AbortSignal`, aborted when the call is cancelled. |
-| `_meta` | Client hints (below). |
+| `http?.authInfo` | Validated token from an auth middleware: `clientId`, `scopes`, `extra`. The [provider](/guides/auth-providers) types the claims in `extra`. |
+| `http?.req` | The HTTP request as a Web `Request`: read headers with `.headers.get()`. |
+| `mcpReq.signal` | An `AbortSignal`, aborted when the call is cancelled. |
+| `mcpReq._meta` | Client hints (below). |
 
 ### Return
 
@@ -245,7 +245,7 @@ For a view tool, Skybridge adds a `viewUUID` to `_meta`, a reserved key used for
 
 ### Client hints
 
-**ChatGPT** attaches conversation context to `extra._meta`. They are hints: tolerate their absence and never use them for authorization.
+**ChatGPT** attaches conversation context to `extra.mcpReq._meta`. They are hints: tolerate their absence and never use them for authorization.
 
 ```ts
 type ClientHintsMeta = {

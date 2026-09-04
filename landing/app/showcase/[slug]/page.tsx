@@ -238,7 +238,7 @@ export default async function ShowcaseDetailPage({
                   style={{ display: "flex", flexDirection: "column", gap: 10 }}
                 >
                   <a
-                    href="https://docs.skybridge.tech/devtools/skills"
+                    href="https://docs.skybridge.tech/guides/migrate"
                     target="_blank"
                     rel="noreferrer"
                     className="sb-btn sb-btn-primary"
