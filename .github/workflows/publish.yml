@@ -128,7 +128,7 @@ jobs:
           pnpm pkg set 'dependencies.skybridge=^${{ steps.version.outputs.version }}'
           pnpm pkg set 'devDependencies.@skybridge/vite-plugin=^${{ steps.version.outputs.version }}'
           pnpm pkg set 'devDependencies.@skybridge/devtools=^${{ steps.version.outputs.version }}'
-          pnpm pkg set 'devDependencies.@skybridge/test=${{ steps.test-version.outputs.version }}'
+          pnpm pkg set 'devDependencies.@skybridge/test=beta'
 
       - name: Pin blank template skybridge dep for publish
         working-directory: ./packages/create-skybridge/templates/blank
