@@ -1,6 +1,6 @@
 {
   "name": "@skybridge/vite-plugin",
-  "version": "0.0.0",
+  "version": "2.0.0",
   "description": "The Skybridge Vite plugin: view discovery, data-llm transforms, and eval wiring",
   "license": "ISC",
   "type": "module",

@@ -2,7 +2,7 @@
   "name": "skybridge-chess-example",
   "version": "0.0.1",
   "private": true,
-  "description": "Skybridge Chess Example \u2014 showcases MCP Apps view-provided tools",
+  "description": "Skybridge Chess Example — showcases MCP Apps view-provided tools",
   "type": "module",
   "scripts": {
     "dev": "skybridge dev",
@@ -30,7 +30,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.2.0",
-    "alpic": "^1.142.1",
+    "alpic": "^1.171.0",
     "tsx": "^4.22.4",
     "typescript": "^5.9.3"
   },
