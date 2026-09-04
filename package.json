@@ -19,7 +19,7 @@
     "ai",
     "skybridge"
   ],
-  "author": "Fr\u00e9d\u00e9ric Barthelet",
+  "author": "Frédéric Barthelet",
   "license": "ISC",
   "devDependencies": {
     "@biomejs/biome": "^2.5.4",

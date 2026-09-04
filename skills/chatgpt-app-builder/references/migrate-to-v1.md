@@ -129,11 +129,7 @@ The old `include` and `@/*` path pointed at the split layout. Repoint both at `s
 
 If `include` still names the deleted `server/src` / `web/src`, `tsc` reports `No inputs were found` and silently typechecks nothing — a passing build that verified zero files.
 
-### 2.8 The server entry file name matters
-
-The flatten in Step 1 collapses `server/` + `web/` into `src/`, and the runtime looks for a fixed entry. On Skybridge 2.x, `src/server.ts` exports the app and `src/index.ts` runs it (`export default await app.run()`); `skybridge dev` execs `src/index.ts` and `skybridge start` runs `dist/index.js`. On 1.x the single entry was `src/server.ts` and `start` ran `dist/server.js`. `tsc` and `skybridge build` pass with any file name; only `dev` and `start` fail to find the entry.
-
-### 2.9 Move view providers into the default export
+### 2.8 Move view providers into the default export
 
 Step 1 removes `mountWidget`. If `mountWidget(<Provider><View /></Provider>)` wrapped the view in a context provider (theme, host detection, store, i18n), auto-mount has no slot for it — it renders the view's default export directly. Move the provider into the default export:
 
@@ -145,7 +141,7 @@ export default function MyView() {
 
 There is no error if the wrapper is dropped: the provider never mounts and its context falls back to defaults (for example, host detection always reports the default host).
 
-### 2.10 Views can be directories; loose `.tsx` files in `src/views/` are scanned as views
+### 2.9 Views can be directories; loose `.tsx` files in `src/views/` are scanned as views
 
 The scanner globs both `src/views/*.{tsx,jsx}` and `src/views/*/index.{tsx,jsx}`, and the view name is the file or directory basename. Two consequences:
 - A multi-file view can stay a directory: `src/views/my-view/index.tsx` plus its helper components in the same folder. Siblings of `index.tsx` are not scanned as views, so flattening is not required.
