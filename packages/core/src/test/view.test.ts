@@ -346,7 +346,11 @@ describe("McpServer.registerTool (unified API)", () => {
       {
         name: "my-view",
         description: "Test tool",
-        view: { component: "my-view" as ViewName, description: "Test view" },
+        view: {
+          component: "my-view" as ViewName,
+          description: "Test view",
+          appsSdk: false,
+        },
       },
       vi.fn(),
     );
@@ -361,7 +365,7 @@ describe("McpServer.registerTool (unified API)", () => {
     expect(toolConfig._meta?.["openai/outputTemplate"]).toBeUndefined();
   });
 
-  it("should also register the legacy apps-sdk resource when view.hosts includes apps-sdk (#1074)", async () => {
+  it("should also register the legacy apps-sdk resource when view.appsSdk is enabled (#1074)", async () => {
     server.registerTool(
       {
         name: "my-view",
@@ -369,7 +373,7 @@ describe("McpServer.registerTool (unified API)", () => {
         view: {
           component: "my-view" as ViewName,
           description: "Test view",
-          hosts: ["apps-sdk"],
+          appsSdk: true,
         },
       },
       vi.fn(),

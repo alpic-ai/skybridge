@@ -120,15 +120,11 @@ export interface ViewConfig {
   /** Human-readable label the host may show alongside the view. */
   description?: string;
   /**
-   * Restrict where the view is rendered, and opt back into the legacy
-   * Apps SDK registration. `"apps-sdk"` also registers the
-   * `ui://views/apps-sdk/…` resource and sets `openai/outputTemplate` on
-   * ChatGPT, which is currently the only host path that exposes the
-   * ChatGPT file APIs (`uploadFile`, `getFileDownloadUrl`, `selectFiles`)
-   * to a view — MCP Apps has no equivalent yet (#1074). Defaults to the
-   * MCP Apps resource only.
+   * Also register the legacy Apps SDK resource and set `openai/outputTemplate`
+   * on ChatGPT. Use this for file APIs (`uploadFile`, `getFileDownloadUrl`,
+   * `selectFiles`) until MCP Apps has equivalents (#1074).
    */
-  hosts?: ViewHostType[];
+  appsSdk?: boolean;
   /** Request a visible border around the view (forwarded as `ui.prefersBorder`). */
   prefersBorder?: boolean;
   /** Override the iframe's served domain (advanced; forwarded as `ui.domain`). */
@@ -138,13 +134,6 @@ export interface ViewConfig {
   /** Free-form metadata forwarded on the view resource's `_meta`. */
   _meta?: Record<string, unknown>;
 }
-
-/**
- * Which host runtime a view targets — `"apps-sdk"` (ChatGPT) or `"mcp-app"`
- * (MCP Apps spec). Selecting `"apps-sdk"` opts the view into the legacy
- * Apps SDK registration that exposes the ChatGPT file APIs (#1074).
- */
-export type ViewHostType = "apps-sdk" | "mcp-app";
 
 export type SecurityScheme =
   | { type: "noauth" }
@@ -272,7 +261,7 @@ type McpAppsResourceMeta = {
 /**
  * `_meta` keys ChatGPT reads on a resource. The full `openai/widgetCSP`
  * shape is only emitted on the legacy Apps SDK registration
- * (`view.hosts: ["apps-sdk"]`, #1074); the MCP Apps registration forwards
+ * (`view.appsSdk`, #1074); the MCP Apps registration forwards
  * `redirect_domains` only, mirrored for cross-host parity.
  * @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields
  */
@@ -963,7 +952,7 @@ export class McpServer<
     // `openai/fileParams` attachments) must render through Apps SDK on
     // ChatGPT. `openai/outputTemplate` is what makes ChatGPT prefer that
     // registration.
-    if (view.hosts?.includes("apps-sdk")) {
+    if (view.appsSdk) {
       const appsSdkResource: ViewResourceConfig = {
         uri: `ui://views/apps-sdk/${view.component}.html${versionParam}`,
         mimeType: "text/html+skybridge",

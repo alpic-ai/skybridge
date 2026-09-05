@@ -93,7 +93,7 @@ server.registerTool(
   {
     name: "scan-receipt",
     description: "Scan a receipt",
-    view: { component: "scan-receipt", hosts: ["apps-sdk"] },
+    view: { component: "scan-receipt", appsSdk: true },
   },
   handler,
 );
