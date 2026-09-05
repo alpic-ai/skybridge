@@ -361,6 +361,69 @@ describe("McpServer.registerTool (unified API)", () => {
     expect(toolConfig._meta?.["openai/outputTemplate"]).toBeUndefined();
   });
 
+  it("should also register the legacy apps-sdk resource when view.hosts includes apps-sdk (#1074)", async () => {
+    server.registerTool(
+      {
+        name: "my-view",
+        description: "Test tool",
+        view: {
+          component: "my-view" as ViewName,
+          description: "Test view",
+          hosts: ["apps-sdk"],
+        },
+      },
+      vi.fn(),
+    );
+
+    // Both registrations: the MCP Apps resource and the legacy Apps SDK one.
+    expect(mockRegisterResource).toHaveBeenCalledTimes(2);
+    expect(mockRegisterResource.mock.calls[0]?.[1]).toBe(
+      "ui://views/ext-apps/my-view.html",
+    );
+    expect(mockRegisterResource.mock.calls[1]?.[1]).toBe(
+      "ui://views/apps-sdk/my-view.html",
+    );
+
+    const toolConfig = mockRegisterTool.mock.calls[0]?.[1] as {
+      _meta?: Record<string, unknown> & { ui?: { resourceUri?: string } };
+    };
+    expect(toolConfig._meta?.["openai/outputTemplate"]).toBe(
+      "ui://views/apps-sdk/my-view.html",
+    );
+    // The MCP Apps pointer stays authoritative for other hosts.
+    expect(toolConfig._meta?.ui?.resourceUri).toBe(
+      "ui://views/ext-apps/my-view.html",
+    );
+
+    // The apps-sdk resource serves the legacy registration: Apps SDK
+    // mimeType plus the openai/* `_meta` keys ChatGPT reads from it.
+    const appsSdkCallback = mockRegisterResource.mock
+      .calls[1]?.[3] as unknown as (
+      uri: URL,
+      extra: McpExtra,
+    ) => Promise<{
+      contents: Array<{
+        uri: URL | string;
+        mimeType: string;
+        text?: string;
+        _meta?: Record<string, unknown>;
+      }>;
+    }>;
+    const result = await appsSdkCallback(
+      new URL("ui://views/apps-sdk/my-view.html"),
+      createMockExtra("localhost:3000") as unknown as McpExtra,
+    );
+    expect(result.contents[0]?.mimeType).toBe("text/html+skybridge");
+    expect(result.contents[0]?._meta).toMatchObject({
+      "openai/widgetDescription": "Test view",
+      "openai/widgetCSP": {
+        resource_domains: ["http://localhost:3000"],
+        connect_domains: ["http://localhost:3000", "ws://localhost:3000"],
+      },
+      "openai/widgetDomain": "http://localhost:3000",
+    });
+  });
+
   it("should not version view URIs in development", () => {
     server.registerTool(
       {

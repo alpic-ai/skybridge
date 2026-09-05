@@ -74,6 +74,7 @@ export type {
   ToolMeta,
   ViewConfig,
   ViewCsp,
+  ViewHostType,
   ViewName,
   ViewNameRegistry,
 } from "./server.js";
