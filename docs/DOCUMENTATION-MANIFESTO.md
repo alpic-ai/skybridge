@@ -32,7 +32,7 @@ Never assume the reader is already an expert in Skybridge or MCP Apps. When you 
    <summary><strong>Get Started</strong>: the <strong>home and most important section of our documentation</strong>. It should explain the value of Skybridge and help readers get to a first working app in less than 5 minutes.</summary>
 
    - **Introduction**: why Skybridge was built, what it does, and what it does not do.
-   - **Fundamentals**: what MCP Apps and ChatGPT plugins are, how they differ from traditional web apps, and how they build on MCP servers. This section should also explain how Skybridge maps to ChatGPT's `window.openai` extensions and the MCP Apps runtime.
+   - **Fundamentals**: what MCP Apps and ChatGPT plugins are, how they differ from traditional web apps, and how they build on MCP servers. This section should also explain how Skybridge maps to the OpenAI Apps SDK and MCP runtimes.
    - **Quickstart**: how to get started with Skybridge in under 5 minutes with our create command or the Skybridge Skill.
    - **Migrate**: how to migrate your app with the Skybridge Skill.
    - **Test your app**: how to test your app locally with DevTools or inside your target MCP client such as ChatGPT, Claude, or Cursor.
@@ -155,11 +155,11 @@ Use this checklist when your PR changes product behavior, APIs, examples, termin
 
 - **Internal links:** Use paths like `/devtools/skills` and `/fundamentals`. Link once per destination per page where it is most useful. Avoid repeating the same link many times on one page.
 - **Link text:** Use descriptive text such as "Skill" or "Fundamentals" instead of "click here" or "this page".
-- **External links:** Use external links for official references such as the OpenAI plugin docs, MCP repositories, or Alpic. Keep essential context on the page and use external links for deeper reading.
+- **External links:** Use external links for official references such as the OpenAI Apps SDK, MCP repositories, or Alpic. Keep essential context on the page and use external links for deeper reading.
 
 ### Terminology and consistency
 
-- **Product and types:** "MCP App" is the spec name and keeps its capitalized form. For ChatGPT, the product is a **plugin** — write "ChatGPT plugin", never "ChatGPT app"; OpenAI retired the "Apps SDK" name, so call that layer ChatGPT's `window.openai` extensions. Use "your app" in body text for the thing the reader is building, since it is host-agnostic. Use consistent product names: Skybridge, Skill, DevTools, MCP.
+- **Product and types:** Write "ChatGPT plugin" for the ChatGPT product and "MCP App" for the spec, both capitalized as shown. "Apps SDK" is the `window.openai` layer ChatGPT layers on top of MCP Apps. Use "your app" in body text for the thing the reader is building, since it is host-agnostic. Use consistent product names: Skybridge, Skill, DevTools, MCP.
 - **User-centric language:** Orient sentences around what the reader is doing or needs. Use internal or team jargon only when it is part of the product vocabulary.
 
 ### What to avoid

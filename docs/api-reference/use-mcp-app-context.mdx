@@ -7,7 +7,7 @@ import { Compat } from "/components/compat.jsx";
 
 <Compat alpic claude cursor goose />
 
-An MCP Apps host (Claude and others) exposes [view](/build/view) context that Skybridge's cross-host hooks read for you. `useMcpAppContext` is the escape hatch: it reads that context raw, by key, for a protocol-level field the hooks don't surface. It runs only on MCP Apps hosts, not ChatGPT; the `window.openai` counterpart is [`useAppsSdkContext`](/api-reference/use-apps-sdk-context).
+An MCP Apps host (Claude and others) exposes [view](/build/view) context that Skybridge's cross-host hooks read for you. `useMcpAppContext` is the escape hatch: it reads that context raw, by key, for a protocol-level field the hooks don't surface. It runs only on MCP Apps hosts, not ChatGPT; the Apps SDK counterpart is [`useAppsSdkContext`](/api-reference/use-apps-sdk-context).
 
 ## Example
 
@@ -87,12 +87,12 @@ The requested key's current value, empty until the host provides it: host-contex
 
 <CardGroup cols={3}>
   <Card title="useAppsSdkContext" icon="panel-top" href="/api-reference/use-apps-sdk-context">
-    The `window.openai` counterpart for ChatGPT
+    The Apps SDK counterpart for ChatGPT
   </Card>
   <Card title="useToolInfo" icon="database" href="/api-reference/use-tool-info">
     Read the tool result across both runtimes
   </Card>
-  <Card title="ChatGPT Extensions and MCP Apps" icon="layers" href="/resources/chatgpt-extensions-and-mcp-apps">
+  <Card title="Apps SDK and MCP Apps" icon="layers" href="/resources/apps-sdk-and-mcp-apps">
     What the raw MCP Apps layer is, and how Skybridge unifies it
   </Card>
 </CardGroup>

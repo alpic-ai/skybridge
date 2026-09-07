@@ -1,4 +1,4 @@
-"""ChatGPT (`window.openai`) host adapter: how to send the prompt, tidy the chrome,
+"""ChatGPT (Apps SDK) host adapter: how to send the prompt, tidy the chrome,
 verify the follow-up message, and accept the native open-link dialog."""
 
 import json

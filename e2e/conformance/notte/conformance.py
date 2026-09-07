@@ -107,7 +107,7 @@ def answer_confirm(
         # so there's no new-tab guessing to do.
         verified = verified_effects[hook]
     elif "requestmodal" in hook_lc:
-        # On ChatGPT the modal is a no-op: the host mounts a modal
+        # On Apps SDK (ChatGPT) the modal is a no-op: the host mounts a modal
         # view instance that misdetects its runtime and broadcasts modal_open
         # even though nothing usable renders (a documented false positive), so
         # it never counts as support — the manual baseline is unsupported. Just
@@ -201,7 +201,7 @@ def drive_stepper(
         )
 
         if state.modal_open:
-            # Only ChatGPT ever broadcasts this, and it's a false
+            # Only ChatGPT's Apps SDK ever broadcasts this, and it's a false
             # positive (a mounted modal-view instance that misdetects its
             # runtime; nothing usable renders). Don't count it as support —
             # just dismiss the overlay so it can't block later tests.

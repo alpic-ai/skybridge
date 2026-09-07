@@ -2,7 +2,7 @@
 
 An example MCP app built with [Skybridge](https://docs.skybridge.tech/home) showing ChatGPT file handling: take a file attachment, compress it into a downloadable `.zip` archive, and hand back a link, all from within the conversation.
 
-> **ChatGPT only.** This example relies on [`useFiles()`](https://docs.skybridge.tech/api-reference/use-files) (`upload`, `selectFiles`, `getDownloadUrl`) and `openai/fileParams`, which are ChatGPT `window.openai` extensions and throw on other MCP hosts. Run and test it in ChatGPT.
+> **ChatGPT only.** This example relies on [`useFiles()`](https://docs.skybridge.tech/api-reference/use-files) (`upload`, `selectFiles`, `getDownloadUrl`) and `openai/fileParams`, which are part of the ChatGPT Apps SDK and throw on other MCP hosts. Run and test it in ChatGPT.
 
 ## What This Example Showcases
 
@@ -128,7 +128,7 @@ The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 ## Resources
 
 - [Skybridge Documentation](https://docs.skybridge.tech/)
-- [ChatGPT Plugins Documentation](https://developers.openai.com/plugins)
+- [Apps SDK Documentation](https://developers.openai.com/plugins)
 - [MCP Apps Documentation](https://github.com/modelcontextprotocol/ext-apps/tree/main)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)

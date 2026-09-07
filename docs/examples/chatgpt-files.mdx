@@ -5,7 +5,7 @@ description: Pick a file from the filesystem or the ChatGPT library and zip it
 
 import { ChatExample } from "/components/chat-example.jsx";
 
-Handles ChatGPT files end to end: takes a file attachment, compresses it server-side, stores the archive in Cloudflare R2, and hands back a presigned download link. Relies on the ChatGPT `window.openai` file APIs, so it runs in ChatGPT.
+Handles ChatGPT files end to end: takes a file attachment, compresses it server-side, stores the archive in Cloudflare R2, and hands back a presigned download link. Relies on the ChatGPT Apps SDK file APIs, so it runs in ChatGPT.
 
 <ChatExample
   prompt="Zip this file for me."

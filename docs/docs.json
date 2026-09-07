@@ -87,7 +87,7 @@
             "group": "Resources",
             "icon": "library",
             "pages": [
-              "resources/chatgpt-extensions-and-mcp-apps",
+              "resources/apps-sdk-and-mcp-apps",
               "resources/telemetry"
             ]
           }
@@ -227,10 +227,6 @@
     ]
   },
   "redirects": [
-    {
-      "source": "/resources/apps-sdk-and-mcp-apps",
-      "destination": "/resources/chatgpt-extensions-and-mcp-apps"
-    },
     {
       "source": "/showcase",
       "destination": "/examples"

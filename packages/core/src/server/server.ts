@@ -192,13 +192,13 @@ function normalizeForwardedPrefix(raw: string | undefined): string {
  * @see https://developers.openai.com/plugins/reference#tool-descriptor-parameters
  */
 export interface KnownToolMeta {
-  /** ChatGPT: allow the rendered view to call this tool from inside its iframe. */
+  /** Apps SDK: allow the rendered view to call this tool from inside its iframe. */
   "openai/widgetAccessible"?: boolean;
-  /** ChatGPT: status text shown while the tool is running (e.g. `"Searching trips"`). */
+  /** Apps SDK: status text shown while the tool is running (e.g. `"Searching trips"`). */
   "openai/toolInvocation/invoking"?: string;
-  /** ChatGPT: status text shown once the tool returns (e.g. `"Found 3 trips"`). */
+  /** Apps SDK: status text shown once the tool returns (e.g. `"Found 3 trips"`). */
   "openai/toolInvocation/invoked"?: string;
-  /** ChatGPT: input parameters that hold file references — the host attaches uploaded files to them. */
+  /** Apps SDK: input parameters that hold file references — the host attaches uploaded files to them. */
   "openai/fileParams"?: string[];
   /** MCP Apps: control whether the tool is exposed to the model, the app, or both. */
   ui?: Pick<McpUiToolMeta, "visibility">;
@@ -373,7 +373,7 @@ type ToolConfig<
 
 /**
  * Optional client-supplied hints attached to `params._meta` on every tool call
- * by the ChatGPT host. Hints only: never use for authorization, and tolerate
+ * by the Apps SDK host. Hints only: never use for authorization, and tolerate
  * absence.
  * @see https://developers.openai.com/plugins/reference#_meta-fields-the-client-provides
  */
@@ -1203,7 +1203,7 @@ export class McpServer<
       // descriptor, but the SDK's `registerTool` drops unknown top-level
       // fields, so the canonical spot isn't reachable without intercepting
       // `tools/list`. Use the `_meta` back-compat mirror documented in the
-      // ChatGPT plugin reference until SEP-1488 lands in the spec.
+      // Apps SDK reference until SEP-1488 lands in the spec.
       toolMeta.securitySchemes = securitySchemes;
     }
 

@@ -15,7 +15,7 @@ import type {
  * {@link useCallTool} (which calls a server tool). Registered on mount, removed
  * on unmount; re-registered when `config.name` changes.
  *
- * MCP Apps only — on the ChatGPT (`window.openai`) runtime it is a no-op.
+ * MCP Apps only — on the Apps SDK (`window.openai`) runtime it is a no-op.
  *
  * @example
  * ```tsx

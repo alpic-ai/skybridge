@@ -211,7 +211,7 @@ function Runner() {
         ? (test.runLabel ?? "Run")
         : null,
     confirm_question: confirming ? (test?.confirm ?? null) : null,
-    // Never derived from useRequestModal().isOpen: on ChatGPT the store flag
+    // Never derived from useRequestModal().isOpen: on Apps SDK the store flag
     // flips even when the host renders no usable modal, which would falsely
     // confirm the test. A modal_open:true broadcast comes only from an
     // actually-mounted modal view (StandaloneModalRemote).
@@ -441,7 +441,7 @@ function Runner() {
 }
 
 function StandaloneModalRemote() {
-  // Wiring for a DEDICATED modal instance (ChatGPT renders the modal as a
+  // Wiring for a DEDICATED modal instance (Apps SDK renders the modal as a
   // fresh view): no runner is mounted there, so the remote control needs its
   // own listener and state broadcast.
   useDriveListener((action) => {
@@ -450,7 +450,7 @@ function StandaloneModalRemote() {
     }
   });
   // Only claim modal_open on MCP Apps, where the polyfill renders the modal in
-  // our own tree and is therefore verifiable. On ChatGPT the modal is
+  // our own tree and is therefore verifiable. On Apps SDK the modal is
   // host-owned and a mounted view instance does NOT prove a usable modal
   // rendered, so we don't self-report it: the driver then answers the
   // confirmation "no" and the hook records unsupported.
@@ -509,7 +509,7 @@ function App() {
 
   // The runner is always mounted AND visible — never hidden on `isOpen`.
   // Coupling visibility to the modal flag bricked the run when a host left it
-  // stuck: on ChatGPT `closeModal` is a no-op and the display store can stay
+  // stuck: on Apps SDK `closeModal` is a no-op and the display store can stay
   // `mode: "modal"` after the modal test, so a hidden runner never came back
   // and every later step ran blind. On MCP Apps the host's ModalProvider frames
   // this view as the modal on its own; we don't need a second treatment.

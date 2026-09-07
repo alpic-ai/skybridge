@@ -259,7 +259,7 @@ export interface Adaptor {
 
 /**
  * Thrown when a host bridge method is called in a runtime that doesn't
- * support it (e.g. `uploadFile` outside the ChatGPT runtime).
+ * support it (e.g. `uploadFile` outside the Apps SDK runtime).
  */
 export class NotSupportedError extends Error {
   constructor(

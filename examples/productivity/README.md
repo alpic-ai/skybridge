@@ -119,7 +119,7 @@ The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 ## Resources
 
 - [Skybridge Documentation](https://docs.skybridge.tech/)
-- [ChatGPT Plugins Documentation](https://developers.openai.com/plugins)
+- [Apps SDK Documentation](https://developers.openai.com/plugins)
 - [MCP Apps Documentation](https://github.com/modelcontextprotocol/ext-apps/tree/main)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)
