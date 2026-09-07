@@ -106,7 +106,7 @@ export function SiteFooter() {
             <h4>FRAMEWORK</h4>
             <a href="https://docs.skybridge.tech">Docs</a>
             <a href="/showcase">Showcase</a>
-            <a href="https://docs.skybridge.tech/showcase">Examples</a>
+            <a href="https://docs.skybridge.tech/examples">Examples</a>
           </div>
           <div>
             <h4>Resources</h4>

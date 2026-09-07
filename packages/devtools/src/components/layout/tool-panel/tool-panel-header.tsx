@@ -83,6 +83,15 @@ export const ToolPanelHeader = ({
 };
 
 export const ToolPanelOutputContent = () => {
+  return (
+    <div className="flex h-full min-h-0 w-full flex-row overflow-hidden bg-light-gray">
+      <ToolPanelToolOutputContent />
+      <ToolPanelViewStateContent className="border-l border-border" />
+    </div>
+  );
+};
+
+export const ToolPanelToolOutputContent = () => {
   const tool = useSelectedToolOrNull();
   const data = useCallToolResult(tool?.name ?? "");
 
@@ -90,54 +99,75 @@ export const ToolPanelOutputContent = () => {
     return null;
   }
 
-  const { response, openaiObject } = data;
+  const { response } = data;
   const responseJson = JSON.stringify(response, null, 2);
+  const toolOutputTokenCount = getToolOutputTokenCount(response);
+  const hasToolOutputWarning =
+    toolOutputTokenCount >= TOOL_OUTPUT_WARNING_TOKENS;
+
+  return (
+    <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      {hasToolOutputWarning && (
+        <ContextWarningAlert
+          kind="tool-output"
+          tokenCount={toolOutputTokenCount}
+        />
+      )}
+      <div className="relative min-h-0 flex-1 overflow-auto p-3">
+        <CopyButton
+          value={responseJson}
+          label="Copy tool output"
+          className="absolute right-2 top-2 z-10"
+        />
+        <JsonSyntaxBlock code={responseJson} />
+      </div>
+    </section>
+  );
+};
+
+export const ToolPanelViewStateContent = ({
+  className,
+}: {
+  className?: string;
+}) => {
+  const tool = useSelectedToolOrNull();
+  const data = useCallToolResult(tool?.name ?? "");
+
+  if (!tool || !data?.response) {
+    return null;
+  }
+
   const widgetStateJson = JSON.stringify(
-    openaiObject?.widgetState ?? null,
+    data.openaiObject?.widgetState ?? null,
     null,
     2,
   );
-
-  const toolOutputTokenCount = getToolOutputTokenCount(response);
-  const viewStateTokenCount = getViewStateTokenCount(openaiObject?.widgetState);
-  const hasToolOutputWarning =
-    toolOutputTokenCount >= TOOL_OUTPUT_WARNING_TOKENS;
+  const viewStateTokenCount = getViewStateTokenCount(
+    data.openaiObject?.widgetState,
+  );
   const hasViewStateWarning = viewStateTokenCount >= VIEW_STATE_WARNING_TOKENS;
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-row overflow-hidden bg-light-gray">
-      <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        {hasToolOutputWarning && (
-          <ContextWarningAlert
-            kind="tool-output"
-            tokenCount={toolOutputTokenCount}
-          />
-        )}
-        <div className="relative min-h-0 flex-1 overflow-auto p-3">
-          <CopyButton
-            value={responseJson}
-            label="Copy tool output"
-            className="absolute right-2 top-2 z-10"
-          />
-          <JsonSyntaxBlock code={responseJson} />
-        </div>
-      </section>
-      <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-l border-border">
-        {hasViewStateWarning && (
-          <ContextWarningAlert
-            kind="view-state"
-            tokenCount={viewStateTokenCount}
-          />
-        )}
-        <div className="relative min-h-0 flex-1 overflow-auto p-3">
-          <CopyButton
-            value={widgetStateJson}
-            label="Copy view state"
-            className="absolute right-2 top-2 z-10"
-          />
-          <JsonSyntaxBlock code={widgetStateJson} />
-        </div>
-      </section>
-    </div>
+    <section
+      className={cn(
+        "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden",
+        className,
+      )}
+    >
+      {hasViewStateWarning && (
+        <ContextWarningAlert
+          kind="view-state"
+          tokenCount={viewStateTokenCount}
+        />
+      )}
+      <div className="relative min-h-0 flex-1 overflow-auto p-3">
+        <CopyButton
+          value={widgetStateJson}
+          label="Copy view state"
+          className="absolute right-2 top-2 z-10"
+        />
+        <JsonSyntaxBlock code={widgetStateJson} />
+      </div>
+    </section>
   );
 };

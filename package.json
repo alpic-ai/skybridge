@@ -4,7 +4,7 @@
   "description": "Skybridge is a framework for building ChatGPT and MCP Apps",
   "type": "module",
   "scripts": {
-    "prepare": "pnpm --filter skybridge build && pnpm --filter @skybridge/vite-plugin build && pnpm --filter @skybridge/test build",
+    "prepare": "pnpm --filter @skybridge/devtools build:server && pnpm --filter skybridge build && pnpm --filter @skybridge/vite-plugin build && pnpm --filter @skybridge/test build",
     "build": "pnpm --filter \"./packages/*\" build",
     "test": "pnpm -r --if-present test",
     "format": "pnpm -r --if-present format",
@@ -20,6 +20,9 @@
     "skybridge"
   ],
   "author": "Frédéric Barthelet",
+  "contributors": [
+    "Julien Vallini"
+  ],
   "license": "ISC",
   "devDependencies": {
     "@biomejs/biome": "^2.5.4",
@@ -31,6 +34,7 @@
     "overrides": {
       "skybridge": "workspace:*",
       "@skybridge/vite-plugin": "workspace:*",
+      "@skybridge/devtools": "workspace:*",
       "@skybridge/test": "workspace:*",
       "@alpic-ai/ui>@radix-ui/react-accordion": "^1.2.17",
       "@alpic-ai/ui>@radix-ui/react-tooltip": "^1.2.13",

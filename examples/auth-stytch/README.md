@@ -10,7 +10,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a p
 - **Self-hosted consent page**: Stytch ships consent only as a React component, so login/consent/callback are plain HTML served from the MCP server; the Connected App's Authorization URL points clients here
 - **Personalized Results**: Authenticated users see favorites highlighted and sorted first
 - **User Identity in Widgets**: Displays the signed-in user's name directly in the widget UI
-- **Simplified Server Setup**: Uses [`app.run()`](https://docs.skybridge.tech/api-reference/run) and `.use()` for a single-file server with no manual Express boilerplate
+- **Simplified Server Setup**: Uses [`app.run()`](https://docs.skybridge.tech/api-reference/skybridge#run) and `.use()` for a single-file server with no manual Express boilerplate
 - **Structured Content & Metadata**: Server passes structured data to widgets via `structuredContent`
 - **Hot Module Replacement**: [Live reloading](https://docs.skybridge.tech/concepts/fast-iteration#hmr-with-vite-plugin) of widget components during development
 - **Local DevTools**: [DevTools](https://docs.skybridge.tech/devtools) at `http://localhost:3000` for local testing

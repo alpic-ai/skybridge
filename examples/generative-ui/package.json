@@ -19,14 +19,14 @@
     "@tailwindcss/vite": "^4.3.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "skybridge": "^2.0.0-beta.0",
+    "skybridge": "^2.0.0",
     "tailwindcss": "^4.3.1",
     "vite": "^8.1.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@skybridge/devtools": "^2.0.0-beta.0",
-    "@skybridge/vite-plugin": "^2.0.0-beta.0",
+    "@skybridge/devtools": "^2.0.0",
+    "@skybridge/vite-plugin": "^2.0.0",
     "@types/node": "^25.9.4",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

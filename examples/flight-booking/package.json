@@ -15,13 +15,13 @@
     "@alpic-ai/insights": "^1.142.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "skybridge": "^2.0.0-beta.0",
+    "skybridge": "^2.0.0",
     "vite": "^8.1.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@skybridge/devtools": "^2.0.0-beta.0",
-    "@skybridge/vite-plugin": "^2.0.0-beta.0",
+    "@skybridge/devtools": "^2.0.0",
+    "@skybridge/vite-plugin": "^2.0.0",
     "@types/node": "^22.20.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

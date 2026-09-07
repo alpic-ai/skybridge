@@ -8,7 +8,7 @@ New here? Please drop by our [Discord](https://discord.com/invite/gNAazGueab) an
 
 ### Prerequisites
 
-- Node.js 24+
+- Node.js >= 24.18.0
 - pnpm 10+ (run `corepack enable` to use the version specified in package.json)
 
 ### Setup

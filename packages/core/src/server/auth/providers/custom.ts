@@ -40,7 +40,7 @@ export type CustomProviderOptions = {
  * Builds a complete {@link OAuthConfig} from an IdP's OAuth discovery document.
  *
  * @typeParam TExtra - Claims the IdP puts in the access token, reaching handlers
- * as `extra.authInfo.extra`. The branded providers pass their documented claims;
+ * as `extra.http?.authInfo.extra`. The branded providers pass their documented claims;
  * pass your own when wiring an IdP by hand.
  */
 export function customProvider<TExtra extends ExtraClaims = ExtraClaims>(

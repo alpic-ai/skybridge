@@ -1,7 +1,9 @@
+import { useDisplayMode } from "skybridge/web";
 import { useToolInfo } from "../helpers.js";
 
 function EchoCard() {
   const { output } = useToolInfo<"echo-card">();
+  const [displayMode, setDisplayMode] = useDisplayMode();
   const message = output?.message ?? "";
   return (
     <div style={{ padding: 16, fontFamily: "sans-serif" }}>
@@ -31,6 +33,15 @@ function EchoCard() {
           Echo
         </div>
         <p style={{ margin: 0 }}>{message}</p>
+        {displayMode !== "fullscreen" ? (
+          <button
+            type="button"
+            onClick={() => setDisplayMode("fullscreen")}
+            style={{ marginTop: 12 }}
+          >
+            Enter fullscreen
+          </button>
+        ) : null}
       </div>
     </div>
   );

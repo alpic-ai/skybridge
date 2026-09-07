@@ -36,7 +36,7 @@ function ServerCode() {
     <pre className="sb-demo-code-body">
       <div>
         <span className="c-kw">import</span> {"{ "}
-        <span className="c-id">McpServer</span>
+        <span className="c-id">Skybridge</span>
         {" }"} <span className="c-kw">from</span>{" "}
         <span className="c-str">"skybridge/server"</span>
         {";"}
@@ -50,31 +50,37 @@ function ServerCode() {
       </div>
       <div>&nbsp;</div>
       <div>
-        <span className="c-kw">const</span> <span className="c-id">server</span>{" "}
-        = <span className="c-kw">new</span>{" "}
-        <span className="c-fn">McpServer</span>({"{ "}
-        <span className="c-id">name</span>:{" "}
-        <span className="c-str">"travel"</span>
-        {" }"});
+        <span className="c-kw">export const</span>{" "}
+        <span className="c-id">app</span> = <span className="c-kw">new</span>{" "}
+        <span className="c-fn">Skybridge</span>({"{"}
       </div>
-      <div>&nbsp;</div>
       <div>
+        {"  "}
+        <span className="c-id">name</span>:{" "}
+        <span className="c-str">"travel"</span>,{" "}
+        <span className="c-id">version</span>:{" "}
+        <span className="c-str">"1.0.0"</span>,
+      </div>
+      <div>
+        {"  "}
+        <span className="c-id">handler</span>: (
+        <span className="c-id">server</span>) {"=>"}{" "}
         <span className="c-id">server</span>.
         <span className="c-fn">registerTool</span>(
       </div>
-      <div>{"  {"}</div>
+      <div>{"    {"}</div>
       <div>
-        {"    "}
+        {"      "}
         <span className="c-id">name</span>:{" "}
         <span className="c-str">"findFlights"</span>,
       </div>
       <div>
-        {"    "}
+        {"      "}
         <span className="c-id">description</span>:{" "}
         <span className="c-str">"Search flights"</span>,
       </div>
       <div>
-        {"    "}
+        {"      "}
         <span className="c-id">inputSchema</span>: {"{ "}
         <span className="c-id">from</span>: z.
         <span className="c-fn">string</span>(), <span className="c-id">to</span>
@@ -84,32 +90,32 @@ function ServerCode() {
         <span className="c-fn">string</span>() {"}"},
       </div>
       <div>
-        {"    "}
+        {"      "}
         <span className="c-id">view</span>: {"{ "}
         <span className="c-id">component</span>:{" "}
         <span className="c-str">"flights"</span> {"}"},
       </div>
-      <div>{"  }"},</div>
+      <div>{"    }"},</div>
       <div>
-        {"  "}
+        {"    "}
         <span className="c-kw">async</span> ({"{ "}
         <span className="c-id">from</span>, <span className="c-id">to</span>,{" "}
         <span className="c-id">when</span>
         {" }"}) {"=>"} ({"{"}
       </div>
       <div>
-        {"    "}
+        {"      "}
         <span className="c-id">structuredContent</span>: {"{"}
       </div>
       <div>
-        {"      "}
+        {"        "}
         <span className="c-id">destination</span>:{" "}
         <span className="c-kw">await</span>{" "}
         <span className="c-fn">getCity</span>(<span className="c-id">to</span>),{" "}
         <span className="c-com">{"// { name, photo }"}</span>
       </div>
       <div>
-        {"      "}
+        {"        "}
         <span className="c-id">flights</span>:{" "}
         <span className="c-kw">await</span>{" "}
         <span className="c-fn">searchFlights</span>({"{ "}
@@ -117,9 +123,10 @@ function ServerCode() {
         <span className="c-id">when</span>
         {" }"}),
       </div>
-      <div>{"    }"},</div>
-      <div>{"  }"}),</div>
-      <div>);</div>
+      <div>{"      }"},</div>
+      <div>{"    }"}),</div>
+      <div>{"  "}),</div>
+      <div>{"}"});</div>
     </pre>
   );
 }

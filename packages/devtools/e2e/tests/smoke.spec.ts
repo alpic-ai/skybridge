@@ -42,6 +42,36 @@ test.describe("devtools smoke", () => {
     const widget = page.frameLocator('iframe[title="html-preview"]');
     await expect(widget.getByText(token)).toBeVisible({ timeout: 45_000 });
   });
+
+  test("opens state and logs from the fullscreen inspector", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const echoCard = page.locator('[data-tool-name="echo-card"]');
+    await echoCard.locator('[data-slot="accordion-trigger"]').click();
+    await echoCard.getByLabel("message").fill("fullscreen inspector");
+    await echoCard.getByRole("button", { name: /^run$/i }).click();
+
+    const widget = page.frameLocator('iframe[title="html-preview"]');
+    await expect(
+      widget.getByRole("button", { name: "Enter fullscreen" }),
+    ).toBeVisible({ timeout: 45_000 });
+    await widget.getByRole("button", { name: "Enter fullscreen" }).click();
+
+    await page.getByRole("button", { name: "Open DevTools inspector" }).click();
+    const inspector = page.getByRole("complementary", {
+      name: "DevTools inspector",
+    });
+    await expect(inspector).toBeVisible();
+    await expect(inspector.getByLabel("Copy tool output")).toBeVisible();
+    await inspector.getByRole("tab", { name: "State" }).click();
+    await expect(inspector.getByLabel("Copy view state")).toBeVisible();
+    await inspector.getByRole("tab", { name: "Logs" }).click();
+    await expect(
+      inspector.getByRole("heading", { name: "Logs" }),
+    ).toBeVisible();
+  });
 });
 
 test.describe("visibility badge", () => {

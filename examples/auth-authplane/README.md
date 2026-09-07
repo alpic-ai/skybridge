@@ -10,8 +10,8 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a p
 - **One resource identifier**: Authplane binds the token `aud` to the RFC 8707 resource indicator, so `resource` is both the advertised resource and the expected audience — no second value to keep in sync
 - **Branded provider via `oauth:`**: Passing `oauth: authplaneProvider(...)` auto-mounts the well-known metadata endpoints and Bearer verification — no manual router
 - **Personalized Results**: Favorites are highlighted and sorted first, keyed off the `sub` claim of the verified token
-- **User Identity in Widgets**: The signed-in user's identity reaches the widget through `extra.authInfo`
-- **Simplified Server Setup**: Uses [`app.run()`](https://docs.skybridge.tech/api-reference/run) and `.use()` for a single-file server with no manual Express boilerplate
+- **User Identity in Widgets**: The signed-in user's identity reaches the widget through `extra.http?.authInfo`
+- **Simplified Server Setup**: Uses [`app.run()`](https://docs.skybridge.tech/api-reference/skybridge#run) and `.use()` for a single-file server with no manual Express boilerplate
 - **Structured Content & Metadata**: Server passes structured data to widgets via `structuredContent`
 - **Hot Module Replacement**: [Live reloading](https://docs.skybridge.tech/concepts/fast-iteration#hmr-with-vite-plugin) of widget components during development
 - **Local DevTools**: [DevTools](https://docs.skybridge.tech/devtools) at `http://localhost:3000` for local testing
