@@ -140,6 +140,6 @@ Use your remote App URL to connect MCP clients, or test in the Alpic Playground.
 - [Skybridge Documentation](https://docs.skybridge.tech/)
 - [Descope MCP Documentation](https://docs.descope.com/mcp)
 - [Alpic OAuth authentication (DCR proxy)](https://docs.alpic.ai/secure/auth/oauth-setup)
-- [Apps SDK Documentation](https://developers.openai.com/plugins)
+- [ChatGPT Plugins Documentation](https://developers.openai.com/plugins)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)

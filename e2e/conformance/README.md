@@ -1,6 +1,6 @@
 # Skybridge Hooks Conformance
 
-A self-testing MCP app built with [Skybridge](https://docs.skybridge.tech/home). It steps through every [Skybridge web hook](https://docs.skybridge.tech/api-reference/overview#hooks) and reports whether each one is **supported on the host it runs on** (ChatGPT / Apps SDK, Claude / MCP Apps, the DevTools emulator, ...).
+A self-testing MCP app built with [Skybridge](https://docs.skybridge.tech/home). It steps through every [Skybridge web hook](https://docs.skybridge.tech/api-reference/overview#hooks) and reports whether each one is **supported on the host it runs on** (ChatGPT / `window.openai`, Claude / MCP Apps, the DevTools emulator, ...).
 
 ## How it works
 
