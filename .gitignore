@@ -4,6 +4,7 @@ dist
 .env
 cdk.out
 .claude/skills/
+skills-lock.json
 .skybridge/
 packages/core/src/server/templates.generated.js
 .vercel
