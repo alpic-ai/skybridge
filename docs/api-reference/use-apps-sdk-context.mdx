@@ -10,6 +10,10 @@ import { Compat } from "/components/compat.jsx";
 
 ChatGPT exposes its host context to your app, which Skybridge's hooks read and normalize for you. `useAppsSdkContext` is the escape hatch: it reads a context value raw, by key, before that normalization. It works only under ChatGPT.
 
+<Note>
+  The name dates from when OpenAI called this layer the Apps SDK. OpenAI now calls these `window.openai` extensions of a ChatGPT plugin; the hook is unchanged.
+</Note>
+
 ## Example
 
 `useUser` canonicalizes the locale (`fr_FR` becomes `fr-FR`). Reading it raw gives exactly what ChatGPT sent.
@@ -72,7 +76,7 @@ The requested key's current value, read live from `window.openai`. It is un-norm
   <Card title="useToolInfo" icon="database" href="/api-reference/use-tool-info">
     Read the tool result the view mounted with, cross-host
   </Card>
-  <Card title="Apps SDK and MCP Apps" icon="layers" href="/resources/apps-sdk-and-mcp-apps">
-    What the raw Apps SDK layer is, and how Skybridge unifies it
+  <Card title="ChatGPT Extensions and MCP Apps" icon="layers" href="/resources/chatgpt-extensions-and-mcp-apps">
+    What the raw `window.openai` layer is, and how Skybridge unifies it
   </Card>
 </CardGroup>

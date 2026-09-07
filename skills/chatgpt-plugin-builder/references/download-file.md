@@ -4,7 +4,7 @@ Save content to the user's filesystem → `useDownload`
 
 Views run in sandboxed iframes where `<a download>` and `URL.createObjectURL` are blocked. `useDownload` asks the host to perform the save; the host shows a confirmation dialog first.
 
-> MCP Apps only. On ChatGPT (Apps SDK), use `useFiles` to work with attachments instead.
+> MCP Apps only. On ChatGPT (`window.openai`), use `useFiles` to work with attachments instead.
 
 ## Inline text (CSV, JSON, markdown)
 

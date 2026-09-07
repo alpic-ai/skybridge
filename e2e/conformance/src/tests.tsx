@@ -325,7 +325,7 @@ function RequestModalTest({ onResult }: TestProps) {
       return unsupported(`open() failed: ${errMessage(e)}`);
     }
     // Whether a modal actually RENDERED (same-view re-render on MCP Apps, a
-    // dedicated instance on Apps SDK) is a visual fact: the confirmation
+    // dedicated instance on ChatGPT) is a visual fact: the confirmation
     // answers it. The store check below only enriches the detail.
     const { mode } = getAdaptor().getHostContextStore("display").getSnapshot();
     return supported(
@@ -428,7 +428,7 @@ function RegisterViewToolTest({ onResult }: TestProps) {
 
   useProbe(onResult, async () => {
     if (detectRuntime() === "apps-sdk") {
-      return unsupported("view-tool registration is a no-op on Apps SDK");
+      return unsupported("view-tool registration is a no-op on ChatGPT");
     }
     const invocation = new Promise<string | null>((resolve) => {
       invokedRef.current = resolve;

@@ -87,7 +87,7 @@
             "group": "Resources",
             "icon": "library",
             "pages": [
-              "resources/apps-sdk-and-mcp-apps",
+              "resources/chatgpt-extensions-and-mcp-apps",
               "resources/telemetry"
             ]
           }
@@ -228,6 +228,10 @@
   },
   "redirects": [
     {
+      "source": "/resources/apps-sdk-and-mcp-apps",
+      "destination": "/resources/chatgpt-extensions-and-mcp-apps"
+    },
+    {
       "source": "/showcase",
       "destination": "/examples"
     },
@@ -290,7 +294,7 @@
       "apiKey": "phc_wz9NIcD7SmH0BEN39lARJwJNjXgggazjuWCCt62eeKT"
     }
   },
-  "description": "The #1 full stack open-source TS framework for building ChatGPT and MCP Apps",
+  "description": "The #1 full stack open-source TS framework for building ChatGPT plugins and MCP Apps",
   "background": {
     "color": {
       "dark": "#051413"

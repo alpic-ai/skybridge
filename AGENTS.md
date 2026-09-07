@@ -2,12 +2,12 @@
 
 ## What is Skybridge
 
-Skybridge is a **fullstack TypeScript framework** for building ChatGPT Apps and MCP Apps — interactive React views that render inside AI conversations.
+Skybridge is a **fullstack TypeScript framework** for building ChatGPT plugins and MCP Apps — interactive React views that render inside AI conversations.
 
 The core loop: an MCP server exposes tools. When the host (ChatGPT, Claude, VSCode…) calls a tool, the server returns structured data **and** a reference to a React view. The host renders that view in an iframe. The view can read tool output, call other tools, send follow-up messages, and sync UI state back to the model.
 
 Skybridge wraps two host runtimes behind one API:
-- **Apps SDK** — ChatGPT's proprietary `window.openai` runtime
+- **ChatGPT extensions** — ChatGPT's proprietary `window.openai` runtime
 - **MCP Apps** — the open `ext-apps` spec (JSON-RPC postMessage)
 
 Developers write one server (backend) and view(s) (frontend). Skybridge detects the runtime at load time.
@@ -73,7 +73,7 @@ Run `pnpm format` to auto-fix.
 ## Cross-cutting concerns
 
 When the public API of `packages/core/` changes (exports from `src/server/index.ts`, `src/web/index.ts`, and CLI commands in `src/commands/`):
-1. Update `skills/` references (chatgpt-app-builder)
+1. Update `skills/` references (chatgpt-plugin-builder)
 2. Update `docs/` — especially `api-reference/` and `guides/`
 
 PR reviewers must enforce these updates are included when a PR touches the public API.

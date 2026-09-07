@@ -1,20 +1,20 @@
 ---
-name: chatgpt-app-builder
+name: chatgpt-plugin-builder
 description: |
-  Guide developers through creating and updating ChatGPT apps.
-  Covers the full lifecycle: brainstorming ideas against UX guidelines, bootstrapping projects, implementing tools/views, debugging, running dev servers, deploying and connecting apps to ChatGPT.
-  Use when a user wants to create or update a ChatGPT app / MCP server for ChatGPT, or use the Skybridge framework.
+  Guide developers through creating and updating ChatGPT plugins.
+  Covers the full lifecycle: brainstorming ideas against UX guidelines, bootstrapping projects, implementing tools/views, debugging, running dev servers, deploying and connecting plugins to ChatGPT.
+  Use when a user wants to create or update a ChatGPT plugin (formerly called a ChatGPT app) / MCP server for ChatGPT, or use the Skybridge framework.
 ---
 
-# Creating Apps For LLMs
+# Creating Plugins For LLMs
 
-ChatGPT apps are conversational experiences that extend ChatGPT through tools and custom UI views. They're built as MCP servers invoked during conversations.
+ChatGPT plugins are conversational experiences that extend ChatGPT through tools and custom UI views. They're built as MCP servers invoked during conversations.
 
-⚠️ The app is consumed by two users at once: the **human** and the **ChatGPT LLM**. They collaborate through the view—the human interacts with it, the LLM sees its state. Internalize this before writing code: the view is your shared surface.
+⚠️ The plugin is consumed by two users at once: the **human** and the **ChatGPT LLM**. They collaborate through the view—the human interacts with it, the LLM sees its state. Internalize this before writing code: the view is your shared surface.
 
-SPEC.md keeps track of the app's requirements and design decisions. Keep it up to date as you work on the app.
+SPEC.md keeps track of the plugin's requirements and design decisions. Keep it up to date as you work on the plugin.
 
-**Building an ecommerce app?** → Read [ecommerce.md](references/ecommerce.md) first.
+**Building an ecommerce plugin?** → Read [ecommerce.md](references/ecommerce.md) first.
 
 **No SPEC.md?** → Read [discover.md](references/discover.md) first. Nothing else until SPEC.md exists.
 

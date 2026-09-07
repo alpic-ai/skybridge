@@ -19,10 +19,10 @@ Scaffold a project with the `--ecom` flag:
 npx skybridge create my-shop --ecom
 ```
 
-The template works best with the `chatgpt-app-builder` skill, which drives the fill workflow below. The scaffolder installs it by default; to add it to an existing project:
+The template works best with the `chatgpt-plugin-builder` skill, which drives the fill workflow below. The scaffolder installs it by default; to add it to an existing project:
 
 ```bash
-npx skills add alpic-ai/skybridge --skill chatgpt-app-builder
+npx skills add alpic-ai/skybridge --skill chatgpt-plugin-builder
 ```
 
 ## Install the Tooling
@@ -95,7 +95,7 @@ flowchart LR
 ```
 
 <Prompt description="`Fill the ecom template with my catalog`" actions={["copy", "cursor"]}>
-Fill this ecom template following the chatgpt-app-builder skill's ecommerce reference. Start with phase 1 and ask me for everything you need.
+Fill this ecom template following the chatgpt-plugin-builder skill's ecommerce reference. Start with phase 1 and ask me for everything you need.
 </Prompt>
 
 The agent asks for your inputs up front: the data source (a Shopify or Medusa API, your own database, docs, credentials), brand assets (Figma file, live site, or screenshots, plus fonts), and the live site for layout inspiration. Then it explores, proposes, and builds. You are pulled in at three gates:
