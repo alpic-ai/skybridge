@@ -47,6 +47,10 @@ function createOpenaiMethods(
     },
     requestClose: async () => {
       log("requestClose", {});
+      const state = useInspectorPreferencesStore.getState();
+      if (state.displayMode === "modal") {
+        state.setPreference("displayMode", "inline");
+      }
     },
     openExternal: (args: { href: string; redirectUrl?: false }) => {
       window.open(args.href, "_blank", "noopener,noreferrer");
