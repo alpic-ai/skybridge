@@ -14,8 +14,9 @@ export function HostCycler({ hosts }: { hosts: string[] }) {
     );
     return () => clearInterval(id);
   }, [hosts.length]);
-  const longest = hosts.reduce((current, host) =>
-    current.length >= host.length ? current : host,
+  const longest = hosts.reduce(
+    (current, host) => (current.length >= host.length ? current : host),
+    "",
   );
   return (
     <span className="sb-h1-host" style={{ color: "rgb(255, 255, 255)" }}>
