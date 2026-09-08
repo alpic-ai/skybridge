@@ -9,7 +9,6 @@ import { SiteFooter } from "../../components/trust-final";
 
 const HERO_HOSTS = ["ChatGPT", "Claude"];
 const INSTALL_CMD = "npx skybridge create my-shop --ecom";
-const DEMO_URL = "https://ecommerce.skybridge.tech/try";
 const GITHUB_URL =
   "https://github.com/alpic-ai/skybridge/tree/main/packages/create-skybridge/templates/ecom";
 const DOCS_URL = "https://docs.skybridge.tech";
@@ -116,14 +115,14 @@ export default function EcommerceTemplatePage() {
                 >
                   <a
                     className="sb-btn sb-btn-primary sb-btn-lg"
-                    href={DEMO_URL}
+                    href={DOCS_URL}
                     target="_blank"
                     rel="noreferrer"
                     data-ga="lp_cta_click"
-                    data-ga-label="ecom_template_try_demo"
+                    data-ga-label="ecom_template_hero_docs"
                     style={{ borderColor: "rgb(166, 244, 241)" }}
                   >
-                    Try the live demo
+                    Read the docs
                     <Icon name="arrow" size={15} stroke={2} />
                   </a>
                   <a
@@ -306,17 +305,18 @@ export default function EcommerceTemplatePage() {
             </a>
             <a
               className="sb-btn sb-btn-ghost sb-btn-lg"
-              href={DEMO_URL}
+              href={GITHUB_URL}
               target="_blank"
               rel="noreferrer"
-              data-ga="lp_cta_click"
-              data-ga-label="ecom_template_getting_started_demo"
+              data-ga="lp_github_click"
+              data-ga-label="ecom_template_getting_started_source"
               style={{
                 borderRadius: "10px",
                 borderColor: "rgb(106, 177, 177)",
               }}
             >
-              Try the live demo
+              <Icon name="github" size={14} />
+              Read the source
             </a>
           </div>
         </div>
