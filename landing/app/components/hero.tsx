@@ -4,9 +4,35 @@ import { useEffect, useState } from "react";
 import { Icon } from "./icons";
 
 const HOSTS = ["Claude", "ChatGPT", "VSCode", "Cursor", "Goose", "your AI app"];
-const LONGEST_HOST = HOSTS.reduce((longest, host) =>
-  longest.length >= host.length ? longest : host,
-);
+
+export function HostCycler({ hosts }: { hosts: string[] }) {
+  const [index, setIndex] = useState(0);
+  useEffect(() => {
+    const id = setInterval(
+      () => setIndex((current) => (current + 1) % hosts.length),
+      2400,
+    );
+    return () => clearInterval(id);
+  }, [hosts.length]);
+  const longest = hosts.reduce((current, host) =>
+    current.length >= host.length ? current : host,
+  );
+  return (
+    <span className="sb-h1-host" style={{ color: "rgb(255, 255, 255)" }}>
+      {hosts.map((host, position) => (
+        <span
+          key={host}
+          className={`sb-h1-host-slot ${position === index ? "is-active" : "is-hidden"}`}
+        >
+          <span className="sb-accent">{host}</span>
+        </span>
+      ))}
+      <span className="sb-h1-host-ghost" aria-hidden="true">
+        {longest}
+      </span>
+    </span>
+  );
+}
 
 type InstallRowProps = {
   cmd: string;
@@ -45,14 +71,6 @@ export function InstallRow({ cmd, label }: InstallRowProps) {
 }
 
 export function Hero() {
-  const [hostIndex, setHostIndex] = useState(0);
-  useEffect(() => {
-    const id = setInterval(
-      () => setHostIndex((current) => (current + 1) % HOSTS.length),
-      2400,
-    );
-    return () => clearInterval(id);
-  }, []);
   return (
     <section className="sb-hero">
       <div className="sb-wrap">
@@ -87,20 +105,7 @@ export function Hero() {
         <div className="sb-h1" style={{ fontWeight: 400 }} aria-hidden="true">
           Build apps that live
           <br />
-          inside{" "}
-          <span className="sb-h1-host" style={{ color: "rgb(255, 255, 255)" }}>
-            {HOSTS.map((host, index) => (
-              <span
-                key={host}
-                className={`sb-h1-host-slot ${index === hostIndex ? "is-active" : "is-hidden"}`}
-              >
-                <span className="sb-accent">{host}</span>
-              </span>
-            ))}
-            <span className="sb-h1-host-ghost" aria-hidden="true">
-              {LONGEST_HOST}
-            </span>
-          </span>
+          inside <HostCycler hosts={HOSTS} />
         </div>
         <p className="sb-lede">The React framework for MCP Apps.</p>
 
