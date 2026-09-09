@@ -74,6 +74,7 @@
             "pages": [
               "guides/csp",
               "guides/ecommerce",
+              "guides/monetization",
               "guides/files",
               "guides/auth-providers",
               "guides/migrate",
