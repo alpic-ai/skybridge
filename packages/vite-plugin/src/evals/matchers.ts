@@ -20,6 +20,10 @@ export interface ChatMatchers<App> {
   toNeverHaveCalledTool<Name extends ToolNames<App>>(name: Name): void;
   toHaveFailedToolCall<Name extends ToolNames<App>>(name: Name): void;
   toHaveSaid(text: string | RegExp): void;
+  toHaveCalledToolsInOrder(
+    ...names: [ToolNames<App>, ...ToolNames<App>[]]
+  ): void;
+  toHaveCalledNoTools(): void;
 }
 
 export interface ChatAssertion<App> extends ChatMatchers<App> {
@@ -39,11 +43,15 @@ function attemptedCalls(
   return chat.toolCalls.filter((call) => String(call.name) === name);
 }
 
+function acceptedAll(chat: ChatLike<unknown>): ToolCall<unknown>[] {
+  return chat.toolCalls.filter((call) => call.failed === undefined);
+}
+
 function acceptedCalls(
   chat: ChatLike<unknown>,
   name: string,
 ): ToolCall<unknown>[] {
-  return attemptedCalls(chat, name).filter((call) => call.failed === undefined);
+  return acceptedAll(chat).filter((call) => String(call.name) === name);
 }
 
 function observed(chat: ChatLike<unknown>): string {
@@ -167,6 +175,46 @@ expect.extend({
 
 What the assistant actually said:
 ${spoken(received)}`,
+    };
+  },
+
+  toHaveCalledNoTools(received: ChatLike<unknown>) {
+    const count = received.toolCalls.length;
+
+    return {
+      pass: count === 0,
+      message: () =>
+        report(
+          received,
+          count === 0
+            ? "Expected the model to call at least one tool."
+            : `Expected the model not to call any tool, but it made ${count} ${count === 1 ? "call" : "calls"}.`,
+        ),
+    };
+  },
+
+  toHaveCalledToolsInOrder(received: ChatLike<unknown>, ...names: string[]) {
+    let matched = 0;
+    for (const call of acceptedAll(received)) {
+      if (String(call.name) === names[matched]) {
+        matched += 1;
+      }
+      if (matched === names.length) {
+        break;
+      }
+    }
+    const pass = matched === names.length;
+    const wanted = names.map((name) => `"${name}"`).join(" then ");
+
+    return {
+      pass,
+      message: () =>
+        report(
+          received,
+          pass
+            ? `Expected ${wanted} not to be called in that order.`
+            : `Expected ${wanted} in that order, but "${names[matched]}" never came${matched === 0 ? "" : ` after "${names[matched - 1]}"`}.`,
+        ),
     };
   },
 

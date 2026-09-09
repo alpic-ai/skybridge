@@ -44,8 +44,10 @@ All typed against the app's registry (`name` autocompletes, `args` is checked ag
 | `toNeverHaveCalledTool(name)` | no call was attempted |
 | `toHaveFailedToolCall(name)` | a call was refused (auth) or threw |
 | `toHaveSaid(text \| RegExp)` | an assistant turn contains it (string match is case- and whitespace-insensitive) |
+| `toHaveCalledToolsInOrder(...names)` | the named tools *succeeded* in that relative order (subsequence, gaps allowed) |
+| `toHaveCalledNoTools()` | no tool was attempted at all |
 
-On failure the message lists every call the model made, with arguments. `chat.toolCalls` and `chat.assistantTurns` are available for custom assertions.
+On failure the message lists every call the model made, with arguments. Matchers see the whole conversation, not just the last `send`. `chat.toolCalls` and `chat.assistantTurns` are available for custom assertions.
 
 ## Authenticated apps
 
