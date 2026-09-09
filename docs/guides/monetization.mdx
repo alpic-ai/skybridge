@@ -35,10 +35,19 @@ function BuyButton({ variant }) {
 List your checkout origin in [`redirectDomains`](/guides/csp#redirect-off-app) so the host skips its safe-link confirmation on the way out.
 
 ```ts server.ts
-view: {
-  component: "carousel",
-  csp: { redirectDomains: ["https://checkout.myshop.com"] },
-},
+server.registerTool(
+  {
+    name: "browse-catalog",
+    inputSchema: { query: z.string() },
+    view: {
+      component: "carousel",
+      csp: { redirectDomains: ["https://checkout.myshop.com"] },
+    },
+  },
+  async ({ query }) => {
+    /* … */
+  },
+);
 ```
 
 What you give up is the return leg. The host opens the page outside the iframe and nothing comes back, so the view keeps rendering the cart and the model still believes the order is pending. This is usually fine for catalogs focused on sending qualified traffic to a storefront. If you want to update the cart after redirect, one strategy is to have the view poll the cart status until it's updated elsewhere.
@@ -169,14 +178,36 @@ Two properties matter more than the integration. The field is data rather than a
 
 The payload lands on `_meta["ads.getlulu.dev/sponsored"]` and never on `structuredContent`. Protocol middleware sees the result but not the tool's `outputSchema`, and an undeclared field in `structuredContent` would fail validation.
 
-Charging some users and showing ads to the rest comes down to the `enabled` flag, which your own code decides:
+Charging some users and showing ads to the rest needs the client directly, because the adapter above takes no per-request decision. Build a `LuluAds` yourself, and let the `enabled` flag read whatever your auth already knows about the caller.
 
 ```ts server.ts
-const sponsored = await ads.sponsoredSlot({
-  context: { tool: "search-flights" },
-  enabled: user.tier !== "paid",
+import { LuluAds } from "lulu-ads";
+
+const ads = new LuluAds({
+  publisherId: process.env.LULU_ADS_PUBLISHER_ID,
+  apiKey: process.env.LULU_ADS_API_KEY,
 });
+
+server.registerTool(
+  {
+    name: "search-flights",
+    inputSchema: { from: z.string(), to: z.string() },
+  },
+  async ({ from, to }, extra) => {
+    const sponsored = await ads.sponsoredSlot({
+      context: { tool: "search-flights" },
+      enabled: extra.http?.authInfo?.extra.tier !== "paid",
+    });
+
+    return {
+      content: [{ type: "text", text: await searchFlights(from, to) }],
+      _meta: { "ads.getlulu.dev/sponsored": sponsored },
+    };
+  },
+);
 ```
+
+Reach for this instead of `withLuluAdsSkybridge`, not alongside it: the adapter already decorates every tool, so a tool doing its own slot would get two.
 
 Lulu also ships [result widgets](https://github.com/Lulu-The-Narwhal/lulu-ads#result-widgets), four templates that render your own tool output with the sponsored strip built in, for hosts that support rendered widgets.
 
