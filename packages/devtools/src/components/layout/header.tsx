@@ -4,7 +4,6 @@ import { LogIn, LogOut } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { logout, signIn, useServerInfo } from "@/lib/mcp/index.js";
 import { StatusBadge } from "./status-badge.js";
-import { TipsButton } from "./tips-dialog.js";
 import {
   AuditButton,
   DeployButton,
@@ -12,6 +11,7 @@ import {
   PlaygroundButton,
   TunnelButton,
 } from "./toolbar-actions.js";
+import { WebMcpButton } from "./webmcp-dialog.js";
 
 const EXTERNAL_LINKS: ReadonlyArray<{ label: string; href: string }> = [
   { label: "discord", href: "https://discord.gg/awV4gu74wK" },
@@ -88,11 +88,11 @@ export const Header = () => {
             Sign out
           </Button>
         )}
-        <TipsButton />
         <nav className="flex items-center gap-1 text-xs">
-          {EXTERNAL_LINKS.map((link, i) => (
+          <WebMcpButton />
+          {EXTERNAL_LINKS.map((link) => (
             <span key={link.label} className="inline-flex items-center gap-1">
-              {i > 0 && <span aria-hidden>·</span>}
+              <span aria-hidden>·</span>
               <Button asChild variant="tertiary">
                 <a href={link.href} target="_blank" rel="noreferrer noopener">
                   {link.label}

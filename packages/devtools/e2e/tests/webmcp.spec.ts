@@ -2,15 +2,13 @@ import { expect, test } from "@playwright/test";
 
 const WEBMCP_TIP_TITLE = "Drive DevTools from your coding agent";
 
-test.describe("tips", () => {
-  test("opens the tips dialog and links to the WebMCP docs", async ({
-    page,
-  }) => {
+test.describe("webmcp", () => {
+  test("opens the WebMCP dialog and links to the docs", async ({ page }) => {
     await page.goto("/");
 
-    const tips = page.getByRole("button", { name: "Tips" });
-    await expect(tips).toBeVisible();
-    await tips.click();
+    const trigger = page.getByRole("button", { name: "webmcp" });
+    await expect(trigger).toBeVisible();
+    await trigger.click();
 
     const dialog = page.getByRole("dialog");
     await expect(dialog.getByText(WEBMCP_TIP_TITLE)).toBeVisible();
@@ -33,16 +31,16 @@ test.describe("tips", () => {
   }) => {
     await page.goto("/");
 
-    const unseen = page.getByTestId("tips-unseen");
+    const unseen = page.getByTestId("webmcp-unseen");
     await expect(unseen).toBeVisible();
 
-    await page.getByRole("button", { name: "Tips" }).click();
+    await page.getByRole("button", { name: "webmcp" }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(unseen).toBeHidden();
 
     // The indicator is intentionally not persisted, so every fresh load of
-    // DevTools advertises the tips again.
+    // DevTools advertises WebMCP again.
     await page.reload();
-    await expect(page.getByTestId("tips-unseen")).toBeVisible();
+    await expect(page.getByTestId("webmcp-unseen")).toBeVisible();
   });
 });

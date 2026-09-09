@@ -7,7 +7,6 @@ import {
   DialogTitle,
 } from "@alpic-ai/ui/components/dialog";
 import { StatusDot } from "@alpic-ai/ui/components/status-dot";
-import { TooltipIconButton } from "@alpic-ai/ui/components/tooltip-icon-button";
 import { ExternalLinkIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -65,7 +64,7 @@ function TipCard({ tip }: { tip: Tip }) {
   );
 }
 
-export function TipsButton() {
+export function WebMcpButton() {
   const [open, setOpen] = useState(false);
   // Deliberately not persisted: DevTools is a local tool that gets restarted
   // constantly, and the dot is cheap to re-show. Keeping it in memory means a
@@ -81,29 +80,27 @@ export function TipsButton() {
 
   return (
     <>
-      <TooltipIconButton
-        tooltip="Tips"
+      {/* Rendered as a text link so it sits in the header nav alongside
+          discord/docs/github rather than standing out as an icon. */}
+      <Button
         variant="tertiary"
         className="relative"
         onClick={() => onOpenChange(true)}
       >
-        {/* The button already carries its accessible name via `tooltip`.
-            Sized above the usual size-3.5 because the artwork carries a lot of
-            internal padding, so it reads smaller than a Lucide icon would. */}
-        <img src="/lightbulb.svg" alt="" aria-hidden className="size-5" />
+        webmcp
         {!seen && (
           <StatusDot
-            data-testid="tips-unseen"
+            data-testid="webmcp-unseen"
             variant="warning"
-            className="absolute top-1 right-1 size-1.5"
+            className="absolute top-0.5 right-0.5 size-1.5"
             aria-hidden
           />
         )}
-      </TooltipIconButton>
+      </Button>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent size="lg">
           <DialogHeader>
-            <DialogTitle>Tips</DialogTitle>
+            <DialogTitle>WebMCP</DialogTitle>
             <DialogDescription>
               Features of DevTools that are easy to miss.
             </DialogDescription>
