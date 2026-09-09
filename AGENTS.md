@@ -58,6 +58,18 @@ pnpm --filter skybridge build
 
 Always run `pnpm test && pnpm build` from root before pushing.
 
+### Publishing on push
+
+`publish.yml` runs on push to **every** branch and publishes pre-release versions of `skybridge`, `@skybridge/vite-plugin`, `@skybridge/devtools`, `@skybridge/test` and `create-skybridge`:
+
+| Branch | Version | npm tag |
+| --- | --- | --- |
+| `main` | `0.0.0-next.<sha>` | `next` |
+| `v2` | `2.0.0-beta.<sha>` | `beta` |
+| anything else | `0.0.0-dev.<sha>` | `dev` |
+
+These pre-release publishes are expected, so pushing a branch needs no special approval. Only a published GitHub release publishes `latest`.
+
 ## Code rules
 
 **Biome** handles lint + format (see `biome.json`):
