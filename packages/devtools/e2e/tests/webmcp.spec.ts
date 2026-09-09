@@ -25,22 +25,4 @@ test.describe("webmcp", () => {
       "https://www.webfuse.com/blog/what-is-webmcp-the-practical-guide-to-the-web-model-context-protocol",
     );
   });
-
-  test("drops the unseen indicator once opened, and shows it again on reload", async ({
-    page,
-  }) => {
-    await page.goto("/");
-
-    const unseen = page.getByTestId("webmcp-unseen");
-    await expect(unseen).toBeVisible();
-
-    await page.getByRole("button", { name: "webmcp" }).click();
-    await expect(page.getByRole("dialog")).toBeVisible();
-    await expect(unseen).toBeHidden();
-
-    // The indicator is intentionally not persisted, so every fresh load of
-    // DevTools advertises WebMCP again.
-    await page.reload();
-    await expect(page.getByTestId("webmcp-unseen")).toBeVisible();
-  });
 });

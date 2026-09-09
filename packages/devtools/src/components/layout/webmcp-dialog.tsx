@@ -6,7 +6,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@alpic-ai/ui/components/dialog";
-import { StatusDot } from "@alpic-ai/ui/components/status-dot";
 import { ExternalLinkIcon } from "lucide-react";
 import { useState } from "react";
 
@@ -66,42 +65,21 @@ function TipCard({ tip }: { tip: Tip }) {
 
 export function WebMcpButton() {
   const [open, setOpen] = useState(false);
-  // Deliberately not persisted: DevTools is a local tool that gets restarted
-  // constantly, and the dot is cheap to re-show. Keeping it in memory means a
-  // newly added tip is surfaced on the next run without a store migration.
-  const [seen, setSeen] = useState(false);
-
-  const onOpenChange = (next: boolean) => {
-    if (next) {
-      setSeen(true);
-    }
-    setOpen(next);
-  };
 
   return (
     <>
       {/* Rendered as a text link so it sits in the header nav alongside
           discord/docs/github rather than standing out as an icon. */}
-      <Button
-        variant="tertiary"
-        className="relative"
-        onClick={() => onOpenChange(true)}
-      >
+      <Button variant="tertiary" onClick={() => setOpen(true)}>
         webmcp
-        {!seen && (
-          <StatusDot
-            data-testid="webmcp-unseen"
-            variant="warning"
-            className="absolute top-0.5 right-0.5 size-1.5"
-            aria-hidden
-          />
-        )}
       </Button>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent size="lg">
           <DialogHeader>
             <DialogTitle>WebMCP</DialogTitle>
-            <DialogDescription>
+            {/* Visually redundant with the tip title below, but Radix warns
+                when a dialog has no description, so keep it for a11y only. */}
+            <DialogDescription className="sr-only">
               Features of DevTools that are easy to miss.
             </DialogDescription>
           </DialogHeader>
