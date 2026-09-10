@@ -190,8 +190,13 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
         },
       };
 
+      const include = [
+        "**/*.{test,spec}.?(c|m)[jt]s?(x)",
+        `${EVALS_DIR}/**/*.eval.?(c|m)ts`,
+      ];
+
       if (!options?.evals) {
-        return base;
+        return { ...base, test: { include } };
       }
 
       return {
@@ -199,10 +204,7 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
         test: {
           setupFiles: [here("./evals/matchers.js")],
           provide: { skybridgeEvals: options.evals },
-          include: [
-            "**/*.{test,spec}.?(c|m)[jt]s?(x)",
-            `${EVALS_DIR}/**/*.eval.?(c|m)ts`,
-          ],
+          include,
           testTimeout: options.evals.timeout ?? DEFAULT_EVAL_TIMEOUT_MS,
           env: loadEnv(mode, projectRoot, ""),
         },
