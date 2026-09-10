@@ -6,7 +6,7 @@ import { resolveSkybridgeConfig } from "../cli/resolve-skybridge-config.js";
 import { runPlain } from "../cli/run-plain.js";
 import { startTunnelControlServer } from "../cli/tunnel-control-server.js";
 import { useMessages } from "../cli/use-messages.js";
-import { useNodemon } from "../cli/use-nodemon.js";
+import { CRASH_MESSAGE, useNodemon } from "../cli/use-nodemon.js";
 import { useOpenBrowser } from "../cli/use-open-browser.js";
 import { useTunnel } from "../cli/use-tunnel.js";
 import { useTypeScriptCheck } from "../cli/use-typescript-check.js";
@@ -108,7 +108,7 @@ export default class Dev extends Command {
     const App = () => {
       const tsErrors = useTypeScriptCheck();
       const [messages, pushMessage] = useMessages();
-      useNodemon(env, pushMessage);
+      const crashed = useNodemon(env, pushMessage);
       useOpenBrowser(port, flags.open);
       const tunnelState = useTunnel(
         port,
@@ -121,22 +121,30 @@ export default class Dev extends Command {
         <Box flexDirection="column" padding={1} marginLeft={1}>
           <Header version={this.config.version} />
 
-          <Box>
-            <Text>🏠{"  "}</Text>
-            {fallback ? (
-              <Text color="yellow">3000 in use, running on </Text>
-            ) : (
-              <Text>Running on </Text>
-            )}
-            <Text color="green">{`http://localhost:${port}/mcp`}</Text>
-          </Box>
-          <Box marginBottom={1}>
-            <Text color="#20a832">→{"  "}</Text>
-            <Text color="white" bold>
-              Test locally with DevTools:{" "}
-            </Text>
-            <Text color="green">{`http://localhost:${port}/`}</Text>
-          </Box>
+          {crashed ? (
+            <Box marginBottom={1}>
+              <Text color="red">{CRASH_MESSAGE}</Text>
+            </Box>
+          ) : (
+            <>
+              <Box>
+                <Text>🏠{"  "}</Text>
+                {fallback ? (
+                  <Text color="yellow">3000 in use, running on </Text>
+                ) : (
+                  <Text>Running on </Text>
+                )}
+                <Text color="green">{`http://localhost:${port}/mcp`}</Text>
+              </Box>
+              <Box marginBottom={1}>
+                <Text color="#20a832">→{"  "}</Text>
+                <Text color="white" bold>
+                  Test locally with DevTools:{" "}
+                </Text>
+                <Text color="green">{`http://localhost:${port}/`}</Text>
+              </Box>
+            </>
+          )}
 
           {tunnelState.status === "idle" && (
             <Box>
@@ -154,7 +162,7 @@ export default class Dev extends Command {
               <Text color="yellow">{tunnelState.message}</Text>
             </Box>
           )}
-          {tunnelState.status === "connected" && (
+          {tunnelState.status === "connected" && !crashed && (
             <Box flexDirection="column" marginBottom={1}>
               <Box>
                 <Text>🌍{"  "}</Text>

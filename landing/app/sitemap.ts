@@ -23,6 +23,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${BASE}/template/ecommerce`,
+      lastModified: SITE_UPDATED,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
       url: `${BASE}/changelog`,
       lastModified: SITE_UPDATED,
       changeFrequency: "weekly",

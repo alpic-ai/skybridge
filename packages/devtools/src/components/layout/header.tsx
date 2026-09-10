@@ -1,8 +1,9 @@
 import { Button } from "@alpic-ai/ui/components/button";
 import { Separator } from "@alpic-ai/ui/components/separator";
-import { LogIn, LogOut } from "lucide-react";
+import { LogIn, LogOut, Sparkles } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { logout, signIn, useServerInfo } from "@/lib/mcp/index.js";
+import { useEvalsPage } from "@/lib/nuqs.js";
 import { StatusBadge } from "./status-badge.js";
 import {
   AuditButton,
@@ -11,6 +12,7 @@ import {
   PlaygroundButton,
   TunnelButton,
 } from "./toolbar-actions.js";
+import { WebMcpButton } from "./webmcp-dialog.js";
 
 const EXTERNAL_LINKS: ReadonlyArray<{ label: string; href: string }> = [
   { label: "discord", href: "https://discord.gg/awV4gu74wK" },
@@ -23,6 +25,20 @@ function Chip({ children }: { children: React.ReactNode }) {
     <div className="inline-flex h-8 items-center gap-2 rounded-md px-2.5 text-sm  bg-light-gray border">
       {children}
     </div>
+  );
+}
+
+function DiscoverEvalsButton() {
+  const [, setOpen] = useEvalsPage();
+  return (
+    <Button
+      variant="tertiary"
+      className="sparkle-twinkle"
+      onClick={() => setOpen(true)}
+    >
+      <Sparkles className="size-3.5" aria-hidden />
+      Discover Evals
+    </Button>
   );
 }
 
@@ -59,6 +75,7 @@ export const Header = () => {
     <header className="flex h-13 items-center justify-between gap-3 border-b border-border px-4">
       <div className="flex items-center gap-2">
         <BrandChip />
+        <DiscoverEvalsButton />
         <LiveUrlChip />
       </div>
 
@@ -88,9 +105,10 @@ export const Header = () => {
           </Button>
         )}
         <nav className="flex items-center gap-1 text-xs">
-          {EXTERNAL_LINKS.map((link, i) => (
+          <WebMcpButton />
+          {EXTERNAL_LINKS.map((link) => (
             <span key={link.label} className="inline-flex items-center gap-1">
-              {i > 0 && <span aria-hidden>·</span>}
+              <span aria-hidden>·</span>
               <Button asChild variant="tertiary">
                 <a href={link.href} target="_blank" rel="noreferrer noopener">
                   {link.label}

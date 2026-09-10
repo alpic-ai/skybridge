@@ -61,3 +61,61 @@
     16px 16px;
   background-position: 0 0;
 }
+
+.evals-grid-fade {
+  mask-image: radial-gradient(
+    ellipse 90% 65% at 50% 0%,
+    black 0%,
+    color-mix(in srgb, black 45%, transparent) 45%,
+    transparent 80%
+  );
+}
+
+.evals-wash {
+  background-image: radial-gradient(
+    ellipse 80% 50% at 50% 0%,
+    color-mix(in oklab, var(--color-primary) 12%, transparent),
+    transparent 70%
+  );
+}
+
+@keyframes sparkle-twinkle {
+  0%,
+  86%,
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  90% {
+    opacity: 0.5;
+    transform: scale(0.8) rotate(-14deg);
+  }
+  94% {
+    opacity: 1;
+    transform: scale(1.2) rotate(12deg);
+  }
+  97% {
+    transform: scale(0.95) rotate(-4deg);
+  }
+}
+
+.sparkle-twinkle svg > * {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sparkle-twinkle 5s ease-in-out infinite;
+}
+
+.sparkle-twinkle svg > *:nth-child(2),
+.sparkle-twinkle svg > *:nth-child(3) {
+  animation-delay: 0.14s;
+}
+
+.sparkle-twinkle svg > *:nth-child(4) {
+  animation-delay: 0.28s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sparkle-twinkle svg > * {
+    animation: none;
+  }
+}
