@@ -25,7 +25,7 @@ bun add -d @skybridge/test@beta vitest ai @ai-sdk/anthropic
 ```
 </CodeGroup>
 
-The plugin always picks up `evals/**/*.eval.ts`. Turn on `evals` to register the `expect.chat` matchers, raise the per-scenario timeout to two minutes, and load your `.env` so the provider key is available:
+Turn on `evals` in the Vite plugin. It registers the `expect.chat` matchers, picks up `evals/**/*.eval.ts`, raises the per-scenario timeout to two minutes, and loads your `.env` so the provider key is available:
 
 ```ts vite.config.ts highlight={7}
 import { skybridge } from "@skybridge/vite-plugin";

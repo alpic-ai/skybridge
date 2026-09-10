@@ -1,8 +1,8 @@
-import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { UserConfig } from "vite";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type SkybridgePluginOptions, skybridge } from "./plugin.js";
 
 type RenderBuiltUrl = NonNullable<
@@ -12,7 +12,7 @@ type RenderBuiltUrl = NonNullable<
 function getConfig(
   root: string,
   options?: SkybridgePluginOptions,
-  projectConfig?: UserConfig,
+  warn: (message: string) => void = () => {},
 ): UserConfig {
   const plugin = skybridge({ viewsDir: join(root, "views"), ...options });
   const hook = plugin.config;
@@ -22,8 +22,8 @@ function getConfig(
   const handler = typeof hook === "function" ? hook : hook.handler;
   return handler.call(
     // biome-ignore lint/suspicious/noExplicitAny: vitest harness for plugin hook
-    {} as any,
-    { root, ...projectConfig },
+    { warn } as any,
+    { root },
     { command: "build", mode: "production" },
   ) as UserConfig;
 }
@@ -89,18 +89,22 @@ describe("skybridge plugin renderBuiltUrl", () => {
 });
 
 describe("skybridge plugin eval discovery", () => {
-  it("collects eval scenarios even when the evals option is missing", () => {
-    const config = getConfig(root);
+  it("points at the missing evals option when scenarios exist", () => {
+    mkdirSync(join(root, "evals"), { recursive: true });
+    writeFileSync(join(root, "evals", "start.eval.ts"), "");
+    const warn = vi.fn();
 
-    expect(config.test?.include).toContain("evals/**/*.eval.?(c|m)ts");
-    expect(config.test?.setupFiles).toBeUndefined();
+    const config = getConfig(root, undefined, warn);
+
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("evals: {}"));
+    expect(config.test).toBeUndefined();
   });
 
-  it("adds only the eval pattern when the project narrowed its own include", () => {
-    const config = getConfig(root, undefined, {
-      test: { include: ["src/**/*.test.ts"] },
-    });
+  it("stays quiet when the project has no scenarios", () => {
+    const warn = vi.fn();
 
-    expect(config.test?.include).toEqual(["evals/**/*.eval.?(c|m)ts"]);
+    getConfig(root, undefined, warn);
+
+    expect(warn).not.toHaveBeenCalled();
   });
 });

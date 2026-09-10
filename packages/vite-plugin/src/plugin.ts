@@ -1,3 +1,4 @@
+import { existsSync, readdirSync } from "node:fs";
 import { isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -108,6 +109,16 @@ function here(file: string): string {
   return fileURLToPath(new URL(file, import.meta.url));
 }
 
+function hasEvalScenarios(projectRoot: string): boolean {
+  const dir = resolve(projectRoot, EVALS_DIR);
+  if (!existsSync(dir)) {
+    return false;
+  }
+  return readdirSync(dir, { recursive: true }).some((entry) =>
+    /\.eval\.(c|m)?ts$/.test(entry.toString()),
+  );
+}
+
 function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
   const rawViewsDir = options?.viewsDir ?? "src/views";
   let resolvedViewsDir: string;
@@ -190,14 +201,13 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
         },
       };
 
-      const evalInclude = `${EVALS_DIR}/**/*.eval.?(c|m)ts`;
-      const include =
-        config.test?.include === undefined
-          ? ["**/*.{test,spec}.?(c|m)[jt]s?(x)", evalInclude]
-          : [evalInclude];
-
       if (!options?.evals) {
-        return { ...base, test: { include } };
+        if (hasEvalScenarios(projectRoot)) {
+          this.warn(
+            `Found scenarios in "${EVALS_DIR}/" but the \`evals\` plugin option is not set, so they are not collected. Add \`skybridge({ evals: {} })\` to run them.`,
+          );
+        }
+        return base;
       }
 
       return {
@@ -205,7 +215,10 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
         test: {
           setupFiles: [here("./evals/matchers.js")],
           provide: { skybridgeEvals: options.evals },
-          include,
+          include: [
+            "**/*.{test,spec}.?(c|m)[jt]s?(x)",
+            `${EVALS_DIR}/**/*.eval.?(c|m)ts`,
+          ],
           testTimeout: options.evals.timeout ?? DEFAULT_EVAL_TIMEOUT_MS,
           env: loadEnv(mode, projectRoot, ""),
         },
