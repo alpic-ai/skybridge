@@ -190,10 +190,11 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
         },
       };
 
-      const include = [
-        "**/*.{test,spec}.?(c|m)[jt]s?(x)",
-        `${EVALS_DIR}/**/*.eval.?(c|m)ts`,
-      ];
+      const evalInclude = `${EVALS_DIR}/**/*.eval.?(c|m)ts`;
+      const include =
+        config.test?.include === undefined
+          ? ["**/*.{test,spec}.?(c|m)[jt]s?(x)", evalInclude]
+          : [evalInclude];
 
       if (!options?.evals) {
         return { ...base, test: { include } };

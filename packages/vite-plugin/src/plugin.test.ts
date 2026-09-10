@@ -9,7 +9,11 @@ type RenderBuiltUrl = NonNullable<
   NonNullable<UserConfig["experimental"]>["renderBuiltUrl"]
 >;
 
-function getConfig(root: string, options?: SkybridgePluginOptions): UserConfig {
+function getConfig(
+  root: string,
+  options?: SkybridgePluginOptions,
+  projectConfig?: UserConfig,
+): UserConfig {
   const plugin = skybridge({ viewsDir: join(root, "views"), ...options });
   const hook = plugin.config;
   if (!hook) {
@@ -19,7 +23,7 @@ function getConfig(root: string, options?: SkybridgePluginOptions): UserConfig {
   return handler.call(
     // biome-ignore lint/suspicious/noExplicitAny: vitest harness for plugin hook
     {} as any,
-    { root },
+    { root, ...projectConfig },
     { command: "build", mode: "production" },
   ) as UserConfig;
 }
@@ -90,5 +94,13 @@ describe("skybridge plugin eval discovery", () => {
 
     expect(config.test?.include).toContain("evals/**/*.eval.?(c|m)ts");
     expect(config.test?.setupFiles).toBeUndefined();
+  });
+
+  it("adds only the eval pattern when the project narrowed its own include", () => {
+    const config = getConfig(root, undefined, {
+      test: { include: ["src/**/*.test.ts"] },
+    });
+
+    expect(config.test?.include).toEqual(["evals/**/*.eval.?(c|m)ts"]);
   });
 });
