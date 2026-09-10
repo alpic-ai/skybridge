@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { ExtendedNodemon } from "./nodemon.d.ts";
 import type { PushMessage } from "./use-messages.js";
 
@@ -15,6 +15,9 @@ function loadNodemon(): ExtendedNodemon {
   }
 }
 
+export const CRASH_MESSAGE =
+  "💥  Server crashed. Fix the error, then save a watched file to restart it.";
+
 const SOURCEMAP_WARNING = /^Sourcemap for ".*" points to missing source files$/;
 
 export interface NodemonHandlers {
@@ -24,6 +27,11 @@ export interface NodemonHandlers {
   onStderr: (message: string) => void;
   /** The server restarted because the listed files changed. */
   onRestart: (files: string[]) => void;
+  /**
+   * The server exited with a non-zero code. nodemon does not restart it on its
+   * own: it waits for the next file change.
+   */
+  onCrash: () => void;
 }
 
 /**
@@ -83,15 +91,20 @@ export function startNodemon(
     }
   };
 
-  nodemon.on("readable", () => {
+  const reattachListeners = () => {
     setupStdoutListener();
     setupStderrListener();
+  };
+
+  nodemon.on("readable", reattachListeners);
+
+  nodemon.on("crash", () => {
+    handlers.onCrash();
   });
 
   nodemon.on("restart", (files: string[]) => {
     handlers.onRestart(files);
-    setupStdoutListener();
-    setupStderrListener();
+    reattachListeners();
   });
 
   return () => {
@@ -105,10 +118,16 @@ export function startNodemon(
   };
 }
 
+/**
+ * Boot nodemon for the Ink dev UI. Returns whether the server is currently
+ * down after a crash, so the UI can stop advertising a URL nothing listens on.
+ */
 export function useNodemon(
   env: NodeJS.ProcessEnv,
   pushMessage: PushMessage,
-): void {
+): boolean {
+  const [crashed, setCrashed] = useState(false);
+
   useEffect(
     () =>
       startNodemon(env, {
@@ -119,12 +138,17 @@ export function useNodemon(
           }
         },
         onStderr: (message) => pushMessage(message, "error"),
-        onRestart: (files) =>
+        onRestart: (files) => {
+          setCrashed(false);
           pushMessage(
             `Server restarted due to file changes: ${files.join(", ")}`,
             "restart",
-          ),
+          );
+        },
+        onCrash: () => setCrashed(true),
       }),
     [env, pushMessage],
   );
+
+  return crashed;
 }
