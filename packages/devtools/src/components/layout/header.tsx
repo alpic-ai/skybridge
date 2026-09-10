@@ -11,6 +11,7 @@ import {
   PlaygroundButton,
   TunnelButton,
 } from "./toolbar-actions.js";
+import { WebMcpButton } from "./webmcp-dialog.js";
 
 const EXTERNAL_LINKS: ReadonlyArray<{ label: string; href: string }> = [
   { label: "discord", href: "https://discord.gg/awV4gu74wK" },
@@ -88,9 +89,10 @@ export const Header = () => {
           </Button>
         )}
         <nav className="flex items-center gap-1 text-xs">
-          {EXTERNAL_LINKS.map((link, i) => (
+          <WebMcpButton />
+          {EXTERNAL_LINKS.map((link) => (
             <span key={link.label} className="inline-flex items-center gap-1">
-              {i > 0 && <span aria-hidden>·</span>}
+              <span aria-hidden>·</span>
               <Button asChild variant="tertiary">
                 <a href={link.href} target="_blank" rel="noreferrer noopener">
                   {link.label}
