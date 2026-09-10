@@ -5,11 +5,13 @@ sidebarTitle: "Monetization"
 icon: "circle-dollar-sign"
 ---
 
-The two main ways to monetize your MCP App are selling:
-- goods or services to your app users
-- sponsored slots to advertisers
+Three parties can pay you for an MCP App, and which one you pick decides the rest of the integration:
 
-A third payer is possible too, and newer: the agent itself, paying out of a wallet its user funded.
+- a person, paying on a checkout page you already run
+- the agent itself, paying for a tool call out of a wallet its user funded
+- an advertiser, paying for a labeled slot in your tool results
+
+The first is where almost every app shipping today sits. The second is newer and still experimental. They are not exclusive: an app can hand off to checkout and carry sponsored slots on the tools it gives away.
 
 ## Hand Off to Your Own Checkout
 
@@ -141,7 +143,7 @@ The middleware runs before the handler, so an unpaid call never reaches your cod
 This is experimental on every side. It needs [Shared Payment Token](https://docs.stripe.com/agentic-commerce/concepts/shared-payment-tokens) access and a Stripe profile, the protocol is young, and no chat host pays for a tool call on a user's behalf today. Agent harnesses with their own wallet, such as a coding agent, are where it currently applies. We have verified the challenge leg against a live Skybridge server; paying one and redeeming the receipt is untested.
 </Warning>
 
-Note that `mppx` imports `@modelcontextprotocol/sdk` (the v1 SDK) to build the error, so it has to be installed alongside Skybridge's own v2 packages. Without it the charge fails at runtime with a missing-dependency message.
+`mppx` needs the v1 `@modelcontextprotocol/sdk` to build the payment error and declares it as an optional peer, so install it yourself alongside Skybridge's v2 packages.
 
 Stripe [documents a different shape](https://docs.stripe.com/agentic-commerce/monetize-mcp) for the same protocol, where a tool returns a payment link and a separate HTTP endpoint handles the exchange. That endpoint also serves human browsers, so it covers both audiences with one URL, at the cost of a custom route Alpic Cloud does not serve.
 
