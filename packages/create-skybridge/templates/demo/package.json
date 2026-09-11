@@ -25,7 +25,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "^2.0.90",
+    "@ai-sdk/anthropic": "^4.0.0",
     "@skybridge/devtools": "workspace:*",
     "@skybridge/test": "workspace:*",
     "@skybridge/vite-plugin": "workspace:*",
@@ -34,7 +34,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
-    "ai": "^5.0.0",
+    "ai": "^7.0.0",
     "alpic": "^1.155.0",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.1",
