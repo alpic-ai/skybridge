@@ -1,6 +1,6 @@
 {
   "name": "skybridge",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Skybridge is a framework for building ChatGPT and MCP Apps",
   "repository": {
     "type": "git",
@@ -47,7 +47,7 @@
     "ai",
     "skybridge"
   ],
-  "author": "Fr\u00e9d\u00e9ric Barthelet",
+  "author": "Frédéric Barthelet",
   "license": "ISC",
   "peerDependencies": {
     "@skybridge/devtools": "^2.0.0",
