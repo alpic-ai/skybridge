@@ -1,0 +1,32 @@
+{
+  "name": "skybridge-evals-example",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Skybridge example whose point is its eval suite: every expect.chat matcher and every start() option, exercised against a tiny catalog app.",
+  "type": "module",
+  "scripts": {
+    "dev": "skybridge dev",
+    "build": "skybridge build",
+    "start": "skybridge start",
+    "evals": "vitest run evals",
+    "evals:types": "tsc --noEmit -p tsconfig.evals.json"
+  },
+  "dependencies": {
+    "skybridge": "^2.0.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@ai-sdk/anthropic": "^2.0.90",
+    "@skybridge/test": "beta",
+    "@skybridge/vite-plugin": "^2.0.0",
+    "@types/node": "^24.13.2",
+    "ai": "^5.0.0",
+    "tsx": "^4.22.4",
+    "typescript": "^5.9.3",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}

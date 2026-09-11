@@ -125,3 +125,81 @@ describe("toHaveSaid", () => {
     expect.chat(chat).not.toHaveSaid("goggles in stock");
   });
 });
+
+describe("toHaveCalledToolsInOrder", () => {
+  const chat = fakeChat([
+    { name: "search-products", arguments: {} },
+    { name: "render-carousel", arguments: {} },
+    { name: "product-details", arguments: {} },
+  ]);
+
+  it("matches a subsequence, so unrelated calls in between are fine", () => {
+    expect
+      .chat(chat)
+      .toHaveCalledToolsInOrder(
+        "search-products" as never,
+        "product-details" as never,
+      );
+  });
+
+  it("names the tool that never came, and reports the calls made", () => {
+    expect(() =>
+      expect
+        .chat(chat)
+        .toHaveCalledToolsInOrder(
+          "product-details" as never,
+          "search-products" as never,
+        ),
+    ).toThrow(
+      /"search-products" never came after "product-details"[\s\S]*render-carousel/,
+    );
+  });
+
+  it("skips a failed call, so it cannot satisfy a step", () => {
+    const withFailure = fakeChat([
+      { name: "search-products", arguments: {} },
+      {
+        name: "create-checkout",
+        arguments: {},
+        failed: "the tool returned an error: []",
+      },
+    ]);
+
+    expect(() =>
+      expect
+        .chat(withFailure)
+        .toHaveCalledToolsInOrder(
+          "search-products" as never,
+          "create-checkout" as never,
+        ),
+    ).toThrow(/"create-checkout" never came after "search-products"/);
+  });
+
+  it("requires as many calls as the name is repeated", () => {
+    expect(() =>
+      expect
+        .chat(chat)
+        .toHaveCalledToolsInOrder(
+          "search-products" as never,
+          "search-products" as never,
+        ),
+    ).toThrow(/never came after "search-products"/);
+  });
+});
+
+describe("toHaveCalledNoTools", () => {
+  it("passes on a conversation that called nothing", () => {
+    expect.chat(fakeChat([])).toHaveCalledNoTools();
+  });
+
+  it("fails with the count and the calls made, failed ones included", () => {
+    const chat = fakeChat([
+      { name: "clear-cart", arguments: {}, failed: "boom" },
+    ]);
+
+    expect(() => expect.chat(chat).toHaveCalledNoTools()).toThrow(
+      /not to call any tool, but it made 1 call\.[\s\S]*clear-cart/,
+    );
+    expect.chat(chat).not.toHaveCalledNoTools();
+  });
+});

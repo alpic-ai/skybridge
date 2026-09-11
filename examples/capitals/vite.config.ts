@@ -13,7 +13,7 @@ export default defineConfig({
       logLevels: ["error"],
     },
   },
-  plugins: [skybridge({ evals: {} }) as PluginOption, react(), tailwindcss()],
+  plugins: [skybridge() as PluginOption, react(), tailwindcss()],
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),

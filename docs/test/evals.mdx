@@ -79,8 +79,12 @@ This is why the app lives in `src/server.ts` and `run()` in `src/index.ts`: impo
 | `toNeverHaveCalledTool(name)` | `name` was never attempted |
 | `toHaveFailedToolCall(name)` | a call to `name` was refused or threw |
 | `toHaveSaid(text)` | an assistant turn contains `text` (string or `RegExp`) |
+| `toHaveCalledToolsInOrder(...names)` | the named tools were called in that relative order |
+| `toHaveCalledNoTools()` | no tool was attempted at all |
 
-Every matcher supports `.not`. On failure, the message lists the calls the model actually made, arguments included. `chat.toolCalls` and `chat.assistantTurns` are also available for custom assertions.
+`toHaveCalledToolsInOrder` matches a subsequence, so unrelated calls in between do not break it. Like the other positive matchers it only counts calls that succeeded, so a failed call never satisfies a step.
+
+Every matcher supports `.not` and sees the whole conversation, not just the last `send`. On failure, the message lists the calls the model actually made, arguments included. `chat.toolCalls` and `chat.assistantTurns` are also available for custom assertions.
 
 ## Test Authenticated Tools
 
