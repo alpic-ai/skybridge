@@ -1,27 +1,35 @@
-import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { UserConfig } from "vite";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { skybridge } from "./plugin.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { type SkybridgePluginOptions, skybridge } from "./plugin.js";
 
 type RenderBuiltUrl = NonNullable<
   NonNullable<UserConfig["experimental"]>["renderBuiltUrl"]
 >;
 
-function getRenderBuiltUrl(root: string): RenderBuiltUrl {
-  const plugin = skybridge({ viewsDir: join(root, "views") });
+function getConfig(
+  root: string,
+  options?: SkybridgePluginOptions,
+  warn: (message: string) => void = () => {},
+): UserConfig {
+  const plugin = skybridge({ viewsDir: join(root, "views"), ...options });
   const hook = plugin.config;
   if (!hook) {
     throw new Error("plugin.config is not defined");
   }
   const handler = typeof hook === "function" ? hook : hook.handler;
-  const config = handler.call(
+  return handler.call(
     // biome-ignore lint/suspicious/noExplicitAny: vitest harness for plugin hook
-    {} as any,
+    { warn } as any,
     { root },
     { command: "build", mode: "production" },
   ) as UserConfig;
+}
+
+function getRenderBuiltUrl(root: string): RenderBuiltUrl {
+  const config = getConfig(root);
 
   const renderBuiltUrl = config.experimental?.renderBuiltUrl;
   if (!renderBuiltUrl) {
@@ -30,18 +38,18 @@ function getRenderBuiltUrl(root: string): RenderBuiltUrl {
   return renderBuiltUrl;
 }
 
+let root: string;
+
+beforeEach(() => {
+  root = mkdtempSync(join(tmpdir(), "skybridge-plugin-"));
+  mkdirSync(join(root, "views"), { recursive: true });
+});
+
+afterEach(() => {
+  rmSync(root, { recursive: true, force: true });
+});
+
 describe("skybridge plugin renderBuiltUrl", () => {
-  let root: string;
-
-  beforeEach(() => {
-    root = mkdtempSync(join(tmpdir(), "skybridge-plugin-"));
-    mkdirSync(join(root, "views"), { recursive: true });
-  });
-
-  afterEach(() => {
-    rmSync(root, { recursive: true, force: true });
-  });
-
   // Assets referenced from JS can't use `import.meta.url`: views render in a
   // host sandbox iframe (web-sandbox.oaiusercontent.com), so the module origin
   // doesn't point back at the Skybridge server. They have to be resolved at
@@ -77,5 +85,26 @@ describe("skybridge plugin renderBuiltUrl", () => {
         ssr: false,
       }),
     ).toEqual({ relative: true });
+  });
+});
+
+describe("skybridge plugin eval discovery", () => {
+  it("points at the missing evals option when scenarios exist", () => {
+    mkdirSync(join(root, "evals"), { recursive: true });
+    writeFileSync(join(root, "evals", "start.eval.ts"), "");
+    const warn = vi.fn();
+
+    const config = getConfig(root, undefined, warn);
+
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("evals: {}"));
+    expect(config.test).toBeUndefined();
+  });
+
+  it("stays quiet when the project has no scenarios", () => {
+    const warn = vi.fn();
+
+    getConfig(root, undefined, warn);
+
+    expect(warn).not.toHaveBeenCalled();
   });
 });

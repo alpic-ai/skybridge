@@ -31,14 +31,14 @@
   },
   "peerDependencies": {
     "@skybridge/vite-plugin": "^2.0.0",
-    "ai": "^5.0.0",
+    "ai": "^7.0.0",
     "skybridge": "^2.0.0",
     "vitest": "^4.1.0"
   },
   "devDependencies": {
     "@skybridge/vite-plugin": "workspace:*",
     "@types/node": "^24.13.3",
-    "ai": "^5.0.0",
+    "ai": "^7.0.0",
     "skybridge": "workspace:*",
     "typescript": "^5.9.3",
     "vitest": "^4.1.10",
