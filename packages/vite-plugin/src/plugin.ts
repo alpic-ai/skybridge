@@ -1,3 +1,4 @@
+import { existsSync, readdirSync } from "node:fs";
 import { isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -108,6 +109,16 @@ function here(file: string): string {
   return fileURLToPath(new URL(file, import.meta.url));
 }
 
+function hasEvalScenarios(projectRoot: string): boolean {
+  const dir = resolve(projectRoot, EVALS_DIR);
+  if (!existsSync(dir)) {
+    return false;
+  }
+  return readdirSync(dir, { recursive: true }).some((entry) =>
+    /\.eval\.(c|m)?ts$/.test(entry.toString()),
+  );
+}
+
 function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
   const rawViewsDir = options?.viewsDir ?? "src/views";
   let resolvedViewsDir: string;
@@ -191,6 +202,11 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
       };
 
       if (!options?.evals) {
+        if (hasEvalScenarios(projectRoot)) {
+          this.warn(
+            `Found scenarios in "${EVALS_DIR}/" but the \`evals\` plugin option is not set, so they are not collected. Add \`skybridge({ evals: {} })\` to run them.`,
+          );
+        }
         return base;
       }
 

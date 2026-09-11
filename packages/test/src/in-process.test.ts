@@ -1,10 +1,14 @@
-import { MockLanguageModelV2 } from "ai/test";
+import { MockLanguageModelV3 } from "ai/test";
 import { Skybridge } from "skybridge/server";
 import { expect, it } from "vitest";
 import { z } from "zod";
 import { start } from "./session-registry.js";
 
-const usage = { inputTokens: 1, outputTokens: 1, totalTokens: 2 };
+const usage = {
+  inputTokens: { total: 1, noCache: 1, cacheRead: 0, cacheWrite: 0 },
+  outputTokens: { total: 1, text: 1, reasoning: 0 },
+  totalTokens: 2,
+};
 
 function buildApp(seen: string[]) {
   return new Skybridge({
@@ -64,7 +68,7 @@ function mockModel(call: {
   input: Record<string, unknown>;
   text: string;
 }) {
-  return new MockLanguageModelV2({
+  return new MockLanguageModelV3({
     doGenerate: [
       {
         content: [
@@ -75,13 +79,13 @@ function mockModel(call: {
             input: JSON.stringify(call.input),
           },
         ],
-        finishReason: "tool-calls",
+        finishReason: { unified: "tool-calls" as const, raw: undefined },
         usage,
         warnings: [],
       },
       {
         content: [{ type: "text", text: call.text }],
-        finishReason: "stop",
+        finishReason: { unified: "stop" as const, raw: undefined },
         usage,
         warnings: [],
       },
