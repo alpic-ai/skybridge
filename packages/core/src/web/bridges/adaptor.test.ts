@@ -120,6 +120,25 @@ describe("HostAdaptor", () => {
     );
   });
 
+  it("file methods throw NotSupportedError when window.openai lacks them (MCP Apps compat shim)", async () => {
+    vi.stubGlobal("openai", {});
+    const adaptor = new HostAdaptor();
+
+    const uploadError = await adaptor
+      .uploadFile(new File([], "x"))
+      .catch((e: unknown) => e);
+    expect(uploadError).toBeInstanceOf(NotSupportedError);
+    expect((uploadError as NotSupportedError).method).toBe("uploadFile");
+
+    const downloadError = await adaptor
+      .getFileDownloadUrl({ fileId: "x" })
+      .catch((e: unknown) => e);
+    expect(downloadError).toBeInstanceOf(NotSupportedError);
+    expect((downloadError as NotSupportedError).method).toBe(
+      "getFileDownloadUrl",
+    );
+  });
+
   it("uploadFile delegates to window.openai.uploadFile and tracks fileId in widgetState", async () => {
     const setWidgetState = vi.fn().mockResolvedValue(undefined);
     const uploadFile = vi.fn().mockResolvedValue({
