@@ -52,7 +52,7 @@ On failure the message lists every call the model made, with arguments. Matchers
 
 ## Judgments
 
-`toPassJudgment` is the only async matcher: `await expect.chat(chat).toPassJudgment("stays inside the app's scope and explains the tool result")`. The judge reads every turn and tool call with its result, runs at temperature 0 on the chat's own model, and its reasoning lands in the failure message. `options` takes `model` (another judge) and `scope: "lastTurn"` (only the final assistant message). Provider failures throw `judge unavailable: <error>` instead of reporting a fail. Use it only for criteria no other matcher can express: it is a live model call and not reproducible.
+`toPassJudgment` is the only async matcher: `await expect.chat(chat).toPassJudgment("stays inside the app's scope and explains the tool result")`. The judge reads every turn and tool call with its result, runs at temperature 0 on the chat's own model, and its reasoning lands in the failure message. `options` takes `model` (another judge). Provider failures throw `judge unavailable: <error>` instead of reporting a fail. Use it only for criteria no other matcher can express: it is a live model call and not reproducible.
 
 ## Authenticated apps
 

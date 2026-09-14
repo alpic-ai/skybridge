@@ -112,12 +112,11 @@ judge: FAIL
   The plan totals 640 euros. The assistant quoted hotel prices that do not appear in the search-hotels result.
 ```
 
-The judge runs on the chat's own model. Pass `model` to use another one, and `scope: "lastTurn"` to judge only the final assistant message:
+The judge runs on the chat's own model. Pass `model` to use another one:
 
 ```ts
 await expect.chat(chat).toPassJudgment("answers in one short paragraph", {
   model: anthropic("claude-haiku-4-5"),
-  scope: "lastTurn",
 });
 ```
 
