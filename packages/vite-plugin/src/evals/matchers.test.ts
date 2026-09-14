@@ -1,6 +1,33 @@
+import { MockLanguageModelV2 } from "ai/test";
 import { describe, expect, it } from "vitest";
 import type { ChatLike } from "./types.js";
 import "./matchers.js";
+
+function judgeChat(
+  verdict: { pass: boolean; reasoning: string } | Error,
+): ChatLike<unknown> {
+  return {
+    toolCalls: [],
+    transcript: [
+      { role: "user", text: "Plan a weekend in Lisbon under 500 euros" },
+      { role: "assistant", text: "Here is a 640 euro plan." },
+    ],
+    assistantTurns: ["Here is a 640 euro plan."],
+    model: new MockLanguageModelV2({
+      doGenerate: async () => {
+        if (verdict instanceof Error) {
+          throw verdict;
+        }
+        return {
+          content: [{ type: "text", text: JSON.stringify(verdict) }],
+          finishReason: "stop",
+          usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+          warnings: [],
+        };
+      },
+    }),
+  };
+}
 
 function fakeChat(
   toolCalls: Array<{
@@ -201,5 +228,28 @@ describe("toHaveCalledNoTools", () => {
       /not to call any tool, but it made 1 call\.[\s\S]*clear-cart/,
     );
     expect.chat(chat).not.toHaveCalledNoTools();
+  });
+});
+
+describe("toPassJudgment", () => {
+  it("puts the judge's reasoning in the failure message", async () => {
+    const chat = judgeChat({
+      pass: false,
+      reasoning: "The plan totals 640 euros.",
+    });
+
+    await expect(
+      expect.chat(chat).toPassJudgment("stays under the budget"),
+    ).rejects.toThrow(/judge: FAIL\n {2}The plan totals 640 euros\./);
+
+    await expect.chat(chat).not.toPassJudgment("stays under the budget");
+  });
+
+  it("tells a broken provider apart from a failed verdict", async () => {
+    const chat = judgeChat(new Error("rate limit"));
+
+    await expect(
+      expect.chat(chat).not.toPassJudgment("stays under the budget"),
+    ).rejects.toThrow("judge unavailable: rate limit");
   });
 });
