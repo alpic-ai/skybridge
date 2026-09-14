@@ -81,7 +81,7 @@ This is why the app lives in `src/server.ts` and `run()` in `src/index.ts`: impo
 | `toHaveSaid(text)` | an assistant turn contains `text` (string or `RegExp`) |
 | `toHaveCalledToolsInOrder(...names)` | the named tools were called in that relative order |
 | `toHaveCalledNoTools()` | no tool was attempted at all |
-| `toPassJudgment(criteria)` | a judge model reads the conversation and grades it against `criteria` |
+| `toPassJudgment(criteria)` | a judge model grades the conversation against `criteria` |
 
 `toHaveCalledToolsInOrder` matches a subsequence, so unrelated calls in between do not break it. Like the other positive matchers it only counts calls that succeeded, so a failed call never satisfies a step.
 
@@ -89,7 +89,7 @@ Every matcher supports `.not` and sees the whole conversation, not just the last
 
 ## Judge the Answer
 
-Some of what makes an app good is not a fact you can match on: whether the assistant explained the tool result, stayed inside the app's scope, or asked the right clarifying question. `toPassJudgment` hands the conversation to a second model along with criteria written in plain English:
+Some things are not a fact you can match on. Did the assistant explain the tool result? Did it stay inside the app's scope? `toPassJudgment` sends the conversation to a second model, with criteria written in plain English:
 
 ```ts evals/trip.eval.ts
 it("plans a trip within budget", async () => {
@@ -102,7 +102,7 @@ it("plans a trip within budget", async () => {
 });
 ```
 
-It is `await`ed, unlike the other matchers. The judge reads every user turn, assistant turn and tool call with its arguments and result, runs at temperature 0, and returns a pass or fail plus its reasoning, which lands in the failure message:
+This matcher is the only one you `await`. The judge reads the whole conversation: every turn, and every tool call with its arguments and result. It runs at temperature 0 and answers pass or fail, with its reasoning. The reasoning is the failure message:
 
 ```
 expected the conversation to pass judgment:
@@ -112,7 +112,7 @@ judge: FAIL
   The plan totals 640 euros. The assistant quoted hotel prices that do not appear in the search-hotels result.
 ```
 
-The judge runs on the chat's own model unless you give it another one, and `scope: "lastTurn"` narrows what it reads to the final assistant message when the criteria are about the answer itself:
+The judge runs on the chat's own model. Pass `model` to use another one, and `scope: "lastTurn"` to judge only the final assistant message:
 
 ```ts
 await expect.chat(chat).toPassJudgment("answers in one short paragraph", {
@@ -121,7 +121,9 @@ await expect.chat(chat).toPassJudgment("answers in one short paragraph", {
 });
 ```
 
-A judgment is a live model call, so it costs money and is not reproducible the way a tool-call assertion is. Reach for it when no matcher can express the criteria, and keep the criteria narrow enough that a fail points at one thing. If the provider itself breaks, the assertion throws `judge unavailable: <error>` rather than reporting a fail, so a flaky provider is never read as an app regression.
+A judgment is a live model call: it costs money, and it is not reproducible the way a tool-call assertion is. Use it only when no other matcher fits. Keep the criteria narrow, so a failure points at one thing.
+
+If the provider breaks, the assertion throws `judge unavailable: <error>` instead of failing. A flaky provider never reads as an app regression.
 
 ## Test Authenticated Tools
 
