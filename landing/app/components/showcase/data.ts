@@ -449,6 +449,79 @@ export const SHOWCASE: ShowcaseApp[] = [
   },
 
   {
+    id: "boulanger",
+    slug: "boulanger",
+    name: "Boulanger",
+    tagline: "Electronics and appliance shopping",
+    blurb:
+      "Discover, compare, and shop Boulanger's electronics and home appliances inside the conversation. Products that exist in several variants and offers are grouped into a single result, and the cart carries over to boulanger.com pre-filled.",
+    category: "3rd Party",
+    host: "ChatGPT",
+    accent: "#F56B01",
+    icon: "/assets/showcase/icons/boulanger.webp",
+    img: "/assets/showcase/boulanger.webp",
+    previews: [
+      {
+        mode: "chatgpt-inline",
+        chat: {
+          user: "I need a laptop for everyday work, nothing too expensive.",
+          assistant: "Let me search the Boulanger catalog.",
+        },
+        screenshot: "/assets/showcase/boulanger.webp",
+      },
+    ],
+    chat: {
+      user: "I need a laptop for everyday work, nothing too expensive.",
+      assistant: "Let me search the Boulanger catalog.",
+    },
+    tags: ["Retail", "Electronics"],
+    highlights: [
+      "Refinement happens in language rather than through filters: cheaper, another brand, better rated each trigger a fresh search.",
+      "Variants such as storage and color are grouped into one product with selectable options instead of duplicate results.",
+      "Each product can carry several offers, new and reconditioned, with the most relevant one surfaced by default.",
+      "When nothing matches, the app relaxes one constraint at a time and tells the user what it widened.",
+      "The cart is built in the conversation, then handed to boulanger.com as a pre-filled deeplink.",
+    ],
+    links: {},
+  },
+  {
+    id: "louis-vuitton",
+    slug: "louis-vuitton",
+    name: "Louis Vuitton",
+    tagline: "Personalized luxury recommendations",
+    blurb:
+      "A Louis Vuitton advisor in the conversation. Describe an occasion or a context and get a short curated selection rather than a catalog dump, with size guidance and customization details on each piece.",
+    category: "3rd Party",
+    host: "ChatGPT · Claude",
+    accent: "#D4B98C",
+    icon: "/assets/showcase/icons/louis-vuitton.webp",
+    img: "/assets/showcase/louis-vuitton.webp",
+    previews: [
+      {
+        mode: "chatgpt-inline",
+        chat: {
+          user: "A Christmas gift for my wife, she loves leather goods, around €1500.",
+          assistant: "Let me ask the Louis Vuitton advisor.",
+        },
+        screenshot: "/assets/showcase/louis-vuitton.webp",
+      },
+    ],
+    chat: {
+      user: "A Christmas gift for my wife, she loves leather goods, around €1500.",
+      assistant: "Let me ask the Louis Vuitton advisor.",
+    },
+    tags: ["Luxury", "Recommendation"],
+    highlights: [
+      "Two flows in one app: gift and occasion based, or contextual intent based such as a trip or a daily commute.",
+      "A curation layer re-ranks and filters the catalog against the conversation, so the user sees a handful of relevant pieces.",
+      "Size guidance and customization options such as hot stamping, engraving and Mon Monogram surface on the product detail view.",
+      "A wishlist is compiled from the conversation, with a CTA to create it on louisvuitton.com.",
+      "The advisor persona and vocabulary are calibrated to the brand guidelines.",
+    ],
+    links: {},
+  },
+
+  {
     id: "evaneos",
     slug: "evaneos",
     name: "Evaneos",

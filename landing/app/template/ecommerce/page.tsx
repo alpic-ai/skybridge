@@ -55,7 +55,7 @@ const STORES = [
   { name: "Shopware", src: "/assets/stores/shopware.svg" },
 ];
 
-const EXAMPLE_SLUGS = ["recommerce", "evaneos"];
+const EXAMPLE_SLUGS = ["louis-vuitton", "boulanger", "recommerce"];
 
 export default function EcommerceTemplatePage() {
   const examples = EXAMPLE_SLUGS.map((slug) =>
@@ -233,7 +233,7 @@ export default function EcommerceTemplatePage() {
               Teams already shipping their catalog inside ChatGPT.
             </p>
           </div>
-          <div className="sxA-grid sxA-grid--pair">
+          <div className="sxA-grid">
             {examples.map((app, index) => (
               <ShowcaseCard key={app.id} app={app} index={index}>
                 <div className="sxA-meta">
