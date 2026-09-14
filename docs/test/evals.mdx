@@ -102,7 +102,7 @@ it("plans a trip within budget", async () => {
 });
 ```
 
-It is `await`ed, unlike the other matchers. The judge reads every user turn, assistant turn and tool call with its arguments, runs at temperature 0, and returns a pass or fail plus its reasoning, which lands in the failure message:
+It is `await`ed, unlike the other matchers. The judge reads every user turn, assistant turn and tool call with its arguments and result, runs at temperature 0, and returns a pass or fail plus its reasoning, which lands in the failure message:
 
 ```
 expected the conversation to pass judgment:

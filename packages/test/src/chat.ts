@@ -24,6 +24,22 @@ const DEFAULT_MAX_STEPS = 8;
 
 const IN_PROCESS_URL = "http://in-process.skybridge.test/mcp";
 
+const MAX_RESULT_CHARS = 2000;
+
+function outputOf(
+  results: { toolCallId: string; output?: unknown }[],
+  toolCallId: string,
+): string {
+  const match = results.find((result) => result.toolCallId === toolCallId);
+  if (match === undefined) {
+    return "(no result)";
+  }
+  const rendered = JSON.stringify(match.output ?? null);
+  return rendered.length > MAX_RESULT_CHARS
+    ? `${rendered.slice(0, MAX_RESULT_CHARS)}… (truncated)`
+    : rendered;
+}
+
 /**
  * A `fetch` replacement the transport dials instead of the network. Mirrors the
  * MCP client's own `fetch` option so an in-process app can serve the session.
@@ -121,9 +137,13 @@ export class Chat<App = unknown> {
           arguments: (call.input ?? {}) as Record<string, unknown>,
           ...failure,
         } as ToolCall<App>);
+        const outcome =
+          failure.failed === undefined
+            ? ` -> ${outputOf(step.toolResults, call.toolCallId)}`
+            : ` (failed: ${failure.failed})`;
         this.transcript.push({
           role: "tool",
-          text: `${call.toolName} ${JSON.stringify(call.input ?? {})}${failure.failed === undefined ? "" : ` (failed: ${failure.failed})`}`,
+          text: `${call.toolName} ${JSON.stringify(call.input ?? {})}${outcome}`,
         });
       }
     }
