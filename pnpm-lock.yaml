@@ -2133,8 +2133,8 @@ importers:
         specifier: ^24.13.3
         version: 24.13.3
       ai:
-        specifier: ^5.0.0
-        version: 5.0.244(zod@4.4.3)
+        specifier: ^7.0.0
+        version: 7.0.93(zod@4.4.3)
       skybridge:
         specifier: workspace:*
         version: link:../core

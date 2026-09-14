@@ -1,4 +1,4 @@
-import { MockLanguageModelV2 } from "ai/test";
+import { MockLanguageModelV3 } from "ai/test";
 import { describe, expect, it } from "vitest";
 import type { ChatLike } from "./types.js";
 import "./matchers.js";
@@ -13,15 +13,19 @@ function judgeChat(
       { role: "assistant", text: "Here is a 640 euro plan." },
     ],
     assistantTurns: ["Here is a 640 euro plan."],
-    model: new MockLanguageModelV2({
+    model: new MockLanguageModelV3({
       doGenerate: async () => {
         if (verdict instanceof Error) {
           throw verdict;
         }
         return {
-          content: [{ type: "text", text: JSON.stringify(verdict) }],
-          finishReason: "stop",
-          usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 },
+          content: [{ type: "text" as const, text: JSON.stringify(verdict) }],
+          finishReason: { unified: "stop" as const, raw: undefined },
+          usage: {
+            inputTokens: { total: 1, noCache: 1, cacheRead: 0, cacheWrite: 0 },
+            outputTokens: { total: 1, text: 1, reasoning: 0 },
+            totalTokens: 2,
+          },
           warnings: [],
         };
       },
