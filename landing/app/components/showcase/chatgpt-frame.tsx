@@ -28,7 +28,7 @@ export const ClaudeStarSVG = ({
   </svg>
 );
 
-const OpenAILogo = ({ size = 14 }: { size?: number }): ReactElement => (
+export const OpenAILogo = ({ size = 14 }: { size?: number }): ReactElement => (
   <svg
     viewBox="0 0 24 24"
     width={size}

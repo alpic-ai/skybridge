@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Image from "next-image-export-optimizer";
 import { HostCycler, InstallRow } from "../../components/hero";
 import { Icon } from "../../components/icons";
 import { SHOWCASE, type ShowcaseApp } from "../../components/showcase/data";
 import { ShowcaseCard } from "../../components/showcase/showcase-card";
 import { SiteNav } from "../../components/site-nav";
 import { SiteFooter } from "../../components/trust-final";
+import { EcomDemo } from "./ecom-demo";
 
 const HERO_HOSTS = ["ChatGPT", "Claude"];
 const INSTALL_CMD = "npx skybridge create my-shop --ecom";
@@ -55,7 +55,7 @@ const STORES = [
   { name: "Shopware", src: "/assets/stores/shopware.svg" },
 ];
 
-const EXAMPLE_SLUGS = ["recommerce", "evaneos"];
+const EXAMPLE_SLUGS = ["louis-vuitton", "boulanger", "recommerce"];
 
 export default function EcommerceTemplatePage() {
   const examples = EXAMPLE_SLUGS.map((slug) =>
@@ -158,22 +158,7 @@ export default function EcommerceTemplatePage() {
               want the detail.
             </p>
           </div>
-          <Image
-            src={SCREENSHOT}
-            alt="A shopper asking for ski gear in ChatGPT, with the template's product carousel rendered in the reply"
-            width={2322}
-            height={1486}
-            sizes="(max-width: 900px) 100vw, 1100px"
-            style={{
-              display: "block",
-              width: "100%",
-              height: "auto",
-              maxWidth: 1100,
-              margin: "0 auto",
-              borderRadius: 18,
-              border: "1px solid var(--sb-border)",
-            }}
-          />
+          <EcomDemo />
         </div>
       </section>
 
@@ -233,7 +218,7 @@ export default function EcommerceTemplatePage() {
               Teams already shipping their catalog inside ChatGPT.
             </p>
           </div>
-          <div className="sxA-grid sxA-grid--pair">
+          <div className="sxA-grid">
             {examples.map((app, index) => (
               <ShowcaseCard key={app.id} app={app} index={index}>
                 <div className="sxA-meta">
