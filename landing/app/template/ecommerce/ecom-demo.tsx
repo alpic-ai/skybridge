@@ -14,7 +14,7 @@ import {
   SquarePen,
 } from "lucide-react";
 import Image from "next-image-export-optimizer";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { OpenAILogo } from "../../components/showcase/chatgpt-frame";
 
 const ASSETS = "/assets/template/ecommerce/lv";
@@ -48,14 +48,24 @@ export function EcomDemo() {
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
 
-  const onScroll = () => {
+  const onScroll = useCallback(() => {
     const el = carousel.current;
     if (!el) {
       return;
     }
     setAtStart(el.scrollLeft <= 1);
     setAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 1);
-  };
+  }, []);
+
+  useEffect(() => {
+    const el = carousel.current;
+    if (!el) {
+      return;
+    }
+    const observer = new ResizeObserver(onScroll);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [onScroll]);
 
   const scroll = (direction: 1 | -1) => {
     const el = carousel.current;
@@ -66,7 +76,7 @@ export function EcomDemo() {
     const max = el.scrollWidth - el.clientWidth;
     const target = el.scrollLeft + direction * step;
     const left = target > max - step / 2 ? max : target < step / 2 ? 0 : target;
-    el.scrollTo({ left, behavior: "smooth" });
+    el.scrollTo({ left });
   };
 
   return (
