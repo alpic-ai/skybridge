@@ -390,10 +390,6 @@
   max-width: 1280px;
   margin: 0 auto;
 }
-.sxA-grid--pair {
-  grid-template-columns: repeat(2, 1fr);
-  max-width: 860px;
-}
 .sxA-card {
   position: relative;
   border: 1px solid var(--sb-border);
@@ -1356,8 +1352,7 @@
   }
 }
 @media (max-width: 600px) {
-  .sxA-grid,
-  .sxA-grid--pair {
+  .sxA-grid {
     grid-template-columns: 1fr;
   }
   .sxA-thumb {

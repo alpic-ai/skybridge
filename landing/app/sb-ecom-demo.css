@@ -1,0 +1,212 @@
+.ed-shell {
+  display: flex;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  border: 1px solid var(--sb-border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--sb-surface) 55%, transparent);
+  color: var(--sb-ink);
+  font: 400 15px / 1.5 var(--font-body);
+  overflow: hidden;
+}
+.ed-side {
+  flex: none;
+  width: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+  border-right: 1px solid var(--sb-border);
+  color: var(--sb-ink-mute);
+}
+.ed-side-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--sb-ink-faint);
+  display: grid;
+  place-items: center;
+  color: var(--sb-ink-soft);
+}
+.ed-side-user {
+  margin-top: auto;
+  border-radius: 50%;
+}
+.ed-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ed-top {
+  height: 52px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--sb-border);
+  color: var(--sb-ink-soft);
+  font-weight: 500;
+}
+.ed-top-model {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ed-thread {
+  padding: 32px clamp(20px, 6%, 72px) 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.ed-user {
+  align-self: flex-end;
+  max-width: 70%;
+  padding: 10px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--sb-border);
+  background: color-mix(in srgb, var(--sb-ink) 5%, transparent);
+}
+.ed-asst {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ed-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--sb-ink-mute);
+  font-size: 14px;
+}
+.ed-tool-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--sb-border);
+}
+.ed-tool-app {
+  color: var(--sb-ink-soft);
+  font-weight: 500;
+}
+.ed-asst p {
+  margin: 0;
+  color: var(--sb-ink-soft);
+  max-width: 640px;
+}
+.ed-widget {
+  position: relative;
+  border: 1px solid var(--sb-border);
+  border-radius: 16px;
+  padding: 20px 0;
+  overflow: hidden;
+}
+.ed-carousel {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 20px;
+  padding: 0 20px;
+  scrollbar-width: none;
+}
+.ed-carousel::-webkit-scrollbar {
+  display: none;
+}
+.ed-card {
+  flex: none;
+  width: clamp(200px, 38%, 300px);
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ed-card-img {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: #f4f4f4;
+  overflow: hidden;
+}
+.ed-card-img img {
+  object-fit: contain;
+  padding: 8%;
+}
+.ed-card-img-alt {
+  background: #f4f4f4;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.ed-card:hover .ed-card-img-alt {
+  opacity: 1;
+}
+.ed-card-name {
+  margin-top: 8px;
+  color: var(--sb-ink);
+  font-size: 15px;
+}
+.ed-card-price {
+  color: var(--sb-ink-mute);
+  font-size: 14px;
+}
+.ed-card-label {
+  color: var(--sb-warn);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.ed-widget-nav {
+  position: absolute;
+  top: 38%;
+  padding: 0;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(6px);
+  color: #111;
+  display: grid;
+  place-items: center;
+  transition: background 0.15s;
+}
+.ed-widget-nav:hover {
+  background: rgba(255, 255, 255, 0.95);
+}
+.ed-widget-nav[hidden] {
+  display: none;
+}
+.ed-widget-nav--prev {
+  left: 12px;
+}
+.ed-widget-nav--next {
+  right: 12px;
+}
+.ed-composer {
+  margin: 0 clamp(20px, 6%, 72px) 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--sb-border);
+  border-radius: 999px;
+  color: var(--sb-ink-mute);
+}
+.ed-composer-text {
+  flex: 1;
+}
+@media (max-width: 700px) {
+  .ed-side {
+    display: none;
+  }
+  .ed-user {
+    max-width: 90%;
+  }
+  .ed-card {
+    width: 62%;
+  }
+}
