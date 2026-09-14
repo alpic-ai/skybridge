@@ -89,7 +89,7 @@ Every matcher supports `.not` and sees the whole conversation, not just the last
 
 ## Judge the Answer
 
-Some things are not a fact you can match on. Did the assistant explain the tool result? Did it stay inside the app's scope? `toPassJudgment` sends the conversation to a second model, with criteria written in plain English:
+Sometimes it's not easy to test an agent behavior using on deterministic matchers. For example, did the assistant reply using the right tone? Was it polite? `toPassJudgment` sends the conversation to model, asking it to judge if the conversation meets the criteria:
 
 ```ts evals/trip.eval.ts
 it("plans a trip within budget", async () => {
@@ -102,7 +102,7 @@ it("plans a trip within budget", async () => {
 });
 ```
 
-This matcher is the only one you `await`. The judge reads the whole conversation: every turn, and every tool call with its arguments and result. It runs at temperature 0 and answers pass or fail, with its reasoning. The reasoning is the failure message:
+The reasoning is the failure message:
 
 ```
 expected the conversation to pass judgment:
@@ -112,7 +112,7 @@ judge: FAIL
   The plan totals 640 euros. The assistant quoted hotel prices that do not appear in the search-hotels result.
 ```
 
-The judge runs on the chat's own model. Pass `model` to use another one:
+By default, the judge runs on the chat's own model. Pass `model` to use another one:
 
 ```ts
 await expect.chat(chat).toPassJudgment("answers in one short paragraph", {
