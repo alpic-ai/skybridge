@@ -1,7 +1,7 @@
 {
   "name": "skybridge",
   "version": "1.0.0",
-  "description": "Skybridge is a framework for building ChatGPT and MCP Apps",
+  "description": "Skybridge is a framework for building ChatGPT plugins and MCP Apps",
   "repository": {
     "type": "git",
     "url": "https://github.com/alpic-ai/skybridge.git"
