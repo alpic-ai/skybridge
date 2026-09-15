@@ -1,6 +1,6 @@
 # Evals
 
-Manual evaluations for the creating-chatgpt-app skill.
+Manual evaluations for the chatgpt-plugin-builder skill.
 
 ## Format
 

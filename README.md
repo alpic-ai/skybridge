@@ -62,7 +62,7 @@ They chose to build their MCP apps with Skybridge:
 
 **For agents**
 
-Install our [skill](https://docs.skybridge.tech/guides/migrate) for building MCP apps and ChatGPT apps:
+Install our [skill](https://docs.skybridge.tech/guides/migrate) for building MCP apps and ChatGPT plugins:
 ```bash
 npx skills add alpic-ai/skybridge -s skybridge
 ```
@@ -84,14 +84,14 @@ For full install instructions, read our [**Quickstart guide**](https://docs.skyb
 
 The [Skybridge documentation](https://docs.skybridge.tech) covers the full lifecycle of building MCP Apps:
 
-- [Fundamentals](https://docs.skybridge.tech/get-started/architecture): understand MCP Apps, ChatGPT Apps, and how Skybridge bridges both runtimes.
+- [Fundamentals](https://docs.skybridge.tech/get-started/architecture): understand MCP Apps, ChatGPT plugins, and how Skybridge bridges both runtimes.
 - [Core concepts](https://docs.skybridge.tech/get-started/architecture): learn about server <> model <> UI data flows, LLM context sync, type safety, and instant local iteration with our devtools.
 - [Guides](https://docs.skybridge.tech/build/tools): build real app behavior with tools, views, state, and model communication.
 - [API Reference](https://docs.skybridge.tech/api-reference): browse our MCP server APIs, React hooks, CLI commands, and runtime compatibility.
 
 ## Deploy
 
-Deploy Skybridge apps instantly on [Alpic](https://alpic.ai) for scalable hosting, MCP-specific analytics, permanent tunneling, app store compliance auditing and submission help. You can also self-host on any Node.js-compatible platform.
+Deploy Skybridge apps instantly on [Alpic](https://alpic.ai) for scalable hosting, MCP-specific analytics, permanent tunneling, plugin directory compliance auditing and submission help. You can also self-host on any Node.js-compatible platform.
 
 See our [deployment guide](https://docs.skybridge.tech/ship/deploy) for the full production path.
 

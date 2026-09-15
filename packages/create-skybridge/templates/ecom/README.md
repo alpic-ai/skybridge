@@ -1,6 +1,6 @@
 # Skybridge Boilerplate
 
-A minimal TypeScript boilerplate for building MCP and ChatGPT Apps with the [Skybridge](https://docs.skybridge.tech) framework.
+A minimal TypeScript boilerplate for building MCP apps and ChatGPT plugins with the [Skybridge](https://docs.skybridge.tech) framework.
 
 ## Getting Started
 
@@ -87,7 +87,7 @@ The simplest way to deploy your app is by running the `deploy` command, which wi
 
 ## Resources
 - [Skybridge Documentation](https://docs.skybridge.tech/)
-- [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
+- [ChatGPT Plugins Documentation](https://developers.openai.com/plugins)
 - [MCP Apps Documentation](https://github.com/modelcontextprotocol/ext-apps/tree/main)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)

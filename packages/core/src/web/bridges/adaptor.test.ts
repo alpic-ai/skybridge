@@ -231,7 +231,7 @@ describe("HostAdaptor", () => {
     expect((adaptor as any)._polyfillDisplay).toEqual({ mode: "inline" });
   });
 
-  it("getHostContextStore: display/viewState route to Apps SDK overlay when present, MCP otherwise", () => {
+  it("getHostContextStore: display/viewState route to ChatGPT overlay when present, MCP otherwise", () => {
     vi.stubGlobal("openai", {
       view: { mode: "fullscreen" },
       widgetState: { modelContent: { count: 5 }, privateContent: {} },

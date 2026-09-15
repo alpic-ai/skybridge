@@ -1,1 +1,1 @@
-This is a ChatGPT/MCP app built with Skybridge. ALWAYS use the `chatgpt-app-builder` skill when planning or updating the codebase.
+This is a ChatGPT/MCP app built with Skybridge. ALWAYS use the `chatgpt-plugin-builder` skill when planning or updating the codebase.
