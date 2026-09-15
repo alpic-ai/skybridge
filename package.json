@@ -1,7 +1,7 @@
 {
   "name": "@skybridge/monorepo",
   "version": "0.0.0",
-  "description": "Skybridge is a framework for building ChatGPT and MCP Apps",
+  "description": "Skybridge is a framework for building ChatGPT plugins and MCP Apps",
   "type": "module",
   "scripts": {
     "prepare": "pnpm --filter @skybridge/devtools build:server && pnpm --filter skybridge build && pnpm --filter @skybridge/vite-plugin build && pnpm --filter @skybridge/test build",
