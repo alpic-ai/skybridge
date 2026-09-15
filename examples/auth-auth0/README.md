@@ -146,6 +146,6 @@ SERVER_URL=https://your-mcp-server.com
 
 - [Skybridge Documentation](https://docs.skybridge.tech/)
 - [Auth0 Documentation](https://auth0.com/docs/)
-- [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
+- [ChatGPT Plugins Documentation](https://developers.openai.com/plugins)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)

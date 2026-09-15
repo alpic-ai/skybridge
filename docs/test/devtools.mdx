@@ -153,7 +153,7 @@ DevTools caches the authorization within the browser, so later sessions reconnec
 DevTools emulates, and three gaps separate the emulation from production:
 
 - **No model**: you pick the [tool](/build/tools) and type the arguments yourself. Tool selection, the prompt surface (names, descriptions, schemas), and follow-up messages are never exercised.
-- **Mocked runtimes**: DevTools mocks the [MCP Apps](/resources/apps-sdk-and-mcp-apps#mcp-apps) runtime and also injects a `window.openai` shim for the [Apps SDK](/resources/apps-sdk-and-mcp-apps#apps-sdk), so an Apps SDK call that works here can still be host-specific in production. Host behaviour outside those mocks is not reproduced, and the conversation around a preview is a skeleton, not a working client.
+- **Mocked runtimes**: DevTools mocks the [MCP Apps](/resources/chatgpt-and-mcp-apps#mcp-apps) runtime and also injects a `window.openai` shim for [ChatGPT](/resources/chatgpt-and-mcp-apps), so a `window.openai` call that works here can still be host-specific in production. Host behaviour outside those mocks is not reproduced, and the conversation around a preview is a skeleton, not a working client.
 - **Loose [CSP](/guides/csp)**: external resources blocked by hosts in production may load locally.
 
 <Info>

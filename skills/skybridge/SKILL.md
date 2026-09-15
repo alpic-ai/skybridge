@@ -1,12 +1,12 @@
 ---
 name: skybridge
 description: |
-  Guide developers through creating and updating ChatGPT and MCP apps.
-  Covers the full lifecycle: brainstorming ideas against UX guidelines, bootstrapping projects, implementing tools/views, debugging, running dev servers, deploying and connecting apps to ChatGPT.
-  Use when a user wants to create or update a ChatGPT app, MCP app, MCP server or use the Skybridge framework.
+  Guide developers through creating and updating ChatGPT plugins and MCP apps.
+  Covers the full lifecycle: brainstorming ideas against UX guidelines, bootstrapping projects, implementing tools/views, debugging, running dev servers, deploying and connecting them to ChatGPT.
+  Use when a user wants to create or update a ChatGPT plugin, MCP app, MCP server or use the Skybridge framework.
 ---
 
-# Creating Apps For LLMs
+# Creating Plugins For LLMs
 
 Those are conversational experiences that extend AI assistants through tools and custom UI views. They're built as MCP servers invoked during conversations.
 
