@@ -1,6 +1,6 @@
 # Ecommerce Example
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a winter-sports shop where the model searches a product catalog by keyword and filters, then renders a curated product carousel with a fullscreen product detail.
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): a winter-sports shop where the model searches a product catalog by keyword and filters, then renders a curated product carousel with a fullscreen product detail.
 
 This is the Skybridge **ecommerce template** — scaffold your own copy with:
 

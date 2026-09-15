@@ -12,7 +12,7 @@ const VALUES: ValueItem[] = [
     icon: "globe",
     title: "Write once, run everywhere",
     description:
-      "Skybridge abstracts implementation differences, so your app runs seamlessly in Claude, ChatGPT, VSCode and any client compatible with MCP apps.",
+      "Skybridge abstracts implementation differences, so your app runs seamlessly in Claude, ChatGPT, VSCode and any client compatible with MCP Apps.",
   },
   {
     icon: "terminal",
@@ -24,7 +24,7 @@ const VALUES: ValueItem[] = [
     icon: "wand",
     title: "Agent-ready",
     description:
-      "Powerful Skills, CLI and programmatic devtools APIs: everything your coding agent needs to build MCP apps end-to-end.",
+      "Powerful Skills, CLI and programmatic devtools APIs: everything your coding agent needs to build MCP Apps end-to-end.",
   },
   {
     icon: "type",

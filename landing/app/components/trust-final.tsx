@@ -58,7 +58,7 @@ export function FinalCtaSection() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            MCP app today.
+            MCP App today.
           </span>
         </h2>
         <div className="sb-final-cta">
@@ -204,7 +204,7 @@ export function TrustSection() {
               Built in the <span className="sb-accent">open</span>
             </h2>
             <p className="sb-section-sub" style={{ margin: "16px auto 0" }}>
-              Every line of Skybridge is MIT-licensed and shaped by the MCP app
+              Every line of Skybridge is MIT-licensed and shaped by the MCP App
               developers who use it. Jump in, open a PR, or hang out with the
               community.
             </p>

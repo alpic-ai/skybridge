@@ -540,7 +540,7 @@ export function DevToolsSection() {
           <p className="sb-section-lede">
             Skybridge comes with all batteries included. Dev server with HMR,
             local emulator, public tunnel, automatic app audit… we built great
-            DX tools so you can focus on building a great MCP app.
+            DX tools so you can focus on building a great MCP App.
           </p>
         </div>
         <div className="sb-devtools-grid" data-hover={hover || ""}>

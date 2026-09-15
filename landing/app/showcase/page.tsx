@@ -116,7 +116,7 @@ export default function ShowcaseListPage() {
               <h2 className="sx-submit-title">Submit your app.</h2>
               <p className="sx-submit-lede">
                 We feature community apps every month. Send us a link to your
-                published MCP app and we&apos;ll give it a permanent home here.
+                published MCP App and we&apos;ll give it a permanent home here.
               </p>
               <div className="sx-submit-actions">
                 <a

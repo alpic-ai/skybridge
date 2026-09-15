@@ -1,6 +1,6 @@
 # Auth Example — Clerk
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating full OAuth authentication with [Clerk](https://clerk.com/).
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating full OAuth authentication with [Clerk](https://clerk.com/).
 
 ## What This Example Showcases
 

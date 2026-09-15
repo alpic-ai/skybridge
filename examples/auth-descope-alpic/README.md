@@ -1,6 +1,6 @@
 # Auth Example — Descope on Alpic (DCR Proxy)
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating OAuth authentication with [Descope](https://docs.descope.com/mcp), deployed on [Alpic](https://alpic.ai/) using [Alpic's DCR proxy](https://docs.alpic.ai/secure/auth/oauth-setup#using-an-oauth-2-0-compatible-identity-provider-idp-with-no-dcr).
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating OAuth authentication with [Descope](https://docs.descope.com/mcp), deployed on [Alpic](https://alpic.ai/) using [Alpic's DCR proxy](https://docs.alpic.ai/secure/auth/oauth-setup#using-an-oauth-2-0-compatible-identity-provider-idp-with-no-dcr).
 
 > **Not the same as [`auth-descope`](../auth-descope/)** — that example uses Descope's native Dynamic Client Registration (DCR). This one **disables DCR on Descope** and lets Alpic handle client registration on your behalf.
 

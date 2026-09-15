@@ -15,7 +15,7 @@ const DOCS_URL = "https://docs.skybridge.tech";
 
 const title = "Ecommerce template — your catalog inside ChatGPT | Skybridge";
 const description =
-  "Publish your MCP app to the ChatGPT plugin directory and the Claude connectors directory and let shoppers browse your products in the conversation. Scaffold the ecommerce template in one command, then point it at your own store.";
+  "Publish your MCP App to the ChatGPT plugin directory and the Claude connectors directory and let shoppers browse your products in the conversation. Scaffold the ecommerce template in one command, then point it at your own store.";
 
 const SCREENSHOT = "/assets/template/ecommerce/chatgpt-conversation.webp";
 
@@ -97,7 +97,7 @@ export default function EcommerceTemplatePage() {
             showcase your products
           </div>
           <p className="sb-lede">
-            With your MCP app published to the ChatGPT plugin directory and the
+            With your MCP App published to the ChatGPT plugin directory and the
             Claude connectors directory, shoppers reach your catalog by
             describing what they want, and browse your products without leaving
             the conversation.

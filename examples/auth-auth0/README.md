@@ -1,6 +1,6 @@
 # Auth Example — Auth0
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating full OAuth authentication with [Auth0](https://auth0.com/).
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating full OAuth authentication with [Auth0](https://auth0.com/).
 
 ## What This Example Showcases
 

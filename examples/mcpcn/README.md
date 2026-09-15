@@ -1,6 +1,6 @@
 # mcpcn Starter
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a starter template combining Skybridge with [mcpcn](https://mcpcn.dev) agentic component library for building rich, interactive widgets.
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): a starter template combining Skybridge with [mcpcn](https://mcpcn.dev) agentic component library for building rich, interactive widgets.
 
 ## What This Example Showcases
 

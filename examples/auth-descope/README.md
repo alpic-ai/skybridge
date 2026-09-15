@@ -1,6 +1,6 @@
 # Auth Example — Descope
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating full OAuth authentication with [Descope](https://docs.descope.com/mcp).
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating full OAuth authentication with [Descope](https://docs.descope.com/mcp).
 
 ## What This Example Showcases
 

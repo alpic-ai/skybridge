@@ -1,6 +1,6 @@
 # Productivity Example
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): interactive productivity charts with localization, display mode, follow-up messages, and widget-to-tool communication.
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): interactive productivity charts with localization, display mode, follow-up messages, and widget-to-tool communication.
 
 ## What This Example Showcases
 

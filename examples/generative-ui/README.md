@@ -1,6 +1,6 @@
 # Generative UI Example
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home) and [json-render](https://github.com/vercel-labs/json-render). It displays dynamic, personalized UIs built from a predefined and reliable catalog of components, following prompt from the model.
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home) and [json-render](https://github.com/vercel-labs/json-render). It displays dynamic, personalized UIs built from a predefined and reliable catalog of components, following prompt from the model.
 
 ## What This Example Showcases
 

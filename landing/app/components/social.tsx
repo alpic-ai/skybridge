@@ -92,7 +92,7 @@ export function SocialProofSection() {
               className="sb-big"
               style={{ fontSize: "52px", fontWeight: "400" }}
             >
-              Powering <span className="sb-accent">10%</span> of the MCP apps in
+              Powering <span className="sb-accent">10%</span> of the MCP Apps in
               Claude and ChatGPT.
             </div>
             <p>

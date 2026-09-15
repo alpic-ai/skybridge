@@ -1,6 +1,6 @@
 # Skybridge Boilerplate
 
-A minimal TypeScript boilerplate for building MCP apps and ChatGPT plugins with the [Skybridge](https://docs.skybridge.tech) framework.
+A minimal TypeScript boilerplate for building MCP Apps and ChatGPT plugins with the [Skybridge](https://docs.skybridge.tech) framework.
 
 ## Getting Started
 
