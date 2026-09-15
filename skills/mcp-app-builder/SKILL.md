@@ -1,9 +1,9 @@
 ---
 name: mcp-app-builder
 description: |
-  Guide developers through creating and updating MCP apps.
+  Guide developers through creating and updating MCP Apps.
   Covers the full lifecycle: brainstorming ideas against UX guidelines, bootstrapping projects, implementing tools/views, debugging, running dev servers, deploying and connecting apps to ChatGPT.
-  Use when a user wants to create or update a MCP app, MCP server or use the Skybridge framework.
+  Use when a user wants to create or update a MCP App, MCP server or use the Skybridge framework.
 ---
 
 # Creating MCP Apps

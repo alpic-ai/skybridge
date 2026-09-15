@@ -13,13 +13,13 @@ const OG_IMAGE = {
   url: "/assets/Skybridge-og.jpg",
   width: 1200,
   height: 630,
-  alt: "Skybridge, the full-stack React framework for MCP apps and MCP servers",
+  alt: "Skybridge, the full-stack React framework for MCP Apps and MCP servers",
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://skybridge.tech"),
   title:
-    "Skybridge, the full-stack React framework for MCP apps and MCP servers | Claude & ChatGPT",
+    "Skybridge, the full-stack React framework for MCP Apps and MCP servers | Claude & ChatGPT",
   description:
     "Skybridge is the leading open-source TypeScript framework for building MCP Apps. Write once, run in Claude, ChatGPT, VSCode, and any MCP client. 100K monthly downloads.",
   authors: [{ name: "Alpic" }],
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Skybridge",
     title:
-      "Skybridge, the full-stack React framework for MCP apps and MCP servers | Claude & ChatGPT",
+      "Skybridge, the full-stack React framework for MCP Apps and MCP servers | Claude & ChatGPT",
     description:
       "Skybridge is the leading open-source TypeScript framework for building MCP Apps. Write once, run in Claude, ChatGPT, VSCode, and any MCP client. 100K monthly downloads.",
     url: "/",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@alpic_ai",
     title:
-      "Skybridge, the full-stack React framework for MCP apps and MCP servers | Claude & ChatGPT",
+      "Skybridge, the full-stack React framework for MCP Apps and MCP servers | Claude & ChatGPT",
     description:
       "Skybridge is the leading open-source TypeScript framework for building MCP Apps. Write once, run in Claude, ChatGPT, VSCode, and any MCP client. 100K monthly downloads.",
     images: [OG_IMAGE],

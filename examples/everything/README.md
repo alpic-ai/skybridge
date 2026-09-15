@@ -1,6 +1,6 @@
 # Everything Example
 
-A playground MCP app built with [Skybridge](https://docs.skybridge.tech/home) that showcases all Skybridge hooks and features for building ChatGPT and MCP Apps in one place.
+A playground MCP App built with [Skybridge](https://docs.skybridge.tech/home) that showcases all Skybridge hooks and features for building ChatGPT and MCP Apps in one place.
 
 ## What This Example Showcases
 

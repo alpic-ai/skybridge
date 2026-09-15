@@ -1,6 +1,6 @@
 # Capitals Explorer Example
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): an interactive map of world capitals with display mode, tool calling, dynamic LLM context, and external APIs.
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): an interactive map of world capitals with display mode, tool calling, dynamic LLM context, and external APIs.
 
 ## What This Example Showcases
 

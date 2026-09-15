@@ -1,6 +1,6 @@
 # Time's Up Example
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a word-guessing party game where the user sees a secret word and gives hints to the AI, which tries to guess it.
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): a word-guessing party game where the user sees a secret word and gives hints to the AI, which tries to guess it.
 
 ## What This Example Showcases
 

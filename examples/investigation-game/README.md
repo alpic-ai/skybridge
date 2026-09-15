@@ -1,6 +1,6 @@
 # Investigation Game
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): an interactive murder mystery game where players interrogate suspects to solve a crime.
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): an interactive murder mystery game where players interrogate suspects to solve a crime.
 
 ## What This Example Showcases
 

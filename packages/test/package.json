@@ -1,7 +1,7 @@
 {
   "name": "@skybridge/test",
   "version": "0.0.0",
-  "description": "Eval runner for Skybridge MCP apps: does a prompt reach the right tool with the right arguments",
+  "description": "Eval runner for Skybridge MCP Apps: does a prompt reach the right tool with the right arguments",
   "license": "ISC",
   "type": "module",
   "repository": {

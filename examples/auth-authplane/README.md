@@ -1,6 +1,6 @@
 # Auth Example — Authplane
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating full OAuth authentication with [Authplane](https://authplane.ai).
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating full OAuth authentication with [Authplane](https://authplane.ai).
 
 ## What This Example Showcases
 

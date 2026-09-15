@@ -111,7 +111,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     name: "Kiwi.com",
     tagline: "Flight search, agent-native",
     blurb:
-      "The official Kiwi.com MCP app. Search across global flight inventory in natural language and get a direct booking link back.",
+      "The official Kiwi.com MCP App. Search across global flight inventory in natural language and get a direct booking link back.",
     category: "3rd Party",
     host: "Claude",
     accent: "#008C79",

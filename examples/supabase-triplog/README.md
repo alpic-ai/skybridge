@@ -1,6 +1,6 @@
 # Supabase Triplog Example
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): an interactive trip log widget backed by a Supabase table (`triplog`), with full CRUD operations, filtering, and a cover image carousel.
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): an interactive trip log widget backed by a Supabase table (`triplog`), with full CRUD operations, filtering, and a cover image carousel.
 
 ## What This Example Showcases
 
