@@ -1,3 +1,4 @@
+import type { LanguageModel } from "ai";
 import type { ToolInput, ToolNames } from "skybridge/server";
 import type { EvalsOptions } from "../plugin.js";
 
@@ -14,12 +15,23 @@ export type ToolCall<App> = {
   };
 }[ToolNames<App>];
 
+/**
+ * One line of the conversation, in the order it happened. `tool` entries carry
+ * the call's arguments and, when it did not go through, the server's reason.
+ */
+export interface TranscriptEntry {
+  role: "user" | "assistant" | "tool";
+  text: string;
+}
+
 /** The part of a conversation the matchers assert on. */
 export interface ChatLike<App> {
   /** Type-only anchor so `expect.chat` infers `App` from the conversation. */
   readonly $app?: App;
   readonly toolCalls: ToolCall<App>[];
   readonly assistantTurns: string[];
+  readonly transcript: TranscriptEntry[];
+  readonly model: LanguageModel;
 }
 
 declare module "vitest" {

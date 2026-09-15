@@ -3,7 +3,7 @@ import {
   StreamableHTTPClientTransport,
   type Tool,
 } from "@modelcontextprotocol/client";
-import type { ToolCall } from "@skybridge/vite-plugin/evals";
+import type { ToolCall, TranscriptEntry } from "@skybridge/vite-plugin/evals";
 import {
   dynamicTool,
   generateText,
@@ -23,6 +23,22 @@ interface HostConfig {
 const DEFAULT_MAX_STEPS = 8;
 
 const IN_PROCESS_URL = "http://in-process.skybridge.test/mcp";
+
+const MAX_RESULT_CHARS = 2000;
+
+function outputOf(
+  results: { toolCallId: string; output?: unknown }[],
+  toolCallId: string,
+): string {
+  const match = results.find((result) => result.toolCallId === toolCallId);
+  if (match === undefined) {
+    return "(no result)";
+  }
+  const rendered = JSON.stringify(match.output ?? null);
+  return rendered.length > MAX_RESULT_CHARS
+    ? `${rendered.slice(0, MAX_RESULT_CHARS)}… (truncated)`
+    : rendered;
+}
 
 /**
  * A `fetch` replacement the transport dials instead of the network. Mirrors the
@@ -47,12 +63,20 @@ export class Chat<App = unknown> {
   /** What the assistant said, one entry per turn, intermediate ones included. */
   readonly assistantTurns: string[] = [];
 
+  /** Every turn and tool call in the order they happened, for the judge. */
+  readonly transcript: TranscriptEntry[] = [];
+
   private readonly messages: ModelMessage[] = [];
   private readonly failures = new Map<string, string>();
   private readonly client: Client;
   private readonly transport: StreamableHTTPClientTransport;
   private readonly host: HostConfig;
   private tools: Tool[] = [];
+
+  /** The model the conversation runs on, and the judge's default. */
+  get model(): LanguageModel {
+    return this.host.model;
+  }
 
   private constructor(
     client: Client,
@@ -88,6 +112,7 @@ export class Chat<App = unknown> {
   /** Takes a turn. Assert on the result with `expect.chat`. */
   async send(prompt: string): Promise<void> {
     this.messages.push({ role: "user", content: prompt });
+    this.transcript.push({ role: "user", text: prompt });
 
     const result = await generateText({
       model: this.host.model,
@@ -101,18 +126,25 @@ export class Chat<App = unknown> {
     });
 
     for (const step of result.steps) {
+      if (step.text !== "") {
+        this.assistantTurns.push(step.text);
+        this.transcript.push({ role: "assistant", text: step.text });
+      }
       for (const call of step.toolCalls) {
+        const failure = this.failureFor(call);
         this.toolCalls.push({
           name: call.toolName,
           arguments: (call.input ?? {}) as Record<string, unknown>,
-          ...this.failureFor(call),
+          ...failure,
         } as ToolCall<App>);
-      }
-    }
-
-    for (const step of result.steps) {
-      if (step.text !== "") {
-        this.assistantTurns.push(step.text);
+        const outcome =
+          failure.failed === undefined
+            ? ` -> ${outputOf(step.toolResults, call.toolCallId)}`
+            : ` (failed: ${failure.failed})`;
+        this.transcript.push({
+          role: "tool",
+          text: `${call.toolName} ${JSON.stringify(call.input ?? {})}${outcome}`,
+        });
       }
     }
 
