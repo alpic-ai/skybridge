@@ -420,7 +420,7 @@ export function CodeDemoSection() {
         <div className="sb-section-header">
           <div className="sb-section-eyebrow">Get started fast</div>
           <h2 className="sb-section-title">
-            Create your <span className="sb-accent">MCP app</span>
+            Create your <span className="sb-accent">MCP App</span>
             <br />
             in seconds
           </h2>

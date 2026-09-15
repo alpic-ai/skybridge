@@ -1,6 +1,6 @@
 # @skybridge/test
 
-Evals for [Skybridge](https://skybridge.tech) MCP apps: they answer whether a
+Evals for [Skybridge](https://skybridge.tech) MCP Apps: they answer whether a
 prompt reaches the right tool with the right arguments, which no unit test can
 check.
 

@@ -1,6 +1,6 @@
 # Auth Example — Auth0
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating full OAuth authentication with [Auth0](https://auth0.com/).
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating full OAuth authentication with [Auth0](https://auth0.com/).
 
 ## What This Example Showcases
 
@@ -146,6 +146,6 @@ SERVER_URL=https://your-mcp-server.com
 
 - [Skybridge Documentation](https://docs.skybridge.tech/)
 - [Auth0 Documentation](https://auth0.com/docs/)
-- [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
+- [ChatGPT Plugins Documentation](https://developers.openai.com/plugins)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)

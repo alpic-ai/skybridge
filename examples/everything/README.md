@@ -1,6 +1,6 @@
 # Everything Example
 
-A playground MCP app built with [Skybridge](https://docs.skybridge.tech/home) that showcases all Skybridge hooks and features for building ChatGPT and MCP Apps in one place.
+A playground MCP App built with [Skybridge](https://docs.skybridge.tech/home) that showcases all Skybridge hooks and features for building ChatGPT and MCP Apps in one place.
 
 ## What This Example Showcases
 
@@ -120,6 +120,6 @@ The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 ## Resources
 
 - [Skybridge Documentation](https://docs.skybridge.tech/)
-- [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
+- [ChatGPT Plugins Documentation](https://developers.openai.com/plugins)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)

@@ -1,6 +1,6 @@
 # Investigation Game
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): an interactive murder mystery game where players interrogate suspects to solve a crime.
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): an interactive murder mystery game where players interrogate suspects to solve a crime.
 
 ## What This Example Showcases
 
@@ -105,6 +105,6 @@ The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 ## Resources
 
 - [Skybridge Documentation](https://docs.skybridge.tech/)
-- [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
+- [ChatGPT Plugins Documentation](https://developers.openai.com/plugins)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)

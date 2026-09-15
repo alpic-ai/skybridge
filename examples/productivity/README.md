@@ -1,6 +1,6 @@
 # Productivity Example
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): interactive productivity charts with localization, display mode, follow-up messages, and widget-to-tool communication.
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): interactive productivity charts with localization, display mode, follow-up messages, and widget-to-tool communication.
 
 ## What This Example Showcases
 
@@ -119,7 +119,7 @@ The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 ## Resources
 
 - [Skybridge Documentation](https://docs.skybridge.tech/)
-- [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
+- [ChatGPT Plugins Documentation](https://developers.openai.com/plugins)
 - [MCP Apps Documentation](https://github.com/modelcontextprotocol/ext-apps/tree/main)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)

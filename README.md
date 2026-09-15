@@ -4,7 +4,7 @@
   <a href="https://docs.skybridge.tech">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/skybridge-readme-banner-dark.png" />
-      <img alt="Skybridge, the full-stack React framework for MCP apps and MCP servers" src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/skybridge-readme-banner-light.png" width="100%" />
+      <img alt="Skybridge, the full-stack React framework for MCP Apps and MCP servers" src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/skybridge-readme-banner-light.png" width="100%" />
     </picture>
   </a>
 </p>
@@ -28,9 +28,9 @@
 
 ## About Skybridge
 
-Skybridge helps developers build type-safe MCP apps for Claude, ChatGPT and other UI-enabled MCP clients, with a complete set of tooling designed for both humans and agents.
+Skybridge helps developers build type-safe MCP Apps for Claude, ChatGPT and other UI-enabled MCP clients, with a complete set of tooling designed for both humans and agents.
 
-Why? MCP apps extend the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) with **rich, interactive UI views** rendered from MCP servers. Conversational apps need seamless interaction between the user, the UI, and the model. This means new UX patterns, developer tooling, and abstractions. 
+Why? MCP Apps extend the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro) with **rich, interactive UI views** rendered from MCP servers. Conversational apps need seamless interaction between the user, the UI, and the model. This means new UX patterns, developer tooling, and abstractions. 
 Plus, the raw SDKs are low-level: no hooks, type safety, HMR, etc.
 
 That's why we built *Skybridge*.
@@ -38,13 +38,13 @@ That's why we built *Skybridge*.
 Features include:
 
 - **Delightful dev environment**: Skybridge provides a dev server with a local emulator, hot module reload, and a permanent tunnel to connect your local app to Claude and ChatGPT.
-- **Write once, run everywhere**: the framework abstracts implementation differences between MCP clients, so your app runs seamlessly in Claude, ChatGPT, VSCode, and any other MCP apps compatible client.
-- **Agent-ready**: powerful skills, CLI, and programmatic dev tool APIs, everything your coding agent needs to build MCP apps end-to-end.
+- **Write once, run everywhere**: the framework abstracts implementation differences between MCP clients, so your app runs seamlessly in Claude, ChatGPT, VSCode, and any other MCP Apps compatible client.
+- **Agent-ready**: powerful skills, CLI, and programmatic dev tool APIs, everything your coding agent needs to build MCP Apps end-to-end.
 - **Type-safe end-to-end**: tRPC-style inference from MCP server tool definition to React view for type safety from server to frontend.
 - **React-first**: Intuitive React Query-style hooks, with advanced state management. 
 - **Example library**: get started quickly with ChatGPT- and Claude-ready app examples for ecommerce, travel, SaaS, and more.
 
-They chose to build their MCP apps with Skybridge: 
+They chose to build their MCP Apps with Skybridge: 
 
 <p align="center">
   <a href="https://www.datadoghq.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/datadog-dark.svg"><img src="https://raw.githubusercontent.com/alpic-ai/skybridge/main/docs/images/user-logos/datadog-light.svg" alt="Datadog" height="24"></picture></a>
@@ -62,7 +62,7 @@ They chose to build their MCP apps with Skybridge:
 
 **For agents**
 
-Install our [skill](https://docs.skybridge.tech/guides/migrate) for building MCP apps and ChatGPT apps:
+Install our [skill](https://docs.skybridge.tech/guides/migrate) for building MCP Apps and ChatGPT plugins:
 ```bash
 npx skills add alpic-ai/skybridge -s skybridge
 ```
@@ -84,14 +84,14 @@ For full install instructions, read our [**Quickstart guide**](https://docs.skyb
 
 The [Skybridge documentation](https://docs.skybridge.tech) covers the full lifecycle of building MCP Apps:
 
-- [Fundamentals](https://docs.skybridge.tech/get-started/architecture): understand MCP Apps, ChatGPT Apps, and how Skybridge bridges both runtimes.
+- [Fundamentals](https://docs.skybridge.tech/get-started/architecture): understand MCP Apps, ChatGPT plugins, and how Skybridge bridges both runtimes.
 - [Core concepts](https://docs.skybridge.tech/get-started/architecture): learn about server <> model <> UI data flows, LLM context sync, type safety, and instant local iteration with our devtools.
 - [Guides](https://docs.skybridge.tech/build/tools): build real app behavior with tools, views, state, and model communication.
 - [API Reference](https://docs.skybridge.tech/api-reference): browse our MCP server APIs, React hooks, CLI commands, and runtime compatibility.
 
 ## Deploy
 
-Deploy Skybridge apps instantly on [Alpic](https://alpic.ai) for scalable hosting, MCP-specific analytics, permanent tunneling, app store compliance auditing and submission help. You can also self-host on any Node.js-compatible platform.
+Deploy Skybridge apps instantly on [Alpic](https://alpic.ai) for scalable hosting, MCP-specific analytics, permanent tunneling, plugin directory compliance auditing and submission help. You can also self-host on any Node.js-compatible platform.
 
 See our [deployment guide](https://docs.skybridge.tech/ship/deploy) for the full production path.
 

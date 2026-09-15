@@ -1,6 +1,6 @@
 [
   {
-    "query": "I want to build a ChatGPT app for my toy store",
+    "query": "I want to build a ChatGPT plugin for my toy store",
     "expected_behavior": "Must start with discovery workflow. Should ask Phase 1 questions (problem, user, pain, core actions). Must NOT jump to implementation, copy template, or write code."
   },
   {

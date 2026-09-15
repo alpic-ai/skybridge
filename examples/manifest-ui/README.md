@@ -1,6 +1,6 @@
 # Manifest UI Starter
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a starter template combining Skybridge with [Manifest UI](https://ui.manifest.build) agentic component library for building rich, interactive widgets.
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): a starter template combining Skybridge with [Manifest UI](https://ui.manifest.build) agentic component library for building rich, interactive widgets.
 
 ## What This Example Showcases
 
@@ -145,6 +145,6 @@ The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 
 - [Skybridge Documentation](https://docs.skybridge.tech/)
 - [Manifest UI](https://ui.manifest.build)
-- [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
+- [ChatGPT Plugins Documentation](https://developers.openai.com/plugins)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)

@@ -1,6 +1,6 @@
 # Auth Example — Stytch
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating full OAuth authentication with [Stytch](https://stytch.com/).
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): a personalized coffee shop finder demonstrating full OAuth authentication with [Stytch](https://stytch.com/).
 
 ## What This Example Showcases
 

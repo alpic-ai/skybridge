@@ -51,7 +51,7 @@ export function UseDownloadTab() {
     <TabBody>
       <Description>
         Ask the host to save a file to the user's filesystem. MCP Apps only — on
-        Apps SDK this will fail with <Code>{`{ isError: true }`}</Code>.
+        ChatGPT this will fail with <Code>{`{ isError: true }`}</Code>.
       </Description>
 
       <div className="flex flex-wrap gap-2">

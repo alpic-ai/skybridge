@@ -59,7 +59,7 @@ mode that follows the host theme with a manual toggle in the header.
 
 ## Runtime support
 
-> View-provided tools are an **MCP Apps** feature. In the ChatGPT Apps SDK
+> View-provided tools are an **MCP Apps** feature. In ChatGPT's `window.openai` runtime
 > runtime (`window.openai`) there is no equivalent, so `useRegisterViewTool` is
 > a no-op there — the human can still drag pieces, but the assistant cannot
 > call the view tools. Run this in an MCP Apps host (e.g. Claude) to see the

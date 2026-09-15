@@ -111,7 +111,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     name: "Kiwi.com",
     tagline: "Flight search, agent-native",
     blurb:
-      "The official Kiwi.com MCP app. Search across global flight inventory in natural language and get a direct booking link back.",
+      "The official Kiwi.com MCP App. Search across global flight inventory in natural language and get a direct booking link back.",
     category: "3rd Party",
     host: "Claude",
     accent: "#008C79",
@@ -212,7 +212,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     links: {
       demo: "https://mcp.cottages.com/try",
       chatgpt:
-        "https://chatgpt.com/apps/cottages/asdk_app_6945254ad31c81919d07ba1c357a1a57",
+        "https://chatgpt.com/plugins/cottages/asdk_app_6945254ad31c81919d07ba1c357a1a57",
     },
   },
   {
@@ -254,7 +254,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     links: {
       demo: "https://mcp.recommerce.com/try",
       chatgpt:
-        "https://chatgpt.com/apps/recommerce/asdk_app_6943b26226c4819189e6b19249055265",
+        "https://chatgpt.com/plugins/recommerce/asdk_app_6943b26226c4819189e6b19249055265",
     },
   },
   {
@@ -302,7 +302,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     links: {
       demo: "https://mcp.alpic.ai/try",
       chatgpt:
-        "https://chatgpt.com/apps/alpic/asdk_app_6996e5762c508191846b87c57edbbebe",
+        "https://chatgpt.com/plugins/alpic/asdk_app_6996e5762c508191846b87c57edbbebe",
     },
   },
   {
@@ -356,7 +356,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     links: {
       demo: "https://mcp.tradin.recommerce.com/try",
       chatgpt:
-        "https://chatgpt.com/apps/recommerce-trade-in/asdk_app_69c5423d7e408191bec964b57cce719e",
+        "https://chatgpt.com/plugins/recommerce-trade-in/asdk_app_69c5423d7e408191bec964b57cce719e",
     },
   },
   {
@@ -398,7 +398,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     links: {
       demo: "https://mcp.voyage-prive.com/try",
       chatgpt:
-        "https://chatgpt.com/apps/voyage-priv/asdk_app_6943c73f6c8481919dc2b9ac42af0064",
+        "https://chatgpt.com/plugins/voyage-priv/asdk_app_6943c73f6c8481919dc2b9ac42af0064",
     },
   },
   {
@@ -444,7 +444,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     ],
     links: {
       chatgpt:
-        "https://chatgpt.com/apps/facile-it-energia/asdk_app_69fcc1c31b2081919069e1f5f6f7166d",
+        "https://chatgpt.com/plugins/facile-it-energia/asdk_app_69fcc1c31b2081919069e1f5f6f7166d",
     },
   },
 
@@ -486,7 +486,7 @@ export const SHOWCASE: ShowcaseApp[] = [
     ],
     links: {
       chatgpt:
-        "https://chatgpt.com/apps/evaneos/asdk_app_69612510d5288191b6a4174252337e93",
+        "https://chatgpt.com/plugins/evaneos/asdk_app_69612510d5288191b6a4174252337e93",
     },
   },
   {
