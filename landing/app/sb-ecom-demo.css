@@ -86,7 +86,10 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 1px solid var(--sb-border);
+  background: #c9a961;
+  color: #1f4d3a;
+  font: 700 11px / 20px var(--font-body);
+  text-align: center;
 }
 .ed-tool-app {
   color: var(--sb-ink-soft);
@@ -133,8 +136,7 @@
   overflow: hidden;
 }
 .ed-card-img img {
-  object-fit: contain;
-  padding: 8%;
+  object-fit: cover;
 }
 .ed-card-img-alt {
   background: #f4f4f4;

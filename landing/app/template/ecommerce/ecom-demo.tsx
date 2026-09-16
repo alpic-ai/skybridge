@@ -17,30 +17,24 @@ import Image from "next-image-export-optimizer";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { OpenAILogo } from "../../components/showcase/chatgpt-frame";
 
-const ASSETS = "/assets/template/ecommerce/lv";
+const ASSETS = "/assets/template/ecommerce/aura";
 const SIZES = "(max-width: 700px) 62vw, 300px";
 
 const PRODUCTS = [
   {
-    id: "neverfull-mm",
-    name: "Sac Neverfull MM",
-    price: "1 550,00€",
+    id: "radiance-face-cream",
+    name: "Radiance Face Cream",
+    price: "54,00€",
     alt: true,
+    label: "Bestseller",
   },
   {
-    id: "express-pm",
-    name: "Sac Express PM",
-    price: "3 500,00€",
-    alt: true,
-    label: "Défilé",
-  },
-  {
-    id: "etui-3-montres",
-    name: "Étui 3 montres",
-    price: "1 200,00€",
+    id: "matte-lipstick",
+    name: "Matte Lipstick Velvet Red",
+    price: "28,00€",
     alt: true,
   },
-  { id: "croisette", name: "Soulier bateau LV Croisette", price: "960,00€" },
+  { id: "eclat-floral", name: "Éclat Floral Eau de Parfum", price: "89,00€" },
 ];
 
 export function EcomDemo() {
@@ -106,24 +100,18 @@ export function EcomDemo() {
         </div>
         <div className="ed-thread">
           <div className="ed-user">
-            A Christmas gift for my wife, she loves leather goods, around €1500.
+            A natural skincare gift for my sister, vegan if possible, under €60.
           </div>
           <div className="ed-asst">
             <div className="ed-tool">
-              <Image
-                src="/assets/showcase/icons/louis-vuitton.webp"
-                alt=""
-                width={20}
-                height={20}
-                className="ed-tool-icon"
-              />
-              <span className="ed-tool-app">Louis Vuitton</span>
+              <span className="ed-tool-icon">A</span>
+              <span className="ed-tool-app">Aura Botanicals</span>
               <span>Searched the catalog</span>
             </div>
             <p>
-              Here is a short selection from the Maison's leather goods within
-              your budget, with one runway piece in case you would like to go
-              further.
+              Here are three vegan, cruelty-free picks from Aura Botanicals. The
+              face cream and the lipstick fit your budget, and the fragrance is
+              there in case you would like to go a little further.
             </p>
             <div className="ed-widget">
               <div
@@ -179,8 +167,8 @@ export function EcomDemo() {
               </button>
             </div>
             <p>
-              Would you prefer something more classic, or shall I look at
-              jewelry instead?
+              Shall I add one to your cart, or would you rather see the gift
+              sets?
             </p>
           </div>
         </div>
