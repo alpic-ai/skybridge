@@ -71,7 +71,8 @@ export function EcomDemo() {
     const max = el.scrollWidth - el.clientWidth;
     const target = el.scrollLeft + direction * step;
     const left = target > max - step / 2 ? max : target < step / 2 ? 0 : target;
-    el.scrollTo({ left });
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollTo({ left, behavior: reduced ? "auto" : "smooth" });
   };
 
   return (
@@ -110,9 +111,9 @@ export function EcomDemo() {
               <span>Searched the catalog</span>
             </div>
             <p>
-              Here are four vegan, cruelty-free picks from Aura Botanicals. The
-              first three fit your budget, and the fragrance is there in case
-              you would like to go a little further.
+              Here are four vegan picks from Aura Botanicals. The first three
+              fit your budget, and the fragrance is there in case you would like
+              to go a little further.
             </p>
             <div className="ed-widget">
               <div

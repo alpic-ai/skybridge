@@ -111,8 +111,7 @@
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
   scroll-padding-left: 20px;
   padding: 0 20px;
   scrollbar-width: none;
@@ -214,9 +213,6 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ed-carousel {
-    scroll-behavior: auto;
-  }
   .ed-card-img-alt,
   .ed-widget-nav {
     transition: none;
