@@ -34,6 +34,7 @@ const PRODUCTS = [
     price: "28,00€",
     alt: true,
   },
+  { id: "radiance-serum", name: "Radiance Serum", price: "46,00€", alt: true },
   { id: "eclat-floral", name: "Éclat Floral Eau de Parfum", price: "89,00€" },
 ];
 
@@ -109,9 +110,9 @@ export function EcomDemo() {
               <span>Searched the catalog</span>
             </div>
             <p>
-              Here are three vegan, cruelty-free picks from Aura Botanicals. The
-              face cream and the lipstick fit your budget, and the fragrance is
-              there in case you would like to go a little further.
+              Here are four vegan, cruelty-free picks from Aura Botanicals. The
+              first three fit your budget, and the fragrance is there in case
+              you would like to go a little further.
             </p>
             <div className="ed-widget">
               <div
