@@ -1,19 +1,17 @@
 import { MockLanguageModelV3 } from "ai/test";
 import { describe, expect, it } from "vitest";
-import type { ChatLike, TranscriptEntry } from "./types.js";
+import type { ChatLike, ToolCall, Turn } from "./types.js";
 import "./matchers.js";
 
 function judgeChat(
   verdict: { pass: boolean; reasoning: string } | Error,
-  transcript: TranscriptEntry[] = [
+  turns: Turn<unknown>[] = [
     { role: "user", text: "Plan a weekend in Lisbon under 500 euros" },
     { role: "assistant", text: "Here is a 640 euro plan." },
   ],
 ): ChatLike<unknown> {
   return {
-    toolCalls: [],
-    transcript,
-    assistantTurns: ["Here is a 640 euro plan."],
+    turns,
     model: new MockLanguageModelV3({
       doGenerate: async () => {
         if (verdict instanceof Error) {
@@ -42,7 +40,10 @@ function fakeChat(
   }>,
 ): ChatLike<unknown> {
   return {
-    toolCalls,
+    turns: toolCalls.map((call) => ({
+      role: "tool" as const,
+      call: call as ToolCall<unknown>,
+    })),
   } as unknown as ChatLike<unknown>;
 }
 
@@ -138,10 +139,9 @@ describe("toHaveFailedToolCall", () => {
 
 describe("toHaveSaid", () => {
   const chat = {
-    toolCalls: [],
-    assistantTurns: [
-      "I found 3 pairs of\nski goggles",
-      "They're all in stock.",
+    turns: [
+      { role: "assistant", text: "I found 3 pairs of\nski goggles" },
+      { role: "assistant", text: "They're all in stock." },
     ],
   } as unknown as ChatLike<unknown>;
 
@@ -265,6 +265,29 @@ describe("toPassJudgment", () => {
     );
     expect(prompt).toContain("&lt;/conversation>");
     expect(prompt.split("</conversation>")).toHaveLength(2);
+  });
+
+  it("shows the judge what each tool call returned", async () => {
+    const chat = judgeChat({ pass: true, reasoning: "fine" }, [
+      {
+        role: "tool",
+        call: {
+          name: "search-hotels",
+          arguments: { city: "Lisbon" },
+        } as ToolCall<unknown>,
+        result: { cheapest: 120 },
+      },
+    ]);
+
+    await expect.chat(chat).toPassJudgment("relies on the tool result");
+
+    expect(
+      JSON.stringify(
+        (chat.model as MockLanguageModelV3).doGenerateCalls[0]?.prompt,
+      ),
+    ).toContain(
+      'search-hotels {\\"city\\":\\"Lisbon\\"} -> {\\"cheapest\\":120}',
+    );
   });
 
   it("tells a broken provider apart from a failed verdict", async () => {

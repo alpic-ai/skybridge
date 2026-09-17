@@ -16,21 +16,20 @@ export type ToolCall<App> = {
 }[ToolNames<App>];
 
 /**
- * One line of the conversation, in the order it happened. `tool` entries carry
- * the call's arguments and, when it did not go through, the server's reason.
+ * One thing that happened in the conversation. A `tool` turn carries the call
+ * itself, so its failure reason lives on the call and `result` holds whatever
+ * the server sent back when it went through.
  */
-export interface TranscriptEntry {
-  role: "user" | "assistant" | "tool";
-  text: string;
-}
+export type Turn<App> =
+  | { role: "user"; text: string }
+  | { role: "assistant"; text: string }
+  | { role: "tool"; call: ToolCall<App>; result?: unknown };
 
 /** The part of a conversation the matchers assert on. */
 export interface ChatLike<App> {
   /** Type-only anchor so `expect.chat` infers `App` from the conversation. */
   readonly $app?: App;
-  readonly toolCalls: ToolCall<App>[];
-  readonly assistantTurns: string[];
-  readonly transcript: TranscriptEntry[];
+  readonly turns: Turn<App>[];
   readonly model: LanguageModel;
 }
 

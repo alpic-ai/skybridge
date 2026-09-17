@@ -11,7 +11,7 @@ import {
   type ModelMessage,
   stepCountIs,
 } from "ai";
-import type { ToolCall, TranscriptEntry } from "./matchers/types.js";
+import type { ToolCall, Turn } from "./matchers/types.js";
 
 interface HostConfig {
   model: LanguageModel;
@@ -24,20 +24,11 @@ const DEFAULT_MAX_STEPS = 8;
 
 const IN_PROCESS_URL = "http://in-process.skybridge.test/mcp";
 
-const MAX_RESULT_CHARS = 2000;
-
 function outputOf(
   results: { toolCallId: string; output?: unknown }[],
   toolCallId: string,
-): string {
-  const match = results.find((result) => result.toolCallId === toolCallId);
-  if (match === undefined) {
-    return "(no result)";
-  }
-  const rendered = JSON.stringify(match.output ?? null);
-  return rendered.length > MAX_RESULT_CHARS
-    ? `${rendered.slice(0, MAX_RESULT_CHARS)}… (truncated)`
-    : rendered;
+): unknown {
+  return results.find((result) => result.toolCallId === toolCallId)?.output;
 }
 
 /**
@@ -57,14 +48,22 @@ export class Chat<App = unknown> {
   /** Type-only anchor so `expect.chat` infers `App` from the conversation. */
   declare readonly $app: App;
 
+  /** Everything that happened, in the order it happened. */
+  readonly turns: Turn<App>[] = [];
+
   /** Every call the model made, in order, as it crossed the wire. */
-  readonly toolCalls: ToolCall<App>[] = [];
+  get toolCalls(): ToolCall<App>[] {
+    return this.turns
+      .filter((turn) => turn.role === "tool")
+      .map((turn) => turn.call);
+  }
 
   /** What the assistant said, one entry per turn, intermediate ones included. */
-  readonly assistantTurns: string[] = [];
-
-  /** Every turn and tool call in the order they happened, for the judge. */
-  readonly transcript: TranscriptEntry[] = [];
+  get assistantTurns(): string[] {
+    return this.turns
+      .filter((turn) => turn.role === "assistant")
+      .map((turn) => turn.text);
+  }
 
   private readonly messages: ModelMessage[] = [];
   private readonly failures = new Map<string, string>();
@@ -112,7 +111,7 @@ export class Chat<App = unknown> {
   /** Takes a turn. Assert on the result with `expect.chat`. */
   async send(prompt: string): Promise<void> {
     this.messages.push({ role: "user", content: prompt });
-    this.transcript.push({ role: "user", text: prompt });
+    this.turns.push({ role: "user", text: prompt });
 
     const result = await generateText({
       model: this.host.model,
@@ -127,23 +126,17 @@ export class Chat<App = unknown> {
 
     for (const step of result.steps) {
       if (step.text !== "") {
-        this.assistantTurns.push(step.text);
-        this.transcript.push({ role: "assistant", text: step.text });
+        this.turns.push({ role: "assistant", text: step.text });
       }
       for (const call of step.toolCalls) {
-        const failure = this.failureFor(call);
-        this.toolCalls.push({
-          name: call.toolName,
-          arguments: (call.input ?? {}) as Record<string, unknown>,
-          ...failure,
-        } as ToolCall<App>);
-        const outcome =
-          failure.failed === undefined
-            ? ` -> ${outputOf(step.toolResults, call.toolCallId)}`
-            : ` (failed: ${failure.failed})`;
-        this.transcript.push({
+        this.turns.push({
           role: "tool",
-          text: `${call.toolName} ${JSON.stringify(call.input ?? {})}${outcome}`,
+          call: {
+            name: call.toolName,
+            arguments: (call.input ?? {}) as Record<string, unknown>,
+            ...this.failureFor(call),
+          } as ToolCall<App>,
+          result: outputOf(step.toolResults, call.toolCallId),
         });
       }
     }
