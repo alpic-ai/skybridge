@@ -1,4 +1,5 @@
 import { existsSync, readdirSync } from "node:fs";
+import { createRequire } from "node:module";
 import { isAbsolute, relative, resolve } from "node:path";
 import {
   assertUniqueViewNames,
@@ -103,6 +104,19 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
 
 const EVALS_DIR = "evals";
 const DEFAULT_EVAL_TIMEOUT_MS = 120_000;
+const MATCHERS_MODULE = "@skybridge/test/matchers";
+
+function assertMatchersInstalled(projectRoot: string): void {
+  try {
+    createRequire(resolve(projectRoot, "package.json")).resolve(
+      MATCHERS_MODULE,
+    );
+  } catch {
+    throw new Error(
+      `The \`evals\` plugin option registers the \`expect.chat\` matchers from "${MATCHERS_MODULE}", which is not installed. Add it with \`npm install -D @skybridge/test@beta\`.`,
+    );
+  }
+}
 
 function hasEvalScenarios(projectRoot: string): boolean {
   const dir = resolve(projectRoot, EVALS_DIR);
@@ -205,10 +219,12 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
         return base;
       }
 
+      assertMatchersInstalled(projectRoot);
+
       return {
         ...base,
         test: {
-          setupFiles: ["@skybridge/test/matchers"],
+          setupFiles: [MATCHERS_MODULE],
           provide: { skybridgeEvals: options.evals },
           include: [
             "**/*.{test,spec}.?(c|m)[jt]s?(x)",
