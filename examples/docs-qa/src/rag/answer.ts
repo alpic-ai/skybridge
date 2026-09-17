@@ -21,6 +21,24 @@ function formatPassage(retrieved: RetrievedChunk, id: number): string {
   return `[${id}] ${breadcrumb}\n${chunk.text.slice(0, MAX_PASSAGE_CHARS)}`;
 }
 
+/**
+ * Drop [n] markers that do not point at a retrieved source. The model is told
+ * to cite only the numbered passages, but nothing stops it from emitting [6]
+ * with five passages; a dangling marker would render as a citation chip with
+ * no source behind it. Valid markers are left untouched.
+ */
+export function stripInvalidCitations(
+  answer: string,
+  sourceCount: number,
+): string {
+  return answer
+    .replace(/\s*\[(\d+)\]/g, (marker, index: string) => {
+      const id = Number(index);
+      return id >= 1 && id <= sourceCount ? marker : "";
+    })
+    .trim();
+}
+
 /** Generate a cited answer from the retrieved passages. */
 export async function generateAnswer(
   question: string,
