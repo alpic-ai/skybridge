@@ -1,7 +1,7 @@
 import "./env.js";
 import { McpServer, text } from "skybridge/server";
 import { z } from "zod";
-import { generateAnswer } from "./rag/answer.js";
+import { generateAnswer, stripInvalidCitations } from "./rag/answer.js";
 import { searchDocs } from "./rag/retrieval.js";
 
 // How many passages back each answer. Enough for cross-page questions while
@@ -69,7 +69,7 @@ const server = new McpServer(
   async ({ question }) => {
     try {
       const retrieved = await searchDocs(question, RETRIEVAL_TOP_K);
-      const answer = await generateAnswer(question, retrieved);
+      const rawAnswer = await generateAnswer(question, retrieved);
 
       const sources = retrieved.map(({ chunk }, index) => ({
         id: index + 1,
@@ -77,6 +77,8 @@ const server = new McpServer(
         section: chunk.section,
         url: chunk.url,
       }));
+      // Every [n] the model and the view see must resolve to one of these.
+      const answer = stripInvalidCitations(rawAnswer, sources.length);
       const sourceLines = sources
         .map(
           (source) =>

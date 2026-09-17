@@ -105,10 +105,12 @@ function CitationChip({
 
 function Answer({
   answer,
+  sourceIds,
   selectedSource,
   onSelectSource,
 }: {
   answer: string;
+  sourceIds: Set<number>;
   selectedSource: number | null;
   onSelectSource: (id: number) => void;
 }) {
@@ -116,6 +118,11 @@ function Answer({
     <p className="type-text-sm leading-relaxed">
       {tokenizeAnswer(answer).map((token) => {
         const key = `${token.type}-${token.offset}`;
+        // The server strips markers with no source; if one slips through,
+        // show it as text rather than a chip that opens nothing.
+        if (token.type === "cite" && !sourceIds.has(token.id)) {
+          return <span key={key}>[{token.id}]</span>;
+        }
         if (token.type === "cite") {
           return (
             <CitationChip
@@ -281,6 +288,7 @@ export default function AskDocs() {
   const rawPassages = data?.meta?.passages ?? responseMetadata?.passages;
   const passages = Array.isArray(rawPassages) ? (rawPassages as Passage[]) : [];
   const sources = result?.sources ?? [];
+  const sourceIds = new Set(sources.map((source) => source.id));
 
   const busy = isHostPending || isCalling || pendingQuestion !== null;
   const errorMessage = callError
@@ -318,6 +326,7 @@ export default function AskDocs() {
             <>
               <Answer
                 answer={result.answer}
+                sourceIds={sourceIds}
                 selectedSource={selectedSource}
                 onSelectSource={toggleSource}
               />
