@@ -1,3 +1,5 @@
+import "./matchers.js";
+
 export type {
   ChatAssertion,
   ChatMatchers,

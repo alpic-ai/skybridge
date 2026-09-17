@@ -3,7 +3,6 @@ import {
   StreamableHTTPClientTransport,
   type Tool,
 } from "@modelcontextprotocol/client";
-import type { ToolCall, TranscriptEntry } from "@skybridge/vite-plugin/evals";
 import {
   dynamicTool,
   generateText,
@@ -12,6 +11,7 @@ import {
   type ModelMessage,
   stepCountIs,
 } from "ai";
+import type { ToolCall, TranscriptEntry } from "./matchers/types.js";
 
 interface HostConfig {
   model: LanguageModel;

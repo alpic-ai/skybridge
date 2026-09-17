@@ -1,6 +1,6 @@
+import type { EvalsOptions } from "@skybridge/vite-plugin";
 import type { LanguageModel } from "ai";
 import type { ToolInput, ToolNames } from "skybridge/server";
-import type { EvalsOptions } from "../plugin.js";
 
 /**
  * One recorded call, typed against the project's own registry: `name` is a

@@ -117,27 +117,6 @@ function transcriptFor(chat: ChatLike<unknown>): string {
     .join("\n");
 }
 
-async function askJudge(
-  model: LanguageModel,
-  criteria: string,
-  conversation: string,
-): Promise<{ pass: boolean; reasoning: string }> {
-  const { generateObject, jsonSchema } = await import("ai");
-  const { object } = await generateObject({
-    model,
-    temperature: 0,
-    system: JUDGE_SYSTEM,
-    prompt: `Criteria:\n${criteria}\n\n<conversation>\n${conversation}\n</conversation>`,
-    schema: jsonSchema<{ pass: boolean; reasoning: string }>({
-      type: "object",
-      properties: { pass: { type: "boolean" }, reasoning: { type: "string" } },
-      required: ["pass", "reasoning"],
-      additionalProperties: false,
-    }),
-  });
-  return object;
-}
-
 function report(chat: ChatLike<unknown>, summary: string): string {
   return `${summary}
 
@@ -276,11 +255,23 @@ ${spoken(received)}`,
   ) {
     let verdict: { pass: boolean; reasoning: string };
     try {
-      verdict = await askJudge(
-        options?.model ?? received.model,
-        criteria,
-        transcriptFor(received),
-      );
+      const { generateObject, jsonSchema } = await import("ai");
+      const { object } = await generateObject({
+        model: options?.model ?? received.model,
+        temperature: 0,
+        system: JUDGE_SYSTEM,
+        prompt: `Criteria:\n${criteria}\n\n<conversation>\n${transcriptFor(received)}\n</conversation>`,
+        schema: jsonSchema<{ pass: boolean; reasoning: string }>({
+          type: "object",
+          properties: {
+            pass: { type: "boolean" },
+            reasoning: { type: "string" },
+          },
+          required: ["pass", "reasoning"],
+          additionalProperties: false,
+        }),
+      });
+      verdict = object;
     } catch (error) {
       throw new Error(
         `judge unavailable: ${error instanceof Error ? error.message : String(error)}`,

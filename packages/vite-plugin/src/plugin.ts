@@ -1,6 +1,5 @@
 import { existsSync, readdirSync } from "node:fs";
 import { isAbsolute, relative, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import {
   assertUniqueViewNames,
   type DiscoveredView,
@@ -104,10 +103,6 @@ export function skybridge(options?: SkybridgePluginOptions): Plugin {
 
 const EVALS_DIR = "evals";
 const DEFAULT_EVAL_TIMEOUT_MS = 120_000;
-
-function here(file: string): string {
-  return fileURLToPath(new URL(file, import.meta.url));
-}
 
 function hasEvalScenarios(projectRoot: string): boolean {
   const dir = resolve(projectRoot, EVALS_DIR);
@@ -213,7 +208,7 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
       return {
         ...base,
         test: {
-          setupFiles: [here("./evals/matchers.js")],
+          setupFiles: ["@skybridge/test/matchers"],
           provide: { skybridgeEvals: options.evals },
           include: [
             "**/*.{test,spec}.?(c|m)[jt]s?(x)",
