@@ -3,7 +3,6 @@ import {
   StreamableHTTPClientTransport,
   type Tool,
 } from "@modelcontextprotocol/client";
-import type { ToolCall } from "@skybridge/vite-plugin/evals";
 import {
   dynamicTool,
   generateText,
@@ -12,6 +11,7 @@ import {
   type ModelMessage,
   stepCountIs,
 } from "ai";
+import type { ToolCall, Turn } from "./matchers/types.js";
 
 interface HostConfig {
   model: LanguageModel;
@@ -23,6 +23,13 @@ interface HostConfig {
 const DEFAULT_MAX_STEPS = 8;
 
 const IN_PROCESS_URL = "http://in-process.skybridge.test/mcp";
+
+function outputOf(
+  results: { toolCallId: string; output?: unknown }[],
+  toolCallId: string,
+): unknown {
+  return results.find((result) => result.toolCallId === toolCallId)?.output;
+}
 
 /**
  * A `fetch` replacement the transport dials instead of the network. Mirrors the
@@ -41,11 +48,22 @@ export class Chat<App = unknown> {
   /** Type-only anchor so `expect.chat` infers `App` from the conversation. */
   declare readonly $app: App;
 
+  /** Everything that happened, in the order it happened. */
+  readonly turns: Turn<App>[] = [];
+
   /** Every call the model made, in order, as it crossed the wire. */
-  readonly toolCalls: ToolCall<App>[] = [];
+  get toolCalls(): ToolCall<App>[] {
+    return this.turns
+      .filter((turn) => turn.role === "tool")
+      .map((turn) => turn.call);
+  }
 
   /** What the assistant said, one entry per turn, intermediate ones included. */
-  readonly assistantTurns: string[] = [];
+  get assistantTurns(): string[] {
+    return this.turns
+      .filter((turn) => turn.role === "assistant")
+      .map((turn) => turn.text);
+  }
 
   private readonly messages: ModelMessage[] = [];
   private readonly failures = new Map<string, string>();
@@ -53,6 +71,11 @@ export class Chat<App = unknown> {
   private readonly transport: StreamableHTTPClientTransport;
   private readonly host: HostConfig;
   private tools: Tool[] = [];
+
+  /** The model the conversation runs on, and the judge's default. */
+  get model(): LanguageModel {
+    return this.host.model;
+  }
 
   private constructor(
     client: Client,
@@ -88,6 +111,7 @@ export class Chat<App = unknown> {
   /** Takes a turn. Assert on the result with `expect.chat`. */
   async send(prompt: string): Promise<void> {
     this.messages.push({ role: "user", content: prompt });
+    this.turns.push({ role: "user", text: prompt });
 
     const result = await generateText({
       model: this.host.model,
@@ -101,18 +125,19 @@ export class Chat<App = unknown> {
     });
 
     for (const step of result.steps) {
-      for (const call of step.toolCalls) {
-        this.toolCalls.push({
-          name: call.toolName,
-          arguments: (call.input ?? {}) as Record<string, unknown>,
-          ...this.failureFor(call),
-        } as ToolCall<App>);
-      }
-    }
-
-    for (const step of result.steps) {
       if (step.text !== "") {
-        this.assistantTurns.push(step.text);
+        this.turns.push({ role: "assistant", text: step.text });
+      }
+      for (const call of step.toolCalls) {
+        this.turns.push({
+          role: "tool",
+          call: {
+            name: call.toolName,
+            arguments: (call.input ?? {}) as Record<string, unknown>,
+            ...this.failureFor(call),
+          } as ToolCall<App>,
+          result: outputOf(step.toolResults, call.toolCallId),
+        });
       }
     }
 

@@ -46,8 +46,13 @@ All typed against the app's registry (`name` autocompletes, `args` is checked ag
 | `toHaveSaid(text \| RegExp)` | an assistant turn contains it (string match is case- and whitespace-insensitive) |
 | `toHaveCalledToolsInOrder(...names)` | the named tools *succeeded* in that relative order (subsequence, gaps allowed) |
 | `toHaveCalledNoTools()` | no tool was attempted at all |
+| `await toPassJudgment(criteria, options?)` | a judge model grades the conversation against `criteria` written in plain English |
 
 On failure the message lists every call the model made, with arguments. Matchers see the whole conversation, not just the last `send`. `chat.toolCalls` and `chat.assistantTurns` are available for custom assertions.
+
+## Judgments
+
+`toPassJudgment` is the only async matcher: `await expect.chat(chat).toPassJudgment("stays inside the app's scope and explains the tool result")`. The judge reads every turn and tool call with its result, runs at temperature 0 on the chat's own model, and its reasoning lands in the failure message. `options` takes `model` (another judge). Provider failures throw `judge unavailable: <error>` instead of reporting a fail. Use it only for criteria no other matcher can express: it is a live model call and not reproducible.
 
 ## Authenticated apps
 

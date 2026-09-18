@@ -12,6 +12,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./matchers": {
+      "types": "./dist/matchers/index.d.ts",
+      "default": "./dist/matchers/index.js"
     }
   },
   "files": [

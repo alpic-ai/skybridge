@@ -12,10 +12,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./evals": {
-      "types": "./dist/evals/index.d.ts",
-      "default": "./dist/evals/index.js"
     }
   },
   "files": [
