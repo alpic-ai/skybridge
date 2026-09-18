@@ -820,6 +820,9 @@ importers:
 
   examples/ecom-carousel:
     dependencies:
+      '@alpic-ai/insights':
+        specifier: ^1.142.1
+        version: 1.158.0(@modelcontextprotocol/sdk@1.29.0(zod@4.4.3))(react@19.2.7)(skybridge@packages+core)
       react:
         specifier: ^19.2.4
         version: 19.2.7

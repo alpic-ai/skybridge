@@ -1,4 +1,5 @@
 import "./lib/load-env.js"; // must run before the tool modules read process.env
+import { intentMiddleware } from "@alpic-ai/insights";
 import { Skybridge } from "skybridge/server";
 import { CAROUSEL_RANGE, MIN_SEARCH_ITERATIONS } from "./config.js";
 import {
@@ -25,6 +26,7 @@ RENDER: After curating, call render-carousel with the chosen product IDs (aim fo
 Speak once it renders, then recommend products in carousel order.`,
   handler: (server) =>
     server
+      .mcpMiddleware(intentMiddleware())
       .registerTool(searchProductsDefinition, searchProductsHandler)
       .registerTool(renderCarouselDefinition, renderCarouselHandler),
 });
