@@ -1,0 +1,11 @@
+{
+  "extends": "skybridge/tsconfig",
+
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+
+  "include": ["src", ".skybridge/**/*.d.ts"]
+}
