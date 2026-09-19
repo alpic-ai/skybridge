@@ -84,6 +84,23 @@ function ReceiptAttach() {
 
 Both paths resolve a download URL and build a [`FileRef`](/api-reference/file-ref) by hand: the hook returns camelCase fields, while `FileRef` wants snake_case with a required `download_url`.
 
+## Host support
+
+The file APIs run on ChatGPT's Apps SDK runtime. Since Skybridge 1.2.0 views render through MCP Apps by default, where ChatGPT does not expose them — a view that needs files must opt back in per tool:
+
+```ts
+server.registerTool(
+  {
+    name: "scan-receipt",
+    description: "Scan a receipt",
+    view: { component: "scan-receipt", appsSdk: true },
+  },
+  handler,
+);
+```
+
+On every other host (and without the opt-in) the methods throw `NotSupportedError`, so feature-detect with `instanceof` when the view runs cross-host.
+
 ## Returns
 
 `useFiles` returns three functions.

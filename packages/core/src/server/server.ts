@@ -119,6 +119,12 @@ export interface ViewConfig {
   component: ViewName;
   /** Human-readable label the host may show alongside the view. */
   description?: string;
+  /**
+   * Also register the legacy Apps SDK resource and set `openai/outputTemplate`
+   * on ChatGPT. Use this for file APIs (`uploadFile`, `getFileDownloadUrl`,
+   * `selectFiles`) until MCP Apps has equivalents (#1074).
+   */
+  appsSdk?: boolean;
   /** Request a visible border around the view (forwarded as `ui.prefersBorder`). */
   prefersBorder?: boolean;
   /** Override the iframe's served domain (advanced; forwarded as `ui.domain`). */
@@ -252,9 +258,25 @@ type McpAppsResourceMeta = {
   ui?: McpUiResourceMeta;
 };
 
+/**
+ * `_meta` keys ChatGPT reads on a resource. The full `openai/widgetCSP`
+ * shape is only emitted on the legacy Apps SDK registration
+ * (`view.appsSdk`, #1074); the MCP Apps registration forwards
+ * `redirect_domains` only, mirrored for cross-host parity.
+ * @see https://developers.openai.com/apps-sdk/reference#component-resource-_meta-fields
+ */
+type OpenaiViewCSP = {
+  connect_domains: string[];
+  resource_domains: string[];
+  frame_domains?: string[];
+  redirect_domains?: string[];
+};
+
 type OpenaiResourceMeta = {
   "openai/widgetDescription"?: string;
-  "openai/widgetCSP"?: { redirect_domains?: string[] };
+  "openai/widgetDomain"?: string;
+  "openai/widgetPrefersBorder"?: boolean;
+  "openai/widgetCSP"?: OpenaiViewCSP;
 };
 
 type ResourceMeta = McpAppsResourceMeta & OpenaiResourceMeta;
@@ -902,7 +924,9 @@ export class McpServer<
             "openai/widgetDescription": view.description,
           }),
           ...(view.csp?.redirectDomains && {
-            "openai/widgetCSP": { redirect_domains: view.csp.redirectDomains },
+            "openai/widgetCSP": {
+              redirect_domains: view.csp.redirectDomains,
+            } as OpenaiViewCSP,
           }),
         };
 
@@ -921,6 +945,56 @@ export class McpServer<
     // @ts-expect-error - For backwards compatibility with Claude current implementation of the specs
     toolMeta["ui/resourceUri"] = viewResource.uri;
     toolMeta.ui = { ...toolMeta.ui, resourceUri: viewResource.uri };
+
+    // Opt back into the legacy Apps SDK registration. MCP Apps has no
+    // equivalent for the ChatGPT file APIs yet (#1074), so tools whose views
+    // need `uploadFile`/`getFileDownloadUrl`/`selectFiles` (or
+    // `openai/fileParams` attachments) must render through Apps SDK on
+    // ChatGPT. `openai/outputTemplate` is what makes ChatGPT prefer that
+    // registration.
+    if (view.appsSdk) {
+      const appsSdkResource: ViewResourceConfig = {
+        uri: `ui://views/apps-sdk/${view.component}.html${versionParam}`,
+        mimeType: "text/html+skybridge",
+        buildContentMeta: ({ resourceDomains, connectDomains, domain }) => {
+          const meta: OpenaiResourceMeta & McpAppsResourceMeta = {
+            "openai/widgetCSP": {
+              resource_domains: unionOf(
+                resourceDomains,
+                view.csp?.resourceDomains,
+              ),
+              connect_domains: unionOf(
+                connectDomains,
+                view.csp?.connectDomains,
+              ),
+              ...(view.csp?.frameDomains && {
+                frame_domains: view.csp.frameDomains,
+              }),
+              ...(view.csp?.redirectDomains && {
+                redirect_domains: view.csp.redirectDomains,
+              }),
+            },
+            "openai/widgetDomain": view.domain ?? domain,
+            ...(view.description && {
+              "openai/widgetDescription": view.description,
+            }),
+            ...(view.prefersBorder !== undefined && {
+              "openai/widgetPrefersBorder": view.prefersBorder,
+            }),
+          };
+          if (view._meta) {
+            return { ...meta, ...view._meta } as ResourceMeta;
+          }
+          return meta;
+        },
+      };
+      this.registerViewResource({
+        name: toolName,
+        viewResource: appsSdkResource,
+        view,
+      });
+      toolMeta["openai/outputTemplate"] = appsSdkResource.uri;
+    }
   }
 
   private registerViewResource({
