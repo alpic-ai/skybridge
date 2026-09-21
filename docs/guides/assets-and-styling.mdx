@@ -77,7 +77,7 @@ export default defineConfig({
 });
 ```
 
-A few settings are set by the plugin so views load correctly inside a host, and your values for them are overridden:
+A few settings are set by Skybridge so views load correctly inside a host, and your values for them are overridden. The plugin sets the first four; `skybridge dev` sets the last one when it mounts Vite inside its Express app:
 
 | Setting | Value |
 | --- | --- |
@@ -85,6 +85,6 @@ A few settings are set by the plugin so views load correctly inside a host, and 
 | `build.outDir`, `build.emptyOutDir`, `build.manifest`, `build.minify`, `build.cssCodeSplit`, `build.rollupOptions.input` | Output goes to `dist/assets` with a manifest the server reads, one entry per view, one stylesheet |
 | `resolve.dedupe` | A single copy of `react` and `react-dom` |
 | `experimental.renderBuiltUrl` | Asset URLs resolve against `window.skybridge.serverUrl` |
-| `server.middlewareMode`, `server.hmr`, `server.allowedHosts` | In development, Vite runs inside the Skybridge Express app |
+| `server.middlewareMode`, `server.hmr`, `server.allowedHosts` | Forced by `skybridge dev`, which runs Vite in middleware mode |
 
 Other `build` options such as `sourcemap` or `target` pass through, and so does the rest of `server` (`forwardConsole` for instance, see [Read View Logs](/test/tunnel#read-view-logs-on-mobile-or-desktop-apps)). The `skybridge()` plugin itself takes `viewsDir` to move your views folder and `serverExternal` to keep packages out of the server bundle: see the [`build` command](/api-reference/cli#excluding-packages-from-the-server-bundle).
