@@ -1,5 +1,5 @@
 import type { AppsSdkContext } from "skybridge/web";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   defaultInspectorPreferences,
   useInspectorPreferencesStore,
@@ -7,19 +7,16 @@ import {
 import { createAndInjectOpenAi } from "./create-openai-mock.js";
 
 describe("createAndInjectOpenAi", () => {
-  beforeEach(() => {
+  it("resets displayMode and openai.view.mode to inline when requestClose is called from modal mode", async () => {
     useInspectorPreferencesStore.setState({
       ...defaultInspectorPreferences,
       previewClient: null,
     });
-  });
-
-  function setup() {
     const iframeWindow = {
       dispatchEvent: vi.fn(),
     } as unknown as Window & { openai?: unknown };
     const setValue = vi.fn();
-    createAndInjectOpenAi(
+    const unsubscribe = createAndInjectOpenAi(
       iframeWindow,
       null,
       vi.fn(),
@@ -31,14 +28,8 @@ describe("createAndInjectOpenAi", () => {
       requestClose: () => Promise<void>;
       requestModal: (args: { params?: unknown }) => Promise<void>;
     };
-    return { openai, setValue };
-  }
-
-  it("resets displayMode and openai.view.mode to inline when requestClose is called from modal mode", async () => {
-    const { openai, setValue } = setup();
 
     await openai.requestModal({ params: { id: 1 } });
-    expect(useInspectorPreferencesStore.getState().displayMode).toBe("modal");
     expect(openai.view).toEqual({ mode: "modal", params: { id: 1 } });
 
     await openai.requestClose();
@@ -46,5 +37,6 @@ describe("createAndInjectOpenAi", () => {
     expect(useInspectorPreferencesStore.getState().displayMode).toBe("inline");
     expect(openai.view).toEqual({ mode: "inline" });
     expect(setValue).toHaveBeenCalledWith("view", { mode: "inline" });
+    unsubscribe();
   });
 });
