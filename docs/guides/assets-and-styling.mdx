@@ -1,0 +1,56 @@
+---
+title: "Assets and Styling"
+description: "Ship images, fonts and stylesheets with your views"
+sidebarTitle: "Assets and Styling"
+icon: "image"
+---
+
+Views are built by [Vite](https://vite.dev) and served by your Skybridge server under `/assets`. Anything Vite can bundle, a view can use. This guide covers where files go and how they are addressed at runtime.
+
+## Images and Other Files
+
+Import the file from your source tree and use the resulting URL. Vite hashes the filename, and the built code resolves the reference at runtime against your server's URL, so it keeps working behind a tunnel or a path prefix.
+
+```tsx views/product.tsx
+import logo from "../assets/logo.svg";
+
+export default function Product() {
+  return <img src={logo} alt="Logo" />;
+}
+```
+
+The folder name is up to you. The examples use `assets/` at the project root, but anything under the project works.
+
+If a file must keep a stable name, or is referenced dynamically (a URL built from data, a `<link rel="icon">`), drop it in `public/` at the project root. Vite copies its contents into `dist/assets/` at build time and serves them in development, so `public/hero.png` is available at `/assets/hero.png` on your server.
+
+Views render inside the host's sandbox iframe, so a path like `"/assets/hero.png"` written in JSX resolves against the sandbox origin, not your server, and fails in production. Prefix it with the server URL Skybridge injects on `window.skybridge`:
+
+```tsx views/product.tsx
+<img src={`${window.skybridge.serverUrl}/assets/hero.png`} alt="Hero" />
+```
+
+From CSS, an absolute `url("/assets/hero.png")` needs no prefix: the stylesheet is served by your server, so the browser resolves it against the right origin.
+
+Files loaded from a third-party origin (a CDN, a font service) must be declared in the tool's `resourceDomains`: see [Configure CSP](/guides/csp).
+
+## CSS
+
+Import a stylesheet from any view or component file, the same way you would in a regular Vite app. No registration is needed.
+
+```tsx views/product.tsx
+import "./product.css";
+```
+
+Skybridge sets `cssCodeSplit: false`, so every stylesheet reached from any view is bundled into a single `style.css` linked from each view's HTML. A class defined for one view is available in all of them.
+
+<Warning>
+With Tailwind v4, `@apply` only resolves in the file that imports `tailwindcss`. Using it in a second stylesheet fails at build time with `Cannot apply unknown utility class`. Add an `@reference` pointing at your main stylesheet at the top of the file:
+
+```css views/product.css
+@reference "../index.css";
+
+.card {
+  @apply rounded-lg p-4;
+}
+```
+</Warning>
