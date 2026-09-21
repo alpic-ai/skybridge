@@ -1,7 +1,8 @@
 import { createMcpHandler, type Server } from "@modelcontextprotocol/server";
 import type { LanguageModel } from "ai";
+import type { ToolInput, ToolNames } from "skybridge/server";
 import { inject, onTestFinished } from "vitest";
-import { Chat } from "./chat.js";
+import { Chat, type StubMap } from "./chat.js";
 
 /**
  * The minimum a Skybridge app has to expose to be served in-process: the
@@ -27,6 +28,16 @@ export interface EvalIdentity {
   resource?: URL;
   extra?: Record<string, unknown>;
 }
+
+/**
+ * Results the runner answers with instead of calling the app, keyed by tool
+ * name and typed against the project's own registry. A stub may be async, and
+ * one that returns `undefined` falls through to the real server, so a scenario
+ * can pin one set of arguments and leave the rest live.
+ */
+export type ToolStubs<App> = {
+  [Name in ToolNames<App>]?: (args: ToolInput<App, Name>) => unknown;
+};
 
 interface StartOptions {
   /** Any AI SDK model instance, built by the project. */
@@ -54,12 +65,21 @@ function sharedDefaults() {
  * The assertions are inferred from the app value itself, so `expect.chat` gets
  * the project's tool names and argument shapes with no type parameter.
  *
+ * `stubs` answers a tool from the scenario instead of the app, so a case that
+ * depends on today's date or on a live catalogue still reads the same weeks
+ * later. A stubbed call never reaches the server, and still shows up in
+ * `chat.toolCalls` like any other. See {@link ToolStubs}.
+ *
  * `authInfo` claims an identity for the session: the app's per-tool scheme and
  * scope enforcement runs against it for real, only token verification is
  * skipped. Omit it to exercise the anonymous path, challenges included.
  */
 export async function start<App extends EvalApp>(
-  options: StartOptions & { app: App; authInfo?: EvalIdentity },
+  options: StartOptions & {
+    app: App;
+    authInfo?: EvalIdentity;
+    stubs?: ToolStubs<App>;
+  },
 ): Promise<Chat<App>> {
   const config = sharedDefaults();
   const { app, authInfo } = options;
@@ -77,6 +97,7 @@ export async function start<App extends EvalApp>(
         new Request(url, init),
         authInfo === undefined ? undefined : { authInfo },
       ),
+    (options.stubs ?? {}) as StubMap,
   );
 
   onTestFinished(async () => {

@@ -30,3 +30,30 @@ it("answers from what the tool returned", async () => {
   expect.chat(chat).toHaveSaid(/out of stock/i);
   expect(chat.assistantTurns.length).toBeGreaterThan(0);
 });
+
+it("answers from a stubbed catalog, and falls through for the rest", async () => {
+  const chat = await start({
+    app,
+    model,
+    stubs: {
+      "search-products": ({ category }) =>
+        category === "goggles"
+          ? {
+              products: [
+                {
+                  id: "goggles-eclipse",
+                  name: "Eclipse Goggles",
+                  price: 90,
+                  inStock: true,
+                },
+              ],
+            }
+          : undefined,
+    },
+  });
+  await chat.send("What ski goggles do you have?");
+  await chat.send("And what gloves do you sell?");
+
+  expect.chat(chat).toHaveSaid(/eclipse/i);
+  expect.chat(chat).toHaveSaid(/tundra/i);
+});

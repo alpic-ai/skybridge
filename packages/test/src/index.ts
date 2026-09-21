@@ -4,5 +4,9 @@ export type {
   ChatMatchers,
   JudgmentOptions,
 } from "./matchers/index.js";
-export type { EvalApp, EvalIdentity } from "./session-registry.js";
+export type {
+  EvalApp,
+  EvalIdentity,
+  ToolStubs,
+} from "./session-registry.js";
 export { start } from "./session-registry.js";

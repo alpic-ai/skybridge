@@ -2,7 +2,7 @@ import { MockLanguageModelV3 } from "ai/test";
 import { Skybridge } from "skybridge/server";
 import { expect, it } from "vitest";
 import { z } from "zod";
-import { start } from "./session-registry.js";
+import { start, type ToolStubs } from "./session-registry.js";
 
 const usage = {
   inputTokens: { total: 1, noCache: 1, cacheRead: 0, cacheWrite: 0 },
@@ -145,4 +145,57 @@ it("enforces the app's own scopes against the injected identity", async () => {
     { name: "create-checkout", arguments: { productId: "sku-1" } },
   ]);
   expect(identified.assistantTurns).toEqual(["Your checkout is ready."]);
+});
+
+it("answers from a stub, and falls through to the app when it returns undefined", async () => {
+  const stubs = {
+    "search-products": ({ category }: { category: string }) =>
+      category === "goggles" ? { found: "stubbed goggles" } : undefined,
+  };
+  const seen: string[] = [];
+  const model = mockModel({
+    toolName: "search-products",
+    input: { category: "goggles" },
+    text: "I found the ski goggles.",
+  });
+
+  const stubbed = await start({ app: buildApp(seen), model, stubs });
+  await stubbed.send("I am looking for ski goggles");
+
+  expect(seen).toEqual([]);
+  expect(stubbed.toolCalls).toEqual([
+    { name: "search-products", arguments: { category: "goggles" } },
+  ]);
+  expect(JSON.stringify(model.doGenerateCalls[1]?.prompt)).toContain(
+    "stubbed goggles",
+  );
+
+  const live = await start({
+    app: buildApp(seen),
+    model: mockModel({
+      toolName: "search-products",
+      input: { category: "skis" },
+      text: "I found the skis.",
+    }),
+    stubs,
+  });
+  await live.send("I am looking for skis");
+
+  expect(seen).toEqual(["skis"]);
+});
+
+it("refuses a stub for a tool the app does not expose", async () => {
+  await expect(
+    start({
+      app: buildApp([]),
+      model: mockModel({
+        toolName: "search-products",
+        input: { category: "goggles" },
+        text: "",
+      }),
+      stubs: { "search-produts": () => ({}) } as ToolStubs<
+        ReturnType<typeof buildApp>
+      >,
+    }),
+  ).rejects.toThrow('the app exposes no tool named "search-produts"');
 });

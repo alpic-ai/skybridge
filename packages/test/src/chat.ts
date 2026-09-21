@@ -20,9 +20,33 @@ interface HostConfig {
   maxSteps?: number;
 }
 
+/**
+ * Stubbed results keyed by tool name. The typed form scenarios write lives on
+ * `start`'s options.
+ *
+ * @internal
+ */
+export type StubMap = Record<
+  string,
+  (args: Record<string, unknown>) => unknown
+>;
+
 const DEFAULT_MAX_STEPS = 8;
 
 const IN_PROCESS_URL = "http://in-process.skybridge.test/mcp";
+
+/**
+ * Dress a stubbed value the way the server dresses a real one, so the model
+ * reads the same envelope under a stub as it does live.
+ */
+function asToolResult(value: unknown): unknown {
+  return [
+    {
+      type: "text",
+      text: typeof value === "string" ? value : JSON.stringify(value),
+    },
+  ];
+}
 
 function outputOf(
   results: { toolCallId: string; output?: unknown }[],
@@ -70,6 +94,7 @@ export class Chat<App = unknown> {
   private readonly client: Client;
   private readonly transport: StreamableHTTPClientTransport;
   private readonly host: HostConfig;
+  private readonly stubs: Map<string, StubMap[string]>;
   private tools: Tool[] = [];
 
   /** The model the conversation runs on, and the judge's default. */
@@ -81,15 +106,18 @@ export class Chat<App = unknown> {
     client: Client,
     transport: StreamableHTTPClientTransport,
     host: HostConfig,
+    stubs: StubMap,
   ) {
     this.client = client;
     this.transport = transport;
     this.host = host;
+    this.stubs = new Map(Object.entries(stubs));
   }
 
   static async open<App>(
     host: HostConfig,
     fetchImpl: TransportFetch,
+    stubs: StubMap,
   ): Promise<Chat<App>> {
     const client = new Client({ name: "skybridge-eval", version: "0" });
     const transport = new StreamableHTTPClientTransport(
@@ -97,10 +125,18 @@ export class Chat<App = unknown> {
       { fetch: fetchImpl },
     );
     await client.connect(transport);
-    const chat = new Chat<App>(client, transport, host);
+    const chat = new Chat<App>(client, transport, host, stubs);
     try {
       const { tools } = await client.listTools();
       chat.tools = tools;
+      const unknownStubs = Object.keys(stubs).filter(
+        (name) => !tools.some((tool) => tool.name === name),
+      );
+      if (unknownStubs.length > 0) {
+        throw new Error(
+          `the app exposes no tool named ${unknownStubs.map((name) => `"${name}"`).join(", ")}, so the stub would never run`,
+        );
+      }
     } catch (error) {
       await transport.close();
       throw error;
@@ -172,6 +208,12 @@ export class Chat<App = unknown> {
             parameters as Parameters<typeof jsonSchema>[0],
           ),
           execute: async (input, { toolCallId }) => {
+            const stubbed = await this.stubs.get(definition.name)?.(
+              (input ?? {}) as Record<string, unknown>,
+            );
+            if (stubbed !== undefined) {
+              return asToolResult(stubbed);
+            }
             let result: Awaited<ReturnType<Client["callTool"]>>;
             try {
               result = await this.client.callTool({

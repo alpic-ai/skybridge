@@ -124,6 +124,30 @@ A judgment is a live model call: it costs money, and it is not reproducible the 
 
 If the provider breaks, the assertion throws `judge unavailable: <error>` instead of failing. A flaky provider never reads as an app regression.
 
+## Stub a Tool Result
+
+A scenario that depends on today's date or on a live catalogue passes today and fails next month, with no change to your code. Pass `stubs` to answer a tool from the scenario instead of the app:
+
+```ts evals/flights.eval.ts highlight={4-6}
+const chat = await start({
+  app,
+  model: anthropic("claude-sonnet-4-5"),
+  stubs: {
+    "search-flights": ({ from, to }) => ({ flights: [{ from, to, price: 120, departsAt: "2026-04-03T08:15:00Z" }] }),
+  },
+});
+```
+
+The arguments are typed against your registry, and a stubbed call still lands in `chat.toolCalls`, so every matcher works on it. Return a string or any JSON value: the runner wraps it the way a real tool result reaches the model. Naming a tool your app does not expose fails the scenario rather than passing silently. Return `undefined` to fall through to the real server, which is how you pin one set of arguments and leave the rest live:
+
+```ts
+stubs: {
+  "search-flights": ({ to }) => (to === "LIS" ? lisbonFixture : undefined),
+}
+```
+
+A stub replaces the call, it does not wrap it: the tool never reaches your handler, so neither its schema validation nor its scope checks run for that call. Stub the tools whose results move under you, and leave the ones the scenario is actually about.
+
 ## Test Authenticated Tools
 
 For an app behind [OAuth](/build/auth), claim an identity for the session:
