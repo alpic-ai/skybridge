@@ -5,6 +5,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { ToolPanelToolbar } from "@/components/layout/tool-panel/tool-panel-toolbar.js";
+import { View } from "@/components/layout/tool-panel/view/index.js";
 import {
   useInspectorPreferencesStore,
   useIsMobile,
@@ -12,8 +14,6 @@ import {
 import { useSelectedToolOrNull } from "@/lib/mcp/index.js";
 import { useCallToolResult } from "@/lib/store.js";
 import { PHONE_VIEWPORT } from "@/lib/utils.js";
-import { ToolPanelToolbar } from "../tool-panel/tool-panel-toolbar.js";
-import { View } from "../tool-panel/view/index.js";
 import { ChatgptShell } from "./chatgpt-shell.js";
 import { ClaudeShell } from "./claude-shell.js";
 
