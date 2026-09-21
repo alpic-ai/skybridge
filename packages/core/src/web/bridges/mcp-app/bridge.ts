@@ -231,10 +231,8 @@ export class McpAppBridge implements Bridge<McpAppContext> {
       ),
       toolOutput: createMcpStore(this, ["toolResult"], ({ toolResult }) => {
         const structuredContent = toolResult?.structuredContent;
-        return typeof structuredContent === "object" &&
-          structuredContent !== null &&
-          !Array.isArray(structuredContent)
-          ? (structuredContent as Record<string, unknown>)
+        return typeof structuredContent === "object"
+          ? (structuredContent as Record<string, unknown> | null)
           : null;
       }),
       toolResponseMetadata: createMcpStore(
