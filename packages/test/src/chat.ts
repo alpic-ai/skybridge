@@ -40,9 +40,6 @@ const IN_PROCESS_URL = "http://in-process.skybridge.test/mcp";
  * reads the same envelope under a stub as it does live.
  */
 function asToolResult(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value;
-  }
   return [
     {
       type: "text",
@@ -97,7 +94,7 @@ export class Chat<App = unknown> {
   private readonly client: Client;
   private readonly transport: StreamableHTTPClientTransport;
   private readonly host: HostConfig;
-  private readonly stubs: StubMap;
+  private readonly stubs: Map<string, StubMap[string]>;
   private tools: Tool[] = [];
 
   /** The model the conversation runs on, and the judge's default. */
@@ -114,7 +111,7 @@ export class Chat<App = unknown> {
     this.client = client;
     this.transport = transport;
     this.host = host;
-    this.stubs = stubs;
+    this.stubs = new Map(Object.entries(stubs));
   }
 
   static async open<App>(
@@ -211,7 +208,7 @@ export class Chat<App = unknown> {
             parameters as Parameters<typeof jsonSchema>[0],
           ),
           execute: async (input, { toolCallId }) => {
-            const stubbed = await this.stubs[definition.name]?.(
+            const stubbed = await this.stubs.get(definition.name)?.(
               (input ?? {}) as Record<string, unknown>,
             );
             if (stubbed !== undefined) {
