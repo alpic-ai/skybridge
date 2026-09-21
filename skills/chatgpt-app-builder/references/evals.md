@@ -54,6 +54,20 @@ On failure the message lists every call the model made, with arguments. Matchers
 
 `toPassJudgment` is the only async matcher: `await expect.chat(chat).toPassJudgment("stays inside the app's scope and explains the tool result")`. The judge reads every turn and tool call with its result, runs at temperature 0 on the chat's own model, and its reasoning lands in the failure message. `options` takes `model` (another judge). Provider failures throw `judge unavailable: <error>` instead of reporting a fail. Use it only for criteria no other matcher can express: it is a live model call and not reproducible.
 
+## Stubs
+
+`stubs` answers a tool from the scenario instead of the app, for results that move over time (relative dates, a live catalogue):
+
+```typescript
+const chat = await start({
+  app,
+  model: anthropic("claude-sonnet-4-5"),
+  stubs: { "search-flights": ({ to }) => (to === "LIS" ? lisbonFixture : undefined) },
+});
+```
+
+Arguments are typed against the registry. Returning `undefined` falls through to the real server. A stubbed call still appears in `chat.toolCalls`, but never reaches the handler, so its schema validation and scope checks do not run for that call.
+
 ## Authenticated apps
 
 Claim an identity per session; only token verification is skipped, per-tool `auth` and scope checks run for real:
