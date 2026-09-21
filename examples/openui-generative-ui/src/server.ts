@@ -33,7 +33,7 @@ export const app = new Skybridge({
         {
           name: "get-openui-prompt",
           description:
-            "Returns the OpenUI Lang component prompt and an example program. Call this before render to learn the available components and syntax.",
+            "Returns the OpenUI Lang component prompt, including the Alpic custom catalog and an example program. Call this before render to learn the available components and syntax.",
           annotations: {
             readOnlyHint: true,
             openWorldHint: false,
@@ -46,7 +46,7 @@ export const app = new Skybridge({
         {
           name: "render",
           description:
-            "Render a dynamic UI from an OpenUI Lang program. Call get-openui-prompt first, then pass only valid OpenUI Lang code.",
+            "Render a dynamic UI from an OpenUI Lang program using the Alpic catalog plus OpenUI primitives. Call get-openui-prompt first, then pass only valid OpenUI Lang code.",
           inputSchema: renderInputSchema,
           annotations: {
             readOnlyHint: true,
@@ -56,7 +56,7 @@ export const app = new Skybridge({
           view: {
             component: "render",
             description:
-              "Renders an OpenUI Lang program with the standard OpenUI component library",
+              "Renders an OpenUI Lang program with the Alpic custom catalog and OpenUI standard library",
           },
         },
         renderOpenui,
