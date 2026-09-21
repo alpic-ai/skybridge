@@ -73,6 +73,7 @@
             "root": "guides/index",
             "pages": [
               "guides/csp",
+              "guides/assets-and-styling",
               "guides/ecommerce",
               "guides/monetization",
               "guides/files",
