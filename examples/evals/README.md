@@ -29,6 +29,7 @@ you change a tool's name, description or input schema.
 | `search.eval.ts`, natural prompt | `toHaveCalledToolOnce`, `toNeverHaveCalledTool` |
 | `search.eval.ts`, price constraint | `toHaveCalledToolWith` |
 | `search.eval.ts`, stock question | `toHaveSaid`, reading `chat.assistantTurns` |
+| `search.eval.ts`, stubbed catalog | `stubs`, falling through to the real tool |
 | `browse.eval.ts`, search then open | `toHaveCalledToolsInOrder` |
 | `browse.eval.ts`, two turns | multi-turn `send`, ordering across turns |
 | `browse.eval.ts`, greeting | `toHaveCalledNoTools`, `systemPrompt` and `maxSteps` overrides |
