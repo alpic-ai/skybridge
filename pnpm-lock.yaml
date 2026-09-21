@@ -1602,6 +1602,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@modelcontextprotocol/client':
+        specifier: ^2.0.0
+        version: 2.0.0
       '@modelcontextprotocol/core':
         specifier: ^2.0.0
         version: 2.0.0
@@ -1675,9 +1678,6 @@ importers:
         specifier: ^5.0.14
         version: 5.0.14(@types/react@19.2.17)(immer@11.1.11)(react@19.2.4)(use-sync-external-store@1.6.0(react@19.2.4))
     devDependencies:
-      '@modelcontextprotocol/client':
-        specifier: ^2.0.0
-        version: 2.0.0
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1

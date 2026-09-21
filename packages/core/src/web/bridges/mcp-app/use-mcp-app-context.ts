@@ -1,4 +1,4 @@
-import type { Implementation } from "@modelcontextprotocol/server";
+import type { Implementation } from "@modelcontextprotocol/client";
 
 import { useSyncExternalStore } from "react";
 import { McpAppBridge } from "./bridge.js";
