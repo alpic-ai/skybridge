@@ -35,3 +35,18 @@ Object.defineProperty(globalThis, "localStorage", {
   writable: true,
   configurable: true,
 });
+
+Object.defineProperty(globalThis, "requestAnimationFrame", {
+  value: (callback: FrameRequestCallback): number => {
+    callback(performance.now());
+    return 0;
+  },
+  writable: true,
+  configurable: true,
+});
+
+Object.defineProperty(globalThis, "cancelAnimationFrame", {
+  value: (): void => {},
+  writable: true,
+  configurable: true,
+});

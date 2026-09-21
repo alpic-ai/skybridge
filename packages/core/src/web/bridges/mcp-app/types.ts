@@ -1,10 +1,10 @@
+import type { Implementation } from "@modelcontextprotocol/client";
 import type {
   McpUiHostContext,
   McpUiToolCancelledNotification,
   McpUiToolInputNotification,
   McpUiToolResultNotification,
 } from "@modelcontextprotocol/ext-apps";
-import type { Implementation } from "@modelcontextprotocol/sdk/types.js";
 
 export type McpToolState = {
   toolInput: NonNullable<
