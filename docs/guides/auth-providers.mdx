@@ -149,6 +149,8 @@ export const app = new Skybridge({
 });
 ```
 
+Reached at more than one URL, say a local port and a `skybridge dev --tunnel` URL? Register each one as a Resource Indicator and pass them all, `audience: [process.env.SERVER_URL, process.env.TUNNEL_URL]`: a token passes when its `aud` matches any of them.
+
 See the runnable [`auth-workos`](https://github.com/alpic-ai/skybridge/tree/main/examples/auth-workos) example.
 
 ## Any Other Provider

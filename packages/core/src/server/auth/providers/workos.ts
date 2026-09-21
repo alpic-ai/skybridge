@@ -28,12 +28,13 @@ export type WorkosClaims = {
 /**
  * OAuth provider for WorkOS AuthKit. `domain` is the AuthKit domain, e.g.
  * `acme.authkit.app`. Requires DCR enabled in the WorkOS dashboard
- * (Connect → Configuration). `audience` is the MCP server's Resource Indicator.
+ * (Connect → Configuration). `audience` is the MCP server's Resource Indicator,
+ * or every Resource Indicator it answers to when it is reached at more than one URL.
  */
 export function workosProvider<
   TCustom extends ExtraClaims = Record<never, never>,
 >(
-  opts: { domain: string; audience: string } & Omit<
+  opts: { domain: string; audience: string | string[] } & Omit<
     CustomProviderOptions,
     "issuer" | "audience"
   >,
