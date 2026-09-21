@@ -42,7 +42,7 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 - **UI guidelines** → [ui-guidelines.md](references/ui-guidelines.md): display modes, layout constraints, theme, device, and locale
 - **External links** → [open-external-links.md](references/open-external-links.md): when redirecting to external URLs or setting "open in app" target
 - **OAuth** → [oauth.md](references/oauth.md): when tools need user authentication to access user-specific data
-- **Assets and styling** → [assets-and-styling.md](references/assets-and-styling.md): when adding images, fonts, CSS, or changing `vite.config.ts`
+- **Assets and styling** → [assets-and-styling.md](references/assets-and-styling.md): when adding images, fonts or CSS to views
 - **CSP** → [csp.md](references/csp.md): when declaring allowed domains for fetch, assets, redirects, or iframes
 
 ## Deploy

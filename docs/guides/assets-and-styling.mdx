@@ -1,11 +1,11 @@
 ---
 title: "Assets and Styling"
-description: "Ship images, fonts and stylesheets with your views, and extend the Vite config"
+description: "Ship images, fonts and stylesheets with your views"
 sidebarTitle: "Assets and Styling"
 icon: "image"
 ---
 
-Views are built by [Vite](https://vite.dev) and served by your Skybridge server under `/assets`. Anything Vite can bundle, a view can use. This guide covers where files go, how they are addressed at runtime, and which parts of `vite.config.ts` are yours to change.
+Views are built by [Vite](https://vite.dev) and served by your Skybridge server under `/assets`. Anything Vite can bundle, a view can use. This guide covers where files go and how they are addressed at runtime.
 
 ## Images and Other Files
 
@@ -54,37 +54,3 @@ With Tailwind v4, `@apply` only resolves in the file that imports `tailwindcss`.
 }
 ```
 </Warning>
-
-## Customize Vite
-
-`vite.config.ts` is a standard Vite config. Skybridge ships as a plugin, so the options, plugins and aliases you would use in another Vite project work here too.
-
-```ts vite.config.ts
-import path from "node:path";
-import { skybridge } from "@skybridge/vite-plugin";
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
-
-export default defineConfig({
-  plugins: [skybridge(), react(), tailwindcss()],
-  resolve: {
-    alias: { "@": path.resolve(import.meta.dirname, "./src") },
-  },
-  server: {
-    forwardConsole: { unhandledErrors: true, logLevels: ["error"] },
-  },
-});
-```
-
-A few settings are set by Skybridge so views load correctly inside a host, and your values for them are overridden. The plugin sets the first four; `skybridge dev` sets the last one when it mounts Vite inside its Express app:
-
-| Setting | Value |
-| --- | --- |
-| `base` | `/assets` |
-| `build.outDir`, `build.emptyOutDir`, `build.manifest`, `build.minify`, `build.cssCodeSplit`, `build.rollupOptions.input` | Output goes to `dist/assets` with a manifest the server reads, one entry per view, one stylesheet |
-| `resolve.dedupe` | A single copy of `react` and `react-dom` |
-| `experimental.renderBuiltUrl` | Asset URLs resolve against `window.skybridge.serverUrl` |
-| `server.middlewareMode`, `server.hmr`, `server.allowedHosts` | Forced by `skybridge dev`, which runs Vite in middleware mode |
-
-Other `build` options such as `sourcemap` or `target` pass through, and so does the rest of `server` (`forwardConsole` for instance, see [Read View Logs](/test/tunnel#read-view-logs-on-mobile-or-desktop-apps)). The `skybridge()` plugin itself takes `viewsDir` to move your views folder and `serverExternal` to keep packages out of the server bundle: see the [`build` command](/api-reference/cli#excluding-packages-from-the-server-bundle).

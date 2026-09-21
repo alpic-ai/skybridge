@@ -24,7 +24,3 @@ In CSS, `url("/assets/hero.png")` works without a prefix. Third-party origins ne
 Import stylesheets from any view or component file (`import "./product.css"`). Skybridge sets `cssCodeSplit: false`, so all CSS is bundled into one `style.css` shared by every view.
 
 Tailwind v4: `@apply` in a stylesheet other than the one importing `tailwindcss` fails with `Cannot apply unknown utility class`. Add `@reference "<path to main stylesheet>";` at the top of that file.
-
-## Vite config
-
-`vite.config.ts` is a standard Vite config; `skybridge()` is a plugin. Plugins, aliases, `define`, `css`, `server.forwardConsole` and `build.sourcemap`/`build.target` work as usual. The plugin overrides `base`, `build.outDir`, `build.emptyOutDir`, `build.manifest`, `build.minify`, `build.cssCodeSplit`, `build.rollupOptions.input`, `resolve.dedupe`, `experimental.renderBuiltUrl`; `skybridge dev` additionally forces `server.middlewareMode`, `server.hmr` and `server.allowedHosts`. Plugin options: `viewsDir` (views folder) and `serverExternal` (packages kept out of the server bundle).
