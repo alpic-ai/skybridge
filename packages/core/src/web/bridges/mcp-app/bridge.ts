@@ -1,8 +1,6 @@
+import { ListToolsRequestSchema } from "@modelcontextprotocol/core";
 import { App } from "@modelcontextprotocol/ext-apps";
-import {
-  type Implementation,
-  ListToolsRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+import type { Implementation } from "@modelcontextprotocol/server";
 import { dequal } from "dequal/lite";
 import * as z from "zod/v4";
 import type {
@@ -234,7 +232,8 @@ export class McpAppBridge implements Bridge<McpAppContext> {
       toolOutput: createMcpStore(
         this,
         ["toolResult"],
-        ({ toolResult }) => toolResult?.structuredContent ?? null,
+        ({ toolResult }) =>
+          (toolResult?.structuredContent as Record<string, unknown>) ?? null,
       ),
       toolResponseMetadata: createMcpStore(
         this,

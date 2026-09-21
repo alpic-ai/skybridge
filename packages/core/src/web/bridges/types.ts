@@ -3,7 +3,7 @@ import type {
   EmbeddedResource,
   ResourceLink,
   ToolAnnotations,
-} from "@modelcontextprotocol/sdk/types.js";
+} from "@modelcontextprotocol/server";
 import type { useSyncExternalStore } from "react";
 import type { output as ZodOutput, ZodType } from "zod/v4";
 
