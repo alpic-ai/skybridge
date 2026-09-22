@@ -145,6 +145,32 @@ describe("createJwksVerifier", () => {
     },
   );
 
+  it("accepts a token minted for any of several audiences", async () => {
+    const { privateKey, jwksUri } = await startJwks();
+    // A server reached at a local port and through a dev tunnel: tokens carry
+    // whichever resource the client discovered.
+    const verifier = createJwksVerifier({
+      issuer: ISSUER,
+      audience: [AUDIENCE, "https://tunnel.test"],
+      jwksUri,
+    });
+
+    const tunnelToken = await sign(
+      privateKey,
+      { client_id: "c" },
+      { audience: "https://tunnel.test" },
+    );
+    expect((await verifier.verifyAccessToken(tunnelToken)).clientId).toBe("c");
+
+    const localToken = await sign(privateKey, { client_id: "c" });
+    expect((await verifier.verifyAccessToken(localToken)).clientId).toBe("c");
+
+    const otherToken = await sign(privateKey, {}, { audience: "api://other" });
+    await expect(verifier.verifyAccessToken(otherToken)).rejects.toThrow(
+      /unexpected {2}aud {2}claim value/,
+    );
+  });
+
   it("skips the aud check when no audience is configured (e.g. Clerk)", async () => {
     const { privateKey, jwksUri } = await startJwks();
     const verifier = createJwksVerifier({ issuer: ISSUER, jwksUri });

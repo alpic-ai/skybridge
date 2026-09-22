@@ -34,7 +34,7 @@ workosProvider(opts: WorkosProviderOptions): Promise<OAuthConfig>;
 
 - **`domain`** is the AuthKit domain, for example `acme.authkit.app`.
 
-- **`audience`** is the [Resource Indicator](https://datatracker.ietf.org/doc/html/rfc8707) configured in the WorkOS dashboard, typically this server's public URL. AuthKit binds it into the token's `aud` claim.
+- **`audience`** is the [Resource Indicator](https://datatracker.ietf.org/doc/html/rfc8707) configured in the WorkOS dashboard, typically this server's public URL. AuthKit binds it into the token's `aud` claim. Reached at more than one URL, say a local port and a `skybridge dev --tunnel` URL? Register each one as a Resource Indicator and pass them all as an array.
 
 It also accepts the shared [`CustomProviderOptions`](/api-reference/custom-provider#parameters) options: `baseUrl`, `serverUrl`, `scopes`, `requiredScopes`, and `metadataOverrides`.
 

@@ -5,9 +5,11 @@ import type { AuthInfo, ExtraClaims, TokenVerifier } from "../auth.js";
 export type JwksVerifyConfig = {
   /** Expected `iss` claim. */
   issuer: string;
-  /** Expected `aud` claim. Omit to skip audience verification — for IdPs that
-   * don't bind an audience to their access tokens (e.g. Clerk). */
-  audience?: string;
+  /** Expected `aud` claim, or several: a token passes when its `aud` matches
+   * any of them, for a server reached at more than one URL (a local port and a
+   * dev tunnel). Omit to skip audience verification — for IdPs that don't bind
+   * an audience to their access tokens (e.g. Clerk). */
+  audience?: string | string[];
   /** Defaults to `${issuer}/.well-known/jwks.json`. */
   jwksUri?: string;
 };

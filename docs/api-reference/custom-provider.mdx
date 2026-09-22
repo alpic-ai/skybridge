@@ -39,7 +39,7 @@ customProvider(opts: CustomProviderOptions): Promise<OAuthConfig>;
 ```ts
 type CustomProviderOptions = {
   issuer: string;
-  audience?: string;
+  audience?: string | string[];
   baseUrl?: string;
   serverUrl?: string;
   scopes?: string[];
@@ -51,7 +51,7 @@ type CustomProviderOptions = {
 | Field | Description |
 | --- | --- |
 | `issuer` | The only required option: the IdP base URL whose discovery document is fetched at boot. It must serve a `jwks_uri`, or the call throws. |
-| `audience` | Checked against each token's `aud` claim. Omit it only for an IdP that binds no audience (Clerk): the `aud` check is then skipped. |
+| `audience` | Checked against each token's `aud` claim. Pass several, say a local port and a dev tunnel URL, when the server is reached at more than one URL: a token passes when its `aud` matches any of them. Omit it only for an IdP that binds no audience (Clerk): the `aud` check is then skipped. |
 | `baseUrl` | This server's public URL. Set it and the resource URLs are baked once at boot; omit it and they resolve per request from the `x-forwarded-host` / `x-forwarded-proto` / `host` headers. |
 | `serverUrl` | Advertises this server as the authorization server: the served AS metadata `issuer` and the PRM `authorization_servers` use this URL instead of the IdP's, while verification still trusts the IdP's real `iss`. Needed when this server must sit in the auth path, as [`auth0Provider`](/api-reference/auth0-provider) does, or behind the Alpic DCR proxy. |
 | `scopes` | Scopes advertised in the served metadata; defaults to the IdP's. |

@@ -10,10 +10,12 @@ import { createJwksVerifier, type RegisteredClaims } from "../verify.js";
 /** Options accepted by {@link customProvider} and the branded providers. */
 export type CustomProviderOptions = {
   issuer: string;
-  /** Expected token `aud`. Omit to skip audience verification — only for IdPs
+  /** Expected token `aud`, or several when the server is reached at more than
+   * one URL (a local port and a dev tunnel): a token passes when its `aud`
+   * matches any of them. Omit to skip audience verification — only for IdPs
    * that don't bind an audience (e.g. Clerk). Branded providers whose IdP does
    * bind an audience re-require it in their own options. */
-  audience?: string;
+  audience?: string | string[];
   /** Omit to let the server infer the resource origin from request headers. */
   baseUrl?: string;
   /** Advertise THIS server as the authorization server (skybridge-as-AS): the
