@@ -29,11 +29,10 @@ import {
 } from "lucide-react";
 import { type ComponentType, useRef, useState } from "react";
 import type { RequestDisplayMode } from "skybridge/web";
-
+import { BlossomIcon } from "@/components/layout/preview/chatgpt-icons.js";
+import { ClaudeLogomark } from "@/components/layout/preview/claude-icons.js";
 import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
 import { cn } from "@/lib/utils.js";
-import { BlossomIcon } from "../preview/chatgpt-icons.js";
-import { ClaudeLogomark } from "../preview/claude-icons.js";
 import { locales } from "./locales.js";
 import { isOneOf } from "./utils.js";
 

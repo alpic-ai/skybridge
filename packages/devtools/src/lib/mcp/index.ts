@@ -11,9 +11,9 @@ import { useAuthStore } from "@/lib/auth-store.js";
 import { warnOnLargeToolOutput } from "@/lib/context-warnings.js";
 import { env } from "@/lib/env.js";
 import { getInspectorPreferences } from "@/lib/inspector-preferences-store.js";
+import { useSelectedToolName } from "@/lib/nuqs.js";
+import { queryClient } from "@/lib/query-client.js";
 import { useStore } from "@/lib/store.js";
-import { useSelectedToolName } from "../nuqs.js";
-import { queryClient } from "../query-client.js";
 import { BrowserOAuthProvider } from "./browser-oauth-provider.js";
 import { McpClient } from "./client.js";
 

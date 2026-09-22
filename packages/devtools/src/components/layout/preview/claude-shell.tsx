@@ -1,11 +1,11 @@
 import { ArrowUp, SlidersVertical } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
+import { claudeFontsCss } from "@/components/layout/tool-panel/view/claude-host-context.js";
 import {
   useInspectorPreferencesStore,
   useIsMobile,
 } from "@/lib/inspector-preferences-store.js";
 import { cn } from "@/lib/utils.js";
-import { claudeFontsCss } from "../tool-panel/view/claude-host-context.js";
 import { CrossIcon } from "./chatgpt-icons.js";
 import {
   ArtifactsIcon,

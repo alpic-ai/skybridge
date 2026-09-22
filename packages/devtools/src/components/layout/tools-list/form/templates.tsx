@@ -12,8 +12,8 @@ import type {
 import { getInputProps } from "@rjsf/utils";
 import { Plus, X } from "lucide-react";
 import type { CSSProperties } from "react";
+import { TruncatedDescription } from "@/components/layout/tools-list/truncated-description.js";
 import { cn } from "@/lib/utils.js";
-import { TruncatedDescription } from "../truncated-description.js";
 import {
   denseInputClass,
   descriptionTextClass,
