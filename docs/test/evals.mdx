@@ -127,11 +127,9 @@ Pass `judge` to grade the conversation yourself. It receives the criteria and th
 ```ts evals/trip.eval.ts
 import { TypeSafeClient, noul } from "@typesafe-ai/sdk";
 
-const typesafe = new TypeSafeClient();
-
 await expect.chat(chat).toPassJudgment("stays under the budget", {
   judge: async ({ criteria, transcript }) => {
-    const { answers } = await typesafe.systemOne({
+    const { answers } = await new TypeSafeClient().systemOne({
       state: { criteria, conversation: transcript },
       questions: { pass: noul("Does the conversation satisfy the criteria?") },
     });
@@ -148,7 +146,7 @@ await expect.chat(chat).toPassJudgment("stays under the budget", {
 
 A judgment is a live model call: it costs money, and it is not reproducible the way a tool-call assertion is. Use it only when no other matcher fits. Keep the criteria narrow, so a failure points at one thing.
 
-If the provider breaks, the assertion throws `judge unavailable: <error>` instead of failing. A flaky provider never reads as an app regression.
+When the judge throws, the assertion throws `judge unavailable: <error>` instead of failing. That covers a broken provider and a bug in your own callback alike, so neither reads as an app regression.
 
 ## Stub a Tool Result
 

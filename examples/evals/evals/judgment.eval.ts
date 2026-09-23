@@ -6,10 +6,16 @@ import { app } from "../src/server.js";
 
 const model = anthropic("claude-sonnet-4-5");
 
-const typesafe = new TypeSafeClient();
+const prompt = "What ski goggles do you have, and how much are they?";
 
-async function jev({ criteria, transcript }: Judgment): Promise<Verdict> {
-  const { answers } = await typesafe.systemOne({
+const criteria =
+  "quotes only goggles that the tool returned, with the prices it returned, and invents no product";
+
+async function typesafeJudge({
+  criteria,
+  transcript,
+}: Judgment): Promise<Verdict> {
+  const { answers } = await new TypeSafeClient().systemOne({
     state: { criteria, conversation: transcript },
     questions: {
       pass: noul("Does the conversation satisfy the criteria?", {
@@ -27,26 +33,17 @@ async function jev({ criteria, transcript }: Judgment): Promise<Verdict> {
 
 it("answers from the catalog rather than from memory", async () => {
   const chat = await start({ app, model });
-  await chat.send("What ski goggles do you have, and how much are they?");
+  await chat.send(prompt);
 
-  await expect
-    .chat(chat)
-    .toPassJudgment(
-      "quotes only goggles that the tool returned, with the prices it returned, and invents no product",
-    );
+  await expect.chat(chat).toPassJudgment(criteria);
 });
 
 it.skipIf(!process.env.TYPESAFE_API_KEY)(
   "grades the same answer with Jev instead of a language model",
   async () => {
     const chat = await start({ app, model });
-    await chat.send("What ski goggles do you have, and how much are they?");
+    await chat.send(prompt);
 
-    await expect
-      .chat(chat)
-      .toPassJudgment(
-        "quotes only goggles that the tool returned, with the prices it returned, and invents no product",
-        { judge: jev },
-      );
+    await expect.chat(chat).toPassJudgment(criteria, { judge: typesafeJudge });
   },
 );
