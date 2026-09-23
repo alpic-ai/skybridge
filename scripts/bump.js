@@ -143,6 +143,13 @@ for (const target of targets) {
     pkg.devDependencies["@skybridge/vite-plugin"] = skybridgeRange;
   }
 
+  if (
+    pkg.devDependencies?.["@skybridge/test"] &&
+    !pkg.devDependencies["@skybridge/test"].startsWith("workspace:")
+  ) {
+    pkg.devDependencies["@skybridge/test"] = skybridgeRange;
+  }
+
   if (alpicRange && pkg.devDependencies?.alpic) {
     pkg.devDependencies.alpic = alpicRange;
   }
