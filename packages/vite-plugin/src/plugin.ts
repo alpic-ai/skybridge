@@ -113,7 +113,7 @@ function assertMatchersInstalled(projectRoot: string): void {
     );
   } catch {
     throw new Error(
-      `The \`evals\` plugin option registers the \`expect.chat\` matchers from "${MATCHERS_MODULE}", which is not installed. Add it with \`npm install -D @skybridge/test@beta\`.`,
+      `The \`evals\` plugin option registers the \`expect.chat\` matchers from "${MATCHERS_MODULE}", which is not installed. Add it with \`npm install -D @skybridge/test\`.`,
     );
   }
 }
