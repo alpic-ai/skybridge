@@ -135,8 +135,8 @@ export async function typesafeJudge({
   transcript,
 }: Judgment): Promise<Verdict> {
   const { answers } = await new TypeSafeClient().systemOne({
-    state: { criteria, conversation: transcript },
-    questions: { pass: noul("Does the conversation satisfy the criteria?") },
+    state: { conversation: transcript },
+    questions: { pass: noul(criteria) },
   });
 
   return {
