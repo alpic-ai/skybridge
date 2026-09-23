@@ -41,7 +41,7 @@ you change a tool's name, description or input schema.
 | `checkout.eval.ts`, anonymous | `toHaveFailedToolCall` |
 | `checkout.eval.ts`, signed in | `authInfo`, `.not`, reading `chat.toolCalls` |
 | `judgment.eval.ts`, catalog answer | `toPassJudgment` on the chat's own model |
-| `judgment.eval.ts`, same answer via Jev | `toPassJudgment` with a custom `judge` |
+| `judgment.eval.ts`, same answer via Jev | `toPassJudgment` with a custom `judge`, defined in `evals/typesafe-judge.ts` |
 
 The plugin config in `vite.config.ts` sets shared defaults for every scenario,
 so it also covers the `evals` options on the Vite plugin.

@@ -124,23 +124,37 @@ await expect.chat(chat).toPassJudgment("answers in one short paragraph", {
 
 Pass `judge` to grade the conversation yourself. It receives the criteria and the rendered transcript, and returns a verdict. This is how you plug in an evaluation model, which answers a typed question with a probability instead of writing text, or any scoring service you already run:
 
-```ts evals/trip.eval.ts
+Define it once in its own module, so every scenario that wants it imports the same judge:
+
+```ts evals/typesafe-judge.ts
+import type { Judgment, Verdict } from "@skybridge/test";
 import { TypeSafeClient, noul } from "@typesafe-ai/sdk";
 
-await expect.chat(chat).toPassJudgment("stays under the budget", {
-  judge: async ({ criteria, transcript }) => {
-    const { answers } = await new TypeSafeClient().systemOne({
-      state: { criteria, conversation: transcript },
-      questions: { pass: noul("Does the conversation satisfy the criteria?") },
-    });
+export async function typesafeJudge({
+  criteria,
+  transcript,
+}: Judgment): Promise<Verdict> {
+  const { answers } = await new TypeSafeClient().systemOne({
+    state: { criteria, conversation: transcript },
+    questions: { pass: noul("Does the conversation satisfy the criteria?") },
+  });
 
-    return {
-      pass: answers.pass.noul >= 0.5,
-      reasoning: `P(pass) = ${answers.pass.noul.toFixed(2)}`,
-    };
-  },
-});
+  return {
+    pass: answers.pass.noul >= 0.5,
+    reasoning: `P(pass) = ${answers.pass.noul.toFixed(2)}`,
+  };
+}
 ```
+
+```ts evals/trip.eval.ts
+import { typesafeJudge } from "./typesafe-judge.js";
+
+await expect
+  .chat(chat)
+  .toPassJudgment("stays under the budget", { judge: typesafeJudge });
+```
+
+`Judgment` and `Verdict` are exported from `@skybridge/test`, so a judge written this way is typed without repeating the shape.
 
 `reasoning` is optional, and the failure message drops the line when there is none. A judge that returns no prose is cheaper and faster, but a red eval then tells you only that it failed, so it is worth returning the score.
 
