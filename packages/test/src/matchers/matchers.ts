@@ -336,6 +336,12 @@ ${spoken(received)}`,
             transcript: transcriptFor(received),
           })
         : await modelVerdict(received, criteria, options?.model);
+
+      if (typeof verdict?.pass !== "boolean") {
+        throw new Error(
+          `the judge returned ${JSON.stringify(verdict)} instead of a verdict with a boolean "pass"`,
+        );
+      }
     } catch (error) {
       throw new Error(
         `judge unavailable: ${error instanceof Error ? error.message : String(error)}`,

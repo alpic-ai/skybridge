@@ -158,7 +158,7 @@ await expect
 
 `reasoning` is optional, and the failure message drops the line when there is none. A judge that returns no prose is cheaper and faster, but a red eval then tells you only that it failed, so it is worth returning the score.
 
-A judgment is a live model call: it costs money, and it is not reproducible the way a tool-call assertion is. Use it only when no other matcher fits. Keep the criteria narrow, so a failure points at one thing.
+By default a judgment is a live model call: it costs money, and it is not reproducible the way a tool-call assertion is. A custom `judge` costs and varies only as much as whatever it calls, and a local heuristic is free and deterministic. Either way, use it only when no other matcher fits, and keep the criteria narrow so a failure points at one thing.
 
 When the judge throws, the assertion throws `judge unavailable: <error>` instead of failing. That covers a broken provider and a bug in your own callback alike, so neither reads as an app regression.
 
