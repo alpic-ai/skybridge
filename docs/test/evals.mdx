@@ -120,6 +120,32 @@ await expect.chat(chat).toPassJudgment("answers in one short paragraph", {
 });
 ```
 
+### Judge With Something Other Than a Model
+
+Pass `judge` to grade the conversation yourself. It receives the criteria and the rendered transcript, and returns a verdict. This is how you plug in an evaluation model, which answers a typed question with a probability instead of writing text, or any scoring service you already run:
+
+```ts evals/trip.eval.ts
+import { TypeSafeClient, noul } from "@typesafe-ai/sdk";
+
+const typesafe = new TypeSafeClient();
+
+await expect.chat(chat).toPassJudgment("stays under the budget", {
+  judge: async ({ criteria, transcript }) => {
+    const { answers } = await typesafe.systemOne({
+      state: { criteria, conversation: transcript },
+      questions: { pass: noul("Does the conversation satisfy the criteria?") },
+    });
+
+    return {
+      pass: answers.pass.noul >= 0.5,
+      reasoning: `P(pass) = ${answers.pass.noul.toFixed(2)}`,
+    };
+  },
+});
+```
+
+`reasoning` is optional, and the failure message drops the line when there is none. A judge that returns no prose is cheaper and faster, but a red eval then tells you only that it failed, so it is worth returning the score.
+
 A judgment is a live model call: it costs money, and it is not reproducible the way a tool-call assertion is. Use it only when no other matcher fits. Keep the criteria narrow, so a failure points at one thing.
 
 If the provider breaks, the assertion throws `judge unavailable: <error>` instead of failing. A flaky provider never reads as an app regression.

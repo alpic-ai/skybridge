@@ -290,6 +290,24 @@ describe("toPassJudgment", () => {
     );
   });
 
+  it("grades with a custom judge instead of the model", async () => {
+    const chat = judgeChat({ pass: true, reasoning: "unused" });
+    const seen: string[] = [];
+
+    await expect(
+      expect.chat(chat).toPassJudgment("stays under the budget", {
+        judge: ({ criteria, transcript }) => {
+          seen.push(criteria, transcript);
+          return { pass: false };
+        },
+      }),
+    ).rejects.toThrow(/judge: FAIL$/);
+
+    expect(seen[0]).toBe("stays under the budget");
+    expect(seen[1]).toContain("Here is a 640 euro plan.");
+    expect((chat.model as MockLanguageModelV3).doGenerateCalls).toHaveLength(0);
+  });
+
   it("tells a broken provider apart from a failed verdict", async () => {
     const chat = judgeChat(new Error("rate limit"));
 
