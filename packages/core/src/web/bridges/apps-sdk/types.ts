@@ -105,14 +105,13 @@ export type AppsSdkMethods<WS extends AppsSdkWidgetState = AppsSdkWidgetState> =
     requestModal: (args: RequestModalOptions) => Promise<void>;
 
     /** Uploads a new file to the host. Pass `{ library: true }` to also save to the user's ChatGPT file library. */
-    uploadFile: (
+    uploadFile?: (
       file: File,
       options?: UploadFileOptions,
     ) => Promise<FileMetadata>;
 
     /**
      * Opens ChatGPT's file library picker and returns app-authorized files.
-     * Feature-detect before using: this method may not be available on all host versions.
      */
     selectFiles?: () => Promise<FileMetadata[]>;
 
@@ -120,7 +119,7 @@ export type AppsSdkMethods<WS extends AppsSdkWidgetState = AppsSdkWidgetState> =
      * Downloads a file from the host. Works for files uploaded by the widget,
      * files selected via selectFiles(), or files provided via tool/file params.
      */
-    getFileDownloadUrl: (
+    getFileDownloadUrl?: (
       file: FileMetadata,
     ) => Promise<{ downloadUrl: string }>;
 
