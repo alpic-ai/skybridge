@@ -266,6 +266,12 @@ export class HostAdaptor implements Adaptor {
     if (!this.openai) {
       throw new NotSupportedError("uploadFile");
     }
+    if (!this.openai.uploadFile) {
+      throw new NotSupportedError(
+        "uploadFile",
+        "not available on the current host version",
+      );
+    }
     const metadata = await this.openai.uploadFile(file, options);
     if (isImage(metadata.mimeType ?? file.type)) {
       await this.trackFileIds(metadata.fileId);
@@ -279,6 +285,14 @@ export class HostAdaptor implements Adaptor {
     if (!this.openai) {
       return Promise.reject(new NotSupportedError("getFileDownloadUrl"));
     }
+    if (!this.openai.getFileDownloadUrl) {
+      return Promise.reject(
+        new NotSupportedError(
+          "getFileDownloadUrl",
+          "not available on the current host version",
+        ),
+      );
+    }
     return this.openai.getFileDownloadUrl(file);
   };
 
@@ -287,8 +301,9 @@ export class HostAdaptor implements Adaptor {
       throw new NotSupportedError("selectFiles");
     }
     if (!this.openai.selectFiles) {
-      throw new Error(
-        "selectFiles is not supported by the current host version.",
+      throw new NotSupportedError(
+        "selectFiles",
+        "not available on the current host version",
       );
     }
     const files = await this.openai.selectFiles();
