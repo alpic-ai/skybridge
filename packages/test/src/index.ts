@@ -2,7 +2,9 @@ export type { Chat } from "./chat.js";
 export type {
   ChatAssertion,
   ChatMatchers,
+  Judgment,
   JudgmentOptions,
+  Verdict,
 } from "./matchers/index.js";
 export type {
   EvalApp,

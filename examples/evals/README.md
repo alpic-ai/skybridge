@@ -19,6 +19,11 @@ pnpm evals             # run the scenarios
 pnpm evals:types       # typecheck them
 ```
 
+One scenario grades the conversation with [Jev](https://typesafe.ai), an
+evaluation model that returns a probability instead of text. It needs a
+`TYPESAFE_API_KEY`, and skips itself when there is none, so the rest of the
+suite runs on an Anthropic key alone.
+
 They cost tokens and their result depends on the model, so you run them when
 you change a tool's name, description or input schema.
 
@@ -35,6 +40,8 @@ you change a tool's name, description or input schema.
 | `browse.eval.ts`, greeting | `toHaveCalledNoTools`, `systemPrompt` and `maxSteps` overrides |
 | `checkout.eval.ts`, anonymous | `toHaveFailedToolCall` |
 | `checkout.eval.ts`, signed in | `authInfo`, `.not`, reading `chat.toolCalls` |
+| `judgment.eval.ts`, catalog answer | `toPassJudgment` on the chat's own model |
+| `judgment.eval.ts`, same answer via Jev | `toPassJudgment` with a custom `judge`, defined in `evals/typesafe-judge.ts` |
 
 The plugin config in `vite.config.ts` sets shared defaults for every scenario,
 so it also covers the `evals` options on the Vite plugin.

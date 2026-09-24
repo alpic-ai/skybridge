@@ -1,5 +1,6 @@
 import { MockLanguageModelV3 } from "ai/test";
 import { describe, expect, it } from "vitest";
+import type { Verdict } from "./matchers.js";
 import type { ChatLike, ToolCall, Turn } from "./types.js";
 import "./matchers.js";
 
@@ -288,6 +289,34 @@ describe("toPassJudgment", () => {
     ).toContain(
       'search-hotels {\\"city\\":\\"Lisbon\\"} -> {\\"cheapest\\":120}',
     );
+  });
+
+  it("grades with a custom judge instead of the model", async () => {
+    const chat = judgeChat({ pass: true, reasoning: "unused" });
+    const seen: string[] = [];
+
+    await expect(
+      expect.chat(chat).toPassJudgment("stays under the budget", {
+        judge: ({ criteria, transcript }) => {
+          seen.push(criteria, transcript);
+          return { pass: false };
+        },
+      }),
+    ).rejects.toThrow(/judge: FAIL$/);
+
+    expect(seen[0]).toBe("stays under the budget");
+    expect(seen[1]).toContain("Here is a 640 euro plan.");
+    expect((chat.model as MockLanguageModelV3).doGenerateCalls).toHaveLength(0);
+  });
+
+  it("reports a malformed verdict as an unavailable judge", async () => {
+    const chat = judgeChat({ pass: true, reasoning: "unused" });
+
+    await expect(
+      expect.chat(chat).toPassJudgment("stays under the budget", {
+        judge: () => undefined as unknown as Verdict,
+      }),
+    ).rejects.toThrow(/judge unavailable: the judge returned/);
   });
 
   it("tells a broken provider apart from a failed verdict", async () => {

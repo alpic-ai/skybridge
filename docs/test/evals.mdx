@@ -120,9 +120,47 @@ await expect.chat(chat).toPassJudgment("answers in one short paragraph", {
 });
 ```
 
-A judgment is a live model call: it costs money, and it is not reproducible the way a tool-call assertion is. Use it only when no other matcher fits. Keep the criteria narrow, so a failure points at one thing.
+### Judge With Something Other Than a Model
 
-If the provider breaks, the assertion throws `judge unavailable: <error>` instead of failing. A flaky provider never reads as an app regression.
+Pass `judge` to grade the conversation yourself. It receives the criteria and the rendered transcript, and returns a verdict. This is how you plug in an evaluation model, which answers a typed question with a probability instead of writing text, or any scoring service you already run:
+
+Define it once in its own module, so every scenario that wants it imports the same judge:
+
+```ts evals/typesafe-judge.ts
+import type { Judgment, Verdict } from "@skybridge/test";
+import { TypeSafeClient, noul } from "@typesafe-ai/sdk";
+
+export async function typesafeJudge({
+  criteria,
+  transcript,
+}: Judgment): Promise<Verdict> {
+  const { answers } = await new TypeSafeClient().systemOne({
+    state: { conversation: transcript },
+    questions: { pass: noul(criteria) },
+  });
+
+  return {
+    pass: answers.pass.noul >= 0.5,
+    reasoning: `P(pass) = ${answers.pass.noul.toFixed(2)}`,
+  };
+}
+```
+
+```ts evals/trip.eval.ts
+import { typesafeJudge } from "./typesafe-judge.js";
+
+await expect
+  .chat(chat)
+  .toPassJudgment("stays under the budget", { judge: typesafeJudge });
+```
+
+`Judgment` and `Verdict` are exported from `@skybridge/test`, so a judge written this way is typed without repeating the shape.
+
+`reasoning` is optional, and the failure message drops the line when there is none. A judge that returns no prose is cheaper and faster, but a red eval then tells you only that it failed, so it is worth returning the score.
+
+By default a judgment is a live model call: it costs money, and it is not reproducible the way a tool-call assertion is. A custom `judge` costs and varies only as much as whatever it calls, and a local heuristic is free and deterministic. Either way, use it only when no other matcher fits, and keep the criteria narrow so a failure points at one thing.
+
+When the judge throws, the assertion throws `judge unavailable: <error>` instead of failing. That covers a broken provider and a bug in your own callback alike, so neither reads as an app regression.
 
 ## Stub a Tool Result
 

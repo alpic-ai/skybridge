@@ -4,10 +4,30 @@ import type { ToolInput, ToolNames } from "skybridge/server";
 import { expect } from "vitest";
 import type { ChatLike, ToolCall, Turn } from "./types.js";
 
+/** What a judge decided about a conversation. */
+export interface Verdict {
+  pass: boolean;
+  /** Why, quoted in the failure message. Omit it when the judge gives no prose. */
+  reasoning?: string;
+}
+
+/** The conversation handed to a {@link JudgmentOptions.judge}. */
+export interface Judgment {
+  criteria: string;
+  /** The rendered conversation, one turn per line, tool results included. */
+  transcript: string;
+}
+
 /** Options for {@link ChatMatchers.toPassJudgment}. */
 export interface JudgmentOptions {
   /** Overrides the judge for this assertion. Defaults to the chat's model. */
   model?: LanguageModel;
+  /**
+   * Grades the conversation instead of the default model call, so an
+   * evaluation model or a scoring service can stand in for the judge. Takes
+   * precedence over {@link JudgmentOptions.model}.
+   */
+  judge?: (judgment: Judgment) => Verdict | Promise<Verdict>;
 }
 
 /**
@@ -155,6 +175,30 @@ Calls the model actually made:
 ${observed(chat)}`;
 }
 
+async function modelVerdict(
+  chat: ChatLike<unknown>,
+  criteria: string,
+  model?: LanguageModel,
+): Promise<Verdict> {
+  const { generateObject, jsonSchema } = await import("ai");
+  const { object } = await generateObject({
+    model: model ?? chat.model,
+    temperature: 0,
+    system: JUDGE_SYSTEM,
+    prompt: `Criteria:\n${criteria}\n\n<conversation>\n${transcriptFor(chat)}\n</conversation>`,
+    schema: jsonSchema<Verdict & { reasoning: string }>({
+      type: "object",
+      properties: {
+        pass: { type: "boolean" },
+        reasoning: { type: "string" },
+      },
+      required: ["pass", "reasoning"],
+      additionalProperties: false,
+    }),
+  });
+  return object;
+}
+
 expect.extend({
   toHaveCalledToolOnce(
     received: ChatLike<unknown>,
@@ -284,25 +328,20 @@ ${spoken(received)}`,
     criteria: string,
     options?: JudgmentOptions,
   ) {
-    let verdict: { pass: boolean; reasoning: string };
+    let verdict: Verdict;
     try {
-      const { generateObject, jsonSchema } = await import("ai");
-      const { object } = await generateObject({
-        model: options?.model ?? received.model,
-        temperature: 0,
-        system: JUDGE_SYSTEM,
-        prompt: `Criteria:\n${criteria}\n\n<conversation>\n${transcriptFor(received)}\n</conversation>`,
-        schema: jsonSchema<{ pass: boolean; reasoning: string }>({
-          type: "object",
-          properties: {
-            pass: { type: "boolean" },
-            reasoning: { type: "string" },
-          },
-          required: ["pass", "reasoning"],
-          additionalProperties: false,
-        }),
-      });
-      verdict = object;
+      verdict = options?.judge
+        ? await options.judge({
+            criteria,
+            transcript: transcriptFor(received),
+          })
+        : await modelVerdict(received, criteria, options?.model);
+
+      if (typeof verdict?.pass !== "boolean") {
+        throw new Error(
+          `the judge returned ${JSON.stringify(verdict)} instead of a verdict with a boolean "pass"`,
+        );
+      }
     } catch (error) {
       throw new Error(
         `judge unavailable: ${error instanceof Error ? error.message : String(error)}`,
@@ -315,8 +354,7 @@ ${spoken(received)}`,
         `expected the conversation ${verdict.pass ? "not " : ""}to pass judgment:
   "${criteria}"
 
-judge: ${verdict.pass ? "PASS" : "FAIL"}
-  ${verdict.reasoning}`,
+judge: ${verdict.pass ? "PASS" : "FAIL"}${verdict.reasoning === undefined ? "" : `\n  ${verdict.reasoning}`}`,
     };
   },
 
