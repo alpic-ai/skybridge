@@ -1,0 +1,88 @@
+---
+title: "Persist Server Data"
+description: "Store data your tools read and write, beyond the request that created it"
+sidebarTitle: "Data Persistence"
+icon: "hard-drive"
+---
+
+[Managing state](/build/state) covers what the *view* remembers between renders. This guide covers something different: the data your *tools* read and write on the server, such as a product catalog, a todo list, or a CRM. That data needs to survive far longer than one request, and outlive the process serving it.
+
+## Local files don't survive deployment
+
+Write that data to a file on disk, and it works perfectly under `skybridge dev`. It then breaks, or silently resets, wherever you deploy:
+
+- **Cloudflare Workers** has no filesystem at all, so a file write throws immediately.
+- **Alpic**, and most container platforms like it, run your server in a container with a **read-only filesystem outside its OS temp directory**. Write anywhere else and the process crashes on boot:
+
+```
+Error: ENOENT: no such file or directory, mkdir '/var/task/data'
+```
+
+- Even inside the temp directory, that container can be replaced at any time (after a redeploy, when it scales, or after sitting idle), taking your data with it.
+- **Self-hosted Docker** does keep a real filesystem, but only for the life of that one container. A redeploy replaces it too, unless you explicitly mount a volume outside the image.
+
+None of this shows up locally, so it's easy to reach production before noticing.
+
+<Warning>
+If your server crashes on deploy with an `ENOENT` or a permission error on a path you wrote yourself, this is almost always why. Point it at an external store instead of a different local path: the next deploy, or the next scale-up, hits the same wall.
+</Warning>
+
+## Use an external data store instead
+
+Give your tools a database reachable over the network (Postgres, a hosted SQLite like Turso, or anything else with a client library) and connect to it once in `setup`, so every tool handler receives the same client:
+
+```ts server.ts
+import { createClient } from "@supabase/supabase-js";
+import { Skybridge } from "skybridge/server";
+import { z } from "zod";
+
+export const app = new Skybridge({
+  name: "todos",
+  version: "0.0.1",
+  setup: () =>
+    createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!),
+  handler: (server, supabase) =>
+    server.registerTool(
+      {
+        name: "add-todo",
+        description: "Add a todo item.",
+        inputSchema: { text: z.string() },
+        outputSchema: { id: z.number() },
+      },
+      async ({ text }) => {
+        const { data, error } = await supabase
+          .from("todos")
+          .insert({ text })
+          .select("id")
+          .single();
+
+        if (error) {
+          return { isError: true, content: [{ type: "text", text: error.message }] };
+        }
+        return {
+          structuredContent: { id: data.id },
+          content: [{ type: "text", text: `Added: ${text}` }],
+        };
+      },
+    ),
+});
+```
+
+The [Supabase Triplog example](/examples/supabase-triplog) builds on the same pattern with full CRUD, filtering, and a view on top: a good starting point if a hosted Postgres table fits what you're building.
+
+<Tip>
+None of this is Supabase-specific: any client that talks to a database over the network works the same way through `setup`. Pick whichever store you're already comfortable with.
+</Tip>
+
+## Go Further
+<Columns cols={3}>
+    <Card title="Manage State" icon="database" href="/build/state">
+        Decide what the view remembers between renders
+    </Card>
+    <Card title="Register Tools" icon="wrench" href="/build/tools">
+        Define what humans and agents can do
+    </Card>
+    <Card title="Deploy" icon="cloud-upload" href="/ship/deploy">
+        Take your app to production
+    </Card>
+</Columns>
