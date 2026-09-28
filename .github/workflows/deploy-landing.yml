@@ -31,7 +31,6 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Setup Pages
-        id: setup_pages
         uses: actions/configure-pages@v6
 
       - name: Restore Next.js cache
@@ -46,7 +45,6 @@ jobs:
         working-directory: ./landing
         run: pnpm run build
         env:
-          PAGES_BASE_PATH: ${{ steps.setup_pages.outputs.base_path }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload artifact
