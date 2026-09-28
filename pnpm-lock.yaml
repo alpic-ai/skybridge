@@ -1671,6 +1671,9 @@ importers:
       react-dom:
         specifier: '>=18.0.0'
         version: 19.2.4(react@19.2.4)
+      std-env:
+        specifier: ^4.0.0
+        version: 4.0.0
       superjson:
         specifier: ^2.2.6
         version: 2.2.6
