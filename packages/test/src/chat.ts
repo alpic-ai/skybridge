@@ -166,7 +166,10 @@ export class Chat<App = unknown> {
                 `the tool returned an error: ${JSON.stringify(result.content)}`,
               );
             }
-            return result.content ?? result;
+            return {
+              content: result.content,
+              structuredContent: result.structuredContent,
+            };
           },
         }),
       ] as const;
