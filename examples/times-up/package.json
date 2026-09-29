@@ -23,14 +23,14 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@skybridge/devtools": "^2.0.0",
+    "@skybridge/devtools": "^2.0.1",
     "@skybridge/vite-plugin": "^2.0.0",
     "@tailwindcss/vite": "^4.3.1",
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.2",
-    "alpic": "^1.142.1",
+    "alpic": "^1.175.1",
     "tsx": "^4.22.4",
     "typescript": "^5.9.3"
   },

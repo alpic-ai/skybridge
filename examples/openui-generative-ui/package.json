@@ -24,7 +24,7 @@
     "zustand": "^4.5.7"
   },
   "devDependencies": {
-    "@skybridge/devtools": "^2.0.0",
+    "@skybridge/devtools": "^2.0.1",
     "@skybridge/vite-plugin": "^2.0.0",
     "@types/node": "^25.9.4",
     "@types/react": "^19.2.17",
