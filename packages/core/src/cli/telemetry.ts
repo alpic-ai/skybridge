@@ -4,7 +4,7 @@ import { join } from "node:path";
 import type { Hook } from "@oclif/core";
 import ci from "ci-info";
 import { PostHog } from "posthog-node";
-import { agent, isAgent } from "std-env";
+import { agent } from "std-env";
 
 const POSTHOG_API_KEY = "phc_rQdkCYr0DO4NcZBQXZnUwsHAbau9zuNwKIpil9FQP6v";
 const POSTHOG_HOST = "https://us.i.posthog.com";
@@ -28,7 +28,6 @@ interface TelemetryEvent {
   machineId: string;
   sessionId: string;
   isCI: boolean;
-  isAgent: boolean;
   agent?: string;
   nodeVersion: string;
   platform: NodeJS.Platform;
@@ -149,7 +148,6 @@ const hook: Hook<"finally"> = async ({
     machineId: getMachineId(),
     sessionId: crypto.randomUUID(),
     isCI: ci.isCI,
-    isAgent,
     agent,
     nodeVersion: process.version,
     platform: process.platform,
