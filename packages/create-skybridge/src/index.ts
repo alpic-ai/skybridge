@@ -331,7 +331,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
       "add",
       "alpic-ai/skybridge",
       "--skill",
-      "chatgpt-plugin-builder",
+      "chatgpt-app-builder",
       "--agent",
       "universal",
       "claude-code",
