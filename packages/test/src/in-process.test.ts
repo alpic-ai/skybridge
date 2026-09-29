@@ -23,7 +23,11 @@ function buildApp(seen: string[]) {
         },
         async ({ category }) => {
           seen.push(category);
-          return { content: `1 pair of ${category}` };
+          return {
+            content: `1 pair of ${category}`,
+            structuredContent: { sku: "GOG-001" },
+            _meta: { imageUrl: "https://cdn.skybridge.test/gog.png" },
+          };
         },
       ),
   });
@@ -110,9 +114,10 @@ it("serves the session from the app's fetch handler, running tools in-process", 
   ]);
   expect(seen).toEqual(["goggles"]);
   expect(chat.assistantTurns).toEqual(["I found a pair of goggles."]);
-  expect(JSON.stringify(model.doGenerateCalls[1]?.prompt)).toContain(
-    "1 pair of goggles",
-  );
+  const prompt = JSON.stringify(model.doGenerateCalls[1]?.prompt);
+  expect(prompt).toContain("1 pair of goggles");
+  expect(prompt).toContain("GOG-001");
+  expect(prompt).not.toContain("cdn.skybridge.test");
 });
 
 it("enforces the app's own scopes against the injected identity", async () => {

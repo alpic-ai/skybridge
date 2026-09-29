@@ -40,12 +40,14 @@ const IN_PROCESS_URL = "http://in-process.skybridge.test/mcp";
  * reads the same envelope under a stub as it does live.
  */
 function asToolResult(value: unknown): unknown {
-  return [
-    {
-      type: "text",
-      text: typeof value === "string" ? value : JSON.stringify(value),
-    },
-  ];
+  return {
+    content: [
+      {
+        type: "text",
+        text: typeof value === "string" ? value : JSON.stringify(value),
+      },
+    ],
+  };
 }
 
 function outputOf(
@@ -233,7 +235,10 @@ export class Chat<App = unknown> {
                 `the tool returned an error: ${JSON.stringify(result.content)}`,
               );
             }
-            return result.content ?? result;
+            return {
+              content: result.content,
+              structuredContent: result.structuredContent,
+            };
           },
         }),
       ] as const;
