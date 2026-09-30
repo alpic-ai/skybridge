@@ -1,32 +1,51 @@
-import "./lib/load-env.js"; // must run before the tool modules read process.env
+import "./lib/load-env.js"; // must run before tool modules read process.env
 import { Skybridge } from "skybridge/server";
-import { CAROUSEL_RANGE, MIN_SEARCH_ITERATIONS } from "./config.js";
 import {
-  renderCarouselDefinition,
-  renderCarouselHandler,
-} from "./tools/render-carousel.js";
+  mentionSearchDefinition,
+  mentionSearchHandler,
+  registerProductResources,
+} from "./tools/search-mentions.js";
 import {
-  searchProductsDefinition,
-  searchProductsHandler,
-} from "./tools/search-products.js";
+  settingsReadDefinition,
+  settingsReadHandler,
+} from "./tools/settings-read.js";
+import {
+  settingsUpdateDefinition,
+  settingsUpdateHandler,
+} from "./tools/settings-update.js";
+import {
+  registerRichFormAdapter,
+  shopDefinition,
+  shopHandler,
+  shopIcons,
+} from "./tools/shop.js";
+
+const settingsCapability = {
+  readTool: "settings-read",
+  updateTool: "settings-update",
+};
 
 export const app = new Skybridge({
   name: "skybridge-shop",
+  title: "Skybridge Shop",
+  icons: shopIcons,
   version: "0.0.1",
-  instructions: `\
-Skybridge is a winter-sports shop: skis, goggles, and cold-weather apparel. Two phases:
-
-SEARCH: Call search-products (at least ${MIN_SEARCH_ITERATIONS}) before presenting. \
-Vary the keyword or scope with a category (apparel, goggles, skis) when the user narrows. \
-Stay silent while searching: emit NO text between calls. Speak only \
-once the carousel renders.
-
-RENDER: After curating, call render-carousel with the chosen product IDs (aim for ${CAROUSEL_RANGE}). \
-Speak once it renders, then recommend products in carousel order.`,
-  handler: (server) =>
-    server
-      .registerTool(searchProductsDefinition, searchProductsHandler)
-      .registerTool(renderCarouselDefinition, renderCarouselHandler),
+  supportedProtocolVersions: ["2026-07-28", "2025-11-25"],
+  capabilities: {
+    extensions: { "openai/settings": settingsCapability },
+    experimental: { "openai/settings": settingsCapability },
+  },
+  instructions: `Skybridge is a winter-sports shop: skis, goggles, and cold-weather apparel.
+Use shop with action search and a short keyword/category to find and visibly present products in one call. Ground recommendations in returned catalogue facts and displayed order. Use action carousel with curated product ids to refine the displayed selection. Use browse to open the workspace or a specific product, and choose with product ids for a native illustrated choice. My Kit is a tab in the workspace and lasts only while that view is open. Exact variants and quantities are selected in the UI. Purchases use the external storefront. Never invent product details, price, stock, or a completed purchase.`,
+  handler: (server) => {
+    registerProductResources(server);
+    registerRichFormAdapter(server);
+    return server
+      .registerTool(shopDefinition, shopHandler)
+      .registerTool(settingsReadDefinition, settingsReadHandler)
+      .registerTool(settingsUpdateDefinition, settingsUpdateHandler)
+      .registerTool(mentionSearchDefinition, mentionSearchHandler);
+  },
 });
 
 export type AppType = typeof app;
