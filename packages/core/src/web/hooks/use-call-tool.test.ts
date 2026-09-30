@@ -207,6 +207,16 @@ describe("useCallTool - onSuccess callback", () => {
       expect(result.current.data).toEqual(secondCallData);
     });
   });
+
+  it("should keep callTool and callToolAsync stable across renders", () => {
+    const { result, rerender } = renderHook(() => useCallTool(toolName));
+    const { callTool, callToolAsync } = result.current;
+
+    rerender();
+
+    expect(result.current.callTool).toBe(callTool);
+    expect(result.current.callToolAsync).toBe(callToolAsync);
+  });
 });
 
 describe("useCallTool - TypeScript typing", () => {

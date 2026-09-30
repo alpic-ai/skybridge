@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import {
   type CallToolArgs,
@@ -158,65 +158,76 @@ export const useCallTool = <
   const callIdRef = useRef(0);
   const adaptor = getAdaptor();
 
-  const execute = async (
-    toolArgs: ToolArgs,
-  ): Promise<CombinedCallToolResponse> => {
-    const callId = ++callIdRef.current;
-    setCallToolState({ status: "pending", data: undefined, error: undefined });
-
-    try {
-      const data = await adaptor.callTool<ToolArgs, CombinedCallToolResponse>(
-        name,
-        toolArgs,
-      );
-      if (callId === callIdRef.current) {
-        setCallToolState({ status: "success", data, error: undefined });
-      }
-
-      return data;
-    } catch (error) {
-      if (callId === callIdRef.current) {
-        setCallToolState({ status: "error", data: undefined, error });
-      }
-      throw error;
-    }
-  };
-
-  const callToolAsync = ((toolArgs?: ToolArgs) => {
-    if (toolArgs === undefined) {
-      return execute(null as ToolArgs);
-    }
-    return execute(toolArgs);
-  }) as CallToolAsyncFn<ToolArgs, CombinedCallToolResponse>;
-
-  const callTool = ((
-    firstArg?: ToolArgs | SideEffects<ToolArgs, CombinedCallToolResponse>,
-    sideEffects?: SideEffects<ToolArgs, CombinedCallToolResponse>,
-  ) => {
-    let toolArgs: ToolArgs;
-    if (
-      firstArg &&
-      typeof firstArg === "object" &&
-      ("onSuccess" in firstArg ||
-        "onError" in firstArg ||
-        "onSettled" in firstArg)
-    ) {
-      toolArgs = null as ToolArgs; // no toolArgs provided
-      sideEffects = firstArg;
-    } else {
-      toolArgs = (firstArg === undefined ? null : firstArg) as ToolArgs;
-    }
-
-    execute(toolArgs)
-      .then((data) => {
-        sideEffects?.onSuccess?.(data, toolArgs);
-        sideEffects?.onSettled?.(data, undefined, toolArgs);
-      })
-      .catch((error) => {
-        sideEffects?.onError?.(error, toolArgs);
-        sideEffects?.onSettled?.(undefined, error, toolArgs);
+  const execute = useCallback(
+    async (toolArgs: ToolArgs): Promise<CombinedCallToolResponse> => {
+      const callId = ++callIdRef.current;
+      setCallToolState({
+        status: "pending",
+        data: undefined,
+        error: undefined,
       });
-  }) as CallToolFn<ToolArgs, CombinedCallToolResponse>;
+
+      try {
+        const data = await adaptor.callTool<ToolArgs, CombinedCallToolResponse>(
+          name,
+          toolArgs,
+        );
+        if (callId === callIdRef.current) {
+          setCallToolState({ status: "success", data, error: undefined });
+        }
+
+        return data;
+      } catch (error) {
+        if (callId === callIdRef.current) {
+          setCallToolState({ status: "error", data: undefined, error });
+        }
+        throw error;
+      }
+    },
+    [adaptor, name],
+  );
+
+  const callToolAsync = useCallback(
+    (toolArgs?: ToolArgs) => {
+      if (toolArgs === undefined) {
+        return execute(null as ToolArgs);
+      }
+      return execute(toolArgs);
+    },
+    [execute],
+  ) as CallToolAsyncFn<ToolArgs, CombinedCallToolResponse>;
+
+  const callTool = useCallback(
+    (
+      firstArg?: ToolArgs | SideEffects<ToolArgs, CombinedCallToolResponse>,
+      sideEffects?: SideEffects<ToolArgs, CombinedCallToolResponse>,
+    ) => {
+      let toolArgs: ToolArgs;
+      if (
+        firstArg &&
+        typeof firstArg === "object" &&
+        ("onSuccess" in firstArg ||
+          "onError" in firstArg ||
+          "onSettled" in firstArg)
+      ) {
+        toolArgs = null as ToolArgs; // no toolArgs provided
+        sideEffects = firstArg;
+      } else {
+        toolArgs = (firstArg === undefined ? null : firstArg) as ToolArgs;
+      }
+
+      execute(toolArgs)
+        .then((data) => {
+          sideEffects?.onSuccess?.(data, toolArgs);
+          sideEffects?.onSettled?.(data, undefined, toolArgs);
+        })
+        .catch((error) => {
+          sideEffects?.onError?.(error, toolArgs);
+          sideEffects?.onSettled?.(undefined, error, toolArgs);
+        });
+    },
+    [execute],
+  ) as CallToolFn<ToolArgs, CombinedCallToolResponse>;
 
   const callToolState = {
     status,
