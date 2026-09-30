@@ -203,9 +203,9 @@ Every field is optional, and Skybridge only emits what you set: ChatGPT applies 
 
 Skybridge throws at startup when:
 
-- a `"global"` or `"thread"` entrypoint is set on a tool whose input schema rejects `{}`, because ChatGPT calls those tools without arguments;
+- a `"global"` or `"thread"` entrypoint is set on a tool whose input schema rejects `{}`, because ChatGPT calls those tools without arguments, or validates asynchronously, because Skybridge can't check it at startup;
 - a `file` extension doesn't start with `.`;
-- `preferredDisplayMode` is missing from `availableDisplayModes`.
+- `preferredDisplayMode` or `preferredModelDisplayMode` is missing from `availableDisplayModes`.
 
 <Info>
 ChatGPT always opens entrypoints fullscreen. The display modes apply when the model calls the tool in a conversation.

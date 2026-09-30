@@ -25,7 +25,7 @@ const HOST_BY_REPORTED_NAME: Record<string, Host> = {
 
 /**
  * OpenAI MCP extensions the host advertises. Each flag is `true` only when the
- * host sends `hostCapabilities.experimental["openai/<name>"]`, so every flag is
+ * host sends a truthy `hostCapabilities.experimental["openai/<name>"]`, so every flag is
  * `false` before the handshake and on hosts other than ChatGPT.
  */
 export type OpenAIHostCapabilities = {
@@ -68,7 +68,7 @@ export function useHost(): HostInfo {
   const name = hostInfo?.name;
   const openai = useMemo(() => {
     const supports = (extension: string) =>
-      capabilities?.experimental?.[`openai/${extension}`] !== undefined;
+      Boolean(capabilities?.experimental?.[`openai/${extension}`]);
     return {
       resource: supports("resource"),
       modelContext: supports("modelContext"),

@@ -5,7 +5,8 @@ import { useMcpAppContext } from "../bridges/index.js";
  * opened the view on through a deep link. Updates when the user follows
  * another deep link while the view is open. `undefined` when the view was not
  * opened through a deep link, on hosts other than ChatGPT, or when the host
- * sends a URL that doesn't start with `/` or contains a fragment.
+ * sends a URL that isn't app-relative (it must start with a single `/`) or
+ * that contains a fragment.
  *
  * Deep links target global entrypoints: set `openai.entrypoints` to include
  * `"global"` on the tool.
@@ -22,7 +23,13 @@ import { useMcpAppContext } from "../bridges/index.js";
  */
 export function useDeepLink(): string | undefined {
   const url = useMcpAppContext("openai/deepLink")?.url;
-  if (typeof url !== "string" || !url.startsWith("/") || url.includes("#")) {
+  if (
+    typeof url !== "string" ||
+    !url.startsWith("/") ||
+    url.startsWith("//") ||
+    url.startsWith("/\\") ||
+    url.includes("#")
+  ) {
     return undefined;
   }
   return url;

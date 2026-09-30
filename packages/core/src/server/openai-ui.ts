@@ -6,21 +6,33 @@ type InputSchema =
   | StandardSchemaWithJSON
   | undefined;
 
-function accepts(schema: StandardSchemaWithJSON, value: unknown): boolean {
+type EmptyInputCheck = "accepted" | "rejected" | "async";
+
+function check(
+  schema: StandardSchemaWithJSON,
+  value: unknown,
+): EmptyInputCheck {
   const result = schema["~standard"].validate(value);
-  return result instanceof Promise || !result.issues;
+  if (result instanceof Promise) {
+    return "async";
+  }
+  return result.issues ? "rejected" : "accepted";
 }
 
-function acceptsEmptyInput(inputSchema: InputSchema): boolean {
+function checkEmptyInput(inputSchema: InputSchema): EmptyInputCheck {
   if (inputSchema === undefined) {
-    return true;
+    return "accepted";
   }
   if ("~standard" in inputSchema) {
-    return accepts(inputSchema as StandardSchemaWithJSON, {});
+    return check(inputSchema as StandardSchemaWithJSON, {});
   }
-  return Object.values(inputSchema).every((schema) =>
-    accepts(schema, undefined),
+  const results = Object.values(inputSchema).map((schema) =>
+    check(schema, undefined),
   );
+  if (results.includes("rejected")) {
+    return "rejected";
+  }
+  return results.includes("async") ? "async" : "accepted";
 }
 
 function toWire(entrypoint: OpenAIEntrypoint): Record<string, unknown> {
@@ -60,9 +72,17 @@ export function buildOpenAIUiMeta(
       entrypoint === "thread" ||
       (typeof entrypoint === "object" && "global" in entrypoint),
   );
-  if (opensWithoutInput && !acceptsEmptyInput(inputSchema)) {
+  const emptyInput = opensWithoutInput
+    ? checkEmptyInput(inputSchema)
+    : "accepted";
+  if (emptyInput === "rejected") {
     fail(
       "has a global or thread entrypoint, so ChatGPT calls it with `{}`, but its input schema rejects `{}`. Make every input optional.",
+    );
+  }
+  if (emptyInput === "async") {
+    fail(
+      "has a global or thread entrypoint, so ChatGPT calls it with `{}`, but its input schema validates asynchronously and Skybridge can't check that it accepts `{}` at startup. Use a synchronous schema.",
     );
   }
   for (const entrypoint of entrypoints ?? []) {
@@ -75,14 +95,19 @@ export function buildOpenAIUiMeta(
       }
     }
   }
-  if (
-    preferredDisplayMode !== undefined &&
-    availableDisplayModes !== undefined &&
-    !availableDisplayModes.includes(preferredDisplayMode)
-  ) {
-    fail(
-      `prefers the "${preferredDisplayMode}" display mode, which isn't in its availableDisplayModes.`,
-    );
+  for (const [field, mode] of [
+    ["preferredDisplayMode", preferredDisplayMode],
+    ["preferredModelDisplayMode", openai.preferredModelDisplayMode],
+  ] as const) {
+    if (
+      mode !== undefined &&
+      availableDisplayModes !== undefined &&
+      !availableDisplayModes.includes(mode)
+    ) {
+      fail(
+        `sets ${field} to "${mode}", which isn't in its availableDisplayModes.`,
+      );
+    }
   }
 
   return {

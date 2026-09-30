@@ -37,7 +37,7 @@ string | undefined;
 
 The app-relative URL, path and query included, for example `"/parts?tag=bolt&sort=asc"`. Parse it with `new URL(deepLink, location.origin)` to read the query.
 
-`undefined` when the view wasn't opened through a deep link, on hosts other than **ChatGPT**, or when the host sends a URL that doesn't start with `/` or contains a fragment.
+`undefined` when the view wasn't opened through a deep link, on hosts other than **ChatGPT**, or when the host sends a URL that isn't app-relative (it must start with a single `/`) or that contains a fragment.
 
 ## Deep link format
 
