@@ -136,6 +136,7 @@
             "icon": "fishing-rod",
             "pages": [
               "api-reference/use-call-tool",
+              "api-reference/use-deep-link",
               "api-reference/use-display-mode",
               "api-reference/use-download",
               "api-reference/use-files",

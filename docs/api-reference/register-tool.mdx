@@ -65,7 +65,9 @@ type ToolConfig = {
   inputSchema?: Record<string, StandardSchemaWithJSON>; // validates the call and types the handler input
   outputSchema?: Record<string, StandardSchemaWithJSON>; // types structuredContent
   annotations?: ToolAnnotations; // standard MCP hints
+  icons?: Icon[];
   view?: ViewConfig; // bind a view to render the result
+  openai?: OpenAIToolConfig;
   auth?: { allowsAnonymous?: boolean; scopes?: string[] }; // per-tool auth
   securitySchemes?: SecurityScheme[]; // low-level alternative to `auth` (mutually exclusive)
   _meta?: ToolMeta; // extra metadata
@@ -75,6 +77,10 @@ type ToolConfig = {
 ### `name`, `title`, `description`
 
 All three are the tool's prompt surface: the model reads them to decide when to call it, so write each for the model. `name` is also the identifier the call uses, and `title` a short display name.
+
+### `icons`
+
+Icons hosts show next to the tool, using the MCP `Icon` type (`src`, `mimeType`, `sizes`). Most apps don't need them: when a tool has none, ChatGPT falls back to the server's [`icons`](/api-reference/skybridge#name-version), so one server icon covers every sidebar and conversation entry. Set tool icons when a server has several [entrypoints](#openai) that should look different. ChatGPT expects a monochrome SVG on a 20x20 viewport that draws with `currentColor`.
 
 ### `inputSchema`, `outputSchema`
 
@@ -149,6 +155,61 @@ type ViewCsp = {
 | `frameDomains` | Iframe embed origins (opts into stricter app review). |
 | `redirectDomains` | `openExternal` targets that skip the safe-link modal. |
 | `baseUriDomains` | `<base href>` origins (MCP Apps only). |
+
+### `openai`
+
+Options only **ChatGPT** reads, from the [OpenAI MCP extensions](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md). They need a [`view`](#view): Skybridge writes them to `_meta["openai/ui"]` on the tool and on its view resource, and throws at startup when the tool has no view.
+
+```ts
+type OpenAIToolConfig = {
+  entrypoints?: OpenAIEntrypoint[];
+  availableDisplayModes?: Array<"inline" | "fullscreen">;
+  preferredDisplayMode?: "inline" | "fullscreen";
+  preferredModelDisplayMode?: "inline" | "fullscreen";
+};
+
+type OpenAIEntrypoint =
+  | "global"
+  | "thread"
+  | { global: { quickAction?: OpenAIQuickAction } }
+  | { file: string[] }
+  | { settings: { searchTerms?: string[] } };
+```
+
+```ts
+server.registerTool(
+  {
+    name: "library",
+    title: "Parts Library",
+    description: "Browse the parts catalog.",
+    view: { component: "library" },
+    openai: {
+      entrypoints: ["global", "thread", { file: [".stl", ".step"] }],
+      availableDisplayModes: ["inline", "fullscreen"],
+    },
+  },
+  async () => ({ structuredContent: { parts: await listParts() } }),
+);
+```
+
+| Field | Purpose |
+| --- | --- |
+| `entrypoints` | Places users open the view from without the model: `"global"` adds a sidebar entry, `"thread"` a tab in a conversation's side panel, `{ file }` a viewer for files with these extensions, `{ settings }` an entry in the plugin settings. A global entry can carry a `quickAction`, a sidebar shortcut that calls another tool. |
+| `availableDisplayModes` | Display modes the view supports, read before the view loads. |
+| `preferredDisplayMode` | Display mode the view prefers to open in. ChatGPT may ignore it. |
+| `preferredModelDisplayMode` | Display mode the view opens in first when the model calls the tool. |
+
+Every field is optional, and Skybridge only emits what you set: ChatGPT applies the spec defaults for the rest. Available modes default to both, or to `[preferredDisplayMode]` alone when only that one is set, so pair `preferredDisplayMode` with `availableDisplayModes` to keep the other mode.
+
+Skybridge throws at startup when:
+
+- a `"global"` or `"thread"` entrypoint is set on a tool whose input schema rejects `{}`, because ChatGPT calls those tools without arguments;
+- a `file` extension doesn't start with `.`;
+- `preferredDisplayMode` is missing from `availableDisplayModes`.
+
+<Info>
+ChatGPT always opens entrypoints fullscreen. The display modes apply when the model calls the tool in a conversation.
+</Info>
 
 ### `auth`
 
@@ -263,6 +324,7 @@ type ClientHintsMeta = {
   "openai/session"?: string;
   "openai/organization"?: string;
   "openai/widgetSessionId"?: string;
+  "openai/resource"?: { path?: string };
 };
 ```
 
@@ -275,10 +337,15 @@ type ClientHintsMeta = {
 | `openai/session` | Anonymized conversation id, stable within a session. |
 | `openai/organization` | Anonymized organization id, when the user account is in an organization. |
 | `openai/widgetSessionId` | Stable id for the mounted view instance. |
+| `openai/resource` | On calls from a view opened through a [file entrypoint](#openai), `path` is the absolute path of the opened file. ChatGPT desktop only. |
 
 <Info>
 These hints are **ChatGPT** only.
 </Info>
+
+<Warning>
+Any MCP client can send `openai/resource`. Resolve the path and check that it stays inside a directory you allow before reading or writing the file.
+</Warning>
 
 ### Content helpers
 

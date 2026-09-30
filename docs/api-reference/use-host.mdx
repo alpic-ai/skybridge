@@ -45,6 +45,40 @@ version: string | undefined;
 
 The host's version string, or `undefined` until the handshake completes.
 
+### `capabilities`
+
+```tsx
+capabilities: McpUiHostCapabilities | undefined;
+```
+
+The host's MCP Apps capabilities from the handshake, such as `downloadFile`, `openLinks`, `message` or `experimental`. `undefined` until the handshake completes.
+
+### `openai`
+
+```tsx
+openai: {
+  resource: boolean;
+  modelContext: boolean;
+  message: boolean;
+  files: boolean;
+};
+```
+
+Which [OpenAI MCP extensions](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md) the host supports. A flag is `true` only when the host advertises `experimental["openai/<name>"]`, so every flag is `false` before the handshake and on hosts other than **ChatGPT**.
+
+| Flag | Extension |
+| --- | --- |
+| `resource` | Read, subscribe to and write the file opened through a file entrypoint. |
+| `modelContext` | Titles, thumbnails and background content in model context. |
+| `message` | Messages sent to a new conversation, and titled items in a message. |
+| `files` | Open a local file in ChatGPT. |
+
+```tsx
+const { openai } = useHost();
+
+return openai.files ? <OpenInChatGPTButton /> : null;
+```
+
 ## Host
 
 The recognized hosts, as normalized slugs. An unrecognized host surfaces its raw reported name instead.
