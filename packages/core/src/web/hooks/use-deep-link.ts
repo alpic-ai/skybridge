@@ -40,7 +40,7 @@ function toUrl(deepLink: unknown): unknown {
  * that contains a fragment.
  *
  * Deep links target global entrypoints: set `openai.entrypoints` to include
- * `"global"` on the tool.
+ * `{ type: "global" }` on the tool.
  *
  * @example
  * ```tsx

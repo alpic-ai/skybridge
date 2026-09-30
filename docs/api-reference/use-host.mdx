@@ -64,6 +64,10 @@ openai: {
 };
 ```
 
+<Info>
+This is an [OpenAI MCP extension](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md), not part of MCP or MCP Apps. Only **ChatGPT** supports it, and other hosts ignore it.
+</Info>
+
 Which [OpenAI MCP extensions](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md) the host supports. A flag is `true` only when the host advertises `experimental["openai/<name>"]`, so every flag is `false` before the handshake and on hosts other than **ChatGPT**.
 
 | Flag | Extension |

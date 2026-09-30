@@ -40,16 +40,6 @@ export type ModelContextParams = {
   structuredContent?: Record<string, unknown>;
 };
 
-/** Options for {@link useViewState}. */
-export type ViewStateOptions = {
-  /**
-   * Set to `false` to keep the state private to the view: it's persisted,
-   * but not shared with the model. Use it with {@link useModelContext},
-   * which then owns what the model sees.
-   */
-  modelContext?: boolean;
-};
-
 /**
  * Result of a tool call as surfaced to the view: MCP `content` blocks plus
  * the typed `structuredContent` and optional `meta`. `isError` is set when
@@ -121,7 +111,6 @@ export interface HostContext {
     params?: Record<string, unknown>;
   };
   viewState: Record<string, unknown> | null;
-  privateViewState: Record<string, unknown> | null;
 }
 
 /** @internal `useSyncExternalStore` subscribe signature, re-exported for bridge implementations. */
@@ -275,10 +264,7 @@ export interface Adaptor {
   ): Promise<void>;
   openExternal(href: string, options?: OpenExternalOptions): void;
   download(params: DownloadParams): Promise<DownloadResult>;
-  setViewState(
-    stateOrUpdater: SetViewStateAction,
-    options?: ViewStateOptions,
-  ): Promise<void>;
+  setViewState(stateOrUpdater: SetViewStateAction): Promise<void>;
   updateModelContext(params: ModelContextParams): Promise<void>;
   uploadFile(file: File, options?: UploadFileOptions): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;

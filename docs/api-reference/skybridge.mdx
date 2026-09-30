@@ -54,7 +54,7 @@ type SkybridgeConfig = Implementation &
 
 The MCP implementation info (`name`, `version`, and optionally `title`, `description`, `icons`, `websiteUrl`). SDK `ServerOptions` such as `instructions` or `capabilities` are forwarded when you set them; registering tools and views advertises those capabilities for you.
 
-`icons` is the app's icon. ChatGPT shows it for every [entrypoint](/api-reference/register-tool#openai) whose tool has no [`icons`](/api-reference/register-tool#icons) of its own, so one server icon usually covers the sidebar and conversation entries. ChatGPT expects a monochrome SVG on a 20x20 viewport that draws with `currentColor`.
+`icons` is the app's icon, a standard MCP field. Hosts show it wherever they represent the app, and fall back to it for tools without [`icons`](/api-reference/register-tool#icons) of their own, so one server icon usually covers every entry. Check each host's format requirements: ChatGPT, for example, expects a monochrome SVG on a 20x20 viewport that draws with `currentColor`.
 
 ### `handler`
 

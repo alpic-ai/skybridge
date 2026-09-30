@@ -6,7 +6,6 @@ import {
   useState,
 } from "react";
 import { getAdaptor, useHostContext } from "../bridges/index.js";
-import type { ViewStateOptions } from "../bridges/types.js";
 import { filterViewContext, injectViewContext } from "../helpers/state.js";
 import type { UnknownObject } from "../types.js";
 
@@ -21,10 +20,6 @@ import type { UnknownObject } from "../types.js";
  * Provide a `defaultState` (value or lazy initializer) to get a non-nullable
  * tuple; omit it for `T | null`.
  *
- * By default the state is also shared with the model. Pass
- * `{ modelContext: false }` to keep it private to the view, for example when
- * {@link useModelContext} controls what the model sees.
- *
  * @typeParam T - Shape of the persisted state. Must be a plain object.
  *
  * @example
@@ -37,21 +32,15 @@ import type { UnknownObject } from "../types.js";
  */
 export function useViewState<T extends UnknownObject>(
   defaultState: T | (() => T),
-  options?: ViewStateOptions,
 ): readonly [T, (state: SetStateAction<T>) => void];
 export function useViewState<T extends UnknownObject>(
   defaultState?: T | (() => T | null) | null,
-  options?: ViewStateOptions,
 ): readonly [T | null, (state: SetStateAction<T | null>) => void];
 export function useViewState<T extends UnknownObject>(
   defaultState?: T | (() => T | null) | null,
-  options?: ViewStateOptions,
 ): readonly [T | null, (state: SetStateAction<T | null>) => void] {
   const adaptor = getAdaptor();
-  const shareWithModel = options?.modelContext !== false;
-  const viewStateFromBridge = useHostContext(
-    shareWithModel ? "viewState" : "privateViewState",
-  ) as T | null;
+  const viewStateFromBridge = useHostContext("viewState") as T | null;
 
   const [viewState, _setViewState] = useState<T | null>(() => {
     if (viewStateFromBridge !== null) {
@@ -88,18 +77,16 @@ export function useViewState<T extends UnknownObject>(
       }
 
       const newState = typeof state === "function" ? state(prevState) : state;
-      const stateToSet = shareWithModel
-        ? injectViewContext(newState)
-        : newState;
+      const stateToSet = injectViewContext(newState);
 
       mountedStateRef.current = newState;
       _setViewState(newState);
 
       if (stateToSet !== null) {
-        adaptor.setViewState(stateToSet, { modelContext: shareWithModel });
+        adaptor.setViewState(stateToSet);
       }
     },
-    [adaptor, shareWithModel],
+    [adaptor],
   );
 
   return [viewState, setViewState] as const;

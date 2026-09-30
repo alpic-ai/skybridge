@@ -2,7 +2,7 @@
 
 Let users open a view without the model → `openai` on `registerTool`, `useDeepLink`, `useHost().openai`
 
-These are OpenAI MCP extensions: only ChatGPT reads them, other hosts ignore them.
+These are OpenAI MCP extensions, not part of MCP or MCP Apps: only ChatGPT reads them, other hosts ignore them.
 
 ## Entrypoints
 
@@ -14,7 +14,11 @@ server.registerTool(
     description: "Browse the parts catalog.",
     view: { component: "library" },
     openai: {
-      entrypoints: ["global", "thread", { file: [".stl"] }],
+      entrypoints: [
+        { type: "global" },
+        { type: "thread" },
+        { type: "file", extensions: [".stl"] },
+      ],
       availableDisplayModes: ["inline", "fullscreen"],
     },
   },
@@ -22,7 +26,7 @@ server.registerTool(
 );
 ```
 
-- `"global"` adds a sidebar entry, `"thread"` a tab in a conversation's side panel, `{ file: [...] }` a viewer for those file extensions.
+- `global` adds a sidebar entry, `thread` a tab in a conversation's side panel, `file` a viewer for those file extensions.
 - ChatGPT calls global and thread tools with `{}`: every input must be optional, or Skybridge throws at startup.
 - Give the tool a `title` that differs from the app name: it labels the entry.
 - The server `icons` cover every entry. Add tool `icons` only to tell several entrypoints apart.

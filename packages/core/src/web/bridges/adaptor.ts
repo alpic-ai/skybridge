@@ -20,24 +20,22 @@ import type {
   SendFollowUpMessageOptions,
   SetViewStateAction,
   UploadFileOptions,
-  ViewStateOptions,
   ViewToolConfig,
 } from "./types.js";
 import { NotSupportedError } from "./types.js";
 
 const STORAGE_PREFIX = "sb:";
-const PRIVATE_STORAGE_PREFIX = "sbp:";
 const MAX_STORAGE_ENTRIES = 200;
 
 function isImage(mimeType: string | undefined): boolean {
   return mimeType?.startsWith("image/") ?? false;
 }
 
-function findStorageKey(prefix: string, viewUUID: string): string | undefined {
+function findStorageKey(viewUUID: string): string | undefined {
   const suffix = `:${viewUUID}`;
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key?.startsWith(prefix) && key.endsWith(suffix)) {
+    if (key?.startsWith(STORAGE_PREFIX) && key.endsWith(suffix)) {
       return key;
     }
   }
@@ -72,18 +70,17 @@ export class HostAdaptor implements Adaptor {
 
   private _viewState: HostContext["viewState"] = null;
   private readonly viewStateListeners = new Set<() => void>();
-  private _privateViewState: HostContext["privateViewState"] = null;
-  private readonly privateViewStateListeners = new Set<() => void>();
   private _viewUUID: string | null = null;
+  private _modelContext: ModelContextParams | null = null;
 
   private _polyfillDisplay: HostContext["display"] = { mode: "inline" };
   private readonly polyfillDisplayListeners = new Set<() => void>();
 
   private readonly polyfillDisplayStore: HostContextStore<"display">;
   private readonly polyfillViewStateStore: HostContextStore<"viewState">;
-  private readonly polyfillPrivateViewStateStore: HostContextStore<"privateViewState">;
 
   private unsubscribeViewUUID: (() => void) | null = null;
+  private unsubscribeModelContext: (() => void) | null = null;
 
   constructor() {
     this.mcp = McpAppBridge.getInstance();
@@ -115,31 +112,29 @@ export class HostAdaptor implements Adaptor {
       },
       getSnapshot: () => this._viewState,
     };
-    this.polyfillPrivateViewStateStore = {
-      subscribe: (onChange: () => void) => {
-        this.privateViewStateListeners.add(onChange);
-        return () => {
-          this.privateViewStateListeners.delete(onChange);
-        };
-      },
-      getSnapshot: () => this._privateViewState,
-    };
 
     this.stores = {
       ...this.mcp.createContextStores(),
       display: overlayStores?.display ?? this.polyfillDisplayStore,
       viewState: overlayStores?.viewState ?? this.polyfillViewStateStore,
-      privateViewState:
-        overlayStores?.privateViewState ?? this.polyfillPrivateViewStateStore,
     };
 
     this.subscribeToViewUUID();
+    this.unsubscribeModelContext = this.mcp.subscribe("openai/modelContext")(
+      () => {
+        if (this.mcp.getSnapshot("openai/modelContext") === null) {
+          this._modelContext = null;
+        }
+      },
+    );
   }
 
   /** @internal Release any subscriptions held on the underlying bridges. */
   public cleanup(): void {
     this.unsubscribeViewUUID?.();
     this.unsubscribeViewUUID = null;
+    this.unsubscribeModelContext?.();
+    this.unsubscribeModelContext = null;
   }
 
   // ---- Adaptor interface ----
@@ -245,12 +240,7 @@ export class HostAdaptor implements Adaptor {
 
   public setViewState = async (
     stateOrUpdater: SetViewStateAction,
-    options?: ViewStateOptions,
   ): Promise<void> => {
-    if (options?.modelContext === false) {
-      await this.setPrivateViewState(stateOrUpdater);
-      return;
-    }
     if (this.openai) {
       const modelContent =
         typeof stateOrUpdater === "function"
@@ -280,58 +270,52 @@ export class HostAdaptor implements Adaptor {
     this.persistToLocalStorage(newState);
 
     try {
-      const app = await this.mcp.getApp();
-      await app.updateModelContext({
-        structuredContent: newState,
-        content: [{ type: "text", text: JSON.stringify(newState) }],
-      });
+      await this.sendModelContext();
     } catch (error) {
       console.error("Failed to update view state in MCP App.", error);
     }
   };
 
-  private async setPrivateViewState(
-    stateOrUpdater: SetViewStateAction,
-  ): Promise<void> {
-    if (this.openai) {
-      const current = this.stores.privateViewState.getSnapshot();
-      const state =
-        typeof stateOrUpdater === "function"
-          ? stateOrUpdater(current)
-          : stateOrUpdater;
-      await this.openai.setWidgetState({
-        modelContent: {},
-        ...this.openai.widgetState,
-        privateContent: {
-          ...this.openai.widgetState?.privateContent,
-          skybridgeViewState: state,
-        },
-      });
-      return;
-    }
-    const state =
-      typeof stateOrUpdater === "function"
-        ? stateOrUpdater(this._privateViewState)
-        : stateOrUpdater;
-    this._privateViewState = state;
-    this.privateViewStateListeners.forEach((l) => {
-      l();
-    });
-    this.persistToLocalStorage(state, PRIVATE_STORAGE_PREFIX);
-  }
-
   public updateModelContext = async (
     params: ModelContextParams,
   ): Promise<void> => {
     const app = await this.mcp.getApp();
-    if (!app.getHostCapabilities()?.experimental?.["openai/modelContext"]) {
+    const capabilities = app.getHostCapabilities();
+    if (
+      !capabilities?.updateModelContext &&
+      !capabilities?.experimental?.["openai/modelContext"]
+    ) {
       throw new NotSupportedError(
         "updateModelContext",
-        "the host does not advertise openai/modelContext",
+        "the host does not advertise updateModelContext",
       );
     }
-    await app.updateModelContext(params);
+    this._modelContext = params;
+    await this.sendModelContext();
   };
+
+  private async sendModelContext(): Promise<void> {
+    const viewState = this.openai ? null : this._viewState;
+    const extra = this._modelContext;
+    const collisions = Object.keys(extra?.structuredContent ?? {}).filter(
+      (key) => viewState !== null && key in viewState,
+    );
+    if (collisions.length > 0) {
+      console.warn(
+        `skybridge: view state overrides model context keys ${collisions.join(", ")}.`,
+      );
+    }
+    const app = await this.mcp.getApp();
+    await app.updateModelContext({
+      structuredContent: { ...extra?.structuredContent, ...viewState },
+      content: [
+        ...(viewState === null
+          ? []
+          : [{ type: "text" as const, text: JSON.stringify(viewState) }]),
+        ...(extra?.content ?? []),
+      ],
+    });
+  }
 
   public uploadFile = async (
     file: File,
@@ -441,54 +425,37 @@ export class HostAdaptor implements Adaptor {
   }
 
   private restoreFromLocalStorage(viewUUID: string): void {
-    const shared = this.readFromLocalStorage(STORAGE_PREFIX, viewUUID);
-    if (shared !== null) {
-      this._viewState = shared;
-      this.viewStateListeners.forEach((l) => {
-        l();
-      });
-    }
-    const local = this.readFromLocalStorage(PRIVATE_STORAGE_PREFIX, viewUUID);
-    if (local !== null) {
-      this._privateViewState = local;
-      this.privateViewStateListeners.forEach((l) => {
-        l();
-      });
-    }
-  }
-
-  private readFromLocalStorage(
-    prefix: string,
-    viewUUID: string,
-  ): Record<string, unknown> | null {
     try {
-      const existingKey = findStorageKey(prefix, viewUUID);
-      const stored = existingKey ? localStorage.getItem(existingKey) : null;
-      return stored === null ? null : JSON.parse(stored);
+      const existingKey = findStorageKey(viewUUID);
+      if (existingKey) {
+        const stored = localStorage.getItem(existingKey);
+        if (stored !== null) {
+          this._viewState = JSON.parse(stored);
+          this.viewStateListeners.forEach((l) => {
+            l();
+          });
+        }
+      }
     } catch (err) {
       console.error(err);
-      return null;
     }
   }
 
-  protected persistToLocalStorage(
-    state: Record<string, unknown> | null,
-    prefix = STORAGE_PREFIX,
-  ): void {
+  protected persistToLocalStorage(state: Record<string, unknown> | null): void {
     if (!this._viewUUID || state === null) {
       return;
     }
     try {
-      const oldKey = findStorageKey(prefix, this._viewUUID);
+      const oldKey = findStorageKey(this._viewUUID);
       if (oldKey) {
         localStorage.removeItem(oldKey);
       }
-      const newKey = `${prefix}${Date.now()}:${this._viewUUID}`;
+      const newKey = `${STORAGE_PREFIX}${Date.now()}:${this._viewUUID}`;
       localStorage.setItem(newKey, JSON.stringify(state));
       const keys: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key?.startsWith(prefix)) {
+        if (key?.startsWith(STORAGE_PREFIX)) {
           keys.push(key);
         }
       }

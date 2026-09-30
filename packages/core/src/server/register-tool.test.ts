@@ -46,7 +46,10 @@ describe("registerTool handler invocation", () => {
             description: "library",
             view: { component: "widget" },
             openai: {
-              entrypoints: ["global", { file: [".stl"] }],
+              entrypoints: [
+                { type: "global" },
+                { type: "file", extensions: [".stl"] },
+              ],
               availableDisplayModes: ["inline", "fullscreen"],
               preferredDisplayMode: "fullscreen",
             },
@@ -87,7 +90,7 @@ describe("registerTool handler invocation", () => {
             description: "search",
             inputSchema: { query: z.string() },
             view: { component: "widget" },
-            openai: { entrypoints: ["global"] },
+            openai: { entrypoints: [{ type: "global" }] },
           },
           async () => ({ content: "ok" }),
         ),

@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HostAdaptor } from "../bridges/adaptor.js";
 import { McpAppBridge } from "../bridges/mcp-app/index.js";
 import {
-  fireToolResultNotification,
   getMcpAppHostPostMessageMock,
   MockResizeObserver,
 } from "./test/utils.js";
@@ -26,12 +25,7 @@ async function notifyHostContext(params: Record<string, unknown>) {
   });
 }
 
-const sentModelContext = (postMessage: ReturnType<typeof vi.fn>) =>
-  postMessage.mock.calls.some(
-    ([message]) => message.method === "ui/update-model-context",
-  );
-
-describe("OpenAI extensions in the view", () => {
+describe("model context and deep links in the view", () => {
   beforeEach(() => {
     vi.stubGlobal("openai", undefined);
     vi.stubGlobal("skybridge", {});
@@ -46,14 +40,17 @@ describe("OpenAI extensions in the view", () => {
     localStorage.clear();
   });
 
-  it("publishes model context and follows its removal by the user", async () => {
+  it("merges model context with view state and drops it once the user removes it", async () => {
     const postMessage = getMcpAppHostPostMessageMock(
       {},
-      { hostCapabilities: { experimental: { "openai/modelContext": {} } } },
+      { hostCapabilities: { updateModelContext: {} } },
     );
     vi.stubGlobal("parent", { postMessage });
-    const { result } = renderHook(useModelContext);
-    await waitFor(() => expect(result.current.supported).toBe(true));
+    const { result } = renderHook(() => ({
+      model: useModelContext(),
+      view: useViewState({ tab: "a" }),
+    }));
+    await waitFor(() => expect(result.current.model.supported).toBe(true));
     const content = [
       {
         type: "text" as const,
@@ -61,62 +58,55 @@ describe("OpenAI extensions in the view", () => {
         _meta: { "openai/title": "Ski" },
       },
     ];
+    const lastModelContext = () =>
+      postMessage.mock.calls
+        .map(([message]) => message as { method: string; params?: unknown })
+        .filter((message) => message.method === "ui/update-model-context")
+        .at(-1)?.params;
 
-    await act(async () => result.current.update({ content }));
-    expect(postMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        method: "ui/update-model-context",
-        params: { content },
+    await act(async () =>
+      result.current.model.update({
+        content,
+        structuredContent: { ski: 1, tab: "x" },
       }),
-      "*",
     );
+    await act(async () => result.current.view[1]({ tab: "b" }));
+    expect(lastModelContext()).toEqual({
+      structuredContent: { ski: 1, tab: "b" },
+      content: [
+        { type: "text", text: JSON.stringify({ tab: "b" }) },
+        ...content,
+      ],
+    });
 
     await notifyHostContext({
       "openai/modelContext": { updateId: "one", content },
     });
-    expect(result.current.context).toEqual({ updateId: "one", content });
+    expect(result.current.model.context).toEqual({ updateId: "one", content });
     await notifyHostContext({ "openai/modelContext": null });
-    expect(result.current.context).toBeNull();
+    expect(result.current.model.context).toBeNull();
+
+    await act(async () => result.current.view[1]({ tab: "c" }));
+    expect(lastModelContext()).toEqual({
+      structuredContent: { tab: "c" },
+      content: [{ type: "text", text: JSON.stringify({ tab: "c" }) }],
+    });
   });
 
-  it("rejects model context updates on hosts without the extension", async () => {
+  it("rejects model context updates on hosts without the capability", async () => {
     const postMessage = getMcpAppHostPostMessageMock();
     vi.stubGlobal("parent", { postMessage });
     const { result } = renderHook(useModelContext);
 
     await expect(result.current.update({ content: [] })).rejects.toThrow(
-      "openai/modelContext",
+      "updateModelContext",
     );
     expect(result.current.supported).toBe(false);
-    expect(sentModelContext(postMessage)).toBe(false);
-  });
-
-  it("keeps private view state out of the model context and apart from shared state", async () => {
-    const postMessage = getMcpAppHostPostMessageMock();
-    vi.stubGlobal("parent", { postMessage });
-    const { result } = renderHook(() => ({
-      local: useViewState({ page: 1 }, { modelContext: false }),
-      shared: useViewState({ tab: "a" }),
-    }));
-    await act(async () => {
-      fireToolResultNotification({
-        content: [],
-        structuredContent: {},
-        _meta: { viewUUID: "view-1" },
-      });
-    });
-
-    act(() => result.current.local[1]({ page: 2 }));
-
-    expect(result.current.local[0]).toEqual({ page: 2 });
-    expect(result.current.shared[0]).toEqual({ tab: "a" });
-    const keys = Array.from(
-      { length: localStorage.length },
-      (_, index) => localStorage.key(index) ?? "",
-    );
-    expect(keys.filter((key) => key.startsWith("sb:"))).toEqual([]);
-    expect(keys.filter((key) => key.startsWith("sbp:"))).toHaveLength(1);
-    expect(sentModelContext(postMessage)).toBe(false);
+    expect(
+      postMessage.mock.calls.some(
+        ([message]) => message.method === "ui/update-model-context",
+      ),
+    ).toBe(false);
   });
 
   it("reads split legacy deep links and ignores malformed ones", async () => {

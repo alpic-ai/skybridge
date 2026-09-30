@@ -7,6 +7,10 @@ import { Compat } from "/components/compat.jsx";
 
 <Compat chatgpt />
 
+<Info>
+This is an [OpenAI MCP extension](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md), not part of MCP or MCP Apps. Only **ChatGPT** supports it, and other hosts ignore it.
+</Info>
+
 A [global entrypoint](/api-reference/register-tool#openai) can be opened on a given page through a deep link, such as `https://chatgpt.com/plugins/<pluginId>/app/<toolName>?path=%2Fparts%2Fhex-bolt`. `useDeepLink` returns that app-relative URL so the view can route to it. It updates when the user follows another deep link while the view is open.
 
 ## Example

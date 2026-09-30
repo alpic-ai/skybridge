@@ -14,25 +14,25 @@ const ModelContextSchema = z
   })
   .nullable();
 
-/** Current model context attached by the view, as reported by ChatGPT. */
+/** Model context the view attached, as ChatGPT reports it back. */
 export type ModelContextState = OpenAIHostContext["openai/modelContext"];
 
 /**
- * Attach content to the conversation as composer attachments, and follow
- * what ChatGPT reports back. Each `update` replaces the context this view
- * attached before. Content blocks accept the OpenAI presentation metadata:
+ * Send content to the model through the MCP Apps `ui/update-model-context`
+ * request. Each `update` replaces what this hook sent before, and is merged
+ * with the {@link useViewState} state, which the view state wins on shared
+ * `structuredContent` keys.
+ *
+ * ChatGPT also reads the OpenAI presentation metadata, shows each block as a
+ * composer attachment and reports the attached context back:
  * `_meta["openai/title"]`, `_meta["openai/thumbnail"]` on text blocks, and
  * `annotations.audience: ["assistant"]` to hide a block from the user.
  *
- * - `supported`: whether the host advertises `openai/modelContext`.
- * - `context`: the attached context; `null` once the user removed it,
- *   `undefined` when the host never reported one.
+ * - `supported`: whether the host advertises `updateModelContext`.
+ * - `context`: ChatGPT only, the attached context; `null` once the user
+ *   removed it, `undefined` when the host never reported one.
  * - `update`: replaces the context. Rejects with `NotSupportedError` on hosts
- *   that don't advertise the extension.
- *
- * Pair it with `useViewState(state, { modelContext: false })`, since a shared
- * view state also writes the model context and would replace these
- * attachments.
+ *   that don't advertise model context updates.
  *
  * @example
  * ```tsx
@@ -55,7 +55,7 @@ export function useModelContext(): {
   context: ModelContextState;
   update: (params: ModelContextParams) => Promise<void>;
 } {
-  const { openai } = useHost();
+  const { capabilities, openai } = useHost();
   const reported = useMcpAppContext("openai/modelContext");
   const context = useMemo(() => {
     if (reported === undefined) {
@@ -69,5 +69,9 @@ export function useModelContext(): {
     [],
   );
 
-  return { supported: openai.modelContext, context, update };
+  return {
+    supported: Boolean(capabilities?.updateModelContext) || openai.modelContext,
+    context,
+    update,
+  };
 }

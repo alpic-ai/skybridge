@@ -39,7 +39,6 @@ import type {
   McpWildcard,
 } from "./middleware.js";
 import { captureToolError } from "./middleware.js";
-import { buildOpenAIUiMeta } from "./openai-ui.js";
 import { resolveServerOrigin } from "./requestOrigin.js";
 import {
   discoverSkills,
@@ -152,20 +151,45 @@ export interface OpenAIQuickAction {
 /**
  * A place in ChatGPT where users can open the tool's view without the model.
  *
- * - `"global"`: an entry in the sidebar, opened fullscreen.
- * - `"thread"`: a tab in a conversation's side panel.
- * - `{ file: [".stl"] }`: a viewer for files with these extensions.
- * - `{ settings: { searchTerms } }`: an entry in the plugin settings.
+ * - `global`: an entry in the sidebar, opened fullscreen.
+ * - `thread`: a tab in a conversation's side panel.
+ * - `file`: a viewer for files with these extensions, such as `".stl"`.
+ * - `settings`: an entry in the plugin settings.
  *
  * ChatGPT calls the tool with `{}` for global and thread entrypoints, so the
  * tool must not require any input.
  */
 export type OpenAIEntrypoint =
-  | "global"
-  | "thread"
-  | { global: { quickAction?: OpenAIQuickAction } }
-  | { file: string[] }
-  | { settings: { searchTerms?: string[] } };
+  | { type: "global"; quickAction?: OpenAIQuickAction }
+  | { type: "thread" }
+  | { type: "file"; extensions: string[] }
+  | { type: "settings"; searchTerms?: string[] };
+
+function definedEntries(values: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(values).filter(([, value]) => value !== undefined),
+  );
+}
+
+function acceptsEmptyInput(
+  inputSchema:
+    | Record<string, StandardSchemaWithJSON>
+    | StandardSchemaWithJSON
+    | undefined,
+): boolean {
+  if (inputSchema === undefined) {
+    return true;
+  }
+  const checks =
+    "~standard" in inputSchema
+      ? [(inputSchema as StandardSchemaWithJSON)["~standard"].validate({})]
+      : Object.values(inputSchema).map((schema) =>
+          schema["~standard"].validate(undefined),
+        );
+  return checks.every(
+    (result) => result instanceof Promise || result.issues === undefined,
+  );
+}
 
 /**
  * ChatGPT-only tool options, emitted as `_meta["openai/ui"]` on the tool and
@@ -1288,22 +1312,44 @@ export class McpServer<
       toolMeta.securitySchemes = securitySchemes;
     }
 
-    const openaiUi = openai
-      ? buildOpenAIUiMeta(name, openai, {
-          hasView: Boolean(view),
-          inputSchema: toolFields.inputSchema,
-        })
-      : undefined;
-    if (openaiUi && Object.keys(openaiUi.tool).length > 0) {
-      toolMeta["openai/ui"] = {
-        ...(userToolMeta?.["openai/ui"] as Record<string, unknown>),
-        ...openaiUi.tool,
-      };
+    if (openai) {
+      if (!view) {
+        throw new Error(
+          `skybridge: tool "${name}" sets \`openai\` options but has no \`view\`.`,
+        );
+      }
+      const opensWithoutInput = openai.entrypoints?.some(
+        ({ type }) => type === "global" || type === "thread",
+      );
+      if (opensWithoutInput && !acceptsEmptyInput(toolFields.inputSchema)) {
+        throw new Error(
+          `skybridge: tool "${name}" has a global or thread entrypoint, so ChatGPT calls it with \`{}\`, but its input schema rejects \`{}\`. Make every input optional.`,
+        );
+      }
+      const openaiUi = definedEntries({
+        entrypoints: openai.entrypoints,
+        preferredModelDisplayMode: openai.preferredModelDisplayMode,
+      });
+      if (Object.keys(openaiUi).length > 0) {
+        toolMeta["openai/ui"] = {
+          ...(userToolMeta?.["openai/ui"] as Record<string, unknown>),
+          ...openaiUi,
+        };
+      }
     }
 
     if (view) {
       this.enforceOneToolPerView(view.component, name);
-      this.registerViewResources(name, view, toolMeta, openaiUi?.resource);
+      this.registerViewResources(
+        name,
+        view,
+        toolMeta,
+        openai &&
+          definedEntries({
+            availableDisplayModes: openai.availableDisplayModes,
+            preferredDisplayMode: openai.preferredDisplayMode,
+          }),
+      );
     }
 
     const wrappedCb = this.decorateToolHandler(cb, {

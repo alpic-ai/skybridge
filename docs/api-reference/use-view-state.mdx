@@ -52,14 +52,6 @@ defaultState?: T | (() => T | null) | null;
 
 The initial state, used only when the host holds no persisted state for this view. Pass a value or a lazy initializer that runs once on mount. Pass one and `state` is never `null`; omit it, or pass `null`, and `state` is `null` until the first write. When the host already has persisted state, that value wins and `defaultState` is ignored.
 
-### `options`
-
-```tsx
-options?: { modelContext?: boolean };
-```
-
-By default the state is also sent to the model. Pass `{ modelContext: false }` to keep it private to the view: it still survives remounts, but the model never sees it. Use it alongside [`useModelContext`](/api-reference/use-model-context), which writes the same model context and would otherwise be replaced by the view state.
-
 ## Returns
 
 `useViewState` returns a `readonly [state, setState]` tuple, the same ergonomics as `useState`.
