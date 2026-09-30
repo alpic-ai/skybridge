@@ -116,6 +116,14 @@ name: string;
 A view can call a tool only when the tool's `_meta.ui.visibility` includes `"app"`, which is the default behavior. See [Register Tools](/build/tools).
 </Info>
 
+### `options`
+
+```tsx
+options?: { timeout?: number };
+```
+
+`timeout` is the call's timeout in milliseconds, 60 seconds by default. Raise it for tools that wait on the user, such as a ChatGPT form. It must be a positive, finite number.
+
 ## Returns
 
 `useCallTool` returns two call functions plus the live [state](/build/state) of the most recent call. Both functions keep the same identity across renders, so they are safe to list in effect dependencies.

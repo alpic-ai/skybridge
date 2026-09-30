@@ -35,8 +35,9 @@ function setNode(node: DataLLMNode) {
 }
 
 function removeNode(id: string) {
-  nodes.delete(id);
-  onChange();
+  if (nodes.delete(id)) {
+    onChange();
+  }
 }
 
 function onChange() {

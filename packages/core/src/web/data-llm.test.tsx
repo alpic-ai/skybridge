@@ -61,6 +61,21 @@ describe("DataLLM", () => {
       }
     });
 
+    it("does not publish context when content-less nodes mount, change or unmount", () => {
+      const { rerender, unmount } = render(
+        <DataLLM content={undefined}>
+          <div>Child</div>
+        </DataLLM>,
+      );
+      rerender(
+        <DataLLM content="">
+          <div>Child</div>
+        </DataLLM>,
+      );
+      unmount();
+      expect(OpenaiMock.setWidgetState).not.toHaveBeenCalled();
+    });
+
     it("should register a node with content and call setViewState", () => {
       render(
         <DataLLM content="Test content">

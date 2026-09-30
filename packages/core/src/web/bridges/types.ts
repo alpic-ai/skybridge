@@ -1,5 +1,6 @@
 import type {
   CallToolResult,
+  ContentBlock,
   EmbeddedResource,
   ResourceLink,
   ToolAnnotations,
@@ -23,6 +24,31 @@ declare global {
 
 /** Arguments passed to a tool call. `null` for tools that take no input. */
 export type CallToolArgs = Record<string, unknown> | null;
+
+/** Options for a tool call made from the view. */
+export type CallToolOptions = {
+  /**
+   * Request timeout in milliseconds. Omit it to keep the SDK default (60s).
+   * Raise it for tools that wait on the user, such as ChatGPT forms.
+   */
+  timeout?: number;
+};
+
+/** Payload of `ui/update-model-context`. Content blocks may carry `_meta`. */
+export type ModelContextParams = {
+  content?: ContentBlock[];
+  structuredContent?: Record<string, unknown>;
+};
+
+/** Options for {@link useViewState}. */
+export type ViewStateOptions = {
+  /**
+   * Set to `false` to keep the state private to the view: it's persisted,
+   * but not shared with the model. Use it with {@link useModelContext},
+   * which then owns what the model sees.
+   */
+  modelContext?: boolean;
+};
 
 /**
  * Result of a tool call as surfaced to the view: MCP `content` blocks plus
@@ -95,6 +121,7 @@ export interface HostContext {
     params?: Record<string, unknown>;
   };
   viewState: Record<string, unknown> | null;
+  privateViewState: Record<string, unknown> | null;
 }
 
 /** @internal `useSyncExternalStore` subscribe signature, re-exported for bridge implementations. */
@@ -232,7 +259,11 @@ export interface Adaptor {
   callTool<
     ToolArgs extends CallToolArgs = null,
     ToolResponse extends CallToolResponse = CallToolResponse,
-  >(name: string, args: ToolArgs): Promise<ToolResponse>;
+  >(
+    name: string,
+    args: ToolArgs,
+    options?: CallToolOptions,
+  ): Promise<ToolResponse>;
   requestDisplayMode(mode: RequestDisplayMode): Promise<{
     mode: RequestDisplayMode;
   }>;
@@ -244,7 +275,11 @@ export interface Adaptor {
   ): Promise<void>;
   openExternal(href: string, options?: OpenExternalOptions): void;
   download(params: DownloadParams): Promise<DownloadResult>;
-  setViewState(stateOrUpdater: SetViewStateAction): Promise<void>;
+  setViewState(
+    stateOrUpdater: SetViewStateAction,
+    options?: ViewStateOptions,
+  ): Promise<void>;
+  updateModelContext(params: ModelContextParams): Promise<void>;
   uploadFile(file: File, options?: UploadFileOptions): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
   selectFiles(): Promise<FileMetadata[]>;

@@ -10,6 +10,7 @@
 | Persist data, single component | `useViewState` |
 | Persist data, shared across components, complex mutations | `createStore` |
 | Help LLM understand "this one" | `data-llm` |
+| Attach an item to the ChatGPT composer (title, thumbnail) | `useModelContext` |
 | Ephemeral UI only (hover, animation) | `useState` |
 
 ## useViewState
@@ -160,3 +161,26 @@ function TaskList() {
 | `tasks` | `useViewState` | Persists. Tasks and progress survive reopen. |
 | `viewing` | `useState` | Ephemeral. Current focus resets on reopen. |
 | `"Viewing: Buy groceries"` | `data-llm` | LLM context. Understands "this task" in conversation. |
+
+## useModelContext (ChatGPT)
+
+Attach explicit items to the conversation. ChatGPT shows each content block as a removable composer attachment.
+
+```tsx
+const { supported, context, update } = useModelContext();
+const [selection, setSelection] = useViewState({ id: null }, { modelContext: false });
+
+update({
+  content: [
+    {
+      type: "text",
+      text: "Selected: M6 hex bolt",
+      _meta: { "openai/title": "Hex bolt", "openai/thumbnail": { src: imageUrl } },
+    },
+  ],
+});
+```
+
+- `useViewState` writes the same model context: pass `{ modelContext: false }` to it when the view uses `useModelContext`, or it replaces the attachments.
+- `context` becomes `null` when the user removes the attachment.
+- `supported` is `false` outside ChatGPT, and `update` rejects there.

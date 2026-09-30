@@ -69,8 +69,19 @@ export class AppsSdkBridge implements Bridge<AppsSdkContext> {
   public createOverlayStores(): {
     display: HostContextStore<"display">;
     viewState: HostContextStore<"viewState">;
+    privateViewState: HostContextStore<"privateViewState">;
   } {
     return {
+      privateViewState: {
+        subscribe: this.subscribe("widgetState"),
+        getSnapshot: () => {
+          const state =
+            this.getSnapshot("widgetState")?.privateContent?.skybridgeViewState;
+          return state && typeof state === "object" && !Array.isArray(state)
+            ? (state as Record<string, unknown>)
+            : null;
+        },
+      },
       display: {
         subscribe: this.subscribe("view"),
         getSnapshot: () => this.getSnapshot("view"),

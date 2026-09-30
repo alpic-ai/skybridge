@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 
 import {
   type CallToolArgs,
+  type CallToolOptions,
   type CallToolResponse,
   getAdaptor,
 } from "../bridges/index.js";
@@ -145,6 +146,7 @@ export const useCallTool = <
   ToolResponse extends Partial<ToolResponseSignature> = Record<string, never>,
 >(
   name: string,
+  options?: CallToolOptions,
 ) => {
   type CombinedCallToolResponse = CallToolResponse & ToolResponse;
 
@@ -157,6 +159,7 @@ export const useCallTool = <
 
   const callIdRef = useRef(0);
   const adaptor = getAdaptor();
+  const timeout = options?.timeout;
 
   const execute = useCallback(
     async (toolArgs: ToolArgs): Promise<CombinedCallToolResponse> => {
@@ -171,6 +174,7 @@ export const useCallTool = <
         const data = await adaptor.callTool<ToolArgs, CombinedCallToolResponse>(
           name,
           toolArgs,
+          ...(timeout === undefined ? [] : [{ timeout }]),
         );
         if (callId === callIdRef.current) {
           setCallToolState({ status: "success", data, error: undefined });
@@ -184,7 +188,7 @@ export const useCallTool = <
         throw error;
       }
     },
-    [adaptor, name],
+    [adaptor, name, timeout],
   );
 
   const callToolAsync = useCallback(

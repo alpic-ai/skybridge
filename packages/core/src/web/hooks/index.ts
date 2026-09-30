@@ -15,6 +15,10 @@ export {
   type OpenAIHostCapabilities,
   useHost,
 } from "./use-host.js";
+export {
+  type ModelContextState,
+  useModelContext,
+} from "./use-model-context.js";
 export { type OpenExternalFn, useOpenExternal } from "./use-open-external.js";
 export { useRegisterViewTool } from "./use-register-view-tool.js";
 export { type RequestCloseFn, useRequestClose } from "./use-request-close.js";
