@@ -19,8 +19,8 @@ export type ModelContextState = OpenAIHostContext["openai/modelContext"];
 
 /**
  * Send content to the model through the MCP Apps `ui/update-model-context`
- * request. Each `update` replaces what this hook sent before, and is merged
- * with the {@link useViewState} state, which the view state wins on shared
+ * request. Each `update` replaces what this hook sent before. Outside ChatGPT
+ * it is merged with the {@link useViewState} state, which wins on shared
  * `structuredContent` keys.
  *
  * ChatGPT also reads the OpenAI presentation metadata, shows each block as a

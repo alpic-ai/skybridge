@@ -180,6 +180,6 @@ update({
 });
 ```
 
-- Skybridge merges it with the `useViewState` state: view state keys win in `structuredContent`.
+- Outside ChatGPT, Skybridge merges it with the `useViewState` state: view state keys win in `structuredContent`.
 - `context` (ChatGPT only) becomes `null` when the user removes the attachment.
 - `supported` is `false` on hosts without model context updates, and `update` rejects there.

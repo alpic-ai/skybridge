@@ -311,9 +311,10 @@ export class HostAdaptor implements Adaptor {
         `skybridge: view state overrides model context keys ${collisions.join(", ")}.`,
       );
     }
+    const structuredContent = { ...extra?.structuredContent, ...viewState };
     const app = await this.mcp.getApp();
     return app.updateModelContext({
-      structuredContent: { ...extra?.structuredContent, ...viewState },
+      ...(Object.keys(structuredContent).length > 0 && { structuredContent }),
       content: [
         ...(viewState === null
           ? []

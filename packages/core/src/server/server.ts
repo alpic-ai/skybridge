@@ -140,7 +140,7 @@ export type OpenAIDisplayMode = "inline" | "fullscreen";
 /** A sidebar shortcut that calls another tool of the same server. */
 export interface OpenAIQuickAction {
   title: string;
-  icons: Icon[];
+  icons: [Icon, ...Icon[]];
   target: {
     type: "tool";
     name: string;
@@ -204,8 +204,7 @@ export interface OpenAIToolConfig {
   entrypoints?: OpenAIEntrypoint[];
   /**
    * Display modes the view supports, read before the view loads. Defaults to
-   * `[preferredDisplayMode]` when that is set, otherwise to the modes the view
-   * declares at initialization.
+   * `[preferredDisplayMode]` when that is set, otherwise to both modes.
    */
   availableDisplayModes?: OpenAIDisplayMode[];
   /**

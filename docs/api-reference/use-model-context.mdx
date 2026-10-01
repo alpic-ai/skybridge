@@ -7,7 +7,7 @@ import { Compat } from "/components/compat.jsx";
 
 <Compat alpic chatgpt claude cursor goose />
 
-`useModelContext` sends content blocks to the model through the MCP Apps `ui/update-model-context` request. Each update replaces what the hook sent before. On MCP Apps hosts, Skybridge sends it together with the [`useViewState`](/api-reference/use-view-state) state, so an update from one doesn't drop the other.
+`useModelContext` sends content blocks to the model through the MCP Apps `ui/update-model-context` request. Each update replaces what the hook sent before. On hosts other than ChatGPT, Skybridge sends it together with the [`useViewState`](/api-reference/use-view-state) state, so an update from one doesn't drop the other.
 
 **ChatGPT** goes further through the [OpenAI MCP extensions](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md): it shows each block as a composer attachment the user can remove, and reports the attached context back as [`context`](#context). Other hosts ignore that metadata and just pass the content to the model.
 
@@ -75,7 +75,7 @@ update: (params: {
 }) => Promise<string | undefined>;
 ```
 
-Replaces what the hook sent before, and resolves with the `updateId` ChatGPT assigns to it, to compare with [`context`](#context)`.updateId`. Other hosts resolve with `undefined`. Rejects with a `NotSupportedError` on hosts that don't advertise model context updates. On MCP Apps hosts the view state is sent alongside: its JSON goes first in `content`, addressed to the model only, and its keys win over yours in `structuredContent`, with a console warning naming the shared keys. The host may reject block types it doesn't list in `hostCapabilities.updateModelContext`, such as an image on a text-only host.
+Replaces what the hook sent before, and resolves with the `updateId` ChatGPT assigns to it, to compare with [`context`](#context)`.updateId`. Other hosts resolve with `undefined`. Rejects with a `NotSupportedError` on hosts that don't advertise model context updates. On hosts other than ChatGPT, the view state is sent alongside: its JSON goes first in `content`, addressed to the model only, and its keys win over yours in `structuredContent`, with a console warning naming the shared keys. The host may reject block types it doesn't list in `hostCapabilities.updateModelContext`, such as an image on a text-only host.
 
 **ChatGPT** reads this presentation metadata on content blocks:
 

@@ -12,6 +12,10 @@ server.registerTool(
     name: "library",
     title: "Parts Library",
     description: "Browse the parts catalog.",
+    inputSchema: {
+      file: z.object({ name: z.string(), resourceUri: z.string() }).optional(),
+    },
+    icons: [{ src: "https://example.com/library.svg", mimeType: "image/svg+xml" }],
     view: { component: "library" },
     openai: {
       entrypoints: [
@@ -22,7 +26,9 @@ server.registerTool(
       availableDisplayModes: ["inline", "fullscreen"],
     },
   },
-  async () => ({ structuredContent: { parts: await listParts() } }),
+  async ({ file }) => ({
+    structuredContent: file ? await openPart(file) : { parts: await listParts() },
+  }),
 );
 ```
 
