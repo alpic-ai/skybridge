@@ -1,6 +1,6 @@
 # OpenAI MCP extensions
 
-Let users open a view without the model → `openai` on `registerTool`, `useDeepLink`, `useHost().openaiCapabilities`. Mentions, titled messages and local files → `registerMentions`, `useSendFollowUpMessage`, `useOpenFile`
+Let users open a view without the model → `openai` on `registerTool`, `useDeepLink`, `useHost().openaiCapabilities`. Mentions, titled messages and local files → `registerMentions`, `useSendFollowUpMessage`, `useOpenFile`, `useFileResource`
 
 These are OpenAI MCP extensions, not part of MCP or MCP Apps: only ChatGPT reads them, other hosts ignore them.
 
@@ -124,3 +124,19 @@ if (openaiCapabilities.files) {
 ```
 
 Needs ChatGPT desktop, with a path on the machine that runs it. ChatGPT shows the file in its built-in viewer, not in your file entrypoint. `openFile` rejects elsewhere.
+
+## Reading and saving the opened file
+
+```tsx
+const { input } = useToolInfo<"open-part">();
+const { data, write } = useFileResource(input.file?.resourceUri, { representation: "text" });
+await write({ text: edited });
+```
+
+- The view never gets the path, only `file.resourceUri`. The hook re-reads the file when it changes.
+- `write` sends the current `etag`: it resolves `conflict` if the file changed, `too-large` past the size limit.
+- Check `data.writable` before offering a save.
+
+## Onboarding
+
+Add `"extensions": { "com.openai": { "onboardingSkill": "./src/skills/setup/SKILL.md" } }` to the plugin's `plugin.json` to run a skill after install. Skybridge doesn't generate that manifest.

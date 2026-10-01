@@ -8,6 +8,10 @@ export {
 export { useDeepLink } from "./use-deep-link.js";
 export { useDisplayMode } from "./use-display-mode.js";
 export { type DownloadFn, useDownload } from "./use-download.js";
+export {
+  type FileResourceState,
+  useFileResource,
+} from "./use-file-resource.js";
 export { useFiles } from "./use-files.js";
 export {
   type Host,
