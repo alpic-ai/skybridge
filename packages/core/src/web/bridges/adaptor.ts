@@ -1,5 +1,4 @@
 import { ResultSchema } from "@modelcontextprotocol/core";
-import type { App } from "@modelcontextprotocol/ext-apps";
 import * as z from "zod/v4";
 import { warnOnLargeViewState } from "../../context-warnings.js";
 import { AppsSdkBridge } from "./apps-sdk/bridge.js";
@@ -394,26 +393,46 @@ export class HostAdaptor implements Adaptor {
     if (!item) {
       throw new Error(`The host returned no contents for ${uri}.`);
     }
-    const meta = ResourceMetaSchema.safeParse(item._meta?.["openai/resource"]);
+    const { data: meta } = ResourceMetaSchema.safeParse(
+      item._meta?.["openai/resource"],
+    );
     return {
       ...("text" in item ? { text: item.text } : { blob: item.blob }),
       mimeType: item.mimeType,
-      writable: meta.success && meta.data?.writable === true,
-      etag: meta.success ? meta.data?.etag : undefined,
+      writable: meta?.writable ?? false,
+      etag: meta?.etag,
     };
   };
 
   public watchResource = (uri: string, onUpdate: () => void): (() => void) => {
-    const app = this.mcp.getApp();
+    const app = this.mcp
+      .getApp()
+      .then((app) =>
+        app.getHostCapabilities()?.experimental?.["openai/resource"]
+          ? app
+          : undefined,
+      );
     const listeners = this.resourceListeners.get(uri) ?? new Set<() => void>();
     if (listeners.size === 0) {
       this.resourceListeners.set(uri, listeners);
       app
         .then((app) => {
-          if (!app.getHostCapabilities()?.experimental?.["openai/resource"]) {
+          if (!app) {
             return;
           }
-          this.listenToResourceUpdates(app);
+          if (!this.listeningToResources) {
+            app.setNotificationHandler(
+              "notifications/resources/updated",
+              (notification) => {
+                this.resourceListeners
+                  .get(notification.params.uri)
+                  ?.forEach((l) => {
+                    l();
+                  });
+              },
+            );
+            this.listeningToResources = true;
+          }
           return app.request(
             { method: "resources/subscribe", params: { uri } },
             ResultSchema,
@@ -429,12 +448,10 @@ export class HostAdaptor implements Adaptor {
         this.resourceListeners.delete(uri);
         app
           .then((app) =>
-            app.getHostCapabilities()?.experimental?.["openai/resource"]
-              ? app.request(
-                  { method: "resources/unsubscribe", params: { uri } },
-                  ResultSchema,
-                )
-              : undefined,
+            app?.request(
+              { method: "resources/unsubscribe", params: { uri } },
+              ResultSchema,
+            ),
           )
           .catch(() => {});
       }
@@ -461,21 +478,6 @@ export class HostAdaptor implements Adaptor {
       WriteResultSchema,
     );
   };
-
-  private listenToResourceUpdates(app: App): void {
-    if (this.listeningToResources) {
-      return;
-    }
-    app.setNotificationHandler(
-      "notifications/resources/updated",
-      (notification) => {
-        this.resourceListeners.get(notification.params.uri)?.forEach((l) => {
-          l();
-        });
-      },
-    );
-    this.listeningToResources = true;
-  }
 
   public uploadFile = async (
     file: File,

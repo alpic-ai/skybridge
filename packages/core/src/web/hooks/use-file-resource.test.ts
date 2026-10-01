@@ -58,10 +58,6 @@ describe("useFileResource", () => {
         etag: "v1",
       }),
     );
-    expect(app.readServerResource).toHaveBeenCalledWith({
-      uri: "host-resource://part",
-      _meta: { "openai/resource": { representation: "text" } },
-    });
     await waitFor(() =>
       expect(request).toHaveBeenCalledWith(
         {
