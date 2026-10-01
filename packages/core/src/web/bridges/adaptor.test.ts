@@ -35,10 +35,13 @@ describe("HostAdaptor", () => {
     (adaptor as any).mcp.getApp = vi.fn().mockResolvedValue(fakeApp);
 
     const result = await adaptor.callTool("greet", { name: "alice" });
-    expect(fakeApp.callServerTool).toHaveBeenCalledWith({
-      name: "greet",
-      arguments: { name: "alice" },
-    });
+    expect(fakeApp.callServerTool).toHaveBeenCalledWith(
+      {
+        name: "greet",
+        arguments: { name: "alice" },
+      },
+      { timeout: undefined },
+    );
     expect(result.structuredContent).toEqual({ ok: true });
     expect(result.meta).toEqual({ x: 1 });
   });

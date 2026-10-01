@@ -60,11 +60,8 @@ export function useModelContext(): {
   const { capabilities, openai } = useHost();
   const reported = useMcpAppContext("openai/modelContext");
   const context = useMemo(() => {
-    if (reported === undefined) {
-      return undefined;
-    }
     const parsed = ModelContextSchema.safeParse(reported);
-    return parsed.success ? (parsed.data as ModelContextState) : undefined;
+    return parsed.success ? parsed.data : undefined;
   }, [reported]);
   const update = useCallback(
     (params: ModelContextParams) => getAdaptor().updateModelContext(params),

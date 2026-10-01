@@ -1,13 +1,11 @@
-import type {
-  ContentBlock,
-  Implementation,
-} from "@modelcontextprotocol/client";
+import type { Implementation } from "@modelcontextprotocol/client";
 import type {
   McpUiHostCapabilities,
   McpUiHostContext,
   McpUiToolCancelledNotification,
   McpUiToolInputNotification,
   McpUiToolResultNotification,
+  McpUiUpdateModelContextRequest,
 } from "@modelcontextprotocol/ext-apps";
 
 export type McpToolState = {
@@ -33,11 +31,9 @@ export type OpenAIHostContext = {
    * Context this view attached to the conversation. `null` once the user
    * removed it, for example by deleting its composer attachment.
    */
-  "openai/modelContext"?: {
-    updateId: string;
-    content?: ContentBlock[];
-    structuredContent?: Record<string, unknown>;
-  } | null;
+  "openai/modelContext"?:
+    | (McpUiUpdateModelContextRequest["params"] & { updateId: string })
+    | null;
 };
 
 export type McpAppContext = McpUiHostContext & OpenAIHostContext & McpToolState;

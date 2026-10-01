@@ -77,7 +77,9 @@ describe("useCallTool - onSuccess callback", () => {
     await act(async () => {
       result.current.callTool(args);
     });
-    expect(callToolMock).toHaveBeenCalledWith(toolName, args);
+    expect(callToolMock).toHaveBeenCalledWith(toolName, args, {
+      timeout: undefined,
+    });
   });
 
   it("should call onSuccess callback with correct data and toolArgs on successful execution", async () => {
@@ -262,7 +264,9 @@ describe("useCallTool - TypeScript typing", () => {
       result.current.callTool();
     });
 
-    expect(callToolMock).toHaveBeenCalledWith("test-tool", null);
+    expect(callToolMock).toHaveBeenCalledWith("test-tool", null, {
+      timeout: undefined,
+    });
     expectTypeOf<typeof data | undefined>(result.current.data);
   });
 

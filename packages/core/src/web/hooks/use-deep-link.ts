@@ -1,34 +1,25 @@
+import * as z from "zod/v4";
 import { useMcpAppContext } from "../bridges/index.js";
 
-function toUrl(deepLink: unknown): unknown {
-  if (typeof deepLink !== "object" || deepLink === null) {
+const DeepLinkSchema = z.union([
+  z.object({ url: z.string() }),
+  z.object({
+    path: z.array(z.string()),
+    query: z.array(z.tuple([z.string(), z.string()])),
+  }),
+]);
+
+function toUrl(deepLink: unknown): string | undefined {
+  const parsed = DeepLinkSchema.safeParse(deepLink);
+  if (!parsed.success) {
     return undefined;
   }
-  if ("url" in deepLink) {
-    return deepLink.url;
+  if ("url" in parsed.data) {
+    return parsed.data.url;
   }
-  if (
-    "path" in deepLink &&
-    Array.isArray(deepLink.path) &&
-    deepLink.path.every((segment) => typeof segment === "string") &&
-    "query" in deepLink &&
-    Array.isArray(deepLink.query) &&
-    deepLink.query.every(
-      (pair) =>
-        Array.isArray(pair) &&
-        pair.length === 2 &&
-        pair.every((part) => typeof part === "string"),
-    )
-  ) {
-    try {
-      const search = new URLSearchParams(deepLink.query).toString();
-      const path = deepLink.path.map(encodeURIComponent).join("/");
-      return `/${path}${search ? `?${search}` : ""}`;
-    } catch {
-      return undefined;
-    }
-  }
-  return undefined;
+  const search = new URLSearchParams(parsed.data.query).toString();
+  const path = parsed.data.path.map(encodeURIComponent).join("/");
+  return `/${path}${search ? `?${search}` : ""}`;
 }
 
 /**
@@ -55,7 +46,7 @@ function toUrl(deepLink: unknown): unknown {
 export function useDeepLink(): string | undefined {
   const url = toUrl(useMcpAppContext("openai/deepLink"));
   if (
-    typeof url !== "string" ||
+    url === undefined ||
     !url.startsWith("/") ||
     url.startsWith("//") ||
     url.startsWith("/\\") ||

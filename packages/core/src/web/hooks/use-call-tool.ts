@@ -174,7 +174,7 @@ export const useCallTool = <
         const data = await adaptor.callTool<ToolArgs, CombinedCallToolResponse>(
           name,
           toolArgs,
-          ...(timeout === undefined ? [] : [{ timeout }]),
+          { timeout },
         );
         if (callId === callIdRef.current) {
           setCallToolState({ status: "success", data, error: undefined });

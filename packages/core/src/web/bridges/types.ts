@@ -1,10 +1,10 @@
 import type {
   CallToolResult,
-  ContentBlock,
   EmbeddedResource,
   ResourceLink,
   ToolAnnotations,
 } from "@modelcontextprotocol/client";
+import type { McpUiUpdateModelContextRequest } from "@modelcontextprotocol/ext-apps";
 import type { useSyncExternalStore } from "react";
 import type { output as ZodOutput, ZodType } from "zod/v4";
 
@@ -35,10 +35,7 @@ export type CallToolOptions = {
 };
 
 /** Payload of `ui/update-model-context`. Content blocks may carry `_meta`. */
-export type ModelContextParams = {
-  content?: ContentBlock[];
-  structuredContent?: Record<string, unknown>;
-};
+export type ModelContextParams = McpUiUpdateModelContextRequest["params"];
 
 /**
  * Result of a tool call as surfaced to the view: MCP `content` blocks plus

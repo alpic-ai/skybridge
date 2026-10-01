@@ -1,3 +1,4 @@
+import * as z from "zod/v4";
 import { warnOnLargeViewState } from "../../context-warnings.js";
 import { AppsSdkBridge } from "./apps-sdk/bridge.js";
 import type { AppsSdkWidgetState } from "./apps-sdk/types.js";
@@ -159,10 +160,7 @@ export class HostAdaptor implements Adaptor {
     }
     const app = await this.mcp.getApp();
     const params = { name, arguments: args ?? undefined };
-    const response =
-      timeout === undefined
-        ? await app.callServerTool(params)
-        : await app.callServerTool(params, { timeout });
+    const response = await app.callServerTool(params, { timeout });
     return {
       content: response.content,
       structuredContent: response.structuredContent ?? {},
@@ -296,12 +294,10 @@ export class HostAdaptor implements Adaptor {
       this._modelContext = previous;
       throw error;
     });
-    const updateId = (
-      result._meta?.["openai/modelContext"] as
-        | { updateId?: unknown }
-        | undefined
-    )?.updateId;
-    return typeof updateId === "string" ? updateId : undefined;
+    const parsed = z
+      .object({ updateId: z.string() })
+      .safeParse(result._meta?.["openai/modelContext"]);
+    return parsed.success ? parsed.data.updateId : undefined;
   };
 
   private async sendModelContext() {

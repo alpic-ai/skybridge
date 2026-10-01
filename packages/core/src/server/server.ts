@@ -166,10 +166,16 @@ export type OpenAIEntrypoint =
   | { type: "file"; extensions: string[] }
   | { type: "settings"; searchTerms?: string[] };
 
-function definedEntries(values: Record<string, unknown>) {
-  return Object.fromEntries(
+function mergeOpenAIUi(
+  meta: { "openai/ui"?: Record<string, unknown> },
+  values: Record<string, unknown>,
+): void {
+  const defined = Object.fromEntries(
     Object.entries(values).filter(([, value]) => value !== undefined),
   );
+  if (Object.keys(defined).length > 0) {
+    meta["openai/ui"] = { ...meta["openai/ui"], ...defined };
+  }
 }
 
 function acceptsEmptyInput(
@@ -962,7 +968,7 @@ export class McpServer<
     toolName: string,
     view: ViewConfig,
     toolMeta: InternalToolMeta,
-    openaiResourceMeta?: Record<string, unknown>,
+    openai?: OpenAIToolConfig,
   ): void {
     // Append a content-derived version param so hosts (e.g. ChatGPT) bust
     // their cache when the bundle changes, but keep the URI stable across
@@ -1008,12 +1014,10 @@ export class McpServer<
         };
 
         const meta = { ...base, ...view._meta } as ResourceMeta;
-        if (openaiResourceMeta && Object.keys(openaiResourceMeta).length > 0) {
-          meta["openai/ui"] = {
-            ...(view._meta?.["openai/ui"] as Record<string, unknown>),
-            ...openaiResourceMeta,
-          };
-        }
+        mergeOpenAIUi(meta, {
+          availableDisplayModes: openai?.availableDisplayModes,
+          preferredDisplayMode: openai?.preferredDisplayMode,
+        });
         return meta;
       },
     };
@@ -1337,30 +1341,15 @@ export class McpServer<
           `skybridge: tool "${name}" has a file entrypoint extension "${badExtension}" that doesn't start with ".".`,
         );
       }
-      const openaiUi = definedEntries({
+      mergeOpenAIUi(toolMeta, {
         entrypoints: openai.entrypoints,
         preferredModelDisplayMode: openai.preferredModelDisplayMode,
       });
-      if (Object.keys(openaiUi).length > 0) {
-        toolMeta["openai/ui"] = {
-          ...(userToolMeta?.["openai/ui"] as Record<string, unknown>),
-          ...openaiUi,
-        };
-      }
     }
 
     if (view) {
       this.enforceOneToolPerView(view.component, name);
-      this.registerViewResources(
-        name,
-        view,
-        toolMeta,
-        openai &&
-          definedEntries({
-            availableDisplayModes: openai.availableDisplayModes,
-            preferredDisplayMode: openai.preferredDisplayMode,
-          }),
-      );
+      this.registerViewResources(name, view, toolMeta, openai);
     }
 
     const wrappedCb = this.decorateToolHandler(cb, {
