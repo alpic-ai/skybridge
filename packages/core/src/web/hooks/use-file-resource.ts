@@ -66,16 +66,14 @@ export function useFileResource(
       .readResource(uri, representation)
       .then(
         (resource) => ({ resource, error: undefined }),
-        (error: unknown) => ({ resource: undefined, error }),
+        (error: unknown) => ({ error }),
       )
-      .then(({ resource, error }) => {
+      .then((next) => {
         if (id === sequence.current) {
           setState((previous) => ({
+            ...(previous?.uri === uri && previous),
             uri,
-            resource:
-              resource ??
-              (previous?.uri === uri ? previous.resource : undefined),
-            error,
+            ...next,
           }));
         }
       });
@@ -95,28 +93,29 @@ export function useFileResource(
 
   const write = useCallback(
     async (content: FileResourceContent) => {
-      const resource = currentRef.current?.resource;
-      if (!uri || currentRef.current?.uri !== uri || !resource?.writable) {
+      const loaded = currentRef.current;
+      const resource = loaded?.resource;
+      if (!loaded || loaded.uri !== uri || !resource?.writable) {
         throw new NotSupportedError(
           "writeResource",
           "the resource is not loaded or not writable",
         );
       }
       const result = await getAdaptor().writeResource(
-        uri,
+        loaded.uri,
         content,
         resource.etag,
       );
       if (result.outcome === "saved") {
         sequence.current++;
         setState((previous) =>
-          previous?.uri === uri
+          previous?.uri === loaded.uri
             ? {
-                uri,
+                uri: loaded.uri,
                 resource: {
                   ...content,
                   mimeType: resource.mimeType,
-                  writable: resource.writable,
+                  writable: true,
                   etag: result.etag,
                 },
               }
@@ -124,7 +123,7 @@ export function useFileResource(
         );
       } else if (
         result.outcome === "conflict" &&
-        currentRef.current?.uri === uri
+        currentRef.current?.uri === loaded.uri
       ) {
         read();
       }

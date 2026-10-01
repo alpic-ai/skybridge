@@ -177,17 +177,17 @@ export type SendFollowUpMessageOptions = {
 /** How the host should return a file resource's contents. */
 export type ResourceRepresentation = "text" | "blob";
 
-/** A file resource as read from the host, text or base64 `blob`. */
-export type FileResource = ({ text: string } | { blob: string }) & {
+/** Contents of a file resource: text, or a base64 `blob`. */
+export type FileResourceContent = { text: string } | { blob: string };
+
+/** A file resource as read from the host. */
+export type FileResource = FileResourceContent & {
   mimeType?: string;
   /** Whether the host accepts writes to this resource. */
   writable: boolean;
   /** Version token of these contents, sent back as `ifMatch` on write. */
   etag?: string;
 };
-
-/** Contents to write back to a file resource. */
-export type FileResourceContent = { text: string } | { blob: string };
 
 /** Result of `openai/resources/write`. */
 export type FileResourceWriteResult =
