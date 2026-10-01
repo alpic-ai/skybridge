@@ -265,7 +265,7 @@ export interface Adaptor {
   openExternal(href: string, options?: OpenExternalOptions): void;
   download(params: DownloadParams): Promise<DownloadResult>;
   setViewState(stateOrUpdater: SetViewStateAction): Promise<void>;
-  updateModelContext(params: ModelContextParams): Promise<void>;
+  updateModelContext(params: ModelContextParams): Promise<string | undefined>;
   uploadFile(file: File, options?: UploadFileOptions): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
   selectFiles(): Promise<FileMetadata[]>;

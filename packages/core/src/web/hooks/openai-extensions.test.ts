@@ -74,7 +74,11 @@ describe("model context and deep links in the view", () => {
     expect(lastModelContext()).toEqual({
       structuredContent: { ski: 1, tab: "b" },
       content: [
-        { type: "text", text: JSON.stringify({ tab: "b" }) },
+        {
+          type: "text",
+          text: JSON.stringify({ tab: "b" }),
+          annotations: { audience: ["assistant"] },
+        },
         ...content,
       ],
     });
@@ -89,7 +93,13 @@ describe("model context and deep links in the view", () => {
     await act(async () => result.current.view[1]({ tab: "c" }));
     expect(lastModelContext()).toEqual({
       structuredContent: { tab: "c" },
-      content: [{ type: "text", text: JSON.stringify({ tab: "c" }) }],
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify({ tab: "c" }),
+          annotations: { audience: ["assistant"] },
+        },
+      ],
     });
   });
 

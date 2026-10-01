@@ -195,7 +195,13 @@ describe("HostAdaptor", () => {
     await adaptor.setViewState({ count: 2 });
     expect(updateModelContext).toHaveBeenCalledWith({
       structuredContent: { count: 2 },
-      content: [{ type: "text", text: JSON.stringify({ count: 2 }) }],
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify({ count: 2 }),
+          annotations: { audience: ["assistant"] },
+        },
+      ],
     });
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {

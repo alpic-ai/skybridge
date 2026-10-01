@@ -278,7 +278,7 @@ export class HostAdaptor implements Adaptor {
 
   public updateModelContext = async (
     params: ModelContextParams,
-  ): Promise<void> => {
+  ): Promise<string | undefined> => {
     const app = await this.mcp.getApp();
     const capabilities = app.getHostCapabilities();
     if (
@@ -291,10 +291,16 @@ export class HostAdaptor implements Adaptor {
       );
     }
     this._modelContext = params;
-    await this.sendModelContext();
+    const result = await this.sendModelContext();
+    const updateId = (
+      result._meta?.["openai/modelContext"] as
+        | { updateId?: unknown }
+        | undefined
+    )?.updateId;
+    return typeof updateId === "string" ? updateId : undefined;
   };
 
-  private async sendModelContext(): Promise<void> {
+  private async sendModelContext() {
     const viewState = this.openai ? null : this._viewState;
     const extra = this._modelContext;
     const collisions = Object.keys(extra?.structuredContent ?? {}).filter(
@@ -306,12 +312,18 @@ export class HostAdaptor implements Adaptor {
       );
     }
     const app = await this.mcp.getApp();
-    await app.updateModelContext({
+    return app.updateModelContext({
       structuredContent: { ...extra?.structuredContent, ...viewState },
       content: [
         ...(viewState === null
           ? []
-          : [{ type: "text" as const, text: JSON.stringify(viewState) }]),
+          : [
+              {
+                type: "text" as const,
+                text: JSON.stringify(viewState),
+                annotations: { audience: ["assistant" as const] },
+              },
+            ]),
         ...(extra?.content ?? []),
       ],
     });

@@ -29,8 +29,9 @@ server.registerTool(
 - `global` adds a sidebar entry, `thread` a tab in a conversation's side panel, `file` a viewer for those file extensions.
 - ChatGPT calls global and thread tools with `{}`: every input must be optional, or Skybridge throws at startup.
 - Give the tool a `title` that differs from the app name: it labels the entry.
-- The server `icons` cover every entry. Add tool `icons` only to tell several entrypoints apart.
-- Entrypoints always open fullscreen.
+- Set `icons` on every entrypoint tool: a monochrome 20x20 SVG using `currentColor`.
+- A file entrypoint calls the tool with `{ file: { name, resourceUri } }`. Extensions must start with `.`.
+- Global, thread and file entrypoints open fullscreen.
 
 ## Deep links
 

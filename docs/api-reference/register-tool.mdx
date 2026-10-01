@@ -80,7 +80,7 @@ All three are the tool's prompt surface: the model reads them to decide when to 
 
 ### `icons`
 
-The tool's icons, a standard MCP field using the `Icon` type (`src`, `mimeType`, `sizes`). Hosts decide whether and where to show them. Most apps don't need them, because hosts fall back to the server's [`icons`](/api-reference/skybridge#name-version). Set them when tools should look different from each other, for example ChatGPT [entrypoints](#openai) in the sidebar. ChatGPT expects a monochrome SVG on a 20x20 viewport that draws with `currentColor`.
+The tool's icons, a standard MCP field using the `Icon` type (`src`, `mimeType`, `sizes`, `theme`). Hosts choose whether and where to show them. **ChatGPT** asks for them on every tool with an [entrypoint](#openai), as a monochrome SVG on a 20x20 viewport that draws with `currentColor`. Without them it falls back to the server's [`icons`](/api-reference/skybridge#name-version) for a local server, or to the logo registered with OpenAI for a hosted app.
 
 ### `inputSchema`, `outputSchema`
 
@@ -185,6 +185,10 @@ server.registerTool(
     name: "library",
     title: "Parts Library",
     description: "Browse the parts catalog.",
+    inputSchema: {
+      file: z.object({ name: z.string(), resourceUri: z.string() }).optional(),
+    },
+    icons: [{ src: "https://example.com/library.svg", mimeType: "image/svg+xml" }],
     view: { component: "library" },
     openai: {
       entrypoints: [
@@ -195,24 +199,30 @@ server.registerTool(
       availableDisplayModes: ["inline", "fullscreen"],
     },
   },
-  async () => ({ structuredContent: { parts: await listParts() } }),
+  async ({ file }) => ({
+    structuredContent: file ? await openPart(file) : { parts: await listParts() },
+  }),
 );
 ```
 
 | Field | Purpose |
 | --- | --- |
-| `entrypoints` | Places users open the view from without the model: `global` adds a sidebar entry, `thread` a tab in a conversation's side panel, `file` a viewer for files with these extensions, `settings` an entry in the plugin settings. A global entry can carry a `quickAction`, a sidebar shortcut that calls another tool. |
+| `entrypoints` | Places users open the view from without the model: `global` adds a sidebar entry, `thread` a tab in a conversation's side panel, `file` a viewer for files with these extensions, `settings` an entry in the plugin settings. A global entry can carry a `quickAction`, a sidebar shortcut that calls another tool. Extensions must start with `.`. |
 | `availableDisplayModes` | Display modes the view supports, read before the view loads. |
 | `preferredDisplayMode` | Display mode the view prefers to open in. ChatGPT may ignore it. |
 | `preferredModelDisplayMode` | Display mode the view opens in first when the model calls the tool. |
 
-Every field is optional, and Skybridge only emits what you set: ChatGPT applies the spec defaults for the rest. Available modes default to both, or to `[preferredDisplayMode]` alone when only that one is set, so pair `preferredDisplayMode` with `availableDisplayModes` to keep the other mode.
+Every field is optional, and Skybridge only emits what you set: ChatGPT applies the spec defaults for the rest. When both display-mode fields are omitted, ChatGPT uses the modes the view declares at initialization. When only `preferredDisplayMode` is set, it becomes the only available mode, so pair it with `availableDisplayModes` to keep the other.
 
-ChatGPT calls tools with a `global` or `thread` entrypoint without arguments, so Skybridge throws at startup when the tool's input schema rejects `{}`.
+ChatGPT calls a tool with `{}` from a `global` or `thread` entrypoint, so Skybridge throws at startup when the tool's input schema rejects `{}`. From a `file` entrypoint it passes `{ file: { name, resourceUri } }`. Skybridge also throws when a file extension doesn't start with `.`.
 
 <Info>
-ChatGPT always opens entrypoints fullscreen. The display modes apply when the model calls the tool in a conversation.
+ChatGPT opens global, thread and file entrypoints fullscreen. The display modes apply when the model calls the tool in a conversation.
 </Info>
+
+<Note>
+`settings`, `quickAction` and `preferredModelDisplayMode` come from OpenAI's [reference package](https://github.com/openai/mcp-extensions), not from the written spec, so their behavior in ChatGPT may change.
+</Note>
 
 ### `auth`
 

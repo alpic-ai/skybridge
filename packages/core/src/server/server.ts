@@ -154,6 +154,7 @@ export interface OpenAIQuickAction {
  * - `global`: an entry in the sidebar, opened fullscreen.
  * - `thread`: a tab in a conversation's side panel.
  * - `file`: a viewer for files with these extensions, such as `".stl"`.
+ *   ChatGPT calls the tool with `{ file: { name, resourceUri } }`.
  * - `settings`: an entry in the plugin settings.
  *
  * ChatGPT calls the tool with `{}` for global and thread entrypoints, so the
@@ -203,7 +204,8 @@ export interface OpenAIToolConfig {
   entrypoints?: OpenAIEntrypoint[];
   /**
    * Display modes the view supports, read before the view loads. Defaults to
-   * `[preferredDisplayMode]` when that is set, otherwise to both modes.
+   * `[preferredDisplayMode]` when that is set, otherwise to the modes the view
+   * declares at initialization.
    */
   availableDisplayModes?: OpenAIDisplayMode[];
   /**
@@ -428,8 +430,8 @@ interface ToolConfigBase<
     | StandardSchemaWithJSON;
   annotations?: ToolAnnotations;
   /**
-   * Icons for the tool. The server's `icons` already cover every entrypoint,
-   * so set these only to tell several entrypoints apart. ChatGPT expects a
+   * Icons for the tool, a standard MCP field. Hosts choose whether and where
+   * to show them. ChatGPT asks for them on every entrypoint tool, as a
    * monochrome SVG on a 20x20 viewport that uses `currentColor`.
    */
   icons?: Icon[];
@@ -1324,6 +1326,16 @@ export class McpServer<
       if (opensWithoutInput && !acceptsEmptyInput(toolFields.inputSchema)) {
         throw new Error(
           `skybridge: tool "${name}" has a global or thread entrypoint, so ChatGPT calls it with \`{}\`, but its input schema rejects \`{}\`. Make every input optional.`,
+        );
+      }
+      const badExtension = openai.entrypoints
+        ?.flatMap((entrypoint) =>
+          entrypoint.type === "file" ? entrypoint.extensions : [],
+        )
+        .find((extension) => !extension.startsWith("."));
+      if (badExtension !== undefined) {
+        throw new Error(
+          `skybridge: tool "${name}" has a file entrypoint extension "${badExtension}" that doesn't start with ".".`,
         );
       }
       const openaiUi = definedEntries({

@@ -28,11 +28,13 @@ export type ModelContextState = OpenAIHostContext["openai/modelContext"];
  * `_meta["openai/title"]`, `_meta["openai/thumbnail"]` on text blocks, and
  * `annotations.audience: ["assistant"]` to hide a block from the user.
  *
- * - `supported`: whether the host advertises `updateModelContext`.
+ * - `supported`: whether the host advertises `updateModelContext` or
+ *   `openai/modelContext`.
  * - `context`: ChatGPT only, the attached context; `null` once the user
  *   removed it, `undefined` when the host never reported one.
- * - `update`: replaces the context. Rejects with `NotSupportedError` on hosts
- *   that don't advertise model context updates.
+ * - `update`: replaces the context and resolves with ChatGPT's `updateId`,
+ *   to compare with `context.updateId`. Rejects with `NotSupportedError` on
+ *   hosts that don't advertise model context updates.
  *
  * @example
  * ```tsx
@@ -53,7 +55,7 @@ export type ModelContextState = OpenAIHostContext["openai/modelContext"];
 export function useModelContext(): {
   supported: boolean;
   context: ModelContextState;
-  update: (params: ModelContextParams) => Promise<void>;
+  update: (params: ModelContextParams) => Promise<string | undefined>;
 } {
   const { capabilities, openai } = useHost();
   const reported = useMcpAppContext("openai/modelContext");
