@@ -211,12 +211,17 @@ export class HostAdaptor implements Adaptor {
     const supportsTarget = Boolean(
       app.getHostCapabilities()?.experimental?.["openai/message"],
     );
+    if (target === "new" && !supportsTarget) {
+      throw new NotSupportedError(
+        "sendFollowUpMessage",
+        "the host does not advertise openai/message, so it can't open a new conversation",
+      );
+    }
     await app.sendMessage({
       role: "user",
       content:
         typeof prompt === "string" ? [{ type: "text", text: prompt }] : prompt,
-      ...(target === "new" &&
-        supportsTarget && { _meta: { "openai/message": { target } } }),
+      ...(target === "new" && { _meta: { "openai/message": { target } } }),
     });
   };
 

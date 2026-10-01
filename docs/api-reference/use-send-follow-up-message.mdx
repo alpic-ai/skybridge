@@ -58,7 +58,7 @@ Posts the message and returns the host's promise. The promise carries no value: 
 - **`prompt`** the text posted as a user turn, model-visible, as if the user had typed it, or an array of MCP content blocks. The view keeps running after the message is posted.
 - **`options`**
   - `scrollToBottom` asks the host to scroll the conversation to the newest message after posting; omit it for the host default, or set `false` to keep the scroll position and the view on screen.
-  - `target: "new"` sends the message to a new conversation instead of the active one. Hosts that don't advertise `openai/message` post it to the active conversation.
+  - `target: "new"` sends the message to a new conversation instead of the active one. On hosts that don't advertise `openai/message`, the call rejects with a `NotSupportedError` and nothing is posted.
 
 <Info>
 `scrollToBottom` is specific to **ChatGPT**. `target` and titled items come from the [OpenAI MCP extensions](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md): only ChatGPT reads them, and mobile only supports the active conversation.

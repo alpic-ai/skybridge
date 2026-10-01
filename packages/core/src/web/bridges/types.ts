@@ -169,6 +169,7 @@ export type SendFollowUpMessageOptions = {
   /**
    * ChatGPT only, from the OpenAI MCP extensions: `"new"` starts a new
    * conversation with the message. Defaults to the active conversation.
+   * Rejects on hosts that don't advertise `openai/message`.
    */
   target?: "active" | "new";
 };
