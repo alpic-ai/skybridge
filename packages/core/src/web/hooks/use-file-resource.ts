@@ -25,8 +25,9 @@ export type FileResourceState = {
  * for text or a base64 blob. `write` uses the OpenAI MCP extensions
  * (`openai/resources/write`) and always sends the current `etag` as
  * `ifMatch`, so it resolves with `conflict` instead of overwriting a newer
- * version. It rejects with `NotSupportedError` when the host doesn't advertise
- * `openai/resource` or the resource isn't writable.
+ * version, and then re-reads the latest one. It rejects with
+ * `NotSupportedError` when the host doesn't advertise `openai/resource` or the
+ * resource isn't writable.
  *
  * Pass `undefined` as `uri` to do nothing, for example outside a file
  * entrypoint.
@@ -46,79 +47,83 @@ export function useFileResource(
   options?: { representation?: ResourceRepresentation },
 ): FileResourceState {
   const representation = options?.representation;
-  const [data, setData] = useState<FileResource | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(uri !== undefined);
-  const [error, setError] = useState<unknown>(undefined);
-  const dataRef = useRef(data);
-  dataRef.current = data;
+  const [state, setState] = useState<{
+    uri: string;
+    resource?: FileResource;
+    error?: unknown;
+  }>();
+  const sequence = useRef(0);
+  const current = state?.uri === uri ? state : undefined;
+  const currentRef = useRef(current);
+  currentRef.current = current;
 
-  useEffect(() => {
-    setData(undefined);
-    setError(undefined);
+  const read = useCallback(() => {
     if (uri === undefined) {
-      setIsLoading(false);
       return;
     }
-    let active = true;
-    const adaptor = getAdaptor();
-    const read = () => {
-      setIsLoading(true);
-      adaptor
-        .readResource(uri, representation)
-        .then((resource) => {
-          if (active) {
-            setData(resource);
-            setError(undefined);
-          }
-        })
-        .catch((err: unknown) => {
-          if (active) {
-            setError(err);
-          }
-        })
-        .finally(() => {
-          if (active) {
-            setIsLoading(false);
-          }
-        });
-    };
+    const id = ++sequence.current;
+    getAdaptor()
+      .readResource(uri, representation)
+      .then(
+        (resource) => ({ uri, resource }),
+        (error: unknown) => ({ uri, error }),
+      )
+      .then((next) => {
+        if (id === sequence.current) {
+          setState(next);
+        }
+      });
+  }, [uri, representation]);
+
+  useEffect(() => {
+    if (uri === undefined) {
+      return;
+    }
     read();
-    const stopWatching = adaptor.watchResource(uri, read);
+    const stopWatching = getAdaptor().watchResource(uri, read);
     return () => {
-      active = false;
+      sequence.current++;
       stopWatching();
     };
-  }, [uri, representation]);
+  }, [uri, read]);
 
   const write = useCallback(
     async (content: FileResourceContent) => {
-      const current = dataRef.current;
-      if (uri === undefined || !current?.writable) {
+      const resource = currentRef.current?.resource;
+      if (uri === undefined || !resource?.writable) {
         throw new NotSupportedError(
           "writeResource",
           "the resource is not loaded or not writable",
         );
       }
+      const id = ++sequence.current;
       const result = await getAdaptor().writeResource(
         uri,
         content,
-        current.etag,
+        resource.etag,
       );
-      if (result.outcome === "saved") {
-        setData(
-          (previous) =>
-            previous && {
-              ...content,
-              mimeType: previous.mimeType,
-              writable: previous.writable,
-              etag: result.etag,
-            },
-        );
+      if (result.outcome === "saved" && id === sequence.current) {
+        setState({
+          uri,
+          resource: {
+            ...content,
+            mimeType: resource.mimeType,
+            writable: resource.writable,
+            etag: result.etag,
+          },
+        });
+      } else if (result.outcome === "conflict") {
+        read();
       }
       return result;
     },
-    [uri],
+    [uri, read],
   );
 
-  return { data, isLoading, error, write };
+  return {
+    data: current?.resource,
+    isLoading: uri !== undefined && current === undefined,
+    error: current?.error,
+    write,
+  };
 }

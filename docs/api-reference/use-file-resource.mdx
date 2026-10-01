@@ -35,7 +35,7 @@ function PartEditor() {
   const save = async () => {
     const result = await write({ text: draft ?? data.text });
     if (result.outcome === "conflict") {
-      alert("The file changed on disk. Reload it before saving.");
+      alert("The file changed on disk. It was reloaded, so review it and save again.");
     }
   };
   return (
@@ -81,7 +81,7 @@ The current contents. `writable` tells whether ChatGPT accepts writes, and `etag
 
 ### `isLoading`, `error`
 
-`isLoading` is `true` while a read is in flight, including the re-reads after a change. `error` holds the last read failure.
+`isLoading` is `true` until the first read of `uri` completes. Re-reads after a change keep the previous `data` on screen until the new contents arrive. `error` holds the last read failure.
 
 ### `write`
 
@@ -94,7 +94,7 @@ write: (content: { text: string } | { blob: string }) =>
   >;
 ```
 
-Saves new contents through `openai/resources/write`, with the current `etag` as `ifMatch`. When the file changed since the last read, ChatGPT answers `conflict` instead of overwriting it. On `saved`, `data` takes the new contents and etag. It rejects with a `NotSupportedError` when the host doesn't advertise `openai/resource` or `data.writable` is `false`.
+Saves new contents through `openai/resources/write`, with the current `etag` as `ifMatch`. When the file changed since the last read, ChatGPT answers `conflict` instead of overwriting it, and the hook re-reads the latest version into `data`. On `saved`, `data` takes the new contents and etag. It rejects with a `NotSupportedError` when the host doesn't advertise `openai/resource` or `data.writable` is `false`.
 
 <CardGroup cols={2}>
   <Card title="registerTool" icon="wrench" href="/api-reference/register-tool#openai">
