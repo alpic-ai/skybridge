@@ -110,7 +110,7 @@ const send = useSendFollowUpMessage();
 send([{ type: "text", text: "M6 hex bolt", _meta: { "openai/title": "Hex bolt" } }], { target: "new" });
 ```
 
-- A text block with `_meta["openai/title"]` becomes a removable labeled item.
+- A text or image block with `_meta["openai/title"]` becomes a removable labeled item.
 - `target: "new"` starts a new conversation. Mobile only supports the active one.
 
 ## Opening local files
@@ -123,4 +123,4 @@ if (openaiCapabilities.files) {
 }
 ```
 
-Needs ChatGPT desktop with the server on the same machine. `openFile` rejects elsewhere.
+Needs ChatGPT desktop, with a path on the machine that runs it. `openFile` rejects elsewhere.

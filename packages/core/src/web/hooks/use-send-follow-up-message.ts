@@ -17,7 +17,8 @@ import {
  * `prompt` can also be an array of content blocks. On ChatGPT, a text block
  * with `_meta["openai/title"]` becomes a labeled item the user can remove, and
  * `target: "new"` sends the message to a new conversation. Both use the OpenAI
- * MCP extensions; other hosts ignore the title and the target.
+ * MCP extensions: other hosts ignore the title, and `target: "new"` rejects
+ * with `NotSupportedError` on hosts that don't advertise `openai/message`.
  *
  * @example
  * ```tsx

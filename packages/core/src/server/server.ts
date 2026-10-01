@@ -525,8 +525,6 @@ export interface OpenAIMentionsConfig<
   /** Name of the tool ChatGPT calls for each search. */
   name: string;
   description?: string;
-  /** Same as a tool's `auth`. Defaults to the server's secure default. */
-  auth?: ToolAuth;
   /** Returns the items matching the typed text, which may be empty. */
   handler: (
     params: { query: string },
@@ -1260,11 +1258,10 @@ export class McpServer<
    * @see https://docs.skybridge.tech/api-reference/register-mentions
    */
   registerMentions(config: OpenAIMentionsConfig<TAuthExtra>): this {
-    return this.registerTool(
+    this.registerTool(
       {
         name: config.name,
         description: config.description ?? "Search items to mention.",
-        auth: config.auth,
         annotations: { readOnlyHint: true },
         inputSchema: { query: z.string() },
         _meta: {
@@ -1276,7 +1273,8 @@ export class McpServer<
         content: [],
         structuredContent: await config.handler({ query }, extra),
       }),
-    ) as this;
+    );
+    return this;
   }
 
   /**

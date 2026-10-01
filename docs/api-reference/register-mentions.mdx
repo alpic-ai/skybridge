@@ -38,7 +38,6 @@ server.registerMentions({
 type OpenAIMentionsConfig = {
   name: string;
   description?: string;
-  auth?: ToolAuth;
   handler: (
     params: { query: string },
     extra: ToolHandlerExtra,
@@ -50,12 +49,11 @@ type OpenAIMentionsConfig = {
 | --- | --- |
 | `name` | Name of the tool ChatGPT calls for each search. |
 | `description` | Tool description. Defaults to a generic one, since the model never sees this tool. |
-| `auth` | Same as a tool's [`auth`](/api-reference/register-tool#auth). Under an `oauth` server, set `{ allowsAnonymous: true }` to let signed-out users search. |
 | `handler` | Receives the typed text as `query`, which may be empty, and returns the matching items as MCP resource links. `extra` is the same as in a [`registerTool`](/api-reference/register-tool) handler. |
 
 ## How it works
 
-Skybridge registers a tool named `name` that takes `{ query: string }` and returns `{ items }` as `structuredContent`. Its `_meta` carries `"openai/extensions": { "mentions/search": {} }`, which tells ChatGPT it serves mentions, and `ui.visibility: ["app"]`, which hides it from the model. Without `auth`, the tool gets the same secure default as any other tool.
+Skybridge registers a tool named `name` that takes `{ query: string }` and returns `{ items }` as `structuredContent`. Its `_meta` carries `"openai/extensions": { "mentions/search": {} }`, which tells ChatGPT it serves mentions, and `ui.visibility: ["app"]`, which hides it from the model. It requires sign-in like any other tool on a server with [`oauth`](/api-reference/skybridge#oauth).
 
 Returns the server, so calls chain.
 

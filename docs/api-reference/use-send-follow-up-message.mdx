@@ -53,7 +53,7 @@ sendFollowUpMessage(
 ): Promise<void>;
 ```
 
-Posts the message and returns the host's promise. The promise carries no value: any model reply lands in the conversation, not back in the view.
+Posts the message and returns the host's promise, which rejects when the host refuses the message. The promise carries no value: any model reply lands in the conversation, not back in the view.
 
 - **`prompt`** the text posted as a user turn, model-visible, as if the user had typed it, or an array of MCP content blocks. The view keeps running after the message is posted.
 - **`options`**
@@ -61,12 +61,12 @@ Posts the message and returns the host's promise. The promise carries no value: 
   - `target: "new"` sends the message to a new conversation instead of the active one. On hosts that don't advertise `openai/message`, the call rejects with a `NotSupportedError` and nothing is posted.
 
 <Info>
-`scrollToBottom` is specific to **ChatGPT**. `target` and titled items come from the [OpenAI MCP extensions](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md): only ChatGPT reads them, and mobile only supports the active conversation.
+`scrollToBottom` is specific to **ChatGPT**. `target` and titled items come from the [OpenAI MCP extensions](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md): only ChatGPT reads them, and mobile only supports the active conversation. ChatGPT doesn't accept audio blocks, nor resource links on iOS.
 </Info>
 
 ### Titled items
 
-On **ChatGPT**, a text block with `_meta["openai/title"]` becomes a labeled item in the message, which the user can remove as one unit. Untitled text stays ordinary message text.
+On **ChatGPT**, a text or image block with `_meta["openai/title"]` becomes a labeled item in the message, which the user can remove as one unit. Untitled text stays ordinary message text.
 
 ```tsx
 sendFollowUpMessage([

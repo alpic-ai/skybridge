@@ -175,8 +175,9 @@ export type SendFollowUpMessageOptions = {
 };
 
 /**
- * A follow-up message: plain text, or content blocks. On ChatGPT, a text block
- * with `_meta["openai/title"]` becomes a labeled item the user can remove.
+ * A follow-up message: plain text, or content blocks. On ChatGPT, a text or
+ * image block with `_meta["openai/title"]` becomes a labeled item the user can
+ * remove.
  */
 export type FollowUpMessage = string | ContentBlock[];
 

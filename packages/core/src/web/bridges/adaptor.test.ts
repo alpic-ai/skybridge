@@ -85,10 +85,7 @@ describe("HostAdaptor", () => {
     const getHostCapabilities = () => ({
       experimental: { "openai/message": {} },
     });
-    // biome-ignore lint/suspicious/noExplicitAny: test seam
-    (adaptor as any).mcp.getApp = vi
-      .fn()
-      .mockResolvedValue({ sendMessage, getHostCapabilities });
+    stubApp(adaptor, { sendMessage });
     await adaptor.sendFollowUpMessage("hi");
     expect(sendMessage).toHaveBeenCalledWith({
       role: "user",

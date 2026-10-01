@@ -3,8 +3,8 @@ import { getAdaptor } from "../bridges/index.js";
 
 /**
  * Ask ChatGPT to open a local file by its absolute path, through the OpenAI
- * MCP extensions (`openai/files/open`). ChatGPT desktop only, and only when
- * the server runs on the same machine. Rejects with `NotSupportedError` on
+ * MCP extensions (`openai/files/open`). ChatGPT desktop only, with a path on
+ * the machine that runs ChatGPT. Rejects with `NotSupportedError` on
  * hosts that don't advertise `openai/files`: check `useHost().openai.files`
  * before showing the control.
  *

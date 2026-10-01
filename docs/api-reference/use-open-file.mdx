@@ -11,7 +11,7 @@ import { Compat } from "/components/compat.jsx";
 This is an [OpenAI MCP extension](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md), not part of MCP or MCP Apps. Only **ChatGPT** supports it: on other hosts the function rejects.
 </Info>
 
-A view usually has no access to the filesystem. When your server knows the absolute path of a file, for example one it just generated, `useOpenFile` asks ChatGPT to open it. This needs ChatGPT desktop, with the server running on the same machine.
+A view usually has no access to the filesystem. When your server knows the absolute path of a file, for example one it just generated, `useOpenFile` asks ChatGPT to open it. This needs ChatGPT desktop, and the path must exist on the machine that runs it.
 
 ## Example
 
