@@ -1,6 +1,6 @@
-# ChatGPT entrypoints and deep links
+# ChatGPT entrypoints, deep links, mentions, messages and files
 
-Let users open a view without the model → `openai` on `registerTool`, `useDeepLink`, `useHost().openaiCapabilities`
+Let users open a view without the model → `openai` on `registerTool`, `useDeepLink`, `useHost().openaiCapabilities`. Mentions, titled messages and local files → `registerMentions`, `useSendFollowUpMessage`, `useOpenFile`
 
 These are OpenAI MCP extensions, not part of MCP or MCP Apps: only ChatGPT reads them, other hosts ignore them.
 
@@ -85,3 +85,42 @@ if (openaiCapabilities.files) {
 ```
 
 `resource`, `modelContext`, `message` and `files` are `false` outside ChatGPT.
+
+## At-mentions
+
+```ts
+server.registerMentions({
+  name: "search_parts",
+  handler: async ({ query }) => ({
+    items: findParts(query).map((part) => ({
+      type: "resource_link",
+      uri: `parts://${part.id}`,
+      name: part.name,
+    })),
+  }),
+});
+```
+
+Users type `@` and the app to mention individual items. The tool is hidden from the model. ChatGPT desktop only.
+
+## Messages
+
+```tsx
+const send = useSendFollowUpMessage();
+send([{ type: "text", text: "M6 hex bolt", _meta: { "openai/title": "Hex bolt" } }], { target: "new" });
+```
+
+- A text block with `_meta["openai/title"]` becomes a removable labeled item.
+- `target: "new"` starts a new conversation. Mobile only supports the active one.
+
+## Opening local files
+
+```tsx
+const { openaiCapabilities } = useHost();
+const openFile = useOpenFile();
+if (openaiCapabilities.files) {
+  openFile("/workspace/parts/hex-bolt.stl");
+}
+```
+
+Needs ChatGPT desktop with the server on the same machine. `openFile` rejects elsewhere.

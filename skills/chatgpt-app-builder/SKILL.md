@@ -44,7 +44,7 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 - **OAuth** → [oauth.md](references/oauth.md): when tools need user authentication to access user-specific data
 - **Assets and styling** → [assets-and-styling.md](references/assets-and-styling.md): when adding images, fonts or CSS to views
 - **CSP** → [csp.md](references/csp.md): when declaring allowed domains for fetch, assets, redirects, or iframes
-- **ChatGPT entrypoints** → [chatgpt-entrypoints.md](references/chatgpt-entrypoints.md): when the view should open from the ChatGPT sidebar, a conversation side panel, a file, or a deep link
+- **ChatGPT entrypoints** → [chatgpt-entrypoints.md](references/chatgpt-entrypoints.md): when the view should open from the ChatGPT sidebar, a conversation side panel, a file, or a deep link, or use ChatGPT at-mentions, titled messages or local files
 
 ## Deploy
 

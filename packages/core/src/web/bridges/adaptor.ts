@@ -11,6 +11,7 @@ import type {
   DownloadParams,
   DownloadResult,
   FileMetadata,
+  FollowUpMessage,
   HostContext,
   HostContextStore,
   ModelContextParams,
@@ -195,10 +196,11 @@ export class HostAdaptor implements Adaptor {
   };
 
   public sendFollowUpMessage = async (
-    prompt: string,
+    prompt: FollowUpMessage,
     options?: SendFollowUpMessageOptions,
   ): Promise<void> => {
-    if (this.openai) {
+    const target = options?.target;
+    if (this.openai && typeof prompt === "string" && target !== "new") {
       await this.openai.sendFollowUpMessage({
         prompt,
         scrollToBottom: options?.scrollToBottom,
@@ -206,9 +208,15 @@ export class HostAdaptor implements Adaptor {
       return;
     }
     const app = await this.mcp.getApp();
+    const supportsTarget = Boolean(
+      app.getHostCapabilities()?.experimental?.["openai/message"],
+    );
     await app.sendMessage({
       role: "user",
-      content: [{ type: "text", text: prompt }],
+      content:
+        typeof prompt === "string" ? [{ type: "text", text: prompt }] : prompt,
+      ...(target === "new" &&
+        supportsTarget && { _meta: { "openai/message": { target } } }),
     });
   };
 
@@ -331,6 +339,20 @@ export class HostAdaptor implements Adaptor {
       ],
     });
   }
+
+  public openFile = async (path: string): Promise<void> => {
+    const app = await this.mcp.getApp();
+    if (!app.getHostCapabilities()?.experimental?.["openai/files"]) {
+      throw new NotSupportedError(
+        "openFile",
+        "the host does not advertise openai/files",
+      );
+    }
+    await app.request(
+      { method: "openai/files/open", params: { path } },
+      z.object({}).loose(),
+    );
+  };
 
   public uploadFile = async (
     file: File,

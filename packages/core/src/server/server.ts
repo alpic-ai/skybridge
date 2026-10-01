@@ -11,6 +11,7 @@ import {
   type Implementation,
   McpServer as McpServerBase,
   type RequestMeta,
+  type ResourceLink,
   type ServerOptions,
   type ServerResult,
   type StandardSchemaV1,
@@ -18,6 +19,7 @@ import {
   type ToolAnnotations,
 } from "@modelcontextprotocol/server";
 import type express from "express";
+import { z } from "zod/v4";
 import { warnOnLargeToolOutput } from "../context-warnings.js";
 import {
   authToSecuritySchemes,
@@ -515,6 +517,22 @@ type ToolHandlerExtra<TAuthExtra extends ExtraClaims = ExtraClaims> = Omit<
     _meta?: RequestMeta & ClientHintsMeta;
   };
 };
+
+/** Composer at-mention search, registered with `server.registerMentions`. */
+export interface OpenAIMentionsConfig<
+  TAuthExtra extends ExtraClaims = ExtraClaims,
+> {
+  /** Name of the tool ChatGPT calls for each search. */
+  name: string;
+  description?: string;
+  /** Same as a tool's `auth`. Defaults to the server's secure default. */
+  auth?: ToolAuth;
+  /** Returns the items matching the typed text, which may be empty. */
+  handler: (
+    params: { query: string },
+    extra: ToolHandlerExtra<TAuthExtra>,
+  ) => Promise<{ items: ResourceLink[] }> | { items: ResourceLink[] };
+}
 
 type ToolHandler<
   TInput extends Record<string, StandardSchemaWithJSON>,
@@ -1217,6 +1235,48 @@ export class McpServer<
       ),
     );
     return cachedDiskManifest ?? {};
+  }
+
+  /**
+   * Register the composer at-mention search for ChatGPT, from the OpenAI MCP
+   * extensions. When the user types `@` and your app name, ChatGPT calls
+   * `handler` with the typed text and lists the returned resource links.
+   * Skybridge registers it as a tool hidden from the model.
+   *
+   * @example
+   * ```ts
+   * server.registerMentions({
+   *   name: "search_parts",
+   *   handler: async ({ query }) => ({
+   *     items: findParts(query).map((part) => ({
+   *       type: "resource_link",
+   *       uri: `parts://${part.id}`,
+   *       name: part.name,
+   *     })),
+   *   }),
+   * });
+   * ```
+   *
+   * @see https://docs.skybridge.tech/api-reference/register-mentions
+   */
+  registerMentions(config: OpenAIMentionsConfig<TAuthExtra>): this {
+    return this.registerTool(
+      {
+        name: config.name,
+        description: config.description ?? "Search items to mention.",
+        auth: config.auth,
+        annotations: { readOnlyHint: true },
+        inputSchema: { query: z.string() },
+        _meta: {
+          "openai/extensions": { "mentions/search": {} },
+          ui: { visibility: ["app"] },
+        },
+      },
+      async ({ query }, extra) => ({
+        content: [],
+        structuredContent: await config.handler({ query }, extra),
+      }),
+    ) as this;
   }
 
   /**

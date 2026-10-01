@@ -1,0 +1,51 @@
+---
+title: useOpenFile
+description: "Ask ChatGPT to open a local file"
+---
+
+import { Compat } from "/components/compat.jsx";
+
+<Compat chatgpt />
+
+<Info>
+This is an [OpenAI MCP extension](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md), not part of MCP or MCP Apps. Only **ChatGPT** supports it: on other hosts the function rejects.
+</Info>
+
+A view usually has no access to the filesystem. When your server knows the absolute path of a file, for example one it just generated, `useOpenFile` asks ChatGPT to open it. This needs ChatGPT desktop, with the server running on the same machine.
+
+## Example
+
+A view offers to open the file the tool exported.
+
+```tsx
+import { useHost, useOpenFile } from "skybridge/web";
+import { useToolInfo } from "../helpers.js";
+
+function ExportResult() {
+  const { output } = useToolInfo<"export-part">();
+  const { openai } = useHost();
+  const openFile = useOpenFile();
+
+  if (!openai.files || !output) {
+    return null;
+  }
+  return <button onClick={() => openFile(output.path)}>Open in ChatGPT</button>;
+}
+```
+
+## Returns
+
+```tsx
+(path: string) => Promise<void>;
+```
+
+A memoized function that sends `openai/files/open` with the absolute `path`. It rejects with a `NotSupportedError` on hosts that don't advertise `openai/files`, so check [`useHost().openai.files`](/api-reference/use-host#openai) before showing the control.
+
+<CardGroup cols={2}>
+  <Card title="useHost" icon="server" href="/api-reference/use-host">
+    Check which extensions the host supports
+  </Card>
+  <Card title="useOpenExternal" icon="external-link" href="/api-reference/use-open-external">
+    Open a URL outside the conversation
+  </Card>
+</CardGroup>

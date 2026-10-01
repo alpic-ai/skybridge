@@ -5,6 +5,12 @@ import { AppsSdkBridge } from "./apps-sdk/bridge.js";
 import { McpAppBridge } from "./mcp-app/bridge.js";
 import { NotSupportedError } from "./types.js";
 
+function stubApp(adaptor: HostAdaptor, app: object) {
+  (
+    adaptor as unknown as { mcp: { getApp: () => Promise<object> } }
+  ).mcp.getApp = () => Promise.resolve(app);
+}
+
 describe("HostAdaptor", () => {
   beforeEach(() => {
     McpAppBridge.resetInstance();
@@ -60,7 +66,7 @@ describe("HostAdaptor", () => {
     expect(fakeApp.downloadFile).not.toHaveBeenCalled();
   });
 
-  it("sendFollowUpMessage routes to window.openai only when scrollToBottom is set", async () => {
+  it("sendFollowUpMessage uses window.openai for plain text and ui/message for content blocks or a target", async () => {
     const sendFollowUpMessage = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal("openai", { sendFollowUpMessage });
     let adaptor = new HostAdaptor();
@@ -76,13 +82,55 @@ describe("HostAdaptor", () => {
     vi.stubGlobal("openai", undefined);
     adaptor = new HostAdaptor();
     const sendMessage = vi.fn().mockResolvedValue(undefined);
+    const getHostCapabilities = () => ({
+      experimental: { "openai/message": {} },
+    });
     // biome-ignore lint/suspicious/noExplicitAny: test seam
-    (adaptor as any).mcp.getApp = vi.fn().mockResolvedValue({ sendMessage });
+    (adaptor as any).mcp.getApp = vi
+      .fn()
+      .mockResolvedValue({ sendMessage, getHostCapabilities });
     await adaptor.sendFollowUpMessage("hi");
     expect(sendMessage).toHaveBeenCalledWith({
       role: "user",
       content: [{ type: "text", text: "hi" }],
     });
+
+    McpAppBridge.resetInstance();
+    AppsSdkBridge.resetInstance();
+    vi.stubGlobal("openai", { sendFollowUpMessage });
+    adaptor = new HostAdaptor();
+    stubApp(adaptor, { sendMessage, getHostCapabilities });
+    const item = {
+      type: "text" as const,
+      text: "M6 hex bolt",
+      _meta: { "openai/title": "Hex bolt" },
+    };
+    await adaptor.sendFollowUpMessage([item], { target: "new" });
+    expect(sendMessage).toHaveBeenLastCalledWith({
+      role: "user",
+      content: [item],
+      _meta: { "openai/message": { target: "new" } },
+    });
+    expect(sendFollowUpMessage).toHaveBeenCalledTimes(1);
+  });
+
+  it("openFile sends openai/files/open only on hosts advertising openai/files", async () => {
+    const adaptor = new HostAdaptor();
+    const request = vi.fn().mockResolvedValue({});
+    let capabilities: Record<string, unknown> = {};
+    stubApp(adaptor, { request, getHostCapabilities: () => capabilities });
+
+    await expect(adaptor.openFile("/tmp/part.stl")).rejects.toThrow(
+      "openai/files",
+    );
+    expect(request).not.toHaveBeenCalled();
+
+    capabilities = { experimental: { "openai/files": {} } };
+    await adaptor.openFile("/tmp/part.stl");
+    expect(request).toHaveBeenCalledWith(
+      { method: "openai/files/open", params: { path: "/tmp/part.stl" } },
+      expect.anything(),
+    );
   });
 
   it("openExternal routes to window.openai only when redirectUrl: false", async () => {

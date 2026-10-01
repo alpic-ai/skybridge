@@ -70,6 +70,7 @@ export type {
   McpServerTypes,
   OpenAIDisplayMode,
   OpenAIEntrypoint,
+  OpenAIMentionsConfig,
   OpenAIQuickAction,
   OpenAIToolConfig,
   SecurityScheme,

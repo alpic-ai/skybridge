@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import {
+  type FollowUpMessage,
   getAdaptor,
   type SendFollowUpMessageOptions,
 } from "../bridges/index.js";
@@ -13,6 +14,11 @@ import {
  * posts the message. This option is Apps-SDK-only; it is silently ignored in
  * the MCP Apps runtime.
  *
+ * `prompt` can also be an array of content blocks. On ChatGPT, a text block
+ * with `_meta["openai/title"]` becomes a labeled item the user can remove, and
+ * `target: "new"` sends the message to a new conversation. Both use the OpenAI
+ * MCP extensions; other hosts ignore the title and the target.
+ *
  * @example
  * ```tsx
  * const send = useSendFollowUpMessage();
@@ -24,7 +30,7 @@ import {
 export function useSendFollowUpMessage() {
   const adaptor = getAdaptor();
   const sendFollowUpMessage = useCallback(
-    (prompt: string, options?: SendFollowUpMessageOptions) =>
+    (prompt: FollowUpMessage, options?: SendFollowUpMessageOptions) =>
       adaptor.sendFollowUpMessage(prompt, options),
     [adaptor],
   );
