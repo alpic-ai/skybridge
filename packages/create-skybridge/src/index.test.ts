@@ -87,7 +87,9 @@ describe("create-skybridge", () => {
     );
     expect(workspaceRaw).toContain('packages:\n  - "."');
     expect(workspaceRaw).toContain("onlyBuiltDependencies:\n  - esbuild");
-    expect(workspaceRaw).toContain("allowBuilds:\n  esbuild: true");
+    expect(workspaceRaw).toContain(
+      'allowBuilds:\n  esbuild: true\n  "@swc/core": false\n  msw: false',
+    );
   });
 
   it("does not write pnpm-workspace.yaml for other package managers", async () => {

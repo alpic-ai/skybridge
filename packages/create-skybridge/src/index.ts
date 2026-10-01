@@ -368,7 +368,7 @@ export async function init(args: string[] = process.argv.slice(2)) {
   if (pm === "pnpm") {
     fs.writeFileSync(
       path.join(root, "pnpm-workspace.yaml"),
-      'packages:\n  - "."\nonlyBuiltDependencies:\n  - esbuild\nallowBuilds:\n  esbuild: true\n',
+      'packages:\n  - "."\nonlyBuiltDependencies:\n  - esbuild\nallowBuilds:\n  esbuild: true\n  "@swc/core": false\n  msw: false\n',
     );
   }
 
