@@ -10,7 +10,7 @@ import { Compat } from "/components/compat.jsx";
 A [file entrypoint](/api-reference/register-tool#openai) opens your view on a file the user picked in ChatGPT desktop. The view never gets the file's path: the tool input carries an opaque `file.resourceUri` instead. `useFileResource` reads that resource, re-reads it whenever the host reports a change, and saves edits back.
 
 <Info>
-Reading uses the standard MCP `resources/read`. Text or blob selection and writes come from the [OpenAI MCP extensions](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md), so only **ChatGPT** desktop supports them.
+Reading uses the standard MCP `resources/read`. Text or blob selection, change subscriptions and writes come from the [OpenAI MCP extensions](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md), so only **ChatGPT** desktop supports them.
 </Info>
 
 ## Example
@@ -35,6 +35,7 @@ function PartEditor() {
   const save = async () => {
     const result = await write({ text: draft ?? data.text });
     if (result.outcome === "conflict") {
+      setDraft(undefined);
       alert("The file changed on disk. It was reloaded, so review it and save again.");
     }
   };
@@ -81,7 +82,7 @@ The current contents. `writable` tells whether ChatGPT accepts writes, and `etag
 
 ### `isLoading`, `error`
 
-`isLoading` is `true` until the first read of `uri` completes. Re-reads after a change keep the previous `data` on screen until the new contents arrive. `error` holds the last read failure.
+`isLoading` is `true` until the first read of `uri` completes. Re-reads after a change keep the previous `data` on screen until the new contents arrive. `error` holds the last read failure, and `data` keeps the last contents that loaded.
 
 ### `write`
 
@@ -94,7 +95,7 @@ write: (content: { text: string } | { blob: string }) =>
   >;
 ```
 
-Saves new contents through `openai/resources/write`, with the current `etag` as `ifMatch`. When the file changed since the last read, ChatGPT answers `conflict` instead of overwriting it, and the hook re-reads the latest version into `data`. On `saved`, `data` takes the new contents and etag. It rejects with a `NotSupportedError` when the host doesn't advertise `openai/resource` or `data.writable` is `false`.
+Saves new contents through `openai/resources/write`, with the current `etag` as `ifMatch`. When ChatGPT returned no `etag`, the write has no version check. When the file changed since the last read, ChatGPT answers `conflict` instead of overwriting it, and the hook re-reads the latest version into `data`. Change subscriptions also need `openai/resource`: on other hosts the hook reads the file once. On `saved`, `data` takes the new contents and etag. It rejects with a `NotSupportedError` when the host doesn't advertise `openai/resource` or `data.writable` is `false`.
 
 <CardGroup cols={2}>
   <Card title="registerTool" icon="wrench" href="/api-reference/register-tool#openai">
