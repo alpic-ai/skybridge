@@ -2,6 +2,7 @@ import "@/index.css";
 
 import { type OpenUIError, Renderer } from "@openuidev/react-lang";
 import { useEffect, useState } from "react";
+import { useUser } from "skybridge/web";
 import { useToolInfo } from "../helpers.js";
 import { openuiLibrary } from "../openui/library.js";
 
@@ -12,7 +13,8 @@ function formatError(error: OpenUIError): string {
 }
 
 function RenderWidget() {
-  const { input } = useToolInfo<"render">();
+  const { input, isPending } = useToolInfo<"render">();
+  const { theme } = useUser();
   const [errors, setErrors] = useState<OpenUIError[]>([]);
   const code = typeof input?.code === "string" ? input.code : null;
 
@@ -23,19 +25,23 @@ function RenderWidget() {
 
   if (!code) {
     return (
-      <div className="empty-state">
-        <strong>Waiting for OpenUI Lang...</strong>
+      <div
+        className={`${theme === "dark" ? "dark" : ""} flex min-h-screen flex-col items-center justify-center gap-2 bg-background text-center text-muted-foreground`}
+      >
+        <strong className="text-foreground">Waiting for OpenUI Lang...</strong>
         <span>Call render with generated OpenUI Lang.</span>
       </div>
     );
   }
 
   return (
-    <div className="renderer-shell">
+    <div
+      className={`${theme === "dark" ? "dark" : ""} renderer-shell min-h-screen bg-background p-7 text-foreground`}
+    >
       <Renderer
         library={openuiLibrary}
         response={code}
-        isStreaming={false}
+        isStreaming={isPending}
         onError={setErrors}
       />
       {errors.length > 0 ? (
