@@ -19,7 +19,7 @@ export const settingsReadDefinition = {
   annotations: readOnly,
   _meta: appOnly,
   description:
-    "Read effective size and colour preferences for this host subject/session.",
+    "Read effective size and colour preferences for the authenticated user or server session. Anonymous calls use defaults.",
   outputSchema: {
     schema: z.object({
       type: z.literal("object"),

@@ -18,7 +18,7 @@ export const settingsUpdateDefinition = {
   inputSchema: { set: settingsSetSchema },
   _meta: appOnly,
   description:
-    "Update supplied preferences, preserving omitted values. Demo storage lasts until server restart.",
+    "Update supplied preferences for the authenticated user or server session, preserving omitted values. Anonymous updates are unavailable.",
   outputSchema: { values: z.strictObject(preferenceShape) },
 };
 export function settingsUpdateHandler(

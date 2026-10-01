@@ -51,6 +51,7 @@ export function ShopWorkspace() {
   );
   const [variantId, setVariantId] = useState<string | null>(null);
   const [linkError, setLinkError] = useState("");
+  const [linkRetry, setLinkRetry] = useState(0);
 
   useEffect(() => {
     if (requestedProductId) {
@@ -84,8 +85,9 @@ export function ShopWorkspace() {
       const id = decodeURIComponent(match[1]);
       const product = products.find((entry) => entry.id === id);
       const requestedVariant = route.searchParams.get("variant");
-      if (!product && requestedLink.current !== deepLink) {
-        requestedLink.current = deepLink;
+      const requestKey = `${deepLink}:${linkRetry}`;
+      if (!product && requestedLink.current !== requestKey) {
+        requestedLink.current = requestKey;
         setLinkError("Opening linked product…");
         lookupCall.current(
           { action: "browse", productId: id },
@@ -110,9 +112,7 @@ export function ShopWorkspace() {
             },
             onError: () => {
               if (latestLink.current === deepLink) {
-                setLinkError(
-                  "Could not load this product. Try opening the link again.",
-                );
+                setLinkError("Could not load this product.");
               }
             },
           },
@@ -135,7 +135,7 @@ export function ShopWorkspace() {
     } catch {
       setLinkError("This shop link could not be opened.");
     }
-  }, [deepLink, responseMetadata, products, requestedProductId]);
+  }, [deepLink, responseMetadata, products, requestedProductId, linkRetry]);
 
   const selected =
     products.find((product) => product.id === selectedId) ??
@@ -208,7 +208,23 @@ export function ShopWorkspace() {
             </button>
           </nav>
         </header>
-        {linkError ? <p role="alert">{linkError}</p> : null}
+        {linkError ? (
+          <p role="alert">
+            {linkError}{" "}
+            {linkError === "Could not load this product." ? (
+              <button
+                type="button"
+                className={styles.button}
+                onClick={() => {
+                  requestedLink.current = null;
+                  setLinkRetry((current) => current + 1);
+                }}
+              >
+                Retry
+              </button>
+            ) : null}
+          </p>
+        ) : null}
         {selected ? (
           <>
             <button

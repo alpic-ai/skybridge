@@ -227,6 +227,7 @@ function verifyFormState(value: unknown, extra: McpExtra) {
   return state;
 }
 type ChoiceThumbnail = { src: string; mimeType?: string };
+const MAX_CHOICE_THUMBNAIL_BYTES = 256_000;
 async function choiceThumbnails(products: Product[]) {
   const entries = await Promise.all(
     products.map(async (product) => {
@@ -240,23 +241,51 @@ async function choiceThumbnails(products: Product[]) {
         });
         const mimeType = response.headers.get("content-type")?.split(";")[0];
         if (
-          response.ok &&
-          mimeType &&
-          ["image/png", "image/jpeg", "image/webp", "image/gif"].includes(
+          !response.ok ||
+          !mimeType ||
+          !["image/png", "image/jpeg", "image/webp", "image/gif"].includes(
             mimeType,
-          )
+          ) ||
+          !response.body
         ) {
-          const bytes = Buffer.from(await response.arrayBuffer());
-          if (bytes.length <= 256_000) {
-            return [
-              product.id,
-              {
-                src: `data:${mimeType};base64,${bytes.toString("base64")}`,
-                mimeType,
-              },
-            ] as const;
-          }
+          await response.body?.cancel();
+          return [product.id, { src }] as const;
         }
+        const declaredLength = response.headers.get("content-length");
+        if (
+          declaredLength &&
+          Number(declaredLength) > MAX_CHOICE_THUMBNAIL_BYTES
+        ) {
+          await response.body.cancel();
+          return [product.id, { src }] as const;
+        }
+        const reader = response.body.getReader();
+        const chunks: Buffer[] = [];
+        let total = 0;
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              break;
+            }
+            total += value.byteLength;
+            if (total > MAX_CHOICE_THUMBNAIL_BYTES) {
+              await reader.cancel();
+              return [product.id, { src }] as const;
+            }
+            chunks.push(Buffer.from(value));
+          }
+        } finally {
+          reader.releaseLock();
+        }
+        const bytes = Buffer.concat(chunks, total);
+        return [
+          product.id,
+          {
+            src: `data:${mimeType};base64,${bytes.toString("base64")}`,
+            mimeType,
+          },
+        ] as const;
       } catch {
         // Keep the catalogue URL if thumbnail fetching is unavailable.
       }
