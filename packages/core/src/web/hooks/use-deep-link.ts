@@ -17,9 +17,13 @@ function toUrl(deepLink: unknown): string | undefined {
   if ("url" in parsed.data) {
     return parsed.data.url;
   }
-  const search = new URLSearchParams(parsed.data.query).toString();
-  const path = parsed.data.path.map(encodeURIComponent).join("/");
-  return `/${path}${search ? `?${search}` : ""}`;
+  try {
+    const search = new URLSearchParams(parsed.data.query).toString();
+    const path = parsed.data.path.map(encodeURIComponent).join("/");
+    return `/${path}${search ? `?${search}` : ""}`;
+  } catch {
+    return undefined;
+  }
 }
 
 /**

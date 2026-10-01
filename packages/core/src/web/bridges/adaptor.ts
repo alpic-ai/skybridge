@@ -291,7 +291,9 @@ export class HostAdaptor implements Adaptor {
     const previous = this._modelContext;
     this._modelContext = params;
     const result = await this.sendModelContext().catch((error: unknown) => {
-      this._modelContext = previous;
+      if (this._modelContext === params) {
+        this._modelContext = previous;
+      }
       throw error;
     });
     const parsed = z
