@@ -390,7 +390,7 @@ export class HostAdaptor implements Adaptor {
         _meta: { "openai/resource": { representation } },
       }),
     });
-    const [item] = contents;
+    const item = contents.find((content) => content.uri === uri) ?? contents[0];
     if (!item) {
       throw new Error(`The host returned no contents for ${uri}.`);
     }
@@ -405,12 +405,14 @@ export class HostAdaptor implements Adaptor {
 
   public watchResource = (uri: string, onUpdate: () => void): (() => void) => {
     const app = this.mcp.getApp();
-    let listeners = this.resourceListeners.get(uri);
-    if (!listeners) {
-      listeners = new Set();
+    const listeners = this.resourceListeners.get(uri) ?? new Set<() => void>();
+    if (listeners.size === 0) {
       this.resourceListeners.set(uri, listeners);
       app
         .then((app) => {
+          if (!app.getHostCapabilities()?.experimental?.["openai/resource"]) {
+            return;
+          }
           this.listenToResourceUpdates(app);
           return app.request(
             { method: "resources/subscribe", params: { uri } },
@@ -421,21 +423,18 @@ export class HostAdaptor implements Adaptor {
           console.warn(`Failed to subscribe to ${uri}.`, error);
         });
     }
-    const uriListeners = listeners;
-    uriListeners.add(onUpdate);
+    listeners.add(onUpdate);
     return () => {
-      uriListeners.delete(onUpdate);
-      if (
-        uriListeners.size === 0 &&
-        this.resourceListeners.get(uri) === uriListeners
-      ) {
+      if (listeners.delete(onUpdate) && listeners.size === 0) {
         this.resourceListeners.delete(uri);
         app
           .then((app) =>
-            app.request(
-              { method: "resources/unsubscribe", params: { uri } },
-              ResultSchema,
-            ),
+            app.getHostCapabilities()?.experimental?.["openai/resource"]
+              ? app.request(
+                  { method: "resources/unsubscribe", params: { uri } },
+                  ResultSchema,
+                )
+              : undefined,
           )
           .catch(() => {});
       }
@@ -467,7 +466,6 @@ export class HostAdaptor implements Adaptor {
     if (this.listeningToResources) {
       return;
     }
-    this.listeningToResources = true;
     app.setNotificationHandler(
       "notifications/resources/updated",
       (notification) => {
@@ -476,6 +474,7 @@ export class HostAdaptor implements Adaptor {
         });
       },
     );
+    this.listeningToResources = true;
   }
 
   public uploadFile = async (

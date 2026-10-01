@@ -134,9 +134,9 @@ await write({ text: edited });
 ```
 
 - The view never gets the path, only `file.resourceUri`. The hook re-reads the file when it changes.
-- `write` sends the current `etag`: it resolves `conflict` if the file changed (and re-reads it), `too-large` past the size limit.
+- `write` sends the current `etag` when ChatGPT returned one: it resolves `conflict` if the file changed (and re-reads it), `too-large` past the size limit.
 - Check `data.writable` before offering a save.
 
 ## Onboarding
 
-Add `"extensions": { "com.openai": { "onboardingSkill": "./src/skills/setup/SKILL.md" } }` to the plugin's `plugin.json` to run a skill after install. Skybridge doesn't generate that manifest.
+Add `"extensions": { "com.openai": { "onboardingSkill": "./src/skills/setup/SKILL.md" } }` to the plugin manifest to offer a setup skill users run after install. Skybridge doesn't generate that manifest.

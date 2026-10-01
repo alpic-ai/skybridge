@@ -29,7 +29,7 @@ export type FileResourceState = {
  * `NotSupportedError` when the host doesn't advertise `openai/resource` or the
  * resource isn't writable.
  *
- * Pass `undefined` as `uri` to do nothing, for example outside a file
+ * Pass `undefined` or an empty string as `uri` to do nothing, for example outside a file
  * entrypoint.
  *
  * @example
@@ -53,30 +53,36 @@ export function useFileResource(
     error?: unknown;
   }>();
   const sequence = useRef(0);
-  const current = state?.uri === uri ? state : undefined;
+  const current = uri && state?.uri === uri ? state : undefined;
   const currentRef = useRef(current);
   currentRef.current = current;
 
   const read = useCallback(() => {
-    if (uri === undefined) {
+    if (!uri) {
       return;
     }
     const id = ++sequence.current;
     getAdaptor()
       .readResource(uri, representation)
       .then(
-        (resource) => ({ uri, resource }),
-        (error: unknown) => ({ uri, error }),
+        (resource) => ({ resource, error: undefined }),
+        (error: unknown) => ({ resource: undefined, error }),
       )
-      .then((next) => {
+      .then(({ resource, error }) => {
         if (id === sequence.current) {
-          setState(next);
+          setState((previous) => ({
+            uri,
+            resource:
+              resource ??
+              (previous?.uri === uri ? previous.resource : undefined),
+            error,
+          }));
         }
       });
   }, [uri, representation]);
 
   useEffect(() => {
-    if (uri === undefined) {
+    if (!uri) {
       return;
     }
     read();
@@ -90,29 +96,36 @@ export function useFileResource(
   const write = useCallback(
     async (content: FileResourceContent) => {
       const resource = currentRef.current?.resource;
-      if (uri === undefined || !resource?.writable) {
+      if (!uri || currentRef.current?.uri !== uri || !resource?.writable) {
         throw new NotSupportedError(
           "writeResource",
           "the resource is not loaded or not writable",
         );
       }
-      const id = ++sequence.current;
       const result = await getAdaptor().writeResource(
         uri,
         content,
         resource.etag,
       );
-      if (result.outcome === "saved" && id === sequence.current) {
-        setState({
-          uri,
-          resource: {
-            ...content,
-            mimeType: resource.mimeType,
-            writable: resource.writable,
-            etag: result.etag,
-          },
-        });
-      } else if (result.outcome === "conflict") {
+      if (result.outcome === "saved") {
+        sequence.current++;
+        setState((previous) =>
+          previous?.uri === uri
+            ? {
+                uri,
+                resource: {
+                  ...content,
+                  mimeType: resource.mimeType,
+                  writable: resource.writable,
+                  etag: result.etag,
+                },
+              }
+            : previous,
+        );
+      } else if (
+        result.outcome === "conflict" &&
+        currentRef.current?.uri === uri
+      ) {
         read();
       }
       return result;
@@ -122,7 +135,7 @@ export function useFileResource(
 
   return {
     data: current?.resource,
-    isLoading: uri !== undefined && current === undefined,
+    isLoading: Boolean(uri) && current === undefined,
     error: current?.error,
     write,
   };
