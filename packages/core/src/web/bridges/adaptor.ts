@@ -290,8 +290,12 @@ export class HostAdaptor implements Adaptor {
         "the host does not advertise updateModelContext",
       );
     }
+    const previous = this._modelContext;
     this._modelContext = params;
-    const result = await this.sendModelContext();
+    const result = await this.sendModelContext().catch((error: unknown) => {
+      this._modelContext = previous;
+      throw error;
+    });
     const updateId = (
       result._meta?.["openai/modelContext"] as
         | { updateId?: unknown }
