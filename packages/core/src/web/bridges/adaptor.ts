@@ -404,15 +404,11 @@ export class HostAdaptor implements Adaptor {
   };
 
   public watchResource = (uri: string, onUpdate: () => void): (() => void) => {
+    const app = this.mcp.getApp();
     let listeners = this.resourceListeners.get(uri);
-    const first = !listeners;
     if (!listeners) {
       listeners = new Set();
       this.resourceListeners.set(uri, listeners);
-    }
-    listeners.add(onUpdate);
-    const app = this.mcp.getApp();
-    if (first) {
       app
         .then((app) => {
           this.listenToResourceUpdates(app);
@@ -421,13 +417,17 @@ export class HostAdaptor implements Adaptor {
             ResultSchema,
           );
         })
-        .catch(() => {});
+        .catch((error: unknown) => {
+          console.warn(`Failed to subscribe to ${uri}.`, error);
+        });
     }
+    const uriListeners = listeners;
+    uriListeners.add(onUpdate);
     return () => {
-      listeners.delete(onUpdate);
+      uriListeners.delete(onUpdate);
       if (
-        listeners.size === 0 &&
-        this.resourceListeners.get(uri) === listeners
+        uriListeners.size === 0 &&
+        this.resourceListeners.get(uri) === uriListeners
       ) {
         this.resourceListeners.delete(uri);
         app
