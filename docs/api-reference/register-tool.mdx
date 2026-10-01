@@ -226,7 +226,7 @@ server.registerTool(
 
 Every field is optional, and Skybridge only emits what you set: ChatGPT applies the spec defaults for the rest. When both display-mode fields are omitted, the view supports both modes. When only `preferredDisplayMode` is set, it becomes the only available mode, so pair it with `availableDisplayModes` to keep the other.
 
-ChatGPT calls a tool with `{}` from a `global` or `thread` entrypoint, so Skybridge throws at startup when the tool's input schema rejects `{}`. From a `file` entrypoint it passes `{ file: { name, resourceUri } }`. Skybridge also throws when a file extension doesn't start with `.`.
+ChatGPT calls a tool with `{}` from a `global` or `thread` entrypoint, so Skybridge throws at startup when the tool's input schema rejects `{}`. From a `file` entrypoint it passes `{ file: { name, resourceUri } }`, which the view reads and saves with [`useFileResource`](/api-reference/use-file-resource). Skybridge also throws when a file extension doesn't start with `.`.
 
 <Info>
 ChatGPT opens global, thread and file entrypoints fullscreen. The display modes apply when the model calls the tool in a conversation.
