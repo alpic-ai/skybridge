@@ -57,6 +57,23 @@ Skybridge registers a tool named `name` that takes `{ query: string }` and retur
 
 Returns the server, so calls chain.
 
+## Serve the mentioned items
+
+When the user picks an item, its resource link goes into the message, so the model gets the `uri` rather than the item itself. Serve those URIs as MCP resources so the host can read them:
+
+```ts
+import { ResourceTemplate } from "@modelcontextprotocol/server";
+
+server.registerResource(
+  "part",
+  new ResourceTemplate("parts://{id}", { list: undefined }),
+  { mimeType: "application/json" },
+  async (uri, { id }) => ({
+    contents: [{ uri: uri.href, text: JSON.stringify(await getPart(String(id))) }],
+  }),
+);
+```
+
 <CardGroup cols={2}>
   <Card title="registerTool" icon="wrench" href="/api-reference/register-tool">
     Register tools and their ChatGPT entrypoints

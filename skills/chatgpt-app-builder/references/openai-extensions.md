@@ -1,4 +1,4 @@
-# ChatGPT entrypoints, deep links, mentions, messages and files
+# OpenAI MCP extensions
 
 Let users open a view without the model → `openai` on `registerTool`, `useDeepLink`, `useHost().openaiCapabilities`. Mentions, titled messages and local files → `registerMentions`, `useSendFollowUpMessage`, `useOpenFile`
 
@@ -44,7 +44,7 @@ server.registerTool(
 - A file entrypoint passes `{ file: { name, resourceUri } }`. Extensions must start with `.`.
 - Give each tool a `title` that differs from the app name: it labels the entry.
 - Set `icons` on every entrypoint tool: a monochrome 20x20 SVG using `currentColor`.
-- Global, thread and file entrypoints open fullscreen.
+- Global, thread and file entrypoints open fullscreen. File entrypoints only exist on ChatGPT desktop.
 
 ## Deep links
 
@@ -73,7 +73,7 @@ useEffect(() => {
 
 - Without `path`, the view opens on `/`. `useDeepLink()` is `undefined` when the view wasn't opened from a deep link.
 - `<plugin-id>` is in your plugin's URL, `https://chatgpt.com/plugins/<plugin-id>`.
-- Desktop and mobile apps use `codex://plugins/<plugin-id>/app/<tool-name>` and `chatgpt://plugins/<plugin-id>/app/<tool-name>`. Android doesn't support deep links.
+- Desktop and mobile apps use `codex://plugins/<plugin-id>/app/<tool-name>` and `chatgpt://plugins/<plugin-id>/app/<tool-name>`. For a plugin from a custom marketplace, write `<plugin-id>@<marketplace>`. Android doesn't support deep links.
 
 ## Feature detection
 
@@ -101,7 +101,7 @@ server.registerMentions({
 });
 ```
 
-Users type `@` and the app to mention individual items. The tool is hidden from the model. ChatGPT desktop only.
+Users type `@` and the app to mention individual items. The tool is hidden from the model. ChatGPT desktop only. Serve the returned `uri`s as resources (`server.registerResource`) so the host can read the picked item.
 
 ## Messages
 
