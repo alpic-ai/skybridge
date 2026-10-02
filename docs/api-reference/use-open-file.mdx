@@ -13,6 +13,8 @@ This is an [OpenAI MCP extension](https://github.com/openai/mcp-extensions/blob/
 
 A view usually has no access to the filesystem. When your server knows the absolute path of a file, for example one it just generated, `useOpenFile` asks ChatGPT to open it. This needs ChatGPT desktop, and the path must exist on the machine that runs it.
 
+ChatGPT desktop opens the file in a new tab with its built-in viewer, from which the user can view the source or open it in an external editor. It doesn't go through your app's [file entrypoint](/api-reference/register-tool#openai), even when the file's extension matches one. That's what we observed in ChatGPT desktop; the spec doesn't describe it.
+
 ## Example
 
 A view offers to open the file the tool exported.

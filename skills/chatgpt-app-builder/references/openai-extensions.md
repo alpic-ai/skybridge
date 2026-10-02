@@ -123,4 +123,4 @@ if (openaiCapabilities.files) {
 }
 ```
 
-Needs ChatGPT desktop, with a path on the machine that runs it. `openFile` rejects elsewhere.
+Needs ChatGPT desktop, with a path on the machine that runs it. ChatGPT shows the file in its built-in viewer, not in your file entrypoint. `openFile` rejects elsewhere.
