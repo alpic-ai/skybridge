@@ -60,6 +60,14 @@ server.registerEvent(config, hooks): this;
 
 Declares an event type hosts can subscribe to, and hands each subscription to your hooks. Experimental. See [registerEvent](/api-reference/register-event).
 
+### `registerFileViewer`
+
+```ts
+server.registerFileViewer(config, handler): this;
+```
+
+Registers a ChatGPT desktop file viewer. See [registerFileViewer](/api-reference/register-file-viewer).
+
 ### `registerResource`, `registerPrompt`
 
 Inherited from the MCP SDK's [`McpServer`](https://github.com/modelcontextprotocol/typescript-sdk), with the same signatures. Views register their own resources, so you only need `registerResource` for data you expose directly.
