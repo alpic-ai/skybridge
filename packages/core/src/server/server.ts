@@ -575,16 +575,6 @@ export type OpenAISettingsValues<
   TFields extends Record<string, OpenAISettingsField>,
 > = { [K in keyof TFields]: z.output<TFields[K]["schema"]> };
 
-/** A settings section, listing fields and buttons that call a tool. */
-export interface OpenAISettingsGroup<TField extends string = string> {
-  kind: "group";
-  title: string;
-  items: (
-    | { kind: "property"; property: TField }
-    | { kind: "tool"; tool: string; title: string; description?: string }
-  )[];
-}
-
 /** App settings in ChatGPT, registered with `server.registerSettings`. */
 export interface OpenAISettingsConfig<
   TFields extends Record<string, OpenAISettingsField>,
@@ -592,7 +582,14 @@ export interface OpenAISettingsConfig<
 > {
   fields: TFields;
   /** Sections of the settings page. Fields left out appear under "Other settings". */
-  layout?: OpenAISettingsGroup<Extract<keyof TFields, string>>[];
+  layout?: {
+    kind: "group";
+    title: string;
+    items: (
+      | { kind: "property"; property: Extract<keyof TFields, string> }
+      | { kind: "tool"; tool: string; title: string; description?: string }
+    )[];
+  }[];
   /** Returns the current value of every field. */
   read: (
     extra: ToolHandlerExtra<TAuthExtra>,
@@ -606,30 +603,6 @@ export interface OpenAISettingsConfig<
   readTool?: string;
   /** Name of the update tool. Defaults to `settings-update`. */
   updateTool?: string;
-}
-
-const nativeSettingTypes = ["boolean", "string", "number", "integer"];
-
-function settingJsonSchema(name: string, field: OpenAISettingsField) {
-  const { $schema: _, ...schema } = z.toJSONSchema(field.schema);
-  if (
-    !nativeSettingTypes.includes(schema.type as string) ||
-    (schema.enum !== undefined && schema.type !== "string")
-  ) {
-    throw new Error(
-      `Setting "${name}" must be a boolean, string, string enum, number or integer.`,
-    );
-  }
-  if ("default" in schema) {
-    throw new Error(
-      `Setting "${name}" declares a default: return current values from \`read\` instead.`,
-    );
-  }
-  return {
-    ...schema,
-    title: field.title,
-    ...(field.description !== undefined && { description: field.description }),
-  };
 }
 
 type ToolHandler<
@@ -1498,28 +1471,60 @@ export class McpServer<
       readTool = "settings-read",
       updateTool = "settings-update",
     } = config;
-    const shape = Object.fromEntries(
-      Object.entries(fields).map(([name, field]) => [name, field.schema]),
-    );
-    const values = z.strictObject(shape).required();
-    const schema = {
-      type: "object",
-      properties: Object.fromEntries(
-        Object.entries(fields).map(([name, field]) => [
-          name,
-          settingJsonSchema(name, field),
-        ]),
-      ),
-      required: Object.keys(fields),
-    };
-    const parseValues = (result: unknown) =>
-      values.parse(result) as OpenAISettingsValues<TFields>;
+    const values = z
+      .strictObject(
+        Object.fromEntries(
+          Object.entries(fields).map(
+            ([name, { schema, title, description }]) => [
+              name,
+              schema.meta({ title, description }),
+            ],
+          ),
+        ),
+      )
+      .required();
+    const { $schema: _, ...schema } = z.toJSONSchema(values);
+    for (const [name, property] of Object.entries(schema.properties ?? {})) {
+      if (
+        typeof property === "boolean" ||
+        !["boolean", "string", "number", "integer"].includes(
+          property.type as string,
+        ) ||
+        (property.enum !== undefined && property.type !== "string")
+      ) {
+        throw new Error(
+          `Setting "${name}" must be a boolean, string, string enum, number or integer.`,
+        );
+      }
+      if ("default" in property) {
+        throw new Error(
+          `Setting "${name}" declares a default: return current values from \`read\` instead.`,
+        );
+      }
+    }
+    const placed = new Set<string>();
+    for (const group of layout ?? []) {
+      for (const item of group.items) {
+        if (item.kind !== "property") {
+          continue;
+        }
+        if (
+          !Object.hasOwn(fields, item.property) ||
+          placed.has(item.property)
+        ) {
+          throw new Error(
+            `Settings layout names an unknown or duplicate field "${item.property}".`,
+          );
+        }
+        placed.add(item.property);
+      }
+    }
 
     this.registerTool(
       {
         name: readTool,
         description: "Read the app settings.",
-        annotations: { readOnlyHint: true },
+        annotations: { readOnlyHint: true, openWorldHint: false },
         inputSchema: {},
         outputSchema: {
           schema: z.record(z.string(), z.unknown()),
@@ -1531,8 +1536,8 @@ export class McpServer<
         content: [],
         structuredContent: {
           schema,
-          values: parseValues(await config.read(extra)),
-          ...(layout && { layout }),
+          values: values.parse(await config.read(extra)),
+          layout,
         },
       }),
     );
@@ -1540,6 +1545,11 @@ export class McpServer<
       {
         name: updateTool,
         description: "Update the app settings.",
+        annotations: {
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: false,
+        },
         inputSchema: {
           set: values
             .partial()
@@ -1551,7 +1561,7 @@ export class McpServer<
       async ({ set }, extra) => ({
         content: [],
         structuredContent: {
-          values: parseValues(
+          values: values.parse(
             await config.update(
               set as Partial<OpenAISettingsValues<TFields>>,
               extra,

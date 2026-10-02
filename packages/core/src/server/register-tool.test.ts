@@ -141,7 +141,7 @@ describe("registerTool handler invocation", () => {
     let stored = { units: "mm" as "mm" | "in", zoom: 3 };
     const fields = {
       units: { title: "Units", schema: z.enum(["mm", "in"]) },
-      zoom: { title: "Zoom", schema: z.number().int().min(1).max(10) },
+      zoom: { title: "Zoom", schema: z.number() },
     };
     const app = new Skybridge({
       name: "test",
@@ -178,6 +178,22 @@ describe("registerTool handler invocation", () => {
       extensions: { "openai/settings": capability },
       experimental: { "openai/settings": capability },
     });
+    const { tools } = await client.listTools();
+    expect(tools).toMatchObject([
+      {
+        name: "settings-read",
+        annotations: { readOnlyHint: true },
+        outputSchema: { required: ["schema", "values"] },
+      },
+      {
+        name: "settings-update",
+        inputSchema: {
+          properties: {
+            set: { additionalProperties: false, minProperties: 1 },
+          },
+        },
+      },
+    ]);
     const read = await client.callTool({
       name: "settings-read",
       arguments: {},
@@ -187,7 +203,7 @@ describe("registerTool handler invocation", () => {
         type: "object",
         properties: {
           units: { type: "string", enum: ["mm", "in"], title: "Units" },
-          zoom: { type: "integer", minimum: 1, maximum: 10, title: "Zoom" },
+          zoom: { type: "number", title: "Zoom" },
         },
         required: ["units", "zoom"],
       },

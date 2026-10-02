@@ -127,7 +127,7 @@ server.registerSettings({
 });
 ```
 
-Adds the app's page to ChatGPT's app settings. Fields are zod booleans, strings, string enums, numbers or integers, without defaults. `read` returns every value, `update` gets only the changed fields and returns every value. The server stores the values, per user when it uses OAuth. A `tool` item is a button that calls a tool with `{}`, and opens its view in a modal when it has one.
+Adds the app's page to ChatGPT's app settings. Fields are zod booleans, strings, string enums, numbers or integers, without defaults. `read` returns every value, `update` gets only the changed fields and returns every value. The server stores the values, per user when it uses OAuth. A `tool` item is a button that calls a tool with `{}`. A tool with a view opens in a modal, and any other tool shows the text `content` it returns. Startup fails on a layout naming an unknown or duplicate field.
 
 ## Messages
 
