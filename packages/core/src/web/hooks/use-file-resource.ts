@@ -106,6 +106,9 @@ export function useFileResource(
         content,
         resource.etag,
       );
+      if (currentRef.current?.uri !== loaded.uri) {
+        return result;
+      }
       if (result.outcome === "saved") {
         sequence.current++;
         setState((previous) =>
@@ -121,10 +124,7 @@ export function useFileResource(
               }
             : previous,
         );
-      } else if (
-        result.outcome === "conflict" &&
-        currentRef.current?.uri === loaded.uri
-      ) {
+      } else if (result.outcome === "conflict") {
         read();
       }
       return result;
