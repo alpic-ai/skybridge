@@ -23,10 +23,10 @@ import { useToolInfo } from "../helpers.js";
 
 function ExportResult() {
   const { output } = useToolInfo<"export-part">();
-  const { openai } = useHost();
+  const { openaiCapabilities } = useHost();
   const openFile = useOpenFile();
 
-  if (!openai.files || !output) {
+  if (!openaiCapabilities.files || !output) {
     return null;
   }
   return <button onClick={() => openFile(output.path)}>Open in ChatGPT</button>;
@@ -39,7 +39,7 @@ function ExportResult() {
 (path: string) => Promise<void>;
 ```
 
-A memoized function that sends `openai/files/open` with the absolute `path`. It rejects with a `NotSupportedError` on hosts that don't advertise `openai/files`, so check [`useHost().openai.files`](/api-reference/use-host#openai) before showing the control.
+A memoized function that sends `openai/files/open` with the absolute `path`. It rejects with a `NotSupportedError` on hosts that don't advertise `openai/files`, so check [`useHost().openaiCapabilities.files`](/api-reference/use-host#openaicapabilities) before showing the control.
 
 <CardGroup cols={2}>
   <Card title="useHost" icon="server" href="/api-reference/use-host">

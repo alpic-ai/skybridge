@@ -5,14 +5,14 @@ import { getAdaptor } from "../bridges/index.js";
  * Ask ChatGPT to open a local file by its absolute path, through the OpenAI
  * MCP extensions (`openai/files/open`). ChatGPT desktop only, with a path on
  * the machine that runs ChatGPT. Rejects with `NotSupportedError` on
- * hosts that don't advertise `openai/files`: check `useHost().openai.files`
+ * hosts that don't advertise `openai/files`: check `useHost().openaiCapabilities.files`
  * before showing the control.
  *
  * @example
  * ```tsx
- * const { openai } = useHost();
+ * const { openaiCapabilities } = useHost();
  * const openFile = useOpenFile();
- * if (openai.files) {
+ * if (openaiCapabilities.files) {
  *   return <button onClick={() => openFile(part.path)}>Open in ChatGPT</button>;
  * }
  * ```
