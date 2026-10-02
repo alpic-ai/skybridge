@@ -39,6 +39,8 @@ server.registerTool(
 );
 ```
 
+The view reads and saves the opened file with `useFileResource(input.file.resourceUri)`, see [Reading and saving the opened file](#reading-and-saving-the-opened-file).
+
 - `global` adds a sidebar entry, `thread` a tab in a conversation's side panel, `file` a viewer for those file extensions.
 - ChatGPT calls global and thread tools with `{}`: every input must be optional, or Skybridge throws at startup.
 - A file entrypoint passes `{ file: { name, resourceUri } }`. Extensions must start with `.`.
