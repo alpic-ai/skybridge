@@ -136,4 +136,35 @@ describe("registerTool handler invocation", () => {
     await client.close();
     await instance.close();
   });
+
+  it("registers a file viewer with the file input and a file entrypoint", async () => {
+    const app = new Skybridge({
+      name: "test",
+      version: "1.0.0",
+      handler: (server) =>
+        server.registerFileViewer(
+          {
+            name: "part-viewer",
+            extensions: [".stl"],
+            view: { component: "widget" },
+          },
+          async ({ file }) => ({ content: file.name }),
+        ),
+    });
+    const instance = await app.createServerInstance();
+    const client = new Client({ name: "client", version: "1.0.0" });
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    await instance.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    const { tools } = await client.listTools();
+    expect(tools[0]?._meta?.["openai/ui"]).toEqual({
+      entrypoints: [{ type: "file", extensions: [".stl"] }],
+    });
+    expect(tools[0]?.inputSchema.required).toEqual(["file"]);
+
+    await client.close();
+    await instance.close();
+  });
 });

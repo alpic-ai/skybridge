@@ -174,6 +174,26 @@ export type SendFollowUpMessageOptions = {
   target?: "active" | "new";
 };
 
+/** How the host should return a file resource's contents. */
+export type ResourceRepresentation = "text" | "blob";
+
+/** Contents of a file resource: text, or a base64 `blob`. */
+export type FileResourceContent = { text: string } | { blob: string };
+
+/** A file resource as read from the host. */
+export type FileResource = FileResourceContent & {
+  mimeType?: string;
+  /** Whether the host accepts writes to this resource. */
+  writable: boolean;
+  /** Version token of these contents, sent back as `ifMatch` on write. */
+  etag?: string;
+};
+
+/** Result of `openai/resources/write`. */
+export type FileResourceWriteResult =
+  | { outcome: "saved" | "conflict"; etag: string }
+  | { outcome: "too-large"; maxBytes: number };
+
 /**
  * A follow-up message: plain text, or content blocks. On ChatGPT, a text or
  * image block with `_meta["openai/title"]` becomes a labeled item the user can
@@ -281,6 +301,16 @@ export interface Adaptor {
   setViewState(stateOrUpdater: SetViewStateAction): Promise<void>;
   updateModelContext(params: ModelContextParams): Promise<string | undefined>;
   openFile(path: string): Promise<void>;
+  readResource(
+    uri: string,
+    representation?: ResourceRepresentation,
+  ): Promise<FileResource>;
+  watchResource(uri: string, onUpdate: () => void): () => void;
+  writeResource(
+    uri: string,
+    content: FileResourceContent,
+    ifMatch?: string,
+  ): Promise<FileResourceWriteResult>;
   uploadFile(file: File, options?: UploadFileOptions): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
   selectFiles(): Promise<FileMetadata[]>;
