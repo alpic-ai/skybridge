@@ -20,13 +20,8 @@ export type McpToolState = {
 
 /** ChatGPT-only host context keys from the OpenAI MCP extensions. */
 export type OpenAIHostContext = {
-  /**
-   * App-relative URL the view was opened on through a deep link. Older hosts
-   * send it split into `path` segments and `query` pairs.
-   */
-  "openai/deepLink"?:
-    | { url: string }
-    | { path: string[]; query: [string, string][] };
+  /** App-relative URL the view was opened on through a deep link. */
+  "openai/deepLink"?: { url: string };
   /**
    * Context this view attached to the conversation. `null` once the user
    * removed it, for example by deleting its composer attachment.

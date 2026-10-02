@@ -119,7 +119,7 @@ describe("model context and deep links in the view", () => {
     ).toBe(false);
   });
 
-  it("reads split legacy deep links and ignores malformed ones", async () => {
+  it("reads app-relative deep links and ignores ones that leave the app", async () => {
     vi.stubGlobal("parent", {
       postMessage: getMcpAppHostPostMessageMock({
         "openai/deepLink": { url: "/parts?tag=bolt" },
@@ -127,14 +127,6 @@ describe("model context and deep links in the view", () => {
     });
     const { result } = renderHook(useDeepLink);
     await waitFor(() => expect(result.current).toBe("/parts?tag=bolt"));
-
-    await notifyHostContext({
-      "openai/deepLink": {
-        path: ["parts", "a/b"],
-        query: [["tag", "hex bolt"]],
-      },
-    });
-    expect(result.current).toBe("/parts/a%2Fb?tag=hex+bolt");
 
     await notifyHostContext({ "openai/deepLink": { url: "//evil.test" } });
     expect(result.current).toBeUndefined();

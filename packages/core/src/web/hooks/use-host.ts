@@ -45,7 +45,7 @@ export type HostInfo = {
   /** The host's MCP Apps capabilities, `undefined` until the handshake. */
   capabilities: McpUiHostCapabilities | undefined;
   /** OpenAI MCP extensions the host supports. */
-  openai: OpenAIHostCapabilities;
+  openaiCapabilities: OpenAIHostCapabilities;
 };
 
 /**
@@ -57,16 +57,16 @@ export type HostInfo = {
  *
  * @example
  * ```tsx
- * const { name, openai } = useHost();
+ * const { name, openaiCapabilities } = useHost();
  * if (name === "claude") return <ClaudeLayout />;
- * if (openai.files) return <OpenFileButton />;
+ * if (openaiCapabilities.files) return <OpenFileButton />;
  * ```
  */
 export function useHost(): HostInfo {
   const hostInfo = useMcpAppContext("hostInfo");
   const capabilities = useMcpAppContext("hostCapabilities") ?? undefined;
   const name = hostInfo?.name;
-  const openai = useMemo(() => {
+  const openaiCapabilities = useMemo(() => {
     const supports = (extension: string) =>
       Boolean(capabilities?.experimental?.[`openai/${extension}`]);
     return {
@@ -82,6 +82,6 @@ export function useHost(): HostInfo {
       name !== undefined ? (HOST_BY_REPORTED_NAME[name] ?? name) : undefined,
     version: hostInfo?.version,
     capabilities,
-    openai,
+    openaiCapabilities,
   };
 }

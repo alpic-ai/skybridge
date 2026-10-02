@@ -53,10 +53,10 @@ capabilities: McpUiHostCapabilities | undefined;
 
 The host's MCP Apps capabilities from the handshake, such as `downloadFile`, `openLinks`, `message` or `experimental`. `undefined` until the handshake completes.
 
-### `openai`
+### `openaiCapabilities`
 
 ```tsx
-openai: {
+openaiCapabilities: {
   resource: boolean;
   modelContext: boolean;
   message: boolean;
@@ -78,9 +78,9 @@ Which [OpenAI MCP extensions](https://github.com/openai/mcp-extensions/blob/main
 | `files` | Open a local file in ChatGPT. |
 
 ```tsx
-const { openai } = useHost();
+const { openaiCapabilities } = useHost();
 
-return openai.files ? <OpenInChatGPTButton /> : null;
+return openaiCapabilities.files ? <OpenInChatGPTButton /> : null;
 ```
 
 ## Host

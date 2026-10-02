@@ -179,29 +179,41 @@ type OpenAIEntrypoint =
   | { type: "settings"; searchTerms?: string[] };
 ```
 
+A sidebar entry and a conversation tab call the tool without arguments, so it takes no required input:
+
 ```ts
 server.registerTool(
   {
     name: "library",
     title: "Parts Library",
     description: "Browse the parts catalog.",
-    inputSchema: {
-      file: z.object({ name: z.string(), resourceUri: z.string() }).optional(),
-    },
     icons: [{ src: "https://example.com/library.svg", mimeType: "image/svg+xml" }],
     view: { component: "library" },
     openai: {
-      entrypoints: [
-        { type: "global" },
-        { type: "thread" },
-        { type: "file", extensions: [".stl", ".step"] },
-      ],
+      entrypoints: [{ type: "global" }, { type: "thread" }],
       availableDisplayModes: ["inline", "fullscreen"],
     },
   },
-  async ({ file }) => ({
-    structuredContent: file ? await openPart(file) : { parts: await listParts() },
-  }),
+  async () => ({ structuredContent: { parts: await listParts() } }),
+);
+```
+
+A file entrypoint calls the tool with the file the user opened, so it gets its own tool with a required `file` input:
+
+```ts
+server.registerTool(
+  {
+    name: "part-viewer",
+    title: "Part Viewer",
+    description: "Open a CAD part.",
+    inputSchema: {
+      file: z.object({ name: z.string(), resourceUri: z.string() }),
+    },
+    icons: [{ src: "https://example.com/part.svg", mimeType: "image/svg+xml" }],
+    view: { component: "part-viewer" },
+    openai: { entrypoints: [{ type: "file", extensions: [".stl", ".step"] }] },
+  },
+  async ({ file }) => ({ structuredContent: { name: file.name } }),
 );
 ```
 

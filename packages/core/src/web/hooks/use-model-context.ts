@@ -57,7 +57,7 @@ export function useModelContext(): {
   context: ModelContextState;
   update: (params: ModelContextParams) => Promise<string | undefined>;
 } {
-  const { capabilities, openai } = useHost();
+  const { capabilities, openaiCapabilities } = useHost();
   const reported = useMcpAppContext("openai/modelContext");
   const context = useMemo(() => {
     const parsed = ModelContextSchema.safeParse(reported);
@@ -69,7 +69,9 @@ export function useModelContext(): {
   );
 
   return {
-    supported: Boolean(capabilities?.updateModelContext) || openai.modelContext,
+    supported:
+      Boolean(capabilities?.updateModelContext) ||
+      openaiCapabilities.modelContext,
     context,
     update,
   };

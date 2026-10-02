@@ -1,30 +1,4 @@
-import * as z from "zod/v4";
 import { useMcpAppContext } from "../bridges/index.js";
-
-const DeepLinkSchema = z.union([
-  z.object({ url: z.string() }),
-  z.object({
-    path: z.array(z.string()),
-    query: z.array(z.tuple([z.string(), z.string()])),
-  }),
-]);
-
-function toUrl(deepLink: unknown): string | undefined {
-  const parsed = DeepLinkSchema.safeParse(deepLink);
-  if (!parsed.success) {
-    return undefined;
-  }
-  if ("url" in parsed.data) {
-    return parsed.data.url;
-  }
-  try {
-    const search = new URLSearchParams(parsed.data.query).toString();
-    const path = parsed.data.path.map(encodeURIComponent).join("/");
-    return `/${path}${search ? `?${search}` : ""}`;
-  } catch {
-    return undefined;
-  }
-}
 
 /**
  * App-relative URL (path and query, e.g. `"/parts?tag=bolt"`) that ChatGPT
@@ -48,9 +22,9 @@ function toUrl(deepLink: unknown): string | undefined {
  * @see https://docs.skybridge.tech/api-reference/use-deep-link
  */
 export function useDeepLink(): string | undefined {
-  const url = toUrl(useMcpAppContext("openai/deepLink"));
+  const url = useMcpAppContext("openai/deepLink")?.url;
   if (
-    url === undefined ||
+    typeof url !== "string" ||
     !url.startsWith("/") ||
     url.startsWith("//") ||
     url.startsWith("/\\") ||
