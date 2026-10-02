@@ -1,5 +1,6 @@
 import type {
   CallToolResult,
+  ContentBlock,
   EmbeddedResource,
   ResourceLink,
   ToolAnnotations,
@@ -162,7 +163,23 @@ export type OpenExternalOptions = {
 };
 
 /** Options for {@link useSendFollowUpMessage}. */
-export type SendFollowUpMessageOptions = { scrollToBottom?: boolean };
+export type SendFollowUpMessageOptions = {
+  /** Apps SDK only: set to `false` to keep the chat scroll position. */
+  scrollToBottom?: boolean;
+  /**
+   * ChatGPT only, from the OpenAI MCP extensions: `"new"` starts a new
+   * conversation with the message. Defaults to the active conversation.
+   * Rejects on hosts that don't advertise `openai/message`.
+   */
+  target?: "active" | "new";
+};
+
+/**
+ * A follow-up message: plain text, or content blocks. On ChatGPT, a text or
+ * image block with `_meta["openai/title"]` becomes a labeled item the user can
+ * remove.
+ */
+export type FollowUpMessage = string | ContentBlock[];
 
 /** Options for {@link useRequestSize}. Omit a dimension to leave it unchanged. */
 export type RequestSizeOptions = {
@@ -256,13 +273,14 @@ export interface Adaptor {
   requestClose(): Promise<void>;
   requestSize(size: RequestSizeOptions): Promise<void>;
   sendFollowUpMessage(
-    prompt: string,
+    prompt: FollowUpMessage,
     options?: SendFollowUpMessageOptions,
   ): Promise<void>;
   openExternal(href: string, options?: OpenExternalOptions): void;
   download(params: DownloadParams): Promise<DownloadResult>;
   setViewState(stateOrUpdater: SetViewStateAction): Promise<void>;
   updateModelContext(params: ModelContextParams): Promise<string | undefined>;
+  openFile(path: string): Promise<void>;
   uploadFile(file: File, options?: UploadFileOptions): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
   selectFiles(): Promise<FileMetadata[]>;

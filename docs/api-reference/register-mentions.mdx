@@ -1,0 +1,84 @@
+---
+title: registerMentions
+description: "Let users at-mention your app's items in the ChatGPT composer"
+---
+
+import { Compat } from "/components/compat.jsx";
+
+<Compat chatgpt />
+
+<Info>
+This is an [OpenAI MCP extension](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md), not part of MCP or MCP Apps. Only **ChatGPT** supports it, and other hosts ignore it.
+</Info>
+
+By default, users can only at-mention your app as a whole. `registerMentions` lets them mention individual items, such as parts, files or people: when the user types `@` and your app, ChatGPT calls your handler with the text typed so far and lists the items it returns. ChatGPT desktop only.
+
+## Example
+
+A parts catalog lets the user mention a part by name.
+
+```ts
+server.registerMentions({
+  name: "search_parts",
+  handler: async ({ query }) => ({
+    items: (await findParts(query)).map((part) => ({
+      type: "resource_link",
+      uri: `parts://${part.id}`,
+      name: part.name,
+    })),
+  }),
+});
+```
+
+## Parameters
+
+### `config`
+
+```ts
+type OpenAIMentionsConfig = {
+  name: string;
+  description?: string;
+  handler: (
+    params: { query: string },
+    extra: ToolHandlerExtra,
+  ) => { items: ResourceLink[] } | Promise<{ items: ResourceLink[] }>;
+};
+```
+
+| Field | Purpose |
+| --- | --- |
+| `name` | Name of the tool ChatGPT calls for each search. |
+| `description` | Tool description. Defaults to a generic one, since the model never sees this tool. |
+| `handler` | Receives the typed text as `query`, which may be empty, and returns the matching items as MCP resource links. `extra` is the same as in a [`registerTool`](/api-reference/register-tool) handler. |
+
+## How it works
+
+Skybridge registers a tool named `name` that takes `{ query: string }` and returns `{ items }` as `structuredContent`. Its `_meta` carries `"openai/extensions": { "mentions/search": {} }`, which tells ChatGPT it serves mentions, and `ui.visibility: ["app"]`, which hides it from the model. It requires sign-in like any other tool on a server with [`oauth`](/api-reference/skybridge#oauth).
+
+Returns the server, so calls chain.
+
+## Serve the mentioned items
+
+When the user picks an item, its resource link goes into the message, so the model gets the `uri` rather than the item itself. Serve those URIs as MCP resources so the host can read them:
+
+```ts
+import { ResourceTemplate } from "skybridge/server";
+
+server.registerResource(
+  "part",
+  new ResourceTemplate("parts://{id}", { list: undefined }),
+  { mimeType: "application/json" },
+  async (uri, { id }) => ({
+    contents: [{ uri: uri.href, text: JSON.stringify(await getPart(String(id))) }],
+  }),
+);
+```
+
+<CardGroup cols={2}>
+  <Card title="registerTool" icon="wrench" href="/api-reference/register-tool">
+    Register tools and their ChatGPT entrypoints
+  </Card>
+  <Card title="McpServer" icon="server" href="/api-reference/mcp-server">
+    Every method of the server
+  </Card>
+</CardGroup>

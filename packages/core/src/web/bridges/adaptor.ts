@@ -1,3 +1,4 @@
+import { ResultSchema } from "@modelcontextprotocol/core";
 import * as z from "zod/v4";
 import { warnOnLargeViewState } from "../../context-warnings.js";
 import { AppsSdkBridge } from "./apps-sdk/bridge.js";
@@ -11,6 +12,7 @@ import type {
   DownloadParams,
   DownloadResult,
   FileMetadata,
+  FollowUpMessage,
   HostContext,
   HostContextStore,
   ModelContextParams,
@@ -195,10 +197,11 @@ export class HostAdaptor implements Adaptor {
   };
 
   public sendFollowUpMessage = async (
-    prompt: string,
+    prompt: FollowUpMessage,
     options?: SendFollowUpMessageOptions,
   ): Promise<void> => {
-    if (this.openai) {
+    const target = options?.target;
+    if (this.openai && typeof prompt === "string" && target !== "new") {
       await this.openai.sendFollowUpMessage({
         prompt,
         scrollToBottom: options?.scrollToBottom,
@@ -206,10 +209,24 @@ export class HostAdaptor implements Adaptor {
       return;
     }
     const app = await this.mcp.getApp();
-    await app.sendMessage({
+    if (
+      target === "new" &&
+      !app.getHostCapabilities()?.experimental?.["openai/message"]
+    ) {
+      throw new NotSupportedError(
+        "sendFollowUpMessage",
+        "the host does not advertise openai/message, so it can't open a new conversation",
+      );
+    }
+    const result = await app.sendMessage({
       role: "user",
-      content: [{ type: "text", text: prompt }],
+      content:
+        typeof prompt === "string" ? [{ type: "text", text: prompt }] : prompt,
+      ...(target === "new" && { _meta: { "openai/message": { target } } }),
     });
+    if (result?.isError) {
+      throw new Error("The host rejected the follow-up message.");
+    }
   };
 
   public openExternal = (href: string, options?: OpenExternalOptions): void => {
@@ -331,6 +348,20 @@ export class HostAdaptor implements Adaptor {
       ],
     });
   }
+
+  public openFile = async (path: string): Promise<void> => {
+    const app = await this.mcp.getApp();
+    if (!app.getHostCapabilities()?.experimental?.["openai/files"]) {
+      throw new NotSupportedError(
+        "openFile",
+        "the host does not advertise openai/files",
+      );
+    }
+    await app.request(
+      { method: "openai/files/open", params: { path } },
+      ResultSchema,
+    );
+  };
 
   public uploadFile = async (
     file: File,

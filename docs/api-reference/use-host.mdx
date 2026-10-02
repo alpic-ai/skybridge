@@ -74,8 +74,8 @@ Which [OpenAI MCP extensions](https://github.com/openai/mcp-extensions/blob/main
 | --- | --- |
 | `resource` | Read, subscribe to and write the file opened through a file entrypoint. |
 | `modelContext` | Titles, thumbnails and background content in model context. |
-| `message` | Messages sent to a new conversation, and titled items in a message. |
-| `files` | Open a local file in ChatGPT. |
+| `message` | Messages sent to a new conversation, and titled items in a message. See [`useSendFollowUpMessage`](/api-reference/use-send-follow-up-message#titled-items). |
+| `files` | Open a local file in ChatGPT. See [`useOpenFile`](/api-reference/use-open-file). |
 
 ```tsx
 const { openaiCapabilities } = useHost();

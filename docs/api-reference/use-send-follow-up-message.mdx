@@ -48,19 +48,38 @@ function Carousel({ products }: { products: Product[] }) {
 
 ```tsx
 sendFollowUpMessage(
-  prompt: string,
-  options?: { scrollToBottom?: boolean }
+  prompt: string | ContentBlock[],
+  options?: { scrollToBottom?: boolean; target?: "active" | "new" }
 ): Promise<void>;
 ```
 
-Posts the message and returns the host's promise. The promise carries no value: any model reply lands in the conversation, not back in the view.
+Posts the message and returns the host's promise, which rejects when the host refuses the message. The promise carries no value: any model reply lands in the conversation, not back in the view.
 
-- **`prompt`** the text posted as a user turn, model-visible, as if the user had typed it. The view keeps running after the message is posted.
-- **`options`** `scrollToBottom` asks the host to scroll the conversation to the newest message after posting; omit it for the host default, or set `false` to keep the scroll position and the view on screen.
+- **`prompt`** the text posted as a user turn, model-visible, as if the user had typed it, or an array of MCP content blocks. The view keeps running after the message is posted.
+- **`options`**
+  - `scrollToBottom` asks the host to scroll the conversation to the newest message after posting; omit it for the host default, or set `false` to keep the scroll position and the view on screen.
+  - `target: "new"` sends the message to a new conversation instead of the active one. On hosts that don't advertise `openai/message`, the call rejects with a `NotSupportedError` and nothing is posted.
 
 <Info>
-`scrollToBottom` is specific to **ChatGPT**.
+`scrollToBottom` is specific to **ChatGPT**. `target` and titled items come from the [OpenAI MCP extensions](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md): only ChatGPT reads them, and mobile only supports the active conversation. ChatGPT doesn't accept audio blocks, nor resource links on iOS.
 </Info>
+
+### Titled items
+
+On **ChatGPT**, a text or image block with `_meta["openai/title"]` becomes a labeled item in the message, which the user can remove as one unit. Untitled text stays ordinary message text.
+
+```tsx
+sendFollowUpMessage([
+  { type: "text", text: "Compare these two parts:" },
+  {
+    type: "text",
+    text: "M6 hex bolt, 20mm, stainless",
+    _meta: { "openai/title": "Hex bolt" },
+  },
+]);
+```
+
+Content blocks and `target` are sent through the MCP Apps `ui/message` request, also inside ChatGPT, so `scrollToBottom` doesn't apply to them.
 
 <CardGroup cols={3}>
   <Card title="useCallTool" icon="square-function" href="/api-reference/use-call-tool">

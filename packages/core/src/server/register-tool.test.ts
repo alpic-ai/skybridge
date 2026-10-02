@@ -98,4 +98,42 @@ describe("registerTool handler invocation", () => {
 
     await expect(app.createServerInstance()).rejects.toThrow(/rejects `\{\}`/);
   });
+
+  it("registers mention search as an app-only tool advertising the extension", async () => {
+    const app = new Skybridge({
+      name: "test",
+      version: "1.0.0",
+      handler: (server) =>
+        server.registerMentions({
+          name: "search_parts",
+          handler: async ({ query }) => ({
+            items: [
+              { type: "resource_link", uri: `parts://${query}`, name: query },
+            ],
+          }),
+        }),
+    });
+    const instance = await app.createServerInstance();
+    const client = new Client({ name: "client", version: "1.0.0" });
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    await instance.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    const { tools } = await client.listTools();
+    expect(tools[0]?._meta).toMatchObject({
+      "openai/extensions": { "mentions/search": {} },
+      ui: { visibility: ["app"] },
+    });
+    const result = await client.callTool({
+      name: "search_parts",
+      arguments: { query: "bolt" },
+    });
+    expect(result.structuredContent).toEqual({
+      items: [{ type: "resource_link", uri: "parts://bolt", name: "bolt" }],
+    });
+
+    await client.close();
+    await instance.close();
+  });
 });

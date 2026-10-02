@@ -2,6 +2,7 @@ export {
   inputRequired,
   ProtocolError,
   ProtocolErrorCode,
+  ResourceTemplate,
   type StandardSchemaWithJSON,
 } from "@modelcontextprotocol/server";
 export type {
@@ -70,6 +71,7 @@ export type {
   McpServerTypes,
   OpenAIDisplayMode,
   OpenAIEntrypoint,
+  OpenAIMentionsConfig,
   OpenAIQuickAction,
   OpenAIToolConfig,
   SecurityScheme,
