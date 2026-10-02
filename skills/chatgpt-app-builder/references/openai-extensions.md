@@ -1,6 +1,6 @@
 # OpenAI MCP extensions
 
-Let users open a view without the model → `openai` on `registerTool`, `useDeepLink`, `useHost().openaiCapabilities`. Mentions, titled messages and local files → `registerMentions`, `useSendFollowUpMessage`, `useOpenFile`, `useFileResource`
+Let users open a view without the model → `openai` on `registerTool`, `useDeepLink`, `useHost().openaiCapabilities`. Mentions, titled messages and local files → `registerMentions`, `useSendFollowUpMessage`, `useOpenFile`, `registerFileViewer`, `useFileResource`
 
 These are OpenAI MCP extensions, not part of MCP or MCP Apps: only ChatGPT reads them, other hosts ignore them.
 
@@ -22,18 +22,17 @@ server.registerTool(
 );
 ```
 
-File viewer, called with the opened file:
+File viewer, called with the opened file as `{ file: { name, resourceUri } }`:
 
 ```ts
-server.registerTool(
+server.registerFileViewer(
   {
     name: "part-viewer",
     title: "Part Viewer",
     description: "Open a CAD part.",
-    inputSchema: { file: z.object({ name: z.string(), resourceUri: z.string() }) },
+    extensions: [".stl"],
     icons: [{ src: "https://example.com/part.svg", mimeType: "image/svg+xml" }],
     view: { component: "part-viewer" },
-    openai: { entrypoints: [{ type: "file", extensions: [".stl"] }] },
   },
   async ({ file }) => ({ structuredContent: { name: file.name } }),
 );

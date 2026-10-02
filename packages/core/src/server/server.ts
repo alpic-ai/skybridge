@@ -472,6 +472,26 @@ type ToolConfig<
     | StandardSchemaWithJSON,
 > = ToolConfigBase<TInput> & ToolAuthConfig;
 
+const fileEntrypointInput = {
+  file: z.object({ name: z.string(), resourceUri: z.string() }),
+};
+
+type FileEntrypointInput = typeof fileEntrypointInput;
+
+/** A ChatGPT file viewer, registered with `server.registerFileViewer`. */
+export type OpenAIFileViewerConfig<TName extends string = string> = Omit<
+  ToolConfigBase<FileEntrypointInput>,
+  "inputSchema" | "openai" | "view"
+> &
+  ToolAuthConfig & {
+    name: TName;
+    /** File extensions the viewer opens, each starting with `.`. */
+    extensions: string[];
+    view: ViewConfig;
+    /** Display modes. The file entrypoint is set from `extensions`. */
+    openai?: Omit<OpenAIToolConfig, "entrypoints">;
+  };
+
 /**
  * Optional client-supplied hints attached to `params._meta` on every tool call
  * by the ChatGPT host. Hints only: never use for authorization, and tolerate
@@ -1233,6 +1253,52 @@ export class McpServer<
       ),
     );
     return cachedDiskManifest ?? {};
+  }
+
+  /**
+   * Register a ChatGPT file viewer, from the OpenAI MCP extensions: a tool
+   * with a file entrypoint for `extensions` and a view. ChatGPT desktop calls
+   * it with the file the user opened, as `{ file: { name, resourceUri } }`.
+   * Read and save the file from the view with `useFileResource`.
+   *
+   * @example
+   * ```ts
+   * server.registerFileViewer(
+   *   {
+   *     name: "part-viewer",
+   *     title: "Part Viewer",
+   *     extensions: [".stl", ".step"],
+   *     view: { component: "part-viewer" },
+   *   },
+   *   async ({ file }) => ({ structuredContent: { name: file.name } }),
+   * );
+   * ```
+   *
+   * @see https://docs.skybridge.tech/api-reference/register-file-viewer
+   */
+  registerFileViewer<
+    TName extends string,
+    TReturn extends { content?: HandlerContent },
+  >(
+    config: OpenAIFileViewerConfig<TName>,
+    cb: ToolHandler<FileEntrypointInput, TReturn, TAuthExtra>,
+  ): AddTool<
+    TTools,
+    TName,
+    FileEntrypointInput,
+    ExtractStructuredContent<TReturn>,
+    ExtractMeta<TReturn>,
+    TAuthExtra
+  > {
+    const { extensions, openai, ...toolConfig } = config;
+    return this.registerTool(
+      {
+        ...toolConfig,
+        inputSchema: fileEntrypointInput,
+        openai: { ...openai, entrypoints: [{ type: "file", extensions }] },
+      },
+      cb,
+    );
   }
 
   /**

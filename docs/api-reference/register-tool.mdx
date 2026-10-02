@@ -198,7 +198,7 @@ server.registerTool(
 );
 ```
 
-A file entrypoint calls the tool with the file the user opened, so it gets its own tool with a required `file` input:
+A file entrypoint calls the tool with the file the user opened, so it gets its own tool with a required `file` input. [`registerFileViewer`](/api-reference/register-file-viewer) is a shortcut for this:
 
 ```ts
 server.registerTool(
