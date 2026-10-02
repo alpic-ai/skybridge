@@ -4,6 +4,7 @@ import type {
   ResourceLink,
   ToolAnnotations,
 } from "@modelcontextprotocol/client";
+import type { McpUiUpdateModelContextRequest } from "@modelcontextprotocol/ext-apps";
 import type { useSyncExternalStore } from "react";
 import type { output as ZodOutput, ZodType } from "zod/v4";
 
@@ -23,6 +24,18 @@ declare global {
 
 /** Arguments passed to a tool call. `null` for tools that take no input. */
 export type CallToolArgs = Record<string, unknown> | null;
+
+/** Options for a tool call made from the view. */
+export type CallToolOptions = {
+  /**
+   * Request timeout in milliseconds. Omit it to keep the SDK default (60s).
+   * Raise it for tools that wait on the user, such as ChatGPT forms.
+   */
+  timeout?: number;
+};
+
+/** Payload of `ui/update-model-context`. Content blocks may carry `_meta`. */
+export type ModelContextParams = McpUiUpdateModelContextRequest["params"];
 
 /**
  * Result of a tool call as surfaced to the view: MCP `content` blocks plus
@@ -232,7 +245,11 @@ export interface Adaptor {
   callTool<
     ToolArgs extends CallToolArgs = null,
     ToolResponse extends CallToolResponse = CallToolResponse,
-  >(name: string, args: ToolArgs): Promise<ToolResponse>;
+  >(
+    name: string,
+    args: ToolArgs,
+    options?: CallToolOptions,
+  ): Promise<ToolResponse>;
   requestDisplayMode(mode: RequestDisplayMode): Promise<{
     mode: RequestDisplayMode;
   }>;
@@ -245,6 +262,7 @@ export interface Adaptor {
   openExternal(href: string, options?: OpenExternalOptions): void;
   download(params: DownloadParams): Promise<DownloadResult>;
   setViewState(stateOrUpdater: SetViewStateAction): Promise<void>;
+  updateModelContext(params: ModelContextParams): Promise<string | undefined>;
   uploadFile(file: File, options?: UploadFileOptions): Promise<FileMetadata>;
   getFileDownloadUrl(file: FileMetadata): Promise<{ downloadUrl: string }>;
   selectFiles(): Promise<FileMetadata[]>;

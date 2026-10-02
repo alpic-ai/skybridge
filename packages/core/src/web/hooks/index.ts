@@ -5,10 +5,20 @@ export {
   type SideEffects,
   useCallTool,
 } from "./use-call-tool.js";
+export { useDeepLink } from "./use-deep-link.js";
 export { useDisplayMode } from "./use-display-mode.js";
 export { type DownloadFn, useDownload } from "./use-download.js";
 export { useFiles } from "./use-files.js";
-export { type Host, type HostInfo, useHost } from "./use-host.js";
+export {
+  type Host,
+  type HostInfo,
+  type OpenAIHostCapabilities,
+  useHost,
+} from "./use-host.js";
+export {
+  type ModelContextState,
+  useModelContext,
+} from "./use-model-context.js";
 export { type OpenExternalFn, useOpenExternal } from "./use-open-external.js";
 export { useRegisterViewTool } from "./use-register-view-tool.js";
 export { type RequestCloseFn, useRequestClose } from "./use-request-close.js";

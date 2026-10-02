@@ -7,6 +7,7 @@ import type {
 } from "@modelcontextprotocol/ext-apps";
 import {
   type ContentBlock,
+  type Icon,
   type Implementation,
   McpServer as McpServerBase,
   type RequestMeta,
@@ -133,6 +134,94 @@ export type SecurityScheme =
   | { type: "noauth" }
   | { type: "oauth2"; scopes?: string[] };
 
+/** A display mode ChatGPT can render a view in. ChatGPT doesn't support `pip`. */
+export type OpenAIDisplayMode = "inline" | "fullscreen";
+
+/** A sidebar shortcut that calls another tool of the same server. */
+export interface OpenAIQuickAction {
+  title: string;
+  icons: [Icon, ...Icon[]];
+  target: {
+    type: "tool";
+    name: string;
+    arguments?: Record<string, unknown>;
+  };
+}
+
+/**
+ * A place in ChatGPT where users can open the tool's view without the model.
+ *
+ * - `global`: an entry in the sidebar, opened fullscreen.
+ * - `thread`: a tab in a conversation's side panel.
+ * - `file`: a viewer for files with these extensions, such as `".stl"`.
+ *   ChatGPT calls the tool with `{ file: { name, resourceUri } }`.
+ * - `settings`: an entry in the plugin settings.
+ *
+ * ChatGPT calls the tool with `{}` for global and thread entrypoints, so the
+ * tool must not require any input.
+ */
+export type OpenAIEntrypoint =
+  | { type: "global"; quickAction?: OpenAIQuickAction }
+  | { type: "thread" }
+  | { type: "file"; extensions: string[] }
+  | { type: "settings"; searchTerms?: string[] };
+
+function mergeOpenAIUi(
+  meta: { "openai/ui"?: Record<string, unknown> },
+  values: Record<string, unknown>,
+): void {
+  const defined = Object.fromEntries(
+    Object.entries(values).filter(([, value]) => value !== undefined),
+  );
+  if (Object.keys(defined).length > 0) {
+    meta["openai/ui"] = { ...meta["openai/ui"], ...defined };
+  }
+}
+
+function acceptsEmptyInput(
+  inputSchema:
+    | Record<string, StandardSchemaWithJSON>
+    | StandardSchemaWithJSON
+    | undefined,
+): boolean {
+  if (inputSchema === undefined) {
+    return true;
+  }
+  const checks =
+    "~standard" in inputSchema
+      ? [(inputSchema as StandardSchemaWithJSON)["~standard"].validate({})]
+      : Object.values(inputSchema).map((schema) =>
+          schema["~standard"].validate(undefined),
+        );
+  return checks.every(
+    (result) => result instanceof Promise || result.issues === undefined,
+  );
+}
+
+/**
+ * ChatGPT-only tool options, emitted as `_meta["openai/ui"]` on the tool and
+ * on its view resource. Every field is optional: ChatGPT applies the defaults
+ * of the OpenAI MCP extensions spec when one is omitted. Requires `view`.
+ *
+ * @see https://github.com/openai/mcp-extensions/blob/main/docs/spec.md
+ */
+export interface OpenAIToolConfig {
+  /** Places where users can open the view directly. */
+  entrypoints?: OpenAIEntrypoint[];
+  /**
+   * Display modes the view supports, read before the view loads. Defaults to
+   * `[preferredDisplayMode]` when that is set, otherwise to both modes.
+   */
+  availableDisplayModes?: OpenAIDisplayMode[];
+  /**
+   * Display mode the view prefers to open in. Setting it alone makes it the
+   * only available mode, so also set `availableDisplayModes` to keep the other.
+   */
+  preferredDisplayMode?: OpenAIDisplayMode;
+  /** Display mode the view opens in first when the model calls the tool. */
+  preferredModelDisplayMode?: OpenAIDisplayMode;
+}
+
 /**
  * Declarative per-tool auth. Enforced when the server has an `oauth` provider:
  * anonymous or under-scoped calls are rejected before the handler runs. Omit
@@ -228,6 +317,7 @@ type ViteManifestEntry = {
 };
 
 type OpenaiToolMeta = {
+  "openai/ui": Record<string, unknown>;
   "openai/outputTemplate": string;
   "openai/widgetAccessible"?: boolean;
   "openai/toolInvocation/invoking"?: string;
@@ -253,6 +343,7 @@ type McpAppsResourceMeta = {
 };
 
 type OpenaiResourceMeta = {
+  "openai/ui"?: Record<string, unknown>;
   "openai/widgetDescription"?: string;
   "openai/widgetCSP"?: { redirect_domains?: string[] };
 };
@@ -343,7 +434,15 @@ interface ToolConfigBase<
     | Record<string, StandardSchemaWithJSON>
     | StandardSchemaWithJSON;
   annotations?: ToolAnnotations;
+  /**
+   * Icons for the tool, a standard MCP field. Hosts choose whether and where
+   * to show them. ChatGPT asks for them on every entrypoint tool, as a
+   * monochrome SVG on a 20x20 viewport that uses `currentColor`.
+   */
+  icons?: Icon[];
   view?: ViewConfig;
+  /** ChatGPT-only options. See {@link OpenAIToolConfig}. */
+  openai?: OpenAIToolConfig;
   _meta?: ToolMeta;
 }
 
@@ -399,6 +498,13 @@ export interface ClientHintsMeta {
   "openai/organization"?: string;
   /** Stable id for the currently mounted widget instance. */
   "openai/widgetSessionId"?: string;
+  /**
+   * Set by ChatGPT desktop on tool calls from a view opened through a file
+   * entrypoint. `path` is the absolute path of the opened file. Any MCP client
+   * can send this key: never use it for authorization, and resolve the path
+   * and keep it inside an allowed directory before touching the filesystem.
+   */
+  "openai/resource"?: { path?: string };
 }
 
 type ToolHandlerExtra<TAuthExtra extends ExtraClaims = ExtraClaims> = Omit<
@@ -862,6 +968,7 @@ export class McpServer<
     toolName: string,
     view: ViewConfig,
     toolMeta: InternalToolMeta,
+    openai?: OpenAIToolConfig,
   ): void {
     // Append a content-derived version param so hosts (e.g. ChatGPT) bust
     // their cache when the bundle changes, but keep the URI stable across
@@ -906,10 +1013,12 @@ export class McpServer<
           }),
         };
 
-        if (view._meta) {
-          return { ...base, ...view._meta } as ResourceMeta;
-        }
-        return base;
+        const meta = { ...base, ...view._meta } as ResourceMeta;
+        mergeOpenAIUi(meta, {
+          availableDisplayModes: openai?.availableDisplayModes,
+          preferredDisplayMode: openai?.preferredDisplayMode,
+        });
+        return meta;
       },
     };
     this.registerViewResource({ name: toolName, viewResource, view });
@@ -1173,6 +1282,7 @@ export class McpServer<
       view,
       auth,
       securitySchemes: rawSecuritySchemes,
+      openai,
       _meta: userToolMeta,
       ...toolFields
     } = config;
@@ -1207,9 +1317,39 @@ export class McpServer<
       toolMeta.securitySchemes = securitySchemes;
     }
 
+    if (openai) {
+      if (!view) {
+        throw new Error(
+          `skybridge: tool "${name}" sets \`openai\` options but has no \`view\`.`,
+        );
+      }
+      const opensWithoutInput = openai.entrypoints?.some(
+        ({ type }) => type === "global" || type === "thread",
+      );
+      if (opensWithoutInput && !acceptsEmptyInput(toolFields.inputSchema)) {
+        throw new Error(
+          `skybridge: tool "${name}" has a global or thread entrypoint, so ChatGPT calls it with \`{}\`, but its input schema rejects \`{}\`. Make every input optional.`,
+        );
+      }
+      const badExtension = openai.entrypoints
+        ?.flatMap((entrypoint) =>
+          entrypoint.type === "file" ? entrypoint.extensions : [],
+        )
+        .find((extension) => !extension.startsWith("."));
+      if (badExtension !== undefined) {
+        throw new Error(
+          `skybridge: tool "${name}" has a file entrypoint extension "${badExtension}" that doesn't start with ".".`,
+        );
+      }
+      mergeOpenAIUi(toolMeta, {
+        entrypoints: openai.entrypoints,
+        preferredModelDisplayMode: openai.preferredModelDisplayMode,
+      });
+    }
+
     if (view) {
       this.enforceOneToolPerView(view.component, name);
-      this.registerViewResources(name, view, toolMeta);
+      this.registerViewResources(name, view, toolMeta, openai);
     }
 
     const wrappedCb = this.decorateToolHandler(cb, {

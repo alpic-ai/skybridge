@@ -1,0 +1,95 @@
+---
+title: useModelContext
+description: "Send content to the model from a view"
+---
+
+import { Compat } from "/components/compat.jsx";
+
+<Compat alpic chatgpt claude cursor goose />
+
+`useModelContext` sends content blocks to the model through the MCP Apps `ui/update-model-context` request. Each update replaces what the hook sent before. On hosts other than ChatGPT, Skybridge sends it together with the [`useViewState`](/api-reference/use-view-state) state, so an update from one doesn't drop the other.
+
+**ChatGPT** goes further through the [OpenAI MCP extensions](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md): it shows each block as a composer attachment the user can remove, and reports the attached context back as [`context`](#context). Other hosts ignore that metadata and just pass the content to the model.
+
+## Example
+
+A product view attaches the selected variant with a title and a thumbnail.
+
+```tsx highlight={4,9-18}
+import { useModelContext, useViewState } from "skybridge/web";
+
+function VariantPicker({ variants }: { variants: Variant[] }) {
+  const { supported, update } = useModelContext();
+  const [selection, setSelection] = useViewState({ id: variants[0].id });
+
+  const select = (variant: Variant) => {
+    setSelection({ id: variant.id });
+    if (supported) {
+      update({
+        content: [
+          {
+            type: "text",
+            text: `Selected ${variant.name}, ${variant.price}`,
+            _meta: {
+              "openai/title": variant.name,
+              "openai/thumbnail": { src: variant.imageUrl },
+            },
+          },
+        ],
+      });
+    }
+  };
+
+  return <VariantList variants={variants} selected={selection.id} onSelect={select} />;
+}
+```
+
+## Returns
+
+### `supported`
+
+```tsx
+supported: boolean;
+```
+
+Whether the host advertises model context updates, through the standard `hostCapabilities.updateModelContext` or the OpenAI `experimental["openai/modelContext"]`. `false` before the handshake.
+
+### `context`
+
+```tsx
+context: {
+  updateId: string;
+  content?: ContentBlock[];
+  structuredContent?: Record<string, unknown>;
+} | null | undefined;
+```
+
+**ChatGPT** only. The context this view attached, as the host reports it. It becomes `null` once the user removes it from the composer, and stays `undefined` when the host never reported one.
+
+### `update`
+
+```tsx
+update: (params: {
+  content?: ContentBlock[];
+  structuredContent?: Record<string, unknown>;
+}) => Promise<string | undefined>;
+```
+
+Replaces what the hook sent before, and resolves with the `updateId` ChatGPT assigns to it, to compare with [`context`](#context)`.updateId`. Other hosts resolve with `undefined`. Rejects with a `NotSupportedError` on hosts that don't advertise model context updates. On hosts other than ChatGPT, the view state is sent alongside: its JSON goes first in `content`, addressed to the model only, and its keys win over yours in `structuredContent`, with a console warning naming the shared keys. The host may reject block types it doesn't list in `hostCapabilities.updateModelContext`, such as an image on a text-only host.
+
+**ChatGPT** reads this presentation metadata on content blocks:
+
+| Field | Effect |
+| --- | --- |
+| `_meta["openai/title"]` | Label of a text attachment, alt text of an image. |
+| `_meta["openai/thumbnail"]` | Thumbnail of a text attachment, as an MCP `Icon`. A square image of at least 128x128 pixels works best. Not shown on iOS yet. |
+| `annotations.audience: ["assistant"]` | Sends the block to the model without showing an attachment. |
+
+<CardGroup cols={2}>
+  <Card title="useViewState" icon="database" href="/api-reference/use-view-state">
+    Persist view state, also shared with the model
+  </Card>
+  <Card title="useHost" icon="server" href="/api-reference/use-host">
+    Check which extensions the host supports
+  </Card>
+</CardGroup>

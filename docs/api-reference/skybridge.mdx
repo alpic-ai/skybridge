@@ -54,6 +54,8 @@ type SkybridgeConfig = Implementation &
 
 The MCP implementation info (`name`, `version`, and optionally `title`, `description`, `icons`, `websiteUrl`). SDK `ServerOptions` such as `instructions` or `capabilities` are forwarded when you set them; registering tools and views advertises those capabilities for you.
 
+`icons` is the app's icon, a standard MCP field. Hosts choose whether and where to show it. Tools can carry their own [`icons`](/api-reference/register-tool#icons) too.
+
 ### `handler`
 
 Receives a fresh [`McpServer`](/api-reference/mcp-server) and must **return** the chain of registrations. That return value is what carries your tool types into `typeof app`.

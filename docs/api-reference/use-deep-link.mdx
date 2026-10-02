@@ -1,0 +1,63 @@
+---
+title: useDeepLink
+description: "Read the deep link ChatGPT opened the view on"
+---
+
+import { Compat } from "/components/compat.jsx";
+
+<Compat chatgpt />
+
+<Info>
+This is an [OpenAI MCP extension](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md), not part of MCP or MCP Apps. Only **ChatGPT** supports it, and other hosts ignore it.
+</Info>
+
+A deep link opens ChatGPT with your app already open, from anywhere outside ChatGPT: an "Open in ChatGPT" button on your website, a link in an email or in your docs. It targets a tool with a [global entrypoint](/api-reference/register-tool#openai), `https://chatgpt.com/plugins/<pluginId>/app/<toolName>`, and can carry a `path` to land on a given page of your view, such as `?path=%2Fparts%2Fhex-bolt`. `useDeepLink` returns that app-relative URL so the view can route to it. It updates when the user follows another deep link while the view is open.
+
+## Example
+
+The view hands the deep link to its router.
+
+```tsx highlight={6,8-10}
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDeepLink } from "skybridge/web";
+
+function DeepLinkRouter() {
+  const deepLink = useDeepLink();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (deepLink) navigate(deepLink);
+  }, [deepLink, navigate]);
+
+  return null;
+}
+```
+
+## Returns
+
+```tsx
+string | undefined;
+```
+
+The app-relative URL, path and query included, for example `"/parts?tag=bolt&sort=asc"`. Parse it with `new URL(deepLink, location.origin)` to read the query.
+
+`undefined` when the view wasn't opened through a deep link, on hosts other than **ChatGPT**, or when the host sends a URL that isn't app-relative (it must start with a single `/`) or that contains a fragment.
+
+## Deep link format
+
+| Surface | Format |
+| --- | --- |
+| Desktop | `codex://plugins/{pluginId}@{marketplace}/app/{toolName}?path={encodedPath}` |
+| Mobile | `chatgpt://plugins/{pluginId}@{marketplace}/app/{toolName}?path={encodedPath}` |
+| Web | `https://chatgpt.com/plugins/{pluginId}/app/{toolName}?path={encodedPath}` |
+
+Find `pluginId` in the plugin's URL, `https://chatgpt.com/plugins/{pluginId}`. Leave out `@{marketplace}` for plugins published directly to ChatGPT. Percent-encode `pluginId`, `toolName` and the whole app-relative URL. Without `path`, the view opens on `/`. Android doesn't support deep links.
+
+<CardGroup cols={2}>
+  <Card title="registerTool" icon="wrench" href="/api-reference/register-tool#openai">
+    Add a global entrypoint to a tool
+  </Card>
+  <Card title="useMcpAppContext" icon="plug" href="/api-reference/use-mcp-app-context">
+    Read a raw MCP Apps context value by key
+  </Card>
+</CardGroup>

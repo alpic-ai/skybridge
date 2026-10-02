@@ -84,6 +84,9 @@ The requested key's current value, empty until the host provides it: host-contex
 | `toolInput` | the tool call's arguments | [`useToolInfo`](/api-reference/use-tool-info) |
 | `toolResult` | the tool's full MCP result (`structuredContent` model-visible) | [`useToolInfo`](/api-reference/use-tool-info) |
 | `toolCancelled` | set when the host aborts the call | — |
+| `hostCapabilities` | the host's MCP Apps capabilities | [`useHost`](/api-reference/use-host) |
+| `openai/deepLink` | ChatGPT only: `{ url }`, the deep link the view was opened on | [`useDeepLink`](/api-reference/use-deep-link) |
+| `openai/modelContext` | ChatGPT only: the context this view attached, `null` once the user removed it | [`useModelContext`](/api-reference/use-model-context) |
 
 <CardGroup cols={3}>
   <Card title="useAppsSdkContext" icon="panel-top" href="/api-reference/use-apps-sdk-context">

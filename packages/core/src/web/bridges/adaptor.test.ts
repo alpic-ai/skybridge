@@ -35,10 +35,13 @@ describe("HostAdaptor", () => {
     (adaptor as any).mcp.getApp = vi.fn().mockResolvedValue(fakeApp);
 
     const result = await adaptor.callTool("greet", { name: "alice" });
-    expect(fakeApp.callServerTool).toHaveBeenCalledWith({
-      name: "greet",
-      arguments: { name: "alice" },
-    });
+    expect(fakeApp.callServerTool).toHaveBeenCalledWith(
+      {
+        name: "greet",
+        arguments: { name: "alice" },
+      },
+      { timeout: undefined },
+    );
     expect(result.structuredContent).toEqual({ ok: true });
     expect(result.meta).toEqual({ x: 1 });
   });
@@ -195,7 +198,13 @@ describe("HostAdaptor", () => {
     await adaptor.setViewState({ count: 2 });
     expect(updateModelContext).toHaveBeenCalledWith({
       structuredContent: { count: 2 },
-      content: [{ type: "text", text: JSON.stringify({ count: 2 }) }],
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify({ count: 2 }),
+          annotations: { audience: ["assistant"] },
+        },
+      ],
     });
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {

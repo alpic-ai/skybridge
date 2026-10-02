@@ -1,3 +1,4 @@
+import * as z from "zod/v4";
 import { warnOnLargeViewState } from "../../context-warnings.js";
 import { AppsSdkBridge } from "./apps-sdk/bridge.js";
 import type { AppsSdkWidgetState } from "./apps-sdk/types.js";
@@ -5,12 +6,14 @@ import { McpAppBridge } from "./mcp-app/bridge.js";
 import type {
   Adaptor,
   AnyViewToolHandler,
+  CallToolOptions,
   CallToolResponse,
   DownloadParams,
   DownloadResult,
   FileMetadata,
   HostContext,
   HostContextStore,
+  ModelContextParams,
   OpenExternalOptions,
   RequestDisplayMode,
   RequestModalOptions,
@@ -69,6 +72,7 @@ export class HostAdaptor implements Adaptor {
   private _viewState: HostContext["viewState"] = null;
   private readonly viewStateListeners = new Set<() => void>();
   private _viewUUID: string | null = null;
+  private _modelContext: ModelContextParams | null = null;
 
   private _polyfillDisplay: HostContext["display"] = { mode: "inline" };
   private readonly polyfillDisplayListeners = new Set<() => void>();
@@ -77,6 +81,7 @@ export class HostAdaptor implements Adaptor {
   private readonly polyfillViewStateStore: HostContextStore<"viewState">;
 
   private unsubscribeViewUUID: (() => void) | null = null;
+  private unsubscribeModelContext: (() => void) | null = null;
 
   constructor() {
     this.mcp = McpAppBridge.getInstance();
@@ -116,12 +121,21 @@ export class HostAdaptor implements Adaptor {
     };
 
     this.subscribeToViewUUID();
+    this.unsubscribeModelContext = this.mcp.subscribe("openai/modelContext")(
+      () => {
+        if (this.mcp.getSnapshot("openai/modelContext") === null) {
+          this._modelContext = null;
+        }
+      },
+    );
   }
 
   /** @internal Release any subscriptions held on the underlying bridges. */
   public cleanup(): void {
     this.unsubscribeViewUUID?.();
     this.unsubscribeViewUUID = null;
+    this.unsubscribeModelContext?.();
+    this.unsubscribeModelContext = null;
   }
 
   // ---- Adaptor interface ----
@@ -136,12 +150,17 @@ export class HostAdaptor implements Adaptor {
   >(
     name: string,
     args: ToolArgs,
+    options?: CallToolOptions,
   ): Promise<ToolResponse> => {
+    const timeout = options?.timeout;
+    if (timeout !== undefined && (!Number.isFinite(timeout) || timeout <= 0)) {
+      throw new RangeError(
+        "Tool call timeout must be a positive, finite number of milliseconds.",
+      );
+    }
     const app = await this.mcp.getApp();
-    const response = await app.callServerTool({
-      name,
-      arguments: args ?? undefined,
-    });
+    const params = { name, arguments: args ?? undefined };
+    const response = await app.callServerTool(params, { timeout });
     return {
       content: response.content,
       structuredContent: response.structuredContent ?? {},
@@ -249,15 +268,69 @@ export class HostAdaptor implements Adaptor {
     this.persistToLocalStorage(newState);
 
     try {
-      const app = await this.mcp.getApp();
-      await app.updateModelContext({
-        structuredContent: newState,
-        content: [{ type: "text", text: JSON.stringify(newState) }],
-      });
+      await this.sendModelContext();
     } catch (error) {
       console.error("Failed to update view state in MCP App.", error);
     }
   };
+
+  public updateModelContext = async (
+    params: ModelContextParams,
+  ): Promise<string | undefined> => {
+    const app = await this.mcp.getApp();
+    const capabilities = app.getHostCapabilities();
+    if (
+      !capabilities?.updateModelContext &&
+      !capabilities?.experimental?.["openai/modelContext"]
+    ) {
+      throw new NotSupportedError(
+        "updateModelContext",
+        "the host does not advertise updateModelContext",
+      );
+    }
+    const previous = this._modelContext;
+    this._modelContext = params;
+    const result = await this.sendModelContext().catch((error: unknown) => {
+      if (this._modelContext === params) {
+        this._modelContext = previous;
+      }
+      throw error;
+    });
+    const parsed = z
+      .object({ updateId: z.string() })
+      .safeParse(result._meta?.["openai/modelContext"]);
+    return parsed.success ? parsed.data.updateId : undefined;
+  };
+
+  private async sendModelContext() {
+    const viewState = this.openai ? null : this._viewState;
+    const extra = this._modelContext;
+    const collisions = Object.keys(extra?.structuredContent ?? {}).filter(
+      (key) => viewState !== null && key in viewState,
+    );
+    if (collisions.length > 0) {
+      console.warn(
+        `skybridge: view state overrides model context keys ${collisions.join(", ")}.`,
+      );
+    }
+    const structuredContent = { ...extra?.structuredContent, ...viewState };
+    const app = await this.mcp.getApp();
+    return app.updateModelContext({
+      ...(Object.keys(structuredContent).length > 0 && { structuredContent }),
+      content: [
+        ...(viewState === null
+          ? []
+          : [
+              {
+                type: "text" as const,
+                text: JSON.stringify(viewState),
+                annotations: { audience: ["assistant" as const] },
+              },
+            ]),
+        ...(extra?.content ?? []),
+      ],
+    });
+  }
 
   public uploadFile = async (
     file: File,

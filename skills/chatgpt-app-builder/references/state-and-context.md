@@ -10,6 +10,7 @@
 | Persist data, single component | `useViewState` |
 | Persist data, shared across components, complex mutations | `createStore` |
 | Help LLM understand "this one" | `data-llm` |
+| Send extra content to the model, or a ChatGPT composer attachment | `useModelContext` |
 | Ephemeral UI only (hover, animation) | `useState` |
 
 ## useViewState
@@ -160,3 +161,25 @@ function TaskList() {
 | `tasks` | `useViewState` | Persists. Tasks and progress survive reopen. |
 | `viewing` | `useState` | Ephemeral. Current focus resets on reopen. |
 | `"Viewing: Buy groceries"` | `data-llm` | LLM context. Understands "this task" in conversation. |
+
+## useModelContext
+
+Send content blocks to the model (MCP Apps `ui/update-model-context`). ChatGPT also shows each block as a removable composer attachment.
+
+```tsx
+const { supported, context, update } = useModelContext();
+
+update({
+  content: [
+    {
+      type: "text",
+      text: "Selected: M6 hex bolt",
+      _meta: { "openai/title": "Hex bolt", "openai/thumbnail": { src: imageUrl } },
+    },
+  ],
+});
+```
+
+- Outside ChatGPT, Skybridge merges it with the `useViewState` state: view state keys win in `structuredContent`.
+- `context` (ChatGPT only) becomes `null` when the user removes the attachment.
+- `supported` is `false` on hosts without model context updates, and `update` rejects there.

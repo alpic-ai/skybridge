@@ -4,7 +4,7 @@ import type {
   ToolOutput,
   ToolResponseMetadata,
 } from "../server/index.js";
-import type { CallToolResponse } from "./bridges/types.js";
+import type { CallToolOptions, CallToolResponse } from "./bridges/types.js";
 import {
   type CallToolAsyncFn,
   type CallToolFn,
@@ -117,11 +117,12 @@ export function generateHelpers<AppType = never>() {
      */
     useCallTool: <ToolName extends ToolNames>(
       name: ToolName,
+      options?: CallToolOptions,
     ): TypedCallToolReturn<
       ToolInput<AppType, ToolName>,
       ToolOutput<AppType, ToolName>
     > => {
-      return useCallTool(name) as TypedCallToolReturn<
+      return useCallTool(name, options) as TypedCallToolReturn<
         ToolInput<AppType, ToolName>,
         ToolOutput<AppType, ToolName>
       >;

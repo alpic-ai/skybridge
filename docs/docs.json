@@ -136,10 +136,12 @@
             "icon": "fishing-rod",
             "pages": [
               "api-reference/use-call-tool",
+              "api-reference/use-deep-link",
               "api-reference/use-display-mode",
               "api-reference/use-download",
               "api-reference/use-files",
               "api-reference/use-host",
+              "api-reference/use-model-context",
               "api-reference/use-open-external",
               "api-reference/use-register-view-tool",
               "api-reference/use-request-close",

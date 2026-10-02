@@ -1,5 +1,6 @@
 import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import { Skybridge } from "./app.js";
 
 describe("registerTool handler invocation", () => {
@@ -32,5 +33,69 @@ describe("registerTool handler invocation", () => {
 
     await client.close();
     await instance.close();
+  });
+
+  it("emits openai options as openai/ui metadata on the tool and its view", async () => {
+    const app = new Skybridge({
+      name: "test",
+      version: "1.0.0",
+      handler: (server) =>
+        server.registerTool(
+          {
+            name: "library",
+            description: "library",
+            view: { component: "widget" },
+            openai: {
+              entrypoints: [
+                { type: "global" },
+                { type: "file", extensions: [".stl"] },
+              ],
+              availableDisplayModes: ["inline", "fullscreen"],
+              preferredDisplayMode: "fullscreen",
+            },
+          },
+          async () => ({ content: "ok" }),
+        ),
+    });
+    const instance = await app.createServerInstance();
+    const client = new Client({ name: "client", version: "1.0.0" });
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    await instance.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    const { tools } = await client.listTools();
+    const { resources } = await client.listResources();
+
+    expect(tools[0]?._meta?.["openai/ui"]).toEqual({
+      entrypoints: [{ type: "global" }, { type: "file", extensions: [".stl"] }],
+    });
+    expect(resources[0]?._meta?.["openai/ui"]).toEqual({
+      availableDisplayModes: ["inline", "fullscreen"],
+      preferredDisplayMode: "fullscreen",
+    });
+
+    await client.close();
+    await instance.close();
+  });
+
+  it("rejects a global entrypoint on a tool that requires input", async () => {
+    const app = new Skybridge({
+      name: "test",
+      version: "1.0.0",
+      handler: (server) =>
+        server.registerTool(
+          {
+            name: "search",
+            description: "search",
+            inputSchema: { query: z.string() },
+            view: { component: "widget" },
+            openai: { entrypoints: [{ type: "global" }] },
+          },
+          async () => ({ content: "ok" }),
+        ),
+    });
+
+    await expect(app.createServerInstance()).rejects.toThrow(/rejects `\{\}`/);
   });
 });
