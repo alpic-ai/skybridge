@@ -100,7 +100,7 @@ export function Hero() {
           </span>
         </a>
         <h1 className="sb-sr-only">
-          Skybridge, the React framework for building MCP apps. Runs in Claude,
+          Skybridge, the React framework for building MCP Apps. Runs in Claude,
           ChatGPT, VSCode, and any MCP client.
         </h1>
         <div className="sb-h1" style={{ fontWeight: 400 }} aria-hidden="true">

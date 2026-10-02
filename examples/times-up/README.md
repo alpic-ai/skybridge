@@ -1,6 +1,6 @@
 # Time's Up Example
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a word-guessing party game where the user sees a secret word and gives hints to the AI, which tries to guess it.
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): a word-guessing party game where the user sees a secret word and gives hints to the AI, which tries to guess it.
 
 ## What This Example Showcases
 
@@ -107,7 +107,7 @@ The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 ## Resources
 
 - [Skybridge Documentation](https://docs.skybridge.tech/)
-- [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
+- [ChatGPT Plugins Documentation](https://developers.openai.com/plugins)
 - [MCP Apps Documentation](https://github.com/modelcontextprotocol/ext-apps/tree/main)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)

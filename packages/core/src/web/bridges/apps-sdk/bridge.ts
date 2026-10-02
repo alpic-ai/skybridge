@@ -12,7 +12,7 @@ export class AppsSdkBridge implements Bridge<AppsSdkContext> {
   public static getInstance(): AppsSdkBridge {
     if (window.openai === undefined) {
       throw new Error(
-        "Apps SDK Bridge requires window.openai (Apps SDK runtime).",
+        "Apps SDK Bridge requires window.openai (ChatGPT runtime).",
       );
     }
     if (AppsSdkBridge.instance === null) {

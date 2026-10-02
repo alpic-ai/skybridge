@@ -1,6 +1,6 @@
 # Generative UI Example
 
-An example MCP app built with [Skybridge](https://docs.skybridge.tech/home) and [json-render](https://github.com/vercel-labs/json-render). It displays dynamic, personalized UIs built from a predefined and reliable catalog of components, following prompt from the model.
+An example MCP App built with [Skybridge](https://docs.skybridge.tech/home) and [json-render](https://github.com/vercel-labs/json-render). It displays dynamic, personalized UIs built from a predefined and reliable catalog of components, following prompt from the model.
 
 ## What This Example Showcases
 
@@ -123,6 +123,6 @@ The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 
 - [Skybridge Documentation](https://docs.skybridge.tech/)
 - [json-render](https://github.com/vercel-labs/json-render)
-- [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
+- [ChatGPT Plugins Documentation](https://developers.openai.com/plugins)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)

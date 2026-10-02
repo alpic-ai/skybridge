@@ -8,7 +8,7 @@ export const openuiLibrary = standardOpenuiLibrary;
 export const exampleOpenuiProgram: string = `root = Stack([hero, metrics, report], "column", "l")
 hero = Card([headline, subhead, themeNote], "clear")
 headline = TextContent("Launch readiness", "large-heavy")
-subhead = TextContent("Generated with OpenUI's standard component library inside a Skybridge MCP app.")
+subhead = TextContent("Generated with OpenUI's standard component library inside a Skybridge MCP App.")
 themeNote = Callout("info", "Skybridge theme", "The view uses OpenUI components styled through Skybridge brand tokens.")
 metrics = Stack([confidenceCard, riskCard, milestoneCard], "row", "m", "stretch", "start", true)
 confidenceCard = Card([confidenceLabel, confidenceValue, confidenceTrend], "card")
@@ -57,7 +57,7 @@ export const openuiPrompt: string = openuiLibrary.prompt({
     "Use the standard OpenUI component library only; do not invent Page, Section, StatCard, or custom components.",
     "Always start with root = Stack(...).",
     "Prefer Card, CardHeader, TextContent, Callout, Table, chart, Tabs, and Steps components for dashboards.",
-    "Keep labels compact so rendered cards fit inside ChatGPT and MCP app iframes.",
+    "Keep labels compact so rendered cards fit inside ChatGPT and MCP App iframes.",
   ],
   examples: [exampleOpenuiProgram, ...(openuiPromptOptions.examples ?? [])],
 });

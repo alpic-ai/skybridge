@@ -1,6 +1,6 @@
 # Contributing to Skybridge
 
-Thank you for your interest in contributing to Skybridge! Every contribution helps make this framework better for everyone building ChatGPT and MCP Apps.
+Thank you for your interest in contributing to Skybridge! Every contribution helps make this framework better for everyone building ChatGPT Plugins and MCP Apps.
 
 New here? Please drop by our [Discord](https://discord.com/invite/gNAazGueab) and introduce yourself before opening your first PR. It helps us know who you are and lets us point you toward good first issues.
 
