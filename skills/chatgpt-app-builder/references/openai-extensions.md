@@ -38,7 +38,7 @@ server.registerFileViewer(
 );
 ```
 
-The view reads and saves the opened file with `useFileResource(input.file.resourceUri)`, see [Reading and saving the opened file](#reading-and-saving-the-opened-file).
+The view reads and saves the opened file with `useFileResource(input.file?.resourceUri)`, see [Reading and saving the opened file](#reading-and-saving-the-opened-file).
 
 - `global` adds a sidebar entry, `thread` a tab in a conversation's side panel, `file` a viewer for those file extensions.
 - ChatGPT calls global and thread tools with `{}`: every input must be optional, or Skybridge throws at startup.
@@ -134,7 +134,7 @@ const { data, write } = useFileResource(input.file?.resourceUri, { representatio
 await write({ text: edited });
 ```
 
-- The view never gets the path, only `file.resourceUri`. The hook re-reads the file when it changes.
+- ChatGPT never gives the view the path, only `file.resourceUri`. The hook re-reads the file when it changes.
 - `write` sends the current `etag` when ChatGPT returned one: it resolves `conflict` if the file changed (and re-reads it), `too-large` past the size limit.
 - Check `data.writable` before offering a save.
 

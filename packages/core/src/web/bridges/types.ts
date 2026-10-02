@@ -191,8 +191,7 @@ export type FileResource = FileResourceContent & {
 
 /** Result of `openai/resources/write`. */
 export type FileResourceWriteResult =
-  | { outcome: "saved"; etag: string }
-  | { outcome: "conflict"; etag: string }
+  | { outcome: "saved" | "conflict"; etag: string }
   | { outcome: "too-large"; maxBytes: number };
 
 /**
