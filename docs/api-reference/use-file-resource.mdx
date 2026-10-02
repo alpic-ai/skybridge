@@ -28,21 +28,28 @@ function PartEditor() {
     representation: "text",
   });
   const [draft, setDraft] = useState<string>();
+  const [conflict, setConflict] = useState(false);
 
   if (isLoading || !data || !("text" in data)) {
     return null;
   }
   const save = async () => {
     const result = await write({ text: draft ?? data.text });
-    if (result.outcome === "conflict") {
-      setDraft(undefined);
-      alert("The file changed on disk. It was reloaded, so review it and save again.");
-    }
+    setConflict(result.outcome === "conflict");
+  };
+  const discardEdits = () => {
+    setDraft(undefined);
+    setConflict(false);
   };
   return (
     <>
       <textarea value={draft ?? data.text} onChange={(e) => setDraft(e.target.value)} />
       <button disabled={!data.writable} onClick={save}>Save</button>
+      {conflict && (
+        <p>
+          The file changed on disk. <button onClick={discardEdits}>Load the latest version</button>
+        </p>
+      )}
     </>
   );
 }
