@@ -75,8 +75,6 @@ export type {
   OpenAIMentionsConfig,
   OpenAIQuickAction,
   OpenAISettingsConfig,
-  OpenAISettingsField,
-  OpenAISettingsGroup,
   OpenAISettingsValues,
   OpenAIToolConfig,
   SecurityScheme,
