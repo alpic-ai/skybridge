@@ -104,6 +104,31 @@ server.registerMentions({
 
 Users type `@` and the app to mention individual items. The tool is hidden from the model. ChatGPT desktop only. Serve the returned `uri`s as resources (`server.registerResource`) so the host can read the picked item.
 
+## Settings
+
+```ts
+server.registerSettings({
+  fields: {
+    units: { title: "Units", schema: z.enum(["mm", "in"]) },
+    showGrid: { title: "Show grid", schema: z.boolean() },
+  },
+  layout: [
+    {
+      kind: "group",
+      title: "Display",
+      items: [
+        { kind: "property", property: "units" },
+        { kind: "tool", tool: "browse-parts", title: "Browse parts" },
+      ],
+    },
+  ],
+  read: (extra) => loadSettings(extra),
+  update: (set, extra) => saveSettings(set, extra),
+});
+```
+
+Adds the app's page to ChatGPT's app settings. Fields are zod booleans, strings, string enums, numbers or integers, without defaults. `read` returns every value, `update` gets only the changed fields and returns every value. The server stores the values, per user when it uses OAuth. A `tool` item is a button that calls a tool with `{}`. A tool with a view opens in a modal, and any other tool shows the text `content` it returns. Startup fails on a layout naming an unknown or duplicate field.
+
 ## Messages
 
 ```tsx

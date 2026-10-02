@@ -107,7 +107,8 @@
               "api-reference/mcp-server",
               "api-reference/register-tool",
               "api-reference/register-mentions",
-              "api-reference/register-file-viewer"
+              "api-reference/register-file-viewer",
+              "api-reference/register-settings"
             ]
           },
           {
