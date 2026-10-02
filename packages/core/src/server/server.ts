@@ -555,6 +555,76 @@ export interface OpenAIMentionsConfig<
   ) => Promise<{ items: ResourceLink[] }> | { items: ResourceLink[] };
 }
 
+/** One setting, registered with `server.registerSettings`. */
+export interface OpenAISettingsField {
+  /** A boolean, string, string enum, number or integer schema, without a default. */
+  schema: z.ZodType<boolean | string | number>;
+  title: string;
+  description?: string;
+}
+
+/** Values of every setting, keyed by field name. */
+export type OpenAISettingsValues<
+  TFields extends Record<string, OpenAISettingsField>,
+> = { [K in keyof TFields]: z.output<TFields[K]["schema"]> };
+
+/** A settings section, listing fields and buttons that call a tool. */
+export interface OpenAISettingsGroup<TField extends string = string> {
+  kind: "group";
+  title: string;
+  items: (
+    | { kind: "property"; property: TField }
+    | { kind: "tool"; tool: string; title: string; description?: string }
+  )[];
+}
+
+/** App settings in ChatGPT, registered with `server.registerSettings`. */
+export interface OpenAISettingsConfig<
+  TFields extends Record<string, OpenAISettingsField>,
+  TAuthExtra extends ExtraClaims = ExtraClaims,
+> {
+  fields: TFields;
+  /** Sections of the settings page. Fields left out appear under "Other settings". */
+  layout?: OpenAISettingsGroup<Extract<keyof TFields, string>>[];
+  /** Returns the current value of every field. */
+  read: (
+    extra: ToolHandlerExtra<TAuthExtra>,
+  ) => OpenAISettingsValues<TFields> | Promise<OpenAISettingsValues<TFields>>;
+  /** Saves the changed fields and returns the value of every field. */
+  update: (
+    set: Partial<OpenAISettingsValues<TFields>>,
+    extra: ToolHandlerExtra<TAuthExtra>,
+  ) => OpenAISettingsValues<TFields> | Promise<OpenAISettingsValues<TFields>>;
+  /** Name of the read tool. Defaults to `settings-read`. */
+  readTool?: string;
+  /** Name of the update tool. Defaults to `settings-update`. */
+  updateTool?: string;
+}
+
+const nativeSettingTypes = ["boolean", "string", "number", "integer"];
+
+function settingJsonSchema(name: string, field: OpenAISettingsField) {
+  const { $schema: _, ...schema } = z.toJSONSchema(field.schema);
+  if (
+    !nativeSettingTypes.includes(schema.type as string) ||
+    (schema.enum !== undefined && schema.type !== "string")
+  ) {
+    throw new Error(
+      `Setting "${name}" must be a boolean, string, string enum, number or integer.`,
+    );
+  }
+  if ("default" in schema) {
+    throw new Error(
+      `Setting "${name}" declares a default: return current values from \`read\` instead.`,
+    );
+  }
+  return {
+    ...schema,
+    title: field.title,
+    ...(field.description !== undefined && { description: field.description }),
+  };
+}
+
 type ToolHandler<
   TInput extends Record<string, StandardSchemaWithJSON>,
   TReturn extends { content?: HandlerContent } = { content?: HandlerContent },
@@ -1343,6 +1413,106 @@ export class McpServer<
         structuredContent: await config.handler({ query }, extra),
       }),
     );
+    return this;
+  }
+
+  /**
+   * Register app settings for ChatGPT, from the OpenAI MCP extensions.
+   * Skybridge registers a read tool and an update tool from `fields`, and
+   * advertises them in the `openai/settings` server capability. ChatGPT shows
+   * the settings page and calls `update` with the changed fields only. Store
+   * the values yourself, for example per user.
+   *
+   * @example
+   * ```ts
+   * server.registerSettings({
+   *   fields: {
+   *     units: { title: "Units", schema: z.enum(["mm", "in"]) },
+   *     showGrid: { title: "Show grid", schema: z.boolean() },
+   *   },
+   *   read: (extra) => loadSettings(extra),
+   *   update: (set, extra) => saveSettings(set, extra),
+   * });
+   * ```
+   *
+   * @see https://docs.skybridge.tech/api-reference/register-settings
+   */
+  registerSettings<TFields extends Record<string, OpenAISettingsField>>(
+    config: OpenAISettingsConfig<TFields, TAuthExtra>,
+  ): this {
+    const {
+      fields,
+      layout,
+      readTool = "settings-read",
+      updateTool = "settings-update",
+    } = config;
+    const shape = Object.fromEntries(
+      Object.entries(fields).map(([name, field]) => [name, field.schema]),
+    );
+    const values = z.strictObject(shape).required();
+    const schema = {
+      type: "object",
+      properties: Object.fromEntries(
+        Object.entries(fields).map(([name, field]) => [
+          name,
+          settingJsonSchema(name, field),
+        ]),
+      ),
+      required: Object.keys(fields),
+    };
+    const parseValues = (result: unknown) =>
+      values.parse(result) as OpenAISettingsValues<TFields>;
+
+    this.registerTool(
+      {
+        name: readTool,
+        description: "Read the app settings.",
+        annotations: { readOnlyHint: true },
+        inputSchema: {},
+        outputSchema: {
+          schema: z.record(z.string(), z.unknown()),
+          values,
+          layout: z.array(z.record(z.string(), z.unknown())).optional(),
+        },
+      },
+      async (_args, extra) => ({
+        content: [],
+        structuredContent: {
+          schema,
+          values: parseValues(await config.read(extra)),
+          ...(layout && { layout }),
+        },
+      }),
+    );
+    this.registerTool(
+      {
+        name: updateTool,
+        description: "Update the app settings.",
+        inputSchema: {
+          set: values
+            .partial()
+            .refine((set) => Object.keys(set).length > 0)
+            .meta({ minProperties: 1 }),
+        },
+        outputSchema: { values },
+      },
+      async ({ set }, extra) => ({
+        content: [],
+        structuredContent: {
+          values: parseValues(
+            await config.update(
+              set as Partial<OpenAISettingsValues<TFields>>,
+              extra,
+            ),
+          ),
+        },
+      }),
+    );
+    const capability = { readTool, updateTool };
+    this.server.registerCapabilities({
+      extensions: { "openai/settings": capability },
+      experimental: { "openai/settings": capability },
+    });
     return this;
   }
 

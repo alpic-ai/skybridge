@@ -137,6 +137,96 @@ describe("registerTool handler invocation", () => {
     await instance.close();
   });
 
+  it("registers settings tools and advertises the settings capability", async () => {
+    let stored = { units: "mm" as "mm" | "in", zoom: 3 };
+    const fields = {
+      units: { title: "Units", schema: z.enum(["mm", "in"]) },
+      zoom: { title: "Zoom", schema: z.number().int().min(1).max(10) },
+    };
+    const app = new Skybridge({
+      name: "test",
+      version: "1.0.0",
+      handler: (server) =>
+        server.registerSettings({
+          fields,
+          layout: [
+            {
+              kind: "group",
+              title: "Display",
+              items: [{ kind: "property", property: "units" }],
+            },
+          ],
+          read: () => stored,
+          update: (set) => {
+            stored = { ...stored, ...set };
+            return stored;
+          },
+        }),
+    });
+    const instance = await app.createServerInstance();
+    const client = new Client({ name: "client", version: "1.0.0" });
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    await instance.connect(serverTransport);
+    await client.connect(clientTransport);
+
+    const capability = {
+      readTool: "settings-read",
+      updateTool: "settings-update",
+    };
+    expect(client.getServerCapabilities()).toMatchObject({
+      extensions: { "openai/settings": capability },
+      experimental: { "openai/settings": capability },
+    });
+    const read = await client.callTool({
+      name: "settings-read",
+      arguments: {},
+    });
+    expect(read.structuredContent).toMatchObject({
+      schema: {
+        type: "object",
+        properties: {
+          units: { type: "string", enum: ["mm", "in"], title: "Units" },
+          zoom: { type: "integer", minimum: 1, maximum: 10, title: "Zoom" },
+        },
+        required: ["units", "zoom"],
+      },
+      values: { units: "mm", zoom: 3 },
+      layout: [{ kind: "group", title: "Display" }],
+    });
+    const updated = await client.callTool({
+      name: "settings-update",
+      arguments: { set: { units: "in" } },
+    });
+    expect(updated.structuredContent).toEqual({
+      values: { units: "in", zoom: 3 },
+    });
+    const empty = await client.callTool({
+      name: "settings-update",
+      arguments: { set: {} },
+    });
+    expect(empty.isError).toBe(true);
+
+    await client.close();
+    await instance.close();
+
+    const withDefault = new Skybridge({
+      name: "test",
+      version: "1.0.0",
+      handler: (server) =>
+        server.registerSettings({
+          fields: {
+            grid: { title: "Grid", schema: z.boolean().default(true) },
+          },
+          read: () => ({ grid: true }),
+          update: () => ({ grid: true }),
+        }),
+    });
+    await expect(withDefault.createServerInstance()).rejects.toThrow(
+      /declares a default/,
+    );
+  });
+
   it("registers a file viewer with the file input and a file entrypoint", async () => {
     const app = new Skybridge({
       name: "test",

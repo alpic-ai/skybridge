@@ -1,0 +1,99 @@
+---
+title: registerSettings
+description: "Give your app a settings page in ChatGPT"
+---
+
+import { Compat } from "/components/compat.jsx";
+
+<Compat chatgpt />
+
+<Info>
+This is an [OpenAI MCP extension](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#settings), not part of MCP or MCP Apps. Only **ChatGPT** supports it, and other hosts ignore it.
+</Info>
+
+`registerSettings` adds a settings page for your app in ChatGPT's app settings. You declare the fields, and ChatGPT renders the form, reads the current values and sends back what the user changed. Your server stores the values, for example per user.
+
+## Example
+
+A CAD app lets users pick their units and zoom level, and adds a button that opens a parts browser.
+
+```ts
+server.registerSettings({
+  fields: {
+    units: { title: "Units", schema: z.enum(["mm", "in"]) },
+    showGrid: { title: "Show grid", schema: z.boolean() },
+    zoom: {
+      title: "Zoom",
+      description: "Default zoom level of the viewer",
+      schema: z.number().int().min(1).max(10),
+    },
+  },
+  layout: [
+    {
+      kind: "group",
+      title: "Display",
+      items: [
+        { kind: "property", property: "units" },
+        { kind: "property", property: "zoom" },
+        { kind: "tool", tool: "browse-parts", title: "Browse parts" },
+      ],
+    },
+  ],
+  read: (extra) => loadSettings(extra),
+  update: (set, extra) => saveSettings(set, extra),
+});
+```
+
+## Parameters
+
+### `config`
+
+```ts
+type OpenAISettingsConfig = {
+  fields: Record<string, { schema: ZodType; title: string; description?: string }>;
+  layout?: OpenAISettingsGroup[];
+  read: (extra: ToolHandlerExtra) => Values | Promise<Values>;
+  update: (set: Partial<Values>, extra: ToolHandlerExtra) => Values | Promise<Values>;
+  readTool?: string;
+  updateTool?: string;
+};
+
+type OpenAISettingsGroup = {
+  kind: "group";
+  title: string;
+  items: (
+    | { kind: "property"; property: string }
+    | { kind: "tool"; tool: string; title: string; description?: string }
+  )[];
+};
+```
+
+| Field | Purpose |
+| --- | --- |
+| `fields` | The settings, by name. `schema` is a zod boolean, string, string enum, number or integer, with optional constraints such as `min`, `max` or `regex`. `title` and `description` label the field. |
+| `layout` | Sections of the settings page. A `property` item shows a field, and a `tool` item shows a button that calls another tool on your server with `{}`. A tool with a view opens it in a modal. Fields left out of the layout appear under "Other settings". |
+| `read` | Returns the current value of every field. |
+| `update` | Receives only the fields the user changed, saves them, and returns the value of every field. |
+| `readTool`, `updateTool` | Names of the two tools. Default to `settings-read` and `settings-update`. |
+
+`extra` is the same as in a [`registerTool`](/api-reference/register-tool) handler, so `read` and `update` can tell users apart when the server uses [`oauth`](/api-reference/skybridge#oauth).
+
+## How it works
+
+Skybridge registers two tools and advertises them in the `openai/settings` server capability:
+
+- The read tool takes no input, is marked read-only and returns `{ schema, values, layout }`, where `schema` is the JSON Schema built from `fields`.
+- The update tool takes `{ set }`, which must hold at least one known field, and returns `{ values }`.
+
+Both check the values your handlers return against the field schemas. Skybridge throws at startup when a field isn't a boolean, string, string enum, number or integer, or declares a default. ChatGPT shows the values `read` returns, so defaults belong there.
+
+Returns the server, so calls chain.
+
+<CardGroup cols={2}>
+  <Card title="registerTool" icon="wrench" href="/api-reference/register-tool#openai">
+    Add a settings entrypoint to a tool
+  </Card>
+  <Card title="McpServer" icon="server" href="/api-reference/mcp-server">
+    Every method of the server
+  </Card>
+</CardGroup>
