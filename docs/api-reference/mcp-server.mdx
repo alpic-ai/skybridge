@@ -68,6 +68,14 @@ server.registerFileViewer(config, handler): this;
 
 Registers a ChatGPT desktop file viewer. See [registerFileViewer](/api-reference/register-file-viewer).
 
+### `registerSettings`
+
+```ts
+server.registerSettings(config): this;
+```
+
+Registers your app's settings page in ChatGPT. See [registerSettings](/api-reference/register-settings).
+
 ### `registerResource`, `registerPrompt`
 
 Inherited from the MCP SDK's [`McpServer`](https://github.com/modelcontextprotocol/typescript-sdk), with the same signatures. Views register their own resources, so you only need `registerResource` for data you expose directly.
