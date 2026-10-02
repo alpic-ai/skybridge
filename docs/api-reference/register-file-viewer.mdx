@@ -8,7 +8,7 @@ import { Compat } from "/components/compat.jsx";
 <Compat chatgpt />
 
 <Info>
-This is an [OpenAI MCP extension](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md), not part of MCP or MCP Apps. Only **ChatGPT** desktop supports it, and other hosts ignore it.
+This is an [OpenAI MCP extension](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md), not part of MCP or MCP Apps. Only **ChatGPT** desktop opens files with it. Other hosts ignore the entrypoint and list a regular tool with a required `file` input.
 </Info>
 
 `registerFileViewer` makes your app a viewer for some file types in ChatGPT desktop. When the user opens a file with one of these extensions through your app, ChatGPT calls the tool with that file and shows its [view](/build/view), where [`useFileResource`](/api-reference/use-file-resource) reads and saves the file.
@@ -43,7 +43,7 @@ The same as [`registerTool`](/api-reference/register-tool)'s config, without `in
 
 ### `handler`
 
-Receives `{ file: { name, resourceUri } }`: the file's name, and an opaque URI the view passes to [`useFileResource`](/api-reference/use-file-resource). The view never gets the file's path. Tools the view calls receive it in [`_meta["openai/resource"].path`](/api-reference/register-tool#client-hints).
+Receives `{ file: { name, resourceUri } }`: the file's name, and an opaque URI the view passes to [`useFileResource`](/api-reference/use-file-resource). ChatGPT never gives the view the file's path. Tools the view calls receive it in [`_meta["openai/resource"].path`](/api-reference/register-tool#client-hints).
 
 ## How it works
 

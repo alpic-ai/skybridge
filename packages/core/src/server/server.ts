@@ -473,7 +473,10 @@ type ToolConfig<
 > = ToolConfigBase<TInput> & ToolAuthConfig;
 
 const fileEntrypointInput = {
-  file: z.object({ name: z.string(), resourceUri: z.string() }),
+  file: z.object({
+    name: z.string().min(1),
+    resourceUri: z.string().trim().min(1),
+  }),
 };
 
 type FileEntrypointInput = typeof fileEntrypointInput;

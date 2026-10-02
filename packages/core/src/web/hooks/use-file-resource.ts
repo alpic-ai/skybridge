@@ -23,11 +23,11 @@ export type FileResourceState = {
  *
  * Reading uses the standard `resources/read`. `representation` asks ChatGPT
  * for text or a base64 blob. `write` uses the OpenAI MCP extensions
- * (`openai/resources/write`) and always sends the current `etag` as
- * `ifMatch`, so it resolves with `conflict` instead of overwriting a newer
- * version, and then re-reads the latest one. It rejects with
- * `NotSupportedError` when the host doesn't advertise `openai/resource` or the
- * resource isn't writable.
+ * (`openai/resources/write`) and sends the current `etag` as `ifMatch`, so it
+ * resolves with `conflict` instead of overwriting a newer version, and then
+ * re-reads the latest one. When ChatGPT returned no `etag`, the write has no
+ * version check. It rejects with `NotSupportedError` when the host doesn't
+ * advertise `openai/resource`, or the resource isn't loaded or writable.
  *
  * Pass `undefined` or an empty string as `uri` to do nothing, for example outside a file
  * entrypoint.
@@ -93,37 +93,32 @@ export function useFileResource(
 
   const write = useCallback(
     async (content: FileResourceContent) => {
-      const loaded = currentRef.current;
-      const resource = loaded?.resource;
-      if (!loaded || loaded.uri !== uri || !resource?.writable) {
+      const resource = currentRef.current?.resource;
+      if (!uri || currentRef.current?.uri !== uri || !resource?.writable) {
         throw new NotSupportedError(
           "writeResource",
           "the resource is not loaded or not writable",
         );
       }
       const result = await getAdaptor().writeResource(
-        loaded.uri,
+        uri,
         content,
         resource.etag,
       );
-      if (currentRef.current?.uri !== loaded.uri) {
+      if (currentRef.current?.uri !== uri) {
         return result;
       }
       if (result.outcome === "saved") {
         sequence.current++;
-        setState((previous) =>
-          previous?.uri === loaded.uri
-            ? {
-                uri: loaded.uri,
-                resource: {
-                  ...content,
-                  mimeType: resource.mimeType,
-                  writable: true,
-                  etag: result.etag,
-                },
-              }
-            : previous,
-        );
+        setState({
+          uri,
+          resource: {
+            ...content,
+            mimeType: resource.mimeType,
+            writable: true,
+            etag: result.etag,
+          },
+        });
       } else if (result.outcome === "conflict") {
         read();
       }

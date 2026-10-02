@@ -1,4 +1,5 @@
 import { ResultSchema } from "@modelcontextprotocol/core";
+import type { App } from "@modelcontextprotocol/ext-apps";
 import * as z from "zod/v4";
 import { warnOnLargeViewState } from "../../context-warnings.js";
 import { AppsSdkBridge } from "./apps-sdk/bridge.js";
@@ -31,9 +32,10 @@ import type {
 } from "./types.js";
 import { NotSupportedError } from "./types.js";
 
-const ResourceMetaSchema = z
-  .object({ writable: z.boolean().optional(), etag: z.string().optional() })
-  .optional();
+const ResourceMetaSchema = z.object({
+  writable: z.boolean().optional(),
+  etag: z.string().optional(),
+});
 
 const WriteResultSchema = z.discriminatedUnion("outcome", [
   z.object({ outcome: z.enum(["saved", "conflict"]), etag: z.string() }),
@@ -89,7 +91,7 @@ export class HostAdaptor implements Adaptor {
   private _viewUUID: string | null = null;
   private _modelContext: ModelContextParams | null = null;
   private readonly resourceListeners = new Map<string, Set<() => void>>();
-  private listeningToResources = false;
+  private resourceApp?: Promise<App | undefined>;
 
   private _polyfillDisplay: HostContext["display"] = { mode: "inline" };
   private readonly polyfillDisplayListeners = new Set<() => void>();
@@ -405,39 +407,16 @@ export class HostAdaptor implements Adaptor {
   };
 
   public watchResource = (uri: string, onUpdate: () => void): (() => void) => {
-    const app = this.mcp
-      .getApp()
-      .then((app) =>
-        app.getHostCapabilities()?.experimental?.["openai/resource"]
-          ? app
-          : undefined,
-      );
     const listeners = this.resourceListeners.get(uri) ?? new Set<() => void>();
     if (listeners.size === 0) {
       this.resourceListeners.set(uri, listeners);
-      app
-        .then((app) => {
-          if (!app) {
-            return;
-          }
-          if (!this.listeningToResources) {
-            app.setNotificationHandler(
-              "notifications/resources/updated",
-              (notification) => {
-                this.resourceListeners
-                  .get(notification.params.uri)
-                  ?.forEach((l) => {
-                    l();
-                  });
-              },
-            );
-            this.listeningToResources = true;
-          }
-          return app.request(
+      this.getResourceApp()
+        .then((app) =>
+          app?.request(
             { method: "resources/subscribe", params: { uri } },
             ResultSchema,
-          );
-        })
+          ),
+        )
         .catch((error: unknown) => {
           console.warn(`Failed to subscribe to ${uri}.`, error);
         });
@@ -446,7 +425,7 @@ export class HostAdaptor implements Adaptor {
     return () => {
       if (listeners.delete(onUpdate) && listeners.size === 0) {
         this.resourceListeners.delete(uri);
-        app
+        this.getResourceApp()
           .then((app) =>
             app?.request(
               { method: "resources/unsubscribe", params: { uri } },
@@ -463,8 +442,8 @@ export class HostAdaptor implements Adaptor {
     content: FileResourceContent,
     ifMatch?: string,
   ): Promise<FileResourceWriteResult> => {
-    const app = await this.mcp.getApp();
-    if (!app.getHostCapabilities()?.experimental?.["openai/resource"]) {
+    const app = await this.getResourceApp();
+    if (!app) {
       throw new NotSupportedError(
         "writeResource",
         "the host does not advertise openai/resource",
@@ -478,6 +457,24 @@ export class HostAdaptor implements Adaptor {
       WriteResultSchema,
     );
   };
+
+  private getResourceApp(): Promise<App | undefined> {
+    this.resourceApp ??= this.mcp.getApp().then((app) => {
+      if (!app.getHostCapabilities()?.experimental?.["openai/resource"]) {
+        return undefined;
+      }
+      app.setNotificationHandler(
+        "notifications/resources/updated",
+        ({ params }) => {
+          this.resourceListeners.get(params.uri)?.forEach((l) => {
+            l();
+          });
+        },
+      );
+      return app;
+    });
+    return this.resourceApp;
+  }
 
   public uploadFile = async (
     file: File,
