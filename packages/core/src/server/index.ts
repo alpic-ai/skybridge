@@ -2,6 +2,7 @@ export {
   inputRequired,
   ProtocolError,
   ProtocolErrorCode,
+  ResourceTemplate,
   type StandardSchemaWithJSON,
 } from "@modelcontextprotocol/server";
 export type {

@@ -62,7 +62,7 @@ Returns the server, so calls chain.
 When the user picks an item, its resource link goes into the message, so the model gets the `uri` rather than the item itself. Serve those URIs as MCP resources so the host can read them:
 
 ```ts
-import { ResourceTemplate } from "@modelcontextprotocol/server";
+import { ResourceTemplate } from "skybridge/server";
 
 server.registerResource(
   "part",
