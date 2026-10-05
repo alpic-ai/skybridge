@@ -137,6 +137,14 @@ describe("stateless server instances", () => {
           type: "string" as const,
           oneOf: [{ const: "bolt", title: "M6 bolt", description: "Fastener" }],
         },
+        drawing: {
+          type: "string" as const,
+          format: "uri" as const,
+          "x-openai-input": {
+            type: "resource" as const,
+            options: [{ uri: "cad://drawings/bolt", name: "bolt" }],
+          },
+        },
       },
       required: ["part"],
     };
@@ -176,10 +184,10 @@ describe("stateless server instances", () => {
       },
     );
     const asked: unknown[] = [];
-    let answer = "bolt";
+    let answer = { part: "bolt", drawing: "cad://drawings/bolt" };
     client.setRequestHandler("elicitation/create", (request) => {
       asked.push(request.params);
-      return { action: "accept", content: { part: answer } };
+      return { action: "accept", content: answer };
     });
     await client.connect(
       new StreamableHTTPClientTransport(
@@ -198,13 +206,17 @@ describe("stateless server instances", () => {
       },
     ]);
 
-    answer = "washer";
-    await expect(client.callTool({ name: "pick-part" })).resolves.toMatchObject(
-      {
+    for (answer of [
+      { part: "washer", drawing: "cad://drawings/bolt" },
+      { part: "bolt", drawing: "cad://drawings/other" },
+    ]) {
+      await expect(
+        client.callTool({ name: "pick-part" }),
+      ).resolves.toMatchObject({
         isError: true,
         content: [{ text: expect.stringContaining("does not match") }],
-      },
-    );
+      });
+    }
     await client.close();
   });
 });
