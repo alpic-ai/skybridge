@@ -293,7 +293,8 @@ export class Skybridge<
    * `registerEvent` to every live subscription its `match` hook accepts. The
    * payload is validated against the event's `payloadSchema`. Resolves once
    * each delivery got a first attempt; failed deliveries are retried in the
-   * background. API may change.
+   * background. Rejects with an `AggregateError` when `match` hooks throw,
+   * after the other deliveries went out. API may change.
    *
    * @example
    * ```ts

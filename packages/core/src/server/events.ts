@@ -591,28 +591,30 @@ export class EventsRuntime {
     const subscriptions = (await this.store.listByEvent(name)).filter(
       (sub) => sub.expiresAt > now,
     );
-    await Promise.all(
+    const results = await Promise.allSettled(
       subscriptions.map(async (subscription) => {
-        try {
-          const matches =
-            (await event.hooks.match?.(
-              { id, data },
-              {
-                arguments: subscription.arguments,
-                principal: subscription.principal,
-              },
-            )) ?? true;
-          if (matches) {
-            await this.deliver(subscription, id, body, 0);
-          }
-        } catch (error) {
-          console.warn(
-            `skybridge: failed to deliver event ${id} to subscription ${subscription.id}`,
-            error,
-          );
+        const matches =
+          (await event.hooks.match?.(
+            { id, data },
+            {
+              arguments: subscription.arguments,
+              principal: subscription.principal,
+            },
+          )) ?? true;
+        if (matches) {
+          await this.deliver(subscription, id, body, 0);
         }
       }),
     );
+    const failures = results.flatMap((result) =>
+      result.status === "rejected" ? [result.reason] : [],
+    );
+    if (failures.length > 0) {
+      throw new AggregateError(
+        failures,
+        `Event ${id} was not delivered to ${failures.length} subscription(s) whose match hook threw.`,
+      );
+    }
   }
 
   private async resolve(

@@ -93,7 +93,7 @@ sequenceDiagram
 ```
 
 - Subscribing requires a signed-in user: set [`oauth`](/api-reference/skybridge#oauth). The subscription belongs to the token's subject, or to its client ID when the token has no subject.
-- Skybridge verifies a callback URL before the first delivery to it, signs every delivery with the subscription's secret ([Standard Webhooks](https://www.standardwebhooks.com/)), and retries failed deliveries twice. `app.emit` validates `data` against `payloadSchema` and resolves once each delivery has had a first attempt.
+- Skybridge verifies a callback URL before the first delivery to it, signs every delivery with the subscription's secret ([Standard Webhooks](https://www.standardwebhooks.com/)), and retries failed deliveries twice. `app.emit` validates `data` against `payloadSchema` and resolves once each delivery has had a first attempt. It rejects with an `AggregateError` when `match` hooks throw, after delivering to the other subscriptions, so you can log or retry.
 - Callback URLs must be `https` and resolve to public addresses. When `NODE_ENV` is `development` (the default under `skybridge dev`) or `test`, `http` and local addresses are allowed so you can test with a local receiver.
 - Subscriptions last 30 minutes unless the host asks for another lifetime, at most 24 hours. The host re-subscribes before they expire.
 - Payloads are capped at 256 KiB. Send a summary and let the model fetch the rest with a tool.
