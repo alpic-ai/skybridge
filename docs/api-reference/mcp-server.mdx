@@ -52,6 +52,14 @@ server.registerMentions(config): this;
 
 Registers the ChatGPT composer at-mention search. See [registerMentions](/api-reference/register-mentions).
 
+### `registerEvent`
+
+```ts
+server.registerEvent(config, hooks?): this;
+```
+
+Declares an event type hosts can subscribe to. Experimental. See [registerEvent](/api-reference/register-event).
+
 ### `registerResource`, `registerPrompt`
 
 Inherited from the MCP SDK's [`McpServer`](https://github.com/modelcontextprotocol/typescript-sdk), with the same signatures. Views register their own resources, so you only need `registerResource` for data you expose directly.

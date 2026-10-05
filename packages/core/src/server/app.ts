@@ -9,6 +9,12 @@ import type { ErrorRequestHandler, Express, RequestHandler } from "express";
 import type { OAuthConfig, OAuthProvider } from "./auth/index.js";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
 import type { ExtraClaims } from "./auth.js";
+import {
+  type EmittedEvent,
+  type EventDef,
+  type EventsOptions,
+  EventsRuntime,
+} from "./events.js";
 import { buildMcpHandler, createApp, createBaseApp } from "./express.js";
 import { createMiddlewareEntry } from "./metric.js";
 import type { McpMiddlewareEntry } from "./middleware.js";
@@ -41,10 +47,11 @@ export type SkybridgeHandler<
   TTools extends Record<string, ToolDef>,
   TConfig,
   TAuthExtra extends ExtraClaims,
+  TEvents extends Record<string, EventDef> = Record<never, EventDef>,
 > = (
   server: McpServer<Record<never, ToolDef>, TAuthExtra>,
   config: TConfig,
-) => McpServer<TTools, TAuthExtra>;
+) => McpServer<TTools, TAuthExtra, TEvents>;
 
 /**
  * What the `oauth` field accepts: an {@link OAuthConfig}, a provider
@@ -82,6 +89,7 @@ export type SkybridgeConfig<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
   TConfig = undefined,
   TAuthExtra extends ExtraClaims = ExtraClaims,
+  TEvents extends Record<string, EventDef> = Record<never, EventDef>,
 > = Implementation &
   ServerOptions & {
     /** Options for the built-in `express.json()` middleware, e.g. `{ limit: "10mb" }`. */
@@ -91,6 +99,11 @@ export type SkybridgeConfig<
      * API may change.
      */
     skills?: boolean;
+    /**
+     * @experimental MCP Events options: where webhook subscriptions are kept.
+     * Only used when the handler registers events. API may change.
+     */
+    events?: EventsOptions;
     /**
      * Loads whatever the app needs up front (remote config, secrets, datasets,
      * …). Runs **once** — at {@link Skybridge.run} or on the first request,
@@ -105,7 +118,7 @@ export type SkybridgeConfig<
      */
     oauth?: SkybridgeOAuthInput<Awaited<TConfig>, TAuthExtra>;
     /** Registers the MCP surface, per request. See {@link SkybridgeHandler}. */
-    handler: SkybridgeHandler<TTools, Awaited<TConfig>, TAuthExtra>;
+    handler: SkybridgeHandler<TTools, Awaited<TConfig>, TAuthExtra, TEvents>;
   };
 
 /**
@@ -145,8 +158,10 @@ export class Skybridge<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
   TConfig = undefined,
   TAuthExtra extends ExtraClaims = ExtraClaims,
+  TEvents extends Record<string, EventDef> = Record<never, EventDef>,
 > {
   declare readonly $types: McpServerTypes<TTools>;
+  private readonly eventsRuntime: EventsRuntime;
   private readonly serverInfo: Implementation;
   private readonly serverOptions: ServerOptions;
   private readonly skills?: boolean;
@@ -154,7 +169,8 @@ export class Skybridge<
   private readonly handler: SkybridgeHandler<
     TTools,
     Awaited<TConfig>,
-    TAuthExtra
+    TAuthExtra,
+    TEvents
   >;
   private readonly setup?: () => TConfig;
   private readonly oauthInput?: SkybridgeOAuthInput<
@@ -179,14 +195,16 @@ export class Skybridge<
     websiteUrl,
     json,
     skills,
+    events,
     setup,
     oauth,
     handler,
     ...serverOptions
-  }: SkybridgeConfig<TTools, TConfig, TAuthExtra>) {
+  }: SkybridgeConfig<TTools, TConfig, TAuthExtra, TEvents>) {
     this.serverInfo = { name, title, version, description, icons, websiteUrl };
     this.serverOptions = serverOptions;
     this.skills = skills;
+    this.eventsRuntime = new EventsRuntime(events);
     this.setup = setup;
     this.oauthInput = oauth;
     this.handler = handler;
@@ -268,6 +286,31 @@ export class Skybridge<
   async connect(transport: Parameters<SdkServer["connect"]>[0]): Promise<void> {
     const instance = await this.createServerInstance();
     await instance.connect(transport);
+  }
+
+  /**
+   * @experimental Deliver an occurrence of an event registered with
+   * `registerEvent` to every live subscription its `match` hook accepts. The
+   * payload is validated against the event's `payloadSchema`. Resolves once
+   * each delivery got a first attempt; failed deliveries are retried in the
+   * background. API may change.
+   *
+   * @example
+   * ```ts
+   * await app.emit("comment.created", {
+   *   id: comment.id,
+   *   data: { documentId: comment.docId, excerpt: comment.text.slice(0, 280) },
+   * });
+   * ```
+   *
+   * @see https://docs.skybridge.tech/api-reference/register-event
+   */
+  async emit<TName extends keyof TEvents & string>(
+    name: TName,
+    event: EmittedEvent<TEvents[TName]["payload"]>,
+  ): Promise<void> {
+    await this.ready();
+    await this.eventsRuntime.emit(name, event);
   }
 
   /**
@@ -404,11 +447,15 @@ export class Skybridge<
     return undefined;
   }
 
-  private buildServer(): McpServer<TTools, TAuthExtra> {
+  private buildServer(): McpServer<TTools, TAuthExtra, TEvents> {
     const server = new McpServer<Record<never, ToolDef>, TAuthExtra>(
       this.serverInfo,
       this.serverOptions,
-      { skills: this.skills, oauth: this.oauthEnabled },
+      {
+        skills: this.skills,
+        oauth: this.oauthEnabled,
+        events: this.eventsRuntime,
+      },
     );
     if (this.resolveResourceMetadataUrl) {
       server.setResourceMetadataUrlResolver(this.resolveResourceMetadataUrl);

@@ -12,6 +12,7 @@ import {
   McpServer as McpServerBase,
   type RequestMeta,
   type ResourceLink,
+  type ServerCapabilities,
   type ServerOptions,
   type ServerResult,
   type StandardSchemaV1,
@@ -28,6 +29,13 @@ import {
 } from "./auth/security-schemes.js";
 import type { ResourceMetadataUrlResolver } from "./auth/setup.js";
 import type { ExtraClaims } from "./auth.js";
+import type {
+  EventConfig,
+  EventDef,
+  EventHooks,
+  EventsRuntime,
+  InferEventSchema,
+} from "./events.js";
 import { hostFromUserAgent } from "./host.js";
 import type {
   McpExtra,
@@ -258,6 +266,12 @@ export interface SkybridgeServerOptions {
    * API may change.
    */
   skills?: boolean;
+  /**
+   * App-wide MCP Events state shared by every per-request server.
+   *
+   * @internal
+   */
+  events?: EventsRuntime;
 }
 
 const SKILLS_DIR = "src/skills";
@@ -416,11 +430,13 @@ type AddTool<
   TOutput,
   TResponseMetadata = unknown,
   TAuthExtra extends ExtraClaims = ExtraClaims,
+  TEvents extends Record<string, EventDef> = Record<never, EventDef>,
 > = McpServer<
   TTools & {
     [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput, TResponseMetadata>;
   },
-  TAuthExtra
+  TAuthExtra,
+  TEvents
 >;
 
 interface ToolConfigBase<
@@ -665,8 +681,12 @@ function withSkillsCapability(
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
   TAuthExtra extends ExtraClaims = ExtraClaims,
+  TEvents extends Record<string, EventDef> = Record<never, EventDef>,
 > extends McpServerBaseOmitted {
   declare readonly $types: McpServerTypes<TTools>;
+  declare readonly $events: TEvents;
+  private readonly eventNames = new Set<string>();
+  private readonly eventsRuntime?: EventsRuntime;
   private claimedViews = new Map<string, string>();
   private viewMetaBuilders = new Map<
     string,
@@ -695,6 +715,7 @@ export class McpServer<
   ) {
     super(serverInfo, withSkillsCapability(options, skybridgeOptions));
     this.oauthEnabled = Boolean(skybridgeOptions?.oauth);
+    this.eventsRuntime = skybridgeOptions?.events;
     // Pick up the manifest if `dist/__entry.js` primed it before importing
     // user code. Explicit `setViteManifest` calls still win because they
     // happen after construction.
@@ -1236,6 +1257,71 @@ export class McpServer<
   }
 
   /**
+   * @experimental Register an MCP Events type that hosts can subscribe to, per
+   * the Triggers & Events working group draft. ChatGPT subscribes with a
+   * webhook; deliver occurrences with {@link Skybridge.emit}. API may change.
+   *
+   * @example
+   * ```ts
+   * server.registerEvent(
+   *   {
+   *     name: "comment.created",
+   *     description: "Fires when someone comments on a document",
+   *     inputSchema: { documentId: z.string() },
+   *     payloadSchema: { documentId: z.string(), excerpt: z.string() },
+   *   },
+   *   {
+   *     match: (event, { arguments: args }) =>
+   *       event.data.documentId === args.documentId,
+   *   },
+   * );
+   * ```
+   *
+   * @see https://docs.skybridge.tech/api-reference/register-event
+   */
+  registerEvent<
+    TName extends string,
+    TInput extends
+      | Record<string, StandardSchemaWithJSON>
+      | StandardSchemaWithJSON = Record<never, StandardSchemaWithJSON>,
+    TPayload extends
+      | Record<string, StandardSchemaWithJSON>
+      | StandardSchemaWithJSON = Record<never, StandardSchemaWithJSON>,
+  >(
+    config: EventConfig<TName, TInput, TPayload>,
+    hooks?: EventHooks<
+      InferEventSchema<TInput>,
+      InferEventSchema<TPayload>,
+      McpExtra<TAuthExtra>
+    >,
+  ): McpServer<
+    TTools,
+    TAuthExtra,
+    TEvents & {
+      [K in TName]: EventDef<
+        InferEventSchema<TInput>,
+        InferEventSchema<TPayload>
+      >;
+    }
+  > {
+    if (!this.eventsRuntime) {
+      throw new Error(
+        `Event "${config.name}" needs a Skybridge app: register events in its handler so \`app.emit\` can deliver them.`,
+      );
+    }
+    if (this.eventNames.has(config.name)) {
+      throw new Error(`Event "${config.name}" is already registered.`);
+    }
+    if (this.eventNames.size === 0) {
+      this.server.registerCapabilities({ events: {} } as ServerCapabilities);
+      this.eventsRuntime.install(this.server);
+    }
+    this.eventNames.add(config.name);
+    this.eventsRuntime.register(config, hooks);
+    return this as never;
+  }
+
+  /**
    * Register the composer at-mention search for ChatGPT, from the OpenAI MCP
    * extensions. When the user types `@` and your app name, ChatGPT calls
    * `handler` with the typed text and lists the returned resource links.
@@ -1319,7 +1405,8 @@ export class McpServer<
     InputArgs,
     ExtractStructuredContent<TReturn>,
     ExtractMeta<TReturn>,
-    TAuthExtra
+    TAuthExtra,
+    TEvents
   >;
   registerTool<InputArgs extends Record<string, StandardSchemaWithJSON>>(
     config: ToolConfig<InputArgs>,

@@ -72,6 +72,7 @@ export default class Dev extends Command {
 
     const env = {
       ...process.env,
+      NODE_ENV: process.env.NODE_ENV ?? "development",
       __PORT: String(port),
       __TUNNEL_CONTROL_PORT: String(controlPort),
     };
