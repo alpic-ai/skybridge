@@ -1,11 +1,10 @@
 import { createHmac, randomBytes } from "node:crypto";
 import http from "node:http";
-import type { AddressInfo } from "node:net";
+import net, { type AddressInfo } from "node:net";
 import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import type { JSONRPCMessage } from "@modelcontextprotocol/server";
 import { afterEach, describe, expect, it } from "vitest";
 import { z } from "zod";
-import { isPublicAddress } from "./events.js";
 import { Skybridge } from "./index.js";
 
 type Received = { headers: http.IncomingHttpHeaders; body: string };
@@ -161,21 +160,39 @@ describe("MCP events", () => {
         new Promise((resolve) => setTimeout(() => resolve("hung"), 2_000)),
       ]),
     ).resolves.toBe("settled");
-  });
 
-  it("blocks callbacks resolving to non-public addresses", () => {
-    expect(isPublicAddress("93.184.216.34")).toBe(true);
-    expect(isPublicAddress("2606:4700::1111")).toBe(true);
-    for (const address of [
-      "127.0.0.1",
-      "10.1.2.3",
-      "169.254.169.254",
-      "192.168.1.1",
-      "::1",
-      "::ffff:127.0.0.1",
-      "fd00::1",
-    ]) {
-      expect(isPublicAddress(address)).toBe(false);
+    let connections = 0;
+    const privateTarget = net.createServer((socket) => {
+      connections += 1;
+      socket.destroy();
+    });
+    await new Promise<void>((resolve) =>
+      privateTarget.listen(0, "127.0.0.1", resolve),
+    );
+    const { port: privatePort } = privateTarget.address() as AddressInfo;
+    const nodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    try {
+      await expect(
+        client.request(
+          {
+            method: "events/subscribe",
+            params: {
+              name: "comment.created",
+              arguments: { documentId: "doc-1" },
+              delivery: {
+                url: `https://127.0.0.1:${privatePort}/hooks`,
+                secret,
+              },
+            },
+          },
+          z.object({}),
+        ),
+      ).rejects.toMatchObject({ code: -32015 });
+      expect(connections).toBe(0);
+    } finally {
+      process.env.NODE_ENV = nodeEnv;
+      privateTarget.close();
     }
   });
 });

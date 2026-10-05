@@ -76,6 +76,8 @@
     "jose": "^6.2.3",
     "open": "^11.0.0",
     "posthog-node": "^5.45.2",
+    "request-filtering-agent": "^3.2.1",
+    "standardwebhooks": "^1.1.1",
     "std-env": "^4.2.0",
     "superjson": "^2.2.6",
     "yaml": "^2.9.0",

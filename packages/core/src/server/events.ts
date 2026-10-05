@@ -1,13 +1,6 @@
-import {
-  createHash,
-  createHmac,
-  randomBytes,
-  timingSafeEqual,
-} from "node:crypto";
-import dns from "node:dns";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import http from "node:http";
 import https from "node:https";
-import net from "node:net";
 import {
   INVALID_PARAMS,
   ProtocolError,
@@ -16,6 +9,8 @@ import {
   type StandardSchemaV1,
   type StandardSchemaWithJSON,
 } from "@modelcontextprotocol/server";
+import { globalHttpAgent, globalHttpsAgent } from "request-filtering-agent";
+import { Webhook } from "standardwebhooks";
 import { z } from "zod/v4";
 
 const EVENTS_ERROR = {
@@ -219,60 +214,6 @@ function isValidSecret(secret: string): boolean {
   return length >= 24 && length <= 64;
 }
 
-function sign(secret: string, id: string, timestamp: number, body: string) {
-  const key = Buffer.from(secret.slice(6), "base64");
-  const digest = createHmac("sha256", key)
-    .update(`${id}.${timestamp}.${body}`)
-    .digest("base64");
-  return `v1,${digest}`;
-}
-
-const blockedAddresses = new net.BlockList();
-for (const [address, prefix] of [
-  ["0.0.0.0", 8],
-  ["10.0.0.0", 8],
-  ["100.64.0.0", 10],
-  ["127.0.0.0", 8],
-  ["169.254.0.0", 16],
-  ["172.16.0.0", 12],
-  ["192.0.0.0", 24],
-  ["192.0.2.0", 24],
-  ["192.168.0.0", 16],
-  ["198.18.0.0", 15],
-  ["198.51.100.0", 24],
-  ["203.0.113.0", 24],
-  ["224.0.0.0", 4],
-  ["240.0.0.0", 4],
-] as const) {
-  blockedAddresses.addSubnet(address, prefix, "ipv4");
-}
-for (const [address, prefix] of [
-  ["::", 128],
-  ["::1", 128],
-  ["64:ff9b::", 96],
-  ["64:ff9b:1::", 48],
-  ["100::", 64],
-  ["2001::", 23],
-  ["2001:db8::", 32],
-  ["2002::", 16],
-  ["3fff::", 20],
-  ["5f00::", 16],
-  ["fc00::", 7],
-  ["fe80::", 10],
-  ["ff00::", 8],
-] as const) {
-  blockedAddresses.addSubnet(address, prefix, "ipv6");
-}
-
-/** @internal */
-export function isPublicAddress(address: string): boolean {
-  const family = net.isIP(address);
-  if (family === 0) {
-    return false;
-  }
-  return !blockedAddresses.check(address, family === 4 ? "ipv4" : "ipv6");
-}
-
 const insecureCallbacksAllowed = () =>
   process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
 
@@ -292,50 +233,18 @@ function checkCallbackUrl(raw: string): string {
   return url.href;
 }
 
-const safeLookup: net.LookupFunction = (hostname, options, callback) => {
-  dns.lookup(hostname, { ...options, all: true }, (error, addresses) => {
-    if (error) {
-      callback(error, "", 4);
-      return;
-    }
-    const resolved = addresses as dns.LookupAddress[];
-    const blocked = resolved.find(({ address }) => !isPublicAddress(address));
-    if (blocked) {
-      callback(
-        new Error(
-          `Callback resolves to a non-public address (${blocked.address})`,
-        ),
-        "",
-        4,
-      );
-      return;
-    }
-    if (options.all) {
-      (callback as unknown as (e: null, a: dns.LookupAddress[]) => void)(
-        null,
-        resolved,
-      );
-      return;
-    }
-    const [first] = resolved;
-    callback(null, first?.address ?? "", first?.family ?? 4);
-  });
-};
-
 type DeliveryOutcome =
   | { ok: true; status: number; body: string }
   | { ok: false; status?: number; reason: string };
 
+const isRetryable = (status = 0) =>
+  status !== 410 && status !== 413 && (status < 300 || status >= 400);
+
 function post(
-  url: URL,
+  url: string,
   headers: Record<string, string>,
   body: string,
 ): Promise<DeliveryOutcome> {
-  const insecure = insecureCallbacksAllowed();
-  const hostname = url.hostname.replace(/^\[|\]$/g, "");
-  if (!insecure && net.isIP(hostname) && !isPublicAddress(hostname)) {
-    return Promise.resolve({ ok: false, reason: "connection_refused" });
-  }
   const signal = AbortSignal.timeout(DELIVERY_TIMEOUT_MS);
   const failure = (error?: NodeJS.ErrnoException): DeliveryOutcome => ({
     ok: false,
@@ -345,7 +254,9 @@ function post(
         ? "tls_error"
         : "connection_refused",
   });
-  const client = url.protocol === "https:" ? https : http;
+  const [client, agent] = url.startsWith("https:")
+    ? [https, globalHttpsAgent]
+    : [http, globalHttpAgent];
   return new Promise((resolve) => {
     const request = client.request(
       url,
@@ -353,7 +264,7 @@ function post(
         method: "POST",
         headers: { ...headers, "content-length": Buffer.byteLength(body) },
         signal,
-        ...(insecure ? {} : { lookup: safeLookup }),
+        ...(!insecureCallbacksAllowed() && { agent }),
       },
       (response) => {
         const status = response.statusCode ?? 0;
@@ -394,22 +305,22 @@ function signedPost(
   messageId: string,
   body: string,
 ): Promise<DeliveryOutcome> {
-  const timestamp = Math.floor(Date.now() / 1000);
+  const signedAt = new Date();
   const secrets = [subscription.secret];
   if (
     subscription.previousSecret &&
-    subscription.previousSecret.until > Date.now()
+    subscription.previousSecret.until > signedAt.getTime()
   ) {
     secrets.push(subscription.previousSecret.secret);
   }
   return post(
-    new URL(subscription.url),
+    subscription.url,
     {
       "content-type": "application/json",
       "webhook-id": messageId,
-      "webhook-timestamp": String(timestamp),
+      "webhook-timestamp": String(Math.floor(signedAt.getTime() / 1000)),
       "webhook-signature": secrets
-        .map((secret) => sign(secret, messageId, timestamp, body))
+        .map((secret) => new Webhook(secret).sign(messageId, signedAt, body))
         .join(" "),
       "x-mcp-subscription-id": subscription.id,
     },
@@ -662,11 +573,8 @@ export class EventsRuntime {
     if (outcome.ok) {
       return;
     }
-    const status = outcome.status ?? 0;
-    const retryable =
-      status !== 410 && status !== 413 && (status < 300 || status >= 400);
     const delay = RETRY_DELAYS_MS[attempt];
-    if (!retryable || delay === undefined) {
+    if (!isRetryable(outcome.status) || delay === undefined) {
       console.warn(
         `skybridge: dropped event ${eventId} for subscription ${subscription.id} (${outcome.reason})`,
       );
