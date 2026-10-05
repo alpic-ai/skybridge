@@ -171,8 +171,8 @@ describe("registerTool handler invocation", () => {
     await client.connect(clientTransport);
 
     const capability = {
-      readTool: "settings-read",
-      updateTool: "settings-update",
+      readTool: "settings.read",
+      updateTool: "settings.update",
     };
     expect(client.getServerCapabilities()).toMatchObject({
       extensions: { "openai/settings": capability },
@@ -181,12 +181,12 @@ describe("registerTool handler invocation", () => {
     const { tools } = await client.listTools();
     expect(tools).toMatchObject([
       {
-        name: "settings-read",
+        name: "settings.read",
         annotations: { readOnlyHint: true },
         outputSchema: { required: ["schema", "values"] },
       },
       {
-        name: "settings-update",
+        name: "settings.update",
         inputSchema: {
           properties: {
             set: { additionalProperties: false, minProperties: 1 },
@@ -195,7 +195,7 @@ describe("registerTool handler invocation", () => {
       },
     ]);
     const read = await client.callTool({
-      name: "settings-read",
+      name: "settings.read",
       arguments: {},
     });
     expect(read.structuredContent).toMatchObject({
@@ -211,14 +211,14 @@ describe("registerTool handler invocation", () => {
       layout: [{ kind: "group", title: "Display" }],
     });
     const updated = await client.callTool({
-      name: "settings-update",
+      name: "settings.update",
       arguments: { set: { units: "in" } },
     });
     expect(updated.structuredContent).toEqual({
       values: { units: "in", zoom: 3 },
     });
     const empty = await client.callTool({
-      name: "settings-update",
+      name: "settings.update",
       arguments: { set: {} },
     });
     expect(empty.isError).toBe(true);
@@ -232,7 +232,7 @@ describe("registerTool handler invocation", () => {
       handler: (server) =>
         server.registerSettings({
           fields: {
-            grid: { title: "Grid", schema: z.boolean().default(true) },
+            grid: { title: "Grid", schema: z.boolean().prefault(true) },
           },
           read: () => ({ grid: true }),
           update: () => ({ grid: true }),

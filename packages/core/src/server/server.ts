@@ -573,7 +573,9 @@ export interface OpenAISettingsField {
 /** Values of every setting, keyed by field name. */
 export type OpenAISettingsValues<
   TFields extends Record<string, OpenAISettingsField>,
-> = { [K in keyof TFields]: z.output<TFields[K]["schema"]> };
+> = {
+  [K in keyof TFields]-?: Exclude<z.output<TFields[K]["schema"]>, undefined>;
+};
 
 /** App settings in ChatGPT, registered with `server.registerSettings`. */
 export interface OpenAISettingsConfig<
@@ -599,9 +601,9 @@ export interface OpenAISettingsConfig<
     set: Partial<OpenAISettingsValues<TFields>>,
     extra: ToolHandlerExtra<TAuthExtra>,
   ) => OpenAISettingsValues<TFields> | Promise<OpenAISettingsValues<TFields>>;
-  /** Name of the read tool. Defaults to `settings-read`. */
+  /** Name of the read tool. Defaults to `settings.read`. */
   readTool?: string;
-  /** Name of the update tool. Defaults to `settings-update`. */
+  /** Name of the update tool. Defaults to `settings.update`. */
   updateTool?: string;
 }
 
@@ -1468,8 +1470,8 @@ export class McpServer<
     const {
       fields,
       layout,
-      readTool = "settings-read",
-      updateTool = "settings-update",
+      readTool = "settings.read",
+      updateTool = "settings.update",
     } = config;
     const values = z
       .strictObject(
@@ -1477,7 +1479,10 @@ export class McpServer<
           Object.entries(fields).map(
             ([name, { schema, title, description }]) => [
               name,
-              schema.meta({ title, description }),
+              schema.meta({
+                title,
+                ...(description !== undefined && { description }),
+              }),
             ],
           ),
         ),
@@ -1485,20 +1490,20 @@ export class McpServer<
       .required();
     const { $schema: _, ...schema } = z.toJSONSchema(values);
     for (const [name, property] of Object.entries(schema.properties ?? {})) {
+      if (fields[name]?.schema.safeParse(undefined).data !== undefined) {
+        throw new Error(
+          `Setting "${name}" declares a default: return current values from \`read\` instead.`,
+        );
+      }
       if (
         typeof property === "boolean" ||
         !["boolean", "string", "number", "integer"].includes(
-          property.type as string,
+          String(property.type),
         ) ||
         (property.enum !== undefined && property.type !== "string")
       ) {
         throw new Error(
           `Setting "${name}" must be a boolean, string, string enum, number or integer.`,
-        );
-      }
-      if ("default" in property) {
-        throw new Error(
-          `Setting "${name}" declares a default: return current values from \`read\` instead.`,
         );
       }
     }

@@ -70,11 +70,11 @@ type Values = OpenAISettingsValues<TFields>;
 
 | Field | Purpose |
 | --- | --- |
-| `fields` | The settings, by name, each with a zod `schema`, a `title` and an optional `description`. A schema is a boolean, string, string enum, number or integer. The spec lets ChatGPT read `min`, `max`, `length`, `regex` and `multipleOf` constraints. Any other constraint, such as `positive()`, is only checked when the update arrives. |
+| `fields` | The settings, by name, each with a zod `schema`, a `title` and an optional `description`. A schema is a boolean, string, string enum, number or integer. The spec defines the `min`, `max`, `length`, `regex` and `multipleOf` constraints for the form. Other constraints, such as `positive()`, may be ignored by ChatGPT, and every constraint is checked when the update arrives. |
 | `layout` | Sections of the settings page. A `property` item shows a field, and a `tool` item shows a button that calls another tool on your server with `{}`. A tool with a view opens it in a modal. Any other tool shows a spinner, then the text `content` it returns. Fields left out of the layout appear under "Other settings". |
 | `read` | Returns the current value of every field. |
 | `update` | Receives only the fields the user changed, saves them, and returns the value of every field. |
-| `readTool`, `updateTool` | Names of the two tools. Default to `settings-read` and `settings-update`. |
+| `readTool`, `updateTool` | Names of the two tools. Default to `settings.read` and `settings.update`. |
 
 Your server stores the values. `extra` is the same as in a [`registerTool`](/api-reference/register-tool) handler, so `read` and `update` can store them per user when the server uses [`oauth`](/api-reference/skybridge#oauth). `OpenAISettingsValues<typeof fields>` types those functions when you declare them apart.
 
