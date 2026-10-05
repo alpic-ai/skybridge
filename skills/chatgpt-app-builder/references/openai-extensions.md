@@ -1,6 +1,6 @@
 # OpenAI MCP extensions
 
-Let users open a view without the model → `openai` on `registerTool`, `useDeepLink`, `useHost().openaiCapabilities`. Mentions, titled messages and local files → `registerMentions`, `useSendFollowUpMessage`, `useOpenFile`, `registerFileViewer`, `useFileResource`
+Let users open a view without the model → `openai` on `registerTool`, `useDeepLink`, `useHost().openaiCapabilities`. Mentions, titled messages and local files → `registerMentions`, `useSendFollowUpMessage`, `useOpenFile`, `registerFileViewer`, `useFileResource`. Settings and forms → `registerSettings`, `requestFormInput`
 
 These are OpenAI MCP extensions, not part of MCP or MCP Apps: only ChatGPT reads them, other hosts ignore them.
 
@@ -128,6 +128,30 @@ server.registerSettings({
 ```
 
 Adds the app's page to ChatGPT's app settings. Fields are zod booleans, strings, string enums, numbers or integers, without defaults. `read` returns every value, `update` gets only the changed fields and returns every value. The server stores the values, per user when it uses OAuth. A `tool` item is a button that calls a tool with `{}`. A tool with a view opens in a modal, and any other tool shows the text `content` it returns. Startup fails on a layout naming an unknown or duplicate field.
+
+## Forms
+
+```ts
+server.registerTool({ name: "inspect-part" }, (_args, extra) => {
+  const result = requestFormInput(extra, {
+    key: "part",
+    message: "Choose a part",
+    requestedSchema: {
+      type: "object",
+      properties: {
+        part: { type: "string", oneOf: [{ const: "hex-bolt", title: "M6 hex bolt" }] },
+      },
+      required: ["part"],
+    },
+  });
+  if ("resultType" in result) {
+    return result;
+  }
+  return { content: result.action === "accept" ? `Inspecting ${result.content.part}` : "No part chosen." };
+});
+```
+
+Asks the user to fill a form before the tool finishes. The first call returns an `input_required` result to return as is; ChatGPT shows the form and calls the tool again, and the same `requestFormInput` call then returns `{ action, content }`. Fields are MCP form fields plus `pattern`, option `description` and `x-openai-thumbnail`, `x-openai-suggestions`, and `x-openai-input: { type: "resource", options, userOptions }` for resource pickers. Needs MCP `2026-07-28` and ChatGPT desktop or web; throws elsewhere. Use a different `key` per form.
 
 ## Messages
 

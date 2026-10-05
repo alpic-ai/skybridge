@@ -9,6 +9,8 @@ import {
   type ContentBlock,
   type Icon,
   type Implementation,
+  type InputRequiredResult,
+  isInputRequiredResult,
   McpServer as McpServerBase,
   type RequestMeta,
   type ResourceLink,
@@ -614,7 +616,7 @@ type ToolHandler<
 > = (
   args: ShapeOutput<TInput>,
   extra: ToolHandlerExtra<TAuthExtra>,
-) => TReturn | Promise<TReturn>;
+) => TReturn | InputRequiredResult | Promise<TReturn | InputRequiredResult>;
 
 /**
  * Drop the query string from a `ui://` view URI, leaving the bare path. The
@@ -1235,6 +1237,9 @@ export class McpServer<
       } catch (error) {
         captureToolError(extra, error);
         throw error;
+      }
+      if (isInputRequiredResult(result)) {
+        return result;
       }
       warnOnLargeToolOutput(result, toolName);
       return {

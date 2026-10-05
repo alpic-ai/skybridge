@@ -54,6 +54,15 @@ export {
   type EventSubscription,
 } from "./events.js";
 export { FileRef } from "./file-ref.js";
+export {
+  type OpenAIForm,
+  type OpenAIFormField,
+  type OpenAIFormInputParams,
+  type OpenAIFormOption,
+  type OpenAIFormResult,
+  type OpenAIResourceInput,
+  requestFormInput,
+} from "./form-input.js";
 export type {
   AnyToolRegistry,
   InferTools,

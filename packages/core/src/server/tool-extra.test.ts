@@ -8,6 +8,7 @@ import type { RequestHandler } from "express";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { Skybridge } from "./app.js";
+import { requestFormInput } from "./form-input.js";
 
 vi.mock("@skybridge/devtools", () => ({
   devtoolsStaticServer: () =>
@@ -125,5 +126,85 @@ describe("stateless server instances", () => {
 
     expect(negotiated).toBe("2026-07-28");
     expect(result.structuredContent).toBe(42);
+  });
+
+  it("asks for an OpenAI form over multi-round-trip requests", async () => {
+    const { createApp } = await import("./express.js");
+    const requestedSchema = {
+      type: "object" as const,
+      properties: {
+        part: {
+          type: "string" as const,
+          oneOf: [{ const: "bolt", title: "M6 bolt", description: "Fastener" }],
+        },
+      },
+      required: ["part"],
+    };
+    const app = new Skybridge({
+      name: "t",
+      version: "0.0.0",
+      handler: (server) =>
+        server.registerTool({ name: "pick-part" }, (_args, extra) => {
+          const result = requestFormInput(extra, {
+            key: "part",
+            message: "Choose a part",
+            requestedSchema,
+          });
+          if ("resultType" in result) {
+            return result;
+          }
+          return {
+            content: `${result.action}:${result.action === "accept" && result.content.part}`,
+          };
+        }),
+    });
+    const httpServer = http.createServer();
+    const expressApp = await createApp({ app, httpServer });
+    const listening = http.createServer(expressApp);
+    await new Promise<void>((r) => listening.listen(0, r));
+    openServer = listening;
+    const port = (listening.address() as { port: number }).port;
+
+    const client = new Client(
+      { name: "c", version: "0.0.0" },
+      {
+        capabilities: {
+          elicitation: { form: {} },
+          extensions: { "openai/elicitation": { form: {} } },
+        },
+        versionNegotiation: { mode: "auto" },
+      },
+    );
+    const asked: unknown[] = [];
+    let answer = "bolt";
+    client.setRequestHandler("elicitation/create", (request) => {
+      asked.push(request.params);
+      return { action: "accept", content: { part: answer } };
+    });
+    await client.connect(
+      new StreamableHTTPClientTransport(
+        new URL(`http://localhost:${port}/mcp`),
+      ),
+    );
+
+    const result = await client.callTool({ name: "pick-part" });
+    expect(result.content).toEqual([{ type: "text", text: "accept:bolt" }]);
+    expect(asked).toEqual([
+      {
+        mode: "form",
+        message: "Choose a part",
+        requestedSchema: { type: "object", properties: {} },
+        _meta: { "openai/elicitation": { requestedSchema } },
+      },
+    ]);
+
+    answer = "washer";
+    await expect(client.callTool({ name: "pick-part" })).resolves.toMatchObject(
+      {
+        isError: true,
+        content: [{ text: expect.stringContaining("does not match") }],
+      },
+    );
+    await client.close();
   });
 });
