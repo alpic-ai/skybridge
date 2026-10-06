@@ -12,6 +12,7 @@ import {
   McpServer as McpServerBase,
   type RequestMeta,
   type ResourceLink,
+  type ServerCapabilities,
   type ServerOptions,
   type ServerResult,
   type StandardSchemaV1,
@@ -28,6 +29,12 @@ import {
 } from "./auth/security-schemes.js";
 import type { ResourceMetadataUrlResolver } from "./auth/setup.js";
 import type { ExtraClaims } from "./auth.js";
+import {
+  type EventConfig,
+  type EventHooks,
+  EventRegistry,
+  type InferEventSchema,
+} from "./events.js";
 import { hostFromUserAgent } from "./host.js";
 import type {
   McpExtra,
@@ -687,6 +694,7 @@ export class McpServer<
     SecurityScheme[] | undefined
   >();
   private readonly userMiddlewareEntries: McpMiddlewareEntry[] = [];
+  private eventRegistry?: EventRegistry;
 
   constructor(
     serverInfo: Implementation,
@@ -1233,6 +1241,50 @@ export class McpServer<
       ),
     );
     return cachedDiskManifest ?? {};
+  }
+
+  /**
+   * @experimental Register an MCP Events type that hosts can subscribe to, per
+   * the Triggers & Events working group draft. Skybridge serves `events/list`,
+   * `events/subscribe` and `events/unsubscribe`, checks auth and arguments,
+   * verifies the callback URL, then hands each subscription to `onSubscribe`.
+   * Delivering the events is up to you, for example with {@link deliverEvent}.
+   * API may change.
+   *
+   * @example
+   * ```ts
+   * server.registerEvent(
+   *   {
+   *     name: "comment.created",
+   *     description: "Fires when someone comments on a document",
+   *     inputSchema: { documentId: z.string() },
+   *     payloadSchema: { documentId: z.string(), excerpt: z.string() },
+   *   },
+   *   {
+   *     onSubscribe: ({ documentId }, { subscription }) =>
+   *       webhooks.upsert({ ...subscription, filter: { documentId } }),
+   *     onUnsubscribe: (_args, { subscription }) =>
+   *       webhooks.remove(subscription.id),
+   *   },
+   * );
+   * ```
+   *
+   * @see https://docs.skybridge.tech/api-reference/register-event
+   */
+  registerEvent<
+    TInput extends
+      | Record<string, StandardSchemaWithJSON>
+      | StandardSchemaWithJSON = Record<never, StandardSchemaWithJSON>,
+  >(
+    config: EventConfig<TInput>,
+    hooks: EventHooks<InferEventSchema<TInput>, McpExtra<TAuthExtra>>,
+  ): this {
+    if (!this.eventRegistry) {
+      this.server.registerCapabilities({ events: {} } as ServerCapabilities);
+      this.eventRegistry = new EventRegistry(this.server);
+    }
+    this.eventRegistry.add(config, hooks);
+    return this;
   }
 
   /**

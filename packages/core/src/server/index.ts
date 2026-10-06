@@ -45,6 +45,14 @@ export {
   resourceLink,
   text,
 } from "./content-helpers.js";
+export {
+  type DeliveryResult,
+  deliverEvent,
+  type EventConfig,
+  type EventHooks,
+  type EventOccurrence,
+  type EventSubscription,
+} from "./events.js";
 export { FileRef } from "./file-ref.js";
 export type {
   AnyToolRegistry,

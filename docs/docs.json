@@ -106,7 +106,8 @@
               "api-reference/skybridge",
               "api-reference/mcp-server",
               "api-reference/register-tool",
-              "api-reference/register-mentions"
+              "api-reference/register-mentions",
+              "api-reference/register-event"
             ]
           },
           {
