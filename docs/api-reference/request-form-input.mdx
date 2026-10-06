@@ -1,0 +1,134 @@
+---
+title: requestFormInput
+description: "Ask the user to fill a form in ChatGPT from a tool"
+---
+
+import { Compat } from "/components/compat.jsx";
+
+<Compat chatgpt />
+
+<Info>
+This is an [OpenAI MCP extension](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#openai-form-elicitation), built on [MCP form elicitation](https://modelcontextprotocol.io/specification/2026-07-28/client/elicitation). Only **ChatGPT** shows these forms, on desktop and web.
+</Info>
+
+`requestFormInput` lets a tool ask the user for input before it finishes. ChatGPT shows a native form, then calls the tool again with the answer. On top of standard MCP forms, it supports suggested values, option descriptions, thumbnails and resource pickers.
+
+## Example
+
+A CAD app asks which part to inspect before opening it.
+
+```ts
+import { requestFormInput } from "skybridge/server";
+
+server.registerTool({ name: "inspect-part" }, (_args, extra) => {
+  const result = requestFormInput(extra, {
+    key: "part",
+    message: "Choose a part to inspect",
+    requestedSchema: {
+      type: "object",
+      properties: {
+        part: {
+          type: "string",
+          title: "Part",
+          oneOf: [
+            {
+              const: "hex-bolt",
+              title: "M6 hex bolt",
+              description: "A fastener for the main joint",
+              "x-openai-thumbnail": { src: "https://example.com/hex-bolt.png" },
+            },
+            { const: "washer", title: "M6 washer" },
+          ],
+        },
+      },
+      required: ["part"],
+    },
+  });
+  if ("resultType" in result) {
+    return result;
+  }
+  if (result.action !== "accept") {
+    return { content: "No part chosen." };
+  }
+  return { content: `Inspecting ${result.content.part}` };
+});
+```
+
+## Parameters
+
+### `extra`
+
+The second argument of the tool handler.
+
+### `params`
+
+```ts
+type OpenAIFormInputParams = {
+  key: string;
+  message: string;
+  requestedSchema: OpenAIForm;
+  requestState?: string;
+  _meta?: Record<string, unknown>;
+};
+```
+
+| Field | Purpose |
+| --- | --- |
+| `key` | Identifies the form across the two calls. Use a different key for each form a tool asks for. |
+| `message` | Text shown above the form. |
+| `requestedSchema` | The form, as `{ type: "object", properties, required? }`. |
+| `requestState` | Opaque state ChatGPT sends back with the answer. It comes from the client, so sign it if it affects access or business logic. |
+
+Each property of `requestedSchema` is an MCP form field (string, number, integer, boolean, single or multiple choice), with these additions:
+
+| Addition | Applies to | Effect |
+| --- | --- | --- |
+| `pattern` | string | Regular expression the value must match. |
+| `description` | `oneOf` and `anyOf` options | Text under the option. |
+| `x-openai-thumbnail` | `oneOf` and `anyOf` options | An image for the option, from an HTTPS URL or a data URI. When one option has a thumbnail, every option shows an image. |
+| `x-openai-suggestions` | string, or the `items` of a string array | Suggested values. Users can still type their own. |
+| `x-openai-input` | `format: "uri"` string, or array of them | A resource picker. See below. |
+
+### Resource picker
+
+```ts
+{
+  type: "array",
+  items: { type: "string", format: "uri" },
+  "x-openai-input": {
+    type: "resource",
+    selection: "explicit",
+    options: [{ uri: "cad://parts/hex-bolt", name: "hex-bolt", title: "M6 hex bolt" }],
+    userOptions: { kind: "file", accept: [".stl", ".step"] },
+  },
+}
+```
+
+A string field picks one resource and an array field picks several. `options` lists the resources you offer, and `userOptions` lets users add their own files or directories. In an array field, `selection: "explicit"` (the default) lets users select and deselect options, while `"implicit"` keeps every item that remains when the form is submitted. Implicit selection always lets users add files. On web, directory selection isn't supported, and a form opened from a view only allows explicit selection without uploads.
+
+## Returns
+
+```ts
+type OpenAIFormResult =
+  | { action: "accept"; content: Record<string, string | number | boolean | string[]> }
+  | { action: "decline" | "cancel" };
+
+requestFormInput(extra, params): InputRequiredResult | OpenAIFormResult;
+```
+
+On the first call, `requestFormInput` returns an `input_required` result: return it from the handler so ChatGPT shows the form. When ChatGPT calls the tool again with the answer, it returns what the user did. `content` is only set when the user accepts.
+
+## How it works
+
+The form uses MCP's [multi-round-trip requests](https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/mrtr), which ChatGPT requires for forms. The tool returns an `elicitation/create` input request whose own `requestedSchema` is empty, and the OpenAI form goes in `_meta["openai/elicitation"].requestedSchema`.
+
+`requestFormInput` throws when the connection is older than MCP `2026-07-28`, or when the client doesn't declare both `elicitation.form` and the `openai/elicitation` form extension. It also throws when the answer has no valid action, doesn't match `requestedSchema`, or names a resource you didn't offer in a picker that allows no uploads.
+
+<CardGroup cols={2}>
+  <Card title="registerTool" icon="wrench" href="/api-reference/register-tool">
+    Register the tool that asks for input
+  </Card>
+  <Card title="McpServer" icon="server" href="/api-reference/mcp-server">
+    Every method of the server
+  </Card>
+</CardGroup>
