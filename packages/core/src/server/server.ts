@@ -29,12 +29,11 @@ import {
 } from "./auth/security-schemes.js";
 import type { ResourceMetadataUrlResolver } from "./auth/setup.js";
 import type { ExtraClaims } from "./auth.js";
-import type {
-  EventConfig,
-  EventDef,
-  EventHooks,
-  EventsRuntime,
-  InferEventSchema,
+import {
+  type EventConfig,
+  type EventHooks,
+  EventRegistry,
+  type InferEventSchema,
 } from "./events.js";
 import { hostFromUserAgent } from "./host.js";
 import type {
@@ -266,12 +265,6 @@ export interface SkybridgeServerOptions {
    * API may change.
    */
   skills?: boolean;
-  /**
-   * App-wide MCP Events state shared by every per-request server.
-   *
-   * @internal
-   */
-  events?: EventsRuntime;
 }
 
 const SKILLS_DIR = "src/skills";
@@ -430,13 +423,11 @@ type AddTool<
   TOutput,
   TResponseMetadata = unknown,
   TAuthExtra extends ExtraClaims = ExtraClaims,
-  TEvents extends Record<string, EventDef> = Record<never, EventDef>,
 > = McpServer<
   TTools & {
     [K in TName]: ToolDef<ShapeOutput<TInput>, TOutput, TResponseMetadata>;
   },
-  TAuthExtra,
-  TEvents
+  TAuthExtra
 >;
 
 interface ToolConfigBase<
@@ -681,12 +672,8 @@ function withSkillsCapability(
 export class McpServer<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
   TAuthExtra extends ExtraClaims = ExtraClaims,
-  TEvents extends Record<string, EventDef> = Record<never, EventDef>,
 > extends McpServerBaseOmitted {
   declare readonly $types: McpServerTypes<TTools>;
-  declare readonly $events: TEvents;
-  private readonly eventNames = new Set<string>();
-  private readonly eventsRuntime?: EventsRuntime;
   private claimedViews = new Map<string, string>();
   private viewMetaBuilders = new Map<
     string,
@@ -707,6 +694,7 @@ export class McpServer<
     SecurityScheme[] | undefined
   >();
   private readonly userMiddlewareEntries: McpMiddlewareEntry[] = [];
+  private eventRegistry?: EventRegistry;
 
   constructor(
     serverInfo: Implementation,
@@ -715,7 +703,6 @@ export class McpServer<
   ) {
     super(serverInfo, withSkillsCapability(options, skybridgeOptions));
     this.oauthEnabled = Boolean(skybridgeOptions?.oauth);
-    this.eventsRuntime = skybridgeOptions?.events;
     // Pick up the manifest if `dist/__entry.js` primed it before importing
     // user code. Explicit `setViteManifest` calls still win because they
     // happen after construction.
@@ -1258,8 +1245,11 @@ export class McpServer<
 
   /**
    * @experimental Register an MCP Events type that hosts can subscribe to, per
-   * the Triggers & Events working group draft. ChatGPT subscribes with a
-   * webhook; deliver occurrences with {@link Skybridge.emit}. API may change.
+   * the Triggers & Events working group draft. Skybridge serves `events/list`,
+   * `events/subscribe` and `events/unsubscribe`, checks auth and arguments,
+   * verifies the callback URL, then hands each subscription to `onSubscribe`.
+   * Delivering the events is up to you, for example with {@link deliverEvent}.
+   * API may change.
    *
    * @example
    * ```ts
@@ -1271,8 +1261,10 @@ export class McpServer<
    *     payloadSchema: { documentId: z.string(), excerpt: z.string() },
    *   },
    *   {
-   *     match: (event, { arguments: args }) =>
-   *       event.data.documentId === args.documentId,
+   *     onSubscribe: ({ documentId }, { subscription }) =>
+   *       webhooks.upsert({ ...subscription, filter: { documentId } }),
+   *     onUnsubscribe: (_args, { subscription }) =>
+   *       webhooks.remove(subscription.id),
    *   },
    * );
    * ```
@@ -1280,45 +1272,19 @@ export class McpServer<
    * @see https://docs.skybridge.tech/api-reference/register-event
    */
   registerEvent<
-    TName extends string,
     TInput extends
       | Record<string, StandardSchemaWithJSON>
       | StandardSchemaWithJSON = Record<never, StandardSchemaWithJSON>,
-    TPayload extends
-      | Record<string, StandardSchemaWithJSON>
-      | StandardSchemaWithJSON = Record<never, StandardSchemaWithJSON>,
   >(
-    config: EventConfig<TName, TInput, TPayload>,
-    hooks?: EventHooks<
-      InferEventSchema<TInput>,
-      InferEventSchema<TPayload>,
-      McpExtra<TAuthExtra>
-    >,
-  ): McpServer<
-    TTools,
-    TAuthExtra,
-    TEvents & {
-      [K in TName]: EventDef<
-        InferEventSchema<TInput>,
-        InferEventSchema<TPayload>
-      >;
-    }
-  > {
-    if (!this.eventsRuntime) {
-      throw new Error(
-        `Event "${config.name}" needs a Skybridge app: register events in its handler so \`app.emit\` can deliver them.`,
-      );
-    }
-    if (this.eventNames.has(config.name)) {
-      throw new Error(`Event "${config.name}" is already registered.`);
-    }
-    if (this.eventNames.size === 0) {
+    config: EventConfig<TInput>,
+    hooks: EventHooks<InferEventSchema<TInput>, McpExtra<TAuthExtra>>,
+  ): this {
+    if (!this.eventRegistry) {
       this.server.registerCapabilities({ events: {} } as ServerCapabilities);
-      this.eventsRuntime.install(this.server);
+      this.eventRegistry = new EventRegistry(this.server);
     }
-    this.eventNames.add(config.name);
-    this.eventsRuntime.register(config, hooks);
-    return this as never;
+    this.eventRegistry.add(config, hooks);
+    return this;
   }
 
   /**
@@ -1405,8 +1371,7 @@ export class McpServer<
     InputArgs,
     ExtractStructuredContent<TReturn>,
     ExtractMeta<TReturn>,
-    TAuthExtra,
-    TEvents
+    TAuthExtra
   >;
   registerTool<InputArgs extends Record<string, StandardSchemaWithJSON>>(
     config: ToolConfig<InputArgs>,

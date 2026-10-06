@@ -22,74 +22,42 @@ const EVENTS_ERROR = {
 
 const MAX_PAYLOAD_BYTES = 256 * 1024;
 const DELIVERY_TIMEOUT_MS = 10_000;
-const RETRY_DELAYS_MS = [1_000, 5_000];
 const VERIFICATION_CACHE_MS = 60 * 60_000;
-const SECRET_ROTATION_GRACE_MS = 5 * 60_000;
 const MIN_TTL_MS = 60_000;
 const DEFAULT_TTL_MS = 30 * 60_000;
 const MAX_TTL_MS = 24 * 60 * 60_000;
 
 /**
- * A webhook subscription as held by an {@link EventStore}. Skybridge creates,
- * refreshes and deletes these; a store only persists them.
+ * A webhook subscription, as passed to `onSubscribe`. Whatever delivers the
+ * events POSTs them to `url`, signed with `secret`, until `expiresAt`.
  */
 export interface EventSubscription {
-  /** Deterministic over `(principal, url, name, arguments)`. */
+  /** Stable across refreshes: the same user subscribing to the same event with the same arguments and callback gets the same `id`. */
   id: string;
-  /** The authenticated subject that subscribed. */
-  principal: string;
-  /** Event type name. */
-  name: string;
-  /** Subscription arguments, validated against the event's `inputSchema`. */
-  arguments: Record<string, unknown>;
   /** Callback URL deliveries are POSTed to. */
   url: string;
-  /** Standard Webhooks signing secret (`whsec_…`). */
+  /** Standard Webhooks signing secret (`whsec_…`). A refresh may carry a new one. */
   secret: string;
-  /** Secret being rotated out, still used to dual-sign until `until`. */
-  previousSecret?: { secret: string; until: number };
-  /** Expiry, in epoch milliseconds. */
-  expiresAt: number;
+  /** When the subscription lapses unless the host refreshes it. */
+  expiresAt: Date;
 }
 
-/**
- * Where webhook subscriptions live between the `events/subscribe` request
- * that creates them and the {@link Skybridge.emit} call that delivers to them.
- * Skybridge ignores subscriptions past `expiresAt`, so a store only needs to
- * persist them; dropping expired entries is optional housekeeping.
- *
- * The default in-memory store is enough for a single long-lived process. Pass
- * your own when the app runs on several instances or restarts often.
- */
-export interface EventStore {
-  get(id: string): Promise<EventSubscription | undefined>;
-  set(subscription: EventSubscription): Promise<void>;
-  delete(id: string): Promise<void>;
-  /** Every stored subscription to the event named `name`. */
-  listByEvent(name: string): Promise<EventSubscription[]>;
-}
-
-/** Options for MCP Events, passed as `events` to {@link Skybridge}. */
-export interface EventsOptions {
-  /** Where subscriptions are kept. Defaults to an in-memory store. */
-  store?: EventStore;
-}
-
-/** An event occurrence as passed to {@link Skybridge.emit}. */
-export interface EmittedEvent<TData> {
-  /** Stable identifier used for deduplication, ideally the upstream's. Generated when omitted. */
+/** An event occurrence, as passed to {@link deliverEvent}. */
+export interface EventOccurrence {
+  /** Event type name, as registered with `registerEvent`. */
+  name: string;
+  /** Stable identifier the host uses to drop duplicates, ideally the upstream's. Generated when omitted. */
   id?: string;
   /** When the event happened. Defaults to now. */
   timestamp?: Date;
-  /** Payload, validated against the event's `payloadSchema`. */
-  data: TData;
+  /** Payload matching the event's `payloadSchema`. */
+  data: unknown;
 }
 
-/** Type marker for a registered event, produced by `registerEvent`. */
-export type EventDef<TArguments = unknown, TPayload = unknown> = {
-  arguments: TArguments;
-  payload: TPayload;
-};
+/** Outcome of {@link deliverEvent}. Retry with the same event `id` when `retryable`. */
+export type DeliveryResult =
+  | { ok: true }
+  | { ok: false; reason: string; retryable: boolean; status?: number };
 
 type EventSchema =
   | Record<string, StandardSchemaWithJSON>
@@ -111,39 +79,36 @@ export type InferEventSchema<T extends EventSchema> =
       : never;
 
 /** The `registerEvent` config: how the event type is described in `events/list`. */
-export interface EventConfig<
-  TName extends string,
-  TInput extends EventSchema,
-  TPayload extends EventSchema,
-> {
+export interface EventConfig<TInput extends EventSchema> {
   /** Stable, specific name such as `comment.created`. */
-  name: TName;
+  name: string;
   /** What the event is and when it fires. */
   description?: string;
   /** Subscription arguments (filters): a Zod shape or a Standard Schema object. */
   inputSchema?: TInput;
   /** Shape of the delivered `data`: a Zod shape or a Standard Schema object. */
-  payloadSchema: TPayload;
+  payloadSchema: EventSchema;
   _meta?: Record<string, unknown>;
 }
 
-/** Optional per-event behavior passed as the second argument of `registerEvent`. */
-export interface EventHooks<TArguments, TPayload, TExtra> {
+/** What `registerEvent` does when the host subscribes and unsubscribes. */
+export interface EventHooks<TArguments, TExtra> {
   /**
-   * Decide whether an emitted event goes to a given subscription. Without it,
-   * every subscription to the event receives every emit.
+   * Runs on every `events/subscribe`, including the host's refreshes, once
+   * the callback URL is verified. Hand the subscription to whatever delivers
+   * the events, keyed by `subscription.id`. Throw (e.g. a `ProtocolError`) to
+   * reject it, for instance when the user may not access what the arguments
+   * point to.
    */
-  match?(
-    event: { id: string; data: TPayload },
-    subscription: { arguments: TArguments; principal: string },
-  ): boolean | Promise<boolean>;
-  /**
-   * Runs on every `events/subscribe`, including refreshes, once the callback
-   * URL is verified and before the subscription is stored. Throw (e.g. a
-   * `ProtocolError`) to reject it, for instance when the caller may not access
-   * what the arguments point to.
-   */
-  onSubscribe?(args: TArguments, extra: TExtra): void | Promise<void>;
+  onSubscribe(
+    args: TArguments,
+    context: { subscription: EventSubscription; extra: TExtra },
+  ): void | Promise<void>;
+  /** Runs on `events/unsubscribe`. Stop delivering to `subscription.id`. */
+  onUnsubscribe?(
+    args: TArguments,
+    context: { subscription: Pick<EventSubscription, "id">; extra: TExtra },
+  ): void | Promise<void>;
 }
 
 type RegisteredEvent = {
@@ -152,7 +117,7 @@ type RegisteredEvent = {
   inputSchema: StandardSchemaWithJSON;
   payloadSchema: StandardSchemaWithJSON;
   _meta?: Record<string, unknown>;
-  hooks: EventHooks<Record<string, unknown>, unknown, ServerContext>;
+  hooks: EventHooks<Record<string, unknown>, ServerContext>;
 };
 
 function toStandardSchema(schema: EventSchema): StandardSchemaWithJSON {
@@ -164,16 +129,15 @@ function toStandardSchema(schema: EventSchema): StandardSchemaWithJSON {
 async function validate(
   schema: StandardSchemaWithJSON,
   value: unknown,
-  what: string,
-): Promise<unknown> {
+): Promise<Record<string, unknown>> {
   const result = await schema["~standard"].validate(value);
   if (result.issues) {
     throw new ProtocolError(
       INVALID_PARAMS,
-      `Invalid ${what}: ${result.issues.map((issue) => issue.message).join(", ")}`,
+      `Invalid arguments: ${result.issues.map((issue) => issue.message).join(", ")}`,
     );
   }
-  return result.value;
+  return result.value as Record<string, unknown>;
 }
 
 function canonicalJson(value: unknown): string {
@@ -192,17 +156,17 @@ function canonicalJson(value: unknown): string {
   return JSON.stringify(value);
 }
 
-function principalOf(ctx: ServerContext): string {
+function subscriberOf(ctx: ServerContext): string {
   const authInfo = ctx.http?.authInfo;
   const subject = authInfo?.extra?.subject;
-  const principal = typeof subject === "string" ? subject : authInfo?.clientId;
-  if (!principal) {
+  const subscriber = typeof subject === "string" ? subject : authInfo?.clientId;
+  if (!subscriber) {
     throw new ProtocolError(
       EVENTS_ERROR.Forbidden,
       "Webhook subscriptions require an authenticated caller",
     );
   }
-  return principal;
+  return subscriber;
 }
 
 function isValidSecret(secret: string): boolean {
@@ -233,20 +197,17 @@ function checkCallbackUrl(raw: string): string {
   return url.href;
 }
 
-type DeliveryOutcome =
-  | { ok: true; status: number; body: string }
+type PostOutcome =
+  | { ok: true; body: string }
   | { ok: false; status?: number; reason: string };
-
-const isRetryable = (status = 0) =>
-  status !== 410 && status !== 413 && (status < 300 || status >= 400);
 
 function post(
   url: string,
   headers: Record<string, string>,
   body: string,
-): Promise<DeliveryOutcome> {
+): Promise<PostOutcome> {
   const signal = AbortSignal.timeout(DELIVERY_TIMEOUT_MS);
-  const failure = (error?: NodeJS.ErrnoException): DeliveryOutcome => ({
+  const failure = (error?: NodeJS.ErrnoException): PostOutcome => ({
     ok: false,
     reason: signal.aborted
       ? "timeout"
@@ -278,11 +239,7 @@ function post(
         });
         response.on("end", () => {
           if (status >= 200 && status < 300) {
-            resolve({
-              ok: true,
-              status,
-              body: Buffer.concat(chunks).toString(),
-            });
+            resolve({ ok: true, body: Buffer.concat(chunks).toString() });
           } else {
             resolve({
               ok: false,
@@ -301,18 +258,12 @@ function post(
 }
 
 function signedPost(
-  subscription: EventSubscription,
+  subscription: { id: string; url: string; secret: string | string[] },
   messageId: string,
   body: string,
-): Promise<DeliveryOutcome> {
+): Promise<PostOutcome> {
   const signedAt = new Date();
-  const secrets = [subscription.secret];
-  if (
-    subscription.previousSecret &&
-    subscription.previousSecret.until > signedAt.getTime()
-  ) {
-    secrets.push(subscription.previousSecret.secret);
-  }
+  const secrets = [subscription.secret].flat();
   return post(
     subscription.url,
     {
@@ -328,26 +279,98 @@ function signedPost(
   );
 }
 
-function memoryEventStore(): EventStore {
-  const subscriptions = new Map<string, EventSubscription>();
+/**
+ * @experimental POST one event to a subscription handed out by `onSubscribe`,
+ * as MCP Events expects: the event envelope, Standard Webhooks signature
+ * headers, a 10 second deadline and, outside development, no requests to
+ * private addresses. Pass the old and new secrets during a rotation so both
+ * sign the delivery. Retrying is up to the caller. API may change.
+ *
+ * @example
+ * ```ts
+ * const result = await deliverEvent(subscription, {
+ *   name: "comment.created",
+ *   id: comment.id,
+ *   data: { documentId: comment.documentId, excerpt: comment.text.slice(0, 280) },
+ * });
+ * if (!result.ok && result.retryable) {
+ *   await queue.retryLater(subscription, comment);
+ * }
+ * ```
+ *
+ * @see https://docs.skybridge.tech/api-reference/register-event
+ */
+export async function deliverEvent(
+  subscription: Pick<EventSubscription, "id" | "url"> & {
+    secret: string | string[];
+  },
+  event: EventOccurrence,
+): Promise<DeliveryResult> {
+  const id = event.id ?? `evt_${randomBytes(12).toString("hex")}`;
+  const body = JSON.stringify({
+    eventId: id,
+    name: event.name,
+    timestamp: (event.timestamp ?? new Date()).toISOString(),
+    data: event.data,
+    cursor: null,
+  });
+  if (Buffer.byteLength(body) > MAX_PAYLOAD_BYTES) {
+    throw new Error(
+      `Event "${event.name}" payload exceeds ${MAX_PAYLOAD_BYTES} bytes; send a summary and expose a tool to fetch the rest.`,
+    );
+  }
+  const outcome = await signedPost(subscription, id, body);
+  if (outcome.ok) {
+    return { ok: true };
+  }
+  const status = outcome.status ?? 0;
   return {
-    get: async (id) => subscriptions.get(id),
-    set: async (subscription) => {
-      subscriptions.set(subscription.id, subscription);
-    },
-    delete: async (id) => {
-      subscriptions.delete(id);
-    },
-    listByEvent: async (name) => {
-      const now = Date.now();
-      for (const [id, subscription] of subscriptions) {
-        if (subscription.expiresAt <= now) {
-          subscriptions.delete(id);
-        }
-      }
-      return [...subscriptions.values()].filter((sub) => sub.name === name);
-    },
+    ...outcome,
+    retryable:
+      status !== 410 && status !== 413 && (status < 300 || status >= 400),
   };
+}
+
+const verifiedCallbacks = new Map<string, number>();
+
+async function verifyCallback(
+  subscriber: string,
+  subscription: EventSubscription,
+): Promise<void> {
+  const key = `${subscriber}\n${subscription.url}`;
+  const now = Date.now();
+  if ((verifiedCallbacks.get(key) ?? 0) > now) {
+    return;
+  }
+  const challenge = randomBytes(24).toString("base64url");
+  const outcome = await signedPost(
+    subscription,
+    `msg_verification_${randomBytes(12).toString("hex")}`,
+    JSON.stringify({ type: "verification", challenge }),
+  );
+  let echoed: unknown;
+  if (outcome.ok) {
+    try {
+      echoed = JSON.parse(outcome.body)?.challenge;
+    } catch {}
+  }
+  const matched =
+    typeof echoed === "string" &&
+    echoed.length === challenge.length &&
+    timingSafeEqual(Buffer.from(echoed), Buffer.from(challenge));
+  if (!matched) {
+    throw new ProtocolError(
+      EVENTS_ERROR.CallbackEndpointError,
+      "Callback endpoint verification failed",
+      { reason: outcome.ok ? "challenge_failed" : outcome.reason },
+    );
+  }
+  for (const [cached, until] of verifiedCallbacks) {
+    if (until <= now) {
+      verifiedCallbacks.delete(cached);
+    }
+  }
+  verifiedCallbacks.set(key, now + VERIFICATION_CACHE_MS);
 }
 
 const SubscriptionKeySchema = z.object({
@@ -367,25 +390,25 @@ const SubscribeParamsSchema = SubscriptionKeySchema.extend({
 });
 
 /**
- * App-wide MCP Events state: the registered event types, the subscription
- * store and the callback verification cache. One per {@link Skybridge} app,
- * shared by every per-request server.
+ * The event types registered on one server, and the `events/*` handlers that
+ * serve them.
  *
  * @internal
  */
-export class EventsRuntime {
-  private readonly store: EventStore;
+export class EventRegistry {
   private readonly events = new Map<string, RegisteredEvent>();
-  private readonly verifiedCallbacks = new Map<string, number>();
 
-  constructor(options: EventsOptions = {}) {
-    this.store = options.store ?? memoryEventStore();
-  }
+  constructor(
+    private readonly server: Pick<SdkMcpServer["server"], "setRequestHandler">,
+  ) {}
 
-  register(
-    config: EventConfig<string, EventSchema, EventSchema>,
-    hooks: EventHooks<never, never, never> = {},
-  ): void {
+  add(config: EventConfig<EventSchema>, hooks: EventHooks<never, never>): void {
+    if (this.events.has(config.name)) {
+      throw new Error(`Event "${config.name}" is already registered.`);
+    }
+    if (this.events.size === 0) {
+      this.install();
+    }
     this.events.set(config.name, {
       name: config.name,
       description: config.description,
@@ -396,9 +419,8 @@ export class EventsRuntime {
     });
   }
 
-  /** Install the `events/*` handlers on a per-request server. */
-  install(server: Pick<SdkMcpServer["server"], "setRequestHandler">): void {
-    server.setRequestHandler(
+  private install(): void {
+    this.server.setRequestHandler(
       "events/list",
       { params: z.object({ cursor: z.string().optional() }).optional() },
       () => ({
@@ -417,7 +439,7 @@ export class EventsRuntime {
       }),
     );
 
-    server.setRequestHandler(
+    this.server.setRequestHandler(
       "events/subscribe",
       { params: SubscribeParamsSchema },
       async (params, ctx) => {
@@ -434,98 +456,43 @@ export class EventsRuntime {
             "delivery.secret must be whsec_ followed by base64 of 24 to 64 bytes",
           );
         }
-        const { event, subscription } = await this.resolve(params, ctx);
+        const { event, subscriber, args, id, url } = await this.resolve(
+          params,
+          ctx,
+        );
         const ttl =
           params.ttlMs === null ? MAX_TTL_MS : (params.ttlMs ?? DEFAULT_TTL_MS);
-        const candidate: EventSubscription = {
-          ...subscription,
+        const subscription: EventSubscription = {
+          id,
+          url,
           secret: params.delivery.secret,
-          expiresAt:
+          expiresAt: new Date(
             Date.now() + Math.min(Math.max(ttl, MIN_TTL_MS), MAX_TTL_MS),
+          ),
         };
-        await this.verifyCallback(candidate);
-        await event.hooks.onSubscribe?.(subscription.arguments, ctx);
-
-        const existing = await this.liveSubscription(subscription.id);
-        const previousSecret =
-          existing && existing.secret !== candidate.secret
-            ? {
-                secret: existing.secret,
-                until: Date.now() + SECRET_ROTATION_GRACE_MS,
-              }
-            : existing?.previousSecret;
-        await this.store.set({
-          ...candidate,
-          ...(previousSecret && { previousSecret }),
-        });
+        await verifyCallback(subscriber, subscription);
+        await event.hooks.onSubscribe(args, { subscription, extra: ctx });
         return {
-          id: candidate.id,
-          refreshBefore: new Date(candidate.expiresAt).toISOString(),
+          id,
+          refreshBefore: subscription.expiresAt.toISOString(),
           cursor: null,
           truncated: false,
         };
       },
     );
 
-    server.setRequestHandler(
+    this.server.setRequestHandler(
       "events/unsubscribe",
       { params: SubscriptionKeySchema },
       async (params, ctx) => {
-        const { subscription } = await this.resolve(params, ctx);
-        await this.store.delete(subscription.id);
+        const { event, args, id } = await this.resolve(params, ctx);
+        await event.hooks.onUnsubscribe?.(args, {
+          subscription: { id },
+          extra: ctx,
+        });
         return {};
       },
     );
-  }
-
-  /** Deliver one event to every live, matching subscription. */
-  async emit(name: string, emitted: EmittedEvent<unknown>): Promise<void> {
-    const event = this.events.get(name);
-    if (!event) {
-      throw new Error(`Event "${name}" is not registered.`);
-    }
-    const data = await validate(event.payloadSchema, emitted.data, "payload");
-    const id = emitted.id ?? `evt_${randomBytes(12).toString("hex")}`;
-    const body = JSON.stringify({
-      eventId: id,
-      name,
-      timestamp: (emitted.timestamp ?? new Date()).toISOString(),
-      data,
-      cursor: null,
-    });
-    if (Buffer.byteLength(body) > MAX_PAYLOAD_BYTES) {
-      throw new Error(
-        `Event "${name}" payload exceeds ${MAX_PAYLOAD_BYTES} bytes; send a summary and expose a tool to fetch the rest.`,
-      );
-    }
-    const now = Date.now();
-    const subscriptions = (await this.store.listByEvent(name)).filter(
-      (sub) => sub.expiresAt > now,
-    );
-    const results = await Promise.allSettled(
-      subscriptions.map(async (subscription) => {
-        const matches =
-          (await event.hooks.match?.(
-            { id, data },
-            {
-              arguments: subscription.arguments,
-              principal: subscription.principal,
-            },
-          )) ?? true;
-        if (matches) {
-          await this.deliver(subscription, id, body, 0);
-        }
-      }),
-    );
-    const failures = results.flatMap((result) =>
-      result.status === "rejected" ? [result.reason] : [],
-    );
-    if (failures.length > 0) {
-      throw new AggregateError(
-        failures,
-        `Event ${id} was not delivered to ${failures.length} subscription(s) whose match hook threw.`,
-      );
-    }
   }
 
   private async resolve(
@@ -541,95 +508,12 @@ export class EventsRuntime {
       );
     }
     const url = checkCallbackUrl(params.delivery.url);
-    const principal = principalOf(ctx);
+    const subscriber = subscriberOf(ctx);
     const rawArguments = params.arguments ?? {};
-    const args = (await validate(
-      event.inputSchema,
-      rawArguments,
-      "arguments",
-    )) as Record<string, unknown>;
+    const args = await validate(event.inputSchema, rawArguments);
     const hash = createHash("sha256")
-      .update(canonicalJson([principal, url, event.name, rawArguments]))
+      .update(canonicalJson([subscriber, url, event.name, rawArguments]))
       .digest("hex");
-    return {
-      event,
-      subscription: {
-        id: `sub_${hash.slice(0, 32)}`,
-        principal,
-        name: event.name,
-        arguments: args,
-        url,
-      },
-    };
-  }
-
-  private async deliver(
-    subscription: EventSubscription,
-    eventId: string,
-    body: string,
-    attempt: number,
-  ): Promise<void> {
-    const outcome = await signedPost(subscription, eventId, body);
-    if (outcome.ok) {
-      return;
-    }
-    const delay = RETRY_DELAYS_MS[attempt];
-    if (!isRetryable(outcome.status) || delay === undefined) {
-      console.warn(
-        `skybridge: dropped event ${eventId} for subscription ${subscription.id} (${outcome.reason})`,
-      );
-      return;
-    }
-    setTimeout(() => {
-      this.liveSubscription(subscription.id)
-        .then((live) => live && this.deliver(live, eventId, body, attempt + 1))
-        .catch(() => {});
-    }, delay).unref();
-  }
-
-  private async liveSubscription(id: string) {
-    const subscription = await this.store.get(id);
-    if (subscription && subscription.expiresAt <= Date.now()) {
-      await this.store.delete(id);
-      return undefined;
-    }
-    return subscription;
-  }
-
-  private async verifyCallback(subscription: EventSubscription): Promise<void> {
-    const key = `${subscription.principal}\n${subscription.url}`;
-    const now = Date.now();
-    if ((this.verifiedCallbacks.get(key) ?? 0) > now) {
-      return;
-    }
-    const challenge = randomBytes(24).toString("base64url");
-    const outcome = await signedPost(
-      subscription,
-      `msg_verification_${randomBytes(12).toString("hex")}`,
-      JSON.stringify({ type: "verification", challenge }),
-    );
-    let echoed: unknown;
-    if (outcome.ok) {
-      try {
-        echoed = JSON.parse(outcome.body)?.challenge;
-      } catch {}
-    }
-    const matched =
-      typeof echoed === "string" &&
-      echoed.length === challenge.length &&
-      timingSafeEqual(Buffer.from(echoed), Buffer.from(challenge));
-    if (!matched) {
-      throw new ProtocolError(
-        EVENTS_ERROR.CallbackEndpointError,
-        "Callback endpoint verification failed",
-        { reason: outcome.ok ? "challenge_failed" : outcome.reason },
-      );
-    }
-    for (const [cached, until] of this.verifiedCallbacks) {
-      if (until <= now) {
-        this.verifiedCallbacks.delete(cached);
-      }
-    }
-    this.verifiedCallbacks.set(key, now + VERIFICATION_CACHE_MS);
+    return { event, subscriber, args, url, id: `sub_${hash.slice(0, 32)}` };
   }
 }

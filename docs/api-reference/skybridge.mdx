@@ -47,7 +47,6 @@ type SkybridgeConfig = Implementation &
     oauth?: OAuthConfig | OAuthProvider | ((config: Config) => OAuthConfig | OAuthProvider);
     json?: JsonOptions;
     skills?: boolean;
-    events?: EventsOptions;
   };
 ```
 
@@ -94,18 +93,6 @@ Set to `true` to serve [Agent Skills over MCP](/guides/skills) from `src/skills`
 <Info>
 Skills over MCP tracks [SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640), which is still under review. The feature is **experimental** and may change with the spec.
 </Info>
-
-### `events`
-
-Options for the experimental [MCP Events](/api-reference/register-event), used once the handler registers an event.
-
-```ts
-type EventsOptions = {
-  store?: EventStore;
-};
-```
-
-`store` is where webhook subscriptions are kept. It defaults to memory, which works for a single process. Pass a [shared store](/api-reference/register-event#where-subscriptions-live) when the app runs on several instances.
 
 ## Properties
 
@@ -154,14 +141,6 @@ app.connect(transport: Transport): Promise<void>;
 ```
 
 Connects the app to a transport you manage, such as stdio for a desktop host. For HTTP, `run()` sets the transport up for you.
-
-### `emit`
-
-```ts
-app.emit(name: string, event: { id?: string; timestamp?: Date; data: Payload }): Promise<void>;
-```
-
-Delivers an occurrence of an event registered with [`registerEvent`](/api-reference/register-event) to its matching subscriptions. `name` and `data` are typed from the registered events. Pass the upstream's own identifier as `id` so the host can drop duplicates. Experimental.
 
 <CardGroup cols={3}>
   <Card title="McpServer" icon="server" href="/api-reference/mcp-server">

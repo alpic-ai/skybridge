@@ -5,7 +5,7 @@ import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import type { JSONRPCMessage } from "@modelcontextprotocol/server";
 import { afterEach, describe, expect, it } from "vitest";
 import { z } from "zod";
-import { Skybridge } from "./index.js";
+import { deliverEvent, type EventSubscription, Skybridge } from "./index.js";
 
 type Received = { headers: http.IncomingHttpHeaders; body: string };
 
@@ -46,8 +46,9 @@ afterEach(async () => {
 });
 
 describe("MCP events", () => {
-  it("verifies the callback, then delivers signed events to matching subscriptions only", async () => {
+  it("verifies the callback, hands the subscription to the hooks, and delivers signed events", async () => {
     const receiver = await startReceiver();
+    const subscriptions = new Map<string, EventSubscription>();
     const app = new Skybridge({
       name: "t",
       version: "0.0.1",
@@ -59,8 +60,12 @@ describe("MCP events", () => {
             payloadSchema: { documentId: z.string(), excerpt: z.string() },
           },
           {
-            match: (event, { arguments: args }) =>
-              event.data.documentId === args.documentId,
+            onSubscribe: (_args, { subscription }) => {
+              subscriptions.set(subscription.id, subscription);
+            },
+            onUnsubscribe: (_args, { subscription }) => {
+              subscriptions.delete(subscription.id);
+            },
           },
         ),
     });
@@ -121,14 +126,18 @@ describe("MCP events", () => {
       "verification",
     ]);
 
-    await app.emit("comment.created", {
-      id: "evt_other",
-      data: { documentId: "doc-2", excerpt: "ignored" },
-    });
-    await app.emit("comment.created", {
-      id: "evt_1",
-      data: { documentId: "doc-1", excerpt: "hello" },
-    });
+    const stored = subscriptions.get(subscription.id);
+    expect(stored).toMatchObject({ url: receiver.url, secret });
+    if (!stored) {
+      return;
+    }
+    await expect(
+      deliverEvent(stored, {
+        name: "comment.created",
+        id: "evt_1",
+        data: { documentId: "doc-1", excerpt: "hello" },
+      }),
+    ).resolves.toEqual({ ok: true });
 
     expect(receiver.received).toHaveLength(2);
     const [, delivery] = receiver.received;
@@ -150,16 +159,29 @@ describe("MCP events", () => {
     expect(headers["webhook-signature"]).toBe(`v1,${expected}`);
 
     receiver.state.dropResponses = true;
-    const emitted = app.emit("comment.created", {
-      id: "evt_2",
+    const delivered = deliverEvent(stored, {
+      name: "comment.created",
       data: { documentId: "doc-1", excerpt: "dropped" },
     });
     await expect(
       Promise.race([
-        emitted.then(() => "settled"),
+        delivered,
         new Promise((resolve) => setTimeout(() => resolve("hung"), 2_000)),
       ]),
-    ).resolves.toBe("settled");
+    ).resolves.toMatchObject({ ok: false, retryable: true });
+
+    await client.request(
+      {
+        method: "events/unsubscribe",
+        params: {
+          name: "comment.created",
+          arguments: { documentId: "doc-1" },
+          delivery: { url: receiver.url },
+        },
+      },
+      z.object({}),
+    );
+    expect(subscriptions.size).toBe(0);
 
     let connections = 0;
     const privateTarget = net.createServer((socket) => {

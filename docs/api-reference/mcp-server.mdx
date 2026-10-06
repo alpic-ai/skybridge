@@ -55,10 +55,10 @@ Registers the ChatGPT composer at-mention search. See [registerMentions](/api-re
 ### `registerEvent`
 
 ```ts
-server.registerEvent(config, hooks?): this;
+server.registerEvent(config, hooks): this;
 ```
 
-Declares an event type hosts can subscribe to. Experimental. See [registerEvent](/api-reference/register-event).
+Declares an event type hosts can subscribe to, and hands each subscription to your hooks. Experimental. See [registerEvent](/api-reference/register-event).
 
 ### `registerResource`, `registerPrompt`
 
