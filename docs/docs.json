@@ -107,7 +107,8 @@
               "api-reference/mcp-server",
               "api-reference/register-tool",
               "api-reference/register-mentions",
-              "api-reference/register-event"
+              "api-reference/register-event",
+              "api-reference/register-file-viewer"
             ]
           },
           {
@@ -141,6 +142,7 @@
               "api-reference/use-deep-link",
               "api-reference/use-display-mode",
               "api-reference/use-download",
+              "api-reference/use-file-resource",
               "api-reference/use-files",
               "api-reference/use-host",
               "api-reference/use-model-context",

@@ -60,6 +60,24 @@ Hosts don't inject skills on their own. To put one in front of the model, refere
 A skill is a set of instructions a model may or may not act on: it does not bypass the model's system directives or guardrails.
 </Info>
 
+## ChatGPT Onboarding
+
+A ChatGPT plugin can offer a setup skill for users to run after they install it. Point to it from the plugin manifest with `extensions["com.openai"].onboardingSkill`, a path relative to the plugin root:
+
+```json
+{
+  "name": "shop",
+  "skills": "./src/skills/",
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./src/skills/setup/SKILL.md"
+    }
+  }
+}
+```
+
+When the user runs setup, ChatGPT invokes the skill in a new conversation, or in the current one when the plugin was installed from a conversation. The manifest belongs to the plugin, not to the MCP server, so Skybridge doesn't serve or generate it. See [OpenAI's plugin docs](https://developers.openai.com/plugins/build/plugins) for the manifest's file name and location. See the [OpenAI MCP extensions](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#plugin-onboarding).
+
 ## Go Further
 <Columns cols={3}>
     <Card title="Register Tools" icon="wrench" href="/build/tools">

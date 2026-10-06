@@ -1,6 +1,6 @@
 # OpenAI MCP extensions
 
-Let users open a view without the model → `openai` on `registerTool`, `useDeepLink`, `useHost().openaiCapabilities`. Mentions, titled messages and local files → `registerMentions`, `useSendFollowUpMessage`, `useOpenFile`
+Let users open a view without the model → `openai` on `registerTool`, `useDeepLink`, `useHost().openaiCapabilities`. Mentions, titled messages and local files → `registerMentions`, `useSendFollowUpMessage`, `useOpenFile`, `registerFileViewer`, `useFileResource`
 
 These are OpenAI MCP extensions, not part of MCP or MCP Apps: only ChatGPT reads them, other hosts ignore them.
 
@@ -22,22 +22,23 @@ server.registerTool(
 );
 ```
 
-File viewer, called with the opened file:
+File viewer, called with the opened file as `{ file: { name, resourceUri } }`:
 
 ```ts
-server.registerTool(
+server.registerFileViewer(
   {
     name: "part-viewer",
     title: "Part Viewer",
     description: "Open a CAD part.",
-    inputSchema: { file: z.object({ name: z.string(), resourceUri: z.string() }) },
+    extensions: [".stl"],
     icons: [{ src: "https://example.com/part.svg", mimeType: "image/svg+xml" }],
     view: { component: "part-viewer" },
-    openai: { entrypoints: [{ type: "file", extensions: [".stl"] }] },
   },
   async ({ file }) => ({ structuredContent: { name: file.name } }),
 );
 ```
+
+The view reads and saves the opened file with `useFileResource(input.file?.resourceUri)`, see [Reading and saving the opened file](#reading-and-saving-the-opened-file).
 
 - `global` adds a sidebar entry, `thread` a tab in a conversation's side panel, `file` a viewer for those file extensions.
 - ChatGPT calls global and thread tools with `{}`: every input must be optional, or Skybridge throws at startup.
@@ -124,3 +125,19 @@ if (openaiCapabilities.files) {
 ```
 
 Needs ChatGPT desktop, with a path on the machine that runs it. ChatGPT shows the file in its built-in viewer, not in your file entrypoint. `openFile` rejects elsewhere.
+
+## Reading and saving the opened file
+
+```tsx
+const { input } = useToolInfo<"open-part">();
+const { data, write } = useFileResource(input.file?.resourceUri, { representation: "text" });
+await write({ text: edited });
+```
+
+- ChatGPT never gives the view the path, only `file.resourceUri`. The hook re-reads the file when it changes.
+- `write` sends the current `etag` when ChatGPT returned one: it resolves `conflict` if the file changed (and re-reads it), `too-large` past the size limit.
+- Check `data.writable` before offering a save.
+
+## Onboarding
+
+Add `"extensions": { "com.openai": { "onboardingSkill": "./src/skills/setup/SKILL.md" } }` to the plugin manifest to offer a setup skill users run after install. Skybridge doesn't generate that manifest.

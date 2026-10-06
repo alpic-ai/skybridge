@@ -1,0 +1,59 @@
+---
+title: registerFileViewer
+description: "Open files with your app in ChatGPT desktop"
+---
+
+import { Compat } from "/components/compat.jsx";
+
+<Compat chatgpt />
+
+<Info>
+This is an [OpenAI MCP extension](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md), not part of MCP or MCP Apps. Only **ChatGPT** desktop opens files with it. Other hosts ignore the entrypoint and list a regular tool with a required `file` input.
+</Info>
+
+`registerFileViewer` makes your app a viewer for some file types in ChatGPT desktop. When the user opens a file with one of these extensions through your app, ChatGPT calls the tool with that file and shows its [view](/build/view), where [`useFileResource`](/api-reference/use-file-resource) reads and saves the file.
+
+## Example
+
+```ts
+server.registerFileViewer(
+  {
+    name: "part-viewer",
+    title: "Part Viewer",
+    description: "Open a CAD part.",
+    extensions: [".stl", ".step"],
+    icons: [{ src: "https://example.com/part.svg", mimeType: "image/svg+xml" }],
+    view: { component: "part-viewer" },
+  },
+  async ({ file }) => ({ structuredContent: { name: file.name } }),
+);
+```
+
+## Parameters
+
+### `config`
+
+The same as [`registerTool`](/api-reference/register-tool)'s config, without `inputSchema`, plus:
+
+| Field | Purpose |
+| --- | --- |
+| `extensions` | File extensions the viewer opens, each starting with `.`. |
+| `view` | **Required.** The view that shows the file. |
+| `openai` | Display modes, as in [`registerTool`](/api-reference/register-tool#openai). The file entrypoint is set from `extensions`. |
+
+### `handler`
+
+Receives `{ file: { name, resourceUri } }`: the file's name, and an opaque URI the view passes to [`useFileResource`](/api-reference/use-file-resource). ChatGPT never gives the view the file's path. Tools the view calls receive it in [`_meta["openai/resource"].path`](/api-reference/register-tool#client-hints).
+
+## How it works
+
+`registerFileViewer` is a shortcut for [`registerTool`](/api-reference/register-tool) with a required `file` input and `openai.entrypoints: [{ type: "file", extensions }]`. It returns the typed server like `registerTool`, so the view can read `input.file` with type safety.
+
+<CardGroup cols={2}>
+  <Card title="useFileResource" icon="file" href="/api-reference/use-file-resource">
+    Read, watch and save the opened file
+  </Card>
+  <Card title="registerTool" icon="wrench" href="/api-reference/register-tool#openai">
+    Every ChatGPT entrypoint
+  </Card>
+</CardGroup>
