@@ -1,6 +1,6 @@
 # Ecommerce Example
 
-An example MCP App built with [Skybridge](https://docs.skybridge.tech/home): a winter-sports shop where the model searches a product catalog by keyword and filters, then renders a curated product carousel with a fullscreen product detail.
+An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): a winter-sports shop where the model searches a product catalog by keyword and filters, then renders a curated product carousel with a fullscreen product detail.
 
 This is the Skybridge **ecommerce template** — scaffold your own copy with:
 
@@ -12,9 +12,12 @@ The catalog is served from a [Medusa](https://medusajs.com/) store, but the data
 
 ## What This Example Showcases
 
-- **Two-tool search + render pattern**: A view-less `search-products` tool returns data-only grounding for the model to curate; a separate `render-carousel` tool draws the chosen products as an inline carousel — the classic "reason, then present" split
-- **Model context vs. view data**: `search-products` returns everything in `structuredContent` (never shown to the user); `render-carousel` puts full presentational data (images, variants, media) in `_meta` for the view, and only trimmed grounding in `structuredContent`
-- **Tool descriptions as behavior**: The server `instructions` and tool descriptions drive a two-phase flow — search silently, then speak only once the carousel renders
+- **ChatGPT extensions**: a sidebar Shop, a per-conversation My Kit panel, product mentions, native shopping preferences, and illustrated product-choice forms
+- **Explicit discussion context**: attach exact variants with product thumbnails and factual specifications; removing a ChatGPT attachment clears the discussion indicator without removing the item from the kit
+- **Deep links**: reopen a product with `/products/<product-id>?variant=<variant-id>` or open `/kit` through the Shop global entrypoint
+- **One shopping tool**: `shop` handles catalogue browsing, search results, curated carousels, kit navigation, and native product choices through its `action` input
+- **Model context vs. view data**: concise product grounding goes into `structuredContent`; full images, variants, and presentation data stay in `_meta`
+- **Four registered tools**: `shop` is model-facing; `settings-read`, `settings-update`, and `search-mentions` serve native host integrations
 - **Inline View Rendering**: A React carousel with a fullscreen product detail (image gallery, variant picker, specs, CTA) rendered directly in AI conversations via a tool `view`
 - **Variant-as-product model**: Products expose variation axes (color, size, length) with a sparse variant matrix; the detail view narrows availability per axis
 - **CSP Configuration**: Allows the product image host via `resourceDomains` and the storefront CTA via `redirectDomains`
@@ -28,6 +31,27 @@ The catalog is served from a [Medusa](https://medusajs.com/) store, but the data
 - Show me some skis
 - I need goggles for a bright day
 - What cold-weather apparel do you have?
+- Compare the two goggles I attached
+- Help me build a ski-weekend kit
+
+## Extensions demo
+
+1. Open **Skybridge Shop** from ChatGPT's sidebar, or call `shop` with `{}` locally.
+2. Browse the catalogue and open a product. Pick a colour and size, then add that exact variant to your kit.
+3. Open **My Kit** beside the conversation through the thread entrypoint (`shop` with `{ "action": "kit" }`). Change quantities or remove items.
+4. Attach products with **Discuss** and ask ChatGPT to compare them. Remove an attachment in ChatGPT; its discussion indicator clears while the kit stays intact.
+5. Search for a catalogue product in the desktop composer's mention picker. The returned resource resolves to catalogue facts.
+6. Configure preferred apparel size and colour in native plugin settings. Defaults are applied only when the product offers a matching value.
+7. Use the illustrated native product-choice form on a compatible host; regular browsing remains available on other hosts. The form embeds small PNG/JPEG/WebP/GIF catalogue thumbnails as data URIs so ChatGPT can display them reliably; the catalogue image URL remains the fallback.
+8. Set `CHATGPT_PLUGIN_ID` to the published plugin ID to enable **Copy product link** on exact variants. Links open the sidebar Shop at that product and variant using OpenAI’s documented `/plugins/{pluginId}/app/shop?path=...` URL. Without the setting, the copy action stays hidden.
+
+The wire API follows [OpenAI's GitHub specification](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md), inspected at commit `e314720a0daac326217d1f123fcf51647868fa9f`. The example uses MCP v2 directly because the OpenAI extension SDK at that revision has MCP v1 peer dependencies.
+
+Local DevTools can render the new views and exercise catalogue and kit interactions. Native sidebar registration, composer mentions, structured settings, and extended forms require a compatible ChatGPT host; they are not emulated by every host. Composer mentions are desktop-only in the published launch matrix.
+
+The kit is demo UI state, not an order or a checkout. With host subject/session metadata, views share a kit through scoped browser storage; without it, the workspace keeps its own view state. Preferences use scoped process memory and reset on server restart. File viewing is intentionally outside this example's first extension release.
+
+Both entrypoints open the same Shop workspace because the host invokes them with empty input. The **My Kit** tab and `/kit` deep link open the kit; a conversational `shop` call can also select `action: "kit"`. The native settings API requires separate read and update tools, while mentions requires its own search contract.
 
 ## Live Demo
 
@@ -53,9 +77,9 @@ pnpm install
 bun install
 ```
 
-#### 2. Point at your own catalog (optional)
+#### 2. Configure your catalog
 
-The example ships pointed at a demo store, so it runs as-is. To use your own catalog, copy `.env.template` to `.env` and fill in `MEDUSA_BASE_URL` and `MEDUSA_PUBLISHABLE_KEY`. Swapping to a different backend entirely is a matter of rewriting `src/lib/medusa.ts`.
+Copy `.env.template` to `.env` and fill in `MEDUSA_BASE_URL` and `MEDUSA_PUBLISHABLE_KEY` for your Medusa store. The checked-in template contains no credentials. Swapping to a different backend entirely is a matter of rewriting `src/lib/medusa.ts`.
 
 #### 3. Start your local server
 
@@ -79,16 +103,18 @@ This command starts:
 #### 4. Project structure
 
 ```
-│   ├── server.ts        # Server entry point (registers both tools)
+│   ├── server.ts        # Server entry point (registers tools and extensions)
 │   ├── config.ts        # Search/carousel tuning constants
 │   ├── tools/
-│   │   ├── search-products.ts   # View-less search tool (data only)
-│   │   └── render-carousel.ts   # Carousel tool + product model
+│   │   ├── search-products.ts   # Internal catalogue search helper
+│   │   ├── extensions.ts        # Entrypoints, settings, mentions, native forms
+│   │   └── render-carousel.ts   # Internal carousel data helper + product model
 │   ├── lib/
 │   │   └── medusa.ts    # Catalog data source (swap for your own backend)
 │   ├── design/          # Vanilla Extract tokens, sprinkles, themes
 │   ├── components/      # Carousel UI + Ladle stories
 │   ├── views/
+│   │   ├── shop.tsx     # Catalogue and kit workspace
 │   │   └── carousel/    # Carousel view + fullscreen product detail
 │   └── index.css        # Global styles
 ├── alpic.json           # Deployment config
@@ -141,7 +167,7 @@ The simplest way to deploy your App in minutes is [Alpic](https://alpic.ai/).
 
 - [Skybridge Documentation](https://docs.skybridge.tech/)
 - [Medusa Documentation](https://docs.medusajs.com/)
-- [ChatGPT Plugins Documentation](https://developers.openai.com/plugins)
+- [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
 - [MCP Apps Documentation](https://github.com/modelcontextprotocol/ext-apps/tree/main)
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
 - [Alpic Documentation](https://docs.alpic.ai/)
