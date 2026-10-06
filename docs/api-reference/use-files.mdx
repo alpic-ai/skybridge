@@ -84,6 +84,22 @@ function ReceiptAttach() {
 
 Both paths resolve a download URL and build a [`FileRef`](/api-reference/file-ref) by hand: the hook returns camelCase fields, while `FileRef` wants snake_case with a required `download_url`.
 
+## Host support
+
+The file APIs depend on the host exposing them on `window.openai`. Host versions differ: ChatGPT web has `uploadFile`, `selectFiles` and `getFileDownloadUrl`, while the current desktop build has none of them. When a method is missing, calling it throws `NotSupportedError`, so feature-detect with `instanceof` when the view runs cross-host:
+
+```ts
+import { NotSupportedError } from "skybridge/web";
+
+try {
+  const { downloadUrl } = await getFileDownloadUrl(file);
+} catch (e) {
+  if (e instanceof NotSupportedError) {
+    // fall back to a non-file flow
+  }
+}
+```
+
 ## Returns
 
 `useFiles` returns three functions.
