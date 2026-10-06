@@ -178,8 +178,7 @@ function isValidSecret(secret: string): boolean {
   return length >= 24 && length <= 64;
 }
 
-const insecureCallbacksAllowed = () =>
-  process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
+const insecureCallbacksAllowed = () => process.env.NODE_ENV !== "production";
 
 function checkCallbackUrl(raw: string): string {
   let url: URL;
