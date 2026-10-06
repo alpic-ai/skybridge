@@ -29,6 +29,44 @@ test.describe("devtools auth", () => {
     await expect(page.getByRole("main")).toContainText(SEED_CLIENT_ID);
   });
 
+  test("performs the full OAuth flow with a localhost-subdomain token endpoint", async ({
+    page,
+  }) => {
+    await page.route(
+      "**/.well-known/oauth-authorization-server",
+      async (route) => {
+        const response = await route.fetch();
+        const metadata = await response.json();
+        const tokenEndpoint = new URL(metadata.token_endpoint);
+        tokenEndpoint.hostname = "chift.localhost";
+        await route.fulfill({
+          response,
+          json: { ...metadata, token_endpoint: tokenEndpoint.href },
+        });
+      },
+    );
+
+    const tokenResponse = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).hostname === "chift.localhost" &&
+        new URL(response.url()).pathname === "/token" &&
+        response.request().method() === "POST",
+    );
+
+    await page.goto(`${DEVTOOLS_AUTH_URL}/`);
+    expect((await tokenResponse).status()).toBe(200);
+    await expect(page.getByText("Connected")).toBeVisible();
+
+    await page.getByRole("button", { name: "whoami", exact: true }).click();
+    await page
+      .locator('[data-tool-name="whoami"]')
+      .getByRole("button", { name: /^run$/i })
+      .click();
+    await expect(page.getByRole("main")).toContainText(
+      /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/,
+    );
+  });
+
   test("performs the full OAuth flow when no token is pre-seeded", async ({
     page,
   }) => {
