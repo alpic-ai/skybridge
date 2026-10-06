@@ -1,0 +1,96 @@
+---
+title: registerSettings
+description: "Give your app a settings page in ChatGPT"
+---
+
+import { Compat } from "/components/compat.jsx";
+
+<Compat chatgpt />
+
+<Info>
+This is an [OpenAI MCP extension](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#structured-settings), not part of MCP or MCP Apps. Only **ChatGPT** shows the settings page. Other hosts list the two settings tools like any other tool.
+</Info>
+
+`registerSettings` adds a page for your app in ChatGPT's app settings. You declare the fields, and ChatGPT renders the form, reads the current values and sends back what the user changed.
+
+## Example
+
+A CAD app lets users pick their units and zoom level, and adds a button that opens a parts browser.
+
+```ts
+server.registerSettings({
+  fields: {
+    units: { title: "Units", schema: z.enum(["mm", "in"]) },
+    showGrid: { title: "Show grid", schema: z.boolean() },
+    zoom: {
+      title: "Zoom",
+      description: "Default zoom level of the viewer",
+      schema: z.number().int().min(1).max(10),
+    },
+  },
+  layout: [
+    {
+      kind: "group",
+      title: "Display",
+      items: [
+        { kind: "property", property: "units" },
+        { kind: "property", property: "zoom" },
+        { kind: "tool", tool: "browse-parts", title: "Browse parts" },
+      ],
+    },
+  ],
+  read: (extra) => loadSettings(extra),
+  update: (set, extra) => saveSettings(set, extra),
+});
+```
+
+## Parameters
+
+### `config`
+
+```ts
+type OpenAISettingsConfig<TFields> = {
+  fields: TFields;
+  layout?: {
+    kind: "group";
+    title: string;
+    items: (
+      | { kind: "property"; property: keyof TFields }
+      | { kind: "tool"; tool: string; title: string; description?: string }
+    )[];
+  }[];
+  read: (extra: ToolHandlerExtra) => Values | Promise<Values>;
+  update: (set: Partial<Values>, extra: ToolHandlerExtra) => Values | Promise<Values>;
+  readTool?: string;
+  updateTool?: string;
+};
+
+type Values = OpenAISettingsValues<TFields>;
+```
+
+| Field | Purpose |
+| --- | --- |
+| `fields` | The settings, by name, each with a zod `schema`, a `title` and an optional `description`. A schema is a boolean, string, string enum, number or integer. The spec defines the `min`, `max`, `length`, `regex` and `multipleOf` constraints for the form. Other constraints, such as `positive()`, may be ignored by ChatGPT, and every constraint is checked when the update arrives. |
+| `layout` | Sections of the settings page. A `property` item shows a field, and a `tool` item shows a button that calls another tool on your server with `{}`. A tool with a view opens it in a modal. Any other tool shows a spinner, then the text `content` it returns. Fields left out of the layout appear under "Other settings". |
+| `read` | Returns the current value of every field. |
+| `update` | Receives only the fields the user changed, saves them, and returns the value of every field. |
+| `readTool`, `updateTool` | Names of the two tools. Default to `settings.read` and `settings.update`. |
+
+Your server stores the values. `extra` is the same as in a [`registerTool`](/api-reference/register-tool) handler, so `read` and `update` can store them per user when the server uses [`oauth`](/api-reference/skybridge#oauth). `OpenAISettingsValues<typeof fields>` types those functions when you declare them apart.
+
+## How it works
+
+Skybridge registers two tools and advertises them in the `openai/settings` server capability. The read tool takes no input, is marked read-only and returns `{ schema, values, layout }`, where `schema` is the JSON Schema built from `fields`. The update tool takes `{ set }`, with at least one field, and returns `{ values }`. Both check the values your handlers return against the field schemas.
+
+Skybridge throws at startup when a field has another type or declares a default, and when `layout` names an unknown field or the same field twice. Defaults belong in `read`, since ChatGPT shows the values it returns.
+
+Returns the server, so calls chain.
+
+<CardGroup cols={2}>
+  <Card title="registerTool" icon="wrench" href="/api-reference/register-tool#openai">
+    Open a view from ChatGPT's settings with a `settings` entrypoint
+  </Card>
+  <Card title="McpServer" icon="server" href="/api-reference/mcp-server">
+    Every method of the server
+  </Card>
+</CardGroup>

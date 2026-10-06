@@ -108,7 +108,8 @@
               "api-reference/register-tool",
               "api-reference/register-mentions",
               "api-reference/register-event",
-              "api-reference/register-file-viewer"
+              "api-reference/register-file-viewer",
+              "api-reference/register-settings"
             ]
           },
           {

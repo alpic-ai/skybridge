@@ -82,6 +82,8 @@ export type {
   OpenAIFileViewerConfig,
   OpenAIMentionsConfig,
   OpenAIQuickAction,
+  OpenAISettingsConfig,
+  OpenAISettingsValues,
   OpenAIToolConfig,
   SecurityScheme,
   SkybridgeServerOptions,
