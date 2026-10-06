@@ -1,32 +1,40 @@
-import "./lib/load-env.js"; // must run before the tool modules read process.env
+import "./lib/load-env.js"; // must run before tool modules read process.env
 import { Skybridge } from "skybridge/server";
-import { CAROUSEL_RANGE, MIN_SEARCH_ITERATIONS } from "./config.js";
 import {
-  renderCarouselDefinition,
-  renderCarouselHandler,
-} from "./tools/render-carousel.js";
-import {
-  searchProductsDefinition,
-  searchProductsHandler,
-} from "./tools/search-products.js";
+  mentionsConfig,
+  registerProductResources,
+  registerRichFormAdapter,
+  settingsCapability,
+  settingsReadDefinition,
+  settingsReadHandler,
+  settingsUpdateDefinition,
+  settingsUpdateHandler,
+  shopDefinition,
+  shopHandler,
+  shopIcons,
+} from "./tools/extensions.js";
 
 export const app = new Skybridge({
   name: "skybridge-shop",
+  title: "Skybridge Shop",
+  icons: shopIcons,
   version: "0.0.1",
-  instructions: `\
-Skybridge is a winter-sports shop: skis, goggles, and cold-weather apparel. Two phases:
-
-SEARCH: Call search-products (at least ${MIN_SEARCH_ITERATIONS}) before presenting. \
-Vary the keyword or scope with a category (apparel, goggles, skis) when the user narrows. \
-Stay silent while searching: emit NO text between calls. Speak only \
-once the carousel renders.
-
-RENDER: After curating, call render-carousel with the chosen product IDs (aim for ${CAROUSEL_RANGE}). \
-Speak once it renders, then recommend products in carousel order.`,
-  handler: (server) =>
-    server
-      .registerTool(searchProductsDefinition, searchProductsHandler)
-      .registerTool(renderCarouselDefinition, renderCarouselHandler),
+  supportedProtocolVersions: ["2026-07-28", "2025-11-25"],
+  capabilities: {
+    extensions: { "openai/settings": settingsCapability },
+    experimental: { "openai/settings": settingsCapability },
+  },
+  instructions: `Skybridge is a winter-sports shop: skis, goggles, and cold-weather apparel.
+Use shop with action search and a short keyword/category to find and visibly present products in one call. Ground recommendations in returned catalogue facts and displayed order. Use action carousel with curated product ids to refine the displayed selection. Use browse to open the workspace or a specific product, kit to open My Kit, and choose with product ids for a native illustrated choice. Exact variants and quantities are selected in the UI; the kit is local demo state. Purchases use the external storefront. Never invent product details, price, stock, or a completed purchase.`,
+  handler: (server) => {
+    registerProductResources(server);
+    registerRichFormAdapter(server);
+    return server
+      .registerTool(shopDefinition, shopHandler)
+      .registerTool(settingsReadDefinition, settingsReadHandler)
+      .registerTool(settingsUpdateDefinition, settingsUpdateHandler)
+      .registerMentions(mentionsConfig);
+  },
 });
 
 export type AppType = typeof app;

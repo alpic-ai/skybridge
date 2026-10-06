@@ -7,7 +7,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { useDisplayMode, useViewState } from "skybridge/web";
+import {
+  DataLLM,
+  useDisplayMode,
+  useModelContext,
+  useViewState,
+} from "skybridge/web";
 import { EmptyState } from "../../components/empty-state";
 import {
   ProductCard,
@@ -20,6 +25,8 @@ import { sprinkles } from "../../design/tokens";
 import { useToolInfo } from "../../helpers.js";
 import { useLabels } from "../../i18n";
 import { formatPrice } from "../../lib/format";
+import { useKit } from "../../lib/kit";
+import { preferenceSelection } from "../../lib/kit-state";
 import type { Product } from "../../tools/render-carousel.js";
 import type { Price, Spec } from "../../types.js";
 import { DetailView } from "./detail";
@@ -90,9 +97,11 @@ function buildProductSpec(product: Product): ProductSpec {
  * hidden, not unmounted). Both read the full products from `_meta`; the detail
  * needs no extra fetch.
  */
-function Carousel() {
-  const { responseMetadata } = useToolInfo<"render-carousel">();
+export function Carousel() {
+  const { responseMetadata } = useToolInfo<"shop">();
   const labels = useLabels();
+  const { supported } = useModelContext();
+  const kit = useKit(responseMetadata?.kitScope ?? null, false);
   const trackRef = useRef<HTMLElement>(null);
   const [visibleIndices, setVisibleIndices] = useState<number[]>([]);
   const [mode, setMode] = useDisplayMode();
@@ -188,13 +197,10 @@ function Carousel() {
     const { card } = product;
     cards.push(
       <div key={product.id} className={cardStyles.cardClickable}>
+        {!supported && !detailProduct && visibleIndices.includes(index) ? (
+          <DataLLM content={narrate(product, index)} />
+        ) : null}
         <ProductCard
-          // Drop per-card grounding while the detail owns the screen.
-          data-llm={
-            !detailProduct && visibleIndices.includes(index)
-              ? narrate(product, index)
-              : ""
-          }
           title={card.title}
           price={card.price}
           media={card.media}
@@ -221,17 +227,26 @@ function Carousel() {
         className={sprinkles({ p: "3xs" })}
         style={{ display: detailProduct ? "none" : undefined }}
       >
+        {!supported && !detailProduct ? <DataLLM content={narration} /> : null}
         <ProductCarousel
           trackRef={trackRef}
           onVisibleChange={setVisibleIndices}
-          data-llm={detailProduct ? "" : narration}
         >
           {cards}
         </ProductCarousel>
       </div>
-      {detailProduct ? <DetailView product={detailProduct} /> : null}
+      {detailProduct ? (
+        <DetailView
+          key={detailProduct.id}
+          product={detailProduct}
+          onAdd={kit.add}
+          preferredSelection={preferenceSelection(
+            detailProduct,
+            responseMetadata?.preferences,
+          )}
+          ground={!supported}
+        />
+      ) : null}
     </ViewFrame>
   );
 }
-
-export default Carousel;

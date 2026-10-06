@@ -9,11 +9,13 @@
     "dev:tunnel": "skybridge dev --tunnel",
     "build": "skybridge build",
     "start": "skybridge start",
+    "test": "tsx --test src/lib/kit.test.ts src/tools/extensions.test.ts",
     "deploy": "alpic deploy",
     "ladle": "ladle serve",
     "ladle:build": "ladle build"
   },
   "dependencies": {
+    "@modelcontextprotocol/server": "^2.0.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "skybridge": "^2.0.0",
@@ -22,6 +24,7 @@
   },
   "devDependencies": {
     "@ladle/react": "^5.1.1",
+    "@modelcontextprotocol/client": "^2.0.0",
     "@skybridge/devtools": "^2.0.0",
     "@skybridge/vite-plugin": "^2.0.0",
     "@types/node": "^24.13.2",
@@ -37,6 +40,6 @@
     "typescript": "^6.0.3"
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=24.18.0"
   }
 }

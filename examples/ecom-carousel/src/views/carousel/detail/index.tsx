@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
-import { useOpenExternal, useSetOpenInAppUrl, useUser } from "skybridge/web";
+import {
+  DataLLM,
+  useOpenExternal,
+  useSetOpenInAppUrl,
+  useUser,
+} from "skybridge/web";
 import { ExpandableText } from "../../../components/expandable-text";
 import { ImageGallery } from "../../../components/image-gallery";
+import { KitActions } from "../../../components/kit-actions";
 import { VariantPicker } from "../../../components/variant-picker";
 import { sprinkles, text } from "../../../design/tokens";
 import { type Labels, useLabels } from "../../../i18n";
@@ -100,13 +106,25 @@ function grounding(
  * does no fetch. Option choices resolve against the product's sparse variant
  * list in-place (no remount).
  */
-export function DetailView({ product }: { product: Product }) {
+export function DetailView({
+  product,
+  onAdd,
+  preferredSelection,
+  ground = true,
+  pluginId,
+}: {
+  product: Product;
+  onAdd?: (product: Product, variant: Variant) => void;
+  preferredSelection?: Selection;
+  ground?: boolean;
+  pluginId?: string | null;
+}) {
   const { locale } = useUser();
   const labels = useLabels();
   const openExternal = useOpenExternal();
   const setOpenInAppUrl = useSetOpenInAppUrl();
-  const [selection, setSelection] = useState<Selection>(() =>
-    initialSelection(product),
+  const [selection, setSelection] = useState<Selection>(
+    () => preferredSelection ?? initialSelection(product),
   );
 
   // The exact variant for the selection; card fields fill in when none
@@ -140,19 +158,8 @@ export function DetailView({ product }: { product: Product }) {
     }
   }, [url, setOpenInAppUrl]);
 
-  return (
-    <div
-      className={styles.detail}
-      data-llm={grounding(
-        product,
-        shown,
-        displayTitle,
-        price,
-        selection,
-        unpurchasable,
-        labels,
-      )}
-    >
+  const view = (
+    <div className={styles.detail}>
       {/* Product / variant reference, idiomatically top-right. */}
       <p className={cx(text({ style: "bodyS" }), styles.reference)}>
         {labels.reference} {reference}
@@ -188,10 +195,7 @@ export function DetailView({ product }: { product: Product }) {
                   <span className={styles.ratingStar}>★</span>
                   {rating.toFixed(1)}
                   {reviewCount != null ? (
-                    <span className={styles.ratingCount}>
-                      {" "}
-                      ({reviewCount})
-                    </span>
+                    <span className={styles.ratingCount}> ({reviewCount})</span>
                   ) : null}
                 </span>
               ) : null}
@@ -233,6 +237,15 @@ export function DetailView({ product }: { product: Product }) {
               : labels.combinationUnavailable}
           </button>
 
+          {onAdd ? (
+            <KitActions
+              product={product}
+              variant={shown}
+              onAdd={onAdd}
+              pluginId={pluginId}
+            />
+          ) : null}
+
           {/* D5: product facts as a simple "label: value" list after the CTA
               (label-less facts show the value alone). Visual only — the full
               spec is already in view state for the model, so this never hides
@@ -271,5 +284,22 @@ export function DetailView({ product }: { product: Product }) {
         </div>
       </div>
     </div>
+  );
+  return ground ? (
+    <DataLLM
+      content={grounding(
+        product,
+        shown,
+        displayTitle,
+        price,
+        selection,
+        unpurchasable,
+        labels,
+      )}
+    >
+      {view}
+    </DataLLM>
+  ) : (
+    view
   );
 }
