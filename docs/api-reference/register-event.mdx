@@ -74,7 +74,7 @@ export const app = new Skybridge({
 | Field | Purpose |
 | --- | --- |
 | `onSubscribe` | Runs on every subscribe, including the host's periodic refreshes, once the callback URL is verified. Receives the validated arguments and `{ subscription, extra }`. Store or update the subscription by `subscription.id`. Throw to reject it, for example when the user may not access the document. |
-| `onUnsubscribe` | Optional. Runs when the host unsubscribes, with the arguments and `{ subscription: { id }, extra }`. Stop delivering to that `id`. |
+| `onUnsubscribe` | Runs when the host unsubscribes, with the arguments and `{ subscription: { id }, extra }`. Stop delivering to that `id`: Skybridge keeps no subscriptions, so this hook is the only way the cancellation reaches your delivery side. |
 
 `subscription` carries:
 
@@ -104,7 +104,7 @@ if (!result.ok && result.retryable) {
 }
 ```
 
-POSTs one event to a subscription the way MCP Events expects: the event envelope, [Standard Webhooks](https://www.standardwebhooks.com/) signature headers and a 10 second deadline. Outside development it refuses to connect to private addresses. Pass the upstream's own identifier as `id` so the host can drop duplicates, and reuse it when retrying. Pass `secret` as an array to sign with several secrets during a rotation. It makes one attempt and returns `{ ok: true }` or `{ ok: false, reason, retryable, status }`, where `status` is the HTTP status when the host answered. A `410` or `413` is not retryable. Retrying is up to you.
+POSTs one event to a subscription the way MCP Events expects: the event envelope, [Standard Webhooks](https://www.standardwebhooks.com/) signature headers and a 10 second deadline. Outside development it refuses to connect to private addresses. Pass the upstream's own identifier as `id` so the host can drop duplicates, and reuse it when retrying. Pass `secret` as an array to sign with several secrets during a rotation. A subscription past its `expiresAt` is not posted to and returns `{ ok: false, reason: "expired", retryable: false }`. Otherwise it makes one attempt and returns `{ ok: true }` or `{ ok: false, reason, retryable, status }`, where `status` is the HTTP status when the host answered. A `410` or `413` is not retryable. Retrying is up to you.
 
 ## How it works
 

@@ -161,6 +161,7 @@ describe("MCP events", () => {
     receiver.state.dropResponses = true;
     const delivered = deliverEvent(stored, {
       name: "comment.created",
+      id: "evt_2",
       data: { documentId: "doc-1", excerpt: "dropped" },
     });
     await expect(

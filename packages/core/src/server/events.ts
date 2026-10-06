@@ -46,8 +46,8 @@ export interface EventSubscription {
 export interface EventOccurrence {
   /** Event type name, as registered with `registerEvent`. */
   name: string;
-  /** Stable identifier the host uses to drop duplicates, ideally the upstream's. Generated when omitted. */
-  id?: string;
+  /** Stable identifier the host uses to drop duplicates, ideally the upstream's. Reuse it when retrying. */
+  id: string;
   /** When the event happened. Defaults to now. */
   timestamp?: Date;
   /** Payload matching the event's `payloadSchema`. */
@@ -105,7 +105,7 @@ export interface EventHooks<TArguments, TExtra> {
     context: { subscription: EventSubscription; extra: TExtra },
   ): void | Promise<void>;
   /** Runs on `events/unsubscribe`. Stop delivering to `subscription.id`. */
-  onUnsubscribe?(
+  onUnsubscribe(
     args: TArguments,
     context: { subscription: Pick<EventSubscription, "id">; extra: TExtra },
   ): void | Promise<void>;
@@ -284,7 +284,8 @@ function signedPost(
  * as MCP Events expects: the event envelope, Standard Webhooks signature
  * headers, a 10 second deadline and, outside development, no requests to
  * private addresses. Pass the old and new secrets during a rotation so both
- * sign the delivery. Retrying is up to the caller. API may change.
+ * sign the delivery. A subscription past `expiresAt` is not posted to.
+ * Retrying is up to the caller. API may change.
  *
  * @example
  * ```ts
@@ -303,12 +304,15 @@ function signedPost(
 export async function deliverEvent(
   subscription: Pick<EventSubscription, "id" | "url"> & {
     secret: string | string[];
+    expiresAt: Date | string;
   },
   event: EventOccurrence,
 ): Promise<DeliveryResult> {
-  const id = event.id ?? `evt_${randomBytes(12).toString("hex")}`;
+  if (!(new Date(subscription.expiresAt).getTime() > Date.now())) {
+    return { ok: false, reason: "expired", retryable: false };
+  }
   const body = JSON.stringify({
-    eventId: id,
+    eventId: event.id,
     name: event.name,
     timestamp: (event.timestamp ?? new Date()).toISOString(),
     data: event.data,
@@ -319,7 +323,7 @@ export async function deliverEvent(
       `Event "${event.name}" payload exceeds ${MAX_PAYLOAD_BYTES} bytes; send a summary and expose a tool to fetch the rest.`,
     );
   }
-  const outcome = await signedPost(subscription, id, body);
+  const outcome = await signedPost(subscription, event.id, body);
   if (outcome.ok) {
     return { ok: true };
   }
@@ -486,7 +490,7 @@ export class EventRegistry {
       { params: SubscriptionKeySchema },
       async (params, ctx) => {
         const { event, args, id } = await this.resolve(params, ctx);
-        await event.hooks.onUnsubscribe?.(args, {
+        await event.hooks.onUnsubscribe(args, {
           subscription: { id },
           extra: ctx,
         });
