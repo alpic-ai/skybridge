@@ -36,10 +36,12 @@ function isLoopbackHost(host: string): boolean {
   } catch {
     return false;
   }
+  // Node's URL parser keeps the brackets on an IPv6 hostname (`[::1]`).
   return (
     hostname === "localhost" ||
     hostname.endsWith(".localhost") ||
     hostname === "127.0.0.1" ||
-    hostname === "::1"
+    hostname === "::1" ||
+    hostname === "[::1]"
   );
 }
