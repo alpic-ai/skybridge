@@ -71,6 +71,7 @@ describe("Skybridge.express", () => {
 
     const health = await fetch(`http://localhost:${port}/health`);
     expect(health.status).toBe(200);
+    expect(health.headers.get("x-powered-by")).toBe("skybridge");
     expect(await health.json()).toEqual({ status: "ok" });
 
     // /mcp still works (POST returns 200/4xx, not 404)

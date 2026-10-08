@@ -42,6 +42,11 @@ export function buildMcpHandler(skybridgeApp: SkybridgeApp): McpHttpHandler {
  */
 export function createBaseApp(json?: JsonOptions): express.Express {
   const app = express();
+  app.disable("x-powered-by");
+  app.use((_req, res, next) => {
+    res.setHeader("X-Powered-By", "skybridge");
+    next();
+  });
   app.use(express.json(json));
   return app;
 }
