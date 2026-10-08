@@ -796,6 +796,9 @@ importers:
 
   examples/ecom-carousel:
     dependencies:
+      '@modelcontextprotocol/server':
+        specifier: ^2.0.0
+        version: 2.0.0
       react:
         specifier: ^19.2.4
         version: 19.2.7
@@ -19559,7 +19562,7 @@ snapshots:
 
   eventsource@3.0.7:
     dependencies:
-      eventsource-parser: 3.0.6
+      eventsource-parser: 3.1.1
 
   execa@1.0.0:
     dependencies:
