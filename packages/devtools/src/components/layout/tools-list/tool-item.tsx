@@ -15,7 +15,6 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import type Form from "@rjsf/core";
 import { Form as FormComponent } from "@rjsf/shadcn";
 import type { RJSFSchema } from "@rjsf/utils";
-import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
 import { Braces, ClipboardList, Loader2, Play, Save } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -34,6 +33,7 @@ import {
   useSavedInputs,
   useSavedInputsStore,
 } from "@/lib/saved-inputs-store.js";
+import { validatorFor } from "@/lib/schema-validator.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
@@ -78,7 +78,9 @@ export function ToolItem({ tool }: { tool: Tool }) {
     if (tab === "json" && jsonError) {
       return true;
     }
-    return validator.validateFormData(formData, schema).errors.length > 0;
+    return (
+      validatorFor(schema).validateFormData(formData, schema).errors.length > 0
+    );
   }, [tool.inputSchema, tab, jsonError, formData]);
 
   const handleRun = async () => {
@@ -94,7 +96,10 @@ export function ToolItem({ tool }: { tool: Tool }) {
     }
 
     if (!hasNoInput) {
-      const { errors } = validator.validateFormData(formData, schema);
+      const { errors } = validatorFor(schema).validateFormData(
+        formData,
+        schema,
+      );
       if (errors.length > 0) {
         if (tab === "form") {
           formRef.current?.validateForm();
@@ -629,7 +634,7 @@ function FormBody({
         tagName={ToolFormTag(tool)}
         idPrefix={tool.name}
         schema={schema}
-        validator={validator}
+        validator={validatorFor(schema)}
         uiSchema={buildFormUiSchema(schema)}
         formData={formData}
         onChange={(data) => setFormData(data.formData)}
