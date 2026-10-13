@@ -183,7 +183,6 @@ async function modelVerdict(
   const { generateObject, jsonSchema } = await import("ai");
   const { object } = await generateObject({
     model: model ?? chat.model,
-    temperature: 0,
     system: JUDGE_SYSTEM,
     prompt: `Criteria:\n${criteria}\n\n<conversation>\n${transcriptFor(chat)}\n</conversation>`,
     schema: jsonSchema<Verdict & { reasoning: string }>({

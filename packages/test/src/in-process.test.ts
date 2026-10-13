@@ -120,6 +120,23 @@ it("serves the session from the app's fetch handler, running tools in-process", 
   expect(prompt).not.toContain("cdn.skybridge.test");
 });
 
+it("sends a temperature only when one is configured", async () => {
+  const call = {
+    toolName: "search-products",
+    input: { category: "goggles" },
+    text: "I found a pair of goggles.",
+  };
+  const unset = mockModel(call);
+  await (await start({ app: buildApp([]), model: unset })).send("goggles");
+  const set = mockModel(call);
+  await (await start({ app: buildApp([]), model: set, temperature: 0.2 })).send(
+    "goggles",
+  );
+
+  expect(unset.doGenerateCalls[0]?.temperature).toBeUndefined();
+  expect(set.doGenerateCalls[0]?.temperature).toBe(0.2);
+});
+
 it("enforces the app's own scopes against the injected identity", async () => {
   const anonymousCall = {
     toolName: "create-checkout",
