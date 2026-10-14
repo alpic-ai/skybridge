@@ -3,9 +3,11 @@ import {
   StreamableHTTPClientTransport,
   type Tool,
 } from "@modelcontextprotocol/client";
+import { AjvJsonSchemaValidator } from "@modelcontextprotocol/client/validators/ajv";
 import {
   dynamicTool,
   generateText,
+  type JSONSchema7,
   jsonSchema,
   type LanguageModel,
   type ModelMessage,
@@ -36,6 +38,32 @@ export type StubMap = Record<
 const DEFAULT_MAX_STEPS = 8;
 
 const IN_PROCESS_URL = "http://in-process.skybridge.test/mcp";
+
+function fileInputSchema(schema: JSONSchema7 | boolean): JSONSchema7 | boolean {
+  if (typeof schema === "boolean") {
+    return schema;
+  }
+  if (schema.anyOf) {
+    return { ...schema, anyOf: schema.anyOf.map(fileInputSchema) };
+  }
+  if (schema.oneOf) {
+    return { ...schema, oneOf: schema.oneOf.map(fileInputSchema) };
+  }
+  if (schema.type === "array") {
+    return {
+      ...schema,
+      items: Array.isArray(schema.items)
+        ? schema.items.map(fileInputSchema)
+        : schema.items === undefined
+          ? undefined
+          : fileInputSchema(schema.items),
+    };
+  }
+  if (schema.type === "object" || schema.$ref) {
+    return { anyOf: [schema, { type: "string" }] };
+  }
+  return schema;
+}
 
 /**
  * Dress a stubbed value the way the server dresses a real one, so the model
@@ -97,6 +125,7 @@ export class Chat<App = unknown> {
   private readonly failures = new Map<string, string>();
   private readonly inputs = new Map<string, Record<string, unknown>>();
   private readonly inputFiles = new InputFiles();
+  private readonly schemaValidator = new AjvJsonSchemaValidator();
   private readonly client: Client;
   private readonly transport: StreamableHTTPClientTransport;
   private readonly host: HostConfig;
@@ -153,6 +182,8 @@ export class Chat<App = unknown> {
   /** Takes a turn. Assert on the result with `expect.chat`. */
   async send(content: UserContent): Promise<void> {
     const prepared = await this.inputFiles.prepare(content);
+    this.inputs.clear();
+    this.failures.clear();
     this.messages.push({ role: "user", content: prepared });
     this.turns.push({
       role: "user",
@@ -228,25 +259,36 @@ export class Chat<App = unknown> {
             (field): field is string => typeof field === "string",
           )
         : [];
-      const properties = { ...parameters.properties };
+      const properties = { ...parameters.properties } as NonNullable<
+        JSONSchema7["properties"]
+      >;
       for (const field of fields) {
         if (field in properties) {
-          properties[field] = {
-            anyOf: [
-              properties[field],
-              { type: "string" },
-              { type: "array", items: { type: "string" } },
-            ],
-          };
+          properties[field] = fileInputSchema(properties[field]);
         }
       }
+      const inputSchema = { ...parameters, properties };
+      const validate =
+        fields.length === 0
+          ? undefined
+          : this.schemaValidator.getValidator<unknown>({
+              ...definition.inputSchema,
+              properties,
+            } as Parameters<AjvJsonSchemaValidator["getValidator"]>[0]);
       return [
         definition.name,
         dynamicTool({
-          description: `${definition.description ?? ""}${fields.length === 0 ? "" : `\nopenai/fileParams fields (${fields.join(", ")}) take an attached file_id or an array of attached file_ids; the host supplies the file objects.`}`,
-          inputSchema: jsonSchema({ ...parameters, properties } as Parameters<
-            typeof jsonSchema
-          >[0]),
+          description: `${definition.description ?? ""}${fields.length === 0 ? "" : `\nFor openai/fileParams fields (${fields.join(", ")}), pass attached file_ids in place of file objects, keeping each field's single-file or array shape; the host supplies the file objects.`}`,
+          inputSchema: jsonSchema(inputSchema as JSONSchema7, {
+            validate: validate
+              ? (input) => {
+                  const result = validate(input);
+                  return result.valid
+                    ? { success: true, value: result.data }
+                    : { success: false, error: new Error(result.errorMessage) };
+                }
+              : undefined,
+          }),
           execute: async (input, { toolCallId }) => {
             let args: Record<string, unknown>;
             try {

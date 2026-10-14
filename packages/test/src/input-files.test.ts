@@ -89,7 +89,7 @@ function fileModel(
             ? [
                 {
                   type: "tool-call" as const,
-                  toolCallId: `call-${call}`,
+                  toolCallId: "call-1",
                   toolName,
                   input: JSON.stringify(input(files)),
                 },
@@ -248,6 +248,132 @@ it("rejects unknown file ids without calling the handler", async () => {
     arguments: { file: "file_invented", width: 1080 },
     failed: expect.stringContaining("Unknown input file id: file_invented"),
   });
+});
+
+it.each(["resize", "upload"] as const)(
+  "rejects the wrong single-file or list shape for %s before handlers and stubs",
+  async (toolName) => {
+    for (const stubbed of [false, true]) {
+      const seen: FileRef[] = [];
+      const stubInputs: unknown[] = [];
+      const chat = await start({
+        app: fileApp(seen),
+        model: fileModel(toolName, (files) =>
+          toolName === "resize"
+            ? { file: [files[0]?.file_id], width: 1080 }
+            : { files: files[0]?.file_id },
+        ),
+        stubs: stubbed
+          ? {
+              resize: (input) => {
+                stubInputs.push(input);
+                return "stubbed";
+              },
+              upload: (input) => {
+                stubInputs.push(input);
+                return "stubbed";
+              },
+            }
+          : undefined,
+      });
+      await chat.send([portrait()]);
+      expect(stubInputs).toEqual([]);
+      expect(seen).toEqual([]);
+      expect(chat.toolCalls[0]?.failed).toBe(
+        "the model's arguments could not be parsed",
+      );
+    }
+  },
+);
+
+it.each(["omitted", "null", "empty", "ids", "mixed"] as const)(
+  "preserves optional and nullable file lists and their size limits: %s",
+  async (shape) => {
+    const received: unknown[] = [];
+    const app = new Skybridge({
+      name: "optional-file-eval",
+      version: "0.0.0",
+      handler: (server) =>
+        server.registerTool(
+          {
+            name: "upload",
+            inputSchema: {
+              files: z.array(FileRef).min(1).nullable().optional(),
+            },
+            _meta: { "openai/fileParams": ["files"] },
+          },
+          async () => ({ content: "uploaded" }),
+        ),
+    });
+    const part = portrait();
+    const chat = await start({
+      app,
+      model: fileModel("upload", (files) => {
+        if (shape === "omitted") {
+          return {};
+        }
+        return {
+          files:
+            shape === "null"
+              ? null
+              : shape === "empty"
+                ? []
+                : shape === "ids"
+                  ? [files[0]?.file_id]
+                  : [files[0], files[0]?.file_id],
+        };
+      }),
+      stubs: {
+        upload: ({ files }) => {
+          received.push(files);
+          return "stubbed";
+        },
+      },
+    });
+    await chat.send([part]);
+    if (shape === "empty") {
+      expect(received).toEqual([]);
+      expect.chat(chat).toHaveFailedToolCall("upload");
+    } else {
+      expect.chat(chat).toHaveCalledToolOnce("upload");
+      expect(received).toEqual([
+        shape === "omitted"
+          ? undefined
+          : shape === "null"
+            ? null
+            : shape === "ids"
+              ? [expect.inputFile(part)]
+              : [expect.inputFile(part), expect.inputFile(part)],
+      ]);
+    }
+  },
+);
+
+it("records current arguments and failures when a model reuses a call id across turns", async () => {
+  const seen: FileRef[] = [];
+  let attempt = 0;
+  const chat = await start({
+    app: fileApp(seen),
+    model: fileModel("resize", (files) => {
+      attempt += 1;
+      return {
+        file: attempt === 2 ? "file_invented" : files[0]?.file_id,
+        width: 1080,
+      };
+    }),
+  });
+  await chat.send([portrait()]);
+  const firstCall = chat.toolCalls[0];
+  await chat.send("Try a different file");
+  expect(chat.toolCalls[0]).toEqual(firstCall);
+  expect(chat.toolCalls[1]).toEqual({
+    name: "resize",
+    arguments: { file: "file_invented", width: 1080 },
+    failed: expect.stringContaining("Unknown input file id: file_invented"),
+  });
+  await chat.send("Use the original file again");
+  expect(chat.toolCalls[2]).toEqual(firstCall);
+  expect(seen).toHaveLength(2);
 });
 
 it.each([
