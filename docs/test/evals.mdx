@@ -64,9 +64,46 @@ it("reaches the search tool from a natural prompt", async () => {
 });
 ```
 
-`start` serves the app in process: no port, no fixture. Each `send` is one turn, during which the model can call several tools before it answers. The session closes when the test finishes.
+`start` serves the app in process: no MCP port, no fixture. Each `send` is one turn, during which the model can call several tools before it answers. The session closes when the test finishes.
 
 This is why the app lives in `src/server.ts` and `run()` in `src/index.ts`: importing the app starts nothing.
+
+## Attach Input Files
+
+`chat.send` accepts AI SDK `UserContent`: either a string or an array of text and file parts. Use the AI SDK's `FilePart` directly, and keep that same object for assertions:
+
+```ts evals/resize.eval.ts
+import { readFile } from "node:fs/promises";
+import type { FilePart } from "ai";
+
+const portrait: FilePart = {
+  type: "file",
+  mediaType: "image/png",
+  filename: "photo.png",
+  data: await readFile(new URL("./fixtures/photo.png", import.meta.url)),
+};
+
+await chat.send([
+  { type: "text", text: "Resize this photo to a vertical 1080x1920 portrait." },
+  portrait,
+]);
+
+expect.chat(chat).toHaveCalledToolWith("image_crop_and_resize", {
+  imageURI: expect.inputFile(portrait),
+});
+
+expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
+  files: [expect.inputFile(portrait)],
+});
+```
+
+The runner gives each attached file a stable `file_id` and a temporary `download_url`, and shows both to the model alongside the file content. The URL serves the bytes from a local HTTP listener, so your real tool handler can download them with `fetch`. It stays available across turns and closes when the test finishes.
+
+For fields declared in a tool's `_meta["openai/fileParams"]`, the model can pass a file id or an array of ids. The runner replaces these with OpenAI file objects (`file_id`, `download_url`, `mime_type`, and optional `file_name`) before a handler or stub runs. `chat.toolCalls` records those rewritten arguments. Unknown ids fail the call. Fields without that metadata remain unchanged, so a plain string URL field receives the `download_url` the model passed.
+
+`expect.inputFile(part)` matches that file's id, download URL, file object (both id and URL must agree), or an array containing one of those. Use it directly for a field or inside an expected array. Two separate `FilePart` objects do not match each other, even if their names and bytes are identical. A copied object that was never sent does not match, and failure messages include the ids in the actual tool arguments.
+
+File data can be bytes (including `Buffer`), base64, a URL, or AI SDK tagged data, URL, or text content. Provider-only file references cannot supply downloadable bytes and are rejected.
 
 ## Assert on Tool Calls
 

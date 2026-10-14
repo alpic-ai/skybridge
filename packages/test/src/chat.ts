@@ -10,7 +10,9 @@ import {
   type LanguageModel,
   type ModelMessage,
   stepCountIs,
+  type UserContent,
 } from "ai";
+import { InputFiles } from "./input-files.js";
 import type { ToolCall, Turn } from "./matchers/types.js";
 
 interface HostConfig {
@@ -93,6 +95,8 @@ export class Chat<App = unknown> {
 
   private readonly messages: ModelMessage[] = [];
   private readonly failures = new Map<string, string>();
+  private readonly inputs = new Map<string, Record<string, unknown>>();
+  private readonly inputFiles = new InputFiles();
   private readonly client: Client;
   private readonly transport: StreamableHTTPClientTransport;
   private readonly host: HostConfig;
@@ -147,9 +151,19 @@ export class Chat<App = unknown> {
   }
 
   /** Takes a turn. Assert on the result with `expect.chat`. */
-  async send(prompt: string): Promise<void> {
-    this.messages.push({ role: "user", content: prompt });
-    this.turns.push({ role: "user", text: prompt });
+  async send(content: UserContent): Promise<void> {
+    const prepared = await this.inputFiles.prepare(content);
+    this.messages.push({ role: "user", content: prepared });
+    this.turns.push({
+      role: "user",
+      text:
+        typeof prepared === "string"
+          ? prepared
+          : prepared
+              .filter((part) => part.type === "text")
+              .map((part) => part.text)
+              .join("\n"),
+    });
 
     const result = await generateText({
       model: this.host.model,
@@ -173,7 +187,9 @@ export class Chat<App = unknown> {
           role: "tool",
           call: {
             name: call.toolName,
-            arguments: (call.input ?? {}) as Record<string, unknown>,
+            arguments:
+              this.inputs.get(call.toolCallId) ??
+              ((call.input ?? {}) as Record<string, unknown>),
             ...this.failureFor(call),
           } as ToolCall<App>,
           result: outputOf(step.toolResults, call.toolCallId),
@@ -185,7 +201,11 @@ export class Chat<App = unknown> {
   }
 
   async close(): Promise<void> {
-    await this.transport.close();
+    try {
+      await this.transport.close();
+    } finally {
+      await this.inputFiles.close();
+    }
   }
 
   private failureFor(call: { toolCallId: string; invalid?: boolean }): {
@@ -204,17 +224,44 @@ export class Chat<App = unknown> {
   private toolSet() {
     const entries = this.tools.map((definition) => {
       const { $schema: _ignored, ...parameters } = definition.inputSchema;
+      const fileParams = definition._meta?.["openai/fileParams"];
+      const fields = Array.isArray(fileParams)
+        ? fileParams.filter(
+            (field): field is string => typeof field === "string",
+          )
+        : [];
+      const properties = { ...parameters.properties };
+      for (const field of fields) {
+        if (field in properties) {
+          properties[field] = {
+            anyOf: [
+              properties[field],
+              { type: "string" },
+              { type: "array", items: { type: "string" } },
+            ],
+          };
+        }
+      }
       return [
         definition.name,
         dynamicTool({
-          description: definition.description ?? "",
-          inputSchema: jsonSchema(
-            parameters as Parameters<typeof jsonSchema>[0],
-          ),
+          description: `${definition.description ?? ""}${fields.length === 0 ? "" : `\nopenai/fileParams fields (${fields.join(", ")}) take an attached file_id or an array of attached file_ids; the host supplies the file objects.`}`,
+          inputSchema: jsonSchema({ ...parameters, properties } as Parameters<
+            typeof jsonSchema
+          >[0]),
           execute: async (input, { toolCallId }) => {
-            const stubbed = await this.stubs.get(definition.name)?.(
-              (input ?? {}) as Record<string, unknown>,
-            );
+            let args: Record<string, unknown>;
+            try {
+              args = this.inputFiles.rewrite(
+                (input ?? {}) as Record<string, unknown>,
+                fields,
+              );
+            } catch (error) {
+              this.failures.set(toolCallId, String(error));
+              throw error;
+            }
+            this.inputs.set(toolCallId, args);
+            const stubbed = await this.stubs.get(definition.name)?.(args);
             if (stubbed !== undefined) {
               return asToolResult(stubbed);
             }
@@ -222,7 +269,7 @@ export class Chat<App = unknown> {
             try {
               result = await this.client.callTool({
                 name: definition.name,
-                arguments: (input ?? {}) as Record<string, unknown>,
+                arguments: args,
               });
             } catch (error) {
               this.failures.set(
