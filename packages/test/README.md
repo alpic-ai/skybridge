@@ -82,6 +82,41 @@ from, so a project can set them once instead of per scenario.
 skybridge({ evals: { temperature: 0, maxSteps: 6 } });
 ```
 
+## Input files
+
+`chat.send` also accepts AI SDK `UserContent`. Attach a `FilePart` and use the
+same object in `expect.inputFile` to check which file a tool received:
+
+```ts
+import { readFile } from "node:fs/promises";
+import type { FilePart } from "ai";
+
+const portrait: FilePart = {
+  type: "file",
+  mediaType: "image/png",
+  filename: "photo.png",
+  data: await readFile(new URL("./fixtures/photo.png", import.meta.url)),
+};
+
+await chat.send([{ type: "text", text: "Resize this photo" }, portrait]);
+
+expect.chat(chat).toHaveCalledToolWith("image_crop_and_resize", {
+  imageURI: expect.inputFile(portrait),
+});
+expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
+  files: [expect.inputFile(portrait)],
+});
+```
+
+The runner gives the model a file id and a temporary local download URL alongside
+the content. For `_meta["openai/fileParams"]` fields, it turns ids into OpenAI
+file objects before the handler or stub runs. Other fields keep the model's
+original input. Downloads serve the attached bytes until the conversation closes.
+
+`expect.inputFile(part)` accepts that file's id, URL, file object, or an array
+containing one of them. Distinct file objects never match each other, even with
+identical bytes. It works with both tool argument matchers and their `.not` forms.
+
 ## Matchers
 
 Assertions on what the assistant said work the same way, though model prose

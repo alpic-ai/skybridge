@@ -1,7 +1,8 @@
 import "vitest";
-import type { LanguageModel } from "ai";
+import type { FilePart, LanguageModel } from "ai";
 import type { ToolInput, ToolNames } from "skybridge/server";
 import { expect } from "vitest";
+import { type InputFileMatcher, inputFile } from "../input-files.js";
 import type { ChatLike, ToolCall, Turn } from "./types.js";
 
 /** What a judge decided about a conversation. */
@@ -30,6 +31,17 @@ export interface JudgmentOptions {
   judge?: (judgment: Judgment) => Verdict | Promise<Verdict>;
 }
 
+type ArgumentMatcher<T> =
+  | T
+  | Pick<InputFileMatcher, "asymmetricMatch">
+  | (T extends readonly (infer Item)[]
+      ? ArgumentMatcher<Item>[]
+      : T extends object
+        ? { [Key in keyof T]: ArgumentMatcher<T[Key]> }
+        : never);
+
+type MatchingArguments<T> = { [Key in keyof T]?: ArgumentMatcher<T[Key]> };
+
 /**
  * Assertions about the tool calls a conversation produced. Kept off vitest's
  * global `Matchers` so they never appear on unrelated `expect()` calls, and so
@@ -38,11 +50,11 @@ export interface JudgmentOptions {
 export interface ChatMatchers<App> {
   toHaveCalledToolOnce<Name extends ToolNames<App>>(
     name: Name,
-    args?: Partial<ToolInput<App, Name>>,
+    args?: MatchingArguments<ToolInput<App, Name>>,
   ): void;
   toHaveCalledToolWith<Name extends ToolNames<App>>(
     name: Name,
-    args: Partial<ToolInput<App, Name>>,
+    args: MatchingArguments<ToolInput<App, Name>>,
   ): void;
   toNeverHaveCalledTool<Name extends ToolNames<App>>(name: Name): void;
   toHaveFailedToolCall<Name extends ToolNames<App>>(name: Name): void;
@@ -60,6 +72,7 @@ export interface ChatAssertion<App> extends ChatMatchers<App> {
 
 declare module "vitest" {
   interface ExpectStatic {
+    inputFile(part: FilePart): InputFileMatcher;
     chat<App>(chat: ChatLike<App>): ChatAssertion<App>;
   }
 }
@@ -376,3 +389,4 @@ judge: ${verdict.pass ? "PASS" : "FAIL"}${verdict.reasoning === undefined ? "" :
 
 expect.chat = <App>(chat: ChatLike<App>): ChatAssertion<App> =>
   expect(chat) as unknown as ChatAssertion<App>;
+expect.inputFile = inputFile;
