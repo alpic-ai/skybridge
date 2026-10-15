@@ -2022,6 +2022,9 @@ importers:
       ahooks:
         specifier: ^3.9.7
         version: 3.9.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      ajv:
+        specifier: ^8.20.0
+        version: 8.20.0
       autoprefixer:
         specifier: ^10.5.4
         version: 10.5.4(postcss@8.5.20)

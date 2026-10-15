@@ -212,7 +212,9 @@ export class Chat<App = unknown> {
 
     const result = await generateText({
       model: this.host.model,
-      temperature: this.host.temperature ?? 0,
+      ...(this.host.temperature === undefined
+        ? {}
+        : { temperature: this.host.temperature }),
       ...(this.host.systemPrompt === undefined
         ? {}
         : { system: this.host.systemPrompt }),

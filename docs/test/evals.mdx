@@ -252,7 +252,7 @@ Defaults every scenario starts from go in the plugin option, and any of them can
 ```ts vite.config.ts
 skybridge({
   evals: {
-    temperature: 0,          // default
+    temperature: 0,          // unset by default: the model's own default applies
     systemPrompt: "You are a shopping assistant.",
     maxSteps: 8,             // tool-call rounds per turn, default
     timeout: 120_000,        // per scenario, default
@@ -260,7 +260,7 @@ skybridge({
 })
 ```
 
-Evals are live model calls: they cost money and the wording varies from run to run. Keep the temperature at `0`, assert on the calls rather than on exact phrasing, and reach for `toHaveSaid` with a loose pattern when the answer itself matters.
+Evals are live model calls: they cost money and the wording varies from run to run. Set the temperature to `0` when your model supports it (some recent models reject the parameter), assert on the calls rather than on exact phrasing, and reach for `toHaveSaid` with a loose pattern when the answer itself matters.
 
 ## Go Further
 <Columns cols={3}>
