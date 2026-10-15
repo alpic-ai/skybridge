@@ -15,7 +15,6 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import type Form from "@rjsf/core";
 import { Form as FormComponent } from "@rjsf/shadcn";
 import type { RJSFSchema } from "@rjsf/utils";
-import validator from "@rjsf/validator-ajv8";
 import { useKeyPress } from "ahooks";
 import { Braces, ClipboardList, Loader2, Play, Save } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -34,6 +33,7 @@ import {
   useSavedInputs,
   useSavedInputsStore,
 } from "@/lib/saved-inputs-store.js";
+import { validator } from "@/lib/schema-validator.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
