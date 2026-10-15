@@ -52,7 +52,7 @@ On failure the message lists every call the model made, with arguments. Matchers
 
 ## Judgments
 
-`toPassJudgment` is the only async matcher: `await expect.chat(chat).toPassJudgment("stays inside the app's scope and explains the tool result")`. The judge reads every turn and tool call with its result, runs at temperature 0 on the chat's own model, and its reasoning lands in the failure message. `options` takes `model` (another judge) or `judge`, a callback receiving `{ criteria, transcript }` and returning `{ pass, reasoning? }`, which lets an evaluation model or a scoring service grade instead of a language model. A judge that throws, the provider or your own callback, raises `judge unavailable: <error>` instead of reporting a fail. Use it only for criteria no other matcher can express. The default judge is a live model call, so it costs money and is not reproducible; a custom `judge` costs and varies only as much as whatever it calls, and a local heuristic is free and deterministic.
+`toPassJudgment` is the only async matcher: `await expect.chat(chat).toPassJudgment("stays inside the app's scope and explains the tool result")`. The judge reads every turn and tool call with its result, runs on the chat's own model at its default temperature, and its reasoning lands in the failure message. `options` takes `model` (another judge) or `judge`, a callback receiving `{ criteria, transcript }` and returning `{ pass, reasoning? }`, which lets an evaluation model or a scoring service grade instead of a language model. A judge that throws, the provider or your own callback, raises `judge unavailable: <error>` instead of reporting a fail. Use it only for criteria no other matcher can express. The default judge is a live model call, so it costs money and is not reproducible; a custom `judge` costs and varies only as much as whatever it calls, and a local heuristic is free and deterministic.
 
 ## Stubs
 
@@ -84,7 +84,7 @@ Omit `authInfo` to test the anonymous path: a gated tool then shows up as `toHav
 
 ## Defaults
 
-`evals: { temperature, systemPrompt, maxSteps, timeout }` in the Vite plugin sets what every scenario starts from (temperature `0`, `maxSteps` 8, timeout 120s). `temperature`, `systemPrompt` and `maxSteps` can be overridden per `start`.
+`evals: { temperature, systemPrompt, maxSteps, timeout }` in the Vite plugin sets what every scenario starts from (`maxSteps` 8, timeout 120s; `temperature` is only sent when set). `temperature`, `systemPrompt` and `maxSteps` can be overridden per `start`.
 
 ## Pitfalls
 
