@@ -31,6 +31,7 @@ export interface ChatLike<App> {
   readonly $app?: App;
   readonly turns: Turn<App>[];
   readonly model: LanguageModel;
+  readonly fileParams?: ReadonlyMap<string, readonly string[]>;
 }
 
 declare module "vitest" {

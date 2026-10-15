@@ -3,14 +3,18 @@ import {
   StreamableHTTPClientTransport,
   type Tool,
 } from "@modelcontextprotocol/client";
+import { AjvJsonSchemaValidator } from "@modelcontextprotocol/client/validators/ajv";
 import {
   dynamicTool,
   generateText,
+  type JSONSchema7,
   jsonSchema,
   type LanguageModel,
   type ModelMessage,
   stepCountIs,
+  type UserContent,
 } from "ai";
+import { InputFiles } from "./input-files.js";
 import type { ToolCall, Turn } from "./matchers/types.js";
 
 interface HostConfig {
@@ -34,6 +38,42 @@ export type StubMap = Record<
 const DEFAULT_MAX_STEPS = 8;
 
 const IN_PROCESS_URL = "http://in-process.skybridge.test/mcp";
+
+function fileParameters(tool: Tool) {
+  const fields = tool._meta?.["openai/fileParams"];
+  return Array.isArray(fields)
+    ? fields.filter((field): field is string => typeof field === "string")
+    : [];
+}
+
+function fileInputSchema(schema: JSONSchema7 | boolean): JSONSchema7 | boolean {
+  if (typeof schema === "boolean") {
+    return schema;
+  }
+  if (schema.anyOf) {
+    return { ...schema, anyOf: schema.anyOf.map(fileInputSchema) };
+  }
+  if (schema.oneOf) {
+    return { ...schema, oneOf: schema.oneOf.map(fileInputSchema) };
+  }
+  if (schema.type === "array") {
+    return {
+      ...schema,
+      items: Array.isArray(schema.items)
+        ? schema.items.map(fileInputSchema)
+        : schema.items === undefined
+          ? undefined
+          : fileInputSchema(schema.items),
+    };
+  }
+  if (schema.type === "object" || schema.$ref) {
+    return {
+      type: "string",
+      description: "This parameter expects an absolute local file path.",
+    };
+  }
+  return schema;
+}
 
 /**
  * Dress a stubbed value the way the server dresses a real one, so the model
@@ -93,6 +133,9 @@ export class Chat<App = unknown> {
 
   private readonly messages: ModelMessage[] = [];
   private readonly failures = new Map<string, string>();
+  private readonly inputs = new Map<string, Record<string, unknown>>();
+  private readonly inputFiles = new InputFiles();
+  private readonly schemaValidator = new AjvJsonSchemaValidator();
   private readonly client: Client;
   private readonly transport: StreamableHTTPClientTransport;
   private readonly host: HostConfig;
@@ -102,6 +145,10 @@ export class Chat<App = unknown> {
   /** The model the conversation runs on, and the judge's default. */
   get model(): LanguageModel {
     return this.host.model;
+  }
+
+  get fileParams() {
+    return new Map(this.tools.map((tool) => [tool.name, fileParameters(tool)]));
   }
 
   private constructor(
@@ -147,9 +194,21 @@ export class Chat<App = unknown> {
   }
 
   /** Takes a turn. Assert on the result with `expect.chat`. */
-  async send(prompt: string): Promise<void> {
-    this.messages.push({ role: "user", content: prompt });
-    this.turns.push({ role: "user", text: prompt });
+  async send(content: UserContent): Promise<void> {
+    const prepared = await this.inputFiles.prepare(content);
+    this.inputs.clear();
+    this.failures.clear();
+    this.messages.push({ role: "user", content: prepared });
+    this.turns.push({
+      role: "user",
+      text:
+        typeof prepared === "string"
+          ? prepared
+          : prepared
+              .filter((part) => part.type === "text")
+              .map((part) => part.text)
+              .join("\n"),
+    });
 
     const result = await generateText({
       model: this.host.model,
@@ -173,7 +232,9 @@ export class Chat<App = unknown> {
           role: "tool",
           call: {
             name: call.toolName,
-            arguments: (call.input ?? {}) as Record<string, unknown>,
+            arguments:
+              this.inputs.get(call.toolCallId) ??
+              ((call.input ?? {}) as Record<string, unknown>),
             ...this.failureFor(call),
           } as ToolCall<App>,
           result: outputOf(step.toolResults, call.toolCallId),
@@ -185,7 +246,11 @@ export class Chat<App = unknown> {
   }
 
   async close(): Promise<void> {
-    await this.transport.close();
+    try {
+      await this.transport.close();
+    } finally {
+      await this.inputFiles.close();
+    }
   }
 
   private failureFor(call: { toolCallId: string; invalid?: boolean }): {
@@ -204,17 +269,50 @@ export class Chat<App = unknown> {
   private toolSet() {
     const entries = this.tools.map((definition) => {
       const { $schema: _ignored, ...parameters } = definition.inputSchema;
+      const fields = fileParameters(definition);
+      const properties = { ...parameters.properties } as NonNullable<
+        JSONSchema7["properties"]
+      >;
+      for (const field of fields) {
+        if (field in properties) {
+          properties[field] = fileInputSchema(properties[field]);
+        }
+      }
+      const inputSchema = { ...parameters, properties };
+      const validate =
+        fields.length === 0
+          ? undefined
+          : this.schemaValidator.getValidator<unknown>({
+              ...definition.inputSchema,
+              properties,
+            } as Parameters<AjvJsonSchemaValidator["getValidator"]>[0]);
       return [
         definition.name,
         dynamicTool({
           description: definition.description ?? "",
-          inputSchema: jsonSchema(
-            parameters as Parameters<typeof jsonSchema>[0],
-          ),
+          inputSchema: jsonSchema(inputSchema as JSONSchema7, {
+            validate: validate
+              ? (input) => {
+                  const result = validate(input);
+                  return result.valid
+                    ? { success: true, value: result.data }
+                    : { success: false, error: new Error(result.errorMessage) };
+                }
+              : undefined,
+          }),
           execute: async (input, { toolCallId }) => {
-            const stubbed = await this.stubs.get(definition.name)?.(
-              (input ?? {}) as Record<string, unknown>,
-            );
+            let args: Record<string, unknown>;
+            try {
+              args = this.inputFiles.rewrite(
+                (input ?? {}) as Record<string, unknown>,
+                fields,
+              );
+            } catch (error) {
+              this.failures.set(toolCallId, String(error));
+              throw error;
+            }
+            this.inputs.set(toolCallId, args);
+            const stubbed = await this.stubs.get(definition.name)?.(args);
             if (stubbed !== undefined) {
               return asToolResult(stubbed);
             }
@@ -222,7 +320,7 @@ export class Chat<App = unknown> {
             try {
               result = await this.client.callTool({
                 name: definition.name,
-                arguments: (input ?? {}) as Record<string, unknown>,
+                arguments: args,
               });
             } catch (error) {
               this.failures.set(
