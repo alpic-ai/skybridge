@@ -33,7 +33,7 @@ import {
   useSavedInputs,
   useSavedInputsStore,
 } from "@/lib/saved-inputs-store.js";
-import { validatorFor } from "@/lib/schema-validator.js";
+import { validator } from "@/lib/schema-validator.js";
 import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
@@ -78,9 +78,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
     if (tab === "json" && jsonError) {
       return true;
     }
-    return (
-      validatorFor(schema).validateFormData(formData, schema).errors.length > 0
-    );
+    return validator.validateFormData(formData, schema).errors.length > 0;
   }, [tool.inputSchema, tab, jsonError, formData]);
 
   const handleRun = async () => {
@@ -96,10 +94,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
     }
 
     if (!hasNoInput) {
-      const { errors } = validatorFor(schema).validateFormData(
-        formData,
-        schema,
-      );
+      const { errors } = validator.validateFormData(formData, schema);
       if (errors.length > 0) {
         if (tab === "form") {
           formRef.current?.validateForm();
@@ -634,7 +629,7 @@ function FormBody({
         tagName={ToolFormTag(tool)}
         idPrefix={tool.name}
         schema={schema}
-        validator={validatorFor(schema)}
+        validator={validator}
         uiSchema={buildFormUiSchema(schema)}
         formData={formData}
         onChange={(data) => setFormData(data.formData)}
