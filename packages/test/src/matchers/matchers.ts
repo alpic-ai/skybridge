@@ -2,7 +2,11 @@ import "vitest";
 import type { FilePart, LanguageModel } from "ai";
 import type { ToolInput, ToolNames } from "skybridge/server";
 import { expect } from "vitest";
-import { type InputFileMatcher, inputFile } from "../input-files.js";
+import {
+  containsInputFile,
+  type InputFileMatcher,
+  inputFile,
+} from "../input-files.js";
 import type { ChatLike, ToolCall, Turn } from "./types.js";
 
 /** What a judge decided about a conversation. */
@@ -81,6 +85,21 @@ function calls(chat: ChatLike<unknown>): ToolCall<unknown>[] {
   return chat.turns
     .filter((turn) => turn.role === "tool")
     .map((turn) => turn.call);
+}
+
+function assertFileParameters(
+  chat: ChatLike<unknown>,
+  name: string,
+  args: Record<string, unknown> = {},
+) {
+  const fields = chat.fileParams?.get(name) ?? [];
+  for (const [field, value] of Object.entries(args)) {
+    if (containsInputFile(value) && !fields.includes(field)) {
+      throw new Error(
+        `expect.inputFile cannot be used for "${name}.${field}": "${field}" is not listed in openai/fileParams`,
+      );
+    }
+  }
 }
 
 function spokenTurns(chat: ChatLike<unknown>): string[] {
@@ -217,6 +236,7 @@ expect.extend({
     name: string,
     args?: Record<string, unknown>,
   ) {
+    assertFileParameters(received, name, args);
     const matching = acceptedCalls(received, name);
     const argsMatch =
       args === undefined ||
@@ -243,6 +263,7 @@ expect.extend({
     name: string,
     args: Record<string, unknown>,
   ) {
+    assertFileParameters(received, name, args);
     const pass = acceptedCalls(received, name).some((call) =>
       this.equals(call.arguments, expect.objectContaining(args)),
     );

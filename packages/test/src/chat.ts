@@ -39,6 +39,13 @@ const DEFAULT_MAX_STEPS = 8;
 
 const IN_PROCESS_URL = "http://in-process.skybridge.test/mcp";
 
+function fileParameters(tool: Tool) {
+  const fields = tool._meta?.["openai/fileParams"];
+  return Array.isArray(fields)
+    ? fields.filter((field): field is string => typeof field === "string")
+    : [];
+}
+
 function fileInputSchema(schema: JSONSchema7 | boolean): JSONSchema7 | boolean {
   if (typeof schema === "boolean") {
     return schema;
@@ -60,7 +67,10 @@ function fileInputSchema(schema: JSONSchema7 | boolean): JSONSchema7 | boolean {
     };
   }
   if (schema.type === "object" || schema.$ref) {
-    return { anyOf: [schema, { type: "string" }] };
+    return {
+      type: "string",
+      description: "This parameter expects an absolute local file path.",
+    };
   }
   return schema;
 }
@@ -135,6 +145,10 @@ export class Chat<App = unknown> {
   /** The model the conversation runs on, and the judge's default. */
   get model(): LanguageModel {
     return this.host.model;
+  }
+
+  get fileParams() {
+    return new Map(this.tools.map((tool) => [tool.name, fileParameters(tool)]));
   }
 
   private constructor(
@@ -255,12 +269,7 @@ export class Chat<App = unknown> {
   private toolSet() {
     const entries = this.tools.map((definition) => {
       const { $schema: _ignored, ...parameters } = definition.inputSchema;
-      const fileParams = definition._meta?.["openai/fileParams"];
-      const fields = Array.isArray(fileParams)
-        ? fileParams.filter(
-            (field): field is string => typeof field === "string",
-          )
-        : [];
+      const fields = fileParameters(definition);
       const properties = { ...parameters.properties } as NonNullable<
         JSONSchema7["properties"]
       >;
@@ -280,7 +289,7 @@ export class Chat<App = unknown> {
       return [
         definition.name,
         dynamicTool({
-          description: `${definition.description ?? ""}${fields.length === 0 ? "" : `\nFor openai/fileParams fields (${fields.join(", ")}), pass attached file_ids in place of file objects, keeping each field's single-file or array shape; the host supplies the file objects.`}`,
+          description: definition.description ?? "",
           inputSchema: jsonSchema(inputSchema as JSONSchema7, {
             validate: validate
               ? (input) => {

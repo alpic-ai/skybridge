@@ -89,7 +89,7 @@ await chat.send([
 ]);
 
 expect.chat(chat).toHaveCalledToolWith("image_crop_and_resize", {
-  imageURI: expect.inputFile(portrait),
+  file: expect.inputFile(portrait),
 });
 
 expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
@@ -97,11 +97,15 @@ expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
 });
 ```
 
-The runner gives each attached file a stable `file_id` and a temporary `download_url`, and shows both to the model alongside the file content. The URL serves the bytes from a local HTTP listener, so your real tool handler can download them with `fetch`. It stays available across turns and closes when the test finishes.
+The runner shows each attachment's `uploaded_name` and a synthetic absolute `workspace_path` alongside its file content. This simulates the path-based model-facing interface observed in ChatGPT: the model selects a path rather than assembling a download URL or file object.
 
-For fields declared in a tool's `_meta["openai/fileParams"]`, the model can pass a file id or an array of ids, keeping the field's declared single-file or list shape. List-size limits and optional or nullable fields are preserved, and invalid shapes are rejected before a handler or stub runs. The runner replaces the ids with OpenAI file objects (`file_id`, `download_url`, `mime_type`, and optional `file_name`). `chat.toolCalls` records those rewritten arguments. Unknown ids fail the call. Fields without that metadata remain unchanged, so a plain string URL field receives the `download_url` the model passed.
+The example assumes `file` and `files` are listed in their tools' `_meta["openai/fileParams"]` and advertise a file object or an array of file objects to the server. The runner adapts those model-facing fields to a path string or an array of path strings. List-size limits and optional or nullable fields are preserved, and invalid shapes are rejected before a handler or stub runs.
 
-`expect.inputFile(part)` matches that file's id, download URL, file object (both id and URL must agree), or an array containing one of those. Use it directly for a field or inside an expected array. Two separate `FilePart` objects do not match each other, even if their names and bytes are identical. A copied object that was never sent does not match, and failure messages include the ids in the actual tool arguments.
+Before invoking the handler or stub, the runner replaces the paths with OpenAI file objects (`file_id`, `download_url`, `mime_type`, and optional `file_name`). The download URL serves the original bytes from a local HTTP listener until the conversation closes. The synthetic path is a host-local identifier for those bytes; no filesystem file is needed. `chat.toolCalls` records the rewritten server-facing arguments. Unknown paths fail the call.
+
+`expect.inputFile(part)` matches that file's path, id, download URL, file object (both id and URL must agree), or an array containing one of those. Use it directly for a declared file field or inside an expected array. Two separate `FilePart` objects do not match each other, even if their names and bytes are identical. A copied object that was never sent does not match, and failure messages include the ids in the actual tool arguments.
+
+Using `expect.inputFile(part)` in a chat assertion for a parameter not listed in `openai/fileParams` throws immediately, including when nested inside an array or object, and for both `.not` and positive assertions. Ordinary URL parameters still accept literal strings, but they receive no automatic attachment conversion or download URL exposure.
 
 File data can be bytes (including `Buffer`), base64, a URL, or AI SDK tagged data, URL, or text content. Provider-only file references cannot supply downloadable bytes and are rejected.
 

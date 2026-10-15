@@ -101,21 +101,28 @@ const portrait: FilePart = {
 await chat.send([{ type: "text", text: "Resize this photo" }, portrait]);
 
 expect.chat(chat).toHaveCalledToolWith("image_crop_and_resize", {
-  imageURI: expect.inputFile(portrait),
+  file: expect.inputFile(portrait),
 });
 expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
   files: [expect.inputFile(portrait)],
 });
 ```
 
-The runner gives the model a file id and a temporary local download URL alongside
-the content. For `_meta["openai/fileParams"]` fields, it turns ids into OpenAI
-file objects before the handler or stub runs. Other fields keep the model's
-original input. Downloads serve the attached bytes until the conversation closes.
+The example assumes `file` and `files` are declared in their tools'
+`_meta["openai/fileParams"]`. The model sees each attachment's name, synthetic
+absolute workspace path, and content. Declared file fields appear as path strings
+or arrays of path strings. The host turns the selected paths into OpenAI file
+objects before the handler or stub runs. The local download URLs serve the
+attached bytes until the conversation closes; paths are host-local identifiers
+and do not require files on disk.
 
-`expect.inputFile(part)` accepts that file's id, URL, file object, or an array
+`expect.inputFile(part)` accepts that file's path, id, URL, file object, or an array
 containing one of them. Distinct file objects never match each other, even with
 identical bytes. It works with both tool argument matchers and their `.not` forms.
+
+Using it for a parameter not listed in `openai/fileParams` throws immediately,
+including nested matchers and negative assertions. Ordinary URL parameters remain
+plain strings and do not receive automatic file conversion or attachment URLs.
 
 ## Matchers
 

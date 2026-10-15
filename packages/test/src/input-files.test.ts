@@ -59,17 +59,16 @@ function fileApp(seen: FileRef[]) {
         )
         .registerTool(
           { name: "plain", inputSchema: { imageURI: z.string() } },
-          async ({ imageURI }) => {
-            const response = await fetch(imageURI);
-            return { content: await response.text() };
-          },
+          async ({ imageURI }) => ({ content: imageURI }),
         ),
   });
 }
 
 function fileModel(
   toolName: string,
-  input: (files: FileRef[]) => Record<string, unknown>,
+  input: (
+    files: { uploaded_name: string; workspace_path: string }[],
+  ) => Record<string, unknown>,
 ) {
   let call = 0;
   return new MockLanguageModelV3({
@@ -80,8 +79,15 @@ function fileModel(
         .flatMap((message) => message.content)
         .filter((part) => part.type === "text")
         .flatMap((part) => {
-          const match = part.text.match(/Attached file: (.+)\. For openai/);
-          return match?.[1] ? [JSON.parse(match[1]) as FileRef] : [];
+          const match = part.text.match(/^Attached file: (.+)$/);
+          return match?.[1]
+            ? [
+                JSON.parse(match[1]) as {
+                  uploaded_name: string;
+                  workspace_path: string;
+                },
+              ]
+            : [];
         });
       return {
         content:
@@ -106,11 +112,11 @@ function fileModel(
   });
 }
 
-it("forwards the file content, rewrites its id, and downloads the exact bytes", async () => {
+it("shows paths to the model, rewrites them, and downloads the exact bytes", async () => {
   const part = portrait();
   const seen: FileRef[] = [];
   const model = fileModel("resize", (files) => ({
-    file: files[0]?.file_id,
+    file: files[0]?.workspace_path,
     width: 1080,
   }));
   const chat = await start({ app: fileApp(seen), model });
@@ -138,6 +144,14 @@ it("forwards the file content, rewrites its id, and downloads the exact bytes", 
       expect.objectContaining({ type: "file", mediaType: "image/png" }),
     ]),
   );
+  const modelContext = JSON.stringify(model.doGenerateCalls[0]);
+  expect(modelContext).toContain("workspace_path");
+  expect(modelContext).toContain("uploaded_name");
+  expect(modelContext).toContain(
+    "This parameter expects an absolute local file path.",
+  );
+  expect(modelContext).not.toContain("download_url");
+  expect(modelContext).not.toContain("file_id");
   expect(JSON.stringify(model.doGenerateCalls[1]?.prompt)).toContain(
     Buffer.from(part.data as Buffer).toString("base64"),
   );
@@ -153,7 +167,7 @@ it("distinguishes identical uploads by object identity and reports the other id"
   const chat = await start({
     app: fileApp(seen),
     model: fileModel("resize", (files) => ({
-      file: files[1]?.file_id,
+      file: files[1]?.workspace_path,
       width: 1080,
     })),
   });
@@ -176,7 +190,7 @@ it("rewrites arrays before handlers and stubs, and accepts matchers inside array
   const chat = await start({
     app: fileApp(seen),
     model: fileModel("upload", (files) => ({
-      files: files.map((file) => file.file_id),
+      files: files.map((file) => file.workspace_path),
     })),
     stubs: {
       upload: ({ files }) => {
@@ -198,55 +212,138 @@ it("rewrites arrays before handlers and stubs, and accepts matchers inside array
   });
 });
 
-it.each(["file_id", "download_url", "object", "array"] as const)(
-  "matches %s, rejects invented references, and leaves plain strings unchanged",
-  async (shape) => {
-    const part = portrait();
-    let attached: FileRef | undefined;
-    const chat = await start({
-      app: fileApp([]),
-      model: fileModel("plain", (files) => {
-        attached = files[0];
-        return { imageURI: attached?.download_url };
-      }),
-    });
-    await chat.send([part]);
-    expect.chat(chat).toHaveCalledToolWith("plain", {
-      imageURI: expect.inputFile(part),
-    });
-    const matcher = expect.inputFile(part);
-    const value =
-      shape === "object"
+it.each([
+  "workspace_path",
+  "file_id",
+  "download_url",
+  "object",
+  "array",
+] as const)("matches %s and rejects invented references", async (shape) => {
+  const part = portrait();
+  const seen: FileRef[] = [];
+  let workspace_path: string | undefined;
+  const chat = await start({
+    app: fileApp(seen),
+    model: fileModel("resize", (files) => {
+      workspace_path = files[0]?.workspace_path;
+      return { file: workspace_path, width: 1080 };
+    }),
+  });
+  await chat.send([part]);
+  expect.chat(chat).toHaveCalledToolWith("resize", {
+    file: expect.inputFile(part),
+  });
+  const attached = seen[0];
+  const matcher = expect.inputFile(part);
+  const value =
+    shape === "workspace_path"
+      ? workspace_path
+      : shape === "object"
         ? attached
         : shape === "array"
           ? ["other", attached]
           : attached?.[shape];
-    expect(matcher.asymmetricMatch(value)).toBe(true);
-    expect(matcher.asymmetricMatch("https://invented.test/photo.png")).toBe(
-      false,
-    );
-    expect(
-      matcher.asymmetricMatch({ ...attached, download_url: "https://wrong" }),
-    ).toBe(false);
-    expect(
-      matcher.asymmetricMatch({ ...attached, file_id: "file_wrong" }),
-    ).toBe(false);
-  },
-);
+  expect(matcher.asymmetricMatch(value)).toBe(true);
+  expect(matcher.asymmetricMatch("https://invented.test/photo.png")).toBe(
+    false,
+  );
+  expect(
+    matcher.asymmetricMatch({ ...attached, download_url: "https://wrong" }),
+  ).toBe(false);
+  expect(matcher.asymmetricMatch({ ...attached, file_id: "file_wrong" })).toBe(
+    false,
+  );
+});
 
-it("rejects unknown file ids without calling the handler", async () => {
+it("rejects unknown file paths without calling the handler", async () => {
   const seen: FileRef[] = [];
   const chat = await start({
     app: fileApp(seen),
-    model: fileModel("resize", () => ({ file: "file_invented", width: 1080 })),
+    model: fileModel("resize", () => ({
+      file: "/workspace/scratch/missing/input",
+      width: 1080,
+    })),
   });
   await chat.send([portrait()]);
   expect(seen).toEqual([]);
   expect.chat(chat).toHaveFailedToolCall("resize");
   expect(chat.toolCalls[0]).toEqual({
     name: "resize",
-    arguments: { file: "file_invented", width: 1080 },
-    failed: expect.stringContaining("Unknown input file id: file_invented"),
+    arguments: { file: "/workspace/scratch/missing/input", width: 1080 },
+    failed: expect.stringContaining(
+      "Unknown input file path: /workspace/scratch/missing/input",
+    ),
+  });
+});
+
+it.each(["file_id", "download_url"] as const)(
+  "does not accept server-facing %s in place of a model-facing path",
+  async (field) => {
+    const seen: FileRef[] = [];
+    const chat = await start({
+      app: fileApp(seen),
+      model: fileModel("resize", (files) => ({
+        file: seen[0]?.[field] ?? files[0]?.workspace_path,
+        width: 1080,
+      })),
+    });
+    await chat.send([portrait()]);
+    await chat.send("Resize the file again");
+    expect(seen).toHaveLength(1);
+    expect(chat.toolCalls[1]).toEqual({
+      name: "resize",
+      arguments: { file: seen[0]?.[field], width: 1080 },
+      failed: expect.stringContaining("Unknown input file path"),
+    });
+  },
+);
+
+it.each([false, true])(
+  "rejects file expectations on undeclared parameters before a turn, including nested matchers (negated: %s)",
+  async (negated) => {
+    const chat = await start({
+      app: fileApp([]),
+      model: fileModel("plain", () => ({ imageURI: "https://example.test" })),
+    });
+    const file = expect.inputFile(portrait());
+    const assertion = negated ? expect.chat(chat).not : expect.chat(chat);
+    for (const value of [
+      file,
+      [file],
+      expect.arrayContaining([file]),
+      { nested: file },
+    ]) {
+      expect(() =>
+        assertion.toHaveCalledToolWith("plain", { imageURI: value } as never),
+      ).toThrow(
+        '"plain.imageURI": "imageURI" is not listed in openai/fileParams',
+      );
+      expect(() =>
+        assertion.toHaveCalledToolOnce("plain", { imageURI: value } as never),
+      ).toThrow(
+        '"plain.imageURI": "imageURI" is not listed in openai/fileParams',
+      );
+    }
+    expect(() =>
+      assertion.toHaveCalledToolWith("resize", { width: file }),
+    ).toThrow('"resize.width": "width" is not listed in openai/fileParams');
+    expect(() =>
+      assertion.toHaveCalledToolOnce("resize", { width: file }),
+    ).toThrow('"resize.width": "width" is not listed in openai/fileParams');
+    expect(chat.toolCalls).toEqual([]);
+  },
+);
+
+it("keeps ordinary URL arguments and expectations unchanged", async () => {
+  const chat = await start({
+    app: fileApp([]),
+    model: fileModel("plain", () => ({
+      imageURI: "https://example.test/photo.png",
+    })),
+  });
+  await chat.send([portrait()]);
+  expect.chat(chat).toHaveCalledToolOnce("plain", {
+    imageURI: "https://example.test/photo.png",
   });
 });
 
@@ -260,8 +357,8 @@ it.each(["resize", "upload"] as const)(
         app: fileApp(seen),
         model: fileModel(toolName, (files) =>
           toolName === "resize"
-            ? { file: [files[0]?.file_id], width: 1080 }
-            : { files: files[0]?.file_id },
+            ? { file: [files[0]?.workspace_path], width: 1080 }
+            : { files: files[0]?.workspace_path },
         ),
         stubs: stubbed
           ? {
@@ -286,7 +383,7 @@ it.each(["resize", "upload"] as const)(
   },
 );
 
-it.each(["omitted", "null", "empty", "ids", "mixed"] as const)(
+it.each(["omitted", "null", "empty", "paths", "objects"] as const)(
   "preserves optional and nullable file lists and their size limits: %s",
   async (shape) => {
     const received: unknown[] = [];
@@ -318,9 +415,14 @@ it.each(["omitted", "null", "empty", "ids", "mixed"] as const)(
               ? null
               : shape === "empty"
                 ? []
-                : shape === "ids"
-                  ? [files[0]?.file_id]
-                  : [files[0], files[0]?.file_id],
+                : shape === "paths"
+                  ? [files[0]?.workspace_path]
+                  : [
+                      {
+                        file_id: "file_invented",
+                        download_url: "https://invented.test",
+                      },
+                    ],
         };
       }),
       stubs: {
@@ -331,7 +433,7 @@ it.each(["omitted", "null", "empty", "ids", "mixed"] as const)(
       },
     });
     await chat.send([part]);
-    if (shape === "empty") {
+    if (shape === "empty" || shape === "objects") {
       expect(received).toEqual([]);
       expect.chat(chat).toHaveFailedToolCall("upload");
     } else {
@@ -341,9 +443,7 @@ it.each(["omitted", "null", "empty", "ids", "mixed"] as const)(
           ? undefined
           : shape === "null"
             ? null
-            : shape === "ids"
-              ? [expect.inputFile(part)]
-              : [expect.inputFile(part), expect.inputFile(part)],
+            : [expect.inputFile(part)],
       ]);
     }
   },
@@ -357,7 +457,10 @@ it("records current arguments and failures when a model reuses a call id across 
     model: fileModel("resize", (files) => {
       attempt += 1;
       return {
-        file: attempt === 2 ? "file_invented" : files[0]?.file_id,
+        file:
+          attempt === 2
+            ? "/workspace/scratch/missing/input"
+            : files[0]?.workspace_path,
         width: 1080,
       };
     }),
@@ -368,8 +471,10 @@ it("records current arguments and failures when a model reuses a call id across 
   expect(chat.toolCalls[0]).toEqual(firstCall);
   expect(chat.toolCalls[1]).toEqual({
     name: "resize",
-    arguments: { file: "file_invented", width: 1080 },
-    failed: expect.stringContaining("Unknown input file id: file_invented"),
+    arguments: { file: "/workspace/scratch/missing/input", width: 1080 },
+    failed: expect.stringContaining(
+      "Unknown input file path: /workspace/scratch/missing/input",
+    ),
   });
   await chat.send("Use the original file again");
   expect(chat.toolCalls[2]).toEqual(firstCall);
@@ -393,7 +498,7 @@ it.each([
     const chat = await start({
       app: fileApp(seen),
       model: fileModel("resize", (files) => ({
-        file: files[0]?.file_id,
+        file: files[0]?.workspace_path,
         width: 1,
       })),
     });
