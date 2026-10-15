@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { CAROUSEL_RANGE, MIN_SEARCH_ITERATIONS } from "../config.js";
 import {
   fetchSearch,
   fromPrice,
@@ -9,10 +8,7 @@ import {
 } from "../lib/medusa.js";
 import { PriceSchema, SpecSchema } from "../types.js";
 
-// The `search-products` tool: keyword + filters in, matching products out as
-// structured output for the model. It has NO view — include only what the model
-// needs to curate (ids + properties), never presentational data (images, media);
-// render-carousel handles that. Everything this tool needs lives in this file.
+// Internal catalogue search and factual grounding used by shop.
 
 // ---------------------------------------------------------------------------
 // Input
@@ -46,7 +42,9 @@ type SearchInput = z.infer<z.ZodObject<typeof inputSchema>>;
 // ---------------------------------------------------------------------------
 
 const productSchema = z.object({
-  id: z.string().describe("Stable product ID; pass to render-carousel."),
+  id: z
+    .string()
+    .describe("Stable product ID; pass to shop with action carousel."),
   title: z.string(),
   category: z.string().optional().describe("apparel, goggles, or skis."),
   description: z.string().optional(),
@@ -127,73 +125,8 @@ async function search(input: SearchInput): Promise<SearchOutput> {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Narration — framing + next-step instructions for the model. The products
-// themselves ride in structuredContent; this text carries NO result data.
-// ---------------------------------------------------------------------------
-
-function narrate({ products }: SearchOutput): string {
-  const size = products.length;
-
-  if (size === 0) {
-    return `\
-No products found.
-
-NEXT STEP: Broaden the keyword or relax filters, then search again.`;
-  }
-
-  // Small catalog: any relevant hit is renderable. Only widen if these clearly
-  // miss the client's intent (e.g. a category with nothing for them).
-  return `\
-Results ready.
-
-NEXT STEPS:
-1. Curate the matches that fit the client's intent from the structured results. If none fit, search again with a broader keyword or drop the category.
-2. Call render-carousel with the selected IDs (display order).
-3. Only after it renders, write your recommendation in carousel order.`;
-}
-
-// ---------------------------------------------------------------------------
-// Tool (registered from server.ts to keep the typed tool chain intact)
-// ---------------------------------------------------------------------------
-
-export const searchProductsDefinition = {
-  name: "search-products" as const,
-
-  description: `\
-Search the Skybridge winter-sports catalog: skis, goggles, and cold-weather apparel. Handles any query: a specific product, a category, a gift, or open browsing. Never assume something is unavailable — always search before responding.
-
-The response is data only: matching products (title, ID, "from" price, rating, badges, description, facts). The raw results are for your eyes only; the client never sees them. Avoid characterizing the raw results to the client (how many, what categories).
-
-Act on the response as follows:
-
-- SEARCH: pass a keyword. Optionally scope with \`category\` (apparel, goggles, or skis) or \`sort\`. This is a small catalog — one focused search usually surfaces everything relevant (${MIN_SEARCH_ITERATIONS}+ calls).
-- REFINEMENT: if the user narrows to a category, re-search with that \`category\`. If they change intent, search with a new keyword.
-- CURATION: pick the best matches for the client's intent, grounding your choice in each product's description. If zero results, broaden the keyword and search again; do NOT call render-carousel on an empty set.
-- PRESENT: once you have ${CAROUSEL_RANGE} distinct, relevant products, call render-carousel with their IDs. Recommend products ONLY AFTER the carousel displays, and in the same order as in the carousel.
-
-The sweet spot is ${CAROUSEL_RANGE} products.
-`,
-  annotations: {
-    readOnlyHint: true,
-    openWorldHint: false,
-    destructiveHint: false,
-  },
-
-  _meta: {
-    "openai/toolInvocation/invoking": "Searching the shop",
-    "openai/toolInvocation/invoked": "Searched the shop",
-  },
-
-  inputSchema,
-  outputSchema,
-};
-
+// Internal search helper: shop is the public search-and-present action.
 export async function searchProductsHandler(input: SearchInput) {
   const results = await search(input);
-  return {
-    structuredContent: results,
-    content: [{ type: "text" as const, text: narrate(results) }],
-    isError: false,
-  };
+  return { structuredContent: results };
 }
