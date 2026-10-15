@@ -52,10 +52,19 @@ describe("validatorFor", () => {
     ]);
   });
 
-  it("keeps validating schemas without $schema", () => {
+  it("validates schemas without $schema as 2020-12, the MCP default dialect", () => {
     const schema = objectSchema(undefined, "page");
     expect(errorsFor(schema, {})).toEqual([
       "must have required property 'page'",
     ]);
+
+    const tuple: RJSFSchema = {
+      type: "array",
+      prefixItems: [{ type: "string" }],
+    };
+    const errors = validatorFor(tuple)
+      .validateFormData([1], tuple)
+      .errors.map((error) => error.message);
+    expect(errors).toEqual(["must be string"]);
   });
 });
