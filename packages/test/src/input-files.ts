@@ -9,7 +9,13 @@ interface FileReference {
   file_name?: string;
 }
 
-const references = new WeakMap<FilePart, Set<FileReference>>();
+interface Attachment {
+  reference: FileReference;
+  workspace_path: string;
+}
+
+const references = new WeakMap<FilePart, Set<Attachment>>();
+const fileMatchers = new WeakSet<object>();
 
 export interface InputFileMatcher {
   asymmetricMatch(value: unknown): boolean;
@@ -22,23 +28,40 @@ export function inputFile(part: FilePart): InputFileMatcher {
     if (Array.isArray(value)) {
       return value.some(matches);
     }
-    return [...(references.get(part) ?? [])].some((reference) => {
-      if (typeof value === "string") {
-        return value === reference.file_id || value === reference.download_url;
-      }
-      return (
-        value !== null &&
-        typeof value === "object" &&
-        "file_id" in value &&
-        "download_url" in value &&
-        value.file_id === reference.file_id &&
-        value.download_url === reference.download_url
-      );
-    });
+    return [...(references.get(part) ?? [])].some(
+      ({ reference, workspace_path }) => {
+        if (typeof value === "string") {
+          return (
+            value === workspace_path ||
+            value === reference.file_id ||
+            value === reference.download_url
+          );
+        }
+        return (
+          value !== null &&
+          typeof value === "object" &&
+          "file_id" in value &&
+          "download_url" in value &&
+          value.file_id === reference.file_id &&
+          value.download_url === reference.download_url
+        );
+      },
+    );
   }
   const label = () =>
-    `inputFile(${part.filename ?? part.mediaType}: ${[...(references.get(part) ?? [])].map((reference) => reference.file_id).join(", ") || "not sent"})`;
-  return { asymmetricMatch: matches, toString: label, toJSON: label };
+    `inputFile(${part.filename ?? part.mediaType}: ${[...(references.get(part) ?? [])].map(({ reference }) => reference.file_id).join(", ") || "not sent"})`;
+  const matcher = { asymmetricMatch: matches, toString: label, toJSON: label };
+  fileMatchers.add(matcher);
+  return matcher;
+}
+
+export function containsInputFile(value: unknown): boolean {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+  return (
+    fileMatchers.has(value) || Object.values(value).some(containsInputFile)
+  );
 }
 
 async function fileBytes(data: FilePart["data"]): Promise<Buffer> {
@@ -80,7 +103,8 @@ export class InputFiles {
     string,
     { reference: FileReference; bytes: Buffer }
   >();
-  private readonly parts = new WeakMap<FilePart, FileReference>();
+  private readonly parts = new WeakMap<FilePart, Attachment>();
+  private readonly paths = new Map<string, FileReference>();
   private readonly server = createServer((request, response) => {
     const file = this.files.get(request.url?.slice(1) ?? "");
     if (!file) {
@@ -101,8 +125,8 @@ export class InputFiles {
         prepared.push(part);
         continue;
       }
-      let reference = this.parts.get(part);
-      if (!reference) {
+      let attachment = this.parts.get(part);
+      if (!attachment) {
         const bytes = await fileBytes(part.data);
         if (!this.server.listening) {
           await new Promise<void>((resolve, reject) => {
@@ -118,23 +142,29 @@ export class InputFiles {
         if (!address || typeof address === "string") {
           throw new Error("Input file server did not open a local port");
         }
-        const file_id = `file_${randomUUID()}`;
-        reference = {
+        const id = randomUUID();
+        const file_id = `file_${id}`;
+        const reference = {
           file_id,
           download_url: `http://127.0.0.1:${address.port}/${file_id}`,
           mime_type: part.mediaType,
           ...(part.filename === undefined ? {} : { file_name: part.filename }),
         };
+        const filename =
+          (part.filename ?? "input").split(/[/\\]/).pop() || "input";
+        const workspace_path = `/workspace/scratch/${id}/upload/${filename}`;
+        attachment = { reference, workspace_path };
         this.files.set(file_id, { reference, bytes });
-        this.parts.set(part, reference);
-        const known = references.get(part) ?? new Set<FileReference>();
-        known.add(reference);
+        this.paths.set(workspace_path, reference);
+        this.parts.set(part, attachment);
+        const known = references.get(part) ?? new Set<Attachment>();
+        known.add(attachment);
         references.set(part, known);
       }
       prepared.push(
         {
           type: "text",
-          text: `Attached file: ${JSON.stringify(reference)}. For openai/fileParams fields, pass its file_id; for plain URL fields, pass its download_url.`,
+          text: `Attached file: ${JSON.stringify({ uploaded_name: part.filename ?? "input", workspace_path: attachment.workspace_path })}`,
         },
         part,
       );
@@ -148,11 +178,11 @@ export class InputFiles {
       if (typeof value !== "string") {
         return value;
       }
-      const file = this.files.get(value);
-      if (!file) {
-        throw new Error(`Unknown input file id: ${value}`);
+      const reference = this.paths.get(value);
+      if (!reference) {
+        throw new Error(`Unknown input file path: ${value}`);
       }
-      return file.reference;
+      return reference;
     };
     for (const field of fields) {
       if (field in rewritten) {
@@ -172,5 +202,6 @@ export class InputFiles {
       });
     }
     this.files.clear();
+    this.paths.clear();
   }
 }
