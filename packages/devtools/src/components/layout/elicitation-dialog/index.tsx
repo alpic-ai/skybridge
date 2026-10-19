@@ -60,7 +60,7 @@ function ElicitationForm({ params, respond }: PendingElicitation) {
           respond({ action: "accept", content: formData ?? {} })
         }
       >
-        <DialogFooter>
+        <DialogFooter className="sticky bottom-0 bg-background">
           <Button
             type="button"
             variant="secondary"
