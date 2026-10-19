@@ -15,7 +15,7 @@ import {
   useElicitationStore,
 } from "@/lib/elicitation-store.js";
 import { validator } from "@/lib/schema-validator.js";
-import { getRequestedSchema, toContent, toFormSchema } from "./schema.js";
+import { getRequestedSchema, toFormSchema } from "./schema.js";
 import { elicitationWidgets } from "./widgets.js";
 
 export function ElicitationDialog() {
@@ -57,7 +57,7 @@ function ElicitationForm({ params, respond }: PendingElicitation) {
         experimental_defaultFormStateBehavior={{ constAsDefaults: "never" }}
         className="max-h-[60vh] overflow-y-auto"
         onSubmit={({ formData }) =>
-          respond({ action: "accept", content: toContent(formData) })
+          respond({ action: "accept", content: formData ?? {} })
         }
       >
         <DialogFooter>

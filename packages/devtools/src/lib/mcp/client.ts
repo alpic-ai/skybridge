@@ -89,15 +89,19 @@ export class McpClient {
   async callTool(
     toolName: string,
     args: CallToolArgs,
+    options?: Parameters<Client["callTool"]>[1],
   ): Promise<CallToolResponse> {
     if (!this.client) {
       throw new Error("Client not connected. Call connect() first.");
     }
 
-    const result = await this.client.callTool({
-      name: toolName,
-      arguments: args ?? {},
-    });
+    const result = await this.client.callTool(
+      {
+        name: toolName,
+        arguments: args ?? {},
+      },
+      options,
+    );
 
     // Transform _meta → meta to match OpenAI's behavior
     const { _meta, ...rest } = result;

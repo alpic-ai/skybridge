@@ -29,6 +29,10 @@ export function requestElicitation(
         resolve(result);
       },
     };
+    if (signal.aborted) {
+      resolve({ action: "cancel" });
+      return;
+    }
     signal.addEventListener(
       "abort",
       () => pending.respond({ action: "cancel" }),

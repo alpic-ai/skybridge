@@ -18,10 +18,10 @@ import { type OpenAiLog, type ToolEntrypoint, useStore } from "@/lib/store.js";
 import { BrowserOAuthProvider } from "./browser-oauth-provider.js";
 import { McpClient } from "./client.js";
 
-let callingTool: string | null = null;
+let elicitingTool: string | null = null;
 
 const client = new McpClient(async (params, signal) => {
-  const toolName = callingTool;
+  const toolName = elicitingTool;
   const log = (
     command: string,
     args: Record<string, unknown>,
@@ -258,9 +258,13 @@ export const useCallTool = () => {
         modelContext: null,
       });
       const startedAt = performance.now();
-      callingTool = toolName;
-      const response = await client.callTool(toolName, args).finally(() => {
-        callingTool = null;
+      const response = await client.callTool(toolName, args, {
+        onprogress: () => {
+          elicitingTool = toolName;
+          setTimeout(() => {
+            elicitingTool = null;
+          });
+        },
       });
       warnOnLargeToolOutput(response, toolName);
       const durationMs = Math.round(performance.now() - startedAt);

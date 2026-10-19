@@ -4,6 +4,8 @@ import type { RJSFSchema, UiSchema } from "@rjsf/utils";
 type Field = RJSFSchema & {
   "x-openai-input"?: {
     options: { uri: string; name?: string; description?: string }[];
+    selection?: "explicit" | "implicit";
+    userOptions?: object;
   };
   "x-openai-suggestions"?: { const: string }[];
 };
@@ -38,6 +40,12 @@ function toField(field: Field): RJSFSchema {
     return isObject(field.items)
       ? { ...withExamples(field), items: withExamples(field.items as Field) }
       : withExamples(field);
+  }
+  if (input.userOptions || input.selection === "implicit") {
+    const examples = input.options.map((option) => option.uri);
+    return field.type === "array"
+      ? { ...rest, items: { type: "string", format: "uri", examples } }
+      : { ...rest, format: "uri", examples };
   }
   const options = input.options.map((option) => ({
     const: option.uri,
@@ -74,16 +82,6 @@ export function toFormSchema(schema: RJSFSchema): {
     }
   }
   return { schema: { ...schema, properties }, uiSchema };
-}
-
-export function toContent(
-  formData: Record<string, unknown> = {},
-): Record<string, string | number | boolean | string[]> {
-  return Object.fromEntries(
-    Object.entries(formData).filter(
-      ([, value]) => !(Array.isArray(value) && value.length === 0),
-    ),
-  ) as Record<string, string | number | boolean | string[]>;
 }
 
 function isObject(value: unknown): value is RJSFSchema {
