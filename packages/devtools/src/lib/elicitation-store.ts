@@ -5,33 +5,37 @@ import type {
 import { create } from "zustand";
 
 export type PendingElicitation = {
+  id: string;
   params: ElicitRequestParams;
   respond: (result: ElicitResult) => void;
 };
 
-export const useElicitationStore = create<{
-  pending: PendingElicitation | null;
-}>(() => ({ pending: null }));
+export const useElicitationStore = create<{ queue: PendingElicitation[] }>(
+  () => ({ queue: [] }),
+);
 
 export function requestElicitation(
   params: ElicitRequestParams,
   signal: AbortSignal,
 ): Promise<ElicitResult> {
-  useElicitationStore.getState().pending?.respond({ action: "cancel" });
   return new Promise((resolve) => {
-    const onAbort = () => respond({ action: "cancel" });
-    const respond = (result: ElicitResult) => {
-      signal.removeEventListener("abort", onAbort);
-      if (useElicitationStore.getState().pending?.respond === respond) {
-        useElicitationStore.setState({ pending: null });
-      }
-      resolve(result);
+    const pending: PendingElicitation = {
+      id: crypto.randomUUID(),
+      params,
+      respond: (result) => {
+        useElicitationStore.setState(({ queue }) => ({
+          queue: queue.filter((item) => item !== pending),
+        }));
+        resolve(result);
+      },
     };
-    if (signal.aborted) {
-      resolve({ action: "cancel" });
-      return;
-    }
-    signal.addEventListener("abort", onAbort, { once: true });
-    useElicitationStore.setState({ pending: { params, respond } });
+    signal.addEventListener(
+      "abort",
+      () => pending.respond({ action: "cancel" }),
+      { once: true },
+    );
+    useElicitationStore.setState(({ queue }) => ({
+      queue: [...queue, pending],
+    }));
   });
 }

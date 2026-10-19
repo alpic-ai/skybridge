@@ -9,7 +9,7 @@ import type {
   ObjectFieldTemplateProps,
   TitleFieldProps,
 } from "@rjsf/utils";
-import { getInputProps } from "@rjsf/utils";
+import { examplesId, getInputProps } from "@rjsf/utils";
 import { Plus, X } from "lucide-react";
 import type { CSSProperties } from "react";
 import { TruncatedDescription } from "@/components/layout/tools-list/truncated-description.js";
@@ -56,24 +56,36 @@ export function BaseInputTemplate(props: BaseInputTemplateProps) {
     return raw;
   };
 
+  const examples = Array.isArray(schema.examples) ? schema.examples : [];
+
   return (
-    <input
-      id={id}
-      name={name}
-      toolparamdescription={schema.description}
-      className={denseInputClass}
-      value={value ?? ""}
-      required={required}
-      disabled={disabled || readonly}
-      placeholder={placeholder}
-      aria-invalid={hasError || undefined}
-      onChange={
-        onChangeOverride ?? ((event) => onChange(parse(event.target.value)))
-      }
-      onBlur={(event) => onBlur(id, parse(event.target.value))}
-      onFocus={(event) => onFocus(id, parse(event.target.value))}
-      {...inputProps}
-    />
+    <>
+      <input
+        id={id}
+        name={name}
+        list={examples.length > 0 ? examplesId(id) : undefined}
+        toolparamdescription={schema.description}
+        className={denseInputClass}
+        value={value ?? ""}
+        required={required}
+        disabled={disabled || readonly}
+        placeholder={placeholder}
+        aria-invalid={hasError || undefined}
+        onChange={
+          onChangeOverride ?? ((event) => onChange(parse(event.target.value)))
+        }
+        onBlur={(event) => onBlur(id, parse(event.target.value))}
+        onFocus={(event) => onFocus(id, parse(event.target.value))}
+        {...inputProps}
+      />
+      {examples.length > 0 && (
+        <datalist id={examplesId(id)}>
+          {examples.map((example) => (
+            <option key={String(example)} value={String(example)} />
+          ))}
+        </datalist>
+      )}
+    </>
   );
 }
 

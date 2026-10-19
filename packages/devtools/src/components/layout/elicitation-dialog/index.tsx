@@ -19,19 +19,17 @@ import { getRequestedSchema, toContent, toFormSchema } from "./schema.js";
 import { elicitationWidgets } from "./widgets.js";
 
 export function ElicitationDialog() {
-  const pending = useElicitationStore((s) => s.pending);
+  const pending = useElicitationStore((s) => s.queue[0]);
   return (
     <Dialog
-      open={pending !== null}
+      open={pending !== undefined}
       onOpenChange={(open) => {
         if (!open) {
           pending?.respond({ action: "cancel" });
         }
       }}
     >
-      {pending && (
-        <ElicitationForm params={pending.params} respond={pending.respond} />
-      )}
+      {pending && <ElicitationForm key={pending.id} {...pending} />}
     </Dialog>
   );
 }
@@ -55,10 +53,11 @@ function ElicitationForm({ params, respond }: PendingElicitation) {
         widgets={elicitationWidgets}
         templates={formTemplates}
         showErrorList={false}
+        omitExtraData
         experimental_defaultFormStateBehavior={{ constAsDefaults: "never" }}
         className="max-h-[60vh] overflow-y-auto"
         onSubmit={({ formData }) =>
-          respond({ action: "accept", content: toContent(schema, formData) })
+          respond({ action: "accept", content: toContent(formData) })
         }
       >
         <DialogFooter>

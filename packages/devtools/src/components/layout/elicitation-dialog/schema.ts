@@ -5,8 +5,15 @@ type Field = RJSFSchema & {
   "x-openai-input"?: {
     options: { uri: string; name?: string; description?: string }[];
   };
-  "x-openai-suggestions"?: unknown[];
+  "x-openai-suggestions"?: { const: string }[];
 };
+
+function withExamples(field: Field): RJSFSchema {
+  const { "x-openai-suggestions": suggestions, ...rest } = field;
+  return suggestions
+    ? { ...rest, examples: suggestions.map((suggestion) => suggestion.const) }
+    : field;
+}
 
 export function getRequestedSchema(params: ElicitRequestParams): RJSFSchema {
   const meta = params._meta?.["openai/elicitation"] as
@@ -25,7 +32,12 @@ function hasItemOptions(field: RJSFSchema): boolean {
 function toField(field: Field): RJSFSchema {
   const { "x-openai-input": input, format: _format, ...rest } = field;
   if (!input) {
-    return hasItemOptions(field) ? { ...field, uniqueItems: true } : field;
+    if (hasItemOptions(field)) {
+      return { ...field, uniqueItems: true };
+    }
+    return isObject(field.items)
+      ? { ...withExamples(field), items: withExamples(field.items as Field) }
+      : withExamples(field);
   }
   const options = input.options.map((option) => ({
     const: option.uri,
@@ -40,12 +52,6 @@ function toField(field: Field): RJSFSchema {
 function toUiField(field: RJSFSchema): UiSchema | undefined {
   if (field.oneOf || hasItemOptions(field)) {
     return { "ui:widget": "OptionsWidget" };
-  }
-  if ("x-openai-suggestions" in field) {
-    return { "ui:widget": "SuggestionsWidget" };
-  }
-  if (isObject(field.items) && "x-openai-suggestions" in field.items) {
-    return { items: { "ui:widget": "SuggestionsWidget" } };
   }
   return undefined;
 }
@@ -71,20 +77,13 @@ export function toFormSchema(schema: RJSFSchema): {
 }
 
 export function toContent(
-  schema: RJSFSchema,
-  formData: Record<string, unknown> | undefined,
+  formData: Record<string, unknown> = {},
 ): Record<string, string | number | boolean | string[]> {
   return Object.fromEntries(
-    Object.keys(schema.properties ?? {})
-      .map((name) => [name, formData?.[name]] as const)
-      .filter(
-        (entry): entry is [string, string | number | boolean | string[]] =>
-          entry[1] !== undefined &&
-          entry[1] !== null &&
-          entry[1] !== "" &&
-          !(Array.isArray(entry[1]) && entry[1].length === 0),
-      ),
-  );
+    Object.entries(formData).filter(
+      ([, value]) => !(Array.isArray(value) && value.length === 0),
+    ),
+  ) as Record<string, string | number | boolean | string[]>;
 }
 
 function isObject(value: unknown): value is RJSFSchema {

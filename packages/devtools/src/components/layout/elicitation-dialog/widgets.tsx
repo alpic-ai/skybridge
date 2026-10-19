@@ -5,7 +5,6 @@ import type {
   WidgetProps,
 } from "@rjsf/utils";
 import { formWidgets } from "@/components/layout/tools-list/form/index.js";
-import { denseInputClass } from "@/components/layout/tools-list/form/styles.js";
 import { cn } from "@/lib/utils.js";
 
 type OptionSchema = RJSFSchema & { "x-openai-thumbnail"?: { src: string } };
@@ -80,45 +79,7 @@ function OptionsWidget({
   );
 }
 
-function SuggestionsWidget({
-  id,
-  value,
-  required,
-  disabled,
-  readonly,
-  schema,
-  onChange,
-  rawErrors,
-}: WidgetProps) {
-  const suggestions = (schema["x-openai-suggestions"] ?? []) as {
-    const: string;
-    title?: string;
-  }[];
-  return (
-    <>
-      <input
-        id={id}
-        list={`${id}-suggestions`}
-        className={denseInputClass}
-        value={value ?? ""}
-        required={required}
-        disabled={disabled || readonly}
-        aria-invalid={(rawErrors?.length ?? 0) > 0 || undefined}
-        onChange={(event) => onChange(event.target.value || undefined)}
-      />
-      <datalist id={`${id}-suggestions`}>
-        {suggestions.map((suggestion) => (
-          <option key={suggestion.const} value={suggestion.const}>
-            {suggestion.title}
-          </option>
-        ))}
-      </datalist>
-    </>
-  );
-}
-
 export const elicitationWidgets: RegistryWidgetsType = {
   ...formWidgets,
   OptionsWidget,
-  SuggestionsWidget,
 };
