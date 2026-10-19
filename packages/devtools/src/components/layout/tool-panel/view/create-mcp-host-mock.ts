@@ -114,19 +114,19 @@ export function createMcpHostMock(
   const post = (msg: unknown) => postToIframe(iframe, msg);
   const availableDisplayModes =
     viewUi.availableDisplayModes ??
-    (viewUi.preferredDisplayMode
-      ? [viewUi.preferredDisplayMode]
-      : ["inline", "fullscreen"]);
-  const availableDisplayMode = (mode: string, fallback = mode) =>
-    availableDisplayModes.find((available) => available === mode) ??
-    availableDisplayModes.find((available) => available === fallback) ??
-    availableDisplayModes[0];
+    (viewUi.preferredDisplayMode && [viewUi.preferredDisplayMode]);
+  const availableDisplayMode = <T extends string>(mode: T, fallback = mode) =>
+    availableDisplayModes
+      ? (availableDisplayModes.find((available) => available === mode) ??
+        availableDisplayModes.find((available) => available === fallback) ??
+        availableDisplayModes[0])
+      : mode;
   const chatgptViewContext = () => {
     const deepLink = new URLSearchParams(window.location.search).get(
       "deepLink",
     );
     return {
-      availableDisplayModes,
+      ...(availableDisplayModes && { availableDisplayModes }),
       ...(deepLink && { "openai/deepLink": { url: deepLink } }),
     };
   };
