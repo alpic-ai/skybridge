@@ -11,6 +11,7 @@ import { useAuthStore } from "@/lib/auth-store.js";
 import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
 import { connectToServer } from "@/lib/mcp/index.js";
 import { useEvalsPage } from "@/lib/nuqs.js";
+import { ElicitationDialog } from "./elicitation-dialog/index.js";
 import { EvalsPage } from "./evals-page.js";
 import { Header } from "./header.js";
 import { Preview } from "./preview/index.js";
@@ -37,6 +38,7 @@ function AppLayout() {
   return (
     <div className="grid h-screen grid-rows-[auto_1fr] overflow-hidden bg-background text-foreground">
       <Header />
+      <ElicitationDialog />
       {evalsOpen ? (
         <EvalsPage />
       ) : isConnected && previewClient ? (
