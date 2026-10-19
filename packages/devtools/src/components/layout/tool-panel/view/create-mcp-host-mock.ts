@@ -80,6 +80,7 @@ function buildHostContext(): HostContext {
 export type McpHostMockCleanup = () => void;
 
 export type ToolDataSnapshot = {
+  modelContext?: Record<string, unknown> | null;
   toolInput?: Record<string, unknown> | null;
   toolOutput?: Record<string, unknown> | null;
   toolResponseMetadata?: Record<string, unknown> | null;
@@ -101,9 +102,9 @@ export function createMcpHostMock(
     type?: "default" | "response",
   ) => void,
   getCurrentToolData: () => ToolDataSnapshot,
+  setModelContext: (modelContext: Record<string, unknown>) => void,
 ): McpHostMockCleanup {
   const post = (msg: unknown) => postToIframe(iframe, msg);
-  let modelContext: Record<string, unknown> | null = null;
 
   const handleMessage = async (event: MessageEvent) => {
     if (event.source !== iframe.contentWindow) {
@@ -135,6 +136,7 @@ export function createMcpHostMock(
 
     switch (method) {
       case "ui/initialize": {
+        const { modelContext } = getCurrentToolData();
         const isChatGpt =
           useInspectorPreferencesStore.getState().previewClient === "chatgpt";
         respond(post, id, {
@@ -201,7 +203,8 @@ export function createMcpHostMock(
           break;
         }
         const updateId = crypto.randomUUID();
-        modelContext = { ...params, updateId };
+        const modelContext = { ...params, updateId };
+        setModelContext(modelContext);
         respond(post, id, { _meta: { "openai/modelContext": { updateId } } });
         post({
           jsonrpc: "2.0",

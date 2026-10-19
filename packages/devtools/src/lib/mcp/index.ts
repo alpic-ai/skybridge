@@ -13,7 +13,7 @@ import { env } from "@/lib/env.js";
 import { getInspectorPreferences } from "@/lib/inspector-preferences-store.js";
 import { useSelectedToolName } from "@/lib/nuqs.js";
 import { queryClient } from "@/lib/query-client.js";
-import { useStore } from "@/lib/store.js";
+import { type ToolEntrypoint, useStore } from "@/lib/store.js";
 import { BrowserOAuthProvider } from "./browser-oauth-provider.js";
 import { McpClient } from "./client.js";
 
@@ -211,7 +211,7 @@ export const useCallTool = () => {
     }: {
       toolName: string;
       args: CallToolArgs;
-      entrypoint?: "global" | null;
+      entrypoint?: ToolEntrypoint | null;
     }) => {
       setToolData(toolName, {
         input: args ?? {},
@@ -222,6 +222,7 @@ export const useCallTool = () => {
         openaiObject: null,
         openInAppUrl: null,
         entrypoint,
+        modelContext: null,
       });
       const startedAt = performance.now();
       const response = await client.callTool(toolName, args);

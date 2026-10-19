@@ -131,7 +131,9 @@ export const View = () => {
           | Record<string, unknown>
           | null
           | undefined,
+        modelContext: useStore.getState().tools[tool.name]?.modelContext,
       }),
+      (modelContext) => setToolData(tool.name, { modelContext }),
     );
 
     iframe.contentDocument.open();

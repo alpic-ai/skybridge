@@ -368,7 +368,9 @@ export const ToolPanelToolbar = ({
             label="preview"
             onClick={() => {
               setPreviewClient("chatgpt");
-              setPreference("displayMode", "inline");
+              if (displayMode === "pip") {
+                setPreference("displayMode", "inline");
+              }
             }}
           />
           {!logsOpen && (

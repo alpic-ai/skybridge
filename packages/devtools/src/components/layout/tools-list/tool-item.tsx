@@ -41,7 +41,11 @@ import {
   useSavedInputsStore,
 } from "@/lib/saved-inputs-store.js";
 import { validator } from "@/lib/schema-validator.js";
-import { useCallToolResult, useStore } from "@/lib/store.js";
+import {
+  type ToolEntrypoint,
+  useCallToolResult,
+  useStore,
+} from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
 import { buildFormUiSchema, formTemplates, formWidgets } from "./form/index.js";
@@ -52,7 +56,7 @@ import { TruncatedDescription } from "./truncated-description.js";
 
 type TabValue = "form" | "json";
 
-type Entrypoint = "normal" | "global";
+type Entrypoint = "normal" | ToolEntrypoint;
 
 function hasGlobalEntrypoint(tool: Tool): boolean {
   const ui = tool._meta?.["openai/ui"] as
