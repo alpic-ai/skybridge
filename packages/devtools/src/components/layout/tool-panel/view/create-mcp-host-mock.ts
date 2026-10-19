@@ -115,12 +115,9 @@ export function createMcpHostMock(
   const availableDisplayModes =
     viewUi.availableDisplayModes ??
     (viewUi.preferredDisplayMode && [viewUi.preferredDisplayMode]);
-  const availableDisplayMode = <T extends string>(mode: T, fallback = mode) =>
-    availableDisplayModes
-      ? (availableDisplayModes.find((available) => available === mode) ??
-        availableDisplayModes.find((available) => available === fallback) ??
-        availableDisplayModes[0])
-      : mode;
+  const supports = (mode: string) =>
+    !availableDisplayModes ||
+    availableDisplayModes.some((available) => available === mode);
   const chatgptViewContext = () => {
     const deepLink = new URLSearchParams(window.location.search).get(
       "deepLink",
@@ -168,7 +165,9 @@ export function createMcpHostMock(
           preferences.setPreference(
             "displayMode",
             viewUi.preferredDisplayMode ??
-              availableDisplayMode(preferences.displayMode),
+              (availableDisplayModes && !supports(preferences.displayMode)
+                ? availableDisplayModes[0]
+                : preferences.displayMode),
           );
         }
         respond(post, id, {
@@ -290,8 +289,8 @@ export function createMcpHostMock(
           state,
         );
         const mode =
-          state.previewClient === "chatgpt"
-            ? availableDisplayMode(resolved, state.displayMode)
+          state.previewClient === "chatgpt" && !supports(resolved)
+            ? state.displayMode
             : resolved;
         state.setPreference("displayMode", mode);
         respond(post, id, { mode });
