@@ -112,20 +112,12 @@ export function createMcpHostMock(
   viewUi: OpenAIViewUi = {},
 ): McpHostMockCleanup {
   const post = (msg: unknown) => postToIframe(iframe, msg);
-  const availableDisplayModes =
-    viewUi.availableDisplayModes ??
-    (viewUi.preferredDisplayMode && [viewUi.preferredDisplayMode]);
-  const supports = (mode: string) =>
-    !availableDisplayModes ||
-    availableDisplayModes.some((available) => available === mode);
-  const chatgptViewContext = () => {
-    const deepLink = new URLSearchParams(window.location.search).get(
-      "deepLink",
-    );
-    return {
-      ...(availableDisplayModes && { availableDisplayModes }),
-      ...(deepLink && { "openai/deepLink": { url: deepLink } }),
-    };
+  const modes = viewUi.availableDisplayModes;
+  const supports = (mode: string) => !modes || modes.some((m) => m === mode);
+  const deepLink = new URLSearchParams(window.location.search).get("deepLink");
+  const chatgptViewContext = {
+    ...(modes && { availableDisplayModes: modes }),
+    ...(deepLink && { "openai/deepLink": { url: deepLink } }),
   };
 
   const handleMessage = async (event: MessageEvent) => {
@@ -165,8 +157,8 @@ export function createMcpHostMock(
           preferences.setPreference(
             "displayMode",
             viewUi.preferredDisplayMode ??
-              (availableDisplayModes && !supports(preferences.displayMode)
-                ? availableDisplayModes[0]
+              (modes && !supports(preferences.displayMode)
+                ? modes[0]
                 : preferences.displayMode),
           );
         }
@@ -199,7 +191,7 @@ export function createMcpHostMock(
           },
           hostContext: {
             ...buildHostContext(),
-            ...(isChatGpt && chatgptViewContext()),
+            ...(isChatGpt && chatgptViewContext),
             ...(isChatGpt &&
               modelContext && { "openai/modelContext": modelContext }),
           },
@@ -366,7 +358,7 @@ export function createMcpHostMock(
             preferences.theme,
             isMobileDevice(preferences.userAgent),
           ),
-          preferences.previewClient === "chatgpt" && chatgptViewContext(),
+          preferences.previewClient === "chatgpt" && chatgptViewContext,
         );
       }
       if (preferences.locale !== previous.locale) {
