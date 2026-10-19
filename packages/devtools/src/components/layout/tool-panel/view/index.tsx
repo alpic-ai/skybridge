@@ -13,6 +13,7 @@ import { useCallToolResult, useStore } from "@/lib/store.js";
 import { asString, cn, injectWaitForOpenai } from "@/lib/utils.js";
 import {
   createMcpHostMock,
+  type OpenAIViewUi,
   pushToolInputNotification,
   pushToolResultNotification,
 } from "./create-mcp-host-mock.js";
@@ -71,6 +72,7 @@ export const View = () => {
     _meta?: Record<string, unknown>;
   };
   const html = resourceEntry.text;
+  const viewUi = resourceEntry._meta?.["openai/ui"] as OpenAIViewUi | undefined;
   const viewDomain = asString(
     (resourceEntry._meta?.ui as { domain?: unknown })?.domain ??
       resourceEntry._meta?.["openai/widgetDomain"],
@@ -134,6 +136,7 @@ export const View = () => {
         modelContext: useStore.getState().tools[tool.name]?.modelContext,
       }),
       (modelContext) => setToolData(tool.name, { modelContext }),
+      viewUi,
     );
 
     iframe.contentDocument.open();
@@ -151,6 +154,7 @@ export const View = () => {
   }, [
     html,
     viewDomain,
+    viewUi,
     tool.name,
     pushOpenAiLog,
     setToolData,

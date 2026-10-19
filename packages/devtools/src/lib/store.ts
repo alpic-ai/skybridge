@@ -6,7 +6,7 @@ import type {
 } from "skybridge/web";
 import { create } from "zustand";
 
-export type ToolEntrypoint = "global";
+export type ToolEntrypoint = "global" | "thread";
 
 export type OpenAiLog = {
   id: string;

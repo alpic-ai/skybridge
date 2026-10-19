@@ -28,6 +28,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { CallToolResponse } from "skybridge/web";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { CopyButton } from "@/lib/copy.js";
+import { addFileResource } from "@/lib/file-resources.js";
 import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
 import {
   toolRequiresAuth,
@@ -59,11 +60,25 @@ type TabValue = "form" | "json";
 
 type Entrypoint = "normal" | ToolEntrypoint;
 
-function hasGlobalEntrypoint(tool: Tool): boolean {
+type OpenAIEntrypointMeta = { type: string; extensions?: string[] };
+
+function openaiEntrypoints(tool: Tool): OpenAIEntrypointMeta[] {
   const ui = tool._meta?.["openai/ui"] as
-    | { entrypoints?: { type: string }[] }
+    | { entrypoints?: OpenAIEntrypointMeta[] }
     | undefined;
-  return ui?.entrypoints?.some(({ type }) => type === "global") ?? false;
+  return ui?.entrypoints ?? [];
+}
+
+function viewEntrypoints(tool: Tool): ToolEntrypoint[] {
+  const declared = openaiEntrypoints(tool);
+  return (["global", "thread"] as const).filter((type) =>
+    declared.some((entrypoint) => entrypoint.type === type),
+  );
+}
+
+function fileExtensions(tool: Tool): string[] | undefined {
+  return openaiEntrypoints(tool).find(({ type }) => type === "file")
+    ?.extensions;
 }
 
 export function ToolItem({ tool }: { tool: Tool }) {
@@ -88,13 +103,17 @@ export function ToolItem({ tool }: { tool: Tool }) {
   const [tab, setTab] = useState<TabValue>("form");
   const [jsonError, setJsonError] = useState(false);
   const [entrypoint, setEntrypoint] = useState<Entrypoint>("normal");
-  const showsEntrypoints = hasGlobalEntrypoint(tool);
-  const runsGlobalEntrypoint = showsEntrypoints && entrypoint === "global";
+  const entrypoints = viewEntrypoints(tool);
+  const acceptedExtensions = fileExtensions(tool);
+  const activeEntrypoint =
+    entrypoint !== "normal" && entrypoints.includes(entrypoint)
+      ? entrypoint
+      : null;
 
   // Run is disabled when the current input doesn't validate against the schema
   // (or the JSON is malformed).
   const inputInvalid = useMemo(() => {
-    if (runsGlobalEntrypoint) {
+    if (activeEntrypoint) {
       return false;
     }
     const schema = tool.inputSchema as RJSFSchema;
@@ -107,13 +126,13 @@ export function ToolItem({ tool }: { tool: Tool }) {
       return true;
     }
     return validator.validateFormData(formData, schema).errors.length > 0;
-  }, [runsGlobalEntrypoint, tool.inputSchema, tab, jsonError, formData]);
+  }, [activeEntrypoint, tool.inputSchema, tab, jsonError, formData]);
 
   const handleRun = async () => {
     if (needsSignIn) {
       return;
     }
-    if (!runsGlobalEntrypoint) {
+    if (activeEntrypoint === null) {
       const schema = tool.inputSchema as RJSFSchema;
       const hasNoInput =
         !schema?.properties || Object.keys(schema.properties).length === 0;
@@ -134,7 +153,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
         }
       }
     }
-    if (runsGlobalEntrypoint) {
+    if (activeEntrypoint) {
       useInspectorPreferencesStore
         .getState()
         .setPreference("displayMode", "fullscreen");
@@ -144,8 +163,8 @@ export function ToolItem({ tool }: { tool: Tool }) {
     setSelectedTool(tool.name);
     return await callTool({
       toolName: tool.name,
-      args: runsGlobalEntrypoint ? {} : formData,
-      entrypoint: runsGlobalEntrypoint ? "global" : null,
+      args: activeEntrypoint ? {} : formData,
+      entrypoint: activeEntrypoint,
     });
   };
 
@@ -236,7 +255,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
               isSelected ? "opacity-100" : "opacity-50",
             )}
           >
-            {!runsGlobalEntrypoint && saved.savedInputs.length > 0 && (
+            {activeEntrypoint === null && saved.savedInputs.length > 0 && (
               <SavedInputsDropdown
                 inputs={saved.savedInputs}
                 activeKey={saved.activeKey}
@@ -245,7 +264,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
                 onDelete={saved.removeInput}
               />
             )}
-            {showsEntrypoints && (
+            {entrypoints.length > 0 && (
               <Select
                 value={entrypoint}
                 onValueChange={(value) => setEntrypoint(value as Entrypoint)}
@@ -260,9 +279,15 @@ export function ToolItem({ tool }: { tool: Tool }) {
                   <SelectItem value="normal" className="font-mono text-xs">
                     normal
                   </SelectItem>
-                  <SelectItem value="global" className="font-mono text-xs">
-                    global
-                  </SelectItem>
+                  {entrypoints.map((type) => (
+                    <SelectItem
+                      key={type}
+                      value={type}
+                      className="font-mono text-xs"
+                    >
+                      {type}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             )}
@@ -295,21 +320,42 @@ export function ToolItem({ tool }: { tool: Tool }) {
         // the ui component hardcodes on the Content root).
         style={{ animation: "none" }}
       >
-        {!runsGlobalEntrypoint && (
-          <ToolBody
-            tool={tool}
-            formData={formData}
-            setFormData={setFormData}
-            formRef={formRef}
-            tab={tab}
-            setTab={setTab}
-            jsonError={jsonError}
-            setJsonError={setJsonError}
-            saved={saved}
-            inputInvalid={inputInvalid}
-            onRun={handleRun}
-          />
-        )}
+        {activeEntrypoint === null &&
+          (acceptedExtensions ? (
+            <input
+              type="file"
+              aria-label="File"
+              accept={acceptedExtensions.join(",")}
+              className="w-full text-xs"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                setFormData(
+                  file
+                    ? {
+                        file: {
+                          name: file.name,
+                          resourceUri: addFileResource(file),
+                        },
+                      }
+                    : null,
+                );
+              }}
+            />
+          ) : (
+            <ToolBody
+              tool={tool}
+              formData={formData}
+              setFormData={setFormData}
+              formRef={formRef}
+              tab={tab}
+              setTab={setTab}
+              jsonError={jsonError}
+              setJsonError={setJsonError}
+              saved={saved}
+              inputInvalid={inputInvalid}
+              onRun={handleRun}
+            />
+          ))}
       </AccordionContent>
     </AccordionItem>
   );
