@@ -117,8 +117,9 @@ export function createMcpHostMock(
     (viewUi.preferredDisplayMode
       ? [viewUi.preferredDisplayMode]
       : ["inline", "fullscreen"]);
-  const availableDisplayMode = (mode: string) =>
+  const availableDisplayMode = (mode: string, fallback = mode) =>
     availableDisplayModes.find((available) => available === mode) ??
+    availableDisplayModes.find((available) => available === fallback) ??
     availableDisplayModes[0];
   const chatgptViewContext = () => {
     const deepLink = new URLSearchParams(window.location.search).get(
@@ -256,13 +257,8 @@ export function createMcpHostMock(
         log("mcp:resources/read", (params as Record<string, unknown>) ?? {});
         try {
           const request = params as Parameters<typeof readResourceFn>[0];
-          const representation = (
-            request._meta?.["openai/resource"] as
-              | { representation?: unknown }
-              | undefined
-          )?.representation;
           const result =
-            (await readFileResource(request.uri, representation)) ??
+            (await readFileResource(request)) ??
             (await readResourceFn(request));
           log(
             "mcp:resources/read response",
@@ -294,9 +290,8 @@ export function createMcpHostMock(
           state,
         );
         const mode =
-          state.previewClient === "chatgpt" &&
-          !availableDisplayModes.includes(resolved)
-            ? availableDisplayMode(state.displayMode)
+          state.previewClient === "chatgpt"
+            ? availableDisplayMode(resolved, state.displayMode)
             : resolved;
         state.setPreference("displayMode", mode);
         respond(post, id, { mode });

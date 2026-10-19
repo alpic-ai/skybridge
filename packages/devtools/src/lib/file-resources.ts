@@ -15,16 +15,19 @@ function readAsBase64(file: File): Promise<string> {
   });
 }
 
-export async function readFileResource(
-  uri: string,
-  representation: unknown,
-): Promise<{ contents: Record<string, unknown>[] } | undefined> {
+export async function readFileResource({
+  uri,
+  _meta,
+}: {
+  uri: string;
+  _meta?: { "openai/resource"?: { representation?: "text" | "blob" } };
+}): Promise<{ contents: Record<string, unknown>[] } | undefined> {
   const file = files.get(uri);
   if (!file) {
     return undefined;
   }
   const content =
-    representation === "text"
+    _meta?.["openai/resource"]?.representation === "text"
       ? { text: await file.text() }
       : { blob: await readAsBase64(file) };
   return {
