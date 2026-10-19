@@ -207,9 +207,11 @@ export const useCallTool = () => {
     mutationFn: async ({
       toolName,
       args,
+      entrypoint = null,
     }: {
       toolName: string;
       args: CallToolArgs;
+      entrypoint?: "global" | null;
     }) => {
       setToolData(toolName, {
         input: args ?? {},
@@ -219,6 +221,7 @@ export const useCallTool = () => {
         openaiLogs: [],
         openaiObject: null,
         openInAppUrl: null,
+        entrypoint,
       });
       const startedAt = performance.now();
       const response = await client.callTool(toolName, args);
@@ -256,6 +259,7 @@ export const useCallTool = () => {
           widgetState: null,
         },
         openInAppUrl: null,
+        entrypoint,
       });
       return response;
     },
@@ -284,7 +288,7 @@ export const useSuspenseResource = (uri?: string) => {
       if (!uri) {
         throw new Error("Resource URI is required");
       }
-      const resource = await client.readResource(uri);
+      const resource = await client.readResource({ uri });
       return resource;
     },
   });

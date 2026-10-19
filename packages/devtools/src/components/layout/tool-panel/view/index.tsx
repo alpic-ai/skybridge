@@ -116,6 +116,7 @@ export const View = () => {
     const cleanupMcpMock = createMcpHostMock(
       iframe,
       (name, args) => mcpClient.callTool(name, args),
+      (params) => mcpClient.readResource(params),
       logFn,
       () => ({
         toolInput: openaiObjectRef.current?.toolInput as

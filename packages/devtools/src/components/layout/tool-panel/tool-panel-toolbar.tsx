@@ -32,6 +32,8 @@ import type { RequestDisplayMode } from "skybridge/web";
 import { BlossomIcon } from "@/components/layout/preview/chatgpt-icons.js";
 import { ClaudeLogomark } from "@/components/layout/preview/claude-icons.js";
 import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
+import { useSelectedToolName } from "@/lib/nuqs.js";
+import { useCallToolResult } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { locales } from "./locales.js";
 import { isOneOf } from "./utils.js";
@@ -45,8 +47,7 @@ const displayModes: { mode: RequestDisplayMode; icon: LucideIcon }[] = [
 // Applies the form's current values to the preferences store and returns a
 // human-readable summary for the agent.
 function applyViewOptions(data: FormData): string {
-  const { userAgent, displayMode, previewClient, setPreference } =
-    useInspectorPreferencesStore.getState();
+  const { userAgent, setPreference } = useInspectorPreferencesStore.getState();
 
   // Checkboxes are absent from FormData when unchecked, so absence is
   // meaningful (false) — apply unconditionally.
@@ -57,9 +58,6 @@ function applyViewOptions(data: FormData): string {
     device: { ...userAgent?.device, type: mobile ? "mobile" : "desktop" },
     capabilities: { hover: !mobile, touch: mobile },
   });
-  if (mobile && displayMode === "pip" && previewClient === "chatgpt") {
-    setPreference("displayMode", "fullscreen");
-  }
 
   const locale = data.get("locale");
   if (
@@ -210,6 +208,8 @@ export const ToolPanelToolbar = ({
     (s) => s.setPreviewClient,
   );
   const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
+  const [selectedTool] = useSelectedToolName();
+  const entrypoint = useCallToolResult(selectedTool ?? "")?.entrypoint;
 
   const formRef = useRef<HTMLFormElement>(null);
   const [localeOpen, setLocaleOpen] = useState(false);
@@ -260,6 +260,15 @@ export const ToolPanelToolbar = ({
         variant === "panel" ? "mt-3 px-3" : "justify-end",
       )}
     >
+      {entrypoint && (
+        <div
+          title="The view was opened from this entrypoint"
+          className="inline-flex h-7 shrink-0 cursor-default items-center whitespace-nowrap rounded-md bg-muted px-2.5 text-xs font-medium text-muted-foreground"
+        >
+          {entrypoint} entrypoint
+        </div>
+      )}
+
       {variant === "panel" && (
         <div
           title="Display mode (driven by the view)"
@@ -357,7 +366,10 @@ export const ToolPanelToolbar = ({
           <ToolbarButton
             icon={Eye}
             label="preview"
-            onClick={() => setPreviewClient("chatgpt")}
+            onClick={() => {
+              setPreviewClient("chatgpt");
+              setPreference("displayMode", "inline");
+            }}
           />
           {!logsOpen && (
             <ToolbarButton icon={Logs} label="logs" onClick={onOpenLogs} />

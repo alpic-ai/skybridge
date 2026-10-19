@@ -4,6 +4,13 @@ import {
 } from "@alpic-ai/ui/components/accordion";
 import { Badge } from "@alpic-ai/ui/components/badge";
 import { Button } from "@alpic-ai/ui/components/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@alpic-ai/ui/components/select";
 import { Tabs, TabsContent } from "@alpic-ai/ui/components/tabs";
 import {
   Tooltip,
@@ -38,11 +45,21 @@ import { useCallToolResult, useStore } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
 import { buildFormUiSchema, formTemplates, formWidgets } from "./form/index.js";
+import { denseSelectTriggerClass } from "./form/styles.js";
 import { ToolFormTag } from "./form/tool-form-tag.js";
 import { SavedInputsDropdown, SaveInputDialog } from "./saved-inputs.js";
 import { TruncatedDescription } from "./truncated-description.js";
 
 type TabValue = "form" | "json";
+
+type Entrypoint = "normal" | "global";
+
+function hasGlobalEntrypoint(tool: Tool): boolean {
+  const ui = tool._meta?.["openai/ui"] as
+    | { entrypoints?: { type: string }[] }
+    | undefined;
+  return ui?.entrypoints?.some(({ type }) => type === "global") ?? false;
+}
 
 export function ToolItem({ tool }: { tool: Tool }) {
   const { mutateAsync: callTool, isPending } = useCallTool();
@@ -65,10 +82,16 @@ export function ToolItem({ tool }: { tool: Tool }) {
 
   const [tab, setTab] = useState<TabValue>("form");
   const [jsonError, setJsonError] = useState(false);
+  const [entrypoint, setEntrypoint] = useState<Entrypoint>("normal");
+  const showsEntrypoints = hasGlobalEntrypoint(tool);
+  const runsGlobalEntrypoint = showsEntrypoints && entrypoint === "global";
 
   // Run is disabled when the current input doesn't validate against the schema
   // (or the JSON is malformed).
   const inputInvalid = useMemo(() => {
+    if (runsGlobalEntrypoint) {
+      return false;
+    }
     const schema = tool.inputSchema as RJSFSchema;
     const hasNoInput =
       !schema?.properties || Object.keys(schema.properties).length === 0;
@@ -79,11 +102,19 @@ export function ToolItem({ tool }: { tool: Tool }) {
       return true;
     }
     return validator.validateFormData(formData, schema).errors.length > 0;
-  }, [tool.inputSchema, tab, jsonError, formData]);
+  }, [runsGlobalEntrypoint, tool.inputSchema, tab, jsonError, formData]);
 
   const handleRun = async () => {
     if (needsSignIn) {
       return;
+    }
+    if (runsGlobalEntrypoint) {
+      setSelectedTool(tool.name);
+      return await callTool({
+        toolName: tool.name,
+        args: {},
+        entrypoint: "global",
+      });
     }
     const schema = tool.inputSchema as RJSFSchema;
     const hasNoInput =
@@ -205,6 +236,27 @@ export function ToolItem({ tool }: { tool: Tool }) {
                 onClear={saved.clearSelection}
                 onDelete={saved.removeInput}
               />
+            )}
+            {showsEntrypoints && (
+              <Select
+                value={entrypoint}
+                onValueChange={(value) => setEntrypoint(value as Entrypoint)}
+              >
+                <SelectTrigger
+                  aria-label="Entrypoint"
+                  className={cn(denseSelectTriggerClass, "w-auto")}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="normal" className="font-mono text-xs">
+                    normal
+                  </SelectItem>
+                  <SelectItem value="global" className="font-mono text-xs">
+                    global
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             )}
             {disabledReason ? (
               <Tooltip>

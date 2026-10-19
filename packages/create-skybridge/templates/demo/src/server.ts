@@ -37,6 +37,7 @@ export const app = new Skybridge({
               redirectDomains: ["https://docs.skybridge.tech"],
             },
           },
+          openai: { entrypoints: [{ type: "global" }] },
         },
         async ({ name }) => {
           return {

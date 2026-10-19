@@ -88,18 +88,12 @@ export const useIsMobile = (): boolean =>
 
 export const resolveDisplayModeRequest = (
   requested: RequestDisplayMode,
-  state: Pick<InspectorPreferences, "displayMode" | "userAgent"> & {
+  state: Pick<InspectorPreferences, "displayMode"> & {
     previewClient: PreviewClient | null;
   },
 ): RequestDisplayMode => {
-  if (requested !== "pip") {
+  if (requested !== "pip" || state.previewClient === null) {
     return requested;
   }
-  if (state.previewClient === "claude") {
-    return state.displayMode === "modal" ? "inline" : state.displayMode;
-  }
-  if (state.previewClient === "chatgpt" && isMobileDevice(state.userAgent)) {
-    return "fullscreen";
-  }
-  return requested;
+  return state.displayMode === "modal" ? "inline" : state.displayMode;
 };

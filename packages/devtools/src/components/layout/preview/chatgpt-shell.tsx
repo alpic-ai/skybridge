@@ -164,7 +164,6 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
   const displayMode = useInspectorPreferencesStore((s) => s.displayMode);
   const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
   const isMobile = useIsMobile();
-  const isPip = displayMode === "pip";
   const isFullscreen = displayMode === "fullscreen";
   const isModal = displayMode === "modal";
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -330,27 +329,14 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
             <div
               className={cn(
                 "relative mt-3 w-full",
-                !isPip &&
-                  !isFullscreen &&
+                !isFullscreen &&
                   !isModal &&
                   !isMobile &&
                   "-mx-4 w-[calc(100%+2rem)]",
-                isPip &&
-                  "absolute top-4 left-1/2 z-30 mt-0 w-[min(768px,calc(100%-32px))] translate-x-[calc(-50%-8px)] rounded-3xl border border-(--border-default) bg-(--main-surface-primary) shadow-[0_8px_32px_rgba(0,0,0,0.12)]",
                 isFullscreen && "mt-0 min-h-0 flex-1",
                 isModal && "absolute inset-0 z-30 mt-0",
               )}
             >
-              {isPip ? (
-                <button
-                  type="button"
-                  aria-label="Exit picture-in-picture"
-                  onClick={() => setPreference("displayMode", "inline")}
-                  className="-top-2.5 -left-2.5 absolute z-10 flex size-8 cursor-pointer items-center justify-center rounded-full bg-[#414141] text-white"
-                >
-                  <CrossIcon className="size-4.5" />
-                </button>
-              ) : null}
               {isModal ? (
                 <button
                   type="button"
@@ -364,10 +350,8 @@ export function ChatgptShell({ children }: { children: ReactNode }) {
               <div
                 className={cn(
                   "w-full",
-                  isPip && "max-h-[80cqh] overflow-y-auto rounded-3xl",
                   (isFullscreen || isModal) && "h-full min-h-0",
                   isMobile &&
-                    !isPip &&
                     !isFullscreen &&
                     !isModal &&
                     "overflow-hidden rounded-xl border border-(--border-default)",
