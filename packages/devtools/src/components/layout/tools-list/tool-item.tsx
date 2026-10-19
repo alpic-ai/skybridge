@@ -236,7 +236,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
               isSelected ? "opacity-100" : "opacity-50",
             )}
           >
-            {saved.savedInputs.length > 0 && (
+            {!runsGlobalEntrypoint && saved.savedInputs.length > 0 && (
               <SavedInputsDropdown
                 inputs={saved.savedInputs}
                 activeKey={saved.activeKey}
@@ -295,19 +295,21 @@ export function ToolItem({ tool }: { tool: Tool }) {
         // the ui component hardcodes on the Content root).
         style={{ animation: "none" }}
       >
-        <ToolBody
-          tool={tool}
-          formData={formData}
-          setFormData={setFormData}
-          formRef={formRef}
-          tab={tab}
-          setTab={setTab}
-          jsonError={jsonError}
-          setJsonError={setJsonError}
-          saved={saved}
-          inputInvalid={inputInvalid}
-          onRun={handleRun}
-        />
+        {!runsGlobalEntrypoint && (
+          <ToolBody
+            tool={tool}
+            formData={formData}
+            setFormData={setFormData}
+            formRef={formRef}
+            tab={tab}
+            setTab={setTab}
+            jsonError={jsonError}
+            setJsonError={setJsonError}
+            saved={saved}
+            inputInvalid={inputInvalid}
+            onRun={handleRun}
+          />
+        )}
       </AccordionContent>
     </AccordionItem>
   );
