@@ -149,8 +149,14 @@ export function createMcpHostMock(
             openLinks: {},
             serverTools: {},
             serverResources: {},
-            message: { text: {}, image: {} },
-            updateModelContext: { text: {}, image: {}, structuredContent: {} },
+            message: { text: {}, image: {}, resourceLink: {}, resource: {} },
+            updateModelContext: {
+              text: {},
+              image: {},
+              resourceLink: {},
+              resource: {},
+              structuredContent: {},
+            },
             ...(isChatGpt && {
               experimental: {
                 "openai/message": {},
@@ -203,14 +209,8 @@ export function createMcpHostMock(
           break;
         }
         const updateId = crypto.randomUUID();
-        const modelContext = { ...params, updateId };
-        setModelContext(modelContext);
+        setModelContext({ ...params, updateId });
         respond(post, id, { _meta: { "openai/modelContext": { updateId } } });
-        post({
-          jsonrpc: "2.0",
-          method: "ui/notifications/host-context-changed",
-          params: { "openai/modelContext": modelContext },
-        });
         break;
       }
       case "ui/message": {
