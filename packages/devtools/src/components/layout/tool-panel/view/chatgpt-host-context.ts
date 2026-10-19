@@ -111,7 +111,9 @@ export function chatgptHostContextExtras(theme: Theme, isMobile: boolean) {
         ? PHONE_VIEWPORT.width - MOBILE_THREAD_MARGINS - MOBILE_CARD_BORDERS
         : 768,
     },
-    availableDisplayModes: ["inline", "fullscreen"],
+    availableDisplayModes: isMobile
+      ? ["inline", "fullscreen"]
+      : ["inline", "fullscreen", "pip"],
     userAgent: "chatgpt",
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   };

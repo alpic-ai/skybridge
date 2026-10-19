@@ -47,7 +47,8 @@ const displayModes: { mode: RequestDisplayMode; icon: LucideIcon }[] = [
 // Applies the form's current values to the preferences store and returns a
 // human-readable summary for the agent.
 function applyViewOptions(data: FormData): string {
-  const { userAgent, setPreference } = useInspectorPreferencesStore.getState();
+  const { userAgent, displayMode, previewClient, setPreference } =
+    useInspectorPreferencesStore.getState();
 
   // Checkboxes are absent from FormData when unchecked, so absence is
   // meaningful (false) — apply unconditionally.
@@ -58,6 +59,9 @@ function applyViewOptions(data: FormData): string {
     device: { ...userAgent?.device, type: mobile ? "mobile" : "desktop" },
     capabilities: { hover: !mobile, touch: mobile },
   });
+  if (mobile && displayMode === "pip" && previewClient === "chatgpt") {
+    setPreference("displayMode", "fullscreen");
+  }
 
   const locale = data.get("locale");
   if (
@@ -366,12 +370,7 @@ export const ToolPanelToolbar = ({
           <ToolbarButton
             icon={Eye}
             label="preview"
-            onClick={() => {
-              setPreviewClient("chatgpt");
-              if (displayMode === "pip") {
-                setPreference("displayMode", "inline");
-              }
-            }}
+            onClick={() => setPreviewClient("chatgpt")}
           />
           {!logsOpen && (
             <ToolbarButton icon={Logs} label="logs" onClick={onOpenLogs} />

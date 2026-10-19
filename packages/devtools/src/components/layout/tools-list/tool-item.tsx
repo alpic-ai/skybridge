@@ -28,6 +28,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { CallToolResponse } from "skybridge/web";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { CopyButton } from "@/lib/copy.js";
+import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
 import {
   toolRequiresAuth,
   useCallTool,
@@ -132,6 +133,11 @@ export function ToolItem({ tool }: { tool: Tool }) {
           return;
         }
       }
+    }
+    if (runsGlobalEntrypoint) {
+      useInspectorPreferencesStore
+        .getState()
+        .setPreference("displayMode", "fullscreen");
     }
     // Focus this tool so the result view (right pane) shows its output — even
     // when Run was clicked from a collapsed header.
