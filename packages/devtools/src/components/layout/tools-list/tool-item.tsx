@@ -112,37 +112,35 @@ export function ToolItem({ tool }: { tool: Tool }) {
     if (needsSignIn) {
       return;
     }
-    if (runsGlobalEntrypoint) {
-      setSelectedTool(tool.name);
-      return await callTool({
-        toolName: tool.name,
-        args: {},
-        entrypoint: "global",
-      });
-    }
-    const schema = tool.inputSchema as RJSFSchema;
-    const hasNoInput =
-      !schema?.properties || Object.keys(schema.properties).length === 0;
+    if (!runsGlobalEntrypoint) {
+      const schema = tool.inputSchema as RJSFSchema;
+      const hasNoInput =
+        !schema?.properties || Object.keys(schema.properties).length === 0;
 
-    if (tab === "json" && jsonError) {
-      return;
-    }
-
-    if (!hasNoInput) {
-      const { errors } = validator.validateFormData(formData, schema);
-      if (errors.length > 0) {
-        if (tab === "form") {
-          formRef.current?.validateForm();
-        } else {
-          setJsonError(true);
-        }
+      if (tab === "json" && jsonError) {
         return;
+      }
+
+      if (!hasNoInput) {
+        const { errors } = validator.validateFormData(formData, schema);
+        if (errors.length > 0) {
+          if (tab === "form") {
+            formRef.current?.validateForm();
+          } else {
+            setJsonError(true);
+          }
+          return;
+        }
       }
     }
     // Focus this tool so the result view (right pane) shows its output — even
     // when Run was clicked from a collapsed header.
     setSelectedTool(tool.name);
-    return await callTool({ toolName: tool.name, args: formData });
+    return await callTool({
+      toolName: tool.name,
+      args: runsGlobalEntrypoint ? {} : formData,
+      entrypoint: runsGlobalEntrypoint ? "global" : null,
+    });
   };
 
   // Enter/⌘Enter run the tool whose input is focused. Scoped per tool so that
