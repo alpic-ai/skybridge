@@ -6,15 +6,26 @@ import type { FilePart, UserContent } from "ai";
 import type { FileRef } from "skybridge/server";
 
 const owners = new WeakMap<object, FilePart>();
+const fileMatchers = new WeakSet<object>();
 
 export function inputFile(part: FilePart): FileRef {
   const label = () => `inputFile(${part.filename ?? part.mediaType})`;
-  return {
+  const matcher = {
     asymmetricMatch: (value: unknown) =>
       typeof value === "object" && value !== null && owners.get(value) === part,
     toString: label,
     toJSON: label,
-  } as unknown as FileRef;
+  };
+  fileMatchers.add(matcher);
+  return matcher as unknown as FileRef;
+}
+
+export function containsInputFile(value: unknown): boolean {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    (fileMatchers.has(value) || Object.values(value).some(containsInputFile))
+  );
 }
 
 async function fileBytes(data: FilePart["data"]): Promise<Buffer> {

@@ -236,3 +236,47 @@ it("rejects unknown file paths without calling the handler", async () => {
     ),
   });
 });
+
+it.each([false, true])(
+  "rejects misplaced input file expectations before any calls (negated: %s)",
+  async (negated) => {
+    const chat = await start({
+      app: fileApp([]),
+      model: fileModel("plain", () => ({ imageURI: "https://example.test" })),
+    });
+    const file = expect.inputFile(portrait());
+    const assertion = negated ? expect.chat(chat).not : expect.chat(chat);
+    for (const value of [
+      file,
+      [file],
+      expect.arrayContaining([file]),
+      { nested: file },
+      expect.objectContaining({ nested: file }),
+    ]) {
+      expect(() =>
+        assertion.toHaveCalledToolWith("plain", { imageURI: value } as never),
+      ).toThrow(
+        '"plain.imageURI": "imageURI" is not listed in openai/fileParams',
+      );
+      expect(() =>
+        assertion.toHaveCalledToolOnce("plain", { imageURI: value } as never),
+      ).toThrow(
+        '"plain.imageURI": "imageURI" is not listed in openai/fileParams',
+      );
+    }
+    expect(() =>
+      assertion.toHaveCalledToolWith("resize", { width: file } as never),
+    ).toThrow('"resize.width": "width" is not listed in openai/fileParams');
+    expect(() =>
+      assertion.toHaveCalledToolOnce("resize", { width: file } as never),
+    ).toThrow('"resize.width": "width" is not listed in openai/fileParams');
+    if (negated) {
+      assertion.toHaveCalledToolWith("resize", { file });
+      assertion.toHaveCalledToolOnce("upload", { files: [file] });
+      assertion.toHaveCalledToolWith("plain", {
+        imageURI: "https://example.test",
+      });
+    }
+    expect(chat.toolCalls).toEqual([]);
+  },
+);

@@ -109,6 +109,7 @@ expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
 ```
 
 `file` and `files` must be listed in their tools' `_meta["openai/fileParams"]`.
+Misplaced file matchers throw immediately, including nested matchers and `.not`.
 See [Evals](https://docs.skybridge.tech/test/evals) for how files reach the model
 and the tool.
 

@@ -131,6 +131,15 @@ export class Chat<App = unknown> {
     return this.host.model;
   }
 
+  get fileParams() {
+    return new Map(
+      this.tools.map((tool) => [
+        tool.name,
+        (tool._meta?.["openai/fileParams"] as string[] | undefined) ?? [],
+      ]),
+    );
+  }
+
   private constructor(
     client: Client,
     transport: StreamableHTTPClientTransport,

@@ -101,6 +101,8 @@ This simulates the ChatGPT host as observed in-app. The model sees each attachme
 
 `expect.inputFile(part)` matches the file object minted for that exact `FilePart`. Two parts with identical bytes do not match each other.
 
+Using it under a parameter not listed in `openai/fileParams` throws a declaration error before calls are compared, including nested matchers, `.not` assertions, and conversations with no calls.
+
 File data can be bytes, base64, a URL, or AI SDK tagged data, URL or text content. Provider file references are rejected because the app under test cannot download them.
 
 ## Assert on Tool Calls
