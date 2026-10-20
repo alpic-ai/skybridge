@@ -3,7 +3,6 @@ import {
   StreamableHTTPClientTransport,
   type Tool,
 } from "@modelcontextprotocol/client";
-import { AjvJsonSchemaValidator } from "@modelcontextprotocol/client/validators/ajv";
 import {
   dynamicTool,
   generateText,
@@ -39,13 +38,6 @@ const DEFAULT_MAX_STEPS = 8;
 
 const IN_PROCESS_URL = "http://in-process.skybridge.test/mcp";
 
-function fileParameters(tool: Tool) {
-  const fields = tool._meta?.["openai/fileParams"];
-  return Array.isArray(fields)
-    ? fields.filter((field): field is string => typeof field === "string")
-    : [];
-}
-
 function fileInputSchema(schema: JSONSchema7 | boolean): JSONSchema7 | boolean {
   if (typeof schema === "boolean") {
     return schema;
@@ -53,20 +45,13 @@ function fileInputSchema(schema: JSONSchema7 | boolean): JSONSchema7 | boolean {
   if (schema.anyOf) {
     return { ...schema, anyOf: schema.anyOf.map(fileInputSchema) };
   }
-  if (schema.oneOf) {
-    return { ...schema, oneOf: schema.oneOf.map(fileInputSchema) };
-  }
   if (schema.type === "array") {
     return {
       ...schema,
-      items: Array.isArray(schema.items)
-        ? schema.items.map(fileInputSchema)
-        : schema.items === undefined
-          ? undefined
-          : fileInputSchema(schema.items),
+      items: fileInputSchema(schema.items as JSONSchema7),
     };
   }
-  if (schema.type === "object" || schema.$ref) {
+  if (schema.type === "object") {
     return {
       type: "string",
       description: "This parameter expects an absolute local file path.",
@@ -135,7 +120,6 @@ export class Chat<App = unknown> {
   private readonly failures = new Map<string, string>();
   private readonly inputs = new Map<string, Record<string, unknown>>();
   private readonly inputFiles = new InputFiles();
-  private readonly schemaValidator = new AjvJsonSchemaValidator();
   private readonly client: Client;
   private readonly transport: StreamableHTTPClientTransport;
   private readonly host: HostConfig;
@@ -145,10 +129,6 @@ export class Chat<App = unknown> {
   /** The model the conversation runs on, and the judge's default. */
   get model(): LanguageModel {
     return this.host.model;
-  }
-
-  get fileParams() {
-    return new Map(this.tools.map((tool) => [tool.name, fileParameters(tool)]));
   }
 
   private constructor(
@@ -246,11 +226,8 @@ export class Chat<App = unknown> {
   }
 
   async close(): Promise<void> {
-    try {
-      await this.transport.close();
-    } finally {
-      await this.inputFiles.close();
-    }
+    await this.inputFiles.close();
+    await this.transport.close();
   }
 
   private failureFor(call: { toolCallId: string; invalid?: boolean }): {
@@ -269,7 +246,8 @@ export class Chat<App = unknown> {
   private toolSet() {
     const entries = this.tools.map((definition) => {
       const { $schema: _ignored, ...parameters } = definition.inputSchema;
-      const fields = fileParameters(definition);
+      const fields =
+        (definition._meta?.["openai/fileParams"] as string[] | undefined) ?? [];
       const properties = { ...parameters.properties } as NonNullable<
         JSONSchema7["properties"]
       >;
@@ -278,28 +256,11 @@ export class Chat<App = unknown> {
           properties[field] = fileInputSchema(properties[field]);
         }
       }
-      const inputSchema = { ...parameters, properties };
-      const validate =
-        fields.length === 0
-          ? undefined
-          : this.schemaValidator.getValidator<unknown>({
-              ...definition.inputSchema,
-              properties,
-            } as Parameters<AjvJsonSchemaValidator["getValidator"]>[0]);
       return [
         definition.name,
         dynamicTool({
           description: definition.description ?? "",
-          inputSchema: jsonSchema(inputSchema as JSONSchema7, {
-            validate: validate
-              ? (input) => {
-                  const result = validate(input);
-                  return result.valid
-                    ? { success: true, value: result.data }
-                    : { success: false, error: new Error(result.errorMessage) };
-                }
-              : undefined,
-          }),
+          inputSchema: jsonSchema({ ...parameters, properties } as JSONSchema7),
           execute: async (input, { toolCallId }) => {
             let args: Record<string, unknown>;
             try {

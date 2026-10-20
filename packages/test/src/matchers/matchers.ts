@@ -1,12 +1,8 @@
 import "vitest";
 import type { FilePart, LanguageModel } from "ai";
-import type { ToolInput, ToolNames } from "skybridge/server";
+import type { FileRef, ToolInput, ToolNames } from "skybridge/server";
 import { expect } from "vitest";
-import {
-  containsInputFile,
-  type InputFileMatcher,
-  inputFile,
-} from "../input-files.js";
+import { inputFile } from "../input-files.js";
 import type { ChatLike, ToolCall, Turn } from "./types.js";
 
 /** What a judge decided about a conversation. */
@@ -35,17 +31,6 @@ export interface JudgmentOptions {
   judge?: (judgment: Judgment) => Verdict | Promise<Verdict>;
 }
 
-type ArgumentMatcher<T> =
-  | T
-  | Pick<InputFileMatcher, "asymmetricMatch">
-  | (T extends readonly (infer Item)[]
-      ? ArgumentMatcher<Item>[]
-      : T extends object
-        ? { [Key in keyof T]: ArgumentMatcher<T[Key]> }
-        : never);
-
-type MatchingArguments<T> = { [Key in keyof T]?: ArgumentMatcher<T[Key]> };
-
 /**
  * Assertions about the tool calls a conversation produced. Kept off vitest's
  * global `Matchers` so they never appear on unrelated `expect()` calls, and so
@@ -54,11 +39,11 @@ type MatchingArguments<T> = { [Key in keyof T]?: ArgumentMatcher<T[Key]> };
 export interface ChatMatchers<App> {
   toHaveCalledToolOnce<Name extends ToolNames<App>>(
     name: Name,
-    args?: MatchingArguments<ToolInput<App, Name>>,
+    args?: Partial<ToolInput<App, Name>>,
   ): void;
   toHaveCalledToolWith<Name extends ToolNames<App>>(
     name: Name,
-    args: MatchingArguments<ToolInput<App, Name>>,
+    args: Partial<ToolInput<App, Name>>,
   ): void;
   toNeverHaveCalledTool<Name extends ToolNames<App>>(name: Name): void;
   toHaveFailedToolCall<Name extends ToolNames<App>>(name: Name): void;
@@ -76,7 +61,7 @@ export interface ChatAssertion<App> extends ChatMatchers<App> {
 
 declare module "vitest" {
   interface ExpectStatic {
-    inputFile(part: FilePart): InputFileMatcher;
+    inputFile(part: FilePart): FileRef;
     chat<App>(chat: ChatLike<App>): ChatAssertion<App>;
   }
 }
@@ -85,21 +70,6 @@ function calls(chat: ChatLike<unknown>): ToolCall<unknown>[] {
   return chat.turns
     .filter((turn) => turn.role === "tool")
     .map((turn) => turn.call);
-}
-
-function assertFileParameters(
-  chat: ChatLike<unknown>,
-  name: string,
-  args: Record<string, unknown> = {},
-) {
-  const fields = chat.fileParams?.get(name) ?? [];
-  for (const [field, value] of Object.entries(args)) {
-    if (containsInputFile(value) && !fields.includes(field)) {
-      throw new Error(
-        `expect.inputFile cannot be used for "${name}.${field}": "${field}" is not listed in openai/fileParams`,
-      );
-    }
-  }
 }
 
 function spokenTurns(chat: ChatLike<unknown>): string[] {
@@ -236,7 +206,6 @@ expect.extend({
     name: string,
     args?: Record<string, unknown>,
   ) {
-    assertFileParameters(received, name, args);
     const matching = acceptedCalls(received, name);
     const argsMatch =
       args === undefined ||
@@ -263,7 +232,6 @@ expect.extend({
     name: string,
     args: Record<string, unknown>,
   ) {
-    assertFileParameters(received, name, args);
     const pass = acceptedCalls(received, name).some((call) =>
       this.equals(call.arguments, expect.objectContaining(args)),
     );
