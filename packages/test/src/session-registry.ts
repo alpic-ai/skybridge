@@ -3,6 +3,7 @@ import type { LanguageModel } from "ai";
 import type { ToolInput, ToolNames } from "skybridge/server";
 import { inject, onTestFinished } from "vitest";
 import { Chat, type StubMap } from "./chat.js";
+import { EvalMiddleware } from "./eval-middleware.js";
 
 /**
  * The minimum a Skybridge app has to expose to be served in-process: the
@@ -85,13 +86,7 @@ export async function start<App extends EvalApp>(
   const { app, authInfo } = options;
   const handler = createMcpHandler(() => app.createServerInstance());
 
-  const chat = await Chat.open<App>(
-    {
-      model: options.model,
-      temperature: options.temperature ?? config?.temperature,
-      systemPrompt: options.systemPrompt ?? config?.systemPrompt,
-      maxSteps: options.maxSteps ?? config?.maxSteps,
-    },
+  const middleware = new EvalMiddleware(
     (url, init) =>
       handler.fetch(
         new Request(url, init),
@@ -99,6 +94,22 @@ export async function start<App extends EvalApp>(
       ),
     (options.stubs ?? {}) as StubMap,
   );
+  let chat: Chat<App>;
+  try {
+    chat = await Chat.open<App>(
+      {
+        model: options.model,
+        temperature: options.temperature ?? config?.temperature,
+        systemPrompt: options.systemPrompt ?? config?.systemPrompt,
+        maxSteps: options.maxSteps ?? config?.maxSteps,
+      },
+      middleware,
+    );
+  } catch (error) {
+    await middleware.files.close();
+    await handler.close();
+    throw error;
+  }
 
   onTestFinished(async () => {
     await chat.close();

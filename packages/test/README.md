@@ -84,8 +84,7 @@ skybridge({ evals: { temperature: 0, maxSteps: 6 } });
 
 ## Input files
 
-`chat.send` also accepts AI SDK `UserContent`. Attach a `FilePart` and use the
-same object in `expect.inputFile` to check which file a tool received:
+`chat.send` also accepts AI SDK `UserContent`. Attach a `FilePart` and use the same object in `expect.inputFile` to check which file a tool received:
 
 ```ts
 import { readFile } from "node:fs/promises";
@@ -110,8 +109,8 @@ expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
 
 `file` and `files` must be listed in their tools' `_meta["openai/fileParams"]`.
 Misplaced file matchers throw immediately, including nested matchers and `.not`.
-See [Evals](https://docs.skybridge.tech/test/evals) for how files reach the model
-and the tool.
+`start` validates that each declared parameter uses `FileRef`, including optional, nullable, and array forms. The eval middleware exposes paths to the model and resolves them before handlers or stubs run.
+See [Evals](https://docs.skybridge.tech/test/evals) for how files reach the model and the tool.
 
 ## Matchers
 

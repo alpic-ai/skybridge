@@ -2,8 +2,45 @@ import "vitest";
 import type { FilePart, LanguageModel } from "ai";
 import type { FileRef, ToolInput, ToolNames } from "skybridge/server";
 import { expect } from "vitest";
-import { containsInputFile, inputFile } from "../input-files.js";
 import type { ChatLike, ToolCall, Turn } from "./types.js";
+
+const owners = new WeakMap<object, FilePart>();
+const fileMatchers = new WeakSet<object>();
+const fileParameters = new WeakMap<
+  object,
+  ReadonlyMap<string, readonly string[]>
+>();
+
+export function registerInputFile(reference: FileRef, part: FilePart) {
+  owners.set(reference, part);
+}
+
+export function registerFileParameters(
+  chat: object,
+  fields: ReadonlyMap<string, readonly string[]>,
+) {
+  fileParameters.set(chat, fields);
+}
+
+function inputFile(part: FilePart): FileRef {
+  const label = () => `inputFile(${part.filename ?? part.mediaType})`;
+  const matcher = {
+    asymmetricMatch: (value: unknown) =>
+      typeof value === "object" && value !== null && owners.get(value) === part,
+    toString: label,
+    toJSON: label,
+  };
+  fileMatchers.add(matcher);
+  return matcher as unknown as FileRef;
+}
+
+function containsInputFile(value: unknown): boolean {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    (fileMatchers.has(value) || Object.values(value).some(containsInputFile))
+  );
+}
 
 /** What a judge decided about a conversation. */
 export interface Verdict {
@@ -77,7 +114,7 @@ function assertFileParameters(
   name: string,
   args: Record<string, unknown> = {},
 ) {
-  const fields = chat.fileParams?.get(name) ?? [];
+  const fields = fileParameters.get(chat)?.get(name) ?? [];
   for (const [field, value] of Object.entries(args)) {
     if (containsInputFile(value) && !fields.includes(field)) {
       throw new Error(

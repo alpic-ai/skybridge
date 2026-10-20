@@ -4,29 +4,7 @@ import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import type { FilePart, UserContent } from "ai";
 import type { FileRef } from "skybridge/server";
-
-const owners = new WeakMap<object, FilePart>();
-const fileMatchers = new WeakSet<object>();
-
-export function inputFile(part: FilePart): FileRef {
-  const label = () => `inputFile(${part.filename ?? part.mediaType})`;
-  const matcher = {
-    asymmetricMatch: (value: unknown) =>
-      typeof value === "object" && value !== null && owners.get(value) === part,
-    toString: label,
-    toJSON: label,
-  };
-  fileMatchers.add(matcher);
-  return matcher as unknown as FileRef;
-}
-
-export function containsInputFile(value: unknown): boolean {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    (fileMatchers.has(value) || Object.values(value).some(containsInputFile))
-  );
-}
+import { registerInputFile } from "./matchers/matchers.js";
 
 async function fileBytes(data: FilePart["data"]): Promise<Buffer> {
   if (data instanceof URL) {
@@ -102,7 +80,7 @@ export class InputFiles {
       const workspace_path = `/workspace/scratch/${id}/upload/${uploaded_name}`;
       this.files.set(file_id, { reference, bytes });
       this.paths.set(workspace_path, reference);
-      owners.set(reference, part);
+      registerInputFile(reference, part);
       prepared.push(
         {
           type: "text",

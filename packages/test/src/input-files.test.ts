@@ -280,3 +280,218 @@ it.each([false, true])(
     expect(chat.toolCalls).toEqual([]);
   },
 );
+
+it.each([
+  ["a string", z.string()],
+  ["an unrelated object", z.object({ url: z.string() })],
+  ["an optional identifier", FileRef.partial({ file_id: true })],
+  ["a numeric identifier", FileRef.extend({ file_id: z.number() })],
+  ["an extra property", FileRef.extend({ extra: z.string().optional() })],
+  ["an open object", FileRef.passthrough()],
+  ["a mixed union", z.union([FileRef, z.string()])],
+  ["a nested array", z.array(z.array(FileRef))],
+])(
+  "rejects %s declared as a file before model generation",
+  async (_, schema) => {
+    const model = fileModel("invalid", () => ({}));
+    const app = new Skybridge({
+      name: "invalid-file-eval",
+      version: "0",
+      handler: (server) =>
+        server.registerTool(
+          {
+            name: "invalid",
+            inputSchema: { file: schema },
+            _meta: { "openai/fileParams": ["file"] },
+          },
+          async () => ({ content: "unexpected" }),
+        ),
+    });
+    await expect(start({ app, model })).rejects.toThrow(
+      'Invalid openai/fileParams for "invalid.file"',
+    );
+    expect(model.doGenerateCalls).toEqual([]);
+  },
+);
+
+it("rejects a declaration for a missing parameter at start", async () => {
+  const app = new Skybridge({
+    name: "missing-file-eval",
+    version: "0",
+    handler: (server) =>
+      server.registerTool(
+        { name: "invalid", _meta: { "openai/fileParams": ["file"] } },
+        async () => ({ content: "unexpected" }),
+      ),
+  });
+  await expect(
+    start({ app, model: fileModel("invalid", () => ({})) }),
+  ).rejects.toThrow('"invalid.file"');
+});
+
+it("preserves optional, nullable, and bounded array file schemas for stubs", async () => {
+  const part = portrait();
+  const received: unknown[] = [];
+  const app = new Skybridge({
+    name: "wrapped-file-eval",
+    version: "0",
+    handler: (server) =>
+      server.registerTool(
+        {
+          name: "wrapped",
+          inputSchema: {
+            optional: FileRef.optional(),
+            nullable: FileRef.nullable(),
+            files: z.array(FileRef).min(1).max(2).nullable().optional(),
+          },
+          _meta: { "openai/fileParams": ["optional", "nullable", "files"] },
+        },
+        async () => ({ content: "unexpected" }),
+      ),
+  });
+  const model = fileModel("wrapped", (files) => ({
+    nullable: null,
+    files: [files[0]?.workspace_path],
+  }));
+  const chat = await start({
+    app,
+    model,
+    stubs: {
+      wrapped: (args) => {
+        received.push(args);
+        return "stubbed";
+      },
+    },
+  });
+  await chat.send([part]);
+  expect(received).toEqual([
+    { nullable: null, files: [expect.inputFile(part)] },
+  ]);
+  expect
+    .chat(chat)
+    .toHaveCalledToolOnce("wrapped", { files: [expect.inputFile(part)] });
+  const schema = model.doGenerateCalls[0]?.tools?.find(
+    (tool) => tool.type === "function" && tool.name === "wrapped",
+  );
+  expect(schema).toMatchObject({
+    inputSchema: {
+      required: ["nullable"],
+      properties: {
+        files: {
+          anyOf: [
+            {
+              type: "array",
+              minItems: 1,
+              maxItems: 2,
+              items: { type: "string" },
+            },
+            { type: "null" },
+          ],
+        },
+      },
+    },
+  });
+  const invalid = await start({
+    app,
+    model: fileModel("wrapped", () => ({ nullable: null, files: [] })),
+    stubs: {
+      wrapped: (args) => {
+        received.push(args);
+        return "stubbed";
+      },
+    },
+  });
+  await invalid.send([part]);
+  expect.chat(invalid).toHaveFailedToolCall("wrapped");
+  expect(received).toHaveLength(1);
+});
+
+it("keeps file schemas on the app and attachments isolated across sessions", async () => {
+  const seen: FileRef[] = [];
+  const app = fileApp(seen);
+  let path = "";
+  const first = await start({
+    app,
+    model: fileModel("resize", (files) => {
+      path = files[0]?.workspace_path ?? "";
+      return { file: path, width: 100 };
+    }),
+  });
+  const second = await start({
+    app,
+    model: fileModel("resize", () => ({ file: path, width: 100 })),
+  });
+  await first.send([portrait()]);
+  await second.send("Use the other session's file");
+  expect.chat(second).toHaveFailedToolCall("resize");
+  expect(seen).toHaveLength(1);
+});
+
+it("records current inputs when a model reuses a call ID across sends", async () => {
+  let calls = 0;
+  const chat = await start({
+    app: fileApp([]),
+    model: fileModel("resize", (files) => {
+      calls += 1;
+      return {
+        file: calls === 2 ? "/missing" : files[0]?.workspace_path,
+        width: calls,
+      };
+    }),
+  });
+  const part = portrait();
+  await chat.send([part]);
+  await chat.send("Try a missing file");
+  await chat.send("Try the original again");
+  expect(chat.toolCalls.map((call) => call.arguments)).toEqual([
+    { file: expect.inputFile(part), width: 1 },
+    { file: "/missing", width: 2 },
+    { file: expect.inputFile(part), width: 3 },
+  ]);
+  expect(chat.toolCalls[1]?.failed).toContain("Unknown input file path");
+  expect(chat.toolCalls[2]?.failed).toBeUndefined();
+});
+
+it.each(["single", "list", "object"])(
+  "rejects the wrong %s file shape before handlers or stubs",
+  async (shape) => {
+    const seen: FileRef[] = [];
+    const stubbed: unknown[] = [];
+    const name = shape === "list" ? "upload" : "resize";
+    const model = fileModel(name, (files) => {
+      const path = files[0]?.workspace_path;
+      return shape === "list"
+        ? { files: path }
+        : {
+            width: 100,
+            file:
+              shape === "single"
+                ? [path]
+                : {
+                    file_id: "invented",
+                    download_url: "https://example.test",
+                    mime_type: "image/png",
+                    file_name: "photo.png",
+                  },
+          };
+    });
+    const chat = await start({
+      app: fileApp(seen),
+      model,
+      stubs: {
+        resize: (args) => {
+          stubbed.push(args);
+          return "unexpected";
+        },
+        upload: (args) => {
+          stubbed.push(args);
+          return "unexpected";
+        },
+      },
+    });
+    await chat.send([portrait()]);
+    expect.chat(chat).toHaveFailedToolCall(name);
+    expect(seen).toEqual([]);
+    expect(stubbed).toEqual([]);
+  },
+);
