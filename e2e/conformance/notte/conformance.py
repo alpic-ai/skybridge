@@ -427,7 +427,7 @@ def notte_browser(profile_id: str) -> Iterator[BrowserContext]:
     client = NotteClient()
     with client.Session(
         profile={"id": profile_id, "persist": True},
-        headless=False,  # headless Chromium drops cross-origin MessagePort transfers, breaking the widget init handshake
+        headless=True,  # Notte no longer supports remote headless=False sessions
         # Tall viewport so the stepper card AND the results table fit on
         # screen; the driver can only click what is visible.
         viewport_width=1440,
