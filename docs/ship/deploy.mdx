@@ -7,6 +7,10 @@ icon: "cloud-upload"
 
 A deployed MCP App is a server on a public URL: hosts connect to `https://your-domain.com/mcp` and the built [views](/build/view) are served from the same origin.
 
+<Info>
+Every target below runs your server in an environment with no durable local filesystem: some have none at all, others reset it on redeploy or on scale. If your tools read or write data that needs to outlive a single request, see [Persist Server Data](/guides/data-persistence) before you deploy.
+</Info>
+
 Two commands take it there:
 
 - [`skybridge build`](/api-reference/cli) compiles the views and the server into `dist/`

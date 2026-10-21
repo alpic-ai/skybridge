@@ -61,6 +61,10 @@ When your app runs in the ChatGPT or Claude desktop or mobile app, the [view](/b
 
 [DevTools](/test/devtools) runs a loose CSP, so violations don't surface locally. Production enforces the policy and blocks any origin the view didn't declare. List every domain the view reaches in the tool's CSP config, then confirm through the [tunnel](/test/tunnel) or the [Audit](/test/audit). See [Configure CSP](/guides/csp) for the field reference.
 
+## Server crashes on deploy with `ENOENT` or a permission error
+
+A local file write, a SQLite database, a JSON file, a log, failing on a path you wrote yourself. Most deploy targets give your server no durable local filesystem: Cloudflare Workers has none at all, and container platforms like Alpic are read-only outside the OS temp directory, which itself doesn't survive a redeploy or a scale event. See [Persist Server Data](/guides/data-persistence) for what to use instead of a local file.
+
 ## DevTools fails to authenticate with `invalid_client`
 
 [DevTools](/test/devtools#authenticated-servers) cached an OAuth registration that the server no longer recognizes, after you switched servers or rotated credentials. Click **Sign out** in the DevTools header to clear it and force a fresh registration on the next connect.
