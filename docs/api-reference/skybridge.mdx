@@ -97,7 +97,7 @@ Skills over MCP tracks [SEP-2640](https://github.com/modelcontextprotocol/modelc
 
 ### `onMcpError`
 
-Replaces the error reporter of the built-in `/mcp` handler. By default, Skybridge logs each error with `console.error("Error handling MCP request:", error)`, except `UnsupportedProtocolVersionError`.
+Replaces the error reporter of the built-in `/mcp` handler. By default, Skybridge logs each error that the MCP SDK handler reports, except `UnsupportedProtocolVersionError`. The log line is `console.error("Error handling MCP request:", error)`.
 
 When you set `onMcpError`, it receives every error that the MCP SDK handler or its Node adapter reports. This includes:
 
@@ -106,7 +106,9 @@ When you set `onMcpError`, it receives every error that the MCP SDK handler or i
 
 `UnsupportedProtocolVersionError` also reaches your function, because the skip belongs to the default reporter. Filter it yourself if you do not want it.
 
-The option only reports. It does not change the response. Nothing waits for it, and it can run before the response is sent, so keep it fast and synchronous.
+Node adapter errors, such as a request after the handler is closed, reach only `onMcpError`. The default reporter does not log them.
+
+The option only reports. It does not change the response. It can run before the response is sent, so keep it fast and synchronous. Skybridge does not await a returned promise, so a rejected promise is an unhandled rejection, which ends the process by default in Node. An error that the function throws is dropped.
 
 Other errors go elsewhere:
 
