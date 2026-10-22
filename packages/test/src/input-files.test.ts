@@ -2,7 +2,7 @@ import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import type { FilePart } from "ai";
 import { MockLanguageModelV3 } from "ai/test";
 import { FileRef, Skybridge } from "skybridge/server";
-import { expect, it } from "vitest";
+import { expect, it, onTestFinished, vi } from "vitest";
 import { z } from "zod";
 import "./matchers/index.js";
 import { start } from "./session-registry.js";
@@ -159,6 +159,60 @@ it("shows paths to the model, rewrites them, and downloads the exact bytes", asy
   await chat.send("Resize the same file again");
   expect(seen[1]).toEqual(seen[0]);
   expect.chat(chat).toHaveCalledToolWith("resize", { file: matcher });
+});
+
+it("shares one downloaded copy with the model and tool for single-use URLs", async () => {
+  const bytes = portrait().data as Buffer;
+  const source = new URL("https://attachments.test/photo.png");
+  const part: FilePart = { ...portrait(), data: source };
+  const fetch = globalThis.fetch;
+  let downloads = 0;
+  const fetchMock = vi
+    .spyOn(globalThis, "fetch")
+    .mockImplementation((input, init) => {
+      const url = input instanceof Request ? input.url : String(input);
+      if (url !== source.href) {
+        return fetch(input, init);
+      }
+      downloads += 1;
+      return Promise.resolve(
+        downloads === 1
+          ? new Response(bytes, { headers: { "Content-Type": part.mediaType } })
+          : new Response(null, { status: 410 }),
+      );
+    });
+  onTestFinished(() => fetchMock.mockRestore());
+  const seen: FileRef[] = [];
+  const model = fileModel("resize", (files) => ({
+    file: files[0]?.workspace_path,
+    width: 1080,
+  }));
+  const chat = await start({ app: fileApp(seen), model });
+
+  await chat.send([part]);
+
+  expect(downloads).toBe(1);
+  expect(
+    model.doGenerateCalls[0]?.prompt.find((message) => message.role === "user")
+      ?.content,
+  ).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        type: "file",
+        mediaType: part.mediaType,
+        filename: part.filename,
+        data: { type: "data", data: bytes },
+      }),
+    ]),
+  );
+  expect(
+    JSON.stringify(chat.turns.find((turn) => turn.role === "tool")?.result),
+  ).toContain(bytes.toString("base64"));
+  expect.chat(chat).toHaveCalledToolOnce("resize", {
+    file: expect.inputFile(part),
+  });
+  expect(seen).toHaveLength(1);
+  expect(part.data).toBe(source);
 });
 
 it("distinguishes identical uploads by object identity and reports the other id", async () => {
