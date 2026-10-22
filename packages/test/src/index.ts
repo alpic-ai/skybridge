@@ -9,6 +9,7 @@ export type {
 export type {
   EvalApp,
   EvalIdentity,
+  EvalServer,
   ToolStubs,
 } from "./session-registry.js";
 export { start } from "./session-registry.js";

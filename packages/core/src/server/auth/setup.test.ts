@@ -572,22 +572,22 @@ describe("per-tool scope enforcement in fully-authenticated mode", () => {
 });
 
 describe("auth shorthand validation", () => {
-  it("throws when `auth` requires sign-in but no oauth provider is configured", () => {
-    expect(() =>
-      new McpServer({ name: "t", version: "0" }).registerTool(
-        { name: "x", inputSchema: {}, auth: {} },
-        () => ({ content: [{ type: "text", text: "" }] }),
-      ),
-    ).toThrow(/no `oauth` provider/);
+  it("declares sign-in independently of an HTTP oauth provider", () => {
+    const server = new McpServer({ name: "t", version: "0" }).registerTool(
+      { name: "x", inputSchema: {}, auth: {} },
+      () => ({ content: [{ type: "text", text: "" }] }),
+    );
+    expect(server.securitySchemesByTool.get("x")).toEqual([{ type: "oauth2" }]);
   });
 
-  it("throws when `auth` sets scopes but no oauth provider is configured", () => {
-    expect(() =>
-      new McpServer({ name: "t", version: "0" }).registerTool(
-        { name: "x", inputSchema: {}, auth: { scopes: ["checkout"] } },
-        () => ({ content: [{ type: "text", text: "" }] }),
-      ),
-    ).toThrow(/no `oauth` provider/);
+  it("declares scopes independently of an HTTP oauth provider", () => {
+    const server = new McpServer({ name: "t", version: "0" }).registerTool(
+      { name: "x", inputSchema: {}, auth: { scopes: ["checkout"] } },
+      () => ({ content: [{ type: "text", text: "" }] }),
+    );
+    expect(server.securitySchemesByTool.get("x")).toEqual([
+      { type: "oauth2", scopes: ["checkout"] },
+    ]);
   });
 
   it("allows `auth: { allowsAnonymous: true }` without an oauth provider", () => {

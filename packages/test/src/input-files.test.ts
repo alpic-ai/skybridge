@@ -1,6 +1,6 @@
 import type { FilePart } from "ai";
 import { MockLanguageModelV3 } from "ai/test";
-import { FileRef, Skybridge } from "skybridge/server";
+import { defineServer, FileRef, Skybridge } from "skybridge/server";
 import { expect, it } from "vitest";
 import { z } from "zod";
 import "./matchers/index.js";
@@ -452,6 +452,38 @@ it("records current inputs when a model reuses a call ID across sends", async ()
   expect(chat.toolCalls[2]?.failed).toBeUndefined();
 });
 
+it("closes one conversation's downloads while another conversation keeps its attachments", async () => {
+  const firstSeen: FileRef[] = [];
+  const secondSeen: FileRef[] = [];
+  const [first, second] = await Promise.all([
+    start({
+      app: fileApp(firstSeen),
+      model: fileModel("resize", (files) => ({
+        file: files[0]?.workspace_path,
+        width: 100,
+      })),
+    }),
+    start({
+      app: fileApp(secondSeen),
+      model: fileModel("resize", (files) => ({
+        file: files[0]?.workspace_path,
+        width: 100,
+      })),
+    }),
+  ]);
+  await Promise.all([first.send([portrait()]), second.send([portrait()])]);
+  const firstFile = firstSeen[0];
+  const secondFile = secondSeen[0];
+  expect(firstFile).toBeDefined();
+  expect(secondFile).toBeDefined();
+  await first.close();
+  await expect(fetch(firstFile?.download_url ?? "")).rejects.toThrow();
+  expect((await fetch(secondFile?.download_url ?? "")).ok).toBe(true);
+  await second.send("Resize it again");
+  expect(secondSeen).toHaveLength(2);
+  expect(secondSeen[1]).toEqual(secondFile);
+});
+
 it.each(["single", "list", "object"])(
   "rejects the wrong %s file shape before handlers or stubs",
   async (shape) => {
@@ -496,11 +528,11 @@ it.each(["single", "list", "object"])(
   },
 );
 
-it("runs eval transformations and stubs inside the app's native middleware pipeline", async () => {
+it("wraps application middleware with file adaptation and keeps stubs terminal", async () => {
   const events: string[] = [];
   const schemas: unknown[] = [];
   const part = portrait();
-  const app = new Skybridge({
+  const service = defineServer({
     name: "native-file-eval",
     version: "1",
     handler: (server) =>
@@ -523,7 +555,9 @@ it("runs eval transformations and stubs inside the app's native middleware pipel
         })
         .mcpMiddleware("tools/call", async (request, _extra, next) => {
           events.push("app:before");
-          expect(typeof request.params.arguments?.file).toBe("string");
+          expect(request.params.arguments?.file).toEqual(
+            expect.inputFile(part),
+          );
           const result = await next();
           expect(request.params.arguments?.file).toEqual(
             expect.inputFile(part),
@@ -533,7 +567,7 @@ it("runs eval transformations and stubs inside the app's native middleware pipel
         }),
   });
   const chat = await start({
-    app,
+    server: service,
     model: fileModel("native", (files) => ({ file: files[0]?.workspace_path })),
     stubs: {
       native: ({ file }) => {
@@ -545,10 +579,10 @@ it("runs eval transformations and stubs inside the app's native middleware pipel
   });
   await chat.send([part]);
   expect(schemas).toEqual([
-    {
-      type: "string",
-      description: "This parameter expects an absolute local file path.",
-    },
+    expect.objectContaining({
+      type: "object",
+      required: expect.arrayContaining(["download_url", "file_id"]),
+    }),
   ]);
   expect(events).toEqual(["app:before", "stub", "app:after"]);
   expect

@@ -9,7 +9,7 @@ DevTools proves a tool works when called. An eval proves the model *calls* it, w
 1. Dev dependencies: `@skybridge/test`, `vitest@^4` (vitest 5 is not supported yet), `ai`, and an AI SDK provider (`@ai-sdk/anthropic`, `@ai-sdk/openai`, ...).
 2. `vite.config.ts`: `skybridge({ evals: {} })`. This registers the `expect.chat` matchers, picks up `evals/**/*.eval.ts`, raises the per-scenario timeout to two minutes, and loads `.env`.
 3. `package.json`: `"evals": "vitest run evals"`.
-4. The provider key in `.env` (`ANTHROPIC_API_KEY` for `@ai-sdk/anthropic`). If the app has `oauth`, its provider env is needed too: `setup` and `oauth` resolve on the first request.
+4. The model provider key in `.env` (`ANTHROPIC_API_KEY` for `@ai-sdk/anthropic`) and any credentials the definition's `setup` needs. The HTTP host's OAuth provider is not resolved during evals.
 
 The default `demo` template from `create skybridge` already has all of this, plus `evals/start.eval.ts` to copy from; the `blank` template has none of it.
 
@@ -20,10 +20,10 @@ The default `demo` template from `create skybridge` already has all of this, plu
 import { anthropic } from "@ai-sdk/anthropic";
 import { start } from "@skybridge/test";
 import { expect, it } from "vitest";
-import { app } from "../src/server.js";
+import { service } from "../src/server.js";
 
 it("searches flights from a natural prompt", async () => {
-  const chat = await start({ app, model: anthropic("claude-sonnet-4-5") });
+  const chat = await start({ server: service, model: anthropic("claude-sonnet-4-5") });
   await chat.send("I need to fly to Lisbon next weekend");
 
   expect.chat(chat).toHaveCalledToolOnce("search-flights", { destination: "Lisbon" });
@@ -31,9 +31,9 @@ it("searches flights from a natural prompt", async () => {
 });
 ```
 
-`start` serves the app in process: no port, no HTTP server. This only works because `src/server.ts` exports the app and `src/index.ts` runs it; never put `run()` in `server.ts`. Each `send` is one user turn, during which the model may call several tools. The session closes with the test.
+Export `service = defineServer({ setup, dispose, handler })` in `src/server.ts` and host it with `new Skybridge({ server: service, oauth })`. `start({ server: service, model })` owns an independent execution: setup once, fresh SDK instances per stateless request, cleanup on `chat.close()`, test teardown, or startup failure. Keep mutable state in `setup`. `start({ app, model })` remains a shorthand using `app.server`. Keep `run()` in `src/index.ts`.
 
-`app.createServerInstance(configure?)` builds a fresh SDK server and runs the synchronous `configure(server)` callback after app registration but before middleware composition. `start` uses it to install native `mcpMiddleware` only on eval-created instances, including file schema adaptation on `tools/list` and path resolution and stubs on `tools/call`. Prefer this hook over wrapping fetch or rewriting HTTP responses when extending an in-process eval host.
+`service.mcpMiddleware(filter, handler)` returns an immutable derived definition. Newly composed wrappers run before the existing pipeline on requests and after it on responses. Evals use outer native middleware for file adaptation: application list middleware sees original schemas, and application call middleware sees resolved `FileRef` arguments before `next()`. `chat.toolCalls` records those arguments while model history keeps paths. Evals exercise MCP behavior and middleware, not HTTP token verification or Express routes.
 
 ## Matchers
 
@@ -62,21 +62,21 @@ On failure the message lists every call the model made, with arguments. Matchers
 
 ```typescript
 const chat = await start({
-  app,
+  server: service,
   model: anthropic("claude-sonnet-4-5"),
   stubs: { "search-flights": ({ to }) => (to === "LIS" ? lisbonFixture : undefined) },
 });
 ```
 
-Arguments are typed against the registry and validated before the stub runs. Returning `undefined` falls through to the real server. A stubbed call still appears in `chat.toolCalls`, but never reaches the handler, so its per-tool scope checks do not run for that call.
+Arguments are typed against the registry. Stubs replace only terminal implementations: normal validation, application middleware, and declared per-tool authorization run first. Returning `undefined` falls through to the original implementation; any other result skips it. Stubbed calls still appear in `chat.toolCalls`.
 
 ## Authenticated apps
 
-Claim an identity per session; only token verification is skipped, per-tool `auth` and scope checks run for real:
+Declare `auth` or `securitySchemes` on the definition and claim an identity per session. Per-tool authorization and scopes run for real, including stubbed calls:
 
 ```typescript
 const chat = await start({
-  app,
+  server: service,
   model: anthropic("claude-sonnet-4-5"),
   authInfo: { token: "eval", clientId: "evals", scopes: ["orders:read"], extra: { subject: "user-1" } },
 });

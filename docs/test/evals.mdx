@@ -48,25 +48,25 @@ Then add a script to run them:
 
 ## Write a Scenario
 
-A scenario opens a conversation against your [app](/api-reference/skybridge), sends a prompt, and asserts on the tools the model called:
+A scenario opens a conversation against your reusable [server definition](/api-reference/skybridge#defineserver), sends a prompt, and asserts on the tools the model called:
 
 ```ts evals/search.eval.ts
 import { anthropic } from "@ai-sdk/anthropic";
 import { start } from "@skybridge/test";
 import { expect, it } from "vitest";
-import { app } from "../src/server.js";
+import { service } from "../src/server.js";
 
 it("reaches the search tool from a natural prompt", async () => {
-  const chat = await start({ app, model: anthropic("claude-sonnet-4-5") });
+  const chat = await start({ server: service, model: anthropic("claude-sonnet-4-5") });
   await chat.send("Find me running shoes under 100 dollars");
 
   expect.chat(chat).toHaveCalledToolWith("search-products", { query: "running shoes" });
 });
 ```
 
-`start` serves the app in process: no MCP port, no fixture. Each `send` is one turn, during which the model can call several tools before it answers. The session closes when the test finishes.
+`start` serves the definition in process: no MCP port, no fixture. Each conversation owns an execution, with setup once and fresh SDK instances for its stateless requests. Each `send` is one turn, during which the model can call several tools before it answers. `chat.close()` closes its session, download listener, and execution; this also happens automatically when the test finishes. Startup failures clean up too.
 
-This is why the app lives in `src/server.ts` and `run()` in `src/index.ts`: importing the app starts nothing.
+Export `service = defineServer({ setup, dispose, handler })` from `src/server.ts` and host it with `new Skybridge({ server: service, oauth })`. Keep `run()` in `src/index.ts`: importing the definition starts nothing. The existing `start({ app, model })` shorthand uses `app.server` to create a separate eval execution.
 
 ## Attach Input Files
 
@@ -99,7 +99,7 @@ expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
 
 This simulates the ChatGPT host as observed in-app. The model sees each attachment's name, a synthetic `workspace_path` and the file content. Fields listed in a tool's `_meta["openai/fileParams"]` are shown to the model as a path (or a list of paths for list fields). Before the handler or stub runs, the runner replaces each path with an OpenAI file object whose `download_url` serves the attached bytes until the conversation closes. `chat.toolCalls` records those server-facing arguments.
 
-`start` registers native `mcpMiddleware` through the app's [`createServerInstance`](/api-reference/skybridge#createserverinstance) hook before middleware composition. The `tools/list` middleware validates and adapts declared file schemas; `tools/call` resolves paths before the handler or stub. These registrations belong only to eval-created instances.
+`start` derives an immutable definition with outer native `mcpMiddleware`. Application `tools/list` middleware processes the original schemas before file adaptation, and application `tools/call` middleware sees resolved `FileRef` arguments before `next()`. The model's history keeps paths; `chat.toolCalls` keeps server-facing arguments. File adaptation belongs to this conversation and does not mutate the production definition.
 
 `expect.inputFile(part)` matches the file object minted for that exact `FilePart`. Two parts with identical bytes do not match each other.
 
@@ -132,7 +132,7 @@ Sometimes it's not easy to test an agent behavior using on deterministic matcher
 
 ```ts evals/trip.eval.ts
 it("plans a trip within budget", async () => {
-  const chat = await start({ app, model: anthropic("claude-sonnet-4-5") });
+  const chat = await start({ server: service, model: anthropic("claude-sonnet-4-5") });
   await chat.send("Plan a weekend in Lisbon under 500 euros");
 
   await expect.chat(chat).toPassJudgment(
@@ -207,7 +207,7 @@ A scenario that depends on today's date or on a live catalogue passes today and 
 
 ```ts evals/flights.eval.ts highlight={4-6}
 const chat = await start({
-  app,
+  server: service,
   model: anthropic("claude-sonnet-4-5"),
   stubs: {
     "search-flights": ({ from, to }) => ({ flights: [{ from, to, price: 120, departsAt: "2026-04-03T08:15:00Z" }] }),
@@ -216,6 +216,8 @@ const chat = await start({
 ```
 
 The arguments are typed against your registry, and a stubbed call still lands in `chat.toolCalls`, so every matcher works on it. Return a string or any JSON value: the runner wraps it the way a real tool result reaches the model. Naming a tool your app does not expose fails the scenario rather than passing silently. Return `undefined` to fall through to the real server, which is how you pin one set of arguments and leave the rest live:
+
+Stubs replace only the terminal tool implementation. Normal input validation, application middleware, and declared per-tool authorization still run. A stub that returns a result never invokes the original implementation.
 
 ```ts
 stubs: {
@@ -231,16 +233,16 @@ For an app behind [OAuth](/build/auth), claim an identity for the session:
 
 ```ts evals/checkout.eval.ts highlight={4}
 const chat = await start({
-  app,
+  server: service,
   model: anthropic("claude-sonnet-4-5"),
   authInfo: { token: "eval", clientId: "evals", scopes: ["checkout"], extra: { email: "ada@example.com" } },
 });
 ```
 
-Only token verification is skipped. Per-tool schemes and scope checks run for real against those claims, and `extra` reaches your handlers as `extra.http.authInfo.extra`. Omit `authInfo` to exercise the anonymous path, auth challenges included.
+Explicit per-tool schemes and scope checks run for real against those claims, including stubbed calls, and `extra` reaches your handlers as `extra.http.authInfo.extra`. Omit `authInfo` to exercise the anonymous path, auth challenges included. Declare `auth` or `securitySchemes` on the definition for transport-independent enforcement.
 
 <Info>
-`setup` and `oauth` still resolve on the first request, so an app wired to an identity provider needs its `.env` to run evals, the same as `dev`.
+These evals exercise MCP behavior and native middleware. They do not run the HTTP host's OAuth provider, bearer-token verification, or Express routes. The definition's `setup` still needs its own credentials, but HTTP-provider discovery is not part of eval startup.
 </Info>
 
 ## Tune the Run

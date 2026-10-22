@@ -88,6 +88,7 @@ export class Chat<App = unknown> {
   private readonly transport: StreamableHTTPClientTransport;
   private readonly host: HostConfig;
   private tools: Tool[] = [];
+  private closePromise?: Promise<void>;
 
   /** The model the conversation runs on, and the judge's default. */
   get model(): LanguageModel {
@@ -99,6 +100,7 @@ export class Chat<App = unknown> {
     transport: StreamableHTTPClientTransport,
     host: HostConfig,
     private readonly middleware: EvalMiddleware,
+    private readonly dispose: () => Promise<void>,
   ) {
     this.client = client;
     this.transport = transport;
@@ -109,15 +111,16 @@ export class Chat<App = unknown> {
     host: HostConfig,
     fetchImpl: TransportFetch,
     middleware: EvalMiddleware,
+    dispose: () => Promise<void>,
   ): Promise<Chat<App>> {
     const client = new Client({ name: "skybridge-eval", version: "0" });
     const transport = new StreamableHTTPClientTransport(
       new URL(IN_PROCESS_URL),
       { fetch: fetchImpl },
     );
-    await client.connect(transport);
-    const chat = new Chat<App>(client, transport, host, middleware);
+    const chat = new Chat<App>(client, transport, host, middleware, dispose);
     try {
+      await client.connect(transport);
       const { tools } = await client.listTools();
       chat.tools = tools;
       registerFileParameters(chat, middleware.fileParams);
@@ -130,6 +133,9 @@ export class Chat<App = unknown> {
 
   /** Takes a turn. Assert on the result with `expect.chat`. */
   async send(content: UserContent): Promise<void> {
+    if (this.closePromise) {
+      throw new Error("The conversation is closed");
+    }
     const prepared = await this.middleware.files.prepare(content);
     this.middleware.inputs.clear();
     this.failures.clear();
@@ -180,9 +186,19 @@ export class Chat<App = unknown> {
     this.messages.push(...result.response.messages);
   }
 
-  async close(): Promise<void> {
-    await this.middleware.files.close();
-    await this.transport.close();
+  close() {
+    this.closePromise ??= (async () => {
+      try {
+        await this.transport.close();
+      } finally {
+        try {
+          await this.middleware.files.close();
+        } finally {
+          await this.dispose();
+        }
+      }
+    })();
+    return this.closePromise;
   }
 
   private failureFor(call: { toolCallId: string; invalid?: boolean }): {

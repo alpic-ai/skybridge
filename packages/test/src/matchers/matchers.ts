@@ -4,7 +4,7 @@ import type { FileRef, ToolInput, ToolNames } from "skybridge/server";
 import { expect } from "vitest";
 import type { ChatLike, ToolCall, Turn } from "./types.js";
 
-const owners = new WeakMap<object, FilePart>();
+const fileIds = new WeakMap<FilePart, Set<string>>();
 const fileMatchers = new WeakSet<object>();
 const fileParameters = new WeakMap<
   object,
@@ -12,7 +12,9 @@ const fileParameters = new WeakMap<
 >();
 
 export function registerInputFile(reference: FileRef, part: FilePart) {
-  owners.set(reference, part);
+  const ids = fileIds.get(part) ?? new Set<string>();
+  ids.add(reference.file_id);
+  fileIds.set(part, ids);
 }
 
 export function registerFileParameters(
@@ -26,7 +28,11 @@ function inputFile(part: FilePart): FileRef {
   const label = () => `inputFile(${part.filename ?? part.mediaType})`;
   const matcher = {
     asymmetricMatch: (value: unknown) =>
-      typeof value === "object" && value !== null && owners.get(value) === part,
+      typeof value === "object" &&
+      value !== null &&
+      "file_id" in value &&
+      typeof value.file_id === "string" &&
+      fileIds.get(part)?.has(value.file_id) === true,
     toString: label,
     toJSON: label,
   };

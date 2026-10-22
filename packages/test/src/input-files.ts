@@ -37,6 +37,7 @@ async function fileBytes(data: FilePart["data"]): Promise<Buffer> {
 }
 
 export class InputFiles {
+  private closed = false;
   private readonly files = new Map<
     string,
     { reference: FileRef; bytes: Buffer }
@@ -53,6 +54,9 @@ export class InputFiles {
   });
 
   async prepare(content: UserContent): Promise<UserContent> {
+    if (this.closed) {
+      throw new Error("The conversation is closed");
+    }
     if (typeof content === "string") {
       return content;
     }
@@ -63,6 +67,9 @@ export class InputFiles {
         continue;
       }
       const bytes = await fileBytes(part.data);
+      if (this.closed) {
+        throw new Error("The conversation is closed");
+      }
       if (!this.server.listening) {
         this.server.listen(0, "127.0.0.1").unref();
         await once(this.server, "listening");
@@ -116,6 +123,9 @@ export class InputFiles {
   }
 
   async close() {
+    this.closed = true;
+    this.files.clear();
+    this.paths.clear();
     if (this.server.listening) {
       this.server.close();
       await once(this.server, "close");

@@ -1,12 +1,12 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { start } from "@skybridge/test";
 import { expect, it } from "vitest";
-import { app } from "../src/server.js";
+import { service } from "../src/server.js";
 
 const model = anthropic("claude-sonnet-4-5");
 
 it("searches the catalog before opening one product", async () => {
-  const chat = await start({ app, model });
+  const chat = await start({ server: service, model });
   await chat.send("Find the goggles you sell and tell me about the cheapest");
 
   expect
@@ -15,7 +15,7 @@ it("searches the catalog before opening one product", async () => {
 });
 
 it("carries the conversation across two turns", async () => {
-  const chat = await start({ app, model });
+  const chat = await start({ server: service, model });
   await chat.send("What goggles do you sell?");
   await chat.send("Tell me more about the Aurora ones");
 
@@ -29,7 +29,7 @@ it("carries the conversation across two turns", async () => {
 
 it("calls nothing when there is nothing to look up", async () => {
   const chat = await start({
-    app,
+    server: service,
     model,
     systemPrompt:
       "You are a ski shop assistant. Only call a tool when the user asks about the catalog, a product or an order.",

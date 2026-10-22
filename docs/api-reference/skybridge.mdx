@@ -3,7 +3,7 @@ title: Skybridge
 description: "Configure and run your app"
 ---
 
-`Skybridge` is the root of your app: one config object that names your server, wires OAuth, and registers your [tools](/build/tools) through a `handler`. It runs an [Express](https://expressjs.com/)-backed HTTP server that serves MCP at `/mcp`, and you export its type for [`generateHelpers`](/api-reference/generate-helpers).
+`defineServer` declares your MCP behavior: setup, [tools](/build/tools), resources, prompts, and native middleware. `Skybridge` hosts that definition on an [Express](https://expressjs.com/)-backed HTTP server at `/mcp`, with OAuth and custom routes. Pass the same definition to [evals](/test/evals).
 
 ## Example
 
@@ -11,15 +11,16 @@ The app registers one tool and exports its type for the typed client hooks. A se
 
 <CodeGroup>
 ```ts src/server.ts
-import { Skybridge } from "skybridge/server";
+import { defineServer, Skybridge } from "skybridge/server";
 
-export const app = new Skybridge({
+export const service = defineServer({
   name: "shop",
   version: "1.0",
   handler: (server) => server.registerTool(/* ... */),
 });
 
-export type AppType = typeof app; // generateHelpers reads your tools from this
+export const app = new Skybridge({ server: service });
+export type AppType = typeof service;
 ```
 
 ```ts src/index.ts
@@ -29,7 +30,43 @@ export default await app.run();
 ```
 </CodeGroup>
 
-Keeping the definition in `server.ts` and the `run()` call in `index.ts` lets tests and [evals](/test/evals) import the app without starting a server.
+Keeping the definition in `server.ts` and the `run()` call in `index.ts` lets tests and [evals](/test/evals) import it without starting a server.
+
+## `defineServer`
+
+```ts
+defineServer({ setup?, dispose?, handler, name?, version?, ...serverOptions });
+```
+
+Returns a reusable `ServerDefinition`, not a connected SDK server. Its tool types flow through composition, `Skybridge`, `start`, and `generateHelpers`. Implementation metadata and SDK server options belong here; omitted `name` and `version` default to `skybridge` and the framework version.
+
+### Immutable middleware composition
+
+```ts
+const logged = service.mcpMiddleware("tools/call", async (request, _extra, next) => {
+  console.log(request.params.name);
+  return next();
+});
+```
+
+This creates a new definition without changing `service`. It accepts the same filters as [`McpServer.mcpMiddleware`](/api-reference/mcp-server#mcpmiddleware). Each newly composed wrapper runs before the existing pipeline on requests and after it on responses, including middleware registered inside `handler`.
+
+### Execution lifecycle
+
+```ts
+const execution = service.createExecution();
+try {
+  const instance = await execution.createServerInstance();
+  await instance.connect(transport);
+  // Keep the execution open for the transport's lifetime.
+} finally {
+  await execution.close();
+}
+```
+
+An execution owns its setup result and SDK instances. `setup` runs once per execution; `createServerInstance` registers a fresh server each time. `close` closes remaining instances and invokes `dispose(config)` once. A `Skybridge` host owns one execution; every eval conversation owns another. Put mutable state in `setup` to isolate conversations and production.
+
+`createExecution({ toolImplementations })` optionally supplies typed terminal tool replacements returning MCP tool results. They run after normal input validation and per-tool authorization, inside application middleware. Returning `undefined` uses the original implementation. Evals expose this through [`stubs`](/test/evals#stubs).
 
 ## Constructor
 
@@ -37,18 +74,17 @@ Keeping the definition in `server.ts` and the `run()` call in `index.ts` lets te
 new Skybridge(config: SkybridgeConfig);
 ```
 
-`config` merges the MCP implementation info, the SDK's `ServerOptions`, and Skybridge's own fields. Every type is inferred from it: the config passed to `handler` from `setup`, the auth claims from `oauth`, and the tool registry from what `handler` returns.
+Pass a definition and HTTP options. An `oauth` function receives the host execution's setup result.
 
 ```ts
-type SkybridgeConfig = Implementation &
-  ServerOptions & {
-    handler: (server: McpServer, config: Config) => McpServer;
-    setup?: () => Config | Promise<Config>;
+type SkybridgeConfig = {
+    server: ServerDefinition;
     oauth?: OAuthConfig | OAuthProvider | ((config: Config) => OAuthConfig | OAuthProvider);
     json?: JsonOptions;
-    skills?: boolean;
-  };
+};
 ```
+
+The existing `new Skybridge({ name, version, setup, handler, oauth, ... })` constructor remains supported. It adapts those declarations into `app.server` and uses the same execution implementation.
 
 ### `name`, `version`
 
@@ -58,21 +94,24 @@ The MCP implementation info (`name`, `version`, and optionally `title`, `descrip
 
 ### `handler`
 
-Receives a fresh [`McpServer`](/api-reference/mcp-server) and must **return** the chain of registrations. That return value is what carries your tool types into `typeof app`.
+The definition's handler receives a fresh [`McpServer`](/api-reference/mcp-server) and must **return** that server's chain of registrations. The return value carries your tool types into `typeof service`.
 
 The handler runs for **every request**, so keep it to registration. Anything else in its body (a connection pool, a timer, a file read) runs per request too: move it into [`setup`](#setup), whose result is the handler's second argument. Skybridge warns once in the console when a handler takes more than 50ms. The handler must stay synchronous.
 
 ### `setup`
 
-Loads what the app needs before it serves: a connection pool, a client, remote config, secrets. It runs **once**, at `run()` or on the first request, never when the module is imported. Its awaited result is passed to `handler` as the second argument, and to `oauth` when `oauth` is a function.
+Loads what the execution needs: a connection pool, a client, remote config, secrets. It runs **once per execution**, never when the module is imported. Its awaited result is passed to `handler` and to the host's `oauth` function. Release those dependencies in `dispose(config)`; hosts and evals also clean up after startup fails once setup has completed.
 
 ```ts src/server.ts
-export const app = new Skybridge({
+export const service = defineServer({
   name: "shop",
   version: "1.0",
   setup: async () => loadConfig(),
-  oauth: (config) => descopeProvider({ url: config.mcpServerUrl }),
   handler: (server, config) => server.registerTool(/* reads config */),
+});
+export const app = new Skybridge({
+  server: service,
+  oauth: (config) => descopeProvider({ url: config.mcpServerUrl }),
 });
 ```
 
@@ -95,6 +134,10 @@ Skills over MCP tracks [SEP-2640](https://github.com/modelcontextprotocol/modelc
 </Info>
 
 ## Properties
+
+### `server`
+
+The reusable server definition hosted by this app. Evals may pass it directly as `start({ server: app.server, model })`; `start({ app, model })` remains a compatibility shorthand.
 
 ### `express`
 
@@ -145,22 +188,23 @@ Connects the app to a transport you manage, such as stdio for a desktop host. Fo
 ### `createServerInstance`
 
 ```ts
-app.createServerInstance(configure?: (server: McpServer) => void): Promise<Server>;
+app.createServerInstance(): Promise<Server>;
 ```
 
-Builds a fresh MCP server after `setup` and `oauth` resolve. The optional synchronous callback runs after your `handler` registers the app and before middleware is composed. Use it to register native [`mcpMiddleware`](/api-reference/mcp-server#mcpmiddleware) on that instance alone, then connect the returned SDK server to your transport.
+Builds a fresh MCP server after the host's `setup` and `oauth` resolve. Middleware is assembled from the definition and its registrations before the instance is returned. For eval-only wrappers, derive a definition with `service.mcpMiddleware(...)` and pass it to `start`.
 
 ```ts
-const instance = await app.createServerInstance((server) => {
-  server.mcpMiddleware("tools/call", (request, _extra, next) => {
-    console.log(request.params.name);
-    return next();
-  });
-});
+const instance = await app.createServerInstance();
 await instance.connect(transport);
 ```
 
-[`start`](/test/evals) uses this hook to install eval-only file transformations and stubs. Each eval-created instance gets its own middleware registration; ordinary server creation keeps the app's registrations.
+### `close`
+
+```ts
+await app.close();
+```
+
+Closes the HTTP handler, listener, and owned execution, including `dispose`. Repeated calls share the same cleanup. A failed `run()` also closes these resources.
 
 <CardGroup cols={3}>
   <Card title="McpServer" icon="server" href="/api-reference/mcp-server">

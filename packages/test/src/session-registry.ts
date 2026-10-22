@@ -1,21 +1,39 @@
-import { createMcpHandler, type Server } from "@modelcontextprotocol/server";
+import {
+  type CallToolResult,
+  createMcpHandler,
+  type Server,
+} from "@modelcontextprotocol/server";
 import type { LanguageModel } from "ai";
-import type { McpServer, ToolInput, ToolNames } from "skybridge/server";
+import type {
+  McpTypedMiddlewareFn,
+  ToolInput,
+  ToolNames,
+} from "skybridge/server";
 import { inject, onTestFinished } from "vitest";
 import { Chat, type StubMap } from "./chat.js";
 import { EvalMiddleware } from "./eval-middleware.js";
 
-/**
- * The minimum a Skybridge app has to expose to be served in-process: the
- * `$types` marker the assertions infer tool names from, and the per-request
- * server builder the session's handler is built on. Structural on purpose, so
- * this package needs no runtime dependency on `skybridge`.
- */
-export interface EvalApp {
+export interface EvalServer {
   readonly $types: { readonly tools: object };
-  createServerInstance(
-    configure?: (server: Pick<McpServer, "mcpMiddleware">) => void,
-  ): Promise<Server>;
+  mcpMiddleware<M extends "tools/list" | "tools/call">(
+    method: M,
+    handler: McpTypedMiddlewareFn<M>,
+  ): EvalServer;
+  createExecution(options?: {
+    toolImplementations?: Record<
+      string,
+      (
+        args: unknown,
+      ) => CallToolResult | undefined | Promise<CallToolResult | undefined>
+    >;
+  }): {
+    createServerInstance(): Promise<Server>;
+    close(): Promise<void>;
+  };
+}
+
+export interface EvalApp {
+  readonly server: EvalServer;
 }
 
 /**
@@ -58,41 +76,56 @@ function sharedDefaults() {
   }
 }
 
-/**
- * Opens a fresh MCP session and conversation against the app under test. The
- * app is served in-process by a handler built on `app.createServerInstance`
- * for this conversation alone, and both are closed when the current test
- * finishes, so scenarios never leak sessions and never write teardown, and
- * tests that run concurrently cannot close each other's sessions.
- *
- * The assertions are inferred from the app value itself, so `expect.chat` gets
- * the project's tool names and argument shapes with no type parameter.
- *
- * `stubs` answers a tool from the scenario instead of the app, so a case that
- * depends on today's date or on a live catalogue still reads the same weeks
- * later. A stubbed call never reaches the tool handler, and still shows up in
- * `chat.toolCalls` like any other. See {@link ToolStubs}.
- *
- * `authInfo` claims an identity for the session: the app's per-tool scheme and
- * scope enforcement runs against it for real, only token verification is
- * skipped. Omit it to exercise the anonymous path, challenges included.
- */
-export async function start<App extends EvalApp>(
+export async function start<Service extends EvalServer>(
   options: StartOptions & {
-    app: App;
     authInfo?: EvalIdentity;
-    stubs?: ToolStubs<App>;
-  },
-): Promise<Chat<App>> {
+    stubs?: ToolStubs<Service>;
+  } & (
+      | { server: Service; app?: never }
+      | { app: { server: Service }; server?: never }
+    ),
+): Promise<Chat<Service>> {
   const config = sharedDefaults();
-  const { app, authInfo } = options;
-  const middleware = new EvalMiddleware((options.stubs ?? {}) as StubMap);
-  const handler = createMcpHandler(() =>
-    app.createServerInstance((server) => middleware.install(server)),
-  );
-  let chat: Chat<App>;
+  const { authInfo } = options;
+  const server = options.app ? options.app.server : options.server;
+  const middleware = new EvalMiddleware();
+  const stubs = (options.stubs ?? {}) as StubMap;
+  const execution = middleware.compose(server).createExecution({
+    toolImplementations: Object.fromEntries(
+      Object.entries(stubs).map(([name, stub]) => [
+        name,
+        async (args: unknown) => {
+          const result = await stub(args as Record<string, unknown>);
+          return result === undefined
+            ? undefined
+            : {
+                content: [
+                  {
+                    type: "text" as const,
+                    text:
+                      typeof result === "string"
+                        ? result
+                        : JSON.stringify(result),
+                  },
+                ],
+              };
+        },
+      ]),
+    ),
+  });
+  const handler = createMcpHandler(() => execution.createServerInstance());
+  const close = async () => {
+    try {
+      await handler.close();
+    } finally {
+      await execution.close();
+    }
+  };
+  let chat: Chat<Service>;
   try {
-    chat = await Chat.open<App>(
+    const sample = await execution.createServerInstance();
+    await sample.close();
+    chat = await Chat.open<Service>(
       {
         model: options.model,
         temperature: options.temperature ?? config?.temperature,
@@ -105,16 +138,15 @@ export async function start<App extends EvalApp>(
           authInfo === undefined ? undefined : { authInfo },
         ),
       middleware,
+      close,
     );
   } catch (error) {
-    await middleware.files.close();
-    await handler.close();
+    await Promise.allSettled([middleware.files.close(), close()]);
     throw error;
   }
 
   onTestFinished(async () => {
     await chat.close();
-    await handler.close();
   });
   return chat;
 }

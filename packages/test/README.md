@@ -5,19 +5,18 @@ prompt reaches the right tool with the right arguments, which no unit test can
 check.
 
 Add the `evals` option to the Skybridge Vite plugin so `expect.chat` exists,
-then write scenarios with vitest's own `it` and `expect`. Pass the app itself
-to `start`: it is served in-process, dialing an in-process handler built on `app.createServerInstance()`, and
-the tool names and argument shapes come from the app value, so no type
-parameter is needed.
+then write scenarios with vitest's own `it` and `expect`. Pass a reusable
+`defineServer` definition to `start`: each conversation owns an in-process
+execution, and tool names and argument shapes come from the definition.
 
 ```ts
 import { anthropic } from "@ai-sdk/anthropic";
 import { expect, it } from "vitest";
 import { start } from "@skybridge/test";
-import { app } from "../src/server.js";
+import { service } from "../src/server.js";
 
 it("finds products by category", async () => {
-  const chat = await start({ app, model: anthropic("claude-sonnet-4-5") });
+  const chat = await start({ server: service, model: anthropic("claude-sonnet-4-5") });
   await chat.send("I am looking for ski goggles");
 
   expect.chat(chat).toHaveCalledToolWith("search-products", {
@@ -26,15 +25,21 @@ it("finds products by category", async () => {
 });
 ```
 
-There is no child process and no server to boot, so the evals run anywhere
-vitest does. The caveat is that they bypass the Express layer, so nothing
-verifies a bearer token; pass `authInfo` to claim an identity.
+Host the same definition with `new Skybridge({ server: service, oauth })`.
+Evals exercise MCP behavior and middleware, while the HTTP host owns Express
+routes and bearer-token verification. `start({ app, model })` remains a shorthand
+for an independent execution of `app.server`.
+
+Setup runs once per conversation, with fresh SDK instances for stateless
+requests. `chat.close()` closes its session, attachment downloads, and execution,
+then invokes the definition's `dispose` once. Test teardown closes it automatically;
+startup failures also release completed setup. Keep mutable state in `setup`.
 
 ## Authenticated evals
 
 ```ts
 const chat = await start({
-  app,
+  server: service,
   model: anthropic("claude-sonnet-4-5"),
   authInfo: {
     token: "eval-token",
@@ -45,7 +50,7 @@ const chat = await start({
 });
 ```
 
-`authInfo` injects a claimed identity: the app's own scheme and scope
+`authInfo` injects a claimed identity: the definition's explicit scheme and scope
 enforcement runs for real, in-band challenges included, and only token
 signature verification is skipped. Omit it to eval the anonymous path, which is
 how you assert that a protected tool challenges instead of running.
@@ -59,7 +64,7 @@ are the project's own. Install the provider package you want alongside `ai`.
 import { anthropic } from "@ai-sdk/anthropic";
 import { start } from "@skybridge/test";
 
-const chat = await start({ app, model: anthropic("claude-sonnet-4-5") });
+const chat = await start({ server: service, model: anthropic("claude-sonnet-4-5") });
 ```
 
 A local runtime or a company gateway works the same way, through the AI SDK's
@@ -72,7 +77,7 @@ const ollama = createOpenAICompatible({
   name: "ollama",
   baseURL: "http://localhost:11434/v1",
 });
-const chat = await start({ app, model: ollama("llama3.1") });
+const chat = await start({ server: service, model: ollama("llama3.1") });
 ```
 
 The plugin's `evals` option also carries the defaults every conversation starts
@@ -109,7 +114,7 @@ expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
 
 `file` and `files` must be listed in their tools' `_meta["openai/fileParams"]`.
 Misplaced file matchers throw immediately, including nested matchers and `.not`.
-`start` validates that each declared parameter uses `FileRef`, including optional, nullable, and array forms. It installs native `mcpMiddleware` on each eval-created server through `createServerInstance` before middleware composition, exposing paths to the model and resolving them before handlers or stubs run.
+`start` validates that each declared parameter uses `FileRef`, including optional, nullable, and array forms. It derives an immutable definition with outer native `mcpMiddleware`, exposing paths to the model and resolving them before application middleware, handlers, or stubs run. Application list middleware sees original schemas. Stubs replace only terminal implementations, retaining input validation and authorization. `chat.toolCalls` records resolved arguments; model history retains paths.
 See [Evals](https://docs.skybridge.tech/test/evals) for how files reach the model and the tool.
 
 ## Matchers

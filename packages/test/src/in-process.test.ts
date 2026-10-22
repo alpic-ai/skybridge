@@ -1,6 +1,6 @@
 import { MockLanguageModelV3 } from "ai/test";
-import { Skybridge } from "skybridge/server";
-import { expect, it } from "vitest";
+import { defineServer, Skybridge } from "skybridge/server";
+import { expect, expectTypeOf, it } from "vitest";
 import { z } from "zod";
 import { start, type ToolStubs } from "./session-registry.js";
 
@@ -220,4 +220,105 @@ it("refuses a stub for a tool the app does not expose", async () => {
       >,
     }),
   ).rejects.toThrow('the app exposes no tool named "search-produts"');
+});
+
+it("enforces sign-in and scopes before stubs without resolving an HTTP provider", async () => {
+  const events: string[] = [];
+  const service = defineServer({
+    handler: (server) =>
+      server
+        .registerTool(
+          {
+            name: "checkout",
+            inputSchema: { id: z.string() },
+            auth: { scopes: ["checkout"] },
+          },
+          () => {
+            events.push("original");
+            return { content: "live" };
+          },
+        )
+        .mcpMiddleware("tools/call", async (_request, _extra, next) => {
+          events.push("before");
+          const result = await next();
+          events.push("after");
+          return result;
+        }),
+  });
+  const app = new Skybridge({
+    server: service,
+    oauth: () => {
+      throw new Error("HTTP provider must not resolve during evals");
+    },
+  });
+  for (const scopes of [undefined, [], ["checkout"]]) {
+    events.length = 0;
+    const chat = await start({
+      app,
+      model: mockModel({
+        toolName: "checkout",
+        input: { id: "sku-1" },
+        text: "Done.",
+      }),
+      authInfo:
+        scopes === undefined
+          ? undefined
+          : { token: "test", clientId: "test", scopes },
+      stubs: {
+        checkout: ({ id }) => {
+          expectTypeOf(id).toEqualTypeOf<string>();
+          events.push(`stub:${id}`);
+          return "stubbed";
+        },
+      },
+    });
+    await chat.send("Buy sku-1");
+    if (scopes?.includes("checkout")) {
+      expect(events).toEqual(["before", "stub:sku-1", "after"]);
+      expect.chat(chat).toHaveCalledToolOnce("checkout", { id: "sku-1" });
+    } else {
+      expect(events).toEqual(["before", "after"]);
+      expect.chat(chat).toHaveFailedToolCall("checkout");
+    }
+    await chat.close();
+  }
+});
+
+it("owns setup and cleanup per concurrent conversation and cleans up failed startup", async () => {
+  let loads = 0;
+  const disposed: number[] = [];
+  const received: string[] = [];
+  const service = defineServer({
+    setup: () => ({ id: ++loads, calls: 0 }),
+    dispose: ({ id }) => {
+      disposed.push(id);
+    },
+    handler: (server, state) =>
+      server.registerTool({ name: "count", inputSchema: {} }, () => {
+        received.push(`${state.id}:${++state.calls}`);
+        return { content: "counted" };
+      }),
+  });
+  const open = () =>
+    start({
+      server: service,
+      model: mockModel({ toolName: "count", input: {}, text: "Done." }),
+    });
+  const [first, second] = await Promise.all([open(), open()]);
+  expect(loads).toBe(2);
+  await Promise.all([first.send("Count"), second.send("Count")]);
+  expect(received.sort()).toEqual(["1:1", "2:1"]);
+  await Promise.all([first.close(), first.close()]);
+  expect(disposed).toEqual([1]);
+  await expect(first.send("Again")).rejects.toThrow("closed");
+  await second.close();
+  expect(disposed).toEqual([1, 2]);
+  await expect(
+    start({
+      server: service,
+      model: mockModel({ toolName: "count", input: {}, text: "" }),
+      stubs: { missing: () => "wrong" } as ToolStubs<typeof service>,
+    }),
+  ).rejects.toThrow("no tool named");
+  expect(disposed).toEqual([1, 2, 3]);
 });
