@@ -125,7 +125,7 @@ server.mcpMiddleware("tools/call", async (request, extra, next) => {
 });
 ```
 
-A tool failure is a valid MCP response, so [`useOnError`](/api-reference/skybridge#useonerror) never runs for it: report tool errors from `mcpMiddleware`, and keep `useOnError` for transport-level failures. Errors raised by the SDK itself (unknown tool, input or output schema validation) never reach your handler and are not reported here.
+A tool failure is a valid MCP response, so [`useOnError`](/api-reference/skybridge#useonerror) never runs for it: report tool errors from `mcpMiddleware`, and keep `useOnError` for transport-level failures. Errors raised by the SDK itself (unknown tool, input or output schema validation) never reach your handler and are not reported here. Requests that the SDK rejects before any tool runs, and failures to build the per-request server, go to [`onMcpError`](/api-reference/skybridge#onmcperror).
 
 <CardGroup cols={3}>
   <Card title="Skybridge" icon="server" href="/api-reference/skybridge">

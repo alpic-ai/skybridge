@@ -47,6 +47,7 @@ type SkybridgeConfig = Implementation &
     oauth?: OAuthConfig | OAuthProvider | ((config: Config) => OAuthConfig | OAuthProvider);
     json?: JsonOptions;
     skills?: boolean;
+    onMcpError?: (error: Error) => void;
   };
 ```
 
@@ -93,6 +94,42 @@ Set to `true` to serve [Agent Skills over MCP](/guides/skills) from `src/skills`
 <Info>
 Skills over MCP tracks [SEP-2640](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640), which is still under review. The feature is **experimental** and may change with the spec.
 </Info>
+
+### `onMcpError`
+
+Replaces the error reporter of the built-in `/mcp` handler. By default, Skybridge logs each error with `console.error("Error handling MCP request:", error)`, except `UnsupportedProtocolVersionError`.
+
+When you set `onMcpError`, it receives every error that the MCP SDK handler or its Node adapter reports. This includes:
+
+- Requests the SDK rejects before any tool runs, such as an unsupported protocol version or a malformed header.
+- Failures to build or serve the per-request server.
+
+`UnsupportedProtocolVersionError` also reaches your function, because the skip belongs to the default reporter. Filter it yourself if you do not want it.
+
+The option only reports. It does not change the response. Nothing waits for it, and it can run before the response is sent, so keep it fast and synchronous.
+
+Other errors go elsewhere:
+
+- Tool errors are valid MCP results. Read them with [`getToolError`](/api-reference/mcp-server#gettoolerror).
+- Express errors on `/mcp` go to your [`useOnError`](#useonerror) handlers, then to the default Express handler. That handler also logs them.
+
+```ts src/server.ts
+import { ProtocolError, ProtocolErrorCode, Skybridge } from "skybridge/server";
+
+export const app = new Skybridge({
+  name: "shop",
+  version: "1.0",
+  onMcpError: (error) => {
+    const unsupportedVersion =
+      error instanceof ProtocolError &&
+      error.code === ProtocolErrorCode.UnsupportedProtocolVersion;
+    if (!unsupportedVersion) {
+      logger.warn({ event: "mcp_error", name: error.name });
+    }
+  },
+  handler: (server) => server.registerTool(/* ... */),
+});
+```
 
 ## Properties
 

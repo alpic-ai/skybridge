@@ -16,20 +16,25 @@ type SkybridgeApp = Pick<
   "express" | "createServerInstance" | "ready"
 >;
 
+const logMcpError = (error: Error) => {
+  if (error instanceof UnsupportedProtocolVersionError) {
+    return;
+  }
+  console.error("Error handling MCP request:", error);
+};
+
 /**
  * The `/mcp` fetch handler for a {@link Skybridge} app: a `Request` →
  * `Response` function that builds a fresh MCP server per request.
  *
  * @internal
  */
-export function buildMcpHandler(skybridgeApp: SkybridgeApp): McpHttpHandler {
+export function buildMcpHandler(
+  skybridgeApp: SkybridgeApp,
+  onMcpError: (error: Error) => void = logMcpError,
+): McpHttpHandler {
   return createMcpHandler(() => skybridgeApp.createServerInstance(), {
-    onerror: (error) => {
-      if (error instanceof UnsupportedProtocolVersionError) {
-        return;
-      }
-      console.error("Error handling MCP request:", error);
-    },
+    onerror: onMcpError,
   });
 }
 
@@ -98,11 +103,13 @@ export async function createApp({
   app: skybridgeApp,
   httpServer,
   mcpHandler,
+  onMcpError,
   errorMiddleware = [],
 }: {
   app: SkybridgeApp;
   httpServer: http.Server;
   mcpHandler?: McpHttpHandler;
+  onMcpError?: (error: Error) => void;
   errorMiddleware?: {
     path?: string;
     handlers: express.ErrorRequestHandler[];
@@ -137,7 +144,13 @@ export async function createApp({
     app.use("/assets", express.static(assetsPath));
   }
 
-  app.use("/mcp", mcpMiddleware(mcpHandler ?? buildMcpHandler(skybridgeApp)));
+  app.use(
+    "/mcp",
+    mcpMiddleware(
+      mcpHandler ?? buildMcpHandler(skybridgeApp, onMcpError),
+      onMcpError,
+    ),
+  );
 
   applyMiddlewares(app, errorMiddleware);
 
@@ -146,8 +159,14 @@ export async function createApp({
   return app;
 }
 
-const mcpMiddleware = (mcpHandler: McpHttpHandler): express.RequestHandler => {
-  const handler = toNodeHandler(mcpHandler);
+const mcpMiddleware = (
+  mcpHandler: McpHttpHandler,
+  onMcpError?: (error: Error) => void,
+): express.RequestHandler => {
+  const handler = toNodeHandler(
+    mcpHandler,
+    onMcpError ? { onerror: onMcpError } : undefined,
+  );
 
   return async (
     req: express.Request,
