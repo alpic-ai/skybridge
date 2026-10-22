@@ -3,6 +3,7 @@ import type {
   RequestDisplayMode,
   Theme,
 } from "skybridge/web";
+import { readFileResource } from "@/lib/file-resources.js";
 import {
   isMobileDevice,
   type PreviewClient,
@@ -79,6 +80,11 @@ function buildHostContext(): HostContext {
 
 export type McpHostMockCleanup = () => void;
 
+export type OpenAIViewUi = {
+  availableDisplayModes?: RequestDisplayMode[];
+  preferredDisplayMode?: RequestDisplayMode;
+};
+
 export type ToolDataSnapshot = {
   modelContext?: Record<string, unknown> | null;
   toolInput?: Record<string, unknown> | null;
@@ -103,8 +109,16 @@ export function createMcpHostMock(
   ) => void,
   getCurrentToolData: () => ToolDataSnapshot,
   setModelContext: (modelContext: Record<string, unknown>) => void,
+  viewUi: OpenAIViewUi = {},
 ): McpHostMockCleanup {
   const post = (msg: unknown) => postToIframe(iframe, msg);
+  const modes = viewUi.availableDisplayModes;
+  const supports = (mode: string) => !modes || modes.some((m) => m === mode);
+  const deepLink = new URLSearchParams(window.location.search).get("deepLink");
+  const chatgptViewContext = {
+    ...(modes && { availableDisplayModes: modes }),
+    ...(deepLink && { "openai/deepLink": { url: deepLink } }),
+  };
 
   const handleMessage = async (event: MessageEvent) => {
     if (event.source !== iframe.contentWindow) {
@@ -137,8 +151,17 @@ export function createMcpHostMock(
     switch (method) {
       case "ui/initialize": {
         const { modelContext } = getCurrentToolData();
-        const isChatGpt =
-          useInspectorPreferencesStore.getState().previewClient === "chatgpt";
+        const preferences = useInspectorPreferencesStore.getState();
+        const isChatGpt = preferences.previewClient === "chatgpt";
+        if (isChatGpt) {
+          preferences.setPreference(
+            "displayMode",
+            viewUi.preferredDisplayMode ??
+              (modes && !supports(preferences.displayMode)
+                ? modes[0]
+                : preferences.displayMode),
+          );
+        }
         respond(post, id, {
           protocolVersion: "2025-06-18",
           hostInfo: {
@@ -161,11 +184,14 @@ export function createMcpHostMock(
               experimental: {
                 "openai/message": {},
                 "openai/modelContext": {},
+                "openai/resource": {},
+                "openai/files": {},
               },
             }),
           },
           hostContext: {
             ...buildHostContext(),
+            ...(isChatGpt && chatgptViewContext),
             ...(isChatGpt &&
               modelContext && { "openai/modelContext": modelContext }),
           },
@@ -221,9 +247,10 @@ export function createMcpHostMock(
       case "resources/read": {
         log("mcp:resources/read", (params as Record<string, unknown>) ?? {});
         try {
-          const result = await readResourceFn(
-            params as Parameters<typeof readResourceFn>[0],
-          );
+          const request = params as Parameters<typeof readResourceFn>[0];
+          const result =
+            (await readFileResource(request)) ??
+            (await readResourceFn(request));
           log(
             "mcp:resources/read response",
             result as unknown as Record<string, unknown>,
@@ -236,13 +263,27 @@ export function createMcpHostMock(
         }
         break;
       }
+      case "resources/subscribe":
+      case "resources/unsubscribe": {
+        respond(post, id, {});
+        break;
+      }
+      case "openai/files/open": {
+        log("openai:files/open", (params as Record<string, unknown>) ?? {});
+        respond(post, id, {});
+        break;
+      }
       case "ui/request-display-mode": {
         const requested = (params as { mode?: string })?.mode ?? "inline";
         const state = useInspectorPreferencesStore.getState();
-        const mode = resolveDisplayModeRequest(
+        const resolved = resolveDisplayModeRequest(
           requested as RequestDisplayMode,
           state,
         );
+        const mode =
+          state.previewClient === "chatgpt" && !supports(resolved)
+            ? state.displayMode
+            : resolved;
         state.setPreference("displayMode", mode);
         respond(post, id, { mode });
         break;
@@ -317,6 +358,7 @@ export function createMcpHostMock(
             preferences.theme,
             isMobileDevice(preferences.userAgent),
           ),
+          preferences.previewClient === "chatgpt" && chatgptViewContext,
         );
       }
       if (preferences.locale !== previous.locale) {
