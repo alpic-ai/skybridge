@@ -6,7 +6,7 @@ check.
 
 Add the `evals` option to the Skybridge Vite plugin so `expect.chat` exists,
 then write scenarios with vitest's own `it` and `expect`. Pass the app itself
-to `start`: it is served in-process, dialing an in-process handler built on `app.createServerInstance()`, and
+to `start`: it is served in-process, using your exported app, and
 the tool names and argument shapes come from the app value, so no type
 parameter is needed.
 
@@ -94,3 +94,33 @@ expect.chat(chat).not.toHaveSaid("refund");
 
 See the [documentation](https://docs.skybridge.tech) for setup and the full
 matcher list.
+
+## Input files
+
+`chat.send` also accepts AI SDK `UserContent`. Attach a `FilePart` and use the same object in `expect.inputFile` to check which file a tool received:
+
+```ts
+import { readFile } from "node:fs/promises";
+import type { FilePart } from "ai";
+
+const portrait: FilePart = {
+  type: "file",
+  mediaType: "image/png",
+  filename: "photo.png",
+  data: await readFile(new URL("./fixtures/photo.png", import.meta.url)),
+};
+
+await chat.send([{ type: "text", text: "Resize this photo" }, portrait]);
+
+expect.chat(chat).toHaveCalledToolWith("image_crop_and_resize", {
+  file: expect.inputFile(portrait),
+});
+expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
+  files: [expect.inputFile(portrait)],
+});
+```
+
+`file` and `files` must be listed in their tools' `_meta["openai/fileParams"]`.
+Misplaced file matchers throw immediately, including nested matchers and `.not`.
+Declare file parameters with `FileRef` and list their names in `_meta["openai/fileParams"]`. Optional, nullable, and array forms are supported. Your handler or stub receives the attached file; downloads remain available until the conversation closes.
+See [Evals](https://docs.skybridge.tech/test/evals) for how files reach the model and the tool.

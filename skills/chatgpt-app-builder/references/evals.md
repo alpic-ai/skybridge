@@ -66,7 +66,7 @@ const chat = await start({
 });
 ```
 
-Arguments are typed against the registry. Returning `undefined` falls through to the real server. A stubbed call still appears in `chat.toolCalls`, but never reaches the handler, so its schema validation and scope checks do not run for that call.
+Arguments are typed against the registry. Returning `undefined` falls through to the real server. A stubbed call still appears in `chat.toolCalls`, but bypasses the application pipeline, including input validation and scope checks.
 
 ## Authenticated apps
 
@@ -91,3 +91,7 @@ Omit `authInfo` to test the anonymous path: a gated tool then shows up as `toHav
 - Assert on tool calls and arguments, not on exact wording; use `toHaveSaid` with a loose pattern when the answer matters.
 - A failing eval usually means the tool `description` or schema `.describe()` text is unclear to the model, not that the handler is wrong. Fix the prompt surface first.
 - Do not run evals in a loop while iterating on UI; run them once a tool's contract changes.
+
+## Input files
+
+`chat.send` accepts AI SDK `UserContent`, including `FilePart` attachments. Declare file arguments with `FileRef` and `_meta: { "openai/fileParams": ["file"] }`; assert with `expect.inputFile(part)`. Downloads live until `chat.close()` or test teardown.
