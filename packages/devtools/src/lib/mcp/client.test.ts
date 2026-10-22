@@ -23,6 +23,7 @@ vi.mock("@modelcontextprotocol/client", async (importOriginal) => ({
   },
   Client: class {
     connect = vi.fn().mockResolvedValue(undefined);
+    setRequestHandler = vi.fn();
   },
 }));
 
@@ -53,7 +54,7 @@ function effectiveFetch(options: TransportOptions): typeof fetch {
 
 /** Connects, then returns the fetch the transport would actually use. */
 async function connectAndCaptureFetch(serverUrl: string = SERVER_URL) {
-  await new McpClient().connect(serverUrl);
+  await new McpClient(async () => ({ action: "decline" })).connect(serverUrl);
   if (!mock.transportOptions) {
     throw new Error("transport was never constructed");
   }

@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import cors from "cors";
 import {
   optionalBearerAuth,
+  requestFormInput,
   requireBearerAuth,
   Skybridge,
 } from "skybridge/server";
@@ -193,6 +194,48 @@ const app = new Skybridge({
             content: [{ type: "text", text: extra.http?.authInfo.clientId }],
             isError: false,
           };
+        },
+      )
+      .registerTool(
+        {
+          name: "pick-part",
+          description: "Asks the user to pick a part through a form",
+          inputSchema: {},
+        },
+        async (_args, extra) => {
+          const result = requestFormInput(extra, {
+            key: "part",
+            message: "Choose a part to inspect",
+            requestedSchema: {
+              type: "object",
+              properties: {
+                part: {
+                  type: "string",
+                  oneOf: [
+                    {
+                      const: "bolt",
+                      title: "M6 bolt",
+                      description: "Fastener",
+                    },
+                    { const: "nut", title: "M6 nut", description: "Locks it" },
+                  ],
+                },
+                finish: {
+                  type: "string",
+                  "x-openai-suggestions": [{ const: "zinc", title: "zinc" }],
+                },
+              },
+              required: ["part"],
+            },
+          });
+          if ("resultType" in result) {
+            return result;
+          }
+          const text =
+            result.action === "accept"
+              ? `Picked ${result.content.part} ${result.content.finish}`
+              : `Form ${result.action}`;
+          return { content: [{ type: "text", text }], isError: false };
         },
       ),
 });

@@ -1,5 +1,7 @@
 import {
   Client,
+  type ElicitRequestParams,
+  type ElicitResult,
   METHOD_NOT_FOUND,
   type OAuthClientProvider,
   ProtocolError,
@@ -7,9 +9,20 @@ import {
 } from "@modelcontextprotocol/client";
 import type { CallToolArgs, CallToolResponse } from "skybridge/web";
 
+type ElicitHandler = (
+  params: ElicitRequestParams,
+  signal: AbortSignal,
+) => Promise<ElicitResult>;
+
 export class McpClient {
   private client: Client | null = null;
   private transport: StreamableHTTPClientTransport | null = null;
+
+  private readonly onElicit: ElicitHandler;
+
+  constructor(onElicit: ElicitHandler) {
+    this.onElicit = onElicit;
+  }
 
   async connect(
     serverUrl: string | URL,
@@ -41,14 +54,15 @@ export class McpClient {
         version: "1.0.0",
       },
       {
+        versionNegotiation: { mode: "auto" },
         capabilities: {
-          experimental: {
-            tools: {},
-            resources: {},
-            prompts: {},
-          },
+          elicitation: { form: {} },
+          extensions: { "openai/elicitation": { form: {} } },
         },
       },
+    );
+    this.client.setRequestHandler("elicitation/create", (request, ctx) =>
+      this.onElicit(request.params, ctx.mcpReq.signal),
     );
 
     await this.client.connect(this.transport);
@@ -75,15 +89,19 @@ export class McpClient {
   async callTool(
     toolName: string,
     args: CallToolArgs,
+    options?: Parameters<Client["callTool"]>[1],
   ): Promise<CallToolResponse> {
     if (!this.client) {
       throw new Error("Client not connected. Call connect() first.");
     }
 
-    const result = await this.client.callTool({
-      name: toolName,
-      arguments: args ?? {},
-    });
+    const result = await this.client.callTool(
+      {
+        name: toolName,
+        arguments: args ?? {},
+      },
+      options,
+    );
 
     // Transform _meta → meta to match OpenAI's behavior
     const { _meta, ...rest } = result;

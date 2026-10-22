@@ -9,15 +9,39 @@ import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import type { AppsSdkContext, CallToolArgs } from "skybridge/web";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { warnOnLargeToolOutput } from "@/lib/context-warnings.js";
+import { requestElicitation } from "@/lib/elicitation-store.js";
 import { env } from "@/lib/env.js";
 import { getInspectorPreferences } from "@/lib/inspector-preferences-store.js";
 import { useSelectedToolName } from "@/lib/nuqs.js";
 import { queryClient } from "@/lib/query-client.js";
-import { type ToolEntrypoint, useStore } from "@/lib/store.js";
+import { type OpenAiLog, type ToolEntrypoint, useStore } from "@/lib/store.js";
 import { BrowserOAuthProvider } from "./browser-oauth-provider.js";
 import { McpClient } from "./client.js";
 
-const client = new McpClient();
+let elicitingTool: string | null = null;
+
+const client = new McpClient(async (params, signal) => {
+  const toolName = elicitingTool;
+  const log = (
+    command: string,
+    args: Record<string, unknown>,
+    type: OpenAiLog["type"],
+  ) => {
+    if (toolName) {
+      useStore.getState().pushOpenAiLog(toolName, {
+        timestamp: Date.now(),
+        source: "server",
+        command,
+        args,
+        type,
+      });
+    }
+  };
+  log("elicitation/create", params, "default");
+  const result = await requestElicitation(params, signal);
+  log("elicitation/create response", result, "response");
+  return result;
+});
 let currentAuthProvider: BrowserOAuthProvider | null = null;
 
 const getServerUrl = () => {
@@ -218,14 +242,30 @@ export const useCallTool = () => {
         response: undefined,
         durationMs: null,
         openaiRef: null,
-        openaiLogs: [],
+        openaiLogs: [
+          {
+            id: crypto.randomUUID(),
+            timestamp: Date.now(),
+            source: "server",
+            command: "callTool",
+            args: { name: toolName, args: args ?? {} },
+            type: "default",
+          },
+        ],
         openaiObject: null,
         openInAppUrl: null,
         entrypoint,
         modelContext: null,
       });
       const startedAt = performance.now();
-      const response = await client.callTool(toolName, args);
+      const response = await client.callTool(toolName, args, {
+        onprogress: () => {
+          elicitingTool = toolName;
+          setTimeout(() => {
+            elicitingTool = null;
+          });
+        },
+      });
       warnOnLargeToolOutput(response, toolName);
       const durationMs = Math.round(performance.now() - startedAt);
       const completedAt = Date.now();
@@ -235,14 +275,7 @@ export const useCallTool = () => {
         durationMs,
         openaiRef: null,
         openaiLogs: [
-          {
-            id: crypto.randomUUID(),
-            timestamp: completedAt - durationMs,
-            source: "server",
-            command: "callTool",
-            args: { name: toolName, args: args ?? {} },
-            type: "default",
-          },
+          ...(useStore.getState().tools[toolName]?.openaiLogs ?? []),
           {
             id: crypto.randomUUID(),
             timestamp: completedAt,
