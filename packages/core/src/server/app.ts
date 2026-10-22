@@ -97,8 +97,9 @@ export type SkybridgeConfig<
      * including the `UnsupportedProtocolVersionError` the default skips, and
      * failures to build or serve the per-request server. Reporting only: the
      * response does not change. It can run before the response is sent, so keep
-     * it fast and synchronous. Default: `console.error` for every error except
-     * `UnsupportedProtocolVersionError`.
+     * it fast and synchronous. Default: `console.error` for every error the MCP
+     * SDK handler reports, except `UnsupportedProtocolVersionError`. Node
+     * adapter errors are not logged by default.
      */
     onMcpError?: (error: Error) => void;
     /**
