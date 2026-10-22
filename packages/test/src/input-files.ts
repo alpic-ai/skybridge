@@ -95,11 +95,8 @@ export class InputFiles {
   rewrite(input: Record<string, unknown>, fields: string[]) {
     const rewritten = { ...input };
     const resolve = (value: unknown): unknown => {
-      if (value === null || value === undefined) {
-        return value;
-      }
       if (typeof value !== "string") {
-        throw new Error("Expected an input file path");
+        return value;
       }
       const reference = this.paths.get(value);
       if (!reference) {
