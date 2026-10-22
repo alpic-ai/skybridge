@@ -1,8 +1,52 @@
 import "vitest";
-import type { LanguageModel } from "ai";
-import type { ToolInput, ToolNames } from "skybridge/server";
+import type { FilePart, LanguageModel } from "ai";
+import type { FileRef, ToolInput, ToolNames } from "skybridge/server";
 import { expect } from "vitest";
 import type { ChatLike, ToolCall, Turn } from "./types.js";
+
+const fileIds = new WeakMap<FilePart, Set<string>>();
+const fileMatchers = new WeakSet<object>();
+const fileParameters = new WeakMap<
+  object,
+  ReadonlyMap<string, readonly string[]>
+>();
+
+export function registerInputFile(reference: FileRef, part: FilePart) {
+  const ids = fileIds.get(part) ?? new Set<string>();
+  ids.add(reference.file_id);
+  fileIds.set(part, ids);
+}
+
+export function registerFileParameters(
+  chat: object,
+  fields: ReadonlyMap<string, readonly string[]>,
+) {
+  fileParameters.set(chat, fields);
+}
+
+function inputFile(part: FilePart): FileRef {
+  const label = () => `inputFile(${part.filename ?? part.mediaType})`;
+  const matcher = {
+    asymmetricMatch: (value: unknown) =>
+      typeof value === "object" &&
+      value !== null &&
+      "file_id" in value &&
+      typeof value.file_id === "string" &&
+      fileIds.get(part)?.has(value.file_id) === true,
+    toString: label,
+    toJSON: label,
+  };
+  fileMatchers.add(matcher);
+  return matcher as unknown as FileRef;
+}
+
+function containsInputFile(value: unknown): boolean {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    (fileMatchers.has(value) || Object.values(value).some(containsInputFile))
+  );
+}
 
 /** What a judge decided about a conversation. */
 export interface Verdict {
@@ -60,6 +104,7 @@ export interface ChatAssertion<App> extends ChatMatchers<App> {
 
 declare module "vitest" {
   interface ExpectStatic {
+    inputFile(part: FilePart): FileRef;
     chat<App>(chat: ChatLike<App>): ChatAssertion<App>;
   }
 }
@@ -68,6 +113,21 @@ function calls(chat: ChatLike<unknown>): ToolCall<unknown>[] {
   return chat.turns
     .filter((turn) => turn.role === "tool")
     .map((turn) => turn.call);
+}
+
+function assertFileParameters(
+  chat: ChatLike<unknown>,
+  name: string,
+  args: Record<string, unknown> = {},
+) {
+  const fields = fileParameters.get(chat)?.get(name) ?? [];
+  for (const [field, value] of Object.entries(args)) {
+    if (containsInputFile(value) && !fields.includes(field)) {
+      throw new Error(
+        `expect.inputFile cannot be used for "${name}.${field}": "${field}" is not listed in openai/fileParams`,
+      );
+    }
+  }
 }
 
 function spokenTurns(chat: ChatLike<unknown>): string[] {
@@ -204,6 +264,7 @@ expect.extend({
     name: string,
     args?: Record<string, unknown>,
   ) {
+    assertFileParameters(received, name, args);
     const matching = acceptedCalls(received, name);
     const argsMatch =
       args === undefined ||
@@ -230,6 +291,7 @@ expect.extend({
     name: string,
     args: Record<string, unknown>,
   ) {
+    assertFileParameters(received, name, args);
     const pass = acceptedCalls(received, name).some((call) =>
       this.equals(call.arguments, expect.objectContaining(args)),
     );
@@ -375,3 +437,4 @@ judge: ${verdict.pass ? "PASS" : "FAIL"}${verdict.reasoning === undefined ? "" :
 
 expect.chat = <App>(chat: ChatLike<App>): ChatAssertion<App> =>
   expect(chat) as unknown as ChatAssertion<App>;
+expect.inputFile = inputFile;

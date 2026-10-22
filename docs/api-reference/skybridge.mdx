@@ -106,7 +106,7 @@ The underlying Express app, for custom routes, middleware, and settings. Registe
 
 ## Methods
 
-Every method returns the app, so calls chain.
+`use` and `useOnError` return the app, so calls chain.
 
 ### `use`
 
@@ -141,6 +141,36 @@ app.connect(transport: Transport): Promise<void>;
 ```
 
 Connects the app to a transport you manage, such as stdio for a desktop host. For HTTP, `run()` sets the transport up for you.
+
+### `withHandler`
+
+```ts
+app.withHandler((server, options, originalHandler) => McpServer): Skybridge;
+```
+
+Returns a new app with the same constructor settings and a wrapped registration handler. `server` is the fresh MCP server, `options` is the awaited `setup` result, and `originalHandler` is the existing handler. Return the registered server; tool types remain inferred, including tools added by the wrapper.
+
+```ts
+const logged = app.withHandler((server, options, originalHandler) => {
+  server.mcpMiddleware("tools/call", (request, _extra, next) => {
+    console.log(request.params.name);
+    return next();
+  });
+  return originalHandler(server, options);
+});
+```
+
+The original app is not mutated. The wrapper must stay synchronous and runs wherever the original handler runs, including startup registration and each request. Each derived app initializes its own `setup` and `oauth` once. Register middleware before calling `originalHandler` to place it outside application middleware; wrap the returned server to add registrations afterward.
+
+[`start`](/test/evals) uses this method internally to install eval-only file adaptation and tool stubs. Existing `new Skybridge({ ... })` and `start({ app, model })` usage stays the same.
+
+### `createServerInstance`
+
+```ts
+app.createServerInstance(): Promise<Server>;
+```
+
+Builds a fresh MCP server after `setup` and `oauth` resolve, then assembles its native middleware. Connect the returned SDK server to your transport. Use `withHandler` to customize registration before this assembly.
 
 <CardGroup cols={3}>
   <Card title="McpServer" icon="server" href="/api-reference/mcp-server">

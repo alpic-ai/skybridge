@@ -150,6 +150,7 @@ export class Skybridge<
   private readonly serverInfo: Implementation;
   private readonly serverOptions: ServerOptions;
   private readonly skills?: boolean;
+  private readonly options: SkybridgeConfig<TTools, TConfig, TAuthExtra>;
   private oauthEnabled = false;
   private readonly handler: SkybridgeHandler<
     TTools,
@@ -170,20 +171,22 @@ export class Skybridge<
   private readyPromise?: Promise<void>;
   private slowHandlerWarned = false;
 
-  constructor({
-    name,
-    title,
-    version,
-    description,
-    icons,
-    websiteUrl,
-    json,
-    skills,
-    setup,
-    oauth,
-    handler,
-    ...serverOptions
-  }: SkybridgeConfig<TTools, TConfig, TAuthExtra>) {
+  constructor(options: SkybridgeConfig<TTools, TConfig, TAuthExtra>) {
+    const {
+      name,
+      title,
+      version,
+      description,
+      icons,
+      websiteUrl,
+      json,
+      skills,
+      setup,
+      oauth,
+      handler,
+      ...serverOptions
+    } = options;
+    this.options = options;
     this.serverInfo = { name, title, version, description, icons, websiteUrl };
     this.serverOptions = serverOptions;
     this.skills = skills;
@@ -268,6 +271,44 @@ export class Skybridge<
   async connect(transport: Parameters<SdkServer["connect"]>[0]): Promise<void> {
     const instance = await this.createServerInstance();
     await instance.connect(transport);
+  }
+
+  /**
+   * Derive a new app whose registration handler is wrapped by `wrapper`. The
+   * wrapper receives the fresh MCP server, the awaited `setup` result and the
+   * original handler, and returns the registered server so tool types stay
+   * inferred. Middleware registered before calling `originalHandler` runs
+   * outside the app's own middleware.
+   *
+   * The original app is left untouched. The derived app runs its own `setup`,
+   * and does not carry over routes or error handlers added through
+   * {@link Skybridge.express}, {@link Skybridge.use} or
+   * {@link Skybridge.useOnError}.
+   *
+   * @example
+   * ```ts
+   * const logged = app.withHandler((server, options, originalHandler) => {
+   *   server.mcpMiddleware("tools/call", (request, _extra, next) => {
+   *     console.log(request.params.name);
+   *     return next();
+   *   });
+   *   return originalHandler(server, options);
+   * });
+   * ```
+   */
+  withHandler<
+    TNextServer extends McpServer<Record<never, ToolDef>, TAuthExtra>,
+  >(
+    wrapper: (
+      server: McpServer<Record<never, ToolDef>, TAuthExtra>,
+      options: Awaited<TConfig>,
+      originalHandler: SkybridgeHandler<TTools, Awaited<TConfig>, TAuthExtra>,
+    ) => TNextServer,
+  ) {
+    return new Skybridge<TNextServer["$types"]["tools"], TConfig, TAuthExtra>({
+      ...this.options,
+      handler: (server, options) => wrapper(server, options, this.handler),
+    });
   }
 
   /**
