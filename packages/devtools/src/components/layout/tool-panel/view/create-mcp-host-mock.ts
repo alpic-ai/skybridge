@@ -80,6 +80,7 @@ function buildHostContext(): HostContext {
 export type McpHostMockCleanup = () => void;
 
 export type ToolDataSnapshot = {
+  modelContext?: Record<string, unknown> | null;
   toolInput?: Record<string, unknown> | null;
   toolOutput?: Record<string, unknown> | null;
   toolResponseMetadata?: Record<string, unknown> | null;
@@ -91,12 +92,17 @@ export function createMcpHostMock(
     name: string,
     args: Record<string, unknown>,
   ) => Promise<CallToolResponse>,
+  readResourceFn: (params: {
+    uri: string;
+    _meta?: Record<string, unknown>;
+  }) => Promise<unknown>,
   log: (
     command: string,
     args: Record<string, unknown>,
     type?: "default" | "response",
   ) => void,
   getCurrentToolData: () => ToolDataSnapshot,
+  setModelContext: (modelContext: Record<string, unknown>) => void,
 ): McpHostMockCleanup {
   const post = (msg: unknown) => postToIframe(iframe, msg);
 
@@ -130,14 +136,39 @@ export function createMcpHostMock(
 
     switch (method) {
       case "ui/initialize": {
+        const { modelContext } = getCurrentToolData();
+        const isChatGpt =
+          useInspectorPreferencesStore.getState().previewClient === "chatgpt";
         respond(post, id, {
           protocolVersion: "2025-06-18",
-          hostInfo: { name: "skybridge-devtools", version: "0.0.1" },
+          hostInfo: {
+            name: isChatGpt ? "chatgpt" : "skybridge-devtools",
+            version: "0.0.1",
+          },
           hostCapabilities: {
             openLinks: {},
             serverTools: {},
+            serverResources: {},
+            message: { text: {}, image: {}, resourceLink: {}, resource: {} },
+            updateModelContext: {
+              text: {},
+              image: {},
+              resourceLink: {},
+              resource: {},
+              structuredContent: {},
+            },
+            ...(isChatGpt && {
+              experimental: {
+                "openai/message": {},
+                "openai/modelContext": {},
+              },
+            }),
           },
-          hostContext: buildHostContext(),
+          hostContext: {
+            ...buildHostContext(),
+            ...(isChatGpt &&
+              modelContext && { "openai/modelContext": modelContext }),
+          },
         });
         // Push current tool state immediately after initialize so the widget
         // sees toolInput/toolOutput without waiting for a separate update.
@@ -171,7 +202,38 @@ export function createMcpHostMock(
           "mcp:updateModelContext",
           (params as Record<string, unknown>) ?? {},
         );
+        if (
+          useInspectorPreferencesStore.getState().previewClient !== "chatgpt"
+        ) {
+          respond(post, id, {});
+          break;
+        }
+        const updateId = crypto.randomUUID();
+        setModelContext({ ...params, updateId });
+        respond(post, id, { _meta: { "openai/modelContext": { updateId } } });
+        break;
+      }
+      case "ui/message": {
+        log("mcp:ui/message", (params as Record<string, unknown>) ?? {});
         respond(post, id, {});
+        break;
+      }
+      case "resources/read": {
+        log("mcp:resources/read", (params as Record<string, unknown>) ?? {});
+        try {
+          const result = await readResourceFn(
+            params as Parameters<typeof readResourceFn>[0],
+          );
+          log(
+            "mcp:resources/read response",
+            result as unknown as Record<string, unknown>,
+            "response",
+          );
+          respond(post, id, result);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          respondError(post, id, -32603, message);
+        }
         break;
       }
       case "ui/request-display-mode": {

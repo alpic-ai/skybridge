@@ -102,12 +102,12 @@ export class McpClient {
     return response.resources;
   }
 
-  async readResource(uri: string) {
+  async readResource(params: { uri: string; _meta?: Record<string, unknown> }) {
     if (!this.client) {
       throw new Error("Client not connected. Call connect() first.");
     }
 
-    const response = await this.client.readResource({ uri });
+    const response = await this.client.readResource(params);
     return response;
   }
 

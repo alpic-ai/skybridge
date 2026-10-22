@@ -4,6 +4,13 @@ import {
 } from "@alpic-ai/ui/components/accordion";
 import { Badge } from "@alpic-ai/ui/components/badge";
 import { Button } from "@alpic-ai/ui/components/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@alpic-ai/ui/components/select";
 import { Tabs, TabsContent } from "@alpic-ai/ui/components/tabs";
 import {
   Tooltip,
@@ -21,6 +28,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { CallToolResponse } from "skybridge/web";
 import { useAuthStore } from "@/lib/auth-store.js";
 import { CopyButton } from "@/lib/copy.js";
+import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
 import {
   toolRequiresAuth,
   useCallTool,
@@ -34,15 +42,29 @@ import {
   useSavedInputsStore,
 } from "@/lib/saved-inputs-store.js";
 import { validator } from "@/lib/schema-validator.js";
-import { useCallToolResult, useStore } from "@/lib/store.js";
+import {
+  type ToolEntrypoint,
+  useCallToolResult,
+  useStore,
+} from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { AccordionTrigger } from "./accordion-trigger.js";
 import { buildFormUiSchema, formTemplates, formWidgets } from "./form/index.js";
+import { denseSelectTriggerClass } from "./form/styles.js";
 import { ToolFormTag } from "./form/tool-form-tag.js";
 import { SavedInputsDropdown, SaveInputDialog } from "./saved-inputs.js";
 import { TruncatedDescription } from "./truncated-description.js";
 
 type TabValue = "form" | "json";
+
+type Entrypoint = "normal" | ToolEntrypoint;
+
+function hasGlobalEntrypoint(tool: Tool): boolean {
+  const ui = tool._meta?.["openai/ui"] as
+    | { entrypoints?: { type: string }[] }
+    | undefined;
+  return ui?.entrypoints?.some(({ type }) => type === "global") ?? false;
+}
 
 export function ToolItem({ tool }: { tool: Tool }) {
   const { mutateAsync: callTool, isPending } = useCallTool();
@@ -65,10 +87,16 @@ export function ToolItem({ tool }: { tool: Tool }) {
 
   const [tab, setTab] = useState<TabValue>("form");
   const [jsonError, setJsonError] = useState(false);
+  const [entrypoint, setEntrypoint] = useState<Entrypoint>("normal");
+  const showsEntrypoints = hasGlobalEntrypoint(tool);
+  const runsGlobalEntrypoint = showsEntrypoints && entrypoint === "global";
 
   // Run is disabled when the current input doesn't validate against the schema
   // (or the JSON is malformed).
   const inputInvalid = useMemo(() => {
+    if (runsGlobalEntrypoint) {
+      return false;
+    }
     const schema = tool.inputSchema as RJSFSchema;
     const hasNoInput =
       !schema?.properties || Object.keys(schema.properties).length === 0;
@@ -79,35 +107,46 @@ export function ToolItem({ tool }: { tool: Tool }) {
       return true;
     }
     return validator.validateFormData(formData, schema).errors.length > 0;
-  }, [tool.inputSchema, tab, jsonError, formData]);
+  }, [runsGlobalEntrypoint, tool.inputSchema, tab, jsonError, formData]);
 
   const handleRun = async () => {
     if (needsSignIn) {
       return;
     }
-    const schema = tool.inputSchema as RJSFSchema;
-    const hasNoInput =
-      !schema?.properties || Object.keys(schema.properties).length === 0;
+    if (!runsGlobalEntrypoint) {
+      const schema = tool.inputSchema as RJSFSchema;
+      const hasNoInput =
+        !schema?.properties || Object.keys(schema.properties).length === 0;
 
-    if (tab === "json" && jsonError) {
-      return;
-    }
-
-    if (!hasNoInput) {
-      const { errors } = validator.validateFormData(formData, schema);
-      if (errors.length > 0) {
-        if (tab === "form") {
-          formRef.current?.validateForm();
-        } else {
-          setJsonError(true);
-        }
+      if (tab === "json" && jsonError) {
         return;
       }
+
+      if (!hasNoInput) {
+        const { errors } = validator.validateFormData(formData, schema);
+        if (errors.length > 0) {
+          if (tab === "form") {
+            formRef.current?.validateForm();
+          } else {
+            setJsonError(true);
+          }
+          return;
+        }
+      }
+    }
+    if (runsGlobalEntrypoint) {
+      useInspectorPreferencesStore
+        .getState()
+        .setPreference("displayMode", "fullscreen");
     }
     // Focus this tool so the result view (right pane) shows its output — even
     // when Run was clicked from a collapsed header.
     setSelectedTool(tool.name);
-    return await callTool({ toolName: tool.name, args: formData });
+    return await callTool({
+      toolName: tool.name,
+      args: runsGlobalEntrypoint ? {} : formData,
+      entrypoint: runsGlobalEntrypoint ? "global" : null,
+    });
   };
 
   // Enter/⌘Enter run the tool whose input is focused. Scoped per tool so that
@@ -197,7 +236,7 @@ export function ToolItem({ tool }: { tool: Tool }) {
               isSelected ? "opacity-100" : "opacity-50",
             )}
           >
-            {saved.savedInputs.length > 0 && (
+            {!runsGlobalEntrypoint && saved.savedInputs.length > 0 && (
               <SavedInputsDropdown
                 inputs={saved.savedInputs}
                 activeKey={saved.activeKey}
@@ -205,6 +244,27 @@ export function ToolItem({ tool }: { tool: Tool }) {
                 onClear={saved.clearSelection}
                 onDelete={saved.removeInput}
               />
+            )}
+            {showsEntrypoints && (
+              <Select
+                value={entrypoint}
+                onValueChange={(value) => setEntrypoint(value as Entrypoint)}
+              >
+                <SelectTrigger
+                  aria-label="Entrypoint"
+                  className={cn(denseSelectTriggerClass, "w-auto")}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="normal" className="font-mono text-xs">
+                    normal
+                  </SelectItem>
+                  <SelectItem value="global" className="font-mono text-xs">
+                    global
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             )}
             {disabledReason ? (
               <Tooltip>
@@ -235,19 +295,21 @@ export function ToolItem({ tool }: { tool: Tool }) {
         // the ui component hardcodes on the Content root).
         style={{ animation: "none" }}
       >
-        <ToolBody
-          tool={tool}
-          formData={formData}
-          setFormData={setFormData}
-          formRef={formRef}
-          tab={tab}
-          setTab={setTab}
-          jsonError={jsonError}
-          setJsonError={setJsonError}
-          saved={saved}
-          inputInvalid={inputInvalid}
-          onRun={handleRun}
-        />
+        {!runsGlobalEntrypoint && (
+          <ToolBody
+            tool={tool}
+            formData={formData}
+            setFormData={setFormData}
+            formRef={formRef}
+            tab={tab}
+            setTab={setTab}
+            jsonError={jsonError}
+            setJsonError={setJsonError}
+            saved={saved}
+            inputInvalid={inputInvalid}
+            onRun={handleRun}
+          />
+        )}
       </AccordionContent>
     </AccordionItem>
   );

@@ -6,6 +6,8 @@ import type {
 } from "skybridge/web";
 import { create } from "zustand";
 
+export type ToolEntrypoint = "global";
+
 export type OpenAiLog = {
   id: string;
   timestamp: number;
@@ -23,6 +25,8 @@ type ToolData = {
   openaiLogs: OpenAiLog[];
   openaiObject: AppsSdkContext | null;
   openInAppUrl: string | null;
+  entrypoint?: ToolEntrypoint | null;
+  modelContext?: Record<string, unknown> | null;
   // Key of the saved input the current form was loaded from (session-only).
   activeSavedInputKey?: string | null;
 };

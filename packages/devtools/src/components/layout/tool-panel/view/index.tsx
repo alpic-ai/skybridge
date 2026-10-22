@@ -116,6 +116,7 @@ export const View = () => {
     const cleanupMcpMock = createMcpHostMock(
       iframe,
       (name, args) => mcpClient.callTool(name, args),
+      (params) => mcpClient.readResource(params),
       logFn,
       () => ({
         toolInput: openaiObjectRef.current?.toolInput as
@@ -130,7 +131,9 @@ export const View = () => {
           | Record<string, unknown>
           | null
           | undefined,
+        modelContext: useStore.getState().tools[tool.name]?.modelContext,
       }),
+      (modelContext) => setToolData(tool.name, { modelContext }),
     );
 
     iframe.contentDocument.open();

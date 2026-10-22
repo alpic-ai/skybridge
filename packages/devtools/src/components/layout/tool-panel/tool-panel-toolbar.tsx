@@ -32,6 +32,8 @@ import type { RequestDisplayMode } from "skybridge/web";
 import { BlossomIcon } from "@/components/layout/preview/chatgpt-icons.js";
 import { ClaudeLogomark } from "@/components/layout/preview/claude-icons.js";
 import { useInspectorPreferencesStore } from "@/lib/inspector-preferences-store.js";
+import { useSelectedToolName } from "@/lib/nuqs.js";
+import { useCallToolResult } from "@/lib/store.js";
 import { cn } from "@/lib/utils.js";
 import { locales } from "./locales.js";
 import { isOneOf } from "./utils.js";
@@ -210,6 +212,8 @@ export const ToolPanelToolbar = ({
     (s) => s.setPreviewClient,
   );
   const setPreference = useInspectorPreferencesStore((s) => s.setPreference);
+  const [selectedTool] = useSelectedToolName();
+  const entrypoint = useCallToolResult(selectedTool ?? "")?.entrypoint;
 
   const formRef = useRef<HTMLFormElement>(null);
   const [localeOpen, setLocaleOpen] = useState(false);
@@ -260,6 +264,15 @@ export const ToolPanelToolbar = ({
         variant === "panel" ? "mt-3 px-3" : "justify-end",
       )}
     >
+      {entrypoint && (
+        <div
+          title="The view was opened from this entrypoint"
+          className="inline-flex h-7 shrink-0 cursor-default items-center whitespace-nowrap rounded-md bg-muted px-2.5 text-xs font-medium text-muted-foreground"
+        >
+          {entrypoint} entrypoint
+        </div>
+      )}
+
       {variant === "panel" && (
         <div
           title="Display mode (driven by the view)"
