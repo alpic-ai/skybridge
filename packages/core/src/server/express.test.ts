@@ -632,6 +632,7 @@ describe("createApp Vercel mode", () => {
     const prevEnv = process.env.NODE_ENV;
     process.env.VERCEL = "1";
     process.env.NODE_ENV = "production";
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
       vi.resetModules();
       const { Skybridge: Reloaded } = await import("./app.js");
@@ -656,7 +657,9 @@ describe("createApp Vercel mode", () => {
       });
       expect(res.status).toBe(400);
       expect(onMcpError).toHaveBeenCalledTimes(1);
+      expect(consoleSpy).not.toHaveBeenCalled();
     } finally {
+      consoleSpy.mockRestore();
       if (prevVercel === undefined) {
         delete process.env.VERCEL;
       } else {
