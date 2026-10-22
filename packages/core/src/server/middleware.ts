@@ -246,29 +246,6 @@ export function getHandlerMaps(server: Server) {
   };
 }
 
-export function instrumentHandlers(
-  server: Server,
-  entries: McpMiddlewareEntry[],
-) {
-  const { requestHandlers, notificationHandlers } = getHandlerMaps(server);
-  const instrumentMap = (map: HandlerMap, isNotification: boolean) => {
-    for (const [method, handler] of map) {
-      map.set(
-        method,
-        buildMiddlewareChain(method, isNotification, handler, entries),
-      );
-    }
-    const originalSet = map.set.bind(map);
-    map.set = (method, handler) =>
-      originalSet(
-        method,
-        buildMiddlewareChain(method, isNotification, handler, entries),
-      );
-  };
-  instrumentMap(requestHandlers, false);
-  instrumentMap(notificationHandlers, true);
-}
-
 /**
  * Check if a single filter pattern matches a given method.
  *

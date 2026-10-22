@@ -1,7 +1,7 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { type EvalIdentity, start } from "@skybridge/test";
 import { expect, it } from "vitest";
-import { service } from "../src/server.js";
+import { app } from "../src/server.js";
 
 const model = anthropic("claude-sonnet-4-5");
 
@@ -13,14 +13,14 @@ const signedIn: EvalIdentity = {
 };
 
 it("refuses checkout for an anonymous visitor", async () => {
-  const chat = await start({ server: service, model });
+  const chat = await start({ app, model });
   await chat.send("Buy the product goggles-aurora for me");
 
   expect.chat(chat).toHaveFailedToolCall("create-checkout");
 });
 
 it("checks out for a signed-in visitor", async () => {
-  const chat = await start({ server: service, model, authInfo: signedIn });
+  const chat = await start({ app, model, authInfo: signedIn });
   await chat.send("Buy the product goggles-aurora for me");
 
   expect.chat(chat).toHaveCalledToolWith("create-checkout", {

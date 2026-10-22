@@ -6,7 +6,6 @@ import type {
   McpUiToolMeta,
 } from "@modelcontextprotocol/ext-apps";
 import {
-  type CallToolResult,
   type ContentBlock,
   type Icon,
   type Implementation,
@@ -263,13 +262,6 @@ export type JsonOptions = NonNullable<Parameters<typeof express.json>[0]>;
 export interface SkybridgeServerOptions {
   /** Whether an OAuth provider guards `/mcp`; enables per-tool scheme enforcement. */
   oauth?: boolean;
-  toolImplementations?: Record<
-    string,
-    (
-      args: Record<string, unknown>,
-      extra: McpExtra,
-    ) => CallToolResult | undefined | Promise<CallToolResult | undefined>
-  >;
   /**
    * @experimental Serve Agent Skills from `src/skills` over MCP (SEP-2640).
    * API may change.
@@ -766,7 +758,6 @@ export class McpServer<
   private viewUriByPath = new Map<string, string>();
   private viteManifest: Record<string, ViteManifestEntry> | null = null;
   private oauthEnabled = false;
-  private readonly toolImplementations?: SkybridgeServerOptions["toolImplementations"];
   private resolveResourceMetadataUrl?: ResourceMetadataUrlResolver;
   private readonly toolSecuritySchemes = new Map<
     string,
@@ -782,7 +773,6 @@ export class McpServer<
   ) {
     super(serverInfo, withSkillsCapability(options, skybridgeOptions));
     this.oauthEnabled = Boolean(skybridgeOptions?.oauth);
-    this.toolImplementations = skybridgeOptions?.toolImplementations;
     // Pick up the manifest if `dist/__entry.js` primed it before importing
     // user code. Explicit `setViteManifest` calls still win because they
     // happen after construction.
@@ -1227,10 +1217,7 @@ export class McpServer<
     },
   ): ToolHandler<InputArgs> {
     return async (args, extra) => {
-      if (
-        this.oauthEnabled ||
-        securitySchemes?.some((scheme) => scheme.type === "oauth2")
-      ) {
+      if (this.oauthEnabled) {
         const failure = evaluateSecuritySchemes(
           securitySchemes,
           extra.http?.authInfo,
@@ -1246,14 +1233,7 @@ export class McpServer<
       }
       let result: Awaited<ReturnType<typeof cb>>;
       try {
-        const replacement = await this.toolImplementations?.[toolName]?.(
-          args,
-          extra,
-        );
-        result =
-          replacement === undefined
-            ? await cb(args, extra)
-            : (replacement as Awaited<ReturnType<typeof cb>>);
+        result = await cb(args, extra);
       } catch (error) {
         captureToolError(extra, error);
         throw error;
@@ -1676,8 +1656,22 @@ export class McpServer<
       ...toolFields
     } = config;
 
+    const authNeedsProvider =
+      auth !== undefined &&
+      (!auth.allowsAnonymous || Boolean(auth.scopes?.length));
+    if (
+      rawSecuritySchemes === undefined &&
+      authNeedsProvider &&
+      !this.oauthEnabled
+    ) {
+      throw new Error(
+        `Tool "${name}" sets \`auth: ${JSON.stringify(auth)}\` but the server has no \`oauth\` provider configured.`,
+      );
+    }
+
     const securitySchemes =
-      rawSecuritySchemes ?? (auth ? authToSecuritySchemes(auth) : undefined);
+      rawSecuritySchemes ??
+      (auth && this.oauthEnabled ? authToSecuritySchemes(auth) : undefined);
 
     const toolMeta: InternalToolMeta = { ...userToolMeta };
 

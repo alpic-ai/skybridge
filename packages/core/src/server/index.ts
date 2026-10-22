@@ -45,17 +45,6 @@ export {
   resourceLink,
   text,
 } from "./content-helpers.js";
-export type {
-  ServerDefinitionConfig,
-  ServerExecutionOptions,
-  ServerHandler,
-  ToolImplementations,
-} from "./definition.js";
-export {
-  defineServer,
-  ServerDefinition,
-  ServerExecution,
-} from "./definition.js";
 export {
   type DeliveryResult,
   deliverEvent,

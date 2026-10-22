@@ -1,8 +1,8 @@
-import { defineServer, Skybridge } from "skybridge/server";
+import { Skybridge } from "skybridge/server";
 import * as z from "zod";
 import { getProduct, searchProducts } from "./products.js";
 
-export const service = defineServer({
+export const app = new Skybridge({
   name: "skybridge-evals",
   version: "0.0.1",
   handler: (server) =>
@@ -139,5 +139,4 @@ export const service = defineServer({
       ),
 });
 
-export const app = new Skybridge({ server: service });
-export type AppType = typeof service;
+export type AppType = typeof app;

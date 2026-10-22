@@ -2,7 +2,6 @@ import http from "node:http";
 import type { AddressInfo } from "node:net";
 import type {
   Implementation,
-  McpHttpHandler,
   Server as SdkServer,
   ServerOptions,
 } from "@modelcontextprotocol/server";
@@ -10,14 +9,18 @@ import type { ErrorRequestHandler, Express, RequestHandler } from "express";
 import type { OAuthConfig, OAuthProvider } from "./auth/index.js";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
 import type { ExtraClaims } from "./auth.js";
-import {
-  defineServer,
-  type ServerDefinition,
-  type ServerExecution,
-  type ServerHandler,
-} from "./definition.js";
 import { buildMcpHandler, createApp, createBaseApp } from "./express.js";
-import type { JsonOptions, McpServerTypes, ToolDef } from "./server.js";
+import { createMiddlewareEntry } from "./metric.js";
+import type { McpMiddlewareEntry } from "./middleware.js";
+import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
+import {
+  type JsonOptions,
+  McpServer,
+  type McpServerTypes,
+  type ToolDef,
+} from "./server.js";
+
+const SLOW_HANDLER_THRESHOLD_MS = 50;
 
 type ErrorMiddlewareConfig = {
   path?: string;
@@ -38,7 +41,10 @@ export type SkybridgeHandler<
   TTools extends Record<string, ToolDef>,
   TConfig,
   TAuthExtra extends ExtraClaims,
-> = ServerHandler<TTools, TConfig, TAuthExtra>;
+> = (
+  server: McpServer<Record<never, ToolDef>, TAuthExtra>,
+  config: TConfig,
+) => McpServer<TTools, TAuthExtra>;
 
 /**
  * What the `oauth` field accepts: an {@link OAuthConfig}, a provider
@@ -76,38 +82,31 @@ export type SkybridgeConfig<
   TTools extends Record<string, ToolDef> = Record<never, ToolDef>,
   TConfig = undefined,
   TAuthExtra extends ExtraClaims = ExtraClaims,
-> =
-  | {
-      server: ServerDefinition<TTools, TConfig, TAuthExtra>;
-      json?: JsonOptions;
-      oauth?: SkybridgeOAuthInput<Awaited<TConfig>, TAuthExtra>;
-    }
-  | (Implementation &
-      ServerOptions & {
-        /** Options for the built-in `express.json()` middleware, e.g. `{ limit: "10mb" }`. */
-        json?: JsonOptions;
-        /**
-         * @experimental Serve Agent Skills from `src/skills` over MCP (SEP-2640).
-         * API may change.
-         */
-        skills?: boolean;
-        /**
-         * Loads whatever the app needs up front (remote config, secrets, datasets,
-         * …). Runs **once** — at {@link Skybridge.run} or on the first request,
-         * never at module import — and its awaited return value is passed to an
-         * `oauth` function and to `handler` as the second argument.
-         */
-        setup?: () => TConfig;
-        dispose?: (config: Awaited<TConfig>) => void | Promise<void>;
-        /**
-         * Resource-server OAuth. When set, mounts the well-known metadata routes
-         * and bearer auth on `/mcp`, and the verifier's claims type
-         * `extra.http.authInfo.extra` in tool handlers.
-         */
-        oauth?: SkybridgeOAuthInput<Awaited<TConfig>, TAuthExtra>;
-        /** Registers the MCP surface, per request. See {@link SkybridgeHandler}. */
-        handler: SkybridgeHandler<TTools, Awaited<TConfig>, TAuthExtra>;
-      });
+> = Implementation &
+  ServerOptions & {
+    /** Options for the built-in `express.json()` middleware, e.g. `{ limit: "10mb" }`. */
+    json?: JsonOptions;
+    /**
+     * @experimental Serve Agent Skills from `src/skills` over MCP (SEP-2640).
+     * API may change.
+     */
+    skills?: boolean;
+    /**
+     * Loads whatever the app needs up front (remote config, secrets, datasets,
+     * …). Runs **once** — at {@link Skybridge.run} or on the first request,
+     * never at module import — and its awaited return value is passed to an
+     * `oauth` function and to `handler` as the second argument.
+     */
+    setup?: () => TConfig;
+    /**
+     * Resource-server OAuth. When set, mounts the well-known metadata routes
+     * and bearer auth on `/mcp`, and the verifier's claims type
+     * `extra.http.authInfo.extra` in tool handlers.
+     */
+    oauth?: SkybridgeOAuthInput<Awaited<TConfig>, TAuthExtra>;
+    /** Registers the MCP surface, per request. See {@link SkybridgeHandler}. */
+    handler: SkybridgeHandler<TTools, Awaited<TConfig>, TAuthExtra>;
+  };
 
 /**
  * A Skybridge app: the HTTP surface (Express, OAuth metadata, the `/mcp`
@@ -148,30 +147,51 @@ export class Skybridge<
   TAuthExtra extends ExtraClaims = ExtraClaims,
 > {
   declare readonly $types: McpServerTypes<TTools>;
-  readonly server: ServerDefinition<TTools, TConfig, TAuthExtra>;
-  private execution?: ServerExecution<TTools, TConfig, TAuthExtra>;
+  private readonly serverInfo: Implementation;
+  private readonly serverOptions: ServerOptions;
+  private readonly skills?: boolean;
+  private readonly json?: JsonOptions;
+  private oauthEnabled = false;
+  private readonly handler: SkybridgeHandler<
+    TTools,
+    Awaited<TConfig>,
+    TAuthExtra
+  >;
+  private readonly setup?: () => TConfig;
   private readonly oauthInput?: SkybridgeOAuthInput<
     Awaited<TConfig>,
     TAuthExtra
   >;
+  private config?: Awaited<TConfig>;
   private readonly expressApp: Express;
   private readonly errorMiddleware: ErrorMiddlewareConfig[] = [];
+  private readonly monitoringEntry: McpMiddlewareEntry | null =
+    createMiddlewareEntry();
   private resolveResourceMetadataUrl?: ResourceMetadataUrlResolver;
   private readyPromise?: Promise<void>;
-  private closed = false;
-  private closePromise?: Promise<void>;
-  private httpServer?: http.Server;
-  private mcpHandler?: McpHttpHandler;
+  private slowHandlerWarned = false;
 
-  constructor(config: SkybridgeConfig<TTools, TConfig, TAuthExtra>) {
-    const { json, oauth, ...definition } = config;
-    this.server =
-      "server" in config
-        ? config.server
-        : defineServer(
-            definition as Exclude<typeof config, { server: unknown }>,
-          );
+  constructor({
+    name,
+    title,
+    version,
+    description,
+    icons,
+    websiteUrl,
+    json,
+    skills,
+    setup,
+    oauth,
+    handler,
+    ...serverOptions
+  }: SkybridgeConfig<TTools, TConfig, TAuthExtra>) {
+    this.serverInfo = { name, title, version, description, icons, websiteUrl };
+    this.serverOptions = serverOptions;
+    this.skills = skills;
+    this.json = json;
+    this.setup = setup;
     this.oauthInput = oauth;
+    this.handler = handler;
     this.expressApp = createBaseApp(json);
   }
 
@@ -183,43 +203,25 @@ export class Skybridge<
    * @internal
    */
   ready(): Promise<void> {
-    if (this.closed) {
-      return Promise.reject(new Error("The Skybridge host is closed"));
-    }
     this.readyPromise ??= (async () => {
-      const execution = this.server.createExecution({
-        oauth: Boolean(this.oauthInput),
-        resourceMetadataUrl: this.oauthInput
-          ? (header) => {
-              if (!this.resolveResourceMetadataUrl) {
-                throw new Error("OAuth is not initialized");
-              }
-              return this.resolveResourceMetadataUrl(header);
-            }
-          : undefined,
-      });
-      this.execution = execution;
-      const config = await execution.ready();
-      const oauth = await resolveOAuthInput(this.oauthInput, config);
-      const sample = await execution.createServerInstance();
-      try {
-        if (oauth) {
-          this.resolveResourceMetadataUrl = setupOAuth(
-            this.expressApp,
-            oauth,
-            execution.securitySchemesByTool,
-          );
-        }
-      } finally {
-        await sample.close();
+      if (this.setup) {
+        this.config = await this.setup();
       }
-    })().catch(async (error) => {
-      try {
-        await this.execution?.close();
-      } finally {
-        this.execution = undefined;
-        this.readyPromise = undefined;
+      const oauth = await resolveOAuthInput(
+        this.oauthInput,
+        this.config as Awaited<TConfig>,
+      );
+      this.oauthEnabled = Boolean(oauth);
+      const sample = this.buildServer();
+      if (oauth) {
+        this.resolveResourceMetadataUrl = setupOAuth(
+          this.expressApp,
+          oauth,
+          sample.securitySchemesByTool,
+        );
       }
+    })().catch((error) => {
+      this.readyPromise = undefined;
       throw error;
     });
     return this.readyPromise;
@@ -254,10 +256,9 @@ export class Skybridge<
    */
   async createServerInstance(): Promise<SdkServer> {
     await this.ready();
-    if (!this.execution) {
-      throw new Error("The Skybridge host is not initialized");
-    }
-    return this.execution.createServerInstance();
+    const server = this.buildServer();
+    this.instrumentHandlers(server);
+    return server.server;
   }
 
   /**
@@ -268,12 +269,27 @@ export class Skybridge<
    */
   async connect(transport: Parameters<SdkServer["connect"]>[0]): Promise<void> {
     const instance = await this.createServerInstance();
-    try {
-      await instance.connect(transport);
-    } catch (error) {
-      await instance.close();
-      throw error;
-    }
+    await instance.connect(transport);
+  }
+
+  withHandler<
+    TNextServer extends McpServer<Record<never, ToolDef>, TAuthExtra>,
+  >(
+    wrapper: (
+      server: McpServer<Record<never, ToolDef>, TAuthExtra>,
+      options: Awaited<TConfig>,
+      originalHandler: SkybridgeHandler<TTools, Awaited<TConfig>, TAuthExtra>,
+    ) => TNextServer,
+  ) {
+    return new Skybridge<TNextServer["$types"]["tools"], TConfig, TAuthExtra>({
+      ...this.serverInfo,
+      ...this.serverOptions,
+      json: this.json,
+      skills: this.skills,
+      setup: this.setup,
+      oauth: this.oauthInput,
+      handler: (server, options) => wrapper(server, options, this.handler),
+    });
   }
 
   /**
@@ -344,36 +360,21 @@ export class Skybridge<
   async run(): Promise<
     { fetch: (...args: unknown[]) => unknown } | Express | undefined
   > {
-    try {
-      return await this.runHttp();
-    } catch (error) {
-      await this.close();
-      throw error;
-    }
-  }
-
-  private async runHttp(): Promise<
-    { fetch: (...args: unknown[]) => unknown } | Express | undefined
-  > {
-    this.mcpHandler = buildMcpHandler(this);
     if (process.env.VERCEL === "1") {
       // createApp only reads httpServer inside its dev-only branch
       // (viewsDevServer); under VERCEL=1 + NODE_ENV=production it's a
       // bare object passed to satisfy the required parameter.
       const httpServer = http.createServer();
-      this.httpServer = httpServer;
       await createApp({
         app: this,
         httpServer,
-        mcpHandler: this.mcpHandler,
         errorMiddleware: this.errorMiddleware,
       });
       return this.expressApp;
     }
 
     const httpServer = http.createServer();
-    this.httpServer = httpServer;
-    const mcpHandler = this.mcpHandler;
+    const mcpHandler = buildMcpHandler(this);
 
     await createApp({
       app: this,
@@ -414,7 +415,8 @@ export class Skybridge<
       // (force-quit on a second Ctrl+C while drain is hanging).
       process.off("SIGTERM", shutdown);
       process.off("SIGINT", shutdown);
-      this.close().finally(() => process.exit(0));
+      mcpHandler.close().catch(() => {});
+      httpServer.close(() => process.exit(0));
       // Force exit if connections don't drain in time so the port is still
       // released promptly (e.g. for nodemon restarts).
       setTimeout(() => process.exit(0), 3000).unref();
@@ -424,27 +426,71 @@ export class Skybridge<
     return undefined;
   }
 
-  close() {
-    this.closePromise ??= this.closeHttp();
-    return this.closePromise;
+  private buildServer(): McpServer<TTools, TAuthExtra> {
+    const server = new McpServer<Record<never, ToolDef>, TAuthExtra>(
+      this.serverInfo,
+      this.serverOptions,
+      { skills: this.skills, oauth: this.oauthEnabled },
+    );
+    if (this.resolveResourceMetadataUrl) {
+      server.setResourceMetadataUrlResolver(this.resolveResourceMetadataUrl);
+    }
+    const startedAt = performance.now();
+    const built = this.handler(server, this.config as Awaited<TConfig>);
+    const elapsed = performance.now() - startedAt;
+    if (typeof (built as { then?: unknown }).then === "function") {
+      throw new Error(
+        "The Skybridge handler must be synchronous — it runs on every request. Load config or secrets in `setup` instead and read them from the handler's second argument.",
+      );
+    }
+    if (elapsed > SLOW_HANDLER_THRESHOLD_MS && !this.slowHandlerWarned) {
+      this.slowHandlerWarned = true;
+      console.warn(
+        `The Skybridge handler took ${Math.round(elapsed)}ms — it runs on every request, so this cost is paid per request. Move expensive work into \`setup\`, whose result is passed to the handler.`,
+      );
+    }
+    return built;
   }
 
-  private async closeHttp() {
-    this.closed = true;
-    await this.readyPromise?.catch(() => {});
-    try {
-      await Promise.all([
-        this.mcpHandler?.close(),
-        this.httpServer?.listening
-          ? new Promise<void>((resolve, reject) =>
-              this.httpServer?.close((error) =>
-                error ? reject(error) : resolve(),
-              ),
-            )
-          : undefined,
-      ]);
-    } finally {
-      await this.execution?.close();
-    }
+  private middlewareEntries(
+    server: McpServer<Record<never, ToolDef>, TAuthExtra>,
+  ): McpMiddlewareEntry[] {
+    return [
+      ...(this.monitoringEntry ? [this.monitoringEntry] : []),
+      ...server.protocolMiddlewareEntries(),
+    ];
+  }
+
+  private instrumentHandlers(
+    server: McpServer<Record<never, ToolDef>, TAuthExtra>,
+  ): void {
+    const entries = this.middlewareEntries(server);
+    const { requestHandlers, notificationHandlers } = getHandlerMaps(
+      server.server,
+    );
+
+    const instrumentMap = (
+      map: Map<string, (...args: unknown[]) => Promise<unknown>>,
+      isNotification: boolean,
+    ) => {
+      for (const [method, handler] of map) {
+        map.set(
+          method,
+          buildMiddlewareChain(method, isNotification, handler, entries),
+        );
+      }
+      const originalSet = map.set.bind(map);
+      map.set = (
+        method: string,
+        handler: (...args: unknown[]) => Promise<unknown>,
+      ) =>
+        originalSet(
+          method,
+          buildMiddlewareChain(method, isNotification, handler, entries),
+        );
+    };
+
+    instrumentMap(requestHandlers, false);
+    instrumentMap(notificationHandlers, true);
   }
 }

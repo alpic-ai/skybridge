@@ -3,7 +3,7 @@ title: McpServer
 description: "The server your handler registers tools on"
 ---
 
-`McpServer` is the fresh instance a [`server definition`](/api-reference/skybridge#defineserver) hands to its `handler`, once per request. Its registration methods return the server itself, so you chain them and return the chain: that return value carries your tool types into the definition and its HTTP host.
+`McpServer` is the server instance a [`Skybridge`](/api-reference/skybridge) app hands to its `handler`, once per request. Its registration methods return the server itself, so you chain them and return the chain: that return value is what carries your tool types into `typeof app`.
 
 ## Example
 
@@ -88,8 +88,6 @@ server.mcpMiddleware(filter: McpMiddlewareFilter, handler: McpMiddlewareFn): thi
 ```
 
 Wraps MCP requests and notifications: each middleware runs `(request, extra, next)`, can inspect or short-circuit the call, and invokes `next()` to continue. Middleware runs in registration order, outermost first. An optional `filter` scopes which methods it runs for.
-
-These registrations apply to the current instance. For reusable outer wrappers, [`service.mcpMiddleware(...)`](/api-reference/skybridge#immutable-middleware-composition) derives an immutable definition: newly composed middleware surrounds this instance's existing pipeline.
 
 | Filter | Matches |
 | --- | --- |

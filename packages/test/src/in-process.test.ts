@@ -1,5 +1,5 @@
 import { MockLanguageModelV3 } from "ai/test";
-import { defineServer, Skybridge } from "skybridge/server";
+import { Skybridge } from "skybridge/server";
 import { expect, expectTypeOf, it } from "vitest";
 import { z } from "zod";
 import { start, type ToolStubs } from "./session-registry.js";
@@ -222,103 +222,149 @@ it("refuses a stub for a tool the app does not expose", async () => {
   ).rejects.toThrow('the app exposes no tool named "search-produts"');
 });
 
-it("enforces sign-in and scopes before stubs without resolving an HTTP provider", async () => {
-  const events: string[] = [];
-  const service = defineServer({
-    handler: (server) =>
-      server
-        .registerTool(
-          {
-            name: "checkout",
-            inputSchema: { id: z.string() },
-            auth: { scopes: ["checkout"] },
-          },
-          () => {
-            events.push("original");
-            return { content: "live" };
-          },
-        )
-        .mcpMiddleware("tools/call", async (_request, _extra, next) => {
-          events.push("before");
-          const result = await next();
-          events.push("after");
-          return result;
-        }),
-  });
-  const app = new Skybridge({
-    server: service,
-    oauth: () => {
-      throw new Error("HTTP provider must not resolve during evals");
-    },
-  });
+it("checks sign-in and scopes before a stub answers", async () => {
   for (const scopes of [undefined, [], ["checkout"]]) {
-    events.length = 0;
+    const original: string[] = [];
+    const stubbed: string[] = [];
+    const app = buildProtectedApp(original);
     const chat = await start({
       app,
       model: mockModel({
-        toolName: "checkout",
-        input: { id: "sku-1" },
+        toolName: "create-checkout",
+        input: { productId: "sku-1" },
         text: "Done.",
       }),
       authInfo:
         scopes === undefined
           ? undefined
-          : { token: "test", clientId: "test", scopes },
+          : { token: "t", clientId: "c", scopes },
       stubs: {
-        checkout: ({ id }) => {
-          expectTypeOf(id).toEqualTypeOf<string>();
-          events.push(`stub:${id}`);
+        "create-checkout": ({ productId }) => {
+          expectTypeOf(productId).toEqualTypeOf<string>();
+          stubbed.push(productId);
           return "stubbed";
         },
       },
     });
     await chat.send("Buy sku-1");
+    expect(original).toEqual([]);
     if (scopes?.includes("checkout")) {
-      expect(events).toEqual(["before", "stub:sku-1", "after"]);
-      expect.chat(chat).toHaveCalledToolOnce("checkout", { id: "sku-1" });
+      expect(stubbed).toEqual(["sku-1"]);
+      expect
+        .chat(chat)
+        .toHaveCalledToolOnce("create-checkout", { productId: "sku-1" });
     } else {
-      expect(events).toEqual(["before", "after"]);
-      expect.chat(chat).toHaveFailedToolCall("checkout");
+      expect(stubbed).toEqual([]);
+      expect.chat(chat).toHaveFailedToolCall("create-checkout");
     }
-    await chat.close();
   }
 });
 
-it("owns setup and cleanup per concurrent conversation and cleans up failed startup", async () => {
-  let loads = 0;
-  const disposed: number[] = [];
-  const received: string[] = [];
-  const service = defineServer({
-    setup: () => ({ id: ++loads, calls: 0 }),
-    dispose: ({ id }) => {
-      disposed.push(id);
+it("keeps typed auth claims through app wrapping and injected identities", async () => {
+  const app = new Skybridge({
+    name: "typed-auth",
+    version: "1",
+    oauth: {
+      baseUrl: "http://in-process.skybridge.test",
+      oauthMetadata: {
+        issuer: "https://issuer.skybridge.test",
+        authorization_endpoint: "https://issuer.skybridge.test/authorize",
+        token_endpoint: "https://issuer.skybridge.test/token",
+        response_types_supported: ["code"],
+      },
+      verifier: {
+        verifyAccessToken: async () => ({
+          token: "t",
+          clientId: "c",
+          scopes: [],
+          extra: { email: "ada@example.com" },
+        }),
+      },
     },
+    handler: (server) =>
+      server.registerTool({ name: "who", inputSchema: {} }, (_args, extra) => {
+        expectTypeOf(extra.http?.authInfo?.extra?.email).toEqualTypeOf<
+          string | undefined
+        >();
+        return { content: extra.http?.authInfo?.extra?.email ?? "anonymous" };
+      }),
+  });
+  const wrapped = app.withHandler((server, options, originalHandler) =>
+    originalHandler(server, options),
+  );
+  const model = mockModel({ toolName: "who", input: {}, text: "Done." });
+  const chat = await start({
+    app: wrapped,
+    model,
+    authInfo: {
+      token: "t",
+      clientId: "c",
+      scopes: [],
+      extra: { email: "ada@example.com" },
+    },
+  });
+  await chat.send("Who am I?");
+  expect.chat(chat).toHaveCalledToolOnce("who");
+  expect(JSON.stringify(model.doGenerateCalls[1]?.prompt)).toContain(
+    "ada@example.com",
+  );
+});
+
+it("runs the tool's normal input parsing before a stub", async () => {
+  const seen: string[] = [];
+  const app = new Skybridge({
+    name: "parsed-stub",
+    version: "1",
+    handler: (server) =>
+      server.registerTool(
+        { name: "echo", inputSchema: { message: z.string().trim() } },
+        () => {
+          throw new Error("The original implementation must not run");
+        },
+      ),
+  });
+  const chat = await start({
+    app,
+    model: mockModel({
+      toolName: "echo",
+      input: { message: " hello " },
+      text: "Done.",
+    }),
+    stubs: {
+      echo: ({ message }) => {
+        seen.push(message);
+        return "stubbed";
+      },
+    },
+  });
+  await chat.send("Echo hello");
+  expect(seen).toEqual(["hello"]);
+  expect.chat(chat).toHaveCalledToolOnce("echo");
+});
+
+it("initializes separate app state once for each concurrent conversation", async () => {
+  let loads = 0;
+  const seen: string[] = [];
+  const app = new Skybridge({
+    name: "isolated-evals",
+    version: "1",
+    setup: () => ({ id: ++loads, calls: 0 }),
     handler: (server, state) =>
       server.registerTool({ name: "count", inputSchema: {} }, () => {
-        received.push(`${state.id}:${++state.calls}`);
+        seen.push(`${state.id}:${++state.calls}`);
         return { content: "counted" };
       }),
   });
   const open = () =>
     start({
-      server: service,
+      app,
       model: mockModel({ toolName: "count", input: {}, text: "Done." }),
     });
   const [first, second] = await Promise.all([open(), open()]);
-  expect(loads).toBe(2);
   await Promise.all([first.send("Count"), second.send("Count")]);
-  expect(received.sort()).toEqual(["1:1", "2:1"]);
-  await Promise.all([first.close(), first.close()]);
-  expect(disposed).toEqual([1]);
-  await expect(first.send("Again")).rejects.toThrow("closed");
-  await second.close();
-  expect(disposed).toEqual([1, 2]);
-  await expect(
-    start({
-      server: service,
-      model: mockModel({ toolName: "count", input: {}, text: "" }),
-      stubs: { missing: () => "wrong" } as ToolStubs<typeof service>,
-    }),
-  ).rejects.toThrow("no tool named");
-  expect(disposed).toEqual([1, 2, 3]);
+  expect(loads).toBe(2);
+  expect(seen.sort()).toEqual(["1:1", "2:1"]);
+  const original = await app.createServerInstance();
+  await original.close();
+  expect(loads).toBe(3);
 });

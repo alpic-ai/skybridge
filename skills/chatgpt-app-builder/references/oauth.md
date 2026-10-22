@@ -128,7 +128,7 @@ Skybridge enforces this before the handler runs: each `tools/call` is checked ag
 
 `auth` compiles down to SEP-1488 `securitySchemes` advertised on the tool descriptor: `{ scopes }` becomes `[{ type: "oauth2", scopes }]`, and `allowsAnonymous` emits **both** `[{ type: "noauth" }, { type: "oauth2" }]`. Setting `securitySchemes` by hand is the low-level escape hatch — it disables the `auth` shorthand for that tool (they're mutually exclusive) and skips no enforcement, but you own the mapping.
 
-Explicit `auth` declarations advertise and enforce schemes independently of an HTTP OAuth provider. Declare sign-in or scopes on the reusable definition and configure `oauth` on its `Skybridge` host for token verification. Evals enforce those declarations against injected identities, including stubbed calls. Omitted `auth` keeps the OAuth HTTP host's sign-in-required default; transport-independent definitions should declare their authorization requirements explicitly.
+Requiring sign-in (`auth: { scopes }`, or `auth: {}`) throws at registration when the server has no `oauth` provider. `auth: { allowsAnonymous: true }` is accepted either way, but without a provider it's silently dropped and no `noauth` scheme is advertised.
 
 Working server: `examples/auth-descope-mixed`.
 

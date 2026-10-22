@@ -49,7 +49,7 @@ export interface SkybridgePluginOptions {
    * Point vitest at this config to run the scenarios. Requires
    * `@skybridge/test` as a dev dependency.
    *
-   * Scenarios run a server definition in-process via `start({ server })`, so
+   * Scenarios always run the app in-process via `start({ app })`, so
    * `evals: {}` is enough to wire the matchers up.
    */
   evals?: EvalsOptions;

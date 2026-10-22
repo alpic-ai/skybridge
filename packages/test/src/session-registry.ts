@@ -1,39 +1,20 @@
-import {
-  type CallToolResult,
-  createMcpHandler,
-  type Server,
-} from "@modelcontextprotocol/server";
+import { createMcpHandler, type Server } from "@modelcontextprotocol/server";
 import type { LanguageModel } from "ai";
-import type {
-  McpTypedMiddlewareFn,
-  ToolInput,
-  ToolNames,
-} from "skybridge/server";
+import type { Skybridge, ToolInput, ToolNames } from "skybridge/server";
 import { inject, onTestFinished } from "vitest";
 import { Chat, type StubMap } from "./chat.js";
 import { EvalMiddleware } from "./eval-middleware.js";
+import { installToolStubs } from "./tool-stubs.js";
 
-export interface EvalServer {
-  readonly $types: { readonly tools: object };
-  mcpMiddleware<M extends "tools/list" | "tools/call">(
-    method: M,
-    handler: McpTypedMiddlewareFn<M>,
-  ): EvalServer;
-  createExecution(options?: {
-    toolImplementations?: Record<
-      string,
-      (
-        args: unknown,
-      ) => CallToolResult | undefined | Promise<CallToolResult | undefined>
-    >;
-  }): {
-    createServerInstance(): Promise<Server>;
-    close(): Promise<void>;
-  };
-}
-
+/**
+ * The minimum a Skybridge app has to expose to be served in-process: the
+ * `$types` marker the assertions infer tool names from, and the per-request
+ * server builder the session's handler is built on. Structural on purpose, so
+ * this package needs no runtime dependency on `skybridge`.
+ */
 export interface EvalApp {
-  readonly server: EvalServer;
+  readonly $types: { readonly tools: object };
+  withHandler(...args: never[]): { createServerInstance(): Promise<Server> };
 }
 
 /**
@@ -76,56 +57,47 @@ function sharedDefaults() {
   }
 }
 
-export async function start<Service extends EvalServer>(
+/**
+ * Opens a fresh MCP session and conversation against the app under test. The
+ * app is served in-process by a handler built on `app.createServerInstance`
+ * for this conversation alone, and both are closed when the current test
+ * finishes, so scenarios never leak sessions and never write teardown, and
+ * tests that run concurrently cannot close each other's sessions.
+ *
+ * The assertions are inferred from the app value itself, so `expect.chat` gets
+ * the project's tool names and argument shapes with no type parameter.
+ *
+ * `stubs` answers a tool from the scenario instead of the app, so a case that
+ * depends on today's date or on a live catalogue still reads the same weeks
+ * later. A stubbed call never reaches the tool handler, and still shows up in
+ * `chat.toolCalls` like any other. See {@link ToolStubs}.
+ *
+ * `authInfo` claims an identity for the session: the app's per-tool scheme and
+ * scope enforcement runs against it for real, only token verification is
+ * skipped. Omit it to exercise the anonymous path, challenges included.
+ */
+export async function start<App extends EvalApp>(
   options: StartOptions & {
+    app: App;
     authInfo?: EvalIdentity;
-    stubs?: ToolStubs<Service>;
-  } & (
-      | { server: Service; app?: never }
-      | { app: { server: Service }; server?: never }
-    ),
-): Promise<Chat<Service>> {
+    stubs?: ToolStubs<App>;
+  },
+): Promise<Chat<App>> {
   const config = sharedDefaults();
-  const { authInfo } = options;
-  const server = options.app ? options.app.server : options.server;
+  const { app, authInfo } = options;
   const middleware = new EvalMiddleware();
-  const stubs = (options.stubs ?? {}) as StubMap;
-  const execution = middleware.compose(server).createExecution({
-    toolImplementations: Object.fromEntries(
-      Object.entries(stubs).map(([name, stub]) => [
-        name,
-        async (args: unknown) => {
-          const result = await stub(args as Record<string, unknown>);
-          return result === undefined
-            ? undefined
-            : {
-                content: [
-                  {
-                    type: "text" as const,
-                    text:
-                      typeof result === "string"
-                        ? result
-                        : JSON.stringify(result),
-                  },
-                ],
-              };
-        },
-      ]),
-    ),
+  // The app's server and setup types are opaque here; both are forwarded unchanged.
+  const evalApp = (
+    app as unknown as Pick<Skybridge, "withHandler">
+  ).withHandler((server, setupOptions, originalHandler) => {
+    middleware.install(server);
+    installToolStubs(server, (options.stubs ?? {}) as StubMap);
+    return originalHandler(server, setupOptions);
   });
-  const handler = createMcpHandler(() => execution.createServerInstance());
-  const close = async () => {
-    try {
-      await handler.close();
-    } finally {
-      await execution.close();
-    }
-  };
-  let chat: Chat<Service>;
+  const handler = createMcpHandler(() => evalApp.createServerInstance());
+  let chat: Chat<App>;
   try {
-    const sample = await execution.createServerInstance();
-    await sample.close();
-    chat = await Chat.open<Service>(
+    chat = await Chat.open<App>(
       {
         model: options.model,
         temperature: options.temperature ?? config?.temperature,
@@ -138,15 +110,16 @@ export async function start<Service extends EvalServer>(
           authInfo === undefined ? undefined : { authInfo },
         ),
       middleware,
-      close,
     );
   } catch (error) {
-    await Promise.allSettled([middleware.files.close(), close()]);
+    await middleware.files.close();
+    await handler.close();
     throw error;
   }
 
   onTestFinished(async () => {
     await chat.close();
+    await handler.close();
   });
   return chat;
 }
