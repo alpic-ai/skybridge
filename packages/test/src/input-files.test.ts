@@ -1,3 +1,4 @@
+import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import type { FilePart } from "ai";
 import { MockLanguageModelV3 } from "ai/test";
 import { defineServer, FileRef, Skybridge } from "skybridge/server";
@@ -588,4 +589,27 @@ it("wraps application middleware with file adaptation and keeps stubs terminal",
   expect
     .chat(chat)
     .toHaveCalledToolOnce("native", { file: expect.inputFile(part) });
+
+  const host = new Skybridge({ server: service });
+  const client = new Client({ name: "production", version: "1" });
+  const [clientTransport, serverTransport] =
+    InMemoryTransport.createLinkedPair();
+  try {
+    await host.connect(serverTransport);
+    await client.connect(clientTransport);
+    expect(
+      (await client.listTools()).tools[0]?.inputSchema.properties?.file,
+    ).toMatchObject({ type: "object" });
+    events.length = 0;
+    expect(
+      await client.callTool({
+        name: "native",
+        arguments: { file: chat.toolCalls[0]?.arguments.file },
+      }),
+    ).toMatchObject({ content: [{ type: "text", text: "unexpected" }] });
+    expect(events).toEqual(["app:before", "handler", "app:after"]);
+  } finally {
+    await client.close();
+    await host.close();
+  }
 });
