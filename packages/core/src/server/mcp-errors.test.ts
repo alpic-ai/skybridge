@@ -63,11 +63,13 @@ function createTestApp() {
 
 async function serve(options: {
   app?: Skybridge;
+  mcpHandler?: ReturnType<typeof buildMcpHandler>;
   onMcpError?: (error: Error) => void;
 }) {
   const expressApp = await createApp({
     app: options.app ?? createTestApp(),
     httpServer: http.createServer(),
+    mcpHandler: options.mcpHandler,
     onMcpError: options.onMcpError,
   });
   const listening = http.createServer(expressApp);
@@ -205,17 +207,9 @@ it("passes a Node adapter failure to onMcpError", async () => {
   const app = createTestApp();
   const mcpHandler = buildMcpHandler(app);
   await mcpHandler.close();
-  const expressApp = await createApp({
-    app,
-    httpServer: http.createServer(),
-    mcpHandler,
-    onMcpError,
-  });
-  const listening = http.createServer(expressApp);
-  await new Promise<void>((r) => listening.listen(0, r));
-  openServer = listening;
+  const port = await serve({ app, mcpHandler, onMcpError });
 
-  const res = await post((listening.address() as AddressInfo).port, REJECTED);
+  const res = await post(port, REJECTED);
 
   expect(res.status).toBe(500);
   expect(onMcpError).toHaveBeenCalledTimes(1);
@@ -230,16 +224,9 @@ it("does not log a Node adapter failure by default", async () => {
   const app = createTestApp();
   const mcpHandler = buildMcpHandler(app);
   await mcpHandler.close();
-  const expressApp = await createApp({
-    app,
-    httpServer: http.createServer(),
-    mcpHandler,
-  });
-  const listening = http.createServer(expressApp);
-  await new Promise<void>((r) => listening.listen(0, r));
-  openServer = listening;
+  const port = await serve({ app, mcpHandler });
 
-  const res = await post((listening.address() as AddressInfo).port, REJECTED);
+  const res = await post(port, REJECTED);
 
   expect(res.status).toBe(500);
   expect(errors).not.toHaveBeenCalled();
