@@ -86,7 +86,7 @@ export class InputFiles {
           type: "text",
           text: `Attached file: ${JSON.stringify({ uploaded_name, workspace_path })}`,
         },
-        part,
+        { ...part, data: bytes },
       );
     }
     return prepared;
