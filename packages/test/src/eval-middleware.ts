@@ -1,7 +1,14 @@
 import type { Tool } from "@modelcontextprotocol/client";
 import type { JSONSchema7 } from "ai";
-import type { McpServer } from "skybridge/server";
+import { FileRef, type McpServer } from "skybridge/server";
 import { InputFiles } from "./input-files.js";
+
+const fileRefFields = Object.keys(FileRef.shape);
+const fileRefRequired = fileRefFields.filter(
+  (field) =>
+    !FileRef.shape[field as keyof typeof FileRef.shape].safeParse(undefined)
+      .success,
+);
 
 function fileInputSchema(
   schema: JSONSchema7 | boolean | undefined,
@@ -30,20 +37,19 @@ function fileInputSchema(
   if (allowArray && schema.type === "array" && !Array.isArray(schema.items)) {
     return { ...schema, items: fileInputSchema(schema.items, false) };
   }
-  const fields = ["download_url", "file_id", "mime_type", "file_name"];
+  const properties = Object.keys(schema.properties ?? {});
+  const required = schema.required ?? [];
   if (
     schema.type !== "object" ||
     (schema.additionalProperties !== undefined &&
       schema.additionalProperties !== false) ||
-    schema.required?.length !== 2 ||
-    !["download_url", "file_id"].every((field) =>
-      schema.required?.includes(field),
-    ) ||
-    Object.keys(schema.properties ?? {}).length !== fields.length ||
-    !fields.every((field) => {
+    properties.length !== fileRefFields.length ||
+    !fileRefFields.every((field) => {
       const property = schema.properties?.[field];
       return typeof property === "object" && property.type === "string";
-    })
+    }) ||
+    required.length !== fileRefRequired.length ||
+    !fileRefRequired.every((field) => required.includes(field))
   ) {
     throw new Error("expected a FileRef schema");
   }

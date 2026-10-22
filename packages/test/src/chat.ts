@@ -1,7 +1,5 @@
 import {
   Client,
-  fromJsonSchema,
-  type JsonSchemaType,
   StreamableHTTPClientTransport,
   type Tool,
 } from "@modelcontextprotocol/client";
@@ -201,22 +199,11 @@ export class Chat<App = unknown> {
   private toolSet() {
     const entries = this.tools.map((definition) => {
       const { $schema: _ignored, ...parameters } = definition.inputSchema;
-      const schema = fromJsonSchema(parameters as JsonSchemaType);
       return [
         definition.name,
         dynamicTool({
           description: definition.description ?? "",
-          inputSchema: jsonSchema(parameters as JSONSchema7, {
-            validate: async (input) => {
-              const result = await schema["~standard"].validate(input);
-              return result.issues
-                ? {
-                    success: false,
-                    error: new Error(JSON.stringify(result.issues)),
-                  }
-                : { success: true, value: result.value };
-            },
-          }),
+          inputSchema: jsonSchema(parameters as JSONSchema7),
           execute: async (input, { toolCallId }) => {
             let result: Awaited<ReturnType<Client["callTool"]>>;
             try {
