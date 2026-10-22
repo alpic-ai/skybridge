@@ -106,7 +106,7 @@ The underlying Express app, for custom routes, middleware, and settings. Registe
 
 ## Methods
 
-Every method returns the app, so calls chain.
+`use` and `useOnError` return the app, so calls chain.
 
 ### `use`
 
@@ -141,6 +141,26 @@ app.connect(transport: Transport): Promise<void>;
 ```
 
 Connects the app to a transport you manage, such as stdio for a desktop host. For HTTP, `run()` sets the transport up for you.
+
+### `createServerInstance`
+
+```ts
+app.createServerInstance(configure?: (server: McpServer) => void): Promise<Server>;
+```
+
+Builds a fresh MCP server after `setup` and `oauth` resolve. The optional synchronous callback runs after your `handler` registers the app and before middleware is composed. Use it to register native [`mcpMiddleware`](/api-reference/mcp-server#mcpmiddleware) on that instance alone, then connect the returned SDK server to your transport.
+
+```ts
+const instance = await app.createServerInstance((server) => {
+  server.mcpMiddleware("tools/call", (request, _extra, next) => {
+    console.log(request.params.name);
+    return next();
+  });
+});
+await instance.connect(transport);
+```
+
+[`start`](/test/evals) uses this hook to install eval-only file transformations and stubs. Each eval-created instance gets its own middleware registration; ordinary server creation keeps the app's registrations.
 
 <CardGroup cols={3}>
   <Card title="McpServer" icon="server" href="/api-reference/mcp-server">

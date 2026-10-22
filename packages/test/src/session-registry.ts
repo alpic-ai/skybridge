@@ -1,6 +1,6 @@
 import { createMcpHandler, type Server } from "@modelcontextprotocol/server";
 import type { LanguageModel } from "ai";
-import type { ToolInput, ToolNames } from "skybridge/server";
+import type { McpServer, ToolInput, ToolNames } from "skybridge/server";
 import { inject, onTestFinished } from "vitest";
 import { Chat, type StubMap } from "./chat.js";
 import { EvalMiddleware } from "./eval-middleware.js";
@@ -13,7 +13,9 @@ import { EvalMiddleware } from "./eval-middleware.js";
  */
 export interface EvalApp {
   readonly $types: { readonly tools: object };
-  createServerInstance(): Promise<Server>;
+  createServerInstance(
+    configure?: (server: Pick<McpServer, "mcpMiddleware">) => void,
+  ): Promise<Server>;
 }
 
 /**
@@ -68,7 +70,7 @@ function sharedDefaults() {
  *
  * `stubs` answers a tool from the scenario instead of the app, so a case that
  * depends on today's date or on a live catalogue still reads the same weeks
- * later. A stubbed call never reaches the server, and still shows up in
+ * later. A stubbed call never reaches the tool handler, and still shows up in
  * `chat.toolCalls` like any other. See {@link ToolStubs}.
  *
  * `authInfo` claims an identity for the session: the app's per-tool scheme and
@@ -84,15 +86,9 @@ export async function start<App extends EvalApp>(
 ): Promise<Chat<App>> {
   const config = sharedDefaults();
   const { app, authInfo } = options;
-  const handler = createMcpHandler(() => app.createServerInstance());
-
-  const middleware = new EvalMiddleware(
-    (url, init) =>
-      handler.fetch(
-        new Request(url, init),
-        authInfo === undefined ? undefined : { authInfo },
-      ),
-    (options.stubs ?? {}) as StubMap,
+  const middleware = new EvalMiddleware((options.stubs ?? {}) as StubMap);
+  const handler = createMcpHandler(() =>
+    app.createServerInstance((server) => middleware.install(server)),
   );
   let chat: Chat<App>;
   try {
@@ -103,6 +99,11 @@ export async function start<App extends EvalApp>(
         systemPrompt: options.systemPrompt ?? config?.systemPrompt,
         maxSteps: options.maxSteps ?? config?.maxSteps,
       },
+      (url, init) =>
+        handler.fetch(
+          new Request(url, init),
+          authInfo === undefined ? undefined : { authInfo },
+        ),
       middleware,
     );
   } catch (error) {

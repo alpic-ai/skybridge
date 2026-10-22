@@ -33,6 +33,8 @@ it("searches flights from a natural prompt", async () => {
 
 `start` serves the app in process: no port, no HTTP server. This only works because `src/server.ts` exports the app and `src/index.ts` runs it; never put `run()` in `server.ts`. Each `send` is one user turn, during which the model may call several tools. The session closes with the test.
 
+`app.createServerInstance(configure?)` builds a fresh SDK server and runs the synchronous `configure(server)` callback after app registration but before middleware composition. `start` uses it to install native `mcpMiddleware` only on eval-created instances, including file schema adaptation on `tools/list` and path resolution and stubs on `tools/call`. Prefer this hook over wrapping fetch or rewriting HTTP responses when extending an in-process eval host.
+
 ## Matchers
 
 All typed against the app's registry (`name` autocompletes, `args` is checked against the tool's `inputSchema`); all support `.not`.
@@ -66,7 +68,7 @@ const chat = await start({
 });
 ```
 
-Arguments are typed against the registry. Returning `undefined` falls through to the real server. A stubbed call still appears in `chat.toolCalls`, but never reaches the handler, so its schema validation and scope checks do not run for that call.
+Arguments are typed against the registry and validated before the stub runs. Returning `undefined` falls through to the real server. A stubbed call still appears in `chat.toolCalls`, but never reaches the handler, so its per-tool scope checks do not run for that call.
 
 ## Authenticated apps
 

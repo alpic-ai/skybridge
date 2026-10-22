@@ -495,3 +495,63 @@ it.each(["single", "list", "object"])(
     expect(stubbed).toEqual([]);
   },
 );
+
+it("runs eval transformations and stubs inside the app's native middleware pipeline", async () => {
+  const events: string[] = [];
+  const schemas: unknown[] = [];
+  const part = portrait();
+  const app = new Skybridge({
+    name: "native-file-eval",
+    version: "1",
+    handler: (server) =>
+      server
+        .registerTool(
+          {
+            name: "native",
+            inputSchema: { file: FileRef },
+            _meta: { "openai/fileParams": ["file"] },
+          },
+          async () => {
+            events.push("handler");
+            return { content: "unexpected" };
+          },
+        )
+        .mcpMiddleware("tools/list", async (_request, _extra, next) => {
+          const result = await next();
+          schemas.push(result.tools[0]?.inputSchema.properties?.file);
+          return result;
+        })
+        .mcpMiddleware("tools/call", async (request, _extra, next) => {
+          events.push("app:before");
+          expect(typeof request.params.arguments?.file).toBe("string");
+          const result = await next();
+          expect(request.params.arguments?.file).toEqual(
+            expect.inputFile(part),
+          );
+          events.push("app:after");
+          return result;
+        }),
+  });
+  const chat = await start({
+    app,
+    model: fileModel("native", (files) => ({ file: files[0]?.workspace_path })),
+    stubs: {
+      native: ({ file }) => {
+        expect(file).toEqual(expect.inputFile(part));
+        events.push("stub");
+        return "stubbed";
+      },
+    },
+  });
+  await chat.send([part]);
+  expect(schemas).toEqual([
+    {
+      type: "string",
+      description: "This parameter expects an absolute local file path.",
+    },
+  ]);
+  expect(events).toEqual(["app:before", "stub", "app:after"]);
+  expect
+    .chat(chat)
+    .toHaveCalledToolOnce("native", { file: expect.inputFile(part) });
+});

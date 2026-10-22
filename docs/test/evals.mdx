@@ -99,6 +99,8 @@ expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
 
 This simulates the ChatGPT host as observed in-app. The model sees each attachment's name, a synthetic `workspace_path` and the file content. Fields listed in a tool's `_meta["openai/fileParams"]` are shown to the model as a path (or a list of paths for list fields). Before the handler or stub runs, the runner replaces each path with an OpenAI file object whose `download_url` serves the attached bytes until the conversation closes. `chat.toolCalls` records those server-facing arguments.
 
+`start` registers native `mcpMiddleware` through the app's [`createServerInstance`](/api-reference/skybridge#createserverinstance) hook before middleware composition. The `tools/list` middleware validates and adapts declared file schemas; `tools/call` resolves paths before the handler or stub. These registrations belong only to eval-created instances.
+
 `expect.inputFile(part)` matches the file object minted for that exact `FilePart`. Two parts with identical bytes do not match each other.
 
 Using it under a parameter not listed in `openai/fileParams` throws a declaration error before calls are compared, including nested matchers, `.not` assertions, and conversations with no calls.

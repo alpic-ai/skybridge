@@ -251,10 +251,14 @@ export class Skybridge<
    * letting concurrent callers overwrite each other's negotiated version.
    *
    * Awaits `setup` and the `oauth` input on first use.
+   * The optional callback configures this instance before middleware composition.
    */
-  async createServerInstance(): Promise<SdkServer> {
+  async createServerInstance(
+    configure?: (server: McpServer<TTools, TAuthExtra>) => void,
+  ): Promise<SdkServer> {
     await this.ready();
     const server = this.buildServer();
+    configure?.(server);
     this.instrumentHandlers(server);
     return server.server;
   }

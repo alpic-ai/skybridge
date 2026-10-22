@@ -107,12 +107,13 @@ export class Chat<App = unknown> {
 
   static async open<App>(
     host: HostConfig,
+    fetchImpl: TransportFetch,
     middleware: EvalMiddleware,
   ): Promise<Chat<App>> {
     const client = new Client({ name: "skybridge-eval", version: "0" });
     const transport = new StreamableHTTPClientTransport(
       new URL(IN_PROCESS_URL),
-      { fetch: (url, init) => middleware.fetch(url, init) },
+      { fetch: fetchImpl },
     );
     await client.connect(transport);
     const chat = new Chat<App>(client, transport, host, middleware);
@@ -227,7 +228,7 @@ export class Chat<App = unknown> {
             } catch (error) {
               this.failures.set(
                 toolCallId,
-                `the call never reached the server: ${error instanceof Error ? error.message : String(error)}`,
+                `the tool call failed: ${error instanceof Error ? error.message : String(error)}`,
               );
               throw error;
             }

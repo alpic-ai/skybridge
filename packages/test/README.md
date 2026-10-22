@@ -109,7 +109,7 @@ expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
 
 `file` and `files` must be listed in their tools' `_meta["openai/fileParams"]`.
 Misplaced file matchers throw immediately, including nested matchers and `.not`.
-`start` validates that each declared parameter uses `FileRef`, including optional, nullable, and array forms. The eval middleware exposes paths to the model and resolves them before handlers or stubs run.
+`start` validates that each declared parameter uses `FileRef`, including optional, nullable, and array forms. It installs native `mcpMiddleware` on each eval-created server through `createServerInstance` before middleware composition, exposing paths to the model and resolving them before handlers or stubs run.
 See [Evals](https://docs.skybridge.tech/test/evals) for how files reach the model and the tool.
 
 ## Matchers
