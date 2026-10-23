@@ -1,6 +1,8 @@
 import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
+import { z } from "zod";
 import { Skybridge } from "./app.js";
+import type { ToolInput, ToolNames } from "./inferUtilityTypes.js";
 
 const oauthConfig = {
   oauthMetadata: {
@@ -20,6 +22,167 @@ const oauthConfig = {
 };
 
 describe("Skybridge setup and handler", () => {
+  it("derives an app with outer middleware without changing the original", async () => {
+    const events: string[] = [];
+    let configured = 0;
+    let loaded = 0;
+    const app = new Skybridge({
+      name: "instance-hook",
+      version: "1",
+      setup: () => {
+        loaded += 1;
+        return "ready";
+      },
+      handler: (server, config) =>
+        server
+          .registerTool(
+            {
+              name: "echo",
+              inputSchema: { message: z.string() },
+              description: config,
+            },
+            async ({ message }) => {
+              events.push("handler");
+              return { content: message };
+            },
+          )
+          .mcpMiddleware("tools/call", async (_request, _extra, next) => {
+            events.push("app:before");
+            const result = await next();
+            events.push("app:after");
+            return result;
+          }),
+    });
+    const derived = app.withHandler((server, options, originalHandler) => {
+      expectTypeOf(options).toEqualTypeOf<string>();
+      configured += 1;
+      server.mcpMiddleware("tools/list", async (_request, _extra, next) => {
+        const result = await next();
+        return {
+          ...result,
+          tools: result.tools.map((tool) => ({
+            ...tool,
+            description: "configured",
+          })),
+        };
+      });
+      server.mcpMiddleware("tools/call", async (request, _extra, next) => {
+        events.push("hook:before");
+        request.params.arguments = { message: "configured" };
+        const result = await next();
+        events.push("hook:after");
+        return result;
+      });
+      return originalHandler(server, options);
+    });
+    expectTypeOf<ToolNames<typeof derived>>().toEqualTypeOf<"echo">();
+    expectTypeOf<ToolInput<typeof derived, "echo">>().toEqualTypeOf<{
+      message: string;
+    }>();
+    const instances = await Promise.all([
+      derived.createServerInstance(),
+      derived.createServerInstance(),
+      app.createServerInstance(),
+    ]);
+    for (const [index, instance] of instances.entries()) {
+      const client = new Client({ name: "client", version: "1" });
+      const [clientTransport, serverTransport] =
+        InMemoryTransport.createLinkedPair();
+      await instance.connect(serverTransport);
+      await client.connect(clientTransport);
+      try {
+        const expected = index < 2 ? "configured" : "ready";
+        expect((await client.listTools()).tools[0]?.description).toBe(expected);
+        events.length = 0;
+        expect(
+          await client.callTool({
+            name: "echo",
+            arguments: { message: "original" },
+          }),
+        ).toMatchObject({
+          content: [
+            { type: "text", text: index < 2 ? "configured" : "original" },
+          ],
+        });
+        expect(events).toEqual(
+          index < 2
+            ? [
+                "hook:before",
+                "app:before",
+                "handler",
+                "app:after",
+                "hook:after",
+              ]
+            : ["app:before", "handler", "app:after"],
+        );
+      } finally {
+        await client.close();
+      }
+    }
+    expect(configured).toBe(3);
+    expect(loaded).toBe(2);
+  });
+
+  it("propagates a failed handler wrapper without changing the original app", async () => {
+    const app = new Skybridge({
+      name: "instance-hook",
+      version: "1",
+      handler: (server) => server,
+    });
+    await expect(
+      app
+        .withHandler(() => {
+          throw new Error("configure failed");
+        })
+        .createServerInstance(),
+    ).rejects.toThrow("configure failed");
+    const instance = await app.createServerInstance();
+    await instance.close();
+  });
+
+  it("infers additional tools returned by a handler wrapper", async () => {
+    const app = new Skybridge({
+      name: "wrapped-tools",
+      version: "1",
+      setup: async () => ({ greeting: "hello" }),
+      handler: (server, { greeting }) =>
+        server.registerTool(
+          { name: "greet", inputSchema: { name: z.string() } },
+          ({ name }) => ({ content: `${greeting} ${name}` }),
+        ),
+    });
+    expectTypeOf<ToolNames<typeof app>>().toEqualTypeOf<"greet">();
+    const derived = app.withHandler((server, options, originalHandler) => {
+      expectTypeOf(options).toEqualTypeOf<{ greeting: string }>();
+      return originalHandler(server, options).registerTool(
+        { name: "echo", inputSchema: { message: z.string() } },
+        ({ message }) => ({ content: message }),
+      );
+    });
+    expectTypeOf<ToolNames<typeof derived>>().toEqualTypeOf<"greet" | "echo">();
+    expectTypeOf<ToolInput<typeof derived, "echo">>().toEqualTypeOf<{
+      message: string;
+    }>();
+    const client = new Client({ name: "client", version: "1" });
+    const [clientTransport, serverTransport] =
+      InMemoryTransport.createLinkedPair();
+    await derived.connect(serverTransport);
+    await client.connect(clientTransport);
+    try {
+      expect(
+        await client.callTool({ name: "greet", arguments: { name: "Ada" } }),
+      ).toMatchObject({ content: [{ type: "text", text: "hello Ada" }] });
+      expect(
+        await client.callTool({
+          name: "echo",
+          arguments: { message: "goodbye" },
+        }),
+      ).toMatchObject({ content: [{ type: "text", text: "goodbye" }] });
+    } finally {
+      await client.close();
+    }
+  });
+
   it("resolves setup once and passes the context to the per-request handler", async () => {
     let loads = 0;
     const app = new Skybridge({
