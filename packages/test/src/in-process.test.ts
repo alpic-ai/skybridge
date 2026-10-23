@@ -1,6 +1,6 @@
 import { MockLanguageModelV3 } from "ai/test";
 import { Skybridge } from "skybridge/server";
-import { expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import { start, type ToolStubs } from "./session-registry.js";
 
@@ -220,4 +220,97 @@ it("refuses a stub for a tool the app does not expose", async () => {
       >,
     }),
   ).rejects.toThrow('the app exposes no tool named "search-produts"');
+});
+
+describe.sequential("separate tests sharing an app", () => {
+  const seen: string[] = [];
+  const app = buildApp(seen);
+  let stubCalls = 0;
+
+  it("uses a stub in the first conversation", async () => {
+    const chat = await start({
+      app,
+      model: mockModel({
+        toolName: "search-products",
+        input: { category: "goggles" },
+        text: "Done",
+      }),
+      stubs: {
+        "search-products": () => {
+          stubCalls++;
+          return "fixture";
+        },
+      },
+    });
+    await chat.send("Find goggles");
+    expect(stubCalls).toBe(1);
+    expect(seen).toEqual([]);
+  });
+
+  it("uses the real handler in the next conversation", async () => {
+    const chat = await start({
+      app,
+      model: mockModel({
+        toolName: "search-products",
+        input: { category: "goggles" },
+        text: "Done",
+      }),
+    });
+    await chat.send("Find goggles");
+    expect(seen).toEqual(["goggles"]);
+    expect(stubCalls).toBe(1);
+  });
+});
+
+it("keeps stubs local to concurrent conversations on the same app", async () => {
+  const seen: string[] = [];
+  const app = buildApp(seen);
+  const model = () =>
+    mockModel({
+      toolName: "search-products",
+      input: { category: "goggles" },
+      text: "Done",
+    });
+  const stubModel = model();
+  const liveModel = model();
+  const [stubbed, live] = await Promise.all([
+    start({
+      app,
+      model: stubModel,
+      stubs: { "search-products": () => "fixture goggles" },
+    }),
+    start({ app, model: liveModel }),
+  ]);
+  await Promise.all([stubbed.send("Find goggles"), live.send("Find goggles")]);
+  expect(seen).toEqual(["goggles"]);
+  expect(JSON.stringify(stubModel.doGenerateCalls[1]?.prompt)).toContain(
+    "fixture goggles",
+  );
+  expect(JSON.stringify(liveModel.doGenerateCalls[1]?.prompt)).toContain(
+    "1 pair of goggles",
+  );
+  expect(JSON.stringify(liveModel.doGenerateCalls[1]?.prompt)).not.toContain(
+    "fixture goggles",
+  );
+});
+
+it("does not retain middleware after a failed conversation startup", async () => {
+  const seen: string[] = [];
+  const app = buildApp(seen);
+  const model = () =>
+    mockModel({
+      toolName: "search-products",
+      input: { category: "goggles" },
+      text: "Done",
+    });
+  await expect(
+    start({
+      app,
+      model: model(),
+      stubs: { missing: () => "fixture" } as ToolStubs<typeof app>,
+    }),
+  ).rejects.toThrow("no tool named");
+  const chat = await start({ app, model: model() });
+  await chat.send("Find goggles");
+  expect(seen).toEqual(["goggles"]);
 });

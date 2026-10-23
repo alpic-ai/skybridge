@@ -112,3 +112,85 @@ describe("Skybridge setup and handler", () => {
     expect(seen).toEqual({ issuer: "https://issuer.example.com" });
   });
 });
+
+it("registers outer middleware on the app while preserving its setup lifecycle", async () => {
+  let loads = 0;
+  const events: string[] = [];
+  const app = new Skybridge({
+    name: "outer-middleware",
+    version: "1",
+    setup: () => ++loads,
+    handler: (server) =>
+      server
+        .registerTool({ name: "echo" }, () => ({ content: "live" }))
+        .mcpMiddleware("tools/call", async (_request, _extra, next) => {
+          events.push("app:before");
+          const result = await next();
+          events.push("app:after");
+          return result;
+        }),
+  });
+  const configured = app
+    .withMcpMiddleware({
+      filter: "tools/call",
+      handler: async (_request, _extra, next) => {
+        events.push("outer:before");
+        const result = await next();
+        events.push("outer:after");
+        return result;
+      },
+    })
+    .withMcpMiddleware({
+      filter: "tools/list",
+      handler: (_request, _extra, next) => {
+        events.push("list");
+        return next();
+      },
+    });
+  const [outer, ordinary, conversation] = await Promise.all([
+    configured.createServerInstance(),
+    app.createServerInstance(),
+    app.createServerInstance([
+      {
+        filter: "tools/call",
+        handler: async (_request, _extra, next) => {
+          events.push("conversation:before");
+          const result = await next();
+          events.push("conversation:after");
+          return result;
+        },
+      },
+    ]),
+  ]);
+  expect(configured).toBe(app);
+  expect(outer).not.toBe(ordinary);
+  expect(loads).toBe(1);
+  for (const [server, expected] of [
+    [
+      conversation,
+      [
+        "conversation:before",
+        "outer:before",
+        "app:before",
+        "app:after",
+        "outer:after",
+        "conversation:after",
+      ],
+    ],
+    [outer, ["outer:before", "app:before", "app:after", "outer:after"]],
+    [ordinary, ["outer:before", "app:before", "app:after", "outer:after"]],
+  ] as const) {
+    const client = new Client({ name: "test", version: "1" });
+    const [a, b] = InMemoryTransport.createLinkedPair();
+    try {
+      await server.connect(b);
+      await client.connect(a);
+      events.length = 0;
+      await client.callTool({ name: "echo" });
+      expect(events).toEqual(expected);
+    } finally {
+      await client.close();
+      await server.close();
+    }
+  }
+});

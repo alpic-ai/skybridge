@@ -10,7 +10,7 @@ import type { OAuthConfig, OAuthProvider } from "./auth/index.js";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
 import type { ExtraClaims } from "./auth.js";
 import { buildMcpHandler, createApp, createBaseApp } from "./express.js";
-import { createMiddlewareEntry } from "./metric.js";
+import { registerMonitoring } from "./metric.js";
 import type { McpMiddlewareEntry } from "./middleware.js";
 import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
 import {
@@ -164,8 +164,7 @@ export class Skybridge<
   private config?: Awaited<TConfig>;
   private readonly expressApp: Express;
   private readonly errorMiddleware: ErrorMiddlewareConfig[] = [];
-  private readonly monitoringEntry: McpMiddlewareEntry | null =
-    createMiddlewareEntry();
+  private readonly mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private resolveResourceMetadataUrl?: ResourceMetadataUrlResolver;
   private readyPromise?: Promise<void>;
   private slowHandlerWarned = false;
@@ -191,6 +190,7 @@ export class Skybridge<
     this.oauthInput = oauth;
     this.handler = handler;
     this.expressApp = createBaseApp(json);
+    registerMonitoring(this);
   }
 
   /**
@@ -250,13 +250,24 @@ export class Skybridge<
    * instance that is never marked, pinning every request to the 2025 codec and
    * letting concurrent callers overwrite each other's negotiated version.
    *
-   * Awaits `setup` and the `oauth` input on first use.
+   * Awaits `setup` and the `oauth` input on first use. Additional middleware
+   * wraps the app pipeline for this instance only; it is not registered on the app.
+   *
+   * @internal
    */
-  async createServerInstance(): Promise<SdkServer> {
+  async createServerInstance(
+    middleware: McpMiddlewareEntry[] = [],
+  ): Promise<SdkServer> {
     await this.ready();
     const server = this.buildServer();
-    this.instrumentHandlers(server);
+    this.instrumentHandlers(server, middleware);
     return server.server;
+  }
+
+  /** Register outer MCP middleware on this app, in registration order. @internal */
+  withMcpMiddleware(entry: McpMiddlewareEntry): this {
+    this.mcpMiddlewareEntries.push(entry);
+    return this;
   }
 
   /**
@@ -430,19 +441,15 @@ export class Skybridge<
     return built;
   }
 
-  private middlewareEntries(
-    server: McpServer<Record<never, ToolDef>, TAuthExtra>,
-  ): McpMiddlewareEntry[] {
-    return [
-      ...(this.monitoringEntry ? [this.monitoringEntry] : []),
-      ...server.protocolMiddlewareEntries(),
-    ];
-  }
-
   private instrumentHandlers(
     server: McpServer<Record<never, ToolDef>, TAuthExtra>,
+    middleware: McpMiddlewareEntry[],
   ): void {
-    const entries = this.middlewareEntries(server);
+    const entries = [
+      ...middleware,
+      ...this.mcpMiddlewareEntries,
+      ...server.protocolMiddlewareEntries(),
+    ];
     const { requestHandlers, notificationHandlers } = getHandlerMaps(
       server.server,
     );

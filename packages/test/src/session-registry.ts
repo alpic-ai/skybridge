@@ -1,19 +1,17 @@
-import { createMcpHandler, type Server } from "@modelcontextprotocol/server";
+import { createMcpHandler } from "@modelcontextprotocol/server";
 import type { LanguageModel } from "ai";
-import type { ToolInput, ToolNames } from "skybridge/server";
+import type {
+  Skybridge,
+  ToolDef,
+  ToolInput,
+  ToolNames,
+} from "skybridge/server";
 import { inject, onTestFinished } from "vitest";
-import { Chat, type StubMap } from "./chat.js";
+import { Chat } from "./chat.js";
+import { createEvalMiddlewares } from "./eval-middlewares.js";
 
-/**
- * The minimum a Skybridge app has to expose to be served in-process: the
- * `$types` marker the assertions infer tool names from, and the per-request
- * server builder the session's handler is built on. Structural on purpose, so
- * this package needs no runtime dependency on `skybridge`.
- */
-export interface EvalApp {
-  readonly $types: { readonly tools: object };
-  createServerInstance(): Promise<Server>;
-}
+/** The Skybridge surface used by an in-process eval session. */
+export type EvalApp = Pick<Skybridge, "$types" | "createServerInstance">;
 
 /**
  * The identity an in-process session claims, handed to the app as the
@@ -35,7 +33,9 @@ export interface EvalIdentity {
  * one that returns `undefined` falls through to the real server, so a scenario
  * can pin one set of arguments and leave the rest live.
  */
-export type ToolStubs<App> = {
+export type ToolStubs<
+  App = Skybridge<Record<string, ToolDef<Record<string, unknown>>>>,
+> = {
   [Name in ToolNames<App>]?: (args: ToolInput<App, Name>) => unknown;
 };
 
@@ -67,7 +67,7 @@ function sharedDefaults() {
  *
  * `stubs` answers a tool from the scenario instead of the app, so a case that
  * depends on today's date or on a live catalogue still reads the same weeks
- * later. A stubbed call never reaches the server, and still shows up in
+ * later. A stubbed call bypasses the application pipeline, and shows up in
  * `chat.toolCalls` like any other. See {@link ToolStubs}.
  *
  * `authInfo` claims an identity for the session: the app's per-tool scheme and
@@ -83,26 +83,37 @@ export async function start<App extends EvalApp>(
 ): Promise<Chat<App>> {
   const config = sharedDefaults();
   const { app, authInfo } = options;
-  const handler = createMcpHandler(() => app.createServerInstance());
-
-  const chat = await Chat.open<App>(
-    {
-      model: options.model,
-      temperature: options.temperature ?? config?.temperature,
-      systemPrompt: options.systemPrompt ?? config?.systemPrompt,
-      maxSteps: options.maxSteps ?? config?.maxSteps,
-    },
-    (url, init) =>
-      handler.fetch(
-        new Request(url, init),
-        authInfo === undefined ? undefined : { authInfo },
-      ),
-    (options.stubs ?? {}) as StubMap,
+  const middleware = createEvalMiddlewares((options.stubs ?? {}) as ToolStubs);
+  const handler = createMcpHandler(() =>
+    app.createServerInstance([
+      { filter: "tools/list", handler: middleware.listTools },
+      { filter: "tools/call", handler: middleware.resolveFiles },
+      { filter: "tools/call", handler: middleware.stubTool },
+    ]),
   );
-
+  let chat: Chat<App>;
+  try {
+    chat = await Chat.open<App>(
+      {
+        model: options.model,
+        temperature: options.temperature ?? config?.temperature,
+        systemPrompt: options.systemPrompt ?? config?.systemPrompt,
+        maxSteps: options.maxSteps ?? config?.maxSteps,
+      },
+      (url, init) =>
+        handler.fetch(
+          new Request(url, init),
+          authInfo === undefined ? undefined : { authInfo },
+        ),
+      middleware,
+      () => handler.close(),
+    );
+  } catch (error) {
+    await Promise.allSettled([middleware.files.close(), handler.close()]);
+    throw error;
+  }
   onTestFinished(async () => {
     await chat.close();
-    await handler.close();
   });
   return chat;
 }
