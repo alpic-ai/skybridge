@@ -15,10 +15,9 @@ import {
   stepCountIs,
   type UserContent,
 } from "ai";
-import { EvalMiddlewares } from "./eval-middlewares.js";
+import type { EvalMiddlewares } from "./eval-middlewares.js";
 import { registerFileParameters } from "./matchers/matchers.js";
 import type { ToolCall, Turn } from "./matchers/types.js";
-import type { ToolStubs } from "./session-registry.js";
 
 interface HostConfig {
   model: LanguageModel;
@@ -79,7 +78,6 @@ export class Chat<App = unknown> {
   private readonly host: HostConfig;
   private tools: Tool[] = [];
   private closePromise?: Promise<void>;
-  private legacyStubs?: ToolStubs;
 
   /** The model the conversation runs on, and the judge's default. */
   get model(): LanguageModel {
@@ -101,13 +99,9 @@ export class Chat<App = unknown> {
   static async open<App>(
     host: HostConfig,
     fetchImpl: TransportFetch,
-    middlewareOrStubs: EvalMiddlewares | ToolStubs,
+    middleware: EvalMiddlewares,
     dispose: () => Promise<void> = async () => {},
   ): Promise<Chat<App>> {
-    const middleware =
-      middlewareOrStubs instanceof EvalMiddlewares
-        ? middlewareOrStubs
-        : new EvalMiddlewares();
     const client = new Client({ name: "skybridge-eval", version: "0" });
     const transport = new StreamableHTTPClientTransport(
       new URL(IN_PROCESS_URL),
@@ -118,17 +112,6 @@ export class Chat<App = unknown> {
       await client.connect(transport);
       const { tools } = await client.listTools();
       chat.tools = tools;
-      if (!(middlewareOrStubs instanceof EvalMiddlewares)) {
-        chat.legacyStubs = middlewareOrStubs;
-        const unknown = Object.keys(middlewareOrStubs).filter(
-          (name) => !tools.some((tool) => tool.name === name),
-        );
-        if (unknown.length) {
-          throw new Error(
-            `the app exposes no tool named ${unknown.map((name) => `"${name}"`).join(", ")}, so the stub would never run`,
-          );
-        }
-      }
       registerFileParameters(chat, middleware.fileParams);
     } catch (error) {
       await transport.close();
@@ -240,22 +223,6 @@ export class Chat<App = unknown> {
             },
           }),
           execute: async (input, { toolCallId }) => {
-            const stubbed = await this.legacyStubs?.[definition.name]?.(
-              (input ?? {}) as Record<string, unknown>,
-            );
-            if (stubbed !== undefined) {
-              return {
-                content: [
-                  {
-                    type: "text",
-                    text:
-                      typeof stubbed === "string"
-                        ? stubbed
-                        : JSON.stringify(stubbed),
-                  },
-                ],
-              };
-            }
             let result: Awaited<ReturnType<Client["callTool"]>>;
             try {
               result = await this.client.callTool({
