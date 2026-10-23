@@ -126,7 +126,7 @@ export const app = new Skybridge({
       error instanceof ProtocolError &&
       error.code === ProtocolErrorCode.UnsupportedProtocolVersion;
     if (!unsupportedVersion) {
-      logger.warn({ event: "mcp_error", name: error.name });
+      console.warn({ event: "mcp_error", name: error.name });
     }
   },
   handler: (server) => server.registerTool(/* ... */),
