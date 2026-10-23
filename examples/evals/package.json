@@ -12,13 +12,13 @@
     "evals:types": "tsc --noEmit -p tsconfig.evals.json"
   },
   "dependencies": {
-    "skybridge": "^2.0.0",
+    "skybridge": "^2.0.4",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@ai-sdk/anthropic": "^4.0.0",
-    "@skybridge/test": "^2.0.0",
-    "@skybridge/vite-plugin": "^2.0.0",
+    "@skybridge/test": "^2.0.4",
+    "@skybridge/vite-plugin": "^2.0.4",
     "@types/node": "^24.13.2",
     "@typesafe-ai/sdk": "^0.6.0",
     "ai": "^7.0.0",
