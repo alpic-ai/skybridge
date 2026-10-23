@@ -8,7 +8,7 @@ import type {
 } from "skybridge/server";
 import { inject, onTestFinished } from "vitest";
 import { Chat } from "./chat.js";
-import { EvalMiddlewares } from "./eval-middlewares.js";
+import { createEvalMiddlewares } from "./eval-middlewares.js";
 
 /** The Skybridge surface used by an in-process eval session. */
 export type EvalApp = Pick<
@@ -86,7 +86,7 @@ export async function start<App extends EvalApp>(
 ): Promise<Chat<App>> {
   const config = sharedDefaults();
   const { app, authInfo } = options;
-  const middleware = new EvalMiddlewares((options.stubs ?? {}) as ToolStubs);
+  const middleware = createEvalMiddlewares((options.stubs ?? {}) as ToolStubs);
   app
     .withMcpMiddleware({
       filter: "tools/list",
