@@ -1,10 +1,8 @@
 import { createMcpHandler, type Server } from "@modelcontextprotocol/server";
 import type { LanguageModel } from "ai";
-import type { Skybridge, ToolInput, ToolNames } from "skybridge/server";
+import type { ToolInput, ToolNames } from "skybridge/server";
 import { inject, onTestFinished } from "vitest";
 import { Chat, type StubMap } from "./chat.js";
-import { EvalMiddleware } from "./eval-middleware.js";
-import { installToolStubs } from "./tool-stubs.js";
 
 /**
  * The minimum a Skybridge app has to expose to be served in-process: the
@@ -14,7 +12,7 @@ import { installToolStubs } from "./tool-stubs.js";
  */
 export interface EvalApp {
   readonly $types: { readonly tools: object };
-  withHandler(...args: never[]): { createServerInstance(): Promise<Server> };
+  createServerInstance(): Promise<Server>;
 }
 
 /**
@@ -69,7 +67,7 @@ function sharedDefaults() {
  *
  * `stubs` answers a tool from the scenario instead of the app, so a case that
  * depends on today's date or on a live catalogue still reads the same weeks
- * later. A stubbed call never reaches the tool handler, and still shows up in
+ * later. A stubbed call never reaches the server, and still shows up in
  * `chat.toolCalls` like any other. See {@link ToolStubs}.
  *
  * `authInfo` claims an identity for the session: the app's per-tool scheme and
@@ -85,37 +83,22 @@ export async function start<App extends EvalApp>(
 ): Promise<Chat<App>> {
   const config = sharedDefaults();
   const { app, authInfo } = options;
-  const middleware = new EvalMiddleware();
-  // The app's server and setup types are opaque here; both are forwarded unchanged.
-  const evalApp = (
-    app as unknown as Pick<Skybridge, "withHandler">
-  ).withHandler((server, setupOptions, originalHandler) => {
-    middleware.install(server);
-    installToolStubs(server, (options.stubs ?? {}) as StubMap);
-    return originalHandler(server, setupOptions);
-  });
-  const handler = createMcpHandler(() => evalApp.createServerInstance());
-  let chat: Chat<App>;
-  try {
-    chat = await Chat.open<App>(
-      {
-        model: options.model,
-        temperature: options.temperature ?? config?.temperature,
-        systemPrompt: options.systemPrompt ?? config?.systemPrompt,
-        maxSteps: options.maxSteps ?? config?.maxSteps,
-      },
-      (url, init) =>
-        handler.fetch(
-          new Request(url, init),
-          authInfo === undefined ? undefined : { authInfo },
-        ),
-      middleware,
-    );
-  } catch (error) {
-    await middleware.files.close();
-    await handler.close();
-    throw error;
-  }
+  const handler = createMcpHandler(() => app.createServerInstance());
+
+  const chat = await Chat.open<App>(
+    {
+      model: options.model,
+      temperature: options.temperature ?? config?.temperature,
+      systemPrompt: options.systemPrompt ?? config?.systemPrompt,
+      maxSteps: options.maxSteps ?? config?.maxSteps,
+    },
+    (url, init) =>
+      handler.fetch(
+        new Request(url, init),
+        authInfo === undefined ? undefined : { authInfo },
+      ),
+    (options.stubs ?? {}) as StubMap,
+  );
 
   onTestFinished(async () => {
     await chat.close();

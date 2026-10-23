@@ -1,22 +1,16 @@
 import {
   Client,
-  fromJsonSchema,
-  type JsonSchemaType,
   StreamableHTTPClientTransport,
   type Tool,
 } from "@modelcontextprotocol/client";
 import {
   dynamicTool,
   generateText,
-  type JSONSchema7,
   jsonSchema,
   type LanguageModel,
   type ModelMessage,
   stepCountIs,
-  type UserContent,
 } from "ai";
-import type { EvalMiddleware } from "./eval-middleware.js";
-import { registerFileParameters } from "./matchers/matchers.js";
 import type { ToolCall, Turn } from "./matchers/types.js";
 
 interface HostConfig {
@@ -40,6 +34,21 @@ export type StubMap = Record<
 const DEFAULT_MAX_STEPS = 8;
 
 const IN_PROCESS_URL = "http://in-process.skybridge.test/mcp";
+
+/**
+ * Dress a stubbed value the way the server dresses a real one, so the model
+ * reads the same envelope under a stub as it does live.
+ */
+function asToolResult(value: unknown): unknown {
+  return {
+    content: [
+      {
+        type: "text",
+        text: typeof value === "string" ? value : JSON.stringify(value),
+      },
+    ],
+  };
+}
 
 function outputOf(
   results: { toolCallId: string; output?: unknown }[],
@@ -87,6 +96,7 @@ export class Chat<App = unknown> {
   private readonly client: Client;
   private readonly transport: StreamableHTTPClientTransport;
   private readonly host: HostConfig;
+  private readonly stubs: Map<string, StubMap[string]>;
   private tools: Tool[] = [];
 
   /** The model the conversation runs on, and the judge's default. */
@@ -98,17 +108,18 @@ export class Chat<App = unknown> {
     client: Client,
     transport: StreamableHTTPClientTransport,
     host: HostConfig,
-    private readonly middleware: EvalMiddleware,
+    stubs: StubMap,
   ) {
     this.client = client;
     this.transport = transport;
     this.host = host;
+    this.stubs = new Map(Object.entries(stubs));
   }
 
   static async open<App>(
     host: HostConfig,
     fetchImpl: TransportFetch,
-    middleware: EvalMiddleware,
+    stubs: StubMap,
   ): Promise<Chat<App>> {
     const client = new Client({ name: "skybridge-eval", version: "0" });
     const transport = new StreamableHTTPClientTransport(
@@ -116,11 +127,18 @@ export class Chat<App = unknown> {
       { fetch: fetchImpl },
     );
     await client.connect(transport);
-    const chat = new Chat<App>(client, transport, host, middleware);
+    const chat = new Chat<App>(client, transport, host, stubs);
     try {
       const { tools } = await client.listTools();
       chat.tools = tools;
-      registerFileParameters(chat, middleware.fileParams);
+      const unknownStubs = Object.keys(stubs).filter(
+        (name) => !tools.some((tool) => tool.name === name),
+      );
+      if (unknownStubs.length > 0) {
+        throw new Error(
+          `the app exposes no tool named ${unknownStubs.map((name) => `"${name}"`).join(", ")}, so the stub would never run`,
+        );
+      }
     } catch (error) {
       await transport.close();
       throw error;
@@ -129,21 +147,9 @@ export class Chat<App = unknown> {
   }
 
   /** Takes a turn. Assert on the result with `expect.chat`. */
-  async send(content: UserContent): Promise<void> {
-    const prepared = await this.middleware.files.prepare(content);
-    this.middleware.inputs.clear();
-    this.failures.clear();
-    this.messages.push({ role: "user", content: prepared });
-    this.turns.push({
-      role: "user",
-      text:
-        typeof prepared === "string"
-          ? prepared
-          : prepared
-              .filter((part) => part.type === "text")
-              .map((part) => part.text)
-              .join("\n"),
-    });
+  async send(prompt: string): Promise<void> {
+    this.messages.push({ role: "user", content: prompt });
+    this.turns.push({ role: "user", text: prompt });
 
     const result = await generateText({
       model: this.host.model,
@@ -167,9 +173,7 @@ export class Chat<App = unknown> {
           role: "tool",
           call: {
             name: call.toolName,
-            arguments:
-              this.middleware.inputs.get(call.toolCallId) ??
-              ((call.input ?? {}) as Record<string, unknown>),
+            arguments: (call.input ?? {}) as Record<string, unknown>,
             ...this.failureFor(call),
           } as ToolCall<App>,
           result: outputOf(step.toolResults, call.toolCallId),
@@ -181,7 +185,6 @@ export class Chat<App = unknown> {
   }
 
   async close(): Promise<void> {
-    await this.middleware.files.close();
     await this.transport.close();
   }
 
@@ -201,34 +204,30 @@ export class Chat<App = unknown> {
   private toolSet() {
     const entries = this.tools.map((definition) => {
       const { $schema: _ignored, ...parameters } = definition.inputSchema;
-      const schema = fromJsonSchema(parameters as JsonSchemaType);
       return [
         definition.name,
         dynamicTool({
           description: definition.description ?? "",
-          inputSchema: jsonSchema(parameters as JSONSchema7, {
-            validate: async (input) => {
-              const result = await schema["~standard"].validate(input);
-              return result.issues
-                ? {
-                    success: false,
-                    error: new Error(JSON.stringify(result.issues)),
-                  }
-                : { success: true, value: result.value };
-            },
-          }),
+          inputSchema: jsonSchema(
+            parameters as Parameters<typeof jsonSchema>[0],
+          ),
           execute: async (input, { toolCallId }) => {
+            const stubbed = await this.stubs.get(definition.name)?.(
+              (input ?? {}) as Record<string, unknown>,
+            );
+            if (stubbed !== undefined) {
+              return asToolResult(stubbed);
+            }
             let result: Awaited<ReturnType<Client["callTool"]>>;
             try {
               result = await this.client.callTool({
                 name: definition.name,
                 arguments: (input ?? {}) as Record<string, unknown>,
-                _meta: { "skybridge/evalToolCallId": toolCallId },
               });
             } catch (error) {
               this.failures.set(
                 toolCallId,
-                `the tool call failed: ${error instanceof Error ? error.message : String(error)}`,
+                `the call never reached the server: ${error instanceof Error ? error.message : String(error)}`,
               );
               throw error;
             }
