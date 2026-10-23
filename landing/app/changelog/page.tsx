@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { SiteNav } from "../components/site-nav";
 import { SiteFooter } from "../components/trust-final";
+import { DEFAULT_SOCIAL_IMAGE } from "../social-preview";
 import { ChangelogControls } from "./ChangelogControls";
 import { LazyChanges } from "./LazyChanges";
 import {
@@ -18,13 +19,6 @@ import { PatchChanges } from "./PatchChanges";
 const description =
   "Every Skybridge release, sourced directly from GitHub. New features, fixes, and breaking changes.";
 
-const OG_IMAGE = {
-  url: "/assets/Skybridge-og.jpg",
-  width: 1200,
-  height: 630,
-  alt: "Skybridge changelog",
-};
-
 export const metadata: Metadata = {
   title: "Skybridge changelog",
   description,
@@ -37,14 +31,14 @@ export const metadata: Metadata = {
     title: "Skybridge changelog",
     description,
     url: "/changelog",
-    images: [OG_IMAGE],
+    images: [DEFAULT_SOCIAL_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     site: "@alpic_ai",
     title: "Skybridge changelog",
     description,
-    images: [OG_IMAGE.url],
+    images: [DEFAULT_SOCIAL_IMAGE.url],
   },
 };
 

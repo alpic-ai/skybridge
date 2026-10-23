@@ -2,19 +2,13 @@ import type { Metadata, Viewport } from "next";
 import { Mozilla_Text } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import { DEFAULT_SOCIAL_IMAGE } from "./social-preview";
 
 const mozillaText = Mozilla_Text({
   subsets: ["latin"],
   variable: "--font-mozilla-text",
   display: "swap",
 });
-
-const OG_IMAGE = {
-  url: "/assets/Skybridge-og.jpg",
-  width: 1200,
-  height: 630,
-  alt: "Skybridge, the full-stack React framework for MCP Apps and MCP servers",
-};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://skybridge.tech"),
@@ -33,7 +27,7 @@ export const metadata: Metadata = {
     description:
       "Skybridge is the leading open-source TypeScript framework for building MCP Apps. Write once, run in Claude, ChatGPT, VSCode, and any MCP client. 100K monthly downloads.",
     url: "/",
-    images: [OG_IMAGE],
+    images: [DEFAULT_SOCIAL_IMAGE],
     locale: "en_US",
   },
   twitter: {
@@ -43,7 +37,7 @@ export const metadata: Metadata = {
       "Skybridge, the full-stack React framework for MCP Apps and MCP servers | Claude & ChatGPT",
     description:
       "Skybridge is the leading open-source TypeScript framework for building MCP Apps. Write once, run in Claude, ChatGPT, VSCode, and any MCP client. 100K monthly downloads.",
-    images: [OG_IMAGE],
+    images: [DEFAULT_SOCIAL_IMAGE],
   },
 };
 

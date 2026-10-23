@@ -9,6 +9,7 @@ import { getShowcaseHeroImage, SHOWCASE } from "../../components/showcase/data";
 import { PreviewCarousel } from "../../components/showcase/preview-carousel";
 import { SiteNav } from "../../components/site-nav";
 import { SiteFooter } from "../../components/trust-final";
+import { DEFAULT_SOCIAL_IMAGE } from "../../social-preview";
 
 export async function generateStaticParams() {
   return SHOWCASE.map((app) => ({ slug: app.slug }));
@@ -29,7 +30,7 @@ export async function generateMetadata({
   const hero = getShowcaseHeroImage(app);
   const images = hero
     ? [{ url: hero, alt: `${app.name} — ${app.tagline}` }]
-    : undefined;
+    : [DEFAULT_SOCIAL_IMAGE];
   return {
     title,
     description: app.blurb,
@@ -40,7 +41,7 @@ export async function generateMetadata({
       site: "@alpic_ai",
       title,
       description: app.blurb,
-      images: images?.map((image) => image.url),
+      images: images.map((image) => image.url),
     },
   };
 }
