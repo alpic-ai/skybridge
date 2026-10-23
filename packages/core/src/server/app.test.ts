@@ -147,14 +147,36 @@ it("registers outer middleware on the app while preserving its setup lifecycle",
         return next();
       },
     });
-  const [outer, ordinary] = await Promise.all([
+  const [outer, ordinary, conversation] = await Promise.all([
     configured.createServerInstance(),
     app.createServerInstance(),
+    app.createServerInstance([
+      {
+        filter: "tools/call",
+        handler: async (_request, _extra, next) => {
+          events.push("conversation:before");
+          const result = await next();
+          events.push("conversation:after");
+          return result;
+        },
+      },
+    ]),
   ]);
   expect(configured).toBe(app);
   expect(outer).not.toBe(ordinary);
   expect(loads).toBe(1);
   for (const [server, expected] of [
+    [
+      conversation,
+      [
+        "conversation:before",
+        "outer:before",
+        "app:before",
+        "app:after",
+        "outer:after",
+        "conversation:after",
+      ],
+    ],
     [outer, ["outer:before", "app:before", "app:after", "outer:after"]],
     [ordinary, ["outer:before", "app:before", "app:after", "outer:after"]],
   ] as const) {

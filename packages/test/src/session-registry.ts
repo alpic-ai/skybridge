@@ -11,10 +11,7 @@ import { Chat } from "./chat.js";
 import { createEvalMiddlewares } from "./eval-middlewares.js";
 
 /** The Skybridge surface used by an in-process eval session. */
-export type EvalApp = Pick<
-  Skybridge,
-  "$types" | "createServerInstance" | "withMcpMiddleware"
->;
+export type EvalApp = Pick<Skybridge, "$types" | "createServerInstance">;
 
 /**
  * The identity an in-process session claims, handed to the app as the
@@ -87,20 +84,13 @@ export async function start<App extends EvalApp>(
   const config = sharedDefaults();
   const { app, authInfo } = options;
   const middleware = createEvalMiddlewares((options.stubs ?? {}) as ToolStubs);
-  app
-    .withMcpMiddleware({
-      filter: "tools/list",
-      handler: middleware.listTools,
-    })
-    .withMcpMiddleware({
-      filter: "tools/call",
-      handler: middleware.resolveFiles,
-    })
-    .withMcpMiddleware({
-      filter: "tools/call",
-      handler: middleware.stubTool,
-    });
-  const handler = createMcpHandler(() => app.createServerInstance());
+  const handler = createMcpHandler(() =>
+    app.createServerInstance([
+      { filter: "tools/list", handler: middleware.listTools },
+      { filter: "tools/call", handler: middleware.resolveFiles },
+      { filter: "tools/call", handler: middleware.stubTool },
+    ]),
+  );
   let chat: Chat<App>;
   try {
     chat = await Chat.open<App>(

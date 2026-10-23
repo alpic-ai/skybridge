@@ -51,6 +51,6 @@ so it also covers the `evals` options on the Vite plugin.
 
 See [`evals/stubs.eval.ts`](evals/stubs.eval.ts). Pass a `stubs` object to `start`, keyed by tool name. Arguments are inferred from the app. Return fixture data to replace the result, or `undefined` to call the real tool for those arguments.
 
-The example replaces goggles with an Eclipse fixture while leaving gloves live. A second test omits `stubs` and checks the real Aurora catalog. Both call `createApp()` to give each conversation its own app; reusing the same app currently carries stub registrations into later conversations.
+The example replaces goggles with an Eclipse fixture while leaving gloves live. A second test omits `stubs` and checks the real Aurora catalog. Both reuse the exported app. Stubs belong to the conversation that declares them, including when conversations run concurrently.
 
 Run only these scenarios with `pnpm exec vitest run evals/stubs.eval.ts` (requires `ANTHROPIC_API_KEY`).

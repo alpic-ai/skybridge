@@ -1,15 +1,15 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { start } from "@skybridge/test";
 import { expect, it } from "vitest";
-import { createApp } from "../src/server.js";
+import { app } from "../src/server.js";
 
 const model = anthropic("claude-sonnet-4-5");
 
-// Use a fresh app per conversation so stubs cannot carry over to another test.
+// Both conversations share the app; stubs apply only to the chat that declares them.
 
 it("answers from a stubbed catalog, and falls through for the rest", async () => {
   const chat = await start({
-    app: createApp(),
+    app,
     model,
     stubs: {
       "search-products": ({ category }) =>
@@ -41,7 +41,7 @@ it("answers from a stubbed catalog, and falls through for the rest", async () =>
 });
 
 it("uses the real catalog in a separate conversation without stubs", async () => {
-  const chat = await start({ app: createApp(), model });
+  const chat = await start({ app, model });
   await chat.send("What ski goggles do you have?");
 
   expect

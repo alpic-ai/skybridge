@@ -408,19 +408,19 @@ it("preserves optional, nullable, and bounded array file schemas for stubs", asy
   expect(received).toHaveLength(1);
 });
 
-it("keeps attachments isolated between separate apps", async () => {
+it("keeps attachments isolated between conversations on the same app", async () => {
   const seen: FileRef[] = [];
-  const createApp = () => fileApp(seen);
+  const app = fileApp(seen);
   let path = "";
   const first = await start({
-    app: createApp(),
+    app,
     model: fileModel("resize", (files) => {
       path = files[0]?.workspace_path ?? "";
       return { file: path, width: 100 };
     }),
   });
   const second = await start({
-    app: createApp(),
+    app,
     model: fileModel("resize", () => ({ file: path, width: 100 })),
   });
   await first.send([portrait()]);
@@ -599,15 +599,15 @@ it("wraps application middleware with file adaptation and short-circuits stubbed
     await client.connect(clientTransport);
     expect(
       (await client.listTools()).tools[0]?.inputSchema.properties?.file,
-    ).toMatchObject({ type: "string" });
+    ).toMatchObject({ type: "object" });
     events.length = 0;
     expect(
       await client.callTool({
         name: "native",
         arguments: { file: chat.toolCalls[0]?.arguments.file },
       }),
-    ).toMatchObject({ content: [{ type: "text", text: "stubbed" }] });
-    expect(events).toEqual(["stub"]);
+    ).toMatchObject({ content: [{ type: "text", text: "unexpected" }] });
+    expect(events).toEqual(["app:before", "handler", "app:after"]);
   } finally {
     await client.close();
     await serverTransport.close();

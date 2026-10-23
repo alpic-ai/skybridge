@@ -250,14 +250,17 @@ export class Skybridge<
    * instance that is never marked, pinning every request to the 2025 codec and
    * letting concurrent callers overwrite each other's negotiated version.
    *
-   * Awaits `setup` and the `oauth` input on first use.
+   * Awaits `setup` and the `oauth` input on first use. Additional middleware
+   * wraps the app pipeline for this instance only; it is not registered on the app.
    *
    * @internal
    */
-  async createServerInstance(): Promise<SdkServer> {
+  async createServerInstance(
+    middleware: McpMiddlewareEntry[] = [],
+  ): Promise<SdkServer> {
     await this.ready();
     const server = this.buildServer();
-    this.instrumentHandlers(server);
+    this.instrumentHandlers(server, middleware);
     return server.server;
   }
 
@@ -440,8 +443,10 @@ export class Skybridge<
 
   private instrumentHandlers(
     server: McpServer<Record<never, ToolDef>, TAuthExtra>,
+    middleware: McpMiddlewareEntry[],
   ): void {
     const entries = [
+      ...middleware,
       ...this.mcpMiddlewareEntries,
       ...server.protocolMiddlewareEntries(),
     ];
