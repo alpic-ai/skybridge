@@ -92,6 +92,17 @@ export type SkybridgeConfig<
      */
     skills?: boolean;
     /**
+     * Replaces the error reporter of the built-in `/mcp` handler. Receives every
+     * error the MCP SDK handler or its Node adapter reports: rejected requests,
+     * including the `UnsupportedProtocolVersionError` the default skips, and
+     * failures to build or serve the per-request server. Reporting only: the
+     * response does not change. It can run before the response is sent, so keep
+     * it fast and synchronous. Default: `console.error` for every error the MCP
+     * SDK handler reports, except `UnsupportedProtocolVersionError`. Node
+     * adapter errors are not logged by default.
+     */
+    onMcpError?: (error: Error) => void;
+    /**
      * Loads whatever the app needs up front (remote config, secrets, datasets,
      * …). Runs **once** — at {@link Skybridge.run} or on the first request,
      * never at module import — and its awaited return value is passed to an
@@ -163,6 +174,7 @@ export class Skybridge<
   >;
   private config?: Awaited<TConfig>;
   private readonly expressApp: Express;
+  private readonly onMcpError?: (error: Error) => void;
   private readonly errorMiddleware: ErrorMiddlewareConfig[] = [];
   private readonly mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private resolveResourceMetadataUrl?: ResourceMetadataUrlResolver;
@@ -178,6 +190,7 @@ export class Skybridge<
     websiteUrl,
     json,
     skills,
+    onMcpError,
     setup,
     oauth,
     handler,
@@ -186,6 +199,7 @@ export class Skybridge<
     this.serverInfo = { name, title, version, description, icons, websiteUrl };
     this.serverOptions = serverOptions;
     this.skills = skills;
+    this.onMcpError = onMcpError;
     this.setup = setup;
     this.oauthInput = oauth;
     this.handler = handler;
@@ -357,18 +371,20 @@ export class Skybridge<
       await createApp({
         app: this,
         httpServer,
+        onMcpError: this.onMcpError,
         errorMiddleware: this.errorMiddleware,
       });
       return this.expressApp;
     }
 
     const httpServer = http.createServer();
-    const mcpHandler = buildMcpHandler(this);
+    const mcpHandler = buildMcpHandler(this, this.onMcpError);
 
     await createApp({
       app: this,
       httpServer,
       mcpHandler,
+      onMcpError: this.onMcpError,
       errorMiddleware: this.errorMiddleware,
     });
 

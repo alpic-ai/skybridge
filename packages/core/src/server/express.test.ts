@@ -626,6 +626,49 @@ describe("createApp Vercel mode", () => {
       vi.resetModules();
     }
   });
+
+  it("passes onMcpError to the /mcp handler when VERCEL=1", async () => {
+    const prevVercel = process.env.VERCEL;
+    const prevEnv = process.env.NODE_ENV;
+    process.env.VERCEL = "1";
+    process.env.NODE_ENV = "production";
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      vi.resetModules();
+      const { Skybridge: Reloaded } = await import("./app.js");
+      const onMcpError = vi.fn();
+      const app = new Reloaded({
+        name: "t",
+        version: "0.0.0",
+        onMcpError,
+        handler: (server) => server,
+      });
+      await app.run();
+      const { port, server: listening } = await listen(app.express);
+      openServer = listening;
+      const res = await fetch(`http://localhost:${port}/mcp`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          accept: "application/json, text/event-stream",
+          "mcp-protocol-version": "client-supplied-text",
+        },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+      });
+      expect(res.status).toBe(400);
+      expect(onMcpError).toHaveBeenCalledTimes(1);
+      expect(consoleSpy).not.toHaveBeenCalled();
+    } finally {
+      consoleSpy.mockRestore();
+      if (prevVercel === undefined) {
+        delete process.env.VERCEL;
+      } else {
+        process.env.VERCEL = prevVercel;
+      }
+      process.env.NODE_ENV = prevEnv;
+      vi.resetModules();
+    }
+  });
 });
 
 describe("createApp tunnel routes", () => {
