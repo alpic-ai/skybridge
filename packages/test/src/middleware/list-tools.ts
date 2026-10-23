@@ -1,14 +1,7 @@
 import type { Tool } from "@modelcontextprotocol/client";
 import type { JSONSchema7 } from "ai";
-import { FileRef, type McpServer } from "skybridge/server";
-import { InputFiles } from "./input-files.js";
-
-const fileRefFields = Object.keys(FileRef.shape);
-const fileRefRequired = fileRefFields.filter(
-  (field) =>
-    !FileRef.shape[field as keyof typeof FileRef.shape].safeParse(undefined)
-      .success,
-);
+import type { McpMiddlewareFn } from "skybridge/server";
+import type { ToolStubs } from "../session-registry.js";
 
 function fileInputSchema(
   schema: JSONSchema7 | boolean | undefined,
@@ -37,19 +30,20 @@ function fileInputSchema(
   if (allowArray && schema.type === "array" && !Array.isArray(schema.items)) {
     return { ...schema, items: fileInputSchema(schema.items, false) };
   }
-  const properties = Object.keys(schema.properties ?? {});
-  const required = schema.required ?? [];
+  const fields = ["download_url", "file_id", "mime_type", "file_name"];
   if (
     schema.type !== "object" ||
     (schema.additionalProperties !== undefined &&
       schema.additionalProperties !== false) ||
-    properties.length !== fileRefFields.length ||
-    !fileRefFields.every((field) => {
+    schema.required?.length !== 2 ||
+    !["download_url", "file_id"].every((field) =>
+      schema.required?.includes(field),
+    ) ||
+    Object.keys(schema.properties ?? {}).length !== fields.length ||
+    !fields.every((field) => {
       const property = schema.properties?.[field];
       return typeof property === "object" && property.type === "string";
-    }) ||
-    required.length !== fileRefRequired.length ||
-    !fileRefRequired.every((field) => required.includes(field))
+    })
   ) {
     throw new Error("expected a FileRef schema");
   }
@@ -59,11 +53,11 @@ function fileInputSchema(
   };
 }
 
-export class EvalMiddleware {
-  readonly files = new InputFiles();
-  readonly inputs = new Map<string, Record<string, unknown>>();
-  readonly fileParams = new Map<string, string[]>();
-  private toolList(tools: Tool[]) {
+export function createListToolsMiddleware(
+  fileParams: Map<string, string[]>,
+  stubs: ToolStubs,
+): McpMiddlewareFn {
+  function toolList(tools: Tool[]) {
     return tools.map((tool) => {
       const fields = tool._meta?.["openai/fileParams"] ?? [];
       if (
@@ -74,7 +68,7 @@ export class EvalMiddleware {
           `Invalid openai/fileParams for "${tool.name}": expected parameter names`,
         );
       }
-      this.fileParams.set(tool.name, fields);
+      fileParams.set(tool.name, fields);
       const properties = { ...tool.inputSchema.properties } as NonNullable<
         JSONSchema7["properties"]
       >;
@@ -93,23 +87,16 @@ export class EvalMiddleware {
     });
   }
 
-  install(server: Pick<McpServer, "mcpMiddleware">) {
-    server.mcpMiddleware("tools/list", async (_request, _extra, next) => {
-      const result = await next();
-      return { ...result, tools: this.toolList(result.tools) };
-    });
-    server.mcpMiddleware("tools/call", async (request, _extra, next) => {
-      const params = request.params;
-      const args = this.files.rewrite(
-        params.arguments ?? {},
-        this.fileParams.get(params.name) ?? [],
+  return async (_request, _extra, next) => {
+    const result = (await next()) as { tools: Tool[] };
+    const unknown = Object.keys(stubs).filter(
+      (name) => !result.tools.some((tool) => tool.name === name),
+    );
+    if (unknown.length) {
+      throw new Error(
+        `the app exposes no tool named ${unknown.map((name) => `"${name}"`).join(", ")}, so the stub would never run`,
       );
-      params.arguments = args as NonNullable<typeof params.arguments>;
-      const callId = params._meta?.["skybridge/evalToolCallId"];
-      if (typeof callId === "string") {
-        this.inputs.set(callId, args);
-      }
-      return next();
-    });
-  }
+    }
+    return { ...result, tools: toolList(result.tools) };
+  };
 }

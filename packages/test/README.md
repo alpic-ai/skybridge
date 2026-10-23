@@ -6,7 +6,7 @@ check.
 
 Add the `evals` option to the Skybridge Vite plugin so `expect.chat` exists,
 then write scenarios with vitest's own `it` and `expect`. Pass the app itself
-to `start`: it is served in-process through an app derived with `app.withHandler`, and
+to `start`: it is served in-process, using your exported app, and
 the tool names and argument shapes come from the app value, so no type
 parameter is needed.
 
@@ -82,6 +82,19 @@ from, so a project can set them once instead of per scenario.
 skybridge({ evals: { temperature: 0, maxSteps: 6 } });
 ```
 
+## Matchers
+
+Assertions on what the assistant said work the same way, though model prose
+varies between runs, so keep them loose.
+
+```ts
+expect.chat(chat).toHaveSaid("in stock");
+expect.chat(chat).not.toHaveSaid("refund");
+```
+
+See the [documentation](https://docs.skybridge.tech) for setup and the full
+matcher list.
+
 ## Input files
 
 `chat.send` also accepts AI SDK `UserContent`. Attach a `FilePart` and use the same object in `expect.inputFile` to check which file a tool received:
@@ -109,18 +122,5 @@ expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
 
 `file` and `files` must be listed in their tools' `_meta["openai/fileParams"]`.
 Misplaced file matchers throw immediately, including nested matchers and `.not`.
-`start` validates that each declared parameter uses `FileRef`, including optional, nullable, and array forms. It derives an app with `withHandler` and installs outer native `mcpMiddleware` before the original handler registers the app. Application list middleware sees original schemas; call middleware sees resolved files before `next()`. Stubs wrap tool implementations, retaining normal input validation and authorization. Concurrent chats initialize separate app state without mutating the original.
+Declare file parameters with `FileRef` and list their names in `_meta["openai/fileParams"]`. Optional, nullable, and array forms are supported. Your handler or stub receives the attached file; downloads remain available until the conversation closes.
 See [Evals](https://docs.skybridge.tech/test/evals) for how files reach the model and the tool.
-
-## Matchers
-
-Assertions on what the assistant said work the same way, though model prose
-varies between runs, so keep them loose.
-
-```ts
-expect.chat(chat).toHaveSaid("in stock");
-expect.chat(chat).not.toHaveSaid("refund");
-```
-
-See the [documentation](https://docs.skybridge.tech) for setup and the full
-matcher list.

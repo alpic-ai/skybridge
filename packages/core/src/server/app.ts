@@ -10,7 +10,7 @@ import type { OAuthConfig, OAuthProvider } from "./auth/index.js";
 import { type ResourceMetadataUrlResolver, setupOAuth } from "./auth/setup.js";
 import type { ExtraClaims } from "./auth.js";
 import { buildMcpHandler, createApp, createBaseApp } from "./express.js";
-import { createMiddlewareEntry } from "./metric.js";
+import { registerMonitoring } from "./metric.js";
 import type { McpMiddlewareEntry } from "./middleware.js";
 import { buildMiddlewareChain, getHandlerMaps } from "./middleware.js";
 import {
@@ -161,7 +161,6 @@ export class Skybridge<
   private readonly serverInfo: Implementation;
   private readonly serverOptions: ServerOptions;
   private readonly skills?: boolean;
-  private readonly options: SkybridgeConfig<TTools, TConfig, TAuthExtra>;
   private oauthEnabled = false;
   private readonly handler: SkybridgeHandler<
     TTools,
@@ -177,29 +176,26 @@ export class Skybridge<
   private readonly expressApp: Express;
   private readonly onMcpError?: (error: Error) => void;
   private readonly errorMiddleware: ErrorMiddlewareConfig[] = [];
-  private readonly monitoringEntry: McpMiddlewareEntry | null =
-    createMiddlewareEntry();
+  private readonly mcpMiddlewareEntries: McpMiddlewareEntry[] = [];
   private resolveResourceMetadataUrl?: ResourceMetadataUrlResolver;
   private readyPromise?: Promise<void>;
   private slowHandlerWarned = false;
 
-  constructor(options: SkybridgeConfig<TTools, TConfig, TAuthExtra>) {
-    const {
-      name,
-      title,
-      version,
-      description,
-      icons,
-      websiteUrl,
-      json,
-      skills,
-      onMcpError,
-      setup,
-      oauth,
-      handler,
-      ...serverOptions
-    } = options;
-    this.options = options;
+  constructor({
+    name,
+    title,
+    version,
+    description,
+    icons,
+    websiteUrl,
+    json,
+    skills,
+    onMcpError,
+    setup,
+    oauth,
+    handler,
+    ...serverOptions
+  }: SkybridgeConfig<TTools, TConfig, TAuthExtra>) {
     this.serverInfo = { name, title, version, description, icons, websiteUrl };
     this.serverOptions = serverOptions;
     this.skills = skills;
@@ -208,6 +204,7 @@ export class Skybridge<
     this.oauthInput = oauth;
     this.handler = handler;
     this.expressApp = createBaseApp(json);
+    registerMonitoring(this);
   }
 
   /**
@@ -267,13 +264,24 @@ export class Skybridge<
    * instance that is never marked, pinning every request to the 2025 codec and
    * letting concurrent callers overwrite each other's negotiated version.
    *
-   * Awaits `setup` and the `oauth` input on first use.
+   * Awaits `setup` and the `oauth` input on first use. Additional middleware
+   * wraps the app pipeline for this instance only; it is not registered on the app.
+   *
+   * @internal
    */
-  async createServerInstance(): Promise<SdkServer> {
+  async createServerInstance(
+    middleware: McpMiddlewareEntry[] = [],
+  ): Promise<SdkServer> {
     await this.ready();
     const server = this.buildServer();
-    this.instrumentHandlers(server);
+    this.instrumentHandlers(server, middleware);
     return server.server;
+  }
+
+  /** Register outer MCP middleware on this app, in registration order. @internal */
+  withMcpMiddleware(entry: McpMiddlewareEntry): this {
+    this.mcpMiddlewareEntries.push(entry);
+    return this;
   }
 
   /**
@@ -285,44 +293,6 @@ export class Skybridge<
   async connect(transport: Parameters<SdkServer["connect"]>[0]): Promise<void> {
     const instance = await this.createServerInstance();
     await instance.connect(transport);
-  }
-
-  /**
-   * Derive a new app whose registration handler is wrapped by `wrapper`. The
-   * wrapper receives the fresh MCP server, the awaited `setup` result and the
-   * original handler, and returns the registered server so tool types stay
-   * inferred. Middleware registered before calling `originalHandler` runs
-   * outside the app's own middleware.
-   *
-   * The original app is left untouched. The derived app runs its own `setup`,
-   * and does not carry over routes or error handlers added through
-   * {@link Skybridge.express}, {@link Skybridge.use} or
-   * {@link Skybridge.useOnError}.
-   *
-   * @example
-   * ```ts
-   * const logged = app.withHandler((server, options, originalHandler) => {
-   *   server.mcpMiddleware("tools/call", (request, _extra, next) => {
-   *     console.log(request.params.name);
-   *     return next();
-   *   });
-   *   return originalHandler(server, options);
-   * });
-   * ```
-   */
-  withHandler<
-    TNextServer extends McpServer<Record<never, ToolDef>, TAuthExtra>,
-  >(
-    wrapper: (
-      server: McpServer<Record<never, ToolDef>, TAuthExtra>,
-      options: Awaited<TConfig>,
-      originalHandler: SkybridgeHandler<TTools, Awaited<TConfig>, TAuthExtra>,
-    ) => TNextServer,
-  ) {
-    return new Skybridge<TNextServer["$types"]["tools"], TConfig, TAuthExtra>({
-      ...this.options,
-      handler: (server, options) => wrapper(server, options, this.handler),
-    });
   }
 
   /**
@@ -487,19 +457,15 @@ export class Skybridge<
     return built;
   }
 
-  private middlewareEntries(
-    server: McpServer<Record<never, ToolDef>, TAuthExtra>,
-  ): McpMiddlewareEntry[] {
-    return [
-      ...(this.monitoringEntry ? [this.monitoringEntry] : []),
-      ...server.protocolMiddlewareEntries(),
-    ];
-  }
-
   private instrumentHandlers(
     server: McpServer<Record<never, ToolDef>, TAuthExtra>,
+    middleware: McpMiddlewareEntry[],
   ): void {
-    const entries = this.middlewareEntries(server);
+    const entries = [
+      ...middleware,
+      ...this.mcpMiddlewareEntries,
+      ...server.protocolMiddlewareEntries(),
+    ];
     const { requestHandlers, notificationHandlers } = getHandlerMaps(
       server.server,
     );

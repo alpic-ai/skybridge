@@ -34,7 +34,8 @@ you change a tool's name, description or input schema.
 | `search.eval.ts`, natural prompt | `toHaveCalledToolOnce`, `toNeverHaveCalledTool` |
 | `search.eval.ts`, price constraint | `toHaveCalledToolWith` |
 | `search.eval.ts`, stock question | `toHaveSaid`, reading `chat.assistantTurns` |
-| `search.eval.ts`, stubbed catalog | `stubs`, falling through to the real tool |
+| `stubs.eval.ts`, stubbed catalog | `stubs`, returning `undefined` to call the real tool |
+| `stubs.eval.ts`, real catalog | a separate conversation without stubs |
 | `browse.eval.ts`, search then open | `toHaveCalledToolsInOrder` |
 | `browse.eval.ts`, two turns | multi-turn `send`, ordering across turns |
 | `browse.eval.ts`, greeting | `toHaveCalledNoTools`, `systemPrompt` and `maxSteps` overrides |
@@ -45,3 +46,11 @@ you change a tool's name, description or input schema.
 
 The plugin config in `vite.config.ts` sets shared defaults for every scenario,
 so it also covers the `evals` options on the Vite plugin.
+
+## Stub a tool result
+
+See [`evals/stubs.eval.ts`](evals/stubs.eval.ts). Pass a `stubs` object to `start`, keyed by tool name. Arguments are inferred from the app. Return fixture data to replace the result, or `undefined` to call the real tool for those arguments.
+
+The example replaces goggles with an Eclipse fixture while leaving gloves live. A second test omits `stubs` and checks the real Aurora catalog. Both reuse the exported app. Stubs belong to the conversation that declares them, including when conversations run concurrently.
+
+Run only these scenarios with `pnpm exec vitest run evals/stubs.eval.ts` (requires `ANTHROPIC_API_KEY`).

@@ -64,48 +64,9 @@ it("reaches the search tool from a natural prompt", async () => {
 });
 ```
 
-`start` serves the app in process: no MCP port, no fixture. Each `send` is one turn, during which the model can call several tools before it answers. The session closes when the test finishes.
+`start` serves the app in process: no port, no fixture. Each `send` is one turn, during which the model can call several tools before it answers. The session closes when the test finishes.
 
 This is why the app lives in `src/server.ts` and `run()` in `src/index.ts`: importing the app starts nothing.
-
-## Attach Input Files
-
-`chat.send` accepts AI SDK `UserContent`: either a string or an array of text and file parts. Use the AI SDK's `FilePart` directly, and keep that same object for assertions:
-
-```ts evals/resize.eval.ts
-import { readFile } from "node:fs/promises";
-import type { FilePart } from "ai";
-
-const portrait: FilePart = {
-  type: "file",
-  mediaType: "image/png",
-  filename: "photo.png",
-  data: await readFile(new URL("./fixtures/photo.png", import.meta.url)),
-};
-
-await chat.send([
-  { type: "text", text: "Resize this photo to a vertical 1080x1920 portrait." },
-  portrait,
-]);
-
-expect.chat(chat).toHaveCalledToolWith("image_crop_and_resize", {
-  file: expect.inputFile(portrait),
-});
-
-expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
-  files: [expect.inputFile(portrait)],
-});
-```
-
-This simulates the ChatGPT host as observed in-app. The model sees each attachment's name, a synthetic `workspace_path` and the file content. Fields listed in a tool's `_meta["openai/fileParams"]` are shown to the model as a path (or a list of paths for list fields). Before the handler or stub runs, the runner replaces each path with an OpenAI file object whose `download_url` serves the attached bytes until the conversation closes. `chat.toolCalls` records those server-facing arguments.
-
-`start` derives an app through [`withHandler`](/api-reference/skybridge#withhandler), then registers native `mcpMiddleware` before invoking the original handler. Application `tools/list` middleware sees original file schemas before adaptation; application `tools/call` middleware sees resolved `FileRef` arguments before `next()`. The original app is not mutated, and concurrent conversations initialize separate app state.
-
-`expect.inputFile(part)` matches the file object minted for that exact `FilePart`. Two parts with identical bytes do not match each other.
-
-Using it under a parameter not listed in `openai/fileParams` throws a declaration error before calls are compared, including nested matchers, `.not` assertions, and conversations with no calls.
-
-File data can be bytes, base64, a URL, or AI SDK tagged data, URL or text content. Provider file references are rejected because the app under test cannot download them.
 
 ## Assert on Tool Calls
 
@@ -217,15 +178,13 @@ const chat = await start({
 
 The arguments are typed against your registry, and a stubbed call still lands in `chat.toolCalls`, so every matcher works on it. Return a string or any JSON value: the runner wraps it the way a real tool result reaches the model. Naming a tool your app does not expose fails the scenario rather than passing silently. Return `undefined` to fall through to the real server, which is how you pin one set of arguments and leave the rest live:
 
-Stubs wrap registered tool implementations, so normal input validation, application middleware, and per-tool sign-in and scope checks still run. A supplied stub result skips the original implementation.
-
 ```ts
 stubs: {
   "search-flights": ({ to }) => (to === "LIS" ? lisbonFixture : undefined),
 }
 ```
 
-A stub replaces the call, it does not wrap it: the tool never reaches your handler, so neither its schema validation nor its scope checks run for that call. Stub the tools whose results move under you, and leave the ones the scenario is actually about.
+A stub replaces the call: the tool never reaches your handler, so neither its schema validation nor its scope checks run. Stub the tools whose results move under you, and leave the ones the scenario is actually about.
 
 ## Test Authenticated Tools
 
@@ -242,7 +201,7 @@ const chat = await start({
 Only token verification is skipped. Per-tool schemes and scope checks run for real against those claims, and `extra` reaches your handlers as `extra.http.authInfo.extra`. Omit `authInfo` to exercise the anonymous path, auth challenges included.
 
 <Info>
-`setup` and `oauth` resolve once for each derived eval app, so an app wired to an identity provider needs its `.env` to run evals, the same as `dev`. Evals exercise MCP behavior and native middleware; they bypass HTTP token verification and Express routes.
+`setup` and `oauth` still resolve on the first request, so an app wired to an identity provider needs its `.env` to run evals, the same as `dev`.
 </Info>
 
 ## Tune the Run
@@ -274,3 +233,40 @@ Evals are live model calls: they cost money and the wording varies from run to r
         Write descriptions the model can act on
     </Card>
 </Columns>
+
+## Attach Input Files
+
+`chat.send` accepts AI SDK `UserContent`: either a string or an array of text and file parts. Use the AI SDK's `FilePart` directly, and keep that same object for assertions:
+
+```ts evals/resize.eval.ts
+import { readFile } from "node:fs/promises";
+import type { FilePart } from "ai";
+
+const portrait: FilePart = {
+  type: "file",
+  mediaType: "image/png",
+  filename: "photo.png",
+  data: await readFile(new URL("./fixtures/photo.png", import.meta.url)),
+};
+
+await chat.send([
+  { type: "text", text: "Resize this photo to a vertical 1080x1920 portrait." },
+  portrait,
+]);
+
+expect.chat(chat).toHaveCalledToolWith("image_crop_and_resize", {
+  file: expect.inputFile(portrait),
+});
+
+expect.chat(chat).toHaveCalledToolOnce("asset_openai_file_upload", {
+  files: [expect.inputFile(portrait)],
+});
+```
+
+Declare file parameters with `FileRef` and list their names in `_meta["openai/fileParams"]`. Your handler or stub receives the attached file, and its download URL remains available until the conversation closes.
+
+`expect.inputFile(part)` matches the file object minted for that exact `FilePart`. Two parts with identical bytes do not match each other.
+
+Using it under a parameter not listed in `openai/fileParams` throws a declaration error before calls are compared, including nested matchers, `.not` assertions, and conversations with no calls.
+
+File data can be bytes, base64, a URL, or AI SDK tagged data, URL or text content. Provider file references are rejected because the app under test cannot download them.

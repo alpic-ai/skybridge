@@ -2,7 +2,7 @@ import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import type { FilePart } from "ai";
 import { MockLanguageModelV3 } from "ai/test";
 import { FileRef, Skybridge } from "skybridge/server";
-import { expect, it, onTestFinished, vi } from "vitest";
+import { expect, it } from "vitest";
 import { z } from "zod";
 import "./matchers/index.js";
 import { start } from "./session-registry.js";
@@ -159,60 +159,6 @@ it("shows paths to the model, rewrites them, and downloads the exact bytes", asy
   await chat.send("Resize the same file again");
   expect(seen[1]).toEqual(seen[0]);
   expect.chat(chat).toHaveCalledToolWith("resize", { file: matcher });
-});
-
-it("shares one downloaded copy with the model and tool for single-use URLs", async () => {
-  const bytes = portrait().data as Buffer;
-  const source = new URL("https://attachments.test/photo.png");
-  const part: FilePart = { ...portrait(), data: source };
-  const fetch = globalThis.fetch;
-  let downloads = 0;
-  const fetchMock = vi
-    .spyOn(globalThis, "fetch")
-    .mockImplementation((input, init) => {
-      const url = input instanceof Request ? input.url : String(input);
-      if (url !== source.href) {
-        return fetch(input, init);
-      }
-      downloads += 1;
-      return Promise.resolve(
-        downloads === 1
-          ? new Response(bytes, { headers: { "Content-Type": part.mediaType } })
-          : new Response(null, { status: 410 }),
-      );
-    });
-  onTestFinished(() => fetchMock.mockRestore());
-  const seen: FileRef[] = [];
-  const model = fileModel("resize", (files) => ({
-    file: files[0]?.workspace_path,
-    width: 1080,
-  }));
-  const chat = await start({ app: fileApp(seen), model });
-
-  await chat.send([part]);
-
-  expect(downloads).toBe(1);
-  expect(
-    model.doGenerateCalls[0]?.prompt.find((message) => message.role === "user")
-      ?.content,
-  ).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        type: "file",
-        mediaType: part.mediaType,
-        filename: part.filename,
-        data: { type: "data", data: bytes },
-      }),
-    ]),
-  );
-  expect(
-    JSON.stringify(chat.turns.find((turn) => turn.role === "tool")?.result),
-  ).toContain(bytes.toString("base64"));
-  expect.chat(chat).toHaveCalledToolOnce("resize", {
-    file: expect.inputFile(part),
-  });
-  expect(seen).toHaveLength(1);
-  expect(part.data).toBe(source);
 });
 
 it("distinguishes identical uploads by object identity and reports the other id", async () => {
@@ -387,29 +333,30 @@ it("rejects a declaration for a missing parameter at start", async () => {
 it("preserves optional, nullable, and bounded array file schemas for stubs", async () => {
   const part = portrait();
   const received: unknown[] = [];
-  const app = new Skybridge({
-    name: "wrapped-file-eval",
-    version: "0",
-    handler: (server) =>
-      server.registerTool(
-        {
-          name: "wrapped",
-          inputSchema: {
-            optional: FileRef.optional(),
-            nullable: FileRef.nullable(),
-            files: z.array(FileRef).min(1).max(2).nullable().optional(),
+  const createApp = () =>
+    new Skybridge({
+      name: "wrapped-file-eval",
+      version: "0",
+      handler: (server) =>
+        server.registerTool(
+          {
+            name: "wrapped",
+            inputSchema: {
+              optional: FileRef.optional(),
+              nullable: FileRef.nullable(),
+              files: z.array(FileRef).min(1).max(2).nullable().optional(),
+            },
+            _meta: { "openai/fileParams": ["optional", "nullable", "files"] },
           },
-          _meta: { "openai/fileParams": ["optional", "nullable", "files"] },
-        },
-        async () => ({ content: "unexpected" }),
-      ),
-  });
+          async () => ({ content: "unexpected" }),
+        ),
+    });
   const model = fileModel("wrapped", (files) => ({
     nullable: null,
     files: [files[0]?.workspace_path],
   }));
   const chat = await start({
-    app,
+    app: createApp(),
     model,
     stubs: {
       wrapped: (args) => {
@@ -447,7 +394,7 @@ it("preserves optional, nullable, and bounded array file schemas for stubs", asy
     },
   });
   const invalid = await start({
-    app,
+    app: createApp(),
     model: fileModel("wrapped", () => ({ nullable: null, files: [] })),
     stubs: {
       wrapped: (args) => {
@@ -461,7 +408,7 @@ it("preserves optional, nullable, and bounded array file schemas for stubs", asy
   expect(received).toHaveLength(1);
 });
 
-it("keeps file schemas on the app and attachments isolated across sessions", async () => {
+it("keeps attachments isolated between conversations on the same app", async () => {
   const seen: FileRef[] = [];
   const app = fileApp(seen);
   let path = "";
@@ -505,6 +452,38 @@ it("records current inputs when a model reuses a call ID across sends", async ()
   ]);
   expect(chat.toolCalls[1]?.failed).toContain("Unknown input file path");
   expect(chat.toolCalls[2]?.failed).toBeUndefined();
+});
+
+it("closes one conversation's downloads while another conversation keeps its attachments", async () => {
+  const firstSeen: FileRef[] = [];
+  const secondSeen: FileRef[] = [];
+  const [first, second] = await Promise.all([
+    start({
+      app: fileApp(firstSeen),
+      model: fileModel("resize", (files) => ({
+        file: files[0]?.workspace_path,
+        width: 100,
+      })),
+    }),
+    start({
+      app: fileApp(secondSeen),
+      model: fileModel("resize", (files) => ({
+        file: files[0]?.workspace_path,
+        width: 100,
+      })),
+    }),
+  ]);
+  await Promise.all([first.send([portrait()]), second.send([portrait()])]);
+  const firstFile = firstSeen[0];
+  const secondFile = secondSeen[0];
+  expect(firstFile).toBeDefined();
+  expect(secondFile).toBeDefined();
+  await first.close();
+  await expect(fetch(firstFile?.download_url ?? "")).rejects.toThrow();
+  expect((await fetch(secondFile?.download_url ?? "")).ok).toBe(true);
+  await second.send("Resize it again");
+  expect(secondSeen).toHaveLength(2);
+  expect(secondSeen[1]).toEqual(secondFile);
 });
 
 it.each(["single", "list", "object"])(
@@ -551,11 +530,11 @@ it.each(["single", "list", "object"])(
   },
 );
 
-it("wraps app middleware with file adaptation without changing the original app", async () => {
+it("wraps application middleware with file adaptation and short-circuits stubbed calls", async () => {
   const events: string[] = [];
   const schemas: unknown[] = [];
   const part = portrait();
-  const app = new Skybridge({
+  const host = new Skybridge({
     name: "native-file-eval",
     version: "1",
     handler: (server) =>
@@ -590,7 +569,7 @@ it("wraps app middleware with file adaptation without changing the original app"
         }),
   });
   const chat = await start({
-    app,
+    app: host,
     model: fileModel("native", (files) => ({ file: files[0]?.workspace_path })),
     stubs: {
       native: ({ file }) => {
@@ -607,16 +586,16 @@ it("wraps app middleware with file adaptation without changing the original app"
       required: expect.arrayContaining(["download_url", "file_id"]),
     }),
   ]);
-  expect(events).toEqual(["app:before", "stub", "app:after"]);
+  expect(events).toEqual(["stub"]);
   expect
     .chat(chat)
     .toHaveCalledToolOnce("native", { file: expect.inputFile(part) });
-  const instance = await app.createServerInstance();
-  const client = new Client({ name: "production", version: "1" });
+
+  const client = new Client({ name: "same-app", version: "1" });
   const [clientTransport, serverTransport] =
     InMemoryTransport.createLinkedPair();
   try {
-    await instance.connect(serverTransport);
+    await host.connect(serverTransport);
     await client.connect(clientTransport);
     expect(
       (await client.listTools()).tools[0]?.inputSchema.properties?.file,
@@ -631,6 +610,6 @@ it("wraps app middleware with file adaptation without changing the original app"
     expect(events).toEqual(["app:before", "handler", "app:after"]);
   } finally {
     await client.close();
-    await instance.close();
+    await serverTransport.close();
   }
 });

@@ -37,6 +37,8 @@ async function fileBytes(data: FilePart["data"]): Promise<Buffer> {
 }
 
 export class InputFiles {
+  private closed = false;
+  private listening?: Promise<void>;
   private readonly files = new Map<
     string,
     { reference: FileRef; bytes: Buffer }
@@ -53,6 +55,9 @@ export class InputFiles {
   });
 
   async prepare(content: UserContent): Promise<UserContent> {
+    if (this.closed) {
+      throw new Error("The conversation is closed");
+    }
     if (typeof content === "string") {
       return content;
     }
@@ -63,16 +68,14 @@ export class InputFiles {
         continue;
       }
       const bytes = await fileBytes(part.data);
-      if (!this.server.listening) {
-        this.server.listen(0, "127.0.0.1").unref();
-        await once(this.server, "listening");
+      if (this.closed) {
+        throw new Error("The conversation is closed");
       }
-      const { port } = this.server.address() as AddressInfo;
       const id = randomUUID();
       const file_id = `file_${id}`;
       const reference = {
         file_id,
-        download_url: `http://127.0.0.1:${port}/${file_id}`,
+        download_url: "",
         mime_type: part.mediaType,
         ...(part.filename === undefined ? {} : { file_name: part.filename }),
       };
@@ -86,13 +89,13 @@ export class InputFiles {
           type: "text",
           text: `Attached file: ${JSON.stringify({ uploaded_name, workspace_path })}`,
         },
-        { ...part, data: bytes },
+        part,
       );
     }
     return prepared;
   }
 
-  rewrite(input: Record<string, unknown>, fields: string[]) {
+  async rewrite(input: Record<string, unknown>, fields: string[]) {
     const rewritten = { ...input };
     const resolve = (value: unknown): unknown => {
       if (typeof value !== "string") {
@@ -112,10 +115,24 @@ export class InputFiles {
           : resolve(value);
       }
     }
+    if (fields.some((field) => input[field] != null) && this.files.size) {
+      this.listening ??= (async () => {
+        this.server.listen(0, "127.0.0.1").unref();
+        await once(this.server, "listening");
+      })();
+      await this.listening;
+      const { port } = this.server.address() as AddressInfo;
+      for (const { reference } of this.files.values()) {
+        reference.download_url = `http://127.0.0.1:${port}/${reference.file_id}`;
+      }
+    }
     return rewritten;
   }
 
   async close() {
+    this.closed = true;
+    this.files.clear();
+    this.paths.clear();
     if (this.server.listening) {
       this.server.close();
       await once(this.server, "close");

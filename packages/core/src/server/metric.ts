@@ -38,20 +38,22 @@ function sendMetric(metric: string): void {
 }
 
 /**
- * Returns an internal MCP middleware entry that emits a DogStatsD counter over UDP
+ * Registers internal MCP middleware that emits a DogStatsD counter over UDP
  * for every tool call. Enabled by default; respects the existing telemetry
  * opt-out (SKYBRIDGE_TELEMETRY_DISABLED, DO_NOT_TRACK, or `skybridge telemetry disable`).
  *
- * Returns `null` when the version string contains "-dev" (e.g. development
+ * Skips registration when the version string contains "-dev" (e.g. development
  * builds) or when the version cannot be parsed into major.minor, so that
  * malformed data does not pollute production metrics.
  *
  * Metric (DogStatsD counter format with tags):
  *   Requests:1|c|#version:<major>.<minor>  — every tools/call
  */
-export function createMiddlewareEntry(): McpMiddlewareEntry | null {
+export function registerMonitoring(app: {
+  withMcpMiddleware(entry: McpMiddlewareEntry): unknown;
+}): void {
   if (isDev || !versionTag) {
-    return null;
+    return;
   }
 
   const handler: McpMiddlewareFn = async (_req, _extra, next) => {
@@ -67,5 +69,5 @@ export function createMiddlewareEntry(): McpMiddlewareEntry | null {
     }
   };
 
-  return { filter: "tools/call", handler };
+  app.withMcpMiddleware({ filter: "tools/call", handler });
 }

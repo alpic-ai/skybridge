@@ -33,8 +33,6 @@ it("searches flights from a natural prompt", async () => {
 
 `start` serves the app in process: no port, no HTTP server. This only works because `src/server.ts` exports the app and `src/index.ts` runs it; never put `run()` in `server.ts`. Each `send` is one user turn, during which the model may call several tools. The session closes with the test.
 
-`app.withHandler((server, options, originalHandler) => ...)` returns a new app with the same constructor settings. `options` is the awaited setup result; forward it to the original handler and return the registered server. Tool inference survives wrapping and additional registrations. The original app is not mutated; setup and OAuth initialize once per derived app. `start` installs outer native middleware before calling the original handler: application list middleware sees original file schemas, and call middleware sees resolved `FileRef` arguments before `next()`. Evals exercise MCP behavior and middleware, bypassing HTTP token verification and Express routes.
-
 ## Matchers
 
 All typed against the app's registry (`name` autocompletes, `args` is checked against the tool's `inputSchema`); all support `.not`.
@@ -68,7 +66,7 @@ const chat = await start({
 });
 ```
 
-Arguments are typed against the registry. Stubs wrap registered tool implementations, retaining normal input validation, application middleware, and per-tool authorization. Returning `undefined` falls through to the original implementation; a supplied result skips it. Stubbed calls still appear in `chat.toolCalls`.
+Arguments are typed against the registry. Returning `undefined` falls through to the real server. A stubbed call still appears in `chat.toolCalls`, but bypasses the application pipeline, including input validation and scope checks.
 
 ## Authenticated apps
 
@@ -93,3 +91,7 @@ Omit `authInfo` to test the anonymous path: a gated tool then shows up as `toHav
 - Assert on tool calls and arguments, not on exact wording; use `toHaveSaid` with a loose pattern when the answer matters.
 - A failing eval usually means the tool `description` or schema `.describe()` text is unclear to the model, not that the handler is wrong. Fix the prompt surface first.
 - Do not run evals in a loop while iterating on UI; run them once a tool's contract changes.
+
+## Input files
+
+`chat.send` accepts AI SDK `UserContent`, including `FilePart` attachments. Declare file arguments with `FileRef` and `_meta: { "openai/fileParams": ["file"] }`; assert with `expect.inputFile(part)`. Downloads live until `chat.close()` or test teardown.
