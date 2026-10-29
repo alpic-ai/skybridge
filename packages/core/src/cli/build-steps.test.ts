@@ -62,6 +62,53 @@ export default defineConfig({ plugins: [skybridge()] });`,
     expect(labels).toContain("Building views");
   });
 
+  it("copies public/ to dist/assets/ when no views but public dir exists", async () => {
+    const root = mkTmp();
+    mkdirSync(path.join(root, "src"), { recursive: true });
+    mkdirSync(path.join(root, "public", ".well-known"), { recursive: true });
+    writeFileSync(
+      path.join(root, "public", ".well-known", "openai-apps-challenge"),
+      "challenge-token",
+    );
+    writeFileSync(path.join(root, "public", "logo.png"), "fake-png");
+    writeFileSync(
+      path.join(root, "vite.config.ts"),
+      `import { defineConfig } from "vite";
+import { skybridge } from "@skybridge/vite-plugin";
+export default defineConfig({ plugins: [skybridge()] });`,
+    );
+    writeFileSync(
+      path.join(root, "tsconfig.json"),
+      JSON.stringify({ compilerOptions: { strict: true } }),
+    );
+
+    const steps = await getCommandSteps(root);
+    const labels = steps.map((step) => step.label);
+
+    expect(labels).not.toContain("Building views");
+    expect(labels).toContain("Copying public assets");
+
+    mkdirSync(path.join(root, "dist"), { recursive: true });
+    const copyStep = steps.find((s) => s.label === "Copying public assets");
+    await copyStep?.run?.();
+
+    expect(
+      readFileSync(
+        path.join(
+          root,
+          "dist",
+          "assets",
+          ".well-known",
+          "openai-apps-challenge",
+        ),
+        "utf-8",
+      ),
+    ).toBe("challenge-token");
+    expect(
+      readFileSync(path.join(root, "dist", "assets", "logo.png"), "utf-8"),
+    ).toBe("fake-png");
+  });
+
   it("emits an empty manifest module when there are no views", async () => {
     const root = mkTmp();
     mkdirSync(path.join(root, "src"), { recursive: true });

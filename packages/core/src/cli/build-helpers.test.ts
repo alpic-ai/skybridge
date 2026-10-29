@@ -161,6 +161,34 @@ describe("emitVercelBuildOutput", () => {
     ).toContain("bundled view");
   });
 
+  it("copies public/ to Vercel static root for root-level serving", async () => {
+    const root = mkTmp();
+    mkdirSync(path.join(root, "dist", "assets"), { recursive: true });
+    mkdirSync(path.join(root, "public", ".well-known"), { recursive: true });
+    writeFileSync(
+      path.join(root, "dist", "__entry.js"),
+      "const userMod = await import('./server.js');\nexport default userMod.default;\n",
+    );
+    writeFileSync(
+      path.join(root, "dist", "server.js"),
+      "export default function handler(_req, res) { res.end('ok'); }\n",
+    );
+    writeFileSync(
+      path.join(root, "public", ".well-known", "openai-apps-challenge"),
+      "challenge-token",
+    );
+
+    await emitVercelBuildOutput(root);
+
+    const outputDir = path.join(root, ".vercel", "output");
+    expect(
+      readFileSync(
+        path.join(outputDir, "static", ".well-known", "openai-apps-challenge"),
+        "utf-8",
+      ),
+    ).toBe("challenge-token");
+  });
+
   it("leaves serverExternal packages unbundled", async () => {
     const root = mkTmp();
     mkdirSync(path.join(root, "dist"), { recursive: true });
