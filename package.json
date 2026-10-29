@@ -10,8 +10,7 @@
     "format": "pnpm -r --if-present format",
     "test:unit": "pnpm -r --if-present test:unit",
     "test:format": "pnpm -r --if-present test:format",
-    "docs:dev": "pnpm --filter @skybridge/docs dev",
-    "bump": "node scripts/bump.js && pnpm i"
+    "docs:dev": "pnpm --filter @skybridge/docs dev"
   },
   "keywords": [
     "chatgpt",
