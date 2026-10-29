@@ -11,7 +11,7 @@ An example MCP app built with [Skybridge](https://docs.skybridge.tech/home): ret
 - **Model/View Data Separation**: The compact cited answer goes to the model via `structuredContent`, while the full passage texts ship view-only in `_meta` so the model's context isn't flooded with raw docs ([registerTool return](https://docs.skybridge.tech/api-reference/register-tool#return))
 - **Dynamic LLM Context with `data-llm`**: The view narrates which source the user is reading via the [data-llm](https://docs.skybridge.tech/api-reference/data-llm) attribute, so follow-ups like "tell me more about this one" resolve correctly
 - **Tool Info Access**: The view reads the mounting tool call's output and metadata via [useToolInfo()](https://docs.skybridge.tech/api-reference/use-tool-info)
-- **Theme Support**: Adapts to the host's light/dark theme via [useLayout()](https://docs.skybridge.tech/api-reference/use-layout)
+- **Theme Support**: Adapts to the host's light/dark theme via [useUser()](https://docs.skybridge.tech/api-reference/use-user)
 - **Hot Module Replacement**: [Live reloading](https://docs.skybridge.tech/concepts/fast-iteration#hmr-with-vite-plugin) of widget components during development
 - **Local DevTools**: [DevTools](https://docs.skybridge.tech/test/devtools) at `http://localhost:3000` for local testing
 
@@ -91,7 +91,8 @@ The first question triggers the docs ingestion and embedding, so it takes a few 
 
 ```
 ├── src/
-│   ├── server.ts          # MCP server: the ask-docs tool
+│   ├── index.ts           # Entry point: runs the app
+│   ├── server.ts          # Skybridge app: the ask-docs tool
 │   ├── env.ts             # Loads .env
 │   ├── helpers.ts         # Typed hooks inferred from the server
 │   ├── index.css          # Global styles

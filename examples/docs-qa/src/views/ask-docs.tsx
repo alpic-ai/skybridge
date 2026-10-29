@@ -10,7 +10,7 @@ import {
   Search,
 } from "lucide-react";
 import { type FormEvent, type ReactNode, useState } from "react";
-import { useLayout, useOpenExternal } from "skybridge/web";
+import { useOpenExternal, useUser } from "skybridge/web";
 import { useCallTool, useToolInfo } from "../helpers.js";
 
 type Source = {
@@ -265,7 +265,7 @@ function Searching({ question }: { question: string | null }) {
 }
 
 export default function AskDocs() {
-  const { theme } = useLayout();
+  const { theme } = useUser();
   const openExternal = useOpenExternal();
   const {
     output,
