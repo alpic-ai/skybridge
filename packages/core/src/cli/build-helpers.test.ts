@@ -189,6 +189,35 @@ describe("emitVercelBuildOutput", () => {
     ).toBe("challenge-token");
   });
 
+  it("skips public copy when publicDir is null (disabled)", async () => {
+    const root = mkTmp();
+    mkdirSync(path.join(root, "dist", "assets"), { recursive: true });
+    mkdirSync(path.join(root, "public"), { recursive: true });
+    writeFileSync(
+      path.join(root, "dist", "__entry.js"),
+      "const userMod = await import('./server.js');\nexport default userMod.default;\n",
+    );
+    writeFileSync(
+      path.join(root, "dist", "server.js"),
+      "export default function handler(_req, res) { res.end('ok'); }\n",
+    );
+    writeFileSync(path.join(root, "public", "secret.txt"), "should-not-copy");
+    writeFileSync(path.join(root, "dist", "assets", "view.js"), "/* view */");
+
+    await emitVercelBuildOutput(root, [], null);
+
+    const outputDir = path.join(root, ".vercel", "output");
+    expect(existsSync(path.join(outputDir, "static", "secret.txt"))).toBe(
+      false,
+    );
+    expect(
+      readFileSync(
+        path.join(outputDir, "static", "assets", "view.js"),
+        "utf-8",
+      ),
+    ).toContain("view");
+  });
+
   it("leaves serverExternal packages unbundled", async () => {
     const root = mkTmp();
     mkdirSync(path.join(root, "dist"), { recursive: true });
