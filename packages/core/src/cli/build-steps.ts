@@ -1,4 +1,4 @@
-import { rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path, { isAbsolute, resolve } from "node:path";
 import { scanAndWriteViewsDts, scanViewsSync } from "../views/index.js";
 import {
@@ -41,6 +41,15 @@ export async function getCommandSteps(
     steps.push({
       label: "Building views",
       command: "vite build",
+    });
+  } else if (existsSync(path.join(root, "public"))) {
+    steps.push({
+      label: "Copying public assets",
+      run: () => {
+        const assetsDir = path.join(root, "dist", "assets");
+        mkdirSync(assetsDir, { recursive: true });
+        cpSync(path.join(root, "public"), assetsDir, { recursive: true });
+      },
     });
   }
 

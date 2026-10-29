@@ -139,6 +139,11 @@ export async function emitVercelBuildOutput(
     mkdirSync(staticAssetsDir, { recursive: true });
   }
 
+  const publicDir = path.join(root, "public");
+  if (existsSync(publicDir)) {
+    cpSync(publicDir, path.join(outputDir, "static"), { recursive: true });
+  }
+
   writeFileSync(
     path.join(outputDir, "config.json"),
     `${JSON.stringify(VERCEL_CONFIG, null, 2)}\n`,
