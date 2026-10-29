@@ -15,12 +15,18 @@ import type { CommandStep } from "./use-execute-steps.js";
 export async function getCommandSteps(
   root = process.cwd(),
 ): Promise<CommandStep[]> {
-  const { viewsDir, serverExternal } = await resolveSkybridgeConfig(root);
+  const {
+    viewsDir,
+    serverExternal,
+    publicDir: configPublicDir,
+  } = await resolveSkybridgeConfig(root);
   const rawDir = viewsDir ?? "src/views";
   const resolvedDir = isAbsolute(rawDir) ? rawDir : resolve(root, rawDir);
-  // Non-throwing pre-check: duplicate view names are validated in the
-  // "Scanning views" step so useExecuteSteps can render a styled error.
   const hasViews = scanViewsSync(resolvedDir).valid.length > 0;
+  const resolvedPublicDir =
+    configPublicDir === false
+      ? null
+      : resolve(root, configPublicDir ?? "public");
 
   const steps: CommandStep[] = [
     {
@@ -42,13 +48,13 @@ export async function getCommandSteps(
       label: "Building views",
       command: "vite build",
     });
-  } else if (existsSync(path.join(root, "public"))) {
+  } else if (resolvedPublicDir && existsSync(resolvedPublicDir)) {
     steps.push({
       label: "Copying public assets",
       run: () => {
         const assetsDir = path.join(root, "dist", "assets");
         mkdirSync(assetsDir, { recursive: true });
-        cpSync(path.join(root, "public"), assetsDir, { recursive: true });
+        cpSync(resolvedPublicDir, assetsDir, { recursive: true });
       },
     });
   }
@@ -107,7 +113,7 @@ export async function getCommandSteps(
     },
     {
       label: "Emitting Vercel build output",
-      run: () => emitVercelBuildOutput(root, serverExternal),
+      run: () => emitVercelBuildOutput(root, serverExternal, resolvedPublicDir),
     },
   );
 

@@ -1,6 +1,7 @@
 export interface SkybridgeConfig {
   viewsDir?: string;
   serverExternal?: string[];
+  publicDir?: string | false;
 }
 
 export async function resolveSkybridgeConfig(
@@ -28,5 +29,16 @@ export async function resolveSkybridgeConfig(
   };
   walk(loaded?.config.plugins ?? []);
   const api = plugins.find((p) => p.name === "skybridge")?.api;
-  return { viewsDir: api?.viewsDir, serverExternal: api?.serverExternal };
+  const rawPublicDir = loaded?.config.publicDir;
+  const publicDir =
+    rawPublicDir === false
+      ? false
+      : typeof rawPublicDir === "string"
+        ? rawPublicDir
+        : undefined;
+  return {
+    viewsDir: api?.viewsDir,
+    serverExternal: api?.serverExternal,
+    publicDir,
+  };
 }

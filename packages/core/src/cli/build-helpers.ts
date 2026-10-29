@@ -87,6 +87,7 @@ export const VERCEL_VC_CONFIG: unknown = {
 export async function emitVercelBuildOutput(
   root: string,
   serverExternal: string[] = [],
+  publicDir: string | null = null,
 ): Promise<void> {
   const outputDir = path.join(root, ".vercel", "output");
   const funcDir = path.join(
@@ -139,9 +140,11 @@ export async function emitVercelBuildOutput(
     mkdirSync(staticAssetsDir, { recursive: true });
   }
 
-  const publicDir = path.join(root, "public");
-  if (existsSync(publicDir)) {
-    cpSync(publicDir, path.join(outputDir, "static"), { recursive: true });
+  const resolvedPublicDir = publicDir ?? path.join(root, "public");
+  if (existsSync(resolvedPublicDir)) {
+    cpSync(resolvedPublicDir, path.join(outputDir, "static"), {
+      recursive: true,
+    });
   }
 
   writeFileSync(
