@@ -48,7 +48,7 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 ## Deploy
 
 - **Ship to production** → [deploy.md](references/deploy.md): when ready to deploy via Alpic
-- **Publish to ChatGPT/Claude Directories** → [publish.md](references/publish.md): when ready to submit for review
+- **Publish to ChatGPT/Claude/Gemini Directories** → [publish.md](references/publish.md): when ready to submit for review
 
 Full API docs: [https://docs.skybridge.tech/api-reference.md](https://docs.skybridge.tech/api-reference.md)
 

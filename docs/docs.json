@@ -90,6 +90,7 @@
             "icon": "library",
             "pages": [
               "resources/chatgpt-and-mcp-apps",
+              "resources/gemini",
               "resources/telemetry"
             ]
           }
