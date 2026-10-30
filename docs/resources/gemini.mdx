@@ -1,0 +1,54 @@
+---
+title: "Gemini and Google Search"
+description: "Run your Skybridge app in the Gemini app and Search through Google's Connected Apps Platform"
+icon: sparkles
+---
+
+Google's [Connected Apps Platform](https://developers.google.com/connected-apps) brings third-party MCP servers into the Gemini app and Google Search. It renders views through the open [MCP Apps](/resources/chatgpt-and-mcp-apps#mcp-apps) contract, so a Skybridge app runs there with the same server and views you ship to ChatGPT and Claude. The platform is in preview, and access is granted through Google's [application form](https://connected.google.com/console/help/?apply).
+
+## How it fits
+
+Gemini calls your remote MCP server over HTTPS and renders each tool's view in a sandboxed iframe, inline in the conversation or in fullscreen. Skybridge detects that `window.openai` is absent and uses the MCP Apps bridge, so the cross-host hooks work without any Gemini-specific code. Gemini identifies itself with `User-Agent: Google` on every JSON-RPC request, which you can use to segment your own analytics.
+
+You register the server, test it, and submit it for review in the [Google Connected Console](https://developers.google.com/connected-apps/gpc). Before review you choose whether the app goes live in Search, the Gemini app, or both.
+
+## Authentication
+
+Skybridge's [`oauth`](/guides/auth-providers) config already serves what Gemini expects. Gemini reads `/.well-known/oauth-authorization-server` on your server and runs the authorization code flow with PKCE. A few constraints come from Google's [OAuth guide](https://developers.google.com/connected-apps/mcp/oauth) and apply to your identity provider:
+
+- Dynamic Client Registration is required, so the discovery document must advertise a `registration_endpoint`. Client ID Metadata Documents are not accepted as a substitute. Without DCR, you enter a static client ID and secret in the Connected Console instead.
+- The identity provider must not rotate refresh tokens on refresh. It should extend the existing token's expiry.
+- The provider must accept Google's redirect URIs: `https://oauth-redirect.googleusercontent.com/r/*` and `https://oauth-redirect.googleusercontent.com/a/*`, plus their `-sandbox` and `-test` variants.
+
+## Designing views
+
+Google's [UI guidelines](https://developers.google.com/connected-apps/mcp/guidelines) are stricter than ChatGPT's in a few places:
+
+- Gemini has no modal. Use [`useDisplayMode`](/api-reference/use-display-mode) to switch to fullscreen instead of [`useRequestModal`](/api-reference/use-request-modal).
+- Dropdowns, popovers, and context menus get clipped inside cards, so avoid them.
+- The host shows its own error component. Return a tool error rather than drawing a custom error state.
+- The host already adds padding and a border around the card.
+- Carousels should hold 3 to 8 cards and show part of the next one.
+- External links go through [`useOpenExternal`](/api-reference/use-open-external) and need a visible "opens in new tab" icon. Never redirect automatically.
+
+## Testing
+
+Deploy the server to a public HTTPS URL, then connect it in [Gemini Developer Mode](https://developers.google.com/connected-apps/mcp/dev-mode). Developer Mode shows the live JSON-RPC traffic, tool schemas, and auth settings for each call.
+
+<Warning>
+  Google has not published which MCP Apps methods Gemini implements beyond `ui/open-link` and display modes. Test follow-up messages, model context updates, and tool calls from views in Developer Mode before relying on them.
+</Warning>
+
+## Related
+
+<CardGroup cols={3}>
+  <Card title="ChatGPT Plugins and MCP Apps" icon="layers" href="/resources/chatgpt-and-mcp-apps">
+    How hosts run your views
+  </Card>
+  <Card title="Auth providers" icon="key" href="/guides/auth-providers">
+    Set up OAuth with your IdP
+  </Card>
+  <Card title="Compatibility" icon="house" href="/api-reference/overview">
+    Which hosts each API runs on
+  </Card>
+</CardGroup>

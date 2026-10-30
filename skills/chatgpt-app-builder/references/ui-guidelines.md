@@ -5,6 +5,7 @@
 - [Modal](#modal) — overlay on top of any display mode
 - [Adapting to Host](#adapting-to-host) — layout constraints, theme
 - [Adapting to User](#adapting-to-user) — device, locale
+- [Gemini](#gemini) — extra constraints for Google Connected Apps
 
 ## Display Modes
 
@@ -203,3 +204,13 @@ function LocalizedGreeting() {
   return <h1>{greeting}</h1>;
 }
 ```
+
+## Gemini
+
+Google Connected Apps (Gemini app, Search) adds constraints on top of the above:
+- No modal: switch to fullscreen with `useDisplayMode` instead of `useRequestModal`
+- No dropdowns, popovers, or context menus in cards (they get clipped)
+- No custom error states: return a tool error, the host renders it
+- No own border or outer padding: the host adds both
+- Carousel cards must peek the next card
+- External links via `useOpenExternal`, with an "open in new" icon; never auto-redirect
