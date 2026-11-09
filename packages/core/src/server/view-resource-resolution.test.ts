@@ -256,7 +256,7 @@ describe("view resource resolution (cache key)", () => {
         "assets/ui-GHI789.js",
       ]);
       expect(text.indexOf("modulepreload")).toBeLessThan(
-        text.indexOf('rel="stylesheet"'),
+        text.indexOf("import("),
       );
     } finally {
       await teardown();
