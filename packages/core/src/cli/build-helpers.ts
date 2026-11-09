@@ -55,34 +55,64 @@ export function ensureAssetsDir(assetsDir: string): void {
 
 export const VERCEL_FUNCTION_NAME = "mcp";
 
-// Vite writes only content-hashed files to `dist/assets/assets/`, so they can be
-// cached forever; `public/` files keep stable names and stay uncached.
 export const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";
 
-export const CLOUDFLARE_HEADERS = `/assets/*
-  Access-Control-Allow-Origin: *
+// Only files listed in the Vite manifest are content-hashed: `public/` is copied
+// into the same folder with stable names, so a folder-wide rule would freeze them.
+export function readHashedAssetPaths(root: string): string[] {
+  const manifestPath = path.join(
+    root,
+    "dist",
+    "assets",
+    ".vite",
+    "manifest.json",
+  );
+  if (!existsSync(manifestPath)) {
+    return [];
+  }
+  const manifest: Record<
+    string,
+    { file: string; css?: string[]; assets?: string[] }
+  > = JSON.parse(readFileSync(manifestPath, "utf-8"));
+  const files = Object.values(manifest).flatMap((chunk) => [
+    chunk.file,
+    ...(chunk.css ?? []),
+    ...(chunk.assets ?? []),
+  ]);
+  return [...new Set(files)].sort().map((file) => `/assets/${file}`);
+}
 
-/assets/assets/*
-  Cache-Control: ${IMMUTABLE_CACHE_CONTROL}
-`;
+// ponytail: one rule per hashed file; Cloudflare caps `_headers` at 100 rules, switch to a dedicated hashed folder if apps outgrow it.
+export function buildCloudflareHeaders(hashedAssetPaths: string[]): string {
+  const immutableRules = hashedAssetPaths.map(
+    (assetPath) =>
+      `\n${assetPath}\n  Cache-Control: ${IMMUTABLE_CACHE_CONTROL}\n`,
+  );
+  return `/assets/*\n  Access-Control-Allow-Origin: *\n${immutableRules.join("")}`;
+}
 
-export const VERCEL_CONFIG: unknown = {
-  version: 3,
-  routes: [
-    {
-      src: "/assets/(.*)",
-      headers: { "Access-Control-Allow-Origin": "*" },
-      continue: true,
-    },
-    {
-      src: "/assets/assets/(.*)",
-      headers: { "Cache-Control": IMMUTABLE_CACHE_CONTROL },
-      continue: true,
-    },
-    { handle: "filesystem" },
-    { src: "/(.*)", dest: `/${VERCEL_FUNCTION_NAME}` },
-  ],
-};
+const escapeRegExp = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+export function buildVercelConfig(hashedAssetPaths: string[] = []): unknown {
+  return {
+    version: 3,
+    routes: [
+      {
+        src: "/assets/(.*)",
+        headers: { "Access-Control-Allow-Origin": "*" },
+        continue: true,
+      },
+      ...hashedAssetPaths.map((assetPath) => ({
+        src: escapeRegExp(assetPath),
+        headers: { "Cache-Control": IMMUTABLE_CACHE_CONTROL },
+        continue: true,
+      })),
+      { handle: "filesystem" },
+      { src: "/(.*)", dest: `/${VERCEL_FUNCTION_NAME}` },
+    ],
+  };
+}
 
 export const VERCEL_VC_CONFIG: unknown = {
   runtime: "nodejs22.x",
@@ -167,6 +197,6 @@ export async function emitVercelBuildOutput(
 
   writeFileSync(
     path.join(outputDir, "config.json"),
-    `${JSON.stringify(VERCEL_CONFIG, null, 2)}\n`,
+    `${JSON.stringify(buildVercelConfig(readHashedAssetPaths(root)), null, 2)}\n`,
   );
 }

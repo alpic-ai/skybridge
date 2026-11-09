@@ -2,13 +2,14 @@ import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path, { isAbsolute, resolve } from "node:path";
 import { scanAndWriteViewsDts, scanViewsSync } from "../views/index.js";
 import {
-  CLOUDFLARE_HEADERS,
+  buildCloudflareHeaders,
   emitEmptyManifestModule,
   emitEntryWrapper,
   emitManifestModule,
   emitSkillsModule,
   emitVercelBuildOutput,
   ensureAssetsDir,
+  readHashedAssetPaths,
 } from "./build-helpers.js";
 import { resolveSkybridgeConfig } from "./resolve-skybridge-config.js";
 import type { CommandStep } from "./use-execute-steps.js";
@@ -106,7 +107,10 @@ export async function getCommandSteps(
       run: () => {
         const assetsDir = path.join(root, "dist", "assets");
         ensureAssetsDir(assetsDir);
-        writeFileSync(path.join(assetsDir, "_headers"), CLOUDFLARE_HEADERS);
+        writeFileSync(
+          path.join(assetsDir, "_headers"),
+          buildCloudflareHeaders(readHashedAssetPaths(root)),
+        );
       },
     },
     {

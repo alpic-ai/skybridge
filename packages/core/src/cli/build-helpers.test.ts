@@ -11,7 +11,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  CLOUDFLARE_HEADERS,
+  buildCloudflareHeaders,
+  buildVercelConfig,
   ENTRY_WRAPPER_CONTENT,
   emitEmptyManifestModule,
   emitEntryWrapper,
@@ -20,7 +21,7 @@ import {
   emitVercelBuildOutput,
   ensureAssetsDir,
   IMMUTABLE_CACHE_CONTROL,
-  VERCEL_CONFIG,
+  readHashedAssetPaths,
   VERCEL_VC_CONFIG,
 } from "./build-helpers.js";
 
@@ -154,7 +155,7 @@ describe("emitVercelBuildOutput", () => {
     ).toEqual({ type: "module" });
     expect(
       JSON.parse(readFileSync(path.join(outputDir, "config.json"), "utf-8")),
-    ).toEqual(VERCEL_CONFIG);
+    ).toEqual(buildVercelConfig());
     expect(
       readFileSync(
         path.join(outputDir, "static", "assets", "view-abc.js"),
@@ -275,18 +276,55 @@ describe("emitVercelBuildOutput", () => {
 });
 
 describe("asset cache headers", () => {
-  it("marks only hashed view assets as immutable", () => {
-    expect(IMMUTABLE_CACHE_CONTROL).toBe("public, max-age=31536000, immutable");
-    expect(CLOUDFLARE_HEADERS).toContain(
-      `/assets/assets/*\n  Cache-Control: ${IMMUTABLE_CACHE_CONTROL}\n`,
+  function rootWithManifestAndNestedPublicAsset() {
+    const root = mkTmp();
+    const assetsDir = path.join(root, "dist", "assets");
+    mkdirSync(path.join(assetsDir, ".vite"), { recursive: true });
+    mkdirSync(path.join(assetsDir, "assets"), { recursive: true });
+    writeFileSync(
+      path.join(assetsDir, ".vite", "manifest.json"),
+      JSON.stringify({
+        "src/views/a.tsx": {
+          file: "assets/a-Ab12Cd34.js",
+          css: ["assets/style-Ef56Gh78.css"],
+          assets: ["assets/icons-Ij90Kl12.svg"],
+        },
+        _shared: { file: "assets/a-Ab12Cd34.js" },
+      }),
     );
-    expect(CLOUDFLARE_HEADERS).toContain(
-      "/assets/*\n  Access-Control-Allow-Origin: *\n",
+    // Copied from `public/assets/logo.svg`: same folder, stable name.
+    writeFileSync(path.join(assetsDir, "assets", "logo.svg"), "<svg/>");
+    return root;
+  }
+
+  it("lists only manifest files as hashed assets", () => {
+    expect(
+      readHashedAssetPaths(rootWithManifestAndNestedPublicAsset()),
+    ).toEqual([
+      "/assets/assets/a-Ab12Cd34.js",
+      "/assets/assets/icons-Ij90Kl12.svg",
+      "/assets/assets/style-Ef56Gh78.css",
+    ]);
+    expect(readHashedAssetPaths(mkTmp())).toEqual([]);
+  });
+
+  it("marks hashed files immutable and leaves public files alone", () => {
+    const hashed = readHashedAssetPaths(rootWithManifestAndNestedPublicAsset());
+    const headers = buildCloudflareHeaders(hashed);
+    expect(headers).toContain("/assets/*\n  Access-Control-Allow-Origin: *\n");
+    expect(headers).toContain(
+      `/assets/assets/a-Ab12Cd34.js\n  Cache-Control: ${IMMUTABLE_CACHE_CONTROL}\n`,
     );
-    expect((VERCEL_CONFIG as { routes: unknown[] }).routes).toContainEqual({
-      src: "/assets/assets/(.*)",
+    expect(headers).not.toContain("logo.svg");
+    expect(headers).not.toContain("/assets/assets/*");
+
+    const routes = (buildVercelConfig(hashed) as { routes: { src: string }[] })
+      .routes;
+    expect(routes).toContainEqual({
+      src: "/assets/assets/a-Ab12Cd34\\.js",
       headers: { "Cache-Control": IMMUTABLE_CACHE_CONTROL },
       continue: true,
     });
+    expect(routes.map((route) => route.src).join()).not.toContain("logo");
   });
 });
