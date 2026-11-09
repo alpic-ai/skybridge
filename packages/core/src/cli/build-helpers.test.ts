@@ -292,7 +292,6 @@ describe("asset cache headers", () => {
         _shared: { file: "assets/a-Ab12Cd34.js" },
       }),
     );
-    // Copied from `public/assets/logo.svg`: same folder, stable name.
     writeFileSync(path.join(assetsDir, "assets", "logo.svg"), "<svg/>");
     return root;
   }

@@ -57,8 +57,6 @@ export const VERCEL_FUNCTION_NAME = "mcp";
 
 export const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";
 
-// Only files listed in the Vite manifest are content-hashed: `public/` is copied
-// into the same folder with stable names, so a folder-wide rule would freeze them.
 export function readHashedAssetPaths(root: string): string[] {
   const manifestPath = path.join(
     root,
@@ -82,7 +80,6 @@ export function readHashedAssetPaths(root: string): string[] {
   return [...new Set(files)].sort().map((file) => `/assets/${file}`);
 }
 
-// ponytail: one rule per hashed file; Cloudflare caps `_headers` at 100 rules, switch to a dedicated hashed folder if apps outgrow it.
 export function buildCloudflareHeaders(hashedAssetPaths: string[]): string {
   const immutableRules = hashedAssetPaths.map(
     (assetPath) =>
