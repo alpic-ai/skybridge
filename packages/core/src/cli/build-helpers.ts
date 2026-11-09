@@ -55,12 +55,28 @@ export function ensureAssetsDir(assetsDir: string): void {
 
 export const VERCEL_FUNCTION_NAME = "mcp";
 
+// Vite writes only content-hashed files to `dist/assets/assets/`, so they can be
+// cached forever; `public/` files keep stable names and stay uncached.
+export const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";
+
+export const CLOUDFLARE_HEADERS = `/assets/*
+  Access-Control-Allow-Origin: *
+
+/assets/assets/*
+  Cache-Control: ${IMMUTABLE_CACHE_CONTROL}
+`;
+
 export const VERCEL_CONFIG: unknown = {
   version: 3,
   routes: [
     {
       src: "/assets/(.*)",
       headers: { "Access-Control-Allow-Origin": "*" },
+      continue: true,
+    },
+    {
+      src: "/assets/assets/(.*)",
+      headers: { "Cache-Control": IMMUTABLE_CACHE_CONTROL },
       continue: true,
     },
     { handle: "filesystem" },

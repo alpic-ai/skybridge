@@ -2,6 +2,7 @@ import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path, { isAbsolute, resolve } from "node:path";
 import { scanAndWriteViewsDts, scanViewsSync } from "../views/index.js";
 import {
+  CLOUDFLARE_HEADERS,
   emitEmptyManifestModule,
   emitEntryWrapper,
   emitManifestModule,
@@ -105,10 +106,7 @@ export async function getCommandSteps(
       run: () => {
         const assetsDir = path.join(root, "dist", "assets");
         ensureAssetsDir(assetsDir);
-        writeFileSync(
-          path.join(assetsDir, "_headers"),
-          "/assets/*\n  Access-Control-Allow-Origin: *\n",
-        );
+        writeFileSync(path.join(assetsDir, "_headers"), CLOUDFLARE_HEADERS);
       },
     },
     {

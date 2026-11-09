@@ -11,6 +11,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  CLOUDFLARE_HEADERS,
   ENTRY_WRAPPER_CONTENT,
   emitEmptyManifestModule,
   emitEntryWrapper,
@@ -18,6 +19,7 @@ import {
   emitSkillsModule,
   emitVercelBuildOutput,
   ensureAssetsDir,
+  IMMUTABLE_CACHE_CONTROL,
   VERCEL_CONFIG,
   VERCEL_VC_CONFIG,
 } from "./build-helpers.js";
@@ -269,5 +271,22 @@ describe("emitVercelBuildOutput", () => {
         ),
       ),
     ).toBe(true);
+  });
+});
+
+describe("asset cache headers", () => {
+  it("marks only hashed view assets as immutable", () => {
+    expect(IMMUTABLE_CACHE_CONTROL).toBe("public, max-age=31536000, immutable");
+    expect(CLOUDFLARE_HEADERS).toContain(
+      `/assets/assets/*\n  Cache-Control: ${IMMUTABLE_CACHE_CONTROL}\n`,
+    );
+    expect(CLOUDFLARE_HEADERS).toContain(
+      "/assets/*\n  Access-Control-Allow-Origin: *\n",
+    );
+    expect((VERCEL_CONFIG as { routes: unknown[] }).routes).toContainEqual({
+      src: "/assets/assets/(.*)",
+      headers: { "Cache-Control": IMMUTABLE_CACHE_CONTROL },
+      continue: true,
+    });
   });
 });
