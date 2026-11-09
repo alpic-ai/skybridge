@@ -1,6 +1,9 @@
-<script type="module">window.skybridge = { serverUrl: "{{serverUrl}}" };</script>
+<link rel="stylesheet" crossorigin href="{{serverUrl}}/assets/{{styleFile}}" />
+{{#each preloadFiles}}
+<link rel="modulepreload" crossorigin href="{{../serverUrl}}/assets/{{this}}" />
+{{/each}}
 <div id="root"></div>
+<script type="module">window.skybridge = { serverUrl: "{{serverUrl}}" };</script>
 <script type="module">
   import('{{serverUrl}}/assets/{{viewFile}}');
 </script>
-<link rel="stylesheet" crossorigin href="{{serverUrl}}/assets/{{styleFile}}" />

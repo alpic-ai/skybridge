@@ -2,6 +2,7 @@
 
 import { createElement, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { ModalProvider } from "./components/modal-provider.js";
 import { installOpenAILoggingProxy } from "./proxy.js";
 
 let rootInstance: Root | null = null;
@@ -40,9 +41,6 @@ export const mountView = (component: React.ReactNode) => {
     installOpenAILoggingProxy();
   }
 
-  (async () => {
-    const { ModalProvider } = await import("./components/modal-provider.js");
-    const app = createElement(ModalProvider, null, component);
-    rootInstance.render(createElement(StrictMode, null, app));
-  })();
+  const app = createElement(ModalProvider, null, component);
+  rootInstance.render(createElement(StrictMode, null, app));
 };
