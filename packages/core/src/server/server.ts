@@ -1172,6 +1172,7 @@ export class McpServer<
               serverUrl: viewBase,
               viewFile: this.lookupViewFile(view.component),
               styleFile: this.lookupDistFile("style.css") ?? "",
+              preloadFiles: this.lookupViewPreloadFiles(view.component),
             })
           : templateHelper.renderDevelopment({
               serverUrl: viewBase,
@@ -1285,6 +1286,24 @@ export class McpServer<
     throw new Error(
       `View "${viewName}" not found in Vite manifest. Did the build complete successfully? Look for an entry with name "${viewName}" in dist/assets/.vite/manifest.json.`,
     );
+  }
+
+  private lookupViewPreloadFiles(viewName: string): string[] {
+    const manifest = this.readManifest();
+    const entryKey = Object.keys(manifest).find(
+      (key) => manifest[key]?.isEntry && manifest[key]?.name === viewName,
+    );
+    const files = new Set<string>();
+    const visit = (key: string | undefined) => {
+      const chunk = key ? manifest[key] : undefined;
+      if (!chunk || files.has(chunk.file)) {
+        return;
+      }
+      files.add(chunk.file);
+      chunk.imports?.forEach(visit);
+    };
+    visit(entryKey);
+    return [...files];
   }
 
   private lookupDistFile(key: string) {

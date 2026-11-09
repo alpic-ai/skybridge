@@ -223,6 +223,46 @@ describe("view resource resolution (cache key)", () => {
     }
   });
 
+  it("preloads the view entry and its static imports (prod)", async () => {
+    process.env.NODE_ENV = "production";
+    __setBuildManifest({
+      "src/views/widget.tsx": {
+        isEntry: true,
+        name: "widget",
+        file: "assets/widget-ABC123.js",
+        imports: ["_shared.js", "_ui.js"],
+        dynamicImports: ["src/lazy.tsx"],
+      },
+      "_shared.js": { file: "assets/shared-DEF456.js" },
+      "_ui.js": { file: "assets/ui-GHI789.js", imports: ["_shared.js"] },
+      "src/lazy.tsx": { file: "assets/lazy-JKL012.js", isDynamicEntry: true },
+      "style.css": { file: "assets/style-XYZ.css" },
+    } as unknown as Record<string, { file: string }>);
+
+    const { client, teardown } = await connect(registerWidget);
+    try {
+      const { contents } = await client.readResource({
+        uri: "ui://views/ext-apps/widget.html",
+      });
+      const { text } = textContent(contents);
+      const preloaded = [
+        ...text.matchAll(
+          /<link rel="modulepreload" crossorigin href="[^"]*\/assets\/(assets\/[^"]+)" \/>/g,
+        ),
+      ].map((match) => match[1]);
+      expect(preloaded).toEqual([
+        "assets/widget-ABC123.js",
+        "assets/shared-DEF456.js",
+        "assets/ui-GHI789.js",
+      ]);
+      expect(text.indexOf("modulepreload")).toBeLessThan(
+        text.indexOf('rel="stylesheet"'),
+      );
+    } finally {
+      await teardown();
+    }
+  });
+
   // Back-compat: older Skybridge advertised the view at `ui://views/apps-sdk/...`
   // via openai/outputTemplate. We no longer advertise it, but apps published then
   // have it cached, so the read must still resolve to the ext-apps content.

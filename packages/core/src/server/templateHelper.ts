@@ -8,6 +8,7 @@ class TemplateHelper {
     serverUrl: string;
     viewFile: string;
     styleFile: string;
+    preloadFiles: string[];
   }): string {
     return productionTemplate(data);
   }

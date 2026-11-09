@@ -1,3 +1,6 @@
+{{#each preloadFiles}}
+<link rel="modulepreload" crossorigin href="{{../serverUrl}}/assets/{{this}}" />
+{{/each}}
 <script type="module">window.skybridge = { serverUrl: "{{serverUrl}}" };</script>
 <div id="root"></div>
 <script type="module">
