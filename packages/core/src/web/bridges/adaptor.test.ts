@@ -191,6 +191,19 @@ describe("HostAdaptor", () => {
     expect((selectError as NotSupportedError).method).toBe("selectFiles");
   });
 
+  it("setOpenInAppUrl rejects with NotSupportedError when window.openai lacks it", async () => {
+    vi.stubGlobal("openai", {});
+    const adaptor = new HostAdaptor();
+
+    let result: Promise<void> | undefined;
+    expect(() => {
+      result = adaptor.setOpenInAppUrl("https://x");
+    }).not.toThrow();
+    const error = await result?.catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(NotSupportedError);
+    expect((error as NotSupportedError).method).toBe("setOpenInAppUrl");
+  });
+
   it("uploadFile delegates to window.openai.uploadFile and tracks fileId in widgetState", async () => {
     const setWidgetState = vi.fn().mockResolvedValue(undefined);
     const uploadFile = vi.fn().mockResolvedValue({
