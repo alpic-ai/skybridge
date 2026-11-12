@@ -172,7 +172,7 @@ export class Chat<App = unknown> {
       }
     }
 
-    this.messages.push(...result.response.messages);
+    this.messages.push(...result.responseMessages);
   }
 
   close() {
