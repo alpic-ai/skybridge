@@ -127,7 +127,7 @@ export type AppsSdkMethods<WS extends AppsSdkWidgetState = AppsSdkWidgetState> =
      * Sets the open in app URL.
      * This URL will be opened in the app when the user clicks on the top right button in fullscreen mode.
      */
-    setOpenInAppUrl: (args: { href: string }) => Promise<void>;
+    setOpenInAppUrl?: (args: { href: string }) => Promise<void>;
   };
 
 // Dispatched when any global changes in the host page

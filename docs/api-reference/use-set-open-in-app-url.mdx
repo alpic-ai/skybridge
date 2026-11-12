@@ -50,7 +50,7 @@ setOpenInAppUrl(href: string): Promise<void>;
 Sets `href` as the target the host's fullscreen "Open in app" button navigates to. `href` is required: an empty or whitespace-only string throws synchronously, before the host is called. The function reference is stable across renders, so it is safe to list in an effect's dependency array. The promise resolves once the host accepts the URL.
 
 <Info>
-**ChatGPT** is the only host with this button; calling the hook on another host throws.
+**ChatGPT** is the only host with this button. On another host, or on a ChatGPT client that does not expose it (the desktop app at the time of writing), the promise rejects with a `NotSupportedError`: catch it.
 </Info>
 
 <CardGroup cols={3}>

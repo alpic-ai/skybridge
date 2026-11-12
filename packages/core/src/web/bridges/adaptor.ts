@@ -551,6 +551,14 @@ export class HostAdaptor implements Adaptor {
     if (!this.openai) {
       return Promise.reject(new NotSupportedError("setOpenInAppUrl"));
     }
+    if (!this.openai.setOpenInAppUrl) {
+      return Promise.reject(
+        new NotSupportedError(
+          "setOpenInAppUrl",
+          "not available on the current host version",
+        ),
+      );
+    }
     const trimmed = href.trim();
     if (!trimmed) {
       return Promise.reject(new Error("The href parameter is required."));
