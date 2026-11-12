@@ -120,6 +120,48 @@ it("serves the session from the app's fetch handler, running tools in-process", 
   expect(prompt).not.toContain("cdn.skybridge.test");
 });
 
+it("keeps the tool calls and results of a turn in the history of the next one", async () => {
+  const model = new MockLanguageModelV3({
+    doGenerate: [
+      {
+        content: [
+          {
+            type: "tool-call",
+            toolCallId: "call-1",
+            toolName: "search-products",
+            input: JSON.stringify({ category: "goggles" }),
+          },
+        ],
+        finishReason: { unified: "tool-calls" as const, raw: undefined },
+        usage,
+        warnings: [],
+      },
+      {
+        content: [{ type: "text", text: "I found a pair of goggles." }],
+        finishReason: { unified: "stop" as const, raw: undefined },
+        usage,
+        warnings: [],
+      },
+      {
+        content: [{ type: "text", text: "Its reference is GOG-001." }],
+        finishReason: { unified: "stop" as const, raw: undefined },
+        usage,
+        warnings: [],
+      },
+    ],
+  });
+
+  const chat = await start({ app: buildApp([]), model });
+  await chat.send("I am looking for ski goggles");
+  await chat.send("What is the reference of the first one?");
+
+  const followUpPrompt = JSON.stringify(model.doGenerateCalls[2]?.prompt);
+  expect(followUpPrompt).toContain("search-products");
+  expect(followUpPrompt).toContain("1 pair of goggles");
+  expect(followUpPrompt).toContain("GOG-001");
+  expect(followUpPrompt).toContain("I found a pair of goggles.");
+});
+
 it("sends a temperature only when one is configured", async () => {
   const call = {
     toolName: "search-products",
