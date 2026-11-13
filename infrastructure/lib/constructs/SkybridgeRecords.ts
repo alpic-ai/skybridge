@@ -90,12 +90,19 @@ export class SkybridgeRecords extends Construct {
     new TxtRecord(this, "DocsAcmeChallenge", {
       zone: hostedZone,
       recordName: "_acme-challenge.docs",
-      values: ["GGdtrZprSahY5--Wq8hS1RMob60o12-oWv7JPei8ZJU"],
+      values: [
+        "GGdtrZprSahY5--Wq8hS1RMob60o12-oWv7JPei8ZJU",
+        "nMeY8BtaoeIsEmCeiFv9ru-RCf0-gRwzZCkw7-DXMAA",
+        "1TgWNnM7LoQjUoyXoZebN_Vn5WOXJfOhcLNpriQeYtY",
+      ],
     });
     new TxtRecord(this, "DocsCfCustomHostname", {
       zone: hostedZone,
       recordName: "_cf-custom-hostname.docs",
-      values: ["a6acb759-d1b4-4fea-b109-8dc787119ae1"],
+      values: [
+        "a6acb759-d1b4-4fea-b109-8dc787119ae1",
+        "92aef939-4db2-40e0-a9e6-edca4a61e0a1",
+      ],
     });
 
     new TxtRecord(this, "GoogleSiteVerification", {
