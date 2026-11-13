@@ -87,6 +87,16 @@ export class SkybridgeRecords extends Construct {
       recordName: "docs-staging",
       domainName: "cname.mintlify-dns.com",
     });
+    new TxtRecord(this, "DocsAcmeChallenge", {
+      zone: hostedZone,
+      recordName: "_acme-challenge.docs",
+      values: ["GGdtrZprSahY5--Wq8hS1RMob60o12-oWv7JPei8ZJU"],
+    });
+    new TxtRecord(this, "DocsCfCustomHostname", {
+      zone: hostedZone,
+      recordName: "_cf-custom-hostname.docs",
+      values: ["a6acb759-d1b4-4fea-b109-8dc787119ae1"],
+    });
 
     new TxtRecord(this, "GoogleSiteVerification", {
       zone: hostedZone,
