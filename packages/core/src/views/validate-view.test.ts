@@ -25,4 +25,31 @@ describe("hasDefaultExport", () => {
     `;
     expect(hasDefaultExport(code)).toBe(false);
   });
+
+  it("keeps a default export after a URL in a one-line block comment", () => {
+    const code = `
+      /** See https://example.com/docs */
+      export default function MyView() {}
+      /** Helper */
+      export const Foo = 1;
+    `;
+    expect(hasDefaultExport(code)).toBe(true);
+  });
+
+  it("keeps a default export after // inside a string", () => {
+    expect(hasDefaultExport("const u = 'http://x'; export default V;")).toBe(
+      true,
+    );
+  });
+
+  it("keeps a default export after /* inside a regex literal", () => {
+    const code = "const re = /[/*]/;\nexport default V;\n// end */\n";
+    expect(hasDefaultExport(code)).toBe(true);
+  });
+
+  it("ignores a default export that only appears in a block comment with a URL", () => {
+    expect(hasDefaultExport("/* http://x */ /* export default V; */")).toBe(
+      false,
+    );
+  });
 });
