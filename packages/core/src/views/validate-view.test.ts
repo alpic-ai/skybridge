@@ -42,6 +42,15 @@ describe("hasDefaultExport", () => {
     );
   });
 
+  it("keeps a default export after a string continued with a backslash", () => {
+    const code = [
+      'const marker = "start \\',
+      '/*"; export default function View() { return null; }',
+      "// */",
+    ].join("\n");
+    expect(hasDefaultExport(code)).toBe(true);
+  });
+
   it("keeps a default export after /* inside a regex literal", () => {
     const code = "const re = /[/*]/;\nexport default V;\n// end */\n";
     expect(hasDefaultExport(code)).toBe(true);
