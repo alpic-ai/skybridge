@@ -80,7 +80,7 @@ export class SkybridgeRecords extends Construct {
     new CnameRecord(this, "Docs", {
       zone: hostedZone,
       recordName: "docs",
-      domainName: "cname.mintlify-dns.com",
+      domainName: "fallback.proxy-skybridge.tech",
     });
     new CnameRecord(this, "DocsStaging", {
       zone: hostedZone,
