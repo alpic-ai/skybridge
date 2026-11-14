@@ -1,6 +1,6 @@
 // Shared Medusa v2 Store API client + mapping helpers. Both tools go through
-// here so id handling stays consistent between search-products and
-// render-carousel. See docs/medusa-store-api.md for the verified API shape.
+// here so id handling stays consistent between catalogue search and
+// carousel mapping. See docs/medusa-store-api.md for the verified API shape.
 
 // Read lazily: server.ts loads .env in its module body, which runs AFTER this
 // module is imported, so reading at import time would see undefined.
@@ -47,7 +47,10 @@ export type RawProduct = {
 
 // --- HTTP ---
 
-async function fetchJson<T>(path: string, params?: URLSearchParams): Promise<T> {
+async function fetchJson<T>(
+  path: string,
+  params?: URLSearchParams,
+): Promise<T> {
   const { base, key } = env();
   const url = `${base}${path}${params ? `?${params}` : ""}`;
   const res = await fetch(url, { headers: { "x-publishable-api-key": key } });
@@ -65,7 +68,9 @@ function getRegionId(): Promise<string> {
     "/store/regions",
   ).then((r) => {
     const id = r.regions[0]?.id;
-    if (!id) throw new Error("No Medusa region available for pricing.");
+    if (!id) {
+      throw new Error("No Medusa region available for pricing.");
+    }
     return id;
   });
   return regionIdPromise;
@@ -87,9 +92,13 @@ function getCategoryId(handle: string): Promise<string | undefined> {
 const SEARCH_FIELDS =
   "id,title,handle,description,thumbnail,metadata,*categories,*variants.calculated_price,*variants.metadata";
 const DETAIL_FIELDS =
-  "id,title,handle,description,thumbnail,metadata,*images,*options,*options.values,*variants,*variants.options,*variants.calculated_price,*variants.metadata";
+  "id,title,handle,description,thumbnail,metadata,*categories,*images,*options,*options.values,*variants,*variants.options,*variants.calculated_price,*variants.metadata";
 
-export type ProductQuery = { keyword?: string; category?: string; order?: string };
+export type ProductQuery = {
+  keyword?: string;
+  category?: string;
+  order?: string;
+};
 
 export async function fetchSearch(
   q: ProductQuery,
@@ -100,11 +109,17 @@ export async function fetchSearch(
     fields: SEARCH_FIELDS,
     limit: "50",
   });
-  if (q.keyword) params.set("q", q.keyword);
-  if (q.order) params.set("order", q.order);
+  if (q.keyword) {
+    params.set("q", q.keyword);
+  }
+  if (q.order) {
+    params.set("order", q.order);
+  }
   if (q.category) {
     const catId = await getCategoryId(q.category);
-    if (catId) params.append("category_id[]", catId);
+    if (catId) {
+      params.append("category_id[]", catId);
+    }
   }
   return fetchJson<{ products: RawProduct[]; count: number }>(
     "/store/products",
@@ -113,14 +128,18 @@ export async function fetchSearch(
 }
 
 export async function fetchByIds(ids: string[]): Promise<RawProduct[]> {
-  if (ids.length === 0) return [];
+  if (ids.length === 0) {
+    return [];
+  }
   const region = await getRegionId();
   const params = new URLSearchParams({
     region_id: region,
     fields: DETAIL_FIELDS,
     limit: String(ids.length),
   });
-  for (const id of ids) params.append("id[]", id);
+  for (const id of ids) {
+    params.append("id[]", id);
+  }
   const { products } = await fetchJson<{ products: RawProduct[] }>(
     "/store/products",
     params,
@@ -135,7 +154,10 @@ export async function fetchByIds(ids: string[]): Promise<RawProduct[]> {
 // --- mapping helpers ---
 
 export const slug = (s: string) =>
-  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 
 // metadata readers: ratings/badges/specs live in metadata, not native fields.
 type Meta = Record<string, unknown> | null | undefined;
@@ -147,15 +169,23 @@ export function readNumber(meta: Meta, key: string): number | undefined {
 
 export function readBadges(meta: Meta): string[] {
   const v = meta?.tags;
-  return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+  return Array.isArray(v)
+    ? v.filter((x): x is string => typeof x === "string")
+    : [];
 }
 
 export function readSpecs(meta: Meta): { label?: string; value: string }[] {
   const v = meta?.specs;
-  if (!Array.isArray(v)) return [];
+  if (!Array.isArray(v)) {
+    return [];
+  }
   const out: { label?: string; value: string }[] = [];
   for (const s of v) {
-    if (s && typeof s === "object" && typeof (s as { value?: unknown }).value === "string") {
+    if (
+      s &&
+      typeof s === "object" &&
+      typeof (s as { value?: unknown }).value === "string"
+    ) {
       const label = (s as { label?: unknown }).label;
       out.push({
         value: (s as { value: string }).value,
@@ -167,7 +197,10 @@ export function readSpecs(meta: Meta): { label?: string; value: string }[] {
 }
 
 // A variant's value on a given option axis (matched by axis title).
-export function variantValue(v: RawVariant, axisTitle: string): string | undefined {
+export function variantValue(
+  v: RawVariant,
+  axisTitle: string,
+): string | undefined {
   return v.options.find((o) => o.option?.title === axisTitle)?.value;
 }
 
@@ -184,7 +217,9 @@ export function fromPrice(p: RawProduct): number | undefined {
   const amounts = (p.variants ?? [])
     .map(priceOf)
     .filter((n): n is number => typeof n === "number");
-  if (amounts.length) return Math.min(...amounts);
+  if (amounts.length) {
+    return Math.min(...amounts);
+  }
   return readNumber(p.metadata, "from_price");
 }
 
@@ -204,10 +239,14 @@ export function imagesForValues(
     .filter((v): v is string => Boolean(v))
     .map(slug)
     .filter(Boolean);
-  if (!slugs.length) return urls;
+  if (!slugs.length) {
+    return urls;
+  }
   const matched = urls.filter((u) => {
     const lower = u.toLowerCase();
-    return slugs.some((s) => lower.includes(`-${s}-`) || lower.includes(`-${s}.`));
+    return slugs.some(
+      (s) => lower.includes(`-${s}-`) || lower.includes(`-${s}.`),
+    );
   });
   return matched.length ? matched : urls;
 }

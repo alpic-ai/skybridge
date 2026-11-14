@@ -68,7 +68,12 @@ export function ProductCard({
           {title}
         </p>
         {price ? (
-          <p className={cx(text({ style: "bodyS", weight: "medium" }), styles.price)}>
+          <p
+            className={cx(
+              text({ style: "bodyS", weight: "medium" }),
+              styles.price,
+            )}
+          >
             {formatPrice(price, locale)}
           </p>
         ) : null}
