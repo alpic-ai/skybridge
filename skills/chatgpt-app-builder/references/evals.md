@@ -82,6 +82,10 @@ const chat = await start({
 
 Omit `authInfo` to test the anonymous path: a gated tool then shows up as `toHaveFailedToolCall`.
 
+## Host tools
+
+`tools` (an AI SDK `ToolSet`) gives the model tools the host offers next to the app's, such as `{ web_search: openai.tools.webSearch() }`. Their calls appear in `chat.toolCalls` like any other. A name the app already exposes is refused.
+
 ## Defaults
 
 `evals: { temperature, systemPrompt, maxSteps, timeout }` in the Vite plugin sets what every scenario starts from (`maxSteps` 8, timeout 120s; `temperature` is only sent when set). `temperature`, `systemPrompt` and `maxSteps` can be overridden per `start`.

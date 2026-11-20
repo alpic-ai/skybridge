@@ -204,6 +204,20 @@ Only token verification is skipped. Per-tool schemes and scope checks run for re
 `setup` and `oauth` still resolve on the first request, so an app wired to an identity provider needs its `.env` to run evals, the same as `dev`.
 </Info>
 
+## Give the Model Host Tools
+
+A host like ChatGPT offers the model tools of its own next to your app's, such as web search. Pass them as `tools` so the eval model has them too:
+
+```ts evals/resorts.eval.ts highlight={4}
+const chat = await start({
+  app,
+  model: openai("gpt-5"),
+  tools: { web_search: openai.tools.webSearch() },
+});
+```
+
+Calls to these tools land in `chat.toolCalls` like your app's, so `toHaveCalledTool("web_search")` works. A name your app already exposes fails the scenario.
+
 ## Tune the Run
 
 Defaults every scenario starts from go in the plugin option, and any of them can be overridden per `start`:

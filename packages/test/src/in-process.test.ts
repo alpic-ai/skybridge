@@ -1,3 +1,4 @@
+import { jsonSchema, type ToolSet } from "ai";
 import { MockLanguageModelV3 } from "ai/test";
 import { Skybridge } from "skybridge/server";
 import { describe, expect, it } from "vitest";
@@ -355,4 +356,69 @@ it("does not retain middleware after a failed conversation startup", async () =>
   const chat = await start({ app, model: model() });
   await chat.send("Find goggles");
   expect(seen).toEqual(["goggles"]);
+});
+
+const webSearch = {
+  type: "provider",
+  id: "openai.web_search",
+  args: {},
+  inputSchema: jsonSchema({ type: "object" }),
+  isProviderExecuted: true,
+} satisfies ToolSet[string];
+
+it("records calls to host tools passed next to the app's own", async () => {
+  const model = new MockLanguageModelV3({
+    doGenerate: [
+      {
+        content: [
+          {
+            type: "tool-call",
+            toolCallId: "ws-1",
+            toolName: "web_search",
+            input: JSON.stringify({ query: "ski resorts" }),
+            providerExecuted: true,
+          },
+          {
+            type: "tool-result",
+            toolCallId: "ws-1",
+            toolName: "web_search",
+            result: { status: "completed" },
+          },
+          { type: "text", text: "Here are some ski resorts." },
+        ],
+        finishReason: { unified: "stop" as const, raw: undefined },
+        usage,
+        warnings: [],
+      },
+    ],
+  });
+
+  const chat = await start({
+    app: buildApp([]),
+    model,
+    tools: { web_search: webSearch },
+  });
+  await chat.send("Find me ski resorts");
+
+  expect(chat.toolCalls).toEqual([
+    { name: "web_search", arguments: { query: "ski resorts" } },
+  ]);
+  expect(model.doGenerateCalls[0]?.tools?.map((tool) => tool.name)).toEqual([
+    "web_search",
+    "search-products",
+  ]);
+});
+
+it("refuses a host tool named like one of the app's", async () => {
+  await expect(
+    start({
+      app: buildApp([]),
+      model: mockModel({
+        toolName: "search-products",
+        input: { category: "goggles" },
+        text: "",
+      }),
+      tools: { "search-products": webSearch },
+    }),
+  ).rejects.toThrow('defines "search-products", which the app already exposes');
 });
