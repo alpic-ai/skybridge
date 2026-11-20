@@ -1,5 +1,5 @@
 import { createMcpHandler } from "@modelcontextprotocol/server";
-import type { LanguageModel } from "ai";
+import type { LanguageModel, ToolSet } from "ai";
 import type {
   Skybridge,
   ToolDef,
@@ -45,6 +45,11 @@ interface StartOptions {
   systemPrompt?: string;
   temperature?: number;
   maxSteps?: number;
+  /**
+   * Tools the host offers next to the app's own, such as a provider's built-in
+   * web search. Their calls are recorded like the app's.
+   */
+  tools?: ToolSet;
 }
 
 function sharedDefaults() {
@@ -73,6 +78,10 @@ function sharedDefaults() {
  * `authInfo` claims an identity for the session: the app's per-tool scheme and
  * scope enforcement runs against it for real, only token verification is
  * skipped. Omit it to exercise the anonymous path, challenges included.
+ *
+ * `tools` gives the model tools the host provides next to the app's, such as
+ * `openai.tools.webSearch()`, so their calls are not reported as unknown. A
+ * name the app already exposes is refused.
  */
 export async function start<App extends EvalApp>(
   options: StartOptions & {
@@ -99,6 +108,7 @@ export async function start<App extends EvalApp>(
         temperature: options.temperature ?? config?.temperature,
         systemPrompt: options.systemPrompt ?? config?.systemPrompt,
         maxSteps: options.maxSteps ?? config?.maxSteps,
+        tools: options.tools,
       },
       (url, init) =>
         handler.fetch(

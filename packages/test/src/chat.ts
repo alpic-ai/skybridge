@@ -13,6 +13,7 @@ import {
   type LanguageModel,
   type ModelMessage,
   stepCountIs,
+  type ToolSet,
   type UserContent,
 } from "ai";
 import type { EvalMiddlewares } from "./eval-middlewares.js";
@@ -24,6 +25,7 @@ interface HostConfig {
   temperature?: number;
   systemPrompt?: string;
   maxSteps?: number;
+  tools?: ToolSet;
 }
 
 const DEFAULT_MAX_STEPS = 8;
@@ -111,6 +113,12 @@ export class Chat<App = unknown> {
     try {
       await client.connect(transport);
       const { tools } = await client.listTools();
+      const clash = tools.find(({ name }) => host.tools?.[name] !== undefined);
+      if (clash !== undefined) {
+        throw new Error(
+          `\`tools\` defines "${clash.name}", which the app already exposes`,
+        );
+      }
       chat.tools = tools;
       registerFileParameters(chat, middleware.fileParams);
     } catch (error) {
@@ -149,7 +157,7 @@ export class Chat<App = unknown> {
         ? {}
         : { system: this.host.systemPrompt }),
       messages: this.messages,
-      tools: this.toolSet(),
+      tools: { ...this.host.tools, ...this.toolSet() },
       stopWhen: stepCountIs(this.host.maxSteps ?? DEFAULT_MAX_STEPS),
     });
 
