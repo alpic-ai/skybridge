@@ -7,7 +7,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { useDisplayMode, useViewState } from "skybridge/web";
+import {
+  DataLLM,
+  useDisplayMode,
+  useHost,
+  useModelContext,
+  useViewState,
+} from "skybridge/web";
 import { EmptyState } from "../../components/empty-state";
 import {
   ProductCard,
@@ -20,6 +26,7 @@ import { sprinkles } from "../../design/tokens";
 import { useToolInfo } from "../../helpers.js";
 import { useLabels } from "../../i18n";
 import { formatPrice } from "../../lib/format";
+import { preferenceSelection } from "../../lib/kit-state";
 import type { Product } from "../../tools/render-carousel.js";
 import type { Price, Spec } from "../../types.js";
 import { DetailView } from "./detail";
@@ -90,17 +97,27 @@ function buildProductSpec(product: Product): ProductSpec {
  * hidden, not unmounted). Both read the full products from `_meta`; the detail
  * needs no extra fetch.
  */
-function Carousel() {
-  const { responseMetadata } = useToolInfo<"render-carousel">();
+export function Carousel() {
+  const { responseMetadata } = useToolInfo<"shop">();
   const labels = useLabels();
+  const { supported } = useModelContext();
+  const { capabilities } = useHost();
+  const useLegacyContext = capabilities !== undefined && !supported;
   const trackRef = useRef<HTMLElement>(null);
   const [visibleIndices, setVisibleIndices] = useState<number[]>([]);
   const [mode, setMode] = useDisplayMode();
-  const [nav, setNav] = useViewState<ViewState>({
+  const [legacyNav, setLegacyNav] = useViewState<ViewState>({
     selectedId: null,
     scrollLeft: 0,
     spec: null,
   });
+  const [localNav, setLocalNav] = useState<ViewState>({
+    selectedId: null,
+    scrollLeft: 0,
+    spec: null,
+  });
+  const nav = useLegacyContext ? legacyNav : localNav;
+  const setNav = useLegacyContext ? setLegacyNav : setLocalNav;
   // True between requesting fullscreen and the host applying it, so the
   // collapse-is-back effect below does not fire mid-transition.
   const enteringRef = useRef(false);
@@ -188,13 +205,12 @@ function Carousel() {
     const { card } = product;
     cards.push(
       <div key={product.id} className={cardStyles.cardClickable}>
+        {useLegacyContext &&
+        !detailProduct &&
+        visibleIndices.includes(index) ? (
+          <DataLLM content={narrate(product, index)} />
+        ) : null}
         <ProductCard
-          // Drop per-card grounding while the detail owns the screen.
-          data-llm={
-            !detailProduct && visibleIndices.includes(index)
-              ? narrate(product, index)
-              : ""
-          }
           title={card.title}
           price={card.price}
           media={card.media}
@@ -221,17 +237,28 @@ function Carousel() {
         className={sprinkles({ p: "3xs" })}
         style={{ display: detailProduct ? "none" : undefined }}
       >
+        {useLegacyContext && !detailProduct ? (
+          <DataLLM content={narration} />
+        ) : null}
         <ProductCarousel
           trackRef={trackRef}
           onVisibleChange={setVisibleIndices}
-          data-llm={detailProduct ? "" : narration}
         >
           {cards}
         </ProductCarousel>
       </div>
-      {detailProduct ? <DetailView product={detailProduct} /> : null}
+      {detailProduct ? (
+        <DetailView
+          key={detailProduct.id}
+          product={detailProduct}
+          pluginId={responseMetadata?.pluginId}
+          preferredSelection={preferenceSelection(
+            detailProduct,
+            responseMetadata?.preferences,
+          )}
+          ground={useLegacyContext}
+        />
+      ) : null}
     </ViewFrame>
   );
 }
-
-export default Carousel;

@@ -12,9 +12,12 @@ The catalog is served from a [Medusa](https://medusajs.com/) store, but the data
 
 ## What This Example Showcases
 
-- **Two-tool search + render pattern**: A view-less `search-products` tool returns data-only grounding for the model to curate; a separate `render-carousel` tool draws the chosen products as an inline carousel — the classic "reason, then present" split
-- **Model context vs. view data**: `search-products` returns everything in `structuredContent` (never shown to the user); `render-carousel` puts full presentational data (images, variants, media) in `_meta` for the view, and only trimmed grounding in `structuredContent`
-- **Tool descriptions as behavior**: The server `instructions` and tool descriptions drive a two-phase flow — search silently, then speak only once the carousel renders
+- **ChatGPT extensions**: a sidebar and conversation Shop, product mentions, native shopping preferences, and illustrated product-choice forms
+- **Explicit discussion context**: attach exact variants with product thumbnails and factual specifications through `useModelContext`; removing a ChatGPT attachment clears the discussion indicator without removing the item from the kit
+- **Deep links**: reopen a product with `/products/<product-id>?variant=<variant-id>` through the Shop global entrypoint
+- **One shopping tool**: `shop` handles catalogue browsing, search results, curated carousels, and native product choices through its `action` input
+- **Model context vs. view data**: concise product grounding goes into `structuredContent`; full images, variants, and presentation data stay in `_meta`
+- **Four registered tools**: `shop` is model-facing; `settings-read`, `settings-update`, and `search-mentions` (via `registerMentions`) serve native host integrations
 - **Inline View Rendering**: A React carousel with a fullscreen product detail (image gallery, variant picker, specs, CTA) rendered directly in AI conversations via a tool `view`
 - **Variant-as-product model**: Products expose variation axes (color, size, length) with a sparse variant matrix; the detail view narrows availability per axis
 - **CSP Configuration**: Allows the product image host via `resourceDomains` and the storefront CTA via `redirectDomains`
@@ -28,6 +31,20 @@ The catalog is served from a [Medusa](https://medusajs.com/) store, but the data
 - Show me some skis
 - I need goggles for a bright day
 - What cold-weather apparel do you have?
+- Compare the two goggles I attached
+- Help me build a ski-weekend kit
+
+## ChatGPT extensions
+
+1. Open **Skybridge Shop** from ChatGPT's sidebar or a conversation's side panel, or call `shop` with `{}` locally.
+2. Browse the catalogue and open a product. Pick a colour and size, then add that exact variant to **My Kit**. The kit is demo UI state that lasts while the Shop view is open; it is not an order or a checkout.
+3. Attach products with **Discuss this item** and ask ChatGPT to compare them. Removing an attachment in ChatGPT clears its indicator while the kit stays intact.
+4. Search for a catalogue product in the desktop composer's mention picker. The returned resource resolves to catalogue facts.
+5. Configure preferred apparel size and colour in native plugin settings. Defaults apply only when the product offers a matching value. Preferences are scoped to the authenticated user or server session and kept in process memory.
+6. Ask ChatGPT to let you choose between products to get the illustrated native choice form on a compatible host. Small catalogue thumbnails are embedded as data URIs; the image URL is the fallback.
+7. Set `CHATGPT_PLUGIN_ID` to the published plugin ID to enable **Copy product link** on exact variants.
+
+These integrations follow the [OpenAI MCP Extensions specification](https://github.com/openai/mcp-extensions/blob/main/docs/spec.md). Local DevTools renders the views; native sidebar, mentions, settings, and choice forms require a compatible ChatGPT host.
 
 ## Live Demo
 
@@ -53,9 +70,9 @@ pnpm install
 bun install
 ```
 
-#### 2. Point at your own catalog (optional)
+#### 2. Configure your catalog
 
-The example ships pointed at a demo store, so it runs as-is. To use your own catalog, copy `.env.template` to `.env` and fill in `MEDUSA_BASE_URL` and `MEDUSA_PUBLISHABLE_KEY`. Swapping to a different backend entirely is a matter of rewriting `src/lib/medusa.ts`.
+Copy `.env.template` to `.env` and fill in `MEDUSA_BASE_URL` and `MEDUSA_PUBLISHABLE_KEY` for your Medusa store. The checked-in template contains no credentials. Swapping to a different backend entirely is a matter of rewriting `src/lib/medusa.ts`.
 
 #### 3. Start your local server
 
@@ -79,16 +96,21 @@ This command starts:
 #### 4. Project structure
 
 ```
-│   ├── server.ts        # Server entry point (registers both tools)
+│   ├── server.ts        # Server entry point (registers tools and extensions)
 │   ├── config.ts        # Search/carousel tuning constants
 │   ├── tools/
-│   │   ├── search-products.ts   # View-less search tool (data only)
-│   │   └── render-carousel.ts   # Carousel tool + product model
+│   │   ├── shop.ts              # Model-facing tool, entrypoints, native choice form
+│   │   ├── settings-read.ts     # Native settings read tool
+│   │   ├── settings-update.ts   # Native settings update tool
+│   │   ├── search-mentions.ts   # Composer mentions + product resources
+│   │   ├── search-products.ts   # Internal catalogue search helper
+│   │   └── render-carousel.ts   # Internal carousel data helper + product model
 │   ├── lib/
 │   │   └── medusa.ts    # Catalog data source (swap for your own backend)
 │   ├── design/          # Vanilla Extract tokens, sprinkles, themes
 │   ├── components/      # Carousel UI + Ladle stories
 │   ├── views/
+│   │   ├── shop.tsx     # Catalogue and kit workspace
 │   │   └── carousel/    # Carousel view + fullscreen product detail
 │   └── index.css        # Global styles
 ├── alpic.json           # Deployment config
