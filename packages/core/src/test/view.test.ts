@@ -149,6 +149,7 @@ describe("McpServer.registerTool (unified API)", () => {
     expect(result.contents[0]?.text).toContain(
       `${serverUrl}/_skybridge/view/my-view`,
     );
+    expect(result.contents[0]?.text).toMatch(/^<!DOCTYPE html>\n/);
   });
 
   it("should generate correct HTML for production mode", async () => {
@@ -214,6 +215,7 @@ describe("McpServer.registerTool (unified API)", () => {
       `${serverUrl}/assets/assets/my-view-abc123.js`,
     );
     expect(result.contents[0]?.text).toContain(`${serverUrl}/assets/style.css`);
+    expect(result.contents[0]?.text).toMatch(/^<!DOCTYPE html>\n/);
   });
 
   it("should prefer x-alpic-forwarded-url when hashing Claude view domains", async () => {
