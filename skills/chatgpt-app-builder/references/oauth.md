@@ -12,6 +12,8 @@ Enable user authentication so tools can access user-specific data.
 
 The `oauth` field guards `/mcp` and nothing else. A route you mount yourself outside `/mcp` is unauthenticated — gate it with `requireBearerAuth`, your own verifier, and the same `requiredScopes` the `oauth` config sets, or it accepts under-scoped tokens `/mcp` rejects. Note that Alpic Cloud only routes traffic to `/mcp` (custom paths work locally and self-hosted).
 
+**Gemini** (Google Connected Apps) requires DCR (CIMD isn't accepted; without DCR the user enters a static client ID and secret in the Connected Console), an IdP that does **not** rotate refresh tokens, and the redirect URIs `https://oauth-redirect.googleusercontent.com/r/*` and `/a/*` (plus `-sandbox` and `-test` variants) allowlisted on the IdP.
+
 ## Which path?
 
 The `oauth` field covers all-or-nothing **and** mixed auth. Manual wiring is only for an IdP whose tokens the framework can't verify.
