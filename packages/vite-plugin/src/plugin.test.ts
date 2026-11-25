@@ -112,9 +112,14 @@ describe("skybridge plugin eval discovery", () => {
 describe("skybridge plugin view paths", () => {
   // Vite ids and glob patterns use `/` on every platform. On Windows `resolve()`
   // returns `\`, which a glob reads as an escape, so Vite scanned no views and
-  // pre-bundled none of their dependencies.
+  // pre-bundled none of their dependencies. The views dir is written with a
+  // backslash so these tests also catch the bug when CI runs on Linux.
+  const backslashViewsDir = () => `${root}\\views`;
+
   it("gives Vite forward-slash globs for the dependency scan", () => {
-    const entries = getConfig(root).optimizeDeps?.entries;
+    const entries = getConfig(root, {
+      viewsDir: backslashViewsDir(),
+    }).optimizeDeps?.entries;
 
     expect(entries).toHaveLength(2);
     for (const entry of entries as string[]) {
@@ -123,7 +128,7 @@ describe("skybridge plugin view paths", () => {
   });
 
   it("warns about a view without a default export for a Vite module id", async () => {
-    const plugin = skybridge({ viewsDir: join(root, "views") });
+    const plugin = skybridge({ viewsDir: backslashViewsDir() });
     const configHook = plugin.config;
     const transformHook = plugin.transform;
     if (
