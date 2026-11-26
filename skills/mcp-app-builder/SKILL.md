@@ -6,7 +6,7 @@ description: |
   Use when a user wants to create or update a MCP App, MCP server or use the Skybridge framework.
 ---
 
-# Creating MCP Apps
+# Creating Plugins For LLMs
 
 Those are conversational experiences that extend AI assistants through tools and custom UI views. They're built as MCP servers invoked during conversations.
 
@@ -27,7 +27,7 @@ SPEC.md keeps track of the app's requirements and design decisions. Keep it up t
 ## Setup
 
 1. **Copy template** → [copy-template.md](references/copy-template.md): when starting a new project with ready SPEC.md
-2. **Run locally** → [run-locally.md](references/run-locally.md): when ready to test, need dev server or ChatGPT/Claude connection
+2. **Run locally** → [run-locally.md](references/run-locally.md): when ready to test, need dev server, use devtools to render views or connect to ChatGPT/Claude
 3. **Evals** → [evals.md](references/evals.md): when checking that a real model reaches the right tools from natural prompts, in a test
 
 ## Architecture
@@ -43,7 +43,10 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 - **External links** → [open-external-links.md](references/open-external-links.md): when redirecting to external URLs or setting "open in app" target
 - **Download file** → [download-file.md](references/download-file.md): when saving content to the user's filesystem
 - **OAuth** → [oauth.md](references/oauth.md): when tools need user authentication to access user-specific data
+- **Assets and styling** → [assets-and-styling.md](references/assets-and-styling.md): when adding images, fonts or CSS to views
 - **CSP** → [csp.md](references/csp.md): when declaring allowed domains for fetch, assets, redirects, or iframes
+- **Events** → [events.md](references/events.md): when ChatGPT should react to activity in the app without the user, such as new comments or incidents
+- **OpenAI MCP extensions** → [openai-extensions.md](references/openai-extensions.md): when the view should open from the ChatGPT sidebar, a conversation side panel, a file, or a deep link, or use ChatGPT at-mentions, titled messages or local files
 
 ## Deploy
 

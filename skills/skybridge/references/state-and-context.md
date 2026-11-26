@@ -1,0 +1,185 @@
+# Manage View State and LLM Context
+
+- View state (`useViewState`/`createStore`) persists and is visible to LLM as structured data.
+- `data-llm` gives LLM context for referential language ("this one").
+- React `useState` is ephemeral and invisible to LLM.
+
+**Decision guide:**
+| Need | Use |
+|------|-----|
+| Persist data, single component | `useViewState` |
+| Persist data, shared across components, complex mutations | `createStore` |
+| Help LLM understand "this one" | `data-llm` |
+| Send extra content to the model, or a ChatGPT composer attachment | `useModelContext` |
+| Ephemeral UI only (hover, animation) | `useState` |
+
+## useViewState
+
+Single component, simple access patterns.
+
+```tsx
+function SeatPicker({ seats }) {
+  const [{ selectedSeat }, setState] = useViewState({ selectedSeat: null });
+
+  return (
+    <div className="seat-grid">
+      {seats.map(seat => (
+        <button
+          key={seat.id}
+          onClick={() => setState((prev) => ({ ...prev, selectedSeat: seat.id }))}
+          className={selectedSeat === seat.id ? "selected" : ""}
+        >
+          {seat.id}
+        </button>
+      ))}
+    </div>
+  );
+}
+```
+
+**Why useViewState:** Single component reads `selectedSeat` to highlight button. View or LLM reads when booking.
+
+## createStore
+
+Shared across components, complex mutations. `createStore` is a thin wrapper around Zustand.
+
+```tsx
+import { createStore } from "skybridge/web";
+
+const useCartStore = createStore<CartState>((set) => ({
+  cart: [],
+  add: (item) => set((s) => ({ cart: [...s.cart, item] })),
+  remove: (id) => set((s) => ({ cart: s.cart.filter(i => i.id !== id) })),
+}));
+
+// ProductCard.tsx
+function ProductCard({ product }) {
+  const add = useCartStore((s) => s.add);
+  return <button onClick={() => add(product)}>Add to Cart</button>;
+}
+
+// CartSummary.tsx
+function CartSummary() {
+  const cart = useCartStore((s) => s.cart);
+  return <span>{cart.length} items</span>;
+}
+```
+
+**Why createStore:** Cart accessed by multiple components. View or LLM reads items at checkout.
+
+## data-llm
+
+Tell the LLM what user is viewing/doing. One-way—view doesn't read it back. These are annotations—don't put complex objects here.
+
+```tsx
+function ProductDetail({ product }) {
+  return (
+    <div data-llm={`Viewing: ${product.name}, $${product.price}, ${product.inStock ? "in stock" : "out of stock"}`}>
+      <h1>{product.name}</h1>
+      <p>${product.price}</p>
+    </div>
+  );
+}
+```
+
+**Why data-llm:** When user asks "Is this one good?" or "Add this to cart", LLM knows what "this" refers to.
+
+## Common mistakes
+
+```tsx
+// DON'T: useState is not persisted, LLM can't see it
+const [selected, setSelected] = useState(null);
+
+// DO: useViewState persists and LLM sees it
+const [{ selected }, setState] = useViewState({ selected: null });
+```
+
+```tsx
+// DON'T: Complex object in data-llm
+<div data-llm={JSON.stringify(cart)}>
+
+// DO: Human-readable summary
+<div data-llm={`Cart: ${cart.length} items, $${total}`}>
+```
+
+## Avoid duplicated model context
+
+Model-visible context accumulates across tool `content`, `structuredContent`, persisted view state, and `data-llm`. Give each channel a distinct role instead of copying the same payload between them:
+
+- Keep tool `content` to a short status or summary.
+- Put model-relevant result fields in `structuredContent`.
+- Persist only UI state that must survive and help the conversation; don't copy the complete tool output into view state.
+- Use `data-llm` for a concise description of the user's current focus or action, not for data already available to the model.
+
+`_meta` is different: it is available to the view but not the model, so it can carry additional details or display-only content intentionally omitted from direct model context.
+
+## Combined example
+
+Todo list. User checks off tasks, asks "what should I prioritize?"
+
+```tsx
+function TaskList() {
+  // PERSIST: All tasks with completed status
+  const [{ tasks }, setState] = useViewState({
+    tasks: [
+      { id: 1, title: "Buy groceries", completed: false },
+      { id: 2, title: "Call mom", completed: true },
+    ]
+  });
+
+  // EPHEMERAL: Task user is viewing — reset on reopen
+  const [viewing, setViewing] = useState(null);
+
+  return (
+    // CONTEXT: What user is looking at — LLM answers "how should I handle this task?"
+    <div data-llm={viewing
+      ? `Viewing: "${viewing.title}"`
+      : `${tasks.filter(t => !t.completed).length} tasks remaining`
+    }>
+      {tasks.map(t => (
+        <Task
+          key={t.id}
+          task={t}
+          onView={() => setViewing(t)}
+          onToggle={() => setState((prev) => ({
+            ...prev,
+            tasks: prev.tasks.map(task =>
+              task.id === t.id ? { ...task, completed: !task.completed } : task
+            )
+          }))}
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+**Why each?**
+
+| What | API | Why |
+|------|-----|-----|
+| `tasks` | `useViewState` | Persists. Tasks and progress survive reopen. |
+| `viewing` | `useState` | Ephemeral. Current focus resets on reopen. |
+| `"Viewing: Buy groceries"` | `data-llm` | LLM context. Understands "this task" in conversation. |
+
+## useModelContext
+
+Send content blocks to the model (MCP Apps `ui/update-model-context`). ChatGPT also shows each block as a removable composer attachment.
+
+```tsx
+const { supported, context, update } = useModelContext();
+
+update({
+  content: [
+    {
+      type: "text",
+      text: "Selected: M6 hex bolt",
+      _meta: { "openai/title": "Hex bolt", "openai/thumbnail": { src: imageUrl } },
+    },
+  ],
+});
+```
+
+- Outside ChatGPT, Skybridge merges it with the `useViewState` state: view state keys win in `structuredContent`.
+- `context` (ChatGPT only) becomes `null` when the user removes the attachment.
+- `supported` is `false` on hosts without model context updates, and `update` rejects there.

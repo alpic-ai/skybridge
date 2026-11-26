@@ -6,10 +6,11 @@
   "scripts": {
     "prepare": "pnpm --filter @skybridge/devtools build:server && pnpm --filter skybridge build && pnpm --filter @skybridge/vite-plugin build && pnpm --filter @skybridge/test build",
     "build": "pnpm --filter \"./packages/*\" build",
-    "test": "pnpm -r --if-present test",
+    "test": "pnpm -r --if-present test && pnpm test:skills",
     "format": "pnpm -r --if-present format",
     "test:unit": "pnpm -r --if-present test:unit",
     "test:format": "pnpm -r --if-present test:format",
+    "test:skills": "scripts/check-skills.sh",
     "docs:dev": "pnpm --filter @skybridge/docs dev"
   },
   "keywords": [

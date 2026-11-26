@@ -20,6 +20,8 @@ jobs:
             command: pnpm run test:unit
           - name: Lint & Format
             command: pnpm run test:format
+          - name: Skills
+            command: pnpm run test:skills
           - name: Build
             command: pnpm run build
           - name: Build Examples
