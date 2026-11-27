@@ -6,10 +6,12 @@ A tool or view is not done until you have seen it work yourself. Never end by as
 
 ```bash
 npx skybridge dev --plain > dev.log 2>&1 &
-until grep -q 'localhost:' dev.log; do sleep 1; done; cat dev.log
+until grep -q 'localhost:' dev.log; do sleep 1; done
+PORT=$(grep -om1 'localhost:[0-9]*' dev.log | cut -d: -f2)
+until curl -s -o /dev/null http://localhost:$PORT/; do sleep 1; done; cat dev.log
 ```
 
-`--plain` prints plain logs instead of the interactive UI, which stays blank when not run in a terminal. The log gives the server URL, `http://localhost:3000/mcp`, or 3001, 3002… when 3000 is taken. Set `PORT` to that port for the commands below. Fix any TypeScript or startup error in `dev.log` before going further.
+`--plain` prints plain logs instead of the interactive UI, which stays blank when not run in a terminal. The server runs on port 3000, or 3001, 3002… when 3000 is taken; `PORT` holds the one it picked. Fix any TypeScript or startup error in `dev.log` before going further.
 
 ## 2. Call each tool you changed
 
@@ -20,7 +22,7 @@ mcp '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 mcp '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"search-flights","arguments":{"destination":"Paris"}}}'
 ```
 
-Check that `tools/list` shows the tool with `_meta.ui.resourceUri`, and that `tools/call` returns `"isError":false` with the `structuredContent` the view expects.
+Check that `tools/call` does not return `"isError":true`. For a tool with a view, also check that `tools/list` shows it with `_meta.ui.resourceUri` and that `tools/call` returns the `structuredContent` the view expects.
 
 ## 3. Check the view compiles
 
