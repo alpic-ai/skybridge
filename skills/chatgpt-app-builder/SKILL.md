@@ -8,13 +8,11 @@ description: |
 
 # Creating Plugins For LLMs
 
-ChatGPT plugins are conversational experiences that extend ChatGPT through tools and custom UI views. They're built as MCP servers invoked during conversations.
+Those are conversational experiences that extend AI assistants through tools and custom UI views. They're built as MCP servers invoked during conversations.
 
-⚠️ The plugin is consumed by two users at once: the **human** and the **ChatGPT LLM**. They collaborate through the view—the human interacts with it, the LLM sees its state. Internalize this before writing code: the view is your shared surface.
+⚠️ The app is consumed by two users at once: the **human** and the **AI Assistant LLM**. They collaborate through the view—the human interacts with it, the LLM sees its state. Internalize this before writing code: the view is your shared surface.
 
-SPEC.md keeps track of the plugin's requirements and design decisions. Keep it up to date as you work on the plugin.
-
-**Building an ecommerce plugin?** → Read [ecommerce.md](references/ecommerce.md) first.
+SPEC.md keeps track of the app's requirements and design decisions. Keep it up to date as you work on the app.
 
 **No SPEC.md?** → Read [discover.md](references/discover.md) first. Nothing else until SPEC.md exists.
 
@@ -24,10 +22,12 @@ SPEC.md keeps track of the plugin's requirements and design decisions. Keep it u
 
 **Migrating from Skybridge `1.x` to `2.x`?** → Fetch the [v2.0.0 release notes](https://github.com/alpic-ai/skybridge/releases/tag/v2.0.0) first and follow them.
 
+**Building an ecommerce app?** → Read [ecommerce.md](references/ecommerce.md) first.
+
 ## Setup
 
 1. **Copy template** → [copy-template.md](references/copy-template.md): when starting a new project with ready SPEC.md
-2. **Run locally** → [run-locally.md](references/run-locally.md): when ready to test, need dev server or ChatGPT connection
+2. **Run locally** → [run-locally.md](references/run-locally.md): when ready to test, need dev server, use devtools to render views or connect to ChatGPT/Claude
 3. **Evals** → [evals.md](references/evals.md): when checking that a real model reaches the right tools from natural prompts, in a test
 
 ## Architecture
@@ -41,6 +41,7 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 - **Prompt LLM** → [prompt-llm.md](references/prompt-llm.md): when view needs to trigger LLM response
 - **UI guidelines** → [ui-guidelines.md](references/ui-guidelines.md): display modes, layout constraints, theme, device, and locale
 - **External links** → [open-external-links.md](references/open-external-links.md): when redirecting to external URLs or setting "open in app" target
+- **Download file** → [download-file.md](references/download-file.md): when saving content to the user's filesystem
 - **OAuth** → [oauth.md](references/oauth.md): when tools need user authentication to access user-specific data
 - **Assets and styling** → [assets-and-styling.md](references/assets-and-styling.md): when adding images, fonts or CSS to views
 - **CSP** → [csp.md](references/csp.md): when declaring allowed domains for fetch, assets, redirects, or iframes
@@ -50,7 +51,7 @@ Design or evolve UX flows and API shape → [architecture.md](references/archite
 ## Deploy
 
 - **Ship to production** → [deploy.md](references/deploy.md): when ready to deploy via Alpic
-- **Publish to ChatGPT Directory** → [publish.md](references/publish.md): when ready to submit for review
+- **Publish to ChatGPT/Claude Directories** → [publish.md](references/publish.md): when ready to submit for review
 
 Full API docs: [https://docs.skybridge.tech/api-reference.md](https://docs.skybridge.tech/api-reference.md)
 
