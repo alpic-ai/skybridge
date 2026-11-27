@@ -50,6 +50,20 @@ enforcement runs for real, in-band challenges included, and only token
 signature verification is skipped. Omit it to eval the anonymous path, which is
 how you assert that a protected tool challenges instead of running.
 
+## Host tools
+
+`tools` gives the model tools the host offers next to the app's, such as a
+provider's built-in web search. Their calls are recorded in `chat.toolCalls`
+like the app's; a name the app already exposes is refused.
+
+```ts
+const chat = await start({
+  app,
+  model: openai("gpt-5"),
+  tools: { web_search: openai.tools.webSearch() },
+});
+```
+
 ## Choosing a model
 
 `start` takes any AI SDK model instance, so the provider and its credentials
