@@ -65,8 +65,14 @@ function buildVirtualEntry(viewFilePath: string): string {
   ].join("\n");
 }
 
+// Vite ids and fast-glob patterns use `/` on every platform, but `resolve()`
+// returns `\` on Windows.
+function toPosixPath(filePath: string): string {
+  return filePath.replace(/\\/g, "/");
+}
+
 function getViewEntryPattern(viewsDir: string): RegExp {
-  const escaped = viewsDir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escaped = toPosixPath(viewsDir).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp(
     `${escaped}\\/(?:[^/]+\\.(?:jsx|tsx)|[^/]+\\/index\\.(?:tsx|jsx))(?:\\?.*)?$`,
   );
@@ -185,8 +191,8 @@ function viewsPlugin(options?: SkybridgePluginOptions): Plugin {
           // Scan view files so transitive user deps (zod, tailwind, etc.)
           // get pre-bundled at startup.
           entries: [
-            `${resolvedViewsDir}/*.{tsx,jsx}`,
-            `${resolvedViewsDir}/*/index.{tsx,jsx}`,
+            `${toPosixPath(resolvedViewsDir)}/*.{tsx,jsx}`,
+            `${toPosixPath(resolvedViewsDir)}/*/index.{tsx,jsx}`,
           ],
           include: ["react", "react-dom/client", "react/jsx-runtime"],
         },

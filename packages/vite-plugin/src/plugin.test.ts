@@ -108,3 +108,53 @@ describe("skybridge plugin eval discovery", () => {
     expect(warn).not.toHaveBeenCalled();
   });
 });
+
+describe("skybridge plugin view paths", () => {
+  // Vite ids and glob patterns use `/` on every platform. On Windows `resolve()`
+  // returns `\`, which a glob reads as an escape, so Vite scanned no views and
+  // pre-bundled none of their dependencies. The views dir is written with a
+  // backslash so these tests also catch the bug when CI runs on Linux.
+  const backslashViewsDir = () => `${root}\\views`;
+
+  it("gives Vite forward-slash globs for the dependency scan", () => {
+    const entries = getConfig(root, {
+      viewsDir: backslashViewsDir(),
+    }).optimizeDeps?.entries;
+
+    expect(entries).toHaveLength(2);
+    for (const entry of entries as string[]) {
+      expect(entry).not.toContain("\\");
+    }
+  });
+
+  it("warns about a view without a default export for a Vite module id", async () => {
+    const plugin = skybridge({ viewsDir: backslashViewsDir() });
+    const configHook = plugin.config;
+    const transformHook = plugin.transform;
+    if (
+      typeof configHook !== "function" ||
+      typeof transformHook !== "function"
+    ) {
+      throw new Error("plugin hooks are not functions");
+    }
+    configHook.call(
+      // biome-ignore lint/suspicious/noExplicitAny: vitest harness for plugin hook
+      { warn: () => {} } as any,
+      { root },
+      { command: "serve", mode: "development" },
+    );
+    const warn = vi.fn();
+    const id = `${root.replace(/\\/g, "/")}/views/broken.tsx`;
+
+    await transformHook.call(
+      // biome-ignore lint/suspicious/noExplicitAny: vitest harness for plugin hook
+      { warn } as any,
+      "export const x = <div />;",
+      id,
+    );
+
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("missing a default export"),
+    );
+  });
+});
