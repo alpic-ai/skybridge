@@ -14,7 +14,9 @@ When started, output the local MCP server and devtools URL.
 
 Hot reload enabled (nodemon for server, HMR for views).
 
-## 2. Test in DevTools via Chrome DevTools MCP (Optional)
+## 2. Test in DevTools via Chrome DevTools MCP
+
+Required before you finish: see [verify.md](verify.md).
 
 The devtools page renders views locally, and it exposes its actions as [WebMCP](https://github.com/webmachinelearning/webmcp) tools, so you can drive it directly instead of clicking around: run any registered tool and see its view render in the preview, read the rendered result, and switch the preview controls. This closes the loop on your own work (edit a view, run the tool, read the result, fix what is wrong) and is much faster than click/fill/screenshot interactions.
 

@@ -24,6 +24,8 @@ SPEC.md keeps track of the app's requirements and design decisions. Keep it up t
 
 **Building an ecommerce app?** → Read [ecommerce.md](references/ecommerce.md) first.
 
+**Before you finish, always** → follow [verify.md](references/verify.md): start the dev server, call the tools you changed, render each view you changed in the DevTools with a browser tool and interact with it. Never end by asking the user to open DevTools or check the view.
+
 ## Setup
 
 1. **Copy template** → [copy-template.md](references/copy-template.md): when starting a new project with ready SPEC.md
